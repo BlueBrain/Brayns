@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Get all loaders',
-    'params': [],
     'plugin': 'Core',
     'returns': {
         'items': {

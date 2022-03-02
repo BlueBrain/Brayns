@@ -21,84 +21,82 @@
 schema = {
     'async': False,
     'description': 'Update the model with the given values',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'bounding_box': {
-                    'description': 'Display model bounds',
-                    'type': 'boolean',
-                    'writeOnly': True
-                },
-                'id': {
-                    'description': 'Model ID',
-                    'minimum': 0,
-                    'type': 'integer',
-                    'writeOnly': True
-                },
-                'name': {
-                    'description': 'Model name',
-                    'type': 'string',
-                    'writeOnly': True
-                },
-                'transformation': {
-                    'additionalProperties': False,
-                    'description': 'Model transformation',
-                    'properties': {
-                        'rotation': {
-                            'description': 'Rotation XYZW',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 4,
-                            'minItems': 4,
-                            'type': 'array'
-                        },
-                        'rotation_center': {
-                            'description': 'Rotation center XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'scale': {
-                            'description': 'Scale XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'translation': {
-                            'description': 'Translation XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        }
-                    },
-                    'title': 'Transformation',
-                    'type': 'object',
-                    'writeOnly': True
-                },
-                'visible': {
-                    'description': 'Model visibility',
-                    'type': 'boolean',
-                    'writeOnly': True
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'bounding_box': {
+                'description': 'Display model bounds',
+                'type': 'boolean',
+                'writeOnly': True
             },
-            'required': [
-                'id'
-            ],
-            'title': 'UpdateModelParams',
-            'type': 'object'
-        }
-    ],
+            'id': {
+                'description': 'Model ID',
+                'minimum': 0,
+                'type': 'integer',
+                'writeOnly': True
+            },
+            'name': {
+                'description': 'Model name',
+                'type': 'string',
+                'writeOnly': True
+            },
+            'transformation': {
+                'additionalProperties': False,
+                'description': 'Model transformation',
+                'properties': {
+                    'rotation': {
+                        'description': 'Rotation XYZW',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 4,
+                        'minItems': 4,
+                        'type': 'array'
+                    },
+                    'rotation_center': {
+                        'description': 'Rotation center XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'scale': {
+                        'description': 'Scale XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'translation': {
+                        'description': 'Translation XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    }
+                },
+                'title': 'Transformation',
+                'type': 'object',
+                'writeOnly': True
+            },
+            'visible': {
+                'description': 'Model visibility',
+                'type': 'boolean',
+                'writeOnly': True
+            }
+        },
+        'required': [
+            'id'
+        ],
+        'title': 'UpdateModelParams',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'update-model',

@@ -21,23 +21,21 @@
 schema = {
     'async': False,
     'description': 'Get the transfer function of the given model',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'id': {
-                    'description': 'Model ID',
-                    'minimum': 0,
-                    'type': 'integer'
-                }
-            },
-            'required': [
-                'id'
-            ],
-            'title': 'GetModelMessage',
-            'type': 'object'
-        }
-    ],
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'id': {
+                'description': 'Model ID',
+                'minimum': 0,
+                'type': 'integer'
+            }
+        },
+        'required': [
+            'id'
+        ],
+        'title': 'GetModelMessage',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,

@@ -21,64 +21,62 @@
 schema = {
     'async': False,
     'description': 'Add a streamline representation to the scene',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'color_scheme': {
-                    'description': 'Color scheme to draw the streamlines',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'color_scheme': {
+                'description': 'Color scheme to draw the streamlines',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'gids': {
+                'description': 'List of cell GIDs',
+                'items': {
                     'minimum': 0,
                     'type': 'integer'
                 },
-                'gids': {
-                    'description': 'List of cell GIDs',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'type': 'array'
-                },
-                'indices': {
-                    'description': 'List of indices',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'type': 'array'
-                },
-                'name': {
-                    'description': 'Model name',
-                    'type': 'string'
-                },
-                'opacity': {
-                    'description': 'Color opacity',
-                    'type': 'number'
-                },
-                'radius': {
-                    'description': 'Streamline tube radius',
-                    'type': 'number'
-                },
-                'vertices': {
-                    'description': 'List of vertices (3 components per vertex)',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'type': 'array'
-                }
+                'type': 'array'
             },
-            'required': [
-                'name',
-                'gids',
-                'indices',
-                'vertices',
-                'radius',
-                'opacity',
-                'color_scheme'
-            ],
-            'title': 'AddStreamlinesMessage',
-            'type': 'object'
-        }
-    ],
+            'indices': {
+                'description': 'List of indices',
+                'items': {
+                    'minimum': 0,
+                    'type': 'integer'
+                },
+                'type': 'array'
+            },
+            'name': {
+                'description': 'Model name',
+                'type': 'string'
+            },
+            'opacity': {
+                'description': 'Color opacity',
+                'type': 'number'
+            },
+            'radius': {
+                'description': 'Streamline tube radius',
+                'type': 'number'
+            },
+            'vertices': {
+                'description': 'List of vertices (3 components per vertex)',
+                'items': {
+                    'type': 'number'
+                },
+                'type': 'array'
+            }
+        },
+        'required': [
+            'name',
+            'gids',
+            'indices',
+            'vertices',
+            'radius',
+            'opacity',
+            'color_scheme'
+        ],
+        'title': 'AddStreamlinesMessage',
+        'type': 'object'
+    },
     'plugin': 'DTI',
     'returns': {},
     'title': 'add-streamlines',

@@ -21,23 +21,21 @@
 schema = {
     'async': False,
     'description': 'Retreive the list of ID of the materials in given model',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'model_id': {
-                    'description': 'Model ID',
-                    'minimum': 0,
-                    'type': 'integer'
-                }
-            },
-            'required': [
-                'model_id'
-            ],
-            'title': 'GetMaterialIdsParams',
-            'type': 'object'
-        }
-    ],
+    'params':  {
+        'additionalProperties': False,
+        'properties': {
+            'model_id': {
+                'description': 'Model ID',
+                'minimum': 0,
+                'type': 'integer'
+            }
+        },
+        'required': [
+            'model_id'
+        ],
+        'title': 'GetMaterialIdsParams',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {
         'additionalProperties': False,

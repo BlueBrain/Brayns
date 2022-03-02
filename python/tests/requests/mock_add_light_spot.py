@@ -21,72 +21,70 @@
 schema = {
     'async': False,
     'description': 'Add a spot light and return its ID',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'color': {
-                    'description': 'Light color RGB',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'direction': {
-                    'description': 'Spot direction XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'intensity': {
-                    'description': 'Light intensity 0-1',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'color': {
+                'description': 'Light color RGB',
+                'items': {
                     'type': 'number'
                 },
-                'is_visible': {
-                    'description': 'Light is visible',
-                    'type': 'boolean'
-                },
-                'opening_angle': {
-                    'description': 'Opening angle in degrees',
-                    'type': 'number'
-                },
-                'penumbra_angle': {
-                    'description': 'Penumbra angle in degrees',
-                    'type': 'number'
-                },
-                'position': {
-                    'description': 'Light position XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'radius': {
-                    'description': 'Spot radius',
-                    'type': 'number'
-                }
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
             },
-            'required': [
-                'color',
-                'intensity',
-                'is_visible',
-                'position',
-                'direction',
-                'opening_angle',
-                'penumbra_angle',
-                'radius'
-            ],
-            'title': 'SpotLight',
-            'type': 'object'
-        }
-    ],
+            'direction': {
+                'description': 'Spot direction XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'intensity': {
+                'description': 'Light intensity 0-1',
+                'type': 'number'
+            },
+            'is_visible': {
+                'description': 'Light is visible',
+                'type': 'boolean'
+            },
+            'opening_angle': {
+                'description': 'Opening angle in degrees',
+                'type': 'number'
+            },
+            'penumbra_angle': {
+                'description': 'Penumbra angle in degrees',
+                'type': 'number'
+            },
+            'position': {
+                'description': 'Light position XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'radius': {
+                'description': 'Spot radius',
+                'type': 'number'
+            }
+        },
+        'required': [
+            'color',
+            'intensity',
+            'is_visible',
+            'position',
+            'direction',
+            'opening_angle',
+            'penumbra_angle',
+            'radius'
+        ],
+        'title': 'SpotLight',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'minimum': 0,

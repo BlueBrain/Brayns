@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Get the environment map from the scene',
-    'params': [],
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,

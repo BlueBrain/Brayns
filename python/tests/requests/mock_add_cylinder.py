@@ -21,57 +21,55 @@
 schema = {
     'async': False,
     'description': 'Add a visual 3D cylinder to the scene',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'center': {
-                    'description': 'Center of the lower cylinder circumference',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'color': {
-                    'description': 'Cylinder color RGBA normalized',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
-                },
-                'name': {
-                    'description': 'Name to give to the added model',
-                    'type': 'string'
-                },
-                'radius': {
-                    'description': 'Radius of the cylinder',
-                    'minimum': 0,
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'center': {
+                'description': 'Center of the lower cylinder circumference',
+                'items': {
                     'type': 'number'
                 },
-                'up': {
-                    'description': 'Center of the upper cylinder circumference',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                }
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
             },
-            'required': [
-                'center',
-                'up',
-                'radius',
-                'color'
-            ],
-            'title': 'AddCylinderMessage',
-            'type': 'object'
-        }
-    ],
+            'color': {
+                'description': 'Cylinder color RGBA normalized',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 4,
+                'minItems': 4,
+                'type': 'array'
+            },
+            'name': {
+                'description': 'Name to give to the added model',
+                'type': 'string'
+            },
+            'radius': {
+                'description': 'Radius of the cylinder',
+                'minimum': 0,
+                'type': 'number'
+            },
+            'up': {
+                'description': 'Center of the upper cylinder circumference',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            }
+        },
+        'required': [
+            'center',
+            'up',
+            'radius',
+            'color'
+        ],
+        'title': 'AddCylinderMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {
         'additionalProperties': False,

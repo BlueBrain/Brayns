@@ -32,14 +32,14 @@ class SchemaValidator
 public:
     static void validate(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
     {
-        auto &schemas = entrypoint.getParamsSchema();
+        auto &schema = entrypoint.getParamsSchema();
         auto &params = request.getParams();
-        if (schemas.empty())
+        if (!schema)
         {
             _checkParamsIsEmpty(params);
             return;
         }
-        _validate(params, schemas[0]);
+        _validate(params, *schema);
     }
 
 private:

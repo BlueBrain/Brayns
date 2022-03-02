@@ -21,28 +21,26 @@
 schema = {
     'async': False,
     'description': 'Modify the geometry radiuses (spheres, cones, cylinders and SDF geometries)',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'model_id': {
-                    'description': 'ID of the circuit model',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'radius_multiplier': {
-                    'description': 'Scaling factor',
-                    'type': 'number'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'model_id': {
+                'description': 'ID of the circuit model',
+                'minimum': 0,
+                'type': 'integer'
             },
-            'required': [
-                'model_id',
-                'radius_multiplier'
-            ],
-            'title': 'SetCircuitThicknessMessage',
-            'type': 'object'
-        }
-    ],
+            'radius_multiplier': {
+                'description': 'Scaling factor',
+                'type': 'number'
+            }
+        },
+        'required': [
+            'model_id',
+            'radius_multiplier'
+        ],
+        'title': 'SetCircuitThicknessMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {},
     'title': 'set-circuit-thickness',

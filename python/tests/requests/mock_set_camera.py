@@ -21,54 +21,52 @@
 schema = {
     'async': False,
     'description': 'Set the current state of the camera',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'current': {
-                    'description': 'Camera current type',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'current': {
+                'description': 'Camera current type',
+                'type': 'string'
+            },
+            'orientation': {
+                'description': 'Camera orientation XYZW',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 4,
+                'minItems': 4,
+                'type': 'array'
+            },
+            'position': {
+                'description': 'Camera position XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'target': {
+                'description': 'Camera target XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'types': {
+                'description': 'Available camera types',
+                'items': {
                     'type': 'string'
                 },
-                'orientation': {
-                    'description': 'Camera orientation XYZW',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
-                },
-                'position': {
-                    'description': 'Camera position XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'target': {
-                    'description': 'Camera target XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'types': {
-                    'description': 'Available camera types',
-                    'items': {
-                        'type': 'string'
-                    },
-                    'readOnly': True,
-                    'type': 'array'
-                }
-            },
-            'title': 'Camera',
-            'type': 'object'
-        }
-    ],
+                'readOnly': True,
+                'type': 'array'
+            }
+        },
+        'title': 'Camera',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'set-camera',

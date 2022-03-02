@@ -32,16 +32,12 @@ class Params:
     unpacked: bool = False
 
     @staticmethod
-    def from_dicts(schemas: List[dict]):
-        if not schemas:
+    def from_dict(schema: dict):
+        if not schema:
             return Params(
                 schemas=[],
                 unpacked=False
             )
-        return Params.from_dict(schemas[0])
-
-    @staticmethod
-    def from_dict(schema: dict):
         return Params.from_schema(Schema.from_dict(schema))
 
     @staticmethod

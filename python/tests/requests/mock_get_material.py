@@ -21,29 +21,27 @@
 schema = {
     'async': False,
     'description': 'Retreive the material with given ID in given model',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'material_id': {
-                    'description': 'Material ID',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'model_id': {
-                    'description': 'Model ID',
-                    'minimum': 0,
-                    'type': 'integer'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'material_id': {
+                'description': 'Material ID',
+                'minimum': 0,
+                'type': 'integer'
             },
-            'required': [
-                'model_id',
-                'material_id'
-            ],
-            'title': 'GetMaterialMessage',
-            'type': 'object'
-        }
-    ],
+            'model_id': {
+                'description': 'Model ID',
+                'minimum': 0,
+                'type': 'integer'
+            }
+        },
+        'required': [
+            'model_id',
+            'material_id'
+        ],
+        'title': 'GetMaterialMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {
         'additionalProperties': False,

@@ -21,161 +21,159 @@
 schema = {
     'async': False,
     'description': 'Set the current state of the scene',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'bounds': {
-                    'additionalProperties': False,
-                    'description': 'Scene boundary',
-                    'properties': {
-                        'max': {
-                            'description': 'Top-right XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'bounds': {
+                'additionalProperties': False,
+                'description': 'Scene boundary',
+                'properties': {
+                    'max': {
+                        'description': 'Top-right XYZ',
+                        'items': {
+                            'type': 'number'
                         },
-                        'min': {
-                            'description': 'Bottom-left XYZ',
-                            'items': {
-                                'type': 'number'
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'min': {
+                        'description': 'Bottom-left XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    }
+                },
+                'readOnly': True,
+                'title': 'Boxd',
+                'type': 'object'
+            },
+            'models': {
+                'description': 'All models',
+                'items': {
+                    'additionalProperties': False,
+                    'properties': {
+                        'bounding_box': {
+                            'description': 'Display bounding box',
+                            'type': 'boolean'
+                        },
+                        'bounds': {
+                            'additionalProperties': False,
+                            'description': 'Model bounds',
+                            'properties': {
+                                'max': {
+                                    'description': 'Top-right XYZ',
+                                    'items': {
+                                        'type': 'number'
+                                    },
+                                    'maxItems': 3,
+                                    'minItems': 3,
+                                    'type': 'array'
+                                },
+                                'min': {
+                                    'description': 'Bottom-left XYZ',
+                                    'items': {
+                                        'type': 'number'
+                                    },
+                                    'maxItems': 3,
+                                    'minItems': 3,
+                                    'type': 'array'
+                                }
                             },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
+                            'readOnly': True,
+                            'title': 'Boxd',
+                            'type': 'object'
+                        },
+                        'id': {
+                            'description': 'Model ID',
+                            'minimum': 0,
+                            'type': 'integer'
+                        },
+                        'loader_name': {
+                            'description': 'Name of the loader',
+                            'type': 'string'
+                        },
+                        'loader_properties': {
+                            'description': 'Loader properties',
+                            'type': 'object'
+                        },
+                        'metadata': {
+                            'additionalProperties': {
+                                'type': 'string'
+                            },
+                            'description': 'Key-value data',
+                            'type': 'object'
+                        },
+                        'name': {
+                            'description': 'Model name',
+                            'type': 'string'
+                        },
+                        'path': {
+                            'description': 'Model file path',
+                            'type': 'string'
+                        },
+                        'transformation': {
+                            'additionalProperties': False,
+                            'description': 'Model transformation',
+                            'properties': {
+                                'rotation': {
+                                    'description': 'Rotation XYZW',
+                                    'items': {
+                                        'type': 'number'
+                                    },
+                                    'maxItems': 4,
+                                    'minItems': 4,
+                                    'type': 'array'
+                                },
+                                'rotation_center': {
+                                    'description': 'Rotation center XYZ',
+                                    'items': {
+                                        'type': 'number'
+                                    },
+                                    'maxItems': 3,
+                                    'minItems': 3,
+                                    'type': 'array'
+                                },
+                                'scale': {
+                                    'description': 'Scale XYZ',
+                                    'items': {
+                                        'type': 'number'
+                                    },
+                                    'maxItems': 3,
+                                    'minItems': 3,
+                                    'type': 'array'
+                                },
+                                'translation': {
+                                    'description': 'Translation XYZ',
+                                    'items': {
+                                        'type': 'number'
+                                    },
+                                    'maxItems': 3,
+                                    'minItems': 3,
+                                    'type': 'array'
+                                }
+                            },
+                            'title': 'Transformation',
+                            'type': 'object'
+                        },
+                        'visible': {
+                            'description': 'Is visible',
+                            'type': 'boolean'
                         }
                     },
-                    'readOnly': True,
-                    'title': 'Boxd',
+                    'title': 'ModelDescriptor',
                     'type': 'object'
                 },
-                'models': {
-                    'description': 'All models',
-                    'items': {
-                        'additionalProperties': False,
-                        'properties': {
-                            'bounding_box': {
-                                'description': 'Display bounding box',
-                                'type': 'boolean'
-                            },
-                            'bounds': {
-                                'additionalProperties': False,
-                                'description': 'Model bounds',
-                                'properties': {
-                                    'max': {
-                                        'description': 'Top-right XYZ',
-                                        'items': {
-                                            'type': 'number'
-                                        },
-                                        'maxItems': 3,
-                                        'minItems': 3,
-                                        'type': 'array'
-                                    },
-                                    'min': {
-                                        'description': 'Bottom-left XYZ',
-                                        'items': {
-                                            'type': 'number'
-                                        },
-                                        'maxItems': 3,
-                                        'minItems': 3,
-                                        'type': 'array'
-                                    }
-                                },
-                                'readOnly': True,
-                                'title': 'Boxd',
-                                'type': 'object'
-                            },
-                            'id': {
-                                'description': 'Model ID',
-                                'minimum': 0,
-                                'type': 'integer'
-                            },
-                            'loader_name': {
-                                'description': 'Name of the loader',
-                                'type': 'string'
-                            },
-                            'loader_properties': {
-                                'description': 'Loader properties',
-                                'type': 'object'
-                            },
-                            'metadata': {
-                                'additionalProperties': {
-                                    'type': 'string'
-                                },
-                                'description': 'Key-value data',
-                                'type': 'object'
-                            },
-                            'name': {
-                                'description': 'Model name',
-                                'type': 'string'
-                            },
-                            'path': {
-                                'description': 'Model file path',
-                                'type': 'string'
-                            },
-                            'transformation': {
-                                'additionalProperties': False,
-                                'description': 'Model transformation',
-                                'properties': {
-                                    'rotation': {
-                                        'description': 'Rotation XYZW',
-                                        'items': {
-                                            'type': 'number'
-                                        },
-                                        'maxItems': 4,
-                                        'minItems': 4,
-                                        'type': 'array'
-                                    },
-                                    'rotation_center': {
-                                        'description': 'Rotation center XYZ',
-                                        'items': {
-                                            'type': 'number'
-                                        },
-                                        'maxItems': 3,
-                                        'minItems': 3,
-                                        'type': 'array'
-                                    },
-                                    'scale': {
-                                        'description': 'Scale XYZ',
-                                        'items': {
-                                            'type': 'number'
-                                        },
-                                        'maxItems': 3,
-                                        'minItems': 3,
-                                        'type': 'array'
-                                    },
-                                    'translation': {
-                                        'description': 'Translation XYZ',
-                                        'items': {
-                                            'type': 'number'
-                                        },
-                                        'maxItems': 3,
-                                        'minItems': 3,
-                                        'type': 'array'
-                                    }
-                                },
-                                'title': 'Transformation',
-                                'type': 'object'
-                            },
-                            'visible': {
-                                'description': 'Is visible',
-                                'type': 'boolean'
-                            }
-                        },
-                        'title': 'ModelDescriptor',
-                        'type': 'object'
-                    },
-                    'readOnly': True,
-                    'type': 'array'
-                }
-            },
-            'title': 'Scene',
-            'type': 'object'
-        }
-    ],
+                'readOnly': True,
+                'type': 'array'
+            }
+        },
+        'title': 'Scene',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'set-scene',

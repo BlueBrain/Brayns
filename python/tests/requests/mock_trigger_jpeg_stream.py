@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Triggers the engine to stream a frame to the clients',
-    'params': [],
     'plugin': 'Core',
     'returns': {},
     'title': 'trigger-jpeg-stream',

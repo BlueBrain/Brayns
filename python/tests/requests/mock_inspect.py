@@ -21,27 +21,25 @@
 schema = {
     'async': False,
     'description': 'Inspect the scene at x-y position',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'position': {
-                    'description': 'Position XY (normalized)',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 2,
-                    'minItems': 2,
-                    'type': 'array'
-                }
-            },
-            'required': [
-                'position'
-            ],
-            'title': 'InspectMessage',
-            'type': 'object'
-        }
-    ],
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'position': {
+                'description': 'Position XY (normalized)',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 2,
+                'minItems': 2,
+                'type': 'array'
+            }
+        },
+        'required': [
+            'position'
+        ],
+        'title': 'InspectMessage',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,

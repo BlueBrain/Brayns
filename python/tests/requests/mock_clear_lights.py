@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Clear all lights in the scene',
-    'params': [],
     'plugin': 'Core',
     'returns': {},
     'title': 'clear-lights',

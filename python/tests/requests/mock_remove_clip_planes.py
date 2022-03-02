@@ -21,26 +21,24 @@
 schema = {
     'async': False,
     'description': 'Remove clip planes from the scene given their ids',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'ids': {
-                    'description': 'Clip planes ID list',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'type': 'array'
-                }
-            },
-            'required': [
-                'ids'
-            ],
-            'title': 'RemoveClipPlanesMessage',
-            'type': 'object'
-        }
-    ],
+    'params':  {
+        'additionalProperties': False,
+        'properties': {
+            'ids': {
+                'description': 'Clip planes ID list',
+                'items': {
+                    'minimum': 0,
+                    'type': 'integer'
+                },
+                'type': 'array'
+            }
+        },
+        'required': [
+            'ids'
+        ],
+        'title': 'RemoveClipPlanesMessage',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'remove-clip-planes',

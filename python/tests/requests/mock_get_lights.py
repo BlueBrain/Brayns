@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Get all lights',
-    'params': [],
     'plugin': 'Core',
     'returns': {
         'items': {

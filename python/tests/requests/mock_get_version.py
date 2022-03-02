@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Get Brayns instance version',
-    'params': [],
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,

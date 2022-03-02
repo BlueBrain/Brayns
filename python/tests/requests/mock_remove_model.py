@@ -21,26 +21,24 @@
 schema = {
     'async': False,
     'description': 'Remove the model(s) from the ID list from the scene',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'ids': {
-                    'description': 'List of model ID to remove',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'type': 'array'
-                }
-            },
-            'required': [
-                'ids'
-            ],
-            'title': 'RemoveModelMessage',
-            'type': 'object'
-        }
-    ],
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'ids': {
+                'description': 'List of model ID to remove',
+                'items': {
+                    'minimum': 0,
+                    'type': 'integer'
+                },
+                'type': 'array'
+            }
+        },
+        'required': [
+            'ids'
+        ],
+        'title': 'RemoveModelMessage',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'remove-model',

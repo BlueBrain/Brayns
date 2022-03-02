@@ -21,71 +21,69 @@
 schema = {
     'async': False,
     'description': 'Performs neuronal tracing showing efferent and afferent synapse relationship between cells (including projections)',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'cell_gids': {
-                    'description': 'List of cell GIDs to use a source of the tracing',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'type': 'array'
-                },
-                'connected_cells_color': {
-                    'description': 'RGBA normalized color to apply to the target cells geometry',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
-                },
-                'model_id': {
-                    'description': 'Model where to perform the neuronal tracing',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'cell_gids': {
+                'description': 'List of cell GIDs to use a source of the tracing',
+                'items': {
                     'minimum': 0,
                     'type': 'integer'
                 },
-                'non_connected_cells_color': {
-                    'description': 'RGBA normalized color to apply to the rest of cells',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
-                },
-                'source_cell_color': {
-                    'description': 'RGBA normalized color to apply to the source cell geometry',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
-                },
-                'target_cell_gids': {
-                    'description': 'List of cells GIDs which are the result of the given tracing mode',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'type': 'array'
-                }
+                'type': 'array'
             },
-            'required': [
-                'model_id',
-                'cell_gids',
-                'target_cell_gids',
-                'source_cell_color',
-                'connected_cells_color',
-                'non_connected_cells_color'
-            ],
-            'title': 'TraceAnterogradeMessage',
-            'type': 'object'
-        }
-    ],
+            'connected_cells_color': {
+                'description': 'RGBA normalized color to apply to the target cells geometry',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 4,
+                'minItems': 4,
+                'type': 'array'
+            },
+            'model_id': {
+                'description': 'Model where to perform the neuronal tracing',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'non_connected_cells_color': {
+                'description': 'RGBA normalized color to apply to the rest of cells',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 4,
+                'minItems': 4,
+                'type': 'array'
+            },
+            'source_cell_color': {
+                'description': 'RGBA normalized color to apply to the source cell geometry',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 4,
+                'minItems': 4,
+                'type': 'array'
+            },
+            'target_cell_gids': {
+                'description': 'List of cells GIDs which are the result of the given tracing mode',
+                'items': {
+                    'minimum': 0,
+                    'type': 'integer'
+                },
+                'type': 'array'
+            }
+        },
+        'required': [
+            'model_id',
+            'cell_gids',
+            'target_cell_gids',
+            'source_cell_color',
+            'connected_cells_color',
+            'non_connected_cells_color'
+        ],
+        'title': 'TraceAnterogradeMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {},
     'title': 'trace-anterograde',

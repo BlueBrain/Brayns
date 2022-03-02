@@ -21,37 +21,35 @@
 schema = {
     'async': False,
     'description': 'Add an ambient light and return its ID',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'color': {
-                    'description': 'Light color RGB',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'intensity': {
-                    'description': 'Light intensity 0-1',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'color': {
+                'description': 'Light color RGB',
+                'items': {
                     'type': 'number'
                 },
-                'is_visible': {
-                    'description': 'Light is visible',
-                    'type': 'boolean'
-                }
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
             },
-            'required': [
-                'color',
-                'intensity',
-                'is_visible'
-            ],
-            'title': 'AmbientLight',
-            'type': 'object'
-        }
-    ],
+            'intensity': {
+                'description': 'Light intensity 0-1',
+                'type': 'number'
+            },
+            'is_visible': {
+                'description': 'Light is visible',
+                'type': 'boolean'
+            }
+        },
+        'required': [
+            'color',
+            'intensity',
+            'is_visible'
+        ],
+        'title': 'AmbientLight',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'minimum': 0,

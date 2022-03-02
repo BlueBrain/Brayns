@@ -21,82 +21,80 @@
 schema = {
     'async': False,
     'description': 'Set the transfer function of the given model',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'id': {
-                    'description': 'Model ID',
-                    'minimum': 0,
-                    'type': 'integer',
-                    'writeOnly': True
-                },
-                'transfer_function': {
-                    'additionalProperties': False,
-                    'description': 'Transfer function',
-                    'properties': {
-                        'colormap': {
-                            'additionalProperties': False,
-                            'description': 'Colors to map',
-                            'properties': {
-                                'colors': {
-                                    'description': 'Colors to map',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'id': {
+                'description': 'Model ID',
+                'minimum': 0,
+                'type': 'integer',
+                'writeOnly': True
+            },
+            'transfer_function': {
+                'additionalProperties': False,
+                'description': 'Transfer function',
+                'properties': {
+                    'colormap': {
+                        'additionalProperties': False,
+                        'description': 'Colors to map',
+                        'properties': {
+                            'colors': {
+                                'description': 'Colors to map',
+                                'items': {
                                     'items': {
-                                        'items': {
-                                            'type': 'number'
-                                        },
-                                        'maxItems': 3,
-                                        'minItems': 3,
-                                        'type': 'array'
+                                        'type': 'number'
                                     },
+                                    'maxItems': 3,
+                                    'minItems': 3,
                                     'type': 'array'
                                 },
-                                'name': {
-                                    'description': 'Label of the color map',
-                                    'type': 'string'
-                                }
-                            },
-                            'required': [
-                                'colors'
-                            ],
-                            'title': 'ColorMap',
-                            'type': 'object'
-                        },
-                        'opacity_curve': {
-                            'description': 'Control points',
-                            'items': {
-                                'items': {
-                                    'type': 'number'
-                                },
-                                'maxItems': 2,
-                                'minItems': 2,
                                 'type': 'array'
                             },
-                            'type': 'array'
+                            'name': {
+                                'description': 'Label of the color map',
+                                'type': 'string'
+                            }
                         },
-                        'range': {
-                            'description': 'Values range',
+                        'required': [
+                            'colors'
+                        ],
+                        'title': 'ColorMap',
+                        'type': 'object'
+                    },
+                    'opacity_curve': {
+                        'description': 'Control points',
+                        'items': {
                             'items': {
                                 'type': 'number'
                             },
                             'maxItems': 2,
                             'minItems': 2,
                             'type': 'array'
-                        }
+                        },
+                        'type': 'array'
                     },
-                    'title': 'TransferFunction',
-                    'type': 'object',
-                    'writeOnly': True
-                }
-            },
-            'required': [
-                'id',
-                'transfer_function'
-            ],
-            'title': 'ModelTransferFunction',
-            'type': 'object'
-        }
-    ],
+                    'range': {
+                        'description': 'Values range',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 2,
+                        'minItems': 2,
+                        'type': 'array'
+                    }
+                },
+                'title': 'TransferFunction',
+                'type': 'object',
+                'writeOnly': True
+            }
+        },
+        'required': [
+            'id',
+            'transfer_function'
+        ],
+        'title': 'ModelTransferFunction',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'set-model-transfer-function',

@@ -21,39 +21,37 @@
 schema = {
     'async': False,
     'description': 'Color cells with given colors using their GID',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'colors': {
-                    'description': 'Cell colors',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'type': 'array'
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'colors': {
+                'description': 'Cell colors',
+                'items': {
+                    'type': 'number'
                 },
-                'gids': {
-                    'description': 'Cells to color',
-                    'items': {
-                        'type': 'string'
-                    },
-                    'type': 'array'
-                },
-                'model_id': {
-                    'description': 'Model to color',
-                    'minimum': 0,
-                    'type': 'integer'
-                }
+                'type': 'array'
             },
-            'required': [
-                'model_id',
-                'gids',
-                'colors'
-            ],
-            'title': 'ColorCellsMessage',
-            'type': 'object'
-        }
-    ],
+            'gids': {
+                'description': 'Cells to color',
+                'items': {
+                    'type': 'string'
+                },
+                'type': 'array'
+            },
+            'model_id': {
+                'description': 'Model to color',
+                'minimum': 0,
+                'type': 'integer'
+            }
+        },
+        'required': [
+            'model_id',
+            'gids',
+            'colors'
+        ],
+        'title': 'ColorCellsMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {},
     'title': 'color-cells',

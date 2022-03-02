@@ -21,67 +21,65 @@
 schema = {
     'async': False,
     'description': 'Add a quad light and return its ID',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'color': {
-                    'description': 'Light color RGB',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'edge1': {
-                    'description': 'First edge XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'edge2': {
-                    'description': 'Second edge XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'intensity': {
-                    'description': 'Light intensity 0-1',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'color': {
+                'description': 'Light color RGB',
+                'items': {
                     'type': 'number'
                 },
-                'is_visible': {
-                    'description': 'Light is visible',
-                    'type': 'boolean'
-                },
-                'position': {
-                    'description': 'Light position XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                }
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
             },
-            'required': [
-                'color',
-                'intensity',
-                'is_visible',
-                'position',
-                'edge1',
-                'edge2'
-            ],
-            'title': 'QuadLight',
-            'type': 'object'
-        }
-    ],
+            'edge1': {
+                'description': 'First edge XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'edge2': {
+                'description': 'Second edge XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'intensity': {
+                'description': 'Light intensity 0-1',
+                'type': 'number'
+            },
+            'is_visible': {
+                'description': 'Light is visible',
+                'type': 'boolean'
+            },
+            'position': {
+                'description': 'Light position XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            }
+        },
+        'required': [
+            'color',
+            'intensity',
+            'is_visible',
+            'position',
+            'edge1',
+            'edge2'
+        ],
+        'title': 'QuadLight',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'minimum': 0,

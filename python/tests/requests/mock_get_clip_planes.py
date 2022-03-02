@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Get all clip planes',
-    'params': [],
     'plugin': 'Core',
     'returns': {
         'items': {

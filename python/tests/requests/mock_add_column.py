@@ -21,22 +21,20 @@
 schema = {
     'async': False,
     'description': 'Add a visual 3D column as a cylinder to the scene',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'radius': {
-                    'description': 'Radius of the cylinder',
-                    'type': 'number'
-                }
-            },
-            'required': [
-                'radius'
-            ],
-            'title': 'AddColumnMessage',
-            'type': 'object'
-        }
-    ],
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'radius': {
+                'description': 'Radius of the cylinder',
+                'type': 'number'
+            }
+        },
+        'required': [
+            'radius'
+        ],
+        'title': 'AddColumnMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {},
     'title': 'add-column',

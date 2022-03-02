@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Get the current state of the statistics',
-    'params': [],
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,

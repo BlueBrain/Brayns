@@ -21,53 +21,51 @@
 schema = {
     'async': False,
     'description': 'Add a spike simulation loaded from a file to a model',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'decay_speed': {
-                    'description': 'Speed of spike decay',
-                    'type': 'number'
-                },
-                'dt': {
-                    'description': 'Simulation time step',
-                    'type': 'number'
-                },
-                'model_id': {
-                    'description': 'The ID of the loaded model',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'path': {
-                    'description': 'Path to BlueConfig file',
-                    'type': 'string'
-                },
-                'rest_intensity': {
-                    'description': 'Rest intensity',
-                    'type': 'number'
-                },
-                'spike_intensity': {
-                    'description': 'Spike intensity',
-                    'type': 'number'
-                },
-                'time_scale': {
-                    'description': 'Simulation time scale',
-                    'type': 'number'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'decay_speed': {
+                'description': 'Speed of spike decay',
+                'type': 'number'
             },
-            'required': [
-                'model_id',
-                'dt',
-                'time_scale',
-                'decay_speed',
-                'rest_intensity',
-                'spike_intensity',
-                'path'
-            ],
-            'title': 'SetSpikeSimulationFromFileMessage',
-            'type': 'object'
-        }
-    ],
+            'dt': {
+                'description': 'Simulation time step',
+                'type': 'number'
+            },
+            'model_id': {
+                'description': 'The ID of the loaded model',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'path': {
+                'description': 'Path to BlueConfig file',
+                'type': 'string'
+            },
+            'rest_intensity': {
+                'description': 'Rest intensity',
+                'type': 'number'
+            },
+            'spike_intensity': {
+                'description': 'Spike intensity',
+                'type': 'number'
+            },
+            'time_scale': {
+                'description': 'Simulation time scale',
+                'type': 'number'
+            }
+        },
+        'required': [
+            'model_id',
+            'dt',
+            'time_scale',
+            'decay_speed',
+            'rest_intensity',
+            'spike_intensity',
+            'path'
+        ],
+        'title': 'SetSpikeSimulationFromFileMessage',
+        'type': 'object'
+    },
     'plugin': 'DTI',
     'returns': {},
     'title': 'set-spike-simulation-from-file',

@@ -21,33 +21,31 @@
 schema = {
     'async': False,
     'description': 'Mirrors a model along a given axis',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'mirror_axis': {
-                    'description': 'The axis used to mirror',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'mirror_axis': {
+                'description': 'The axis used to mirror',
+                'items': {
+                    'type': 'number'
                 },
-                'model_id': {
-                    'description': 'Model to mirror',
-                    'minimum': 0,
-                    'type': 'integer'
-                }
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
             },
-            'required': [
-                'model_id',
-                'mirror_axis'
-            ],
-            'title': 'MirrorModelMessage',
-            'type': 'object'
-        }
-    ],
+            'model_id': {
+                'description': 'Model to mirror',
+                'minimum': 0,
+                'type': 'integer'
+            }
+        },
+        'required': [
+            'model_id',
+            'mirror_axis'
+        ],
+        'title': 'MirrorModelMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {},
     'title': 'mirror-model',

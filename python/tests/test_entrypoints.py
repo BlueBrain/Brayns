@@ -76,11 +76,10 @@ class TestEntrypoints(unittest.TestCase):
         self.assertEqual(result, request.result)
 
     def _call_method(self, method: Callable, request: MockRequest):
-        schemas = request.schema['params']
-        if not schemas:
+        schema = request.schema.get('params', None)
+        if schema is None:
             return method()
         params = request.params
-        schema = schemas[0]
         if isinstance(schema, dict) and 'oneOf' in schema:
             return method(params)
         return method(**params)

@@ -21,29 +21,27 @@
 schema = {
     'async': False,
     'description': 'Update a clip plane with the given coefficients',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'id': {
-                    'description': 'Plane ID',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'plane': {
-                    'description': 'Plane normal vector XYZ and distance from origin',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'id': {
+                'description': 'Plane ID',
+                'minimum': 0,
+                'type': 'integer'
             },
-            'title': 'ClipPlane',
-            'type': 'object'
-        }
-    ],
+            'plane': {
+                'description': 'Plane normal vector XYZ and distance from origin',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 4,
+                'minItems': 4,
+                'type': 'array'
+            }
+        },
+        'title': 'ClipPlane',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'update-clip-plane',

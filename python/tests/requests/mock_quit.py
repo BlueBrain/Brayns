@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Quit the application',
-    'params': [],
     'plugin': 'Core',
     'returns': {},
     'title': 'quit',

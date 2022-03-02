@@ -21,52 +21,50 @@
 schema = {
     'async': False,
     'description': 'Add a directional light and return its ID',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'angular_diameter': {
-                    'description': 'Angular diameter in degrees',
-                    'type': 'number'
-                },
-                'color': {
-                    'description': 'Light color RGB',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'direction': {
-                    'description': 'Light source direction',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'intensity': {
-                    'description': 'Light intensity 0-1',
-                    'type': 'number'
-                },
-                'is_visible': {
-                    'description': 'Light is visible',
-                    'type': 'boolean'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'angular_diameter': {
+                'description': 'Angular diameter in degrees',
+                'type': 'number'
             },
-            'required': [
-                'color',
-                'intensity',
-                'is_visible',
-                'direction',
-                'angular_diameter'
-            ],
-            'title': 'DirectionalLight',
-            'type': 'object'
-        }
-    ],
+            'color': {
+                'description': 'Light color RGB',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'direction': {
+                'description': 'Light source direction',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'intensity': {
+                'description': 'Light intensity 0-1',
+                'type': 'number'
+            },
+            'is_visible': {
+                'description': 'Light is visible',
+                'type': 'boolean'
+            }
+        },
+        'required': [
+            'color',
+            'intensity',
+            'is_visible',
+            'direction',
+            'angular_diameter'
+        ],
+        'title': 'DirectionalLight',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'minimum': 0,

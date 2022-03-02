@@ -21,33 +21,31 @@
 schema = {
     'async': False,
     'description': 'Dynamically loads and attach a simulation to a loaded model',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'circuit_configuration': {
-                    'description': 'Simulation configuration file path',
-                    'type': 'string'
-                },
-                'model_id': {
-                    'description': 'The model to which to attach the handler',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'report_name': {
-                    'description': 'The name of the report to attach',
-                    'type': 'string'
-                }
+    'params':  {
+        'additionalProperties': False,
+        'properties': {
+            'circuit_configuration': {
+                'description': 'Simulation configuration file path',
+                'type': 'string'
             },
-            'required': [
-                'model_id',
-                'circuit_configuration',
-                'report_name'
-            ],
-            'title': 'AttachCircuitSimulationHandlerMessage',
-            'type': 'object'
-        }
-    ],
+            'model_id': {
+                'description': 'The model to which to attach the handler',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'report_name': {
+                'description': 'The name of the report to attach',
+                'type': 'string'
+            }
+        },
+        'required': [
+            'model_id',
+            'circuit_configuration',
+            'report_name'
+        ],
+        'title': 'AttachCircuitSimulationHandlerMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {},
     'title': 'attach-circuit-simulation-handler',

@@ -21,102 +21,100 @@
 schema = {
     'async': False,
     'description': 'Set the current state of the volume parameters',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'adaptive_max_sampling_rate': {
-                    'description': 'Max sampling rate',
-                    'type': 'number'
-                },
-                'adaptive_sampling': {
-                    'description': 'Use adaptive sampling',
-                    'type': 'boolean'
-                },
-                'clip_box': {
-                    'additionalProperties': False,
-                    'description': 'Clip box',
-                    'properties': {
-                        'max': {
-                            'description': 'Top-right XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'min': {
-                            'description': 'Bottom-left XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        }
-                    },
-                    'title': 'Boxd',
-                    'type': 'object'
-                },
-                'gradient_shading': {
-                    'description': 'Use gradient shading',
-                    'type': 'boolean'
-                },
-                'pre_integration': {
-                    'description': 'Use pre-integration',
-                    'type': 'boolean'
-                },
-                'sampling_rate': {
-                    'description': 'Fixed sampling rate',
-                    'type': 'number'
-                },
-                'single_shade': {
-                    'description': 'Use a single shade for the whole volume',
-                    'type': 'boolean'
-                },
-                'specular': {
-                    'description': 'Reflectivity amount XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'volume_dimensions': {
-                    'description': 'Dimensions XYZ',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'volume_element_spacing': {
-                    'description': 'Element spacing XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'volume_offset': {
-                    'description': 'Offset XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'adaptive_max_sampling_rate': {
+                'description': 'Max sampling rate',
+                'type': 'number'
             },
-            'title': 'VolumeParameters',
-            'type': 'object'
-        }
-    ],
+            'adaptive_sampling': {
+                'description': 'Use adaptive sampling',
+                'type': 'boolean'
+            },
+            'clip_box': {
+                'additionalProperties': False,
+                'description': 'Clip box',
+                'properties': {
+                    'max': {
+                        'description': 'Top-right XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'min': {
+                        'description': 'Bottom-left XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    }
+                },
+                'title': 'Boxd',
+                'type': 'object'
+            },
+            'gradient_shading': {
+                'description': 'Use gradient shading',
+                'type': 'boolean'
+            },
+            'pre_integration': {
+                'description': 'Use pre-integration',
+                'type': 'boolean'
+            },
+            'sampling_rate': {
+                'description': 'Fixed sampling rate',
+                'type': 'number'
+            },
+            'single_shade': {
+                'description': 'Use a single shade for the whole volume',
+                'type': 'boolean'
+            },
+            'specular': {
+                'description': 'Reflectivity amount XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'volume_dimensions': {
+                'description': 'Dimensions XYZ',
+                'items': {
+                    'minimum': 0,
+                    'type': 'integer'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'volume_element_spacing': {
+                'description': 'Element spacing XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'volume_offset': {
+                'description': 'Offset XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            }
+        },
+        'title': 'VolumeParameters',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'set-volume-parameters',

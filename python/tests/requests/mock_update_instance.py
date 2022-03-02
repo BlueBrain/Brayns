@@ -21,77 +21,75 @@
 schema = {
     'async': False,
     'description': 'Update the model instance with the given values',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'bounding_box': {
-                    'description': 'Display bounding box',
-                    'type': 'boolean'
-                },
-                'instance_id': {
-                    'description': 'Instance ID',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'model_id': {
-                    'description': 'Model ID',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'transformation': {
-                    'additionalProperties': False,
-                    'description': 'Model transformation',
-                    'properties': {
-                        'rotation': {
-                            'description': 'Rotation XYZW',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 4,
-                            'minItems': 4,
-                            'type': 'array'
-                        },
-                        'rotation_center': {
-                            'description': 'Rotation center XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'scale': {
-                            'description': 'Scale XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'translation': {
-                            'description': 'Translation XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        }
-                    },
-                    'title': 'Transformation',
-                    'type': 'object'
-                },
-                'visible': {
-                    'description': 'Check if rendered',
-                    'type': 'boolean'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'bounding_box': {
+                'description': 'Display bounding box',
+                'type': 'boolean'
             },
-            'title': 'ModelInstance',
-            'type': 'object'
-        }
-    ],
+            'instance_id': {
+                'description': 'Instance ID',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'model_id': {
+                'description': 'Model ID',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'transformation': {
+                'additionalProperties': False,
+                'description': 'Model transformation',
+                'properties': {
+                    'rotation': {
+                        'description': 'Rotation XYZW',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 4,
+                        'minItems': 4,
+                        'type': 'array'
+                    },
+                    'rotation_center': {
+                        'description': 'Rotation center XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'scale': {
+                        'description': 'Scale XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'translation': {
+                        'description': 'Translation XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    }
+                },
+                'title': 'Transformation',
+                'type': 'object'
+            },
+            'visible': {
+                'description': 'Check if rendered',
+                'type': 'boolean'
+            }
+        },
+        'title': 'ModelInstance',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'update-instance',

@@ -21,23 +21,21 @@
 schema = {
     'async': False,
     'description': 'Schedules Brayns to shutdown after a given amount of minutes',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'minutes': {
-                    'description': 'Number of minutes after which Brayns will shut down',
-                    'minimum': 0,
-                    'type': 'integer'
-                }
-            },
-            'required': [
-                'minutes'
-            ],
-            'title': 'ExitLaterMessage',
-            'type': 'object'
-        }
-    ],
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'minutes': {
+                'description': 'Number of minutes after which Brayns will shut down',
+                'minimum': 0,
+                'type': 'integer'
+            }
+        },
+        'required': [
+            'minutes'
+        ],
+        'title': 'ExitLaterMessage',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'exit-later',
