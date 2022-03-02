@@ -28,7 +28,7 @@ struct FileLoadParameters
 {
     std::string filePath;
     std::string loaderName;
-    JsonValue loadSettings;
+    JsonValue loadParameters;
 };
 
 struct BinaryLoadParameters

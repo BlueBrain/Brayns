@@ -26,13 +26,13 @@
 #include <brayns/io/LoaderRegistry.h>
 
 #include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/adapters/ModelParamsAdapter.h>
+#include <brayns/network/adapters/FileLoadParametersAdapter.h>
 #include <brayns/network/common/CancellationToken.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-class AddModelEntrypoint : public Entrypoint<ModelParams, std::vector<ModelDescriptorPtr>>
+class AddModelEntrypoint : public Entrypoint<FileLoadParameters, ModelInstance>
 {
 public:
     AddModelEntrypoint(Scene &scene, LoaderRegistry &loaders, CancellationToken token);
