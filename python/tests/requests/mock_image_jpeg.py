@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Take a snapshot at JPEG format',
-    'params': [],
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,

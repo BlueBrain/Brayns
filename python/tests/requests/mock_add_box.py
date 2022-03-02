@@ -21,51 +21,49 @@
 schema = {
     'async': False,
     'description': 'Add a visual 3D box to the scene',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'color': {
-                    'description': 'Box color RGBA normalized',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'color': {
+                'description': 'Box color RGBA normalized',
+                'items': {
+                    'type': 'number'
                 },
-                'max_corner': {
-                    'description': 'Axis aligned maximum bound of the box',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'min_corner': {
-                    'description': 'Axis aligned minimum bound of the box',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'name': {
-                    'description': 'Name to give to the added model',
-                    'type': 'string'
-                }
+                'maxItems': 4,
+                'minItems': 4,
+                'type': 'array'
             },
-            'required': [
-                'min_corner',
-                'max_corner',
-                'color'
-            ],
-            'title': 'AddBoxMessage',
-            'type': 'object'
-        }
-    ],
+            'max_corner': {
+                'description': 'Axis aligned maximum bound of the box',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'min_corner': {
+                'description': 'Axis aligned minimum bound of the box',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'name': {
+                'description': 'Name to give to the added model',
+                'type': 'string'
+            }
+        },
+        'required': [
+            'min_corner',
+            'max_corner',
+            'color'
+        ],
+        'title': 'AddBoxMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {
         'additionalProperties': False,

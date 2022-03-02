@@ -21,187 +21,185 @@
 schema = {
     'async': True,
     'description': 'Take a snapshot with given parameters',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'animation_parameters': {
-                    'additionalProperties': False,
-                    'description': 'Animation parameters',
-                    'properties': {
-                        'current': {
-                            'description': 'Current frame index',
-                            'minimum': 0,
-                            'type': 'integer'
-                        },
-                        'delta': {
-                            'description': 'Frame delta',
-                            'type': 'integer'
-                        },
-                        'dt': {
-                            'description': 'Frame time',
-                            'type': 'number'
-                        },
-                        'frame_count': {
-                            'description': 'Animation frame count',
-                            'minimum': 0,
-                            'type': 'integer'
-                        },
-                        'playing': {
-                            'description': 'Animation is playing',
-                            'type': 'boolean'
-                        },
-                        'unit': {
-                            'description': 'Time unit',
-                            'type': 'string'
-                        }
-                    },
-                    'title': 'AnimationParameters',
-                    'type': 'object'
-                },
-                'camera': {
-                    'additionalProperties': False,
-                    'description': 'Camera parameters',
-                    'properties': {
-                        'current': {
-                            'description': 'Camera current type',
-                            'type': 'string'
-                        },
-                        'orientation': {
-                            'description': 'Camera orientation XYZW',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 4,
-                            'minItems': 4,
-                            'type': 'array'
-                        },
-                        'position': {
-                            'description': 'Camera position XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'target': {
-                            'description': 'Camera target XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'types': {
-                            'description': 'Available camera types',
-                            'items': {
-                                'type': 'string'
-                            },
-                            'readOnly': True,
-                            'type': 'array'
-                        }
-                    },
-                    'title': 'Camera',
-                    'type': 'object'
-                },
-                'file_path': {
-                    'description': 'Path if saved on disk',
-                    'type': 'string'
-                },
-                'format': {
-                    'description': 'Image format (extension without dot)',
-                    'type': 'string'
-                },
-                'name': {
-                    'description': 'Name of the snapshot',
-                    'type': 'string'
-                },
-                'quality': {
-                    'description': 'Image quality from 0 to 100',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'renderer': {
-                    'additionalProperties': False,
-                    'description': 'Renderer parameters',
-                    'properties': {
-                        'accumulation': {
-                            'description': 'Multiple render passes',
-                            'type': 'boolean'
-                        },
-                        'background_color': {
-                            'description': 'Background color RGB',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'current': {
-                            'description': 'Current renderer name',
-                            'type': 'string'
-                        },
-                        'head_light': {
-                            'description': 'Light source follows camera origin',
-                            'type': 'boolean'
-                        },
-                        'max_accum_frames': {
-                            'description': 'Max render passes',
-                            'minimum': 0,
-                            'type': 'integer'
-                        },
-                        'samples_per_pixel': {
-                            'description': 'Samples per pixel',
-                            'minimum': 0,
-                            'type': 'integer'
-                        },
-                        'subsampling': {
-                            'description': 'Subsampling',
-                            'minimum': 0,
-                            'type': 'integer'
-                        },
-                        'types': {
-                            'description': 'Available renderers',
-                            'items': {
-                                'type': 'string'
-                            },
-                            'readOnly': True,
-                            'type': 'array'
-                        },
-                        'variance_threshold': {
-                            'description': 'Stop accumulation threshold',
-                            'type': 'number'
-                        }
-                    },
-                    'title': 'RenderingParameters',
-                    'type': 'object'
-                },
-                'samples_per_pixel': {
-                    'description': 'Samples per pixel',
-                    'type': 'integer'
-                },
-                'size': {
-                    'description': 'Image dimensions',
-                    'items': {
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'animation_parameters': {
+                'additionalProperties': False,
+                'description': 'Animation parameters',
+                'properties': {
+                    'current': {
+                        'description': 'Current frame index',
                         'minimum': 0,
                         'type': 'integer'
                     },
-                    'maxItems': 2,
-                    'minItems': 2,
-                    'type': 'array'
-                }
+                    'delta': {
+                        'description': 'Frame delta',
+                        'type': 'integer'
+                    },
+                    'dt': {
+                        'description': 'Frame time',
+                        'type': 'number'
+                    },
+                    'frame_count': {
+                        'description': 'Animation frame count',
+                        'minimum': 0,
+                        'type': 'integer'
+                    },
+                    'playing': {
+                        'description': 'Animation is playing',
+                        'type': 'boolean'
+                    },
+                    'unit': {
+                        'description': 'Time unit',
+                        'type': 'string'
+                    }
+                },
+                'title': 'AnimationParameters',
+                'type': 'object'
             },
-            'required': [
-                'format',
-                'size'
-            ],
-            'title': 'SnapshotParams',
-            'type': 'object'
-        }
-    ],
+            'camera': {
+                'additionalProperties': False,
+                'description': 'Camera parameters',
+                'properties': {
+                    'current': {
+                        'description': 'Camera current type',
+                        'type': 'string'
+                    },
+                    'orientation': {
+                        'description': 'Camera orientation XYZW',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 4,
+                        'minItems': 4,
+                        'type': 'array'
+                    },
+                    'position': {
+                        'description': 'Camera position XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'target': {
+                        'description': 'Camera target XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'types': {
+                        'description': 'Available camera types',
+                        'items': {
+                            'type': 'string'
+                        },
+                        'readOnly': True,
+                        'type': 'array'
+                    }
+                },
+                'title': 'Camera',
+                'type': 'object'
+            },
+            'file_path': {
+                'description': 'Path if saved on disk',
+                'type': 'string'
+            },
+            'format': {
+                'description': 'Image format (extension without dot)',
+                'type': 'string'
+            },
+            'name': {
+                'description': 'Name of the snapshot',
+                'type': 'string'
+            },
+            'quality': {
+                'description': 'Image quality from 0 to 100',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'renderer': {
+                'additionalProperties': False,
+                'description': 'Renderer parameters',
+                'properties': {
+                    'accumulation': {
+                        'description': 'Multiple render passes',
+                        'type': 'boolean'
+                    },
+                    'background_color': {
+                        'description': 'Background color RGB',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'current': {
+                        'description': 'Current renderer name',
+                        'type': 'string'
+                    },
+                    'head_light': {
+                        'description': 'Light source follows camera origin',
+                        'type': 'boolean'
+                    },
+                    'max_accum_frames': {
+                        'description': 'Max render passes',
+                        'minimum': 0,
+                        'type': 'integer'
+                    },
+                    'samples_per_pixel': {
+                        'description': 'Samples per pixel',
+                        'minimum': 0,
+                        'type': 'integer'
+                    },
+                    'subsampling': {
+                        'description': 'Subsampling',
+                        'minimum': 0,
+                        'type': 'integer'
+                    },
+                    'types': {
+                        'description': 'Available renderers',
+                        'items': {
+                            'type': 'string'
+                        },
+                        'readOnly': True,
+                        'type': 'array'
+                    },
+                    'variance_threshold': {
+                        'description': 'Stop accumulation threshold',
+                        'type': 'number'
+                    }
+                },
+                'title': 'RenderingParameters',
+                'type': 'object'
+            },
+            'samples_per_pixel': {
+                'description': 'Samples per pixel',
+                'type': 'integer'
+            },
+            'size': {
+                'description': 'Image dimensions',
+                'items': {
+                    'minimum': 0,
+                    'type': 'integer'
+                },
+                'maxItems': 2,
+                'minItems': 2,
+                'type': 'array'
+            }
+        },
+        'required': [
+            'format',
+            'size'
+        ],
+        'title': 'SnapshotParams',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,

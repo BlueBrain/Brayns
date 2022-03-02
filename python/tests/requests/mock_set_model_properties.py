@@ -21,28 +21,26 @@
 schema = {
     'async': False,
     'description': 'Set the properties of the given model',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'id': {
-                    'description': 'Model ID',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'properties': {
-                    'description': 'Model properties',
-                    'type': 'object'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'id': {
+                'description': 'Model ID',
+                'minimum': 0,
+                'type': 'integer'
             },
-            'required': [
-                'id',
-                'properties'
-            ],
-            'title': 'ModelPropertiesMessage',
-            'type': 'object'
-        }
-    ],
+            'properties': {
+                'description': 'Model properties',
+                'type': 'object'
+            }
+        },
+        'required': [
+            'id',
+            'properties'
+        ],
+        'title': 'ModelPropertiesMessage',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'set-model-properties',

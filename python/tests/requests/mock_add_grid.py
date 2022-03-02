@@ -21,52 +21,50 @@
 schema = {
     'async': False,
     'description': 'Add a visual 3D grid to the scene',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'max_value': {
-                    'description': 'Positive square grid length from world origin',
-                    'type': 'number'
-                },
-                'min_value': {
-                    'description': 'Negative square grid length from world origin',
-                    'type': 'number'
-                },
-                'plane_opacity': {
-                    'description': 'Opacity of the grid mesh material',
-                    'type': 'number'
-                },
-                'radius': {
-                    'description': 'Radius of the cylinder that will be placed at each cell',
-                    'type': 'number'
-                },
-                'show_axis': {
-                    'description': 'Wether to show a world aligned axis',
-                    'type': 'boolean'
-                },
-                'steps': {
-                    'description': 'Number of divisions',
-                    'type': 'number'
-                },
-                'use_colors': {
-                    'description': 'Use colors on the grid axes',
-                    'type': 'boolean'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'max_value': {
+                'description': 'Positive square grid length from world origin',
+                'type': 'number'
             },
-            'required': [
-                'min_value',
-                'max_value',
-                'steps',
-                'radius',
-                'plane_opacity',
-                'show_axis',
-                'use_colors'
-            ],
-            'title': 'AddGridMessage',
-            'type': 'object'
-        }
-    ],
+            'min_value': {
+                'description': 'Negative square grid length from world origin',
+                'type': 'number'
+            },
+            'plane_opacity': {
+                'description': 'Opacity of the grid mesh material',
+                'type': 'number'
+            },
+            'radius': {
+                'description': 'Radius of the cylinder that will be placed at each cell',
+                'type': 'number'
+            },
+            'show_axis': {
+                'description': 'Wether to show a world aligned axis',
+                'type': 'boolean'
+            },
+            'steps': {
+                'description': 'Number of divisions',
+                'type': 'number'
+            },
+            'use_colors': {
+                'description': 'Use colors on the grid axes',
+                'type': 'boolean'
+            }
+        },
+        'required': [
+            'min_value',
+            'max_value',
+            'steps',
+            'radius',
+            'plane_opacity',
+            'show_axis',
+            'use_colors'
+        ],
+        'title': 'AddGridMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {},
     'title': 'add-grid',

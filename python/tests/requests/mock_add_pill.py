@@ -21,8 +21,7 @@
 schema = {
     'async': False,
     'description': 'Add a visual 3D pill to the scene',
-    'params': [
-        {
+    'params': {
             'additionalProperties': False,
             'properties': {
                 'color': {
@@ -86,8 +85,7 @@ schema = {
             ],
             'title': 'AddPillMessage',
             'type': 'object'
-        }
-    ],
+        },
     'plugin': 'Circuit Explorer',
     'returns': {
         'additionalProperties': False,

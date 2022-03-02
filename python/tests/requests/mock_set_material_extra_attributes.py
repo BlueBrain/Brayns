@@ -21,23 +21,21 @@
 schema = {
     'async': False,
     'description': 'Add extra material attributes necessary for the Circuit Explorer renderer',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'model_id': {
-                    'description': 'Model ID',
-                    'minimum': 0,
-                    'type': 'integer'
-                }
-            },
-            'required': [
-                'model_id'
-            ],
-            'title': 'GetMaterialIdsParams',
-            'type': 'object'
-        }
-    ],
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'model_id': {
+                'description': 'Model ID',
+                'minimum': 0,
+                'type': 'integer'
+            }
+        },
+        'required': [
+            'model_id'
+        ],
+        'title': 'GetMaterialIdsParams',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {},
     'title': 'set-material-extra-attributes',

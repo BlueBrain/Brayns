@@ -21,70 +21,68 @@
 schema = {
     'async': False,
     'description': 'Add a spike simulation to a model',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'decay_speed': {
-                    'description': 'Speed of spike decay',
-                    'type': 'number'
-                },
-                'dt': {
-                    'description': 'Simulation time step',
-                    'type': 'number'
-                },
-                'end_time': {
-                    'description': 'Simulation normalized end time',
-                    'type': 'number'
-                },
-                'gids': {
-                    'description': 'List of cel GIDs',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'type': 'array'
-                },
-                'model_id': {
-                    'description': 'The ID of the loaded model',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'decay_speed': {
+                'description': 'Speed of spike decay',
+                'type': 'number'
+            },
+            'dt': {
+                'description': 'Simulation time step',
+                'type': 'number'
+            },
+            'end_time': {
+                'description': 'Simulation normalized end time',
+                'type': 'number'
+            },
+            'gids': {
+                'description': 'List of cel GIDs',
+                'items': {
                     'minimum': 0,
                     'type': 'integer'
                 },
-                'rest_intensity': {
-                    'description': 'Rest intensity',
-                    'type': 'number'
-                },
-                'spike_intensity': {
-                    'description': 'Spike intensity',
-                    'type': 'number'
-                },
-                'time_scale': {
-                    'description': 'Time scale',
-                    'type': 'number'
-                },
-                'timestamps': {
-                    'description': 'List of spike timestamps',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'type': 'array'
-                }
+                'type': 'array'
             },
-            'required': [
-                'model_id',
-                'gids',
-                'timestamps',
-                'dt',
-                'end_time',
-                'time_scale',
-                'decay_speed',
-                'rest_intensity',
-                'spike_intensity'
-            ],
-            'title': 'SetSpikeSimulationMessage',
-            'type': 'object'
-        }
-    ],
+            'model_id': {
+                'description': 'The ID of the loaded model',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'rest_intensity': {
+                'description': 'Rest intensity',
+                'type': 'number'
+            },
+            'spike_intensity': {
+                'description': 'Spike intensity',
+                'type': 'number'
+            },
+            'time_scale': {
+                'description': 'Time scale',
+                'type': 'number'
+            },
+            'timestamps': {
+                'description': 'List of spike timestamps',
+                'items': {
+                    'type': 'number'
+                },
+                'type': 'array'
+            }
+        },
+        'required': [
+            'model_id',
+            'gids',
+            'timestamps',
+            'dt',
+            'end_time',
+            'time_scale',
+            'decay_speed',
+            'rest_intensity',
+            'spike_intensity'
+        ],
+        'title': 'SetSpikeSimulationMessage',
+        'type': 'object'
+    },
     'plugin': 'DTI',
     'returns': {},
     'title': 'set-spike-simulation',

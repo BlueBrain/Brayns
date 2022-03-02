@@ -21,112 +21,110 @@
 schema = {
     'async': False,
     'description': 'Update the corresponding materials with common properties',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'material_ids': {
-                    'description': 'The list of ID that identifies the materials',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'type': 'array',
-                    'writeOnly': True
-                },
-                'model_id': {
-                    'description': 'The model which this material belongs to',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'material_ids': {
+                'description': 'The list of ID that identifies the materials',
+                'items': {
                     'minimum': 0,
-                    'type': 'integer',
-                    'writeOnly': True
+                    'type': 'integer'
                 },
-                'properties': {
-                    'additionalProperties': False,
-                    'description': 'Material properties to apply on all given materials',
-                    'properties': {
-                        'clipping_mode': {
-                            'description': 'The choosen material clipping mode',
-                            'enum': [
-                                'No clipping',
-                                'Plane',
-                                'Sphere'
-                            ],
-                            'type': 'string'
-                        },
-                        'diffuse_color': {
-                            'description': 'Diffuse reflection color RGB normalized',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'emission': {
-                            'description': 'The emissive property of a material',
-                            'type': 'number'
-                        },
-                        'glossiness': {
-                            'description': 'The glossy component of a material',
-                            'type': 'number'
-                        },
-                        'opacity': {
-                            'description': 'The transparency of the material (0 to 1)',
-                            'type': 'number'
-                        },
-                        'reflection_index': {
-                            'description': 'The index of reflection of the material surface',
-                            'type': 'number'
-                        },
-                        'refraction_index': {
-                            'description': 'The index of refraction of a transparent material',
-                            'type': 'number'
-                        },
-                        'shading_mode': {
-                            'description': 'The chosen shading mode',
-                            'enum': [
-                                'None',
-                                'Diffuse',
-                                'Electron',
-                                'Cartoon',
-                                'Electron transparency',
-                                'Perlin',
-                                'Diffuse transparency',
-                                'Checker'
-                            ],
-                            'type': 'string'
-                        },
-                        'simulation_data_cast': {
-                            'description': 'Wether to cast the user parameter for simulation',
-                            'type': 'boolean'
-                        },
-                        'specular_color': {
-                            'description': 'Specular reflection RGB normalized',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'specular_exponent': {
-                            'description': 'The specular exponent to sharpen the specular reflection',
-                            'type': 'number'
-                        },
-                        'user_parameter': {
-                            'description': 'A custom parameter passed to the simulation',
-                            'type': 'number'
-                        }
-                    },
-                    'title': 'ExtendedMaterial',
-                    'type': 'object',
-                    'writeOnly': True
-                }
+                'type': 'array',
+                'writeOnly': True
             },
-            'title': 'MaterialRange',
-            'type': 'object'
-        }
-    ],
+            'model_id': {
+                'description': 'The model which this material belongs to',
+                'minimum': 0,
+                'type': 'integer',
+                'writeOnly': True
+            },
+            'properties': {
+                'additionalProperties': False,
+                'description': 'Material properties to apply on all given materials',
+                'properties': {
+                    'clipping_mode': {
+                        'description': 'The choosen material clipping mode',
+                        'enum': [
+                            'No clipping',
+                            'Plane',
+                            'Sphere'
+                        ],
+                        'type': 'string'
+                    },
+                    'diffuse_color': {
+                        'description': 'Diffuse reflection color RGB normalized',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'emission': {
+                        'description': 'The emissive property of a material',
+                        'type': 'number'
+                    },
+                    'glossiness': {
+                        'description': 'The glossy component of a material',
+                        'type': 'number'
+                    },
+                    'opacity': {
+                        'description': 'The transparency of the material (0 to 1)',
+                        'type': 'number'
+                    },
+                    'reflection_index': {
+                        'description': 'The index of reflection of the material surface',
+                        'type': 'number'
+                    },
+                    'refraction_index': {
+                        'description': 'The index of refraction of a transparent material',
+                        'type': 'number'
+                    },
+                    'shading_mode': {
+                        'description': 'The chosen shading mode',
+                        'enum': [
+                            'None',
+                            'Diffuse',
+                            'Electron',
+                            'Cartoon',
+                            'Electron transparency',
+                            'Perlin',
+                            'Diffuse transparency',
+                            'Checker'
+                        ],
+                        'type': 'string'
+                    },
+                    'simulation_data_cast': {
+                        'description': 'Wether to cast the user parameter for simulation',
+                        'type': 'boolean'
+                    },
+                    'specular_color': {
+                        'description': 'Specular reflection RGB normalized',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'specular_exponent': {
+                        'description': 'The specular exponent to sharpen the specular reflection',
+                        'type': 'number'
+                    },
+                    'user_parameter': {
+                        'description': 'A custom parameter passed to the simulation',
+                        'type': 'number'
+                    }
+                },
+                'title': 'ExtendedMaterial',
+                'type': 'object',
+                'writeOnly': True
+            }
+        },
+        'title': 'MaterialRange',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {},
     'title': 'set-material-range',

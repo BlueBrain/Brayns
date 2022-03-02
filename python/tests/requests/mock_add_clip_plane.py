@@ -21,24 +21,22 @@
 schema = {
     'async': False,
     'description': 'Add a clip plane and returns the clip plane descriptor',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'plane': {
-                    'description': 'Plane normal vector XYZ and distance from origin',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
-                }
-            },
-            'title': 'ClipPlane',
-            'type': 'object'
-        }
-    ],
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'plane': {
+                'description': 'Plane normal vector XYZ and distance from origin',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 4,
+                'minItems': 4,
+                'type': 'array'
+            }
+        },
+        'title': 'ClipPlane',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,

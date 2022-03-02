@@ -38,8 +38,6 @@ class Entrypoint:
     :type params: List[Schema]
     :param result: Entrypoint result schema
     :type result: Schema, can be None
-    :param unpack_params: True if the params are unpacked in Python method
-    :type unpack_params: bool, defaults to True
     """
 
     name: str
@@ -85,7 +83,7 @@ def _get_plugin(schema: dict) -> str:
 
 
 def _get_params(schema: dict):
-    return Params.from_dicts(schema.get('params', []))
+    return Params.from_dict(schema.get('params', {}))
 
 
 def _get_result(schema: dict):

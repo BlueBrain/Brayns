@@ -21,33 +21,31 @@
 schema = {
     'async': False,
     'description': 'Get instances of the given model',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'id': {
-                    'description': 'Model ID',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'id': {
+                'description': 'Model ID',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'result_range': {
+                'description': 'Result list from/to indices',
+                'items': {
                     'minimum': 0,
                     'type': 'integer'
                 },
-                'result_range': {
-                    'description': 'Result list from/to indices',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'maxItems': 2,
-                    'minItems': 2,
-                    'type': 'array'
-                }
-            },
-            'required': [
-                'id'
-            ],
-            'title': 'GetInstanceMessage',
-            'type': 'object'
-        }
-    ],
+                'maxItems': 2,
+                'minItems': 2,
+                'type': 'array'
+            }
+        },
+        'required': [
+            'id'
+        ],
+        'title': 'GetInstanceMessage',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'items': {

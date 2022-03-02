@@ -21,48 +21,46 @@
 schema = {
     'async': False,
     'description': 'Set the current state of the application parameters',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'engine': {
-                    'description': 'Application engine',
-                    'readOnly': True,
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'engine': {
+                'description': 'Application engine',
+                'readOnly': True,
+                'type': 'string'
+            },
+            'image_stream_fps': {
+                'description': 'Framerate of image stream',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'jpeg_compression': {
+                'description': 'JPEG compression rate',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'plugins': {
+                'description': 'Loaded plugins',
+                'items': {
                     'type': 'string'
                 },
-                'image_stream_fps': {
-                    'description': 'Framerate of image stream',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'jpeg_compression': {
-                    'description': 'JPEG compression rate',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'plugins': {
-                    'description': 'Loaded plugins',
-                    'items': {
-                        'type': 'string'
-                    },
-                    'readOnly': True,
-                    'type': 'array'
-                },
-                'viewport': {
-                    'description': 'Window size',
-                    'items': {
-                        'minimum': 0,
-                        'type': 'integer'
-                    },
-                    'maxItems': 2,
-                    'minItems': 2,
-                    'type': 'array'
-                }
+                'readOnly': True,
+                'type': 'array'
             },
-            'title': 'ApplicationParameters',
-            'type': 'object'
-        }
-    ],
+            'viewport': {
+                'description': 'Window size',
+                'items': {
+                    'minimum': 0,
+                    'type': 'integer'
+                },
+                'maxItems': 2,
+                'minItems': 2,
+                'type': 'array'
+            }
+        },
+        'title': 'ApplicationParameters',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'set-application-parameters',

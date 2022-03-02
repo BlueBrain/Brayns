@@ -21,101 +21,99 @@
 schema = {
     'async': True,
     'description': 'Request model upload from further received blobs and return model descriptor on success',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'bounding_box': {
-                    'description': 'Display bounds',
-                    'type': 'boolean'
-                },
-                'chunks_id': {
-                    'description': 'Chunk ID',
-                    'type': 'string'
-                },
-                'loader_name': {
-                    'description': 'Loader name',
-                    'type': 'string'
-                },
-                'loader_properties': {
-                    'description': 'Loader properties',
-                    'type': 'object'
-                },
-                'name': {
-                    'description': 'Model name',
-                    'type': 'string'
-                },
-                'path': {
-                    'description': 'Model source path',
-                    'type': 'string'
-                },
-                'size': {
-                    'description': 'File size in bytes',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'transformation': {
-                    'additionalProperties': False,
-                    'description': 'Model transformation',
-                    'properties': {
-                        'rotation': {
-                            'description': 'Rotation XYZW',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 4,
-                            'minItems': 4,
-                            'type': 'array'
-                        },
-                        'rotation_center': {
-                            'description': 'Rotation center XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'scale': {
-                            'description': 'Scale XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'translation': {
-                            'description': 'Translation XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        }
-                    },
-                    'title': 'Transformation',
-                    'type': 'object'
-                },
-                'type': {
-                    'description': 'File extension or type (MESH, POINTS, CIRCUIT)',
-                    'type': 'string'
-                },
-                'visible': {
-                    'description': 'Visible',
-                    'type': 'boolean'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'bounding_box': {
+                'description': 'Display bounds',
+                'type': 'boolean'
             },
-            'required': [
-                'chunks_id',
-                'size',
-                'type'
-            ],
-            'title': 'BinaryParam',
-            'type': 'object'
-        }
-    ],
+            'chunks_id': {
+                'description': 'Chunk ID',
+                'type': 'string'
+            },
+            'loader_name': {
+                'description': 'Loader name',
+                'type': 'string'
+            },
+            'loader_properties': {
+                'description': 'Loader properties',
+                'type': 'object'
+            },
+            'name': {
+                'description': 'Model name',
+                'type': 'string'
+            },
+            'path': {
+                'description': 'Model source path',
+                'type': 'string'
+            },
+            'size': {
+                'description': 'File size in bytes',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'transformation': {
+                'additionalProperties': False,
+                'description': 'Model transformation',
+                'properties': {
+                    'rotation': {
+                        'description': 'Rotation XYZW',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 4,
+                        'minItems': 4,
+                        'type': 'array'
+                    },
+                    'rotation_center': {
+                        'description': 'Rotation center XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'scale': {
+                        'description': 'Scale XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'translation': {
+                        'description': 'Translation XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    }
+                },
+                'title': 'Transformation',
+                'type': 'object'
+            },
+            'type': {
+                'description': 'File extension or type (MESH, POINTS, CIRCUIT)',
+                'type': 'string'
+            },
+            'visible': {
+                'description': 'Visible',
+                'type': 'boolean'
+            }
+        },
+        'required': [
+            'chunks_id',
+            'size',
+            'type'
+        ],
+        'title': 'BinaryParam',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'items': {

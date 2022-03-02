@@ -21,83 +21,81 @@
 schema = {
     'async': True,
     'description': 'Add model from path and return model descriptor on success',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'bounding_box': {
-                    'description': 'Display bounding box',
-                    'type': 'boolean'
-                },
-                'loader_name': {
-                    'description': 'Name of the loader',
-                    'type': 'string'
-                },
-                'loader_properties': {
-                    'description': 'Loader properties',
-                    'type': 'object'
-                },
-                'name': {
-                    'description': 'Model name',
-                    'type': 'string'
-                },
-                'path': {
-                    'description': 'Model file path',
-                    'type': 'string'
-                },
-                'transformation': {
-                    'additionalProperties': False,
-                    'description': 'Model transformation',
-                    'properties': {
-                        'rotation': {
-                            'description': 'Rotation XYZW',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 4,
-                            'minItems': 4,
-                            'type': 'array'
-                        },
-                        'rotation_center': {
-                            'description': 'Rotation center XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'scale': {
-                            'description': 'Scale XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        },
-                        'translation': {
-                            'description': 'Translation XYZ',
-                            'items': {
-                                'type': 'number'
-                            },
-                            'maxItems': 3,
-                            'minItems': 3,
-                            'type': 'array'
-                        }
-                    },
-                    'title': 'Transformation',
-                    'type': 'object'
-                },
-                'visible': {
-                    'description': 'Is visible',
-                    'type': 'boolean'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'bounding_box': {
+                'description': 'Display bounding box',
+                'type': 'boolean'
             },
-            'title': 'ModelParams',
-            'type': 'object'
-        }
-    ],
+            'loader_name': {
+                'description': 'Name of the loader',
+                'type': 'string'
+            },
+            'loader_properties': {
+                'description': 'Loader properties',
+                'type': 'object'
+            },
+            'name': {
+                'description': 'Model name',
+                'type': 'string'
+            },
+            'path': {
+                'description': 'Model file path',
+                'type': 'string'
+            },
+            'transformation': {
+                'additionalProperties': False,
+                'description': 'Model transformation',
+                'properties': {
+                    'rotation': {
+                        'description': 'Rotation XYZW',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 4,
+                        'minItems': 4,
+                        'type': 'array'
+                    },
+                    'rotation_center': {
+                        'description': 'Rotation center XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'scale': {
+                        'description': 'Scale XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    },
+                    'translation': {
+                        'description': 'Translation XYZ',
+                        'items': {
+                            'type': 'number'
+                        },
+                        'maxItems': 3,
+                        'minItems': 3,
+                        'type': 'array'
+                    }
+                },
+                'title': 'Transformation',
+                'type': 'object'
+            },
+            'visible': {
+                'description': 'Is visible',
+                'type': 'boolean'
+            }
+        },
+        'title': 'ModelParams',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'items': {

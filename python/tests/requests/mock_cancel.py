@@ -21,33 +21,31 @@
 schema = {
     'async': False,
     'description': 'Cancel the task started by the request with the given ID',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'id': {
-                    'description': 'ID of the request to cancel',
-                    'oneOf': [
-                        {
-                            'type': 'null'
-                        },
-                        {
-                            'type': 'integer'
-                        },
-                        {
-                            'type': 'string'
-                        }
-                    ],
-                    'title': 'RequestId'
-                }
-            },
-            'required': [
-                'id'
-            ],
-            'title': 'CancelParams',
-            'type': 'object'
-        }
-    ],
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'id': {
+                'description': 'ID of the request to cancel',
+                'oneOf': [
+                    {
+                        'type': 'null'
+                    },
+                    {
+                        'type': 'integer'
+                    },
+                    {
+                        'type': 'string'
+                    }
+                ],
+                'title': 'RequestId'
+            }
+        },
+        'required': [
+            'id'
+        ],
+        'title': 'CancelParams',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'cancel',

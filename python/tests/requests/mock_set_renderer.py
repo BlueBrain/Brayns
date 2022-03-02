@@ -21,63 +21,61 @@
 schema = {
     'async': False,
     'description': 'Set the current state of the renderer',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'accumulation': {
-                    'description': 'Multiple render passes',
-                    'type': 'boolean'
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'accumulation': {
+                'description': 'Multiple render passes',
+                'type': 'boolean'
+            },
+            'background_color': {
+                'description': 'Background color RGB',
+                'items': {
+                    'type': 'number'
                 },
-                'background_color': {
-                    'description': 'Background color RGB',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'current': {
-                    'description': 'Current renderer name',
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'current': {
+                'description': 'Current renderer name',
+                'type': 'string'
+            },
+            'head_light': {
+                'description': 'Light source follows camera origin',
+                'type': 'boolean'
+            },
+            'max_accum_frames': {
+                'description': 'Max render passes',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'samples_per_pixel': {
+                'description': 'Samples per pixel',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'subsampling': {
+                'description': 'Subsampling',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'types': {
+                'description': 'Available renderers',
+                'items': {
                     'type': 'string'
                 },
-                'head_light': {
-                    'description': 'Light source follows camera origin',
-                    'type': 'boolean'
-                },
-                'max_accum_frames': {
-                    'description': 'Max render passes',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'samples_per_pixel': {
-                    'description': 'Samples per pixel',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'subsampling': {
-                    'description': 'Subsampling',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'types': {
-                    'description': 'Available renderers',
-                    'items': {
-                        'type': 'string'
-                    },
-                    'readOnly': True,
-                    'type': 'array'
-                },
-                'variance_threshold': {
-                    'description': 'Stop accumulation threshold',
-                    'type': 'number'
-                }
+                'readOnly': True,
+                'type': 'array'
             },
-            'title': 'RenderingParameters',
-            'type': 'object'
-        }
-    ],
+            'variance_threshold': {
+                'description': 'Stop accumulation threshold',
+                'type': 'number'
+            }
+        },
+        'title': 'RenderingParameters',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'set-renderer',

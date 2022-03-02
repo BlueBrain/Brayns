@@ -21,205 +21,203 @@
 schema = {
     'async': False,
     'description': 'Set the current properties of the camera',
-    'params': [
-        {
-            'oneOf': [
-                {
-                    'additionalProperties': False,
-                    'properties': {
-                        'apertureRadius': {
-                            'default': 0,
-                            'title': 'Aperture radius',
-                            'type': 'number'
-                        },
-                        'aspect': {
-                            'default': 1,
-                            'title': 'Aspect ratio',
-                            'type': 'number'
-                        },
-                        'enableClippingPlanes': {
-                            'default': True,
-                            'title': 'Clipping',
-                            'type': 'boolean'
-                        },
-                        'focusDistance': {
-                            'default': 1,
-                            'title': 'Focus Distance',
-                            'type': 'number'
-                        },
-                        'fovy': {
-                            'default': 45,
-                            'title': 'Field of view',
-                            'type': 'number'
-                        }
+    'params': {
+        'oneOf': [
+            {
+                'additionalProperties': False,
+                'properties': {
+                    'apertureRadius': {
+                        'default': 0,
+                        'title': 'Aperture radius',
+                        'type': 'number'
                     },
-                    'title': 'circuit_explorer_dof_perspective',
-                    'type': 'object'
+                    'aspect': {
+                        'default': 1,
+                        'title': 'Aspect ratio',
+                        'type': 'number'
+                    },
+                    'enableClippingPlanes': {
+                        'default': True,
+                        'title': 'Clipping',
+                        'type': 'boolean'
+                    },
+                    'focusDistance': {
+                        'default': 1,
+                        'title': 'Focus Distance',
+                        'type': 'number'
+                    },
+                    'fovy': {
+                        'default': 45,
+                        'title': 'Field of view',
+                        'type': 'number'
+                    }
                 },
-                {
-                    'additionalProperties': False,
-                    'properties': {
-                        'apertureRadius': {
-                            'default': 0,
-                            'title': 'Aperture radius',
-                            'type': 'number'
-                        },
-                        'aspect': {
-                            'default': 1,
-                            'title': 'Aspect ratio',
-                            'type': 'number'
-                        },
-                        'enableClippingPlanes': {
-                            'default': True,
-                            'title': 'Clipping',
-                            'type': 'boolean'
-                        },
-                        'focusDistance': {
-                            'default': 1,
-                            'title': 'Focus Distance',
-                            'type': 'number'
-                        },
-                        'fovy': {
-                            'default': 45,
-                            'title': 'Field of view',
-                            'type': 'number'
-                        }
+                'title': 'circuit_explorer_dof_perspective',
+                'type': 'object'
+            },
+            {
+                'additionalProperties': False,
+                'properties': {
+                    'apertureRadius': {
+                        'default': 0,
+                        'title': 'Aperture radius',
+                        'type': 'number'
                     },
-                    'title': 'circuit_explorer_sphere_clipping',
-                    'type': 'object'
+                    'aspect': {
+                        'default': 1,
+                        'title': 'Aspect ratio',
+                        'type': 'number'
+                    },
+                    'enableClippingPlanes': {
+                        'default': True,
+                        'title': 'Clipping',
+                        'type': 'boolean'
+                    },
+                    'focusDistance': {
+                        'default': 1,
+                        'title': 'Focus Distance',
+                        'type': 'number'
+                    },
+                    'fovy': {
+                        'default': 45,
+                        'title': 'Field of view',
+                        'type': 'number'
+                    }
                 },
-                {
-                    'additionalProperties': False,
-                    'properties': {
-                        'apertureRadius': {
-                            'default': 0,
-                            'title': 'Aperture radius',
-                            'type': 'number'
-                        },
-                        'aspect': {
-                            'default': 1,
-                            'readOnly': True,
-                            'title': 'Aspect ratio',
-                            'type': 'number'
-                        },
-                        'enableClippingPlanes': {
-                            'default': True,
-                            'title': 'Clipping',
-                            'type': 'boolean'
-                        },
-                        'focusDistance': {
-                            'default': 1,
-                            'title': 'Focus Distance',
-                            'type': 'number'
-                        },
-                        'fovy': {
-                            'default': 45,
-                            'title': 'Field of view',
-                            'type': 'number'
-                        }
+                'title': 'circuit_explorer_sphere_clipping',
+                'type': 'object'
+            },
+            {
+                'additionalProperties': False,
+                'properties': {
+                    'apertureRadius': {
+                        'default': 0,
+                        'title': 'Aperture radius',
+                        'type': 'number'
                     },
-                    'title': 'fisheye',
-                    'type': 'object'
+                    'aspect': {
+                        'default': 1,
+                        'readOnly': True,
+                        'title': 'Aspect ratio',
+                        'type': 'number'
+                    },
+                    'enableClippingPlanes': {
+                        'default': True,
+                        'title': 'Clipping',
+                        'type': 'boolean'
+                    },
+                    'focusDistance': {
+                        'default': 1,
+                        'title': 'Focus Distance',
+                        'type': 'number'
+                    },
+                    'fovy': {
+                        'default': 45,
+                        'title': 'Field of view',
+                        'type': 'number'
+                    }
                 },
-                {
-                    'additionalProperties': False,
-                    'properties': {
-                        'aspect': {
-                            'default': 1,
-                            'readOnly': True,
-                            'title': 'Aspect ratio',
-                            'type': 'number'
-                        },
-                        'enableClippingPlanes': {
-                            'default': True,
-                            'title': 'Clipping',
-                            'type': 'boolean'
-                        },
-                        'height': {
-                            'default': 1,
-                            'title': 'Height',
-                            'type': 'number'
-                        }
+                'title': 'fisheye',
+                'type': 'object'
+            },
+            {
+                'additionalProperties': False,
+                'properties': {
+                    'aspect': {
+                        'default': 1,
+                        'readOnly': True,
+                        'title': 'Aspect ratio',
+                        'type': 'number'
                     },
-                    'title': 'orthographic',
-                    'type': 'object'
+                    'enableClippingPlanes': {
+                        'default': True,
+                        'title': 'Clipping',
+                        'type': 'boolean'
+                    },
+                    'height': {
+                        'default': 1,
+                        'title': 'Height',
+                        'type': 'number'
+                    }
                 },
-                {
-                    'additionalProperties': False,
-                    'properties': {
-                        'enableClippingPlanes': {
-                            'default': True,
-                            'title': 'Clipping',
-                            'type': 'boolean'
-                        },
-                        'half': {
-                            'default': True,
-                            'title': 'Half sphere',
-                            'type': 'boolean'
-                        }
+                'title': 'orthographic',
+                'type': 'object'
+            },
+            {
+                'additionalProperties': False,
+                'properties': {
+                    'enableClippingPlanes': {
+                        'default': True,
+                        'title': 'Clipping',
+                        'type': 'boolean'
                     },
-                    'title': 'panoramic',
-                    'type': 'object'
+                    'half': {
+                        'default': True,
+                        'title': 'Half sphere',
+                        'type': 'boolean'
+                    }
                 },
-                {
-                    'additionalProperties': False,
-                    'properties': {
-                        'apertureRadius': {
-                            'default': 0,
-                            'title': 'Aperture radius',
-                            'type': 'number'
-                        },
-                        'aspect': {
-                            'default': 1,
-                            'readOnly': True,
-                            'title': 'Aspect ratio',
-                            'type': 'number'
-                        },
-                        'enableClippingPlanes': {
-                            'default': True,
-                            'title': 'Clipping',
-                            'type': 'boolean'
-                        },
-                        'focusDistance': {
-                            'default': 1,
-                            'title': 'Focus Distance',
-                            'type': 'number'
-                        },
-                        'fovy': {
-                            'default': 45,
-                            'title': 'Field of view',
-                            'type': 'number'
-                        }
+                'title': 'panoramic',
+                'type': 'object'
+            },
+            {
+                'additionalProperties': False,
+                'properties': {
+                    'apertureRadius': {
+                        'default': 0,
+                        'title': 'Aperture radius',
+                        'type': 'number'
                     },
-                    'title': 'perspective',
-                    'type': 'object'
+                    'aspect': {
+                        'default': 1,
+                        'readOnly': True,
+                        'title': 'Aspect ratio',
+                        'type': 'number'
+                    },
+                    'enableClippingPlanes': {
+                        'default': True,
+                        'title': 'Clipping',
+                        'type': 'boolean'
+                    },
+                    'focusDistance': {
+                        'default': 1,
+                        'title': 'Focus Distance',
+                        'type': 'number'
+                    },
+                    'fovy': {
+                        'default': 45,
+                        'title': 'Field of view',
+                        'type': 'number'
+                    }
                 },
-                {
-                    'additionalProperties': False,
-                    'properties': {
-                        'aspect': {
-                            'default': 1,
-                            'readOnly': True,
-                            'title': 'Aspect ratio',
-                            'type': 'number'
-                        },
-                        'enableClippingPlanes': {
-                            'default': True,
-                            'title': 'Clipping',
-                            'type': 'boolean'
-                        },
-                        'fovy': {
-                            'default': 45,
-                            'title': 'Field of view',
-                            'type': 'number'
-                        }
+                'title': 'perspective',
+                'type': 'object'
+            },
+            {
+                'additionalProperties': False,
+                'properties': {
+                    'aspect': {
+                        'default': 1,
+                        'readOnly': True,
+                        'title': 'Aspect ratio',
+                        'type': 'number'
                     },
-                    'title': 'perspectiveParallax',
-                    'type': 'object'
-                }
-            ]
-        }
-    ],
+                    'enableClippingPlanes': {
+                        'default': True,
+                        'title': 'Clipping',
+                        'type': 'boolean'
+                    },
+                    'fovy': {
+                        'default': 45,
+                        'title': 'Field of view',
+                        'type': 'number'
+                    }
+                },
+                'title': 'perspectiveParallax',
+                'type': 'object'
+            }
+        ]
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'set-camera-params',

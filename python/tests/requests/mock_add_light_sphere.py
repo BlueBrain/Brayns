@@ -21,52 +21,50 @@
 schema = {
     'async': False,
     'description': 'Add a sphere light and return its ID',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'color': {
-                    'description': 'Light color RGB',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'intensity': {
-                    'description': 'Light intensity 0-1',
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'color': {
+                'description': 'Light color RGB',
+                'items': {
                     'type': 'number'
                 },
-                'is_visible': {
-                    'description': 'Light is visible',
-                    'type': 'boolean'
-                },
-                'position': {
-                    'description': 'Light position XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'radius': {
-                    'description': 'Sphere radius',
-                    'type': 'number'
-                }
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
             },
-            'required': [
-                'color',
-                'intensity',
-                'is_visible',
-                'position',
-                'radius'
-            ],
-            'title': 'SphereLight',
-            'type': 'object'
-        }
-    ],
+            'intensity': {
+                'description': 'Light intensity 0-1',
+                'type': 'number'
+            },
+            'is_visible': {
+                'description': 'Light is visible',
+                'type': 'boolean'
+            },
+            'position': {
+                'description': 'Light position XYZ',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
+            },
+            'radius': {
+                'description': 'Sphere radius',
+                'type': 'number'
+            }
+        },
+        'required': [
+            'color',
+            'intensity',
+            'is_visible',
+            'position',
+            'radius'
+        ],
+        'title': 'SphereLight',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {
         'minimum': 0,

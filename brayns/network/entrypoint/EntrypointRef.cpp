@@ -35,7 +35,7 @@ public:
         auto params = entrypoint.getParamsSchema();
         if (!brayns::JsonSchemaHelper::isNull(params))
         {
-            schema.params.push_back(std::move(params));
+            schema.params = std::move(params);
         }
         schema.returns = entrypoint.getResultSchema();
     }
@@ -108,7 +108,7 @@ const std::string &EntrypointRef::getDescription() const
     return _schema.description;
 }
 
-const std::vector<JsonSchema> &EntrypointRef::getParamsSchema() const
+const std::optional<JsonSchema> &EntrypointRef::getParamsSchema() const
 {
     return _schema.params;
 }

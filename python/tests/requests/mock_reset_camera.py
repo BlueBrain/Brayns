@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Reset the camera to its initial values',
-    'params': [],
     'plugin': 'Core',
     'returns': {},
     'title': 'reset-camera',

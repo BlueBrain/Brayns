@@ -21,26 +21,24 @@
 schema = {
     'async': False,
     'description': 'Set the image streaming method between automatic or controlled',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'type': {
-                    'description': 'Stream mode',
-                    'enum': [
-                        'stream',
-                        'quanta'
-                    ],
-                    'type': 'string'
-                }
-            },
-            'required': [
-                'type'
-            ],
-            'title': 'ImageStreamingModeMessage',
-            'type': 'object'
-        }
-    ],
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'type': {
+                'description': 'Stream mode',
+                'enum': [
+                    'stream',
+                    'quanta'
+                ],
+                'type': 'string'
+            }
+        },
+        'required': [
+            'type'
+        ],
+        'title': 'ImageStreamingModeMessage',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'image-streaming-mode',

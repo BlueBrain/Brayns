@@ -129,10 +129,9 @@ public:
      *
      * Must be called after onCreate().
      *
-     * @return const std::vector<JsonSchema>& Vector with JSON schema as first
-     * component or empty if no schema.
+     * @return const std::optional<JsonSchema>& Schema if any.
      */
-    const std::vector<JsonSchema> &getParamsSchema() const;
+    const std::optional<JsonSchema> &getParamsSchema() const;
 
     /**
      * @brief Get the JSON schema of the entrypoint result.

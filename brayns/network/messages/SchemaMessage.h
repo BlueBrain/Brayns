@@ -34,7 +34,7 @@ BRAYNS_JSON_OBJECT_ENTRY(std::string, plugin, "Name of the plugin that loads the
 BRAYNS_JSON_OBJECT_ENTRY(std::string, title, "Name of the entrypoint")
 BRAYNS_JSON_OBJECT_ENTRY(std::string, description, "Description of the entrypoint")
 BRAYNS_JSON_OBJECT_ENTRY(bool, async, "Check if the entrypoint is asynchronous")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<JsonSchema>, params, "Input schema")
+BRAYNS_JSON_OBJECT_ENTRY(std::optional<JsonSchema>, params, "Input schema")
 BRAYNS_JSON_OBJECT_ENTRY(JsonSchema, returns, "Output schema")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

@@ -21,7 +21,6 @@
 schema = {
     'async': False,
     'description': 'Get the current state of the camera',
-    'params': [],
     'plugin': 'Core',
     'returns': {
         'additionalProperties': False,

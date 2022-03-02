@@ -21,47 +21,45 @@
 schema = {
     'async': False,
     'description': 'Add a visual 3D sphere to the scene',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'center': {
-                    'description': 'Sphere center XYZ',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 3,
-                    'minItems': 3,
-                    'type': 'array'
-                },
-                'color': {
-                    'description': 'Sphere color RGBA normalized',
-                    'items': {
-                        'type': 'number'
-                    },
-                    'maxItems': 4,
-                    'minItems': 4,
-                    'type': 'array'
-                },
-                'name': {
-                    'description': 'Name of the sphere model',
-                    'type': 'string'
-                },
-                'radius': {
-                    'description': 'Radius of the sphere',
-                    'minimum': 0,
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'center': {
+                'description': 'Sphere center XYZ',
+                'items': {
                     'type': 'number'
-                }
+                },
+                'maxItems': 3,
+                'minItems': 3,
+                'type': 'array'
             },
-            'required': [
-                'center',
-                'radius',
-                'color'
-            ],
-            'title': 'AddSphereMessage',
-            'type': 'object'
-        }
-    ],
+            'color': {
+                'description': 'Sphere color RGBA normalized',
+                'items': {
+                    'type': 'number'
+                },
+                'maxItems': 4,
+                'minItems': 4,
+                'type': 'array'
+            },
+            'name': {
+                'description': 'Name of the sphere model',
+                'type': 'string'
+            },
+            'radius': {
+                'description': 'Radius of the sphere',
+                'minimum': 0,
+                'type': 'number'
+            }
+        },
+        'required': [
+            'center',
+            'radius',
+            'color'
+        ],
+        'title': 'AddSphereMessage',
+        'type': 'object'
+    },
     'plugin': 'Circuit Explorer',
     'returns': {
         'additionalProperties': False,

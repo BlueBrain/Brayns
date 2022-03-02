@@ -21,41 +21,39 @@
 schema = {
     'async': False,
     'description': 'Set the current state of the animation parameters',
-    'params': [
-        {
-            'additionalProperties': False,
-            'properties': {
-                'current': {
-                    'description': 'Current frame index',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'delta': {
-                    'description': 'Frame delta',
-                    'type': 'integer'
-                },
-                'dt': {
-                    'description': 'Frame time',
-                    'type': 'number'
-                },
-                'frame_count': {
-                    'description': 'Animation frame count',
-                    'minimum': 0,
-                    'type': 'integer'
-                },
-                'playing': {
-                    'description': 'Animation is playing',
-                    'type': 'boolean'
-                },
-                'unit': {
-                    'description': 'Time unit',
-                    'type': 'string'
-                }
+    'params': {
+        'additionalProperties': False,
+        'properties': {
+            'current': {
+                'description': 'Current frame index',
+                'minimum': 0,
+                'type': 'integer'
             },
-            'title': 'AnimationParameters',
-            'type': 'object'
-        }
-    ],
+            'delta': {
+                'description': 'Frame delta',
+                'type': 'integer'
+            },
+            'dt': {
+                'description': 'Frame time',
+                'type': 'number'
+            },
+            'frame_count': {
+                'description': 'Animation frame count',
+                'minimum': 0,
+                'type': 'integer'
+            },
+            'playing': {
+                'description': 'Animation is playing',
+                'type': 'boolean'
+            },
+            'unit': {
+                'description': 'Time unit',
+                'type': 'string'
+            }
+        },
+        'title': 'AnimationParameters',
+        'type': 'object'
+    },
     'plugin': 'Core',
     'returns': {},
     'title': 'set-animation-parameters',
