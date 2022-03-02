@@ -78,7 +78,7 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto &loader = _loaders.getSuitableLoader(path, "", name);
     auto &parameters = params.loadParameters;
     auto callback = [&](const auto &operation, auto amount) { progress.notify(operation, amount); };
-    auto model = loader.loadFromFile(path, {callback}, parameters);
+    auto models = loader.loadFromFile(path, {callback}, parameters);
 
     ModelLoadParameters loadParameters;
     loadParameters.type = ModelLoadParameters::LoadType::FROM_FILE;
@@ -86,8 +86,15 @@ void AddModelEntrypoint::onRequest(const Request &request)
     loadParameters.loaderName = name;
     loadParameters.loadParameters = parameters;
 
-    auto instanceID = _scene.addModel(loadParameters, std::move(model));
-    request.reply(descriptors);
+    std::vector<const ModelInstance*> result;
+    result.reserve(models.size());
+    for(auto& model : models)
+    {
+        auto instanceID = _scene.addModel(loadParameters, std::move(model));
+        const auto& instance = _scene.getModel(instanceID);
+        result.push_back(&instance);
+    }
+    request.reply(result);
 }
 
 void AddModelEntrypoint::onCancel()

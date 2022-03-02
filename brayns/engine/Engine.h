@@ -24,7 +24,6 @@
 #include <brayns/common/FPSCounter.h>
 #include <brayns/common/Statistics.h>
 #include <brayns/engine/Camera.h>
-#include <brayns/engine/EngineObjectFactory.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>

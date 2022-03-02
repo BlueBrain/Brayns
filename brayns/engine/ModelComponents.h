@@ -27,7 +27,7 @@
 #include <string_view>
 #include <typeindex>
 
-namespace
+namespace brayns
 {
 struct IComponent
 {
@@ -69,10 +69,7 @@ decltype(auto) extract(Map& map, std::string_view key)
         throw bc;
     }
 }
-}
 
-namespace brayns
-{
 class ModelComponents
 {
 public:

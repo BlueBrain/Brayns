@@ -6,19 +6,20 @@
 set(BRAYNSNETWORK_HEADERS
   adapters/AnimationParametersAdapter.h
   adapters/ApplicationParametersAdapter.h
-  adapters/BinaryParamAdapter.h
-  adapters/BoxAdapter.h
+  adapters/BinaryLoadParametersAdapter.h
   adapters/CameraAdapter.h
   adapters/ClipPlaneAdapter.h
   adapters/ColorMapAdapter.h
+  adapters/FileLoadParametersAdapter.h
+  adapters/GeometryAdapter.h
   adapters/LightAdapter.h
   adapters/LoaderInfoAdapter.h
+  adapters/MaterialAdapter.h
   adapters/ModelDescriptorAdapter.h
   adapters/ModelInstanceAdapter.h
-  adapters/ModelParamsAdapter.h
   adapters/ModelTransferFunctionAdapter.h
   adapters/RendererPickResultAdapter.h
-  adapters/RenderingParametersAdapter.h
+  adapters/RendererAdapter.h
   adapters/SceneAdapter.h
   adapters/StatisticsAdapter.h
   adapters/TransferFunctionAdapter.h
@@ -97,7 +98,6 @@ set(BRAYNSNETWORK_HEADERS
   jsonrpc/JsonRpcParser.h
   jsonrpc/JsonRpcSender.h
   jsonrpc/RequestId.h
-  messages/AddClipPlaneMessage.h
   messages/ExitLaterMessage.h
   messages/ExportFramesMessage.h
   messages/GetInstancesMessage.h

@@ -6,7 +6,6 @@
 
 set(BRAYNSENGINE_SOURCES
     Camera.cpp
-    DefaultEngineObjects.cpp
     Engine.cpp
     EngineObject.cpp
     FrameBuffer.cpp
@@ -38,10 +37,8 @@ set(BRAYNSENGINE_SOURCES
 
 set(BRAYNSENGINE_PUBLIC_HEADERS
     Camera.h
-    DefaultEngineObjects.h
     Engine.h
     EngineObject.h
-    EngineObjectFactory.h
     FrameBuffer.h
     Geometry.h
     Light.h
