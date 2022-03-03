@@ -24,6 +24,7 @@
 #include <brayns/common/FPSCounter.h>
 #include <brayns/common/Statistics.h>
 #include <brayns/engine/Camera.h>
+#include <brayns/engine/EngineObjectFactory.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
@@ -90,6 +91,11 @@ public:
     Camera &getCamera() noexcept;
 
     /**
+     * @brief Return the cameras factory
+     */
+    EngineObjectFactory<Camera> &getCameraFactory() noexcept;
+
+    /**
      * @brief SEts a new system Renderer to use
      */
     void setRenderer(Renderer::Ptr&& renderer) noexcept;
@@ -98,6 +104,11 @@ public:
      * @brief Returns the system's current Renderer object
      */
     Renderer &getRenderer() noexcept;
+
+    /**
+     * @brief Return the renderers factory
+     */
+    EngineObjectFactory<Renderer> &getRendererFactory() noexcept;
 
     /**
      * @brief Sets wether the engine should keep running or not
@@ -114,6 +125,11 @@ public:
      */
     const Statistics &getStatistics() const noexcept;
 
+    /**
+     * @brief Returns the system parameters manager
+     */
+    const ParametersManager& getParametersManager() const noexcept;
+
 private:
     // Global system parameters used to read when updating the backend during commit() and render()
     const ParametersManager& _params;
@@ -123,6 +139,9 @@ private:
     Scene _scene;
     Camera::Ptr _camera {nullptr};
     Renderer::Ptr _renderer {nullptr};
+
+    EngineObjectFactory<Renderer> _rendererFactory;
+    EngineObjectFactory<Camera> _cameraFactory;
 
     // Engine statistics
     FPSCounter _fpsCounter;

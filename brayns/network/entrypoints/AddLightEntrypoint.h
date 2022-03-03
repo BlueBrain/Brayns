@@ -28,7 +28,7 @@
 namespace brayns
 {
 template<typename T>
-class AddLightEntrypoint : public Entrypoint<T, uint32_t>
+class AddLightEntrypoint : public IEntrypoint
 {
 public:
     AddLightEntrypoint(Scene &scene)
@@ -41,6 +41,11 @@ public:
         JsonSchema baseSchema = Json::getSchema<T>();
         baseSchema.properties.erase("type");
         return baseSchema;
+    }
+
+    virtual JsonSchema getResultSchema() const override
+    {
+        return Json::getSchema<uint32_t>();
     }
 
     virtual void onRequest(const JsonRpcRequest &request) override

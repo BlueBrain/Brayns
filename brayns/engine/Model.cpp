@@ -148,6 +148,11 @@ const Model& ModelInstance::getModel() const noexcept
     return *_model;
 }
 
+const Model::Metadata &ModelInstance::getModelMetadata() const noexcept
+{
+    return _model->getMetaData();
+}
+
 void ModelInstance::setVisible(const bool val) noexcept
 {
     _updateValue(_visible, val);
@@ -158,7 +163,7 @@ bool ModelInstance::isVisible() const noexcept
     return _visible;
 }
 
-void ModelInstance::setTranform(const Transformation &transform) noexcept
+void ModelInstance::setTransform(const Transformation &transform) noexcept
 {
     _updateValue(_transformation, transform);
 

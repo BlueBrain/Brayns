@@ -184,6 +184,13 @@ void Scene::removeLight(const uint32_t lightID)
     const auto count = _lights.erase(lightID);
     if(count == 0)
         throw std::invalid_argument("Could not remove light, ID does not exists");
+    markModified(false);
+}
+
+void Scene::removeAllLights() noexcept
+{
+    _lights.clear();
+    markModified(false);
 }
 
 void Scene::preRender(const AnimationParameters &animation)

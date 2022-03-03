@@ -150,6 +150,11 @@ public:
     void removeLight(const uint32_t lightID);
 
     /**
+     * @brief Removes all lights in the scene
+     */
+    void removeAllLights() noexcept;
+
+    /**
      * @brief Called before a new frame is. Will call onPreRender on all the models of the scene
      */
     void preRender(const AnimationParameters& animation);

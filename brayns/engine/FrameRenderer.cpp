@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -18,16 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/engine/FrameRenderer.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(FileModelMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to the file to load")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, loader_name, "Name of the loader to use")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Name of the model in the scene")
-BRAYNS_JSON_OBJECT_ENTRY(JsonValue, loader_properties, "Parameters to tune the loading model loading")
-BRAYNS_JSON_OBJECT_END()
-} // namespace brayns
+void FrameRenderer::render(const Camera &camera, const FrameBuffer &fb, const Renderer &renderer, const Scene &scene)
+{
+    auto cameraHandle = camera.handle();
+    auto fbHandle = fb.handle();
+    auto rendererHandle = renderer.handle();
+    auto sceneHandle = scene.handle();
+
+    auto frameFuture = ospRenderFrame(fbHandle, rendererHandle, cameraHandle, sceneHandle);
+    ospWait(frameFuture);
+}
+}

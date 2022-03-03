@@ -30,15 +30,10 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(ModelInstance)
-BRAYNS_JSON_ADAPTER_GETSET("model_id", getModelID, setModelID, "Model ID")
-BRAYNS_JSON_ADAPTER_GETSET("instance_id", getInstanceID, setInstanceID, "Instance ID")
-BRAYNS_JSON_ADAPTER_GETSET("bounding_box", getBoundingBox, setBoundingBox, "Display bounding box", Required(false))
-BRAYNS_JSON_ADAPTER_GETSET(
-    "transformation",
-    getTransformation,
-    setTransformation,
-    "Model transformation",
-    Required(false))
-BRAYNS_JSON_ADAPTER_GETSET("visible", getVisible, setVisible, "Check if rendered", Required(false))
+BRAYNS_JSON_ADAPTER_GET("model_id", getID, "Model ID")
+BRAYNS_JSON_ADAPTER_GET("bounding_box", getBounds, "Model instance AABB")
+BRAYNS_JSON_ADAPTER_GET("metadata", getModelMetadata, "Model metadata")
+BRAYNS_JSON_ADAPTER_GETSET("transformation", getTransform, setTransform, "Model transformation", Required(false))
+BRAYNS_JSON_ADAPTER_GETSET("visible", isVisible, setVisible, "Wether the model is rendered or not", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

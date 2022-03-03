@@ -176,6 +176,11 @@ public:
     const Model& getModel() const noexcept;
 
     /**
+     * @brief Utility function to return this Model Instance underlying model metadata
+     */
+    const Model::Metadata &getModelMetadata() const noexcept;
+
+    /**
      * @brief Sets wether this instance is visible or not.
      */
     void setVisible(const bool val) noexcept;
@@ -188,7 +193,7 @@ public:
     /**
      * @brief Sets the transformation of this instance.
      */
-    void setTranform(const Transformation &transform) noexcept;
+    void setTransform(const Transformation &transform) noexcept;
 
     /**
      * @brief Returns the trasnsformation of this instance.

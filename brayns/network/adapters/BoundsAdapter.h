@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,14 +20,13 @@
 
 #pragma once
 
-#include <brayns/common/scene/ClipPlane.h>
-
+#include <brayns/common/Bounds.h>
 #include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ClipPlane)
-BRAYNS_JSON_ADAPTER_GETSET("id", getID, setID, "Plane ID")
-BRAYNS_JSON_ADAPTER_GETSET("plane", getPlane, setPlane, "Plane normal vector XYZ and distance from origin")
+BRAYNS_JSON_ADAPTER_BEGIN(Bounds)
+BRAYNS_JSON_ADAPTER_GET("min", min, "Bounds minimum (bottom back left corner)")
+BRAYNS_JSON_ADAPTER_GET("max", max, "Bounds maximum (top front right corner)")
 BRAYNS_JSON_ADAPTER_END()
-} // namespace brayns
+}

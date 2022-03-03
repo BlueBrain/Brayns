@@ -26,19 +26,31 @@
 #include <brayns/engine/cameras/OrthographicCamera.h>
 #include <brayns/engine/cameras/PerspectiveCamera.h>
 
+#include <brayns/network/adapters/GenericEngineObjectAdapter.h>
+
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(OrthographicCamera)
-BRAYNS_JSON_ADAPTER_GETSET("height", getHeight, setHeight, "Camera orthographic projection height")
+BRAYNS_JSON_ADAPTER_GETSET("height", getHeight, setHeight, "Camera orthographic projection height", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(PerspectiveCamera)
-BRAYNS_JSON_ADAPTER_GETSET("fovy", getFOVY, setFOVY, "Camera vertical field of view (in degrees)")
+BRAYNS_JSON_ADAPTER_GETSET("fovy", getFOVY, setFOVY, "Camera vertical field of view (in degrees)", Required(false))
 BRAYNS_JSON_ADAPTER_GETSET("aperture_radius", getApertureRadius, setApertureRadius,
                            "Lens aperture radius (Use for depth of field effect. A value of 0.0 disables it. "
-                           "Will be clamped to the range [0.0, +infinity)")
+                           "Will be clamped to the range [0.0, +infinity)", Required(false))
 BRAYNS_JSON_ADAPTER_GETSET("focus_distance", getFocusDistance, setFocusDistance,
                            "Distance at which to focus (for depth of field effect). A value of 1.0 disables it. "
-                           "Will be clamped to the range [1.0, +infinity]")
+                           "Will be clamped to the range [1.0, +infinity]", Required(false))
+BRAYNS_JSON_ADAPTER_END()
+
+class GenericCamera : public GenericEngineObjectAdapter<Camera>
+{
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(GenericCamera)
+BRAYNS_JSON_ADAPTER_GETSET("type", getType, setType, "Camera type name");
+BRAYNS_JSON_ADAPTER_GETSET("parameters", getParams, setParams, "Parameters for the specified camera type",
+                           Required(false))
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

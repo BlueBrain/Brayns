@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,14 +20,15 @@
 
 #pragma once
 
-#include <brayns/common/transferFunction/TransferFunction.h>
-
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/engine/Engine.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ColorMap)
-BRAYNS_JSON_ADAPTER_ENTRY(name, "Label of the color map", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(colors, "Colors to map")
-BRAYNS_JSON_ADAPTER_END()
-} // namespace brayns
+/**
+ * @brief Utility class to register Brayns core types
+ */
+struct EngineObjectRegisterer
+{
+    static void registerDefaultTypes(Engine &engine) noexcept;
+};
+}

@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,17 +20,13 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <brayns/engine/Scene.h>
-
-#include "BoxAdapter.h"
-#include "ModelDescriptorAdapter.h"
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Scene)
-BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Scene boundary")
-BRAYNS_JSON_ADAPTER_GET("models", getModels, "All models")
-BRAYNS_JSON_ADAPTER_END()
-} // namespace brayns
+BRAYNS_JSON_OBJECT_BEGIN(GenericImageSettings)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, format, "Image format (jpg or png)");
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, quality, "Image quality (0 = lowest quality, 100 = highest quality")
+BRAYNS_JSON_OBJECT_ENTRY(Vector2ui, size, "Image dimensions [width, height]")
+BRAYNS_JSON_OBJECT_END()
+}

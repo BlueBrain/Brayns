@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,27 +20,13 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/PropertyObjectEntrypoint.h>
-
-#include "CameraEntrypoint.h"
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-class GetCameraParamsEntrypoint : public GetPropertyObjectEntrypoint<Camera>
-{
-public:
-    GetCameraParamsEntrypoint(const Camera &camera);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-};
-
-class SetCameraParamsEntrypoint : public SetPropertyObjectEntrypoint<Camera>
-{
-public:
-    SetCameraParamsEntrypoint(Camera &camera);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-};
-} // namespace brayns
+BRAYNS_JSON_OBJECT_BEGIN(LookAtParameters)
+BRAYNS_JSON_OBJECT_ENTRY(Vector3f, eye, "Position of the camera in world space");
+BRAYNS_JSON_OBJECT_ENTRY(Vector3f, target, "Target at which the camera will be looking in world space")
+BRAYNS_JSON_OBJECT_ENTRY(Vector3f, up, "Up vector (Real up vector will be computed from eye, target and up)");
+BRAYNS_JSON_OBJECT_END()
+}

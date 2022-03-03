@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-ClearLightsEntrypoint::ClearLightsEntrypoint(LightManager &lights)
-    : _lights(lights)
+ClearLightsEntrypoint::ClearLightsEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -40,7 +40,7 @@ std::string ClearLightsEntrypoint::getDescription() const
 
 void ClearLightsEntrypoint::onRequest(const Request &request)
 {
-    _lights.clearLights();
+    _scene.removeAllLights();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

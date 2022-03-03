@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,44 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "UpdateModelAdapter.h"
+#pragma once
 
-#include <brayns/network/common/ExtractModel.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Renderer.h>
+#include <brayns/engine/Scene.h>
 
 namespace brayns
 {
-UpdateModelProxy::UpdateModelProxy(Scene &scene)
-    : _scene(&scene)
+struct FrameRenderer
 {
+    static void render(const Camera& camera, const FrameBuffer& fb, const Renderer& renderer, const Scene& scene);
+};
 }
-
-void UpdateModelProxy::setId(size_t id)
-{
-    _model = &ExtractModel::fromId(*_scene, id);
-}
-
-void UpdateModelProxy::setBoundingBox(bool enabled)
-{
-    _model->setBoundingBox(enabled);
-}
-
-void UpdateModelProxy::setName(const std::string &name)
-{
-    _model->setName(name);
-}
-
-void UpdateModelProxy::setTransformation(const Transformation &transformation)
-{
-    _model->setTransformation(transformation);
-}
-
-void UpdateModelProxy::setVisible(bool visible)
-{
-    _model->setVisible(visible);
-}
-
-void UpdateModelProxy::computeBounds()
-{
-    _model->computeBounds();
-}
-} // namespace brayns

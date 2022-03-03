@@ -22,26 +22,41 @@
 
 #include <brayns/engine/renderers/InteractiveRenderer.h>
 #include <brayns/engine/renderers/ProductionRenderer.h>
+
 #include <brayns/json/JsonAdapterMacro.h>
+
+#include <brayns/network/adapters/GenericEngineObjectAdapter.h>
 
 namespace brayns
 {
 
 #define BRAYNS_RENDERER_PARAMETERS \
     BRAYNS_JSON_ADAPTER_GETSET("samples_per_pixel", getSamplesPerPixel, setSamplesPerPixel, \
-                               "Number of samples per pixel") \
+                               "Number of samples per pixel", Required(false)) \
     BRAYNS_JSON_ADAPTER_GETSET("max_ray_bounces", getMaxRayBounces, setMaxRayBounces, \
-                               "Max ray bounces per sample") \
-    BRAYNS_JSON_ADAPTER_GETSET("background_color", getBackgroundColor, setBackgroundColor, "Background color")
+                               "Max ray bounces per sample", Required(false)) \
+    BRAYNS_JSON_ADAPTER_GETSET("background_color", getBackgroundColor, setBackgroundColor, "Background color", \
+                               Required(false))
 
 BRAYNS_JSON_ADAPTER_BEGIN(InteractiveRenderer)
 BRAYNS_RENDERER_PARAMETERS
-BRAYNS_JSON_ADAPTER_GETSET("enable_shadows", getShadowsEnabled, setShadowsEnabled, "Render casted shadows")
+BRAYNS_JSON_ADAPTER_GETSET("enable_shadows", getShadowsEnabled, setShadowsEnabled, "Render casted shadows",
+                           Required(false))
 BRAYNS_JSON_ADAPTER_GETSET("ao_samples", getAmbientOcclusionSamples, setAmbientOcclusionSamples,
-                           "Sets number of samples to compute ambient occlusion")
+                           "Sets number of samples to compute ambient occlusion", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(ProductionRenderer)
 BRAYNS_RENDERER_PARAMETERS
+BRAYNS_JSON_ADAPTER_END()
+
+class GenericRenderer : public GenericEngineObjectAdapter<Renderer>
+{
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(GenericRenderer)
+BRAYNS_JSON_ADAPTER_GETSET("type", getType, setType, "Renderer type name");
+BRAYNS_JSON_ADAPTER_GETSET("parameters", getParams, setParams, "Parameters for the specified renderer type",
+                           Required(false))
 BRAYNS_JSON_ADAPTER_END()
 }

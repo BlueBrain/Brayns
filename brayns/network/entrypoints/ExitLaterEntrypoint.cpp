@@ -57,7 +57,7 @@ void ExitLaterEntrypoint::onPreRender()
     {
         return;
     }
-    _engine.setKeepRunning(false);
+    _engine.setRunning(false);
     _start = std::nullopt;
     _duration = std::nullopt;
 }
