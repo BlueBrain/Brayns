@@ -43,14 +43,9 @@ auto glmMatrixToAffine(const brayns::Matrix4f& transform) noexcept
 
 namespace brayns
 {
-Model::Model()
-{
-    _groupHandle = ospNewGroup();
-}
-
 Model::~Model()
 {
-    ospRelease(_groupHandle);
+    _components.onDestroyed();
 }
 
 void Model::setMetaData(Metadata metadata) noexcept
@@ -63,32 +58,35 @@ const Model::Metadata& Model::getMetaData() const noexcept
     return _metadata;
 }
 
-ModelComponents &Model::getComponents() noexcept
+ModelGroup &Model::getGroup() noexcept
 {
-    return _components;
+    return _group;
 }
 
-void Model::onPreRender(const AnimationParameters &animation)
+void Model::commit()
 {
-    (void) animation;
+    _components.onCommit();
+    _group.commit();
+}
+
+void Model::onPreRender()
+{
+    _components.onPreRender();
 }
 
 void Model::onPostRender()
 {
-}
-
-void Model::onRemoved()
-{
-}
-
-void Model::setBoundsChanged(const bool val) noexcept
-{
-    _boundsChanged = val;
+    _components.onPostRender();
 }
 
 OSPGroup Model::groupHandle() const noexcept
 {
-    return _groupHandle;
+    return _group.handle();
+}
+
+uint64_t Model::getSizeInBytes() const noexcept
+{
+    return sizeof(Model) + _components.getByteSize();
 }
 
 ModelInstance::ModelInstance(const size_t modelID, Model* model)

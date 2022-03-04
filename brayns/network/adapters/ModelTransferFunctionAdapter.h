@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,29 +21,31 @@
 
 #pragma once
 
-#include <brayns/engine/geometries/TriangleMesh.h>
-#include <brayns/engine/models/GeometricModel.h>
+#include <brayns/engine/Scene.h>
+
+#include <brayns/json/JsonBuffer.h>
+
+#include "TransferFunctionAdapter.h"
 
 namespace brayns
 {
-class MeshModel : public GeometricModel
+class ModelTransferFunction
 {
 public:
-    MeshModel(const TriangleMesh& mesh);
+    ModelTransferFunction() = default;
+    ModelTransferFunction(Scene &scene);
 
-    Bounds computeBounds(const Matrix4f& transform) const noexcept final;
-
-    const Vector4f& getColor() const noexcept;
-
-    void setColor(const Vector4f& newColor) noexcept;
+    void setId(const uint32_t id);
+    void setTransferFunction(const JsonBuffer<TransferFunction> &buffer);
 
 private:
-    uint64_t getGeometryModelSizeInBytes() const noexcept final;
-
-    void commitGeometryModel() final;
-
-private:
-    Geometry<TriangleMesh> _meshGeometry;
-    Vector4f _color {1.f};
+    Scene *_scene = nullptr;
+    uint32_t _modelId {std::numeric_limits<uint32_t>::max()};
+    TransferFunction _transferFunction;
 };
-}
+
+BRAYNS_JSON_ADAPTER_BEGIN(ModelTransferFunction)
+BRAYNS_JSON_ADAPTER_SET("id", setId, "Model ID", Required())
+BRAYNS_JSON_ADAPTER_SET("transfer_function", setTransferFunction, "Transfer function", Required())
+BRAYNS_JSON_ADAPTER_END()
+} // namespace brayns

@@ -23,7 +23,6 @@
 #include <brayns/common/Bounds.h>
 #include <brayns/common/Log.h>
 #include <brayns/engine/EngineObject.h>
-#include <brayns/json/Json.h>
 
 #include <ospray/ospray.h>
 
@@ -176,6 +175,11 @@ public:
         return _geometries.size();
     }
 
+    bool isModified() const noexcept
+    {
+        return _dirty;
+    }
+
     /**
      * @brief Compute the spatial bounds of the geometry on the buffer transformed by the given
      * matrix.
@@ -208,7 +212,7 @@ public:
      * synchronization has happen. It will call the commitGeometrySpecificParams(), which must have been
      * specialized for the geometry type being handled.
      */
-    void commit()
+    void doCommit()
     {
         if(!_dirty)
             return;
@@ -226,11 +230,6 @@ public:
     OSPGeometry handle() const noexcept
     {
         return _handle;
-    }
-
-    JsonValue serialize() const
-    {
-        return Json::serialize<T>(_geometries);
     }
 
 private:

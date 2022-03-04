@@ -21,7 +21,11 @@
 #include <brayns/io/loaders/xyzb/XYZBLoader.h>
 
 #include <brayns/common/Log.h>
-#include <brayns/io/loaders/xyzb/XYZBModel.h>
+
+#include <brayns/engine/defaultcomponents/GeometryComponent.h>
+#include <brayns/engine/defaultcomponents/GeometryRendererComponent.h>
+#include <brayns/engine/defaultcomponents/MaterialComponent.h>
+
 #include <brayns/utils/StringUtils.h>
 
 #include <filesystem>
@@ -104,7 +108,10 @@ std::vector<Model::Ptr> XYZBLoader::importFromBlob(Blob &&blob, const LoaderProg
     for (i = 0; i < numlines; ++i)
         spheres[i + startOffset].radius = meanRadius;
 
-    auto model = std::make_unique<XYZBModel>(spheres);
+    auto model = std::make_unique<Model>();
+    model->addComponent<SphereGeometryComponent>(spheres);
+    model->addComponent<MaterialComponent>();
+    model->addComponent<GeometryRendererComponent<Sphere>>();
 
     std::vector<Model::Ptr> result;
     result.push_back(std::move(model));

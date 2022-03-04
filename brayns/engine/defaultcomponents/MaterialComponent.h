@@ -20,32 +20,23 @@
 
 #pragma once
 
-#include <brayns/engine/Geometry.h>
-#include <brayns/engine/geometries/Sphere.h>
-#include <brayns/engine/models/GeometricModel.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/ModelComponents.h>
 
 namespace brayns
 {
-class XYZBModel : public GeometricModel
+class MaterialComponent final : public Component
 {
 public:
-    XYZBModel(const std::vector<Sphere>& spheres);
+    MaterialComponent();
 
-    Bounds computeBounds(const Matrix4f& transform) const noexcept final;
+    uint64_t getSizeInBytes() const noexcept override;
 
-    void setColor(const Vector4f& color) noexcept;
+    void setMaterial(Material::Ptr& newMaterial);
 
-    const Vector4f& getColor() const noexcept;
-
-    void setRadius(const float newRadius) noexcept;
+    Material& getMaterial() noexcept;
 
 private:
-    uint64_t getGeometryModelSizeInBytes() const noexcept final;
-
-    void commitGeometryModel() final;
-
-private:
-    Geometry<Sphere> _geometry;
-    Vector4f _color;
+    Material::Ptr _material {nullptr};
 };
 }

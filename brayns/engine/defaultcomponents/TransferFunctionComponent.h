@@ -20,30 +20,21 @@
 
 #pragma once
 
-#include <brayns/engine/Geometry.h>
-#include <brayns/engine/geometries/Sphere.h>
-#include <brayns/engine/models/GeometricModel.h>
+#include <brayns/common/TransferFunction.h>
+#include <brayns/engine/ModelComponents.h>
 
 namespace brayns
 {
-class ProteinModel : public GeometricModel
+class TransferFunctionComponent final : public Component
 {
 public:
-    ProteinModel(const std::vector<Sphere>& spheres,
-                 std::vector<Vector4f>&& colorMap,
-                 std::vector<uint8_t>&& colorMapIndices);
+    uint64_t getSizeInBytes() const noexcept override;
 
-    Bounds computeBounds(const Matrix4f& transform) const noexcept final;
+    TransferFunction& getTransferFunction() noexcept;
 
-private:
-    uint64_t getGeometryModelSizeInBytes() const noexcept final;
-
-    void commitGeometryModel() final;
+    void setTransferFunction(TransferFunction tf) noexcept;
 
 private:
-    std::vector<Vector4f> _colorMap;
-    std::vector<uint8_t> _colorMapIndices;
-
-    Geometry<Sphere> _geometry;
+    TransferFunction _transferFunction;
 };
 }

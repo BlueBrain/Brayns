@@ -25,6 +25,7 @@
 #include <brayns/common/Transformation.h>
 #include <brayns/engine/EngineObject.h>
 #include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/ModelGroup.h>
 #include <brayns/parameters/AnimationParameters.h>
 
 #include <ospray/ospray.h>
@@ -35,7 +36,9 @@
 namespace brayns
 {
 /**
- * @brief The Model class is the base class for all models that can be loaded into Brayns.
+ * @brief The Model class represents an isolate rendering unit in the engine. It is made up of
+ * components, which adds functionality as well as renderable items, such as geometry, volumes and
+ * clipping geometry.
  */
 class Model : public EngineObject
 {
@@ -43,18 +46,14 @@ public:
     using Ptr = std::unique_ptr<Model>;
     using Metadata = std::map<std::string, std::string>;
 
-    /**
-     * @brief Initializes the OSPRay handle
-     */
-    Model();
+    Model() = default;
+    ~Model();
 
     Model(const Model&) = delete;
     Model &operator=(const Model&) = delete;
 
     Model(Model&&) = delete;
     Model &operator=(Model&&) = delete;
-
-    virtual ~Model();
 
     /**
      * @brief Sets the metadata of this model (The metadata is a map<string, string> with model-specific
@@ -69,50 +68,73 @@ public:
     const Metadata& getMetaData() const noexcept;
 
     /**
-     * @brief Returns this model components container as a modifiable reference
+     * @brief Adds a new component to the model
      */
-    ModelComponents &getComponents() noexcept;
-
-protected:
-    /**
-     * @brief called before a new frame is rendered
-     */
-    virtual void onPreRender(const AnimationParameters& animation);
-
-    /**
-     * @brief called after a new frame is rendered
-     */
-    virtual void onPostRender();
+    template<typename T, typename ...Args>
+    T& addComponent(Args&& ...args) noexcept
+    {
+        auto& component = _components.addComponent<T>(std::forward<Args>(args)...);
+        component._model = this;
+        return component;
+    }
 
     /**
-     * @brief onRemoved called when the model is removed from the Scene and before it is destoryed
+     * @brief Retrieves a component from the model
      */
-    virtual void onRemoved();
+    template<typename T>
+    T& getComponent()
+    {
+        return _components.getComponent<T>();
+    }
 
     /**
-     * @brief Returns the size in bytes of the model. Subclasses should override it to provide a more accurate
-     * measure of the memory footprint.
+     * @brief Removes a component from the model
      */
-    virtual uint64_t getSizeInBytes() const noexcept = 0;
+    template<typename T>
+    void removeComponent()
+    {
+        _components.removeComponent<T>();
+    }
 
+    /**
+     * @brief Returns the OSPRay group handler object
+     */
+    ModelGroup& getGroup() noexcept;
+
+    /**
+     * @brief commit implementation
+     */
+    void commit() override;
+
+private:
     /**
      * @brief Compute the model bounds, taking into account the given trasnformation
      * @param transform Matrix with the trasnformation to apply to the model data
      * @return Bounds of the model
      */
-    virtual Bounds computeBounds(const Matrix4f& transform) const noexcept = 0;
+    Bounds computeBounds(const Matrix4f& transform) const noexcept;
 
     /**
-     * @brief Sets wether the intrisict data of the model, on which the bounds depend, have changed or not.
-     * This method sets a flag that is used by the instances to know if they need to update the bounds more
-     * efficiently. Subclasses call it to control the behaviour. Otherwise, the flag is always false.
+     * @brief Subclasses should override it to provide a more accurate measure of the memory footprint.
      */
-    void setBoundsChanged(const bool val) noexcept;
+    uint64_t getSizeInBytes() const noexcept;
 
     /**
      * @brief Returns the OSPRay handle
      */
     OSPGroup groupHandle() const noexcept;
+
+private:
+    /**
+     * @brief Called before the commit + rendering happens
+     */
+    void onPreRender();
+
+    /**
+     * @brief Called after the commit + rendering happens
+     */
+    void onPostRender();
+
 
 private:
     friend class Scene;
@@ -122,10 +144,9 @@ private:
     // The model index refers to the position of this model in the Model list of the scene.
     uint32_t _modelIndex {};
     bool _boundsChanged {false};
-    OSPGroup _groupHandle {nullptr};
     Metadata _metadata;
-    // Holds string based bindings to model objects so that they can be accessed in a generic way
-    ModelComponents _components;
+    ModelComponentContainer _components;
+    ModelGroup _group;
 };
 
 /**

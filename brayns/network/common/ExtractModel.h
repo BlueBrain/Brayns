@@ -37,9 +37,9 @@ public:
      *
      * @param engine Brayns scene.
      * @param id Model ID.
-     * @return ModelDescriptor& Model instance.
+     * @return ModelInstance& Model instance.
      * @throw JsonRpcException Model not found.
      */
-    static ModelDescriptor &fromId(Scene &scene, size_t id);
+    static ModelInstance &fromId(Scene &scene, size_t id);
 };
 } // namespace brayns

@@ -20,17 +20,20 @@
 
 #include <brayns/io/loaders/mesh/MeshLoader.h>
 
-#include <filesystem>
-#include <fstream>
-#include <sstream>
+#include <brayns/engine/defaultcomponents/GeometryComponent.h>
+#include <brayns/engine/defaultcomponents/GeometryRendererComponent.h>
+#include <brayns/engine/defaultcomponents/MaterialComponent.h>
 
-#include <brayns/utils/FileReader.h>
-
-#include <brayns/io/loaders/mesh/MeshModel.h>
 #include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
 #include <brayns/io/loaders/mesh/parsers/OffMeshParser.h>
 #include <brayns/io/loaders/mesh/parsers/PlyMeshParser.h>
 #include <brayns/io/loaders/mesh/parsers/StlMeshParser.h>
+
+#include <brayns/utils/FileReader.h>
+
+#include <filesystem>
+#include <fstream>
+#include <sstream>
 
 namespace
 {
@@ -75,7 +78,13 @@ class MeshLoadingHelper
 public:
     static brayns::Model::Ptr load(const brayns::TriangleMesh &mesh)
     {
-        return std::make_unique<brayns::MeshModel>(mesh);
+        auto model = std::make_unique<brayns::Model>();
+
+        model->addComponent<brayns::MeshGeometryComponent>(mesh);
+        model->addComponent<brayns::MaterialComponent>();
+        model->addComponent<brayns::GeometryRendererComponent<brayns::TriangleMesh>>();
+
+        return model;
     }
 };
 

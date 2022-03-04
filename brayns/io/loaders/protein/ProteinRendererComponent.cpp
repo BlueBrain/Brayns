@@ -18,43 +18,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/io/loaders/protein/ProteinModel.h>
+#include <brayns/io/loaders/protein/ProteinRendererComponent.h>
 
 namespace brayns
 {
-ProteinModel::ProteinModel(const std::vector<Sphere>& spheres,
-                           std::vector<Vector4f>&& colorMap,
-                           std::vector<uint8_t>&& colorMapIndices)
+ProteinRendererComponent::ProteinRendererComponent(std::vector<Vector4f>&& colorMap, std::vector<uint8_t>&& indices)
  : _colorMap(std::move(colorMap))
- , _colorMapIndices(std::move(colorMapIndices))
+ , _colorMapIndices(std::move(indices))
 {
-    _geometry.add(spheres);
 }
 
-Bounds ProteinModel::computeBounds(const Matrix4f& transform) const noexcept
+uint64_t ProteinRendererComponent::getSizeInBytes() const noexcept
 {
-    return _geometry.computeBounds(transform);
+    return sizeof(*this) + sizeof(Vector4f) * _colorMap.size() + sizeof(uint8_t) * _colorMapIndices.size();
 }
 
-uint64_t ProteinModel::getGeometryModelSizeInBytes() const noexcept
+void ProteinRendererComponent::onStart()
 {
-    auto baseSize = sizeof(ProteinModel);
+    GeometryRendererComponent<Sphere>::onStart();
 
-    baseSize += _colorMap.size() * sizeof(Vector4f);
-    baseSize += _colorMapIndices.size() * sizeof(uint8_t);
-    baseSize += _geometry.getNumGeometries() * sizeof(Sphere);
-
-    return baseSize;
-}
-
-void ProteinModel::commitGeometryModel()
-{
     auto ospHandle = handle();
-
-    _geometry.commit();
-
-    auto geomHandle = _geometry.handle();
-    ospSetParam(ospHandle, "geometry", OSPDataType::OSP_GEOMETRY, &geomHandle);
 
     auto colorData = ospNewSharedData(_colorMap.data(), OSPDataType::OSP_VEC4F, _colorMap.size());
     ospSetParam(ospHandle, "color", OSPDataType::OSP_DATA, &colorData);

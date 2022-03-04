@@ -18,44 +18,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/io/loaders/mesh/MeshModel.h>
+#include <brayns/engine/defaultcomponents/TransferFunctionComponent.h>
 
 namespace brayns
 {
-MeshModel::MeshModel(const TriangleMesh& mesh)
+uint64_t TransferFunctionComponent::getSizeInBytes() const noexcept
 {
-    _meshGeometry.add(mesh);
+    const auto& colors = _transferFunction.getColors();
+    const auto& opacities = _transferFunction.getOpacities();
+    const auto& controlPoints = _transferFunction.getControlPoints();
+
+    uint64_t result = sizeof(TransferFunction);
+    result += colors.size() * sizeof(Vector3f);
+    result += opacities.size() * sizeof(float);
+    result += controlPoints.size() * sizeof(Vector2f);
+
+    return result;
 }
 
-Bounds MeshModel::computeBounds(const Matrix4f& transform) const noexcept
+TransferFunction &TransferFunctionComponent::getTransferFunction() noexcept
 {
-    return _meshGeometry.computeBounds(transform);
+    return _transferFunction;
 }
 
-const Vector4f &MeshModel::getColor() const noexcept
+void TransferFunctionComponent::setTransferFunction(TransferFunction tf) noexcept
 {
-    return _color;
-}
-
-void MeshModel::setColor(const Vector4f &newColor) noexcept
-{
-    _updateValue(_color, newColor);
-}
-
-uint64_t MeshModel::getGeometryModelSizeInBytes() const noexcept
-{
-    // Mesh geometry can only have 1 mesh, but we will still do the multiplicaion...
-    return sizeof(MeshModel) + sizeof(TriangleMesh) * _meshGeometry.getNumGeometries();
-}
-
-void MeshModel::commitGeometryModel()
-{
-    _meshGeometry.commit();
-
-    auto ospHandle = handle();
-    auto geomHandle = _meshGeometry.handle();
-
-    ospSetParam(ospHandle, "geometry", OSPDataType::OSP_GEOMETRY, &geomHandle);
-    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC4F, &_color);
+    _transferFunction = std::move(tf);
 }
 }

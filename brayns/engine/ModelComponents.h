@@ -20,78 +20,147 @@
 
 #pragma once
 
-#include <brayns/common/Log.h>
+#include <brayns/common/Bounds.h>
+#include <brayns/engine/EngineObject.h>
 
-#include <map>
 #include <memory>
 #include <string_view>
 #include <typeindex>
+#include <unordered_map>
 
 namespace brayns
 {
-struct IComponent
-{
-    using Ptr = std::unique_ptr<IComponent>;
+class Model;
 
-    virtual ~IComponent() = default;
-};
-
-template<typename T>
-struct Component : public IComponent
-{
-    Component(T& src)
-     : value(&src)
-    {
-    }
-
-    T* value {nullptr};
-};
-
-template<typename T, typename Map>
-decltype(auto) extract(Map& map, std::string_view key)
-{
-    auto it = map.find(key);
-
-    if(it == map.end())
-    {
-        brayns::Log::error("Unknown component binding key '{}'", key);
-        throw std::invalid_argument("Wrong binding key");
-    }
-
-    try
-    {
-        auto& castedWrapper = dynamic_cast<Component<T>&>(*(it->second));
-        return *castedWrapper.value;
-    }
-    catch (const std::bad_cast& bc)
-    {
-        brayns::Log::error("Could not cast component binding");
-        throw bc;
-    }
-}
-
-class ModelComponents
+/**
+ * @brief The Component class is an unit which is added to the model to add extra data and functionality
+ */
+class Component
 {
 public:
-    template<typename T>
-    void bindComponent(std::string_view key, T& component)
-    {
-        _components[std::string(key)] = std::make_unique<Component<T>>(component);
-    }
+    using Ptr = std::unique_ptr<Component>;
 
-    template<typename T>
-    T& getComponent(std::string_view key)
-    {
-        return extract<T>(_components, key);
-    }
+    virtual ~Component() = default;
 
-    template<typename T>
-    const T& getComponent(std::string_view key) const
-    {
-        return extract<T>(_components, key);
-    }
+    /**
+     * @brief Returns the size in bytes of the component.
+     */
+    virtual uint64_t getSizeInBytes() const noexcept = 0;
+
+protected:
+    /**
+     * @brief Returns a reference to the model that owns this component. This reference is only valid after the
+     * component has been added to the model.
+     * @throws runtime_error if the method is accessed before the component is initialized
+     */
+    Model& getModel();
+
+    /**
+     * @brief called when the component is added to the model. Does nothing by default.
+     */
+    virtual void onStart();
+
+    /**
+     * @brief onPreRender called before the commit+rendering process happens. Does nothing by default.
+     */
+    virtual void onPreRender();
+
+    /**
+     * @brief onPostRender called after the commit+rendering process happens. Does nothing by default.
+     */
+    virtual void onPostRender();
+
+    /**
+     * @brief onCommit called during the commit process. Does nothing by defualt.
+     */
+    virtual void onCommit();
+
+    /**
+     * @brief onDestroyed called when the component is removed from the model. Does nothing by defualt.
+     */
+    virtual void onDestroyed();
+
+    /**
+     * @brief Compute the bounds of the content of the component, if it applies. Does nothing by default.
+     */
+    virtual Bounds computeBounds(const Matrix4f& transform) const noexcept;
 
 private:
-    std::map<std::string, IComponent::Ptr, std::less<>> _components;
+    friend class ModelComponentContainer;
+    friend class Model;
+
+    Model* _model;
+};
+
+class ModelComponentContainer
+{
+public:
+    template<typename T, typename ...Args>
+    T& addComponent(Args&& ...args)
+    {
+        static_assert(std::is_base_of_v<Component, T>, "Model components must inherit from Component");
+
+        const std::type_index ti = typeid(T);
+        auto component = std::make_unique<T>(std::forward<Args>(args)...);
+        auto componentPtr = component.get();
+        _components[ti] = std::move(component);
+
+        componentPtr->onStart();
+
+        return *componentPtr;
+    }
+
+    template<typename T>
+    T& getComponent()
+    {
+        const std::type_index ti = typeid(T);
+        auto it = _components.find(ti);
+        if(it == _components.end())
+        {
+            throw std::invalid_argument("No component of the given type registered");
+        }
+
+        return dynamic_cast<T&>(*(it->second));
+    }
+
+    template<typename T>
+    void removeComponent()
+    {
+        const std::type_index ti = typeid(T);
+        auto it = _components.find(ti);
+        if(it == _components.end())
+        {
+            throw std::invalid_argument("No component of the given type registered");
+        }
+
+        auto& component = *(it->second);
+        component.onDestroyed();
+
+        _components.erase(it);
+    }
+
+    uint64_t getByteSize() const noexcept;
+
+    /**
+     * @brief Calls all the components 'onPreRender' in this container
+     */
+    void onPreRender();
+
+    /**
+     * @brief Calls all the components 'onPreRender' in this container
+     */
+    void onPostRender();
+
+    /**
+     * @brief Calls all the components 'onCommit' in this container
+     */
+    void onCommit();
+
+    /**
+     * @brief Calls all the components 'onDestroyed' in this container
+     */
+    void onDestroyed();
+private:
+    std::unordered_map<std::type_index, Component::Ptr> _components;
 };
 }

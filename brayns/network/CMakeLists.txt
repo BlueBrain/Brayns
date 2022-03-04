@@ -7,15 +7,14 @@ set(BRAYNSNETWORK_HEADERS
   adapters/AnimationParametersAdapter.h
   adapters/ApplicationParametersAdapter.h
   adapters/BinaryLoadParametersAdapter.h
+  adapters/BoundsAdapter.h
   adapters/CameraAdapter.h
-  adapters/ClipPlaneAdapter.h
-  adapters/ColorMapAdapter.h
   adapters/FileLoadParametersAdapter.h
+  adapters/GenericEngineObjectAdapter.h
   adapters/GeometryAdapter.h
   adapters/LightAdapter.h
   adapters/LoaderInfoAdapter.h
   adapters/MaterialAdapter.h
-  adapters/ModelDescriptorAdapter.h
   adapters/ModelInstanceAdapter.h
   adapters/ModelTransferFunctionAdapter.h
   adapters/RendererPickResultAdapter.h

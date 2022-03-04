@@ -8,6 +8,7 @@ set(BRAYNSENGINE_SOURCES
     Camera.cpp
     Engine.cpp
     EngineObject.cpp
+    EngineObjectRegisterer.cpp
     FrameBuffer.cpp
     Light.cpp
     Material.cpp
@@ -39,11 +40,14 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     Camera.h
     Engine.h
     EngineObject.h
+    EngineObjectFactory.h
+    EngineObjectRegisterer.h
     FrameBuffer.h
     Geometry.h
     Light.h
     Material.h
     Model.h
+    ModelComponents.h
     Renderer.h
     Scene.h
     cameras/OrthographicCamera.h

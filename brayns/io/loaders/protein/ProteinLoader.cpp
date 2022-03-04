@@ -21,7 +21,11 @@
 #include <brayns/io/loaders/protein/ProteinLoader.h>
 
 #include <brayns/common/Log.h>
-#include <brayns/io/loaders/protein/ProteinModel.h>
+
+#include <brayns/engine/defaultcomponents/GeometryComponent.h>
+#include <brayns/engine/defaultcomponents/MaterialComponent.h>
+
+#include <brayns/io/loaders/protein/ProteinRendererComponent.h>
 
 #include <assert.h>
 #include <fstream>
@@ -449,7 +453,10 @@ std::vector<Model::Ptr> ProteinLoader::importFromFile(
         modelColors.emplace_back(r, g, b, 1.f);
     }
 
-    Model::Ptr model = std::make_unique<ProteinModel>(spheres, std::move(modelColors), std::move(colorMapIndices));
+    auto model = std::make_unique<Model>();
+    model->addComponent<SphereGeometryComponent>(spheres);
+    model->addComponent<MaterialComponent>();
+    model->addComponent<ProteinRendererComponent>(std::move(modelColors), std::move(colorMapIndices));
 
     std::vector<Model::Ptr> result;
     result.push_back(std::move(model));
