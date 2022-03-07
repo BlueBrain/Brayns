@@ -68,12 +68,13 @@ int main(int argc, const char **argv)
 {
     try
     {
+        BraynsService service(argc, argv);
+
         brayns::Log::info("Start Brayns service.");
 
         brayns::Timer timer;
         timer.start();
 
-        BraynsService service(argc, argv);
         service.run();
 
         timer.stop();
