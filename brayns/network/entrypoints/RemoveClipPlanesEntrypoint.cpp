@@ -44,7 +44,7 @@ void RemoveClipPlanesEntrypoint::onRequest(const Request &request)
     auto &ids = params.ids;
     for (auto id : ids)
     {
-        _scene.removeClipPlane(id);
+        _scene.removeClippingModel(id);
     }
     request.reply(EmptyMessage());
 }

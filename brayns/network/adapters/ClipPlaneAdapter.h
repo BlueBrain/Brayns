@@ -19,39 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "GetInstancesEntrypoint.h"
+#pragma once
 
-#include <algorithm>
-
-#include <brayns/network/common/ExtractModel.h>
+#include <brayns/engine/Model.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-GetInstancesEntrypoint::GetInstancesEntrypoint(Scene &scene)
-    : _scene(scene)
+class ClipPlane
 {
-}
+public:
+    ClipPlane(const uint32_t id, const Vector4f& coefficents);
 
-std::string GetInstancesEntrypoint::getMethod() const
-{
-    return "get-instances";
-}
+    uint32_t getID() const noexcept;
 
-std::string GetInstancesEntrypoint::getDescription() const
-{
-    return "Get instances of the given model";
-}
+    const Vector4f& getPlane() const noexcept;
 
-void GetInstancesEntrypoint::onRequest(const Request &request)
-{
-    auto params = request.getParams();
-    auto id = params.id;
-    auto &range = params.result_range;
-    auto &model = ExtractModel::fromId(_scene, id);
-    auto &instances = model.getInstances();
-    auto first = instances.begin();
-    auto from = std::min(size_t(range.x), instances.size());
-    auto to = std::min(size_t(range.y), instances.size());
-    request.reply({first + from, first + to});
-}
+private:
+    const uint32_t _id;
+    const Vector4f& _coefficents;
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(ClipPlane)
+BRAYNS_JSON_ADAPTER_GET("id", getID, "Plane ID")
+BRAYNS_JSON_ADAPTER_GET("plane", getPlane, "Plane normal vector XYZ and distance from origin")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

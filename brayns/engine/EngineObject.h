@@ -37,11 +37,13 @@ protected:
     virtual void commit() = 0;
 };
 
-class SerializableEngineObject : public EngineObject
+template<typename T>
+struct EngineObjectName
 {
-public:
-    virtual ~SerializableEngineObject() = default;
-
-    virtual std::string_view getName() const noexcept = 0;
+    static std::string_view get()
+    {
+        const std::string typeName (typeid(T).name());
+        throw std::runtime_error("EngineObjectName not implemented for " + typeName);
+    }
 };
 }

@@ -20,7 +20,6 @@
 
 #include <brayns/io/loaders/mesh/MeshLoader.h>
 
-#include <brayns/engine/defaultcomponents/GeometryComponent.h>
 #include <brayns/engine/defaultcomponents/GeometryRendererComponent.h>
 #include <brayns/engine/defaultcomponents/MaterialComponent.h>
 
@@ -80,9 +79,8 @@ public:
     {
         auto model = std::make_unique<brayns::Model>();
 
-        model->addComponent<brayns::MeshGeometryComponent>(mesh);
         model->addComponent<brayns::MaterialComponent>();
-        model->addComponent<brayns::GeometryRendererComponent<brayns::TriangleMesh>>();
+        model->addComponent<brayns::GeometryRendererComponent<brayns::TriangleMesh>>(mesh);
 
         return model;
     }

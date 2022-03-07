@@ -32,7 +32,7 @@ namespace brayns
 /**
  * @brief The Renderer class is the base class for all renderer to be available on Brayns
  */
-class Renderer : public SerializableEngineObject
+class Renderer : public EngineObject
 {
 public:
     using Ptr = std::unique_ptr<Renderer>;
@@ -93,6 +93,11 @@ public:
      * @brief Subclasses must implement this to create a copy of themselves
      */
     virtual Ptr clone() const noexcept = 0;
+
+    /**
+     * @brief Returns the renderer type as a string
+     */
+    virtual std::string_view getName() const noexcept = 0;
 
 protected:
     /**

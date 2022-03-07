@@ -24,7 +24,7 @@ namespace brayns
 {
 std::string_view ProductionRenderer::getName() const noexcept
 {
-    return "production";
+    return EngineObjectName<ProductionRenderer>::get();
 }
 
 Renderer::Ptr ProductionRenderer::clone() const noexcept
@@ -39,5 +39,11 @@ std::string_view ProductionRenderer::getOSPHandleName() const noexcept
 
 void ProductionRenderer::commitRendererSpecificParams()
 {
+}
+
+template<>
+std::string_view EngineObjectName<ProductionRenderer>::get()
+{
+    return "production";
 }
 }

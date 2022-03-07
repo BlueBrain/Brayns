@@ -24,9 +24,11 @@
 
 namespace brayns
 {
-class OrthographicCamera : public Camera
+class OrthographicCamera final : public Camera
 {
 public:
+    std::string_view getName() const noexcept override;
+
     Ptr clone() const noexcept final;
 
     /**
@@ -46,4 +48,7 @@ protected:
 private:
     float _height {1.f};
 };
+
+template<>
+std::string_view EngineObjectName<OrthographicCamera>::get();
 }

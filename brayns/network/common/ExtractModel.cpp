@@ -25,13 +25,16 @@
 
 namespace brayns
 {
-ModelDescriptor &ExtractModel::fromId(Scene &scene, size_t id)
+ModelInstance &ExtractModel::fromId(Scene &scene, size_t id)
 {
-    auto model = scene.getModel(id);
-    if (!model)
+    try
+    {
+        auto& model = scene.getModel(id);
+        return model;
+    }
+    catch(const std::invalid_argument&)
     {
         throw InvalidParamsException("No model found with ID " + std::to_string(id));
     }
-    return *model;
 }
 } // namespace brayns

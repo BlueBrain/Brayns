@@ -24,6 +24,7 @@
 #include <brayns/json/JsonAdapterMacro.h>
 
 #include <brayns/engine/Model.h>
+#include <brayns/engine/Scene.h>
 
 #include "TransformationAdapter.h"
 
@@ -33,7 +34,27 @@ BRAYNS_JSON_ADAPTER_BEGIN(ModelInstance)
 BRAYNS_JSON_ADAPTER_GET("model_id", getID, "Model ID")
 BRAYNS_JSON_ADAPTER_GET("bounding_box", getBounds, "Model instance AABB")
 BRAYNS_JSON_ADAPTER_GET("metadata", getModelMetadata, "Model metadata")
-BRAYNS_JSON_ADAPTER_GETSET("transformation", getTransform, setTransform, "Model transformation", Required(false))
-BRAYNS_JSON_ADAPTER_GETSET("visible", isVisible, setVisible, "Wether the model is rendered or not", Required(false))
+BRAYNS_JSON_ADAPTER_GET("transformation", getTransform, "Model transformation")
+BRAYNS_JSON_ADAPTER_GET("visible", isVisible, "Wether the model is rendered or not")
+BRAYNS_JSON_ADAPTER_END()
+
+class UpdateModelProxy
+{
+public:
+    UpdateModelProxy(Scene &scene);
+
+    void setId(uint32_t id);
+    void setTransformation(const Transformation &transformation);
+    void setVisible(bool visible);
+
+private:
+    Scene &_scene;
+    ModelInstance *_modelInstance {nullptr};
+};
+
+BRAYNS_NAMED_JSON_ADAPTER_BEGIN(UpdateModelProxy, "UpdateModelParams")
+BRAYNS_JSON_ADAPTER_SET("id", setId, "Model ID", Required())
+BRAYNS_JSON_ADAPTER_SET("transformation", setTransformation, "Model transformation")
+BRAYNS_JSON_ADAPTER_SET("visible", setVisible, "Model visibility")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

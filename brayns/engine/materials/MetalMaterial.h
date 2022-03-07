@@ -25,7 +25,7 @@
 
 namespace brayns
 {
-class MetalMaterial : public Material
+class MetalMaterial final : public Material
 {
 public:
     std::string_view getName() const noexcept final;
@@ -61,4 +61,7 @@ private:
     Vector3f _color {1.f}; // default white
     float _roughness {0.1f};  // default opaque
 };
+
+template<>
+std::string_view EngineObjectName<MetalMaterial>::get();
 }

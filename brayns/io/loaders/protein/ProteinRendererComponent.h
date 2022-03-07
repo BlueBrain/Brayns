@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/engine/defaultcomponents/GeometryRendererComponent.h>
+#include <brayns/engine/geometries/Sphere.h>
 
 #include <ospray/ospray.h>
 
@@ -29,7 +30,8 @@ namespace brayns
 class ProteinRendererComponent final : public GeometryRendererComponent<Sphere>
 {
 public:
-    ProteinRendererComponent(std::vector<Vector4f>&& colorMap,
+    ProteinRendererComponent(const std::vector<Sphere>& spheres,
+                             std::vector<Vector4f>&& colorMap,
                              std::vector<uint8_t>&& colorMapIndices);
 
     uint64_t getSizeInBytes() const noexcept override;

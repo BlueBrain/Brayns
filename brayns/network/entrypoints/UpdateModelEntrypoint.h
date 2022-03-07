@@ -23,7 +23,7 @@
 
 #include <brayns/engine/Scene.h>
 
-#include <brayns/network/adapters/UpdateModelAdapter.h>
+#include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns

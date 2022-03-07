@@ -20,7 +20,11 @@
 
 #pragma once
 
+#include <brayns/engine/Camera.h>
 #include <brayns/engine/EngineObject.h>
+#include <brayns/engine/Light.h>
+#include <brayns/engine/Material.h>
+#include <brayns/engine/Renderer.h>
 
 #include <brayns/json/Json.h>
 
@@ -60,16 +64,13 @@ public:
     };
 
 public:
-    EngineObjectFactory()
-    {
-        static_assert(std::is_base_of_v<SerializableEngineObject, T>,
-                "EngineObjectFactory requires EngineSerializableObjects");
-    }
+    using Ptr = std::shared_ptr<EngineObjectFactory<T>>;
 
     template<typename SubT>
-    void registerType(std::string_view name) noexcept
+    void registerType() noexcept
     {
-        _creators[name] = std::make_unique<ItemCreator<SubT>>();
+        const auto name = EngineObjectName<SubT>::get();
+        _creators[std::string(name)] = std::make_unique<ItemCreator<SubT>>();
     }
 
     std::unique_ptr<T> deserialize(std::string_view name, const JsonValue& params = JsonValue()) const
@@ -115,4 +116,9 @@ private:
 private:
     std::map<std::string, typename AbstractItemCreator::Ptr, std::less<>> _creators;
 };
+
+using CameraFactory = EngineObjectFactory<Camera>;
+using LightFactory = EngineObjectFactory<Light>;
+using MaterialFactory = EngineObjectFactory<Material>;
+using RendererFactory = EngineObjectFactory<Renderer>;
 }

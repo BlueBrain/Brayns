@@ -19,12 +19,9 @@ set(BRAYNSNETWORK_HEADERS
   adapters/ModelTransferFunctionAdapter.h
   adapters/RendererPickResultAdapter.h
   adapters/RendererAdapter.h
-  adapters/SceneAdapter.h
   adapters/StatisticsAdapter.h
   adapters/TransferFunctionAdapter.h
   adapters/TransformationAdapter.h
-  adapters/UpdateModelAdapter.h
-  adapters/VolumeParametersAdapter.h
   binary/BinaryManager.h
   client/ClientBuffer.h
   client/ClientManager.h
@@ -33,6 +30,8 @@ set(BRAYNSNETWORK_HEADERS
   client/ClientSender.h
   common/CancellationToken.h
   common/Clock.h
+  common/EngineObjectFactory.h
+  common/EngineObjectRegisterer.h
   common/ExtractMaterial.h
   common/ExtractModel.h
   common/ProgressHandler.h
@@ -54,7 +53,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/AnimationParametersEntrypoint.h
   entrypoints/ApplicationParametersEntrypoint.h
   entrypoints/CameraEntrypoint.h
-  entrypoints/CameraParamsEntrypoint.h
   entrypoints/CancelEntrypoint.h
   entrypoints/ClearLightsEntrypoint.h
   entrypoints/ExitLaterEntrypoint.h
@@ -66,7 +64,7 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/GetModelEntrypoint.h
   entrypoints/ImageJpegEntrypoint.h
   entrypoints/ImageStreamingModeEntrypoint.h
-  entrypoints/InspectEntrypoint.h
+  #entrypoints/InspectEntrypoint.h
   entrypoints/ModelPropertiesEntrypoint.h
   entrypoints/ModelTransferFunctionEntrypoint.h
   entrypoints/QuitEntrypoint.h
@@ -99,13 +97,11 @@ set(BRAYNSNETWORK_HEADERS
   jsonrpc/RequestId.h
   messages/ExitLaterMessage.h
   messages/ExportFramesMessage.h
-  messages/GetInstancesMessage.h
   messages/GetModelMessage.h
   messages/ImageBase64Message.h
   messages/ImageStreamingModeMessage.h
   messages/InspectMessage.h
   messages/LightMessage.h
-  messages/ModelPropertiesMessage.h
   messages/RemoveClipPlanesMessage.h
   messages/RemoveLightsMessage.h
   messages/RemoveModelMessage.h
@@ -131,7 +127,6 @@ set(BRAYNSNETWORK_HEADERS
   
 set(BRAYNSNETWORK_SOURCES
   adapters/ModelTransferFunctionAdapter.cpp
-  adapters/UpdateModelAdapter.cpp
   binary/BinaryManager.cpp
   client/ClientBuffer.cpp
   client/ClientManager.cpp
@@ -140,6 +135,7 @@ set(BRAYNSNETWORK_SOURCES
   client/ClientSender.cpp
   client/RequestBuffer.cpp
   common/CancellationToken.cpp
+  common/EngineObjectRegisterer.cpp
   common/ExtractMaterial.cpp
   common/ExtractModel.cpp
   common/PropertyObjectSchema.cpp
@@ -154,7 +150,6 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/AnimationParametersEntrypoint.cpp
   entrypoints/ApplicationParametersEntrypoint.cpp
   entrypoints/CameraEntrypoint.cpp
-  entrypoints/CameraParamsEntrypoint.cpp
   entrypoints/CancelEntrypoint.cpp
   entrypoints/ClearLightsEntrypoint.cpp
   entrypoints/ExitLaterEntrypoint.cpp
@@ -166,7 +161,7 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/GetModelEntrypoint.cpp
   entrypoints/ImageJpegEntrypoint.cpp
   entrypoints/ImageStreamingModeEntrypoint.cpp
-  entrypoints/InspectEntrypoint.cpp
+  #entrypoints/InspectEntrypoint.cpp
   entrypoints/ModelPropertiesEntrypoint.cpp
   entrypoints/ModelTransferFunctionEntrypoint.cpp
   entrypoints/QuitEntrypoint.cpp

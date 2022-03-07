@@ -20,73 +20,73 @@
 
 #pragma once
 
-#include <brayns/engine/Geometry.h>
+#include <brayns/engine/Volume.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/defaultcomponents/MaterialComponent.h>
+#include <brayns/engine/defaultcomponents/TransferFunctionRendererComponent.h>
 
 #include <ospray/ospray.h>
 
 namespace brayns
 {
 /**
- * @brief Adds renderable geometry to the model
+ * @brief Adds a renderable volume to the model
  */
 template<typename T>
-class GeometryRendererComponent : public Component
+class VolumeRendererComponent : public Component
 {
 public:
-    GeometryRendererComponent()
+    VolumeRendererComponent()
     {
         _initializeHandle();
     }
 
-    GeometryRendererComponent(const T& geometry)
+    VolumeRendererComponent(const T& volume)
     {
         _initializeHandle();
-        _geometry.add(geometry);
+        _volume.add(volume);
     }
 
-    GeometryRendererComponent(const std::vector<T>& geometries)
-    {
-        _initializeHandle();
-        _geometry.add(geometries);
-    }
-
-    ~GeometryRendererComponent()
+    ~VolumeRendererComponent()
     {
         if(_model)
             ospRelease(_model);
     }
 
-    Geometry<T> &getGeometry() noexcept
-    {
-        return _geometry;
-    }
-
     virtual uint64_t getSizeInBytes() const noexcept override
     {
-        return sizeof(GeometryRendererComponent<T>) + _geometry.getNumGeometries() * sizeof(T);
+        return sizeof(VolumeRendererComponent<T>);
     }
 
     virtual Bounds computeBounds(const Matrix4f& transform) const noexcept override
     {
-        return _geometry.computeBounds(transform);
+        return _volume.computeBounds(transform);
     }
 
     virtual void onStart() override
     {
-        auto& model = getModel();
+        Model& model = getModel();
         auto& group = model.getGroup();
-        group.addGeometricModel(_model);
+        group.addVolumetricModel(_model);
+
+        try
+        {
+            auto& tfrComponent = model.getComponent<TransferFunctionRendererComponent>();
+        }
+        catch (...)
+        {
+            model.addComponent<TransferFunctionRendererComponent>();
+        }
     }
 
     virtual void onCommit() override
     {
+        Model& model = getModel();
+
         bool needsCommit = false;
 
-        needsCommit = needsCommit || _commitGeometry();
-        needsCommit = needsCommit || _commitMaterial();
+        needsCommit = needsCommit || _commitVolume();
+        needsCommit = needsCommit || _commitTransferFunction();
 
         if(needsCommit)
         {
@@ -98,13 +98,13 @@ public:
     {
         auto& model = getModel();
         auto& group = model.getGroup();
-        group.removeGeometricModel(_model);
+        group.removeVolumetricModel(_model);
         ospRelease(_model);
         _model = nullptr;
     }
 
 protected:
-    OSPGeometricModel handle() const noexcept
+    OSPVolumetricModel handle() const noexcept
     {
         return _model;
     }
@@ -112,45 +112,32 @@ protected:
 private:
     void _initializeHandle()
     {
-        _model = ospNewGeometricModel();
+        _model = ospNewVolumetricModel();
     }
 
-    bool _commitGeometry()
+    bool _commitVolume()
     {
-        if(_geometry.isModified())
+        if(_volume.isModified())
         {
-            _geometry.doCommit();
-            auto geometryHandle = _geometry.handle();
-            ospSetParam(_model, "geometry", OSPDataType::OSP_GEOMETRY, &geometryHandle);
+            _volume.doCommit();
+            auto volumeHandle = _volume.handle();
+            ospSetParam(_model, "volume", OSPDataType::OSP_VOLUME, &volumeHandle);
             return true;
         }
 
         return false;
     }
 
-    bool _commitMaterial()
+    bool _commitTransferFunction()
     {
         Model& model = getModel();
-        MaterialComponent* materialComponent = nullptr;
-        try
-        {
-            materialComponent = &model.getComponent<MaterialComponent>();
-        }
-        catch(...)
-        {
-        }
+        auto &tfComponent = model.getComponent<TransferFunctionRendererComponent>();
 
-        if(!materialComponent)
+        if(tfComponent.needsCommit())
         {
-            return false;
-        }
-
-        auto &material = materialComponent->getMaterial();
-        if(material.isModified())
-        {
-            material.doCommit();
-            auto materialHandle = material.handle();
-            ospSetParam(_model, "material", OSPDataType::OSP_MATERIAL, &materialHandle);
+            tfComponent.manualCommit();
+            auto tfHandle = tfComponent.handle();
+            ospSetParam(_model, "transferFunction", OSPDataType::OSP_TRANSFER_FUNCTION, &tfHandle);
             return true;
         }
 
@@ -158,7 +145,7 @@ private:
     }
 
 private:
-    OSPGeometricModel _model {nullptr};
-    Geometry<T> _geometry;
+    OSPVolumetricModel _model {nullptr};
+    Volume<T> _volume;
 };
 }

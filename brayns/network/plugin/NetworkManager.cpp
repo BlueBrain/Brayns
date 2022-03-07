@@ -23,6 +23,7 @@
 
 #include <brayns/common/Log.h>
 
+#include <brayns/network/common/EngineObjectRegisterer.h>
 #include <brayns/network/dispatch/RequestDispatcher.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
 #include <brayns/network/interface/NetworkInterface.h>
@@ -40,20 +41,17 @@
 #include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
-#include <brayns/network/entrypoints/CameraParamsEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
 #include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/ExportFramesEntrypoint.h>
 #include <brayns/network/entrypoints/GetClipPlanesEntrypoint.h>
-#include <brayns/network/entrypoints/GetInstancesEntrypoint.h>
 #include <brayns/network/entrypoints/GetLightsEntrypoint.h>
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
-#include <brayns/network/entrypoints/ModelPropertiesEntrypoint.h>
 #include <brayns/network/entrypoints/ModelTransferFunctionEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RegistryEntrypoint.h>
@@ -61,19 +59,15 @@
 #include <brayns/network/entrypoints/RemoveLightsEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
-#include <brayns/network/entrypoints/RendererParamsEntrypoint.h>
 #include <brayns/network/entrypoints/RequestModelUploadEntrypoint.h>
-#include <brayns/network/entrypoints/ResetCameraEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
 #include <brayns/network/entrypoints/SnapshotEntrypoint.h>
 #include <brayns/network/entrypoints/StatisticsEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateClipPlaneEntrypoint.h>
-#include <brayns/network/entrypoints/UpdateInstanceEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateModelEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
-#include <brayns/network/entrypoints/VolumeParametersEntrypoint.h>
 
 namespace
 {
@@ -88,14 +82,11 @@ public:
         auto &parameters = api.getParametersManager();
         auto &application = parameters.getApplicationParameters();
         auto &animation = parameters.getAnimationParameters();
-        auto &volume = parameters.getVolumeParameters();
-        auto &rendering = parameters.getRenderingParameters();
 
         auto &engine = api.getEngine();
         auto &camera = engine.getCamera();
         auto &renderer = engine.getRenderer();
         auto &scene = engine.getScene();
-        auto &lights = scene.getLightManager();
         auto &statistics = engine.getStatistics();
 
         auto &loaders = api.getLoaderRegistry();
@@ -106,62 +97,53 @@ public:
         auto &stream = context.stream;
         auto &monitor = stream.getMonitor();
 
+        std::shared_ptr<brayns::CameraFactory> cameraFactory = std::make_shared<brayns::CameraFactory>();
+        std::shared_ptr<brayns::LightFactory> lightFactory = std::make_shared<brayns::LightFactory>();
+        std::shared_ptr<brayns::MaterialFactory> materialFactory = std::make_shared<brayns::MaterialFactory>();
+        std::shared_ptr<brayns::RendererFactory> rendererFactory = std::make_shared<brayns::RendererFactory>();
+
         brayns::CancellationToken token(interface);
         brayns::EntrypointBuilder builder("Core", interface);
 
         builder.add<brayns::AddClipPlaneEntrypoint>(scene);
-        builder.add<brayns::AddLightAmbientEntrypoint>(lights);
-        builder.add<brayns::AddLightDirectionalEntrypoint>(lights);
-        builder.add<brayns::AddLightQuadEntrypoint>(lights);
-        builder.add<brayns::AddLightSphereEntrypoint>(lights);
-        builder.add<brayns::AddLightSpotEntrypoint>(lights);
+        builder.add<brayns::AddLightAmbientEntrypoint>(scene);
+        builder.add<brayns::AddLightDirectionalEntrypoint>(scene);
+        builder.add<brayns::AddLightQuadEntrypoint>(scene);
         builder.add<brayns::AddModelEntrypoint>(scene, loaders, token);
         builder.add<brayns::CancelEntrypoint>(tasks);
-        builder.add<brayns::ClearLightsEntrypoint>(lights);
+        builder.add<brayns::ClearLightsEntrypoint>(scene);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
         builder.add<brayns::ExportFramesEntrypoint>(engine, token);
         builder.add<brayns::GetAnimationParametersEntrypoint>(animation);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
-        builder.add<brayns::GetCameraEntrypoint>(camera);
-        builder.add<brayns::GetCameraParamsEntrypoint>(camera);
+        builder.add<brayns::GetCameraEntrypoint>(engine, cameraFactory);
         builder.add<brayns::GetClipPlanesEntrypoint>(scene);
-        builder.add<brayns::GetInstancesEntrypoint>(scene);
-        builder.add<brayns::GetLightsEntrypoint>(lights);
+        builder.add<brayns::GetLightsEntrypoint>(scene);
         builder.add<brayns::GetLoadersEntrypoint>(loaders);
-        builder.add<brayns::GetModelEntrypoint>(scene);
-        builder.add<brayns::GetModelPropertiesEntrypoint>(scene);
         builder.add<brayns::GetModelTransferFunctionEntrypoint>(scene);
-        builder.add<brayns::GetRendererEntrypoint>(rendering);
-        builder.add<brayns::GetRendererParamsEntrypoint>(renderer);
+        builder.add<brayns::GetRendererEntrypoint>(engine, rendererFactory);
         builder.add<brayns::GetSceneEntrypoint>(scene);
         builder.add<brayns::GetStatisticsEntrypoint>(statistics);
-        builder.add<brayns::GetVolumeParametersEntrypoint>(volume);
         builder.add<brayns::ImageJpegEntrypoint>(application, engine);
         builder.add<brayns::ImageStreamingModeEntrypoint>(application, monitor);
         builder.add<brayns::InspectEntrypoint>(renderer);
-        builder.add<brayns::ModelPropertiesSchemaEntrypoint>(scene);
         builder.add<brayns::QuitEntrypoint>(engine);
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
         builder.add<brayns::RemoveClipPlanesEntrypoint>(scene);
-        builder.add<brayns::RemoveLightsEntrypoint>(lights);
+        builder.add<brayns::RemoveLightsEntrypoint>(scene);
         builder.add<brayns::RemoveModelEntrypoint>(scene);
         builder.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, binary, token);
-        builder.add<brayns::ResetCameraEntrypoint>(camera);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
         builder.add<brayns::SetAnimationParametersEntrypoint>(animation);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
-        builder.add<brayns::SetCameraEntrypoint>(camera);
-        builder.add<brayns::SetCameraParamsEntrypoint>(camera);
-        builder.add<brayns::SetModelPropertiesEntrypoint>(scene);
+        builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);
+        builder.add<brayns::SetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::SetModelTransferFunctionEntrypoint>(scene);
-        builder.add<brayns::SetRendererEntrypoint>(rendering);
-        builder.add<brayns::SetRendererParamsEntrypoint>(renderer);
-        builder.add<brayns::SetSceneEntrypoint>(scene);
-        builder.add<brayns::SetVolumeParametersEntrypoint>(volume);
+        builder.add<brayns::SetRendererInteractiveEntrypoint>(engine);
+        builder.add<brayns::SetRendererProductionEntrypoint>(engine);
         builder.add<brayns::SnapshotEntrypoint>(engine, interface);
         builder.add<brayns::TriggerJpegStreamEntrypoint>(monitor);
         builder.add<brayns::UpdateClipPlaneEntrypoint>(scene);
-        builder.add<brayns::UpdateInstanceEntrypoint>(scene);
         builder.add<brayns::UpdateModelEntrypoint>(scene);
         builder.add<brayns::VersionEntrypoint>();
     }

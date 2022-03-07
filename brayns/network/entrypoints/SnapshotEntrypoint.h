@@ -35,7 +35,7 @@ namespace brayns
 class SnapshotEntrypoint : public Entrypoint<SnapshotParams, ImageBase64Message>
 {
 public:
-    SnapshotEntrypoint(Engine &engine, CancellationToken token);
+    SnapshotEntrypoint(Engine &engine, CancellationToken token, CameraFactory::Ptr cameraFactory, RendererFactory::Ptr rendererFactory);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -47,6 +47,8 @@ public:
 private:
     Engine &_engine;
     CancellationToken _token;
+    CameraFactory::Ptr _cameraFactory;
+    RendererFactory::Ptr _rendererFactory;
     std::optional<ClientRef> _client;
 };
 } // namespace brayns

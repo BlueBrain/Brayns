@@ -38,18 +38,4 @@ std::string GetSceneEntrypoint::getDescription() const
     return "Get the current state of the scene";
 }
 
-SetSceneEntrypoint::SetSceneEntrypoint(Scene &scene)
-    : SetEntrypoint(scene)
-{
-}
-
-std::string SetSceneEntrypoint::getMethod() const
-{
-    return "set-scene";
-}
-
-std::string SetSceneEntrypoint::getDescription() const
-{
-    return "Set the current state of the scene";
-}
 } // namespace brayns

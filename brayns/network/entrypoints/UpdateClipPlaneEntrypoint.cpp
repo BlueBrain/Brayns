@@ -21,6 +21,8 @@
 
 #include "UpdateClipPlaneEntrypoint.h"
 
+#include <brayns/engine/defaultcomponents/ClippingComponent.h>
+#include <brayns/engine/geometries/Plane.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
@@ -44,13 +46,16 @@ void UpdateClipPlaneEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto id = params.getID();
-    auto &plane = params.getPlane();
-    auto clipPlane = _scene.getClipPlane(id);
-    if (!clipPlane)
+    auto &newPlane = params.getPlane();
+    auto &clippingModel = _scene.getClippingModel(id);
+    // All clipping models, by now, have always a ClippingComponent<Plane> attached
+    auto &clippingComponent = clippingModel.getComponent<ClippingComponent<Plane>>();
+    auto &geometry = clippingComponent.getGeometry();
+    geometry.manipulate(0, [&](Plane& plane)
     {
-        throw InvalidParamsException("No clip plane found with ID " + std::to_string(id));
-    }
-    clipPlane->setPlane(plane);
+        plane.coefficents = newPlane;
+    });
+
     request.reply(EmptyMessage());
 }
 } // namespace brayns

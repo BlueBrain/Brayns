@@ -35,7 +35,7 @@ namespace brayns
  * managed by the GeometricModels implementation, because this allows for a more optimal representation
  * of the geometry color for Brayns needs.
  */
-class Material : public SerializableEngineObject
+class Material : public EngineObject
 {
 public:
     using Ptr = std::unique_ptr<Material>;
@@ -59,6 +59,11 @@ public:
      * @brief Subclasses must implement this method returning their size in bytes
      */
     virtual uint64_t getSizeInBytes() const noexcept = 0;
+
+    /**
+     * @brief Returns the material type as a string
+     */
+    virtual std::string_view getName() const noexcept = 0;
 
 protected:
     /**

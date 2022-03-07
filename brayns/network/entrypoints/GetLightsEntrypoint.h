@@ -21,23 +21,23 @@
 
 #pragma once
 
-#include <brayns/engine/LightManager.h>
-
+#include <brayns/engine/Scene.h>
+#include <brayns/network/adapters/LightAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/LightMessage.h>
 
 namespace brayns
 {
-class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<LightMessage>>
+class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<GenericLight>>
 {
 public:
-    GetLightsEntrypoint(LightManager &manager);
+    GetLightsEntrypoint(Scene &scene, LightFactory::Ptr lightFactory);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    LightManager &_manager;
+    Scene &_scene;
+    LightFactory::Ptr _lightFactory;
 };
 } // namespace brayns

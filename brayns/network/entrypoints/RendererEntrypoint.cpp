@@ -23,8 +23,39 @@
 
 namespace brayns
 {
-GetRendererEntrypoint::GetRendererEntrypoint(const RenderingParameters &parameters)
-    : GetEntrypoint(parameters)
+SetRendererInteractiveEntrypoint::SetRendererInteractiveEntrypoint(Engine &engine)
+ : SetRendererEntrypoint<InteractiveRenderer>(engine)
+{
+}
+
+std::string SetRendererInteractiveEntrypoint::getMethod() const
+{
+    return "set-renderer-interactive";
+}
+
+std::string SetRendererInteractiveEntrypoint::getDescription() const
+{
+    return "Sets the system renderer to the interactive one";
+}
+
+SetRendererProductionEntrypoint::SetRendererProductionEntrypoint(Engine &engine)
+ : SetRendererEntrypoint<ProductionRenderer>(engine)
+{
+}
+
+std::string SetRendererProductionEntrypoint::getMethod() const
+{
+    return "set-renderer-production";
+}
+
+std::string SetRendererProductionEntrypoint::getDescription() const
+{
+    return "Sets the system renderer to the production one";
+}
+
+GetRendererEntrypoint::GetRendererEntrypoint(Engine &engine, RendererFactory::Ptr factory)
+    : _engine(engine)
+    , _rendererFactory(factory)
 {
 }
 
@@ -35,21 +66,16 @@ std::string GetRendererEntrypoint::getMethod() const
 
 std::string GetRendererEntrypoint::getDescription() const
 {
-    return "Get the current state of the renderer";
+    return "Get the current system renderer";
 }
 
-SetRendererEntrypoint::SetRendererEntrypoint(RenderingParameters &parameters)
-    : SetEntrypoint(parameters)
+void GetRendererEntrypoint::onRequest(const Request &request)
 {
-}
+    auto& renderer = _engine.getRenderer();
 
-std::string SetRendererEntrypoint::getMethod() const
-{
-    return "set-renderer";
-}
+    GenericRenderer result;
+    result.serialize(*_rendererFactory, renderer);
 
-std::string SetRendererEntrypoint::getDescription() const
-{
-    return "Set the current state of the renderer";
+    request.reply(result);
 }
 } // namespace brayns

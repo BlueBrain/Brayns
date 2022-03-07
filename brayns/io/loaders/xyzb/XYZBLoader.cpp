@@ -22,9 +22,9 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/engine/defaultcomponents/GeometryComponent.h>
 #include <brayns/engine/defaultcomponents/GeometryRendererComponent.h>
 #include <brayns/engine/defaultcomponents/MaterialComponent.h>
+#include <brayns/engine/geometries/Sphere.h>
 
 #include <brayns/utils/StringUtils.h>
 
@@ -109,9 +109,8 @@ std::vector<Model::Ptr> XYZBLoader::importFromBlob(Blob &&blob, const LoaderProg
         spheres[i + startOffset].radius = meanRadius;
 
     auto model = std::make_unique<Model>();
-    model->addComponent<SphereGeometryComponent>(spheres);
     model->addComponent<MaterialComponent>();
-    model->addComponent<GeometryRendererComponent<Sphere>>();
+    model->addComponent<GeometryRendererComponent<Sphere>>(spheres);
 
     std::vector<Model::Ptr> result;
     result.push_back(std::move(model));

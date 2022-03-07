@@ -24,7 +24,7 @@
 
 namespace brayns
 {
-class ProductionRenderer : public Renderer
+class ProductionRenderer final : public Renderer
 {
 public:
     std::string_view getName() const noexcept final;
@@ -36,4 +36,7 @@ protected:
 
     void commitRendererSpecificParams() final;
 };
+
+template<>
+std::string_view EngineObjectName<ProductionRenderer>::get();
 }

@@ -20,7 +20,6 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/engine/Engine.h>
-#include <brayns/engine/EngineObjectRegisterer.h>
 #include <brayns/engine/FrameRenderer.h>
 #include <brayns/engine/cameras/PerspectiveCamera.h>
 #include <brayns/engine/renderers/InteractiveRenderer.h>
@@ -29,7 +28,7 @@
 
 namespace brayns
 {
-Engine::Engine(const ParametersManager& parameters)
+Engine::Engine(ParametersManager& parameters)
  : _params(parameters)
 {
     _device = ospNewDevice("cpu");
@@ -50,8 +49,6 @@ Engine::Engine(const ParametersManager& parameters)
         throw std::runtime_error("Could not initialize OSPRay device");
     }
 
-    EngineObjectRegisterer::registerDefaultTypes(*this);
-
     // Default camera and renderer
     _camera = std::make_unique<PerspectiveCamera>();
     _renderer = std::make_unique<InteractiveRenderer>();
@@ -67,9 +64,7 @@ Engine::~Engine()
 
 void Engine::preRender()
 {
-    const auto& animation = _params.getAnimationParameters();
-
-    _scene.preRender(animation);
+    _scene.preRender(_params);
 }
 
 void Engine::commit()
@@ -140,14 +135,14 @@ void Engine::render()
     // Start measuring a new frame render time.
     _fpsCounter.startFrame();
 
-    FrameRenderer::render(*_camera, _frameBuffer, *_renderer, _scene);
+    FrameRenderer::synchronousRender(*_camera, _frameBuffer, *_renderer, _scene);
 
     _frameBuffer.incrementAccumFrames();
 }
 
 void Engine::postRender()
 {
-    _scene.postRender();
+    _scene.postRender(_params);
 }
 
 Scene &Engine::getScene()
@@ -165,19 +160,9 @@ Camera &Engine::getCamera() noexcept
     return *_camera;
 }
 
-EngineObjectFactory<Camera> &Engine::getCameraFactory() noexcept
-{
-    return _cameraFactory;
-}
-
 Renderer &Engine::getRenderer() noexcept
 {
     return *_renderer;
-}
-
-EngineObjectFactory<Renderer> &Engine::getRendererFactory() noexcept
-{
-    return _rendererFactory;
 }
 
 void Engine::setRunning(bool keepRunning) noexcept

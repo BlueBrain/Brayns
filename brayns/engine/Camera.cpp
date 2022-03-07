@@ -47,11 +47,6 @@ Camera::~Camera()
         ospRelease(_handle);
 }
 
-std::string_view Camera::getName() const noexcept
-{
-    return getOSPHandleName();
-}
-
 void Camera::commit()
 {
     if(!_handle)

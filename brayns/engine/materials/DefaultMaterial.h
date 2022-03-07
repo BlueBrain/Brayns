@@ -25,7 +25,7 @@
 
 namespace brayns
 {
-class DefaultMaterial : public Material
+class DefaultMaterial final : public Material
 {
 public:
     std::string_view getName() const noexcept final;
@@ -62,5 +62,8 @@ private:
     Vector3f _color {1.f}; // default white
     float _opacity {1.f};  // default opaque
 };
+
+template<>
+std::string_view EngineObjectName<DefaultMaterial>::get();
 }
 

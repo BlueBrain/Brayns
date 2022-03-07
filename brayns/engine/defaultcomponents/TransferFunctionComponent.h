@@ -25,6 +25,9 @@
 
 namespace brayns
 {
+/**
+ * @brief Adds a transfer function to the model
+ */
 class TransferFunctionComponent final : public Component
 {
 public:

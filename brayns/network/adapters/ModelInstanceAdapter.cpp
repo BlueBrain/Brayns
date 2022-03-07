@@ -19,26 +19,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/engine/Scene.h>
-
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/GetInstancesMessage.h>
 
 namespace brayns
 {
-class GetInstancesEntrypoint : public Entrypoint<GetInstanceMessage, std::vector<ModelInstance>>
+UpdateModelProxy::UpdateModelProxy(Scene &scene)
+ : _scene(scene)
 {
-public:
-    GetInstancesEntrypoint(Scene &scene);
+}
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
+void UpdateModelProxy::setId(uint32_t id)
+{
+    _modelInstance = &_scene.getModelInstance(id);
+}
 
-private:
-    Scene &_scene;
-};
-} // namespace brayns
+void UpdateModelProxy::setTransformation(const Transformation &transformation)
+{
+    _modelInstance->setTransform(transformation);
+}
+
+void UpdateModelProxy::setVisible(bool visible)
+{
+    _modelInstance->setVisible(visible);
+}
+}

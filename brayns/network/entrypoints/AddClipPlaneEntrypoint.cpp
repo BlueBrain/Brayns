@@ -21,7 +21,7 @@
 
 #include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
 
-#include <brayns/engine/models/ClippingModel.h>
+#include <brayns/engine/defaultcomponents/ClippingComponent.h>
 
 namespace brayns
 {
@@ -37,18 +37,15 @@ std::string AddClipPlaneEntrypoint::getMethod() const
 
 std::string AddClipPlaneEntrypoint::getDescription() const
 {
-    return "Add a clip plane and returns the clip plane descriptor";
+    return "Add a clip plane and returns the clip plane ID";
 }
 
 void AddClipPlaneEntrypoint::onRequest(const Request &request)
 {
     auto plane = request.getParams();
-
-    auto model = std::make_unique<ClippingModel<Plane>>();
-    model->addClipGeometry(plane);
-    auto modelPtr = model.get();
+    auto model = std::make_unique<Model>();
+    model->addComponent<ClippingComponent<Plane>>(plane);
     auto id = _scene.addClippingModel(std::move(model));
-
     request.reply(id);
 }
 } // namespace brayns

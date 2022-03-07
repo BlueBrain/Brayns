@@ -28,7 +28,7 @@
 
 namespace brayns
 {
-class GetClipPlanesEntrypoint : public Entrypoint<EmptyMessage, std::vector<ClipPlanePtr>>
+class GetClipPlanesEntrypoint : public Entrypoint<EmptyMessage, std::vector<ClipPlane>>
 {
 public:
     GetClipPlanesEntrypoint(Scene &scene);

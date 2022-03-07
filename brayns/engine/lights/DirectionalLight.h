@@ -24,7 +24,7 @@
 
 namespace brayns
 {
-class DirectionalLight : public Light
+class DirectionalLight final : public Light
 {
 public:
     /**
@@ -52,4 +52,7 @@ protected:
 private:
     Vector3f _direction {0.f, 1.f, 0.f};
 };
+
+template<>
+std::string_view EngineObjectName<DirectionalLight>::get();
 }

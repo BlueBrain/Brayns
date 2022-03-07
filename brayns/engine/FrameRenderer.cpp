@@ -20,9 +20,27 @@
 
 #include <brayns/engine/FrameRenderer.h>
 
+#include <ospray/ospray_util.h>
+
 namespace brayns
 {
-void FrameRenderer::render(const Camera &camera, const FrameBuffer &fb, const Renderer &renderer, const Scene &scene)
+void FrameRenderer::synchronousRender(const Camera &camera,
+                                      const FrameBuffer &fb,
+                                      const Renderer &renderer,
+                                      const Scene &scene)
+{
+    auto cameraHandle = camera.handle();
+    auto fbHandle = fb.handle();
+    auto rendererHandle = renderer.handle();
+    auto sceneHandle = scene.handle();
+
+    ospRenderFrameBlocking(fbHandle, rendererHandle, cameraHandle, sceneHandle);
+}
+
+OSPFuture FrameRenderer::asynchronousRender(const Camera& camera,
+                                            const FrameBuffer& fb,
+                                            const Renderer& renderer,
+                                            const Scene& scene)
 {
     auto cameraHandle = camera.handle();
     auto fbHandle = fb.handle();
@@ -30,6 +48,6 @@ void FrameRenderer::render(const Camera &camera, const FrameBuffer &fb, const Re
     auto sceneHandle = scene.handle();
 
     auto frameFuture = ospRenderFrame(fbHandle, rendererHandle, cameraHandle, sceneHandle);
-    ospWait(frameFuture);
+    return frameFuture;
 }
 }

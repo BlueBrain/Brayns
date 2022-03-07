@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,27 +20,18 @@
 
 #pragma once
 
-#include <brayns/engine/Renderer.h>
-
-#include <brayns/network/entrypoint/PropertyObjectEntrypoint.h>
+#include <brayns/network/common/EngineObjectFactory.h>
 
 namespace brayns
 {
-class GetRendererParamsEntrypoint : public GetPropertyObjectEntrypoint<Renderer>
+/**
+ * @brief Utility class to register Brayns core types
+ */
+struct EngineObjectRegisterer
 {
-public:
-    GetRendererParamsEntrypoint(const Renderer &renderer);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
+    static void registerCameras(CameraFactory& factory) noexcept;
+    static void registerLights(LightFactory& factory) noexcept;
+    static void registerMaterials(MaterialFactory& factory) noexcept;
+    static void registerRenderer(RendererFactory& renderer) noexcept;
 };
-
-class SetRendererParamsEntrypoint : public SetPropertyObjectEntrypoint<Renderer>
-{
-public:
-    SetRendererParamsEntrypoint(Renderer &renderer);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-};
-} // namespace brayns
+}

@@ -31,44 +31,6 @@
 namespace brayns
 {
 template<typename T>
-class GetCameraEntrypoint : public IEntrypoint
-{
-public:
-    GetCameraEntrypoint(Engine &engine)
-        : _engine(engine)
-    {
-    }
-
-    virtual JsonSchema getParamsSchema() const override
-    {
-        return Json::getSchema<EmptyMessage>();
-    }
-
-    virtual JsonSchema getResultSchema() const override
-    {
-        return Json::getSchema<T>();
-    }
-
-    virtual void onRequest(const JsonRpcRequest &request) override
-    {
-        auto& currentCamera = _engine.getCamera();
-        try
-        {
-            auto& castedCamera = dynamic_cast<T&>(currentCamera);
-            const auto result = Json::serialize<T>(castedCamera);
-            request.reply(result);
-        }
-        catch(const std::bad_cast&)
-        {
-            throw JsonRpcException("Cannot cast system camera to the requested type");
-        }
-    }
-
-private:
-    Engine &_engine;
-};
-
-template<typename T>
 class SetCameraEntrypoint : public IEntrypoint
 {
 public:
@@ -107,24 +69,6 @@ private:
     Engine &_engine;
 };
 
-class GetCameraPerspectiveEntrypoint final : public GetCameraEntrypoint<PerspectiveCamera>
-{
-public:
-    GetCameraPerspectiveEntrypoint(Engine &engine);
-
-    std::string getMethod() const override;
-    std::string getDescription() const override;
-};
-
-class GetCameraOrthographicEntrypoit final : public GetCameraEntrypoint<OrthographicCamera>
-{
-public:
-    GetCameraOrthographicEntrypoit(Engine &engine);
-
-    std::string getMethod() const override;
-    std::string getDescription() const override;
-};
-
 class SetCameraPerspectiveEntrypoint final : public SetCameraEntrypoint<PerspectiveCamera>
 {
 public:
@@ -134,26 +78,28 @@ public:
     std::string getDescription() const override;
 };
 
-class SetCameraOrthographicEntrypoit final : public SetCameraEntrypoint<OrthographicCamera>
+class SetCameraOrthographicEntrypoint final : public SetCameraEntrypoint<OrthographicCamera>
 {
 public:
-    SetCameraOrthographicEntrypoit(Engine &engine);
+    SetCameraOrthographicEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
 };
 
-class GetCurrentCameraTypeEntrypoint : public Entrypoint<EmptyMessage, std::string>
+class GetCameraEntrypoint final : public Entrypoint<EmptyMessage, GenericCamera>
 {
 public:
-    GetCurrentCameraTypeEntrypoint(Engine& engine);
+    GetCameraEntrypoint(Engine& engine, CameraFactory::Ptr factory);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
+
     void onRequest(const Request &request) override;
 
 private:
-    Engine& _engine;
+    Engine &_engine;
+    CameraFactory::Ptr _cameraFactory;
 };
 
 class CameraLookAtEntrypoint final : public Entrypoint<LookAtParameters, EmptyMessage>

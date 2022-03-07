@@ -24,7 +24,7 @@
 
 namespace brayns
 {
-class QuadLight : public Light
+class QuadLight final : public Light
 {
 public:
     /**
@@ -79,4 +79,7 @@ private:
     Vector3f _verticalDisplacement {0.f, 1.f, 0.f};
     Vector3f _horizontalDisplacement {1.f, 0.f, 1.f};
 };
+
+template<>
+std::string_view EngineObjectName<QuadLight>::get();
 }

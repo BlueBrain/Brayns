@@ -24,7 +24,7 @@ namespace brayns
 {
 std::string_view CarPaintMaterial::getName() const noexcept
 {
-    return "car paint";
+    return EngineObjectName<CarPaintMaterial>::get();
 }
 
 uint64_t CarPaintMaterial::getSizeInBytes() const noexcept
@@ -64,5 +64,11 @@ void CarPaintMaterial::commitMaterialSpecificParams()
 std::string_view CarPaintMaterial::getOSPHandleName() const noexcept
 {
     return "carPaint";
+}
+
+template<>
+std::string_view EngineObjectName<CarPaintMaterial>::get()
+{
+    return "car paint";
 }
 }

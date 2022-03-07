@@ -23,37 +23,25 @@
 #include <brayns/engine/Geometry.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/defaultcomponents/MaterialComponent.h>
 
 #include <ospray/ospray.h>
 
 namespace brayns
 {
 /**
- * @brief Adds renderable geometry to the model
+ * @brief Adds clipping geometry to the model (Affects the whole scene)
  */
 template<typename T>
-class GeometryRendererComponent : public Component
+class ClippingComponent : public Component
 {
 public:
-    GeometryRendererComponent()
-    {
-        _initializeHandle();
-    }
-
-    GeometryRendererComponent(const T& geometry)
+    ClippingComponent(const T& geometry)
     {
         _initializeHandle();
         _geometry.add(geometry);
     }
 
-    GeometryRendererComponent(const std::vector<T>& geometries)
-    {
-        _initializeHandle();
-        _geometry.add(geometries);
-    }
-
-    ~GeometryRendererComponent()
+    ~ClippingComponent()
     {
         if(_model)
             ospRelease(_model);
@@ -66,19 +54,14 @@ public:
 
     virtual uint64_t getSizeInBytes() const noexcept override
     {
-        return sizeof(GeometryRendererComponent<T>) + _geometry.getNumGeometries() * sizeof(T);
-    }
-
-    virtual Bounds computeBounds(const Matrix4f& transform) const noexcept override
-    {
-        return _geometry.computeBounds(transform);
+        return sizeof(ClippingComponent<T>) + _geometry.getNumGeometries() * sizeof(T);
     }
 
     virtual void onStart() override
     {
         auto& model = getModel();
         auto& group = model.getGroup();
-        group.addGeometricModel(_model);
+        group.addClippingModel(_model);
     }
 
     virtual void onCommit() override
@@ -86,7 +69,6 @@ public:
         bool needsCommit = false;
 
         needsCommit = needsCommit || _commitGeometry();
-        needsCommit = needsCommit || _commitMaterial();
 
         if(needsCommit)
         {
@@ -98,7 +80,7 @@ public:
     {
         auto& model = getModel();
         auto& group = model.getGroup();
-        group.removeGeometricModel(_model);
+        group.removeClippingModel(_model);
         ospRelease(_model);
         _model = nullptr;
     }
@@ -122,35 +104,6 @@ private:
             _geometry.doCommit();
             auto geometryHandle = _geometry.handle();
             ospSetParam(_model, "geometry", OSPDataType::OSP_GEOMETRY, &geometryHandle);
-            return true;
-        }
-
-        return false;
-    }
-
-    bool _commitMaterial()
-    {
-        Model& model = getModel();
-        MaterialComponent* materialComponent = nullptr;
-        try
-        {
-            materialComponent = &model.getComponent<MaterialComponent>();
-        }
-        catch(...)
-        {
-        }
-
-        if(!materialComponent)
-        {
-            return false;
-        }
-
-        auto &material = materialComponent->getMaterial();
-        if(material.isModified())
-        {
-            material.doCommit();
-            auto materialHandle = material.handle();
-            ospSetParam(_model, "material", OSPDataType::OSP_MATERIAL, &materialHandle);
             return true;
         }
 

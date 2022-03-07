@@ -24,7 +24,7 @@ namespace brayns
 {
 std::string_view GlassMaterial::getName() const noexcept
 {
-    return "glass";
+    return EngineObjectName<GlassMaterial>::get();
 }
 
 uint64_t GlassMaterial::getSizeInBytes() const noexcept
@@ -62,6 +62,12 @@ void GlassMaterial::commitMaterialSpecificParams()
 }
 
 std::string_view GlassMaterial::getOSPHandleName() const noexcept
+{
+    return "glass";
+}
+
+template<>
+std::string_view EngineObjectName<GlassMaterial>::get()
 {
     return "glass";
 }

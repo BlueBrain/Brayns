@@ -27,6 +27,8 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 
+#include <brayns/network/adapters/GenericEngineObjectAdapter.h>
+
 namespace brayns
 {
 
@@ -56,4 +58,28 @@ BRAYNS_JSON_ADAPTER_GETSET("horizontal_displacement", getHorizontalDisplacement,
                            "Sets the horizontal displacement vector used to compute the bottom right corner")
 BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
+
+class GenericLight : public GenericEngineObjectAdapter<Light>
+{
+public:
+    uint32_t getID() const noexcept
+    {
+        return _id;
+    }
+
+    void setID(const uint32_t id) noexcept
+    {
+        _id = id;
+    }
+
+private:
+    uint32_t _id;
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(GenericLight)
+BRAYNS_JSON_ADAPTER_GET("id", getID, "Light ID within the scene")
+BRAYNS_JSON_ADAPTER_GET("type", getType, "Light type name");
+BRAYNS_JSON_ADAPTER_GET("parameters", getParams, "Parameters for the specified light type", Required(false))
+BRAYNS_JSON_ADAPTER_END()
+
 } // namespace brayns

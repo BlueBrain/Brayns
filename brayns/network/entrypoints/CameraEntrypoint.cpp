@@ -23,38 +23,6 @@
 
 namespace brayns
 {
-GetCameraPerspectiveEntrypoint::GetCameraPerspectiveEntrypoint(Engine &engine)
- : GetCameraEntrypoint<PerspectiveCamera>(engine)
-{
-}
-
-std::string GetCameraPerspectiveEntrypoint::getMethod() const
-{
-    return "get-camera-perspective";
-}
-
-std::string GetCameraPerspectiveEntrypoint::getDescription() const
-{
-    return "Return the parameters of the current perspective camera. "
-           "Will result on an error if the current camera is not perspective";
-}
-
-GetCameraOrthographicEntrypoit::GetCameraOrthographicEntrypoit(Engine &engine)
- : GetCameraEntrypoint<OrthographicCamera>(engine)
-{
-}
-
-std::string GetCameraOrthographicEntrypoit::getMethod() const
-{
-    return "get-camera-orthographic";
-}
-
-std::string GetCameraOrthographicEntrypoit::getDescription() const
-{
-    return "Return the parameters of the current orthographic camera. "
-           "Will result on an error if the current camera is not orthographic";
-}
-
 SetCameraPerspectiveEntrypoint::SetCameraPerspectiveEntrypoint(Engine &engine)
  : SetCameraEntrypoint<PerspectiveCamera>(engine)
 {
@@ -70,41 +38,45 @@ std::string SetCameraPerspectiveEntrypoint::getDescription() const
     return "Sets the current camera to a perspective one, with the specified parameters";
 }
 
-SetCameraOrthographicEntrypoit::SetCameraOrthographicEntrypoit(Engine &engine)
+SetCameraOrthographicEntrypoint::SetCameraOrthographicEntrypoint(Engine &engine)
  : SetCameraEntrypoint<OrthographicCamera>(engine)
 {
 }
 
-std::string SetCameraOrthographicEntrypoit::getMethod() const
+std::string SetCameraOrthographicEntrypoint::getMethod() const
 {
     return "set-camera-orthographic";
 }
 
-std::string SetCameraOrthographicEntrypoit::getDescription() const
+std::string SetCameraOrthographicEntrypoint::getDescription() const
 {
     return "Sets the current camera to an orthographic one, with the specified parameters";
 }
 
-GetCurrentCameraTypeEntrypoint::GetCurrentCameraTypeEntrypoint(Engine& engine)
+GetCameraEntrypoint::GetCameraEntrypoint(Engine& engine, CameraFactory::Ptr factory)
  : _engine(engine)
+ , _cameraFactory(factory)
 {
 }
 
-std::string GetCurrentCameraTypeEntrypoint::getMethod() const
+std::string GetCameraEntrypoint::getMethod() const
 {
-    return "get-current-camera-type";
+    return "get-camera";
 }
 
-std::string GetCurrentCameraTypeEntrypoint::getDescription() const
+std::string GetCameraEntrypoint::getDescription() const
 {
-    return "Returns the type name of the current system camera";
+    return "Returns the current camera type and its parameters";
 }
 
-void GetCurrentCameraTypeEntrypoint::onRequest(const Request &request)
+void GetCameraEntrypoint::onRequest(const Request &request)
 {
     auto& camera = _engine.getCamera();
-    const std::string type (camera.getName());
-    request.reply(type);
+
+    GenericCamera result;
+    result.serialize(*_cameraFactory, camera);
+
+    request.reply(result);
 }
 
 CameraLookAtEntrypoint::CameraLookAtEntrypoint(Engine &engine)

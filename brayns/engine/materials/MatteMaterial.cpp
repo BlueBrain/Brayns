@@ -24,7 +24,7 @@ namespace brayns
 {
 std::string_view MatteMaterial::getName() const noexcept
 {
-    return "matte";
+    return EngineObjectName<MatteMaterial>::get();
 }
 
 uint64_t MatteMaterial::getSizeInBytes() const noexcept
@@ -67,5 +67,11 @@ void MatteMaterial::commitMaterialSpecificParams()
 std::string_view MatteMaterial::getOSPHandleName() const noexcept
 {
     return "principled";
+}
+
+template<>
+std::string_view EngineObjectName<MatteMaterial>::get()
+{
+    return "matte";
 }
 }

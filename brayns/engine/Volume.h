@@ -117,11 +117,16 @@ public:
         _dirty = true;
     }
 
+    bool isModified() const noexcept
+    {
+        return _dirty;
+    }
+
     /**
      * @brief Commits the volume data to OSPRay. Will only have effect if the volume has been modified since the last
      * commit. If so, it will call commitVolumeSpecificParams() and clear the dirty flag.
      */
-    void commit()
+    void doCommit()
     {
         if(!_dirty)
             return;
@@ -149,6 +154,11 @@ public:
     uint64_t getSizeInBytes() const noexcept
     {
         return sizeof(*this);
+    }
+
+    OSPVolume handle() const noexcept
+    {
+        return _handle;
     }
 
 private:

@@ -25,7 +25,7 @@
 
 namespace brayns
 {
-class PlasticMaterial : public Material
+class PlasticMaterial final : public Material
 {
 public:
     std::string_view getName() const noexcept final;
@@ -62,4 +62,7 @@ private:
     Vector3f _color {1.f};
     float _opacity {1.f};
 };
+
+template<>
+std::string_view EngineObjectName<PlasticMaterial>::get();
 }

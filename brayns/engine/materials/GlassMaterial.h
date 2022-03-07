@@ -25,7 +25,7 @@
 
 namespace brayns
 {
-class GlassMaterial : public Material
+class GlassMaterial final : public Material
 {
 public:
     std::string_view getName() const noexcept final;
@@ -61,5 +61,8 @@ private:
     Vector3f _color {1.f};
     float _ior {1.5f};
 };
+
+template<>
+std::string_view EngineObjectName<GlassMaterial>::get();
 }
 

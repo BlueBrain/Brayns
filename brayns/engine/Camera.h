@@ -31,7 +31,7 @@
 
 namespace brayns
 {
-class Camera : public SerializableEngineObject
+class Camera : public EngineObject
 {
 public:
     using Ptr = std::unique_ptr<Camera>;
@@ -47,9 +47,9 @@ public:
     virtual ~Camera();
 
     /**
-     * @brief EngineObject getName() implementation
+     * @brief Returns the camera type as a string
      */
-    std::string_view getName() const noexcept final;
+    virtual std::string_view getName() const noexcept = 0;
 
     /**
      * @brief Creates a copy of this camera

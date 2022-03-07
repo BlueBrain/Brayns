@@ -23,13 +23,13 @@
 
 #include <brayns/engine/Scene.h>
 
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
+#include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetModelMessage.h>
 
 namespace brayns
 {
-class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelDescriptor>
+class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelInstance>
 {
 public:
     GetModelEntrypoint(Scene &scene);

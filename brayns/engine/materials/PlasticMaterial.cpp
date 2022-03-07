@@ -24,7 +24,7 @@ namespace brayns
 {
 std::string_view PlasticMaterial::getName() const noexcept
 {
-    return "plastic";
+    return EngineObjectName<PlasticMaterial>::get();
 }
 
 uint64_t PlasticMaterial::getSizeInBytes() const noexcept
@@ -73,5 +73,11 @@ void PlasticMaterial::commitMaterialSpecificParams()
 std::string_view PlasticMaterial::getOSPHandleName() const noexcept
 {
     return "principled";
+}
+
+template<>
+std::string_view EngineObjectName<PlasticMaterial>::get()
+{
+    return "plastic";
 }
 }

@@ -25,7 +25,7 @@
 
 namespace brayns
 {
-class EmissiveMaterial : public Material
+class EmissiveMaterial final : public Material
 {
 public:
     std::string_view getName() const noexcept final;
@@ -61,4 +61,7 @@ private:
     Vector3f _color {1.f};
     float _intensity {1.f};
 };
+
+template<>
+std::string_view EngineObjectName<EmissiveMaterial>::get();
 }

@@ -46,7 +46,7 @@ const Bounds &Scene::getBounds() const noexcept
     return _bounds;
 }
 
-uint32_t Scene::addModel(ModelLoadParameters params, Model::Ptr&& model)
+ModelInstance &Scene::addModel(ModelLoadParameters params, Model::Ptr&& model)
 {
     if(!model)
         throw std::invalid_argument("Scene: Attempted to add a null model");
@@ -62,7 +62,7 @@ uint32_t Scene::addModel(ModelLoadParameters params, Model::Ptr&& model)
     // Set the model index and store it on the model entry
     model->_modelIndex = modelIndex;
     auto modelPtr = model.get();
-    modelEntry.model = (std::move(model));
+    modelEntry.model = std::move(model);
 
     // Create an instance that we will use for rendering
     auto& modelInstance = _createModelInstance(modelPtr);
@@ -73,10 +73,10 @@ uint32_t Scene::addModel(ModelLoadParameters params, Model::Ptr&& model)
 
     markModified(false);
 
-    return modelID;
+    return modelInstance;
 }
 
-uint32_t Scene::createInstance(const uint32_t modelID)
+ModelInstance &Scene::createInstance(const uint32_t modelID)
 {
     auto& modelInstance = retrieveModel(_modelInstances, modelID);
     auto& model = modelInstance.getModel();
@@ -89,10 +89,10 @@ uint32_t Scene::createInstance(const uint32_t modelID)
     modelEntry.instances.insert(newInstanceID);
 
     markModified(false);
-    return newInstanceID;
+    return newInstance;
 }
 
-const ModelInstance &Scene::getModel(const uint32_t modelID) const
+ModelInstance &Scene::getModelInstance(const uint32_t modelID)
 {
     return retrieveModel(_modelInstances, modelID);
 }
@@ -100,7 +100,7 @@ const ModelInstance &Scene::getModel(const uint32_t modelID) const
 void Scene::removeModel(const uint32_t modelID)
 {
     // Get the source model index
-    auto& instance = getModel(modelID);
+    auto& instance = getModelInstance(modelID);
     auto& model = instance.getModel();
     auto modelIndex = model._modelIndex;
 
@@ -121,20 +121,12 @@ void Scene::removeModel(const uint32_t modelID)
     }
 }
 
-void Scene::manipulateModel(const uint32_t modelID, const std::function<void(ModelInstance&)> &callback)
+std::vector<const ModelInstance*> Scene::getAllModelInstances() const noexcept
 {
-    auto& instance = retrieveModel(_modelInstances, modelID);
-    callback(instance);
-    if(instance._boundsDirty)
-        _recomputeBounds();
-}
-
-std::vector<uint32_t> Scene::getAllModelIDs() const noexcept
-{
-    std::vector<uint32_t> result;
+    std::vector<const ModelInstance*> result;
     result.reserve(_models.size());
     for(const auto& [modelID, model] : _modelInstances)
-        result.push_back(modelID);
+        result.push_back(model.get());
     return result;
 }
 
@@ -144,14 +136,20 @@ uint32_t Scene::addClippingModel(Model::Ptr&& clippingModel)
     return _clippingModelIDFactory++;
 }
 
-const Model &Scene::getClippingModel(const uint32_t clippingModelID) const
+Model& Scene::getClippingModel(const uint32_t modelID)
 {
-    const auto it = _clippingModels.find(clippingModelID);
-
+    auto it = _clippingModels.find(modelID);
     if(it == _clippingModels.end())
-        throw std::invalid_argument("Clippoing model with ID " + std::to_string(clippingModelID) + " does not exists");
+    {
+        throw std::invalid_argument("No clipping model with ID" + std::to_string(modelID) + " found");
+    }
 
     return *(it->second);
+}
+
+std::map<uint32_t, Model::Ptr> &Scene::getAllClippingModels() noexcept
+{
+    return _clippingModels;
 }
 
 void Scene::removeClippingModel(const uint32_t clippingModelID)
@@ -170,7 +168,12 @@ uint32_t Scene::addLight(Light::Ptr&& light) noexcept
     return id;
 }
 
-const Light& Scene::getLight(const uint32_t lightID) const
+std::map<uint32_t, Light::Ptr> &Scene::getAllLights() noexcept
+{
+    return _lights;
+}
+
+Light& Scene::getLight(const uint32_t lightID)
 {
     const auto it = _lights.find(lightID);
     if(it == _lights.end())
@@ -193,21 +196,21 @@ void Scene::removeAllLights() noexcept
     markModified(false);
 }
 
-void Scene::preRender(const AnimationParameters &animation)
+void Scene::preRender(const ParametersManager& params)
 {
     for(auto& [modelID, modelInstance] : _modelInstances)
     {
         auto& model = modelInstance->getModel();
-        model.onPreRender(animation);
+        model.onPreRender(params);
     }
 }
 
-void Scene::postRender()
+void Scene::postRender(const ParametersManager& params)
 {
     for(auto& [modelID, modelInstance] : _modelInstances)
     {
         auto& model = modelInstance->getModel();
-        model.onPostRender();
+        model.onPostRender(params);
     }
 }
 

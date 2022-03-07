@@ -21,45 +21,11 @@
 
 #include "GetLightsEntrypoint.h"
 
-namespace
-{
-class LightsMessageBuilder
-{
-public:
-    static std::vector<brayns::LightMessage> buildMessages(const std::map<size_t, brayns::LightPtr> &lights)
-    {
-        std::vector<brayns::LightMessage> messages;
-        messages.reserve(lights.size());
-        for (const auto &pair : lights)
-        {
-            auto id = pair.first;
-            auto &light = pair.second;
-            if (!light)
-            {
-                continue;
-            }
-            auto message = _buildMessage(id, light);
-            messages.push_back(std::move(message));
-        }
-        return messages;
-    }
-
-private:
-    static brayns::LightMessage _buildMessage(size_t id, const brayns::LightPtr &light)
-    {
-        brayns::LightMessage message;
-        message.type = light->_type;
-        message.id = id;
-        message.properties = *light;
-        return message;
-    }
-};
-} // namespace
-
 namespace brayns
 {
-GetLightsEntrypoint::GetLightsEntrypoint(LightManager &manager)
-    : _manager(manager)
+GetLightsEntrypoint::GetLightsEntrypoint(Scene &scene, LightFactory::Ptr lightFactory)
+    : _scene(scene)
+    , _lightFactory(lightFactory)
 {
 }
 
@@ -75,8 +41,19 @@ std::string GetLightsEntrypoint::getDescription() const
 
 void GetLightsEntrypoint::onRequest(const Request &request)
 {
-    auto &lights = _manager.getLights();
-    auto messages = LightsMessageBuilder::buildMessages(lights);
-    request.reply(messages);
+    auto &lights = _scene.getAllLights();
+
+    std::vector<GenericLight> result;
+    result.reserve(lights.size());
+
+    for(const auto& [id, light] : lights)
+    {
+        result.emplace_back();
+        auto& genericLight = result.back();
+        genericLight.serialize(*_lightFactory, *light);
+        genericLight.setID(id);
+    }
+
+    request.reply(result);
 }
 } // namespace brayns

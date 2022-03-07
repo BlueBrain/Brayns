@@ -26,7 +26,7 @@
 #include <brayns/engine/EngineObject.h>
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/ModelGroup.h>
-#include <brayns/parameters/AnimationParameters.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #include <ospray/ospray.h>
 
@@ -74,7 +74,7 @@ public:
     T& addComponent(Args&& ...args) noexcept
     {
         auto& component = _components.addComponent<T>(std::forward<Args>(args)...);
-        component._model = this;
+        component._owner = this;
         return component;
     }
 
@@ -128,12 +128,12 @@ private:
     /**
      * @brief Called before the commit + rendering happens
      */
-    void onPreRender();
+    void onPreRender(const ParametersManager& params);
 
     /**
      * @brief Called after the commit + rendering happens
      */
-    void onPostRender();
+    void onPostRender(const ParametersManager& params);
 
 
 private:

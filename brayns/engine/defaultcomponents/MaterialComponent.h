@@ -25,6 +25,9 @@
 
 namespace brayns
 {
+/**
+ * @brief Adds a material to the model
+ */
 class MaterialComponent final : public Component
 {
 public:

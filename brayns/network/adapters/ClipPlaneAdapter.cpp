@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -18,23 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/EngineObjectRegisterer.h>
-#include <brayns/engine/cameras/OrthographicCamera.h>
-#include <brayns/engine/cameras/PerspectiveCamera.h>
-#include <brayns/engine/renderers/InteractiveRenderer.h>
-#include <brayns/engine/renderers/ProductionRenderer.h>
+#include <brayns/network/adapters/ClipPlaneAdapter.h>
 
 namespace brayns
 {
-void EngineObjectRegisterer::registerDefaultTypes(Engine &engine) noexcept
+ClipPlane::ClipPlane(const uint32_t id, const Vector4f &coefficents)
+ : _id(id)
+ , _coefficents(coefficents)
 {
-    auto& cameraFactory = engine.getCameraFactory();
+}
 
-    cameraFactory.registerType<OrthographicCamera>("orthographic");
-    cameraFactory.registerType<PerspectiveCamera>("perspective");
+uint32_t ClipPlane::getID() const noexcept
+{
+    return _id;
+}
 
-    auto& rendererFactory = engine.getRendererFactory();
-    rendererFactory.registerType<InteractiveRenderer>("interactive");
-    rendererFactory.registerType<ProductionRenderer>("production");
+const Vector4f &ClipPlane::getPlane() const noexcept
+{
+    return _coefficents;
 }
 }

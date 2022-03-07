@@ -24,7 +24,7 @@ namespace brayns
 {
 std::string_view DefaultMaterial::getName() const noexcept
 {
-    return "default";
+    return EngineObjectName<DefaultMaterial>::get();
 }
 
 uint64_t DefaultMaterial::getSizeInBytes() const noexcept
@@ -67,5 +67,11 @@ void DefaultMaterial::commitMaterialSpecificParams()
 std::string_view DefaultMaterial::getOSPHandleName() const noexcept
 {
     return "obj";
+}
+
+template<>
+std::string_view EngineObjectName<DefaultMaterial>::get()
+{
+    return "default";
 }
 }

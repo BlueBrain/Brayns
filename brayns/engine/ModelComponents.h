@@ -22,6 +22,7 @@
 
 #include <brayns/common/Bounds.h>
 #include <brayns/engine/EngineObject.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #include <memory>
 #include <string_view>
@@ -63,12 +64,12 @@ protected:
     /**
      * @brief onPreRender called before the commit+rendering process happens. Does nothing by default.
      */
-    virtual void onPreRender();
+    virtual void onPreRender(const ParametersManager& params);
 
     /**
      * @brief onPostRender called after the commit+rendering process happens. Does nothing by default.
      */
-    virtual void onPostRender();
+    virtual void onPostRender(const ParametersManager& params);
 
     /**
      * @brief onCommit called during the commit process. Does nothing by defualt.
@@ -89,7 +90,7 @@ private:
     friend class ModelComponentContainer;
     friend class Model;
 
-    Model* _model;
+    Model* _owner {nullptr};
 };
 
 class ModelComponentContainer
@@ -144,12 +145,12 @@ public:
     /**
      * @brief Calls all the components 'onPreRender' in this container
      */
-    void onPreRender();
+    void onPreRender(const ParametersManager& params);
 
     /**
      * @brief Calls all the components 'onPreRender' in this container
      */
-    void onPostRender();
+    void onPostRender(const ParametersManager& params);
 
     /**
      * @brief Calls all the components 'onCommit' in this container

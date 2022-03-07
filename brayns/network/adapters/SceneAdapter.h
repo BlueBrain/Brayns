@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,39 +21,17 @@
 
 #pragma once
 
-#include <brayns/engine/Volume.h>
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/volumes/RegularVolume.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
+#include <brayns/engine/Scene.h>
+
+#include "BoundsAdapter.h"
+#include "ModelInstanceAdapter.h"
 
 namespace brayns
 {
-template<typename T>
-class VolumeComponent final: public Component
-{
-public:
-    uint64_t getSizeInBytes() const noexcept
-    {
-        return sizeof(Volume<T>);
-    }
-
-    void onCommit()
-    {
-        _volumeData.commit();
-    }
-
-    Bounds computeBounds(const Matrix4f& transform) const noexcept override
-    {
-        return _volumeData.computeBounds(transform);
-    }
-
-    Volume<T> getVolumeData() noexcept
-    {
-        return _volumeData;
-    }
-
-private:
-    Volume<T> _volumeData;
-};
-
-using RegularVolumeComponent = VolumeComponent<RegularVolume>;
+BRAYNS_JSON_ADAPTER_BEGIN(Scene)
+BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Scene boundary")
+BRAYNS_JSON_ADAPTER_GET("models", getAllModelInstances, "All models")
+BRAYNS_JSON_ADAPTER_END()
+} // namespace brayns

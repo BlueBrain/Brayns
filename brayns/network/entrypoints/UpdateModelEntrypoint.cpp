@@ -42,8 +42,6 @@ void UpdateModelEntrypoint::onRequest(const Request &request)
 {
     UpdateModelProxy model(_scene);
     request.getParams(model);
-    model.computeBounds();
-    _scene.markModified();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,23 +20,33 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/ModelComponents.h>
 
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <ospray/ospray.h>
 
 namespace brayns
 {
-class UpdateInstanceEntrypoint : public Entrypoint<ModelInstance, EmptyMessage>
+/**
+ * @brief Takes (or adds, if not present) the transfer function from the model and converts it
+ * to an OSPRay transfer function. Modified and committment is done manually to allow the components
+ * that make use of this to control its life cylce
+ */
+class TransferFunctionRendererComponent : public Component
 {
 public:
-    UpdateInstanceEntrypoint(Scene &scene);
+    TransferFunctionRendererComponent();
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
+    void onStart() override;
+
+    void onDestroyed() override;
+
+    bool needsCommit();
+
+    void manualCommit();
+
+    OSPTransferFunction handle() const noexcept;
 
 private:
-    Scene &_scene;
+    OSPTransferFunction _handle;
 };
-} // namespace brayns
+}

@@ -24,7 +24,7 @@ namespace brayns
 {
 std::string_view MetalMaterial::getName() const noexcept
 {
-    return "metal";
+    return EngineObjectName<MetalMaterial>::get();
 }
 
 uint64_t MetalMaterial::getSizeInBytes() const noexcept
@@ -63,5 +63,11 @@ void MetalMaterial::commitMaterialSpecificParams()
 std::string_view MetalMaterial::getOSPHandleName() const noexcept
 {
     return "alloy";
+}
+
+template<>
+std::string_view EngineObjectName<MetalMaterial>::get()
+{
+    return "metal";
 }
 }

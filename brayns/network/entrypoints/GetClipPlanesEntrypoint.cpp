@@ -21,6 +21,9 @@
 
 #include "GetClipPlanesEntrypoint.h"
 
+#include <brayns/engine/defaultcomponents/ClippingComponent.h>
+#include <brayns/engine/geometries/Plane.h>
+
 namespace brayns
 {
 GetClipPlanesEntrypoint::GetClipPlanesEntrypoint(Scene &scene)
@@ -40,7 +43,21 @@ std::string GetClipPlanesEntrypoint::getDescription() const
 
 void GetClipPlanesEntrypoint::onRequest(const Request &request)
 {
-    auto &clipPlanes = _scene.getClipPlanes();
-    request.reply(clipPlanes);
+    // Right now we only allow clipping planes, so we can safely assure that any clipping model uses plane geometry
+    auto& clippingModels = _scene.getAllClippingModels();
+
+    std::vector<ClipPlane> result;
+    result.reserve(clippingModels.size());
+
+    for(auto& [id, model] : clippingModels)
+    {
+        auto& clipComponent = model->getComponent<ClippingComponent<Plane>>();
+        auto& geometry = clipComponent.getGeometry();
+        auto& plane = geometry.get(0);
+
+        result.emplace_back(id, plane.coefficents);
+    }
+
+    request.reply(result);
 }
 } // namespace brayns

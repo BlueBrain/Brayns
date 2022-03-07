@@ -22,15 +22,21 @@
 
 namespace brayns
 {
-ProteinRendererComponent::ProteinRendererComponent(std::vector<Vector4f>&& colorMap, std::vector<uint8_t>&& indices)
- : _colorMap(std::move(colorMap))
+ProteinRendererComponent::ProteinRendererComponent(const std::vector<Sphere>& spheres,
+                                                   std::vector<Vector4f>&& colorMap,
+                                                   std::vector<uint8_t>&& indices)
+ : GeometryRendererComponent<Sphere>(spheres)
+ , _colorMap(std::move(colorMap))
  , _colorMapIndices(std::move(indices))
 {
 }
 
 uint64_t ProteinRendererComponent::getSizeInBytes() const noexcept
 {
-    return sizeof(*this) + sizeof(Vector4f) * _colorMap.size() + sizeof(uint8_t) * _colorMapIndices.size();
+    return GeometryRendererComponent<Sphere>::getSizeInBytes()
+            + sizeof(*this)
+            + sizeof(Vector4f) * _colorMap.size()
+            + sizeof(uint8_t) * _colorMapIndices.size();
 }
 
 void ProteinRendererComponent::onStart()

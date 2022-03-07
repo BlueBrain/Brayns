@@ -31,37 +31,12 @@
 
 namespace
 {
-/**
- * Utility function. Will create an engine object with the parameters specified on the request.
- * If none were provided, the system object will be cloned instead
- */
-template<typename T>
-std::unique_ptr<T> createObject(const brayns::GenericEngineObjectAdapter<T>& object,
-                                const brayns::EngineObjectFactory<T>& factory,
-                                const T& defaultObject)
-{
-    const auto &type = object.getType();
-    if(!type.empty())
-    {
-        return object.deserialize(factory);
-    }
-    else
-    {
-        return defaultObject.clone();
-    }
-}
-}
-
-namespace brayns
-{
-namespace
-{
 
 
 void logExportInfo(const size_t numKeyFrames,
                    const std::string& path,
-                   const GenericImageSettings& imageSettings,
-                   const Renderer& renderer)
+                   const brayns::GenericImageSettings& imageSettings,
+                   const brayns::Renderer& renderer)
 {
     const auto spp = renderer.getSamplesPerPixel();
     const auto rendererName = renderer.getName();
@@ -83,26 +58,26 @@ void logExportInfo(const size_t numKeyFrames,
         renderer);
 }
 
-std::string writeFrameToDisk(const ExportFramesParams &params, const uint32_t frameName, FrameBuffer &fb)
+std::string writeFrameToDisk(const brayns::ExportFramesParams &params, const uint32_t frame, brayns::FrameBuffer &fb)
 {
     const auto &path = params.path;
     const auto &imageSettings = params.image_settings;
-    const auto format = string_utils::toLowercase(imageSettings.format);
+    const auto format = brayns::string_utils::toLowercase(imageSettings.format);
     auto quality = imageSettings.quality;
     auto image = fb.getImage();
 
-    char frame[64];
-    sprintf(frame, "%05d", static_cast<int32_t>(frameName));
+    char frameName[64];
+    sprintf(frameName, "%05d", static_cast<int32_t>(frame));
 
-    auto filename = path + "/" + std::string(frame) + "." + format;
+    auto filename = path + "/" + std::string(frameName) + "." + format;
     try
     {
-        ImageEncoder::save(image, filename, quality);
-        Log::info("Frame saved to {}", filename);
+        brayns::ImageEncoder::save(image, filename, quality);
+        brayns::Log::info("Frame saved to {}", filename);
     }
     catch (const std::runtime_error &e)
     {
-        Log::error("{}", e.what());
+        brayns::Log::error("{}", e.what());
     }
 
     return {};
@@ -111,15 +86,17 @@ std::string writeFrameToDisk(const ExportFramesParams &params, const uint32_t fr
 class FrameExporter
 {
 public:
-    static void exportFrames(Engine &engine,
-                             ParametersManager& parametersManager,
-                             CancellationToken &token,
-                             const ExportFramesEntrypoint::Request &request)
+    static void exportFrames(brayns::Engine &engine,
+                             brayns::ParametersManager& paramsManager,
+                             brayns::CancellationToken &token,
+                             brayns::CameraFactory& cameraFactory,
+                             brayns::RendererFactory& rendererFactory,
+                             const brayns::ExportFramesEntrypoint::Request &request)
     {
-        ExportFramesEntrypoint::Result result = {};
+        brayns::ExportFramesEntrypoint::Result result = {};
 
         // Progress
-        auto progress = ProgressHandler(token, request);
+        auto progress = brayns::ProgressHandler(token, request);
 
         // Initialize parameters
         const auto params = request.getParams();
@@ -131,22 +108,20 @@ public:
         const auto sequentialNaming = params.sequential_naming;
 
         // Renderer
-        const auto &renderFactory = engine.getRendererFactory();
         const auto &systemRenderer = engine.getRenderer();
-        auto renderer = createObject(rendererSettings, renderFactory, systemRenderer);
+        auto renderer = rendererSettings? rendererSettings->deserialize(rendererFactory) : systemRenderer.clone();
         renderer->commit();
 
         // Camera
-        const auto &cameraFactory = engine.getCameraFactory();
         const auto &systemCamera = engine.getCamera();
-        auto camera = createObject(cameraSettings, cameraFactory, systemCamera);
+        auto camera = cameraSettings? cameraSettings->deserialize(cameraFactory) : systemCamera.clone();
         const auto aspectRatio = static_cast<float>(imageSettings.size.x) / static_cast<float>(imageSettings.size.y);
         camera->setAspectRatio(aspectRatio);
 
         // Framebuffer
-        FrameBuffer frameBuffer;
+        brayns::FrameBuffer frameBuffer;
         frameBuffer.setAccumulation(false);
-        frameBuffer.setFormat(PixelFormat::SRGBA_I8);
+        frameBuffer.setFormat(brayns::PixelFormat::SRGBA_I8);
         frameBuffer.setFrameSize(imageSettings.size);
         frameBuffer.commit();
 
@@ -154,6 +129,7 @@ public:
         auto& scene = engine.getScene();
 
         // Parameters manager
+        auto parametersManager = paramsManager;
         auto& animParams = parametersManager.getAnimationParameters();
 
         // Compute for how much progress each frame accounts
@@ -170,7 +146,7 @@ public:
 
             // Update scene
             animParams.setFrame(keyFrame.frame_index);
-            scene.preRender(animParams);
+            scene.preRender(parametersManager);
             scene.commit();
 
             // Update camera
@@ -181,7 +157,7 @@ public:
             camera->commit();
 
             // Render
-            FrameRenderer::render(*camera, frameBuffer, *renderer, scene);
+            brayns::FrameRenderer::synchronousRender(*camera, frameBuffer, *renderer, scene);
 
             // Write frame to disk
             auto name = sequentialNaming ? i : keyFrame.frame_index;
@@ -207,10 +183,18 @@ public:
 };
 } // namespace
 
-ExportFramesEntrypoint::ExportFramesEntrypoint(Engine &engine, ParametersManager& parmManager, CancellationToken token)
+namespace brayns
+{
+ExportFramesEntrypoint::ExportFramesEntrypoint(Engine &engine,
+                                               ParametersManager& parmManager,
+                                               CancellationToken token,
+                                               CameraFactory::Ptr cameraFactory,
+                                               RendererFactory::Ptr rendererFactory)
     : _engine(engine)
     , _paramsManager(parmManager)
     , _token(token)
+    , _cameraFactory(cameraFactory)
+    , _rendererFactory(rendererFactory)
 {
 }
 
@@ -231,7 +215,7 @@ bool ExportFramesEntrypoint::isAsync() const
 
 void ExportFramesEntrypoint::onRequest(const Request &request)
 {
-    FrameExporter::exportFrames(_engine, _paramsManager, _token, request);
+    FrameExporter::exportFrames(_engine, _paramsManager, _token, *_cameraFactory, *_rendererFactory, request);
 }
 
 void ExportFramesEntrypoint::onCancel()

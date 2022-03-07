@@ -35,7 +35,7 @@ using Progress = brayns::ProgressHandler<Request>;
 class BinaryParamsValidator
 {
 public:
-    static void validate(const brayns::BinaryParam &params)
+    static void validate(const brayns::BinaryLoadParameters &params)
     {
         if (params.size == 0)
         {
@@ -52,9 +52,10 @@ public:
 class LoaderFinder
 {
 public:
-    static const brayns::AbstractLoader &find(const brayns::BinaryParam &params, const brayns::LoaderRegistry &loaders)
+    static const brayns::AbstractLoader &find(const brayns::BinaryLoadParameters &params,
+                                              const brayns::LoaderRegistry &loaders)
     {
-        auto &name = params.getLoaderName();
+        auto &name = params.loaderName;
         auto &type = params.type;
         try
         {
@@ -88,7 +89,7 @@ public:
 class BlobValidator
 {
 public:
-    static void throwIfTooBig(const brayns::BinaryParam &params, std::string_view data)
+    static void throwIfTooBig(const brayns::BinaryLoadParameters &params, std::string_view data)
     {
         auto modelSize = params.size;
         auto frameSize = data.size();
@@ -111,7 +112,9 @@ private:
 class BlobLoader
 {
 public:
-    static brayns::Blob load(const brayns::BinaryParam &params, std::string_view data, const Progress &progress)
+    static brayns::Blob load(const brayns::BinaryLoadParameters &params,
+                             std::string_view data,
+                             const Progress &progress)
     {
         auto blob = _prepare(params);
         BlobValidator::throwIfTooBig(params, data);
@@ -121,11 +124,11 @@ public:
     }
 
 private:
-    static brayns::Blob _prepare(const brayns::BinaryParam &params)
+    static brayns::Blob _prepare(const brayns::BinaryLoadParameters &params)
     {
         brayns::Blob blob;
         blob.type = params.type;
-        blob.name = params.getName();
+        blob.name = params.loaderName;
         return blob;
     }
 
@@ -162,11 +165,23 @@ public:
         auto binaryRequest = BinaryLock::waitForBinary(_binary, progress);
         auto data = binaryRequest.getData();
         auto blob = BlobLoader::load(params, data, progress);
-        auto parameters = params.getLoadParameters();
+        auto parameters = params.loadParameters;
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
-        auto descriptors = loader.loadFromBlob(std::move(blob), {callback}, parameters, _scene);
-        _scene.addModels(descriptors, params);
-        request.reply(descriptors);
+        auto descriptors = loader.loadFromBlob(std::move(blob), {callback}, parameters);
+
+        brayns::ModelLoadParameters loadParameters;
+        loadParameters.type = brayns::ModelLoadParameters::LoadType::FROM_BLOB;
+        loadParameters.loaderName = params.loaderName;
+        loadParameters.loadParameters = parameters;
+
+        std::vector<brayns::ModelInstance*> result;
+        result.reserve(descriptors.size());
+        for(auto& model : descriptors)
+        {
+            auto& instance = _scene.addModel(loadParameters, std::move(model));
+            result.push_back(&instance);
+        }
+        request.reply(result);
     }
 
 private:

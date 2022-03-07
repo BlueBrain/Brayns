@@ -86,13 +86,12 @@ void AddModelEntrypoint::onRequest(const Request &request)
     loadParameters.loaderName = name;
     loadParameters.loadParameters = parameters;
 
-    std::vector<const ModelInstance*> result;
+    std::vector<ModelInstance*> result;
     result.reserve(models.size());
     for(auto& model : models)
     {
-        auto instanceID = _scene.addModel(loadParameters, std::move(model));
-        const auto& instance = _scene.getModel(instanceID);
-        result.push_back(&instance);
+        auto& modelInstance = _scene.addModel(loadParameters, std::move(model));
+        result.push_back(&modelInstance);
     }
     request.reply(result);
 }

@@ -24,7 +24,7 @@
 
 namespace brayns
 {
-class InteractiveRenderer : public Renderer
+class InteractiveRenderer final : public Renderer
 {
 public:
     std::string_view getName() const noexcept final;
@@ -60,4 +60,7 @@ private:
     bool _shadowsEnabled {true};
     int32_t _aoSamples {10u};
 };
+
+template<>
+std::string_view EngineObjectName<InteractiveRenderer>::get();
 }

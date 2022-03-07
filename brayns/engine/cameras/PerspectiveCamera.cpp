@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+std::string_view PerspectiveCamera::getName() const noexcept
+{
+    return EngineObjectName<PerspectiveCamera>::get();
+}
+
 void PerspectiveCamera::commitCameraSpecificParams()
 {
     auto ospHandle = handle();
@@ -66,6 +71,12 @@ float PerspectiveCamera::getFocusDistance() const noexcept
 }
 
 std::string_view PerspectiveCamera::getOSPHandleName() const noexcept
+{
+    return "perspective";
+}
+
+template<>
+std::string_view EngineObjectName<PerspectiveCamera>::get()
 {
     return "perspective";
 }

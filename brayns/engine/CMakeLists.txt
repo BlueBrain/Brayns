@@ -8,15 +8,19 @@ set(BRAYNSENGINE_SOURCES
     Camera.cpp
     Engine.cpp
     EngineObject.cpp
-    EngineObjectRegisterer.cpp
     FrameBuffer.cpp
     Light.cpp
     Material.cpp
     Model.cpp
+    ModelComponents.cpp
+    ModelGroup.cpp
     Renderer.cpp
     Scene.cpp
     cameras/OrthographicCamera.cpp
     cameras/PerspectiveCamera.cpp
+    defaultcomponents/MaterialComponent.cpp
+    defaultcomponents/TransferFunctionComponent.cpp
+    defaultcomponents/TransferFunctionRendererComponent.cpp
     geometries/Box.cpp
     geometries/Plane.cpp
     geometries/Primitive.cpp
@@ -31,8 +35,6 @@ set(BRAYNSENGINE_SOURCES
     materials/MatteMaterial.cpp
     materials/MetalMaterial.cpp
     materials/PlasticMaterial.cpp
-    models/GeometricModel.cpp
-    models/VolumetricModel.cpp
     renderers/InteractiveRenderer.cpp
 )
 
@@ -40,18 +42,23 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     Camera.h
     Engine.h
     EngineObject.h
-    EngineObjectFactory.h
-    EngineObjectRegisterer.h
     FrameBuffer.h
     Geometry.h
     Light.h
     Material.h
     Model.h
     ModelComponents.h
+    ModelGroup.h
     Renderer.h
     Scene.h
     cameras/OrthographicCamera.h
     cameras/PerspectiveCamera.h
+    defaultcomponents/ClippingComponent.h
+    defaultcomponents/GeometryRendererComponent.h
+    defaultcomponents/MaterialComponent.h
+    defaultcomponents/TransferFunctionComponent.h
+    defaultcomponents/TransferFunctionRendererComponent.h
+    defaultcomponents/VolumeRendererComponent.h
     geometries/Box.h
     geometries/Plane.h
     geometries/Primitive.h
@@ -66,9 +73,6 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     materials/MatteMaterial.h
     materials/MetalMaterial.h
     materials/PlasticMaterial.h
-    models/ClippingModel.h
-    models/GeometricModel.h
-    models/VolumetricModel.h
     renderers/InteractiveRenderer.h
 )
 

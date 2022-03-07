@@ -21,29 +21,40 @@
 
 #pragma once
 
-#include <brayns/engine/Light.h>
-#include <brayns/json/JsonObjectMacro.h>
-#include <brayns/network/adapters/LightAdapter.h>
+#include <brayns/engine/Scene.h>
+#include <brayns/json/JsonSchemaValidator.h>
+#include <brayns/network/adapters/MaterialAdapter.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/utils/StringUtils.h>
 
 namespace brayns
 {
-class LightProperties
+template<typename MaterialUpdaterType>
+class SetMaterialEntrypoint : public Entrypoint<MaterialUpdaterType, EmptyMessage>
 {
 public:
-    LightProperties() = default;
-    LightProperties(const Light &light);
+    SetMaterialEntrypoint(Scene& scene)
+     : _scene(scene)
+    {
+    }
 
-    JsonSchema getSchema() const;
-    bool serialize(JsonValue &json) const;
-    bool deserialize(const JsonValue &json);
+    void onRequest(const EntrypointRequest<MaterialUpdaterType, EmptyMessage>& request) override
+    {
+        auto params = request.getParams();
+        params.updateMaterialOnModel(_scene);
+        const auto result = Json::serialize(EmptyMessage());
+        request.reply(result);
+    }
 
 private:
-    JsonValue _json;
+    Scene &_scene;
 };
 
-BRAYNS_JSON_OBJECT_BEGIN(LightMessage)
-BRAYNS_JSON_OBJECT_ENTRY(LightType, type, "Light type")
-BRAYNS_JSON_OBJECT_ENTRY(size_t, id, "Light ID")
-BRAYNS_JSON_OBJECT_ENTRY(LightProperties, properties, "Light properties")
-BRAYNS_JSON_OBJECT_END()
-} // namespace brayns
+class SetDefaultMaterialEntrypoint final : public SetMaterialEntrypoint<DefaultMaterialUpdater>
+{
+public:
+    SetDefaultMaterialEntrypoint(Scene &scene);
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+};
+}

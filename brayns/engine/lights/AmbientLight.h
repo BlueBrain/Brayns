@@ -24,21 +24,31 @@
 
 namespace brayns
 {
-class AmbientLight : public Light
+class AmbientLight final : public Light
 {
 public:
     /**
      * @brief getName() implementation
      */
-    std::string_view getName() const noexcept final;
-
-    const std::string& getType() const;
+    std::string_view getName() const noexcept override;
 
 protected:
+    /**
+     * @brief getOSPHandleName implementation
+     */
     std::string_view getOSPHandleName() const noexcept final;
 
+    /**
+     * @brief getSizeInBytes implementation
+     */
     uint64_t getSizeInBytes() const noexcept final;
 
+    /**
+     * @brief commitLightSpecificParams implementation
+     */
     void commitLightSpecificParams() final;
 };
+
+template<>
+std::string_view EngineObjectName<AmbientLight>::get();
 }

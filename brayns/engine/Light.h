@@ -32,7 +32,7 @@ namespace brayns
 /**
  * @brief The Light class defines the common base class for all lights
  */
-class Light : public SerializableEngineObject
+class Light : public EngineObject
 {
 public:
     using Ptr = std::unique_ptr<Light>;
@@ -46,6 +46,11 @@ public:
     Light &operator=(Light&&) = default;
 
     virtual ~Light();
+
+    /**
+     * @brief Returns the light type as a string
+     */
+    virtual std::string_view getName() const noexcept = 0;
 
     /**
      * @brief Sets the light color as normalized RGB

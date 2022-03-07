@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
 
@@ -27,12 +25,12 @@ namespace brayns
 {
 Model& Component::getModel()
 {
-    if(!_model)
+    if(!_owner)
     {
         throw std::runtime_error("Component has not been initialized by Model");
     }
 
-    return *_model;
+    return *_owner;
 }
 
 void Component::onStart()
@@ -40,12 +38,14 @@ void Component::onStart()
 
 }
 
-void Component::onPreRender()
+void Component::onPreRender(const ParametersManager& params)
 {
+     (void)params;
 }
 
-void Component::onPostRender()
+void Component::onPostRender(const ParametersManager& params)
 {
+    (void)params;
 }
 
 void Component::onCommit()
@@ -58,6 +58,7 @@ void Component::onDestroyed()
 
 Bounds Component::computeBounds(const Matrix4f& transform) const noexcept
 {
+    (void) transform;
     return {};
 }
 
@@ -71,19 +72,19 @@ uint64_t ModelComponentContainer::getByteSize() const noexcept
     return result;
 }
 
-void ModelComponentContainer::onPreRender()
+void ModelComponentContainer::onPreRender(const ParametersManager& params)
 {
     for(auto& [index, component] : _components)
     {
-        component->onPreRender();
+        component->onPreRender(params);
     }
 }
 
-void ModelComponentContainer::onPostRender()
+void ModelComponentContainer::onPostRender(const ParametersManager& params)
 {
     for(auto& [index, component] : _components)
     {
-        component->onPostRender();
+        component->onPostRender(params);
     }
 }
 

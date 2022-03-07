@@ -24,7 +24,7 @@ namespace brayns
 {
 std::string_view EmissiveMaterial::getName() const noexcept
 {
-    return "emissive";
+    return EngineObjectName<EmissiveMaterial>::get();
 }
 
 uint64_t EmissiveMaterial::getSizeInBytes() const noexcept
@@ -64,5 +64,11 @@ void EmissiveMaterial::commitMaterialSpecificParams()
 std::string_view EmissiveMaterial::getOSPHandleName() const noexcept
 {
     return "luminous";
+}
+
+template<>
+std::string_view EngineObjectName<EmissiveMaterial>::get()
+{
+    return "emissive";
 }
 }

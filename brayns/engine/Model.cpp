@@ -69,14 +69,14 @@ void Model::commit()
     _group.commit();
 }
 
-void Model::onPreRender()
+void Model::onPreRender(const ParametersManager& params)
 {
-    _components.onPreRender();
+    _components.onPreRender(params);
 }
 
-void Model::onPostRender()
+void Model::onPostRender(const ParametersManager& params)
 {
-    _components.onPostRender();
+    _components.onPostRender(params);
 }
 
 OSPGroup Model::groupHandle() const noexcept

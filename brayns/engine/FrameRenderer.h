@@ -29,6 +29,14 @@ namespace brayns
 {
 struct FrameRenderer
 {
-    static void render(const Camera& camera, const FrameBuffer& fb, const Renderer& renderer, const Scene& scene);
+    static void synchronousRender(const Camera& camera,
+                                  const FrameBuffer& fb,
+                                  const Renderer& renderer,
+                                  const Scene& scene);
+
+    static OSPFuture asynchronousRender(const Camera& camera,
+                                        const FrameBuffer& fb,
+                                        const Renderer& renderer,
+                                        const Scene& scene);
 };
 }

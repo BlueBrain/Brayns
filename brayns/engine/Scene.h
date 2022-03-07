@@ -26,6 +26,7 @@
 #include <brayns/engine/Light.h>
 #include <brayns/engine/Model.h>
 #include <brayns/json/JsonType.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #include <ospray/ospray.h>
 
@@ -79,25 +80,25 @@ public:
      * @brief Adds a new model to the scene and creates an instance out of it to be rendered.
      * The model ID is returned
      */
-    uint32_t addModel(ModelLoadParameters params, Model::Ptr&& model);
+    ModelInstance& addModel(ModelLoadParameters params, Model::Ptr&& model);
 
     /**
      * @brief Creates a new instance from the model that is being instantiated by the given model ID,
      * adds it to the scene and returns its ID.
      * @throws std::invalid_argument if modelID does not correspond to any existing model
      */
-    uint32_t createInstance(const uint32_t modelID);
+    ModelInstance& createInstance(const uint32_t modelID);
 
     /**
      * @brief Returns the model instance identified by the given model ID
      * @throws std::invalid_argument if modelID does not correspond to any existing model
      */
-    const ModelInstance& getModel(const uint32_t modelID) const;
+    ModelInstance& getModelInstance(const uint32_t modelID);
 
     /**
      * @brief Return a list of all the IDs of the model instances on the scene
      */
-    std::vector<uint32_t> getAllModelIDs() const noexcept;
+    std::vector<const ModelInstance*> getAllModelInstances() const noexcept;
 
     /**
      * @brief Removes a model instance from the scene, identified by the given model ID.
@@ -107,13 +108,6 @@ public:
     void removeModel(const uint32_t modelID);
 
     /**
-     * @brief Allos to pass a callback to modify a model instance (and thus, its model) given its model ID.
-     * This allows to control better when the bounds needs to be re-computed.
-     * @throws std::invalid_argument if modelID does not correspond to any existing model
-     */
-    void manipulateModel(const uint32_t modelID, const std::function<void(ModelInstance&)>& callback);
-
-    /**
      * @brief Adds a new model to be used as geometry and volume clipping geometry, returning the ID assigned
      * to it
      * @throws std::invalid_argument if the passed model is null
@@ -121,10 +115,15 @@ public:
     uint32_t addClippingModel(Model::Ptr&& clippingModel);
 
     /**
-     * @brief Return a clipping model identified by its ID.
-     * @throws std::invalid_argument if the given ID does not correspond to any existing clipping model
+     * @brief Returns a clipping model identified by its ID
+     * @throws std::invalid_argument if no clipping model with the given ID exists
      */
-    const Model& getClippingModel(const uint32_t clippingModelID) const;
+    Model& getClippingModel(const uint32_t modelID);
+
+    /**
+     * @brief Return an ID -> clipping model with all the clipping models on the scene
+     */
+    std::map<uint32_t, Model::Ptr>& getAllClippingModels() noexcept;
 
     /**
      * @brief Removes a clipping plane from the scene, identified by its ID.
@@ -138,10 +137,15 @@ public:
     uint32_t addLight(Light::Ptr&& light) noexcept;
 
     /**
+     * @brief Return an ID -> light map with all the lights on the scene
+     */
+    std::map<uint32_t, Light::Ptr>& getAllLights() noexcept;
+
+    /**
      * @brief Returns the light that it is identified by the given light ID.
      * @throws std::invalid_argument if lightID does not correspond to any existing light
      */
-    const Light& getLight(const uint32_t lightID) const;
+    Light& getLight(const uint32_t lightID);
 
     /**
      * @brief Removes the light from the scene that is identified by the given light ID
@@ -157,12 +161,12 @@ public:
     /**
      * @brief Called before a new frame is. Will call onPreRender on all the models of the scene
      */
-    void preRender(const AnimationParameters& animation);
+    void preRender(const ParametersManager& params);
 
     /**
      * @brief Called after a new frame is rendered. Will call onPostRender on all the models of the scene
      */
-    void postRender();
+    void postRender(const ParametersManager& params);
 
     /**
      * @brief commit implementation. Will call the doCommit() implementation of the models and the lights.

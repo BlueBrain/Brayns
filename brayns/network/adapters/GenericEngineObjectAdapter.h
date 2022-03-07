@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/EngineObjectFactory.h>
+#include <brayns/network/common/EngineObjectFactory.h>
 #include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
@@ -32,11 +32,6 @@ template<typename T>
 class GenericEngineObjectAdapter
 {
 public:
-    GenericEngineObjectAdapter()
-    {
-        static_assert(std::is_base_of_v<SerializableEngineObject, T>,
-                "GenericEngineObjectAdapter requires EngineSerializableObjects");
-    }
     void setType(const std::string &type) noexcept
     {
         _type = type;
