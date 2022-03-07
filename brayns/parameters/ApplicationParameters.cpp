@@ -18,11 +18,17 @@
  */
 
 #include "ApplicationParameters.h"
+
+#include <stdexcept>
+#include <string_view>
+
 #include <brayns/common/Log.h>
+
 #include <brayns/parameters/ParametersManager.h>
 
 namespace
 {
+constexpr auto PARAM_LOG_LEVEL = "log-level";
 constexpr auto PARAM_BENCHMARKING = "enable-benchmark";
 constexpr auto PARAM_HTTP_SERVER = "http-server";
 constexpr auto PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
@@ -38,6 +44,39 @@ constexpr size_t DEFAULT_WINDOW_WIDTH = 800;
 constexpr size_t DEFAULT_WINDOW_HEIGHT = 600;
 constexpr size_t DEFAULT_JPEG_COMPRESSION = 90;
 constexpr auto DEFAULT_SANDBOX_PATH = "/gpfs/bbp.cscs.ch/project";
+
+class GetLogLevel
+{
+public:
+    static brayns::LogLevel fromName(std::string_view name)
+    {
+        if (name == "trace")
+        {
+            return brayns::LogLevel::Trace;
+        }
+        if (name == "debug")
+        {
+            return brayns::LogLevel::Debug;
+        }
+        if (name == "info")
+        {
+            return brayns::LogLevel::Info;
+        }
+        if (name == "warn" || name == "warning")
+        {
+            return brayns::LogLevel::Warn;
+        }
+        if (name == "error")
+        {
+            return brayns::LogLevel::Error;
+        }
+        if (name == "critical")
+        {
+            return brayns::LogLevel::Critical;
+        }
+        throw std::runtime_error("Invalid log level '" + std::string(name) + "'");
+    }
+};
 } // namespace
 
 namespace brayns
@@ -49,6 +88,9 @@ ApplicationParameters::ApplicationParameters()
     , _sandBoxPath(DEFAULT_SANDBOX_PATH)
 {
     _parameters.add_options() //
+        (PARAM_LOG_LEVEL,
+         po::value<std::string>(),
+         "Log level among [trace, debug, info, warn, error, critical] (default info).") //
         (PARAM_INPUT_PATHS,
          po::value<std::vector<std::string>>(&_inputPaths),
          "List of files/folders to load data from") //
@@ -192,6 +234,13 @@ void ApplicationParameters::parse(const po::variables_map &vm)
         auto values = vm[PARAM_WINDOW_SIZE].as<std::vector<uint32_t>>();
         _windowSize.x = values[0];
         _windowSize.y = values[1];
+    }
+    auto i = vm.find(PARAM_LOG_LEVEL);
+    if (i != vm.end())
+    {
+        auto &value = i->second.as<std::string>();
+        auto level = GetLogLevel::fromName(value);
+        Log::setLevel(level);
     }
     markModified();
 }
