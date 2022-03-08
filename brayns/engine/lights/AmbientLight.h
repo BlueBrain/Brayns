@@ -30,7 +30,7 @@ public:
     /**
      * @brief getName() implementation
      */
-    std::string_view getName() const noexcept override;
+    std::string getName() const noexcept override;
 
 protected:
     /**
@@ -50,5 +50,5 @@ protected:
 };
 
 template<>
-std::string_view EngineObjectName<AmbientLight>::get();
+std::string EngineObjectName<AmbientLight>::get();
 }

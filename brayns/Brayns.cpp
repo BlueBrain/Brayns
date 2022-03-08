@@ -24,14 +24,15 @@
 
 namespace brayns
 {
-SystemPluginAPI::SystemPluginAPI(ParametersManager& paramManager,
-                                 PluginManager& pluginManager,
-                                 Engine& engine,
-                                 LoaderRegistry& loadRegistry)
- : _paramManager(paramManager)
- , _pluginManager(pluginManager)
- , _engine(engine)
- , _loadRegistry(loadRegistry)
+SystemPluginAPI::SystemPluginAPI(
+    ParametersManager &paramManager,
+    PluginManager &pluginManager,
+    Engine &engine,
+    LoaderRegistry &loadRegistry)
+    : _paramManager(paramManager)
+    , _pluginManager(pluginManager)
+    , _engine(engine)
+    , _loadRegistry(loadRegistry)
 {
     _pluginManager.initPlugins(this);
 
@@ -60,10 +61,10 @@ LoaderRegistry &SystemPluginAPI::getLoaderRegistry()
 // -----------------------------------------------------------------------------
 
 Brayns::Brayns(int argc, const char **argv)
- : _parametersManager(argc, argv)
- , _pluginManager(argc, argv)
- , _pluginAPI(_parametersManager, _pluginManager, _engine, _loaderRegistry)
- , _engine(_parametersManager)
+    : _parametersManager(argc, argv)
+    , _pluginManager(argc, argv)
+    , _pluginAPI(_parametersManager, _pluginManager, _engine, _loaderRegistry)
+    , _engine(_parametersManager)
 {
     Log::info("");
     Log::info(" _|_|_|");
@@ -79,6 +80,13 @@ Brayns::Brayns(int argc, const char **argv)
 Brayns::~Brayns()
 {
     _loaderRegistry.clear();
+
+    tab.foreach (
+        []
+        {
+            test();
+            test();
+        });
 
     // make sure that plugin objects are removed first, as plugins are
     // destroyed before the engine, but plugin destruction still should have
@@ -98,9 +106,9 @@ bool Brayns::commitAndRender()
     _engine.commit();
 
     // After commiting the engine, the parameters are in sync with the engine, so reset state
-     _parametersManager.resetModified();
+    _parametersManager.resetModified();
 
-     // Render new frame, if needed
+    // Render new frame, if needed
     _engine.render();
 
     // Post render engine

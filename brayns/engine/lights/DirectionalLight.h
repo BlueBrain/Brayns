@@ -30,17 +30,17 @@ public:
     /**
      * @brief Sets the direction this light is facing. The vector will be normalized before storing it.
      */
-    void setDirection(const Vector3f& newDirection);
+    void setDirection(const Vector3f &newDirection);
 
     /**
      * @brief Returns the normalized direction that the light is facing
      */
-    const Vector3f& getDirection() const noexcept;
+    const Vector3f &getDirection() const noexcept;
 
     /**
      * @brief getName() implementation
      */
-    std::string_view getName() const noexcept final;
+    std::string getName() const noexcept final;
 
 protected:
     std::string_view getOSPHandleName() const noexcept final;
@@ -50,9 +50,9 @@ protected:
     void commitLightSpecificParams() final;
 
 private:
-    Vector3f _direction {0.f, 1.f, 0.f};
+    Vector3f _direction{0.f, 1.f, 0.f};
 };
 
 template<>
-std::string_view EngineObjectName<DirectionalLight>::get();
+std::string EngineObjectName<DirectionalLight>::get();
 }

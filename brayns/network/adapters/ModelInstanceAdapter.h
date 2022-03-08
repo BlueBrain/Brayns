@@ -26,16 +26,36 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/Scene.h>
 
+#include "BoundsAdapter.h"
 #include "TransformationAdapter.h"
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ModelInstance)
-BRAYNS_JSON_ADAPTER_GET("model_id", getID, "Model ID")
+class ReadModelProxy
+{
+public:
+    ReadModelProxy() = default;
+    ReadModelProxy(const ModelInstance &mi);
+
+    uint32_t getId() const;
+    const Bounds &getBounds() const;
+    const Model::Metadata &getMetadata() const;
+    const Transformation &getTransform() const;
+    bool getIsVisible() const;
+
+private:
+    const ModelInstance &getModel() const;
+
+private:
+    const ModelInstance *_instance{nullptr};
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(ReadModelProxy)
+BRAYNS_JSON_ADAPTER_GET("model_id", getId, "Model ID")
 BRAYNS_JSON_ADAPTER_GET("bounding_box", getBounds, "Model instance AABB")
-BRAYNS_JSON_ADAPTER_GET("metadata", getModelMetadata, "Model metadata")
+BRAYNS_JSON_ADAPTER_GET("metadata", getMetadata, "Model metadata")
 BRAYNS_JSON_ADAPTER_GET("transformation", getTransform, "Model transformation")
-BRAYNS_JSON_ADAPTER_GET("visible", isVisible, "Wether the model is rendered or not")
+BRAYNS_JSON_ADAPTER_GET("visible", getIsVisible, "Wether the model is rendered or not")
 BRAYNS_JSON_ADAPTER_END()
 
 class UpdateModelProxy
@@ -49,7 +69,7 @@ public:
 
 private:
     Scene &_scene;
-    ModelInstance *_modelInstance {nullptr};
+    ModelInstance *_modelInstance{nullptr};
 };
 
 BRAYNS_NAMED_JSON_ADAPTER_BEGIN(UpdateModelProxy, "UpdateModelParams")

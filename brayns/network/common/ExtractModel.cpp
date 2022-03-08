@@ -29,10 +29,10 @@ ModelInstance &ExtractModel::fromId(Scene &scene, size_t id)
 {
     try
     {
-        auto& model = scene.getModel(id);
+        auto &model = scene.getModelInstance(id);
         return model;
     }
-    catch(const std::invalid_argument&)
+    catch (const std::invalid_argument &)
     {
         throw InvalidParamsException("No model found with ID " + std::to_string(id));
     }

@@ -27,7 +27,7 @@ namespace brayns
 class ProductionRenderer final : public Renderer
 {
 public:
-    std::string_view getName() const noexcept final;
+    std::string getName() const noexcept final;
 
     Ptr clone() const noexcept final;
 
@@ -38,5 +38,5 @@ protected:
 };
 
 template<>
-std::string_view EngineObjectName<ProductionRenderer>::get();
+std::string EngineObjectName<ProductionRenderer>::get();
 }

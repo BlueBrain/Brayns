@@ -28,14 +28,14 @@ namespace brayns
 class MetalMaterial final : public Material
 {
 public:
-    std::string_view getName() const noexcept final;
+    std::string getName() const noexcept final;
 
     uint64_t getSizeInBytes() const noexcept final;
 
     /**
      * @brief Sets the base color
      */
-    void setColor(const Vector3f& color) noexcept;
+    void setColor(const Vector3f &color) noexcept;
 
     /**
      * @brief Sets the surface roughness
@@ -45,7 +45,7 @@ public:
     /**
      * @brief Returns the current base color of the material as normalized RGB
      */
-    const Vector3f& getColor() const noexcept;
+    const Vector3f &getColor() const noexcept;
 
     /**
      * @brief Returns the surface roughness
@@ -58,10 +58,10 @@ protected:
     void commitMaterialSpecificParams() final;
 
 private:
-    Vector3f _color {1.f}; // default white
-    float _roughness {0.1f};  // default opaque
+    Vector3f _color{1.f}; // default white
+    float _roughness{0.1f}; // default opaque
 };
 
 template<>
-std::string_view EngineObjectName<MetalMaterial>::get();
+std::string EngineObjectName<MetalMaterial>::get();
 }

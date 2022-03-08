@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-std::string_view PerspectiveCamera::getName() const noexcept
+std::string PerspectiveCamera::getName() const noexcept
 {
     return EngineObjectName<PerspectiveCamera>::get();
 }
@@ -47,12 +47,12 @@ void PerspectiveCamera::setFOVY(const float fovy) noexcept
 
 void PerspectiveCamera::setApertureRadius(const float aperture) noexcept
 {
-    _updateValue(_apertureRadius, aperture < 0.f? 0.f : aperture);
+    _updateValue(_apertureRadius, aperture < 0.f ? 0.f : aperture);
 }
 
 void PerspectiveCamera::setFocusDistance(const float distance) noexcept
 {
-    _updateValue(_focusDistance, distance < 1.f? 1.f : distance);
+    _updateValue(_focusDistance, distance < 1.f ? 1.f : distance);
 }
 
 float PerspectiveCamera::getFOVY() const noexcept
@@ -76,7 +76,7 @@ std::string_view PerspectiveCamera::getOSPHandleName() const noexcept
 }
 
 template<>
-std::string_view EngineObjectName<PerspectiveCamera>::get()
+std::string EngineObjectName<PerspectiveCamera>::get()
 {
     return "perspective";
 }

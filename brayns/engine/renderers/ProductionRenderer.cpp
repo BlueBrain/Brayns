@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-std::string_view ProductionRenderer::getName() const noexcept
+std::string ProductionRenderer::getName() const noexcept
 {
     return EngineObjectName<ProductionRenderer>::get();
 }
@@ -42,7 +42,7 @@ void ProductionRenderer::commitRendererSpecificParams()
 }
 
 template<>
-std::string_view EngineObjectName<ProductionRenderer>::get()
+std::string EngineObjectName<ProductionRenderer>::get()
 {
     return "production";
 }

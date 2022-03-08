@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-std::string_view DefaultMaterial::getName() const noexcept
+std::string DefaultMaterial::getName() const noexcept
 {
     return EngineObjectName<DefaultMaterial>::get();
 }
@@ -43,7 +43,7 @@ void DefaultMaterial::setOpacity(const float opacity) noexcept
     _updateValue(_opacity, glm::clamp(opacity, 0.f, 1.f));
 }
 
-const Vector3f& DefaultMaterial::getColor() const noexcept
+const Vector3f &DefaultMaterial::getColor() const noexcept
 {
     return _color;
 }
@@ -70,7 +70,7 @@ std::string_view DefaultMaterial::getOSPHandleName() const noexcept
 }
 
 template<>
-std::string_view EngineObjectName<DefaultMaterial>::get()
+std::string EngineObjectName<DefaultMaterial>::get()
 {
     return "default";
 }

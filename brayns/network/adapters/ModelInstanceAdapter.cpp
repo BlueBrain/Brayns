@@ -23,8 +23,52 @@
 
 namespace brayns
 {
+ReadModelProxy::ReadModelProxy(const ModelInstance &mi)
+    : _instance(&mi)
+{
+}
+
+uint32_t ReadModelProxy::getId() const
+{
+    const auto &mi = getModel();
+    return mi.getID();
+}
+
+const Bounds &ReadModelProxy::getBounds() const
+{
+    const auto &mi = getModel();
+    return mi.getBounds();
+}
+
+const Model::Metadata &ReadModelProxy::getMetadata() const
+{
+    const auto &mi = getModel();
+    return mi.getModelMetadata();
+}
+
+const Transformation &ReadModelProxy::getTransform() const
+{
+    const auto &mi = getModel();
+    return mi.getTransform();
+}
+
+bool ReadModelProxy::getIsVisible() const
+{
+    const auto &mi = getModel();
+    return mi.isVisible();
+}
+
+const ModelInstance &ReadModelProxy::getModel() const
+{
+    if (!_instance)
+    {
+        throw std::runtime_error("ModelInstance not set in ReadModelProxy");
+    }
+    return *_instance;
+}
+
 UpdateModelProxy::UpdateModelProxy(Scene &scene)
- : _scene(scene)
+    : _scene(scene)
 {
 }
 

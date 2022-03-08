@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-std::string_view EmissiveMaterial::getName() const noexcept
+std::string EmissiveMaterial::getName() const noexcept
 {
     return EngineObjectName<EmissiveMaterial>::get();
 }
@@ -43,7 +43,7 @@ void EmissiveMaterial::setIntensity(const float intensity) noexcept
     _updateValue(_intensity, glm::max(intensity, 0.f));
 }
 
-const Vector3f& EmissiveMaterial::getColor() const noexcept
+const Vector3f &EmissiveMaterial::getColor() const noexcept
 {
     return _color;
 }
@@ -67,7 +67,7 @@ std::string_view EmissiveMaterial::getOSPHandleName() const noexcept
 }
 
 template<>
-std::string_view EngineObjectName<EmissiveMaterial>::get()
+std::string EngineObjectName<EmissiveMaterial>::get()
 {
     return "emissive";
 }

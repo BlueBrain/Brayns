@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-std::string_view GlassMaterial::getName() const noexcept
+std::string GlassMaterial::getName() const noexcept
 {
     return EngineObjectName<GlassMaterial>::get();
 }
@@ -43,7 +43,7 @@ void GlassMaterial::setIndexOfRefraction(const float ior) noexcept
     _updateValue(_ior, ior);
 }
 
-const Vector3f& GlassMaterial::getColor() const noexcept
+const Vector3f &GlassMaterial::getColor() const noexcept
 {
     return _color;
 }
@@ -67,7 +67,7 @@ std::string_view GlassMaterial::getOSPHandleName() const noexcept
 }
 
 template<>
-std::string_view EngineObjectName<GlassMaterial>::get()
+std::string EngineObjectName<GlassMaterial>::get()
 {
     return "glass";
 }

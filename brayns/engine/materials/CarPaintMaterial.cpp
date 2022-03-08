@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-std::string_view CarPaintMaterial::getName() const noexcept
+std::string CarPaintMaterial::getName() const noexcept
 {
     return EngineObjectName<CarPaintMaterial>::get();
 }
@@ -43,7 +43,7 @@ void CarPaintMaterial::setFlakesDesnity(const float flakeDensity) noexcept
     _updateValue(_flakeDensity, glm::clamp(flakeDensity, 0.f, 1.f));
 }
 
-const Vector3f& CarPaintMaterial::getColor() const noexcept
+const Vector3f &CarPaintMaterial::getColor() const noexcept
 {
     return _color;
 }
@@ -67,7 +67,7 @@ std::string_view CarPaintMaterial::getOSPHandleName() const noexcept
 }
 
 template<>
-std::string_view EngineObjectName<CarPaintMaterial>::get()
+std::string EngineObjectName<CarPaintMaterial>::get()
 {
     return "car paint";
 }

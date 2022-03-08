@@ -37,11 +37,10 @@ public:
      * @brief Extract a material from a model descriptor and its ID.
      *
      * @param descriptor Source model.
-     * @param id Material ID
      * @return Material& Material instance.
      * @throw JsonRpcException Material or model not found.
      */
-    static Material &fromId(ModelDescriptor &descriptor, size_t id);
+    static Material &fromModel(ModelInstance &descriptor);
 
     /**
      * @brief Extract a material from a model and its ID.
@@ -51,6 +50,6 @@ public:
      * @return Material& Material instance.
      * @throw JsonRpcException Material or model not found.
      */
-    static Material &fromId(Model &model, size_t modelId, size_t id);
+    static Material &fromModel(Model &model, uint32_t modelId);
 };
 } // namespace brayns

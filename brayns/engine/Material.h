@@ -42,11 +42,11 @@ public:
 
     Material() = default;
 
-    Material(const Material&);
-    Material &operator=(const Material&);
+    Material(const Material &);
+    Material &operator=(const Material &);
 
-    Material(Material&&) = default;
-    Material &operator=(Material&&) = default;
+    Material(Material &&) = default;
+    Material &operator=(Material &&) = default;
 
     virtual ~Material();
 
@@ -63,7 +63,7 @@ public:
     /**
      * @brief Returns the material type as a string
      */
-    virtual std::string_view getName() const noexcept = 0;
+    virtual std::string getName() const noexcept = 0;
 
 protected:
     /**
@@ -86,6 +86,5 @@ protected:
 
 private:
     OSPMaterial _handle{nullptr};
-
 };
 } // namespace brayns

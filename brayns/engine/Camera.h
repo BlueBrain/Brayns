@@ -38,18 +38,18 @@ public:
 
     Camera() = default;
 
-    Camera(const Camera&);
+    Camera(const Camera &);
     Camera &operator=(const Camera &);
 
-    Camera(Camera&&) = default;
-    Camera &operator=(Camera&&) = default;
+    Camera(Camera &&) = default;
+    Camera &operator=(Camera &&) = default;
 
     virtual ~Camera();
 
     /**
      * @brief Returns the camera type as a string
      */
-    virtual std::string_view getName() const noexcept = 0;
+    virtual std::string getName() const noexcept = 0;
 
     /**
      * @brief Creates a copy of this camera
@@ -91,18 +91,18 @@ public:
     /**
      * @brief Returns the camera current position in space
      */
-    const Vector3f& getPosition() const noexcept;
+    const Vector3f &getPosition() const noexcept;
 
     /**
      * @brief Returns the camera current view target in space
      */
-    const Vector3f& getTarget() const noexcept;
+    const Vector3f &getTarget() const noexcept;
 
     /**
      * @brief Returns the user-specified camera up vector (It might be not the same that is being
      * commited to OSPRay, see setUp())
      */
-    const Vector3f& getUp() const noexcept;
+    const Vector3f &getUp() const noexcept;
 
     /**
      * @brief Returns the OSPRay handle of this camera
@@ -123,10 +123,10 @@ protected:
     virtual void commitCameraSpecificParams() = 0;
 
 private:
-    Vector3f _position {0.f};
-    Vector3f _target {0.f, 0.f, 1.f};
-    Vector3f _up {0.f, 1.f, 0.f};
-    float _aspectRatio {1.f};
-    OSPCamera _handle {nullptr};
+    Vector3f _position{0.f};
+    Vector3f _target{0.f, 0.f, 1.f};
+    Vector3f _up{0.f, 1.f, 0.f};
+    float _aspectRatio{1.f};
+    OSPCamera _handle{nullptr};
 };
 } // namespace brayns

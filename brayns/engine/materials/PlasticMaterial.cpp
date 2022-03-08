@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-std::string_view PlasticMaterial::getName() const noexcept
+std::string PlasticMaterial::getName() const noexcept
 {
     return EngineObjectName<PlasticMaterial>::get();
 }
@@ -43,7 +43,7 @@ void PlasticMaterial::setOpacity(const float opacity) noexcept
     _updateValue(_opacity, glm::clamp(opacity, 0.f, 1.f));
 }
 
-const Vector3f& PlasticMaterial::getColor() const noexcept
+const Vector3f &PlasticMaterial::getColor() const noexcept
 {
     return _color;
 }
@@ -76,7 +76,7 @@ std::string_view PlasticMaterial::getOSPHandleName() const noexcept
 }
 
 template<>
-std::string_view EngineObjectName<PlasticMaterial>::get()
+std::string EngineObjectName<PlasticMaterial>::get()
 {
     return "plastic";
 }

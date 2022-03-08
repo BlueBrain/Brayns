@@ -22,20 +22,20 @@
 
 namespace brayns
 {
-void DirectionalLight::setDirection(const Vector3f& newDirection)
+void DirectionalLight::setDirection(const Vector3f &newDirection)
 {
-    if(glm::length2(newDirection) == 0.f)
+    if (glm::length2(newDirection) == 0.f)
         throw std::invalid_argument("DirectionalLight direction must be a non-zero vector");
 
     _updateValue(_direction, glm::normalize(newDirection));
 }
 
-const Vector3f& DirectionalLight::getDirection() const noexcept
+const Vector3f &DirectionalLight::getDirection() const noexcept
 {
     return _direction;
 }
 
-std::string_view DirectionalLight::getName() const noexcept
+std::string DirectionalLight::getName() const noexcept
 {
     return EngineObjectName<DirectionalLight>::get();
 }
@@ -64,7 +64,7 @@ std::string_view DirectionalLight::getOSPHandleName() const noexcept
 }
 
 template<>
-std::string_view EngineObjectName<DirectionalLight>::get()
+std::string EngineObjectName<DirectionalLight>::get()
 {
     return "directional";
 }

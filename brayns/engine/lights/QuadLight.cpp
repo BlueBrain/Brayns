@@ -22,17 +22,17 @@
 
 namespace brayns
 {
-void QuadLight::setBottomLeftCorner(const Vector3f& pos) noexcept
+void QuadLight::setBottomLeftCorner(const Vector3f &pos) noexcept
 {
     _updateValue(_bottomLeftCorner, pos);
 }
 
-void QuadLight::setVerticalDisplacement(const Vector3f& verticalVector) noexcept
+void QuadLight::setVerticalDisplacement(const Vector3f &verticalVector) noexcept
 {
     _updateValue(_verticalDisplacement, verticalVector);
 }
 
-void QuadLight::setHorizontalDisplacement(const Vector3f& horizontalVector) noexcept
+void QuadLight::setHorizontalDisplacement(const Vector3f &horizontalVector) noexcept
 {
     _updateValue(_horizontalDisplacement, horizontalVector);
 }
@@ -52,7 +52,7 @@ const Vector3f &QuadLight::getHorizontalDisplacement() const noexcept
     return _horizontalDisplacement;
 }
 
-std::string_view QuadLight::getName() const noexcept
+std::string QuadLight::getName() const noexcept
 {
     return EngineObjectName<QuadLight>::get();
 }
@@ -78,7 +78,7 @@ void QuadLight::commitLightSpecificParams()
 }
 
 template<>
-std::string_view EngineObjectName<QuadLight>::get()
+std::string EngineObjectName<QuadLight>::get()
 {
     return "quad";
 }

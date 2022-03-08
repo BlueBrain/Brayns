@@ -22,8 +22,6 @@
 
 #include <brayns/common/BaseObject.h>
 
-#include <string_view>
-
 namespace brayns
 {
 class EngineObject : public BaseObject
@@ -40,9 +38,9 @@ protected:
 template<typename T>
 struct EngineObjectName
 {
-    static std::string_view get()
+    static std::string get()
     {
-        const std::string typeName (typeid(T).name());
+        const std::string typeName(typeid(T).name());
         throw std::runtime_error("EngineObjectName not implemented for " + typeName);
     }
 };

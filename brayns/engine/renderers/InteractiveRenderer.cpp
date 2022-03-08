@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-std::string_view InteractiveRenderer::getName() const noexcept
+std::string InteractiveRenderer::getName() const noexcept
 {
     return EngineObjectName<InteractiveRenderer>::get();
 }
@@ -66,7 +66,7 @@ void InteractiveRenderer::commitRendererSpecificParams()
 }
 
 template<>
-std::string_view EngineObjectName<InteractiveRenderer>::get()
+std::string EngineObjectName<InteractiveRenderer>::get()
 {
     return "interactive";
 }

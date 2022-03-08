@@ -39,18 +39,18 @@ public:
 
     Light() = default;
 
-    Light(const Light&);
-    Light &operator=(const Light&);
+    Light(const Light &);
+    Light &operator=(const Light &);
 
-    Light(Light&&) = default;
-    Light &operator=(Light&&) = default;
+    Light(Light &&) = default;
+    Light &operator=(Light &&) = default;
 
     virtual ~Light();
 
     /**
      * @brief Returns the light type as a string
      */
-    virtual std::string_view getName() const noexcept = 0;
+    virtual std::string getName() const noexcept = 0;
 
     /**
      * @brief Sets the light color as normalized RGB
@@ -112,9 +112,9 @@ protected:
     virtual void commitLightSpecificParams() = 0;
 
 private:
-    Vector3f _color {1.f};
-    float _intensity {1.};
-    bool _visible {true};
-    OSPLight _handle {nullptr};
+    Vector3f _color{1.f};
+    float _intensity{1.};
+    bool _visible{true};
+    OSPLight _handle{nullptr};
 };
 } // namespace brayns

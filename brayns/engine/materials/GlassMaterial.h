@@ -28,14 +28,14 @@ namespace brayns
 class GlassMaterial final : public Material
 {
 public:
-    std::string_view getName() const noexcept final;
+    std::string getName() const noexcept final;
 
     uint64_t getSizeInBytes() const noexcept final;
 
     /**
      * @brief Sets the base color
      */
-    void setColor(const Vector3f& color) noexcept;
+    void setColor(const Vector3f &color) noexcept;
 
     /**
      * @brief Sets index of refraction of the glass.
@@ -45,7 +45,7 @@ public:
     /**
      * @brief Returns the current base color of the material as normalized RGB
      */
-    const Vector3f& getColor() const noexcept;
+    const Vector3f &getColor() const noexcept;
 
     /**
      * @brief Returns the index of refraction of the glass
@@ -58,11 +58,10 @@ protected:
     void commitMaterialSpecificParams() final;
 
 private:
-    Vector3f _color {1.f};
-    float _ior {1.5f};
+    Vector3f _color{1.f};
+    float _ior{1.5f};
 };
 
 template<>
-std::string_view EngineObjectName<GlassMaterial>::get();
+std::string EngineObjectName<GlassMaterial>::get();
 }
-

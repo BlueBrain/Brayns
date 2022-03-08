@@ -32,7 +32,7 @@
 
 namespace brayns
 {
-class AddModelEntrypoint : public Entrypoint<FileLoadParameters, std::vector<ModelInstance*>>
+class AddModelEntrypoint : public Entrypoint<FileLoadParameters, std::vector<ModelInstance *>>
 {
 public:
     AddModelEntrypoint(Scene &scene, LoaderRegistry &loaders, CancellationToken token);

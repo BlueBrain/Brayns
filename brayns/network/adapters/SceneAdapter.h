@@ -30,6 +30,19 @@
 
 namespace brayns
 {
+class ReadSceneProxy
+{
+public:
+    ReadSceneProxy() = default;
+    ReadSceneProxy(Scene &scene);
+
+private:
+    Scene &getScene();
+
+private:
+    Scene *_scene{nullptr};
+};
+
 BRAYNS_JSON_ADAPTER_BEGIN(Scene)
 BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Scene boundary")
 BRAYNS_JSON_ADAPTER_GET("models", getAllModelInstances, "All models")

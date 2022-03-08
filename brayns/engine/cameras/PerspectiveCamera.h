@@ -27,7 +27,7 @@ namespace brayns
 class PerspectiveCamera final : public Camera
 {
 public:
-    std::string_view getName() const noexcept override;
+    std::string getName() const noexcept override;
 
     Ptr clone() const noexcept final;
 
@@ -68,11 +68,11 @@ protected:
     void commitCameraSpecificParams() final;
 
 private:
-    float _fovy {45.f};
-    float _apertureRadius {0.f};
-    float _focusDistance {1.f};
+    float _fovy{45.f};
+    float _apertureRadius{0.f};
+    float _focusDistance{1.f};
 };
 
 template<>
-std::string_view EngineObjectName<PerspectiveCamera>::get();
+std::string EngineObjectName<PerspectiveCamera>::get();
 }

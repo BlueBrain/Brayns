@@ -38,16 +38,16 @@ void ModelTransferFunction::setId(const uint32_t id)
 
 void ModelTransferFunction::setTransferFunction(const JsonBuffer<TransferFunction> &buffer)
 {
-    auto& modelInstance = _scene->getModel(_modelId);
-    auto& model = modelInstance.getModel();
+    auto &modelInstance = _scene->getModelInstance(_modelId);
+    auto &model = modelInstance.getModel();
 
     try
     {
-        auto& tfComponent = model.getComponent<TransferFunctionComponent>();
+        auto &tfComponent = model.getComponent<TransferFunctionComponent>();
         auto &transferFunction = tfComponent.getTransferFunction();
         buffer.deserialize(transferFunction);
     }
-    catch(...)
+    catch (...)
     {
         throw std::runtime_error("The requested model does not have a transfer function");
     }

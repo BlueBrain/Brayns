@@ -31,32 +31,42 @@
 
 namespace brayns
 {
-
-#define BRAYNS_LIGHT_PROPERTIES() \
+#define BRAYNS_LIGHT_PROPERTIES \
     BRAYNS_JSON_ADAPTER_GET("type", getName, "Light type name") \
     BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Light color (Normalized RGB)") \
-    BRAYNS_JSON_ADAPTER_GETSET("intensity", getIntensity, setIntensity, \
-                               "Light intensity (Will be clamped on the range [0.0, +infinity)") \
-    BRAYNS_JSON_ADAPTER_GETSET("visible", isVisible, setVisible, \
-                               "Sets wether the light should be visible on the scene")
+    BRAYNS_JSON_ADAPTER_GETSET( \
+        "intensity", \
+        getIntensity, \
+        setIntensity, \
+        "Light intensity (Will be clamped on the range [0.0, +infinity)") \
+    BRAYNS_JSON_ADAPTER_GETSET("visible", isVisible, setVisible, "Sets wether the light should be visible on the scene")
 
 BRAYNS_JSON_ADAPTER_BEGIN(AmbientLight)
-BRAYNS_LIGHT_PROPERTIES()
+BRAYNS_LIGHT_PROPERTIES
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(DirectionalLight)
 BRAYNS_JSON_ADAPTER_GETSET("direction", getDirection, setDirection, "Light direction vector")
-BRAYNS_LIGHT_PROPERTIES()
+BRAYNS_LIGHT_PROPERTIES
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(QuadLight)
-BRAYNS_JSON_ADAPTER_GETSET("bottom_left_corner", getBottomLeftCorner, setBottomLeftCorner,
-                           "Sets the bottom left corner position of the light (in world space coordinates)")
-BRAYNS_JSON_ADAPTER_GETSET("vertical_displacement", getVerticalDisplacement, setVerticalDisplacement,
-                           "Sets the vertical displacement vector used to compute the top left corner")
-BRAYNS_JSON_ADAPTER_GETSET("horizontal_displacement", getHorizontalDisplacement, setHorizontalDisplacement,
-                           "Sets the horizontal displacement vector used to compute the bottom right corner")
-BRAYNS_LIGHT_PROPERTIES()
+BRAYNS_JSON_ADAPTER_GETSET(
+    "bottom_left_corner",
+    getBottomLeftCorner,
+    setBottomLeftCorner,
+    "Sets the bottom left corner position of the light (in world space coordinates)")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "vertical_displacement",
+    getVerticalDisplacement,
+    setVerticalDisplacement,
+    "Sets the vertical displacement vector used to compute the top left corner")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "horizontal_displacement",
+    getHorizontalDisplacement,
+    setHorizontalDisplacement,
+    "Sets the horizontal displacement vector used to compute the bottom right corner")
+BRAYNS_LIGHT_PROPERTIES
 BRAYNS_JSON_ADAPTER_END()
 
 class GenericLight : public GenericEngineObjectAdapter<Light>

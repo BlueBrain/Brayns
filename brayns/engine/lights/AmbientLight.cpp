@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-std::string_view AmbientLight::getName() const noexcept
+std::string AmbientLight::getName() const noexcept
 {
     return EngineObjectName<AmbientLight>::get();
 }
@@ -43,7 +43,7 @@ void AmbientLight::commitLightSpecificParams()
 }
 
 template<>
-std::string_view EngineObjectName<AmbientLight>::get()
+std::string EngineObjectName<AmbientLight>::get()
 {
     return "ambient";
 }

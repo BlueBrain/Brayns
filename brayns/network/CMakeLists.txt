@@ -35,7 +35,6 @@ set(BRAYNSNETWORK_HEADERS
   common/ExtractMaterial.h
   common/ExtractModel.h
   common/ProgressHandler.h
-  common/PropertyObjectSchema.h
   common/RateLimiter.h
   dispatch/RequestDispatcher.h
   entrypoint/Entrypoint.h
@@ -131,7 +130,6 @@ set(BRAYNSNETWORK_SOURCES
   common/EngineObjectRegisterer.cpp
   common/ExtractMaterial.cpp
   common/ExtractModel.cpp
-  common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
   dispatch/RequestDispatcher.cpp
   entrypoint/EntrypointFinder.cpp

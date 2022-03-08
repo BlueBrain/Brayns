@@ -30,41 +30,41 @@ public:
     /**
      * @brief Sets the bottom left corner position of the light (in world space coordinates)
      */
-    void setBottomLeftCorner(const Vector3f& pos) noexcept;
+    void setBottomLeftCorner(const Vector3f &pos) noexcept;
 
     /**
      * @brief Sets a displacement vector to compute the top left corner, computed as
      * top left corner = bottom left corner + vertical displacement.
      */
-    void setVerticalDisplacement(const Vector3f& verticalVector) noexcept;
+    void setVerticalDisplacement(const Vector3f &verticalVector) noexcept;
 
     /**
      * @brief Sets a displacement vector to compute the bottom right corner, computed as
      * bottom right corner = bottom left corner + horizontal displacement.
      */
-    void setHorizontalDisplacement(const Vector3f& horizontalVector) noexcept;
+    void setHorizontalDisplacement(const Vector3f &horizontalVector) noexcept;
 
     /**
      * @brief Returns the bottom left corner position of the light
      */
-    const Vector3f& getBottomLeftCorner() const noexcept;
+    const Vector3f &getBottomLeftCorner() const noexcept;
 
     /**
      * @brief Returns the vertical displacement vector of the light (used to compute the top left corner from
      * the bottom left corner)
      */
-    const Vector3f& getVerticalDisplacement() const noexcept;
+    const Vector3f &getVerticalDisplacement() const noexcept;
 
     /**
      * @brief Returns the horizontal displacement vector of the light (used to compute the bottom right corner
      * from the bottom left corner)
      */
-    const Vector3f& getHorizontalDisplacement() const noexcept;
+    const Vector3f &getHorizontalDisplacement() const noexcept;
 
     /**
      * @brief getName() implementation
      */
-    std::string_view getName() const noexcept final;
+    std::string getName() const noexcept final;
 
 protected:
     std::string_view getOSPHandleName() const noexcept final;
@@ -75,11 +75,11 @@ protected:
 
 private:
     // Default crates a X-Plane parallel light of size 1 x 1
-    Vector3f _bottomLeftCorner {0.f};
-    Vector3f _verticalDisplacement {0.f, 1.f, 0.f};
-    Vector3f _horizontalDisplacement {1.f, 0.f, 1.f};
+    Vector3f _bottomLeftCorner{0.f};
+    Vector3f _verticalDisplacement{0.f, 1.f, 0.f};
+    Vector3f _horizontalDisplacement{1.f, 0.f, 1.f};
 };
 
 template<>
-std::string_view EngineObjectName<QuadLight>::get();
+std::string EngineObjectName<QuadLight>::get();
 }

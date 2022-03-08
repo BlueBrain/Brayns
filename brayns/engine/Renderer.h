@@ -39,11 +39,11 @@ public:
 
     Renderer() = default;
 
-    Renderer(const Renderer&);
-    Renderer &operator=(const Renderer&);
+    Renderer(const Renderer &);
+    Renderer &operator=(const Renderer &);
 
-    Renderer(Renderer&&) = default;
-    Renderer &operator=(Renderer&&) = default;
+    Renderer(Renderer &&) = default;
+    Renderer &operator=(Renderer &&) = default;
 
     virtual ~Renderer();
 
@@ -77,7 +77,7 @@ public:
      * @brief Sets the background color of this renderer as normalized RGB. The background color is used when a ray
      * does not intersect anything in the scene (miss)
      */
-    void setBackgroundColor(const Vector4f& background) noexcept;
+    void setBackgroundColor(const Vector4f &background) noexcept;
 
     /**
      * @brief Returns the OSPRay handle of this renderer
@@ -97,7 +97,7 @@ public:
     /**
      * @brief Returns the renderer type as a string
      */
-    virtual std::string_view getName() const noexcept = 0;
+    virtual std::string getName() const noexcept = 0;
 
 protected:
     /**
@@ -112,9 +112,9 @@ protected:
     virtual void commitRendererSpecificParams() = 0;
 
 private:
-    int32_t _samplesPerPixel {1};
-    int32_t _maxRayBounces {5};
-    Vector4f _backgroundColor {0.004f, 0.016f, 0.102f, 0.f}; // Default background color is BBP dark blue
-    OSPRenderer _handle {nullptr};
+    int32_t _samplesPerPixel{1};
+    int32_t _maxRayBounces{5};
+    Vector4f _backgroundColor{0.004f, 0.016f, 0.102f, 0.f}; // Default background color is BBP dark blue
+    OSPRenderer _handle{nullptr};
 };
 } // namespace brayns

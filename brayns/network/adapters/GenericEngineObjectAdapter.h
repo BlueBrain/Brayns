@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/network/common/EngineObjectFactory.h>
 #include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/network/common/EngineObjectFactory.h>
 
 namespace brayns
 {
@@ -42,17 +42,17 @@ public:
         _params = params;
     }
 
-    const std::string& getType() const noexcept
+    const std::string &getType() const noexcept
     {
         return _type;
     }
 
-    const JsonValue& getParams() const noexcept
+    const JsonValue &getParams() const noexcept
     {
         return _params;
     }
 
-    JsonValue serialize(const EngineObjectFactory<T> &factory, const T& object) noexcept
+    void serialize(const EngineObjectFactory<T> &factory, const T &object) noexcept
     {
         _type = std::string(object.getName());
         _params = factory.serialize(object);

@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-std::string_view MetalMaterial::getName() const noexcept
+std::string MetalMaterial::getName() const noexcept
 {
     return EngineObjectName<MetalMaterial>::get();
 }
@@ -43,7 +43,7 @@ void MetalMaterial::setRoughness(const float roughness) noexcept
     _updateValue(_roughness, glm::clamp(roughness, 0.f, 1.f));
 }
 
-const Vector3f& MetalMaterial::getColor() const noexcept
+const Vector3f &MetalMaterial::getColor() const noexcept
 {
     return _color;
 }
@@ -66,7 +66,7 @@ std::string_view MetalMaterial::getOSPHandleName() const noexcept
 }
 
 template<>
-std::string_view EngineObjectName<MetalMaterial>::get()
+std::string EngineObjectName<MetalMaterial>::get()
 {
     return "metal";
 }
