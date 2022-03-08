@@ -24,12 +24,12 @@
 
 namespace
 {
-auto glmMatrixToAffine(const brayns::Matrix4f& transform) noexcept
+auto glmMatrixToAffine(const brayns::Matrix4f &transform) noexcept
 {
-    const auto& strafe = transform[0];
-    const auto& up = transform[1];
-    const auto& forward = transform[2];
-    const auto& position = transform[3];
+    const auto &strafe = transform[0];
+    const auto &up = transform[1];
+    const auto &forward = transform[2];
+    const auto &position = transform[3];
 
     rkcommon::math::affine3f result;
     result.l.vx = rkcommon::math::vec3f(strafe.x, strafe.y, strafe.z);
@@ -53,7 +53,7 @@ void Model::setMetaData(Metadata metadata) noexcept
     _metadata = std::move(metadata);
 }
 
-const Model::Metadata& Model::getMetaData() const noexcept
+const Model::Metadata &Model::getMetaData() const noexcept
 {
     return _metadata;
 }
@@ -63,18 +63,17 @@ ModelGroup &Model::getGroup() noexcept
     return _group;
 }
 
-void Model::commit()
+void Model::markBoundsDirty() noexcept
 {
-    _components.onCommit();
-    _group.commit();
+    _boundsDirty = true;
 }
 
-void Model::onPreRender(const ParametersManager& params)
+void Model::onPreRender(const ParametersManager &params)
 {
     _components.onPreRender(params);
 }
 
-void Model::onPostRender(const ParametersManager& params)
+void Model::onPostRender(const ParametersManager &params)
 {
     _components.onPostRender(params);
 }
@@ -89,14 +88,17 @@ uint64_t Model::getSizeInBytes() const noexcept
     return sizeof(Model) + _components.getByteSize();
 }
 
-ModelInstance::ModelInstance(const size_t modelID, Model* model)
- : _modelID(modelID)
- , _model(model)
+void Model::commit()
 {
-    if(!_model)
-        throw std::invalid_argument("A ModelInstance cannot be initialized with a null model");
+    _components.onCommit();
+    _group.commit();
+}
 
-    _instanceHandle = ospNewInstance(model->groupHandle());
+ModelInstance::ModelInstance(const size_t modelID, Model &model)
+    : _modelID(modelID)
+    , _model(model)
+{
+    _instanceHandle = ospNewInstance(model.groupHandle());
     _recomputeBounds();
 }
 
@@ -118,14 +120,10 @@ const Bounds &ModelInstance::getBounds() const noexcept
 void ModelInstance::commit()
 {
     // Commit model data (If any other instance did it before, it will have no effect)
-    _model->doCommit();
-
-    // Recompute bounds if needed
-    if(_model->_boundsChanged)
-        _recomputeBounds();
+    _model.commit();
 
     // Re-commit transform if needed
-    if(_transformation.isModified())
+    if (_transformation.isModified())
     {
         const auto affine = glmMatrixToAffine(_transformation.toMatrix());
         ospSetParam(_instanceHandle, "transform", OSPDataType::OSP_AFFINE3F, &affine);
@@ -134,21 +132,21 @@ void ModelInstance::commit()
     }
 }
 
-Model& ModelInstance::getModel() noexcept
+Model &ModelInstance::getModel() noexcept
 {
     // The caller could modify the model, so we must check on the next commit() call
     markModified(false);
-    return *_model;
+    return _model;
 }
 
-const Model& ModelInstance::getModel() const noexcept
+const Model &ModelInstance::getModel() const noexcept
 {
-    return *_model;
+    return _model;
 }
 
 const Model::Metadata &ModelInstance::getModelMetadata() const noexcept
 {
-    return _model->getMetaData();
+    return _model.getMetaData();
 }
 
 void ModelInstance::setVisible(const bool val) noexcept
@@ -166,11 +164,11 @@ void ModelInstance::setTransform(const Transformation &transform) noexcept
     _updateValue(_transformation, transform);
 
     // Recompute bounds as soon as the transform changes
-    if(_transformation.isModified())
+    if (_transformation.isModified())
         _recomputeBounds();
 }
 
-const Transformation& ModelInstance::getTransform() const noexcept
+const Transformation &ModelInstance::getTransform() const noexcept
 {
     return _transformation;
 }
@@ -183,7 +181,7 @@ OSPInstance ModelInstance::handle() const noexcept
 void ModelInstance::_recomputeBounds() noexcept
 {
     const auto matrix = _transformation.toMatrix();
-    _bounds = _model->computeBounds(matrix);
+    _bounds = _model.computeBounds(matrix);
     _boundsDirty = true;
 }
 } // namespace brayns

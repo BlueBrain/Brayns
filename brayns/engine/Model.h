@@ -40,7 +40,7 @@ namespace brayns
  * components, which adds functionality as well as renderable items, such as geometry, volumes and
  * clipping geometry.
  */
-class Model : public EngineObject
+class Model
 {
 public:
     using Ptr = std::unique_ptr<Model>;
@@ -49,11 +49,11 @@ public:
     Model() = default;
     ~Model();
 
-    Model(const Model&) = delete;
-    Model &operator=(const Model&) = delete;
+    Model(const Model &) = delete;
+    Model &operator=(const Model &) = delete;
 
-    Model(Model&&) = delete;
-    Model &operator=(Model&&) = delete;
+    Model(Model &&) = delete;
+    Model &operator=(Model &&) = delete;
 
     /**
      * @brief Sets the metadata of this model (The metadata is a map<string, string> with model-specific
@@ -65,15 +65,15 @@ public:
     /**
      * @brief Returns the metadata of this model
      */
-    const Metadata& getMetaData() const noexcept;
+    const Metadata &getMetaData() const noexcept;
 
     /**
      * @brief Adds a new component to the model
      */
-    template<typename T, typename ...Args>
-    T& addComponent(Args&& ...args) noexcept
+    template<typename T, typename... Args>
+    T &addComponent(Args &&...args) noexcept
     {
-        auto& component = _components.addComponent<T>(std::forward<Args>(args)...);
+        auto &component = _components.addComponent<T>(std::forward<Args>(args)...);
         component._owner = this;
         return component;
     }
@@ -82,7 +82,7 @@ public:
      * @brief Retrieves a component from the model
      */
     template<typename T>
-    T& getComponent()
+    T &getComponent()
     {
         return _components.getComponent<T>();
     }
@@ -99,12 +99,7 @@ public:
     /**
      * @brief Returns the OSPRay group handler object
      */
-    ModelGroup& getGroup() noexcept;
-
-    /**
-     * @brief commit implementation
-     */
-    void commit() override;
+    ModelGroup &getGroup() noexcept;
 
 private:
     /**
@@ -112,7 +107,7 @@ private:
      * @param transform Matrix with the trasnformation to apply to the model data
      * @return Bounds of the model
      */
-    Bounds computeBounds(const Matrix4f& transform) const noexcept;
+    Bounds computeBounds(const Matrix4f &transform) const noexcept;
 
     /**
      * @brief Subclasses should override it to provide a more accurate measure of the memory footprint.
@@ -124,17 +119,20 @@ private:
      */
     OSPGroup groupHandle() const noexcept;
 
-private:
     /**
      * @brief Called before the commit + rendering happens
      */
-    void onPreRender(const ParametersManager& params);
+    void onPreRender(const ParametersManager &params);
 
     /**
      * @brief Called after the commit + rendering happens
      */
-    void onPostRender(const ParametersManager& params);
+    void onPostRender(const ParametersManager &params);
 
+    /**
+     * @brief commit implementation
+     */
+    void commit();
 
 private:
     friend class Scene;
@@ -142,11 +140,11 @@ private:
 
 private:
     // The model index refers to the position of this model in the Model list of the scene.
-    uint32_t _modelIndex {};
-    bool _boundsChanged {false};
+    uint32_t _modelIndex{};
     Metadata _metadata;
     ModelComponentContainer _components;
     ModelGroup _group;
+    bool _boundsDirty{true};
 };
 
 /**
@@ -161,13 +159,13 @@ public:
     /**
      * @brief Initializes the instance with the unique ID and the given model
      */
-    ModelInstance(const size_t modelID, Model* model);
+    ModelInstance(const size_t modelID, Model &model);
 
-    ModelInstance(const ModelInstance&) = delete;
-    ModelInstance &operator=(const ModelInstance&) = delete;
+    ModelInstance(const ModelInstance &) = delete;
+    ModelInstance &operator=(const ModelInstance &) = delete;
 
-    ModelInstance(ModelInstance&&) = delete;
-    ModelInstance &operator=(ModelInstance&&) = delete;
+    ModelInstance(ModelInstance &&) = delete;
+    ModelInstance &operator=(ModelInstance &&) = delete;
 
     ~ModelInstance();
 
@@ -179,7 +177,7 @@ public:
     /**
      * @brief Returns the bounds of this instance in world space coordinates
      */
-    const Bounds& getBounds() const noexcept;
+    const Bounds &getBounds() const noexcept;
 
     /**
      * @brief Commit implementation
@@ -189,12 +187,12 @@ public:
     /**
      * @brief Returns a mutable version of the model this instance refers to.
      */
-    Model& getModel() noexcept;
+    Model &getModel() noexcept;
 
     /**
      * @brief Returns a const reference to the model this instance refers to.
      */
-    const Model& getModel() const noexcept;
+    const Model &getModel() const noexcept;
 
     /**
      * @brief Utility function to return this Model Instance underlying model metadata
@@ -219,7 +217,7 @@ public:
     /**
      * @brief Returns the trasnsformation of this instance.
      */
-    const Transformation& getTransform() const noexcept;
+    const Transformation &getTransform() const noexcept;
 
 private:
     /**
@@ -236,16 +234,16 @@ private:
     friend class Scene;
 
 private:
-    const size_t _modelID {};
-    Model* _model {nullptr};
+    const size_t _modelID{};
+    Model &_model;
 
-    bool _visible {true};
+    bool _visible{true};
     Transformation _transformation;
 
     // Flag used by the scene to know if it needs to recompute its own bounds
-    bool _boundsDirty {true};
+    bool _boundsDirty{true};
     Bounds _bounds;
 
-    OSPInstance _instanceHandle {nullptr};
+    OSPInstance _instanceHandle{nullptr};
 };
 } // namespace brayns

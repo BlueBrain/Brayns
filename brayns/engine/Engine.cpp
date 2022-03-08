@@ -28,8 +28,8 @@
 
 namespace brayns
 {
-Engine::Engine(ParametersManager& parameters)
- : _params(parameters)
+Engine::Engine(ParametersManager &parameters)
+    : _params(parameters)
 {
     _device = ospNewDevice("cpu");
 
@@ -42,7 +42,7 @@ Engine::Engine(ParametersManager& parameters)
 
     ospDeviceCommit(_device);
     const auto error = ospDeviceGetLastErrorCode(_device);
-    if(error != OSPError::OSP_NO_ERROR)
+    if (error != OSPError::OSP_NO_ERROR)
     {
         const auto ospErrorMessage = ospDeviceGetLastErrorMsg(_device);
         Log::critical("Could not initialize OSPRay device: {}", ospErrorMessage);
@@ -56,7 +56,7 @@ Engine::Engine(ParametersManager& parameters)
 
 Engine::~Engine()
 {
-    if(_device)
+    if (_device)
         ospDeviceRelease(_device);
 
     ospShutdown();
@@ -69,7 +69,7 @@ void Engine::preRender()
 
 void Engine::commit()
 {
-    if(!_keepRunning)
+    if (!_keepRunning)
         return;
 
     // update statistics
@@ -77,10 +77,10 @@ void Engine::commit()
     _statistics.setFPS(avgFPS);
 
     // Update changes on the viewport
-    auto& appParams = _params.getApplicationParameters();
-    if(appParams.isModified())
+    auto &appParams = _params.getApplicationParameters();
+    if (appParams.isModified())
     {
-        const auto& frameSize = appParams.getWindowSize();
+        const auto &frameSize = appParams.getWindowSize();
         const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
 
         _frameBuffer.setFrameSize(frameSize);
@@ -89,10 +89,10 @@ void Engine::commit()
 
     // Clear the framebuffer if something changed, so that we do not accumulate on top of old stuff,
     // which would produce an incorrect image
-    const bool somethingChanged = _frameBuffer.isModified() || _scene.isModified()
-            || _camera->isModified() || _renderer->isModified();
+    const bool somethingChanged =
+        _frameBuffer.isModified() || _scene.isModified() || _camera->isModified() || _renderer->isModified();
 
-    if(somethingChanged)
+    if (somethingChanged)
         _frameBuffer.clear();
 
     _frameBuffer.commit();
@@ -106,18 +106,18 @@ void Engine::commit()
 
 void Engine::render()
 {
-    if(!_keepRunning)
+    if (!_keepRunning)
         return;
 
     // Check wether we should keep rendering or not
     const auto maxSpp = _renderer->getSamplesPerPixel();
     const auto currentSpp = _frameBuffer.numAccumFrames();
-    if(currentSpp >= maxSpp)
+    if (currentSpp >= maxSpp)
         return;
 
     // A frame is counted from the momment we start rendering until we come again to the same point.
     _fpsCounter.endFrame();
-    const auto& appParams = _params.getApplicationParameters();
+    const auto &appParams = _params.getApplicationParameters();
     const auto maxFPS = appParams.getMaxRenderFPS();
     const auto minFrameTimeMilis = (1.0 / static_cast<double>(maxFPS)) * 1000.0;
 
@@ -126,7 +126,7 @@ void Engine::render()
 
     const auto diff = avgFrameTimeMillis - minFrameTimeMilis;
 
-    if(diff < 0.0)
+    if (diff < 0.0)
     {
         Log::info("Slowing down FPS. Last frame rendered {} ms too fast", diff);
         std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(diff));
@@ -155,9 +155,19 @@ FrameBuffer &Engine::getFrameBuffer() noexcept
     return _frameBuffer;
 }
 
+void Engine::setCamera(Camera::Ptr camera) noexcept
+{
+    _camera = std::move(camera);
+}
+
 Camera &Engine::getCamera() noexcept
 {
     return *_camera;
+}
+
+void Engine::setRenderer(Renderer::Ptr renderer) noexcept
+{
+    _renderer = std::move(renderer);
 }
 
 Renderer &Engine::getRenderer() noexcept

@@ -25,8 +25,8 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(LookAtParameters)
-BRAYNS_JSON_OBJECT_ENTRY(Vector3f, eye, "Position of the camera in world space");
+BRAYNS_JSON_OBJECT_ENTRY(Vector3f, eye, "Position of the camera in world space")
 BRAYNS_JSON_OBJECT_ENTRY(Vector3f, target, "Target at which the camera will be looking in world space")
-BRAYNS_JSON_OBJECT_ENTRY(Vector3f, up, "Up vector (Real up vector will be computed from eye, target and up)");
+BRAYNS_JSON_OBJECT_ENTRY(Vector3f, up, "Up vector (Real up vector will be computed from eye, target and up)")
 BRAYNS_JSON_OBJECT_END()
 }

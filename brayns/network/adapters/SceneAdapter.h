@@ -36,6 +36,8 @@ public:
     ReadSceneProxy() = default;
     ReadSceneProxy(Scene &scene);
 
+    Bounds &getBounds();
+
 private:
     Scene &getScene();
 

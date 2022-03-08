@@ -43,7 +43,7 @@ public:
      * @brief Initializes OSPRay and register core engine objects available for use (cameras, renderers, materials
      * and lights)
      */
-    Engine(ParametersManager& parameters);
+    Engine(ParametersManager &parameters);
 
     ~Engine();
 
@@ -82,7 +82,7 @@ public:
     /**
      * @brief Sets a new system Camera to use
      */
-    void setCamera(Camera::Ptr&& camera) noexcept;
+    void setCamera(Camera::Ptr camera) noexcept;
 
     /**
      * @brief Returns the system's current Camera object
@@ -90,9 +90,9 @@ public:
     Camera &getCamera() noexcept;
 
     /**
-     * @brief SEts a new system Renderer to use
+     * @brief Sets a new system Renderer to use
      */
-    void setRenderer(Renderer::Ptr&& renderer) noexcept;
+    void setRenderer(Renderer::Ptr renderer) noexcept;
 
     /**
      * @brief Returns the system's current Renderer object
@@ -117,17 +117,17 @@ public:
     /**
      * @brief Returns the system parameters manager
      */
-    const ParametersManager& getParametersManager() const noexcept;
+    const ParametersManager &getParametersManager() const noexcept;
 
 private:
     // Global system parameters used to read when updating the backend during commit() and render()
-    ParametersManager& _params;
+    ParametersManager &_params;
 
     // System objects
     FrameBuffer _frameBuffer;
     Scene _scene;
-    Camera::Ptr _camera {nullptr};
-    Renderer::Ptr _renderer {nullptr};
+    Camera::Ptr _camera{nullptr};
+    Renderer::Ptr _renderer{nullptr};
 
     // Engine statistics
     FPSCounter _fpsCounter;
@@ -136,6 +136,6 @@ private:
     // Run flag
     bool _keepRunning{true};
 
-    OSPDevice _device {nullptr};
+    OSPDevice _device{nullptr};
 };
 } // namespace brayns
