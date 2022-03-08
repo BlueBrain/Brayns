@@ -144,17 +144,38 @@
 #define BRAYNS_JSON_ADAPTER_ARGTYPE(OBJECT, METHOD) DecayArgType<decltype(&std::decay_t<decltype(OBJECT)>::METHOD), 0>
 
 /**
- * @brief Shortcut to create a functor to serialize an object using Json class.
- *
- * The argument is a functor setting the property from a JsonValue and a TYPE
- * instance.
+ * @brief Shortcut to generate a default JSON schema from a setter.
  *
  */
-#define BRAYNS_JSON_ADAPTER_FROMJSON(SET) \
+#define BRAYNS_JSON_ADAPTER_DEFAULT_SCHEMA(SET) \
+    [](const auto &object) \
+    { \
+        using T = BRAYNS_JSON_ADAPTER_ARGTYPE(object, SET); \
+        return Json::getSchema<T>(); \
+    }
+
+/**
+ * @brief Shortcut to generate a default value from a setter.
+ *
+ */
+#define BRAYNS_JSON_ADAPTER_DEFAULT_VALUE(SET) \
+    [](const auto &object) \
+    { \
+        using T = BRAYNS_JSON_ADAPTER_ARGTYPE(object, SET); \
+        return T{}; \
+    }
+
+/**
+ * @brief Shortcut to create a functor to serialize an object using Json class.
+ *
+ * The arguments are object setter name and a default factory.
+ *
+ */
+#define BRAYNS_JSON_ADAPTER_FROMJSON(SET, DEFAULT) \
     [](const auto &json, auto &object) \
     { \
         using T = BRAYNS_JSON_ADAPTER_ARGTYPE(object, SET); \
-        T buffer{}; \
+        T buffer = DEFAULT(object); \
         if (!Json::deserialize(json, buffer)) \
         { \
             return false; \
@@ -162,6 +183,19 @@
         object.SET(std::move(buffer)); \
         return true; \
     }
+
+/**
+ * @brief Shortcut for a deserializer using getter and setter.
+ *
+ */
+#define BRAYNS_JSON_ADAPTER_GETSET_FROMJSON(GET, SET) \
+    BRAYNS_JSON_ADAPTER_FROMJSON(SET, [](auto &object) { return object.GET(); })
+
+/**
+ * @brief Shortcut for a deserializer using only setter.
+ *
+ */
+#define BRAYNS_JSON_ADAPTER_SET_FROMJSON(SET) BRAYNS_JSON_ADAPTER_FROMJSON(SET, BRAYNS_JSON_ADAPTER_DEFAULT_VALUE(SET))
 
 /**
  * @brief Register a property that can be get and set.
@@ -174,7 +208,7 @@
         NAME, \
         BRAYNS_JSON_ADAPTER_SCHEMA(GET), \
         BRAYNS_JSON_ADAPTER_TOJSON(GET), \
-        BRAYNS_JSON_ADAPTER_FROMJSON(SET), \
+        BRAYNS_JSON_ADAPTER_GETSET_FROMJSON(GET, SET), \
         Description(DESCRIPTION), \
         __VA_ARGS__)
 
@@ -199,13 +233,9 @@
 #define BRAYNS_JSON_ADAPTER_SET(NAME, SET, DESCRIPTION, ...) \
     BRAYNS_JSON_ADAPTER_PROPERTY( \
         NAME, \
-        [](const auto &object) \
-        { \
-            using T = BRAYNS_JSON_ADAPTER_ARGTYPE(object, SET); \
-            return Json::getSchema<T>(); \
-        }, \
+        BRAYNS_JSON_ADAPTER_DEFAULT_SCHEMA(SET), \
         [](const auto &, auto &) { return true; }, \
-        BRAYNS_JSON_ADAPTER_FROMJSON(SET), \
+        BRAYNS_JSON_ADAPTER_SET_FROMJSON(SET), \
         Description(DESCRIPTION), \
         WriteOnly(), \
         __VA_ARGS__)
