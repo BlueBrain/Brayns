@@ -186,17 +186,16 @@
 
 /**
  * @brief Shortcut for a deserializer using getter and setter.
- * 
+ *
  */
 #define BRAYNS_JSON_ADAPTER_GETSET_FROMJSON(GET, SET) \
     BRAYNS_JSON_ADAPTER_FROMJSON(SET, [](auto &object) { return object.GET(); })
 
 /**
  * @brief Shortcut for a deserializer using only setter.
- * 
+ *
  */
-#define BRAYNS_JSON_ADAPTER_SET_FROMJSON(SET) \
-    BRAYNS_JSON_ADAPTER_FROMJSON(SET, BRAYNS_JSON_ADAPTER_DEFAULT_VALUE(SET))
+#define BRAYNS_JSON_ADAPTER_SET_FROMJSON(SET) BRAYNS_JSON_ADAPTER_FROMJSON(SET, BRAYNS_JSON_ADAPTER_DEFAULT_VALUE(SET))
 
 /**
  * @brief Register a property that can be get and set.
