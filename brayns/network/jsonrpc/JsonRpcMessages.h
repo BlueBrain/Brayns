@@ -117,7 +117,7 @@ public:
     static bool serialize(const EmptyMessage &value, JsonValue &json)
     {
         (void)value;
-        json = Poco::makeShared<JsonObject>();
+        json = {};
         return true;
     }
 
