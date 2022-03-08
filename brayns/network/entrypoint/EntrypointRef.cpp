@@ -37,7 +37,11 @@ public:
         {
             schema.params = std::move(params);
         }
-        schema.returns = entrypoint.getResultSchema();
+        auto returns = entrypoint.getResultSchema();
+        if (!brayns::JsonSchemaHelper::isNull(returns))
+        {
+            schema.returns = returns;
+        }
     }
 };
 } // namespace
@@ -113,7 +117,7 @@ const std::optional<JsonSchema> &EntrypointRef::getParamsSchema() const
     return _schema.params;
 }
 
-const JsonSchema &EntrypointRef::getResultSchema() const
+const std::optional<JsonSchema> &EntrypointRef::getResultSchema() const
 {
     return _schema.returns;
 }

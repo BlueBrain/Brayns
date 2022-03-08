@@ -53,7 +53,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -81,7 +81,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -102,5 +102,5 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 

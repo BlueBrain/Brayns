@@ -277,7 +277,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -292,7 +292,7 @@ This method takes no parameters.
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -307,7 +307,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1102,7 +1102,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1154,7 +1154,7 @@ This method takes no parameters.
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1188,7 +1188,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1205,7 +1205,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1222,7 +1222,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1320,7 +1320,7 @@ This method takes no parameters.
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1339,7 +1339,7 @@ Return value:
 
   * ``async``: ``bool``. Check if the entrypoint is asynchronous.
   * ``description``: ``str``. Description of the entrypoint.
-  * ``params``: ``list``. Input schema.
+  * ``params``: ``Any``. Input schema.
   * ``plugin``: ``str``. Name of the plugin that loads the entrypoint.
   * ``returns``: ``Any``. Output schema.
   * ``title``: ``str``. Name of the entrypoint.
@@ -1359,7 +1359,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1378,7 +1378,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1404,7 +1404,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1464,7 +1464,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1480,7 +1480,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1516,7 +1516,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1541,7 +1541,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1601,7 +1601,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1616,7 +1616,7 @@ This method takes no parameters.
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1661,7 +1661,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1769,7 +1769,7 @@ This method takes no parameters.
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1787,7 +1787,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1823,7 +1823,7 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 
 ----
 
@@ -1859,5 +1859,5 @@ Parameters:
 
 Return value:
 
-* ``None``
+This method has no return values.
 

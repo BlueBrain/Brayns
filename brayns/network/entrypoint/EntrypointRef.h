@@ -138,9 +138,9 @@ public:
      *
      * Must be called after onCreate().
      *
-     * @return const JsonSchema& JSON schema.
+     * @return const std::optional<JsonSchema>& JSON schema if any.
      */
-    const JsonSchema &getResultSchema() const;
+    const std::optional<JsonSchema> &getResultSchema() const;
 
     /**
      * @brief Check if the request can be cancelled.
