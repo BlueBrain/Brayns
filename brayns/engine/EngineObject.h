@@ -24,24 +24,22 @@
 
 namespace brayns
 {
+/**
+ * @brief Base class for all engine objects which required synchronization with OSPRay
+ */
 class EngineObject : public BaseObject
 {
 public:
     virtual ~EngineObject() = default;
 
-    void doCommit();
+    /**
+     * @brief Get the object type as a string
+     */
+    virtual std::string getName() const noexcept = 0;
+
+    void commit();
 
 protected:
-    virtual void commit() = 0;
-};
-
-template<typename T>
-struct EngineObjectName
-{
-    static std::string get()
-    {
-        const std::string typeName(typeid(T).name());
-        throw std::runtime_error("EngineObjectName not implemented for " + typeName);
-    }
+    virtual void commitImpl() = 0;
 };
 }

@@ -42,8 +42,8 @@ public:
     Light(const Light &);
     Light &operator=(const Light &);
 
-    Light(Light &&) = default;
-    Light &operator=(Light &&) = default;
+    Light(Light &&) noexcept = default;
+    Light &operator=(Light &&) noexcept = default;
 
     virtual ~Light();
 
@@ -93,7 +93,7 @@ protected:
     /**
      * @brief commit() implementation
      */
-    void commit() final;
+    void commitImpl() final;
 
     /**
      * @brief Returns this light OSPRay handle

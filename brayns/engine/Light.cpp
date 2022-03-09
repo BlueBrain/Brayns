@@ -22,12 +22,12 @@
 
 namespace brayns
 {
-Light::Light(const Light& o)
+Light::Light(const Light &o)
 {
     *this = o;
 }
 
-Light& Light::operator=(const Light &o)
+Light &Light::operator=(const Light &o)
 {
     _color = o._color;
     _intensity = o._intensity;
@@ -38,7 +38,7 @@ Light& Light::operator=(const Light &o)
 
 Light::~Light()
 {
-    if(_handle)
+    if (_handle)
         ospRelease(_handle);
 }
 
@@ -72,9 +72,9 @@ bool Light::isVisible() const noexcept
     return _visible;
 }
 
-void Light::commit()
+void Light::commitImpl()
 {
-    if(!_handle)
+    if (!_handle)
     {
         const auto handleName = getOSPHandleName();
         _handle = ospNewLight(handleName.data());

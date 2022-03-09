@@ -180,6 +180,11 @@ public:
     const Bounds &getBounds() const noexcept;
 
     /**
+     * @brief Recompute the model bounds with the current transformation
+     */
+    void computeBounds() noexcept;
+
+    /**
      * @brief Commit implementation
      */
     void commit() final;
@@ -225,11 +230,6 @@ private:
      */
     OSPInstance handle() const noexcept;
 
-    /**
-     * @brief Recompute the model bounds with the current transformation
-     */
-    void _recomputeBounds() noexcept;
-
 private:
     friend class Scene;
 
@@ -239,9 +239,6 @@ private:
 
     bool _visible{true};
     Transformation _transformation;
-
-    // Flag used by the scene to know if it needs to recompute its own bounds
-    bool _boundsDirty{true};
     Bounds _bounds;
 
     OSPInstance _instanceHandle{nullptr};

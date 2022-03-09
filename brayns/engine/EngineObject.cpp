@@ -22,12 +22,12 @@
 
 namespace brayns
 {
-void EngineObject::doCommit()
+void EngineObject::commit()
 {
-    if(!isModified())
+    if (!isModified())
         return;
 
-    commit();
+    commitImpl();
 
     resetModified();
 }

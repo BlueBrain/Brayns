@@ -99,7 +99,7 @@ ModelInstance::ModelInstance(const size_t modelID, Model &model)
     , _model(model)
 {
     _instanceHandle = ospNewInstance(model.groupHandle());
-    _recomputeBounds();
+    computeBounds();
 }
 
 ModelInstance::~ModelInstance()
@@ -115,6 +115,12 @@ uint32_t ModelInstance::getID() const noexcept
 const Bounds &ModelInstance::getBounds() const noexcept
 {
     return _bounds;
+}
+
+void ModelInstance::computeBounds() noexcept
+{
+    const auto matrix = _transformation.toMatrix();
+    _bounds = _model.computeBounds(matrix);
 }
 
 void ModelInstance::commit()
@@ -165,7 +171,7 @@ void ModelInstance::setTransform(const Transformation &transform) noexcept
 
     // Recompute bounds as soon as the transform changes
     if (_transformation.isModified())
-        _recomputeBounds();
+        computeBounds();
 }
 
 const Transformation &ModelInstance::getTransform() const noexcept
@@ -176,12 +182,5 @@ const Transformation &ModelInstance::getTransform() const noexcept
 OSPInstance ModelInstance::handle() const noexcept
 {
     return _instanceHandle;
-}
-
-void ModelInstance::_recomputeBounds() noexcept
-{
-    const auto matrix = _transformation.toMatrix();
-    _bounds = _model.computeBounds(matrix);
-    _boundsDirty = true;
 }
 } // namespace brayns
