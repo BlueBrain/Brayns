@@ -40,7 +40,7 @@ Example:
 
 from .client.client import Client
 from .client.connect import connect
-from .client.reply_error import ReplyError
+from .client.json_rpc_error import JsonRpcError
 from .doc.doc_builder import build_rst_doc, save_rst_doc
 from .utils.camera_path_handler import CameraPathHandler
 
@@ -50,5 +50,5 @@ __all__ = [
     'save_rst_doc',
     'Client',
     'CameraPathHandler',
-    'ReplyError'
+    'JsonRpcError'
 ]

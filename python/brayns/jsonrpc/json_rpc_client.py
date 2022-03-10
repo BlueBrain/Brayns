@@ -18,34 +18,30 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json
-from typing import Any, Union
+import json_rpc_handler
+from .json_rpc_request import JsonRpcRequest
+from .json_rpc_listener import JsonRpcListener
+from ..websocket.web_socket_client import WebSocketClient
 
 
-class Request:
+class JsonRpcClient:
 
-    def __init__(
-        self,
-        method: str,
-        params: Any = None,
-        request_id: Union[None, int, str] = None,
-        jsonrpc: str = '2.0'
-    ) -> None:
-        self.method = method
-        self.params = params
-        self.request_id = request_id
-        self.jsonrpc = jsonrpc
+    def __init__(self, client: WebSocketClient) -> None:
+        self._client = client
+        self._listener = None
 
-    def is_notification(self) -> bool:
-        return self.request_id is None
+    def start(self, listener: JsonRpcListener) -> None:
+        self._listener = listener
+        self._client.start(self)
 
-    def to_json(self) -> str:
-        message = {
-            'jsonrpc': self.jsonrpc,
-            'method': self.method
-        }
-        if self.params is not None:
-            message['params'] = self.params
-        if self.request_id is not None:
-            message['id'] = self.request_id
-        return json.dumps(message)
+    def stop(self) -> None:
+        self._client.stop()
+
+    def send(self, request: JsonRpcRequest) -> None:
+        self._client.send_text(request.to_json())
+
+    def on_binary_frame(self, data: bytes) -> None:
+        pass
+
+    def on_text_frame(self, data: str) -> None:
+        json_rpc_handler.handle_text(data, self._listener)

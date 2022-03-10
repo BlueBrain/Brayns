@@ -18,33 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""Helper module to format function params of an entrypoint."""
-
-from .entrypoint import Entrypoint
-from .schema import Schema
+from dataclasses import dataclass
+from typing import Any, Union
 
 
-def from_entrypoint(entrypoint: Entrypoint):
-    """Create a string representing function params of an entrypoint.
+@dataclass
+class JsonRpcReply:
 
-    Example: {
-        params: {a: int, b: str}
-    }
-    gives 'a: int, b: str'
+    id: Union[int, str, None]
+    result: Any
 
-    :param entrypoint: Function source
-    :type entrypoint: Entrypoint
-    :return: Function params as string
-    :rtype: str
-    """
-    return ', '.join(
-        _format_param(schema)
-        for schema in entrypoint.params.schemas
-    )
-
-
-def _format_param(schema: Schema):
-    name = schema.name
-    typename = schema.typename
-    default = '' if schema.required else ' = None'
-    return f'{name}: {typename}{default}'
+    @staticmethod
+    def from_dict(message: dict) -> 'JsonRpcReply':
+        return JsonRpcReply(
+            id=message['id'],
+            result=message['result']
+        )

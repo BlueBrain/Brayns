@@ -18,34 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import asyncio
-import threading
-from typing import Coroutine
+from typing import Protocol
+
+from .json_rpc_error import JsonRpcError
+from .json_rpc_progress import JsonRpcProgress
+from .json_rpc_reply import JsonRpcReply
 
 
-class EventLoop:
+class JsonRpcListener(Protocol):
 
-    def __init__(self) -> None:
-        self._loop = asyncio.new_event_loop()
-        self._thread = None
+    def on_reply(self, reply: JsonRpcReply) -> None:
+        pass
 
-    @property
-    def running(self) -> bool:
-        return self._loop.is_running()
+    def on_error(self, error: JsonRpcError) -> None:
+        pass
 
-    def start(self) -> None:
-        if self.running:
-            return
-        self._thread = threading.Thread(
-            target=self._loop.run_forever,
-            daemon=True
-        )
-        self._thread.start()
+    def on_progress(self, progress: JsonRpcProgress) -> None:
+        pass
 
-    def stop(self) -> None:
-        if not self.running:
-            return
-        self._loop.call_soon_threadsafe(self._loop.stop)
-
-    def run(self, coroutine: Coroutine) -> asyncio.Future:
-        return asyncio.run_coroutine_threadsafe(coroutine, self._loop)
+    def on_invalid_message(self, data: str, e: Exception) -> None:
+        pass

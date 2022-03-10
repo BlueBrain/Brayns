@@ -18,14 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""Brayns client API to connect to a Brayns renderer."""
+import json
+from dataclasses import dataclass
+from typing import Any, Union
 
-from .abstract_client import AbstractClient
-from .client import Client
-from .json_rpc_error import JsonRpcError
 
-__all__ = [
-    'AbstractClient',
-    'Client',
-    'JsonRpcError'
-]
+@dataclass
+class JsonRpcRequest:
+
+    method: str
+    params: Any = None
+    id: Union[None, int, str] = None
+
+    def is_notification(self) -> bool:
+        return self.id is None
+
+    def to_json(self) -> str:
+        message = {
+            'method': self.method
+        }
+        if self.params is not None:
+            message['params'] = self.params
+        if self.id is not None:
+            message['id'] = self.id
+        return json.dumps(message)
