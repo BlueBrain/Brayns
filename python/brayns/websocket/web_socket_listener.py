@@ -18,31 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import ABC, abstractmethod
-from typing import Any, Union
+from typing import Protocol
 
 
-class AbstractClient(ABC):
-    """Interface to implement to connect to the renderer."""
+class WebSocketListener(Protocol):
 
-    @abstractmethod
-    def request(
-        self,
-        method: str,
-        params: Any = None,
-        request_id: Union[int, str] = 0,
-        timeout: Union[float, None] = None,
-    ) -> Any:
-        """Send a JSON-RPC request to the renderer.
+    def on_binary_frame(self, data: bytes) -> None:
+        pass
 
-        :param method: method name
-        :type method: str
-        :param params: request params, defaults to None
-        :type params: Any, optional
-        :param request_id: request ID, defaults to 0
-        :type request_id: Union[int, str], optional
-        :param timeout: optional timeout in seconds, defaults to None
-        :type timeout: Union[float, None], optional
-        :return: request result.
-        :rtype: Any
-        """
+    def on_text_frame(self, data: str) -> None:
+        pass

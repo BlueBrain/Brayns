@@ -17,3 +17,25 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+from dataclasses import dataclass
+from typing import Union
+
+
+@dataclass
+class JsonRpcProgress:
+
+    method: str
+    id: Union[int, str, None]
+    operation: str
+    amount: float
+
+    @staticmethod
+    def from_dict(message: dict) -> 'JsonRpcProgress':
+        params = message['params']
+        return JsonRpcProgress(
+            method=message['method'],
+            id=params['id'],
+            operation=params['operation'],
+            amount=params['amount']
+        )

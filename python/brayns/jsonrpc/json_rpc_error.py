@@ -18,8 +18,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""Build a Python API exposing a Brayns renderer entrypoints."""
+from dataclasses import dataclass
+from typing import Any, Union
 
-from . import api_builder
 
-__all__ = ['api_builder']
+@dataclass
+class JsonRpcError:
+
+    id: Union[int, str, None]
+    code: int
+    message: str
+    data: Any = None
+
+    @staticmethod
+    def from_dict(message: dict) -> 'JsonRpcError':
+        error = message['error']
+        return JsonRpcError(
+            id=message['id'],
+            code=error['code'],
+            message=error['message'],
+            data=error.get('data')
+        )

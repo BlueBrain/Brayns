@@ -20,14 +20,12 @@
 
 from typing import Any, Union
 
-from ..api import api_builder
-
-from .abstract_client import AbstractClient
-from .json_rpc_client import JsonRpcClient
-from .request import Request
+from ..jsonrpc.json_rpc_client import JsonRpcClient
+from ..jsonrpc.json_rpc_request import JsonRpcRequest
+from ..jsonrpc.json_rpc_listener import JsonRpcListener
 
 
-class Client(AbstractClient):
+class Client:
     """Brayns client implementation to connect to the renderer."""
 
     def __init__(
@@ -38,16 +36,15 @@ class Client(AbstractClient):
     ) -> None:
         """Connect to the renderer using the given settings.
 
-        :param uri: Renderer URI in format host:port
+        :param uri: Renderer URI in format 'host:port'
         :type uri: str
         :param secure: True if SSL is enabled, defaults to False
         :type secure: bool, optional
-        :param cafile: CA used to authenticate the renderer, defaults to None
+        :param cafile: Optional certification authority, defaults to None
         :type cafile: Union[str, None], optional
         """
         self._client = JsonRpcClient()
         self._client.connect(uri, secure, cafile)
-        api_builder.build_api(self)
 
     def __enter__(self) -> None:
         """Allow using Brayns client in context manager."""
@@ -87,7 +84,7 @@ class Client(AbstractClient):
         :return: reply result
         :rtype: Any
         """
-        request = Request(method, params, request_id)
+        request = JsonRpcRequest(method, params, request_id)
         self._client.send(request)
         if request.is_notification():
             return None
