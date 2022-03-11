@@ -17,7 +17,7 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT sonata_FOUND AND NOT TARGET sonata::so
         FetchContent_Declare(
             libsonata
             GIT_REPOSITORY https://github.com/BlueBrain/libsonata.git
-            GIT_TAG        v0.1.9
+            GIT_TAG        v0.1.11
             GIT_SHALLOW OFF # Required for its own CMakeLists.txt not to fail
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libsonata
@@ -40,7 +40,7 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT MorphIO_FOUND AND NOT TARGET MorphIO::
         FetchContent_Declare(
             MorphIO
             GIT_REPOSITORY https://github.com/BlueBrain/MorphIO.git
-            GIT_TAG        v3.3.2
+            GIT_TAG        v3.3.3
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/MorphIO
@@ -81,7 +81,7 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT MVDTool_FOUND AND NOT TARGET MVDTool)
         FetchContent_Declare(
             MVDTool
             GIT_REPOSITORY https://github.com/BlueBrain/MVDTool.git
-            GIT_TAG        v2.4.2
+            GIT_TAG        v2.4.4
             GIT_SHALLOW ON
             #GIT_SUBMODULES # Empty string from 3.16 onwards will not clone submodules
             GIT_SUBMODULES_RECURSE OFF
@@ -109,7 +109,7 @@ if((BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED OR BRAYNS_DTI_E
         FetchContent_Declare(
             Brion
             GIT_REPOSITORY https://github.com/BlueBrain/Brion.git
-            GIT_TAG        3.3.7
+            GIT_TAG        3.3.8
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE OFF
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Brion

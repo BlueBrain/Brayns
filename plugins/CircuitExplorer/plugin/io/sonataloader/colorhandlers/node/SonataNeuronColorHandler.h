@@ -32,7 +32,7 @@ namespace sonataloader
 class SonataNeuronColorHandler : public NeuronColorHandler<std::vector<bbp::sonata::NodeID>>
 {
 public:
-    SonataNeuronColorHandler(const std::string &configPath, const std::string &population);
+    SonataNeuronColorHandler(bbp::sonata::CircuitConfig circuitConfig, const std::string &population);
 
     std::vector<std::string> _getExtraMethods() const final;
     std::vector<std::string> _getValuesForMethod(const std::string &method) const final;

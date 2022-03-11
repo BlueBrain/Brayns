@@ -20,18 +20,47 @@
 
 #include <bbp/sonata/config.h>
 
+#include <filesystem>
+#include <optional>
+
 namespace sonataloader
 {
+/**
+ * @brief The SonataNetworkConfig class holds the parsed circuit & simulation configuration files of a SONATA network
+ */
+class SonataNetworkConfig
+{
+public:
+    /**
+     * @brief Returns the path to the folder where circuit config file is located
+     */
+    const std::string &circuitConfigDir() const noexcept;
+
+    /**
+     * @brief Returns the parsed circuit config file
+     */
+    const bbp::sonata::CircuitConfig &circuitConfig() const noexcept;
+
+    /**
+     * @brief Rreturns the parsed simulation config file
+     * @throws std::runtime_error if no simulation configuration file was found while loading
+     */
+    const bbp::sonata::SimulationConfig &simulationConfig() const;
+
+private:
+    friend class SonataConfig;
+
+    SonataNetworkConfig(std::string circuitConfigPath, std::string simulationConfigPath);
+
+    const std::string _circuitConfigDir;
+    const bbp::sonata::CircuitConfig _config;
+    const std::optional<bbp::sonata::SimulationConfig> _simConfig;
+};
+
 class SonataConfig
 {
 public:
-    struct Data
-    {
-        std::string path;
-        bbp::sonata::CircuitConfig config;
-    };
-
-    static Data readNetwork(const std::string &configPath);
+    static SonataNetworkConfig readNetwork(std::string configPath, std::string simConfigPath);
 
     class MorphologyPath
     {
@@ -46,5 +75,11 @@ public:
     };
 
     static MorphologyPath resolveMorphologyPath(const bbp::sonata::PopulationProperties &);
+
+    static std::filesystem::path resolveSpikesPath(const bbp::sonata::SimulationConfig &simConfig);
+
+    static std::filesystem::path resolveReportPath(
+        const bbp::sonata::SimulationConfig &simConfig,
+        const std::string &report);
 };
 } // namespace sonataloader

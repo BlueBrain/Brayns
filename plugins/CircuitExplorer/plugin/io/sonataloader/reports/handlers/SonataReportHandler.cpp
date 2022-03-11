@@ -61,7 +61,13 @@ std::vector<float> SonataReportHandler::getFrameDataImpl(const uint32_t frame)
     _ready = false;
     const auto realFrame = frame > _nbFrames ? _nbFrames : frame;
     const auto timestamp = frameIndexToTimestamp(realFrame, _dt);
-    const auto data = _reportPopulation.get(_selection, timestamp).data;
+    const auto data = _reportPopulation
+                          .get(
+                              nonstd::optional<bbp::sonata::Selection>(_selection),
+                              nonstd::optional<double>(timestamp),
+                              nonstd::nullopt,
+                              nonstd::nullopt)
+                          .data;
     _ready = true;
 
     return data;

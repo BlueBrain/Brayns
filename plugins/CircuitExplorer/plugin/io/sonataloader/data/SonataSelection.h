@@ -52,7 +52,11 @@ public:
      * @brief select node ids from a node population based on reported nodes in
      * a simulation
      */
-    void select(const ReportType simType, const std::string &reportPath, const std::string &population);
+    void select(
+        const bbp::sonata::SimulationConfig &config,
+        const ReportType simType,
+        const std::string &reportName,
+        const std::string &population);
 
     /**
      * @brief return the best selection candidate based on what was selected:

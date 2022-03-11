@@ -29,16 +29,23 @@ PointNeuronPopulationLoader::PointNeuronPopulationLoader()
 }
 
 std::vector<MorphologyInstance::Ptr> PointNeuronPopulationLoader::load(
-    const SonataConfig::Data &networkData,
+    const SonataNetworkConfig &networkData,
     const SonataNodePopulationParameters &lc,
     const bbp::sonata::Selection &nodeSelection) const
 {
-    const auto population = networkData.config.getNodePopulation(lc.node_population);
+    const auto &populationName = lc.node_population;
+    const auto &config = networkData.circuitConfig();
+    const auto population = config.getNodePopulation(populationName);
+
     const auto nodesSize = nodeSelection.flatSize();
+
     const auto positions = SonataCells::getPositions(population, nodeSelection);
-    const auto radMult = lc.neuron_morphology_parameters.radius_multiplier;
-    const auto radOverride = lc.neuron_morphology_parameters.radius_override;
+
+    const auto &neuronParameters = lc.neuron_morphology_parameters;
+    const auto radMult = neuronParameters.radius_multiplier;
+    const auto radOverride = neuronParameters.radius_override;
     const float radius = radOverride > 0.f ? radOverride : (radMult > 0.f ? radMult : 1.f);
+
     std::vector<MorphologyInstance::Ptr> result(nodesSize);
 
     auto sharedData = std::make_shared<SampleSharedData>();

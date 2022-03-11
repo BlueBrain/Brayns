@@ -38,15 +38,56 @@ using namespace sonataloader;
 
 namespace
 {
-auto selectNodes(const bbp::sonata::CircuitConfig &config, const SonataNodePopulationParameters &lc)
+float computeProgressChunk(const SonataLoaderParameters &loadParameters) noexcept
+{
+    // Compute how much progress percentage each population load will consume
+    const auto &populations = loadParameters.node_population_settings;
+    const auto numNodePopulations = populations.size();
+
+    size_t numEdgePopulations = 0u;
+    for (const auto &popLoadConfig : populations)
+    {
+        const auto &edgePopulations = popLoadConfig.edge_populations;
+        numEdgePopulations += edgePopulations.size();
+    }
+    // Each population (wether nodes or edges) have 3 step: geometry, simulation, model creation
+    const float chunk = (1.f / static_cast<float>(numNodePopulations * 3 + numEdgePopulations * 3));
+
+    return chunk;
+}
+
+auto selectNodes(const SonataNetworkConfig &network, const SonataNodePopulationParameters &lc)
 {
     NodeSelection selection;
-    selection.select(config, lc.node_population, lc.node_sets);
-    selection.select(lc.node_ids);
-    selection.select(lc.report_type, lc.report_path, lc.node_population);
-    const auto selected = selection.intersection(lc.node_percentage);
+
+    const auto &nodePopulation = lc.node_population;
+    const auto &nodeSets = lc.node_sets;
+
+    const auto &nodeIds = lc.node_ids;
+
+    const auto reportType = lc.report_type;
+    const auto &reportName = lc.report_name;
+
+    const auto percentage = lc.node_percentage;
+
+    const auto &config = network.circuitConfig();
+
+    selection.select(config, nodePopulation, nodeSets);
+    selection.select(nodeIds);
+
+    if (reportType != ReportType::NONE)
+    {
+        const auto &simConfig = network.simulationConfig();
+        selection.select(simConfig, reportType, reportName, nodePopulation);
+    }
+
+    const auto selected = selection.intersection(percentage);
+
     if (selected.empty())
+    {
         throw std::runtime_error("SonataLoader: Empty node selection for " + lc.node_population);
+    }
+
     return selected;
 }
 
@@ -104,17 +145,17 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
     const brayns::Timer timer;
     brayns::Log::info("[CE] {}: loading {}.", getName(), path);
 
-    // Parse and check config and load parameters
-    const SonataConfig::Data network = SonataConfig::readNetwork(path);
-    ParameterCheck::checkInput(network.config, input);
+    // Load config files
+    const auto &circuitConfigPath = path;
+    const auto &simulationConfigPath = input.simulation_config_path;
+    const auto network = SonataConfig::readNetwork(circuitConfigPath, simulationConfigPath);
 
-    // Compute how much progress percentage each population load will consume
-    const auto numNodes = input.node_population_settings.size();
-    size_t numEdges = 0u;
-    for (const auto &popLoadConfig : input.node_population_settings)
-        numEdges += popLoadConfig.edge_populations.size();
+    // Check input parameters and data available on disk
+    ParameterCheck::checkInput(network, input);
+
+    // Compute progress chunk per population load item
+    const float chunk = computeProgressChunk(input);
     float total = 0.f;
-    const float chunk = (1.f / static_cast<float>(numNodes * 3 + numEdges * 3));
 
     std::vector<brayns::ModelDescriptorPtr> result;
     for (const auto &nodeSettings : input.node_population_settings)
@@ -124,18 +165,21 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
         brayns::Log::info("[CE] Loading {} node population.", nodeName);
 
         // Select nodes that are going to be loaded
-        const auto nodeSelection = selectNodes(network.config, nodeSettings);
+        const auto nodeSelection = selectNodes(network, nodeSettings);
 
         // Load node data
         const auto nodeIDs = nodeSelection.flatten();
         informProgress(callback, "Loading " + nodeName, total, chunk);
         auto nodes = PopulationLoaderManager::loadNodes(network, nodeSettings, nodeSelection);
         if (nodes.empty())
+        {
+            brayns::Log::warn("Skipping node population {}, no nodes were loaded", nodeName);
             continue;
+        }
 
         // Load node report mapping, if any
         informProgress(callback, nodeName + ": Loading simulation", total, chunk);
-        PopulationReportManager::loadNodeMapping(nodeSettings, nodeSelection, nodes);
+        PopulationReportManager::loadNodeMapping(network, nodeSettings, nodeSelection, nodes);
 
         // Load edges for this node population
         std::vector<brayns::ModelDescriptor *> edgeModels;
@@ -155,7 +199,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
 
             // Load edge report mapping, if any
             informProgress(callback, edgeName + ": Loading simulation", total, chunk);
-            PopulationReportManager::loadEdgeMapping(edge, nodeSelection, edges);
+            PopulationReportManager::loadEdgeMapping(network, edge, nodeSelection, edges);
 
             // Add geometry to the edge model
             informProgress(callback, edgeName + ": Generating edge geometry", total, chunk);
@@ -170,7 +214,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
             result.push_back(createModelDescriptor(edgeName, path, edgeModel));
 
             // Create simulation handler, if any
-            PopulationReportManager::addEdgeReportHandler(edge, nodeSelection, result.back());
+            PopulationReportManager::addEdgeReportHandler(network, edge, nodeSelection, result.back());
             // Add to the synapse model list to set the node simulation handler
             // if this edge model does not have one
             edgeModels.push_back(result.back().get());
@@ -197,7 +241,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
         result.push_back(createModelDescriptor(nodeName, path, nodeModel));
 
         // Create simulation handler
-        PopulationReportManager::addNodeReportHandler(nodeSettings, nodeSelection, result.back());
+        PopulationReportManager::addNodeReportHandler(network, nodeSettings, nodeSelection, result.back());
         // Update all the edge populations that does not have a simulation of
         // their own
         PopulationReportManager::addNodeHandlerToEdges(result.back(), edgeModels);

@@ -31,13 +31,15 @@
 namespace sonataloader
 {
 CircuitColorHandler::Ptr PopulationColorManager::createNodeColorHandler(
-    const SonataConfig::Data &network,
+    const SonataNetworkConfig &network,
     const SonataNodePopulationParameters &lc)
 {
     std::string type;
+    const auto &config = network.circuitConfig();
+    const auto &populationName = lc.node_population;
     try
     {
-        const auto population = network.config.getNodePopulation(lc.node_population);
+        const auto population = config.getNodePopulation(populationName);
         type = SonataCells::getPopulationType(population);
     }
     catch (...)
@@ -46,24 +48,27 @@ CircuitColorHandler::Ptr PopulationColorManager::createNodeColorHandler(
             "[CE] PopulationLoaderManager: Extracting population type "
             "from population properties for {}.",
             lc.node_population);
-        type = network.config.getNodePopulationProperties(lc.node_population).type;
+        type = config.getNodePopulationProperties(populationName).type;
     }
 
     if (type == "vasculature")
         return std::make_unique<VasculatureColorHandler>();
 
-    return std::make_unique<SonataNeuronColorHandler>(network.path, lc.node_population);
+    return std::make_unique<SonataNeuronColorHandler>(config, lc.node_population);
 }
 
 CircuitColorHandler::Ptr PopulationColorManager::createEdgeColorHandler(
-    const SonataConfig::Data &network,
+    const SonataNetworkConfig &network,
     const SonataEdgePopulationParameters &lc)
 {
-    const auto edgeProperties = network.config.getEdgePopulationProperties(lc.edge_population);
+    const auto &config = network.circuitConfig();
+    const auto &population = lc.edge_population;
+    const auto edgeProperties = config.getEdgePopulationProperties(population);
+    const auto loadAfferent = lc.load_afferent;
 
     if (edgeProperties.type == "endfoot")
         return std::make_unique<EndFootColorHandler>();
 
-    return std::make_unique<CommonEdgeColorHandler>(network.path, lc.edge_population, lc.load_afferent);
+    return std::make_unique<CommonEdgeColorHandler>(config, population, loadAfferent);
 }
 } // namespace sonataloader

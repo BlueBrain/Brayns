@@ -32,7 +32,7 @@ public:
     SynapseAstrocytePopulationLoader();
 
     std::vector<SynapseGroup::Ptr> load(
-        const SonataConfig::Data &networkData,
+        const SonataNetworkConfig &networkData,
         const SonataEdgePopulationParameters &lc,
         const bbp::sonata::Selection &nodeSelection) const final;
 };

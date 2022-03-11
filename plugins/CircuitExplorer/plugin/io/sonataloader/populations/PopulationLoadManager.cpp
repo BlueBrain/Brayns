@@ -61,7 +61,7 @@ public:
     }
 
 private:
-    std::unordered_map<std::string, typename Super::Ptr> _nodes;
+    std::unordered_map<std::string, std::unique_ptr<Super>> _nodes;
 };
 
 class NodePopulationLoaders
@@ -115,27 +115,32 @@ private:
 } // namespace
 
 std::vector<SynapseGroup::Ptr> PopulationLoaderManager::loadEdges(
-    const SonataConfig::Data &networkConfig,
+    const SonataNetworkConfig &network,
     const SonataEdgePopulationParameters &lc,
     const bbp::sonata::Selection &nodeSelection)
 {
-    const auto edgeType = networkConfig.config.getEdgePopulationProperties(lc.edge_population).type;
+    const auto &config = network.circuitConfig();
+    const auto &populationName = lc.edge_population;
+    const auto edgePopulationProperties = config.getEdgePopulationProperties(populationName);
+    const auto edgeType = edgePopulationProperties.type;
     EdgePopulationLoaders epl;
     const auto &loader = epl.getEdgeLoader(edgeType);
 
-    return loader.load(networkConfig, lc, nodeSelection);
+    return loader.load(network, lc, nodeSelection);
 }
 
 std::vector<MorphologyInstance::Ptr> PopulationLoaderManager::loadNodes(
-    const SonataConfig::Data &networkData,
+    const SonataNetworkConfig &network,
     const SonataNodePopulationParameters &lc,
     const bbp::sonata::Selection &nodeSelection)
 {
     std::string nodeType;
+    const auto &config = network.circuitConfig();
+    const auto &populationName = lc.node_population;
     {
         try
         {
-            const auto nodes = networkData.config.getNodePopulation(lc.node_population);
+            const auto nodes = config.getNodePopulation(lc.node_population);
             nodeType = SonataCells::getPopulationType(nodes);
         }
         catch (...)
@@ -144,14 +149,14 @@ std::vector<MorphologyInstance::Ptr> PopulationLoaderManager::loadNodes(
                 "[CE] PopulationLoaderManager: Extracting population "
                 "type from population properties for {}.",
                 lc.node_population);
-            auto nodeProperties = networkData.config.getNodePopulationProperties(lc.node_population);
+            auto nodeProperties = config.getNodePopulationProperties(populationName);
             nodeType = std::move(nodeProperties.type);
         }
     }
     NodePopulationLoaders npl;
     const auto &loader = npl.getNodeLoader(nodeType);
 
-    return loader.load(networkData, lc, nodeSelection);
+    return loader.load(network, lc, nodeSelection);
 }
 
 void PopulationLoaderManager::mapEdgesToNodes(

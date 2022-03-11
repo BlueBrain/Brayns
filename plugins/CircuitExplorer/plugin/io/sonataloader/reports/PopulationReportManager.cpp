@@ -53,6 +53,26 @@ NodeReportLoader::Ptr getLoaderForType(const ReportType type)
     }
 }
 
+std::string getReportPath(const ReportType type, const bbp::sonata::SimulationConfig &config, const std::string &name)
+{
+    switch (type)
+    {
+    case ReportType::BLOODFLOW_PRESSURE:
+    case ReportType::BLOODFLOW_RADII:
+    case ReportType::BLOODFLOW_SPEED:
+    case ReportType::COMPARTMENT:
+    case ReportType::SUMMATION:
+    case ReportType::SYNAPSE:
+        return SonataConfig::resolveReportPath(config, name);
+    case ReportType::SPIKES:
+        return SonataConfig::resolveSpikesPath(config);
+    case ReportType::NONE:
+        return "";
+    }
+
+    throw std::runtime_error("Unknown report type");
+}
+
 brayns::AbstractSimulationHandlerPtr getHandlerForType(
     const ReportType type,
     const std::string &reportPath,
@@ -79,16 +99,23 @@ brayns::AbstractSimulationHandlerPtr getHandlerForType(
 } // namespace
 
 void PopulationReportManager::loadNodeMapping(
+    const SonataNetworkConfig &network,
     const SonataNodePopulationParameters &input,
     const bbp::sonata::Selection &selection,
     std::vector<MorphologyInstance::Ptr> &nodes)
 {
     const auto type = input.report_type;
     if (type == ReportType::NONE)
+    {
         return;
+    }
 
+    const auto &population = input.node_population;
+    const auto &simConfig = network.simulationConfig();
+    const auto &reportName = input.report_name;
+    const auto reportPath = getReportPath(type, simConfig, reportName);
     const auto reportLoader = getLoaderForType(type);
-    const auto mapping = reportLoader->loadMapping(input.report_path, input.node_population, selection);
+    const auto mapping = reportLoader->loadMapping(reportPath, population, selection);
 
 #pragma omp parallel for
     for (size_t i = 0; i < nodes.size(); ++i)
@@ -99,22 +126,31 @@ void PopulationReportManager::loadNodeMapping(
 }
 
 void PopulationReportManager::loadEdgeMapping(
+    const SonataNetworkConfig &network,
     const SonataEdgePopulationParameters &input,
     const bbp::sonata::Selection &selection,
     std::vector<SynapseGroup::Ptr> &edges)
 {
-    if (input.edge_report.empty())
+    const auto &reportName = input.edge_report_name;
+    if (reportName.empty())
+    {
         return;
+    }
 
-    // Currently there is only one type of synapse report...
-    const auto mapping = EdgeCompartmentLoader().loadMapping(input.edge_report, input.edge_population, selection);
+    const auto &population = input.edge_population;
+    const auto &simConfig = network.simulationConfig();
+    const auto reportPath = getReportPath(ReportType::SYNAPSE, simConfig, reportName);
+    const auto mapping = EdgeCompartmentLoader().loadMapping(reportPath, population, selection);
 
 #pragma omp parallel for
     for (size_t j = 0; j < edges.size(); ++j)
+    {
         edges[j]->mapSimulation(mapping[j].offsets);
+    }
 }
 
 void PopulationReportManager::addNodeReportHandler(
+    const SonataNetworkConfig &network,
     const SonataNodePopulationParameters &input,
     const bbp::sonata::Selection &selection,
     brayns::ModelDescriptorPtr &model)
@@ -123,26 +159,35 @@ void PopulationReportManager::addNodeReportHandler(
     if (type == ReportType::NONE)
         return;
 
-    const auto &path = input.report_path;
+    const auto &simConfig = network.simulationConfig();
+    const auto &reportName = input.report_name;
+    const auto reportPath = getReportPath(type, simConfig, reportName);
     const auto &population = input.node_population;
 
-    auto handler = getHandlerForType(type, path, population, selection);
+    auto handler = getHandlerForType(type, reportPath, population, selection);
     if (!handler)
+    {
         return;
+    }
 
     model->getModel().setSimulationHandler(handler);
     CircuitExplorerMaterial::setSimulationColorEnabled(model->getModel(), true);
 }
 
 void PopulationReportManager::addEdgeReportHandler(
+    const SonataNetworkConfig &network,
     const SonataEdgePopulationParameters &input,
     const bbp::sonata::Selection &selection,
     brayns::ModelDescriptorPtr &model)
 {
-    if (input.edge_report.empty())
+    const auto &reportName = input.edge_report_name;
+    if (reportName.empty())
+    {
         return;
+    }
 
-    const auto &path = input.edge_report;
+    const auto &simConfig = network.simulationConfig();
+    const auto path = getReportPath(ReportType::SYNAPSE, simConfig, reportName);
     const auto &population = input.edge_population;
 
     auto handler = getHandlerForType(ReportType::SYNAPSE, path, population, selection);

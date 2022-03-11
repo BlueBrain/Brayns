@@ -32,11 +32,8 @@ namespace sonataloader
 class EdgePopulationLoader
 {
 public:
-    using Ptr = std::unique_ptr<EdgePopulationLoader>;
-
-    template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-    EdgePopulationLoader(T &&name)
-        : _typeName(std::forward<T>(name))
+    EdgePopulationLoader(std::string typeName)
+        : _typeName(std::move(typeName))
     {
     }
 
@@ -57,7 +54,7 @@ public:
      * progress to listening clients of the Brayns API
      */
     virtual std::vector<SynapseGroup::Ptr> load(
-        const SonataConfig::Data &networkConfig,
+        const SonataNetworkConfig &networkConfig,
         const SonataEdgePopulationParameters &lc,
         const bbp::sonata::Selection &nodeSelection) const = 0;
 

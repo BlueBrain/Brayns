@@ -25,7 +25,7 @@
 namespace sonataloader
 {
 std::vector<std::unique_ptr<SynapseGroup>> CommonEdgeLoader::load(
-    const SonataConfig::Data &networkConfig,
+    const SonataNetworkConfig &network,
     const SonataEdgePopulationParameters &lc,
     const bbp::sonata::Selection &nodeSelection) const
 {
@@ -43,12 +43,14 @@ std::vector<std::unique_ptr<SynapseGroup>> CommonEdgeLoader::load(
     std::vector<brayns::Vector3f> surfacePos;
     std::vector<uint64_t> edgeIds;
 
-    const auto population = networkConfig.config.getEdgePopulation(lc.edge_population);
+    const auto &config = network.circuitConfig();
+    const auto &populationName = lc.edge_population;
+    const auto percentage = lc.edge_percentage;
+    const auto population = config.getEdgePopulation(populationName);
 
     if (lc.load_afferent)
     {
-        const auto edgeSelection =
-            EdgeSelection(population.afferentEdges(baseNodeList)).intersection(lc.edge_percentage);
+        const auto edgeSelection = EdgeSelection(population.afferentEdges(baseNodeList)).intersection(percentage);
         edgeIds = edgeSelection.flatten();
         srcNodes = SonataSynapses::getTargetNodes(population, edgeSelection);
         sectionIds = SonataSynapses::getAfferentSectionIds(population, edgeSelection);
@@ -57,8 +59,7 @@ std::vector<std::unique_ptr<SynapseGroup>> CommonEdgeLoader::load(
     }
     else
     {
-        const auto edgeSelection =
-            EdgeSelection(population.efferentEdges(baseNodeList)).intersection(lc.edge_percentage);
+        const auto edgeSelection = EdgeSelection(population.efferentEdges(baseNodeList)).intersection(percentage);
         edgeIds = edgeSelection.flatten();
         srcNodes = SonataSynapses::getSourceNodes(population, edgeSelection);
         surfacePos = SonataSynapses::getEfferentSurfacePos(population, edgeSelection);

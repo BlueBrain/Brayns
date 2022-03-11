@@ -30,7 +30,7 @@ SynapseAstrocytePopulationLoader::SynapseAstrocytePopulationLoader()
 }
 
 std::vector<SynapseGroup::Ptr> SynapseAstrocytePopulationLoader::load(
-    const SonataConfig::Data &networkData,
+    const SonataNetworkConfig &network,
     const SonataEdgePopulationParameters &lc,
     const bbp::sonata::Selection &nodeSelection) const
 {
@@ -41,15 +41,17 @@ std::vector<SynapseGroup::Ptr> SynapseAstrocytePopulationLoader::load(
             "This should not have happened");
 
     const auto baseNodeList = nodeSelection.flatten();
-
-    const auto population = networkData.config.getEdgePopulation(lc.edge_population);
+    const auto &populationName = lc.edge_population;
+    const auto percentage = lc.edge_percentage;
+    const auto &config = network.circuitConfig();
+    const auto population = config.getEdgePopulation(populationName);
     // Fill it by mapping node ID to synapse list in case there is a node Id
     // without synapses, so we can still place an empty vector at the end
     std::map<uint64_t, std::unique_ptr<SynapseGroup>> mapping;
     for (const auto nodeId : baseNodeList)
         mapping[nodeId] = std::make_unique<SynapseAstrocyteGroup>();
 
-    const auto edgeSelection = EdgeSelection(population.efferentEdges(baseNodeList)).intersection(lc.edge_percentage);
+    const auto edgeSelection = EdgeSelection(population.efferentEdges(baseNodeList)).intersection(percentage);
     const auto edgeIds = edgeSelection.flatten();
     const auto srcNodes = SonataSynapses::getSourceNodes(population, edgeSelection);
     const auto sectionIds = SonataSynapses::getEfferentAstrocyteSectionIds(population, edgeSelection);

@@ -50,7 +50,7 @@ public:
      * @return a vector of morphology instances holding the geometries
      */
     std::vector<MorphologyInstance::Ptr> loadNodes(
-        const SonataConfig::Data &networkData,
+        const SonataNetworkConfig &networkData,
         const SonataNodePopulationParameters &loadSettings,
         const bbp::sonata::Selection &nodeSelection,
         const std::vector<std::string> &morphologyNames,

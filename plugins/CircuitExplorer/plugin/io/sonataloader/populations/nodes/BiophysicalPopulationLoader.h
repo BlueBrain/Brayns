@@ -32,7 +32,7 @@ public:
     BiophysicalPopulationLoader();
 
     std::vector<MorphologyInstance::Ptr> load(
-        const SonataConfig::Data &networkData,
+        const SonataNetworkConfig &networkData,
         const SonataNodePopulationParameters &loadSettings,
         const bbp::sonata::Selection &nodeSelection) const final;
 };

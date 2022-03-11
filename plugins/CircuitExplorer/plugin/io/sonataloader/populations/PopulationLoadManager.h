@@ -35,7 +35,7 @@ public:
      * type of edge population denoted by edgeType
      */
     static std::vector<SynapseGroup::Ptr> loadEdges(
-        const SonataConfig::Data &networkConfig,
+        const SonataNetworkConfig &networkConfig,
         const SonataEdgePopulationParameters &lc,
         const bbp::sonata::Selection &nodeSelection);
 
@@ -44,7 +44,7 @@ public:
      * type of node population denoted by nodeType
      */
     static std::vector<MorphologyInstance::Ptr> loadNodes(
-        const SonataConfig::Data &networkData,
+        const SonataNetworkConfig &networkData,
         const SonataNodePopulationParameters &loadSettings,
         const bbp::sonata::Selection &nodeSelection);
 
