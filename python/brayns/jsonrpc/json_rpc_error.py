@@ -21,6 +21,8 @@
 from dataclasses import dataclass
 from typing import Any, Union
 
+from .request_error import RequestError
+
 
 @dataclass
 class JsonRpcError:
@@ -28,14 +30,21 @@ class JsonRpcError:
     id: Union[int, str, None]
     code: int
     message: str
-    data: Any = None
+    data: Any
 
     @staticmethod
     def from_dict(message: dict) -> 'JsonRpcError':
-        error = message['error']
+        error: dict = message['error']
         return JsonRpcError(
-            id=message['id'],
+            id=message.get('id'),
             code=error['code'],
             message=error['message'],
             data=error.get('data')
+        )
+
+    def to_exception(self) -> RequestError:
+        return RequestError(
+            code=self.code,
+            message=self.message,
+            data=self.data
         )

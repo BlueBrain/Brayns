@@ -18,43 +18,50 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .json_rpc_error import JsonRpcError
-from .json_rpc_progress import JsonRpcProgress
-from .json_rpc_reply import JsonRpcReply
+import threading
+from typing import Any, Generator
+
+from .json_rpc_context import JsonRpcContext
+from .request_error import RequestError
+from .request_progress import RequestProgress
 
 
 class JsonRpcTask:
 
     def __init__(self) -> None:
-        self._reply = None
-        self._error = None
-        self._progress = None
+        self._context = JsonRpcContext()
+        self._lock = threading.Condition()
 
-    def is_ready(self) -> None:
-        return self._reply is not None or self._error is not None
+    def set_result(self, result: Any) -> None:
+        with self._lock:
+            self._context.set_result(result)
+            self._lock.notify_all()
 
-    def has_progress(self) -> None:
-        if self.is_ready():
-            raise StopIteration()
-        return self._progress is not None
+    def set_exception(self, error: RequestError) -> None:
+        with self._lock:
+            self._context.set_exception(error)
+            self._lock.notify_all()
 
-    def get_reply(self) -> JsonRpcReply:
-        if self._error is not None:
-            raise self._error
-        return self._reply
+    def add_progress(self, progress: RequestProgress) -> None:
+        with self._lock:
+            self._context.add_progress(progress)
+            self._lock.notify_all()
 
-    def get_progress(self) -> JsonRpcProgress:
-        if self.is_ready():
-            raise StopIteration()
-        progress = self._progress
-        self._progress = None
-        return progress
+    def wait_for_result(self) -> Any:
+        for _ in self.wait_for_all_progresses():
+            pass
+        return self._context.get_result()
 
-    def set_reply(self, reply: JsonRpcReply) -> None:
-        self._reply = reply
+    def wait_for_all_progresses(self) -> Generator[RequestProgress]:
+        while True:
+            try:
+                yield self._wait_for_next_progress()
+            except StopIteration:
+                return
 
-    def set_error(self, error: JsonRpcError) -> None:
-        self._error = error
-
-    def add_progress(self, progress: JsonRpcProgress) -> None:
-        self._progress = progress
+    def _wait_for_next_progress(self) -> RequestProgress:
+        with self._lock:
+            if self._context.has_progress():
+                return self._context.get_progress()
+            self._lock.wait()
+            return self._context.get_progress()

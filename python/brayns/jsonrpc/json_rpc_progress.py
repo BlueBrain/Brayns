@@ -21,12 +21,14 @@
 from dataclasses import dataclass
 from typing import Union
 
+from .request_progress import RequestProgress
+
 
 @dataclass
 class JsonRpcProgress:
 
-    method: str
     id: Union[int, str, None]
+    method: str
     operation: str
     amount: float
 
@@ -34,8 +36,14 @@ class JsonRpcProgress:
     def from_dict(message: dict) -> 'JsonRpcProgress':
         params = message['params']
         return JsonRpcProgress(
-            method=message['method'],
             id=params['id'],
+            method=message['method'],
             operation=params['operation'],
             amount=params['amount']
+        )
+
+    def to_progress(self) -> RequestProgress:
+        return RequestProgress(
+            operation=self.operation,
+            amount=self.amount
         )

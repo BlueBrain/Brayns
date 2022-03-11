@@ -26,9 +26,9 @@ from typing import Any, Union
 @dataclass
 class JsonRpcRequest:
 
+    id: Union[None, int, str]
     method: str
-    params: Any = None
-    id: Union[None, int, str] = None
+    params: Any
 
     def is_notification(self) -> bool:
         return self.id is None
@@ -37,8 +37,8 @@ class JsonRpcRequest:
         message = {
             'method': self.method
         }
-        if self.params is not None:
-            message['params'] = self.params
         if self.id is not None:
             message['id'] = self.id
+        if self.params is not None:
+            message['params'] = self.params
         return json.dumps(message)

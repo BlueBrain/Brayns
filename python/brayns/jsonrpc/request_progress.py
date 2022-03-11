@@ -18,15 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .client import Client
+from dataclasses import dataclass
 
 
-def connect(*args, **kwargs) -> Client:
-    """Shortcut to connect to a Brayns renderer.
+@dataclass
+class RequestProgress:
 
-    See brayns.Client for parameters and usage.
+    operation: str
+    amount: float
 
-    :return: client instance connected to the renderer
-    :rtype: Client
-    """
-    return Client(*args, **kwargs)
+    def __str__(self) -> str:
+        return f'{self.operation}: {100 * self.amount}%'

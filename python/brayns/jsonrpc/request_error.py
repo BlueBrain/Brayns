@@ -18,40 +18,38 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, Callable, Generator
-
-from .json_rpc_task import JsonRpcTask
-from .request_error import RequestError
-from .request_progress import RequestProgress
+from typing import Any
 
 
-class JsonRpcFuture:
-
-    @staticmethod
-    def for_notifications() -> 'JsonRpcFuture':
-        task = JsonRpcTask()
-        task.set_result(None)
-        return JsonRpcFuture(
-            task=task,
-            on_cancel=lambda: None
-        )
+class RequestError(Exception):
+    """Exception raised when a request fails."""
 
     def __init__(
         self,
-        task: JsonRpcTask,
-        on_cancel: Callable[[], None]
+        message: str,
+        code: int = 0,
+        data: Any = None
     ) -> None:
-        self._task = task
-        self._on_cancel = on_cancel
+        """Initialize exception with error message data.
 
-    def cancel(self) -> None:
-        self._on_cancel()
-        self._task.set_exception(
-            RequestError('Request cancelled')
-        )
+        :param message: JSON-RPC error description.
+        :type message: str
+        :param code: JSON-RPC error code.
+        :type code: int
+        :param data: Additional optional error data.
+        :type data: Any
+        """
+        self.message = message
+        self.code = code
+        self.data = data
 
-    def wait_for_result(self) -> Any:
-        return self._task.wait_for_all_progresses()
+    def __str__(self) -> str:
+        """Format the error.
 
-    def wait_for_all_progresses(self) -> Generator[RequestProgress]:
-        return self._task.wait_for_all_progresses()
+        :return: Formatted error message with code and data.
+        :rtype: str
+        """
+        message = f'{self.message} ({self.code})'
+        if self.data is None:
+            return message
+        return f'{message}: {self.data!r}'
