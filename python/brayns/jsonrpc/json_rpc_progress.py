@@ -19,18 +19,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Union
 
-from .request_progress import RequestProgress
+from ..request.request_progress import RequestProgress
 
 
 @dataclass
 class JsonRpcProgress:
 
-    id: Union[int, str, None]
+    id: int
     method: str
-    operation: str
-    amount: float
+    params: RequestProgress
 
     @staticmethod
     def from_dict(message: dict) -> 'JsonRpcProgress':
@@ -38,12 +36,8 @@ class JsonRpcProgress:
         return JsonRpcProgress(
             id=params['id'],
             method=message['method'],
-            operation=params['operation'],
-            amount=params['amount']
-        )
-
-    def to_progress(self) -> RequestProgress:
-        return RequestProgress(
-            operation=self.operation,
-            amount=self.amount
+            params=RequestProgress(
+                operation=params['operation'],
+                amount=params['amount']
+            )
         )

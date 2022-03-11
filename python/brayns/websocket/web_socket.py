@@ -18,9 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import ssl
-from typing import Union
-
+from typing import Any
 import websockets
 
 from .web_socket_listener import WebSocketListener
@@ -28,26 +26,8 @@ from .web_socket_listener import WebSocketListener
 
 class WebSocket:
 
-    def __init__(
-        self,
-        uri: str,
-        secure: bool,
-        cafile: Union[str, None] = None
-    ) -> None:
-        self._uri = ('wss://' if secure else 'ws://') + uri
-        self._ssl = ssl.create_default_context(
-            cafile=cafile
-        ) if secure else None
-        self._websocket = None
-
-    async def connect(self) -> None:
-        self._websocket = await websockets.connect(
-            uri=self._uri,
-            ssl=self._ssl,
-            ping_interval=None,
-            timeout=None,
-            max_size=int(2e9)
-        )
+    def __init__(self, websocket: websockets.WebSocketCommonProtocol) -> None:
+        self._websocket = websocket
 
     async def disconnect(self) -> None:
         await self._websocket.close()
@@ -58,10 +38,17 @@ class WebSocket:
     async def send_text(self, data: str) -> None:
         await self._websocket.send(data)
 
+    async def receive(self, listener: WebSocketListener) -> None:
+        data = self._websocket.recv()
+        await self._dispatch(data, listener)
+
     async def poll(self, listener: WebSocketListener) -> None:
         async for data in self._websocket:
-            if isinstance(data, bytes):
-                listener.on_binary_frame(data)
-            if isinstance(data, str):
-                listener.on_text_frame(data)
-            raise RuntimeError('Invalid data received')
+            await self._dispatch(data, listener)
+
+    async def _dispatch(self, data: Any, listener: WebSocketListener) -> None:
+        if isinstance(data, bytes):
+            listener.on_binary_frame(data)
+        if isinstance(data, str):
+            listener.on_text_frame(data)
+        raise RuntimeError('Invalid data received')

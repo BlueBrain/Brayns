@@ -19,32 +19,25 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any, Union
+from typing import Union
 
-from .request_error import RequestError
+from ..request.request_error import RequestError
 
 
 @dataclass
 class JsonRpcError:
 
     id: Union[int, str, None]
-    code: int
-    message: str
-    data: Any
+    error: RequestError
 
     @staticmethod
     def from_dict(message: dict) -> 'JsonRpcError':
         error: dict = message['error']
         return JsonRpcError(
             id=message.get('id'),
-            code=error['code'],
-            message=error['message'],
-            data=error.get('data')
-        )
-
-    def to_exception(self) -> RequestError:
-        return RequestError(
-            code=self.code,
-            message=self.message,
-            data=self.data
+            error=RequestError(
+                code=error['code'],
+                message=error['message'],
+                data=error.get('data')
+            )
         )

@@ -19,18 +19,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass
-class JsonRpcReply:
+class RequestProgress:
+    """Progress info about a running request."""
 
-    id: int
-    result: Any
+    operation: str
+    """Description of the current step as str."""
 
-    @staticmethod
-    def from_dict(message: dict) -> 'JsonRpcReply':
-        return JsonRpcReply(
-            id=message['id'],
-            result=message['result']
-        )
+    amount: float
+    """Progress of the request between 0 and 1."""
+
+    def __str__(self) -> str:
+        """Format progress and amount in a more readable way.
+
+        :return: progress description.
+        :rtype: str
+        """
+        return f'{self.operation}: {100 * self.amount}%'

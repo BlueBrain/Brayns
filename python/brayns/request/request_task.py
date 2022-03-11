@@ -21,15 +21,15 @@
 import threading
 from typing import Any, Generator
 
-from .json_rpc_context import JsonRpcContext
+from .request_context import RequestContext
 from .request_error import RequestError
 from .request_progress import RequestProgress
 
 
-class JsonRpcTask:
+class RequestTask:
 
     def __init__(self) -> None:
-        self._context = JsonRpcContext()
+        self._context = RequestContext()
         self._lock = threading.Condition()
 
     def set_result(self, result: Any) -> None:
@@ -55,11 +55,11 @@ class JsonRpcTask:
     def wait_for_all_progresses(self) -> Generator[RequestProgress]:
         while True:
             try:
-                yield self._wait_for_next_progress()
+                yield self.wait_for_next_progress()
             except StopIteration:
                 return
 
-    def _wait_for_next_progress(self) -> RequestProgress:
+    def wait_for_next_progress(self) -> RequestProgress:
         with self._lock:
             if self._context.has_progress():
                 return self._context.get_progress()
