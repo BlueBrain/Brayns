@@ -18,43 +18,60 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .json_rpc_client import JsonRpcClient
+from typing import Dict, Union
+
+from json_rpc_task import JsonRpcTask
+
 from .json_rpc_error import JsonRpcError
+from .json_rpc_future import JsonRpcFuture
 from .json_rpc_progress import JsonRpcProgress
 from .json_rpc_reply import JsonRpcReply
 from .json_rpc_request import JsonRpcRequest
-from .json_rpc_future import JsonRpcFuture
+from .request_error import RequestError
 
 
 class JsonRpcManager:
 
-    def __init__(self, client: JsonRpcClient) -> None:
-        self._client = client
-        self._futures = {}
-        self._client.start(self)
+    def __init__(self) -> None:
+        self._tasks: Dict[Union[int, str], JsonRpcTask] = {}
 
-    def send(self, request: JsonRpcRequest) -> JsonRpcFuture:
-        future = JsonRpcFuture()
-        self._futures[request.id] = future
-        return future
+    def add_request(self, request: JsonRpcRequest) -> JsonRpcFuture:
+        if request.is_notification():
+            return JsonRpcFuture.for_notifications()
+        task = JsonRpcTask()
+        self._tasks[request.id] = task
+        return JsonRpcFuture(
+            task=task,
+            on_cancel=lambda: self.on_cancel(request.id)
+        )
+
+    def on_cancel(self, request: JsonRpcRequest) -> None:
+        del self._tasks[request.id]
+
+    def on_disconnect(self) -> None:
+        for task in self._tasks.values():
+            task.set_exception(
+                RequestError('Client disconnected')
+            )
+        self._tasks.clear()
 
     def on_reply(self, reply: JsonRpcReply) -> None:
-        future = self._futures.get(reply.id)
-        if future is None:
+        task = self._tasks.get(reply.id)
+        if task is None:
             return
-        future.set_reply(reply)
+        task.set_result(reply.result)
 
     def on_error(self, error: JsonRpcError) -> None:
-        future = self._futures.get(error.id)
-        if future is None:
+        task = self._tasks.get(error.id)
+        if task is None:
             return
-        future.set_error(error)
+        task.set_exception(error.to_exception())
 
     def on_progress(self, progress: JsonRpcProgress) -> None:
-        future = self._futures.get(progress.id)
-        if future is None:
+        task = self._tasks.get(progress.id)
+        if task is None:
             return
-        future.add_progress(progress)
+        task.add_progress(progress.to_progress())
 
     def on_invalid_message(self, data: str, e: Exception) -> None:
         print(f'Invalid message received: {data} {e}')

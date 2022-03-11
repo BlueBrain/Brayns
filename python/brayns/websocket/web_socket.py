@@ -31,7 +31,7 @@ class WebSocket:
     def __init__(
         self,
         uri: str,
-        secure: bool = False,
+        secure: bool,
         cafile: Union[str, None] = None
     ) -> None:
         self._uri = ('wss://' if secure else 'ws://') + uri
@@ -42,7 +42,7 @@ class WebSocket:
 
     async def connect(self) -> None:
         self._websocket = await websockets.connect(
-            self._uri,
+            uri=self._uri,
             ssl=self._ssl,
             ping_interval=None,
             timeout=None,
@@ -50,7 +50,7 @@ class WebSocket:
         )
 
     async def disconnect(self) -> None:
-        self._websocket.close()
+        await self._websocket.close()
 
     async def send_binary(self, data: bytes) -> None:
         await self._websocket.send(data)
@@ -58,7 +58,7 @@ class WebSocket:
     async def send_text(self, data: str) -> None:
         await self._websocket.send(data)
 
-    async def poll(self, listener: WebSocketListener):
+    async def poll(self, listener: WebSocketListener) -> None:
         async for data in self._websocket:
             if isinstance(data, bytes):
                 listener.on_binary_frame(data)

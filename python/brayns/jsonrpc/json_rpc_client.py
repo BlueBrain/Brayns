@@ -18,30 +18,30 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json_rpc_handler
-from .json_rpc_request import JsonRpcRequest
-from .json_rpc_listener import JsonRpcListener
+from ..websocket.web_socket import WebSocket
 from ..websocket.web_socket_client import WebSocketClient
+from .json_rpc_future import JsonRpcFuture
+from .json_rpc_handler import JsonRpcHandler
+from .json_rpc_manager import JsonRpcManager
+from .json_rpc_request import JsonRpcRequest
 
 
 class JsonRpcClient:
 
-    def __init__(self, client: WebSocketClient) -> None:
-        self._client = client
-        self._listener = None
+    def __init__(self, websocket: WebSocket) -> None:
+        self._manager = JsonRpcManager()
+        self._client = WebSocketClient(
+            listener=JsonRpcHandler(self._manager),
+            websocket=websocket
+        )
 
-    def start(self, listener: JsonRpcListener) -> None:
-        self._listener = listener
-        self._client.start(self)
+    def disconnect(self) -> None:
+        self._manager.on_disconnect()
+        self._client.disconnect()
 
-    def stop(self) -> None:
-        self._client.stop()
-
-    def send(self, request: JsonRpcRequest) -> None:
-        self._client.send_text(request.to_json())
-
-    def on_binary_frame(self, data: bytes) -> None:
-        pass
-
-    def on_text_frame(self, data: str) -> None:
-        json_rpc_handler.handle_text(data, self._listener)
+    def send(self, request: JsonRpcRequest) -> JsonRpcFuture:
+        future = self._manager.add_request(request)
+        self._client.send_text(
+            request.to_json()
+        )
+        return future

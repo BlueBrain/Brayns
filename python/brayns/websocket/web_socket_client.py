@@ -27,14 +27,12 @@ from .web_socket_listener import WebSocketListener
 
 class WebSocketClient:
 
-    def __init__(self, websocket: WebSocket) -> None:
+    def __init__(
+        self,
+        listener: WebSocketListener,
+        websocket: WebSocket
+    ) -> None:
         self._websocket = websocket
-        self._listener = None
-        self._loop = None
-        self._task = None
-
-    def start(self, listener: WebSocketListener) -> None:
-        self._listener = listener
         self._loop = EventLoop()
         self._loop.run(
             self._websocket.connect()
@@ -43,7 +41,7 @@ class WebSocketClient:
             self._websocket.poll(listener)
         )
 
-    def stop(self) -> None:
+    def disconnect(self) -> None:
         self._task.cancel()
         try:
             self._task.result()

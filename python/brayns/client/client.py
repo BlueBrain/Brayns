@@ -21,12 +21,13 @@
 from typing import Any, Union
 
 from ..jsonrpc.json_rpc_client import JsonRpcClient
+from ..jsonrpc.json_rpc_future import JsonRpcFuture
 from ..jsonrpc.json_rpc_request import JsonRpcRequest
-from ..jsonrpc.json_rpc_listener import JsonRpcListener
+from ..websocket.web_socket import WebSocket
 
 
 class Client:
-    """Brayns client implementation to connect to the renderer."""
+    """Brayns client implementation to connect to a renderer."""
 
     def __init__(
         self,
@@ -43,8 +44,13 @@ class Client:
         :param cafile: Optional certification authority, defaults to None
         :type cafile: Union[str, None], optional
         """
-        self._client = JsonRpcClient()
-        self._client.connect(uri, secure, cafile)
+        self._client = JsonRpcClient(
+            WebSocket(
+                uri=uri,
+                secure=secure,
+                cafile=cafile
+            )
+        )
 
     def __enter__(self) -> None:
         """Allow using Brayns client in context manager."""
@@ -65,13 +71,11 @@ class Client:
         self,
         method: str,
         params: Any = None,
-        request_id: Union[int, str] = 0,
-        timeout: Union[float, None] = None,
+        request_id: Union[int, str] = 0
     ) -> Any:
         """Send a JSON-RPC request to the renderer.
 
-        Raise a ReplyError if an error message is received.
-        Raise a Timeout error if a timeout is specified and reached.
+        Raise a RequestError if an error message is received.
 
         :param method: method name
         :type method: str
@@ -79,16 +83,38 @@ class Client:
         :type params: Any, optional
         :param request_id: request ID, defaults to 0
         :type request_id: Union[int, str], optional
-        :param timeout: request timeout in seconds, defaults to None
-        :type timeout: Union[float, None], optional
         :return: reply result
         :rtype: Any
         """
-        request = JsonRpcRequest(method, params, request_id)
-        self._client.send(request)
-        if request.is_notification():
-            return None
-        return self._client.get_reply(
-            request,
-            timeout
-        ).get_result()
+        return self.task(
+            method=method,
+            params=params,
+            request_id=request_id
+        ).wait_for_result()
+
+    def task(
+        self,
+        method: str,
+        params: Any = None,
+        request_id: Union[int, str] = 0
+    ) -> JsonRpcFuture:
+        """Send a JSON-RPC request to the renderer with progress support.
+
+        Raise a RequestError if an error message is received.
+
+        :param method: method name
+        :type method: str
+        :param params: request params, defaults to None
+        :type params: Any, optional
+        :param request_id: request ID, defaults to 0
+        :type request_id: Union[int, str], optional
+        :return: Future to monitor the request
+        :rtype: JsonRpcFuture
+        """
+        return self._client.send(
+            JsonRpcRequest(
+                method=method,
+                params=params,
+                request_id=request_id
+            )
+        )
