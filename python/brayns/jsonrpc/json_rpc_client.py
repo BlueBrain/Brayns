@@ -18,9 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from ..websocket.web_socket import WebSocket
+from ..request.request import Request
+from ..request.request_future import RequestFuture
+from ..utils.id_generator import IdGenerator
 from ..websocket.web_socket_client import WebSocketClient
-from .json_rpc_future import JsonRpcFuture
+from ..websocket.web_socket_connector import WebSocketConnector
 from .json_rpc_handler import JsonRpcHandler
 from .json_rpc_manager import JsonRpcManager
 from .json_rpc_request import JsonRpcRequest
@@ -28,20 +30,25 @@ from .json_rpc_request import JsonRpcRequest
 
 class JsonRpcClient:
 
-    def __init__(self, websocket: WebSocket) -> None:
+    def __init__(self, connector: WebSocketConnector) -> None:
+        self._generator = IdGenerator()
         self._manager = JsonRpcManager()
         self._client = WebSocketClient(
             listener=JsonRpcHandler(self._manager),
-            websocket=websocket
+            connector=connector
         )
 
     def disconnect(self) -> None:
-        self._manager.on_disconnect()
         self._client.disconnect()
+        self._manager.clear_tasks()
 
-    def send(self, request: JsonRpcRequest) -> JsonRpcFuture:
-        future = self._manager.add_request(request)
+    def send(self, request: Request) -> RequestFuture:
+        id = self._generator.generate_new_id()
+        task = self._manager.create_task(id)
         self._client.send_text(
-            request.to_json()
+            JsonRpcRequest.from_request(id, request).to_json()
         )
-        return future
+        return RequestFuture(
+            task=task,
+            cancel=lambda: self.send(Request.to_cancel(id))
+        )

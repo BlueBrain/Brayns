@@ -20,35 +20,22 @@
 
 from typing import Any, Callable, Generator
 
-from .json_rpc_task import JsonRpcTask
-from .request_error import RequestError
 from .request_progress import RequestProgress
+from .request_task import RequestTask
 
 
-class JsonRpcFuture:
-
-    @staticmethod
-    def for_notifications() -> 'JsonRpcFuture':
-        task = JsonRpcTask()
-        task.set_result(None)
-        return JsonRpcFuture(
-            task=task,
-            on_cancel=lambda: None
-        )
+class RequestFuture:
 
     def __init__(
         self,
-        task: JsonRpcTask,
-        on_cancel: Callable[[], None]
+        task: RequestTask,
+        cancel: Callable[[], None]
     ) -> None:
         self._task = task
-        self._on_cancel = on_cancel
+        self._cancel = cancel
 
     def cancel(self) -> None:
-        self._on_cancel()
-        self._task.set_exception(
-            RequestError('Request cancelled')
-        )
+        self._cancel()
 
     def wait_for_result(self) -> Any:
         return self._task.wait_for_all_progresses()

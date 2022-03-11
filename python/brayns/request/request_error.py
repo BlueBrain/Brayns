@@ -18,14 +18,38 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from typing import Any
 
 
-@dataclass
-class RequestProgress:
+class RequestError(Exception):
+    """Exception raised when a request fails."""
 
-    operation: str
-    amount: float
+    def __init__(
+        self,
+        message: str,
+        code: int = 0,
+        data: Any = None
+    ) -> None:
+        """Initialize exception with error message data.
+
+        :param message: JSON-RPC error description.
+        :type message: str
+        :param code: JSON-RPC error code.
+        :type code: int
+        :param data: additional optional error data.
+        :type data: Any
+        """
+        self.message = message
+        self.code = code
+        self.data = data
 
     def __str__(self) -> str:
-        return f'{self.operation}: {100 * self.amount}%'
+        """Format the error.
+
+        :return: formatted error message with code and data.
+        :rtype: str
+        """
+        message = f'{self.message} ({self.code})'
+        if self.data is None:
+            return message
+        return f'{message}: {self.data!r}'

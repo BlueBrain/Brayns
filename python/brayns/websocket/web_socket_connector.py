@@ -18,19 +18,34 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any
+import ssl
+from typing import Optional
+
+import websockets
+
+from .web_socket import WebSocket
 
 
-@dataclass
-class JsonRpcReply:
+class WebSocketConnector:
 
-    id: int
-    result: Any
+    def __init__(
+        self,
+        uri: str,
+        secure: bool,
+        cafile: Optional[str] = None
+    ) -> None:
+        self._uri = ('wss://' if secure else 'ws://') + uri
+        self._ssl = ssl.create_default_context(
+            cafile=cafile
+        ) if secure else None
 
-    @staticmethod
-    def from_dict(message: dict) -> 'JsonRpcReply':
-        return JsonRpcReply(
-            id=message['id'],
-            result=message['result']
+    async def connect(self) -> WebSocket:
+        return WebSocket(
+            await websockets.connect(
+                uri=self._uri,
+                ssl=self._ssl,
+                ping_interval=None,
+                timeout=None,
+                max_size=int(2e9)
+            )
         )

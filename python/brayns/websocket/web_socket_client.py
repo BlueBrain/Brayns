@@ -21,7 +21,7 @@
 import concurrent.futures
 
 from .event_loop import EventLoop
-from .web_socket import WebSocket
+from .web_socket_connector import WebSocketConnector
 from .web_socket_listener import WebSocketListener
 
 
@@ -30,12 +30,11 @@ class WebSocketClient:
     def __init__(
         self,
         listener: WebSocketListener,
-        websocket: WebSocket
+        connector: WebSocketConnector
     ) -> None:
-        self._websocket = websocket
         self._loop = EventLoop()
-        self._loop.run(
-            self._websocket.connect()
+        self._websocket = self._loop.run(
+            connector.connect()
         ).result()
         self._task = self._loop.run(
             self._websocket.poll(listener)

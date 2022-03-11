@@ -18,38 +18,30 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from dataclasses import dataclass
 from typing import Any
 
 
-class RequestError(Exception):
-    """Exception raised when a request fails."""
+@dataclass
+class Request:
+    """Request to send to the renderer."""
 
-    def __init__(
-        self,
-        message: str,
-        code: int = 0,
-        data: Any = None
-    ) -> None:
-        """Initialize exception with error message data.
+    method: str
+    params: Any = None
 
-        :param message: JSON-RPC error description.
-        :type message: str
-        :param code: JSON-RPC error code.
-        :type code: int
-        :param data: Additional optional error data.
-        :type data: Any
-        """
-        self.message = message
-        self.code = code
-        self.data = data
+    @staticmethod
+    def to_cancel(id: int) -> 'Request':
+        return Request(
+            method='cancel',
+            params={
+                'id': id
+            }
+        )
 
     def __str__(self) -> str:
-        """Format the error.
+        """Format request in a more readable way.
 
-        :return: Formatted error message with code and data.
+        :return: request description.
         :rtype: str
         """
-        message = f'{self.message} ({self.code})'
-        if self.data is None:
-            return message
-        return f'{message}: {self.data!r}'
+        return f'{self.method}: {self.params!r}'

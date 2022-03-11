@@ -18,20 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, Union
+from typing import Any, Optional
 
-from .json_rpc_progress import JsonRpcProgress
 from .request_error import RequestError
 from .request_progress import RequestProgress
 
 
-class JsonRpcContext:
+class RequestContext:
 
     def __init__(self) -> None:
         self._ready = False
         self._result: Any = None
-        self._exception: Union[RequestError, None] = None
-        self._progress: Union[RequestProgress, None] = None
+        self._exception: Optional[RequestError] = None
+        self._progress: Optional[RequestProgress] = None
 
     def is_ready(self) -> None:
         return self._ready
@@ -48,7 +47,7 @@ class JsonRpcContext:
             raise self._exception
         return self._result
 
-    def get_progress(self) -> JsonRpcProgress:
+    def get_progress(self) -> RequestProgress:
         if self.is_ready():
             raise StopIteration()
         progress = self._progress

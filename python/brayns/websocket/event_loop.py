@@ -20,10 +20,12 @@
 
 import asyncio
 import threading
-from typing import Coroutine
+from typing import Any, Coroutine, TypeVar
 
 
 class EventLoop:
+
+    T = TypeVar('T')
 
     def __init__(self) -> None:
         self._loop = asyncio.new_event_loop()
@@ -36,5 +38,5 @@ class EventLoop:
     def stop(self) -> None:
         self._loop.call_soon_threadsafe(self._loop.stop)
 
-    def run(self, coroutine: Coroutine) -> asyncio.Future:
+    def run(self, coroutine: Coroutine[Any, Any, T]) -> 'asyncio.Future[T]':
         return asyncio.run_coroutine_threadsafe(coroutine, self._loop)
