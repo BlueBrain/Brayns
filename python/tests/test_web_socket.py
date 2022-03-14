@@ -21,7 +21,6 @@
 import unittest
 from typing import Union
 
-from brayns.client.websocket.web_socket import WebSocket
 from brayns.client.websocket.web_socket_protocol import WebSocketProtocol
 
 from helpers.client_and_server import ClientAndServer

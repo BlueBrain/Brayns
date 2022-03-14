@@ -33,7 +33,8 @@ class Client:
         self,
         uri: str,
         secure: bool = False,
-        cafile: Optional[str] = None
+        cafile: Optional[str] = None,
+        loglevel=logging.INFO
     ) -> None:
         """Connect to the renderer using the given settings.
 
@@ -41,14 +42,18 @@ class Client:
         :type uri: str
         :param secure: True if SSL is enabled, defaults to False
         :type secure: bool, optional
-        :param cafile: Optional certification authority, defaults to None
+        :param cafile: Additional certification authority, defaults to None
         :type cafile: Optional[str], optional
+        :param loglevel: Log level, defaults to logging.INFO
+        :type loglevel: int
         """
-        self._logger = logging.Logger('Brayns')
-        self._websocket = WebSocket.connect(
-            uri=uri,
-            secure=secure,
-            cafile=cafile
+        self._client = JsonRpcClient(
+            logger=logging.Logger('Brayns', loglevel),
+            websocket=WebSocket.connect(
+                uri=uri,
+                secure=secure,
+                cafile=cafile
+            )
         )
 
     def __enter__(self) -> None:
@@ -78,7 +83,7 @@ class Client:
         :return: reply result field
         :rtype: Any
         """
-        return self.task(method, params).wait_for_result()
+        return self.task(method, params).get_result()
 
     def task(self, method: str, params: Any = None) -> RequestFuture:
         """Send a JSON-RPC request to the renderer with progress support.
@@ -90,6 +95,6 @@ class Client:
         :param params: request params, defaults to None
         :type params: Any, optional
         :return: future to monitor the request
-        :rtype: JsonRpcFuture
+        :rtype: RequestFuture
         """
-        return self._client.send(Request(method, params))
+        return self._client.send(method, params)

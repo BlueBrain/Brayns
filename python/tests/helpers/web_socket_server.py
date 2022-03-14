@@ -78,6 +78,8 @@ class WebSocketServer:
         )
         return context
 
+    async def _start(self) -> None:
+
     async def _handle(
         self,
         websocket: websockets.WebSocketClientProtocol

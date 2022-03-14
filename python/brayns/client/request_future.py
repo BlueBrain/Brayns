@@ -52,7 +52,7 @@ class RequestFuture:
             pass
         return self._task.get_result()
 
-    def wait(self) -> Generator[RequestProgress]:
+    def wait(self) -> Generator[RequestProgress, None, None]:
         while not self._task.is_ready():
             self._receive()
             if self._task.has_progress():
