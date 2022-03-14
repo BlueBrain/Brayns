@@ -23,7 +23,13 @@
 namespace brayns
 {
 template<>
-void GeometryBoundsUpdater<Sphere>::update(const Sphere& s, const Matrix4f& t, Bounds& b)
+std::string_view RenderableOSPRayID<Sphere>::get()
+{
+    return "sphere";
+}
+
+template<>
+void RenderableBoundsUpdater<Sphere>::update(const Sphere& s, const Matrix4f& t, Bounds& b)
 {
     const Vector3f radiusDelta (s.radius);
     auto sphereMin = s.center - radiusDelta;
@@ -34,12 +40,6 @@ void GeometryBoundsUpdater<Sphere>::update(const Sphere& s, const Matrix4f& t, B
 
     b.expand(sphereMin);
     b.expand(sphereMax);
-}
-
-template<>
-void Geometry<Sphere>::initializeHandle()
-{
-    _handle = ospNewGeometry("sphere");
 }
 
 template<>

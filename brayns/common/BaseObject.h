@@ -30,54 +30,28 @@ namespace brayns
 class BaseObject
 {
 public:
-    using ModifiedCallback = std::function<void(const BaseObject &)>;
-
     BaseObject() = default;
 
     virtual ~BaseObject() = default;
 
     /**
-     * Custom copy constructor to not copy changedCallback and solve
-     * non-copyable atomic modified state.
-     */
-    BaseObject(const BaseObject &other);
-
-    /** Custom assignment operator that does not copy the changedCallback. */
-    BaseObject &operator=(const BaseObject &rhs);
-
-    /**
-     * @return true if any parameter has been modified since the last
-     *         resetModified().
+     * @return true if or markModified() was called or any parameter has been modified since the last resetModified().
      */
     bool isModified() const;
 
     /**
-     * Reset the modified state, typically done after changes have been applied.
+     * @brief Reset the modified state, typically done after changes have been applied.
      */
     void resetModified();
 
     /**
      * @brief Mark the object as modified.
-     *
-     * @param triggerCallback Call modification callback if set.
      */
-    void markModified(const bool triggerCallback = true);
-
-    /**
-     * Set a function that is called after this object has been modified.
-     */
-    void onModified(const ModifiedCallback &callback);
-
-    /**
-     * @brief Remove modification callback.
-     *
-     */
-    void clearModifiedCallback();
+    void markModified();
 
 protected:
     /**
-     * Helper function for derived classes to update a parameter and mark it
-     * modified if it has changed.
+     * @brief Helper function for derived classes to update a parameter and mark it modified if it has changed.
      */
     template<typename T>
     void _updateValue(T &member, const T &newValue, const bool triggerCallback = true)
@@ -85,7 +59,6 @@ protected:
         if (!_isEqual(member, newValue))
         {
             member = newValue;
-            markModified(triggerCallback);
         }
     }
 
@@ -103,6 +76,5 @@ protected:
 
 private:
     bool _modified{true};
-    ModifiedCallback _modifiedCallback;
 };
 } // namespace brayns

@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/EngineObject.h>
 
 #include <ospray/ospray.h>
 
@@ -32,11 +32,9 @@ namespace brayns
 /**
  * @brief The Light class defines the common base class for all lights
  */
-class Light : public EngineObject
+class Light : public BaseObject
 {
 public:
-    using Ptr = std::unique_ptr<Light>;
-
     Light() = default;
 
     Light(const Light &);
@@ -46,11 +44,6 @@ public:
     Light &operator=(Light &&) noexcept = default;
 
     virtual ~Light();
-
-    /**
-     * @brief Returns the light type as a string
-     */
-    virtual std::string getName() const noexcept = 0;
 
     /**
      * @brief Sets the light color as normalized RGB
@@ -93,7 +86,7 @@ protected:
     /**
      * @brief commit() implementation
      */
-    void commitImpl() final;
+    bool commit();
 
     /**
      * @brief Returns this light OSPRay handle

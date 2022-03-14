@@ -38,7 +38,13 @@ Primitive Primitive::sphere(const Vector3f& center, const float radius) noexcept
 }
 
 template<>
-void GeometryBoundsUpdater<Primitive>::update(const Primitive& p, const Matrix4f& t, Bounds& b)
+std::string_view RenderableOSPRayID<Primitive>::get()
+{
+    return "curve";
+}
+
+template<>
+void RenderableBoundsUpdater<Primitive>::update(const Primitive& p, const Matrix4f& t, Bounds& b)
 {
     const Vector3f p0Delta (p.r0);
     const auto p0Min = p.p0 - p0Delta;
@@ -51,12 +57,6 @@ void GeometryBoundsUpdater<Primitive>::update(const Primitive& p, const Matrix4f
     b.expand(Vector3f(t * Vector4f(p0Max, 1.f)));
     b.expand(Vector3f(t * Vector4f(p1Min, 1.f)));
     b.expand(Vector3f(t * Vector4f(p1Max, 1.f)));
-}
-
-template<>
-void Geometry<Primitive>::initializeHandle()
-{
-    _handle = ospNewGeometry("curve");
 }
 
 template<>

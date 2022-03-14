@@ -21,9 +21,9 @@
 
 #pragma once
 
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
 #include <brayns/common/PixelFormat.h>
-#include <brayns/engine/EngineObject.h>
 #include <brayns/utils/image/Image.h>
 
 #include <ospray/ospray.h>
@@ -33,7 +33,7 @@ namespace brayns
 /**
  * @brief The FrameBuffer class is the object that handles the frames rendered by a given renderer
  */
-class FrameBuffer : public EngineObject
+class FrameBuffer : public BaseObject
 {
 public:
     FrameBuffer() = default;
@@ -69,7 +69,7 @@ public:
     /**
      * @brief Syncs this object data to the OSPRay backend framebuffer
      */
-    void commit() final;
+    void commit();
 
     /**
      * @brief Sets the frame dimensions (width x height)

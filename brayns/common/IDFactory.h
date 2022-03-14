@@ -20,26 +20,53 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
+#include <limits>
+#include <queue>
+#include <stdexcept>
 
 namespace brayns
 {
-/**
- * @brief Base class for all engine objects which required synchronization with OSPRay
- */
-class EngineObject : public BaseObject
+template<typename T>
+class IDFactory
 {
 public:
-    virtual ~EngineObject() = default;
+    IDFactory()
+    {
+        // Narrows it down to unsigned integer types
+        static_assert (std::is_unsigned_v<T>, "ID factory should be instantiated with unsigned integer types");
+    }
 
     /**
-     * @brief Get the object type as a string
+     * @brief Returns an ID
+     * @throws std::runtime_error if the IDs have been exhausted
      */
-    virtual std::string getName() const noexcept = 0;
+    T requestID()
+    {
+        if(!_releasedIDs.empty())
+        {
+            auto id = _releasedIDs.front();
+            _releasedIDs.pop();
+            return id;
+        }
 
-    void commit();
+        if(_factory == std::numeric_limits<T>::max())
+        {
+            throw std::runtime_error("ID factory exhausted");
+        }
 
-protected:
-    virtual void commitImpl() = 0;
+        return _factory++;
+    }
+
+    /**
+     * @brief Recycles an ID that is not used anymore
+     */
+    void releaseID(T id) noexcept
+    {
+        _releasedIDs.push(id);
+    }
+
+private:
+    T _factory {};
+    std::queue<T> _releasedIDs;
 };
 }

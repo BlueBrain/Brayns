@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
+#include <brayns/engine/RenderableType.h>
 
 namespace brayns
 {
@@ -40,10 +40,10 @@ struct Primitive
 };
 
 template<>
-void GeometryBoundsUpdater<Primitive>::update(const Primitive& s, const Matrix4f& t, Bounds& b);
+std::string_view RenderableOSPRayID<Primitive>::get();
 
 template<>
-void Geometry<Primitive>::initializeHandle();
+void RenderableBoundsUpdater<Primitive>::update(const Primitive& s, const Matrix4f& t, Bounds& b);
 
 template<>
 void Geometry<Primitive>::commitGeometrySpecificParams();

@@ -23,7 +23,6 @@
 
 #include <brayns/common/Bounds.h>
 #include <brayns/common/Transformation.h>
-#include <brayns/engine/EngineObject.h>
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/ModelGroup.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -43,9 +42,6 @@ namespace brayns
 class Model
 {
 public:
-    using Ptr = std::unique_ptr<Model>;
-    using Metadata = std::map<std::string, std::string>;
-
     Model() = default;
     ~Model();
 
@@ -56,16 +52,15 @@ public:
     Model &operator=(Model &&) = delete;
 
     /**
-     * @brief Sets the metadata of this model (The metadata is a map<string, string> with model-specific
-     * information).
+     * @brief Sets the metadata of this model (The metadata is model-specific information).
      * @param metadata
      */
-    void setMetaData(Metadata metadata) noexcept;
+    void setMetaData(std::map<std::string, std::string> metadata) noexcept;
 
     /**
      * @brief Returns the metadata of this model
      */
-    const Metadata &getMetaData() const noexcept;
+    const std::map<std::string, std::string> &getMetaData() const noexcept;
 
     /**
      * @brief Adds a new component to the model
@@ -75,6 +70,7 @@ public:
     {
         auto &component = _components.addComponent<T>(std::forward<Args>(args)...);
         component._owner = this;
+        component.onStart();
         return component;
     }
 
@@ -85,6 +81,12 @@ public:
     T &getComponent()
     {
         return _components.getComponent<T>();
+    }
+
+    template<typename T>
+    std::vector<T *> getAllComponents()
+    {
+        return _components.getAllComponents<T>();
     }
 
     /**
@@ -112,7 +114,7 @@ private:
     /**
      * @brief Subclasses should override it to provide a more accurate measure of the memory footprint.
      */
-    uint64_t getSizeInBytes() const noexcept;
+    size_t getSizeInBytes() const noexcept;
 
     /**
      * @brief Returns the OSPRay handle
@@ -132,7 +134,7 @@ private:
     /**
      * @brief commit implementation
      */
-    void commit();
+    bool commit();
 
 private:
     friend class Scene;
@@ -141,21 +143,18 @@ private:
 private:
     // The model index refers to the position of this model in the Model list of the scene.
     uint32_t _modelIndex{};
-    Metadata _metadata;
+    std::map<std::string, std::string> _metadata;
     ModelComponentContainer _components;
     ModelGroup _group;
-    bool _boundsDirty{true};
 };
 
 /**
  * @brief The ModelInstance class is a wrapper around a Model. It shares the data provided by the Model
  * with other instances, and applies a custom trasnformation and visibility.
  */
-class ModelInstance : public EngineObject
+class ModelInstance
 {
 public:
-    using Ptr = std::unique_ptr<ModelInstance>;
-
     /**
      * @brief Initializes the instance with the unique ID and the given model
      */
@@ -187,7 +186,7 @@ public:
     /**
      * @brief Commit implementation
      */
-    void commit() final;
+    bool commit();
 
     /**
      * @brief Returns a mutable version of the model this instance refers to.
@@ -202,7 +201,7 @@ public:
     /**
      * @brief Utility function to return this Model Instance underlying model metadata
      */
-    const Model::Metadata &getModelMetadata() const noexcept;
+    const std::map<std::string, std::string> &getModelMetadata() const noexcept;
 
     /**
      * @brief Sets wether this instance is visible or not.
@@ -234,10 +233,11 @@ private:
     friend class Scene;
 
 private:
-    const size_t _modelID{};
+    const uint32_t _modelID{};
     Model &_model;
 
     bool _visible{true};
+    bool _visibilityChanged {true};
     Transformation _transformation;
     Bounds _bounds;
 

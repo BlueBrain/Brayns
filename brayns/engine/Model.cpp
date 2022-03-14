@@ -48,12 +48,12 @@ Model::~Model()
     _components.onDestroyed();
 }
 
-void Model::setMetaData(Metadata metadata) noexcept
+void Model::setMetaData(std::map<std::string, std::string> metadata) noexcept
 {
     _metadata = std::move(metadata);
 }
 
-const Model::Metadata &Model::getMetaData() const noexcept
+const std::map<std::string, std::string> &Model::getMetaData() const noexcept
 {
     return _metadata;
 }
@@ -61,11 +61,6 @@ const Model::Metadata &Model::getMetaData() const noexcept
 ModelGroup &Model::getGroup() noexcept
 {
     return _group;
-}
-
-void Model::markBoundsDirty() noexcept
-{
-    _boundsDirty = true;
 }
 
 void Model::onPreRender(const ParametersManager &params)
@@ -83,15 +78,20 @@ OSPGroup Model::groupHandle() const noexcept
     return _group.handle();
 }
 
-uint64_t Model::getSizeInBytes() const noexcept
+size_t Model::getSizeInBytes() const noexcept
 {
-    return sizeof(Model) + _components.getByteSize();
+    return sizeof(Model) + _components.getSizeInBytes();
 }
 
-void Model::commit()
+bool Model::commit()
 {
-    _components.onCommit();
-    _group.commit();
+    if(_components.commit())
+    {
+        _group.commit();
+        return true;
+    }
+
+    return false;
 }
 
 ModelInstance::ModelInstance(const size_t modelID, Model &model)
@@ -123,25 +123,34 @@ void ModelInstance::computeBounds() noexcept
     _bounds = _model.computeBounds(matrix);
 }
 
-void ModelInstance::commit()
+bool ModelInstance::commit()
 {
-    // Commit model data (If any other instance did it before, it will have no effect)
-    _model.commit();
+    bool needsCommit = false;
+
+    if(_model.commit())
+    {
+        needsCommit = true;
+    }
 
     // Re-commit transform if needed
     if (_transformation.isModified())
     {
         const auto affine = glmMatrixToAffine(_transformation.toMatrix());
         ospSetParam(_instanceHandle, "transform", OSPDataType::OSP_AFFINE3F, &affine);
-        ospCommit(_instanceHandle);
         _transformation.resetModified();
+        needsCommit = true;
     }
+
+    if(needsCommit)
+    {
+        ospCommit(_instanceHandle);
+    }
+
+    return needsCommit || _visibilityChanged;
 }
 
 Model &ModelInstance::getModel() noexcept
 {
-    // The caller could modify the model, so we must check on the next commit() call
-    markModified(false);
     return _model;
 }
 
@@ -150,14 +159,15 @@ const Model &ModelInstance::getModel() const noexcept
     return _model;
 }
 
-const Model::Metadata &ModelInstance::getModelMetadata() const noexcept
+const std::map<std::string, std::string> &ModelInstance::getModelMetadata() const noexcept
 {
     return _model.getMetaData();
 }
 
 void ModelInstance::setVisible(const bool val) noexcept
 {
-    _updateValue(_visible, val);
+    _visibilityChanged = _visible != val;
+    _visible = val;
 }
 
 bool ModelInstance::isVisible() const noexcept
@@ -167,8 +177,7 @@ bool ModelInstance::isVisible() const noexcept
 
 void ModelInstance::setTransform(const Transformation &transform) noexcept
 {
-    _updateValue(_transformation, transform);
-
+    _transformation = transform;
     // Recompute bounds as soon as the transform changes
     if (_transformation.isModified())
         computeBounds();

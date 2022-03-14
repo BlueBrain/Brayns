@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
+#include <brayns/engine/RenderableType.h>
 
 #include <vector>
 
@@ -37,10 +37,10 @@ struct TriangleMesh
 };
 
 template<>
-void GeometryBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const Matrix4f& matrix, Bounds& bounds);
+std::string_view RenderableOSPRayID<TriangleMesh>::get();
 
 template<>
-void Geometry<TriangleMesh>::initializeHandle();
+void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const Matrix4f& matrix, Bounds& bounds);
 
 template<>
 uint32_t Geometry<TriangleMesh>::add(const TriangleMesh& geometry);

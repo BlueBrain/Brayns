@@ -24,7 +24,13 @@
 namespace brayns
 {
 template<>
-void GeometryBoundsUpdater<Plane>::update(const Plane& p, const Matrix4f& t, Bounds& b)
+std::string_view RenderableOSPRayID<Plane>::get()
+{
+    return "plane";
+}
+
+template<>
+void RenderableBoundsUpdater<Plane>::update(const Plane& p, const Matrix4f& t, Bounds& b)
 {
     // NOOP
     // Planes are infinite. They can be limited, but on Brayns we only use them for clipping
@@ -32,12 +38,6 @@ void GeometryBoundsUpdater<Plane>::update(const Plane& p, const Matrix4f& t, Bou
     (void) p;
     (void) t;
     (void) b;
-}
-
-template<>
-void Geometry<Plane>::initializeHandle()
-{
-    _handle = ospNewGeometry("plane");
 }
 
 template<>

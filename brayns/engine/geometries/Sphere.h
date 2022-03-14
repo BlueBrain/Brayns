@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
+#include <brayns/engine/RenderableType.h>
 
 namespace brayns
 {
@@ -32,10 +32,10 @@ struct Sphere
 };
 
 template<>
-void GeometryBoundsUpdater<Sphere>::update(const Sphere& s, const Matrix4f& t, Bounds& b);
+std::string_view RenderableOSPRayID<Sphere>::get();
 
 template<>
-void Geometry<Sphere>::initializeHandle();
+void RenderableBoundsUpdater<Sphere>::update(const Sphere& s, const Matrix4f& t, Bounds& b);
 
 template<>
 void Geometry<Sphere>::commitGeometrySpecificParams();

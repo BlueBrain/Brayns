@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Volume.h>
+#include <brayns/engine/RenderableType.h>
 
 #include <vector>
 
@@ -54,10 +54,10 @@ struct RegularVolume
 };
 
 template<>
-void VolumeBoundsUpdater<RegularVolume>::update(const RegularVolume& s, const Matrix4f& t, Bounds& b);
+std::string_view RenderableOSPRayID<RegularVolume>::get();
 
 template<>
-void Volume<RegularVolume>::initializeHandle();
+void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume& s, const Matrix4f& t, Bounds& b);
 
 template<>
 uint64_t Volume<RegularVolume>::getSizeInBytes() const noexcept;

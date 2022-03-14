@@ -22,8 +22,8 @@
 
 #pragma once
 
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/EngineObject.h>
 
 #include <ospray/ospray.h>
 
@@ -31,7 +31,7 @@
 
 namespace brayns
 {
-class Camera : public EngineObject
+class Camera : public BaseObject
 {
 public:
     using Ptr = std::unique_ptr<Camera>;
@@ -60,7 +60,7 @@ public:
      * @brief Commit implementation. Derived camera types must override commitCameraSpecificParams(),
      * which will be called during commit() to perform camera-specific synchronization with OSPRay
      */
-    void commit() final;
+    void commit();
 
     /**
      * @brief Sets the camera position on world coordinates

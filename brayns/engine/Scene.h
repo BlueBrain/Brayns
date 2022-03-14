@@ -22,7 +22,7 @@
 #pragma once
 
 #include <brayns/common/Bounds.h>
-#include <brayns/engine/EngineObject.h>
+#include <brayns/common/IDFactory.h>
 #include <brayns/engine/Light.h>
 #include <brayns/engine/Model.h>
 #include <brayns/json/JsonType.h>
@@ -38,23 +38,6 @@
 namespace brayns
 {
 /**
- * @brief The ModelsLoadParameters struct holds the information with which a group of models was loaded
- */
-struct ModelLoadParameters
-{
-    enum class LoadType
-    {
-        FROM_FILE,
-        FROM_BLOB
-    };
-
-    LoadType type;
-    std::string path;
-    std::string loaderName;
-    JsonValue loadParameters;
-};
-
-/**
  * @brief Handles the lights of the scene
  */
 class SceneLightManager
@@ -63,12 +46,7 @@ public:
     struct LightEntry
     {
         uint32_t id{};
-        Light::Ptr light;
-
-        LightEntry();
-
-    private:
-        static uint32_t ID_FACTORY;
+        std::unique_ptr<Light> light;
     };
 
 public:
@@ -78,7 +56,7 @@ public:
      * @param light
      * @return uint32_t
      */
-    uint32_t addLight(Light::Ptr light) noexcept;
+    uint32_t addLight(std::unique_ptr<Light> light) noexcept;
 
     /**
      * @brief Removes a light identifid by its ID
@@ -104,6 +82,7 @@ private:
 
 private:
     bool _modified{false};
+    IDFactory<uint32_t> _idFactory;
     std::vector<LightEntry> _lights;
 };
 
@@ -116,7 +95,7 @@ public:
     struct ClippingModelEntry
     {
         uint32_t id{};
-        Model::Ptr clipper;
+        std::unique_ptr<Model> clipper;
 
         ClippingModelEntry();
 
@@ -131,7 +110,7 @@ public:
      * @param clippingModel
      * @return uint32_t
      */
-    uint32_t addClippingModel(Model::Ptr clippingModel) noexcept;
+    uint32_t addClippingModel(std::unique_ptr<Model> clippingModel) noexcept;
 
     /**
      * @brief Returns a modifiable clipping model reference. Marks the manager as modified
@@ -158,41 +137,35 @@ public:
     void removeAllClippingModels() noexcept;
 
 private:
+    IDFactory<uint32_t> _idFactory;
     std::vector<ClippingModelEntry> _clippingModels;
 };
 
 /**
- * @brief The Scene class is the container of objects that are being rendered. It contains Models, which can
- * be geometry, volumes or clipping geometry, as well as the lights.
+ * @brief The ModelsLoadParameters struct holds the information with which a group of models was loaded
  */
-class Scene : public EngineObject
+struct ModelLoadParameters
+{
+    enum class LoadType
+    {
+        FROM_FILE,
+        FROM_BLOB
+    };
+
+    LoadType type;
+    std::string path;
+    std::string loaderName;
+    JsonValue loadParameters;
+};
+
+class SceneModelManager
 {
 public:
-    Scene() = default;
-    ~Scene();
-
-    Scene(const Scene &) = delete;
-    Scene &operator=(const Scene &) = delete;
-
-    Scene(Scene &&) = delete;
-    Scene &operator=(Scene &&) = delete;
-
-    /**
-     * @brief Return the bounds of the scene
-     */
-    const Bounds &getBounds() const noexcept;
-
-    /**
-     * @brief Recompute bounds based on its current instances. It will use the current bounds of each model instance,
-     * (it will not call computeBound() on the instances)
-     */
-    void computeBounds() noexcept;
-
     /**
      * @brief Adds a new model to the scene and creates an instance out of it to be rendered.
      * The model ID is returned
      */
-    ModelInstance &addModel(ModelLoadParameters params, Model::Ptr model);
+    ModelInstance &addModel(ModelLoadParameters params, std::unique_ptr<Model> model);
 
     /**
      * @brief Creates a new instance from the model that is being instantiated by the given model ID,
@@ -219,56 +192,55 @@ public:
      */
     void removeModel(const uint32_t modelID);
 
+private:
     /**
-     * @brief Adds a new model to be used as geometry and volume clipping geometry, returning the ID assigned
-     * to it
-     * @throws std::invalid_argument if the passed model is null
+     * @brief Creates a new instance of the given Model, adds it to the scene and returns it.
      */
-    uint32_t addClippingModel(Model::Ptr clippingModel);
+    ModelInstance &_createModelInstance(Model *model);
+
+private:
+    /**
+     * @brief The ModelsLoadEntry struct is used to keep track of every model loaded into the scene and the
+     * instances made out of it.
+     */
+    struct ModelEntry
+    {
+        ModelLoadParameters params;
+        std::unique_ptr<Model> model;
+        std::set<uint32_t> instances;
+    };
+
+    IDFactory<uint32_t> _idFactory;
+    std::vector<ModelEntry> _models;
+    std::vector<std::unique_ptr<ModelInstance>> _modelInstances;
+};
+
+/**
+ * @brief The Scene class is the container of objects that are being rendered. It contains Models, which can
+ * be geometry, volumes or clipping geometry, as well as the lights.
+ */
+class Scene
+{
+public:
+    Scene() = default;
+    ~Scene();
+
+    Scene(const Scene &) = delete;
+    Scene &operator=(const Scene &) = delete;
+
+    Scene(Scene &&) = delete;
+    Scene &operator=(Scene &&) = delete;
 
     /**
-     * @brief Returns a clipping model identified by its ID
-     * @throws std::invalid_argument if no clipping model with the given ID exists
+     * @brief Return the bounds of the scene
      */
-    Model &getClippingModel(const uint32_t modelID);
+    const Bounds &getBounds() const noexcept;
 
     /**
-     * @brief Return an ID -> clipping model with all the clipping models on the scene
+     * @brief Recompute bounds based on its current instances. It will use the current bounds of each model instance,
+     * (it will not call computeBound() on the instances)
      */
-    std::map<uint32_t, Model::Ptr> &getAllClippingModels() noexcept;
-
-    /**
-     * @brief Removes a clipping plane from the scene, identified by its ID.
-     * @throws std::invalid_argument if the given ID does not correspond to any existing clipping model
-     */
-    void removeClippingModel(const uint32_t clippingModelID);
-
-    /**
-     * @brief Adds a new light to the scene and returns the ID which identifies it.
-     */
-    uint32_t addLight(Light::Ptr light) noexcept;
-
-    /**
-     * @brief Return an ID -> light map with all the lights on the scene
-     */
-    std::map<uint32_t, Light::Ptr> &getAllLights() noexcept;
-
-    /**
-     * @brief Returns the light that it is identified by the given light ID.
-     * @throws std::invalid_argument if lightID does not correspond to any existing light
-     */
-    Light &getLight(const uint32_t lightID);
-
-    /**
-     * @brief Removes the light from the scene that is identified by the given light ID
-     * @throws std::invalid_argument if lightID does not correspond to any existing ligth
-     */
-    void removeLight(const uint32_t lightID);
-
-    /**
-     * @brief Removes all lights in the scene
-     */
-    void removeAllLights() noexcept;
+    void computeBounds() noexcept;
 
     /**
      * @brief Called before a new frame is. Will call onPreRender on all the models of the scene
@@ -283,7 +255,7 @@ public:
     /**
      * @brief commit implementation. Will call the doCommit() implementation of the models and the lights.
      */
-    void commit() final;
+    void commit();
 
     /**
      * @brief Returns the OSPRay handle of the scene
@@ -299,41 +271,19 @@ private:
      */
     uint64_t _getSizeBytes() const noexcept;
 
-    if(!ptr)
-
-    /**
-     * @brief Creates a new instance of the given Model, adds it to the scene and returns it.
-     */
-    ModelInstance &_createModelInstance(Model *model);
-
-private:
-    /**
-     * @brief The ModelsLoadEntry struct is used to keep track of every model loaded into the scene and the
-     * instances made out of it.
-     */
-    struct ModelEntry
-    {
-        ModelLoadParameters params;
-        Model::Ptr model;
-        std::set<uint32_t> instances;
-    };
 
 private:
     // Scene bounds
     Bounds _bounds;
 
     // Model data
-    uint32_t _modelIdFactory{0};
-    std::vector<ModelEntry> _models; // Stores loaded models
-    std::map<uint32_t, ModelInstance::Ptr> _modelInstances; // Stores model instances
+    SceneModelManager _modelManager;
 
     // Clipping model data
-    uint32_t _clippingModelIDFactory{0};
-    std::map<uint32_t, Model::Ptr> _clippingModels;
+    SceneClipperManager _clippingManager;
 
     // Lights data
-    uint32_t _lightIdFactory{0};
-    std::map<uint32_t, Light::Ptr> _lights;
+    SceneLightManager _lightManager;
 
     // OSPRRay "scene" handle
     OSPWorld _handle{nullptr};

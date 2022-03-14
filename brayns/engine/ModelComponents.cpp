@@ -25,9 +25,10 @@ namespace brayns
 {
 Model& Component::getModel()
 {
+    // In case its called from the component's constructor
     if(!_owner)
     {
-        throw std::runtime_error("Component has not been initialized by Model");
+        throw std::runtime_error("Component has not been initialized with its Model");
     }
 
     return *_owner;
@@ -48,8 +49,9 @@ void Component::onPostRender(const ParametersManager& params)
     (void)params;
 }
 
-void Component::onCommit()
+bool Component::commit()
 {
+    return false;
 }
 
 void Component::onDestroyed()
@@ -62,10 +64,10 @@ Bounds Component::computeBounds(const Matrix4f& transform) const noexcept
     return {};
 }
 
-uint64_t ModelComponentContainer::getByteSize() const noexcept
+size_t ModelComponentContainer::getSizeInBytes() const noexcept
 {
-    uint64_t result = 0;
-    for(const auto& [index, component] : _components)
+    size_t result = 0;
+    for(const auto &component : _components)
     {
         result += component->getSizeInBytes();
     }
@@ -74,7 +76,7 @@ uint64_t ModelComponentContainer::getByteSize() const noexcept
 
 void ModelComponentContainer::onPreRender(const ParametersManager& params)
 {
-    for(auto& [index, component] : _components)
+    for(auto& component : _components)
     {
         component->onPreRender(params);
     }
@@ -82,23 +84,25 @@ void ModelComponentContainer::onPreRender(const ParametersManager& params)
 
 void ModelComponentContainer::onPostRender(const ParametersManager& params)
 {
-    for(auto& [index, component] : _components)
+    for(auto& component : _components)
     {
         component->onPostRender(params);
     }
 }
 
-void ModelComponentContainer::onCommit()
+bool ModelComponentContainer::commit()
 {
-    for(auto& [index, component] : _components)
+    bool committed = false;
+    for(auto& component : _components)
     {
-        component->onCommit();
+        committed = committed || component->commit();
     }
+    return committed;
 }
 
 void ModelComponentContainer::onDestroyed()
 {
-    for(auto& [index, component] : _components)
+    for(auto& component : _components)
     {
         component->onDestroyed();
     }

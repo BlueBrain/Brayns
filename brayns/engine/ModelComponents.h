@@ -46,7 +46,7 @@ public:
     /**
      * @brief Returns the size in bytes of the component.
      */
-    virtual uint64_t getSizeInBytes() const noexcept = 0;
+    virtual size_t getSizeInBytes() const noexcept = 0;
 
 protected:
     /**
@@ -72,9 +72,10 @@ protected:
     virtual void onPostRender(const ParametersManager& params);
 
     /**
-     * @brief onCommit called during the commit process. Does nothing by defualt.
+     * @brief Called during the commit process. Does nothing by default. Should return true when the result of
+     * the commit operation requires the model to be committed as well.
      */
-    virtual void onCommit();
+    virtual bool commit();
 
     /**
      * @brief onDestroyed called when the component is removed from the model. Does nothing by defualt.
@@ -91,56 +92,112 @@ private:
     friend class Model;
 
     Model* _owner {nullptr};
+    std::type_index _type;
 };
 
 class ModelComponentContainer
 {
-public:
+private:
+    /**
+     * @brief Adds a new component of the given type to the component list.
+     */
     template<typename T, typename ...Args>
     T& addComponent(Args&& ...args)
     {
-        static_assert(std::is_base_of_v<Component, T>, "Model components must inherit from Component");
-
-        const std::type_index ti = typeid(T);
         auto component = std::make_unique<T>(std::forward<Args>(args)...);
         auto componentPtr = component.get();
-        _components[ti] = std::move(component);
+        _components.push_back(std::move(component));
 
-        componentPtr->onStart();
+        componentPtr._type = typeid(T);
 
         return *componentPtr;
     }
 
+    /**
+     * @brief Returns a reference to the component of the given type. If multiple components of the
+     * same type are present, the first one added is returned.
+     * @throws std::invalid_argument if there is no component of the given type
+     */
     template<typename T>
     T& getComponent()
     {
         const std::type_index ti = typeid(T);
-        auto it = _components.find(ti);
-        if(it == _components.end())
+        auto begin = _components.begin();
+        auto end = _components.end();
+
+        auto it = std::find_if(begin, end, [type = ti](std::unique_ptr<Component> &component)
+        {
+            return component->_type == type;
+        });
+
+        if(it == end)
         {
             throw std::invalid_argument("No component of the given type registered");
         }
 
-        return dynamic_cast<T&>(*(it->second));
+        return dynamic_cast<T&>(*(*it).get());
     }
 
+    /**
+     * @brief Returns all components of a given type
+     */
+    template<typename T>
+    std::vector<Component*> getAllComponents()
+    {
+        std::vector<T *> result;
+        auto it = _components.begin();
+        auto end = _components.end();
+
+        const std::type_index ti = typeid(T);
+        do
+        {
+            it = std::find_if(it, end, [type = ti](std::unique_ptr<Component> &component)
+            {
+                return component->_type = type;
+            });
+
+            if(it != end)
+            {
+                result.push_back(static_cast<T*>((*it).get()));
+                ++it;
+            }
+        }
+        while(it != end);
+
+        return result;
+    }
+
+    /**
+     * @brief Removes a component of the given type. If there are multiple components of the same type,
+     * the first one that was added is removed
+     */
     template<typename T>
     void removeComponent()
     {
         const std::type_index ti = typeid(T);
-        auto it = _components.find(ti);
+        auto begin = _components.begin();
+        auto end = _components.end();
+
+        auto it = std::find_if(begin, end, [type = ti](std::unique_ptr<Component> &component)
+        {
+            return component->_type == type;
+        });
         if(it == _components.end())
         {
             throw std::invalid_argument("No component of the given type registered");
         }
 
-        auto& component = *(it->second);
-        component.onDestroyed();
+        auto& component = (*it);
+        component->onDestroyed();
 
         _components.erase(it);
     }
 
-    uint64_t getByteSize() const noexcept;
+    /**
+     * @brief Returns the size in bytes of this component list. It will call getSizeInBytes for each
+     * component
+     */
+    size_t getSizeInBytes() const noexcept;
 
     /**
      * @brief Calls all the components 'onPreRender' in this container
@@ -153,15 +210,18 @@ public:
     void onPostRender(const ParametersManager& params);
 
     /**
-     * @brief Calls all the components 'onCommit' in this container
+     * @brief Calls all the components 'commit' in this container. Returns true if any component returned true
+     * from its commit implementation
      */
-    void onCommit();
+    bool commit();
 
     /**
      * @brief Calls all the components 'onDestroyed' in this container
      */
     void onDestroyed();
 private:
-    std::unordered_map<std::type_index, Component::Ptr> _components;
+    friend class Model;
+
+    std::vector<Component::Ptr> _components;
 };
 }

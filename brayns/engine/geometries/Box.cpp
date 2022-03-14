@@ -23,19 +23,19 @@
 namespace brayns
 {
 template<>
-void GeometryBoundsUpdater<Box>::update(const Box& box, const Matrix4f& t, Bounds& b)
+std::string_view RenderableOSPRayID<Box>::get()
+{
+    return "box";
+}
+
+template<>
+void RenderableBoundsUpdater<Box>::update(const Box& box, const Matrix4f& t, Bounds& b)
 {
     const auto& min = box.min;
     const auto& max = box.max;
 
     b.expand(Vector3f(t * Vector4f(min, 1.f)));
     b.expand(Vector3f(t * Vector4f(max, 1.f)));
-}
-
-template<>
-void Geometry<Box>::initializeHandle()
-{
-    _handle = ospNewGeometry("box");
 }
 
 template<>

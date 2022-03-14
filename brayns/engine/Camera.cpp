@@ -36,7 +36,7 @@ Camera &Camera::operator=(const Camera &o)
     _up = o._up;
     _aspectRatio = o._aspectRatio;
 
-    markModified(false);
+    markModified();
 
     return *this;
 }
@@ -49,6 +49,11 @@ Camera::~Camera()
 
 void Camera::commit()
 {
+    if(!isModified())
+    {
+        return;
+    }
+
     if(!_handle)
     {
         const auto handleName = getOSPHandleName();
@@ -58,7 +63,6 @@ void Camera::commit()
     const auto forward = glm::normalize(_target - _position);
     const auto strafe = glm::cross(forward, _up);
     const auto up = glm::cross(strafe, forward);
-
 
     ospSetParam(_handle, "position", OSP_VEC3F, &_position[0]);
     ospSetParam(_handle, "direction", OSP_VEC3F, &forward);

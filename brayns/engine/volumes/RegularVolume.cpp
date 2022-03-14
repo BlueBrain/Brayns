@@ -46,7 +46,13 @@ size_t getTypeByteSize(const OSPDataType type)
 namespace brayns
 {
 template<>
-void VolumeBoundsUpdater<RegularVolume>::update(const RegularVolume& s, const Matrix4f& t, Bounds& b)
+std::string_view RenderableOSPRayID<RegularVolume>::get()
+{
+    return "structuredRegular";
+}
+
+template<>
+void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume& s, const Matrix4f& t, Bounds& b)
 {
     static const Vector3f regularVolumeMin {0.f};
     static const Vector3f regularVolumeMax {1.f};
@@ -56,12 +62,6 @@ void VolumeBoundsUpdater<RegularVolume>::update(const RegularVolume& s, const Ma
 
     b.expand(minBound);
     b.expand(maxBound);
-}
-
-template<>
-void Volume<RegularVolume>::initializeHandle()
-{
-    _handle = ospNewVolume("structuredRegular");
 }
 
 template<>

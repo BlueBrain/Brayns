@@ -93,6 +93,11 @@ const uint8_t *FrameBuffer::getColorBuffer() const
 
 void FrameBuffer::commit()
 {
+    if(!isModified())
+    {
+        return;
+    }
+
     unmap();
 
     if(_handle)

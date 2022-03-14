@@ -32,7 +32,7 @@ Light &Light::operator=(const Light &o)
     _color = o._color;
     _intensity = o._intensity;
     _visible = o._visible;
-    markModified(false);
+    markModified();
     return *this;
 }
 
@@ -72,8 +72,13 @@ bool Light::isVisible() const noexcept
     return _visible;
 }
 
-void Light::commitImpl()
+bool Light::commit()
 {
+    if(!isModified())
+    {
+        return false;
+    }
+
     if (!_handle)
     {
         const auto handleName = getOSPHandleName();
@@ -87,6 +92,8 @@ void Light::commitImpl()
     commitLightSpecificParams();
 
     ospCommit(_handle);
+
+    return true;
 }
 
 OSPLight Light::handle() const noexcept

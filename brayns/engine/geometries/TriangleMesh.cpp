@@ -38,7 +38,13 @@ void commitVector(OSPGeometry handle, std::vector<T>& data, OSPDataType dataType
 namespace brayns
 {
 template<>
-void GeometryBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const Matrix4f& matrix, Bounds& bounds)
+std::string_view RenderableOSPRayID<TriangleMesh>::get()
+{
+    return "mesh";
+}
+
+template<>
+void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const Matrix4f& matrix, Bounds& bounds)
 {
     const auto& vertices = mesh.vertices;
 
@@ -47,12 +53,6 @@ void GeometryBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const
         auto point = Vector3f(matrix * Vector4f(vertex, 1.f));
         bounds.expand(point);
     }
-}
-
-template<>
-void Geometry<TriangleMesh>::initializeHandle()
-{
-    _handle = ospNewGeometry("mesh");
 }
 
 template<>

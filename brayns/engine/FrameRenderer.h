@@ -29,14 +29,24 @@ namespace brayns
 {
 struct FrameRenderer
 {
-    static void synchronousRender(const Camera& camera,
-                                  const FrameBuffer& fb,
-                                  const Renderer& renderer,
-                                  const Scene& scene);
+    /**
+     * @brief Renders a frame synchronously. When the function returns, the rendering process will have finished.
+     * @param camera
+     * @param fb
+     * @param renderer
+     * @param scene
+     */
+    static void synchronous(const Camera& camera, const FrameBuffer& fb, const Renderer& renderer, const Scene& scene);
 
-    static OSPFuture asynchronousRender(const Camera& camera,
-                                        const FrameBuffer& fb,
-                                        const Renderer& renderer,
-                                        const Scene& scene);
+    /**
+     * @brief Renders a frame asynchronously. The function returns inmediatly with an OSPFuture, which can be used
+     * for both querying the current frame rendering process and waiting for the frame rendering to complete.
+     * @param camera
+     * @param fb
+     * @param renderer
+     * @param scene
+     * @return OSPFuture
+     */
+    static OSPFuture asynchronous(const Camera& cam, const FrameBuffer& fb, const Renderer& render, const Scene& scen);
 };
 }
