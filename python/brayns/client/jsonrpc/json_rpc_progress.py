@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Union
 
 from ..request_progress import RequestProgress
 
@@ -26,7 +27,7 @@ from ..request_progress import RequestProgress
 @dataclass
 class JsonRpcProgress:
 
-    id: int
+    id: Union[int, str]
     method: str
     params: RequestProgress
 

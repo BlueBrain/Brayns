@@ -18,37 +18,78 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from ..request.request import Request
-from ..request.request_future import RequestFuture
-from ..utils.id_generator import IdGenerator
-from ..websocket.web_socket_client import WebSocketClient
-from ..websocket.web_socket_client_factory import WebSocketClientFactory
-from .json_rpc_handler import JsonRpcHandler
-from .json_rpc_manager import JsonRpcManager
+import logging
+from typing import Any, Union
+
+from ..websocket.web_socket_protocol import WebSocketProtocol
+from .json_rpc_dispatcher import JsonRpcDispatcher
 from .json_rpc_request import JsonRpcRequest
+from ...utils.id_generator import IdGenerator
+from ..request_future import RequestFuture
+from .json_rpc_manager import JsonRpcManager
+from .json_rpc_error import JsonRpcError
+from .json_rpc_progress import JsonRpcProgress
+from .json_rpc_reply import JsonRpcReply
 
 
 class JsonRpcClient:
 
-    def __init__(self, factory: WebSocketClientFactory) -> None:
+    def __init__(
+        self,
+        logger: logging.Logger,
+        websocket: WebSocketProtocol
+    ) -> None:
+        self._logger = logger
+        self._websocket = websocket
         self._generator = IdGenerator()
         self._manager = JsonRpcManager()
-        self._client = WebSocketClient(
-            listener=JsonRpcHandler(self._manager),
-            factory=factory
-        )
+        self._dispatcher = JsonRpcDispatcher(self)
 
     def disconnect(self) -> None:
-        self._client.disconnect()
+        self._logger.debug('Disconnecting from renderer')
+        self._websocket.disconnect()
         self._manager.clear_tasks()
 
-    def send(self, request: Request) -> RequestFuture:
+    def receive(self) -> None:
+        self._dispatcher.dispatch(
+            self._websocket.receive()
+        )
+
+    def send(self, method: str, params: Any = None) -> RequestFuture:
         id = self._generator.generate_new_id()
-        task = self._manager.create_task(id)
-        self._client.send_text(
-            JsonRpcRequest.from_request(id, request).to_json()
+        task = self._manager.add_task(id)
+        self._websocket.send(
+            JsonRpcRequest(
+                id=id,
+                method=method,
+                params=params
+            ).to_json()
         )
         return RequestFuture(
-            task=task,
-            cancel=lambda: self.send(Request.to_cancel(id))
+            cancel=lambda: self.cancel(id),
+            receive=self.receive,
+            task=task
         )
+
+    def cancel(self, id: Union[int, str]) -> None:
+        self.send('cancel', {'id': id})
+
+    def on_binary(self, data: bytes) -> None:
+        self._logger.debug('Binary frame of {} bytes received.', len(data))
+
+    def on_reply(self, reply: JsonRpcReply) -> None:
+        self._logger.debug('Reply received {}.', reply)
+        self._manager.set_result(reply.id, reply.result)
+        self._generator.recycle_id(reply.id)
+
+    def on_error(self, error: JsonRpcError) -> None:
+        self._logger.debug('Error message received {}.', error)
+        self._manager.set_error(error.id, error.error)
+        self._generator.recycle_id(error.id)
+
+    def on_progress(self, progress: JsonRpcProgress) -> None:
+        self._logger.debug('Progress message received {}.', progress)
+        self._manager.add_progress(progress.id, progress.params)
+
+    def on_invalid_frame(self, data: Union[bytes, str], e: Exception) -> None:
+        self._logger.error('Invalid message received {}.', data, exc_info=e)

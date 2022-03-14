@@ -18,11 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
 from typing import Any, Optional
 
 from .jsonrpc.json_rpc_client import JsonRpcClient
-from .request.request import Request
-from .request.request_future import RequestFuture
+from .request_future import RequestFuture
 from .websocket.web_socket import WebSocket
 
 
@@ -44,12 +44,11 @@ class Client:
         :param cafile: Optional certification authority, defaults to None
         :type cafile: Optional[str], optional
         """
-        self._client = JsonRpcClient(
-            WebSocket.connect(
-                uri=uri,
-                secure=secure,
-                cafile=cafile
-            )
+        self._logger = logging.Logger('Brayns')
+        self._websocket = WebSocket.connect(
+            uri=uri,
+            secure=secure,
+            cafile=cafile
         )
 
     def __enter__(self) -> None:

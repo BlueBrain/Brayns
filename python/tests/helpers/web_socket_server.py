@@ -24,13 +24,14 @@ from typing import Callable, Optional
 import websockets
 from brayns.client.websocket.event_loop import EventLoop
 from brayns.client.websocket.web_socket import WebSocket
+from brayns.client.websocket.web_socket_protocol import WebSocketProtocol
 
 
 class WebSocketServer:
 
     def __init__(
         self,
-        handle_connection: Callable[[WebSocket], None],
+        handle_connection: Callable[[WebSocketProtocol], None],
         host: str,
         port: int,
         certfile: Optional[str] = None,

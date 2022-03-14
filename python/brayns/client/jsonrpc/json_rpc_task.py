@@ -24,32 +24,38 @@ from ..request_error import RequestError
 from ..request_progress import RequestProgress
 
 
-class RequestContext:
+class JsonRpcTask:
+
+    @staticmethod
+    def from_result(result: Any) -> 'JsonRpcTask':
+        task = JsonRpcTask()
+        task.set_result(result)
+        return task
 
     def __init__(self) -> None:
         self._ready = False
         self._result: Any = None
-        self._exception: Optional[RequestError] = None
+        self._error: Optional[RequestError] = None
         self._progress: Optional[RequestProgress] = None
 
     def is_ready(self) -> None:
         return self._ready
 
     def has_progress(self) -> None:
-        if self.is_ready():
-            raise StopIteration()
         return self._progress is not None
 
     def get_result(self) -> Any:
         if not self.is_ready():
             raise RuntimeError('Task is still running')
-        if self._exception is not None:
-            raise self._exception
+        if self._error is not None:
+            raise self._error
         return self._result
 
     def get_progress(self) -> RequestProgress:
         if self.is_ready():
-            raise StopIteration()
+            raise RuntimeError('Task is not running anymore')
+        if not self.has_progress():
+            raise RuntimeError('No progresses received yet')
         progress = self._progress
         self._progress = None
         return progress
@@ -58,8 +64,8 @@ class RequestContext:
         self._result = result
         self._ready = True
 
-    def set_exception(self, exception: RequestError) -> None:
-        self._exception = exception
+    def set_error(self, error: RequestError) -> None:
+        self._error = error
         self._ready = True
 
     def add_progress(self, progress: RequestProgress) -> None:

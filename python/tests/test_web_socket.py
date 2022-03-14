@@ -18,10 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Union
 import unittest
+from typing import Union
 
 from brayns.client.websocket.web_socket import WebSocket
+from brayns.client.websocket.web_socket_protocol import WebSocketProtocol
 
 from helpers.client_and_server import ClientAndServer
 
@@ -34,17 +35,17 @@ class TestWebSocket(unittest.TestCase):
             reply='reply'
         )
 
-    def test_binary(self) -> None:
-        self._send_and_receive(
-            request=b'request',
-            reply=b'reply'
-        )
-
     def test_text_secure(self) -> None:
         self._send_and_receive(
             request='request',
             reply='reply',
             secure=True
+        )
+
+    def test_binary(self) -> None:
+        self._send_and_receive(
+            request=b'request',
+            reply=b'reply'
         )
 
     def test_binary_secure(self) -> None:
@@ -71,7 +72,7 @@ class TestWebSocket(unittest.TestCase):
             self.assertEqual(self._request, self._expected_request)
             self.assertEqual(self._reply, self._expected_reply)
 
-    def _handle(self, websocket: WebSocket) -> None:
+    def _handle(self, websocket: WebSocketProtocol) -> None:
         self._request = websocket.receive()
         websocket.send(self._expected_reply)
 

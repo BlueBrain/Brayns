@@ -20,25 +20,40 @@
 
 from typing import Any, Callable, Generator
 
-from ..request_progress import RequestProgress
-from .request_task import RequestTask
+from .request_progress import RequestProgress
+from .jsonrpc.json_rpc_task import JsonRpcTask
 
 
 class RequestFuture:
 
+    @staticmethod
+    def for_notification() -> 'RequestFuture':
+        return RequestFuture(
+            cancel=lambda: None,
+            receive=lambda: None,
+            task=JsonRpcTask.from_result(None)
+        )
+
     def __init__(
         self,
-        task: RequestTask,
-        cancel: Callable[[], None]
+        cancel: Callable[[], None],
+        receive: Callable[[], None],
+        task: JsonRpcTask
     ) -> None:
-        self._task = task
         self._cancel = cancel
+        self._receive = receive
+        self._task = task
 
     def cancel(self) -> None:
         self._cancel()
 
-    def wait_for_result(self) -> Any:
-        return self._task.wait_for_all_progresses()
+    def get_result(self) -> Any:
+        for _ in self.wait():
+            pass
+        return self._task.get_result()
 
-    def wait_for_all_progresses(self) -> Generator[RequestProgress]:
-        return self._task.wait_for_all_progresses()
+    def wait(self) -> Generator[RequestProgress]:
+        while not self._task.is_ready():
+            self._receive()
+            if self._task.has_progress():
+                yield self._task.get_progress()

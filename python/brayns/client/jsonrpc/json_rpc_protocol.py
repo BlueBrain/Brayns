@@ -18,30 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any
+from typing import Protocol, Union
+
+from .json_rpc_error import JsonRpcError
+from .json_rpc_progress import JsonRpcProgress
+from .json_rpc_reply import JsonRpcReply
 
 
-@dataclass
-class Request:
-    """Request to send to the renderer."""
+class JsonRpcProtocol(Protocol):
 
-    method: str
-    params: Any = None
+    def on_binary(self, data: bytes) -> None:
+        pass
 
-    @staticmethod
-    def to_cancel(id: int) -> 'Request':
-        return Request(
-            method='cancel',
-            params={
-                'id': id
-            }
-        )
+    def on_reply(self, reply: JsonRpcReply) -> None:
+        pass
 
-    def __str__(self) -> str:
-        """Format request in a more readable way.
+    def on_error(self, error: JsonRpcError) -> None:
+        pass
 
-        :return: request description.
-        :rtype: str
-        """
-        return f'{self.method}: {self.params!r}'
+    def on_progress(self, progress: JsonRpcProgress) -> None:
+        pass
+
+    def on_invalid_frame(self, data: Union[bytes, str], e: Exception) -> None:
+        pass

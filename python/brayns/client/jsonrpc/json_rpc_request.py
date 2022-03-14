@@ -20,31 +20,25 @@
 
 import json
 from dataclasses import dataclass
-from typing import Any
-
-from ..request.request import Request
+from typing import Any, Union
 
 
 @dataclass
 class JsonRpcRequest:
 
-    id: int
+    id: Union[int, str, None]
     method: str
-    params: Any
+    params: Any = None
 
-    @staticmethod
-    def to_cancel(id: int, request: Request) -> 'JsonRpcRequest':
-        return JsonRpcRequest(
-            id=id,
-            method=request.method,
-            params=request.params
-        )
+    def is_notification(self) -> bool:
+        return self.id is None
 
     def to_json(self) -> str:
         message = {
-            'id': self.id,
             'method': self.method
         }
+        if self.id is not None:
+            message['id'] = self.id
         if self.params is not None:
             message['params'] = self.params
         return json.dumps(message)
