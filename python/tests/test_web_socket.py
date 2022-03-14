@@ -23,7 +23,7 @@ from typing import Union
 
 from brayns.client.websocket.web_socket_protocol import WebSocketProtocol
 
-from helpers.client_and_server import ClientAndServer
+from helpers.client_with_server import ClientWithServer
 
 
 class TestWebSocket(unittest.TestCase):
@@ -64,8 +64,7 @@ class TestWebSocket(unittest.TestCase):
         self._expected_reply = reply
         self._request = None
         self._reply = None
-        with ClientAndServer(self._handle, secure) as client_and_server:
-            client = client_and_server.client
+        with ClientWithServer(self._handle, secure) as client:
             client.send(self._expected_request)
             self._reply = client.receive()
             self.assertEqual(self._request, self._expected_request)
