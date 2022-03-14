@@ -22,7 +22,7 @@ from ..request.request import Request
 from ..request.request_future import RequestFuture
 from ..utils.id_generator import IdGenerator
 from ..websocket.web_socket_client import WebSocketClient
-from ..websocket.web_socket_connector import WebSocketConnector
+from ..websocket.web_socket_client_factory import WebSocketClientFactory
 from .json_rpc_handler import JsonRpcHandler
 from .json_rpc_manager import JsonRpcManager
 from .json_rpc_request import JsonRpcRequest
@@ -30,12 +30,12 @@ from .json_rpc_request import JsonRpcRequest
 
 class JsonRpcClient:
 
-    def __init__(self, connector: WebSocketConnector) -> None:
+    def __init__(self, factory: WebSocketClientFactory) -> None:
         self._generator = IdGenerator()
         self._manager = JsonRpcManager()
         self._client = WebSocketClient(
             listener=JsonRpcHandler(self._manager),
-            connector=connector
+            factory=factory
         )
 
     def disconnect(self) -> None:

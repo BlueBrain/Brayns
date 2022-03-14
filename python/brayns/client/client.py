@@ -20,10 +20,10 @@
 
 from typing import Any, Optional
 
-from ..jsonrpc.json_rpc_client import JsonRpcClient
-from ..request.request import Request
-from ..request.request_future import RequestFuture
-from ..websocket.web_socket_connector import WebSocketConnector
+from .jsonrpc.json_rpc_client import JsonRpcClient
+from .request.request import Request
+from .request.request_future import RequestFuture
+from .websocket.web_socket import WebSocket
 
 
 class Client:
@@ -45,7 +45,7 @@ class Client:
         :type cafile: Optional[str], optional
         """
         self._client = JsonRpcClient(
-            WebSocketConnector(
+            WebSocket.connect(
                 uri=uri,
                 secure=secure,
                 cafile=cafile

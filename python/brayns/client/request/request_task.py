@@ -22,8 +22,8 @@ import threading
 from typing import Any, Generator
 
 from .request_context import RequestContext
-from .request_error import RequestError
-from .request_progress import RequestProgress
+from ..request_error import RequestError
+from ..request_progress import RequestProgress
 
 
 class RequestTask:

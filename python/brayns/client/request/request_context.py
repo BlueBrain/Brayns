@@ -20,8 +20,8 @@
 
 from typing import Any, Optional
 
-from .request_error import RequestError
-from .request_progress import RequestProgress
+from ..request_error import RequestError
+from ..request_progress import RequestProgress
 
 
 class RequestContext:

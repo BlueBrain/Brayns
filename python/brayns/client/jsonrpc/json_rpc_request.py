@@ -33,7 +33,7 @@ class JsonRpcRequest:
     params: Any
 
     @staticmethod
-    def from_request(id: int, request: Request) -> 'JsonRpcRequest':
+    def to_cancel(id: int, request: Request) -> 'JsonRpcRequest':
         return JsonRpcRequest(
             id=id,
             method=request.method,
