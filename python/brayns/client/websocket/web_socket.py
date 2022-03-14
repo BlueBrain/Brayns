@@ -18,45 +18,57 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import concurrent.futures
+import ssl
+from typing import Optional, Union
+
+import websockets
 
 from .event_loop import EventLoop
-from .web_socket_connector import WebSocketConnector
-from .web_socket_listener import WebSocketListener
 
 
-class WebSocketClient:
+class WebSocket:
+
+    @staticmethod
+    def connect(
+        uri: str,
+        secure: bool = False,
+        cafile: Optional[str] = None
+    ) -> 'WebSocket':
+        loop = EventLoop()
+        return WebSocket(
+            loop.run(
+                websockets.connect(
+                    uri=('wss://' if secure else 'ws://') + uri,
+                    ssl=ssl.create_default_context(
+                        cafile=cafile
+                    ) if secure else None,
+                    ping_interval=None,
+                    timeout=None,
+                    max_size=int(2e9)
+                )
+            ).result(),
+            loop
+        )
 
     def __init__(
         self,
-        listener: WebSocketListener,
-        connector: WebSocketConnector
+        websocket: websockets.WebSocketClientProtocol,
+        loop: EventLoop
     ) -> None:
-        self._loop = EventLoop()
-        self._websocket = self._loop.run(
-            connector.connect()
-        ).result()
-        self._task = self._loop.run(
-            self._websocket.poll(listener)
-        )
+        self._websocket = websocket
+        self._loop = loop
 
     def disconnect(self) -> None:
-        self._task.cancel()
-        try:
-            self._task.result()
-        except concurrent.futures.CancelledError:
-            pass
         self._loop.run(
-            self._websocket.disconnect()
-        ).result()
-        self._loop.stop()
-
-    def send_binary(self, data: bytes) -> None:
-        self._loop.run(
-            self._websocket.send_binary(data)
+            self._websocket.close()
         ).result()
 
-    def send_text(self, data: str) -> None:
+    def send(self, data: Union[bytes, str]) -> None:
         self._loop.run(
-            self._websocket.send_text(data)
+            self._websocket.send(data)
+        ).result()
+
+    def receive(self) -> Union[bytes, str]:
+        return self._loop.run(
+            self._websocket.recv()
         ).result()

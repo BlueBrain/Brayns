@@ -20,8 +20,8 @@
 
 from typing import Any, Dict
 
-from .request_error import RequestError
-from .request_progress import RequestProgress
+from ..request_error import RequestError
+from ..request_progress import RequestProgress
 from .request_task import RequestTask
 
 

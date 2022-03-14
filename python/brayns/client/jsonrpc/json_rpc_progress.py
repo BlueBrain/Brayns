@@ -19,25 +19,25 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Union
 
-from ..request.request_error import RequestError
+from ..request_progress import RequestProgress
 
 
 @dataclass
-class JsonRpcError:
+class JsonRpcProgress:
 
-    id: Union[int, str, None]
-    error: RequestError
+    id: int
+    method: str
+    params: RequestProgress
 
     @staticmethod
-    def from_dict(message: dict) -> 'JsonRpcError':
-        error: dict = message['error']
-        return JsonRpcError(
-            id=message.get('id'),
-            error=RequestError(
-                code=error['code'],
-                message=error['message'],
-                data=error.get('data')
+    def from_dict(message: dict) -> 'JsonRpcProgress':
+        params = message['params']
+        return JsonRpcProgress(
+            id=params['id'],
+            method=message['method'],
+            params=RequestProgress(
+                operation=params['operation'],
+                amount=params['amount']
             )
         )
