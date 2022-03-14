@@ -19,8 +19,8 @@
 #include "SonataSelection.h"
 
 #include <bbp/sonata/node_sets.h>
-#include <bbp/sonata/report_reader.h>
 
+#include <plugin/io/sonataloader/data/SonataConfig.h>
 #include <plugin/io/sonataloader/data/SonataSimulationMapping.h>
 
 namespace sonataloader
@@ -64,7 +64,9 @@ void NodeSelection::select(
         }
     }
     else
+    {
         _nodeSetsSelection = nodePopulation.selectAll();
+    }
 }
 
 void NodeSelection::select(const std::vector<uint64_t> &nodeList)
@@ -72,10 +74,18 @@ void NodeSelection::select(const std::vector<uint64_t> &nodeList)
     _nodeListSelection = bbp::sonata::Selection::fromValues(nodeList);
 }
 
-void NodeSelection::select(const ReportType simType, const std::string &reportPath, const std::string &population)
+void NodeSelection::select(
+    const bbp::sonata::SimulationConfig &config,
+    const ReportType simType,
+    const std::string &reportName,
+    const std::string &population)
 {
     if (simType == ReportType::SPIKES || simType == ReportType::NONE)
+    {
         return;
+    }
+
+    auto reportPath = SonataConfig::resolveReportPath(config, reportName);
 
     auto nodeIds = SonataSimulationMapping::getCompartmentNodes(reportPath, population);
     std::sort(nodeIds.begin(), nodeIds.end());

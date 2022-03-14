@@ -63,7 +63,13 @@ std::vector<float> VasculatureRadiiHandler::getFrameDataImpl(const uint32_t fram
     _ready = false;
     const auto realFrame = frame > _nbFrames ? _nbFrames : frame;
     const auto timestamp = frameIndexToTimestamp(realFrame, _dt);
-    _radii = _reportPopulation.get(_selection, timestamp).data;
+    _radii = _reportPopulation
+                 .get(
+                     nonstd::optional<bbp::sonata::Selection>(_selection),
+                     nonstd::optional<double>(timestamp),
+                     nonstd::nullopt,
+                     nonstd::nullopt)
+                 .data;
     _ready = true;
 
     return {};

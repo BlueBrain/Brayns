@@ -29,19 +29,22 @@ VasculaturePopulationLoader::VasculaturePopulationLoader()
 }
 
 std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
-    const SonataConfig::Data &networkData,
+    const SonataNetworkConfig &networkData,
     const SonataNodePopulationParameters &lc,
     const bbp::sonata::Selection &selection) const
 {
-    const auto population = networkData.config.getNodePopulation(lc.node_population);
+    const auto &populationName = lc.node_population;
+    const auto &config = networkData.circuitConfig();
+    const auto population = config.getNodePopulation(populationName);
 
     const auto startPoints = SonataVasculature::getSegmentStartPoints(population, selection);
     const auto endPoints = SonataVasculature::getSegmentEndPoints(population, selection);
     const auto sectionTypes = SonataVasculature::getSegmentSectionTypes(population, selection);
 
     std::vector<float> startRadii, endRadii;
-    const auto radOverride = lc.vasculature_geometry_parameters.radius_override;
-    const auto radMultiplier = lc.vasculature_geometry_parameters.radius_multiplier;
+    const auto &vasculatureParameters = lc.vasculature_geometry_parameters;
+    const auto radOverride = vasculatureParameters.radius_override;
+    const auto radMultiplier = vasculatureParameters.radius_multiplier;
     if (radOverride > 0.f)
     {
         startRadii.resize(startPoints.size(), radOverride);

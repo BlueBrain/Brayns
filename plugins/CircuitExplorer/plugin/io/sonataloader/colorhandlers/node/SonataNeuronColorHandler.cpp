@@ -59,8 +59,8 @@ std::vector<std::string> getAttributeValues(
 
 namespace sonataloader
 {
-SonataNeuronColorHandler::SonataNeuronColorHandler(const std::string &configPath, const std::string &population)
-    : _config(bbp::sonata::CircuitConfig::fromFile(configPath))
+SonataNeuronColorHandler::SonataNeuronColorHandler(bbp::sonata::CircuitConfig config, const std::string &population)
+    : _config(std::move(config))
     , _population(population)
 {
 }

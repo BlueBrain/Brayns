@@ -36,14 +36,14 @@ public:
      * @brief creates a CircuitColorHandler based on the node population type
      */
     static CircuitColorHandler::Ptr createNodeColorHandler(
-        const SonataConfig::Data &network,
+        const SonataNetworkConfig &network,
         const SonataNodePopulationParameters &lc);
 
     /**
      * @brief creates a CircuitColorHandler based on the edge population type
      */
     static CircuitColorHandler::Ptr createEdgeColorHandler(
-        const SonataConfig::Data &network,
+        const SonataNetworkConfig &network,
         const SonataEdgePopulationParameters &lc);
 };
 } // namespace sonataloader

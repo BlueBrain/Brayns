@@ -33,11 +33,8 @@ namespace sonataloader
 class NodePopulationLoader
 {
 public:
-    using Ptr = std::unique_ptr<NodePopulationLoader>;
-
-    template<typename T, typename = std::enable_if_t<std::is_constructible<std::string, T>::value>>
-    NodePopulationLoader(T &&typeName)
-        : _typeName(std::forward<T>(typeName))
+    NodePopulationLoader(std::string populationType)
+        : _typeName(std::move(populationType))
     {
     }
 
@@ -58,7 +55,7 @@ public:
      * progress to listening clients of the Brayns API
      */
     virtual std::vector<MorphologyInstance::Ptr> load(
-        const SonataConfig::Data &networkData,
+        const SonataNetworkConfig &networkData,
         const SonataNodePopulationParameters &loadSettings,
         const bbp::sonata::Selection &nodeSelection) const = 0;
 

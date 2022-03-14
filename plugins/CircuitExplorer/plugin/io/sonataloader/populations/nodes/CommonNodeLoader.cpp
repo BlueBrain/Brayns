@@ -27,7 +27,7 @@
 namespace sonataloader
 {
 std::vector<MorphologyInstance::Ptr> CommonNodeLoader::loadNodes(
-    const SonataConfig::Data &networkData,
+    const SonataNetworkConfig &networkData,
     const SonataNodePopulationParameters &lc,
     const bbp::sonata::Selection &nodeSelection,
     const std::vector<std::string> &morphologyNames,
@@ -58,8 +58,9 @@ std::vector<MorphologyInstance::Ptr> CommonNodeLoader::loadNodes(
         radOverride,
         geometryMode == "smooth" && (loadAxon || loadDend));
 
-    const auto morphPath =
-        SonataConfig::resolveMorphologyPath(networkData.config.getNodePopulationProperties(lc.node_population));
+    const auto &config = networkData.circuitConfig();
+    const auto &populationName = lc.node_population;
+    const auto morphPath = SonataConfig::resolveMorphologyPath(config.getNodePopulationProperties(populationName));
 
     const auto loadFn = [&](const std::string &name, const std::vector<size_t> &indices)
     {

@@ -89,7 +89,10 @@ std::vector<float> SonataSpikeHandler::getFrameDataImpl(const uint32_t frame)
 
     const auto trStart = std::max(timestamp - SPIKE_TRANSITION_TIME_SECONDS, 0.0);
     const auto trEnd = std::min(timestamp + SPIKE_TRANSITION_TIME_SECONDS, _endTime);
-    const auto readSpikes = _spikePopulation.get(_selection, trStart, trEnd);
+    const auto readSpikes = _spikePopulation.get(
+        nonstd::optional<bbp::sonata::Selection>(_selection),
+        nonstd::optional<double>(trStart),
+        nonstd::optional<double>(trEnd));
     for (const auto &spike : readSpikes)
     {
         const auto index = _gidsToIndex[spike.first];

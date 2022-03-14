@@ -47,8 +47,7 @@ BRAYNS_JSON_OBJECT_BEGIN(VasculatureGeometrySettings)
 BRAYNS_JSON_OBJECT_ENTRY(
     float,
     radius_multiplier,
-    "Factor by which to multiply all vasculature sample "
-    "radii. Ignored if radius_override is greater than 0",
+    "Factor by which to multiply all vasculature sample radii. Ignored if radius_override is greater than 0",
     brayns::Default(1.f))
 BRAYNS_JSON_OBJECT_ENTRY(
     float,
@@ -64,8 +63,8 @@ BRAYNS_JSON_OBJECT_ENTRY(bool, load_afferent, "Wether to load afferent or effere
 BRAYNS_JSON_OBJECT_ENTRY(float, edge_percentage, "Percentage of edges to load from all available")
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
-    edge_report,
-    "Path to a synapse report to load algon the edge population",
+    edge_report_name,
+    "Name of a synapse report to load along the edge population",
     brayns::Required(false))
 BRAYNS_JSON_OBJECT_END()
 
@@ -76,8 +75,7 @@ BRAYNS_JSON_OBJECT_ENTRY(std::string, node_population, "Name of the node populat
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<std::string>,
     node_sets,
-    "List of node set names/regex to filter the node population load. Ignored "
-    "if a list of node ids is provided",
+    "List of node set names/regex to filter the node population load. Ignored if a list of node ids is provided",
     brayns::Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     float,
@@ -87,20 +85,17 @@ BRAYNS_JSON_OBJECT_ENTRY(
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<uint64_t>,
     node_ids,
-    "List of node IDs to load from the population. "
-    "Invalidates 'node_percentage' and 'node_sets'",
+    "List of node IDs to load from the population. Invalidates 'node_percentage' and 'node_sets'",
     brayns::Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     sonataloader::ReportType,
     report_type,
-    "Type of report to load for the given node population. Possible values "
-    "are: "
+    "Type of report to load for the given node population. Possible values are: "
         + string_utils::join(brayns::enumNames<sonataloader::ReportType>(), ", "))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
-    report_path,
-    "Path of the report file to load (Ignored if report_type "
-    "is 'none' or 'spikes')",
+    report_name,
+    "Name of the report file to load (Ignored if report_type is 'none' or 'spikes')",
     brayns::Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<SonataEdgePopulationParameters>,
@@ -110,18 +105,24 @@ BRAYNS_JSON_OBJECT_ENTRY(
 BRAYNS_JSON_OBJECT_ENTRY(
     NeuronMorphologyLoaderParameters,
     neuron_morphology_parameters,
-    "Settings to configure the morphology geometry load. "
-    "Ignored for vasculature populations")
+    "Settings to configure the morphology geometry load. Ignored for vasculature populations",
+    Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     VasculatureGeometrySettings,
     vasculature_geometry_parameters,
-    "Settings to configure the vasculature geometry load. "
-    "Ignored for any node population that is not vasculature")
+    "Settings to configure the vasculature geometry load. Ignored for any node population that is not vasculature",
+    Required(false))
 BRAYNS_JSON_OBJECT_END()
 
 // ---------------------------------------------------------------------------
 
 BRAYNS_JSON_OBJECT_BEGIN(SonataLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(
+    std::string,
+    simulation_config_path,
+    "Path to the simulation config file .json "
+    "(By default will be searched in the same directory as the circuit config with name simulation_config.json)",
+    Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<SonataNodePopulationParameters>,
     node_population_settings,

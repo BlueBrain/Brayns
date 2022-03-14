@@ -22,6 +22,7 @@
 
 #include <plugin/io/SonataLoaderParameters.h>
 #include <plugin/io/morphology/MorphologyInstance.h>
+#include <plugin/io/sonataloader/data/SonataConfig.h>
 #include <plugin/io/sonataloader/reports/EdgeReportLoader.h>
 #include <plugin/io/sonataloader/reports/NodeReportLoader.h>
 #include <plugin/io/synapse/SynapseGroup.h>
@@ -37,6 +38,7 @@ public:
      * the node population
      */
     static void loadNodeMapping(
+        const SonataNetworkConfig &network,
         const SonataNodePopulationParameters &input,
         const bbp::sonata::Selection &selection,
         std::vector<MorphologyInstance::Ptr> &nodes);
@@ -47,6 +49,7 @@ public:
      * the edge population
      */
     static void loadEdgeMapping(
+        const SonataNetworkConfig &network,
         const SonataEdgePopulationParameters &input,
         const bbp::sonata::Selection &selection,
         std::vector<SynapseGroup::Ptr> &edges);
@@ -57,6 +60,7 @@ public:
      * coloring and handles any special case (such as vasculature radii reports)
      */
     static void addNodeReportHandler(
+        const SonataNetworkConfig &network,
         const SonataNodePopulationParameters &input,
         const bbp::sonata::Selection &selection,
         brayns::ModelDescriptorPtr &model);
@@ -66,6 +70,7 @@ public:
      * it instantiates the appropriate simulation handler and enabled simulation
      */
     static void addEdgeReportHandler(
+        const SonataNetworkConfig &network,
         const SonataEdgePopulationParameters &input,
         const bbp::sonata::Selection &selection,
         brayns::ModelDescriptorPtr &model);

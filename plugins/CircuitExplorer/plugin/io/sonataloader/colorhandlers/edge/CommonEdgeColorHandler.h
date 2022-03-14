@@ -32,7 +32,7 @@ namespace sonataloader
 class CommonEdgeColorHandler : public CircuitColorHandler
 {
 public:
-    CommonEdgeColorHandler(const std::string &configPath, const std::string &edgePopulation, const bool afferent);
+    CommonEdgeColorHandler(bbp::sonata::CircuitConfig config, const std::string &edgePopulation, const bool afferent);
 
     void _setElementsImpl(const std::vector<uint64_t> &ids, std::vector<ElementMaterialMap::Ptr> &&elements) final;
 

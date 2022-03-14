@@ -102,20 +102,21 @@ EndFootPopulationLoader::EndFootPopulationLoader()
 }
 
 std::vector<std::unique_ptr<SynapseGroup>> EndFootPopulationLoader::load(
-    const SonataConfig::Data &networkData,
+    const SonataNetworkConfig &network,
     const SonataEdgePopulationParameters &lc,
     const bbp::sonata::Selection &nodeSelection) const
 {
     if (lc.load_afferent)
         throw std::runtime_error("Afferent edges not supported on endfoot connectivity");
 
-    const auto basePath = std::filesystem::path(networkData.path).parent_path().string();
-    auto path = getEndFeetAreasPath(networkData.config, lc.edge_population, basePath);
-
+    const auto &config = network.circuitConfig();
+    const std::filesystem::path basePath(network.circuitConfigDir());
+    const auto &populationName = lc.edge_population;
+    auto path = getEndFeetAreasPath(config, populationName, basePath);
     const auto nodes = nodeSelection.flatten();
-    const auto population = networkData.config.getEdgePopulation(lc.edge_population);
-
-    const auto edgeSelection = EdgeSelection(population.efferentEdges(nodes)).intersection(lc.edge_percentage);
+    const auto percentage = lc.edge_percentage;
+    const auto population = config.getEdgePopulation(populationName);
+    const auto edgeSelection = EdgeSelection(population.efferentEdges(nodes)).intersection(percentage);
     const auto flatEdges = edgeSelection.flatten();
     const auto sourceNodes = SonataSynapses::getSourceNodes(population, edgeSelection);
     const auto endFeetIds = SonataSynapses::getEndFeetIds(population, edgeSelection);
