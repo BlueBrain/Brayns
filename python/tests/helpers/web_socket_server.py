@@ -41,17 +41,14 @@ class WebSocketServer:
         self._handle_connection = handle_connection
         self._loop = EventLoop()
         self._websocket = self._loop.run(
-            websockets.serve(
-                ws_handler=self._handle,
+            self._start(
                 host=host,
                 port=port,
                 ssl=self._create_ssl_context(
                     certfile=certfile,
                     keyfile=keyfile,
                     password=password
-                ),
-                ping_interval=None,
-                timeout=0
+                )
             )
         ).result()
 
@@ -78,10 +75,25 @@ class WebSocketServer:
         )
         return context
 
-    async def _start(self) -> None:
+    async def _start(
+        self,
+        host: str,
+        port: int,
+        ssl: ssl.SSLContext
+    ) -> None:
+        return await websockets.serve(
+            ws_handler=self._handle,
+            host=host,
+            port=port,
+            ssl=ssl,
+            ping_interval=None,
+            timeout=0
+        )
 
     async def _handle(
         self,
         websocket: websockets.WebSocketClientProtocol
     ) -> None:
-        self._handle_connection(WebSocket(websocket, self._loop))
+        self._handle_connection(
+            WebSocket(websocket, self._loop)
+        )

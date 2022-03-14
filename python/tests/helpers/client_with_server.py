@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
-from typing import Callable
+from typing import Callable, Union
 
 from brayns.client.websocket.web_socket import WebSocket
 from brayns.client.websocket.web_socket_protocol import WebSocketProtocol
@@ -35,7 +35,7 @@ KEY = str(SSL_FOLDER / 'key.pem')
 PASSWORD = 'test'
 
 
-class ClientAndServer:
+class ClientWithServer:
 
     def __init__(
         self,
@@ -56,13 +56,15 @@ class ClientAndServer:
             cafile=CERTIFICATE if secure else None
         )
 
-    def __enter__(self) -> 'ClientAndServer':
+    def __enter__(self) -> 'ClientWithServer':
         return self
 
     def __exit__(self, *_) -> None:
         self._client.disconnect()
         self._server.disconnect()
 
-    @property
-    def client(self) -> 'WebSocket':
-        return self._client
+    def receive(self) -> Union[bytes, str]:
+        return self._client.receive()
+
+    def send(self, data: Union[bytes, str]) -> None:
+        self._client.send(data)
