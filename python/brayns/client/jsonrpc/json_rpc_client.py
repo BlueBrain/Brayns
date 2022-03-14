@@ -21,15 +21,15 @@
 import logging
 from typing import Any, Union
 
-from ..websocket.web_socket_protocol import WebSocketProtocol
-from .json_rpc_dispatcher import JsonRpcDispatcher
-from .json_rpc_request import JsonRpcRequest
 from ...utils.id_generator import IdGenerator
 from ..request_future import RequestFuture
-from .json_rpc_manager import JsonRpcManager
+from ..websocket.web_socket_protocol import WebSocketProtocol
+from .json_rpc_dispatcher import JsonRpcDispatcher
 from .json_rpc_error import JsonRpcError
+from .json_rpc_manager import JsonRpcManager
 from .json_rpc_progress import JsonRpcProgress
 from .json_rpc_reply import JsonRpcReply
+from .json_rpc_request import JsonRpcRequest
 
 
 class JsonRpcClient:
@@ -57,14 +57,10 @@ class JsonRpcClient:
 
     def send(self, method: str, params: Any = None) -> RequestFuture:
         id = self._generator.generate_new_id()
+        request = JsonRpcRequest(id, method, params)
+        self._logger.debug('Send {}.', request)
         task = self._manager.add_task(id)
-        self._websocket.send(
-            JsonRpcRequest(
-                id=id,
-                method=method,
-                params=params
-            ).to_json()
-        )
+        self._websocket.send(request.to_json())
         return RequestFuture(
             cancel=lambda: self.cancel(id),
             receive=self.receive,

@@ -22,8 +22,8 @@ import json
 from typing import Union
 
 from .json_rpc_error import JsonRpcError
-from .json_rpc_protocol import JsonRpcProtocol
 from .json_rpc_progress import JsonRpcProgress
+from .json_rpc_protocol import JsonRpcProtocol
 from .json_rpc_reply import JsonRpcReply
 
 
