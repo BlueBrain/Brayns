@@ -19,34 +19,38 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import json
+from typing import Union
 
 from .json_rpc_error import JsonRpcError
-from .json_rpc_listener import JsonRpcListener
+from .json_rpc_protocol import JsonRpcProtocol
 from .json_rpc_progress import JsonRpcProgress
 from .json_rpc_reply import JsonRpcReply
 
 
-class JsonRpcHandler:
+class JsonRpcDispatcher:
 
-    def __init__(self, listener: JsonRpcListener) -> None:
+    def __init__(self, listener: JsonRpcProtocol) -> None:
         self._listener = listener
 
-    def on_binary_frame(self, _: bytes) -> None:
-        pass
-
-    def on_text_frame(self, data: str) -> None:
+    def dispatch(self, data: Union[bytes, str]) -> None:
         try:
-            self._handle_text(data)
+            self._dispatch(data)
         except Exception as e:
             self._listener.on_invalid_message(data, e)
 
-    def _handle_text(self, data: str) -> None:
+    def _dispatch(self, data: Union[bytes, str]) -> None:
+        if isinstance(data, bytes):
+            self._listener.on_binary(data)
+            return
+        self._dispatch_text(data)
+
+    def _dispatch_text(self, data: str) -> None:
         message = self._parse(data)
-        if self._handle_error(message):
+        if self._dispatch_error(message):
             return
-        if self._handle_progress(message):
+        if self._dispatch_reply(message):
             return
-        if self._handle_reply(message):
+        if self._dispatch_progress(message):
             return
         raise ValueError('Message is not supported JSON-RPC')
 
@@ -56,7 +60,7 @@ class JsonRpcHandler:
             raise ValueError('Message is not a JSON object')
         return message
 
-    def _handle_error(self, message: dict) -> bool:
+    def _dispatch_error(self, message: dict) -> bool:
         if 'error' not in message:
             return False
         self._listener.on_error(
@@ -64,18 +68,18 @@ class JsonRpcHandler:
         )
         return True
 
-    def _handle_progress(self, message: dict) -> bool:
-        if 'id' in message:
-            return False
-        self._listener.on_progress(
-            JsonRpcProgress.from_dict(message)
-        )
-        return True
-
-    def _handle_reply(self, message: dict) -> bool:
+    def _dispatch_reply(self, message: dict) -> bool:
         if 'result' not in message:
             return False
         self._listener.on_reply(
             JsonRpcReply.from_dict(message)
+        )
+        return True
+
+    def _dispatch_progress(self, message: dict) -> bool:
+        if 'id' in message:
+            return False
+        self._listener.on_progress(
+            JsonRpcProgress.from_dict(message)
         )
         return True

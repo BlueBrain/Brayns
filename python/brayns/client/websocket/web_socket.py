@@ -63,12 +63,12 @@ class WebSocket:
             self._websocket.close()
         ).result()
 
-    def send(self, data: Union[bytes, str]) -> None:
-        self._loop.run(
-            self._websocket.send(data)
-        ).result()
-
     def receive(self) -> Union[bytes, str]:
         return self._loop.run(
             self._websocket.recv()
+        ).result()
+
+    def send(self, data: Union[bytes, str]) -> None:
+        self._loop.run(
+            self._websocket.send(data)
         ).result()

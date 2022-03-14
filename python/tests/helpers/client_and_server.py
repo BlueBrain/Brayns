@@ -22,6 +22,7 @@ import pathlib
 from typing import Callable
 
 from brayns.client.websocket.web_socket import WebSocket
+from brayns.client.websocket.web_socket_protocol import WebSocketProtocol
 
 from helpers.web_socket_server import WebSocketServer
 
@@ -38,7 +39,7 @@ class ClientAndServer:
 
     def __init__(
         self,
-        handle_connection: Callable[[WebSocket], None],
+        handle_connection: Callable[[WebSocketProtocol], None],
         secure: bool = False
     ) -> None:
         self._server = WebSocketServer(

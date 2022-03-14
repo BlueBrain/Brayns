@@ -18,32 +18,62 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from ..request.request_manager import RequestManager
-from ..request.request_task import RequestTask
-from .json_rpc_error import JsonRpcError
-from .json_rpc_reply import JsonRpcReply
-from .json_rpc_progress import JsonRpcProgress
+from typing import Any, Dict, Union
+
+from ..request_error import RequestError
+from ..request_progress import RequestProgress
+from .json_rpc_task import JsonRpcTask
 
 
 class JsonRpcManager:
 
     def __init__(self) -> None:
-        self._manager = RequestManager()
+        self._tasks: Dict[int, JsonRpcTask] = {}
 
-    def create_task(self, id: int) -> RequestTask:
-        return self._manager.create_task(id)
+    def add_task(self, id: Union[int, str]) -> JsonRpcTask:
+        if id is None:
+            raise RuntimeError('Cannot create a task for a notification')
+        if id in self._tasks:
+            raise RuntimeError('Request with same ID already running')
+        task = JsonRpcTask()
+        self._tasks[id] = task
+        return task
 
     def clear_tasks(self) -> None:
-        self._manager.clear_tasks()
+        for task in self._tasks.values():
+            task.set_error(
+                RequestError('Task has been stopped on client side')
+            )
+        self._tasks.clear()
 
-    def on_reply(self, reply: JsonRpcReply) -> None:
-        self._manager.set_result(reply.id, reply.result)
+    def set_result(
+        self,
+        id: Union[int, str],
+        result: Any
+    ) -> None:
+        task = self._tasks.get(id)
+        if task is None:
+            return
+        task.set_result(result)
+        del self._tasks[id]
 
-    def on_error(self, error: JsonRpcError) -> None:
-        self._manager.set_error(error.id, error.error)
+    def set_error(
+        self,
+        id: Union[int, str],
+        error: RequestError
+    ) -> None:
+        task = self._tasks.get(id)
+        if task is None:
+            return
+        task.set_error(error)
+        del self._tasks[id]
 
-    def on_progress(self, progress: JsonRpcProgress) -> None:
-        self._manager.add_progress(progress.id, progress.params)
-
-    def on_invalid_message(self, data: str, e: Exception) -> None:
-        print(f'Invalid message received: {data} {e}')
+    def add_progress(
+        self,
+        id: Union[int, str],
+        progress: RequestProgress
+    ) -> None:
+        task = self._tasks.get(id)
+        if task is None:
+            return
+        task.add_progress(progress)
