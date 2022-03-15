@@ -53,3 +53,10 @@ class RequestError(Exception):
         if self.data is None:
             return message
         return f'{message}: {self.data!r}'
+
+    def __eq__(self, other: 'RequestError') -> bool:
+        return (
+            self.code == other.code
+            and self.message == other.message
+            and self.data == other.data
+        )

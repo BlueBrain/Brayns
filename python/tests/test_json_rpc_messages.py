@@ -25,6 +25,7 @@ from brayns.client.jsonrpc.json_rpc_error import JsonRpcError
 from brayns.client.jsonrpc.json_rpc_progress import JsonRpcProgress
 from brayns.client.jsonrpc.json_rpc_reply import JsonRpcReply
 from brayns.client.jsonrpc.json_rpc_request import JsonRpcRequest
+from brayns.client.request_error import RequestError
 
 
 class TestJsonRpcTask(unittest.TestCase):
@@ -39,9 +40,11 @@ class TestJsonRpcTask(unittest.TestCase):
             }
         })
         self.assertEqual(error.id, 1)
-        self.assertEqual(error.error.message, 'test')
-        self.assertEqual(error.error.code, 2)
-        self.assertEqual(error.error.data, [1, 2, 3])
+        self.assertEqual(error.error, RequestError(
+            message='test',
+            code=2,
+            data=[1, 2, 3]
+        ))
 
     def test_progress(self) -> None:
         progress = JsonRpcProgress.from_dict({
