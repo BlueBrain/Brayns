@@ -17,3 +17,22 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+from typing import List
+
+
+class IdGenerator:
+
+    def __init__(self) -> None:
+        self._current_id = 0
+        self._recycled_ids: List[int] = []
+
+    def generate_new_id(self) -> int:
+        if self._recycled_ids:
+            return self._recycled_ids.pop()
+        id = self._current_id
+        self._current_id += 1
+        return id
+
+    def recycle_id(self, id: int) -> None:
+        self._recycled_ids.append(id)

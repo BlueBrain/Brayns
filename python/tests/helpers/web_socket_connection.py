@@ -17,3 +17,19 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+from typing import Union
+
+import websockets
+
+
+class WebSocketConnection:
+
+    def __init__(self, websocket: websockets.WebSocketServerProtocol) -> None:
+        self._websocket = websocket
+
+    async def receive(self) -> Union[bytes, str]:
+        return await self._websocket.recv()
+
+    async def send(self, data: Union[bytes, str]) -> None:
+        await self._websocket.send(data)

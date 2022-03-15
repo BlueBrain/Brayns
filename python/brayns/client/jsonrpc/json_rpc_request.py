@@ -17,3 +17,28 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import json
+from dataclasses import dataclass
+from typing import Any, Union
+
+
+@dataclass
+class JsonRpcRequest:
+
+    id: Union[int, str, None]
+    method: str
+    params: Any = None
+
+    def is_notification(self) -> bool:
+        return self.id is None
+
+    def to_json(self) -> str:
+        message = {
+            'method': self.method
+        }
+        if self.id is not None:
+            message['id'] = self.id
+        if self.params is not None:
+            message['params'] = self.params
+        return json.dumps(message)

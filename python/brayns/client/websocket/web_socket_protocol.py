@@ -17,3 +17,17 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+from typing import Protocol, Union
+
+
+class WebSocketProtocol(Protocol):
+
+    def close(self) -> None:
+        pass
+
+    def receive(self) -> Union[bytes, str]:
+        pass
+
+    def send(self, data: Union[bytes, str]) -> None:
+        pass

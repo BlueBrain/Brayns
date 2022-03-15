@@ -17,3 +17,27 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+from dataclasses import dataclass
+from typing import Union
+
+from ..request_error import RequestError
+
+
+@dataclass
+class JsonRpcError:
+
+    id: Union[int, str, None]
+    error: RequestError
+
+    @staticmethod
+    def from_dict(message: dict) -> 'JsonRpcError':
+        error: dict = message['error']
+        return JsonRpcError(
+            id=message.get('id'),
+            error=RequestError(
+                code=error['code'],
+                message=error['message'],
+                data=error.get('data')
+            )
+        )
