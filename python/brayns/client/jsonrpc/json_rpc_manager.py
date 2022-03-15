@@ -18,62 +18,47 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, Dict, Union
+import logging
+from typing import Tuple, Union
 
-from ..request_error import RequestError
-from ..request_progress import RequestProgress
+from ...utils.id_generator import IdGenerator
+from .json_rpc_context import JsonRpcContext
+from .json_rpc_error import JsonRpcError
+from .json_rpc_progress import JsonRpcProgress
+from .json_rpc_reply import JsonRpcReply
 from .json_rpc_task import JsonRpcTask
 
 
 class JsonRpcManager:
 
-    def __init__(self) -> None:
-        self._tasks: Dict[int, JsonRpcTask] = {}
-
-    def add_task(self, id: Union[int, str]) -> JsonRpcTask:
-        if id is None:
-            raise RuntimeError('Cannot create a task for a notification')
-        if id in self._tasks:
-            raise RuntimeError('Request with same ID already running')
-        task = JsonRpcTask()
-        self._tasks[id] = task
-        return task
+    def __init__(self, logger: logging.Logger) -> None:
+        self._logger = logger
+        self._generator = IdGenerator()
+        self._context = JsonRpcContext()
 
     def clear_tasks(self) -> None:
-        for task in self._tasks.values():
-            task.set_error(
-                RequestError('Task has been stopped on client side')
-            )
-        self._tasks.clear()
+        self._context.clear_tasks()
 
-    def set_result(
-        self,
-        id: Union[int, str],
-        result: Any
-    ) -> None:
-        task = self._tasks.get(id)
-        if task is None:
-            return
-        task.set_result(result)
-        del self._tasks[id]
+    def add_task(self) -> Tuple[int, JsonRpcTask]:
+        id = self._generator.generate_new_id()
+        return id, self._context.add_task(id)
 
-    def set_error(
-        self,
-        id: Union[int, str],
-        error: RequestError
-    ) -> None:
-        task = self._tasks.get(id)
-        if task is None:
-            return
-        task.set_error(error)
-        del self._tasks[id]
+    def on_binary(self, data: bytes) -> None:
+        self._logger.debug('Binary frame of {} bytes received.', len(data))
 
-    def add_progress(
-        self,
-        id: Union[int, str],
-        progress: RequestProgress
-    ) -> None:
-        task = self._tasks.get(id)
-        if task is None:
-            return
-        task.add_progress(progress)
+    def on_reply(self, reply: JsonRpcReply) -> None:
+        self._logger.debug('Reply received {}.', reply)
+        self._context.set_result(reply.id, reply.result)
+        self._generator.recycle_id(reply.id)
+
+    def on_error(self, error: JsonRpcError) -> None:
+        self._logger.debug('Error message received {}.', error)
+        self._context.set_error(error.id, error.error)
+        self._generator.recycle_id(error.id)
+
+    def on_progress(self, progress: JsonRpcProgress) -> None:
+        self._logger.debug('Progress message received {}.', progress)
+        self._context.add_progress(progress.id, progress.params)
+
+    def on_invalid_frame(self, data: Union[bytes, str], e: Exception) -> None:
+        self._logger.error('Invalid message received {}.', data, exc_info=e)

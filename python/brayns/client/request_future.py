@@ -18,16 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, Callable, Generator
+from typing import Any, Callable, Iterator
 
-from .request_progress import RequestProgress
 from .jsonrpc.json_rpc_task import JsonRpcTask
+from .request_progress import RequestProgress
 
 
 class RequestFuture:
+    """Object used to monitor a request."""
 
     @staticmethod
     def for_notification() -> 'RequestFuture':
+        """Create a dummy future for notifications.
+
+        :return: future that returns None immediately
+        :rtype: RequestFuture
+        """
         return RequestFuture(
             cancel=lambda: None,
             receive=lambda: None,
@@ -40,20 +46,42 @@ class RequestFuture:
         receive: Callable[[], None],
         task: JsonRpcTask
     ) -> None:
+        """Create a future using callbacks and underlying task.
+
+        :param cancel: callback to cancel the request
+        :type cancel: Callable[[], None]
+        :param receive: callback to poll incoming replies
+        :type receive: Callable[[], None]
+        :param task: JSON-RPC task bound to the future
+        :type task: JsonRpcTask
+        """
         self._cancel = cancel
         self._receive = receive
         self._task = task
 
+    def __iter__(self) -> Iterator[RequestProgress]:
+        """Yield progress sent by the request.
+
+        :yield: progress messages received during request execution
+        :rtype: Iterator[RequestProgress]
+        """
+        while not self._task.is_ready():
+            if self._task.has_progress():
+                yield self._task.get_progress()
+            self._receive()
+
     def cancel(self) -> None:
+        """Cancel the task if possible."""
         self._cancel()
 
     def get_result(self) -> Any:
-        for _ in self.wait():
+        """Wait for reply and return result from it.
+
+        Raise RequestError if an error message is received.
+
+        :return: result field of the reply
+        :rtype: Any
+        """
+        for _ in self:
             pass
         return self._task.get_result()
-
-    def wait(self) -> Generator[RequestProgress, None, None]:
-        while not self._task.is_ready():
-            self._receive()
-            if self._task.has_progress():
-                yield self._task.get_progress()

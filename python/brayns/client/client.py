@@ -49,7 +49,7 @@ class Client:
         """
         self._client = JsonRpcClient(
             logger=logging.Logger('Brayns', loglevel),
-            websocket=WebSocket.connect(
+            websocket=WebSocket(
                 uri=uri,
                 secure=secure,
                 cafile=cafile
@@ -80,7 +80,7 @@ class Client:
         :type method: str
         :param params: request params, defaults to None
         :type params: Any, optional
-        :return: reply result field
+        :return: reply result
         :rtype: Any
         """
         return self.task(method, params).get_result()
