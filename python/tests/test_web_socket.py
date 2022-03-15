@@ -18,15 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import pathlib
 import unittest
 from typing import Union
 
-from brayns.client.websocket.web_socket_protocol import WebSocketProtocol
-
-from helpers.client_with_server import ClientWithServer
+from brayns.client.websocket.web_socket import WebSocket
+from helpers.web_socket_connection import WebSocketConnection
+from helpers.web_socket_server import WebSocketServer
 
 
 class TestWebSocket(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self._uri = 'localhost:5000'
+        ssl_folder = pathlib.Path(__file__).parent / 'ssl'
+        self._certificate = str(ssl_folder / 'certificate.pem')
+        self._key = str(ssl_folder / 'key.pem')
+        self._password = 'test'
+        self._expected_request = None
+        self._expected_reply = None
+        self._request = None
+        self._reply = None
 
     def test_text(self) -> None:
         self._send_and_receive(
@@ -54,6 +66,22 @@ class TestWebSocket(unittest.TestCase):
             secure=True
         )
 
+    def _serve(self, secure: bool = False) -> WebSocketServer:
+        return WebSocketServer(
+            handle_connection=self._handle_connection,
+            uri=self._uri,
+            certfile=self._certificate if secure else None,
+            keyfile=self._key if secure else None,
+            password=self._password if secure else None
+        )
+
+    def _connect(self, secure: bool = False) -> WebSocket:
+        return WebSocket(
+            self._uri,
+            secure=secure,
+            cafile=self._certificate if secure else None
+        )
+
     def _send_and_receive(
         self,
         request: Union[bytes, str],
@@ -62,17 +90,16 @@ class TestWebSocket(unittest.TestCase):
     ) -> None:
         self._expected_request = request
         self._expected_reply = reply
-        self._request = None
-        self._reply = None
-        with ClientWithServer(self._handle, secure) as client:
-            client.send(self._expected_request)
-            self._reply = client.receive()
-            self.assertEqual(self._request, self._expected_request)
-            self.assertEqual(self._reply, self._expected_reply)
+        with self._serve(secure):
+            with self._connect(secure) as client:
+                client.send(self._expected_request)
+                self._reply = client.receive()
+                self.assertEqual(self._request, self._expected_request)
+                self.assertEqual(self._reply, self._expected_reply)
 
-    def _handle(self, websocket: WebSocketProtocol) -> None:
-        self._request = websocket.receive()
-        websocket.send(self._expected_reply)
+    async def _handle_connection(self, connection: WebSocketConnection) -> None:
+        self._request = await connection.receive()
+        await connection.send(self._expected_reply)
 
 
 if __name__ == '__main__':

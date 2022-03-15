@@ -28,47 +28,28 @@ from .event_loop import EventLoop
 
 class WebSocket:
 
-    @staticmethod
-    def connect(
+    def __init__(
+        self,
         uri: str,
         secure: bool = False,
         cafile: Optional[str] = None
-    ) -> 'WebSocket':
-        loop = EventLoop()
-        return WebSocket(
-            loop.run(
-                WebSocket._connect(
-                    uri=('wss://' if secure else 'ws://') + uri,
-                    ssl=ssl.create_default_context(
-                        cafile=cafile
-                    ) if secure else None
-                )
-            ).result(),
-            loop
-        )
-
-    @staticmethod
-    async def _connect(
-        uri: str,
-        ssl: ssl.SSLContext
-    ) -> websockets.WebSocketClientProtocol:
-        return await websockets.connect(
-            uri=uri,
-            ssl=ssl,
-            ping_interval=None,
-            timeout=None,
-            max_size=int(2e9)
-        )
-
-    def __init__(
-        self,
-        websocket: websockets.WebSocketClientProtocol,
-        loop: EventLoop
     ) -> None:
-        self._websocket = websocket
-        self._loop = loop
+        self._uri = ('wss://' if secure else 'ws://') + uri
+        self._ssl = ssl.create_default_context(
+            cafile=cafile
+        ) if secure else None
+        self._loop = EventLoop()
+        self._loop.run(
+            self._connect()
+        ).result()
 
-    def disconnect(self) -> None:
+    def __enter__(self) -> 'WebSocket':
+        return self
+
+    def __exit__(self, *_) -> None:
+        self.close()
+
+    def close(self) -> None:
         self._loop.run(
             self._websocket.close()
         ).result()
@@ -82,3 +63,12 @@ class WebSocket:
         self._loop.run(
             self._websocket.send(data)
         ).result()
+
+    async def _connect(self) -> None:
+        self._websocket = await websockets.connect(
+            uri=self._uri,
+            ssl=self._ssl,
+            ping_interval=None,
+            timeout=0,
+            max_size=int(2e9)
+        )

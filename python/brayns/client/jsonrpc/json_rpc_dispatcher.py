@@ -36,7 +36,7 @@ class JsonRpcDispatcher:
         try:
             self._dispatch(data)
         except Exception as e:
-            self._listener.on_invalid_message(data, e)
+            self._listener.on_invalid_frame(data, e)
 
     def _dispatch(self, data: Union[bytes, str]) -> None:
         if isinstance(data, bytes):

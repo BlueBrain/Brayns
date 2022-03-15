@@ -21,14 +21,10 @@
 import logging
 from typing import Any, Union
 
-from ...utils.id_generator import IdGenerator
 from ..request_future import RequestFuture
 from ..websocket.web_socket_protocol import WebSocketProtocol
 from .json_rpc_dispatcher import JsonRpcDispatcher
-from .json_rpc_error import JsonRpcError
 from .json_rpc_manager import JsonRpcManager
-from .json_rpc_progress import JsonRpcProgress
-from .json_rpc_reply import JsonRpcReply
 from .json_rpc_request import JsonRpcRequest
 
 
@@ -41,13 +37,12 @@ class JsonRpcClient:
     ) -> None:
         self._logger = logger
         self._websocket = websocket
-        self._generator = IdGenerator()
-        self._manager = JsonRpcManager()
-        self._dispatcher = JsonRpcDispatcher(self)
+        self._manager = JsonRpcManager(self._logger)
+        self._dispatcher = JsonRpcDispatcher(self._manager)
 
     def disconnect(self) -> None:
-        self._logger.debug('Disconnecting from renderer')
-        self._websocket.disconnect()
+        self._logger.debug('Disconnecting from server')
+        self._websocket.close()
         self._manager.clear_tasks()
 
     def receive(self) -> None:
@@ -56,36 +51,15 @@ class JsonRpcClient:
         )
 
     def send(self, method: str, params: Any = None) -> RequestFuture:
-        id = self._generator.generate_new_id()
-        request = JsonRpcRequest(id, method, params)
-        self._logger.debug('Send {}.', request)
-        task = self._manager.add_task(id)
-        self._websocket.send(request.to_json())
+        id, task = self._manager.add_task()
+        self._websocket.send(
+            JsonRpcRequest(id, method, params).to_json()
+        )
         return RequestFuture(
-            cancel=lambda: self.cancel(id),
+            cancel=lambda: self._cancel(id),
             receive=self.receive,
             task=task
         )
 
-    def cancel(self, id: Union[int, str]) -> None:
-        self.send('cancel', {'id': id})
-
-    def on_binary(self, data: bytes) -> None:
-        self._logger.debug('Binary frame of {} bytes received.', len(data))
-
-    def on_reply(self, reply: JsonRpcReply) -> None:
-        self._logger.debug('Reply received {}.', reply)
-        self._manager.set_result(reply.id, reply.result)
-        self._generator.recycle_id(reply.id)
-
-    def on_error(self, error: JsonRpcError) -> None:
-        self._logger.debug('Error message received {}.', error)
-        self._manager.set_error(error.id, error.error)
-        self._generator.recycle_id(error.id)
-
-    def on_progress(self, progress: JsonRpcProgress) -> None:
-        self._logger.debug('Progress message received {}.', progress)
-        self._manager.add_progress(progress.id, progress.params)
-
-    def on_invalid_frame(self, data: Union[bytes, str], e: Exception) -> None:
-        self._logger.error('Invalid message received {}.', data, exc_info=e)
+    def _cancel(self, id: Union[int, str]) -> None:
+        self.send('cancel', {'id': id}).get_result()

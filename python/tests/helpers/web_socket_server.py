@@ -19,81 +19,74 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import ssl
-from typing import Callable, Optional
+from typing import Any, Callable, Coroutine, Optional
 
 import websockets
 from brayns.client.websocket.event_loop import EventLoop
-from brayns.client.websocket.web_socket import WebSocket
-from brayns.client.websocket.web_socket_protocol import WebSocketProtocol
+
+from .web_socket_connection import WebSocketConnection
 
 
 class WebSocketServer:
 
+    ConnectionHandler = Callable[
+        [WebSocketConnection],
+        Coroutine[Any, Any, None]
+    ]
+
     def __init__(
         self,
-        handle_connection: Callable[[WebSocketProtocol], None],
-        host: str,
-        port: int,
+        handle_connection: ConnectionHandler,
+        uri: str,
         certfile: Optional[str] = None,
         keyfile: Optional[str] = None,
         password: Optional[str] = None
     ) -> None:
         self._handle_connection = handle_connection
-        self._loop = EventLoop()
-        self._websocket = self._loop.run(
-            self._start(
-                host=host,
-                port=port,
-                ssl=self._create_ssl_context(
-                    certfile=certfile,
-                    keyfile=keyfile,
-                    password=password
-                )
+        host, port = uri.split(':')
+        self._host = host
+        self._port = int(port)
+        self._ssl = None
+        if certfile is not None:
+            self._ssl = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            self._ssl.load_cert_chain(
+                certfile=certfile,
+                keyfile=keyfile,
+                password=password
             )
+        self._loop = EventLoop()
+        self._loop.run(
+            self._start()
         ).result()
 
-    def disconnect(self) -> None:
+    def __enter__(self) -> 'WebSocketServer':
+        return self
+
+    def __exit__(self, *_) -> None:
+        self.stop()
+
+    def stop(self) -> None:
         self._websocket.close()
         self._loop.run(
             self._websocket.wait_closed()
         ).result()
         self._loop.stop()
 
-    def _create_ssl_context(
-        self,
-        certfile: Optional[str] = None,
-        keyfile: Optional[str] = None,
-        password: Optional[str] = None
-    ) -> ssl.SSLContext:
-        if certfile is None:
-            return None
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        context.load_cert_chain(
-            certfile=certfile,
-            keyfile=keyfile,
-            password=password
-        )
-        return context
-
-    async def _start(
-        self,
-        host: str,
-        port: int,
-        ssl: ssl.SSLContext
-    ) -> None:
-        return await websockets.serve(
+    async def _start(self) -> None:
+        self._websocket = await websockets.serve(
             ws_handler=self._handle,
-            host=host,
-            port=port,
-            ssl=ssl,
+            host=self._host,
+            port=self._port,
+            ssl=self._ssl,
             ping_interval=None,
             timeout=0
         )
 
     async def _handle(
         self,
-        websocket: websockets.WebSocketClientProtocol
+        websocket: websockets.WebSocketServerProtocol,
+        *_
     ) -> None:
-        self._handle_connection(
-            WebSocket(websocket, self._loop)
+        await self._handle_connection(
+            WebSocketConnection(websocket)
         )
