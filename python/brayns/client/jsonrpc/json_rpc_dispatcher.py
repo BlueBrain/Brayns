@@ -29,18 +29,18 @@ from .json_rpc_reply import JsonRpcReply
 
 class JsonRpcDispatcher:
 
-    def __init__(self, listener: JsonRpcProtocol) -> None:
-        self._listener = listener
+    def __init__(self, protocol: JsonRpcProtocol) -> None:
+        self._protocol = protocol
 
     def dispatch(self, data: Union[bytes, str]) -> None:
         try:
             self._dispatch(data)
         except Exception as e:
-            self._listener.on_invalid_frame(data, e)
+            self._protocol.on_invalid_frame(data, e)
 
     def _dispatch(self, data: Union[bytes, str]) -> None:
         if isinstance(data, bytes):
-            self._listener.on_binary(data)
+            self._protocol.on_binary(data)
             return
         self._dispatch_text(data)
 
@@ -63,7 +63,7 @@ class JsonRpcDispatcher:
     def _dispatch_error(self, message: dict) -> bool:
         if 'error' not in message:
             return False
-        self._listener.on_error(
+        self._protocol.on_error(
             JsonRpcError.from_dict(message)
         )
         return True
@@ -71,7 +71,7 @@ class JsonRpcDispatcher:
     def _dispatch_reply(self, message: dict) -> bool:
         if 'result' not in message:
             return False
-        self._listener.on_reply(
+        self._protocol.on_reply(
             JsonRpcReply.from_dict(message)
         )
         return True
@@ -79,7 +79,7 @@ class JsonRpcDispatcher:
     def _dispatch_progress(self, message: dict) -> bool:
         if 'id' in message:
             return False
-        self._listener.on_progress(
+        self._protocol.on_progress(
             JsonRpcProgress.from_dict(message)
         )
         return True

@@ -24,7 +24,7 @@ Example:
 .. code-block: python
     import brayns
 
-    with brayns.connect(
+    with brayns.Client(
         uri='localhost:5000',  # Renderer URI
         secure=True,  # Enable SSL, defaults to False
         cafile='server.pem' # Custom CA if server certificate is self-signed
