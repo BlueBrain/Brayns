@@ -28,7 +28,6 @@ from ..request_progress import RequestProgress
 class JsonRpcProgress:
 
     id: Union[int, str]
-    method: str
     params: RequestProgress
 
     @staticmethod
@@ -36,7 +35,6 @@ class JsonRpcProgress:
         params = message['params']
         return JsonRpcProgress(
             id=params['id'],
-            method=message['method'],
             params=RequestProgress(
                 operation=params['operation'],
                 amount=params['amount']
