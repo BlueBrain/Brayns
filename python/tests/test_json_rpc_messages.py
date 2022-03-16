@@ -28,7 +28,7 @@ from brayns.client.jsonrpc.json_rpc_request import JsonRpcRequest
 from brayns.client.request_error import RequestError
 
 
-class TestJsonRpcTask(unittest.TestCase):
+class TestJsonRpcMessages(unittest.TestCase):
 
     def test_error(self) -> None:
         error = JsonRpcError.from_dict({

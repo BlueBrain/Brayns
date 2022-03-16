@@ -36,27 +36,27 @@ class RequestFuture:
         """
         return RequestFuture(
             cancel=lambda: None,
-            receive=lambda: None,
+            poll=lambda: None,
             task=JsonRpcTask.from_result(None)
         )
 
     def __init__(
         self,
         cancel: Callable[[], None],
-        receive: Callable[[], None],
+        poll: Callable[[], None],
         task: JsonRpcTask
     ) -> None:
         """Create a future using callbacks and underlying task.
 
         :param cancel: callback to cancel the request
         :type cancel: Callable[[], None]
-        :param receive: callback to poll incoming replies
-        :type receive: Callable[[], None]
+        :param poll: callback to poll incoming replies
+        :type poll: Callable[[], None]
         :param task: JSON-RPC task bound to the future
         :type task: JsonRpcTask
         """
         self._cancel = cancel
-        self._receive = receive
+        self._poll = poll
         self._task = task
 
     def __iter__(self) -> Iterator[RequestProgress]:
@@ -68,13 +68,13 @@ class RequestFuture:
         while not self._task.is_ready():
             if self._task.has_progress():
                 yield self._task.get_progress()
-            self._receive()
+            self._poll()
 
     def cancel(self) -> None:
         """Cancel the task if possible."""
         self._cancel()
 
-    def get_result(self) -> Any:
+    def wait_for_result(self) -> Any:
         """Wait for reply and return result from it.
 
         Raise RequestError if an error message is received.

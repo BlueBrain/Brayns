@@ -22,6 +22,7 @@ import logging
 from typing import Any, Optional
 
 from .jsonrpc.json_rpc_client import JsonRpcClient
+from .jsonrpc.json_rpc_request import JsonRpcRequest
 from .request_future import RequestFuture
 from .websocket.web_socket import WebSocket
 
@@ -34,7 +35,7 @@ class Client:
         uri: str,
         secure: bool = False,
         cafile: Optional[str] = None,
-        loglevel=logging.INFO
+        loglevel=logging.ERROR
     ) -> None:
         """Connect to the renderer using the given settings.
 
@@ -44,16 +45,16 @@ class Client:
         :type secure: bool, optional
         :param cafile: Additional certification authority, defaults to None
         :type cafile: Optional[str], optional
-        :param loglevel: Log level, defaults to logging.INFO
+        :param loglevel: Log level, defaults to logging.ERROR
         :type loglevel: int
         """
         self._client = JsonRpcClient(
-            logger=logging.Logger('Brayns', loglevel),
             websocket=WebSocket(
                 uri=uri,
                 secure=secure,
                 cafile=cafile
-            )
+            ),
+            logger=logging.Logger('Brayns', loglevel)
         )
 
     def __enter__(self) -> None:
@@ -83,7 +84,7 @@ class Client:
         :return: reply result
         :rtype: Any
         """
-        return self.task(method, params).get_result()
+        return self.task(method, params).wait_for_result()
 
     def task(self, method: str, params: Any = None) -> RequestFuture:
         """Send a JSON-RPC request to the renderer with progress support.
@@ -97,4 +98,11 @@ class Client:
         :return: future to monitor the request
         :rtype: RequestFuture
         """
-        return self._client.send(method, params)
+        id = 0
+        while id in self._client.get_active_tasks():
+            id += 1
+        return RequestFuture(
+            cancel=lambda: self.request('cancel', {'id': id}),
+            poll=self._client.poll,
+            task=self._client.send(JsonRpcRequest(id, method, params))
+        )
