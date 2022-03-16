@@ -35,7 +35,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_USE_STATIC_LIBS OFF)
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(OpenMP REQUIRED)
-find_package(ospray 2.8 REQUIRED)
+find_package(ospray 2.9 REQUIRED)
 find_package(Poco QUIET COMPONENTS Foundation JSON Net NetSSL)
 find_package(glm QUIET)
 

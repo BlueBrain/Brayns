@@ -76,7 +76,7 @@ public:
     bool isVisible() const noexcept;
 
 protected:
-    friend class Scene;
+    friend class SceneLightManager;
 
     /**
      * @brief Returns the size in bytes of the light

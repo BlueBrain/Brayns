@@ -31,7 +31,6 @@ set(BRAYNSNETWORK_HEADERS
   common/CancellationToken.h
   common/Clock.h
   common/EngineObjectFactory.h
-  common/EngineObjectRegisterer.h
   common/ExtractMaterial.h
   common/ExtractModel.h
   common/ProgressHandler.h
@@ -127,7 +126,7 @@ set(BRAYNSNETWORK_SOURCES
   client/ClientSender.cpp
   client/RequestBuffer.cpp
   common/CancellationToken.cpp
-  common/EngineObjectRegisterer.cpp
+  common/EngineObjectFactory.cpp
   common/ExtractMaterial.cpp
   common/ExtractModel.cpp
   common/RateLimiter.cpp

@@ -85,111 +85,12 @@ size_t Model::getSizeInBytes() const noexcept
 
 bool Model::commit()
 {
-    if(_components.commit())
+    if (_components.commit())
     {
         _group.commit();
         return true;
     }
 
     return false;
-}
-
-ModelInstance::ModelInstance(const size_t modelID, Model &model)
-    : _modelID(modelID)
-    , _model(model)
-{
-    _instanceHandle = ospNewInstance(model.groupHandle());
-    computeBounds();
-}
-
-ModelInstance::~ModelInstance()
-{
-    ospRelease(_instanceHandle);
-}
-
-uint32_t ModelInstance::getID() const noexcept
-{
-    return _modelID;
-}
-
-const Bounds &ModelInstance::getBounds() const noexcept
-{
-    return _bounds;
-}
-
-void ModelInstance::computeBounds() noexcept
-{
-    const auto matrix = _transformation.toMatrix();
-    _bounds = _model.computeBounds(matrix);
-}
-
-bool ModelInstance::commit()
-{
-    bool needsCommit = false;
-
-    if(_model.commit())
-    {
-        needsCommit = true;
-    }
-
-    // Re-commit transform if needed
-    if (_transformation.isModified())
-    {
-        const auto affine = glmMatrixToAffine(_transformation.toMatrix());
-        ospSetParam(_instanceHandle, "transform", OSPDataType::OSP_AFFINE3F, &affine);
-        _transformation.resetModified();
-        needsCommit = true;
-    }
-
-    if(needsCommit)
-    {
-        ospCommit(_instanceHandle);
-    }
-
-    return needsCommit || _visibilityChanged;
-}
-
-Model &ModelInstance::getModel() noexcept
-{
-    return _model;
-}
-
-const Model &ModelInstance::getModel() const noexcept
-{
-    return _model;
-}
-
-const std::map<std::string, std::string> &ModelInstance::getModelMetadata() const noexcept
-{
-    return _model.getMetaData();
-}
-
-void ModelInstance::setVisible(const bool val) noexcept
-{
-    _visibilityChanged = _visible != val;
-    _visible = val;
-}
-
-bool ModelInstance::isVisible() const noexcept
-{
-    return _visible;
-}
-
-void ModelInstance::setTransform(const Transformation &transform) noexcept
-{
-    _transformation = transform;
-    // Recompute bounds as soon as the transform changes
-    if (_transformation.isModified())
-        computeBounds();
-}
-
-const Transformation &ModelInstance::getTransform() const noexcept
-{
-    return _transformation;
-}
-
-OSPInstance ModelInstance::handle() const noexcept
-{
-    return _instanceHandle;
 }
 } // namespace brayns

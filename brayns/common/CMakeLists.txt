@@ -16,6 +16,7 @@ set(BRAYNSCOMMON_SOURCES
 set(BRAYNSCOMMON_PUBLIC_HEADERS
     BaseObject.h
     Blob.h
+    IDFactory.h
     Log.h
     MathTypes.h
     PixelFormat.h

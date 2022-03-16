@@ -7,13 +7,13 @@
 set(BRAYNSENGINE_SOURCES
     Camera.cpp
     Engine.cpp
-    EngineObject.cpp
     FrameBuffer.cpp
     Light.cpp
     Material.cpp
     Model.cpp
     ModelComponents.cpp
     ModelGroup.cpp
+    ModelInstance.h
     Renderer.cpp
     Scene.cpp
     cameras/OrthographicCamera.cpp
@@ -36,20 +36,23 @@ set(BRAYNSENGINE_SOURCES
     materials/MetalMaterial.cpp
     materials/PlasticMaterial.cpp
     renderers/InteractiveRenderer.cpp
+    scenecomponents/SceneClipManager.cpp
+    scenecomponents/SceneLightManager.cpp
+    scenecomponents/SceneModelManager.cpp
 )
 
 set(BRAYNSENGINE_PUBLIC_HEADERS
     Camera.h
     Engine.h
-    EngineObject.h
     FrameBuffer.h
-    Geometry.h
     Light.h
     Material.h
     Model.h
     ModelComponents.h
     ModelGroup.h
+    ModelInstance.h
     Renderer.h
+    RenderableType.h
     Scene.h
     cameras/OrthographicCamera.h
     cameras/PerspectiveCamera.h
@@ -74,6 +77,9 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     materials/MetalMaterial.h
     materials/PlasticMaterial.h
     renderers/InteractiveRenderer.h
+    scenecomponents/SceneClipManager.h
+    scenecomponents/SceneLightManager.h
+    scenecomponents/SceneModelManager.h
 )
 
 add_library(braynsEngine SHARED ${BRAYNSENGINE_SOURCES} ${BRAYNSENGINE_PUBLIC_HEADERS})
