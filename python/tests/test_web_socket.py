@@ -23,6 +23,7 @@ import unittest
 from typing import Union
 
 from brayns.client.websocket.web_socket import WebSocket
+
 from helpers.web_socket_connection import WebSocketConnection
 from helpers.web_socket_server import WebSocketServer
 
