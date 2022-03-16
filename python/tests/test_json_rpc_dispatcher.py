@@ -59,7 +59,7 @@ class FakeJsonRpcProtocol:
         self._data = data
 
 
-class TestJsonRpcTask(unittest.TestCase):
+class TestJsonRpcDispatcher(unittest.TestCase):
 
     def setUp(self) -> None:
         self._protocol = FakeJsonRpcProtocol()

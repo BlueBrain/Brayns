@@ -24,9 +24,10 @@ from typing import Optional, Union
 import websockets
 
 from .event_loop import EventLoop
+from .web_socket_protocol import WebSocketProtocol
 
 
-class WebSocket:
+class WebSocket(WebSocketProtocol):
 
     def __init__(
         self,

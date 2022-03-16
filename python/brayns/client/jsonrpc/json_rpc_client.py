@@ -19,47 +19,52 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
-from typing import Any, Union
 
-from ..request_future import RequestFuture
 from ..websocket.web_socket_protocol import WebSocketProtocol
 from .json_rpc_dispatcher import JsonRpcDispatcher
+from .json_rpc_handler import JsonRpcHandler
 from .json_rpc_manager import JsonRpcManager
 from .json_rpc_request import JsonRpcRequest
+from .json_rpc_task import JsonRpcTask
 
 
 class JsonRpcClient:
 
     def __init__(
         self,
-        logger: logging.Logger,
-        websocket: WebSocketProtocol
+        websocket: WebSocketProtocol,
+        logger: logging.Logger
     ) -> None:
-        self._logger = logger
         self._websocket = websocket
-        self._manager = JsonRpcManager(self._logger)
-        self._dispatcher = JsonRpcDispatcher(self._manager)
+        self._logger = logger
+        self._manager = JsonRpcManager()
+        self._dispatcher = JsonRpcDispatcher(
+            JsonRpcHandler(self._manager, self._logger)
+        )
+
+    def __enter__(self) -> 'JsonRpcClient':
+        return self
+
+    def __exit__(self, *_) -> None:
+        self.disconnect()
 
     def disconnect(self) -> None:
-        self._logger.debug('Disconnecting from server')
+        self._logger.debug('Disconnection from JSON-RPC server.')
         self._websocket.close()
-        self._manager.clear_tasks()
+        self._manager.cancel_all_tasks()
 
-    def receive(self) -> None:
+    def poll(self) -> None:
+        self._logger.debug('Poll incoming JSON-RPC messages.')
         self._dispatcher.dispatch(
             self._websocket.receive()
         )
 
-    def send(self, method: str, params: Any = None) -> RequestFuture:
-        id, task = self._manager.add_task()
-        self._websocket.send(
-            JsonRpcRequest(id, method, params).to_json()
-        )
-        return RequestFuture(
-            cancel=lambda: self._cancel(id),
-            receive=self.receive,
-            task=task
-        )
+    def send(self, request: JsonRpcRequest) -> JsonRpcTask:
+        self._logger.debug('Send JSON-RPC request: {}.', request)
+        self._websocket.send(request.to_json())
+        if request.is_notification():
+            return JsonRpcTask.from_result(None)
+        return self._manager.add_task(request.id)
 
-    def _cancel(self, id: Union[int, str]) -> None:
-        self.send('cancel', {'id': id}).get_result()
+    def get_active_tasks(self) -> JsonRpcManager:
+        return self._manager

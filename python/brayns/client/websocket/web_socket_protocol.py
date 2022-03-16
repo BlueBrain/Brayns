@@ -23,11 +23,8 @@ from typing import Protocol, Union
 
 class WebSocketProtocol(Protocol):
 
-    def close(self) -> None:
-        pass
+    def close(self) -> None: ...
 
-    def receive(self) -> Union[bytes, str]:
-        pass
+    def receive(self) -> Union[bytes, str]: ...
 
-    def send(self, data: Union[bytes, str]) -> None:
-        pass
+    def send(self, data: Union[bytes, str]) -> None: ...
