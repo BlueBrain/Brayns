@@ -18,15 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import logging
 import unittest
-from typing import Any, Union
-from brayns.client.jsonrpc.json_rpc_manager import JsonRpcManager
 
-from brayns.client.jsonrpc.json_rpc_handler import JsonRpcHandler
-from brayns.client.jsonrpc.json_rpc_error import JsonRpcError
-from brayns.client.jsonrpc.json_rpc_progress import JsonRpcProgress
-from brayns.client.jsonrpc.json_rpc_reply import JsonRpcReply
+from brayns.client.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.client.request_error import RequestError
 from brayns.client.request_progress import RequestProgress
 

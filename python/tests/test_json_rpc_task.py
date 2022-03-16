@@ -56,6 +56,8 @@ class TestJsonRpcTask(unittest.TestCase):
         task.set_result(result)
         self.assertTrue(task.is_ready())
         self.assertEqual(task.get_result(), result)
+        task = JsonRpcTask.from_result(22)
+        self.assertEqual(task.get_result(), 22)
 
     def test_error(self) -> None:
         task = JsonRpcTask()

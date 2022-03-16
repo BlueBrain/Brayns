@@ -67,19 +67,15 @@ class TestJsonRpcMessages(unittest.TestCase):
         self.assertEqual(reply.result, 12)
 
     def test_request(self) -> None:
-        request = JsonRpcRequest(
-            id=1,
-            method='test',
-            params=[1, 2, 3]
-        )
-        self.assertEqual(
-            json.loads(request.to_json()),
-            {
-                'id': 1,
-                'method': 'test',
-                'params': [1, 2, 3]
-            }
-        )
+        request = JsonRpcRequest(1, 'test', [1, 2, 3])
+        message = json.loads(request.to_json())
+        self.assertEqual(request.id, message['id'])
+        self.assertEqual(request.method, message['method'])
+        self.assertEqual(request.params, message['params'])
+        notification = JsonRpcRequest(None, 'test', None)
+        message = json.loads(notification.to_json())
+        self.assertEqual(len(message), 1)
+        self.assertEqual(message['method'], notification.method)
 
 
 if __name__ == '__main__':
