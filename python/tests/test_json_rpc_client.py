@@ -132,10 +132,11 @@ class TestJsonRpcClient(unittest.TestCase):
             self._check_request(sent, received)
 
     def _check_request(self, request: JsonRpcRequest, data: str) -> None:
-        self.assertEqual(
-            json.loads(request.to_json()),
-            json.loads(data)
-        )
+        message = json.loads(data)
+        self.assertEqual(message['jsonrpc'], '2.0')
+        self.assertEqual(message['id'], request.id)
+        self.assertEqual(message['method'], request.method)
+        self.assertEqual(message['params'], request.params)
 
 
 if __name__ == '__main__':
