@@ -17,3 +17,24 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+from dataclasses import dataclass
+
+
+@dataclass
+class RequestProgress:
+    """Progress info about a running request."""
+
+    operation: str
+    """Description of the current step as str."""
+
+    amount: float
+    """Progress of the request between 0 and 1."""
+
+    def __str__(self) -> str:
+        """Format progress and amount in a more readable way.
+
+        :return: progress description.
+        :rtype: str
+        """
+        return f'{self.operation}: {100 * self.amount}%'

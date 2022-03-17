@@ -24,7 +24,7 @@ Example:
 .. code-block: python
     import brayns
 
-    with brayns.connect(
+    with brayns.Client(
         uri='localhost:5000',  # Renderer URI
         secure=True,  # Enable SSL, defaults to False
         cafile='server.pem' # Custom CA if server certificate is self-signed
@@ -39,16 +39,15 @@ Example:
 """
 
 from .client.client import Client
-from .client.connect import connect
-from .client.reply_error import ReplyError
-from .doc.doc_builder import build_rst_doc, save_rst_doc
+from .client.request_error import RequestError
+from .client.request_future import RequestFuture
+from .client.request_progress import RequestProgress
 from .utils.camera_path_handler import CameraPathHandler
 
 __all__ = [
-    'connect',
-    'build_rst_doc',
-    'save_rst_doc',
     'Client',
-    'CameraPathHandler',
-    'ReplyError'
+    'RequestError',
+    'RequestFuture',
+    'RequestProgress',
+    'CameraPathHandler'
 ]
