@@ -28,6 +28,9 @@ class WebSocketConnection:
     def __init__(self, websocket: websockets.WebSocketServerProtocol) -> None:
         self._websocket = websocket
 
+    async def close(self) -> None:
+        await self._websocket.close()
+
     async def receive(self) -> Union[bytes, str]:
         return await self._websocket.recv()
 
