@@ -49,11 +49,13 @@ class TestJsonRpcManager(unittest.TestCase):
             self._manager.add_task(None)
 
     def test_cancel(self) -> None:
-        self._manager.cancel_all_tasks()
+        error = RequestError('Test cancel all')
+        self._manager.cancel_all_tasks(error)
         self.assertEqual(len(self._manager), 0)
         for task in self._tasks:
-            with self.assertRaises(RequestError):
+            with self.assertRaises(RequestError) as context:
                 task.get_result()
+            self.assertEqual(context.exception, error)
 
     def test_result(self) -> None:
         id = self._ids[0]

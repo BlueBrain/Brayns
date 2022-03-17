@@ -51,11 +51,9 @@ class JsonRpcManager:
         self._tasks[id] = task
         return task
 
-    def cancel_all_tasks(self) -> None:
+    def cancel_all_tasks(self, error: RequestError) -> None:
         for task in self._tasks.values():
-            task.set_error(
-                RequestError('Task has been stopped on client side')
-            )
+            task.set_error(error)
         self._tasks.clear()
 
     def set_result(self, id: Union[int, str], result: Any) -> None:
@@ -65,7 +63,10 @@ class JsonRpcManager:
         task.set_result(result)
         del self._tasks[id]
 
-    def set_error(self, id: Union[int, str], error: RequestError) -> None:
+    def set_error(self, id: Union[int, str, None], error: RequestError) -> None:
+        if id is None:
+            self.cancel_all_tasks(error)
+            return
         task = self.get_task(id)
         if task is None:
             return

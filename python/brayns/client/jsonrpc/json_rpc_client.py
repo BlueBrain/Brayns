@@ -20,6 +20,7 @@
 
 import logging
 
+from ..request_error import RequestError
 from ..websocket.web_socket_protocol import WebSocketProtocol
 from .json_rpc_dispatcher import JsonRpcDispatcher
 from .json_rpc_handler import JsonRpcHandler
@@ -51,7 +52,9 @@ class JsonRpcClient:
     def disconnect(self) -> None:
         self._logger.debug('Disconnection from JSON-RPC server.')
         self._websocket.close()
-        self._manager.cancel_all_tasks()
+        self._manager.cancel_all_tasks(
+            RequestError('Disconnection from client side')
+        )
 
     def poll(self) -> None:
         self._logger.debug('Poll incoming JSON-RPC messages.')

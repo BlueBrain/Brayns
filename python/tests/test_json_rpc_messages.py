@@ -74,7 +74,7 @@ class TestJsonRpcMessages(unittest.TestCase):
         self.assertEqual(request.params, message['params'])
         notification = JsonRpcRequest(None, 'test', None)
         message = json.loads(notification.to_json())
-        self.assertEqual(len(message), 1)
+        self.assertEqual(len(message), 2)
         self.assertEqual(message['method'], notification.method)
 
 
