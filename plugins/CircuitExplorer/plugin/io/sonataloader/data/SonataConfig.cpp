@@ -46,10 +46,10 @@ std::optional<bbp::sonata::SimulationConfig> getSimulationConfig(
     else
     {
         std::filesystem::path configDirPath(circuitConfigDirPath);
-        if (simConfigPath.is_relative() && std::filesystem::exists(configDirPath / simConfigPath))
+        if (simConfigPath.is_relative() && std::filesystem::is_regular_file(configDirPath / simConfigPath))
         {
             const auto composedPath = (configDirPath / simConfigPath).string();
-            return std::optional<bbp::sonata::SimulationConfig>(bbp::sonata::SimulationConfig::fromFile(composedPath));
+            return bbp::sonata::SimulationConfig::fromFile(composedPath);
         }
         else if (std::filesystem::exists(configDirPath / std::filesystem::path("simulation_sonata.json")))
         {
