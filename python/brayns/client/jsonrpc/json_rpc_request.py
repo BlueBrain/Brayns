@@ -35,6 +35,7 @@ class JsonRpcRequest:
 
     def to_json(self) -> str:
         message = {
+            'jsonrpc': '2.0',
             'method': self.method
         }
         if self.id is not None:
