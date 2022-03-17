@@ -55,32 +55,24 @@
     public: \
         static JsonSchema getSchema(const TYPE &value) \
         { \
-            return _getInfo().getSchema(&value); \
+            return _info.getSchema(&value); \
         } \
 \
         static bool serialize(const TYPE &value, JsonValue &json) \
         { \
-            return _getInfo().serialize(&value, json); \
+            return _info.serialize(&value, json); \
         } \
 \
         static bool deserialize(const JsonValue &json, TYPE &value) \
         { \
-            return _getInfo().deserialize(json, &value); \
+            return _info.deserialize(json, &value); \
         } \
 \
     private: \
         using ObjectType = TYPE; \
 \
-        static JsonObjectInfo &_getInfo() \
-        { \
-            static JsonObjectInfo info = _createInfo(); \
-            return info; \
-        } \
-\
-        static JsonObjectInfo _createInfo() \
-        { \
+        static inline const JsonObjectInfo _info = [] { \
             JsonObjectInfo info(NAME);
-
 /**
  * @brief Shortcut to have the same type symbol and name.
  *
@@ -274,5 +266,6 @@
 #define BRAYNS_JSON_ADAPTER_END() \
     return info; \
     } \
+    (); \
     } \
     ;

@@ -83,7 +83,7 @@ struct Json
     template<typename T>
     static JsonSchema getSchema()
     {
-        static const T value = {};
+        static const T value{};
         return getSchema(value);
     }
 
