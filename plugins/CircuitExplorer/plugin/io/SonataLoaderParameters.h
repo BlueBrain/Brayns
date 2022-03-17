@@ -87,11 +87,7 @@ BRAYNS_JSON_OBJECT_ENTRY(
     node_ids,
     "List of node IDs to load from the population. Invalidates 'node_percentage' and 'node_sets'",
     brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(
-    sonataloader::ReportType,
-    report_type,
-    "Type of report to load for the given node population. Possible values are: "
-        + string_utils::join(brayns::enumNames<sonataloader::ReportType>(), ", "))
+BRAYNS_JSON_OBJECT_ENTRY(sonataloader::ReportType, report_type, "Type of report to load for the given node population.")
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     report_name,
@@ -106,12 +102,12 @@ BRAYNS_JSON_OBJECT_ENTRY(
     NeuronMorphologyLoaderParameters,
     neuron_morphology_parameters,
     "Settings to configure the morphology geometry load. Ignored for vasculature populations",
-    Required(false))
+    brayns::Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     VasculatureGeometrySettings,
     vasculature_geometry_parameters,
     "Settings to configure the vasculature geometry load. Ignored for any node population that is not vasculature",
-    Required(false))
+    brayns::Required(false))
 BRAYNS_JSON_OBJECT_END()
 
 // ---------------------------------------------------------------------------
@@ -122,7 +118,7 @@ BRAYNS_JSON_OBJECT_ENTRY(
     simulation_config_path,
     "Path to the simulation config file .json "
     "(By default will be searched in the same directory as the circuit config with name simulation_config.json)",
-    Required(false))
+    brayns::Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<SonataNodePopulationParameters>,
     node_population_settings,

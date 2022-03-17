@@ -49,10 +49,7 @@ BRAYNS_JSON_OBJECT_ENTRY(
     gids,
     "List of GIDs to load. Invalidates 'percentage' and 'targets' parameters",
     brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(
-    bbploader::SimulationType,
-    report_type,
-    "Type of report to load. Possible values are: " + string_utils::join(enumNames<bbploader::SimulationType>(), ", "))
+BRAYNS_JSON_OBJECT_ENTRY(bbploader::SimulationType, report_type, "Type of report to load.")
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     report_name,
