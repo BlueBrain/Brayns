@@ -42,7 +42,7 @@ brayns-spack-test:
 brayns-python-test:
   extends: .spack_test
   needs: ["brayns-spack-build"]
-  timeout: 10
+  timeout: 10 minutes
   script:
     - cd ${SPACK_BUILD_DIR}
     - module load unstable
