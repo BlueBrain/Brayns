@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
 #include <brayns/engine/geometries/TriangleMesh.h>
 
 #include <brayns/common/Log.h>
@@ -75,6 +73,7 @@ uint32_t Geometry<TriangleMesh>::add(const TriangleMesh& geometry)
 template<>
 std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh>& geometries)
 {
+    (void) geometries;
     throw std::runtime_error("TriangleMesh Geometry can only handle 1 mesh. Use add() to add a single mesh");
     return {};
 }

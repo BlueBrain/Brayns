@@ -112,4 +112,16 @@ void ModelComponentContainer::onDestroyed()
         component.onDestroyed();
     }
 }
+
+Bounds ModelComponentContainer::computeBounds(const Matrix4f &transform) const noexcept
+{
+    Bounds result;
+    for(auto &entry : _components)
+    {
+        auto &component = *entry.component;
+        auto componentBounds = component.computeBounds(transform);
+        result.expand(componentBounds);
+    }
+    return result;
+}
 }

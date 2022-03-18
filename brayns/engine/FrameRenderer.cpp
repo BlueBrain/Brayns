@@ -24,23 +24,20 @@
 
 namespace brayns
 {
-void FrameRenderer::synchronousRender(const Camera &camera,
-                                      const FrameBuffer &fb,
-                                      const Renderer &renderer,
-                                      const Scene &scene)
+void FrameRenderer::synchronous(const Camera &cam, const FrameBuffer &fb, const Renderer &render, const Scene &scene)
 {
-    auto cameraHandle = camera.handle();
+    auto cameraHandle = cam.handle();
     auto fbHandle = fb.handle();
-    auto rendererHandle = renderer.handle();
+    auto rendererHandle = render.handle();
     auto sceneHandle = scene.handle();
 
     ospRenderFrameBlocking(fbHandle, rendererHandle, cameraHandle, sceneHandle);
 }
 
-OSPFuture FrameRenderer::asynchronousRender(const Camera& camera,
-                                            const FrameBuffer& fb,
-                                            const Renderer& renderer,
-                                            const Scene& scene)
+OSPFuture FrameRenderer::asynchronous(const Camera& camera,
+                                      const FrameBuffer& fb,
+                                      const Renderer& renderer,
+                                      const Scene& scene)
 {
     auto cameraHandle = camera.handle();
     auto fbHandle = fb.handle();

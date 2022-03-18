@@ -8,12 +8,13 @@ set(BRAYNSENGINE_SOURCES
     Camera.cpp
     Engine.cpp
     FrameBuffer.cpp
+    FrameRenderer.cpp
     Light.cpp
     Material.cpp
     Model.cpp
     ModelComponents.cpp
     ModelGroup.cpp
-    ModelInstance.h
+    ModelInstance.cpp
     Renderer.cpp
     Scene.cpp
     cameras/OrthographicCamera.cpp
@@ -25,6 +26,7 @@ set(BRAYNSENGINE_SOURCES
     geometries/Plane.cpp
     geometries/Primitive.cpp
     geometries/Sphere.cpp
+    geometries/TriangleMesh.cpp
     lights/AmbientLight.cpp
     lights/DirectionalLight.cpp
     lights/QuadLight.cpp
@@ -36,6 +38,7 @@ set(BRAYNSENGINE_SOURCES
     materials/MetalMaterial.cpp
     materials/PlasticMaterial.cpp
     renderers/InteractiveRenderer.cpp
+    renderers/ProductionRenderer.cpp
     scenecomponents/SceneClipManager.cpp
     scenecomponents/SceneLightManager.cpp
     scenecomponents/SceneModelManager.cpp
@@ -45,6 +48,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     Camera.h
     Engine.h
     FrameBuffer.h
+    FrameRenderer.h
     Light.h
     Material.h
     Model.h

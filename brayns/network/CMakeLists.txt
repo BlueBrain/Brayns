@@ -50,6 +50,7 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/AnimationParametersEntrypoint.h
   entrypoints/ApplicationParametersEntrypoint.h
   entrypoints/CameraEntrypoint.h
+  entrypoints/CameraLookAtEntrypoint.h
   entrypoints/CancelEntrypoint.h
   entrypoints/ClearLightsEntrypoint.h
   entrypoints/ExitLaterEntrypoint.h
@@ -59,6 +60,7 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/ImageJpegEntrypoint.h
   entrypoints/ImageStreamingModeEntrypoint.h
   #entrypoints/InspectEntrypoint.h
+  entrypoints/ModelMaterialEntrypoint.h
   entrypoints/ModelTransferFunctionEntrypoint.h
   entrypoints/QuitEntrypoint.h
   entrypoints/RegistryEntrypoint.h
@@ -140,6 +142,7 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/AnimationParametersEntrypoint.cpp
   entrypoints/ApplicationParametersEntrypoint.cpp
   entrypoints/CameraEntrypoint.cpp
+  entrypoints/CameraLookAtEntrypoint.cpp
   entrypoints/CancelEntrypoint.cpp
   entrypoints/ClearLightsEntrypoint.cpp
   entrypoints/ExitLaterEntrypoint.cpp
@@ -149,6 +152,7 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/ImageJpegEntrypoint.cpp
   entrypoints/ImageStreamingModeEntrypoint.cpp
   #entrypoints/InspectEntrypoint.cpp
+  entrypoints/ModelMaterialEntrypoint.cpp
   entrypoints/ModelTransferFunctionEntrypoint.cpp
   entrypoints/QuitEntrypoint.cpp
   entrypoints/RegistryEntrypoint.cpp

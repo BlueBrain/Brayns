@@ -47,6 +47,11 @@ uint32_t Model::getID() const noexcept
     return _modelId;
 }
 
+Bounds Model::computeBounds(const Matrix4f &transform) const noexcept
+{
+    return _components.computeBounds(transform);
+}
+
 void Model::onPreRender(const ParametersManager &params)
 {
     _components.onPreRender(params);
