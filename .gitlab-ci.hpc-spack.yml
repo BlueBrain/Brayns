@@ -44,10 +44,9 @@ brayns-python-test:
   needs: ["brayns-spack-build"]
   timeout: 10 minutes
   script:
-    - cd ${SPACK_BUILD_DIR}
+    - cd ${SPACK_BUILD_DIR}/../python
     - module load unstable
     - module load python
-    - cd python
     - python -m venv pythonvenv
     - source pythonvenv/bin/activate
     - python setup.py sdist
