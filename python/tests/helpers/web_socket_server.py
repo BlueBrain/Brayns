@@ -70,7 +70,7 @@ class WebSocketServer:
         self._loop.run(
             self._websocket.wait_closed()
         ).result()
-        self._loop.stop()
+        self._loop.close()
 
     async def _start(self) -> None:
         self._websocket = await websockets.serve(
@@ -79,7 +79,7 @@ class WebSocketServer:
             port=self._port,
             ssl=self._ssl,
             ping_interval=None,
-            timeout=0
+            close_timeout=0
         )
 
     async def _handle(

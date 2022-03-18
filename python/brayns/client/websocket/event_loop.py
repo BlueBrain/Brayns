@@ -35,8 +35,10 @@ class EventLoop:
         )
         self._thread.start()
 
-    def stop(self) -> None:
+    def close(self) -> None:
         self._loop.call_soon_threadsafe(self._loop.stop)
+        self._thread.join()
+        self._loop.close()
 
     def run(self, coroutine: Coroutine[Any, Any, T]) -> 'asyncio.Future[T]':
         return asyncio.run_coroutine_threadsafe(coroutine, self._loop)
