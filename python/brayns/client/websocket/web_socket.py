@@ -70,6 +70,6 @@ class WebSocket(WebSocketProtocol):
             uri=self._uri,
             ssl=self._ssl,
             ping_interval=None,
-            timeout=0,
+            close_timeout=0,
             max_size=int(2e9)
         )
