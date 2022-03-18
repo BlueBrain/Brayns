@@ -26,8 +26,6 @@
 #include <brayns/engine/cameras/OrthographicCamera.h>
 #include <brayns/engine/cameras/PerspectiveCamera.h>
 
-#include <brayns/network/adapters/GenericEngineObjectAdapter.h>
-
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(OrthographicCamera)
@@ -44,13 +42,9 @@ BRAYNS_JSON_ADAPTER_GETSET("focus_distance", getFocusDistance, setFocusDistance,
                            "Will be clamped to the range [1.0, +infinity]", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 
-class GenericCamera : public GenericEngineObjectAdapter<Camera>
-{
-};
-
-BRAYNS_JSON_ADAPTER_BEGIN(GenericCamera)
-BRAYNS_JSON_ADAPTER_GETSET("type", getType, setType, "Camera type name");
-BRAYNS_JSON_ADAPTER_GETSET("parameters", getParams, setParams, "Parameters for the specified camera type",
-                           Required(false))
+BRAYNS_JSON_ADAPTER_BEGIN(LookAt)
+BRAYNS_JSON_ADAPTER_ENTRY(position, "Position of the camera", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(target, "Target position at which the camera is looking", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(up, "Up vector to compute the camera orthonormal basis", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

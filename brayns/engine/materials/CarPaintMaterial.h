@@ -61,7 +61,4 @@ private:
     Vector3f _color{1.f};
     float _flakeDensity{0.f};
 };
-
-template<>
-std::string EngineObjectName<CarPaintMaterial>::get();
 }

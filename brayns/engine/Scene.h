@@ -69,9 +69,10 @@ public:
     void postRender(const ParametersManager &params);
 
     /**
-     * @brief commit implementation. Will call the doCommit() implementation of the models and the lights.
+     * @brief commit implementation.
+     * @return True if anything changed since the last commit operation, false otherwise
      */
-    void commit();
+    bool commit();
 
     /**
      * @brief Get the scene model manager object
@@ -79,6 +80,13 @@ public:
      * @return SceneModelManager&
      */
     SceneModelManager &getModelManager() noexcept;
+
+    /**
+     * @brief Get the scene model manager object
+     *
+     * @return const SceneModelManager&
+     */
+    const SceneModelManager &getModelManager() const noexcept;
 
     /**
      * @brief Get the scene clipping models manager object

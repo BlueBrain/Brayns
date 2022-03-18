@@ -62,7 +62,4 @@ private:
     Vector3f _color{1.f}; // default white
     float _opacity{1.f}; // default opaque
 };
-
-template<>
-std::string EngineObjectName<DefaultMaterial>::get();
 }

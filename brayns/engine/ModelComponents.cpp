@@ -67,44 +67,49 @@ Bounds Component::computeBounds(const Matrix4f& transform) const noexcept
 size_t ModelComponentContainer::getSizeInBytes() const noexcept
 {
     size_t result = 0;
-    for(const auto &component : _components)
+    for(const auto &entry : _components)
     {
-        result += component->getSizeInBytes();
+        auto &component = *entry.component;
+        result += component.getSizeInBytes();
     }
     return result;
 }
 
 void ModelComponentContainer::onPreRender(const ParametersManager& params)
 {
-    for(auto& component : _components)
+    for(auto &entry : _components)
     {
-        component->onPreRender(params);
+        auto &component = *entry.component;
+        component.onPreRender(params);
     }
 }
 
 void ModelComponentContainer::onPostRender(const ParametersManager& params)
 {
-    for(auto& component : _components)
+    for(auto &entry : _components)
     {
-        component->onPostRender(params);
+        auto &component = *entry.component;
+        component.onPostRender(params);
     }
 }
 
 bool ModelComponentContainer::commit()
 {
     bool committed = false;
-    for(auto& component : _components)
+    for(auto &entry : _components)
     {
-        committed = committed || component->commit();
+        auto &component = *entry.component;
+        committed = committed || component.commit();
     }
     return committed;
 }
 
 void ModelComponentContainer::onDestroyed()
 {
-    for(auto& component : _components)
+    for(auto &entry : _components)
     {
-        component->onDestroyed();
+        auto &component = *entry.component;
+        component.onDestroyed();
     }
 }
 }

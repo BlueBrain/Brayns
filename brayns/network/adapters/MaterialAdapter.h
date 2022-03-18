@@ -30,7 +30,7 @@
 #include <brayns/engine/materials/MetalMaterial.h>
 #include <brayns/engine/materials/PlasticMaterial.h>
 #include <brayns/json/JsonAdapterMacro.h>
-#include <brayns/network/adapters/GenericEngineObjectAdapter.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
@@ -76,62 +76,69 @@ BRAYNS_JSON_ADAPTER_GETSET("opacity", getOpacity, setOpacity,
                            "Base opacity of the material. Will be clampled to the range [0.0, 1.0]")
 BRAYNS_JSON_ADAPTER_END()
 
-class GenericMaterial : public GenericEngineObjectAdapter<Material>
-{
-};
-
-BRAYNS_JSON_ADAPTER_BEGIN(GenericMaterial)
-BRAYNS_JSON_ADAPTER_GETSET("type", getType, setType, "Material type name");
-BRAYNS_JSON_ADAPTER_GETSET("parameters", getParams, setParams, "Parameters for the specified material type",
-                           Required(false))
-BRAYNS_JSON_ADAPTER_END()
-
-template<typename T>
-class MaterialUpdater
+template<typename MaterialType>
+class ModelMaterial
 {
 public:
-    void setModelID(const uint32_t modelID)
+    ModelMaterial() = default;
+    ModelMaterial(SceneModelManager &modelManager)
+     : _modelManager(&modelManager)
     {
-        _modelID = modelID;
     }
 
-    void setMaterial(const T& material)
+    void setModelId(const uint32_t id) noexcept
     {
-        _material = std::make_unique<T>(material);
+        _modelId = id;
     }
 
-    void updateMaterialOnModel(Scene &scene)
+    void setMaterial(std::unique_ptr<MaterialType> material) noexcept
     {
-        auto& modelInstance = scene.getModelInstance(_modelID);
-        auto& model = modelInstance.getModel();
-        try
-        {
-            auto& materialComponent = model.getComponent<MaterialComponent>();
-            materialComponent.setMaterial(std::move(_material));
-        }
-        catch(...)
-        {
-            throw std::invalid_argument("The given model does not have a material");
-        }
+        _material = std::move(material);
+    }
+
+    void update()
+    {
+        auto &modelInstance = _modelManager->getModelInstance(_modelId);
+        auto &model = modelInstance.getModel();
+        auto &materialComponent = model.getComponent<MaterialComponent>();
+        materialComponent.setMaterial(std::move(_material));
     }
 
 private:
-    uint32_t _modelID;
-    std::unique_ptr<T> _material;
+    SceneModelManager *_modelManager;
+    uint32_t _modelId {};
+    std::unique_ptr<MaterialType> _material;
 };
 
-#define MATERIAL_UPDATER_FOR_TYPE(Type) \
-    class Type##Updater : public MaterialUpdater<Type> {}; \
-    BRAYNS_JSON_ADAPTER_BEGIN(Type##Updater) \
-    BRAYNS_JSON_ADAPTER_SET("model_id", setModelID, "Model ID") \
-    BRAYNS_JSON_ADAPTER_SET("material", setMaterial, "Material parameters", Required(false)) \
-    BRAYNS_JSON_ADAPTER_END()
+#define MODEL_MATERIAL_PARAMS \
+    BRAYNS_JSON_ADAPTER_SET("model_id", setModelId, "ID of the model") \
+    BRAYNS_JSON_ADAPTER_SET("material", setMaterial, "Material parameters")
 
-MATERIAL_UPDATER_FOR_TYPE(CarPaintMaterial)
-MATERIAL_UPDATER_FOR_TYPE(DefaultMaterial)
-MATERIAL_UPDATER_FOR_TYPE(EmissiveMaterial)
-MATERIAL_UPDATER_FOR_TYPE(GlassMaterial)
-MATERIAL_UPDATER_FOR_TYPE(MatteMaterial)
-MATERIAL_UPDATER_FOR_TYPE(MetalMaterial)
-MATERIAL_UPDATER_FOR_TYPE(PlasticMaterial)
+BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<CarPaintMaterial>)
+MODEL_MATERIAL_PARAMS
+BRAYNS_JSON_ADAPTER_END()
+
+BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<DefaultMaterial>)
+MODEL_MATERIAL_PARAMS
+BRAYNS_JSON_ADAPTER_END()
+
+BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<EmissiveMaterial>)
+MODEL_MATERIAL_PARAMS
+BRAYNS_JSON_ADAPTER_END()
+
+BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<GlassMaterial>)
+MODEL_MATERIAL_PARAMS
+BRAYNS_JSON_ADAPTER_END()
+
+BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<MatteMaterial>)
+MODEL_MATERIAL_PARAMS
+BRAYNS_JSON_ADAPTER_END()
+
+BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<MetalMaterial>)
+MODEL_MATERIAL_PARAMS
+BRAYNS_JSON_ADAPTER_END()
+
+BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<PlasticMaterial>)
+MODEL_MATERIAL_PARAMS
+BRAYNS_JSON_ADAPTER_END()
 }

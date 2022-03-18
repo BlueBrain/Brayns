@@ -54,7 +54,7 @@ protected:
      * @brief Helper function for derived classes to update a parameter and mark it modified if it has changed.
      */
     template<typename T>
-    void _updateValue(T &member, const T &newValue, const bool triggerCallback = true)
+    void _updateValue(T &member, const T &newValue)
     {
         if (!_isEqual(member, newValue))
         {

@@ -23,23 +23,38 @@
 namespace
 {
 template<typename Container>
-decltype(auto) findInstanceIterator(Container &&models, const uint32_t id)
+decltype(auto) findModelIterator(Container &&models, const uint32_t modelId)
 {
-    auto it = std::find(models.begin(), models.end(), [mId = id](auto &model) { return model->getID() == mId; });
-
-    if (it == models.end())
+    auto begin = models.begin();
+    auto end = models.end();
+    auto it = std::find_if(begin, end, [mId = modelId](auto &modelEntry)
     {
-        throw std::invalid_argument("No Model with id " + std::to_string(id) + " was found");
+        auto &model = *modelEntry.model;
+        return model.getID() == mId;
+    });
+
+    // Shouldn't happen, but...
+    if(it == models.end())
+    {
+        throw std::invalid_argument("No model with id " + std::to_string(modelId) + " was found");
     }
 
     return it;
 }
 
 template<typename Container>
-decltype(auto) findInstance(Container &&models, const uint32_t id)
+decltype(auto) findInstanceIterator(Container &&instances, const uint32_t instanceId)
 {
-    auto it = findInstanceIterator(models, id);
-    return *(*it);
+    auto begin = instances.begin();
+    auto end = instances.end();
+    auto it = std::find_if(begin, end, [mId = instanceId](auto &instance) { return instance->getID() == mId; });
+
+    if (it == instances.end())
+    {
+        throw std::invalid_argument("No instance with id " + std::to_string(instanceId) + " was found");
+    }
+
+    return it;
 }
 }
 
@@ -51,50 +66,61 @@ ModelInstance &SceneModelManager::addModel(ModelLoadParameters params, std::uniq
     auto &modelEntry = _models.back();
     modelEntry.params = std::move(params);
     modelEntry.model = std::move(model);
+    modelEntry.model->_modelId = _modelIdFactory.requestID();
 
     return _createModelInstance(modelEntry);
 }
 
-ModelInstance &SceneModelManager::createInstance(const uint32_t modelID)
+ModelInstance &SceneModelManager::createInstance(const uint32_t instanceID)
 {
-    auto &sourceInstance = findInstance(_modelInstances, modelID);
+    auto &sourceInstance = **findInstanceIterator(_instances, instanceID);
     auto &model = sourceInstance.getModel();
-    auto modelIndex = model._modelIndex;
-    auto &modelEntry = _models[modelIndex];
+    auto modelId = model._modelId;
+    auto &modelEntry = *findModelIterator(_models, modelId);
     return _createModelInstance(modelEntry);
 }
 
 ModelInstance &SceneModelManager::getModelInstance(const uint32_t modelID)
 {
-    return findInstance(_modelInstances, modelID);
+    return **findInstanceIterator(_instances, modelID);
 }
 
-const std::vector<ModelInstance *> SceneModelManager::getAllModelInstances() const noexcept
+const std::vector<ModelInstance *> &SceneModelManager::getAllModelInstances() const noexcept
 {
-    return _modelInstances;
+    return _instances;
 }
 
-void SceneModelManager::removeModel(const uint32_t modelID)
+void SceneModelManager::removeModel(const uint32_t instanceID)
 {
-    auto it = findInstanceIterator(_modelInstances, modelID);
-    auto &modelInstance = *it;
+    auto it = findInstanceIterator(_instances, instanceID);
+    auto &modelInstance = **it;
 
-    auto &model = modelInstance->getModel();
-    auto modelIndex = model._modelIndex;
-    auto &modelEntry = _models[modelIndex];
-    auto &modelInstanceList = modelEntry.instances;
-    auto instanceIterator = findInstanceIterator(modelInstanceList, modelID);
-    modelInstanceList.erase(instanceIterator);
-
-    _modelInstances.erase(it);
-}
-
-const ModelLoadParameters SceneModelManager::getModelLoadParameters(const uint32_t modelID) const
-{
-    auto &modelInstance = findInstance(_modelInstances, modelID);
     auto &model = modelInstance.getModel();
-    auto modelIndex = model._modelIndex;
-    auto &modelEntry = _models[modelIndex];
+    auto modelId = model.getID();
+    auto modelIt = findModelIterator(_models, modelId);
+    auto &modelEntry = *modelIt;
+    auto &modelInstanceList = modelEntry.instances;
+    auto instanceIterator = findInstanceIterator(modelInstanceList, instanceID);
+
+    modelInstanceList.erase(instanceIterator);
+    _instances.erase(it);
+
+    _instanceIdFactory.releaseID(instanceID);
+
+    // If no more instances of the model, get rid of it
+    if(modelInstanceList.empty())
+    {
+        _models.erase(modelIt);
+        _modelIdFactory.releaseID(modelId);
+    }
+}
+
+const ModelLoadParameters &SceneModelManager::getModelLoadParameters(const uint32_t instanceID) const
+{
+    auto &modelInstance = **findInstanceIterator(_instances, instanceID);
+    auto &model = modelInstance.getModel();
+    auto modelId = model.getID();
+    auto &modelEntry = *findModelIterator(_models, modelId);
     auto &loadParams = modelEntry.params;
 
     return loadParams;
@@ -143,7 +169,7 @@ void SceneModelManager::postRender(const ParametersManager &parameters)
 Bounds SceneModelManager::getBounds() const noexcept
 {
     Bounds result;
-    for (const auto &instance : _modelInstances)
+    for (const auto instance : _instances)
     {
         const auto &instanceBounds = instance->getBounds();
         result.expand(instanceBounds);
@@ -154,26 +180,41 @@ Bounds SceneModelManager::getBounds() const noexcept
 
 ModelInstance &SceneModelManager::_createModelInstance(ModelEntry &modelEntry)
 {
-    const auto instanceID = _idFactory.requestID();
+    const auto instanceID = _instanceIdFactory.requestID();
     auto &model = *modelEntry.model;
-    auto &modelInstance = modelEntry.instances;
+    auto &modelInstanceList = modelEntry.instances;
 
     auto instance = std::make_unique<ModelInstance>(instanceID, model);
-    _modelInstances.push_back(instance.get());
-    modelInstance.push_back(std::move(instance));
+    _instances.push_back(instance.get());
+    modelInstanceList.push_back(std::move(instance));
 
-    return *(_modelInstances.back());
+    return *(_instances.back());
 }
 
 std::vector<OSPInstance> SceneModelManager::getInstanceHandles() noexcept
 {
     std::vector<OSPInstance> handles;
-    handles.reserve(_modelInstances.size());
-    for (auto &instance : _modelInstances)
+    handles.reserve(_instances.size());
+    for (auto instance : _instances)
     {
         auto handle = instance->handle();
         handles.push_back(handle);
     }
     return handles;
+}
+
+size_t SceneModelManager::getSizeInBytes() const noexcept
+{
+    size_t size = 0;
+    for (const auto &modelEntry : _models)
+    {
+        size += sizeof(ModelEntry);
+        size += modelEntry.model->getSizeInBytes();
+        size += sizeof(ModelInstance) * modelEntry.instances.size();
+    }
+
+    size += _instances.size() * sizeof(ModelInstance*);
+
+    return size;
 }
 }

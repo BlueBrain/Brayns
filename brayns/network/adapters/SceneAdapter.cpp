@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,25 +18,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/engine/Scene.h>
-#include <brayns/network/adapters/LightAdapter.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include "SceneAdapter.h"
 
 namespace brayns
 {
-class GetLightsEntrypoint : public Entrypoint<EmptyMessage, std::vector<GenericLight>>
+ReadSceneProxy::ReadSceneProxy(const Scene &scene)
+ : _scene(&scene)
 {
-public:
-    GetLightsEntrypoint(Scene &scene, LightFactory::Ptr lightFactory);
+}
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
+const Bounds &ReadSceneProxy::getBounds() const noexcept
+{
+    return _scene->getBounds();
+}
 
-private:
-    Scene &_scene;
-    LightFactory::Ptr _lightFactory;
-};
-} // namespace brayns
+std::vector<ModelInstanceProxy> ReadSceneProxy::getModels() const noexcept
+{
+    const auto &modelManager = _scene->getModelManager();
+    auto& models = modelManager.getAllModelInstances();
+
+    std::vector<ModelInstanceProxy> result;
+    result.reserve(models.size());
+    for(auto model : models)
+    {
+        result.emplace_back(*model);
+    }
+    return result;
+}
+}

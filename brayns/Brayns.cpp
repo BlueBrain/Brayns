@@ -80,14 +80,6 @@ Brayns::Brayns(int argc, const char **argv)
 Brayns::~Brayns()
 {
     _loaderRegistry.clear();
-
-    tab.foreach (
-        []
-        {
-            test();
-            test();
-        });
-
     // make sure that plugin objects are removed first, as plugins are
     // destroyed before the engine, but plugin destruction still should have
     // a valid engine and _api (aka this object).
@@ -104,9 +96,6 @@ bool Brayns::commitAndRender()
 
     // Commit any change to the engine (scene, camera, renderer, parameters, ...)
     _engine.commit();
-
-    // After commiting the engine, the parameters are in sync with the engine, so reset state
-    _parametersManager.resetModified();
 
     // Render new frame, if needed
     _engine.render();

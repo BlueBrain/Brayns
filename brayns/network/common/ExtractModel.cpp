@@ -25,11 +25,17 @@
 
 namespace brayns
 {
-ModelInstance &ExtractModel::fromId(Scene &scene, size_t id)
+ModelInstance &ExtractModel::fromId(Scene &scene, uint32_t id)
+{
+    auto &sceneModelManager = scene.getModelManager();
+    return fromId(sceneModelManager, id);
+}
+
+ModelInstance &ExtractModel::fromId(SceneModelManager &sceneModelManager, uint32_t id)
 {
     try
     {
-        auto &model = scene.getModelInstance(id);
+        auto &model = sceneModelManager.getModelInstance(id);
         return model;
     }
     catch (const std::invalid_argument &)

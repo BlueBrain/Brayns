@@ -46,7 +46,7 @@ float _computeHalfArea(const Bounds &bbox)
 }
 } // namespace
 
-std::vector<Model::Ptr> XYZBLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback) const
+std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback) const
 {
     Log::info("Loading xyz {}.", blob.name);
 
@@ -112,12 +112,12 @@ std::vector<Model::Ptr> XYZBLoader::importFromBlob(Blob &&blob, const LoaderProg
     model->addComponent<MaterialComponent>();
     model->addComponent<GeometryRendererComponent<Sphere>>(spheres);
 
-    std::vector<Model::Ptr> result;
+    std::vector<std::unique_ptr<Model>> result;
     result.push_back(std::move(model));
     return result;
 }
 
-std::vector<Model::Ptr> XYZBLoader::importFromFile(const std::string &filename, const LoaderProgress &callback) const
+std::vector<std::unique_ptr<Model>> XYZBLoader::importFromFile(const std::string &filename, const LoaderProgress &callback) const
 {
     std::ifstream file(filename);
     if (!file.good())

@@ -38,8 +38,6 @@ class Model;
 class Component
 {
 public:
-    using Ptr = std::unique_ptr<Component>;
-
     virtual ~Component() = default;
 
     /**
@@ -87,11 +85,10 @@ protected:
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept;
 
 private:
-    friend class ModelComponentContainer;
     friend class Model;
+    friend class ModelComponentContainer;
 
     Model *_owner{nullptr};
-    std::type_index _type;
 };
 
 class ModelComponentContainer
@@ -103,13 +100,18 @@ private:
     template<typename T, typename... Args>
     T &addComponent(Args &&...args)
     {
+        _components.emplace_back();
+        auto &entry = _components.back();
+
         auto component = std::make_unique<T>(std::forward<Args>(args)...);
-        auto componentPtr = component.get();
-        _components.push_back(std::move(component));
+        std::type_index type = typeid(T);
 
-        componentPtr._type = typeid(T);
+        entry.type = type;
+        entry.component = std::move(component);
 
-        return *componentPtr;
+        auto &result = static_cast<T&>(*entry.component);
+
+        return result;
     }
 
     /**
@@ -120,21 +122,10 @@ private:
     template<typename T>
     T &getComponent()
     {
-        const std::type_index ti = typeid(T);
-        auto begin = _components.begin();
-        auto end = _components.end();
-
-        auto it = std::find_if(
-            begin,
-            end,
-            [type = ti](std::unique_ptr<Component> &component) { return component->_type == type; });
-
-        if (it == end)
-        {
-            throw std::invalid_argument("No component of the given type registered");
-        }
-
-        return dynamic_cast<T &>(*(*it).get());
+        auto it = _findComponentIterator<T>();
+        auto &entry = *it;
+        auto &component = *entry.component;
+        return dynamic_cast<T &>(component);
     }
 
     /**
@@ -153,11 +144,13 @@ private:
             it = std::find_if(
                 it,
                 end,
-                [type = ti](std::unique_ptr<Component> &component) { return component->_type = type; });
+                [type = ti](ComponentEntry &entry) { return entry.type = type; });
 
             if (it != end)
             {
-                result.push_back(static_cast<T *>((*it).get()));
+                auto &entry = *it;
+                auto &component = *entry.component;
+                result.push_back(static_cast<T *>(&component));
                 ++it;
             }
         } while (it != end);
@@ -172,21 +165,11 @@ private:
     template<typename T>
     void removeComponent()
     {
-        const std::type_index ti = typeid(T);
-        auto begin = _components.begin();
-        auto end = _components.end();
+        auto it = _findComponentIterator<T>();
+        auto &entry = *it;
 
-        auto it = std::find_if(
-            begin,
-            end,
-            [type = ti](std::unique_ptr<Component> &component) { return component->_type == type; });
-        if (it == _components.end())
-        {
-            throw std::invalid_argument("No component of the given type registered");
-        }
-
-        auto &component = (*it);
-        component->onDestroyed();
+        auto &component = *entry.component;;
+        component.onDestroyed();
 
         _components.erase(it);
     }
@@ -219,8 +202,39 @@ private:
     void onDestroyed();
 
 private:
+    template<typename T>
+    auto _findComponentIterator()
+    {
+        const std::type_index ti = typeid(T);
+        auto begin = _components.begin();
+        auto end = _components.end();
+
+        auto it = std::find_if(
+            begin,
+            end,
+            [type = ti](ComponentEntry &entry) { return entry.type == type; });
+        if (it == _components.end())
+        {
+            throw std::invalid_argument("No component of the given type registered");
+        }
+
+        return it;
+    }
+
     friend class Model;
 
-    std::vector<Component::Ptr> _components;
+    struct ComponentEntry
+    {
+        std::type_index type;
+        std::unique_ptr<Component> component;
+
+        // type_index does not have a default constructor...
+        ComponentEntry()
+         : type(typeid(void))
+        {
+        }
+    };
+
+    std::vector<ComponentEntry> _components;
 };
 }

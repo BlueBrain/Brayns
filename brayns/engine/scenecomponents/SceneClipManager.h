@@ -71,7 +71,17 @@ private:
      */
     bool commit();
 
+    /**
+     * @brief Return the handles of the instances of the clipping geometry
+     * @return std::vector<OSPInstance>
+     */
     std::vector<OSPInstance> getInstanceHandles() noexcept;
+
+    /**
+     * @brief returns the size in bytes of this clipping model manager
+     * @return size_t
+     */
+    size_t getSizeInBytes() const noexcept;
 
 private:
     bool _dirty{false};

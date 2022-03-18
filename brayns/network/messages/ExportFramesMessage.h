@@ -21,24 +21,19 @@
 #pragma once
 
 #include <brayns/json/JsonObjectMacro.h>
-
 #include <brayns/network/adapters/CameraAdapter.h>
-#include <brayns/network/adapters/RendererAdapter.h>
 #include <brayns/network/messages/GenericImageSettingsMessage.h>
-#include <brayns/network/messages/LookAtMessage.h>
 
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(ExportFramesKeyFrame)
 BRAYNS_JSON_OBJECT_ENTRY(uint32_t, frame_index, "Integer index of the simulation frame")
-BRAYNS_JSON_OBJECT_ENTRY(LookAtParameters, camera_view, "Camera view settings")
+BRAYNS_JSON_OBJECT_ENTRY(LookAt, camera_view, "Camera view settings")
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(ExportFramesParams)
 BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path where the frames will be stored")
 BRAYNS_JSON_OBJECT_ENTRY(GenericImageSettings, image_settings, "Image dimenssion [width, height]")
-BRAYNS_JSON_OBJECT_ENTRY(std::unique_ptr<GenericRenderer>, renderer, "Renderer settings", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::unique_ptr<GenericCamera>, camera, "Camera settings", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(std::vector<ExportFramesKeyFrame>, key_frames, "List of keyframes to export")
 BRAYNS_JSON_OBJECT_ENTRY(bool, sequential_naming, "Name the image file after the frame index", Default(true))
 BRAYNS_JSON_OBJECT_END()

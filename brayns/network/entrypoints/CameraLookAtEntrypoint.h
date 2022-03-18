@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,23 +20,35 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
-
-#include <brayns/network/adapters/ClipPlaneAdapter.h>
+#include <brayns/engine/Engine.h>
+#include <brayns/network/adapters/CameraAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-class GetClipPlanesEntrypoint : public Entrypoint<EmptyMessage, std::vector<ClipPlane>>
+class SetCameraLookAtEntrypoint final : public Entrypoint<LookAt, EmptyMessage>
 {
 public:
-    GetClipPlanesEntrypoint(Scene &scene);
+    SetCameraLookAtEntrypoint(Engine &engine);
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+    void onRequest(const Request &request) override;
 
 private:
-    Scene &_scene;
+    Engine &_engine;
 };
-} // namespace brayns
+
+class GetCameraLookAtEntrypoint final : public Entrypoint<EmptyMessage, LookAt>
+{
+public:
+    GetCameraLookAtEntrypoint(Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+    void onRequest(const Request &request) override;
+
+private:
+    Engine &_engine;
+};
+}

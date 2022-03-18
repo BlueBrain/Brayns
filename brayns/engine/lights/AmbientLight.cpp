@@ -22,11 +22,6 @@
 
 namespace brayns
 {
-std::string AmbientLight::getName() const noexcept
-{
-    return EngineObjectName<AmbientLight>::get();
-}
-
 std::string_view AmbientLight::getOSPHandleName() const noexcept
 {
     return "ambient";
@@ -40,11 +35,5 @@ uint64_t AmbientLight::getSizeInBytes() const noexcept
 
 void AmbientLight::commitLightSpecificParams()
 {
-}
-
-template<>
-std::string EngineObjectName<AmbientLight>::get()
-{
-    return "ambient";
 }
 }

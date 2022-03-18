@@ -35,10 +35,10 @@ public:
 
     std::string getName() const final;
 
-    std::vector<Model::Ptr> importFromFile(
+    std::vector<std::unique_ptr<Model>> importFromFile(
         const std::string &fileName, const LoaderProgress &cb, const ProteinLoaderParameters &properties) const final;
 
-    std::vector<Model::Ptr> importFromBlob(
+    std::vector<std::unique_ptr<Model>> importFromBlob(
         Blob &&blob, const LoaderProgress &callback, const ProteinLoaderParameters &properties) const final;
 };
 } // namespace brayns

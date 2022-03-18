@@ -26,8 +26,8 @@
 
 namespace brayns
 {
-GetModelTransferFunctionEntrypoint::GetModelTransferFunctionEntrypoint(Scene &scene)
-    : _scene(scene)
+GetModelTransferFunctionEntrypoint::GetModelTransferFunctionEntrypoint(SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -45,7 +45,7 @@ void GetModelTransferFunctionEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.id;
-    auto& modelInstance = ExtractModel::fromId(_scene, modelId);
+    auto& modelInstance = ExtractModel::fromId(_modelManager, modelId);
     auto& model = modelInstance.getModel();
 
     try
@@ -60,8 +60,8 @@ void GetModelTransferFunctionEntrypoint::onRequest(const Request &request)
     }
 }
 
-SetModelTransferFunctionEntrypoint::SetModelTransferFunctionEntrypoint(Scene &scene)
-    : _scene(scene)
+SetModelTransferFunctionEntrypoint::SetModelTransferFunctionEntrypoint(SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -77,7 +77,7 @@ std::string SetModelTransferFunctionEntrypoint::getDescription() const
 
 void SetModelTransferFunctionEntrypoint::onRequest(const Request &request)
 {
-    ModelTransferFunction transferFunction(_scene);
+    ModelTransferFunction transferFunction(_modelManager);
     request.getParams(transferFunction);
     request.reply(EmptyMessage());
 }

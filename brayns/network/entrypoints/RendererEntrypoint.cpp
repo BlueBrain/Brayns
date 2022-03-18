@@ -23,6 +23,28 @@
 
 namespace brayns
 {
+GetRendererTypeEntrypoint::GetRendererTypeEntrypoint(Engine &engine)
+ : _engine(engine)
+{
+}
+
+std::string GetRendererTypeEntrypoint::getMethod() const
+{
+    return "get-renderer-type";
+}
+
+std::string GetRendererTypeEntrypoint::getDescription() const
+{
+    return "Returns the type of the renderer currently being used";
+}
+
+void GetRendererTypeEntrypoint::onRequest(const Request &request)
+{
+    auto &renderer = _engine.getRenderer();
+    auto name = renderer.getName();
+    request.reply(name);
+}
+
 SetRendererInteractiveEntrypoint::SetRendererInteractiveEntrypoint(Engine &engine)
  : SetRendererEntrypoint<InteractiveRenderer>(engine)
 {
@@ -53,29 +75,33 @@ std::string SetRendererProductionEntrypoint::getDescription() const
     return "Sets the system renderer to the production one";
 }
 
-GetRendererEntrypoint::GetRendererEntrypoint(Engine &engine, RendererFactory::Ptr factory)
-    : _engine(engine)
-    , _rendererFactory(factory)
+GetRendererInteractiveEntrypoint::GetRendererInteractiveEntrypoint(Engine &engine)
+ : GetRendererEntrypoint<InteractiveRenderer>(engine)
 {
 }
 
-std::string GetRendererEntrypoint::getMethod() const
+std::string GetRendererInteractiveEntrypoint::getMethod() const
 {
-    return "get-renderer";
+    return "get-renderer-interactive";
 }
 
-std::string GetRendererEntrypoint::getDescription() const
+std::string GetRendererInteractiveEntrypoint::getDescription() const
 {
-    return "Get the current system renderer";
+    return "Returns the current renderer as interactive renderer, if possible";
 }
 
-void GetRendererEntrypoint::onRequest(const Request &request)
+GetRendererProductionEntrypoint::GetRendererProductionEntrypoint(Engine &engine)
+ : GetRendererEntrypoint<ProductionRenderer>(engine)
 {
-    auto& renderer = _engine.getRenderer();
+}
 
-    GenericRenderer result;
-    result.serialize(*_rendererFactory, renderer);
+std::string GetRendererProductionEntrypoint::getMethod() const
+{
+    return "get-renderer-production";
+}
 
-    request.reply(result);
+std::string GetRendererProductionEntrypoint::getDescription() const
+{
+    return "Returns the current renderer as production renderer, if possible";
 }
 } // namespace brayns

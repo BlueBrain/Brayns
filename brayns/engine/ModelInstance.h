@@ -39,7 +39,7 @@ public:
     /**
      * @brief Initializes the instance with the unique ID and the given model
      */
-    ModelInstance(const size_t modelID, Model &model);
+    ModelInstance(const uint32_t modelInstanceID, Model& model);
 
     ModelInstance(const ModelInstance &) = delete;
     ModelInstance &operator=(const ModelInstance &) = delete;
@@ -114,8 +114,8 @@ private:
     bool commit(const bool modelChanged);
 
 private:
-    const uint32_t _modelID{};
-    Model &_model;
+    const uint32_t _modelInstanceID{};
+    Model& _model;
 
     bool _visible{true};
     bool _visibilityChanged{true};

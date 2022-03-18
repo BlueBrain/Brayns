@@ -74,27 +74,16 @@ public:
     uint32_t getEndFrame() const noexcept;
 
     /**
-     * @brief setFrame sets the current normalized frame. A normalized frame
-     * number is in the interval [ 0, getEndFrame() - getStartFrame() ). If
-     * the provided value is outside the interval, it will be clampped
-     * @param value uint32_t normalized frame to set
+     * @brief sets the current frame.
+     * @param value uint32_t
      */
     void setFrame(const uint32_t value) noexcept;
 
     /**
-     * @brief getFrame returns the current normalized frame. A normalized frame
-     * number is in the interval [ 0, getEndFrame() - getStartFrame() )
+     * @brief getFrame returns the current frame.
      * @return uint32_t
      */
     uint32_t getFrame() const noexcept;
-
-    /**
-     * @brief getAbsoluteFrame returns the current absolute frame. An absolute
-     * frame is calculated as getStartFrame() + getFrame(). It is in the
-     * interval [ getStartFrame(), getEndFrame() )
-     * @return uint32_t
-     */
-    uint32_t getAbsoluteFrame() const noexcept;
 
     /**
      * @brief setDt sets the simulation timestep (in milliseconds)

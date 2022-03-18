@@ -62,7 +62,4 @@ private:
     Vector3f _color{1.f};
     float _opacity{1.f};
 };
-
-template<>
-std::string EngineObjectName<PlasticMaterial>::get();
 }

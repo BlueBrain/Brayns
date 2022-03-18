@@ -71,6 +71,12 @@ private:
      */
     std::vector<OSPLight> getLightHandles() const noexcept;
 
+    /**
+     * @brief returns the size in bytes of this light manager
+     * @return size_t
+     */
+    size_t getSizeInBytes() const noexcept;
+
 private:
     bool _dirty;
     IDFactory<uint32_t> _idFactory;

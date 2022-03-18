@@ -10,7 +10,6 @@ set(BRAYNSNETWORK_HEADERS
   adapters/BoundsAdapter.h
   adapters/CameraAdapter.h
   adapters/FileLoadParametersAdapter.h
-  adapters/GenericEngineObjectAdapter.h
   adapters/GeometryAdapter.h
   adapters/LightAdapter.h
   adapters/LoaderInfoAdapter.h
@@ -55,8 +54,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/ClearLightsEntrypoint.h
   entrypoints/ExitLaterEntrypoint.h
   entrypoints/ExportFramesEntrypoint.h
-  entrypoints/GetClipPlanesEntrypoint.h
-  entrypoints/GetLightsEntrypoint.h
   entrypoints/GetLoadersEntrypoint.h
   entrypoints/GetModelEntrypoint.h
   entrypoints/ImageJpegEntrypoint.h
@@ -75,7 +72,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/SnapshotEntrypoint.h
   entrypoints/StatisticsEntrypoint.h
   entrypoints/TriggerJpegStreamEntrypoint.h
-  entrypoints/UpdateClipPlaneEntrypoint.h
   entrypoints/UpdateModelEntrypoint.h
   entrypoints/VersionEntrypoint.h
   interface/INetworkInterface.h
@@ -89,6 +85,7 @@ set(BRAYNSNETWORK_HEADERS
   jsonrpc/RequestId.h
   messages/ExitLaterMessage.h
   messages/ExportFramesMessage.h
+  messages/GenericImageSettingsMessage.h
   messages/GetModelMessage.h
   messages/ImageBase64Message.h
   messages/ImageStreamingModeMessage.h
@@ -117,7 +114,10 @@ set(BRAYNSNETWORK_HEADERS
 )
   
 set(BRAYNSNETWORK_SOURCES
+  adapters/ClipPlaneAdapter.cpp
+  adapters/ModelInstanceAdapter.cpp
   adapters/ModelTransferFunctionAdapter.cpp
+  adapters/SceneAdapter.cpp
   binary/BinaryManager.cpp
   client/ClientBuffer.cpp
   client/ClientManager.cpp
@@ -144,8 +144,6 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/ClearLightsEntrypoint.cpp
   entrypoints/ExitLaterEntrypoint.cpp
   entrypoints/ExportFramesEntrypoint.cpp
-  entrypoints/GetClipPlanesEntrypoint.cpp
-  entrypoints/GetLightsEntrypoint.cpp
   entrypoints/GetLoadersEntrypoint.cpp
   entrypoints/GetModelEntrypoint.cpp
   entrypoints/ImageJpegEntrypoint.cpp
@@ -164,7 +162,6 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/SnapshotEntrypoint.cpp
   entrypoints/StatisticsEntrypoint.cpp
   entrypoints/TriggerJpegStreamEntrypoint.cpp
-  entrypoints/UpdateClipPlaneEntrypoint.cpp
   entrypoints/UpdateModelEntrypoint.cpp
   entrypoints/VersionEntrypoint.cpp
   interface/NetworkInterface.cpp

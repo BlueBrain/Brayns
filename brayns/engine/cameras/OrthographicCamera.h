@@ -29,8 +29,6 @@ class OrthographicCamera final : public Camera
 public:
     std::string getName() const noexcept override;
 
-    Ptr clone() const noexcept final;
-
     /**
      * @brief Sets the orthographic projection height
      */
@@ -48,7 +46,4 @@ protected:
 private:
     float _height{1.f};
 };
-
-template<>
-std::string EngineObjectName<OrthographicCamera>::get();
 }

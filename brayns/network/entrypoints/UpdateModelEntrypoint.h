@@ -21,23 +21,23 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/scenecomponents/SceneModelManager.h>
 
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-class UpdateModelEntrypoint : public Entrypoint<UpdateModelProxy, EmptyMessage>
+class UpdateModelEntrypoint : public Entrypoint<UpdateModelMessage, EmptyMessage>
 {
 public:
-    UpdateModelEntrypoint(Scene &scene);
+    UpdateModelEntrypoint(SceneModelManager &modelManager);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Scene &_scene;
+    SceneModelManager &_modelManager;
 };
 } // namespace brayns

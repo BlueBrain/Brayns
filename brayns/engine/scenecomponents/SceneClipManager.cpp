@@ -83,4 +83,15 @@ std::vector<OSPInstance> SceneClipManager::getInstanceHandles() noexcept
 
     return result;
 }
+
+size_t SceneClipManager::getSizeInBytes() const noexcept
+{
+    size_t size = 0;
+    for (const auto &[id, clippingModel] : _clippingModels)
+    {
+        auto& model = *clippingModel.model;
+        size += sizeof(id) + model.getSizeInBytes() + sizeof(ModelInstance);
+    }
+    return size;
+}
 }

@@ -24,7 +24,7 @@ namespace brayns
 {
 std::string InteractiveRenderer::getName() const noexcept
 {
-    return EngineObjectName<InteractiveRenderer>::get();
+    return "interactive";
 }
 
 void InteractiveRenderer::setShadowsEnabled(const bool enabled) noexcept
@@ -47,11 +47,6 @@ int32_t InteractiveRenderer::getAmbientOcclusionSamples() const noexcept
     return _aoSamples;
 }
 
-Renderer::Ptr InteractiveRenderer::clone() const noexcept
-{
-    return std::make_unique<InteractiveRenderer>(*this);
-}
-
 std::string_view InteractiveRenderer::getOSPHandleName() const noexcept
 {
     return "scivis";
@@ -63,11 +58,5 @@ void InteractiveRenderer::commitRendererSpecificParams()
 
     ospSetParam(ospHandle, "shadows", OSPDataType::OSP_BOOL, &_shadowsEnabled);
     ospSetParam(ospHandle, "aoSamples", OSPDataType::OSP_INT, &_aoSamples);
-}
-
-template<>
-std::string EngineObjectName<InteractiveRenderer>::get()
-{
-    return "interactive";
 }
 }

@@ -22,62 +22,52 @@
 #pragma once
 
 #include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/JsonBuffer.h>
 #include <brayns/json/JsonObjectMacro.h>
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/ModelInstance.h>
+
+#include <brayns/network/messages/GetModelMessage.h>
 
 #include "BoundsAdapter.h"
 #include "TransformationAdapter.h"
 
 namespace brayns
 {
-class ReadModelProxy
+class ModelInstanceProxy
 {
 public:
-    ReadModelProxy() = default;
-    ReadModelProxy(const ModelInstance &mi);
+    ModelInstanceProxy() = default;
+    ModelInstanceProxy(ModelInstance &modelInstance);
 
-    uint32_t getId() const noexcept;
+    uint32_t getID() const noexcept;
+
     const Bounds &getBounds() const noexcept;
-    const Model::Metadata &getMetadata() const noexcept;
+
+    const std::map<std::string, std::string> &getModelMetadata() const noexcept;
+
     const Transformation &getTransform() const noexcept;
-    bool getVisible() const noexcept;
+
+    void setTransform(const Transformation &transform) noexcept;
+
+    bool isVisible() const noexcept;
+
+    void setVisible(const bool val) noexcept;
 
 private:
-    const ModelInstance *_instance{nullptr};
+    ModelInstance *_modelInstance = nullptr;
 };
 
-BRAYNS_JSON_ADAPTER_BEGIN(ReadModelProxy)
-BRAYNS_JSON_ADAPTER_GET("model_id", getId, "Model ID")
+BRAYNS_JSON_ADAPTER_BEGIN(ModelInstanceProxy)
+BRAYNS_JSON_ADAPTER_GET("model_id", getID, "Model ID")
 BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Model axis-aligned bounds")
-BRAYNS_JSON_ADAPTER_GET("metadata", getMetadata, "Model-specific metadata")
-BRAYNS_JSON_ADAPTER_GET("transformation", getTransform, "Model transformation")
-BRAYNS_JSON_ADAPTER_GET("is_visible", getVisible, "Wether the model is being rendered or not")
+BRAYNS_JSON_ADAPTER_GET("metadata", getModelMetadata, "Model-specific metadata")
+BRAYNS_JSON_ADAPTER_GETSET("transformation", getTransform, setTransform, "Model transformation")
+BRAYNS_JSON_ADAPTER_GETSET("is_visible", isVisible, setVisible, "Wether the model is being rendered or not")
 BRAYNS_JSON_ADAPTER_END()
 
-class UpdateModelProxy
-{
-public:
-    UpdateModelProxy() = default;
-    UpdateModelProxy(ModelInstance &instance);
-
-    const Transformation &getTransform() const noexcept;
-    void setTransform(const Transformation &transformation) noexcept;
-    bool getVisible() const noexcept;
-    void setVisible(bool visible) noexcept;
-
-private:
-    ModelInstance *_modelInstance{nullptr};
-};
-
-BRAYNS_JSON_ADAPTER_BEGIN(UpdateModelProxy)
-BRAYNS_JSON_ADAPTER_GETSET("transformation", getTransform, setTransform, "Model transformation", Required(false))
-BRAYNS_JSON_ADAPTER_GETSET("visible", getVisible, setVisible, "Model visibility", Required(false))
-BRAYNS_JSON_ADAPTER_END()
-
-BRAYNS_JSON_OBJECT_BEGIN(UpdateModelParams)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "Model ID")
-BRAYNS_JSON_OBJECT_ENTRY(UpdateModelProxy, parameters, "Parameters to update in the model")
+BRAYNS_JSON_OBJECT_BEGIN(UpdateModelMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "Model ID")
+BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<ModelInstanceProxy>, model, "Model data to update")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

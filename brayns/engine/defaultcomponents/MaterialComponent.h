@@ -35,11 +35,13 @@ public:
 
     uint64_t getSizeInBytes() const noexcept override;
 
-    void setMaterial(Material::Ptr& newMaterial);
+    bool commit() override;
+
+    void setMaterial(std::unique_ptr<Material> material);
 
     Material& getMaterial() noexcept;
 
 private:
-    Material::Ptr _material {nullptr};
+    std::unique_ptr<Material> _material;
 };
 }

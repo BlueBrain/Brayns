@@ -64,7 +64,7 @@ void Scene::postRender(const ParametersManager &params)
     _modelManager.postRender(params);
 }
 
-void Scene::commit()
+bool Scene::commit()
 {
     bool needsCommit = false;
     if (!_handle)
@@ -74,53 +74,55 @@ void Scene::commit()
     }
 
     // Commit models
-    std::vector<OSPInstance> instances;
     if (_modelManager.commit() || _clippingManager.commit())
     {
+        std::vector<OSPInstance> instances;
         auto modelInstances = _modelManager.getInstanceHandles();
         instances.insert(instances.end(), modelInstances.begin(), modelInstances.end());
         auto clipInstances = _clippingManager.getInstanceHandles();
         instances.insert(instances.end(), clipInstances.begin(), clipInstances.end());
+
+        commitHandleList(instances, OSPDataType::OSP_INSTANCE, _handle, "instance");
+
         needsCommit = true;
     }
 
-    std::vector<OSPLight> lights;
     if (_lightManager.commit())
     {
-        lights = _lightManager.getLightHandles();
+        auto lights = _lightManager.getLightHandles();
+
+        commitHandleList(lights, OSPDataType::OSP_LIGHT, _handle, "light");
+
         needsCommit = true;
     }
 
-    auto instancesPtr = instances.data();
-    auto numInstances = instances.size();
-    auto sharedInstanceData = ospNewSharedData(instancesPtr, OSPDataType::OSP_INSTANCE, numInstances);
-    auto instanceCopies = ospNewData(OSPDataType::OSP_INSTANCE, numInstances);
-    ospCopyData(sharedInstanceData, instanceCopies);
-    ospSetParam(_handle, "instance", OSPDataType::OSP_DATA, &instanceCopies);
-    ospRelease(sharedInstanceData);
-    ospRelease(instanceCopies);
-
-    // Commit lights
-    std::ver2i0n33ctor<OSPLight> lights;
-    lights.reserve(_lights.size());
-
-    for (auto &[lightID, light] : _lights)
+    // Commit handle
+    if(needsCommit)
     {
-        light->doCommit();
-        lights.push_back(light->handle());
+        ospCommit(_handle);
     }
 
-    auto lightsPtr = lights.data();
-    auto numLights = lights.size();
-    auto sharedLightData = ospNewSharedData(lightsPtr, OSPDataType::OSP_LIGHT, numLights);
-    auto lightsCopy = ospNewData(OSPDataType::OSP_LIGHT, numLights);
-    ospCopyData(sharedLightData, lightsCopy);
-    ospSetParam(_handle, "light", OSPDataType::OSP_DATA, &lightsCopy);
-    ospRelease(sharedLightData);
-    ospRelease(lightsCopy);
+    return needsCommit;
+}
 
-    // Commit handle
-    ospCommit(_handle);
+SceneModelManager &Scene::getModelManager() noexcept
+{
+    return _modelManager;
+}
+
+const SceneModelManager &Scene::getModelManager() const noexcept
+{
+    return _modelManager;
+}
+
+SceneClipManager &Scene::getClipManager() noexcept
+{
+    return _clippingManager;
+}
+
+SceneLightManager &Scene::getLightManager() noexcept
+{
+    return _lightManager;
 }
 
 OSPWorld Scene::handle() const noexcept
@@ -132,34 +134,10 @@ uint64_t Scene::_getSizeBytes() const noexcept
 {
     uint64_t baseSize = sizeof(Scene);
 
-    // Account for model entries
-    for (const auto &modelEntry : _models)
-    {
-        baseSize += sizeof(ModelEntry);
-        baseSize += modelEntry.model->getSizeInBytes();
-        baseSize += sizeof(uint32_t) * modelEntry.instances.size();
-    }
-
-    // Account for instances
-    baseSize += _modelInstances.size() * sizeof(ModelInstance);
-
-    // Account for clipping geometry
-    for (const auto &[clippingModelID, clippingModel] : _clippingModels)
-        baseSize += clippingModel->getSizeInBytes();
-
-    // Account for lights
-    for (const auto &[lightID, light] : _lights)
-        baseSize += light->getSizeInBytes();
+    baseSize += _modelManager.getSizeInBytes();
+    baseSize += _clippingManager.getSizeInBytes();
+    baseSize += _lightManager.getSizeInBytes();
 
     return baseSize;
-}
-
-ModelInstance &Scene::_createModelInstance(Model *model)
-{
-    auto modelID = _modelIdFactory++;
-    auto modelInstance = std::make_unique<ModelInstance>(modelID, model);
-    auto result = modelInstance.get();
-    _modelInstances[modelID] = std::move(modelInstance);
-    return *result;
 }
 } // namespace brayns

@@ -24,6 +24,11 @@
 
 namespace brayns
 {
+bool operator==(const LookAt &a, const LookAt &b) noexcept
+{
+    return a.position == b.position && a.target == b.target && a.up == b.up;
+}
+
 Camera::Camera(const Camera &o)
 {
     *this = o;
@@ -31,9 +36,7 @@ Camera::Camera(const Camera &o)
 
 Camera &Camera::operator=(const Camera &o)
 {
-    _position = o._position;
-    _target = o._target;
-    _up = o._up;
+    _lookAtParams = o._lookAtParams;
     _aspectRatio = o._aspectRatio;
 
     markModified();
@@ -60,13 +63,17 @@ void Camera::commit()
         _handle = ospNewCamera(handleName.data());
     }
 
-    const auto forward = glm::normalize(_target - _position);
-    const auto strafe = glm::cross(forward, _up);
-    const auto up = glm::cross(strafe, forward);
+    const auto &position = _lookAtParams.position;
+    const auto &target = _lookAtParams.target;
+    const auto &up = _lookAtParams.up;
 
-    ospSetParam(_handle, "position", OSP_VEC3F, &_position[0]);
+    const auto forward = glm::normalize(target - position);
+    const auto strafe = glm::cross(forward, up);
+    const auto realUp = glm::cross(strafe, forward);
+
+    ospSetParam(_handle, "position", OSP_VEC3F, &position[0]);
     ospSetParam(_handle, "direction", OSP_VEC3F, &forward);
-    ospSetParam(_handle, "up", OSP_VEC3F, &up);
+    ospSetParam(_handle, "up", OSP_VEC3F, &realUp);
     ospSetParam(_handle, "aspect", OSP_FLOAT, &_aspectRatio);
 
     commitCameraSpecificParams();
@@ -74,39 +81,19 @@ void Camera::commit()
     ospCommit(_handle);
 }
 
-void Camera::setPosition(const Vector3f &position) noexcept
+void Camera::setLookAt(const LookAt &params) noexcept
 {
-    _updateValue(_position, position);
+    _updateValue(_lookAtParams, params);
 }
 
-void Camera::setTarget(const Vector3f &target) noexcept
+const LookAt &Camera::getLookAt() const noexcept
 {
-    _updateValue(_target, target);
-}
-
-void Camera::setUp(const Vector3f &up) noexcept
-{
-    _updateValue(_up, glm::normalize(up));
+    return _lookAtParams;
 }
 
 void Camera::setAspectRatio(const float aspectRatio) noexcept
 {
     _aspectRatio = aspectRatio;
-}
-
-const Vector3f& Camera::getPosition() const noexcept
-{
-    return _position;
-}
-
-const Vector3f& Camera::getTarget() const noexcept
-{
-    return _target;
-}
-
-const Vector3f& Camera::getUp() const noexcept
-{
-    return _up;
 }
 
 OSPCamera Camera::handle() const noexcept

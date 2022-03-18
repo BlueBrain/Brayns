@@ -82,7 +82,7 @@ public:
     /**
      * @brief Sets a new system Camera to use
      */
-    void setCamera(Camera::Ptr camera) noexcept;
+    void setCamera(std::unique_ptr<Camera> camera) noexcept;
 
     /**
      * @brief Returns the system's current Camera object
@@ -92,7 +92,7 @@ public:
     /**
      * @brief Sets a new system Renderer to use
      */
-    void setRenderer(Renderer::Ptr renderer) noexcept;
+    void setRenderer(std::unique_ptr<Renderer> renderer) noexcept;
 
     /**
      * @brief Returns the system's current Renderer object
@@ -126,8 +126,8 @@ private:
     // System objects
     FrameBuffer _frameBuffer;
     Scene _scene;
-    Camera::Ptr _camera{nullptr};
-    Renderer::Ptr _renderer{nullptr};
+    std::unique_ptr<Camera> _camera;
+    std::unique_ptr<Renderer> _renderer;
 
     // Engine statistics
     FPSCounter _fpsCounter;

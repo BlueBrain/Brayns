@@ -52,15 +52,7 @@ void TransferFunctionRendererComponent::onDestroyed()
     }
 }
 
-bool TransferFunctionRendererComponent::needsCommit()
-{
-    Model& model = getModel();
-    auto& tfComponent = model.getComponent<TransferFunctionComponent>();
-    auto& tf = tfComponent.getTransferFunction();
-    return tf.isModified();
-}
-
-void TransferFunctionRendererComponent::manualCommit()
+bool TransferFunctionRendererComponent::manualCommit()
 {
     Model& model = getModel();
     auto& tfComponent = model.getComponent<TransferFunctionComponent>();
@@ -68,7 +60,7 @@ void TransferFunctionRendererComponent::manualCommit()
 
     if(!tf.isModified())
     {
-        return;
+        return false;
     }
 
     auto& color = tf.getColors();
@@ -89,6 +81,8 @@ void TransferFunctionRendererComponent::manualCommit()
     ospCommit(_handle);
 
     tf.resetModified();
+
+    return true;
 }
 
 OSPTransferFunction TransferFunctionRendererComponent::handle() const noexcept

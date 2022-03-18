@@ -40,9 +40,7 @@ public:
 
     void onDestroyed() override;
 
-    bool needsCommit();
-
-    void manualCommit();
+    bool manualCommit();
 
     OSPTransferFunction handle() const noexcept;
 

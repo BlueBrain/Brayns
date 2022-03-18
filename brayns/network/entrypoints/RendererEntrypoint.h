@@ -29,8 +29,22 @@
 
 namespace brayns
 {
+class GetRendererTypeEntrypoint final : public Entrypoint<EmptyMessage, std::string>
+{
+public:
+    GetRendererTypeEntrypoint(Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+
+    void onRequest(const Request &request) override;
+
+private:
+    Engine &_engine;
+};
+
 template<typename T>
-class SetRendererEntrypoint : public IEntrypoint
+class SetRendererEntrypoint : public Entrypoint<T, EmptyMessage>
 {
 public:
     SetRendererEntrypoint(Engine &engine)
@@ -38,30 +52,25 @@ public:
     {
     }
 
-    virtual JsonSchema getParamsSchema() const override
+    virtual void onRequest(const typename Entrypoint<T, EmptyMessage>::Request &request) override
     {
-        return Json::getSchema<T>();
-    }
-
-    virtual JsonSchema getResultSchema() const override
-    {
-        return Json::getSchema<EmptyMessage>();
-    }
-
-    virtual void onRequest(const JsonRpcRequest &request) override
-    {
-        const auto params = request.getParams();
-
-        const auto errors = JsonSchemaValidator::validate(params, getParamsSchema());
-        if (!errors.empty())
+        T* targetRenderer = nullptr;
+        try
         {
-            throw JsonRpcException("Could not parse renderer parameters: " + string_utils::join(errors, ", "));
+            auto &renderer = _engine.getRenderer();
+            auto &castedRenderer = dynamic_cast<T&>(renderer);
+            targetRenderer = &castedRenderer;
+        }
+        catch(const std::bad_cast &)
+        {
+            auto newRenderer = std::make_unique<T>();
+            targetRenderer = newRenderer.get();
+            _engine.setRenderer(std::move(newRenderer));
         }
 
-        auto newRenderer = Json::deserialize<std::unique_ptr<T>>(params);
-        _engine.setRenderer(std::move(newRenderer));
-        const auto result = Json::serialize(EmptyMessage());
-        request.reply(result);
+        request.getParams(*targetRenderer);
+
+        request.reply(EmptyMessage());
     }
 
 private:
@@ -86,18 +95,48 @@ public:
     std::string getDescription() const override;
 };
 
-class GetRendererEntrypoint final : public Entrypoint<EmptyMessage, GenericRenderer>
+template<typename T>
+class GetRendererEntrypoint : public Entrypoint<EmptyMessage, T>
 {
 public:
-    GetRendererEntrypoint(Engine& engine, RendererFactory::Ptr factory);
+    GetRendererEntrypoint(Engine& engine)
+     : _engine(engine)
+    {
+    }
 
-    std::string getMethod() const override;
-    std::string getDescription() const override;
-
-    void onRequest(const Request &request) override;
+    void onRequest(const typename Entrypoint<EmptyMessage, T>::Request &request) override
+    {
+        auto &renderer = _engine.getRenderer();
+        try
+        {
+            auto &castedRenderer = dynamic_cast<T&>(renderer);
+            request.reply(castedRenderer);
+        }
+        catch(const std::bad_cast &)
+        {
+            throw JsonRpcException("Cannot cast the renderer to the requested type");
+        }
+    }
 
 private:
     Engine &_engine;
-    RendererFactory::Ptr _rendererFactory;
+};
+
+class GetRendererInteractiveEntrypoint final : public GetRendererEntrypoint<InteractiveRenderer>
+{
+public:
+    GetRendererInteractiveEntrypoint(Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+};
+
+class GetRendererProductionEntrypoint final : public GetRendererEntrypoint<ProductionRenderer>
+{
+public:
+    GetRendererProductionEntrypoint(Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
 };
 } // namespace brayns

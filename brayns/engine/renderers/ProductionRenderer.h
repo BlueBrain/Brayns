@@ -29,14 +29,9 @@ class ProductionRenderer final : public Renderer
 public:
     std::string getName() const noexcept final;
 
-    Ptr clone() const noexcept final;
-
 protected:
     std::string_view getOSPHandleName() const noexcept final;
 
     void commitRendererSpecificParams() final;
 };
-
-template<>
-std::string EngineObjectName<ProductionRenderer>::get();
 }

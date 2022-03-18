@@ -33,7 +33,7 @@ Renderer &Renderer::operator=(const Renderer &o)
     _maxRayBounces = o._maxRayBounces;
     _backgroundColor = o._backgroundColor;
 
-    markModified(false);
+    markModified();
 
     return *this;
 }
@@ -75,6 +75,11 @@ void Renderer::setBackgroundColor(const Vector4f& background) noexcept
 
 void Renderer::commit()
 {
+    if(!isModified())
+    {
+        return;
+    }
+
     if(!_handle)
     {
         const auto handleName = getOSPHandleName();

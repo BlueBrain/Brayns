@@ -22,7 +22,7 @@
 #pragma once
 
 #include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
+#include <brayns/engine/ModelInstance.h>
 
 namespace brayns
 {

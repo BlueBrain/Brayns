@@ -145,11 +145,11 @@ class BinaryModelHandler
 {
 public:
     BinaryModelHandler(
-        brayns::Scene &scene,
+        brayns::SceneModelManager &modelManager,
         const brayns::LoaderRegistry &loaders,
         brayns::BinaryManager &binary,
         brayns::CancellationToken &token)
-        : _scene(scene)
+        : _modelManager(modelManager)
         , _loaders(loaders)
         , _binary(binary)
         , _token(token)
@@ -174,18 +174,18 @@ public:
         loadParameters.loaderName = params.loaderName;
         loadParameters.loadParameters = parameters;
 
-        std::vector<brayns::ModelInstance*> result;
+        std::vector<brayns::ModelInstanceProxy> result;
         result.reserve(descriptors.size());
         for(auto& model : descriptors)
         {
-            auto& instance = _scene.addModel(loadParameters, std::move(model));
-            result.push_back(&instance);
+            auto& instance = _modelManager.addModel(loadParameters, std::move(model));
+            result.emplace_back(instance);
         }
         request.reply(result);
     }
 
 private:
-    brayns::Scene &_scene;
+    brayns::SceneModelManager &_modelManager;
     const brayns::LoaderRegistry &_loaders;
     brayns::BinaryManager &_binary;
     brayns::CancellationToken &_token;
@@ -195,11 +195,11 @@ private:
 namespace brayns
 {
 RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
-    Scene &scene,
+    SceneModelManager &modelManager,
     const LoaderRegistry &loaders,
     BinaryManager &binary,
     CancellationToken token)
-    : _scene(scene)
+    : _modelManager(modelManager)
     , _loaders(loaders)
     , _binary(binary)
     , _token(token)
@@ -224,7 +224,7 @@ bool RequestModelUploadEntrypoint::isAsync() const
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
     _client = request.getClient();
-    BinaryModelHandler handler(_scene, _loaders, _binary, _token);
+    BinaryModelHandler handler(_modelManager, _loaders, _binary, _token);
     handler.handle(request);
 }
 

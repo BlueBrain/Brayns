@@ -33,14 +33,19 @@ uint64_t MaterialComponent::getSizeInBytes() const noexcept
     return _material->getSizeInBytes();
 }
 
-void MaterialComponent::setMaterial(Material::Ptr& newMaterial)
+bool MaterialComponent::commit()
 {
-    if(!newMaterial)
+    return _material->commit();
+}
+
+void MaterialComponent::setMaterial(std::unique_ptr<Material> material)
+{
+    if(!material)
     {
         throw std::invalid_argument("Cannot set a null material to a MaterialComponent");
     }
 
-    _material = std::move(newMaterial);
+    _material = std::move(material);
 }
 
 Material &MaterialComponent::getMaterial() noexcept

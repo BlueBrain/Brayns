@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,71 +18,48 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
+
+#include "ModelInstanceAdapter.h"
 
 namespace brayns
 {
-ReadModelProxy::ReadModelProxy(const ModelInstance &mi)
-    : _instance(&mi)
+ModelInstanceProxy::ModelInstanceProxy(ModelInstance &modelInstance)
+ : _modelInstance(&modelInstance)
 {
 }
 
-uint32_t ReadModelProxy::getId() const
+uint32_t ModelInstanceProxy::getID() const noexcept
 {
-    const auto &mi = getModel();
-    return mi.getID();
+    return _modelInstance->getID();
 }
 
-const Bounds &ReadModelProxy::getBounds() const
+const Bounds &ModelInstanceProxy::getBounds() const noexcept
 {
-    const auto &mi = getModel();
-    return mi.getBounds();
+    return _modelInstance->getBounds();
 }
 
-const Model::Metadata &ReadModelProxy::getMetadata() const
+const std::map<std::string, std::string> &ModelInstanceProxy::getModelMetadata() const noexcept
 {
-    const auto &mi = getModel();
-    return mi.getModelMetadata();
+    return _modelInstance->getModelMetadata();
 }
 
-const Transformation &ReadModelProxy::getTransform() const
+const Transformation &ModelInstanceProxy::getTransform() const noexcept
 {
-    const auto &mi = getModel();
-    return mi.getTransform();
+    return _modelInstance->getTransform();
 }
 
-bool ReadModelProxy::getIsVisible() const
+void ModelInstanceProxy::setTransform(const Transformation &transform) noexcept
 {
-    const auto &mi = getModel();
-    return mi.isVisible();
+    _modelInstance->setTransform(transform);
 }
 
-const ModelInstance &ReadModelProxy::getModel() const
+bool ModelInstanceProxy::isVisible() const noexcept
 {
-    if (!_instance)
-    {
-        throw std::runtime_error("ModelInstance not set in ReadModelProxy");
-    }
-    return *_instance;
+    return _modelInstance->isVisible();
 }
 
-UpdateModelProxy::UpdateModelProxy(Scene &scene)
-    : _scene(scene)
+void ModelInstanceProxy::setVisible(const bool val) noexcept
 {
-}
-
-void UpdateModelProxy::setId(uint32_t id)
-{
-    _modelInstance = &_scene.getModelInstance(id);
-}
-
-void UpdateModelProxy::setTransformation(const Transformation &transformation)
-{
-    _modelInstance->setTransform(transformation);
-}
-
-void UpdateModelProxy::setVisible(bool visible)
-{
-    _modelInstance->setVisible(visible);
+    _modelInstance->setVisible(val);
 }
 }

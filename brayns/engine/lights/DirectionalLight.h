@@ -37,11 +37,6 @@ public:
      */
     const Vector3f &getDirection() const noexcept;
 
-    /**
-     * @brief getName() implementation
-     */
-    std::string getName() const noexcept final;
-
 protected:
     std::string_view getOSPHandleName() const noexcept final;
 
@@ -52,7 +47,4 @@ protected:
 private:
     Vector3f _direction{0.f, 1.f, 0.f};
 };
-
-template<>
-std::string EngineObjectName<DirectionalLight>::get();
 }

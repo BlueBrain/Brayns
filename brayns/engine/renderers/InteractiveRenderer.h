@@ -49,8 +49,6 @@ public:
      */
     int32_t getAmbientOcclusionSamples() const noexcept;
 
-    Ptr clone() const noexcept final;
-
 protected:
     std::string_view getOSPHandleName() const noexcept final;
 
@@ -60,7 +58,4 @@ private:
     bool _shadowsEnabled{true};
     int32_t _aoSamples{10u};
 };
-
-template<>
-std::string EngineObjectName<InteractiveRenderer>::get();
 }

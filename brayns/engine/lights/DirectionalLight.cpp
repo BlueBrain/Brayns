@@ -35,11 +35,6 @@ const Vector3f &DirectionalLight::getDirection() const noexcept
     return _direction;
 }
 
-std::string DirectionalLight::getName() const noexcept
-{
-    return EngineObjectName<DirectionalLight>::get();
-}
-
 uint64_t DirectionalLight::getSizeInBytes() const noexcept
 {
     // We copy all the light data to OSPRay, so we must account for it
@@ -61,11 +56,5 @@ void DirectionalLight::commitLightSpecificParams()
 std::string_view DirectionalLight::getOSPHandleName() const noexcept
 {
     return "distant";
-}
-
-template<>
-std::string EngineObjectName<DirectionalLight>::get()
-{
-    return "directional";
 }
 }

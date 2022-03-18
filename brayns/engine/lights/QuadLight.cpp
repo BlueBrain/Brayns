@@ -52,11 +52,6 @@ const Vector3f &QuadLight::getHorizontalDisplacement() const noexcept
     return _horizontalDisplacement;
 }
 
-std::string QuadLight::getName() const noexcept
-{
-    return EngineObjectName<QuadLight>::get();
-}
-
 std::string_view QuadLight::getOSPHandleName() const noexcept
 {
     return "quad";
@@ -75,11 +70,5 @@ void QuadLight::commitLightSpecificParams()
     ospSetParam(ospHandle, "position", OSPDataType::OSP_VEC3F, &_bottomLeftCorner);
     ospSetParam(ospHandle, "edge1", OSPDataType::OSP_VEC3F, &_horizontalDisplacement);
     ospSetParam(ospHandle, "edge2", OSPDataType::OSP_VEC3F, &_verticalDisplacement);
-}
-
-template<>
-std::string EngineObjectName<QuadLight>::get()
-{
-    return "quad";
 }
 }

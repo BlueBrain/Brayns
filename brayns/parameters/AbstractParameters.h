@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
-
 #include <boost/program_options.hpp>
 #include <boost/program_options/value_semantic.hpp>
 
@@ -31,7 +29,7 @@ namespace brayns
 /**
    Base class defining command line parameters
  */
-class AbstractParameters : public BaseObject
+class AbstractParameters
 {
 public:
     /**

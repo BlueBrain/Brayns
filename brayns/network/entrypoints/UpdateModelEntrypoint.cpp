@@ -21,10 +21,12 @@
 
 #include "UpdateModelEntrypoint.h"
 
+#include <brayns/network/common/ExtractModel.h>
+
 namespace brayns
 {
-UpdateModelEntrypoint::UpdateModelEntrypoint(Scene &scene)
-    : _scene(scene)
+UpdateModelEntrypoint::UpdateModelEntrypoint(SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -40,8 +42,10 @@ std::string UpdateModelEntrypoint::getDescription() const
 
 void UpdateModelEntrypoint::onRequest(const Request &request)
 {
-    UpdateModelProxy model(_scene);
-    request.getParams(model);
+    const auto params = request.getParams();
+    auto &model = ExtractModel::fromId(_modelManager, params.model_id);
+    ModelInstanceProxy proxy (model);
+    params.model.deserialize(proxy);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

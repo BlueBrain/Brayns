@@ -70,7 +70,9 @@ void Engine::preRender()
 void Engine::commit()
 {
     if (!_keepRunning)
+    {
         return;
+    }
 
     // update statistics
     const auto avgFPS = _fpsCounter.getAverageFPS();
@@ -78,36 +80,61 @@ void Engine::commit()
 
     // Update changes on the viewport
     auto &appParams = _params.getApplicationParameters();
-    if (appParams.isModified())
-    {
-        const auto &frameSize = appParams.getWindowSize();
-        const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
+    const auto &frameSize = appParams.getWindowSize();
+    const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
 
-        _frameBuffer.setFrameSize(frameSize);
-        _camera->setAspectRatio(aspectRatio);
+    _frameBuffer.setFrameSize(frameSize);
+    _camera->setAspectRatio(aspectRatio);
+
+    bool fbChanged = _frameBuffer.isModified();
+    _frameBuffer.commit();
+    if(fbChanged)
+    {
+        Log::debug("[Engine] Framebuffer committed");
+    }
+
+    bool cameraChanged = _camera->isModified();
+    _camera->commit();
+    if(cameraChanged)
+    {
+        Log::debug("[Engine] Camera committed");
+    }
+
+    bool rendererChanged = _renderer->isModified();
+    _renderer->commit();
+    if(rendererChanged)
+    {
+        Log::debug("[Engine] Renderer committed");
+    }
+
+    bool sceneChanged = _scene.commit();
+    if(sceneChanged)
+    {
+        Log::debug("[Engine] Scene committed");
     }
 
     // Clear the framebuffer if something changed, so that we do not accumulate on top of old stuff,
     // which would produce an incorrect image
-    const bool somethingChanged =
-        _frameBuffer.isModified() || _scene.isModified() || _camera->isModified() || _renderer->isModified();
+    const bool somethingChanged = fbChanged || cameraChanged || rendererChanged || sceneChanged;
 
     if (somethingChanged)
+    {
         _frameBuffer.clear();
+    }
 
-    _frameBuffer.commit();
-    _camera->commit();
-    _renderer->commit();
-    _scene.commit();
-
-    const auto sceneSize = _scene._getSizeBytes();
-    _statistics.setSceneSizeInBytes(sceneSize);
+    if(sceneChanged)
+    {
+        const auto sceneSize = _scene._getSizeBytes();
+        _statistics.setSceneSizeInBytes(sceneSize);
+    }
 }
 
 void Engine::render()
 {
     if (!_keepRunning)
+    {
         return;
+    }
 
     // Check wether we should keep rendering or not
     const auto maxSpp = _renderer->getSamplesPerPixel();
@@ -135,13 +162,18 @@ void Engine::render()
     // Start measuring a new frame render time.
     _fpsCounter.startFrame();
 
-    FrameRenderer::synchronousRender(*_camera, _frameBuffer, *_renderer, _scene);
+    FrameRenderer::synchronous(*_camera, _frameBuffer, *_renderer, _scene);
 
     _frameBuffer.incrementAccumFrames();
 }
 
 void Engine::postRender()
 {
+    if(!_keepRunning)
+    {
+        return;
+    }
+
     _scene.postRender(_params);
 }
 
@@ -155,7 +187,7 @@ FrameBuffer &Engine::getFrameBuffer() noexcept
     return _frameBuffer;
 }
 
-void Engine::setCamera(Camera::Ptr camera) noexcept
+void Engine::setCamera(std::unique_ptr<Camera> camera) noexcept
 {
     _camera = std::move(camera);
 }
@@ -165,7 +197,7 @@ Camera &Engine::getCamera() noexcept
     return *_camera;
 }
 
-void Engine::setRenderer(Renderer::Ptr renderer) noexcept
+void Engine::setRenderer(std::unique_ptr<Renderer> renderer) noexcept
 {
     _renderer = std::move(renderer);
 }

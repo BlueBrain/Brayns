@@ -22,8 +22,6 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/engine/defaultcomponents/MaterialComponent.h>
-
 #include <brayns/io/loaders/protein/ProteinRendererComponent.h>
 
 #include <assert.h>
@@ -312,7 +310,7 @@ static AtomicRadius atomic_radii[colorMapSize] = // atomic radii in microns
      {"OXT", 25.f, 112},
      {"P", 25.f, 113}};
 
-std::vector<Model::Ptr> ProteinLoader::importFromFile(
+std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
     const std::string &fileName, const LoaderProgress &cb, const ProteinLoaderParameters &properties) const
 {
     (void) cb;
@@ -453,10 +451,9 @@ std::vector<Model::Ptr> ProteinLoader::importFromFile(
     }
 
     auto model = std::make_unique<Model>();
-    model->addComponent<MaterialComponent>();
     model->addComponent<ProteinRendererComponent>(spheres, std::move(modelColors), std::move(colorMapIndices));
 
-    std::vector<Model::Ptr> result;
+    std::vector<std::unique_ptr<Model>> result;
     result.push_back(std::move(model));
     return result;
 }
@@ -471,7 +468,7 @@ std::vector<std::string> ProteinLoader::getSupportedExtensions() const
     return {"pdb", "pdb1"};
 }
 
-std::vector<Model::Ptr> ProteinLoader::importFromBlob(
+std::vector<std::unique_ptr<Model>> ProteinLoader::importFromBlob(
     Blob &&blob, const LoaderProgress &callback, const ProteinLoaderParameters &properties) const
 {
     (void)blob;

@@ -30,12 +30,7 @@ void OrthographicCamera::commitCameraSpecificParams()
 
 std::string OrthographicCamera::getName() const noexcept
 {
-    return EngineObjectName<OrthographicCamera>::get();
-}
-
-Camera::Ptr OrthographicCamera::clone() const noexcept
-{
-    return std::make_unique<OrthographicCamera>(*this);
+    return "orthographic";
 }
 
 void OrthographicCamera::setHeight(const float height) noexcept
@@ -49,12 +44,6 @@ float OrthographicCamera::getHeight() const noexcept
 }
 
 std::string_view OrthographicCamera::getOSPHandleName() const noexcept
-{
-    return "orthographic";
-}
-
-template<>
-std::string EngineObjectName<OrthographicCamera>::get()
 {
     return "orthographic";
 }

@@ -75,7 +75,7 @@ public:
 class MeshLoadingHelper
 {
 public:
-    static brayns::Model::Ptr load(const brayns::TriangleMesh &mesh)
+    static std::unique_ptr<brayns::Model> load(const brayns::TriangleMesh &mesh)
     {
         auto model = std::make_unique<brayns::Model>();
 
@@ -89,7 +89,7 @@ public:
 class MeshMetadataBuilder
 {
 public:
-    static brayns::Model::Metadata build(const brayns::TriangleMesh &mesh)
+    static std::map<std::string, std::string> build(const brayns::TriangleMesh &mesh)
     {
         auto vertexCount = mesh.vertices.size();
         auto triangleCount = mesh.indices.size();
@@ -100,14 +100,14 @@ public:
 class MeshImporter
 {
 public:
-    static std::vector<brayns::Model::Ptr> import(const brayns::TriangleMesh &mesh)
+    static std::vector<std::unique_ptr<brayns::Model>> import(const brayns::TriangleMesh &mesh)
     {
         auto model = MeshLoadingHelper::load(mesh);
 
         auto metadata = MeshMetadataBuilder::build(mesh);
         model->setMetaData(metadata);
 
-        std::vector<brayns::Model::Ptr> result;
+        std::vector<std::unique_ptr<brayns::Model>> result;
         result.push_back(std::move(model));
         return result;
     }
@@ -174,14 +174,14 @@ std::string MeshLoader::getName() const
     return "mesh";
 }
 
-std::vector<Model::Ptr> MeshLoader::importFromFile(const std::string &fileName, const LoaderProgress &callback) const
+std::vector<std::unique_ptr<Model>> MeshLoader::importFromFile(const std::string &fileName, const LoaderProgress &callback) const
 {
     (void)callback;
     auto mesh = MeshParsingHelper::parse(_parsers, fileName);
     return MeshImporter::import(mesh);
 }
 
-std::vector<Model::Ptr> MeshLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback)
+std::vector<std::unique_ptr<Model>> MeshLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback)
     const
 {
     (void)callback;

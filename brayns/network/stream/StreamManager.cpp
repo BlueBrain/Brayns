@@ -36,10 +36,6 @@ public:
         {
             return false;
         }
-        if (framebuffer.getFrameBufferFormat() == brayns::PixelFormat::NONE)
-        {
-            return false;
-        }
         return framebuffer.isModified();
     }
 };

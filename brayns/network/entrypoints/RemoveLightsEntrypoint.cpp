@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-RemoveLightsEntrypoint::RemoveLightsEntrypoint(Scene &scene)
-    : _scene(scene)
+RemoveLightsEntrypoint::RemoveLightsEntrypoint(SceneLightManager &lightManager)
+    : _lightManager(lightManager)
 {
 }
 
@@ -44,7 +44,7 @@ void RemoveLightsEntrypoint::onRequest(const Request &request)
     auto &ids = params.ids;
     for (auto id : ids)
     {
-        _scene.removeLight(id);
+        _lightManager.removeLight(id);
     }
     request.reply(EmptyMessage());
 }

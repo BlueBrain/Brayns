@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/EngineObject.h>
+#include <brayns/common/BaseObject.h>
 
 #include <ospray/ospray.h>
 
@@ -35,11 +35,9 @@ namespace brayns
  * managed by the GeometricModels implementation, because this allows for a more optimal representation
  * of the geometry color for Brayns needs.
  */
-class Material : public EngineObject
+class Material : public BaseObject
 {
 public:
-    using Ptr = std::unique_ptr<Material>;
-
     Material() = default;
 
     Material(const Material &);
@@ -65,12 +63,13 @@ public:
      */
     virtual std::string getName() const noexcept = 0;
 
-protected:
     /**
      * @brief synchronizes the material data with the OSPRay backend
+     * @returns true if there was anything to commit
      */
-    void commit() final;
+    bool commit();
 
+protected:
     /**
      * @brief Subclasses must implement this method to return the OSPRay material ID to instantiate the appropiate
      * object

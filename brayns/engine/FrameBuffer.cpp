@@ -72,7 +72,9 @@ FrameBuffer FrameBuffer::clone() const noexcept
 void FrameBuffer::map()
 {
     if(_handle)
+    {
         throw std::runtime_error("Framebuffer is not initialized. Cannot be mapped at this time");
+    }
 
     _colorBuffer = (uint8_t *)ospMapFrameBuffer(_handle, OSP_FB_COLOR);
 }

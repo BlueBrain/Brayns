@@ -25,8 +25,6 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/network/adapters/GenericEngineObjectAdapter.h>
-
 namespace brayns
 {
 
@@ -48,15 +46,5 @@ BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(ProductionRenderer)
 BRAYNS_RENDERER_PARAMETERS
-BRAYNS_JSON_ADAPTER_END()
-
-class GenericRenderer : public GenericEngineObjectAdapter<Renderer>
-{
-};
-
-BRAYNS_JSON_ADAPTER_BEGIN(GenericRenderer)
-BRAYNS_JSON_ADAPTER_GETSET("type", getType, setType, "Renderer type name");
-BRAYNS_JSON_ADAPTER_GETSET("parameters", getParams, setParams, "Parameters for the specified renderer type",
-                           Required(false))
 BRAYNS_JSON_ADAPTER_END()
 }

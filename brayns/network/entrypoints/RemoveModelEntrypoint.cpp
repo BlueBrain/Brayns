@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-RemoveModelEntrypoint::RemoveModelEntrypoint(Scene &scene)
-    : _scene(scene)
+RemoveModelEntrypoint::RemoveModelEntrypoint(SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -43,7 +43,7 @@ void RemoveModelEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     for (auto id : params.ids)
     {
-        _scene.removeModel(id);
+        _modelManager.removeModel(id);
     }
     request.reply(EmptyMessage());
 }

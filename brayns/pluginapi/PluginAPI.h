@@ -47,32 +47,11 @@ public:
     virtual Engine &getEngine() = 0;
 
     /**
-     * @brief Get the scene.
-     *
-     * @return Scene& Scene.
-     */
-    virtual Scene &getScene() = 0;
-
-    /**
      * @brief Get the parameters.
      *
      * @return ParametersManager& Parameters.
      */
     virtual ParametersManager &getParametersManager() = 0;
-
-    /**
-     * @brief Get the camera.
-     *
-     * @return Camera& Camera.
-     */
-    virtual Camera &getCamera() = 0;
-
-    /**
-     * @brief Get the renderer.
-     *
-     * @return Renderer& Renderer.
-     */
-    virtual Renderer &getRenderer() = 0;
 
     /**
      * @brief Get the available loaders.

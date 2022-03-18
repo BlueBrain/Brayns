@@ -31,7 +31,7 @@ Material::Material(const Material& o)
 Material &Material::operator=(const Material &o)
 {
     (void)o;
-    markModified(false);
+    markModified();
     return *this;
 }
 
@@ -41,8 +41,13 @@ Material::~Material()
         ospRelease(_handle);
 }
 
-void Material::commit()
+bool Material::commit()
 {
+    if(!isModified())
+    {
+        return false;
+    }
+
     if(!_handle)
     {
         const auto handleName = getOSPHandleName();
@@ -52,6 +57,8 @@ void Material::commit()
     commitMaterialSpecificParams();
 
     ospCommit(_handle);
+
+    return true;
 }
 
 OSPMaterial Material::handle() const noexcept

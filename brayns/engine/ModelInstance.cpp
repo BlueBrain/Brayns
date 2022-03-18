@@ -44,8 +44,8 @@ auto glmMatrixToAffine(const brayns::Matrix4f &transform) noexcept
 
 namespace brayns
 {
-ModelInstance::ModelInstance(const size_t modelID, Model &model)
-    : _modelID(modelID)
+ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model& model)
+    : _modelInstanceID(modelInstanceID)
     , _model(model)
 {
     _instanceHandle = ospNewInstance(model.groupHandle());
@@ -59,7 +59,7 @@ ModelInstance::~ModelInstance()
 
 uint32_t ModelInstance::getID() const noexcept
 {
-    return _modelID;
+    return _modelInstanceID;
 }
 
 const Bounds &ModelInstance::getBounds() const noexcept

@@ -27,11 +27,7 @@
 namespace brayns
 {
 /**
-   Class managing all parameters registered by the application. By default
-   this class create an instance of Application, Rendering, and Geometry
-   parameters are registered. Other parameters can also be added using the
-   registerParameters method for as long as they are inherited from
-   AbstractParameters.
+ * @brief Class managing all parameters registered by the application. Additional parameter objects may be registered.
  */
 class ParametersManager
 {
@@ -39,50 +35,41 @@ public:
     ParametersManager(int argc, const char **argv);
 
     /**
-       Registers specific parameters to the manager
-       @param parameters to be registered
+     * @brief Registers specific parameters to the manager
+     * @param parameters to be registered
      */
     void registerParameters(AbstractParameters *parameters);
 
     /**
-       Displays usage of registered parameters
+     * @brief Displays usage of registered parameters
      */
     void usage();
 
     /**
-       Displays values registered parameters
+     * @brief Displays values registered parameters
      */
     void print();
 
     /**
-       Gets animation parameters
-       @return Animation parameters for the current scene
-    */
+     * @brief Gets animation parameters
+     * @return Animation parameters for the current scene
+     */
     AnimationParameters &getAnimationParameters();
     const AnimationParameters &getAnimationParameters() const;
 
     /**
-       Gets application parameters
-       @return Application parameters for the current scene
-    */
+     * @brief Gets application parameters
+     * @return Application parameters for the current scene
+     */
     ApplicationParameters &getApplicationParameters();
     const ApplicationParameters &getApplicationParameters() const;
 
     /**
-       Gets volume parameters
-       @return Parameters for the current volume
-    */
+     * @brief Gets volume parameters
+     * @return Parameters for the current volume
+     */
     NetworkParameters &getNetworkParameters();
     const NetworkParameters &getNetworkParameters() const;
-
-    /** Call resetModified on all parameters. */
-    void resetModified();
-
-    /**
-     * @return true if any of the parameters has been modified since the last
-     * resetModified().
-     */
-    bool isAnyModified() const;
 
 private:
     void _parse(int argc, const char **argv);

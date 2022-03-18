@@ -29,8 +29,6 @@ class PerspectiveCamera final : public Camera
 public:
     std::string getName() const noexcept override;
 
-    Ptr clone() const noexcept final;
-
     /**
      * @brief Sets the perspective viertical field of view (in degrees)
      */
@@ -72,7 +70,4 @@ private:
     float _apertureRadius{0.f};
     float _focusDistance{1.f};
 };
-
-template<>
-std::string EngineObjectName<PerspectiveCamera>::get();
 }

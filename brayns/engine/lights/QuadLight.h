@@ -61,11 +61,6 @@ public:
      */
     const Vector3f &getHorizontalDisplacement() const noexcept;
 
-    /**
-     * @brief getName() implementation
-     */
-    std::string getName() const noexcept final;
-
 protected:
     std::string_view getOSPHandleName() const noexcept final;
 
@@ -79,7 +74,4 @@ private:
     Vector3f _verticalDisplacement{0.f, 1.f, 0.f};
     Vector3f _horizontalDisplacement{1.f, 0.f, 1.f};
 };
-
-template<>
-std::string EngineObjectName<QuadLight>::get();
 }

@@ -80,38 +80,31 @@ public:
 
     static void handle(const Request &request,
                        brayns::Engine &engine,
-                       brayns::CancellationToken &token,
-                       brayns::CameraFactory &cameraFactory,
-                       brayns::RendererFactory &rendererFactory)
+                       brayns::CancellationToken &token)
     {
         auto progress = brayns::ProgressHandler(token, request);
 
         // Initialize parameters
         auto params = request.getParams();
-        auto &cameraSettings = params.camera;
         auto &cameraView = params.camera_view;
-        auto &rendererSettings = params.renderer;
         auto &imageSettings = params.image_settings;
         auto &imagePath = params.file_path;
         auto &animationSettings = params.animation;
 
         // Renderer
-        const auto &systemRenderer = engine.getRenderer();
-        auto renderer = rendererSettings? rendererSettings->deserialize(rendererFactory) : systemRenderer.clone();
-        renderer->commit();
+        auto &renderer = engine.getRenderer();
+        renderer.commit();
 
         // Camera
-        const auto &systemCamera = engine.getCamera();
-        auto camera = cameraSettings? cameraSettings->deserialize(cameraFactory) : systemCamera.clone();
+        auto &camera = engine.getCamera();
         const auto aspectRatio = static_cast<float>(imageSettings.size.x) / static_cast<float>(imageSettings.size.y);
-        camera->setAspectRatio(aspectRatio);
+        camera.setAspectRatio(aspectRatio);
+        auto currentLookAt = camera.getLookAt(); // To restore it afterwards
         if(cameraView)
         {
-            camera->setPosition(cameraView->eye);
-            camera->setTarget(cameraView->target);
-            camera->setUp(cameraView->up);
+            camera.setLookAt(*cameraView);
         }
-        camera->commit();
+        camera.commit();
 
         // Framebuffer
         brayns::FrameBuffer frameBuffer;
@@ -137,7 +130,7 @@ public:
         scene.commit();
 
         // Render
-        auto future = brayns::FrameRenderer::asynchronousRender(*camera, frameBuffer, *renderer, scene);
+        auto future = brayns::FrameRenderer::asynchronous(camera, frameBuffer, renderer, scene);
 
         auto progressThread = std::thread([&]()
         {
@@ -165,6 +158,9 @@ public:
             image.data = encodeSnapshotToBase64(imageSettings, frameBuffer);
         }
 
+        // Restore camera view
+        camera.setLookAt(currentLookAt);
+
         request.reply(image);
     }
 };
@@ -172,11 +168,9 @@ public:
 
 namespace brayns
 {
-SnapshotEntrypoint::SnapshotEntrypoint(Engine &engine, CancellationToken token, CameraFactory::Ptr cameraFactory, RendererFactory::Ptr rendererFactory)
+SnapshotEntrypoint::SnapshotEntrypoint(Engine &engine, CancellationToken token)
     : _engine(engine)
     , _token(token)
-    , _cameraFactory(cameraFactory)
-    , _rendererFactory(rendererFactory)
 {
 }
 
@@ -197,7 +191,7 @@ bool SnapshotEntrypoint::isAsync() const
 
 void SnapshotEntrypoint::onRequest(const Request &request)
 {
-    SnapshotHandler::handle(request, _engine, _token, *_cameraFactory, *_rendererFactory);
+    SnapshotHandler::handle(request, _engine, _token);
 }
 
 void SnapshotEntrypoint::onCancel()

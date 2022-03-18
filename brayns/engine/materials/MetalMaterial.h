@@ -58,10 +58,7 @@ protected:
     void commitMaterialSpecificParams() final;
 
 private:
-    Vector3f _color{1.f}; // default white
-    float _roughness{0.1f}; // default opaque
+    Vector3f _color{1.f};
+    float _roughness{0.1f};
 };
-
-template<>
-std::string EngineObjectName<MetalMaterial>::get();
 }

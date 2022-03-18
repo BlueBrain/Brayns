@@ -23,7 +23,7 @@
 
 #include <optional>
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/scenecomponents/SceneModelManager.h>
 
 #include <brayns/io/LoaderRegistry.h>
 
@@ -35,11 +35,11 @@
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryLoadParameters, std::vector<ModelInstance*>>
+class RequestModelUploadEntrypoint : public Entrypoint<BinaryLoadParameters, std::vector<ModelInstanceProxy>>
 {
 public:
     RequestModelUploadEntrypoint(
-        Scene &scene,
+        SceneModelManager &modelManager,
         const LoaderRegistry &loaders,
         BinaryManager &binary,
         CancellationToken token);
@@ -53,7 +53,7 @@ public:
     virtual void onDisconnect(const ClientRef &client) override;
 
 private:
-    Scene &_scene;
+    SceneModelManager &_modelManager;
     const LoaderRegistry &_loaders;
     BinaryManager &_binary;
     CancellationToken _token;

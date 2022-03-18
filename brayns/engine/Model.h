@@ -24,6 +24,7 @@
 #include <brayns/common/Bounds.h>
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/ModelGroup.h>
+#include <brayns/json/JsonType.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <ospray/ospray.h>
@@ -42,6 +43,7 @@ class Model
 {
 public:
     Model() = default;
+
     ~Model();
 
     Model(const Model &) = delete;
@@ -102,6 +104,12 @@ public:
      */
     ModelGroup &getGroup() noexcept;
 
+    /**
+     * @brief returns the model ID
+     * @return uint32_t
+     */
+    uint32_t getID() const noexcept;
+
 private:
     /**
      * @brief Compute the model bounds, taking into account the given trasnformation
@@ -141,8 +149,7 @@ private:
     friend class ModelInstance;
 
 private:
-    // The model index refers to the position of this model in the Model list of the scene.
-    uint32_t _modelIndex{};
+    uint32_t _modelId {};
     std::map<std::string, std::string> _metadata;
     ModelComponentContainer _components;
     ModelGroup _group;

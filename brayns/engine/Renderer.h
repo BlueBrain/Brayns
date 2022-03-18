@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/EngineObject.h>
 
 #include <ospray/ospray.h>
 
@@ -29,14 +29,13 @@
 
 namespace brayns
 {
+
 /**
  * @brief The Renderer class is the base class for all renderer to be available on Brayns
  */
-class Renderer : public EngineObject
+class Renderer : public BaseObject
 {
 public:
-    using Ptr = std::unique_ptr<Renderer>;
-
     Renderer() = default;
 
     Renderer(const Renderer &);
@@ -87,12 +86,7 @@ public:
     /**
      * @brief commit() implementation
      */
-    void commit() final;
-
-    /**
-     * @brief Subclasses must implement this to create a copy of themselves
-     */
-    virtual Ptr clone() const noexcept = 0;
+    void commit();
 
     /**
      * @brief Returns the renderer type as a string

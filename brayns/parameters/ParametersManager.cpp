@@ -192,22 +192,6 @@ void ParametersManager::print()
         parameters->print();
 }
 
-void ParametersManager::resetModified()
-{
-    for (AbstractParameters *parameters : _parameterSets)
-        parameters->resetModified();
-}
-
-bool ParametersManager::isAnyModified() const
-{
-    for (AbstractParameters *parameters : _parameterSets)
-    {
-        if (parameters->isModified())
-            return true;
-    }
-    return false;
-}
-
 AnimationParameters &ParametersManager::getAnimationParameters()
 {
     return _animationParameters;

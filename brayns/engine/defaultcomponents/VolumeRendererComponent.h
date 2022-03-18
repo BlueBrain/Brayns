@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/Volume.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/RenderableType.h>
 #include <brayns/engine/defaultcomponents/TransferFunctionRendererComponent.h>
 
 #include <ospray/ospray.h>
@@ -79,7 +79,7 @@ public:
         }
     }
 
-    virtual void onCommit() override
+    virtual bool commit() override
     {
         Model& model = getModel();
 
@@ -117,9 +117,8 @@ private:
 
     bool _commitVolume()
     {
-        if(_volume.isModified())
+        if(_volume.commit())
         {
-            _volume.doCommit();
             auto volumeHandle = _volume.handle();
             ospSetParam(_model, "volume", OSPDataType::OSP_VOLUME, &volumeHandle);
             return true;
@@ -133,9 +132,8 @@ private:
         Model& model = getModel();
         auto &tfComponent = model.getComponent<TransferFunctionRendererComponent>();
 
-        if(tfComponent.needsCommit())
+        if(tfComponent.manualCommit())
         {
-            tfComponent.manualCommit();
             auto tfHandle = tfComponent.handle();
             ospSetParam(_model, "transferFunction", OSPDataType::OSP_TRANSFER_FUNCTION, &tfHandle);
             return true;

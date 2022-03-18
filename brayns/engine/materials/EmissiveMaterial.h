@@ -61,7 +61,4 @@ private:
     Vector3f _color{1.f};
     float _intensity{1.f};
 };
-
-template<>
-std::string EngineObjectName<EmissiveMaterial>::get();
 }

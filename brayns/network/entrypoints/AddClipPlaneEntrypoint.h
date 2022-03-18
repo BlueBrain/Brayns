@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/scenecomponents/SceneClipManager.h>
 #include <brayns/network/adapters/GeometryAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -30,13 +30,13 @@ namespace brayns
 class AddClipPlaneEntrypoint : public Entrypoint<Plane, uint32_t>
 {
 public:
-    AddClipPlaneEntrypoint(Scene &scene);
+    AddClipPlaneEntrypoint(SceneClipManager &scm);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Scene &_scene;
+    SceneClipManager &_scm;
 };
 } // namespace brayns

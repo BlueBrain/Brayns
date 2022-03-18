@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/Geometry.h>
+#include <brayns/engine/RenderableType.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/defaultcomponents/MaterialComponent.h>
@@ -38,18 +38,18 @@ class GeometryRendererComponent : public Component
 public:
     GeometryRendererComponent()
     {
-        _initializeHandle();
+        _model = ospNewGeometricModel();
     }
 
     GeometryRendererComponent(const T& geometry)
     {
-        _initializeHandle();
+        _model = ospNewGeometricModel();
         _geometry.add(geometry);
     }
 
     GeometryRendererComponent(const std::vector<T>& geometries)
     {
-        _initializeHandle();
+        _model = ospNewGeometricModel();
         _geometry.add(geometries);
     }
 
@@ -76,22 +76,24 @@ public:
 
     virtual void onStart() override
     {
+        _setMaterial();
+
         auto& model = getModel();
         auto& group = model.getGroup();
         group.addGeometricModel(_model);
     }
 
-    virtual void onCommit() override
+    virtual bool commit() override
     {
-        bool needsCommit = false;
-
-        needsCommit = needsCommit || _commitGeometry();
-        needsCommit = needsCommit || _commitMaterial();
-
-        if(needsCommit)
+        if(_geometry.commit())
         {
+            auto geometryHandle = _geometry.handle();
+            ospSetParam(_model, "geometry", OSPDataType::OSP_GEOMETRY, &geometryHandle);
             ospCommit(_model);
+            return true;
         }
+
+        return false;
     }
 
     virtual void onDestroyed() override
@@ -104,57 +106,38 @@ public:
     }
 
 protected:
+    /**
+     * @brief Gives subclasses access to the geometric model
+     * @return OSPGeometricModel
+     */
     OSPGeometricModel handle() const noexcept
     {
         return _model;
     }
 
 private:
-    void _initializeHandle()
-    {
-        _model = ospNewGeometricModel();
-    }
-
-    bool _commitGeometry()
-    {
-        if(_geometry.isModified())
-        {
-            _geometry.doCommit();
-            auto geometryHandle = _geometry.handle();
-            ospSetParam(_model, "geometry", OSPDataType::OSP_GEOMETRY, &geometryHandle);
-            return true;
-        }
-
-        return false;
-    }
-
-    bool _commitMaterial()
+    /**
+     * @brief Sets the material object in the geometric model
+     */
+    void _setMaterial()
     {
         Model& model = getModel();
         MaterialComponent* materialComponent = nullptr;
         try
         {
-            materialComponent = &model.getComponent<MaterialComponent>();
+            auto &componentRef = model.getComponent<MaterialComponent>();
+            materialComponent = &componentRef;
         }
         catch(...)
         {
-        }
-
-        if(!materialComponent)
-        {
-            return false;
+            auto &newComponent = model.addComponent<MaterialComponent>();
+            materialComponent = &newComponent;
         }
 
         auto &material = materialComponent->getMaterial();
-        if(material.isModified())
-        {
-            material.doCommit();
-            auto materialHandle = material.handle();
-            ospSetParam(_model, "material", OSPDataType::OSP_MATERIAL, &materialHandle);
-            return true;
-        }
-
-        return false;
+        material.commit();
+        auto materialHandle = material.handle();
+        ospSetParam(_model, "material", OSPDataType::OSP_MATERIAL, &materialHandle);
     }
 
 private:

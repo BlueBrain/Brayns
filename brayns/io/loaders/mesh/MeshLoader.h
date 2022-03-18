@@ -132,7 +132,7 @@ public:
      * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
      * @throw std::runtime_error An error occurs.
      */
-    std::vector<Model::Ptr>
+    std::vector<std::unique_ptr<Model>>
         importFromFile(const std::string &fileName, const LoaderProgress &callback) const final;
 
     /**
@@ -143,7 +143,7 @@ public:
      * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
      * @throw std::runtime_error An error occurs.
      */
-    std::vector<Model::Ptr> importFromBlob(Blob &&blob, const LoaderProgress &callback)
+    std::vector<std::unique_ptr<Model>> importFromBlob(Blob &&blob, const LoaderProgress &callback)
         const final;
 
 private:

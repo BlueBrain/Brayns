@@ -26,8 +26,8 @@
 
 namespace brayns
 {
-ModelTransferFunction::ModelTransferFunction(Scene &scene)
-    : _scene(&scene)
+ModelTransferFunction::ModelTransferFunction(SceneModelManager &smm)
+    : _smm(&smm)
 {
 }
 
@@ -38,7 +38,7 @@ void ModelTransferFunction::setId(const uint32_t id)
 
 void ModelTransferFunction::setTransferFunction(const JsonBuffer<TransferFunction> &buffer)
 {
-    auto &modelInstance = _scene->getModelInstance(_modelId);
+    auto &modelInstance = _smm->getModelInstance(_modelId);
     auto &model = modelInstance.getModel();
 
     try

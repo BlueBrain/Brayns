@@ -61,7 +61,4 @@ private:
     Vector3f _color{1.f};
     float _ior{1.5f};
 };
-
-template<>
-std::string EngineObjectName<GlassMaterial>::get();
 }

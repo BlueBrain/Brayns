@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/Geometry.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/RenderableType.h>
 
 #include <ospray/ospray.h>
 
@@ -64,16 +64,15 @@ public:
         group.addClippingModel(_model);
     }
 
-    virtual void onCommit() override
+    virtual bool commit() override
     {
-        bool needsCommit = false;
-
-        needsCommit = needsCommit || _commitGeometry();
-
-        if(needsCommit)
+        if(_commitGeometry())
         {
             ospCommit(_model);
+            return true;
         }
+
+        return false;
     }
 
     virtual void onDestroyed() override
@@ -99,9 +98,8 @@ private:
 
     bool _commitGeometry()
     {
-        if(_geometry.isModified())
+        if(_geometry.commit())
         {
-            _geometry.doCommit();
             auto geometryHandle = _geometry.handle();
             ospSetParam(_model, "geometry", OSPDataType::OSP_GEOMETRY, &geometryHandle);
             return true;
