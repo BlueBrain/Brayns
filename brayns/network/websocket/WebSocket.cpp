@@ -71,7 +71,8 @@ public:
     {
         auto data = packet.getData();
         auto size = data.size();
-        if (size > std::numeric_limits<int>::max())
+        constexpr auto limit = static_cast<size_t>(std::numeric_limits<int>::max());
+        if (size > limit)
         {
             throw std::invalid_argument("Output packet size too big: " + std::to_string(size));
         }
