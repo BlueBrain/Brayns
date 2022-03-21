@@ -93,6 +93,8 @@ bool Light::commit()
 
     ospCommit(_handle);
 
+    resetModified();
+
     return true;
 }
 

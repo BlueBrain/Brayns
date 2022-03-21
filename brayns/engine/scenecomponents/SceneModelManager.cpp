@@ -148,6 +148,11 @@ bool SceneModelManager::commit()
         bool instancesChanged = false;
         for (auto &instance : instances)
         {
+            if(!instance->isVisible())
+            {
+                continue;
+            }
+
             instancesChanged = instancesChanged || instance->commit(modelChanged);
         }
 
@@ -197,6 +202,10 @@ std::vector<OSPInstance> SceneModelManager::getInstanceHandles() noexcept
     handles.reserve(_instances.size());
     for (auto instance : _instances)
     {
+        if(!instance->isVisible())
+        {
+            continue;
+        }
         auto handle = instance->handle();
         handles.push_back(handle);
     }

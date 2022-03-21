@@ -24,7 +24,7 @@
 #include <brayns/engine/scenecomponents/SceneModelManager.h>
 
 #include <brayns/network/adapters/MaterialAdapter.h>
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
+#include <brayns/network/messages/GetModelMessage.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 

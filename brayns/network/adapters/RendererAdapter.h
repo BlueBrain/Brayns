@@ -20,10 +20,10 @@
 
 #pragma once
 
+#include <brayns/json/JsonAdapterMacro.h>
+
 #include <brayns/engine/renderers/InteractiveRenderer.h>
 #include <brayns/engine/renderers/ProductionRenderer.h>
-
-#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {

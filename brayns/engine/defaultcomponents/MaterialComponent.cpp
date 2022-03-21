@@ -35,7 +35,8 @@ uint64_t MaterialComponent::getSizeInBytes() const noexcept
 
 bool MaterialComponent::commit()
 {
-    return _material->commit();
+    return false;
+    //return _material->commit();
 }
 
 void MaterialComponent::setMaterial(std::unique_ptr<Material> material)

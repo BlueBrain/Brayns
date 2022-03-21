@@ -21,12 +21,13 @@
 #pragma once
 
 #include <brayns/common/Bounds.h>
+
 #include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(Bounds)
-BRAYNS_JSON_ADAPTER_GET("min", min, "Bounds minimum (bottom back left corner)")
-BRAYNS_JSON_ADAPTER_GET("max", max, "Bounds maximum (top front right corner)")
+BRAYNS_JSON_ADAPTER_GET("min", getMin, "Bounds minimum (bottom back left corner)")
+BRAYNS_JSON_ADAPTER_GET("max", getMax, "Bounds maximum (top front right corner)")
 BRAYNS_JSON_ADAPTER_END()
 }

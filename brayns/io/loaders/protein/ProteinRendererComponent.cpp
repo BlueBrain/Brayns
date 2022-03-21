@@ -53,4 +53,9 @@ void ProteinRendererComponent::onStart()
     ospSetParam(ospHandle, "index", OSPDataType::OSP_DATA, &colorIndexData);
     ospRelease(colorIndexData);
 }
+
+void ProteinRendererComponent::commitColor()
+{
+    // NOOP, colors are fixed from loader
+}
 }

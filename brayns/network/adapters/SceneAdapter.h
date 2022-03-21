@@ -21,22 +21,23 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-
 #include <brayns/engine/Scene.h>
+
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include "BoundsAdapter.h"
 #include "ModelInstanceAdapter.h"
 
 namespace brayns
 {
+
 class ReadSceneProxy
 {
 public:
     ReadSceneProxy() = default;
     ReadSceneProxy(const Scene &scene);
 
-    const Bounds &getBounds() const noexcept;
+    Bounds getBounds() const noexcept;
     std::vector<ModelInstanceProxy> getModels() const noexcept;
 
 private:

@@ -33,19 +33,9 @@ uint64_t GlassMaterial::getSizeInBytes() const noexcept
     return sizeof(GlassMaterial) * 2 - sizeof(OSPMaterial);
 }
 
-void GlassMaterial::setColor(const Vector3f &color) noexcept
-{
-    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
-}
-
 void GlassMaterial::setIndexOfRefraction(const float ior) noexcept
 {
     _updateValue(_ior, ior);
-}
-
-const Vector3f &GlassMaterial::getColor() const noexcept
-{
-    return _color;
 }
 
 float GlassMaterial::getIndexOfRefraction() const noexcept
@@ -57,8 +47,11 @@ void GlassMaterial::commitMaterialSpecificParams()
 {
     auto ospHandle = handle();
 
-    ospSetParam(ospHandle, "attenuationColor", OSPDataType::OSP_VEC3F, &_color);
+    const float ad = 0.0f;
+
+    ospSetParam(ospHandle, "attenuationColor", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
     ospSetParam(ospHandle, "eta", OSPDataType::OSP_FLOAT, &_ior);
+    ospSetParam(ospHandle, "attenuationDistance", OSPDataType::OSP_FLOAT, &ad);
 }
 
 std::string_view GlassMaterial::getOSPHandleName() const noexcept

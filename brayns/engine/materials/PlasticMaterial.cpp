@@ -33,19 +33,9 @@ uint64_t PlasticMaterial::getSizeInBytes() const noexcept
     return sizeof(PlasticMaterial) * 2 - sizeof(OSPMaterial);
 }
 
-void PlasticMaterial::setColor(const Vector3f &color) noexcept
-{
-    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
-}
-
 void PlasticMaterial::setOpacity(const float opacity) noexcept
 {
     _updateValue(_opacity, glm::clamp(opacity, 0.f, 1.f));
-}
-
-const Vector3f &PlasticMaterial::getColor() const noexcept
-{
-    return _color;
 }
 
 float PlasticMaterial::getOpacity() const noexcept
@@ -57,12 +47,12 @@ void PlasticMaterial::commitMaterialSpecificParams()
 {
     static constexpr float clearCoat = 1.f;
     static constexpr float clearCoatThickness = 3.f;
-    static constexpr float roughness = 0.3f;
+    static constexpr float roughness = 0.1f;
     static constexpr float sheen = 1.f;
 
     auto ospHandle = handle();
 
-    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &_color);
+    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
     ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &roughness);
     ospSetParam(ospHandle, "coat", OSPDataType::OSP_FLOAT, &clearCoat);
     ospSetParam(ospHandle, "coatThickness", OSPDataType::OSP_FLOAT, &clearCoatThickness);

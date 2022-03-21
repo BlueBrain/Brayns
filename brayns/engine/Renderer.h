@@ -85,8 +85,9 @@ public:
 
     /**
      * @brief commit() implementation
+     * @returns true if there was anything to commit
      */
-    void commit();
+    bool commit();
 
     /**
      * @brief Returns the renderer type as a string

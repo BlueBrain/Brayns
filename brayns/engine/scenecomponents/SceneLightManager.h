@@ -78,7 +78,7 @@ private:
     size_t getSizeInBytes() const noexcept;
 
 private:
-    bool _dirty;
+    bool _dirty {false};
     IDFactory<uint32_t> _idFactory;
     std::unordered_map<uint32_t, std::unique_ptr<Light>> _lights;
 };

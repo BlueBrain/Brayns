@@ -27,17 +27,58 @@ namespace brayns
 class Bounds
 {
 public:
+    /**
+     * @brief Default initializes min to {max float} and max to {lowest float} in anticipation of the use of expand().
+     */
     Bounds() = default;
+
+    /**
+     * @brief Initializes bounds with pre-defined boundaries.
+     * @param minB
+     * @param maxB
+     */
     Bounds(const Vector3f& minB, const Vector3f& maxB);
 
+    /**
+     * @brief Expands the bounds (if needed) to include the given point.
+     * @param point
+     */
     void expand(const Vector3f& point) noexcept;
+
+    /**
+     * @brief Expands the bounds (if needed) to include the given bounds.
+     * @param bounds
+     */
     void expand(const Bounds& bounds) noexcept;
 
+    /**
+     * @brief Returns true if the given point is within the bounds.
+     * @param point
+     * @return bool
+     */
     bool intersects(const Vector3f& point) const noexcept;
+
+    /**
+     * @brief Returns true if the given bounds collide with this bounds.
+     * @param bounds
+     * @return bool
+     */
     bool intersects(const Bounds& bounds) const noexcept;
 
-    const Vector3f& min() const noexcept;
-    const Vector3f& max() const noexcept;
+    /**
+     * @brief Returns the minimum corner of the bounds. The value is not valid if the bounds were default-constructed
+     * and ensureBounds() was not called.
+     * @return const Vector3f &
+     */
+    const Vector3f& getMin() const;
+
+    /**
+     * @brief Returns the maximum corner of the bounds. The value is not valid if the bounds were default-constructed
+     * and ensureBounds() was not called.
+     * @return const Vector3f &
+     */
+    const Vector3f& getMax() const;
+
 private:
     Vector3f _min {std::numeric_limits<float>::max()};
     Vector3f _max {std::numeric_limits<float>::lowest()};

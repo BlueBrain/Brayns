@@ -27,7 +27,9 @@ Bounds::Bounds(const Vector3f& minB, const Vector3f& maxB)
  , _max(maxB)
 {
     if(glm::min(_min, _max) != _min)
+    {
         throw std::invalid_argument("The min bounds must be smaller or equal to the max bounds");
+    }
 }
 
 void Bounds::expand(const Vector3f& point) noexcept
@@ -80,12 +82,12 @@ bool Bounds::intersects(const Bounds& other) const noexcept
     return true;
 }
 
-const Vector3f& Bounds::min() const noexcept
+const Vector3f &Bounds::getMin() const
 {
     return _min;
 }
 
-const Vector3f& Bounds::max() const noexcept
+const Vector3f &Bounds::getMax() const
 {
     return _max;
 }

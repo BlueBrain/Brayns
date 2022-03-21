@@ -38,6 +38,8 @@ public:
 
     void onStart() override;
 
+    void commitColor() override;
+
 private:
     std::vector<Vector4f> _colorMap;
     std::vector<uint8_t> _colorMapIndices;

@@ -33,19 +33,9 @@ uint64_t DefaultMaterial::getSizeInBytes() const noexcept
     return sizeof(DefaultMaterial) * 2 - sizeof(OSPMaterial);
 }
 
-void DefaultMaterial::setColor(const Vector3f &color) noexcept
-{
-    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
-}
-
 void DefaultMaterial::setOpacity(const float opacity) noexcept
 {
     _updateValue(_opacity, glm::clamp(opacity, 0.f, 1.f));
-}
-
-const Vector3f &DefaultMaterial::getColor() const noexcept
-{
-    return _color;
 }
 
 float DefaultMaterial::getOpacity() const noexcept
@@ -59,7 +49,7 @@ void DefaultMaterial::commitMaterialSpecificParams()
 
     auto ospHandle = handle();
 
-    ospSetParam(ospHandle, "kd", OSPDataType::OSP_VEC3F, &_color);
+    ospSetParam(ospHandle, "kd", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
     ospSetParam(ospHandle, "ns", OSPDataType::OSP_FLOAT, &ns);
     ospSetParam(ospHandle, "d", OSPDataType::OSP_FLOAT, &_opacity);
 }

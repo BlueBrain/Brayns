@@ -21,6 +21,8 @@
 
 #include "ModelInstance.h"
 
+#include <brayns/common/Log.h>
+
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace
@@ -69,8 +71,19 @@ const Bounds &ModelInstance::getBounds() const noexcept
 
 void ModelInstance::computeBounds() noexcept
 {
+    Log::debug("[ModelInstance {}] Computing bounds", _modelInstanceID);
+    
     const auto matrix = _transformation.toMatrix();
     _bounds = _model.computeBounds(matrix);
+
+    // In the event that the model used by this instance has no geometry,
+    // The result of computeBounds() would be bounds with min > max.
+    const auto &min = _bounds.getMin();
+    const auto &max = _bounds.getMax();
+    if(glm::max(min, max) == min)
+    {
+        _bounds = Bounds(Vector3f(0.f), Vector3f(0.f));
+    }
 }
 
 Model &ModelInstance::getModel() noexcept
@@ -104,7 +117,9 @@ void ModelInstance::setTransform(const Transformation &transform) noexcept
     _transformation = transform;
     // Recompute bounds as soon as the transform changes
     if (_transformation.isModified())
+    {
         computeBounds();
+    }
 }
 
 const Transformation &ModelInstance::getTransform() const noexcept
@@ -135,6 +150,9 @@ bool ModelInstance::commit(const bool modelChanged)
         ospCommit(_instanceHandle);
     }
 
-    return needsCommit || _visibilityChanged;
+    needsCommit = needsCommit || _visibilityChanged;
+    _visibilityChanged = false;
+
+    return needsCommit;
 }
 }

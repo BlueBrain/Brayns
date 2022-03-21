@@ -38,7 +38,7 @@ namespace brayns
 class Scene
 {
 public:
-    Scene() = default;
+    Scene();
     ~Scene();
 
     Scene(const Scene &) = delete;

@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
 #include <brayns/engine/Material.h>
 
 namespace brayns
@@ -33,19 +32,9 @@ public:
     uint64_t getSizeInBytes() const noexcept final;
 
     /**
-     * @brief Sets the base color
-     */
-    void setColor(const Vector3f &color) noexcept;
-
-    /**
      * @brief Sets the intensity of the light emitted by the material
      */
     void setIntensity(const float intensity) noexcept;
-
-    /**
-     * @brief Returns the current base color of the material as normalized RGB
-     */
-    const Vector3f &getColor() const noexcept;
 
     /**
      * @brief Returns the material emission intensity
@@ -58,7 +47,6 @@ protected:
     void commitMaterialSpecificParams() final;
 
 private:
-    Vector3f _color{1.f};
     float _intensity{1.f};
 };
 }

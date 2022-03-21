@@ -31,6 +31,7 @@ namespace brayns
 Engine::Engine(ParametersManager &parameters)
     : _params(parameters)
 {
+    ospLoadModule("cpu");
     _device = ospNewDevice("cpu");
 
     const auto logLevel = OSPLogLevel::OSP_LOG_WARNING;
@@ -41,6 +42,8 @@ Engine::Engine(ParametersManager &parameters)
     ospDeviceSetParam(_device, "errorOutput", OSPDataType::OSP_STRING, logErrorOutput);
 
     ospDeviceCommit(_device);
+    ospSetCurrentDevice(_device);
+
     const auto error = ospDeviceGetLastErrorCode(_device);
     if (error != OSPError::OSP_NO_ERROR)
     {
@@ -49,22 +52,31 @@ Engine::Engine(ParametersManager &parameters)
         throw std::runtime_error("Could not initialize OSPRay device");
     }
 
-    // Default camera and renderer
+    // Initialize components
+    _frameBuffer = std::make_unique<FrameBuffer>();
+    _scene =  std::make_unique<Scene>();
     _camera = std::make_unique<PerspectiveCamera>();
     _renderer = std::make_unique<InteractiveRenderer>();
 }
 
 Engine::~Engine()
 {
+    _frameBuffer.reset();
+    _camera.reset();
+    _renderer.reset();
+    _scene.reset();
+
     if (_device)
+    {
         ospDeviceRelease(_device);
+    }
 
     ospShutdown();
 }
 
 void Engine::preRender()
 {
-    _scene.preRender(_params);
+    _scene->preRender(_params);
 }
 
 void Engine::commit()
@@ -83,49 +95,39 @@ void Engine::commit()
     const auto &frameSize = appParams.getWindowSize();
     const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
 
-    _frameBuffer.setFrameSize(frameSize);
+    _frameBuffer->setFrameSize(frameSize);
     _camera->setAspectRatio(aspectRatio);
 
-    bool fbChanged = _frameBuffer.isModified();
-    _frameBuffer.commit();
-    if(fbChanged)
+    bool needResetFramebuffer = false;
+    if(_frameBuffer->commit())
     {
-        Log::debug("[Engine] Framebuffer committed");
+        Log::critical("[Engine] Framebuffer committed");
+        needResetFramebuffer = true;
     }
 
-    bool cameraChanged = _camera->isModified();
-    _camera->commit();
-    if(cameraChanged)
+    if(_camera->commit())
     {
-        Log::debug("[Engine] Camera committed");
+        Log::critical("[Engine] Camera committed");
+        needResetFramebuffer = true;
     }
 
-    bool rendererChanged = _renderer->isModified();
-    _renderer->commit();
-    if(rendererChanged)
+    if(_renderer->commit())
     {
-        Log::debug("[Engine] Renderer committed");
+        Log::critical("[Engine] Renderer committed");
+        needResetFramebuffer = true;
     }
 
-    bool sceneChanged = _scene.commit();
-    if(sceneChanged)
+    if(_scene->commit())
     {
-        Log::debug("[Engine] Scene committed");
-    }
-
-    // Clear the framebuffer if something changed, so that we do not accumulate on top of old stuff,
-    // which would produce an incorrect image
-    const bool somethingChanged = fbChanged || cameraChanged || rendererChanged || sceneChanged;
-
-    if (somethingChanged)
-    {
-        _frameBuffer.clear();
-    }
-
-    if(sceneChanged)
-    {
-        const auto sceneSize = _scene._getSizeBytes();
+        Log::critical("[Engine] Scene committed");
+        needResetFramebuffer = true;
+        const auto sceneSize = _scene->_getSizeBytes();
         _statistics.setSceneSizeInBytes(sceneSize);
+    }
+
+    if (needResetFramebuffer)
+    {
+        _frameBuffer->clear();
     }
 }
 
@@ -138,7 +140,7 @@ void Engine::render()
 
     // Check wether we should keep rendering or not
     const auto maxSpp = _renderer->getSamplesPerPixel();
-    const auto currentSpp = _frameBuffer.numAccumFrames();
+    const auto currentSpp = _frameBuffer->numAccumFrames();
     if (currentSpp >= maxSpp)
         return;
 
@@ -162,9 +164,9 @@ void Engine::render()
     // Start measuring a new frame render time.
     _fpsCounter.startFrame();
 
-    FrameRenderer::synchronous(*_camera, _frameBuffer, *_renderer, _scene);
+    FrameRenderer::synchronous(*_camera, *_frameBuffer, *_renderer, *_scene);
 
-    _frameBuffer.incrementAccumFrames();
+    _frameBuffer->incrementAccumFrames();
 }
 
 void Engine::postRender()
@@ -174,17 +176,17 @@ void Engine::postRender()
         return;
     }
 
-    _scene.postRender(_params);
+    _scene->postRender(_params);
 }
 
 Scene &Engine::getScene()
 {
-    return _scene;
+    return *_scene;
 }
 
 FrameBuffer &Engine::getFrameBuffer() noexcept
 {
-    return _frameBuffer;
+    return *_frameBuffer;
 }
 
 void Engine::setCamera(std::unique_ptr<Camera> camera) noexcept

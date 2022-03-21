@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/scenecomponents/SceneModelManager.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/io/LoaderRegistry.h>
 
@@ -35,7 +35,7 @@ namespace brayns
 class AddModelEntrypoint : public Entrypoint<FileLoadParameters, std::vector<ModelInstanceProxy>>
 {
 public:
-    AddModelEntrypoint(SceneModelManager &scene, LoaderRegistry &loaders, CancellationToken token);
+    AddModelEntrypoint(Scene &scene, LoaderRegistry &loaders, CancellationToken token);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -44,7 +44,7 @@ public:
     virtual void onCancel() override;
 
 private:
-    SceneModelManager &_sceneModelManager;
+    Scene &_scene;
     LoaderRegistry &_loaders;
     CancellationToken _token;
 };

@@ -73,11 +73,11 @@ void Renderer::setBackgroundColor(const Vector4f& background) noexcept
     _updateValue(_backgroundColor, background);
 }
 
-void Renderer::commit()
+bool Renderer::commit()
 {
     if(!isModified())
     {
-        return;
+        return false;
     }
 
     if(!_handle)
@@ -93,6 +93,10 @@ void Renderer::commit()
     commitRendererSpecificParams();
 
     ospCommit(_handle);
+
+    resetModified();
+
+    return true;
 }
 
 OSPRenderer Renderer::handle() const noexcept

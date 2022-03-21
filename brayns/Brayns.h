@@ -97,8 +97,8 @@ public:
 private:
     ParametersManager _parametersManager;
     PluginManager _pluginManager;
-    SystemPluginAPI _pluginAPI;
     Engine _engine;
+    SystemPluginAPI _pluginAPI;
     LoaderRegistry _loaderRegistry;
 };
 } // namespace brayns

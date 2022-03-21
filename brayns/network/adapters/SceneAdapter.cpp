@@ -22,27 +22,39 @@
 
 namespace brayns
 {
+
 ReadSceneProxy::ReadSceneProxy(const Scene &scene)
  : _scene(&scene)
 {
 }
 
-const Bounds &ReadSceneProxy::getBounds() const noexcept
+Bounds ReadSceneProxy::getBounds() const noexcept
 {
-    return _scene->getBounds();
+    if(_scene)
+    {
+        return _scene->getBounds();
+    }
+
+    return {Vector3f(0.f), Vector3f(0.f)};
 }
 
 std::vector<ModelInstanceProxy> ReadSceneProxy::getModels() const noexcept
 {
-    const auto &modelManager = _scene->getModelManager();
-    auto& models = modelManager.getAllModelInstances();
-
-    std::vector<ModelInstanceProxy> result;
-    result.reserve(models.size());
-    for(auto model : models)
+    if(_scene)
     {
-        result.emplace_back(*model);
+        const auto &modelManager = _scene->getModelManager();
+        auto& models = modelManager.getAllModelInstances();
+
+        std::vector<ModelInstanceProxy> result;
+        result.reserve(models.size());
+        for(auto model : models)
+        {
+            result.emplace_back(*model);
+        }
+        return result;
     }
-    return result;
+
+    return {};
 }
+
 }

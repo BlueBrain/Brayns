@@ -63,8 +63,8 @@ LoaderRegistry &SystemPluginAPI::getLoaderRegistry()
 Brayns::Brayns(int argc, const char **argv)
     : _parametersManager(argc, argv)
     , _pluginManager(argc, argv)
-    , _pluginAPI(_parametersManager, _pluginManager, _engine, _loaderRegistry)
     , _engine(_parametersManager)
+    , _pluginAPI(_parametersManager, _pluginManager, _engine, _loaderRegistry)
 {
     Log::info("");
     Log::info(" _|_|_|");

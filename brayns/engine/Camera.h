@@ -61,8 +61,9 @@ public:
     /**
      * @brief Commit implementation. Derived camera types must override commitCameraSpecificParams(),
      * which will be called during commit() to perform camera-specific synchronization with OSPRay
+     * @returns true if there was anything to commit
      */
-    void commit();
+    bool commit();
 
     /**
      * @brief Sets the look-at parameters of the camera

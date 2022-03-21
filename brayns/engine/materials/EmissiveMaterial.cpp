@@ -33,19 +33,9 @@ uint64_t EmissiveMaterial::getSizeInBytes() const noexcept
     return sizeof(EmissiveMaterial) * 2 - sizeof(OSPMaterial);
 }
 
-void EmissiveMaterial::setColor(const Vector3f &color) noexcept
-{
-    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
-}
-
 void EmissiveMaterial::setIntensity(const float intensity) noexcept
 {
     _updateValue(_intensity, glm::max(intensity, 0.f));
-}
-
-const Vector3f &EmissiveMaterial::getColor() const noexcept
-{
-    return _color;
 }
 
 float EmissiveMaterial::getIntensity() const noexcept
@@ -57,7 +47,7 @@ void EmissiveMaterial::commitMaterialSpecificParams()
 {
     auto ospHandle = handle();
 
-    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &_color);
+    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
     ospSetParam(ospHandle, "intensity", OSPDataType::OSP_FLOAT, &_intensity);
 }
 

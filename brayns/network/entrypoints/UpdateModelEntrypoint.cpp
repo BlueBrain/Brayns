@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-UpdateModelEntrypoint::UpdateModelEntrypoint(SceneModelManager &modelManager)
-    : _modelManager(modelManager)
+UpdateModelEntrypoint::UpdateModelEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -43,9 +43,13 @@ std::string UpdateModelEntrypoint::getDescription() const
 void UpdateModelEntrypoint::onRequest(const Request &request)
 {
     const auto params = request.getParams();
-    auto &model = ExtractModel::fromId(_modelManager, params.model_id);
+    auto &model = ExtractModel::fromId(_scene, params.model_id);
     ModelInstanceProxy proxy (model);
     params.model.deserialize(proxy);
+
+    // In case the trasnform was updated, and thus the model bounds, we need to recompute scene bounds
+    _scene.computeBounds();
+    
     request.reply(EmptyMessage());
 }
 } // namespace brayns

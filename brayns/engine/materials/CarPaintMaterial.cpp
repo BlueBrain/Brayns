@@ -33,19 +33,9 @@ uint64_t CarPaintMaterial::getSizeInBytes() const noexcept
     return sizeof(CarPaintMaterial) * 2 - sizeof(OSPMaterial);
 }
 
-void CarPaintMaterial::setColor(const Vector3f &color) noexcept
-{
-    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
-}
-
 void CarPaintMaterial::setFlakesDesnity(const float flakeDensity) noexcept
 {
     _updateValue(_flakeDensity, glm::clamp(flakeDensity, 0.f, 1.f));
-}
-
-const Vector3f &CarPaintMaterial::getColor() const noexcept
-{
-    return _color;
 }
 
 float CarPaintMaterial::getFlakesDensity() const noexcept
@@ -57,7 +47,7 @@ void CarPaintMaterial::commitMaterialSpecificParams()
 {
     auto ospHandle = handle();
 
-    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &_color);
+    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
     ospSetParam(ospHandle, "flakeDensity", OSPDataType::OSP_FLOAT, &_flakeDensity);
 }
 

@@ -71,7 +71,7 @@ FrameBuffer FrameBuffer::clone() const noexcept
 
 void FrameBuffer::map()
 {
-    if(_handle)
+    if(!_handle)
     {
         throw std::runtime_error("Framebuffer is not initialized. Cannot be mapped at this time");
     }
@@ -93,17 +93,19 @@ const uint8_t *FrameBuffer::getColorBuffer() const
     return _colorBuffer;
 }
 
-void FrameBuffer::commit()
+bool FrameBuffer::commit()
 {
     if(!isModified())
     {
-        return;
+        return false;
     }
 
     unmap();
 
     if(_handle)
+    {
         ospRelease(_handle);
+    }
 
     const auto width = static_cast<int>(_frameSize.x);
     const auto height = static_cast<int>(_frameSize.y);
@@ -119,6 +121,10 @@ void FrameBuffer::commit()
     ospCommit(_handle);
 
     clear();
+
+    resetModified();
+
+    return true;
 }
 
 void FrameBuffer::setFrameSize(const Vector2ui &frameSize)

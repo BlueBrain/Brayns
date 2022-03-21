@@ -42,11 +42,11 @@ public:
 
     uint32_t getID() const noexcept;
 
-    const Bounds &getBounds() const noexcept;
+    Bounds getBounds() const noexcept;
 
-    const std::map<std::string, std::string> &getModelMetadata() const noexcept;
+    std::map<std::string, std::string> getModelMetadata() const noexcept;
 
-    const Transformation &getTransform() const noexcept;
+    Transformation getTransform() const noexcept;
 
     void setTransform(const Transformation &transform) noexcept;
 

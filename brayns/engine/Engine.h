@@ -124,8 +124,8 @@ private:
     ParametersManager &_params;
 
     // System objects
-    FrameBuffer _frameBuffer;
-    Scene _scene;
+    std::unique_ptr<FrameBuffer> _frameBuffer;
+    std::unique_ptr<Scene> _scene;
     std::unique_ptr<Camera> _camera;
     std::unique_ptr<Renderer> _renderer;
 

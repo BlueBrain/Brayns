@@ -145,11 +145,11 @@ class BinaryModelHandler
 {
 public:
     BinaryModelHandler(
-        brayns::SceneModelManager &modelManager,
+        brayns::Scene &scene,
         const brayns::LoaderRegistry &loaders,
         brayns::BinaryManager &binary,
         brayns::CancellationToken &token)
-        : _modelManager(modelManager)
+        : _scene(scene)
         , _loaders(loaders)
         , _binary(binary)
         , _token(token)
@@ -176,16 +176,18 @@ public:
 
         std::vector<brayns::ModelInstanceProxy> result;
         result.reserve(descriptors.size());
+        auto &modelManager = _scene.getModelManager();
         for(auto& model : descriptors)
         {
-            auto& instance = _modelManager.addModel(loadParameters, std::move(model));
+            auto& instance = modelManager.addModel(loadParameters, std::move(model));
             result.emplace_back(instance);
         }
+        _scene.computeBounds();
         request.reply(result);
     }
 
 private:
-    brayns::SceneModelManager &_modelManager;
+    brayns::Scene &_scene;
     const brayns::LoaderRegistry &_loaders;
     brayns::BinaryManager &_binary;
     brayns::CancellationToken &_token;
@@ -195,11 +197,11 @@ private:
 namespace brayns
 {
 RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
-    SceneModelManager &modelManager,
+    Scene &scene,
     const LoaderRegistry &loaders,
     BinaryManager &binary,
     CancellationToken token)
-    : _modelManager(modelManager)
+    : _scene(scene)
     , _loaders(loaders)
     , _binary(binary)
     , _token(token)
@@ -224,7 +226,7 @@ bool RequestModelUploadEntrypoint::isAsync() const
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
     _client = request.getClient();
-    BinaryModelHandler handler(_modelManager, _loaders, _binary, _token);
+    BinaryModelHandler handler(_scene, _loaders, _binary, _token);
     handler.handle(request);
 }
 

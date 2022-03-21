@@ -47,14 +47,16 @@ Camera &Camera::operator=(const Camera &o)
 Camera::~Camera()
 {
     if(_handle)
+    {
         ospRelease(_handle);
+    }
 }
 
-void Camera::commit()
+bool Camera::commit()
 {
     if(!isModified())
     {
-        return;
+        return false;
     }
 
     if(!_handle)
@@ -79,6 +81,10 @@ void Camera::commit()
     commitCameraSpecificParams();
 
     ospCommit(_handle);
+
+    resetModified();
+
+    return true;
 }
 
 void Camera::setLookAt(const LookAt &params) noexcept
@@ -93,7 +99,7 @@ const LookAt &Camera::getLookAt() const noexcept
 
 void Camera::setAspectRatio(const float aspectRatio) noexcept
 {
-    _aspectRatio = aspectRatio;
+    _updateValue(_aspectRatio, aspectRatio);
 }
 
 OSPCamera Camera::handle() const noexcept

@@ -30,22 +30,42 @@ ModelInstanceProxy::ModelInstanceProxy(ModelInstance &modelInstance)
 
 uint32_t ModelInstanceProxy::getID() const noexcept
 {
-    return _modelInstance->getID();
+    if(_modelInstance)
+    {
+        return _modelInstance->getID();
+    }
+
+    return {};
 }
 
-const Bounds &ModelInstanceProxy::getBounds() const noexcept
+Bounds ModelInstanceProxy::getBounds() const noexcept
 {
-    return _modelInstance->getBounds();
+    if(_modelInstance)
+    {
+        return _modelInstance->getBounds();
+    }
+
+    return {};
 }
 
-const std::map<std::string, std::string> &ModelInstanceProxy::getModelMetadata() const noexcept
+std::map<std::string, std::string> ModelInstanceProxy::getModelMetadata() const noexcept
 {
-    return _modelInstance->getModelMetadata();
+    if(_modelInstance)
+    {
+        return _modelInstance->getModelMetadata();
+    }
+
+    return {};
 }
 
-const Transformation &ModelInstanceProxy::getTransform() const noexcept
+Transformation ModelInstanceProxy::getTransform() const noexcept
 {
-    return _modelInstance->getTransform();
+    if(_modelInstance)
+    {
+        return _modelInstance->getTransform();
+    }
+
+    return {};
 }
 
 void ModelInstanceProxy::setTransform(const Transformation &transform) noexcept
@@ -55,7 +75,12 @@ void ModelInstanceProxy::setTransform(const Transformation &transform) noexcept
 
 bool ModelInstanceProxy::isVisible() const noexcept
 {
-    return _modelInstance->isVisible();
+    if(_modelInstance)
+    {
+        return _modelInstance->isVisible();
+    }
+
+    return {};
 }
 
 void ModelInstanceProxy::setVisible(const bool val) noexcept

@@ -59,6 +59,7 @@ protected:
         if (!_isEqual(member, newValue))
         {
             member = newValue;
+            _modified = true;
         }
     }
 

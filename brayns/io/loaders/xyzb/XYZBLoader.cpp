@@ -41,7 +41,7 @@ constexpr auto LOADER_NAME = "xyzb";
 
 float _computeHalfArea(const Bounds &bbox)
 {
-    const auto size = bbox.max() - bbox.min();
+    const auto size = bbox.getMax() - bbox.getMin();
     return size[0] * size[1] + size[0] * size[2] + size[1] * size[2];
 }
 } // namespace
@@ -98,7 +98,7 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(Blob &&blob, cons
     // Find an appropriate mean radius to avoid overlaps of the spheres, see
     // https://en.wikipedia.org/wiki/Wigner%E2%80%93Seitz_radius
 
-    const auto size = bbox.max() - bbox.min();
+    const auto size = bbox.getMax() - bbox.getMin();
     const auto volume = glm::compMul(size);
     const auto density4PI = 4 * M_PI * numlines / (volume > ALMOST_ZERO ? volume : _computeHalfArea(bbox));
 

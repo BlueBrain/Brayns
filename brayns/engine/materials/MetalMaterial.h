@@ -33,19 +33,9 @@ public:
     uint64_t getSizeInBytes() const noexcept final;
 
     /**
-     * @brief Sets the base color
-     */
-    void setColor(const Vector3f &color) noexcept;
-
-    /**
      * @brief Sets the surface roughness
      */
     void setRoughness(const float roughness) noexcept;
-
-    /**
-     * @brief Returns the current base color of the material as normalized RGB
-     */
-    const Vector3f &getColor() const noexcept;
 
     /**
      * @brief Returns the surface roughness
@@ -58,7 +48,6 @@ protected:
     void commitMaterialSpecificParams() final;
 
 private:
-    Vector3f _color{1.f};
     float _roughness{0.1f};
 };
 }

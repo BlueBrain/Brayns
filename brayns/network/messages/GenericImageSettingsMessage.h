@@ -25,8 +25,8 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(GenericImageSettings)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, format, "Image format (jpg or png)")
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, quality, "Image quality (0 = lowest quality, 100 = highest quality")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, format, "Image format (jpg or png)", Default("png"))
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, quality, "Image quality (0 = lowest quality, 100 = highest quality", Default(100))
 BRAYNS_JSON_OBJECT_ENTRY(Vector2ui, size, "Image dimensions [width, height]")
 BRAYNS_JSON_OBJECT_END()
 }

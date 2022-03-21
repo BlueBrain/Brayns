@@ -68,8 +68,9 @@ public:
 
     /**
      * @brief Syncs this object data to the OSPRay backend framebuffer
+     * @returns true if there was anything to commit
      */
-    void commit();
+    bool commit();
 
     /**
      * @brief Sets the frame dimensions (width x height)

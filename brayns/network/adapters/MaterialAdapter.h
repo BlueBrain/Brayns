@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
+#include <brayns/common/Log.h>
 #include <brayns/engine/defaultcomponents/MaterialComponent.h>
 #include <brayns/engine/materials/CarPaintMaterial.h>
 #include <brayns/engine/materials/DefaultMaterial.h>
@@ -29,6 +29,7 @@
 #include <brayns/engine/materials/MatteMaterial.h>
 #include <brayns/engine/materials/MetalMaterial.h>
 #include <brayns/engine/materials/PlasticMaterial.h>
+#include <brayns/engine/scenecomponents/SceneModelManager.h>
 #include <brayns/json/JsonAdapterMacro.h>
 #include <brayns/json/JsonObjectMacro.h>
 

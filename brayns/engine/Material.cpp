@@ -23,6 +23,9 @@
 
 namespace brayns
 {
+
+const Vector3f Material::BASE_COLOR_WHITE = Vector3f(1.f);
+
 Material::Material(const Material& o)
 {
     (void)o;
@@ -58,12 +61,24 @@ bool Material::commit()
 
     ospCommit(_handle);
 
+    resetModified();
+
     return true;
 }
 
 OSPMaterial Material::handle() const noexcept
 {
     return _handle;
+}
+
+void Material::setColor(const Vector3f &color) noexcept
+{
+    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
+}
+
+const Vector3f &Material::getColor() const noexcept
+{
+    return _color;
 }
 
 } // namespace brayns

@@ -33,19 +33,9 @@ uint64_t MetalMaterial::getSizeInBytes() const noexcept
     return sizeof(MetalMaterial) * 2 - sizeof(OSPMaterial);
 }
 
-void MetalMaterial::setColor(const Vector3f &color) noexcept
-{
-    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
-}
-
 void MetalMaterial::setRoughness(const float roughness) noexcept
 {
     _updateValue(_roughness, glm::clamp(roughness, 0.f, 1.f));
-}
-
-const Vector3f &MetalMaterial::getColor() const noexcept
-{
-    return _color;
 }
 
 float MetalMaterial::getRoughness() const noexcept
@@ -56,7 +46,7 @@ float MetalMaterial::getRoughness() const noexcept
 void MetalMaterial::commitMaterialSpecificParams()
 {
     auto ospHandle = handle();
-    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &_color);
+    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
     ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &_roughness);
 }
 

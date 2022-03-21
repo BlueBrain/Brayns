@@ -108,17 +108,15 @@ public:
     virtual void onRequest(const typename Entrypoint<EmptyMessage, T>::Request &request) override
     {
         auto &currentCamera = _engine.getCamera();
-        T* castedCamera = nullptr;
         try
         {
-            castedCamera = dynamic_cast<T*>(&currentCamera);
+            auto &castedCamera = dynamic_cast<T&>(currentCamera);
+            request.reply(castedCamera);
         }
         catch(const std::bad_cast &)
         {
             throw JsonRpcException("Cannot cast the current camera to the requested type");
         }
-
-        request.reply(*castedCamera);
     }
 
 private:

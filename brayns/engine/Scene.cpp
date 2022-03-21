@@ -39,6 +39,11 @@ void commitHandleList(std::vector<Handle> &list, OSPDataType type, OSPWorld worl
 
 namespace brayns
 {
+Scene::Scene()
+ : _bounds(Vector3f(0.f), Vector3f(0.f))
+{
+}
+
 Scene::~Scene()
 {
     ospRelease(_handle);
@@ -82,18 +87,21 @@ bool Scene::commit()
         auto clipInstances = _clippingManager.getInstanceHandles();
         instances.insert(instances.end(), clipInstances.begin(), clipInstances.end());
 
-        commitHandleList(instances, OSPDataType::OSP_INSTANCE, _handle, "instance");
-
-        needsCommit = true;
+        if(!instances.empty())
+        {
+            commitHandleList(instances, OSPDataType::OSP_INSTANCE, _handle, "instance");
+            needsCommit = true;
+        }
     }
 
     if (_lightManager.commit())
     {
         auto lights = _lightManager.getLightHandles();
-
-        commitHandleList(lights, OSPDataType::OSP_LIGHT, _handle, "light");
-
-        needsCommit = true;
+        if(!lights.empty())
+        {
+            commitHandleList(lights, OSPDataType::OSP_LIGHT, _handle, "light");
+            needsCommit = true;
+        }
     }
 
     // Commit handle

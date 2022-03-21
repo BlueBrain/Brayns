@@ -85,15 +85,31 @@ public:
 
     virtual bool commit() override
     {
+        bool needsCommit = false;
         if(_geometry.commit())
         {
             auto geometryHandle = _geometry.handle();
             ospSetParam(_model, "geometry", OSPDataType::OSP_GEOMETRY, &geometryHandle);
-            ospCommit(_model);
-            return true;
+            //ospCommit(_model);
+            //return true;
+            needsCommit = true;
         }
 
-        return false;
+        auto &material = _materialComponent->getMaterial();
+        if(material.commit())
+        {
+            auto materialHandle = material.handle();
+            ospSetParam(_model, "material", OSPDataType::OSP_MATERIAL, &materialHandle);
+            commitColor();
+            needsCommit = true;
+        }
+
+        if(needsCommit)
+        {
+            ospCommit(_model);
+        }
+
+        return needsCommit;
     }
 
     virtual void onDestroyed() override
@@ -115,6 +131,36 @@ protected:
         return _model;
     }
 
+    /**
+     * @brief specifies how colors are committed into the Geometric Model.
+     * There are 3 options:
+     * - Material base color
+     * - List of colors, 1 per primitive
+     * - Indexed list of colors, with 1 index per primitive
+     * 
+     * OSPRay will always take as base color the material one, and, if any other
+     * color (from the list or from the indexed list) is present, it will blend them
+     * together. 
+     * 
+     * To be able to have full control of the colors, all materials use as base color
+     * full white (1, 1, 1). Then, by default, GeometryRendererComponent will commit the
+     * material base color as a single color that will be used by the underneath geometry
+     * (All geometry will share the same color).
+     * 
+     * Subclasses of the GeometryRendererComponent may override this method to change this
+     * behaviour (An example can be seen in brayns/io/loaders/ProteinRendererComponent)
+     * 
+     */
+    virtual void commitColor()
+    {
+        auto &material = _materialComponent->getMaterial();
+        const auto &color = material.getColor();
+
+        // Blending the material opacity with color opacity = material opacity
+        Vector4f finalColor (color, 1.f);
+        ospSetParam(_model, "color", OSPDataType::OSP_VEC4F, &finalColor);
+    }
+
 private:
     /**
      * @brief Sets the material object in the geometric model
@@ -122,26 +168,21 @@ private:
     void _setMaterial()
     {
         Model& model = getModel();
-        MaterialComponent* materialComponent = nullptr;
         try
         {
             auto &componentRef = model.getComponent<MaterialComponent>();
-            materialComponent = &componentRef;
+            _materialComponent = &componentRef;
         }
         catch(...)
         {
             auto &newComponent = model.addComponent<MaterialComponent>();
-            materialComponent = &newComponent;
+            _materialComponent = &newComponent;
         }
-
-        auto &material = materialComponent->getMaterial();
-        material.commit();
-        auto materialHandle = material.handle();
-        ospSetParam(_model, "material", OSPDataType::OSP_MATERIAL, &materialHandle);
     }
 
 private:
     OSPGeometricModel _model {nullptr};
     Geometry<T> _geometry;
+    MaterialComponent *_materialComponent {nullptr};
 };
 }

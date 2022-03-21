@@ -22,6 +22,7 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
+#include <brayns/common/MathTypes.h>
 
 #include <ospray/ospray.h>
 
@@ -54,6 +55,20 @@ public:
     OSPMaterial handle() const noexcept;
 
     /**
+     * @brief Sets the base color
+     * 
+     * @param color 
+     */
+    void setColor(const Vector3f &color) noexcept;
+
+    /**
+     * @brief Returns the base color
+     * 
+     * @return const Vector3f& 
+     */
+    const Vector3f &getColor() const noexcept;
+
+    /**
      * @brief Subclasses must implement this method returning their size in bytes
      */
     virtual uint64_t getSizeInBytes() const noexcept = 0;
@@ -83,7 +98,14 @@ protected:
      */
     virtual void commitMaterialSpecificParams() = 0;
 
+    // Geometric models blend the geometry primitive color with the material base color. To be able to fully control
+    // the color, the materials will commit a fully white base color, and the color will be used directly in the
+    // OSPGeometriModel "color" parameter, so that the blend result in the color itself
+    static const Vector3f BASE_COLOR_WHITE;
+
 private:
     OSPMaterial _handle{nullptr};
+
+    Vector3f _color;
 };
 } // namespace brayns
