@@ -59,9 +59,9 @@ add_subdirectory(brayns)
 add_subdirectory(apps)
 
 # BRAYNS plugins
-#add_subdirectory(plugins)
+add_subdirectory(plugins)
 
 # BRAYNS tests
 if(BRAYNS_TESTS_ENABLED)
-#  add_subdirectory(tests)
+  add_subdirectory(tests)
 endif()

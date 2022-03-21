@@ -126,7 +126,9 @@ public:
         const auto endIdx = idx + geometries.size();
         constexpr auto limit = std::numeric_limits<uint32_t>::max();
         if(idx >= limit || endIdx >= limit)
+        {
             throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
+        }
 
         _geometries.insert(_geometries.end(), geometries.begin(), geometries.end());
 
@@ -135,6 +137,28 @@ public:
         _dirty = true;
         return result;
     }
+
+    /**
+     * @brief Sets the primitives of this geometry object. Returns the list of indices that correspond
+     * to the added geometries
+     * 
+     * @param geometries 
+     * @return std::vector<uint32_t> 
+     */
+    std::vector<uint32_t> set(std::vector<T> geometries)
+    {
+        constexpr auto limit = std::numeric_limits<uint32_t>::max();
+        if(geometries.size() >= limit)
+        {
+            throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
+        }
+        _geometries = std::move(geometries);
+        std::vector<uint32_t> result (_geometries.size());
+        std::iota(result.begin(), result.end(), 0u);
+        _dirty = true;
+        return result;
+    }
+
 
     /**
      * @brief Retrieves a constant reference to a geometry given its index in the Geometry buffer.
