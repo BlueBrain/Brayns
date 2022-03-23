@@ -22,8 +22,8 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/engine/defaultcomponents/GeometryRendererComponent.h>
-#include <brayns/engine/defaultcomponents/MaterialComponent.h>
+#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/components/MaterialComponent.h>
 #include <brayns/engine/geometries/Sphere.h>
 
 #include <brayns/utils/StringUtils.h>
@@ -110,7 +110,7 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(Blob &&blob, cons
 
     auto model = std::make_unique<Model>();
     model->addComponent<MaterialComponent>();
-    model->addComponent<GeometryRendererComponent<Sphere>>(spheres);
+    model->addComponent<GeometryRendererComponent<Sphere>>(std::move(spheres));
 
     std::vector<std::unique_ptr<Model>> result;
     result.push_back(std::move(model));

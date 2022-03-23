@@ -20,8 +20,8 @@
 
 #include <brayns/io/loaders/mesh/MeshLoader.h>
 
-#include <brayns/engine/defaultcomponents/GeometryRendererComponent.h>
-#include <brayns/engine/defaultcomponents/MaterialComponent.h>
+#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/components/MaterialComponent.h>
 
 #include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
 #include <brayns/io/loaders/mesh/parsers/OffMeshParser.h>

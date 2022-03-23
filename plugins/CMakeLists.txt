@@ -28,7 +28,7 @@ if (BRAYNS_CIRCUITEXPLORER_ENABLED)
 endif()
 
 if (BRAYNS_DTI_ENABLED)
-    add_subdirectory(DTI)
+    #add_subdirectory(DTI)
 endif()
 
 if(BRAYNS_CIRCUITINFO_ENABLED)

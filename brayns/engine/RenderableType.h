@@ -298,7 +298,7 @@ private:
             throw std::invalid_argument("Geometry index out of range");
     }
 
-protected:
+private:
     OSPGeometry _handle {nullptr};
     bool _dirty {false};
 
