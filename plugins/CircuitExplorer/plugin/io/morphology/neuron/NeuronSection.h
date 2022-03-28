@@ -18,20 +18,17 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include <brayns/utils/EnumUtils.h>
 
 /**
- * @brief The NeuronSection enum list holds all the available neuron/astrocyte
- * morphology sections
+ * @brief The NeuronSection enum list holds all the available neuron/astrocyte morphology section types
  */
-enum class NeuronSection : uint8_t
+enum class NeuronSection
 {
-    SOMA = 1,
-    AXON = 2,
-    DENDRITE = 3,
-    APICAL_DENDRITE = 4
+    SOMA,
+    AXON,
+    DENDRITE,
+    APICAL_DENDRITE
 };
 
 namespace brayns

@@ -21,7 +21,7 @@
 
 #include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
 
-#include <brayns/engine/defaultcomponents/ClippingComponent.h>
+#include <brayns/engine/components/ClippingComponent.h>
 
 namespace brayns
 {

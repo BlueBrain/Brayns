@@ -25,12 +25,6 @@
 
 BRAYNS_JSON_OBJECT_BEGIN(NeuronMorphologyLoaderParameters)
 BRAYNS_JSON_OBJECT_ENTRY(
-    std::string,
-    geometry_mode,
-    "Type of geometry to use to display the cells. Possible "
-    "values are: 'vanilla', 'samples', 'smooth'",
-    brayns::Default("smooth"))
-BRAYNS_JSON_OBJECT_ENTRY(
     float,
     radius_multiplier,
     "Parameter to multiply all morphology sample radii by. "

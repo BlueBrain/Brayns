@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <brayns/common/transferFunction/TransferFunction.h>
+#include <brayns/common/TransferFunction.h>
 
 /**
  * @brief The TransferFunctionUtils class adds functionality to manipulate the

@@ -21,7 +21,7 @@
 
 #include "ExtractMaterial.h"
 
-#include <brayns/engine/defaultcomponents/MaterialComponent.h>
+#include <brayns/engine/components/MaterialComponent.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns

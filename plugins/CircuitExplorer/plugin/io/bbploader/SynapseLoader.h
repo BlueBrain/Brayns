@@ -18,23 +18,15 @@
 
 #pragma once
 
-#include <plugin/io/bbploader/ParameterCheck.h>
-#include <plugin/io/synapse/SynapseGroup.h>
+#include <brayns/engine/Model.h>
 
-#include <brain/brain.h>
+#include <brain/circuit.h>
 
 namespace bbploader
 {
-/**
- * @brief The CellLoader class is in charge of load the needed data from BBP's
- * internal format files provided by a CircuitConfig/BlueConfig file, and
- * transform them into a list of SynapseGroups that can be added to the Brayns
- * scene
- */
 class SynapseLoader
 {
 public:
-    static std::vector<std::unique_ptr<SynapseGroup>>
-        load(const brain::Circuit &circuit, const brain::GIDSet &gids, const bool afferent);
+    static void load(const brain::Circuit &circuit, const brain::GIDSet &gids, const bool post, brayns::Model &model);
 };
 } // namespace bbploader

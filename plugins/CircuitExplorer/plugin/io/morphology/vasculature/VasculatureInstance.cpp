@@ -18,10 +18,9 @@
 
 #include "VasculatureInstance.h"
 
-#include <brayns/engine/Model.h>
+#include <plugin/io/morphology/vasculature/VasculatureComponent.h>
 
-#include <plugin/api/MaterialUtils.h>
-#include <plugin/io/morphology/vasculature/VasculatureMaterialMap.h>
+#include <brayns/engine/Model.h>
 
 VasculatureInstance::VasculatureInstance(
     const brayns::Vector3f &start,
@@ -29,32 +28,20 @@ VasculatureInstance::VasculatureInstance(
     const brayns::Vector3f &end,
     const float endR,
     const VasculatureSection sectionType)
-    : _geometry(brayns::createSDFConePill(
-        start,
-        end,
-        startR,
-        endR)) //_geometry(start, end, startR, endR)
+    : _geometry(brayns::Primitive::cone(start, startR, end, endR))
     , _sectionType(sectionType)
 {
 }
 
-void VasculatureInstance::mapSimulation(
-    const size_t globalOffset,
-    const std::vector<uint16_t> &,
-    const std::vector<uint16_t> &)
+std::vector<uint64_t> VasculatureInstance::mapSimulation(const SimulationMapping &mapping) const
 {
-    _geometry.userData = globalOffset;
+    return {mapping.globalOffset};
 }
 
-ElementMaterialMap::Ptr VasculatureInstance::addToModel(brayns::Model &model) const
+void VasculatureInstance::addToModel(uint64_t id, brayns::Model &model)
 {
-    const auto newMatId = CircuitExplorerMaterial::create(model);
-    model.addSDFGeometry(newMatId, _geometry, {});
-
-    auto materialMap = std::make_unique<VasculatureMaterialMap>();
-    materialMap->materialId = newMatId;
-    materialMap->sectionType = _sectionType;
-    return materialMap;
+    auto &vasculature = model.getComponent<VasculatureComponent>();
+    vasculature.addVessel(id, _geometry, _sectionType);
 }
 
 size_t VasculatureInstance::getSectionSegmentCount(const int32_t) const
@@ -65,9 +52,4 @@ size_t VasculatureInstance::getSectionSegmentCount(const int32_t) const
 MorphologyInstance::SegmentPoints VasculatureInstance::getSegment(const int32_t, const uint32_t) const
 {
     return std::make_pair(&_geometry.p0, &_geometry.p1);
-}
-
-uint64_t VasculatureInstance::getSegmentSimulationOffset(const int32_t, const uint32_t) const
-{
-    return _geometry.userData;
 }

@@ -1,14 +1,14 @@
 #pragma once
 
 #include <brayns/engine/Model.h>
-#include <plugin/api/CircuitColorData.h>
 #include <plugin/api/CircuitColorHandler.h>
-#include <plugin/io/morphology/neuron/NeuronGeometryMapping.h>
+#include <plugin/io/morphology/neuron/colorhandlers/NeuronColorData.h>
+#include <plugin/io/morphology/neuron/components/MorphologyCircuitComponent.h>
 
 class PrimitiveColorHandler final : public CircuitColorHandler
 {
 public:
-    PrimitiveColorHandler(CircuitColorData &colorData, brayns::Model &model);
+    PrimitiveColorHandler(NeuronColorData &colorData, MorphologyCircuitComponent &circuit);
 
     /**
      * @brief updateColorById Updates color of the elements by the ID they are
@@ -30,16 +30,17 @@ public:
     void updateColor(const std::string &method, const std::vector<ColoringInformation> &vars) override;
 
     /**
-     * @brief addMappingForElement adds a new element geometry mapping to the handler
-     * @param id
-     * @param ranges
+     * @brief updateSimulationColor
+     * @param color
+     * @param indices
      */
-    void addMappingForElement(uint64_t id, std::vector<NeuronSectionRange> ranges);
+    void updateSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices) override;
 
 private:
-    CircuitColorData &_colorData;
-    brayns::Model &_model;
-    std::vector<uint64_t> _ids;
-    std::vector<std::vector<NeuronSectionRange>> _elementMappings;
+    void _colorWithInput(const std::string &method, const std::vector<ColoringInformation> &vars);
+    void _colorAll(const std::string &method);
 
+private:
+    NeuronColorData &_colorData;
+    MorphologyCircuitComponent &_circuit;
 };

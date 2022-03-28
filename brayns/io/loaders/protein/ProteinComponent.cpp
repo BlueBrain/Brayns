@@ -31,6 +31,7 @@ ProteinComponent::ProteinComponent(std::vector<Sphere> sphe, std::vector<Vector4
  , _colors(std::move(colors))
  , _colorIndices(std::move(indx))
 {
+    sphe.shrink_to_fit();
     _geometry.set(std::move(sphe));
 }
 
@@ -40,6 +41,11 @@ uint64_t ProteinComponent::getSizeInBytes() const noexcept
             + _geometry.getSizeInBytes()
             + sizeof(Vector4f) * _colors.size()
             + sizeof(uint8_t) * _colorIndices.size();
+}
+
+Bounds ProteinComponent::computeBounds(const Matrix4f &transform) const noexcept
+{
+    return _geometry.computeBounds(transform);
 }
 
 void ProteinComponent::onStart()

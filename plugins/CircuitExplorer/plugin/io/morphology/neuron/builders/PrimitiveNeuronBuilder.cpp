@@ -18,58 +18,32 @@
 
 #include "PrimitiveNeuronBuilder.h"
 
-#include <plugin/io/morphology/neuron/instances/PrimitiveNeuronInstance.h>
-
 namespace
 {
-struct PrimitiveInstantiableGeometry : public NeuronInstantiableGeometry
+void addGeometry(PrimitiveNeuronGeometry &data, int32_t sectionId, brayns::Primitive geometry)
 {
-    std::unique_ptr<MorphologyInstance> instantiate(const brayns::Vector3f &tr,
-                                                    const brayns::Quaternion &rot) const final
-    {
-        auto geometryCopy = geometry;
-        for (auto &primitive : geometryCopy)
-        {
-            primitive.p0 = tr + rot * primitive.p0;
-            primitive.p1 = tr + rot * primitive.p1;
-        }
+    auto &geometryBuffer = data.geometry;
+    auto &sectionMapping = data.sectionSegmentMapping;
 
-        return std::make_unique<PrimitiveNeuronInstance>(std::move(geometryCopy), std::move(data));
-    }
-
-    void add(brayns::Primitive primitive, const int32_t sectionId) noexcept
-    {
-        const auto geomIdx = geometry.size();
-        geometry.push_back(std::move(primitive));
-        data.sectionMap[sectionId].push_back(geomIdx);
-    }
-
-    std::vector<brayns::Primitive> geometry;
-    NeuronGeometryMapping data;
-};
-
-} // namespace
-
-PrimitiveNeuronBuilder::PrimitiveNeuronBuilder()
-    : NeuronBuilder("smooth")
-{
+    auto idx = geometryBuffer.size();
+    geometryBuffer.push_back(std::move(geometry));
+    sectionMapping[sectionId].push_back(idx);
 }
 
-std::unique_ptr<NeuronInstantiableGeometry> PrimitiveNeuronBuilder::build(const NeuronMorphology &m) const
+PrimitiveNeuronGeometry build(const NeuronMorphology &morphology)
 {
-    auto instantiableResult = std::make_unique<PrimitiveInstantiableGeometry>();
-    auto &instantiable = *instantiableResult;
-    auto &data = instantiable.data;
-    auto &sectionRanges = data.sectionRanges;
+    PrimitiveNeuronGeometry result;
+    auto &geometry = result.geometry;
+    auto &sectionRanges = result.sectionMapping;
 
     // Add soma
-    if (m.hasSoma())
+    if (morphology.hasSoma())
     {
-        const auto &soma = m.soma();
+        const auto &soma = morphology.soma();
         const auto &somaCenter = soma.center;
         const auto somaRadius = soma.radius;
         auto somaSphere = brayns::Primitive::sphere(somaCenter, somaRadius);
-        instantiable.add(std::move(somaSphere), -1);
+        addGeometry(result, -1, std::move(somaSphere));
 
         for (const auto childPtr : soma.children)
         {
@@ -83,18 +57,18 @@ std::unique_ptr<NeuronInstantiableGeometry> PrimitiveNeuronBuilder::build(const 
             const brayns::Vector3f samplePos (childFirstSample);
             const float sampleRadius = childFirstSample.w;
             auto somaCone = brayns::Primitive::cone(somaCenter, somaRadius, samplePos, sampleRadius);
-            instantiable.add(somaCone, -1);
+            addGeometry(result, -1, std::move(somaCone));
         }
 
-        NeuronSectionRange somaRange;
-        somaRange.section = NeuronSection::SOMA;
+        MorphologySectionMapping somaRange;
+        somaRange.type = NeuronSection::SOMA;
         somaRange.begin = 0;
-        somaRange.end = instantiable.geometry.size();
+        somaRange.end = geometry.size();
         sectionRanges.push_back(std::move(somaRange));
     }
 
     // Sort sections by section type
-    auto &morphologySections = m.sections();
+    auto &morphologySections = morphology.sections();
     std::unordered_map<NeuronSection, std::vector<const NeuronMorphology::Section*>> sortedSections;
     for(const auto &section : morphologySections)
     {
@@ -112,7 +86,7 @@ std::unique_ptr<NeuronInstantiableGeometry> PrimitiveNeuronBuilder::build(const 
     // Add section geometry, grouped by section type
     for(const auto& [sectionType, sectionPointers] : sortedSections)
     {
-        const auto sectionIndexBegin = instantiable.geometry.size();
+        const auto sectionIndexBegin = geometry.size();
 
         // Add dendrites and axon
         for (const auto sectionPtr : sectionPointers)
@@ -136,20 +110,40 @@ std::unique_ptr<NeuronInstantiableGeometry> PrimitiveNeuronBuilder::build(const 
                 const float r2 = s2.w;
 
                 const auto geometry = brayns::Primitive::cone(p1, r1, p2, r2);
-                instantiable.add(std::move(geometry), section.id);
+                addGeometry(result, section.id, std::move(geometry));
             }
         }
 
-        const auto sectionIndexEnd = instantiable.geometry.size();
+        const auto sectionIndexEnd = geometry.size();
         if(sectionIndexEnd - sectionIndexBegin > 0)
         {
-            NeuronSectionRange range;
-            range.section = sectionType;
+            MorphologySectionMapping range;
+            range.type = sectionType;
             range.begin = sectionIndexBegin;
             range.end = sectionIndexEnd;
             sectionRanges.push_back(std::move(range));
         }
     }
 
-    return instantiableResult;
+    return result;
+}
+
+} // namespace
+
+PrimitiveNeuronBuilder::PrimitiveNeuronBuilder(const NeuronMorphology &morphology)
+ : _data(build(morphology))
+{
+}
+
+PrimitiveNeuronGeometry PrimitiveNeuronBuilder::instantiate(
+        const brayns::Vector3f &position, const brayns::Quaternion &rotation) const
+{
+    auto copy = _data;
+    auto &geometry = copy.geometry;
+    for (auto &primitive : geometry)
+    {
+        primitive.p0 = position + rotation * primitive.p0;
+        primitive.p1 = position + rotation * primitive.p1;
+    }
+    return copy;
 }

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <plugin/api/CircuitColorHandler.h>
+#include <plugin/api/CircuitColorData.h>
 
 #include <plugin/io/SonataLoaderParameters.h>
 #include <plugin/io/sonataloader/data/SonataConfig.h>
@@ -35,15 +35,13 @@ public:
     /**
      * @brief creates a CircuitColorHandler based on the node population type
      */
-    static CircuitColorHandler::Ptr createNodeColorHandler(
-        const SonataNetworkConfig &network,
-        const SonataNodePopulationParameters &lc);
+    static std::unique_ptr<CircuitColorData> createNodeColorHandler(
+        const SonataNetworkConfig &network, const SonataNodePopulationParameters &lc);
 
     /**
      * @brief creates a CircuitColorHandler based on the edge population type
      */
-    static CircuitColorHandler::Ptr createEdgeColorHandler(
-        const SonataNetworkConfig &network,
-        const SonataEdgePopulationParameters &lc);
+    static std::unique_ptr<CircuitColorData> createEdgeColorHandler(
+        const SonataNetworkConfig &network, const SonataEdgePopulationParameters &lc);
 };
 } // namespace sonataloader

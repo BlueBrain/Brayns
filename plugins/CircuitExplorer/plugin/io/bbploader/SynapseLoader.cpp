@@ -1,60 +1,69 @@
 #include "SynapseLoader.h"
 
-#include <plugin/io/synapse/groups/OldSurfaceSynapseGroup.h>
+#include <plugin/io/synapse/components/SynapseComponent.h>
+
+#include <brain/synapse.h>
+#include <brain/synapses.h>
+#include <brain/synapsesIterator.h>
+#include <brain/synapsesStream.h>
+
+namespace
+{
+struct AfferentLoader
+{
+    static void load(const brain::Circuit &circuit, const brain::GIDSet &gids, SynapseComponent &synapses)
+    {
+        std::map<uint32_t, std::vector<brayns::Sphere>> synapseGeometry;
+        const brain::Synapses synapseData (circuit.getAfferentSynapses(gids));
+        for(const auto &synapse : synapseData)
+        {
+            const auto position = synapse.getPostsynapticSurfacePosition();
+            const auto gid = synapse.getPostsynapticGID();
+            auto &buffer = synapseGeometry[gid];
+            buffer.push_back({position, 2.f});
+        }
+
+        for(auto &[gid, synapseSpheres] : synapseGeometry)
+        {
+            synapses.addSynapses(gid, std::move(synapseSpheres));
+        }
+    }
+};
+
+struct EfferentLoader
+{
+    static void load(const brain::Circuit &circuit, const brain::GIDSet &gids, SynapseComponent &synapses)
+    {
+        std::map<uint32_t, std::vector<brayns::Sphere>> synapseGeometry;
+        const brain::Synapses synapseData (circuit.getEfferentSynapses(gids));
+        for(const auto &synapse : synapseData)
+        {
+            const auto position = synapse.getPresynapticSurfacePosition();
+            const auto gid = synapse.getPresynapticGID();
+            auto &buffer = synapseGeometry[gid];
+            buffer.push_back({position, 2.f});
+        }
+
+        for(auto &[gid, synapseSpheres] : synapseGeometry)
+        {
+            synapses.addSynapses(gid, std::move(synapseSpheres));
+        }
+    }
+};
+}
 
 namespace bbploader
 {
-namespace
+void SynapseLoader::load(const brain::Circuit &circuit, const brain::GIDSet &gids, const bool post, brayns::Model &mod)
 {
-auto doLoad(
-    const brain::Synapses &src,
-    const brain::GIDSet &gids,
-    glm::vec3 (brain::Synapse::*posMethod)() const,
-    uint32_t (brain::Synapse::*gidMethod)() const,
-    uint32_t (brain::Synapse::*sectionMethod)() const)
-{
-    std::vector<std::unique_ptr<SynapseGroup>> result;
-    if (!src.empty())
+    auto &synapseComponent = mod.addComponent<SynapseComponent>();
+    if (post)
     {
-        std::map<uint32_t, std::unique_ptr<SynapseGroup>> synapseMap;
-        for (const auto gid : gids)
-            synapseMap[gid] = std::make_unique<OldSurfaceSynapseGroup>();
-
-        for (const auto &synapse : src)
-        {
-            auto &group = static_cast<OldSurfaceSynapseGroup &>(*synapseMap[(synapse.*gidMethod)()]);
-            group.addSynapse(0, (synapse.*sectionMethod)(), (synapse.*posMethod)());
-        }
-
-        result.reserve(synapseMap.size());
-        for (auto &entry : synapseMap)
-            result.push_back(std::move(entry.second));
-    }
-
-    return result;
-}
-} // namespace
-
-std::vector<std::unique_ptr<SynapseGroup>>
-    SynapseLoader::load(const brain::Circuit &circuit, const brain::GIDSet &gids, const bool afferent)
-{
-    if (afferent)
-    {
-        return doLoad(
-            circuit.getAfferentSynapses(gids),
-            gids,
-            &brain::Synapse::getPostsynapticSurfacePosition,
-            &brain::Synapse::getPostsynapticGID,
-            &brain::Synapse::getPostsynapticSectionID);
+        AfferentLoader::load(circuit, gids, synapseComponent);
     }
     else
     {
-        return doLoad(
-            circuit.getEfferentSynapses(gids),
-            gids,
-            &brain::Synapse::getPresynapticSurfacePosition,
-            &brain::Synapse::getPresynapticGID,
-            &brain::Synapse::getPresynapticSectionID);
+        EfferentLoader::load(circuit, gids, synapseComponent);
     }
 }
 } // namespace bbploader

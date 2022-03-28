@@ -32,14 +32,14 @@ public:
      * @brief getAvailableMethods Return the available methods by which a
      * circuit can be colored (For example: By ID, By layer, by population, ...)
      */
-    std::vector<std::string> getMethods() const noexcept;
+    virtual std::vector<std::string> getMethods() const noexcept = 0;
 
     /**
      * @brief getMethodVariables Return the possible variable specofications for
      * a given method (For example, for layer it will return the list of loaded
      * layers, for mtypes the list of loaded mtypes, ...)
      */
-    std::vector<std::string> getMethodVariables(const std::string &method) const;
+    virtual std::vector<std::string> getMethodVariables(const std::string &method) const = 0;
 
     /**
      * @brief Return the values corresponding to the given ids for the given method of coloring
@@ -47,5 +47,6 @@ public:
      * @param ids
      * @return std::vector<std::string>
      */
-    std::vector<std::string> getMethodValuesForIDs(const std::string &method, const std::vector<uint64_t>& ids) const;
+    virtual std::vector<std::string> getMethodValuesForIDs(const std::string &method,
+                                                           const std::vector<uint64_t>& ids) const = 0;
 };

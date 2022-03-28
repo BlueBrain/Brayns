@@ -19,6 +19,7 @@
 #pragma once
 
 #include <brayns/engine/Model.h>
+#include <brayns/engine/common/DataHandler.h>
 
 #include <map>
 #include <stdexcept>
@@ -88,4 +89,11 @@ public:
      * updated. Otherwise, updates the whole circuit.
      */
     virtual void updateColor(const std::string &method, const std::vector<ColoringInformation> &vars) = 0;
+
+    /**
+     * @brief updateSimulationColor udpates the circuit color to the simulation values
+     * @param color
+     * @param indices
+     */
+    virtual void updateSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices) = 0;
 };

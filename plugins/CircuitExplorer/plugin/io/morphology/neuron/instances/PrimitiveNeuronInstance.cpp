@@ -19,10 +19,8 @@
 #include "PrimitiveNeuronInstance.h"
 
 #include <brayns/engine/Model.h>
-#include <brayns/engine/defaultcomponents/GeometryRendererComponent.h>
 
-#include <plugin/components/CircuitColorComponent.h>
-#include <plugin/io/morphology/neuron/colorhandlers/PrimitiveColorHandler.h>
+#include <plugin/io/morphology/neuron/components/MorphologyCircuitComponent.h>
 
 PrimitiveNeuronInstance::PrimitiveNeuronInstance(std::vector<brayns::Primitive> geometry, NeuronGeometryMapping data)
     : _geometry(std::move(geometry))
@@ -38,7 +36,7 @@ std::vector<uint64_t> PrimitiveNeuronInstance::mapSimulation(const SimulationMap
 
     std::vector<uint64_t> result (_geometry.size(), offset);
 
-    for (const auto& [sectionId, segments] : _data.sectionMap)
+    for (const auto& [sectionId, segments] : _data.sectionSegmentMapping)
     {
         // No section level information (soma report, spike simulation, etc.) or dealing with soma
         if (sectionId <= -1 || localOffsets.empty() || static_cast<size_t>(sectionId) > localOffsets.size() - 1)
@@ -64,50 +62,10 @@ std::vector<uint64_t> PrimitiveNeuronInstance::mapSimulation(const SimulationMap
     return result;
 }
 
+/*
 void PrimitiveNeuronInstance::addToModel(uint64_t id, brayns::Model &model)
 {
-    auto &renderComponent = model.getComponent<brayns::GeometryRendererComponent<brayns::Primitive>>();
-    auto &geometry = renderComponent.getGeometry();
-    auto offset = geometry.getNumGeometries();
-    geometry.add(_geometry);
-
-    auto &ranges = _data.sectionRanges;
-    for(auto &range : ranges)
-    {
-        range.begin += offset;
-        range.end += offset;
-    }
-
-    auto &colorComponent = model.getComponent<CircuitColorComponent>();
-    auto &colorHandler = colorComponent.getColorHandler();
-    auto &primitiveHandler = static_cast<PrimitiveColorHandler&>(colorHandler);
-    primitiveHandler.addMappingForElement(id, std::move(ranges));
+    auto &renderComponent = model.getComponent<MorphologyCircuitComponent>();
+    renderComponent.addMorphology(id, _geometry, _data.sectionMapping);
 }
-
-size_t PrimitiveNeuronInstance::getSectionSegmentCount(const int32_t section) const
-{
-    auto it = _data.sectionMap.find(section);
-    if (it == _data.sectionMap.end())
-        throw std::invalid_argument("Section " + std::to_string(section) + "not found");
-
-    return it->second.size();
-}
-
-MorphologyInstance::SegmentPoints PrimitiveNeuronInstance::getSegment(const int32_t section, const uint32_t segment)
-    const
-{
-    auto it = _data.sectionMap.find(section);
-    if (it == _data.sectionMap.end())
-        throw std::invalid_argument("Section " + std::to_string(section) + " not found");
-
-    if (it->second.size() <= segment)
-        throw std::invalid_argument("Section " + std::to_string(section) +
-                                    " "
-                                    "Segment " +
-                                    std::to_string(segment) + " not found");
-
-    const auto &geom = _geometry[it->second[segment]];
-    const auto &start = geom.p0;
-    const auto &end = geom.p1;
-    return std::make_pair(&start, &end);
-}
+*/

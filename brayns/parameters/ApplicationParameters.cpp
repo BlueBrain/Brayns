@@ -123,12 +123,12 @@ const Vector2ui &ApplicationParameters::getWindowSize() const noexcept
 
 void ApplicationParameters::setWindowSize(const Vector2ui &size) noexcept
 {
-    _windowSize = size;
+    _updateValue(_windowSize, size);
 }
 
 void ApplicationParameters::setJpegCompression(const size_t cmpr) noexcept
 {
-    _jpegCompression = cmpr;
+    _updateValue(_jpegCompression, cmpr);
 }
 
 size_t ApplicationParameters::getJpegCompression() const noexcept
@@ -143,7 +143,7 @@ size_t ApplicationParameters::getImageStreamFPS() const noexcept
 
 void ApplicationParameters::setImageStreamFPS(const size_t fps) noexcept
 {
-    _imageStreamFPS = fps;
+    _updateValue(_imageStreamFPS, fps);
 }
 
 bool ApplicationParameters::getUseQuantaRenderControl() const noexcept
@@ -153,7 +153,7 @@ bool ApplicationParameters::getUseQuantaRenderControl() const noexcept
 
 void ApplicationParameters::setUseQuantaRenderControl(const bool val) noexcept
 {
-    _useQuantaRenderControl = val;
+    _updateValue(_useQuantaRenderControl, val);
 }
 
 size_t ApplicationParameters::getMaxRenderFPS() const noexcept

@@ -32,6 +32,8 @@ public:
 
     uint64_t getSizeInBytes() const noexcept override;
 
+    Bounds computeBounds(const Matrix4f& transform) const noexcept override;
+
     void onStart() override;
 
     bool commit() override;

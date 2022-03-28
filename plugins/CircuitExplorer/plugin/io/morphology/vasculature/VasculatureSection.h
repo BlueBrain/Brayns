@@ -18,43 +18,34 @@
 
 #pragma once
 
-#include <cstdint>
+#include <brayns/utils/EnumUtils.h>
 
 /**
- * @brief The VasculatureSection enum list holds all the available vasculature
- * morphology sections, given also support to work with them as bitmask elements
+ * @brief The VasculatureSection enum list holds all the available vasculature section types
  */
-enum class VasculatureSection : uint8_t
+enum class VasculatureSection
 {
-    NONE = 0,
-    VEIN = 1,
-    ARTERY = 2,
-    VENULE = 4,
-    ARTERIOLE = 8,
-    VENOUS_CAPILLARY = 16,
-    ARTERIAL_CAPILLARY = 32,
-    TRANSITIONAL = 64,
-    ALL = VEIN | ARTERY | VENULE | ARTERIOLE | VENOUS_CAPILLARY | TRANSITIONAL
+    VEIN,
+    ARTERY,
+    VENULE,
+    ARTERIOLE,
+    VENOUS_CAPILLARY,
+    ARTERIAL_CAPILLARY,
+    TRANSITIONAL
 };
 
-inline VasculatureSection operator&(const VasculatureSection a, const VasculatureSection b) noexcept
+namespace brayns
 {
-    return static_cast<VasculatureSection>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
-}
-
-inline VasculatureSection operator&=(VasculatureSection &a, const VasculatureSection &b) noexcept
+template<>
+inline std::vector<std::pair<std::string, VasculatureSection>> enumMap()
 {
-    a = a & b;
-    return a;
+    return {
+        {"vein", VasculatureSection::VEIN},
+        {"artery", VasculatureSection::ARTERY},
+        {"venule", VasculatureSection::VENULE},
+        {"arteriole", VasculatureSection::ARTERIOLE},
+        {"venous capillary", VasculatureSection::VENOUS_CAPILLARY},
+        {"arterial capillary", VasculatureSection::ARTERIAL_CAPILLARY},
+        {"transitional", VasculatureSection::TRANSITIONAL}};
 }
-
-inline VasculatureSection operator|(const VasculatureSection a, const VasculatureSection b) noexcept
-{
-    return static_cast<VasculatureSection>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
-}
-
-inline VasculatureSection operator|=(VasculatureSection &a, const VasculatureSection &b) noexcept
-{
-    a = a | b;
-    return a;
-}
+} // namespace brayns

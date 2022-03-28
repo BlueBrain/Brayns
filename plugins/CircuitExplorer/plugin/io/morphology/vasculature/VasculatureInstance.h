@@ -21,16 +21,12 @@
 #include <plugin/io/morphology/MorphologyInstance.h>
 #include <plugin/io/morphology/vasculature/VasculatureSection.h>
 
-#include <brayns/common/geometry/SDFGeometry.h>
-
-#include <unordered_map>
+#include <brayns/engine/geometries/Primitive.h>
 
 /**
- * @brief The VasculatureInstance class represents a vasculature node geometry
- * to be placed on the scene and to which simulation can be mapped. It also
- *        gives access to geometry information at the section/segment level
- *        to allow for external geometry surface mapping (unused for
- * vasculature)
+ * @brief The VasculatureInstance class represents a vasculature node geometry to be placed on the scene and to which
+ * simulation can be mapped. It also gives access to geometry information at the section/segment level to allow for
+ * external geometry surface mapping (unused for vasculature)
  */
 class VasculatureInstance : public MorphologyInstance
 {
@@ -42,17 +38,33 @@ public:
         const float endR,
         const VasculatureSection sectionType);
 
-    void mapSimulation(const size_t globalOffset, const std::vector<uint16_t> &, const std::vector<uint16_t> &) final;
+    /**
+     * @brief mapSimulation
+     * @param mapping
+     * @return
+     */
+    std::vector<uint64_t> mapSimulation(const SimulationMapping &mapping) const final;
 
-    ElementMaterialMap::Ptr addToModel(brayns::Model &model) const final;
+    /**
+     * @brief addToModel
+     * @param id
+     * @param model
+     */
+    void addToModel(uint64_t id, brayns::Model &model) final;
 
+    /**
+     * @brief getSectionSegmentCount
+     * @return
+     */
     size_t getSectionSegmentCount(const int32_t) const final;
 
+    /**
+     * @brief getSegment
+     * @return
+     */
     MorphologyInstance::SegmentPoints getSegment(const int32_t, const uint32_t) const final;
 
-    uint64_t getSegmentSimulationOffset(const int32_t, const uint32_t) const final;
-
 private:
-    brayns::SDFGeometry _geometry;
+    brayns::Primitive _geometry;
     VasculatureSection _sectionType;
 };

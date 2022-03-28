@@ -33,13 +33,13 @@ void GeometricModelHandler::setColor(OSPGeometricModel model, const Vector4f &co
     ospRemoveParam(model, "index");
 }
 
-void GeometricModelHandler::setColors(OSPGeometricModel model, Buffer &colors)
+void GeometricModelHandler::setColors(OSPGeometricModel model, OSPBuffer &colors)
 {
     ospSetParam(model, "color", OSPDataType::OSP_DATA, &colors.handle);
     ospRemoveParam(model, "index");
 }
 
-void GeometricModelHandler::setColorMap(OSPGeometricModel model, Buffer &colors, Buffer &indices)
+void GeometricModelHandler::setColorMap(OSPGeometricModel model, OSPBuffer &colors, OSPBuffer &indices)
 {
     ospSetParam(model, "color", OSPDataType::OSP_DATA, &colors.handle);
     ospSetParam(model, "index", OSPDataType::OSP_DATA, &indices.handle);

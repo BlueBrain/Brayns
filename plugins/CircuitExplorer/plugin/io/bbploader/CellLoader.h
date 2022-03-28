@@ -18,8 +18,12 @@
 
 #pragma once
 
+#include <brayns/io/Loader.h>
+
 #include <plugin/io/BBPLoaderParameters.h>
 #include <plugin/io/morphology/MorphologyInstance.h>
+#include <plugin/io/simulation/SimulationMapping.h>
+#include <plugin/io/util/ProgressUpdater.h>
 
 #include <brain/brain.h>
 
@@ -34,7 +38,21 @@ namespace bbploader
 class CellLoader
 {
 public:
-    static std::vector<MorphologyInstance::Ptr>
-        load(const BBPLoaderParameters &lc, const brain::GIDSet &gids, const brain::Circuit &circuit);
+    /**
+     * @brief load
+     * @param lc
+     * @param gids
+     * @param circuit
+     * @param blueConfig
+     * @param cb
+     * @param model
+     * @return
+     */
+    static std::vector<CompartmentStructure> load(const BBPLoaderParameters &lc,
+                                                  const std::vector<uint64_t> &gids,
+                                                  const brain::Circuit &circuit,
+                                                  const brion::BlueConfig &blueConfig,
+                                                  ProgressUpdater &updater,
+                                                  brayns::Model &model);
 };
 } // namespace bbploader

@@ -101,14 +101,14 @@ public:
      * @returns the index at which the given geometry was added to the buffer. This index is the same that
      * OSPRay will use as 'primID' within itself.
      */
-    uint32_t add(const T& geometry)
+    uint32_t add(T geometry)
     {
         const auto idx = _geometries.size();
         constexpr auto limit = std::numeric_limits<uint32_t>::max();
         if(idx >= limit)
             throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
 
-        _geometries.push_back(geometry);
+        _geometries.emplace_back(std::move(geometry));
         _dirty = true;
         return static_cast<uint32_t>(idx);
     }

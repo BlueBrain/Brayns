@@ -33,15 +33,16 @@ const brain::GIDSet &CompartmentSimulation::getReportGids() const
     return _report->getGIDs();
 }
 
-std::vector<Simulation::CellMapping> CompartmentSimulation::getMapping(const brain::GIDSet &inputGids) const
+std::vector<SimulationMapping> CompartmentSimulation::getMapping() const
 {
     const auto &ccounts = _report->getCompartmentCounts();
     const auto &offsets = _report->getOffsets();
 
-    std::vector<Simulation::CellMapping> mapping(inputGids.size());
+    const auto &gids = getReportGids();
+    std::vector<SimulationMapping> mapping(gids.size());
 
 #pragma omp parallel for
-    for (size_t i = 0; i < inputGids.size(); ++i)
+    for (size_t i = 0; i < gids.size(); ++i)
     {
         const auto &count = ccounts[i];
         const auto &offset = offsets[i];
@@ -58,7 +59,7 @@ std::vector<Simulation::CellMapping> CompartmentSimulation::getMapping(const bra
     return mapping;
 }
 
-brayns::AbstractSimulationHandlerPtr CompartmentSimulation::createHandler() const
+void CompartmentSimulation::addSimulationComponent(brayns::Model &model) const
 {
     return std::make_shared<CompartmentHandler>(_path, _report);
 }

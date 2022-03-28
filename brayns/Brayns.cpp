@@ -100,6 +100,9 @@ bool Brayns::commitAndRender()
     // Render new frame, if needed
     _engine.render();
 
+    // The parameters are modified on pluginManager.preRender, and processed on engine.preRender and engine.commit
+    _parametersManager.resetModified();
+
     // Post render engine
     _engine.postRender();
 

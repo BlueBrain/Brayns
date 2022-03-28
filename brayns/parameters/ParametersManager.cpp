@@ -222,6 +222,14 @@ const NetworkParameters &ParametersManager::getNetworkParameters() const
     return _networkParameters;
 }
 
+void ParametersManager::resetModified()
+{
+    for (auto parameters : _parameterSets)
+    {
+        parameters->resetModified();
+    }
+}
+
 void ParametersManager::_processUnrecognizedOptions(const std::vector<std::string> &unrecognizedOptions) const
 {
     if (unrecognizedOptions.empty())

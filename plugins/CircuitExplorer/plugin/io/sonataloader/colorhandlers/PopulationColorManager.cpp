@@ -20,17 +20,17 @@
 
 #include <brayns/common/Log.h>
 
-#include <plugin/io/sonataloader/colorhandlers/edge/CommonEdgeColorHandler.h>
-#include <plugin/io/sonataloader/colorhandlers/edge/EndFootColorHandler.h>
+#include <plugin/io/sonataloader/colorhandlers/edge/CommonEdgeColorData.h>
+#include <plugin/io/sonataloader/colorhandlers/edge/EndFootColorData.h>
 
-#include <plugin/io/sonataloader/colorhandlers/node/SonataNeuronColorHandler.h>
-#include <plugin/io/sonataloader/colorhandlers/node/VasculatureColorHandler.h>
+#include <plugin/io/sonataloader/colorhandlers/node/SonataNeuronColorData.h>
+#include <plugin/io/sonataloader/colorhandlers/node/VasculatureColorData.h>
 
 #include <plugin/io/sonataloader/data/SonataCells.h>
 
 namespace sonataloader
 {
-CircuitColorHandler::Ptr PopulationColorManager::createNodeColorHandler(
+std::unique_ptr<CircuitColorData> PopulationColorManager::createNodeColorHandler(
     const SonataNetworkConfig &network,
     const SonataNodePopulationParameters &lc)
 {
@@ -52,12 +52,14 @@ CircuitColorHandler::Ptr PopulationColorManager::createNodeColorHandler(
     }
 
     if (type == "vasculature")
-        return std::make_unique<VasculatureColorHandler>();
+    {
+        return std::make_unique<VasculatureColorData>(config, populationName);
+    }
 
-    return std::make_unique<SonataNeuronColorHandler>(config, lc.node_population);
+    return std::make_unique<SonataNeuronColorData>(config, populationName);
 }
 
-CircuitColorHandler::Ptr PopulationColorManager::createEdgeColorHandler(
+std::unique_ptr<CircuitColorData> PopulationColorManager::createEdgeColorHandler(
     const SonataNetworkConfig &network,
     const SonataEdgePopulationParameters &lc)
 {
@@ -67,8 +69,10 @@ CircuitColorHandler::Ptr PopulationColorManager::createEdgeColorHandler(
     const auto loadAfferent = lc.load_afferent;
 
     if (edgeProperties.type == "endfoot")
-        return std::make_unique<EndFootColorHandler>();
+    {
+        return std::make_unique<EndFootColorData>();
+    }
 
-    return std::make_unique<CommonEdgeColorHandler>(config, population, loadAfferent);
+    return std::make_unique<CommonEdgeColorData>(config, population, loadAfferent);
 }
 } // namespace sonataloader

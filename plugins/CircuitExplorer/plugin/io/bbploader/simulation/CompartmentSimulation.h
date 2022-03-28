@@ -26,14 +26,33 @@ namespace bbploader
  * @brief The CompartmentSimulation class implements BBP internal format
  * compartment report handling (soma, full compartment, summation)
  */
-class CompartmentSimulation : public Simulation
+class CompartmentSimulation final : public Simulation
 {
 public:
+    /**
+     * @brief CompartmentSimulation
+     * @param path
+     * @param inputGids
+     */
     CompartmentSimulation(const std::string &path, const brain::GIDSet &inputGids);
 
-    const brain::GIDSet &getReportGids() const final;
-    std::vector<CellMapping> getMapping(const brain::GIDSet &inputGids) const final;
-    brayns::AbstractSimulationHandlerPtr createHandler() const final;
+    /**
+     * @brief getReportGids
+     * @return
+     */
+    const brain::GIDSet &getReportGids() const override;
+
+    /**
+     * @brief getMapping
+     * @return
+     */
+    std::vector<SimulationMapping> getMapping() const override;
+
+    /**
+     * @brief addSimulationComponent
+     * @param model
+     */
+    void addSimulationComponent(brayns::Model &model) const override;
 
 private:
     const std::string _path;

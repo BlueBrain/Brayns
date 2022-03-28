@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/defaultcomponents/MaterialComponent.h>
+#include <brayns/engine/components/MaterialComponent.h>
 #include <brayns/engine/scenecomponents/SceneModelManager.h>
 
 #include <brayns/network/adapters/MaterialAdapter.h>

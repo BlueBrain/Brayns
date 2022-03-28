@@ -18,65 +18,145 @@
 
 #include "CellLoader.h"
 
-#include <plugin/io/morphology/neuron/NeuronBuilder.h>
+#include <plugin/components/CircuitColorComponent.h>
 #include <plugin/io/morphology/neuron/NeuronMorphologyPipeline.h>
+#include <plugin/io/morphology/neuron/builders/PrimitiveNeuronBuilder.h>
+#include <plugin/io/morphology/neuron/colorhandlers/PrimitiveColorHandler.h>
+#include <plugin/io/morphology/neuron/colorhandlers/SomaColorHandler.h>
+#include <plugin/io/morphology/neuron/components/MorphologyCircuitComponent.h>
+#include <plugin/io/morphology/neuron/components/SomaCircuitComponent.h>
+#include <plugin/io/bbploader/colordata/BBPNeuronColorData.h>
+
+#include <brion/blueConfig.h>
 
 #include <future>
+#include <filesystem>
+
+namespace
+{
+struct BBPNeuronColorCreator
+{
+    static std::unique_ptr<bbploader::BBPNeuronColorData> newData(const brion::BlueConfig& config,
+                                                                  const brain::Circuit &circuit)
+    {
+        auto circuitPath = circuit.getSource().getPath();
+        auto circuitPopulation = config.getCircuitPopulation();
+        return std::make_unique<bbploader::BBPNeuronColorData>(std::move(circuitPath), std::move(circuitPopulation));
+    }
+};
+}
 
 namespace bbploader
 {
-std::vector<MorphologyInstance::Ptr>
-    CellLoader::load(const BBPLoaderParameters &lc, const brain::GIDSet &gids, const brain::Circuit &circuit)
+std::vector<CompartmentStructure> CellLoader::load(const BBPLoaderParameters &lc,
+                                                   const std::vector<uint64_t> &ids,
+                                                   const brain::Circuit &circuit,
+                                                   const brion::BlueConfig &blueConfig,
+                                                   ProgressUpdater &updater,
+                                                   brayns::Model &model)
 {
-    const auto morphPaths = circuit.getMorphologyURIs(gids);
-    // Group indices by the morphology name, so we will load the morphology
-    // once, and then iterate over the indices of the corresponding cells
-    std::unordered_map<std::string, std::vector<size_t>> morphPathMap;
-    for (size_t i = 0; i < morphPaths.size(); ++i)
-        morphPathMap[morphPaths[i].getPath()].push_back(i);
-
-    const auto positions = circuit.getPositions(gids);
-    const auto rotations = circuit.getRotations(gids);
-
     const auto &morphSettings = lc.neuron_morphology_parameters;
-    const auto &geometryMode = morphSettings.geometry_mode;
-    const auto radMultiplier = morphSettings.radius_multiplier;
-    const auto radOverride = morphSettings.radius_override;
     const auto loadSoma = morphSettings.load_soma;
     const auto loadAxon = morphSettings.load_axon;
     const auto loadDend = morphSettings.load_dendrites;
+    const auto onlySoma = loadSoma && !loadAxon && !loadDend;
+    const auto radMultiplier = morphSettings.radius_multiplier;
+    const auto radOverride = morphSettings.radius_override;
 
-    const NeuronBuilderTable builderTable;
-    const auto &builder = builderTable.getBuilder(geometryMode);
-    const NeuronMorphologyPipeline pipeline = NeuronMorphologyPipeline::create(
-        radMultiplier,
-        radOverride,
-        geometryMode == "smooth" && (loadAxon || loadDend));
+    const brain::GIDSet gids (ids.begin(), ids.end());
 
-    std::vector<MorphologyInstance::Ptr> cells(gids.size());
+    const auto positions = circuit.getPositions(gids);
 
-    const auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
+    std::vector<CompartmentStructure> result(gids.size());
+
+    auto colorData = BBPNeuronColorCreator::newData(blueConfig, circuit);
+    std::unique_ptr<CircuitColorHandler> colorHandler;
+
+    if(onlySoma)
     {
-        NeuronMorphology morphology(path, loadSoma, loadAxon, loadDend);
-        pipeline.process(morphology);
-        const auto instantiable = builder.build(morphology);
-        for (const auto idx : indices)
-            cells[idx] = instantiable->instantiate(positions[idx], rotations[idx]);
-    };
+        auto &somaCircuit = model.addComponent<SomaCircuitComponent>();
+        colorHandler = std::make_unique<SomaColorHandler>(*colorData, somaCircuit);
 
-    std::vector<std::future<void>> loadTasks;
-    loadTasks.reserve(morphPathMap.size());
-    for (const auto &entry : morphPathMap)
-        loadTasks.push_back(std::async(loadFn, entry.first, entry.second));
+        const auto radius = radOverride > 0.f? radOverride : radMultiplier;
+#pragma omp parallel for
+        for(size_t i = 0; i < ids.size(); ++i)
+        {
+            const auto id = ids[i];
+            const auto &pos = positions[i];
+            brayns::Sphere somaGeometry = {pos, radius};
+            somaCircuit.addSoma(id, std::move(somaGeometry));
 
-    for (auto &task : loadTasks)
+            auto &compartments = result[i];
+            compartments.sectionSegments[-1].push_back(0);
+        }
+    }
+    else
     {
-        if (task.valid())
-            task.get();
-        else
-            throw std::runtime_error("Unknown error while loading morphologies");
+        auto &morphologyCircuit = model.addComponent<MorphologyCircuitComponent>();
+        colorHandler = std::make_unique<PrimitiveColorHandler>(*colorData, morphologyCircuit);
+
+        const auto morphPaths = circuit.getMorphologyURIs(gids);
+        const auto rotations = circuit.getRotations(gids);
+
+        // Group indices by the morphology name, so we will load the morphology
+        // once, and then iterate over the indices of the corresponding cells
+        std::unordered_map<std::string, std::vector<size_t>> morphPathMap;
+        for (size_t i = 0; i < morphPaths.size(); ++i)
+        {
+            morphPathMap[morphPaths[i].getPath()].push_back(i);
+        }
+
+        const auto pipeline = NeuronMorphologyPipeline::create(radMultiplier, radOverride);
+        std::vector<PrimitiveNeuronGeometry> morphologies (ids.size());
+        const auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
+        {
+            NeuronMorphology morphology(path, loadSoma, loadAxon, loadDend);
+            pipeline.process(morphology);
+            const PrimitiveNeuronBuilder builder(morphology);
+            for (const auto idx : indices)
+            {
+                morphologies[idx] = builder.instantiate(positions[idx], rotations[idx]);
+            }
+        };
+
+        std::vector<std::future<void>> loadTasks;
+        loadTasks.reserve(morphPathMap.size());
+        for (const auto &entry : morphPathMap)
+        {
+            loadTasks.push_back(std::async(loadFn, entry.first, entry.second));
+        }
+
+        const std::string updateMessage ("Loading neurons");
+        for (auto &task : loadTasks)
+        {
+            if (task.valid())
+            {
+                task.get();
+                updater.update(updateMessage);
+            }
+            else
+            {
+                throw std::runtime_error("Unknown error while loading morphologies");
+            }
+        }
+
+#pragma omp parallel for
+        for(size_t i = 0; i < ids.size(); ++i)
+        {
+            const auto id = ids[i];
+            auto &morphology = morphologies[i];
+            auto &sectionMapping = morphology.sectionMapping;
+            auto &compartmentMapping = morphology.sectionSegmentMapping;
+            auto &geometry = morphology.geometry;
+
+            result[i].sectionSegments = std::move(compartmentMapping);
+
+            morphologyCircuit.addMorphology(id, std::move(geometry),std::move(sectionMapping));
+        }
     }
 
-    return cells;
+    model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
+
+    return result;
 }
 } // namespace bbploader

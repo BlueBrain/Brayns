@@ -19,15 +19,16 @@
 #pragma once
 
 #include <plugin/io/morphology/MorphologyInstance.h>
-#include <plugin/io/morphology/neuron/NeuronGeometryMapping.h>
+#include <plugin/io/morphology/neuron/components/MorphologyCircuitComponent.h>
 
 #include <brayns/engine/geometries/Primitive.h>
 
-enum class PrimitiveType : uint8_t
+#include <unordered_map>
+
+struct NeuronGeometryMapping
 {
-    SPHERE = 0,
-    CYLINDER = 1,
-    CONE = 2
+    std::vector<MorphologySectionMapping> sectionMapping;
+    std::unordered_map<int32_t, std::vector<uint32_t>> sectionSegmentMapping;
 };
 
 /**
@@ -39,13 +40,7 @@ class PrimitiveNeuronInstance final : public MorphologyInstance
 public:
     PrimitiveNeuronInstance(std::vector<brayns::Primitive> prims, NeuronGeometryMapping data);
 
-    std::vector<uint64_t> mapSimulation(const SimulationMapping &mapping) const override;
-
     void addToModel(uint64_t id, brayns::Model &model) override;
-
-    size_t getSectionSegmentCount(const int32_t section) const override;
-
-    MorphologyInstance::SegmentPoints getSegment(const int32_t section, const uint32_t segment) const override;
 
 private:
     std::vector<brayns::Primitive> _geometry;

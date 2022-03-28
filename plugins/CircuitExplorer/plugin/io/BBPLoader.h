@@ -20,7 +20,6 @@
 
 #include <brayns/io/Loader.h>
 
-#include <plugin/api/CircuitColorManager.h>
 #include <plugin/io/BBPLoaderParameters.h>
 
 #include <brion/blueConfig.h>
@@ -31,8 +30,6 @@
 class BBPLoader : public brayns::Loader<BBPLoaderParameters>
 {
 public:
-    BBPLoader(CircuitColorManager &colorManager);
-
     /**
      * @brief getSupportedExtensions returns a list with supported file
      * extensions
@@ -54,20 +51,18 @@ public:
     /**
      * @brief importFromBlob imports models from a byte blob. NOT SUPPORTED
      */
-    std::vector<brayns::ModelDescriptorPtr> importFromBlob(
+    std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
         brayns::Blob &&,
         const brayns::LoaderProgress &,
-        const BBPLoaderParameters &,
-        brayns::Scene &) const final;
+        const BBPLoaderParameters &) const final;
 
     /**
      * @brief importFromFile imports models from a file given by a path
      */
-    std::vector<brayns::ModelDescriptorPtr> importFromFile(
+    std::vector<std::unique_ptr<brayns::Model>> importFromFile(
         const std::string &path,
         const brayns::LoaderProgress &callback,
-        const BBPLoaderParameters &params,
-        brayns::Scene &scene) const final;
+        const BBPLoaderParameters &params) const final;
 
     /**
      * @brief importFromBlueConfig imports a neuronal circuit from a BlueConfig
@@ -75,13 +70,9 @@ public:
      * loader for each population.
      *        TODO: Remove once NGV Project has switched to SONATA format...
      */
-    std::vector<brayns::ModelDescriptorPtr> importFromBlueConfig(
+    std::vector<std::unique_ptr<brayns::Model>> importFromBlueConfig(
         const std::string &path,
         const brayns::LoaderProgress &callback,
         const BBPLoaderParameters &params,
-        const brion::BlueConfig &config,
-        brayns::Scene &scene) const;
-
-private:
-    CircuitColorManager &_colorManager;
+        const brion::BlueConfig &config) const;
 };

@@ -22,8 +22,7 @@ void TransferFunctionUtils::set(brayns::TransferFunction &tf) noexcept
 {
     tf.setControlPoints({{0.f, 1.f}, {1.f, 1.f}});
     // curl https://api.colormaps.io/colormap/unipolar
-    tf.setColorMap(
-        {"unipolar",
+    tf.setColors(
          {{0.0, 0.0, 0.0},
           {0.00392156862745098, 0.00392156862745098, 0.12941176470588237},
           {0.00784313725490196, 0.00784313725490196, 0.25882352941176473},
@@ -151,6 +150,6 @@ void TransferFunctionUtils::set(brayns::TransferFunction &tf) noexcept
           {0.996078431372549, 1.0, 0.9607843137254902},
           {0.996078431372549, 1.0, 0.9686274509803922},
           {0.996078431372549, 1.0, 0.9803921568627451},
-          {1.0, 1.0, 1.0}}});
+          {1.0, 1.0, 1.0}});
     tf.setValuesRange({-80, -10});
 }

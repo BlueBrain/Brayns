@@ -21,7 +21,7 @@
 
 #include "ModelTransferFunctionAdapter.h"
 
-#include <brayns/engine/defaultcomponents/TransferFunctionComponent.h>
+#include <brayns/engine/components/TransferFunctionComponent.h>
 #include <brayns/network/common/ExtractModel.h>
 
 namespace brayns

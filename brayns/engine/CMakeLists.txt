@@ -19,9 +19,11 @@ set(BRAYNSENGINE_SOURCES
     Scene.cpp
     cameras/OrthographicCamera.cpp
     cameras/PerspectiveCamera.cpp
-    defaultcomponents/MaterialComponent.cpp
-    defaultcomponents/TransferFunctionComponent.cpp
-    defaultcomponents/TransferFunctionRendererComponent.cpp
+    common/ExtractModelObject.cpp
+    common/GeometricModelHandler.cpp
+    components/MaterialComponent.cpp
+    components/TransferFunctionComponent.cpp
+    components/TransferFunctionRendererComponent.cpp
     geometries/Box.cpp
     geometries/Plane.cpp
     geometries/Primitive.cpp
@@ -60,12 +62,16 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     Scene.h
     cameras/OrthographicCamera.h
     cameras/PerspectiveCamera.h
-    defaultcomponents/ClippingComponent.h
-    defaultcomponents/GeometryRendererComponent.h
-    defaultcomponents/MaterialComponent.h
-    defaultcomponents/TransferFunctionComponent.h
-    defaultcomponents/TransferFunctionRendererComponent.h
-    defaultcomponents/VolumeRendererComponent.h
+    common/DataHandler.h
+    common/ExtractModelObject.h
+    common/GeometricModelHandler.h
+    common/SizeHelper.h
+    components/ClippingComponent.h
+    components/GeometryRendererComponent.h
+    components/MaterialComponent.h
+    components/TransferFunctionComponent.h
+    components/TransferFunctionRendererComponent.h
+    components/VolumeRendererComponent.h
     geometries/Box.h
     geometries/Plane.h
     geometries/Primitive.h

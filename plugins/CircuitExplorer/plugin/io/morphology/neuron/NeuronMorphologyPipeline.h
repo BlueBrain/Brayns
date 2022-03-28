@@ -53,11 +53,8 @@ public:
      * @param radiusMultiplier A multiplier to apply to all morphology sample
      * radii
      * @param radiusOverride A value to override all morphology sample radii
-     * @param smooth a flag indicating wether the morphology should be processed
-     * to have a smooth appearance, getting rid of original sampling artifacts
      */
-    static NeuronMorphologyPipeline
-        create(const float radiusMultiplier, const float radiusOverride, const bool smooth) noexcept;
+    static NeuronMorphologyPipeline create(const float radiusMultiplier, const float radiusOverride) noexcept;
 
     /**
      * @brief registers a processing stage into this pipeline. Pipeline stages

@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/defaultcomponents/MaterialComponent.h>
+#include <brayns/engine/components/MaterialComponent.h>
 #include <brayns/engine/materials/CarPaintMaterial.h>
 #include <brayns/engine/materials/DefaultMaterial.h>
 #include <brayns/engine/materials/EmissiveMaterial.h>

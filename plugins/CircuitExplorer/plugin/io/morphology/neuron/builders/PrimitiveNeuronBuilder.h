@@ -18,16 +18,39 @@
 
 #pragma once
 
-#include <plugin/io/morphology/neuron/NeuronBuilder.h>
+#include <brayns/engine/geometries/Primitive.h>
+
+#include <plugin/io/morphology/neuron/NeuronMorphology.h>
+#include <plugin/io/morphology/neuron/components/MorphologyCircuitComponent.h>
+
+struct PrimitiveNeuronGeometry
+{
+    std::vector<brayns::Primitive> geometry;
+    std::vector<MorphologySectionMapping> sectionMapping;
+    std::unordered_map<int32_t, std::vector<size_t>> sectionSegmentMapping;
+};
 
 /**
- * @brief The PrimitiveGeometryBuilder class is a builder that transform a
- * Morphology object into primitive shapes (sheres, cones and cylinders)
+ * @brief The PrimitiveGeometryBuilder class is a builder that transform a Morphology object into primitive geometry
  */
-class PrimitiveNeuronBuilder final : public NeuronBuilder
+class PrimitiveNeuronBuilder
 {
 public:
-    PrimitiveNeuronBuilder();
+    /**
+     * @brief PrimitiveNeuronBuilder
+     * @param morphology
+     */
+    PrimitiveNeuronBuilder(const NeuronMorphology &morphology);
 
-    std::unique_ptr<NeuronInstantiableGeometry> build(const NeuronMorphology &) const override;
+    /**
+     * @brief instantiate
+     * @param position
+     * @param rotation
+     * @return
+     */
+    PrimitiveNeuronGeometry instantiate(
+            const brayns::Vector3f &position, const brayns::Quaternion &rotation) const;
+
+private:
+    PrimitiveNeuronGeometry _data;
 };

@@ -28,9 +28,9 @@ struct GeometricModelHandler
 
     static void setColor(OSPGeometricModel model, const Vector4f &color);
 
-    static void setColors(OSPGeometricModel model, Buffer &colors);
+    static void setColors(OSPGeometricModel model, OSPBuffer &colors);
 
-    static void setColorMap(OSPGeometricModel model, Buffer &colors, Buffer &indices);
+    static void setColorMap(OSPGeometricModel model, OSPBuffer &colors, OSPBuffer &indices);
 
     static void commitModel(OSPGeometricModel model);
 

@@ -46,12 +46,12 @@ void AnimationParameters::reset()
 
 void AnimationParameters::setStartFrame(const uint32_t startFrame) noexcept
 {
-    _startFrame = startFrame;
+    _updateValue(_startFrame, startFrame);
 }
 
 void AnimationParameters::setEndFrame(const uint32_t endFrame) noexcept
 {
-    _endFrame = endFrame;
+    _updateValue(_endFrame, endFrame);
 }
 
 uint32_t AnimationParameters::getStartFrame() const noexcept
@@ -66,7 +66,7 @@ uint32_t AnimationParameters::getEndFrame() const noexcept
 
 void AnimationParameters::setFrame(const uint32_t value) noexcept
 {
-    _current = value;
+    _updateValue(_current, value);
 }
 
 uint32_t AnimationParameters::getFrame() const noexcept

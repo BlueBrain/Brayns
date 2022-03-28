@@ -71,6 +71,11 @@ public:
     NetworkParameters &getNetworkParameters();
     const NetworkParameters &getNetworkParameters() const;
 
+    /**
+     * @brief resetModified resets the modified status for all registered parameters
+     */
+    void resetModified();
+
 private:
     void _parse(int argc, const char **argv);
     void _processUnrecognizedOptions(const std::vector<std::string> &unrecognizedOptions) const;

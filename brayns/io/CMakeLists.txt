@@ -6,8 +6,8 @@
 set(BRAYNSIO_SOURCES
     Loader.cpp
     LoaderRegistry.cpp
+    loaders/protein/ProteinComponent.cpp
     loaders/protein/ProteinLoader.cpp
-    loaders/protein/ProteinRendererComponent.cpp
     loaders/xyzb/XYZBLoader.cpp
     loaders/mesh/MeshLoader.cpp
     loaders/mesh/parsers/ObjMeshParser.cpp
@@ -22,8 +22,8 @@ set(BRAYNSIO_PUBLIC_HEADERS
     Loader.h
     LoaderRegistry.h
     loaders/mesh/MeshLoader.h
+    loaders/protein/ProteinComponent.h
     loaders/protein/ProteinLoader.h
-    loaders/protein/ProteinRendererComponent.h
     loaders/xyzb/XYZBLoader.h
 )
 
