@@ -84,12 +84,24 @@ public:
     {
         auto progress = brayns::ProgressHandler(token, request);
 
+        const auto &systemFrameBuffer = engine.getFrameBuffer();
+        const auto &systemFrameSize = systemFrameBuffer.getFrameSize();
+        const auto &systemCamera = engine.getCamera();
+        const auto &systemLookAt = systemCamera.getLookAt();
+        const auto &systemParameters = engine.getParametersManager();
+        const auto &systemAnimationParams = systemParameters.getAnimationParameters();
+        const auto systemAnimationFrame = systemAnimationParams.getFrame();
+
         // Initialize parameters
         auto params = request.getParams();
         auto &cameraView = params.camera_view;
+        auto cameraLookAt = cameraView.value_or(systemLookAt);
         auto &imageSettings = params.image_settings;
+        auto &imageSettingsSize = imageSettings.size;
+        auto imageSize = imageSettingsSize.value_or(systemFrameSize);
         auto &imagePath = params.file_path;
-        auto &animationSettings = params.animation;
+        auto &animationFrame = params.animation_frame;
+        auto animationFrameIndex = animationFrame.value_or(systemAnimationFrame);
 
         // Renderer
         auto &renderer = engine.getRenderer();
@@ -97,32 +109,22 @@ public:
 
         // Camera
         auto &camera = engine.getCamera();
-        const auto aspectRatio = static_cast<float>(imageSettings.size.x) / static_cast<float>(imageSettings.size.y);
+        const auto aspectRatio = static_cast<float>(imageSize.x) / static_cast<float>(imageSize.y);
         camera.setAspectRatio(aspectRatio);
-        auto currentLookAt = camera.getLookAt(); // To restore it afterwards
-        if(cameraView)
-        {
-            camera.setLookAt(*cameraView);
-        }
+        camera.setLookAt(cameraLookAt);
         camera.commit();
 
         // Framebuffer
         brayns::FrameBuffer frameBuffer;
         frameBuffer.setAccumulation(false);
         frameBuffer.setFormat(brayns::PixelFormat::SRGBA_I8);
-        frameBuffer.setFrameSize(imageSettings.size);
+        frameBuffer.setFrameSize(imageSize);
         frameBuffer.commit();
 
         // Parameters
-        auto parameters = engine.getParametersManager();
-        if(animationSettings)
-        {
-            auto& animationParameters = parameters.getAnimationParameters();
-            animationParameters.setDt(animationSettings->getDt());
-            animationParameters.setEndFrame(animationSettings->getEndFrame());
-            animationParameters.setStartFrame(animationSettings->getStartFrame());
-            animationParameters.setFrame(animationSettings->getFrame());
-        }
+        auto parameters = systemParameters;
+        auto &animation = parameters.getAnimationParameters();
+        animation.setFrame(animationFrameIndex);
 
         // Scene
         auto& scene = engine.getScene();
@@ -131,7 +133,7 @@ public:
 
         // Render
         auto future = brayns::FrameRenderer::asynchronous(camera, frameBuffer, renderer, scene);
-
+/*
         auto progressThread = std::thread([&]()
         {
             const auto msg = "Rendering snapshot ...";
@@ -142,9 +144,17 @@ public:
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
             }
         });
+*/
 
+        //progressThread.join();
+        const auto msg = "Rendering snapshot ...";
+        while(!ospIsReady(future))
+        {
+            const auto percentage = ospGetProgress(future);
+            progress.notify(msg, percentage);
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
         ospWait(future);
-        progressThread.join();
 
         // Handle result
         brayns::ImageBase64Message image;
@@ -159,7 +169,7 @@ public:
         }
 
         // Restore camera view
-        camera.setLookAt(currentLookAt);
+        camera.setLookAt(systemLookAt);
 
         request.reply(image);
     }
