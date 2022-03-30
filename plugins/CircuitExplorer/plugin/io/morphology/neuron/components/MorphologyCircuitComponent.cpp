@@ -12,11 +12,9 @@ size_t MorphologyCircuitComponent::getSizeInBytes() const noexcept
     {
         const auto &geometry = morphology.geometry;
         const auto &sections = morphology.sections;
-        const auto &indices = morphology.colorIndices;
         morphologiesSize += sizeof(MorphologyGeometry);
         morphologiesSize += geometry.getSizeInBytes();
         morphologiesSize += brayns::SizeHelper::vectorSize(sections);
-        morphologiesSize += brayns::SizeHelper::vectorSize(indices);
     }
 
     return sizeof(MorphologyCircuitComponent)
@@ -91,7 +89,6 @@ void MorphologyCircuitComponent::addMorphology(uint64_t id,
     auto &model = morphology.model;
     auto &geometry = morphology.geometry;
     auto &sections = morphology.sections;
-    auto &indices = morphology.colorIndices;
 
     model = brayns::GeometricModelHandler::create();
     brayns::GeometricModelHandler::addToGeometryGroup(model, group);
@@ -103,8 +100,6 @@ void MorphologyCircuitComponent::addMorphology(uint64_t id,
     brayns::GeometricModelHandler::setMaterial(model, material);
 
     sections = std::move(map);
-
-    indices.resize(geometry.getNumGeometries(), 0);
 }
 
 const std::vector<uint64_t> &MorphologyCircuitComponent::getIDs() const noexcept
@@ -122,13 +117,18 @@ void MorphologyCircuitComponent::setColor(const brayns::Vector4f &color) noexcep
     _colorsDirty = true;
 }
 
-void MorphologyCircuitComponent::setColorById(std::vector<brayns::Vector4f> colors) noexcept
+void MorphologyCircuitComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
 {
+    if(colors.size() < _morphologies.size())
+    {
+        throw std::invalid_argument("Not enough colors provided");
+    }
+
     for(size_t i = 0; i < _morphologies.size(); ++i)
     {
         auto &morphology = _morphologies[i];
         auto model = morphology.model;
-        auto &color = colors[i];
+        const auto &color = colors[i];
         brayns::GeometricModelHandler::setColor(model, color);
     }
     _colorsDirty = true;
@@ -193,7 +193,8 @@ void MorphologyCircuitComponent::setColorBySection(
     // Apply the appropiate color index to the appropiate section on each morphology
     for(auto &morphology : _morphologies)
     {
-        auto &indices = morphology.colorIndices;
+        const auto &geometry = morphology.geometry;
+        std::vector<uint8_t> indices (geometry.getNumGeometries(), 0u);
         auto &sections = morphology.sections;
 
         for(const auto &entry : sectionIndices)
@@ -212,7 +213,7 @@ void MorphologyCircuitComponent::setColorBySection(
             }
         }
 
-        auto indexData = brayns::DataHandler::shareBuffer(indices, OSPDataType::OSP_UCHAR);
+        auto indexData = brayns::DataHandler::copyBuffer(indices, OSPDataType::OSP_UCHAR);
 
         auto model = morphology.model;
         brayns::GeometricModelHandler::setColorMap(model, colorData, indexData);
@@ -221,8 +222,13 @@ void MorphologyCircuitComponent::setColorBySection(
     _colorsDirty = true;
 }
 
-void MorphologyCircuitComponent::setSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &map) noexcept
+void MorphologyCircuitComponent::setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &map)
 {
+    if(color.size > 256)
+    {
+        throw std::invalid_argument("Colormap has more than 256 values");
+    }
+
     size_t mappingOffset = 0;
     for(auto &morphology : _morphologies)
     {
@@ -230,8 +236,13 @@ void MorphologyCircuitComponent::setSimulationColor(brayns::OSPBuffer &color, co
         auto &geometry = morphology.geometry;
         auto geometrySize = geometry.getNumGeometries();
 
+        if(mappingOffset + geometrySize < map.size())
+        {
+            throw std::invalid_argument("Not enough mapping data provided");
+        }
+
         auto morphologyMapping = &map[mappingOffset];
-        auto mappingData = brayns::DataHandler::shareBuffer(morphologyMapping, geometrySize, OSPDataType::OSP_UCHAR);
+        auto mappingData = brayns::DataHandler::copyBuffer(morphologyMapping, geometrySize, OSPDataType::OSP_UCHAR);
         brayns::GeometricModelHandler::setColorMap(model, color, mappingData);
     }
     _colorsDirty = true;

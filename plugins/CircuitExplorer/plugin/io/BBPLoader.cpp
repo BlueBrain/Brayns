@@ -25,7 +25,7 @@
 #include <brayns/common/Timer.h>
 
 #include <plugin/io/bbploader/CellLoader.h>
-#include <plugin/io/bbploader/GIDLoadList.h>
+#include <plugin/io/bbploader/GIDLoader.h>
 #include <plugin/io/bbploader/ParameterCheck.h>
 #include <plugin/io/bbploader/SimulationLoader.h>
 #include <plugin/io/bbploader/SynapseLoader.h>
@@ -95,24 +95,19 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
     const brain::Circuit circuit(config);
     bbploader::ParameterCheck::checkInput(config, params);
 
-    auto cellModel = std::make_unique<brayns::Model>();
-
     // Configure progress reporter
     const float chunk = 0.2f;
     float total = 0.f;
 
     // Compute GIDs
     callback.updateProgress("Computing GIDs", total);
-    const auto gids = bbploader::GIDLoadList::compute(config, circuit, params);
-    if (gids.empty())
-    {
-        throw std::runtime_error("BBPLoader: No GIDs selected. Empty circuits not supported");
-    }
+    const auto gids = bbploader::GIDLoader::compute(config, circuit, params);
+    const std::vector<uint64_t> gidList(gids.begin(), gids.end());
 
     // Load neurons
     total += chunk;
+    auto cellModel = std::make_unique<brayns::Model>();
     callback.updateProgress("Loading neurons", total);
-    const std::vector<uint64_t> gidList(gids.begin(), gids.end());
     ProgressUpdater cellLoadUpdater (callback, total, total + chunk, gidList.size());
     auto compartments = bbploader::CellLoader::load(params, gidList, circuit, config, cellLoadUpdater, *cellModel);
 

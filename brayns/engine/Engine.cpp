@@ -18,8 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "Engine.h"
+
 #include <brayns/common/Log.h>
-#include <brayns/engine/Engine.h>
 #include <brayns/engine/FrameRenderer.h>
 #include <brayns/engine/cameras/PerspectiveCamera.h>
 #include <brayns/engine/renderers/InteractiveRenderer.h>

@@ -18,18 +18,15 @@
 
 #pragma once
 
-#include <cstdint>
-
 namespace bbploader
 {
 /**
- * @brief The SimulationType enum list all supported simulation types from BBP
- * internat formats
+ * @brief The SimulationType enum list all supported simulation types from BBP internat formats
  */
-enum class SimulationType : uint8_t
+enum class SimulationType
 {
-    NONE = 0,
-    SPIKES = 1,
-    COMPARTMENT = 2,
+    NONE,
+    SPIKES,
+    COMPARTMENT,
 };
 } // namespace bbploader

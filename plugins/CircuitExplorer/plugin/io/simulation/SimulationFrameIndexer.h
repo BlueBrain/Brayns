@@ -1,13 +1,16 @@
 #pragma once
 
+#include <brayns/common/MathTypes.h>
+
 #include <cstdint>
 #include <vector>
 
 struct SimulationFrameIndexer
 {
-    static void updateIndexing(const std::vector<float> &frame,
-                               const std::vector<uint64_t> &offsets,
-                               const float rangeStart,
-                               const float rangeEnd,
-                               std::vector<uint8_t> &indices);
+    static std::vector<uint8_t> computeIndices(const std::vector<float> &frame,
+                                               const std::vector<uint64_t> &offsets,
+                                               const brayns::Vector2f &range) noexcept;
+
+    static std::vector<uint8_t> computeIndices(const std::vector<float> &frame,
+                                               const brayns::Vector2f &range) noexcept;
 };

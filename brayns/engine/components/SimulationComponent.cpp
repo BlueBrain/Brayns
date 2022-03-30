@@ -18,26 +18,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CircuitColorComponent.h"
+#include "SimulationComponent.h"
 
-CircuitColorComponent::CircuitColorComponent(
-        std::unique_ptr<CircuitColorData> data, std::unique_ptr<CircuitColorHandler> handler)
- : _colorData(std::move(data))
- , _colorHandler(std::move(handler))
+namespace brayns
+{
+SimulationComponent::SimulationComponent(float start, float end, float dt, std::string timeUnit)
+ : _startTime(start)
+ , _endTime(end)
+ , _dt(dt)
+ , _timeUnit(std::move(timeUnit))
 {
 }
 
-size_t CircuitColorComponent::getSizeInBytes() const noexcept
+size_t SimulationComponent::getSizeInBytes() const noexcept
 {
-    return sizeof(CircuitColorComponent);
+    return sizeof(SimulationComponent);
 }
 
-CircuitColorData &CircuitColorComponent::getColorData() noexcept
+uint32_t SimulationComponent::getStartTime() const noexcept
 {
-    return *_colorData;
+    return _startTime;
 }
 
-CircuitColorHandler &CircuitColorComponent::getColorHandler() noexcept
+uint32_t SimulationComponent::getEndTime() const noexcept
 {
-    return *_colorHandler;
+    return _endTime;
+}
+
+const std::string &SimulationComponent::getTimeUnit() const noexcept
+{
+    return _timeUnit;
+}
+
+bool SimulationComponent::enabled() const noexcept
+{
+    return _enabled;
+}
+
+void SimulationComponent::setEnabled(const bool val) noexcept
+{
+    _enabled = val;
+}
 }

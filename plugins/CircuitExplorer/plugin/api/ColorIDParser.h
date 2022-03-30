@@ -1,9 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
- *
- * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -21,13 +18,13 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <plugin/api/CircuitColorHandler.h>
 
-#include <plugin/network/adapters/MaterialAdapter.h>
-
-namespace brayns
+/**
+ * @brief The ColorIDParser struct parses strings containing IDs or ID ranges and stores them separately
+ * into a map
+ */
+struct ColorIDParser
 {
-BRAYNS_JSON_OBJECT_BEGIN(SetMaterialsMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<brayns::JsonBuffer<MaterialProxy>>, materials, "List of materials to update")
-BRAYNS_JSON_OBJECT_END()
-} // namespace brayns
+    static std::map<uint64_t, brayns::Vector4f> parse(const std::vector<ColoringInformation> &colors);
+};

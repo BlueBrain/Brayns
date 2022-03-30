@@ -105,6 +105,11 @@ const Vector2f &TransferFunction::getValuesRange() const
 
 void TransferFunction::setValuesRange(const Vector2f &valuesRange)
 {
+    if(valuesRange.x >= valuesRange.y)
+    {
+        throw std::invalid_argument("Transfer function range must define a non zero positive interval");
+    }
+
     _updateValue(_valuesRange, valuesRange);
 }
 

@@ -19,7 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/FrameBuffer.h>
+#include "FrameBuffer.h"
+
 #include <brayns/utils/image/ImageFlipper.h>
 
 namespace

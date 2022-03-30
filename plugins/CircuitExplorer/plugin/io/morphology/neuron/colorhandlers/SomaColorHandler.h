@@ -17,6 +17,12 @@ public:
     void updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap) override;
 
     /**
+     * @brief udpateColorById
+     * @param colors
+     */
+    void updateColorById(const std::vector<brayns::Vector4f> &colors) override;
+
+    /**
      * @brief updateSingleColor Updates the color of all the elements to the
      * given color
      */
@@ -30,11 +36,11 @@ public:
     void updateColor(const std::string &method, const std::vector<ColoringInformation> &vars) override;
 
     /**
-     * @brief updateSimulationColor
+     * @brief updateIndexedColor
      * @param color
      * @param indices
      */
-    void updateSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices) override;
+    void updateIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices) override;
 
 private:
     void _colorWithInput(const std::string &method, const std::vector<ColoringInformation> &vars);

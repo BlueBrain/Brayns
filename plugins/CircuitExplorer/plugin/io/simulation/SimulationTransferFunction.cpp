@@ -1,24 +1,6 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License version 3.0 as published
- * by the Free Software Foundation.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+#include "SimulationTransferFunction.h"
 
-#include "TransferFunctionUtils.h"
-
-void TransferFunctionUtils::set(brayns::TransferFunction &tf) noexcept
+void SimulationTransferFunction::setUnipolarColormap(brayns::TransferFunction &tf) noexcept
 {
     tf.setControlPoints({{0.f, 1.f}, {1.f, 1.f}});
     // curl https://api.colormaps.io/colormap/unipolar
@@ -152,4 +134,21 @@ void TransferFunctionUtils::set(brayns::TransferFunction &tf) noexcept
           {0.996078431372549, 1.0, 0.9803921568627451},
           {1.0, 1.0, 1.0}});
     tf.setValuesRange({-80, -10});
+}
+
+brayns::OSPBuffer SimulationTransferFunction::sampleAsBuffer(const brayns::TransferFunction &tf) noexcept
+{
+    std::vector<brayns::Vector4f> colors (256);
+
+    const auto &range = tf.getValuesRange();
+    const auto chunk = (range.y - range.x) / 256.f;
+
+    for(size_t i = 0; i < 256; ++i)
+    {
+        const auto value = range.x + chunk * i;
+        auto color = tf.getColorForValue(value);
+        colors[i] = std::move(color);
+    }
+
+    return brayns::DataHandler::copyBuffer(colors, OSPDataType::OSP_VEC4F);
 }

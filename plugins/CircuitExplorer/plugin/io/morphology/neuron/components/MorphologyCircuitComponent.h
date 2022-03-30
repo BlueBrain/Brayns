@@ -23,7 +23,6 @@ public:
         OSPGeometricModel model {nullptr};
         brayns::Geometry<brayns::Primitive> geometry;
         std::vector<MorphologySectionMapping> sections;
-        std::vector<uint8_t> colorIndices;
     };
 
 public:
@@ -85,7 +84,7 @@ public:
      * a color for each ID
      * @param colors
      */
-    void setColorById(std::vector<brayns::Vector4f> colors) noexcept;
+    void setColorById(const std::vector<brayns::Vector4f> &colors);
 
     /**
      * @brief setColorById sets colors on a per-id (per cell) basis
@@ -105,7 +104,7 @@ public:
      * @param color
      * @param mapping per geometry primitive indices into the color buffer
      */
-    void setSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping) noexcept;
+    void setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping);
 
 private:
     std::vector<uint64_t> _ids;

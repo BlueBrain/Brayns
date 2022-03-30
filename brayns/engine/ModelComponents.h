@@ -22,6 +22,7 @@
 
 #include <brayns/common/Bounds.h>
 #include <brayns/parameters/ParametersManager.h>
+#include <brayns/utils/TypeNameDemangler.h>
 
 #include <memory>
 #include <string_view>
@@ -222,7 +223,7 @@ private:
             [type = ti](ComponentEntry &entry) { return entry.type == type; });
         if (it == _components.end())
         {
-            throw std::invalid_argument("No component of the given type registered");
+            throw std::invalid_argument("No " + TypeNameDemangler::demangle<T>() + "component registered");
         }
 
         return it;

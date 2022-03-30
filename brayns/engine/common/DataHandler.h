@@ -9,6 +9,7 @@ namespace brayns
 struct OSPBuffer
 {
     OSPData handle = nullptr;
+    size_t size {};
 
     ~OSPBuffer()
     {
@@ -25,14 +26,14 @@ struct DataHandler
     static OSPBuffer shareBuffer(const std::vector<T> &data, OSPDataType type)
     {
         OSPData sharedData = ospNewSharedData(data.data(), type, data.size());
-        return {sharedData};
+        return {sharedData, data.size()};
     }
 
     template<typename T>
     static OSPBuffer shareBuffer(const T *data, const size_t size, OSPDataType type)
     {
         OSPData sharedData = ospNewSharedData(data, type, size);
-        return {sharedData};
+        return {sharedData, size};
     }
 
     template<typename T>
@@ -42,7 +43,7 @@ struct DataHandler
         OSPData copy = ospNewData(type, data.size());
         ospCopyData(shared, copy);
         ospRelease(shared);
-        return {copy};
+        return {copy, data.size()};
     }
 
     template<typename T>
@@ -52,7 +53,7 @@ struct DataHandler
         OSPData copy = ospNewData(type, size);
         ospCopyData(shared, copy);
         ospRelease(shared);
-        return {copy};
+        return {copy, size};
     }
 };
 }

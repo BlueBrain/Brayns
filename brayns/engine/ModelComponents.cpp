@@ -18,8 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ModelComponents.h"
+
 #include <brayns/engine/Model.h>
-#include <brayns/engine/ModelComponents.h>
 
 namespace brayns
 {

@@ -22,9 +22,38 @@
 
 #include <brayns/network/common/ExtractModel.h>
 
-ColorCircuitByIdEntrypoint::ColorCircuitByIdEntrypoint(brayns::Scene &scene, CircuitColorManager &manager)
-    : _scene(scene)
-    , _manager(manager)
+#include <plugin/api/ColorIDParser.h>
+#include <plugin/components/CircuitColorComponent.h>
+
+namespace
+{
+struct ColorHandlerExtractor
+{
+    static CircuitColorHandler &extract(brayns::SceneModelManager &modelManager, const uint32_t modelId)
+    {
+        auto &modelInstance = brayns::ExtractModel::fromId(modelManager, modelId);
+        auto &model = modelInstance.getModel();
+        auto &colorComponent = model.getComponent<CircuitColorComponent>();
+        auto &colorHandler = colorComponent.getColorHandler();
+        return colorHandler;
+    }
+};
+
+struct ColorDataExtractor
+{
+    static CircuitColorData &extract(brayns::SceneModelManager &modelManager, const uint32_t modelId)
+    {
+        auto &modelInstance = brayns::ExtractModel::fromId(modelManager, modelId);
+        auto &model = modelInstance.getModel();
+        auto &colorComponent = model.getComponent<CircuitColorComponent>();
+        auto &colorData = colorComponent.getColorData();
+        return colorData;
+    }
+};
+}
+
+ColorCircuitByIdEntrypoint::ColorCircuitByIdEntrypoint(brayns::SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -43,29 +72,16 @@ std::string ColorCircuitByIdEntrypoint::getDescription() const
 void ColorCircuitByIdEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    try
-    {
-        const auto &descriptor = brayns::ExtractModel::fromId(_scene, params.model_id);
-        _manager.updateColorsById(descriptor, params.color_info);
-        _scene.markModified();
-    }
-    catch (const CircuitModelNotFoundException &)
-    {
-        throw brayns::JsonRpcException(1, "The given ID does not correspond to any circuit model");
-    }
-    catch (const IDRangeParseException &irpe)
-    {
-        throw brayns::JsonRpcException(2, irpe.what());
-    }
-
+    const auto modelId = params.model_id;
+    const auto &colorInfo = params.color_info;
+    auto& colorHandler = ColorHandlerExtractor::extract(_modelManager, modelId);
+    const auto colorMap = ColorIDParser::parse(colorInfo);
+    colorHandler.updateColorById(colorMap);
     request.reply(brayns::EmptyMessage());
 }
 
-ColorCircuitBySingleColorEntrypoint::ColorCircuitBySingleColorEntrypoint(
-    brayns::Scene &scene,
-    CircuitColorManager &manager)
-    : _scene(scene)
-    , _manager(manager)
+ColorCircuitBySingleColorEntrypoint::ColorCircuitBySingleColorEntrypoint(brayns::SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -82,22 +98,15 @@ std::string ColorCircuitBySingleColorEntrypoint::getDescription() const
 void ColorCircuitBySingleColorEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    try
-    {
-        const auto &descriptor = brayns::ExtractModel::fromId(_scene, params.model_id);
-        _manager.updateSingleColor(descriptor, params.color);
-        _scene.markModified();
-    }
-    catch (const CircuitModelNotFoundException &)
-    {
-        throw brayns::JsonRpcException(1, "The given ID does not correspond to any circuit model");
-    }
+    const auto modelId = params.model_id;
+    const auto &color = params.color;
+    auto& colorHandler = ColorHandlerExtractor::extract(_modelManager, modelId);
+    colorHandler.updateSingleColor(color);
     request.reply(brayns::EmptyMessage());
 }
 
-AvailableColorMethodsEntrypoint::AvailableColorMethodsEntrypoint(brayns::Scene &scene, CircuitColorManager &manager)
-    : _scene(scene)
-    , _manager(manager)
+AvailableColorMethodsEntrypoint::AvailableColorMethodsEntrypoint(brayns::SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -114,22 +123,13 @@ std::string AvailableColorMethodsEntrypoint::getDescription() const
 void AvailableColorMethodsEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    const auto &descriptor = brayns::ExtractModel::fromId(_scene, params.model_id);
-    try
-    {
-        request.reply({_manager.getAvailableMethods(descriptor)});
-    }
-    catch (const CircuitModelNotFoundException &)
-    {
-        throw brayns::JsonRpcException(1, "The given ID does not correspond to any circuit model");
-    }
+    const auto modelId = params.model_id;
+    auto& colorData = ColorDataExtractor::extract(_modelManager, modelId);
+    request.reply({colorData.getMethods()});
 }
 
-AvailableColorMethodVariablesEntrypoint::AvailableColorMethodVariablesEntrypoint(
-    brayns::Scene &scene,
-    CircuitColorManager &manager)
-    : _scene(scene)
-    , _manager(manager)
+AvailableColorMethodVariablesEntrypoint::AvailableColorMethodVariablesEntrypoint(brayns::SceneModelManager &modelMangr)
+    : _modelManager(modelMangr)
 {
 }
 
@@ -146,24 +146,14 @@ std::string AvailableColorMethodVariablesEntrypoint::getDescription() const
 void AvailableColorMethodVariablesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    const auto &descriptor = brayns::ExtractModel::fromId(_scene, params.model_id);
-    try
-    {
-        request.reply({_manager.getMethodVariables(descriptor, params.method)});
-    }
-    catch (const CircuitModelNotFoundException &)
-    {
-        throw brayns::JsonRpcException(1, "The given ID does not correspond to any circuit model");
-    }
-    catch (const ColorMethodNotFoundException &)
-    {
-        throw brayns::JsonRpcException(2, "The given coloring method does not exists for the given model");
-    }
+    const auto modelId = params.model_id;
+    const auto &method = params.method;
+    auto &colorData = ColorDataExtractor::extract(_modelManager, modelId);
+    request.reply({colorData.getMethodVariables(method)});
 }
 
-ColorCircuitByMethodEntrypoint::ColorCircuitByMethodEntrypoint(brayns::Scene &scene, CircuitColorManager &manager)
-    : _scene(scene)
-    , _manager(manager)
+ColorCircuitByMethodEntrypoint::ColorCircuitByMethodEntrypoint(brayns::SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -181,24 +171,10 @@ std::string ColorCircuitByMethodEntrypoint::getDescription() const
 void ColorCircuitByMethodEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    const auto &descriptor = brayns::ExtractModel::fromId(_scene, params.model_id);
-    try
-    {
-        _manager.updateColors(descriptor, params.method, params.color_info);
-        _scene.markModified();
-    }
-    catch (const CircuitModelNotFoundException &)
-    {
-        throw brayns::JsonRpcException(1, "The given ID does not correspond to any circuit model");
-    }
-    catch (const ColorMethodNotFoundException &)
-    {
-        throw brayns::JsonRpcException(2, "The given coloring method does not exists for the given model");
-    }
-    catch (const ColorMethodVariableNotFoundException &)
-    {
-        throw brayns::JsonRpcException(3, "One or more method variables specified does not exist");
-    }
-
+    const auto modelId = params.model_id;
+    const auto &method = params.method;
+    const auto &variables = params.color_info;
+    auto &colorHandler = ColorHandlerExtractor::extract(_modelManager, modelId);
+    colorHandler.updateColor(method, variables);
     request.reply(brayns::EmptyMessage());
 }

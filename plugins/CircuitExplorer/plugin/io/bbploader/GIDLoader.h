@@ -18,26 +18,30 @@
 
 #pragma once
 
-#include <plugin/io/bbploader/simulation/Simulation.h>
+#include <plugin/io/BBPLoaderParameters.h>
+
+#include <brion/blueConfig.h>
+#include <brain/circuit.h>
 
 namespace bbploader
 {
-/**
- * @brief The SpikeSimulation class implements BBP internal format spike reports
- */
-class SpikeSimulation : public Simulation
+class GIDLoader
 {
 public:
-    SpikeSimulation(const std::string &reportPath, const brain::GIDSet &inputGids, const float tt);
-
-    const brain::GIDSet &getReportGids() const final;
-    std::vector<CellMapping> getMapping(const brain::GIDSet &inputGids) const final;
-    brayns::AbstractSimulationHandlerPtr createHandler() const final;
+    static brain::GIDSet compute(const brion::BlueConfig &config,
+                                 const brain::Circuit &circuit,
+                                 const BBPLoaderParameters &input);
 
 private:
-    const std::string _path;
-    const float _transitionTime;
-    const brain::GIDSet _gids;
-    std::shared_ptr<brain::SpikeReportReader> _report;
+    static brain::GIDSet _fromParameters(const brion::BlueConfig &config,
+                                         const brain::Circuit &circuit,
+                                         const BBPLoaderParameters &input);
+
+    static brain::GIDSet _fromSimulation(const brion::BlueConfig &config,
+                                         const BBPLoaderParameters &input,
+                                         const brain::GIDSet &src);
+
+    static brain::GIDSet _fromPercentage(const brain::GIDSet &src,
+                                         const float percentage);
 };
-} // namespace bbploader
+}

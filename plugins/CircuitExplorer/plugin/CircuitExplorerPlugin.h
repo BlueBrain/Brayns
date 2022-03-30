@@ -23,21 +23,13 @@
 
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
-#include <plugin/api/CircuitColorManager.h>
-
 /**
- * @brief The CircuitExplorerPlugin class manages the loading and visualization
- * of the Blue Brain Project micro-circuits, and allows visualisation of voltage
- * simulations
+ * @brief The CircuitExplorerPlugin class manages the loading visualization and manipulation of the Blue Brain Project
+ * morphologies, micro-circuits and their simulations
  */
 class CircuitExplorerPlugin : public brayns::ExtensionPlugin
 {
 public:
     void init() final;
     void registerEntrypoints(brayns::INetworkInterface &interface) final;
-    void preRender() final;
-    void postRender() final;
-
-private:
-    CircuitColorManager _colorManager;
 };

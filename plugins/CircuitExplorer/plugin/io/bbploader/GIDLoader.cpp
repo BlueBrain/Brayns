@@ -1,23 +1,47 @@
-#include "GIDLoadList.h"
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "GIDLoader.h"
 
 #include <brion/compartmentReport.h>
 
 namespace bbploader
 {
-brain::GIDSet GIDLoadList::compute(const brion::BlueConfig &config,
+brain::GIDSet GIDLoader::compute(const brion::BlueConfig &config,
                                    const brain::Circuit &circuit,
                                    const BBPLoaderParameters &input)
     {
         brain::GIDSet allGids;
-        allGids = fromParameters(config, circuit, input);
-        allGids = fromSimulation(config, input, allGids);
-        allGids = fromPercentage(allGids, input.percentage);
+        allGids = _fromParameters(config, circuit, input);
+        allGids = _fromSimulation(config, input, allGids);
+        allGids = _fromPercentage(allGids, input.percentage);
+
+        if(allGids.empty())
+        {
+            throw std::runtime_error("No GIDs were selected with the input parameters");
+        }
+
         return allGids;
     }
 
-brain::GIDSet GIDLoadList::fromParameters(const brion::BlueConfig &config,
-                                          const brain::Circuit &circuit,
-                                          const BBPLoaderParameters &input)
+brain::GIDSet GIDLoader::_fromParameters(const brion::BlueConfig &config,
+                                         const brain::Circuit &circuit,
+                                         const BBPLoaderParameters &input)
 {
     if (!input.gids.empty())
     {
@@ -52,9 +76,9 @@ brain::GIDSet GIDLoadList::fromParameters(const brion::BlueConfig &config,
     return allGids;
 }
 
-brain::GIDSet GIDLoadList::fromSimulation(const brion::BlueConfig &config,
-                                          const BBPLoaderParameters &input,
-                                          const brain::GIDSet &src)
+brain::GIDSet GIDLoader::_fromSimulation(const brion::BlueConfig &config,
+                                         const BBPLoaderParameters &input,
+                                         const brain::GIDSet &src)
 {
     const auto reportType = input.report_type;
     if(reportType == bbploader::SimulationType::COMPARTMENT)
@@ -69,7 +93,7 @@ brain::GIDSet GIDLoadList::fromSimulation(const brion::BlueConfig &config,
     return src;
 }
 
-brain::GIDSet GIDLoadList::fromPercentage(const brain::GIDSet &src, const float percentage)
+brain::GIDSet GIDLoader::_fromPercentage(const brain::GIDSet &src, const float percentage)
 {
     if (percentage >= 1.f)
     {

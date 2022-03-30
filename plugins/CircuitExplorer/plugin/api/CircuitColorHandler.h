@@ -18,40 +18,11 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
+#include <brayns/common/MathTypes.h>
 #include <brayns/engine/common/DataHandler.h>
 
 #include <map>
-#include <stdexcept>
-#include <unordered_map>
 #include <vector>
-
-/**
- * @brief Exception throw when parsing of ID and/or ID ranges fails
- */
-class IDRangeParseException : public std::runtime_error
-{
-public:
-    IDRangeParseException(const std::string &message);
-};
-/**
- * @brief Exception thrown when a requested method does not exists on a given
- * CircuitColorHandler
- */
-class ColorMethodNotFoundException : public std::runtime_error
-{
-public:
-    ColorMethodNotFoundException();
-};
-/**
- * @brief Exception thrown when a requested variable does not exists on a given
- * CircuitColorHandler and coloring method
- */
-class ColorMethodVariableNotFoundException : public std::runtime_error
-{
-public:
-    ColorMethodVariableNotFoundException();
-};
 
 /**
  * @brief The ColoringInformation matches a method variable with a color
@@ -73,9 +44,15 @@ public:
 
     /**
      * @brief updateColorById Updates color of the elements by the ID they are
-     * identified by. Specific ids might be specified to isolate the update
+     * identified by. Specific ids might be used to isolate the update
      */
     virtual void updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap) = 0;
+
+    /**
+     * @brief updateColorById Updates colors of the elements by assigning one to each element
+     * @param colors
+     */
+    virtual void updateColorById(const std::vector<brayns::Vector4f> &colors) = 0;
 
     /**
      * @brief updateSingleColor Updates the color of all the elements to the
@@ -91,9 +68,10 @@ public:
     virtual void updateColor(const std::string &method, const std::vector<ColoringInformation> &vars) = 0;
 
     /**
-     * @brief updateSimulationColor udpates the circuit color to the simulation values
-     * @param color
-     * @param indices
+     * @brief updateIndexedColor udpates the circuit color using an indexed colormap.
+     * @param color the color map
+     * @param indices the indices into the color map
      */
-    virtual void updateSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices) = 0;
+    virtual void updateIndexedColor(brayns::OSPBuffer &color,
+                                    const std::vector<uint8_t> &indices) = 0;
 };

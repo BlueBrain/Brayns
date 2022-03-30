@@ -93,6 +93,9 @@ public:
     {
         brayns::ExportFramesEntrypoint::Result result = {};
 
+        const auto &systemFrameBuffer = engine.getFrameBuffer();
+        const auto &systemFrameSize = systemFrameBuffer.getFrameSize();
+
         // Progress
         auto progress = brayns::ProgressHandler(token, request);
 
@@ -100,6 +103,8 @@ public:
         const auto params = request.getParams();
         const auto &path = params.path;
         const auto &imageSettings = params.image_settings;
+        const auto &imageSizeSettings = imageSettings.size;
+        const auto frameSize = imageSizeSettings.value_or(systemFrameSize);
         const auto &keyFrames = params.key_frames;
         const auto sequentialNaming = params.sequential_naming;
 
@@ -114,14 +119,14 @@ public:
         const auto currentLookAt = camera.getLookAt();
 
         // Update aspect ratio to match the rendered images size
-        const auto aspectRatio = static_cast<float>(imageSettings.size.x) / static_cast<float>(imageSettings.size.y);
+        const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
         camera.setAspectRatio(aspectRatio);
 
         // Framebuffer
         brayns::FrameBuffer frameBuffer;
         frameBuffer.setAccumulation(false);
         frameBuffer.setFormat(brayns::PixelFormat::SRGBA_I8);
-        frameBuffer.setFrameSize(imageSettings.size);
+        frameBuffer.setFrameSize(frameSize);
         frameBuffer.commit();
 
         // Scene (committed on the loop)

@@ -23,9 +23,10 @@
 
 #include <brayns/network/common/ExtractModel.h>
 
-TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(brayns::Scene &scene, CircuitColorManager &manager)
-    : _scene(scene)
-    , _manager(manager)
+#include <plugin/components/CircuitColorComponent.h>
+
+TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(brayns::SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -52,28 +53,31 @@ void TraceAnterogradeEntrypoint::onRequest(const Request &request)
 
     // Extract API data
     auto modelId = params.model_id;
-    auto &model = brayns::ExtractModel::fromId(_scene, modelId);
+    auto &modelInstance = brayns::ExtractModel::fromId(_modelManager, modelId);
+    auto &model = modelInstance.getModel();
+    auto &colorComponent = model.getComponent<CircuitColorComponent>();
+    auto &colorHandler = colorComponent.getColorHandler();
 
-    // Retreive cell mapping
-    if (!_manager.handlerExists(model))
-    {
-        throw brayns::JsonRpcException(
-            "There given model ID does not correspond to any existing "
-            "circuit model");
-    }
+    const auto &srcIDs = params.cell_gids;
+    const auto &targetIDs = params.target_cell_gids;
+    const auto &baseColor = params.non_connected_cells_color;
+    const auto &srcColor = params.source_cell_color;
+    const auto &targetColor = params.connected_cells_color;
 
-    _manager.updateSingleColor(model, params.non_connected_cells_color);
+    colorHandler.updateSingleColor(baseColor);
 
     std::map<uint64_t, brayns::Vector4f> colorMap;
-    for (const auto gid : params.cell_gids)
-        colorMap[gid] = params.source_cell_color;
+    for (const auto gid : srcIDs)
+    {
+        colorMap[gid] = srcColor;
+    }
 
-    for (const auto gid : params.target_cell_gids)
-        colorMap[gid] = params.connected_cells_color;
+    for (const auto gid : targetIDs)
+    {
+        colorMap[gid] = targetColor;
+    }
 
-    _manager.updateColorsById(model, colorMap);
-
-    _scene.markModified();
+    colorHandler.updateColorById(colorMap);
 
     request.reply(brayns::EmptyMessage());
 }

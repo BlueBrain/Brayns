@@ -13,6 +13,11 @@ void SomaColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f
     _circuit.setColorById(colorMap);
 }
 
+void SomaColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)
+{
+    _circuit.setColorById(colors);
+}
+
 void SomaColorHandler::updateSingleColor(const brayns::Vector4f &color)
 {
     _circuit.setColor(color);
@@ -28,6 +33,11 @@ void SomaColorHandler::updateColor(const std::string &method, const std::vector<
     {
         _colorAll(method);
     }
+}
+
+void SomaColorHandler::updateIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices)
+{
+    _circuit.setIndexedColor(color, indices);
 }
 
 void SomaColorHandler::_colorWithInput(const std::string &method, const std::vector<ColoringInformation> &vars)
@@ -95,16 +105,10 @@ void SomaColorHandler::_colorAll(const std::string &method)
         std::vector<brayns::Vector4f> result (ids.size());
         for(size_t i = 0; i < ids.size(); ++i)
         {
-            const auto id = ids[i];
             const auto &value = perIdValues[i];
             const auto &color = deck.getColorForKey(value);
             result[i] = color;
         }
         _circuit.setColorById(result);
     }
-}
-
-void SomaColorHandler::updateSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices)
-{
-    _circuit.setSimulationColor(color, indices);
 }

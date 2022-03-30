@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/FrameRenderer.h>
+#include "FrameRenderer.h"
 
 #include <ospray/ospray_util.h>
 

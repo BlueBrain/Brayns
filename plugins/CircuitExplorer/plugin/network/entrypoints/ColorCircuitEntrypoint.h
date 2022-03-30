@@ -20,82 +20,76 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/scenecomponents/SceneModelManager.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <plugin/api/CircuitColorManager.h>
 #include <plugin/network/messages/AvailableColoringInfoMessage.h>
 #include <plugin/network/messages/ColorCircuitMessage.h>
 
 class ColorCircuitByIdEntrypoint : public brayns::Entrypoint<ColorCircuitByIdMessage, brayns::EmptyMessage>
 {
 public:
-    ColorCircuitByIdEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
+    ColorCircuitByIdEntrypoint(brayns::SceneModelManager &modelManager);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    brayns::Scene &_scene;
-    CircuitColorManager &_manager;
+    brayns::SceneModelManager &_modelManager;
 };
 
 class ColorCircuitBySingleColorEntrypoint
     : public brayns::Entrypoint<ColorCircuitBySingleColorMessage, brayns::EmptyMessage>
 {
 public:
-    ColorCircuitBySingleColorEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
+    ColorCircuitBySingleColorEntrypoint(brayns::SceneModelManager &modelManager);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    brayns::Scene &_scene;
-    CircuitColorManager &_manager;
+    brayns::SceneModelManager &_modelManager;
 };
 
 class AvailableColorMethodsEntrypoint : public brayns::Entrypoint<ColoredCircuitID, AvailableColorMethodsMessage>
 {
 public:
-    AvailableColorMethodsEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
+    AvailableColorMethodsEntrypoint(brayns::SceneModelManager &modelManager);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    brayns::Scene &_scene;
-    CircuitColorManager &_manager;
+    brayns::SceneModelManager &_modelManager;
 };
 
 class AvailableColorMethodVariablesEntrypoint
     : public brayns::Entrypoint<RequestCircuitColorMethodVariables, AvailableColorMethodVariablesMessage>
 {
 public:
-    AvailableColorMethodVariablesEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
+    AvailableColorMethodVariablesEntrypoint(brayns::SceneModelManager &modelManager);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    brayns::Scene &_scene;
-    CircuitColorManager &_manager;
+    brayns::SceneModelManager &_modelManager;
 };
 
 class ColorCircuitByMethodEntrypoint : public brayns::Entrypoint<ColorCircuitByMethodMessage, brayns::EmptyMessage>
 {
 public:
-    ColorCircuitByMethodEntrypoint(brayns::Scene &scene, CircuitColorManager &manager);
+    ColorCircuitByMethodEntrypoint(brayns::SceneModelManager &modelManager);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    brayns::Scene &_scene;
-    CircuitColorManager &_manager;
+    brayns::SceneModelManager &_modelManager;
 };

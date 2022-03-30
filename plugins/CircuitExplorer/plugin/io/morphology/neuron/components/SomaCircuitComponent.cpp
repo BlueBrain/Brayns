@@ -61,14 +61,13 @@ void SomaCircuitComponent::onDestroyed()
 void SomaCircuitComponent::setNumCells(const size_t size) noexcept
 {
     _ids.reserve(size);
-    _colors.reserve(size);
+    _geometry.reserve(size);
 }
 
 void SomaCircuitComponent::addSoma(uint64_t id, brayns::Sphere geometry) noexcept
 {
     _ids.push_back(id);
     _geometry.add(std::move(geometry));
-    _colors.push_back(brayns::Vector4f(1.f));
 }
 
 const std::vector<uint64_t> &SomaCircuitComponent::getIDs() const noexcept
@@ -78,17 +77,21 @@ const std::vector<uint64_t> &SomaCircuitComponent::getIDs() const noexcept
 
 void SomaCircuitComponent::setColor(const brayns::Vector4f &color) noexcept
 {
-    auto begin = _colors.begin();
-    auto end = _colors.end();
-    std::fill(begin, end, color);
+    std::fill(_colors.begin(), _colors.end(), color);
     auto colorBuffer = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
     brayns::GeometricModelHandler::setColors(_model, colorBuffer);
     _colorsDirty = true;
 }
 
-void SomaCircuitComponent::setColorById(std::vector<brayns::Vector4f> colors) noexcept
+void SomaCircuitComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
 {
-    _colors = std::move(colors);
+    if(colors.size() < _geometry.getNumGeometries())
+    {
+        throw std::invalid_argument("Not enough colors for all geometry");
+    }
+
+    _colors = colors;
+
     auto colorBuffer = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
     brayns::GeometricModelHandler::setColors(_model, colorBuffer);
     _colorsDirty = true;
@@ -96,7 +99,6 @@ void SomaCircuitComponent::setColorById(std::vector<brayns::Vector4f> colors) no
 
 void SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
 {
-
     auto idIt = _ids.begin();
     auto bufferIt = _colors.begin();
     auto colorsIt = colors.begin();
@@ -133,8 +135,12 @@ void SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4
     }
 }
 
-void SomaCircuitComponent::setSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping) noexcept
+void SomaCircuitComponent::setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping)
 {
+    if(color.size > 256)
+    {
+        throw std::invalid_argument("Color map has more than 256 values");
+    }
     auto indexData = brayns::DataHandler::shareBuffer(mapping, OSPDataType::OSP_UCHAR);
     brayns::GeometricModelHandler::setColorMap(_model, color, indexData);
     _colorsDirty = true;

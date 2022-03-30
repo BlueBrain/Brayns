@@ -13,6 +13,11 @@ void PrimitiveColorHandler::updateColorById(const std::map<uint64_t, brayns::Vec
     _circuit.setColorById(colorMap);
 }
 
+void PrimitiveColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)
+{
+    _circuit.setColorById(colors);
+}
+
 void PrimitiveColorHandler::updateSingleColor(const brayns::Vector4f &color)
 {
     _circuit.setColor(color);
@@ -29,6 +34,12 @@ void PrimitiveColorHandler::updateColor(const std::string &method, const std::ve
         _colorAll(method);
     }
 }
+
+void PrimitiveColorHandler::updateIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices)
+{
+    _circuit.setIndexedColor(color, indices);
+}
+
 
 void PrimitiveColorHandler::_colorWithInput(const std::string &method, const std::vector<ColoringInformation> &vars)
 {
@@ -109,9 +120,4 @@ void PrimitiveColorHandler::_colorAll(const std::string &method)
         }
         _circuit.setColorById(result);
     }
-}
-
-void PrimitiveColorHandler::updateSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices)
-{
-    _circuit.setSimulationColor(color, indices);
 }

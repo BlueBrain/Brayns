@@ -27,12 +27,14 @@
 #include <brayns/network/adapters/CameraAdapter.h>
 #include <brayns/network/messages/GenericImageSettingsMessage.h>
 
+#include <optional>
+
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(SnapshotParams)
 BRAYNS_JSON_OBJECT_ENTRY(GenericImageSettings, image_settings, "Image settings")
-BRAYNS_JSON_OBJECT_ENTRY(std::unique_ptr<LookAt>, camera_view, "Camera 'look at' view settings", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::unique_ptr<AnimationParameters>, animation, "Simulation settings", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(std::optional<LookAt>, camera_view, "Camera 'look at' view settings", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(std::optional<uint32_t>, animation_frame, "Animation frame", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(std::string,
                          file_path,
                          "Path if saved on disk. If empty, image will be sent to the client as a base64 encoded image",
