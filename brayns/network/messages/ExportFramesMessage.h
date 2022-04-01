@@ -33,7 +33,7 @@ BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(ExportFramesParams)
 BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path where the frames will be stored")
-BRAYNS_JSON_OBJECT_ENTRY(GenericImageSettings, image_settings, "Image dimenssion [width, height]")
+BRAYNS_JSON_OBJECT_ENTRY(GenericImageSettings, image_settings, "Image settings")
 BRAYNS_JSON_OBJECT_ENTRY(std::vector<ExportFramesKeyFrame>, key_frames, "List of keyframes to export")
 BRAYNS_JSON_OBJECT_ENTRY(bool, sequential_naming, "Name the image file after the frame index", Default(true))
 BRAYNS_JSON_OBJECT_END()

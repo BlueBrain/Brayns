@@ -21,7 +21,6 @@
 #include <brayns/io/loaders/mesh/MeshLoader.h>
 
 #include <brayns/engine/components/GeometryRendererComponent.h>
-#include <brayns/engine/components/MaterialComponent.h>
 
 #include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
 #include <brayns/io/loaders/mesh/parsers/OffMeshParser.h>
@@ -79,7 +78,6 @@ public:
     {
         auto model = std::make_unique<brayns::Model>();
 
-        model->addComponent<brayns::MaterialComponent>();
         model->addComponent<brayns::GeometryRendererComponent<brayns::TriangleMesh>>(mesh);
 
         return model;

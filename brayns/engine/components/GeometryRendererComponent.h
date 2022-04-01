@@ -67,8 +67,10 @@ public:
 
     virtual void onStart() override
     {
+        Model &model = getModel();
         _model = GeometricModelHandler::create();
-        GeometricModelHandler::addToGeometryGroup(_model, getModel());
+        GeometricModelHandler::addToGeometryGroup(_model, model);
+        model.addComponent<MaterialComponent>();
     }
 
     virtual bool commit() override

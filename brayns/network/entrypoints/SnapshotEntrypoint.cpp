@@ -133,20 +133,6 @@ public:
 
         // Render
         auto future = brayns::FrameRenderer::asynchronous(camera, frameBuffer, renderer, scene);
-/*
-        auto progressThread = std::thread([&]()
-        {
-            const auto msg = "Rendering snapshot ...";
-            while(!ospIsReady(future))
-            {
-                const auto percentage = ospGetProgress(future);
-                progress.notify(msg, percentage);
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            }
-        });
-*/
-
-        //progressThread.join();
         const auto msg = "Rendering snapshot ...";
         while(!ospIsReady(future))
         {
@@ -154,7 +140,7 @@ public:
             progress.notify(msg, percentage);
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
-        ospWait(future);
+        //ospWait(future);
 
         // Handle result
         brayns::ImageBase64Message image;

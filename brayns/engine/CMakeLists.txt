@@ -22,6 +22,7 @@ set(BRAYNSENGINE_SOURCES
     common/ExtractModelObject.cpp
     common/GeometricModelHandler.cpp
     components/MaterialComponent.cpp
+    components/SimulationComponent.cpp
     components/TransferFunctionComponent.cpp
     components/TransferFunctionRendererComponent.cpp
     geometries/Box.cpp
@@ -69,6 +70,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     components/ClippingComponent.h
     components/GeometryRendererComponent.h
     components/MaterialComponent.h
+    components/SimulationComponent.h
     components/TransferFunctionComponent.h
     components/TransferFunctionRendererComponent.h
     components/VolumeRendererComponent.h

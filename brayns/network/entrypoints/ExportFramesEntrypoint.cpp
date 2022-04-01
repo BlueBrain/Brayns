@@ -35,11 +35,11 @@ namespace
 
 void logExportInfo(const size_t numKeyFrames,
                    const std::string& path,
-                   const brayns::GenericImageSettings& imageSettings,
+                   const brayns::Vector2ui &frameSize,
                    const brayns::Renderer& renderer)
 {
-    const auto w = imageSettings.size.x;
-    const auto h = imageSettings.size.y;
+    const auto w = frameSize.x;
+    const auto h = frameSize.y;
     const auto spp = renderer.getSamplesPerPixel();
     const auto name = renderer.getName();
 
@@ -97,7 +97,7 @@ public:
         const auto &systemFrameSize = systemFrameBuffer.getFrameSize();
 
         // Progress
-        auto progress = brayns::ProgressHandler(token, request);
+        brayns::ProgressHandler progress (token, request);
 
         // Initialize parameters
         const auto params = request.getParams();
@@ -141,7 +141,7 @@ public:
         float totalProgress = 0.f;
 
         // Log export info
-        logExportInfo(keyFrames.size(), path, imageSettings, renderer);
+        logExportInfo(keyFrames.size(), path, frameSize, renderer);
 
         // Render frames
         for (size_t i = 0; i < keyFrames.size(); ++i)

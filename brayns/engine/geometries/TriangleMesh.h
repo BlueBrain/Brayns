@@ -36,6 +36,11 @@ struct TriangleMesh
     std::vector<Vector3ui> indices;
 };
 
+struct TriangleMeshMerger
+{
+    static void merge(const TriangleMesh &src, TriangleMesh &dst);
+};
+
 template<>
 std::string_view RenderableOSPRayID<TriangleMesh>::get();
 
@@ -43,10 +48,13 @@ template<>
 void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const Matrix4f& matrix, Bounds& bounds);
 
 template<>
-uint32_t Geometry<TriangleMesh>::add(const TriangleMesh& geometry);
+uint32_t Geometry<TriangleMesh>::add(TriangleMesh geometry);
 
 template<>
 std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh>& geometries);
+
+template<>
+std::vector<uint32_t> Geometry<TriangleMesh>::set(std::vector<TriangleMesh> geometries);
 
 template<>
 void Geometry<TriangleMesh>::commitGeometrySpecificParams();

@@ -66,7 +66,9 @@ void Geometry<Primitive>::commitGeometrySpecificParams()
 
     std::vector<uint32_t> indexData (numGeoms);
     for(uint32_t i = 0, index = 0; i < numGeoms; ++i, index = index + 2)
+    {
         indexData[i] = index;
+    }
 
     const auto type = OSP_ROUND;
     const auto basis = OSP_LINEAR;
