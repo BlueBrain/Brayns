@@ -10,6 +10,8 @@
 #include <brain/synapsesIterator.h>
 #include <brain/synapsesStream.h>
 
+#include <filesystem>
+
 namespace
 {
 struct AfferentLoader
@@ -19,22 +21,18 @@ struct AfferentLoader
         const auto &circuit = context.circuit;
         const auto &gids = context.gids;
 
-        auto &synapses = model.addComponent<SynapseComponent>();
-
-        std::map<uint32_t, std::vector<brayns::Sphere>> synapseGeometry;
+        std::map<uint64_t, std::vector<brayns::Sphere>> synapseGeometry;
         const brain::Synapses synapseData (circuit.getAfferentSynapses(gids));
         for(const auto &synapse : synapseData)
         {
             const auto position = synapse.getPostsynapticSurfacePosition();
-            const auto gid = synapse.getPostsynapticGID();
+            const auto gid = synapse.getPresynapticGID();
             auto &buffer = synapseGeometry[gid];
             buffer.push_back({position, 2.f});
         }
 
-        for(auto &[gid, synapseSpheres] : synapseGeometry)
-        {
-            synapses.addSynapses(gid, std::move(synapseSpheres));
-        }
+        auto &synapses = model.addComponent<SynapseComponent>();
+        synapses.addSynapses(synapseGeometry);
     }
 };
 
@@ -45,22 +43,18 @@ struct EfferentLoader
         const auto &circuit = context.circuit;
         const auto &gids = context.gids;
 
-        auto &synapses = model.addComponent<SynapseComponent>();
-
-        std::map<uint32_t, std::vector<brayns::Sphere>> synapseGeometry;
+        std::map<uint64_t, std::vector<brayns::Sphere>> synapseGeometry;
         const brain::Synapses synapseData (circuit.getEfferentSynapses(gids));
         for(const auto &synapse : synapseData)
         {
             const auto position = synapse.getPresynapticSurfacePosition();
-            const auto gid = synapse.getPresynapticGID();
+            const auto gid = synapse.getPostsynapticGID();
             auto &buffer = synapseGeometry[gid];
             buffer.push_back({position, 2.f});
         }
 
-        for(auto &[gid, synapseSpheres] : synapseGeometry)
-        {
-            synapses.addSynapses(gid, std::move(synapseSpheres));
-        }
+        auto &synapses = model.addComponent<SynapseComponent>();
+        synapses.addSynapses(synapseGeometry);
     }
 };
 
@@ -68,11 +62,15 @@ struct SynapseColorComponentFactory
 {
     static void create(const bbploader::LoadContext &context, brayns::Model &model)
     {
-        const auto &circuit = context.circuit;
-        const auto &config = context.config;
-
         auto &synapses = model.getComponent<SynapseComponent>();
-        auto path = circuit.getSource().getPath();
+        const auto &config = context.config;
+        auto circuitURI = config.getCircuitSource();
+        auto path = circuitURI.getPath();
+        if(!std::filesystem::exists(path))
+        {
+            circuitURI = config.getCellLibrarySource();
+            path = circuitURI.getPath();
+        }
         auto population = config.getCircuitPopulation();
         auto colorData = std::make_unique<bbploader::BBPSynapseColorData>(std::move(path), std::move(population));
         auto colorHandler = std::make_unique<SynapseColorHandler>(synapses);

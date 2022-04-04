@@ -119,13 +119,15 @@ std::vector<NeuronMorphology::Section> readNeurites(const morphio::Morphology &m
         }
 
         result.emplace_back();
-        auto& sectionObject = result.back();
+        auto &sectionObject = result.back();
 
-        sectionObject.id = sectionId;
+        // + 1 because MorphIO returns section IDs starting at -1, whereas compartment reports begin sections at 0
+        // And thats the only use we make of section IDs
+        sectionObject.id = sectionId + 1;
         sectionObject.parentId = parentId;
         sectionObject.type = type;
 
-        auto& sectionSamples = sectionObject.samples;
+        auto &sectionSamples = sectionObject.samples;
         sectionSamples.reserve(secPoints.size());
         for (size_t i = 0; i < secPoints.size(); ++i)
         {
@@ -184,7 +186,7 @@ NeuronMorphology::Soma &NeuronMorphology::soma()
     {
         return _soma.value();
     }
-    catch(...)
+    catch (...)
     {
         throw std::runtime_error("Morphology loaded without soma");
     }
@@ -196,7 +198,7 @@ const NeuronMorphology::Soma &NeuronMorphology::soma() const
     {
         return _soma.value();
     }
-    catch(...)
+    catch (...)
     {
         throw std::runtime_error("Morphology loaded without soma");
     }
@@ -217,10 +219,10 @@ std::vector<size_t> NeuronMorphology::sectionChildrenIndices(const Section &sect
     const auto checkId = section.id;
     std::vector<size_t> indices;
 
-    for(size_t i = 0; i < _sections.size(); ++i)
+    for (size_t i = 0; i < _sections.size(); ++i)
     {
         const auto &candidateSection = _sections[i];
-        if(candidateSection.parentId == checkId)
+        if (candidateSection.parentId == checkId)
         {
             indices.push_back(i);
         }

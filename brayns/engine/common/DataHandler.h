@@ -1,10 +1,29 @@
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #pragma once
 
 #include <ospray/ospray.h>
 
+#include <stdexcept>
 #include <vector>
-
-#include <iostream>
 
 namespace brayns
 {
@@ -22,13 +41,22 @@ struct OSPBuffer
     {
         if(handle)
         {
-            //std::cout << "DELETED" << std::endl;
-            //ospRelease(handle);
+            ospRelease(handle);
         }
     }
 
-    OSPBuffer(OSPBuffer &&) = default;
-    OSPBuffer &operator=(OSPBuffer &&) = default;
+    OSPBuffer(OSPBuffer &&other)
+    {
+        *this = std::move(other);
+    }
+    OSPBuffer &operator=(OSPBuffer &&other)
+    {
+        handle = other.handle;
+        size = other.size;
+
+        other.handle = nullptr;
+        return *this;
+    }
 
     OSPBuffer(const OSPBuffer &) = delete;
     OSPBuffer &operator=(const OSPBuffer &) = delete;
@@ -42,6 +70,11 @@ struct DataHandler
     template<typename T>
     static OSPBuffer shareBuffer(const std::vector<T> &data, OSPDataType type)
     {
+        if(data.empty())
+        {
+            throw std::invalid_argument("Cannot send empty array to OSPRay");
+        }
+
         OSPData sharedData = ospNewSharedData(data.data(), type, data.size());
         return OSPBuffer(sharedData, data.size());
     }
@@ -49,6 +82,11 @@ struct DataHandler
     template<typename T>
     static OSPBuffer shareBuffer(const T *data, const size_t size, OSPDataType type)
     {
+        if(size == 0)
+        {
+            throw std::invalid_argument("Cannot send empty array to OSPRay");
+        }
+
         OSPData sharedData = ospNewSharedData(data, type, size);
         return OSPBuffer(sharedData, size);
     }

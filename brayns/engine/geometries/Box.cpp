@@ -43,7 +43,7 @@ void Geometry<Box>::commitGeometrySpecificParams()
 {
     const auto numGeoms = _geometries.size();
 
-    OSPData boxDataHandle = ospNewSharedData(_geometries.data(), OSPDataType::OSP_VEC3F, numGeoms * 2);
+    OSPData boxDataHandle = ospNewSharedData(_geometries.data(), OSPDataType::OSP_BOX3F, numGeoms);
 
     ospSetParam(_handle, "box", OSP_DATA, &boxDataHandle);
 

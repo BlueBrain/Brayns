@@ -42,12 +42,12 @@ void PerspectiveCamera::setFOVY(const float fovy) noexcept
 
 void PerspectiveCamera::setApertureRadius(const float aperture) noexcept
 {
-    _updateValue(_apertureRadius, aperture < 0.f ? 0.f : aperture);
+    _updateValue(_apertureRadius, aperture);
 }
 
 void PerspectiveCamera::setFocusDistance(const float distance) noexcept
 {
-    _updateValue(_focusDistance, distance < 1.f ? 1.f : distance);
+    _updateValue(_focusDistance, distance);
 }
 
 float PerspectiveCamera::getFOVY() const noexcept

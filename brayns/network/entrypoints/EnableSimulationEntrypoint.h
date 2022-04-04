@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,42 +20,36 @@
 
 #pragma once
 
-#include <brayns/common/Timer.h>
+#include <brayns/engine/scenecomponents/SceneModelManager.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/EnableSimulationMessage.h>
 
 namespace brayns
 {
-class FPSCounter
+class EnableSimulationEntrypoint final : public Entrypoint<EnableSimulationMessage, EmptyMessage>
 {
 public:
-    /**
-     * @brief startFrame starts measuring time
-     */
-    void startFrame() noexcept;
+    EnableSimulationEntrypoint(SceneModelManager &modelManager);
 
     /**
-     * @brief endFrame stops time measuring and accumulates the result
+     * @brief getMethod
+     * @return
      */
-    void endFrame() noexcept;
+    std::string getMethod() const override;
 
     /**
-     * @brief getAverageFPS returns the current average frames per second measurement made by this counter
+     * @brief getDescription
+     * @return
      */
-    uint32_t getAverageFPS() const noexcept;
+    std::string getDescription() const override;
 
     /**
-     * @brief getLastFPS return the FPS ratio measured by the last take
+     * @brief onRequest
+     * @param request
      */
-    uint32_t getLastFPS() const noexcept;
-
-    /**
-     * @brief getLastFrameTimeMillis return the time, in milliseconds, that it took to render the last frame
-     */
-    int64_t getLastFrameTimeMillis() const noexcept;
+    void onRequest(const Request &request) override;
 
 private:
-    Timer _timer;
-    int64_t _lastFrameTimeMillis {0u};
-    uint32_t _lastFPS {0u};
-    double _smoothFPS {0};
+    SceneModelManager &_modelManager;
 };
 }

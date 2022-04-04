@@ -18,42 +18,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/materials/EmissiveMaterial.h>
+#include "EnableSimulationEntrypoint.h"
+
+#include <brayns/engine/components/SimulationComponent.h>
+#include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
 {
-std::string EmissiveMaterial::getName() const noexcept
+EnableSimulationEntrypoint::EnableSimulationEntrypoint(SceneModelManager &modelManager)
+ : _modelManager(modelManager)
 {
-    return "emissive";
 }
 
-uint64_t EmissiveMaterial::getSizeInBytes() const noexcept
+std::string EnableSimulationEntrypoint::getMethod() const
 {
-    // We copy all data to ospray, so we must account for that
-    return sizeof(EmissiveMaterial) * 2 - sizeof(OSPMaterial);
+    return "enable-simulation";
 }
 
-void EmissiveMaterial::setIntensity(const float intensity) noexcept
+std::string EnableSimulationEntrypoint::getDescription() const
 {
-    _updateValue(_intensity, glm::max(intensity, 0.f));
+    return "A switch to enable or disable simulation on a model";
 }
 
-float EmissiveMaterial::getIntensity() const noexcept
+void EnableSimulationEntrypoint::onRequest(const Request &request)
 {
-    return _intensity;
-}
-
-void EmissiveMaterial::commitMaterialSpecificParams()
-{
-    auto ospHandle = handle();
-
-    static Vector3f baseColor (0.f);
-    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &baseColor);
-    ospSetParam(ospHandle, "intensity", OSPDataType::OSP_FLOAT, &_intensity);
-}
-
-std::string_view EmissiveMaterial::getOSPHandleName() const noexcept
-{
-    return "luminous";
+    auto params = request.getParams();
+    auto modelId = params.model_id;
+    auto enableSimulation = params.enabled;
+    auto &instance = ExtractModel::fromId(_modelManager, modelId);
+    auto &model = instance.getModel();
+    auto &simulation = model.getComponent<SimulationComponent>();
+    simulation.setEnabled(enableSimulation);
+    request.reply(EmptyMessage());
 }
 }

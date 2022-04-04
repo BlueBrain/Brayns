@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/common/FPSCounter.h>
 #include <brayns/common/Statistics.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/FrameBuffer.h>
@@ -130,7 +129,6 @@ private:
     std::unique_ptr<Renderer> _renderer;
 
     // Engine statistics
-    FPSCounter _fpsCounter;
     Statistics _statistics;
 
     // Run flag

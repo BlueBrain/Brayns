@@ -49,21 +49,14 @@ public:
     void onDestroyed() override;
 
     /**
-     * @brief setNumMorphologies allows to specify in advance the number ofcells this circuit will hold, so that
-     * memory can be allocated
-     * @param size number of cells
-     */
-    void setNumMorphologies(const size_t size) noexcept;
-
-    /**
-     * @brief addMorphology adds a new cell morphology to this circuit
+     * @brief Sets the morphologies of this component
      * @param id
      * @param primitives
      * @param map
      */
-    void addMorphology(uint64_t id,
-                       std::vector<brayns::Primitive> primitives,
-                       std::vector<NeuronSectionMapping> map) noexcept;
+    void setMorphologies(std::vector<uint64_t> id,
+                         std::vector<std::vector<brayns::Primitive>> primitives,
+                         std::vector<std::vector<NeuronSectionMapping>> map) noexcept;
 
     /**
      * @brief getIDs return the cell IDs in this circuit

@@ -78,9 +78,9 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlob(
     const brayns::LoaderProgress &cb,
     const BBPLoaderParameters &params) const
 {
-    (void) blob;
-    (void) cb;
-    (void) params;
+    (void)blob;
+    (void)cb;
+    (void)params;
     throw std::runtime_error("BBP loader: import from blob not supported");
 }
 
@@ -108,7 +108,7 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
 
     const brain::Circuit circuit(config);
     const auto gids = bbploader::GIDLoader::compute(config, circuit, params);
-    const bbploader::LoadContext context (circuit, gids, config, params);
+    const bbploader::LoadContext context(circuit, gids, config, params);
 
     std::vector<std::unique_ptr<brayns::Model>> result;
 
@@ -125,12 +125,12 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
     total += chunk;
     callback.updateProgress("Loading neurons", total);
     auto cellModel = std::make_unique<brayns::Model>();
-    ProgressUpdater updater (callback, total, total + chunk, gidList.size());
+    ProgressUpdater updater(callback, total, total + chunk, gidList.size());
     auto compartments = bbploader::CellLoader::load(context, updater, *cellModel);
 
     // Load simulation
     total += chunk;
-    if(params.report_type != bbploader::SimulationType::NONE)
+    if (params.report_type != bbploader::SimulationType::NONE)
     {
         callback.updateProgress("Loading simulation", total);
         bbploader::SimulationLoader::load(context, compartments, *cellModel);

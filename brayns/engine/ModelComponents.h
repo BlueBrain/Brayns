@@ -223,7 +223,7 @@ private:
             [type = ti](ComponentEntry &entry) { return entry.type == type; });
         if (it == _components.end())
         {
-            throw std::invalid_argument("No " + TypeNameDemangler::demangle<T>() + "component registered");
+            throw std::invalid_argument("No " + TypeNameDemangler::demangle<T>() + " component registered");
         }
 
         return it;

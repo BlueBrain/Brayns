@@ -26,6 +26,7 @@
 #include <brayns/engine/geometries/Sphere.h>
 #include <brayns/engine/geometries/TriangleMesh.h>
 #include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
@@ -57,4 +58,22 @@ BRAYNS_JSON_ADAPTER_ENTRY(colors, "Mesh vertex colors")
 BRAYNS_JSON_ADAPTER_ENTRY(uvs, "Mesh vertex texture coordinates")
 BRAYNS_JSON_ADAPTER_ENTRY(indices, "Mesh triangle vertex indices")
 BRAYNS_JSON_ADAPTER_END()
+
+template<typename T>
+struct AddGeometryProxy
+{
+    T geometry;
+    Vector4f color;
+};
+
+#define ADD_GEOMETRY_ADAPTER(Type) \
+    BRAYNS_JSON_ADAPTER_BEGIN(AddGeometryProxy<Type>) \
+    BRAYNS_JSON_ADAPTER_ENTRY(geometry, "Geometry data") \
+    BRAYNS_JSON_ADAPTER_ENTRY(color, "Geometry color") \
+    BRAYNS_JSON_ADAPTER_END()
+
+ADD_GEOMETRY_ADAPTER(Box)
+ADD_GEOMETRY_ADAPTER(Plane)
+ADD_GEOMETRY_ADAPTER(Primitive)
+ADD_GEOMETRY_ADAPTER(Sphere)
 }

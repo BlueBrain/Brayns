@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/volumes/RegularVolume.h>
+#include "RegularVolume.h"
 
 namespace brayns
 {

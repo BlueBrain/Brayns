@@ -47,15 +47,12 @@ void GlassMaterial::commitMaterialSpecificParams()
 {
     auto ospHandle = handle();
 
-    const float ad = 0.0f;
-
     ospSetParam(ospHandle, "attenuationColor", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
     ospSetParam(ospHandle, "eta", OSPDataType::OSP_FLOAT, &_ior);
-    ospSetParam(ospHandle, "attenuationDistance", OSPDataType::OSP_FLOAT, &ad);
 }
 
 std::string_view GlassMaterial::getOSPHandleName() const noexcept
 {
-    return "glass";
+    return "thinGlass";
 }
 }

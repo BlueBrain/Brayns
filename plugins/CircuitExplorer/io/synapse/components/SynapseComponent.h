@@ -67,7 +67,7 @@ public:
      * @param cellId
      * @param synapseGeometry
      */
-    void addSynapses(uint64_t cellId, std::vector<brayns::Sphere> synapseGeometry);
+    void addSynapses(std::map<uint64_t, std::vector<brayns::Sphere>> &synapses);
 
     /**
      * @brief setColor Sets all the synapses to the same specified color
@@ -99,5 +99,5 @@ public:
 private:
     std::vector<uint64_t> _cellIds;
     std::vector<CellSynapses> _synapses;
-    bool _colorsDirty {false};
+    bool _colorsDirty{false};
 };

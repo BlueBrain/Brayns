@@ -85,6 +85,11 @@ ModelInstance &SceneModelManager::getModelInstance(const uint32_t modelID)
     return **findInstanceIterator(_instances, modelID);
 }
 
+std::vector<ModelInstance *> &SceneModelManager::getAllModelInstances() noexcept
+{
+    return _instances;
+}
+
 const std::vector<ModelInstance *> &SceneModelManager::getAllModelInstances() const noexcept
 {
     return _instances;

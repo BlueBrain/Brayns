@@ -20,32 +20,76 @@
 
 namespace
 {
-void addGeometry(NeuronGeometry &data, int32_t sectionId, brayns::Primitive geometry)
+struct PrimitiveAllocationSize
 {
-    auto &geometryBuffer = data.geometry;
-    auto &sectionMapping = data.sectionSegmentMapping;
-
-    auto idx = geometryBuffer.size();
-    geometryBuffer.push_back(std::move(geometry));
-    sectionMapping[sectionId].push_back(idx);
-}
-
-NeuronGeometry build(const NeuronMorphology &morphology)
-{
-    NeuronGeometry result;
-    auto &geometry = result.geometry;
-    auto &sectionRanges = result.sectionMapping;
-
-    auto &sections = morphology.sections();
-
-    // Add soma
-    if (morphology.hasSoma())
+    static size_t compute(const NeuronMorphology &morphology)
     {
+        size_t result = 0;
+
+        if(morphology.hasSoma())
+        {
+            const auto &soma = morphology.soma();
+            const auto &somaChildren = soma.childrenIndices;
+
+            result += 1; // soma sphere
+            result += somaChildren.size(); // soma-neurite cones
+        }
+
+        const auto &sections = morphology.sections();
+        for(const auto &section : sections)
+        {
+            auto &samples = section.samples;
+            if(!samples.empty())
+            {
+                // * -> sample
+                // = -> primitive added
+                // section: *=*=*=*
+                // Hence -1
+                result += samples.size() - 1;
+            }
+        }
+
+        return result;
+    }
+};
+
+struct NeuronSectionMappingGenerator
+{
+    static void generate(NeuronGeometry &dst, NeuronSection section, size_t start, size_t end)
+    {
+        auto &sectionRanges = dst.sectionMapping;
+        sectionRanges.emplace_back();
+        auto &sectionRange = sectionRanges.back();
+        sectionRange.type = section;
+        sectionRange.begin = start;
+        sectionRange.end = end;
+    }
+};
+
+struct NeuronGeometryAppender
+{
+    static void append(NeuronGeometry &dst, int32_t section, brayns::Primitive geometry)
+    {
+        auto &geometryBuffer = dst.geometry;
+        auto &sectionMapping = dst.sectionSegmentMapping;
+
+        auto idx = geometryBuffer.size();
+        geometryBuffer.push_back(std::move(geometry));
+        sectionMapping[section].push_back(idx);
+    }
+};
+
+struct SomaBuilder
+{
+    static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
+    {
+        const auto &sections = morphology.sections();
         const auto &soma = morphology.soma();
+
         const auto &somaCenter = soma.center;
         const auto somaRadius = soma.radius;
         auto somaSphere = brayns::Primitive::sphere(somaCenter, somaRadius);
-        addGeometry(result, -1, std::move(somaSphere));
+        NeuronGeometryAppender::append(dst, -1, std::move(somaSphere));
 
         for (const auto childIndex : soma.childrenIndices)
         {
@@ -59,82 +103,99 @@ NeuronGeometry build(const NeuronMorphology &morphology)
             const auto &samplePos = childFirstSample.position;
             const auto sampleRadius = childFirstSample.radius;
             auto somaCone = brayns::Primitive::cone(somaCenter, somaRadius, samplePos, sampleRadius);
-            addGeometry(result, -1, std::move(somaCone));
+            NeuronGeometryAppender::append(dst, -1, std::move(somaCone));
         }
 
-        NeuronSectionMapping somaRange;
-        somaRange.type = NeuronSection::SOMA;
-        somaRange.begin = 0;
-        somaRange.end = geometry.size();
-        sectionRanges.push_back(std::move(somaRange));
+        auto &geometry = dst.geometry;
+        auto end = geometry.size();
+        NeuronSectionMappingGenerator::generate(dst, NeuronSection::SOMA, 0, end);
     }
+};
 
-    // Sort sections by section type
-    std::unordered_map<NeuronSection, std::vector<const NeuronMorphology::Section*>> sortedSections;
-    for(const auto &section : sections)
+struct NeuriteBuilder
+{
+    static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
     {
-        auto sectionType = section.type;
-        // We've already handled soma
-        if(sectionType == NeuronSection::SOMA)
+        const auto &sections = morphology.sections();
+
+        auto &geometry = dst.geometry;
+
+        // Sort sections by section type
+        std::unordered_map<NeuronSection, std::vector<const NeuronMorphology::Section*>> sortedSections;
+        for(const auto &section : sections)
         {
-            continue;
+            auto sectionType = section.type;
+            auto &sectionBuffer = sortedSections[sectionType];
+            sectionBuffer.push_back(&section);
         }
 
-        auto &sectionBuffer = sortedSections[sectionType];
-        sectionBuffer.push_back(&section);
-    }
-
-    // Add section geometry, grouped by section type
-    for(const auto& [sectionType, sectionPointers] : sortedSections)
-    {
-        const auto sectionIndexBegin = geometry.size();
-
-        // Add dendrites and axon
-        for (const auto sectionPtr : sectionPointers)
+        // Add section geometry, grouped by section type
+        for(const auto& [sectionType, sectionPointers] : sortedSections)
         {
-            const auto &section = *sectionPtr;
-            const auto &sectionSamples = section.samples;
+            const auto sectionIndexBegin = geometry.size();
 
-            if(sectionSamples.empty())
+            // Add dendrites and axon
+            for (const auto sectionPtr : sectionPointers)
             {
-                continue;
+                const auto &section = *sectionPtr;
+                const auto &sectionSamples = section.samples;
+
+                if(sectionSamples.empty())
+                {
+                    continue;
+                }
+
+                auto &samples = section.samples;
+                for (size_t i = 1; i < samples.size(); ++i)
+                {
+                    const auto &s1 = samples[i - 1];
+                    const auto &p1 = s1.position;
+                    const auto r1 = s1.radius;
+
+                    const auto &s2 = samples[i];
+                    const auto &p2 = s2.position;
+                    const auto r2 = s2.radius;
+
+                    const auto geometry = brayns::Primitive::cone(p1, r1, p2, r2);
+                    NeuronGeometryAppender::append(dst, section.id, std::move(geometry));
+                }
             }
 
-            auto &samples = section.samples;
-            for (size_t i = 1; i < samples.size(); ++i)
+            const auto sectionIndexEnd = geometry.size();
+            if(sectionIndexEnd - sectionIndexBegin > 0)
             {
-                const auto &s1 = samples[i - 1];
-                const auto &p1 = s1.position;
-                const auto r1 = s1.radius;
-
-                const auto &s2 = samples[i];
-                const auto &p2 = s2.position;
-                const auto r2 = s2.radius;
-
-                const auto geometry = brayns::Primitive::cone(p1, r1, p2, r2);
-                addGeometry(result, section.id, std::move(geometry));
+                NeuronSectionMappingGenerator::generate(dst, sectionType, sectionIndexBegin, sectionIndexEnd);
             }
         }
-
-        const auto sectionIndexEnd = geometry.size();
-        if(sectionIndexEnd - sectionIndexBegin > 0)
-        {
-            NeuronSectionMapping range;
-            range.type = sectionType;
-            range.begin = sectionIndexBegin;
-            range.end = sectionIndexEnd;
-            sectionRanges.push_back(std::move(range));
-        }
     }
+};
 
-    return result;
-}
+struct NeuronBuilder
+{
+    static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
+    {
+        auto numPrimitives = PrimitiveAllocationSize::compute(morphology);
+        auto &geometry = dst.geometry;
+        auto &sectionRanges = dst.sectionMapping;
 
+        geometry.reserve(numPrimitives);
+
+        if(morphology.hasSoma())
+        {
+            SomaBuilder::build(morphology, dst);
+        }
+
+        NeuriteBuilder::build(morphology, dst);
+
+        geometry.shrink_to_fit();
+        sectionRanges.shrink_to_fit();
+    }
+};
 } // namespace
 
 NeuronGeometryBuilder::NeuronGeometryBuilder(const NeuronMorphology &morphology)
- : _data(build(morphology))
-{
+{    
+    NeuronBuilder::build(morphology, _data);
 }
 
 NeuronGeometry NeuronGeometryBuilder::instantiate(const brayns::Vector3f &t, const brayns::Quaternion &r) const

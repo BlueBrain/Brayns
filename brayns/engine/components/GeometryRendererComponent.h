@@ -40,31 +40,84 @@ class GeometryRendererComponent final : public Component
 public:
     GeometryRendererComponent() = default;
 
-    GeometryRendererComponent(const T& geometry)
+    /**
+     * @brief Constructs the component with a single geometry
+     * @param geometry
+     */
+    GeometryRendererComponent(T geometry)
     {
-        _geometry.add(geometry);
+        _geometry.add(std::move(geometry));
     }
 
+    /**
+     * @brief Constructs the component with a list of geometries
+     * @param geometries
+     */
     GeometryRendererComponent(std::vector<T> geometries)
     {
         _geometry.set(std::move(geometries));
     }
 
+    /**
+     * @brief Returns the geometry
+     * @return
+     */
     Geometry<T> &getGeometry() noexcept
     {
         return _geometry;
     }
 
+    /**
+     * @brief Sets all the geometry to the same color. Disables material color
+     * @param color
+     */
+    void setColor(const Vector4f &color) noexcept
+    {
+        GeometricModelHandler::setColor(_model, color);
+        _useMaterialColor = false;
+        _colorDirty = true;
+    }
+
+    /**
+     * @brief Sets a color per geometry. Disables material color
+     * @param colors
+     * @throws std::invalid_argument if there are not enough colors for the contained geometry
+     */
+    void setColors(const std::vector<brayns::Vector4f> &colors)
+    {
+        if(colors.size() < _geometry.getNumGeometries())
+        {
+            throw std::invalid_argument("Not enough colors for all geometry");
+        }
+
+        auto buffer = DataHandler::copyBuffer(colors, OSPDataType::OSP_VEC4F);
+        GeometricModelHandler::setColors(_model, buffer);
+        _useMaterialColor = false;
+        _colorDirty = true;
+    }
+
+    /**
+     * @brief getSizeInBytes
+     * @return
+     */
     virtual uint64_t getSizeInBytes() const noexcept override
     {
         return sizeof(GeometryRendererComponent<T>) + _geometry.getNumGeometries() * sizeof(T);
     }
 
+    /**
+     * @brief computeBounds
+     * @param transform
+     * @return
+     */
     virtual Bounds computeBounds(const Matrix4f& transform) const noexcept override
     {
         return _geometry.computeBounds(transform);
     }
 
+    /**
+     * @brief onStart
+     */
     virtual void onStart() override
     {
         Model &model = getModel();
@@ -73,9 +126,15 @@ public:
         model.addComponent<MaterialComponent>();
     }
 
+    /**
+     * @brief commit
+     * @return
+     */
     virtual bool commit() override
     {
-        bool needsCommit = false;
+        bool needsCommit = _colorDirty;
+        _colorDirty = false;
+
         Model &model = getModel();
 
         if(_geometry.commit())
@@ -88,7 +147,10 @@ public:
         if(material.commit())
         {
             GeometricModelHandler::setMaterial(_model, material);
-            GeometricModelHandler::setColor(_model, material.getColor());
+            if(_useMaterialColor)
+            {
+                GeometricModelHandler::setColor(_model, material.getColor());
+            }
             needsCommit = true;
         }
 
@@ -101,6 +163,9 @@ public:
         return false;
     }
 
+    /**
+     * @brief onDestroyed
+     */
     virtual void onDestroyed() override
     {
         GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
@@ -110,5 +175,8 @@ public:
 private:
     OSPGeometricModel _model {nullptr};
     Geometry<T> _geometry;
+    // Need these to flag to avoid using the material color when need to customize colors
+    bool _useMaterialColor {true};
+    bool _colorDirty {false};
 };
 }

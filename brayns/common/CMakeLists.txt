@@ -7,7 +7,6 @@
 set(BRAYNSCOMMON_SOURCES
     BaseObject.cpp
     Bounds.cpp
-    FPSCounter.cpp
     Log.cpp
     Statistics.cpp
     Timer.cpp
@@ -19,7 +18,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
     BaseObject.h
     Blob.h
     Bounds.h
-    FPSCounter.h
     IDFactory.h
     Log.h
     MathTypes.h

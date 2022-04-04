@@ -79,7 +79,13 @@ public:
 
     /**
      * @brief Return a list of all model instances in the manager
-     * @returns std::vector<ModelInstance *>
+     * @return std::vector<ModelInstance *> &
+     */
+    std::vector<ModelInstance *> &getAllModelInstances() noexcept;
+
+    /**
+     * @brief Return a list of all model instances in the manager
+     * @returns const std::vector<ModelInstance *> &
      */
     const std::vector<ModelInstance *> &getAllModelInstances() const noexcept;
 

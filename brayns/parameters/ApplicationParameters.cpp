@@ -31,7 +31,6 @@ namespace
 constexpr auto PARAM_LOG_LEVEL = "log-level";
 constexpr auto PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
 constexpr auto PARAM_JPEG_COMPRESSION = "jpeg-compression";
-constexpr auto PARAM_MAX_RENDER_FPS = "max-render-fps";
 constexpr auto PARAM_PLUGIN = "plugin";
 constexpr auto PARAM_WINDOW_SIZE = "window-size";
 
@@ -96,12 +95,7 @@ ApplicationParameters::ApplicationParameters()
         (PARAM_JPEG_COMPRESSION,
          po::value<size_t>(&_jpegCompression),
          "JPEG compression rate (100 is full quality) [int]") //
-        (PARAM_IMAGE_STREAM_FPS,
-         po::value<size_t>(&_imageStreamFPS),
-         "Image stream FPS (60 default), [int]") //
-        (PARAM_MAX_RENDER_FPS,
-         po::value<size_t>(&_maxRenderFPS),
-         "Max. render FPS");
+        (PARAM_IMAGE_STREAM_FPS, po::value<size_t>(&_imageStreamFPS), "Image stream FPS (60 default), [int]");
 }
 
 void ApplicationParameters::print()
@@ -113,7 +107,6 @@ void ApplicationParameters::print()
     Log::info("Window size                 : {}", _windowSize);
     Log::info("JPEG Compression            : {}", _jpegCompression);
     Log::info("Image stream FPS            : {}", _imageStreamFPS);
-    Log::info("Max. render  FPS            : {}", _maxRenderFPS);
 }
 
 const Vector2ui &ApplicationParameters::getWindowSize() const noexcept
@@ -156,9 +149,9 @@ void ApplicationParameters::setUseQuantaRenderControl(const bool val) noexcept
     _updateValue(_useQuantaRenderControl, val);
 }
 
-size_t ApplicationParameters::getMaxRenderFPS() const noexcept
+LogLevel ApplicationParameters::getLogLevel() const noexcept
 {
-    return _maxRenderFPS;
+    return _logLevel;
 }
 
 const std::vector<std::string> &ApplicationParameters::getPlugins() const noexcept
@@ -183,8 +176,8 @@ void ApplicationParameters::parse(const po::variables_map &vm)
     if (i != vm.end())
     {
         auto &value = i->second.as<std::string>();
-        auto level = GetLogLevel::fromName(value);
-        Log::setLevel(level);
+        _logLevel = GetLogLevel::fromName(value);
+        Log::setLevel(_logLevel);
     }
 }
 

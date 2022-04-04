@@ -45,6 +45,7 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/ObjectEntrypoint.h
   entrypoint/PropertyObjectEntrypoint.h
   entrypoints/AddClipPlaneEntrypoint.h
+  entrypoints/AddGeometryEntrypoint.h
   entrypoints/AddLightEntrypoint.h
   entrypoints/AddModelEntrypoint.h
   entrypoints/AnimationParametersEntrypoint.h
@@ -53,6 +54,7 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/CameraLookAtEntrypoint.h
   entrypoints/CancelEntrypoint.h
   entrypoints/ClearLightsEntrypoint.h
+  entrypoints/EnableSimulationEntrypoint.h
   entrypoints/ExitLaterEntrypoint.h
   entrypoints/ExportFramesEntrypoint.h
   entrypoints/GetLoadersEntrypoint.h
@@ -137,6 +139,7 @@ set(BRAYNSNETWORK_SOURCES
   entrypoint/EntrypointRegistry.cpp
   entrypoint/EntrypointRef.cpp
   entrypoints/AddClipPlaneEntrypoint.cpp
+  entrypoints/AddGeometryEntrypoint.cpp
   entrypoints/AddLightEntrypoint.cpp
   entrypoints/AddModelEntrypoint.cpp
   entrypoints/AnimationParametersEntrypoint.cpp
@@ -145,6 +148,7 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/CameraLookAtEntrypoint.cpp
   entrypoints/CancelEntrypoint.cpp
   entrypoints/ClearLightsEntrypoint.cpp
+  entrypoints/EnableSimulationEntrypoint.cpp
   entrypoints/ExitLaterEntrypoint.cpp
   entrypoints/ExportFramesEntrypoint.cpp
   entrypoints/GetLoadersEntrypoint.cpp

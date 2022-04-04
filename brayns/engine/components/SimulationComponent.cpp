@@ -35,14 +35,19 @@ size_t SimulationComponent::getSizeInBytes() const noexcept
     return sizeof(SimulationComponent);
 }
 
-uint32_t SimulationComponent::getStartTime() const noexcept
+float SimulationComponent::getStartTime() const noexcept
 {
     return _startTime;
 }
 
-uint32_t SimulationComponent::getEndTime() const noexcept
+float SimulationComponent::getEndTime() const noexcept
 {
     return _endTime;
+}
+
+float SimulationComponent::getDT() const noexcept
+{
+    return _dt;
 }
 
 const std::string &SimulationComponent::getTimeUnit() const noexcept

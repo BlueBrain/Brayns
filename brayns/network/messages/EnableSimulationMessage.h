@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
- *
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,17 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Statistics.h"
+#pragma once
+
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-size_t Statistics::getSceneSizeInBytes() const
-{
-    return _sceneSizeInBytes;
+BRAYNS_JSON_OBJECT_BEGIN(EnableSimulationMessage)
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model to enable or disable simulation")
+BRAYNS_JSON_OBJECT_ENTRY(bool, enabled, "Bool flag enabling or disabling the simulation")
+BRAYNS_JSON_OBJECT_END()
 }
-
-void Statistics::setSceneSizeInBytes(const size_t sceneSizeInBytes)
-{
-    _updateValue(_sceneSizeInBytes, sceneSizeInBytes);
-}
-} // namespace brayns

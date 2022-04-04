@@ -21,6 +21,8 @@
 #include "TransferFunctionRendererComponent.h"
 
 #include <brayns/engine/Model.h>
+#include <brayns/engine/common/DataHandler.h>
+#include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/components/TransferFunctionComponent.h>
 
 namespace brayns
@@ -42,28 +44,22 @@ void TransferFunctionRendererComponent::onDestroyed()
 bool TransferFunctionRendererComponent::manualCommit()
 {
     Model& model = getModel();
-    auto& tfComponent = model.getComponent<TransferFunctionComponent>();
-    auto& tf = tfComponent.getTransferFunction();
-
+    auto &tf = ExtractModelObject::extractTransferFunction(model);
     if(!tf.isModified())
     {
         return false;
     }
 
     auto& color = tf.getColors();
-    OSPData colorData = ospNewSharedData(color.data(), OSPDataType::OSP_VEC3F, color.size());
-
     auto& opacity = tf.getOpacities();
-    OSPData opacityData = ospNewSharedData(opacity.data(), OSPDataType::OSP_FLOAT, opacity.size());
-
     auto& range = tf.getValuesRange();
 
-    ospSetParam(_handle, "color", OSPDataType::OSP_DATA, &colorData);
-    ospSetParam(_handle, "opacity", OSPDataType::OSP_DATA, &opacityData);
-    ospSetParam(_handle, "valueRange", OSPDataType::OSP_VEC2F, &range);
+    auto colorBuffer = DataHandler::shareBuffer(color, OSPDataType::OSP_VEC3F);
+    auto opacityBuffer = DataHandler::shareBuffer(opacity, OSPDataType::OSP_FLOAT);
 
-    ospRelease(colorData);
-    ospRelease(opacityData);
+    ospSetParam(_handle, "color", OSPDataType::OSP_DATA, &colorBuffer.handle);
+    ospSetParam(_handle, "opacity", OSPDataType::OSP_DATA, &opacityBuffer.handle);
+    ospSetParam(_handle, "valueRange", OSPDataType::OSP_VEC2F, &range);
 
     ospCommit(_handle);
 

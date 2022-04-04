@@ -21,21 +21,7 @@
 
 #include "Scene.h"
 
-namespace
-{
-template<typename Handle>
-void commitHandleList(std::vector<Handle> &list, OSPDataType type, OSPWorld worldHandle, const char *ID)
-{
-    auto handlesPtr = list.data();
-    auto numHandles = list.size();
-    auto sharedHandleData = ospNewSharedData(handlesPtr, type, numHandles);
-    auto handleCopies = ospNewData(type, numHandles);
-    ospCopyData(sharedHandleData, handleCopies);
-    ospSetParam(worldHandle, ID, OSPDataType::OSP_DATA, &handleCopies);
-    ospRelease(sharedHandleData);
-    ospRelease(handleCopies);
-}
-} // namespace
+#include <brayns/engine/common/DataHandler.h>
 
 namespace brayns
 {
@@ -89,7 +75,8 @@ bool Scene::commit()
 
         if(!instances.empty())
         {
-            commitHandleList(instances, OSPDataType::OSP_INSTANCE, _handle, "instance");
+            auto instanceBuffer = DataHandler::copyBuffer(instances, OSPDataType::OSP_INSTANCE);
+            ospSetParam(_handle, "instance", OSPDataType::OSP_DATA, &instanceBuffer.handle);
             needsCommit = true;
         }
     }
@@ -99,7 +86,8 @@ bool Scene::commit()
         auto lights = _lightManager.getLightHandles();
         if(!lights.empty())
         {
-            commitHandleList(lights, OSPDataType::OSP_LIGHT, _handle, "light");
+            auto lightBuffer = DataHandler::copyBuffer(lights, OSPDataType::OSP_LIGHT);
+            ospSetParam(_handle, "light", OSPDataType::OSP_DATA, &lightBuffer.handle);
             needsCommit = true;
         }
     }

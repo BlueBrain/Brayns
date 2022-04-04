@@ -70,43 +70,44 @@ bool MorphologyCircuitComponent::commit()
 
 void MorphologyCircuitComponent::onDestroyed()
 {
+    auto &group = getModel();
     for(auto &morphology : _morphologies)
     {
         auto &model = morphology.model;
-        brayns::GeometricModelHandler::removeFromGeometryGroup(model, getModel());
+        brayns::GeometricModelHandler::removeFromGeometryGroup(model, group);
         brayns::GeometricModelHandler::destory(model);
     }
 }
 
-void MorphologyCircuitComponent::setNumMorphologies(const size_t size) noexcept
+void MorphologyCircuitComponent::setMorphologies(std::vector<uint64_t> ids,
+                                                 std::vector<std::vector<brayns::Primitive>> primitives,
+                                                 std::vector<std::vector<NeuronSectionMapping>> map) noexcept
 {
-    _ids.reserve(size);
-    _morphologies.reserve(size);
-}
-
-void MorphologyCircuitComponent::addMorphology(uint64_t id,
-                                               std::vector<brayns::Primitive> primitives,
-                                               std::vector<NeuronSectionMapping> map) noexcept
-{
-    _ids.push_back(id);
-
     auto &group = getModel();
-    _morphologies.emplace_back();
-    auto &morphology = _morphologies.back();
-    auto &model = morphology.model;
-    auto &geometry = morphology.geometry;
-    auto &sections = morphology.sections;
 
-    model = brayns::GeometricModelHandler::create();
-    brayns::GeometricModelHandler::addToGeometryGroup(model, group);
+    _ids = std::move(ids);
+    _morphologies.resize(_ids.size());
 
-    geometry.set(std::move(primitives));
-    brayns::GeometricModelHandler::setGeometry(model, geometry);
+    for(size_t i = 0; i < _ids.size(); ++i)
+    {
+        auto &morphGeometry = primitives[i];
+        auto &morphSections = map[i];
 
-    auto &material = brayns::ExtractModelObject::extractMaterial(group);
-    brayns::GeometricModelHandler::setMaterial(model, material);
+        auto &morphology = _morphologies[i];
+        auto &model = morphology.model;
+        auto &geometry = morphology.geometry;
+        auto &sections = morphology.sections;
 
-    sections = std::move(map);
+        geometry.set(std::move(morphGeometry));
+        geometry.commit();
+
+        sections = std::move(morphSections);
+
+        model = brayns::GeometricModelHandler::create();
+        brayns::GeometricModelHandler::addToGeometryGroup(model, group);
+        brayns::GeometricModelHandler::setGeometry(model, geometry);
+        brayns::GeometricModelHandler::setColor(model, brayns::Vector4f(1.f));
+    }
 }
 
 const std::vector<uint64_t> &MorphologyCircuitComponent::getIDs() const noexcept
@@ -243,7 +244,7 @@ void MorphologyCircuitComponent::setIndexedColor(brayns::OSPBuffer &color, const
         auto &geometry = morphology.geometry;
         auto geometrySize = geometry.getNumGeometries();
 
-        if(mappingOffset + geometrySize < map.size())
+        if(mappingOffset + geometrySize > map.size())
         {
             throw std::invalid_argument("Not enough mapping data provided");
         }
@@ -251,6 +252,7 @@ void MorphologyCircuitComponent::setIndexedColor(brayns::OSPBuffer &color, const
         auto morphologyMapping = &map[mappingOffset];
         auto mappingData = brayns::DataHandler::copyBuffer(morphologyMapping, geometrySize, OSPDataType::OSP_UCHAR);
         brayns::GeometricModelHandler::setColorMap(model, color, mappingData);
+        mappingOffset += geometrySize;
     }
     _colorsDirty = true;
 }

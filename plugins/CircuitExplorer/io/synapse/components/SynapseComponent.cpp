@@ -9,21 +9,19 @@
 size_t SynapseComponent::getSizeInBytes() const noexcept
 {
     size_t synapsesSize = brayns::SizeHelper::vectorSize(_synapses);
-    for(const auto &synapse : _synapses)
+    for (const auto &synapse : _synapses)
     {
         auto &geometry = synapse.geometry;
         synapsesSize += geometry.getSizeInBytes();
     }
 
-    return sizeof(SynapseComponent)
-            + synapsesSize
-            + brayns::SizeHelper::vectorSize(_cellIds);
+    return sizeof(SynapseComponent) + synapsesSize + brayns::SizeHelper::vectorSize(_cellIds);
 }
 
 brayns::Bounds SynapseComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds result;
-    for(const auto &synapse : _synapses)
+    for (const auto &synapse : _synapses)
     {
         const auto &geometry = synapse.geometry;
         const auto synapseBounds = geometry.computeBounds(transform);
@@ -41,11 +39,12 @@ void SynapseComponent::onStart()
 bool SynapseComponent::commit()
 {
     bool needsCommit = _colorsDirty;
+    _colorsDirty = false;
 
     auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
-    if(material.commit())
+    if (material.commit())
     {
-        for(auto &synapse : _synapses)
+        for (auto &synapse : _synapses)
         {
             auto model = synapse.model;
             brayns::GeometricModelHandler::setMaterial(model, material);
@@ -53,9 +52,9 @@ bool SynapseComponent::commit()
         }
     }
 
-    if(needsCommit)
+    if (needsCommit)
     {
-        for(auto &synapse : _synapses)
+        for (auto &synapse : _synapses)
         {
             auto model = synapse.model;
             brayns::GeometricModelHandler::commitModel(model);
@@ -68,7 +67,7 @@ bool SynapseComponent::commit()
 void SynapseComponent::onDestroyed()
 {
     auto &group = getModel();
-    for(auto &synapse : _synapses)
+    for (auto &synapse : _synapses)
     {
         auto &model = synapse.model;
         brayns::GeometricModelHandler::removeFromGeometryGroup(model, group);
@@ -87,23 +86,34 @@ void SynapseComponent::setNumCells(const size_t size) noexcept
     _synapses.reserve(size);
 }
 
-void SynapseComponent::addSynapses(uint64_t cellId, std::vector<brayns::Sphere> synapseGeometry)
+void SynapseComponent::addSynapses(std::map<uint64_t, std::vector<brayns::Sphere>> &synapses)
 {
-    _cellIds.push_back(cellId);
-    _synapses.emplace_back();
-    auto &synapse = _synapses.back();
-    auto &geometry = synapse.geometry;
-    auto &model = synapse.model;
+    _cellIds.reserve(synapses.size());
+    _synapses.reserve(synapses.size());
 
-    geometry.set(std::move(synapseGeometry));
+    for(auto &[id, synapseGeometry] : synapses)
+    {
+        _cellIds.push_back(id);
+        _synapses.emplace_back();
+        auto &synapse = _synapses.back();
+        auto &geometry = synapse.geometry;
+        auto &model = synapse.model;
 
-    model = brayns::GeometricModelHandler::create();
-    brayns::GeometricModelHandler::setGeometry(model, geometry);
+        geometry.set(std::move(synapseGeometry));
+        geometry.commit();
+
+        auto &group = getModel();
+
+        model = brayns::GeometricModelHandler::create();
+        brayns::GeometricModelHandler::addToGeometryGroup(model, group);
+        brayns::GeometricModelHandler::setGeometry(model, geometry);
+        brayns::GeometricModelHandler::setColor(model, brayns::Vector4f(1.f));
+    }
 }
 
 void SynapseComponent::setColor(const brayns::Vector4f &color) noexcept
 {
-    for(auto &synapse : _synapses)
+    for (auto &synapse : _synapses)
     {
         auto model = synapse.model;
         brayns::GeometricModelHandler::setColor(model, color);
@@ -113,7 +123,7 @@ void SynapseComponent::setColor(const brayns::Vector4f &color) noexcept
 
 void SynapseComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
 {
-    for(size_t i = 0; i < _synapses.size(); ++i)
+    for (size_t i = 0; i < _synapses.size(); ++i)
     {
         const auto &color = colors[i];
         auto &synapse = _synapses[i];
@@ -129,21 +139,21 @@ void SynapseComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &
     auto synIt = _synapses.begin();
     auto colorsIt = colorMap.begin();
 
-    while(colorsIt != colorMap.end())
+    while (colorsIt != colorMap.end())
     {
         const auto targetId = colorsIt->first;
         const auto &targetColor = colorsIt->second;
 
-        while(idIt != _cellIds.end())
+        while (idIt != _cellIds.end())
         {
-            if(*idIt != targetId)
+            if (*idIt != targetId)
             {
                 ++idIt;
                 ++synIt;
             }
         }
 
-        if(idIt == _cellIds.end())
+        if (idIt == _cellIds.end())
         {
             break;
         }
@@ -159,19 +169,19 @@ void SynapseComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &
 
 void SynapseComponent::setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping)
 {
-    if(color.size > 256)
+    if (color.size > 256)
     {
         throw std::invalid_argument("Colormap has more than 256 values");
     }
 
     size_t mappingOffset = 0;
-    for(auto &synapses : _synapses)
+    for (auto &synapses : _synapses)
     {
         auto model = synapses.model;
         auto &geometry = synapses.geometry;
         auto geometrySize = geometry.getNumGeometries();
 
-        if(mappingOffset + geometrySize < mapping.size())
+        if (mappingOffset + geometrySize < mapping.size())
         {
             throw std::invalid_argument("Not enough mapping data provided");
         }

@@ -26,6 +26,7 @@
 #include <brion/blueConfig.h>
 
 #include <future>
+#include <filesystem>
 
 namespace
 {
@@ -33,10 +34,14 @@ struct BBPNeuronColorCreator
 {
     static std::unique_ptr<bbploader::BBPNeuronColorData> newData(const bbploader::LoadContext& context)
     {
-        const auto &circuit = context.circuit;
-        const auto &circuitUri = circuit.getSource();
-        auto circuitPath = circuitUri.getPath();
         const auto &config = context.config;
+        auto circuitURI = config.getCircuitSource();
+        auto circuitPath = circuitURI.getPath();
+        if(!std::filesystem::exists(circuitPath))
+        {
+            circuitURI = config.getCellLibrarySource();
+            circuitPath = circuitURI.getPath();
+        }
         auto circuitPopulation = config.getCircuitPopulation();
         return std::make_unique<bbploader::BBPNeuronColorData>(std::move(circuitPath), std::move(circuitPopulation));
     }

@@ -31,8 +31,10 @@ std::vector<CompartmentStructure> SomaCircuitLoader::load(
         somaSphere.center = pos;
         somaSphere.radius = radius;
 
-        auto &compartments = result[i];
-        compartments.sectionSegments[-1].push_back(0);
+        auto &compartment = result[i];
+
+        compartment.numItems = 1;
+        compartment.sectionSegments[-1].push_back(0);
     }
 
     auto &somaCircuit = model.addComponent<SomaCircuitComponent>();

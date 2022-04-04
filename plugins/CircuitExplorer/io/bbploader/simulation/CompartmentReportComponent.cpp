@@ -23,6 +23,7 @@
 #include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/SimulationComponent.h>
+#include <brayns/engine/components/TransferFunctionComponent.h>
 
 #include <components/CircuitColorComponent.h>
 #include <io/simulation/SimulationFrameIndexer.h>
@@ -45,13 +46,15 @@ std::vector<SimulationMapping> getMapping(brion::CompartmentReport &report)
         const auto &count = ccounts[i];
         const auto &offset = offsets[i];
 
-        mapping[i].globalOffset = offset[0];
+        auto &cellMapping = mapping[i];
+        cellMapping.globalOffset = offset[0];
+        cellMapping.compartments = std::vector<uint16_t>(count.begin(), count.end());
+        cellMapping.offsets.resize(offset.size());
 
-        mapping[i].compartments = std::vector<uint16_t>(count.begin(), count.end());
-
-        mapping[i].offsets.resize(offset.size());
         for (size_t j = 0; j < offset.size(); ++j)
-            mapping[i].offsets[j] = offset[j] - mapping[i].globalOffset;
+        {
+            cellMapping.offsets[j] = offset[j] - cellMapping.globalOffset;
+        }
     }
 
     return mapping;
@@ -60,24 +63,25 @@ std::vector<SimulationMapping> getMapping(brion::CompartmentReport &report)
 
 namespace bbploader
 {
-CompartmentReportComponent::CompartmentReportComponent(std::unique_ptr<brion::CompartmentReport> report,
-                                                       const std::vector<CompartmentStructure> &compartments)
- : _report(std::move(report))
- , _offsets(SimulationMappingGenerator::generate(compartments, getMapping(*_report)))
+CompartmentReportComponent::CompartmentReportComponent(
+    std::unique_ptr<brion::CompartmentReport> report,
+    const std::vector<CompartmentStructure> &compartments)
+    : _report(std::move(report))
+    , _offsets(SimulationMappingGenerator::generate(compartments, getMapping(*_report)))
 {
 }
 
 size_t CompartmentReportComponent::getSizeInBytes() const noexcept
 {
-    return sizeof(CompartmentReportComponent)
-            + brayns::SizeHelper::vectorSize(_offsets)
-            + brayns::SizeHelper::vectorSize(_indices);
+    return sizeof(CompartmentReportComponent) + brayns::SizeHelper::vectorSize(_offsets)
+        + brayns::SizeHelper::vectorSize(_indices);
 }
 
 void CompartmentReportComponent::onStart()
 {
     auto &model = getModel();
-    auto &tf = brayns::ExtractModelObject::extractTransferFunction(model);
+    auto &tfComponent = model.addComponent<brayns::TransferFunctionComponent>();
+    auto &tf = tfComponent.getTransferFunction();
     SimulationTransferFunction::setUnipolarColormap(tf);
 
     float startTime = _report->getStartTime();
@@ -91,8 +95,7 @@ void CompartmentReportComponent::onPreRender(const brayns::ParametersManager &pa
 {
     auto &model = getModel();
 
-    auto &simulationComponent = model.getComponent<brayns::SimulationComponent>();
-    if(!simulationComponent.enabled())
+    if (!brayns::ExtractModelObject::isSimulationEnabled(model))
     {
         _lastEnabledValue = false;
         return;
@@ -101,17 +104,18 @@ void CompartmentReportComponent::onPreRender(const brayns::ParametersManager &pa
     bool forceUpdate = !_lastEnabledValue;
     _lastEnabledValue = true;
 
-    bool tfChanged = false;
     auto &tf = brayns::ExtractModelObject::extractTransferFunction(model);
-    if(tf.isModified())
+    if (tf.isModified())
     {
         _colors = SimulationTransferFunction::sampleAsBuffer(tf);
         tf.resetModified();
-        tfChanged = true;
+        forceUpdate = true;
     }
 
     const auto &animationParameters = parameters.getAnimationParameters();
-    if(forceUpdate || tfChanged || animationParameters.isModified())
+    forceUpdate = forceUpdate || animationParameters.isModified();
+
+    if (forceUpdate)
     {
         const auto frame = animationParameters.getFrame();
         const auto simStart = _report->getStartTime();
@@ -121,11 +125,8 @@ void CompartmentReportComponent::onPreRender(const brayns::ParametersManager &pa
         auto frameFuture = _report->loadFrame(frameTime);
         auto simulationFrame = frameFuture.get();
         auto &frameData = *simulationFrame.data;
-
         auto &tfRange = tf.getValuesRange();
-
         _indices = SimulationFrameIndexer::computeIndices(frameData, _offsets, tfRange);
-
         auto &colorComponent = model.getComponent<CircuitColorComponent>();
         auto &handler = colorComponent.getColorHandler();
         handler.updateIndexedColor(_colors, _indices);

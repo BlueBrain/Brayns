@@ -9,21 +9,25 @@
 #include <future>
 #include <unordered_map>
 
-MorphologyCircuitLoader::Context::Context(const std::vector<uint64_t> &ids,
-                                          const std::vector<std::string> &morphologyPaths,
-                                          const std::vector<brayns::Vector3f> &positions,
-                                          const std::vector<brayns::Quaternion> &rotations,
-                                          const NeuronMorphologyLoaderParameters &morphologyParams)
- : ids(ids)
- , morphologyPaths(morphologyPaths)
- , positions(positions)
- , rotations(rotations)
- , morphologyParams(morphologyParams)
+MorphologyCircuitLoader::Context::Context(
+    const std::vector<uint64_t> &ids,
+    const std::vector<std::string> &morphologyPaths,
+    const std::vector<brayns::Vector3f> &positions,
+    const std::vector<brayns::Quaternion> &rotations,
+    const NeuronMorphologyLoaderParameters &morphologyParams)
+    : ids(ids)
+    , morphologyPaths(morphologyPaths)
+    , positions(positions)
+    , rotations(rotations)
+    , morphologyParams(morphologyParams)
 {
 }
 
 std::vector<CompartmentStructure> MorphologyCircuitLoader::load(
-        const Context &context, brayns::Model &model, ProgressUpdater &cb, std::unique_ptr<IColorData> colorData)
+    const Context &context,
+    brayns::Model &model,
+    ProgressUpdater &cb,
+    std::unique_ptr<IColorData> colorData)
 {
     const auto &morphPaths = context.morphologyPaths;
     const auto &ids = context.ids;
@@ -43,7 +47,7 @@ std::vector<CompartmentStructure> MorphologyCircuitLoader::load(
         morphPathMap[morphPaths[i]].push_back(i);
     }
 
-    std::vector<NeuronGeometry> morphologies (ids.size());
+    std::vector<NeuronGeometry> morphologies(ids.size());
     const auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
     {
         NeuronMorphology morphology(path, soma, axon, dendrites);
@@ -62,7 +66,7 @@ std::vector<CompartmentStructure> MorphologyCircuitLoader::load(
         loadTasks.push_back(std::async(loadFn, entry.first, entry.second));
     }
 
-    const std::string updateMessage ("Loading neurons");
+    const std::string updateMessage("Loading neurons");
     for (auto &task : loadTasks)
     {
         if (task.valid())
@@ -76,26 +80,33 @@ std::vector<CompartmentStructure> MorphologyCircuitLoader::load(
         }
     }
 
-    auto &morphologyCircuit = model.addComponent<MorphologyCircuitComponent>();
+    std::vector<CompartmentStructure> compartments(ids.size());
+    std::vector<std::vector<brayns::Primitive>> geometries(ids.size());
+    std::vector<std::vector<NeuronSectionMapping>> mappings(ids.size());
 
-    std::vector<CompartmentStructure> result (ids.size());
-
-    #pragma omp parallel for
-    for(size_t i = 0; i < ids.size(); ++i)
+#pragma omp parallel for
+    for (size_t i = 0; i < ids.size(); ++i)
     {
-        const auto id = ids[i];
         auto &morphology = morphologies[i];
         auto &sectionMapping = morphology.sectionMapping;
         auto &compartmentMapping = morphology.sectionSegmentMapping;
         auto &geometry = morphology.geometry;
 
-        result[i].sectionSegments = std::move(compartmentMapping);
+        mappings[i] = std::move(sectionMapping);
 
-        morphologyCircuit.addMorphology(id, std::move(geometry), std::move(sectionMapping));
+        auto &compartment = compartments[i];
+        compartment.id = ids[i];
+        compartment.numItems = geometry.size();
+        compartment.sectionSegments = std::move(compartmentMapping);
+
+        geometries[i] = std::move(geometry);
     }
+
+    auto &morphologyCircuit = model.addComponent<MorphologyCircuitComponent>();
+    morphologyCircuit.setMorphologies(ids, std::move(geometries), std::move(mappings));
 
     auto colorHandler = std::make_unique<MorphologyColorHandler>(morphologyCircuit);
     model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
 
-    return result;
+    return compartments;
 }

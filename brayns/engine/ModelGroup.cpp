@@ -20,38 +20,40 @@
 
 #include "ModelGroup.h"
 
+#include <brayns/engine/common/DataHandler.h>
+
 #include <algorithm>
 
 namespace
 {
-template<typename T>
-void copyListToOSPRay(OSPGroup handle, std::vector<T> &ospModels, const OSPDataType type, const char* ID) noexcept
+struct HandleCommitter
 {
-    if(ospModels.empty())
+    template<typename T>
+    static void commit(const std::vector<T> &handleList, OSPDataType type, OSPGroup groupHandle, const char* id)
     {
-        return;
+        if(!handleList.empty())
+        {
+            auto buffer = brayns::DataHandler::copyBuffer(handleList, type);
+            ospSetParam(groupHandle, id, OSPDataType::OSP_DATA, &buffer.handle);
+        }
     }
+};
 
-    auto sharedList = ospNewSharedData(ospModels.data(), type, ospModels.size());
-    auto copiedList = ospNewData(type, 1);
-    ospCopyData(sharedList, copiedList);
-    ospRelease(sharedList);
-    ospSetParam(handle, ID, OSPDataType::OSP_DATA, &copiedList);
-    ospRelease(copiedList);
-}
-
-template<typename T>
-bool removeModel(std::vector<T> &modelList, T value)
+struct ModelEraser
 {
-    auto it = std::find(modelList.begin(), modelList.end(), value);
-    if(it != modelList.end())
+    template<typename T>
+    static bool removeModel(std::vector<T> &modelList, T value)
     {
-        modelList.erase(it);
-        return true;
-    }
+        auto it = std::find(modelList.begin(), modelList.end(), value);
+        if(it != modelList.end())
+        {
+            modelList.erase(it);
+            return true;
+        }
 
-    return false;
-}
+        return false;
+    }
+};
 }
 
 namespace brayns
@@ -75,7 +77,7 @@ void ModelGroup::addGeometricModel(OSPGeometricModel model)
 
 void ModelGroup::removeGeometricModel(OSPGeometricModel model)
 {
-    _modified = _modified || removeModel(_geometryModels, model);
+    _modified = _modified || ModelEraser::removeModel(_geometryModels, model);
 }
 
 void ModelGroup::addVolumetricModel(OSPVolumetricModel model)
@@ -86,7 +88,7 @@ void ModelGroup::addVolumetricModel(OSPVolumetricModel model)
 
 void ModelGroup::removeVolumetricModel(OSPVolumetricModel model)
 {
-    _modified = _modified || removeModel(_volumeModels, model);
+    _modified = _modified || ModelEraser::removeModel(_volumeModels, model);
 }
 
 void ModelGroup::addClippingModel(OSPGeometricModel model)
@@ -97,7 +99,7 @@ void ModelGroup::addClippingModel(OSPGeometricModel model)
 
 void ModelGroup::removeClippingModel(OSPGeometricModel model)
 {
-    _modified = _modified || removeModel(_clippingModels, model);
+    _modified = _modified || ModelEraser::removeModel(_clippingModels, model);
 }
 
 OSPGroup ModelGroup::handle() const noexcept
@@ -112,9 +114,9 @@ void ModelGroup::commit()
         return;
     }
 
-    copyListToOSPRay(_handle, _geometryModels, OSPDataType::OSP_GEOMETRIC_MODEL, "geometry");
-    copyListToOSPRay(_handle, _volumeModels, OSPDataType::OSP_VOLUMETRIC_MODEL, "volume");
-    copyListToOSPRay(_handle, _clippingModels, OSPDataType::OSP_GEOMETRIC_MODEL, "clippingGeometry");
+    HandleCommitter::commit(_geometryModels, OSPDataType::OSP_GEOMETRIC_MODEL, _handle, "geometry");
+    HandleCommitter::commit(_volumeModels, OSPDataType::OSP_VOLUMETRIC_MODEL, _handle, "volume");
+    HandleCommitter::commit(_clippingModels, OSPDataType::OSP_GEOMETRIC_MODEL, _handle, "clippingGeometry");
 
     ospCommit(_handle);
 }

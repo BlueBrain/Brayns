@@ -23,6 +23,7 @@
 #include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/SimulationComponent.h>
+#include <brayns/engine/components/TransferFunctionComponent.h>
 
 #include <components/CircuitColorComponent.h>
 #include <io/simulation/SimulationFrameIndexer.h>
@@ -66,7 +67,8 @@ size_t SpikeReportComponent::getSizeInBytes() const noexcept
 void SpikeReportComponent::onStart()
 {
     auto &model = getModel();
-    auto &tf = brayns::ExtractModelObject::extractTransferFunction(model);
+    auto &tfComponent = model.addComponent<brayns::TransferFunctionComponent>();
+    auto &tf = tfComponent.getTransferFunction();
     SimulationTransferFunction::setUnipolarColormap(tf);
 
     float endTime = _report->getEndTime();
@@ -77,8 +79,7 @@ void SpikeReportComponent::onPreRender(const brayns::ParametersManager &paramete
 {
     auto &model = getModel();
 
-    auto &simulationComponent = model.getComponent<brayns::SimulationComponent>();
-    if(!simulationComponent.enabled())
+    if(!brayns::ExtractModelObject::isSimulationEnabled(model))
     {
         _lastEnabledValue = false;
         return;

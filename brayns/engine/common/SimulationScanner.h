@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
- *
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,17 +18,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Statistics.h"
+#pragma once
+
+#include <brayns/engine/scenecomponents/SceneModelManager.h>
+#include <brayns/parameters/AnimationParameters.h>
 
 namespace brayns
 {
-size_t Statistics::getSceneSizeInBytes() const
+/**
+ * @brief The SimulationScanner struct scans all models with a simulation component to update the simulation
+ * global state in AnimationParameters
+ */
+struct SimulationScanner
 {
-    return _sceneSizeInBytes;
+    static void scanAndUpdate(SceneModelManager &modelManager, AnimationParameters& globalAnimation);
+};
 }
-
-void Statistics::setSceneSizeInBytes(const size_t sceneSizeInBytes)
-{
-    _updateValue(_sceneSizeInBytes, sceneSizeInBytes);
-}
-} // namespace brayns

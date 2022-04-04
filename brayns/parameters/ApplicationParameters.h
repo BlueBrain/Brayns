@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/common/Log.h>
 #include <brayns/common/MathTypes.h>
 #include <brayns/parameters/AbstractParameters.h>
 
@@ -98,11 +99,11 @@ public:
     void setUseQuantaRenderControl(const bool value) noexcept;
 
     /**
-     * @brief getMaxRenderFPS returns the max FPS at which the renderer should
-     * produce frames
-     * @return size_T
+     * @brief Returns the system's log level
+     *
+     * @return LogLevel
      */
-    size_t getMaxRenderFPS() const noexcept;
+    LogLevel getLogLevel() const noexcept;
 
     /**
      * @brief getPlugins return the list of plugis with which brayns was
@@ -128,8 +129,8 @@ protected:
     Vector2ui _windowSize;
     size_t _jpegCompression;
     size_t _imageStreamFPS{60};
-    size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
     bool _useQuantaRenderControl{false};
+    LogLevel _logLevel;
 
     std::vector<std::string> _plugins;
 

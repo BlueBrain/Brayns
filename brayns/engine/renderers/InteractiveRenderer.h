@@ -55,7 +55,7 @@ protected:
     void commitRendererSpecificParams() final;
 
 private:
-    bool _shadowsEnabled{true};
-    int32_t _aoSamples{10u};
+    bool _shadowsEnabled{false};
+    int32_t _aoSamples{0u};
 };
 }

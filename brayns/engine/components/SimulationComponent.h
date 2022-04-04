@@ -44,15 +44,21 @@ public:
 
     /**
      * @brief Returns the start time of the simulation
-     * @return uint32_t
+     * @return float
      */
-    uint32_t getStartTime() const noexcept;
+    float getStartTime() const noexcept;
 
     /**
      * @brief Returns the end time of the simulation
-     * @return uint32_t
+     * @return float
      */
-    uint32_t getEndTime() const noexcept;
+    float getEndTime() const noexcept;
+
+    /**
+     * @brief Returns the simulation timestep
+     * @return float
+     */
+    float getDT() const noexcept;
 
     /**
      * @brief Returns the time unit of the time parameters of this component

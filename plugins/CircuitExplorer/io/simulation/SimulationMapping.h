@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 /**
  * @brief The CompartmentStructure struct represents the internal structure of an element onto which simulation
@@ -10,7 +10,8 @@
  */
 struct CompartmentStructure
 {
-    size_t numItems {};
+    uint64_t id{};
+    size_t numItems{};
     std::unordered_map<int32_t, std::vector<size_t>> sectionSegments;
 };
 
@@ -26,6 +27,7 @@ struct SimulationMapping
 
 struct SimulationMappingGenerator
 {
-    static std::vector<uint64_t> generate(const std::vector<CompartmentStructure> &structure,
-                                          const std::vector<SimulationMapping> &mapping);
+    static std::vector<uint64_t> generate(
+        const std::vector<CompartmentStructure> &structure,
+        const std::vector<SimulationMapping> &mapping);
 };

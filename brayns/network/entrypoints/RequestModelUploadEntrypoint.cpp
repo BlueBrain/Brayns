@@ -24,6 +24,7 @@
 #include <sstream>
 #include <thread>
 
+#include <brayns/engine/common/SimulationScanner.h>
 #include <brayns/network/common/ProgressHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
@@ -145,11 +146,11 @@ class BinaryModelHandler
 {
 public:
     BinaryModelHandler(
-        brayns::Scene &scene,
+        brayns::SceneModelManager &modelManager,
         const brayns::LoaderRegistry &loaders,
         brayns::BinaryManager &binary,
         brayns::CancellationToken &token)
-        : _scene(scene)
+        : _modelManager(modelManager)
         , _loaders(loaders)
         , _binary(binary)
         , _token(token)
@@ -176,18 +177,17 @@ public:
 
         std::vector<brayns::ModelInstanceProxy> result;
         result.reserve(descriptors.size());
-        auto &modelManager = _scene.getModelManager();
         for(auto& model : descriptors)
         {
-            auto& instance = modelManager.addModel(loadParameters, std::move(model));
+            auto& instance = _modelManager.addModel(loadParameters, std::move(model));
             result.emplace_back(instance);
         }
-        _scene.computeBounds();
+
         request.reply(result);
     }
 
 private:
-    brayns::Scene &_scene;
+    brayns::SceneModelManager &_modelManager;
     const brayns::LoaderRegistry &_loaders;
     brayns::BinaryManager &_binary;
     brayns::CancellationToken &_token;
@@ -199,10 +199,12 @@ namespace brayns
 RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
     Scene &scene,
     const LoaderRegistry &loaders,
+    AnimationParameters &animation,
     BinaryManager &binary,
     CancellationToken token)
     : _scene(scene)
     , _loaders(loaders)
+    , _animation(animation)
     , _binary(binary)
     , _token(token)
 {
@@ -226,7 +228,10 @@ bool RequestModelUploadEntrypoint::isAsync() const
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
     _client = request.getClient();
-    BinaryModelHandler handler(_scene, _loaders, _binary, _token);
+    auto &modelManager = _scene.getModelManager();
+    BinaryModelHandler handler(modelManager, _loaders, _binary, _token);
+    SimulationScanner::scanAndUpdate(modelManager, _animation);
+    _scene.computeBounds();
     handler.handle(request);
 }
 

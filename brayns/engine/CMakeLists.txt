@@ -21,6 +21,7 @@ set(BRAYNSENGINE_SOURCES
     cameras/PerspectiveCamera.cpp
     common/ExtractModelObject.cpp
     common/GeometricModelHandler.cpp
+    common/SimulationScanner.cpp
     components/MaterialComponent.cpp
     components/SimulationComponent.cpp
     components/TransferFunctionComponent.cpp
@@ -66,6 +67,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     common/DataHandler.h
     common/ExtractModelObject.h
     common/GeometricModelHandler.h
+    common/SimulationScanner.h
     common/SizeHelper.h
     components/ClippingComponent.h
     components/GeometryRendererComponent.h

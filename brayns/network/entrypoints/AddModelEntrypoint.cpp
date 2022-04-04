@@ -21,6 +21,7 @@
 
 #include "AddModelEntrypoint.h"
 
+#include <brayns/engine/common/SimulationScanner.h>
 #include <brayns/network/common/ProgressHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
@@ -48,9 +49,11 @@ namespace brayns
 {
 AddModelEntrypoint::AddModelEntrypoint(Scene &scene,
                                        LoaderRegistry &loaders,
+                                       AnimationParameters &animation,
                                        CancellationToken token)
     : _scene(scene)
     , _loaders(loaders)
+    , _animation(animation)
     , _token(token)
 {
 }
@@ -97,6 +100,8 @@ void AddModelEntrypoint::onRequest(const Request &request)
         auto& modelInstance = modelManager.addModel(loadParameters, std::move(model));
         result.emplace_back(modelInstance);
     }
+
+    SimulationScanner::scanAndUpdate(modelManager, _animation);
 
     _scene.computeBounds();
 

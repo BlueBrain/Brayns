@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+﻿/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -27,6 +27,35 @@
 
 #include <thread>
 
+namespace
+{
+struct OSPRayLogLevelGenerator
+{
+    static OSPLogLevel generate(brayns::ApplicationParameters &params)
+    {
+        const auto systemLogLevel = params.getLogLevel();
+        switch (systemLogLevel)
+        {
+        case brayns::LogLevel::Off:
+            return OSPLogLevel::OSP_LOG_NONE;
+        case brayns::LogLevel::Critical:
+        case brayns::LogLevel::Error:
+            return OSPLogLevel::OSP_LOG_ERROR;
+        case brayns::LogLevel::Warn:
+            return OSPLogLevel::OSP_LOG_WARNING;
+        case brayns::LogLevel::Info:
+            return OSPLogLevel::OSP_LOG_INFO;
+        case brayns::LogLevel::Debug:
+        case brayns::LogLevel::Trace:
+        case brayns::LogLevel::Count:
+            return OSPLogLevel::OSP_LOG_DEBUG;
+        }
+
+        return OSPLogLevel::OSP_LOG_NONE;
+    }
+};
+}
+
 namespace brayns
 {
 Engine::Engine(ParametersManager &parameters)
@@ -35,7 +64,8 @@ Engine::Engine(ParametersManager &parameters)
     ospLoadModule("cpu");
     _device = ospNewDevice("cpu");
 
-    const auto logLevel = OSPLogLevel::OSP_LOG_WARNING;
+    auto &appParams = parameters.getApplicationParameters();
+    const auto logLevel = OSPRayLogLevelGenerator::generate(appParams);
     const auto logOutput = "cout";
     const auto logErrorOutput = "cerr";
     ospDeviceSetParam(_device, "logLevel", OSPDataType::OSP_INT, &logLevel);
@@ -55,7 +85,7 @@ Engine::Engine(ParametersManager &parameters)
 
     // Initialize components
     _frameBuffer = std::make_unique<FrameBuffer>();
-    _scene =  std::make_unique<Scene>();
+    _scene = std::make_unique<Scene>();
     _camera = std::make_unique<PerspectiveCamera>();
     _renderer = std::make_unique<InteractiveRenderer>();
 }
@@ -87,10 +117,6 @@ void Engine::commit()
         return;
     }
 
-    // update statistics
-    const auto avgFPS = _fpsCounter.getAverageFPS();
-    _statistics.setFPS(avgFPS);
-
     // Update changes on the viewport
     auto &appParams = _params.getApplicationParameters();
     const auto &frameSize = appParams.getWindowSize();
@@ -100,25 +126,25 @@ void Engine::commit()
     _camera->setAspectRatio(aspectRatio);
 
     bool needResetFramebuffer = false;
-    if(_frameBuffer->commit())
+    if (_frameBuffer->commit())
     {
         Log::critical("[Engine] Framebuffer committed");
         needResetFramebuffer = true;
     }
 
-    if(_camera->commit())
+    if (_camera->commit())
     {
         Log::critical("[Engine] Camera committed");
         needResetFramebuffer = true;
     }
 
-    if(_renderer->commit())
+    if (_renderer->commit())
     {
         Log::critical("[Engine] Renderer committed");
         needResetFramebuffer = true;
     }
 
-    if(_scene->commit())
+    if (_scene->commit())
     {
         Log::critical("[Engine] Scene committed");
         needResetFramebuffer = true;
@@ -143,27 +169,9 @@ void Engine::render()
     const auto maxSpp = _renderer->getSamplesPerPixel();
     const auto currentSpp = _frameBuffer->numAccumFrames();
     if (currentSpp >= maxSpp)
-        return;
-
-    // A frame is counted from the momment we start rendering until we come again to the same point.
-    _fpsCounter.endFrame();
-    const auto &appParams = _params.getApplicationParameters();
-    const auto maxFPS = appParams.getMaxRenderFPS();
-    const auto minFrameTimeMilis = (1.0 / static_cast<double>(maxFPS)) * 1000.0;
-
-    const auto avgFPS = _fpsCounter.getAverageFPS();
-    const auto avgFrameTimeMillis = (1.0 / static_cast<double>(avgFPS)) * 1000.0;
-
-    const auto diff = avgFrameTimeMillis - minFrameTimeMilis;
-
-    if (diff < 0.0)
     {
-        Log::info("Slowing down FPS. Last frame rendered {} ms too fast", diff);
-        std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(diff));
+        return;
     }
-
-    // Start measuring a new frame render time.
-    _fpsCounter.startFrame();
 
     FrameRenderer::synchronous(*_camera, *_frameBuffer, *_renderer, *_scene);
 
@@ -172,7 +180,7 @@ void Engine::render()
 
 void Engine::postRender()
 {
-    if(!_keepRunning)
+    if (!_keepRunning)
     {
         return;
     }
