@@ -24,8 +24,8 @@
 #include <brayns/json/JsonObjectMacro.h>
 #include <brayns/utils/StringUtils.h>
 
-#include <plugin/io/NeuronMorphologyLoaderParameters.h>
-#include <plugin/io/sonataloader/reports/ReportType.h>
+#include <io/NeuronMorphologyLoaderParameters.h>
+#include <io/sonataloader/reports/ReportType.h>
 
 namespace brayns
 {
@@ -47,20 +47,14 @@ BRAYNS_JSON_OBJECT_BEGIN(VasculatureGeometrySettings)
 BRAYNS_JSON_OBJECT_ENTRY(
     float,
     radius_multiplier,
-    "Factor by which to multiply all vasculature sample radii. Ignored if radius_override is greater than 0",
-    brayns::Default(1.f))
-BRAYNS_JSON_OBJECT_ENTRY(
-    float,
-    radius_override,
-    "Factor to replace all vasculature sample radii. Disabled by setting to "
-    "0.0. Invalidates radius_multiplier if greater than 0",
-    brayns::Default(0.f))
+    "Factor by which to multiply all vasculature sample radii",
+    brayns::Default(1.f), brayns::Minimum(0.1f))
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(SonataEdgePopulationParameters)
 BRAYNS_JSON_OBJECT_ENTRY(std::string, edge_population, "Name of the edge population to load")
 BRAYNS_JSON_OBJECT_ENTRY(bool, load_afferent, "Wether to load afferent or efferent edges")
-BRAYNS_JSON_OBJECT_ENTRY(float, edge_percentage, "Percentage of edges to load from all available")
+BRAYNS_JSON_OBJECT_ENTRY(float, edge_percentage, "Percentage of edges to load from all available", brayns::Minimum(0.001f))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     edge_report_name,
@@ -81,13 +75,15 @@ BRAYNS_JSON_OBJECT_ENTRY(
     float,
     node_percentage,
     "Percentage of nodes to load after filter them by whichever node sets have "
-    "been specified. Ignored if a lsit of node ids is provided")
+    "been specified. Ignored if a lsit of node ids is provided",
+    brayns::Required(false), brayns::Default(0.01f), brayns::Minimum(0.001f))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<uint64_t>,
     node_ids,
     "List of node IDs to load from the population. Invalidates 'node_percentage' and 'node_sets'",
     brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(sonataloader::ReportType, report_type, "Type of report to load for the given node population.")
+BRAYNS_JSON_OBJECT_ENTRY(sonataloader::ReportType, report_type, "Type of report to load for the given node population.",
+                         brayns::Default(sonataloader::ReportType::NONE))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     report_name,

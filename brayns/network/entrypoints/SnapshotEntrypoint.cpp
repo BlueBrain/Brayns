@@ -138,9 +138,8 @@ public:
         {
             const auto percentage = ospGetProgress(future);
             progress.notify(msg, percentage);
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-        //ospWait(future);
 
         // Handle result
         brayns::ImageBase64Message image;

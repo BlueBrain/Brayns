@@ -23,16 +23,11 @@
 #include <brayns/engine/Scene.h>
 #include <brayns/utils/StringUtils.h>
 
-#include <plugin/api/CircuitColorManager.h>
-#include <plugin/api/MaterialUtils.h>
-
-#include <plugin/io/sonataloader/ParameterCheck.h>
-#include <plugin/io/sonataloader/colorhandlers/PopulationColorManager.h>
-#include <plugin/io/sonataloader/data/SonataSelection.h>
-#include <plugin/io/sonataloader/populations/PopulationLoadManager.h>
-#include <plugin/io/sonataloader/reports/PopulationReportManager.h>
-
-#include <plugin/io/util/TransferFunctionUtils.h>
+#include <io/sonataloader/ParameterCheck.h>
+#include <io/sonataloader/colorhandlers/PopulationColorManager.h>
+#include <io/sonataloader/data/SonataSelection.h>
+#include <io/sonataloader/populations/PopulationLoadManager.h>
+#include <io/sonataloader/reports/PopulationReportManager.h>
 
 using namespace sonataloader;
 
@@ -91,19 +86,6 @@ auto selectNodes(const SonataNetworkConfig &network, const SonataNodePopulationP
     return selected;
 }
 
-brayns::ModelDescriptorPtr
-    createModelDescriptor(const std::string &name, const std::string &path, brayns::ModelPtr &model)
-{
-    model->updateBounds();
-    brayns::Transformation transform;
-    transform.setRotationCenter(model->getBounds().getCenter());
-    auto modelDescriptor =
-        std::make_shared<brayns::ModelDescriptor>(std::move(model), name, path, brayns::ModelMetadata());
-    modelDescriptor->setName(name);
-    modelDescriptor->setTransformation(transform);
-    return modelDescriptor;
-}
-
 void informProgress(const brayns::LoaderProgress &cb, const std::string &msg, float &total, const float chunk)
 {
     cb.updateProgress(msg, total);
@@ -111,11 +93,6 @@ void informProgress(const brayns::LoaderProgress &cb, const std::string &msg, fl
     total = std::max(total, 1.f);
 }
 } // namespace
-
-SonataLoader::SonataLoader(CircuitColorManager &colorManager)
-    : _colorManager(colorManager)
-{
-}
 
 std::vector<std::string> SonataLoader::getSupportedExtensions() const
 {
@@ -127,20 +104,21 @@ std::string SonataLoader::getName() const
     return std::string("SONATA loader");
 }
 
-std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromBlob(
-    brayns::Blob &&,
-    const brayns::LoaderProgress &,
-    const SonataLoaderParameters &,
-    brayns::Scene &) const
+std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromBlob(
+    brayns::Blob &&blob,
+    const brayns::LoaderProgress &cb,
+    const SonataLoaderParameters &params) const
 {
-    throw std::runtime_error("Sonata loader: import from blob not supported");
+    (void)blob;
+    (void)cb;
+    (void)params;
+    throw std::runtime_error("Import from blob not supported");
 }
 
-std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
+std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
     const std::string &path,
     const brayns::LoaderProgress &callback,
-    const SonataLoaderParameters &input,
-    brayns::Scene &scene) const
+    const SonataLoaderParameters &input) const
 {
     const brayns::Timer timer;
     brayns::Log::info("[CE] {}: loading {}.", getName(), path);
@@ -157,7 +135,7 @@ std::vector<brayns::ModelDescriptorPtr> SonataLoader::importFromFile(
     const float chunk = computeProgressChunk(input);
     float total = 0.f;
 
-    std::vector<brayns::ModelDescriptorPtr> result;
+    std::vector<std::unique_ptr<brayns::Model>> result;
     for (const auto &nodeSettings : input.node_population_settings)
     {
         const auto &nodeName = nodeSettings.node_population;

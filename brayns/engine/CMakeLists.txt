@@ -31,6 +31,8 @@ set(BRAYNSENGINE_SOURCES
     geometries/Primitive.cpp
     geometries/Sphere.cpp
     geometries/TriangleMesh.cpp
+    imageoperations/ImageOperationManager.cpp
+    imageoperations/ToneMapping.cpp
     lights/AmbientLight.cpp
     lights/DirectionalLight.cpp
     lights/QuadLight.cpp
@@ -53,6 +55,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     Engine.h
     FrameBuffer.h
     FrameRenderer.h
+    ImageOperation.h
     Light.h
     Material.h
     Model.h
@@ -80,6 +83,8 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     geometries/Plane.h
     geometries/Primitive.h
     geometries/Sphere.h
+    imageoperations/ImageOperationManager.h
+    imageoperations/ToneMapping.h
     lights/AmbientLight.h
     lights/DirectionalLight.h
     lights/QuadLight.h

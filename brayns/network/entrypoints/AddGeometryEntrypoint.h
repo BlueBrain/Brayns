@@ -59,6 +59,7 @@ public:
 
         auto &modelManager = _scene.getModelManager();
         auto &instance = modelManager.addModel({}, std::move(newModel));
+        // Need to compute bounds here to make sure the bounds will be updated for the next call (which may need them)
         _scene.computeBounds();
 
         ModelInstanceProxy result (instance);

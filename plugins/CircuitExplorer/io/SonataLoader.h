@@ -20,8 +20,7 @@
 
 #include <brayns/io/Loader.h>
 
-#include <plugin/api/CircuitColorManager.h>
-#include <plugin/io/SonataLoaderParameters.h>
+#include <io/SonataLoaderParameters.h>
 
 /**
  * @brief Imports one or multiple node and edge SONATA populations into Brayns
@@ -29,8 +28,6 @@
 class SonataLoader : public brayns::Loader<SonataLoaderParameters>
 {
 public:
-    SonataLoader(CircuitColorManager &colorManager);
-
     /**
      * @brief getSupportedExtensions returns a list with supported file
      * extensions
@@ -44,29 +41,18 @@ public:
     std::string getName() const final;
 
     /**
-     * @brief getProperties return all the available properties for this loader,
-     * and the default value of each of them
-     */
-    brayns::PropertyMap getProperties() const;
-
-    /**
      * @brief importFromBlob imports models from a byte blob. NOT SUPPORTED
      */
-    std::vector<brayns::ModelDescriptorPtr> importFromBlob(
-        brayns::Blob &&,
-        const brayns::LoaderProgress &,
-        const SonataLoaderParameters &,
-        brayns::Scene &) const final;
+    std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
+        brayns::Blob &&blob,
+        const brayns::LoaderProgress &cb,
+        const SonataLoaderParameters &params) const final;
 
     /**
      * @brief importFromFile imports models from a file given by a path
      */
-    std::vector<brayns::ModelDescriptorPtr> importFromFile(
+    std::vector<std::unique_ptr<brayns::Model>> importFromFile(
         const std::string &path,
         const brayns::LoaderProgress &callback,
-        const SonataLoaderParameters &input,
-        brayns::Scene &scene) const final;
-
-private:
-    CircuitColorManager &_colorManager;
+        const SonataLoaderParameters &input) const final;
 };

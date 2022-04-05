@@ -102,7 +102,7 @@ void AddModelEntrypoint::onRequest(const Request &request)
     }
 
     SimulationScanner::scanAndUpdate(modelManager, _animation);
-
+    // Need to compute bounds here to make sure the bounds will be updated for the next call (which may need them)
     _scene.computeBounds();
 
     request.reply(result);

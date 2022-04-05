@@ -47,7 +47,7 @@ void PlasticMaterial::commitMaterialSpecificParams()
 {
     static constexpr float clearCoat = 1.f;
     static constexpr float clearCoatThickness = 3.f;
-    static constexpr float roughness = 0.1f;
+    static constexpr float roughness = 0.01f;
     static constexpr float sheen = 1.f;
 
     auto ospHandle = handle();

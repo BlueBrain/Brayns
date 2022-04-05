@@ -21,6 +21,7 @@
 
 #include "FrameBuffer.h"
 
+#include <brayns/engine/common/DataHandler.h>
 #include <brayns/utils/image/ImageFlipper.h>
 
 namespace
@@ -115,9 +116,18 @@ bool FrameBuffer::commit()
 
     size_t channels = OSP_FB_COLOR;
     if (_accumulation)
+    {
         channels |= OSP_FB_ACCUM;
+    }
 
     _handle = ospNewFrameBuffer(width, height, format, channels);
+
+    auto operations = _operationManager.getOperationHandles();
+    if(!operations.empty())
+    {
+        auto operationsBuffer = DataHandler::copyBuffer(operations, OSPDataType::OSP_IMAGE_OPERATION);
+        ospSetParam(_handle, "imageOperation", OSPDataType::OSP_DATA, &operationsBuffer.handle);
+    }
 
     ospCommit(_handle);
 
@@ -131,7 +141,9 @@ bool FrameBuffer::commit()
 void FrameBuffer::setFrameSize(const Vector2ui &frameSize)
 {
     if (glm::compMul(frameSize) == 0 || frameSize.x < 64 || frameSize.y < 64)
+    {
         throw std::invalid_argument("Frame size must be greather than or equal to 64x64");
+    }
 
     _updateValue(_frameSize, frameSize);
 }
@@ -204,5 +216,10 @@ Image FrameBuffer::getImage()
 OSPFrameBuffer FrameBuffer::handle() const noexcept
 {
     return _handle;
+}
+
+ImageOperationManager &FrameBuffer::getOperationsManager() noexcept
+{
+    return _operationManager;
 }
 } // namespace brayns

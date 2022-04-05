@@ -24,6 +24,7 @@
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
 #include <brayns/common/PixelFormat.h>
+#include <brayns/engine/imageoperations/ImageOperationManager.h>
 #include <brayns/utils/image/Image.h>
 
 #include <ospray/ospray.h>
@@ -131,6 +132,12 @@ public:
      */
     OSPFrameBuffer handle() const noexcept;
 
+    /**
+     * @brief Returns the image operations manager
+     * @return ImageOperationManager &
+     */
+    ImageOperationManager &getOperationsManager() noexcept;
+
 private:
     Vector2ui _frameSize {800u, 600u};
     PixelFormat _frameBufferFormat {PixelFormat::SRGBA_I8};
@@ -140,5 +147,7 @@ private:
     OSPFrameBuffer _handle {nullptr};
 
     uint8_t *_colorBuffer {nullptr};
+
+    ImageOperationManager _operationManager;
 };
 } // namespace brayns
