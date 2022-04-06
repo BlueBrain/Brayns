@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include <plugin/io/SonataLoaderParameters.h>
-#include <plugin/io/sonataloader/data/SonataConfig.h>
-#include <plugin/io/synapse/SynapseGroup.h>
+#include <io/simulation/SimulationMapping.h>
+#include <io/sonataloader/LoadContext.h>
+#include <io/util/ProgressUpdater.h>
 
 namespace sonataloader
 {

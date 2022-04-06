@@ -18,31 +18,17 @@
 
 #pragma once
 
-#include <brayns/io/Loader.h>
+#include <io/SonataLoaderParameters.h>
+#include <io/sonataloader/data/SonataConfig.h>
 
-#include <io/bbploader/LoadContext.h>
-#include <io/simulation/SimulationMapping.h>
-#include <io/util/ProgressUpdater.h>
+#include <bbp/sonata/population.h>
 
-namespace bbploader
+namespace sonataloader
 {
-/**
- * @brief The CellLoader class is in charge of load the needed data from BBP's
- * internal format files provided by a CircuitConfig/BlueConfig file, and
- * transform them into a list of MorphologyInstances that can be added to the
- * Brayns scene
- */
-class CellLoader
+struct NodeSelector
 {
-public:
-    /**
-     * @brief load
-     * @param context
-     * @param updater
-     * @param model
-     * @return
-     */
-    static std::vector<CompartmentStructure>
-        load(const LoadContext &context, ProgressUpdater &updater, brayns::Model &model);
+    static bbp::sonata::Selection selectNodes(
+        const SonataNetworkConfig &network,
+        const SonataNodePopulationParameters &params);
 };
-} // namespace bbploader
+}

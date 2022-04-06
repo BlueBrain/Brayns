@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <plugin/io/sonataloader/populations/EdgePopulationLoader.h>
-#include <plugin/io/sonataloader/populations/NodePopulationLoader.h>
+#include <io/sonataloader/populations/EdgePopulationLoader.h>
+#include <io/sonataloader/populations/NodePopulationLoader.h>
 
 namespace sonataloader
 {

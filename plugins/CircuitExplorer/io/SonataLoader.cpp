@@ -23,9 +23,10 @@
 #include <brayns/engine/Scene.h>
 #include <brayns/utils/StringUtils.h>
 
+#include <io/sonataloader/LoadContext.h>
+#include <io/sonataloader/NodeSelector.h>
 #include <io/sonataloader/ParameterCheck.h>
 #include <io/sonataloader/colorhandlers/PopulationColorManager.h>
-#include <io/sonataloader/data/SonataSelection.h>
 #include <io/sonataloader/populations/PopulationLoadManager.h>
 #include <io/sonataloader/reports/PopulationReportManager.h>
 
@@ -49,41 +50,6 @@ float computeProgressChunk(const SonataLoaderParameters &loadParameters) noexcep
     const float chunk = (1.f / static_cast<float>(numNodePopulations * 3 + numEdgePopulations * 3));
 
     return chunk;
-}
-
-auto selectNodes(const SonataNetworkConfig &network, const SonataNodePopulationParameters &lc)
-{
-    NodeSelection selection;
-
-    const auto &nodePopulation = lc.node_population;
-    const auto &nodeSets = lc.node_sets;
-
-    const auto &nodeIds = lc.node_ids;
-
-    const auto reportType = lc.report_type;
-    const auto &reportName = lc.report_name;
-
-    const auto percentage = lc.node_percentage;
-
-    const auto &config = network.circuitConfig();
-
-    selection.select(config, nodePopulation, nodeSets);
-    selection.select(nodeIds);
-
-    if (reportType != ReportType::NONE)
-    {
-        const auto &simConfig = network.simulationConfig();
-        selection.select(simConfig, reportType, reportName, nodePopulation);
-    }
-
-    const auto selected = selection.intersection(percentage);
-
-    if (selected.empty())
-    {
-        throw std::runtime_error("SonataLoader: Empty node selection for " + lc.node_population);
-    }
-
-    return selected;
 }
 
 void informProgress(const brayns::LoaderProgress &cb, const std::string &msg, float &total, const float chunk)
@@ -127,6 +93,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
     const auto &circuitConfigPath = path;
     const auto &simulationConfigPath = input.simulation_config_path;
     const auto network = SonataConfig::readNetwork(circuitConfigPath, simulationConfigPath);
+    const auto &circuitConfig = network.circuitConfig();
 
     // Check input parameters and data available on disk
     ParameterCheck::checkInput(network, input);
@@ -139,11 +106,14 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
     for (const auto &nodeSettings : input.node_population_settings)
     {
         const auto &nodeName = nodeSettings.node_population;
+        const auto nodePopulation = circuitConfig.getNodePopulation(nodeName);
+        const auto nodeSelection = NodeSelector::selectNodes(network, nodeSettings);
+
+        const NodeLoadContext nodeContext{network, nodeSettings, nodePopulation, nodeSelection};
 
         brayns::Log::info("[CE] Loading {} node population.", nodeName);
 
         // Select nodes that are going to be loaded
-        const auto nodeSelection = selectNodes(network, nodeSettings);
 
         // Load node data
         const auto nodeIDs = nodeSelection.flatten();

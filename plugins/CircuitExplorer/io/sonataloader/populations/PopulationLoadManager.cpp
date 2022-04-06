@@ -20,18 +20,18 @@
 
 #include <brayns/common/Log.h>
 
-#include <plugin/io/sonataloader/data/SonataCells.h>
+#include <io/sonataloader/data/SonataCells.h>
 
-#include <plugin/io/sonataloader/populations/edges/ChemicalSynapsePopulationLoader.h>
-#include <plugin/io/sonataloader/populations/edges/ElectricalSynapsePopulationLoader.h>
-#include <plugin/io/sonataloader/populations/edges/EndFootPopulationLoader.h>
-#include <plugin/io/sonataloader/populations/edges/GlialGlialPopulationLoader.h>
-#include <plugin/io/sonataloader/populations/edges/SynapseAstrocytePopulationLoader.h>
+#include <io/sonataloader/populations/edges/ChemicalSynapsePopulationLoader.h>
+#include <io/sonataloader/populations/edges/ElectricalSynapsePopulationLoader.h>
+#include <io/sonataloader/populations/edges/EndFootPopulationLoader.h>
+#include <io/sonataloader/populations/edges/GlialGlialPopulationLoader.h>
+#include <io/sonataloader/populations/edges/SynapseAstrocytePopulationLoader.h>
 
-#include <plugin/io/sonataloader/populations/nodes/AstrocytePopulationLoader.h>
-#include <plugin/io/sonataloader/populations/nodes/BiophysicalPopulationLoader.h>
-#include <plugin/io/sonataloader/populations/nodes/PointNeuronPopulationLoader.h>
-#include <plugin/io/sonataloader/populations/nodes/VasculaturePopulationLoader.h>
+#include <io/sonataloader/populations/nodes/AstrocytePopulationLoader.h>
+#include <io/sonataloader/populations/nodes/BiophysicalPopulationLoader.h>
+#include <io/sonataloader/populations/nodes/PointNeuronPopulationLoader.h>
+#include <io/sonataloader/populations/nodes/VasculaturePopulationLoader.h>
 
 #include <unordered_map>
 
@@ -43,25 +43,28 @@ template<typename Super>
 class PopulationLoaderTable
 {
 public:
-    template<typename T, typename = std::enable_if_t<std::is_base_of<Super, T>::value>>
+    template<typename T>
     void registerLoader()
     {
-        auto loader = std::make_unique<T>();
-        const auto name = loader->getType();
-        _nodes[name] = std::move(loader);
+        _loaders.pop_back(std::make_unique<T>());
     }
 
-    Super *getLoader(const std::string &name)
+    Super &getLoader(const std::string &name)
     {
-        auto it = _nodes.find(name);
-        if (it != _nodes.end())
-            return it->second.get();
+        auto begin = _loaders.begin();
+        auto end = _loaders.end();
+        auto it = _nodes.find_if(begin, end, [&](std::unique_ptr<Super> &loader) { return loader->getName() == name; });
 
-        return nullptr;
+        if (it == _nodes.end())
+        {
+            throw std::invalid_argument("No population loader with name " + name);
+        }
+
+        return *(*it);
     }
 
 private:
-    std::unordered_map<std::string, std::unique_ptr<Super>> _nodes;
+    std::vector<std::unique_ptr<Super>> _loaders;
 };
 
 class NodePopulationLoaders

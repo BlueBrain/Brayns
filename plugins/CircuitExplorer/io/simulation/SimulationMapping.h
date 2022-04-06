@@ -10,11 +10,14 @@
  */
 struct CompartmentStructure
 {
-    uint64_t id{};
     size_t numItems{};
     std::unordered_map<int32_t, std::vector<size_t>> sectionSegments;
 };
 
+/**
+ * @brief The SimulationMapping holds the simulation compartment mapping of a cell
+ *
+ */
 struct SimulationMapping
 {
     // Global offset within the while simulation frame
@@ -25,6 +28,10 @@ struct SimulationMapping
     std::vector<uint16_t> compartments;
 };
 
+/**
+ * @brief The SimulationMappingGenerator is in charge of generating a simulation frame offset array
+ *
+ */
 struct SimulationMappingGenerator
 {
     static std::vector<uint64_t> generate(

@@ -18,48 +18,38 @@
 
 #pragma once
 
-#include <plugin/io/SonataLoaderParameters.h>
-#include <plugin/io/morphology/MorphologyInstance.h>
-#include <plugin/io/sonataloader/data/SonataConfig.h>
+#include <io/simulation/SimulationMapping.h>
+#include <io/sonataloader/LoadContext.h>
+#include <io/util/ProgressUpdater.h>
 
 namespace sonataloader
 {
 /**
- * @brief The NodePopulationLoader is the base class for implementations that
- * load SONATA node populations which must be transformed into morphology
- * instances (in other words, transforms node population data into scene
- * geometry)
+ * @brief Interface to implement node population load types
+ *
  */
 class NodePopulationLoader
 {
 public:
-    NodePopulationLoader(std::string populationType)
-        : _typeName(std::move(populationType))
-    {
-    }
-
     virtual ~NodePopulationLoader() = default;
 
     /**
-     * @brief returns a std::string that represents the population type of this
-     * loader
+     * @brief Returns the population type that the loader handles. The type must match a valid population type
+     * in the SONATA specs
+     *
+     * @return std::string
      */
-    const std::string &getType() const noexcept
-    {
-        return _typeName;
-    }
+    virtual std::string getPopulationType() const noexcept = 0;
 
     /**
-     * @brief load the node population data. The given parameters may be used to
-     * configure the load process. The SubProgressReport allows to notify
-     * progress to listening clients of the Brayns API
+     * @brief Interface to load a node population
+     *
+     * @param ctxt
+     * @param cb
+     * @param model
+     * @return std::vector<CompartmentStructure>
      */
-    virtual std::vector<MorphologyInstance::Ptr> load(
-        const SonataNetworkConfig &networkData,
-        const SonataNodePopulationParameters &loadSettings,
-        const bbp::sonata::Selection &nodeSelection) const = 0;
-
-private:
-    const std::string _typeName;
+    virtual std::vector<CompartmentStructure>
+        load(const NodeLoadContext &ctxt, ProgressUpdater &cb, brayns::Model &model) const = 0;
 };
 } // namespace sonataloader

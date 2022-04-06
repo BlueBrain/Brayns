@@ -95,7 +95,6 @@ std::vector<CompartmentStructure> MorphologyCircuitLoader::load(
         mappings[i] = std::move(sectionMapping);
 
         auto &compartment = compartments[i];
-        compartment.id = ids[i];
         compartment.numItems = geometry.size();
         compartment.sectionSegments = std::move(compartmentMapping);
 
