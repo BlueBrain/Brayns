@@ -6,8 +6,6 @@
 #include <unordered_map>
 #include <vector>
 
-namespace sonataloader
-{
 namespace
 {
 using Range = std::pair<uint64_t, uint64_t>;
@@ -23,18 +21,24 @@ auto computeMapping(
     {
         const auto it = nodePointers.find(nodeId);
         if (it == nodePointers.end())
+        {
             continue;
+        }
 
         std::vector<bbp::sonata::ElementID> elementIds(it->second.second - it->second.first);
         elementIdsData.select({it->second.first}, {it->second.second - it->second.first}).read(elementIds.data());
 
         for (const auto elem : elementIds)
+        {
             result.push_back(std::make_pair(nodeId, elem));
+        }
     }
     return result;
 }
 } // namespace
 
+namespace sonataloader
+{
 std::vector<bbp::sonata::NodeID> SonataSimulationMapping::getCompartmentNodes(
     const std::string &reportPath,
     const std::string &population)
@@ -72,12 +76,20 @@ std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>> SonataSimula
 
     std::unordered_map<bbp::sonata::NodeID, Range> nodePointers;
     for (size_t i = 0; i < reportNodeIds.size(); ++i)
-        nodePointers.emplace(reportNodeIds[i], std::make_pair(indexPointers[i], indexPointers[i + 1]));
+    {
+        const auto nodeId = reportNodeIds[i];
+        const auto start = indexPointers[i];
+        const auto end = indexPointers[i + 1];
+
+        nodePointers.emplace(nodeId, std::make_pair(start, end));
+    }
 
     // Compute final list of
     if (!nodeIds.empty())
+    {
         return computeMapping(reportPop, nodePointers, nodeIds);
-    else
-        return computeMapping(reportPop, nodePointers, reportNodeIds);
+    }
+
+    return computeMapping(reportPop, nodePointers, reportNodeIds);
 }
 } // namespace sonataloader

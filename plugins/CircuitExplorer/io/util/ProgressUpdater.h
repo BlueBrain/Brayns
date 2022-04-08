@@ -5,13 +5,20 @@
 class ProgressUpdater
 {
 public:
-    ProgressUpdater(const brayns::LoaderProgress &cb, const float start, const float end, const size_t items);
+    ProgressUpdater(const brayns::LoaderProgress &cb, const size_t stages);
+
+    void beginStage(const size_t numSubElements = 1);
 
     void update(const std::string &message) noexcept;
+
+    void endStage();
+
 private:
     const brayns::LoaderProgress &_callback;
-    const float _start {};
-    const float _end {};
-    float _current;
-    float _chunks;
+    const size_t _numStages{};
+    const float _stageSize{};
+
+    size_t _currentStage{};
+    float _currentStageChunkSize{};
+    float _currentStageProgress{};
 };

@@ -31,9 +31,13 @@ namespace brayns
 class TransferFunctionComponent final : public Component
 {
 public:
+    TransferFunctionComponent() = default;
+
+    TransferFunctionComponent(TransferFunction tf);
+
     uint64_t getSizeInBytes() const noexcept override;
 
-    TransferFunction& getTransferFunction() noexcept;
+    TransferFunction &getTransferFunction() noexcept;
 
     void setTransferFunction(TransferFunction tf) noexcept;
 

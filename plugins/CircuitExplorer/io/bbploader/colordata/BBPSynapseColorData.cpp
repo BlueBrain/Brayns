@@ -20,26 +20,34 @@
 
 #include "BBPSynapseColorData.h"
 
+#include <io/bbploader/colordata/ColorDataExtractor.h>
+
+#include <set>
+
 namespace bbploader
 {
 BBPSynapseColorData::BBPSynapseColorData(std::string circuitPath, std::string circuitPopulation)
- : _internal(std::move(circuitPath), std::move(circuitPopulation))
+    : _circuitPath(std::move(circuitPath))
+    , _circuitPop(std::move(circuitPopulation))
 {
 }
 
 std::vector<std::string> BBPSynapseColorData::getMethods() const noexcept
 {
-    return _internal.getCircuitLevelMethods();
+    return BBPColorMethods::get(_circuitPath, _circuitPop);
 }
 
 std::vector<std::string> BBPSynapseColorData::getMethodVariables(const std::string &method) const
 {
-    return _internal.getCircuitLevelMethodVariables(method);
+    const auto variables = BBPColorValues::getAll(_circuitPath, _circuitPop, method);
+    const std::set<std::string> unique(variables.begin(), variables.end());
+    return std::vector<std::string>(unique.begin(), unique.end());
 }
 
 std::vector<std::string> BBPSynapseColorData::getMethodValuesForIDs(
-        const std::string &method, const std::vector<uint64_t>& ids) const
+    const std::string &method,
+    const std::vector<uint64_t> &ids) const
 {
-    return _internal.getMethodValuesForIDs(method, ids);
+    return BBPColorValues::get(_circuitPath, _circuitPop, method, ids);
 }
 } // namespace bbploader

@@ -18,22 +18,30 @@
 
 #pragma once
 
-#include <plugin/io/sonataloader/populations/NodePopulationLoader.h>
+#include <io/sonataloader/populations/NodePopulationLoader.h>
 
 namespace sonataloader
 {
 /**
- * @brief The VasculaturePopulationLoader class implements the node load
- * functionality to read 'vasculature' node population types
+ * @brief Implementation to load vasculature populations
  */
-class VasculaturePopulationLoader : public NodePopulationLoader
+class VasculaturePopulationLoader final : public NodePopulationLoader
 {
 public:
-    VasculaturePopulationLoader();
+    /**
+     * @brief Get the Population Type object
+     *
+     * @return std::string
+     */
+    std::string getPopulationType() const noexcept override;
 
-    std::vector<MorphologyInstance::Ptr> load(
-        const SonataNetworkConfig &networkData,
-        const SonataNodePopulationParameters &loadSettings,
-        const bbp::sonata::Selection &nodeSelection) const final;
+    /**
+     * @brief
+     *
+     * @param ctxt
+     * @param cb
+     * @param model
+     */
+    void load(const NodeLoadContext &ctxt, ProgressUpdater &cb, brayns::Model &model) const override;
 };
 } // namespace sonataloader

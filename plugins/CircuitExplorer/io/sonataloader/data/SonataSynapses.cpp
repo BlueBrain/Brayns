@@ -22,8 +22,6 @@
 #include <map>
 #include <random>
 
-namespace sonataloader
-{
 namespace
 {
 constexpr char attribEffSectionId[] = "efferent_section_id";
@@ -92,6 +90,8 @@ void fixSections(std::vector<int32_t> &sectionIds) noexcept
 }
 } // namespace
 
+namespace sonataloader
+{
 std::vector<uint64_t> SonataSynapses::getSourceNodes(const Edges &population, const Selection &selection)
 {
     return population.sourceNodeIDs(selection);

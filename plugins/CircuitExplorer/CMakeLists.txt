@@ -6,40 +6,45 @@
 
 set(BRAYNSCIRCUITEXPLORER_SOURCES
     CircuitExplorerPlugin.cpp
-    api/ColorIDParser.cpp
-    api/ColorUtils.cpp
+    api/circuit/MorphologyCircuitBuilder.cpp
+    api/circuit/SomaCircuitBuilder.cpp
+    api/circuit/colorhandlers/MorphologyColorHandler.cpp
+    api/circuit/colorhandlers/SomaColorHandler.cpp
+    api/coloring/ColorIDParser.cpp
+    api/coloring/ColorUtils.cpp
+    api/neuron/NeuronGeometryBuilder.cpp
+    api/neuron/NeuronMorphology.cpp
+    api/neuron/NeuronMorphologyProcessor.cpp
+    api/neuron/NeuronMorphologyReader.cpp
+    api/reports/ReportMapping.cpp
+    api/reports/TransferFunctionUtils.cpp
+    api/reports/common/FrameTimeCalculator.cpp
+    api/reports/common/SpikeUtils.cpp
+    api/reports/indexers/OffsetIndexer.cpp
+    api/reports/indexers/SpikeIndexer.cpp
+    api/synapse/EndfeetColorHandler.cpp
+    api/synapse/SynapseColorHandler.cpp
+    api/vasculature/VasculatureColorHandler.cpp
     components/CircuitColorComponent.cpp
+    components/EndfeetComponent.cpp
+    components/MorphologyCircuitComponent.cpp
+    components/ReportComponent.cpp
+    components/SomaCircuitComponent.cpp
+    components/SynapseComponent.cpp
+    components/VasculatureComponent.cpp
     io/BBPLoader.cpp
     io/NeuronMorphologyLoader.cpp
     io/SonataNGVLoader.cpp
     io/bbploader/CellLoader.cpp
     io/bbploader/GIDLoader.cpp
     io/bbploader/ParameterCheck.cpp
-    io/bbploader/SimulationLoader.cpp
+    io/bbploader/ReportLoader.cpp
     io/bbploader/SynapseLoader.cpp
     io/bbploader/colordata/BBPNeuronColorData.cpp
     io/bbploader/colordata/BBPSynapseColorData.cpp
-    io/bbploader/simulation/CompartmentReportComponent.cpp
-    io/bbploader/simulation/SpikeReportComponent.cpp
-    io/circuit/MorphologyCircuitLoader.cpp
-    io/circuit/SomaCircuitLoader.cpp
-    io/circuit/colorhandlers/MorphologyColorHandler.cpp
-    io/circuit/colorhandlers/SomaColorHandler.cpp
-    io/circuit/components/MorphologyCircuitComponent.cpp
-    io/circuit/components/SomaCircuitComponent.cpp
-    io/morphology/neuron/NeuronGeometryBuilder.cpp
-    io/morphology/neuron/NeuronMorphology.cpp
-    io/morphology/neuron/NeuronMorphologyProcessor.cpp
-    io/morphology/vasculature/VasculatureColorHandler.cpp
-    io/morphology/vasculature/VasculatureComponent.cpp
-    io/simulation/SimulationFrameIndexer.cpp
-    io/simulation/SimulationFrameTime.cpp
-    io/simulation/SimulationMapping.cpp
-    io/simulation/SimulationTransferFunction.cpp
-    io/synapse/colorhandlers/EndfeetColorHandler.cpp
-    io/synapse/colorhandlers/SynapseColorHandler.cpp
-    io/synapse/components/EndfeetComponent.cpp
-    io/synapse/components/SynapseComponent.cpp
+    io/bbploader/colordata/ColorDataExtractor.cpp
+    io/bbploader/reports/CompartmentData.cpp
+    io/bbploader/reports/SpikeData.cpp
     io/util/ProgressUpdater.cpp
     movie/MovieMaker.cpp
     network/entrypoints/ColorCircuitEntrypoint.cpp
@@ -49,11 +54,41 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
 
 set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     CircuitExplorerPlugin.h
-    api/ColorIDParser.h
-    api/ColorUtils.h
-    api/IColorData.h
-    api/IColorHandler.h
+    api/circuit/MorphologyCircuitBuilder.h
+    api/circuit/SomaCircuitBuilder.h
+    api/circuit/colorhandlers/MorphologyColorHandler.h
+    api/circuit/colorhandlers/SomaColorHandler.h
+    api/coloring/ColorIDParser.h
+    api/coloring/ColorUtils.h
+    api/coloring/IColorData.h
+    api/coloring/IColorHandler.h
+    api/neuron/NeuronColorMethods.h
+    api/neuron/NeuronGeometry.h
+    api/neuron/NeuronGeometryBuilder.h
+    api/neuron/NeuronMorphology.h
+    api/neuron/NeuronMorphologyProcessor.h
+    api/neuron/NeuronMorphologyReader.h
+    api/neuron/NeuronSection.h
+    api/reports/IColormapIndexer.h
+    api/reports/IReportData.h
+    api/reports/ReportMapping.h
+    api/reports/TransferFunctionUtils.h
+    api/reports/common/FrameTimeCalculator.h
+    api/reports/common/SpikeUtils.h
+    api/reports/indexers/OffsetIndexer.h
+    api/reports/indexers/SpikeIndexer.h
+    api/synapse/EndfeetColorHandler.h
+    api/synapse/SynapseColorHandler.h
+    api/vasculature/VasculatureColorHandler.h
+    api/vasculature/VasculatureColorMethods.h
+    api/vasculature/VasculatureSection.h
     components/CircuitColorComponent.h
+    components/EndfeetComponent.h
+    components/MorphologyCircuitComponent.h
+    components/ReportComponent.h
+    components/SomaCircuitComponent.h
+    components/SynapseComponent.h
+    components/VasculatureComponent.h
     io/BBPLoader.h
     io/BBPLoaderParameters.h
     io/NeuronMorphologyLoader.h
@@ -64,37 +99,14 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     io/bbploader/GIDLoader.h
     io/bbploader/LoadContext.h
     io/bbploader/ParameterCheck.h
-    io/bbploader/SimulationLoader.h
+    io/bbploader/ReportLoader.h
     io/bbploader/SynapseLoader.h
     io/bbploader/colordata/BBPNeuronColorData.h
     io/bbploader/colordata/BBPSynapseColorData.h
-    io/bbploader/simulation/CompartmentReportComponent.h
-    io/bbploader/simulation/SimulationType.h
-    io/bbploader/simulation/SpikeReportComponent.h
-    io/circuit/MorphologyCircuitLoader.h
-    io/circuit/SomaCircuitLoader.h
-    io/circuit/colorhandlers/MorphologyColorHandler.h
-    io/circuit/colorhandlers/SomaColorHandler.h
-    io/circuit/components/MorphologyCircuitComponent.h
-    io/circuit/components/SomaCircuitComponent.h
-    io/morphology/neuron/NeuronColorMethods.h
-    io/morphology/neuron/NeuronGeometry.h
-    io/morphology/neuron/NeuronGeometryBuilder.h
-    io/morphology/neuron/NeuronMorphology.h
-    io/morphology/neuron/NeuronMorphologyProcessor.h
-    io/morphology/neuron/NeuronSection.h
-    io/morphology/vasculature/VasculatureColorHandler.h
-    io/morphology/vasculature/VasculatureComponent.h
-    io/morphology/vasculature/VasculatureColorMethods.h
-    io/morphology/vasculature/VasculatureSection.h
-    io/simulation/SimulationFrameIndexer.h
-    io/simulation/SimulationFrameTime.h
-    io/simulation/SimulationMapping.h
-    io/simulation/SimulationTransferFunction.h
-    io/synapse/colorhandlers/EndfeetColorHandler.h
-    io/synapse/colorhandlers/SynapseColorHandler.h
-    io/synapse/components/EndfeetComponent.h
-    io/synapse/components/SynapseComponent.h
+    io/bbploader/colordata/ColorDataExtractor.h
+    io/bbploader/reports/CompartmentData.h
+    io/bbploader/reports/ReportType.h
+    io/bbploader/reports/SpikeData.h
     io/util/ProgressUpdater.h
     movie/MovieMaker.h
     network/adapters/ColoringInfoAdapter.h

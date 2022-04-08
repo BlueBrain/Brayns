@@ -22,26 +22,26 @@
 
 namespace bbploader
 {
-brain::GIDSet GIDLoader::compute(const brion::BlueConfig &config,
-                                   const brain::Circuit &circuit,
-                                   const BBPLoaderParameters &input)
+brain::GIDSet
+    GIDLoader::compute(const brion::BlueConfig &config, const brain::Circuit &circuit, const BBPLoaderParameters &input)
+{
+    brain::GIDSet allGids;
+    allGids = _fromParameters(config, circuit, input);
+    allGids = _fromSimulation(config, input, allGids);
+    allGids = _fromPercentage(allGids, input.percentage);
+
+    if (allGids.empty())
     {
-        brain::GIDSet allGids;
-        allGids = _fromParameters(config, circuit, input);
-        allGids = _fromSimulation(config, input, allGids);
-        allGids = _fromPercentage(allGids, input.percentage);
-
-        if(allGids.empty())
-        {
-            throw std::runtime_error("No GIDs were selected with the input parameters");
-        }
-
-        return allGids;
+        throw std::runtime_error("No GIDs were selected with the input parameters");
     }
 
-brain::GIDSet GIDLoader::_fromParameters(const brion::BlueConfig &config,
-                                         const brain::Circuit &circuit,
-                                         const BBPLoaderParameters &input)
+    return allGids;
+}
+
+brain::GIDSet GIDLoader::_fromParameters(
+    const brion::BlueConfig &config,
+    const brain::Circuit &circuit,
+    const BBPLoaderParameters &input)
 {
     if (!input.gids.empty())
     {
@@ -76,17 +76,18 @@ brain::GIDSet GIDLoader::_fromParameters(const brion::BlueConfig &config,
     return allGids;
 }
 
-brain::GIDSet GIDLoader::_fromSimulation(const brion::BlueConfig &config,
-                                         const BBPLoaderParameters &input,
-                                         const brain::GIDSet &src)
+brain::GIDSet GIDLoader::_fromSimulation(
+    const brion::BlueConfig &config,
+    const BBPLoaderParameters &input,
+    const brain::GIDSet &src)
 {
     const auto reportType = input.report_type;
-    if(reportType == bbploader::SimulationType::COMPARTMENT)
+    if (reportType == bbploader::ReportType::COMPARTMENT)
     {
         const auto &reportName = input.report_name;
         const auto reportPath = config.getReportSource(reportName).getPath();
-        const brion::URI uri (reportPath);
-        const brion::CompartmentReport report (uri, brion::AccessMode::MODE_READ, src);
+        const brion::URI uri(reportPath);
+        const brion::CompartmentReport report(uri, brion::AccessMode::MODE_READ, src);
         return report.getGIDs();
     }
 

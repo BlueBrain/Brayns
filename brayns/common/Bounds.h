@@ -37,50 +37,55 @@ public:
      * @param minB
      * @param maxB
      */
-    Bounds(const Vector3f& minB, const Vector3f& maxB);
+    Bounds(const Vector3f &minB, const Vector3f &maxB);
 
     /**
      * @brief Expands the bounds (if needed) to include the given point.
      * @param point
      */
-    void expand(const Vector3f& point) noexcept;
+    void expand(const Vector3f &point) noexcept;
 
     /**
      * @brief Expands the bounds (if needed) to include the given bounds.
      * @param bounds
      */
-    void expand(const Bounds& bounds) noexcept;
+    void expand(const Bounds &bounds) noexcept;
 
     /**
      * @brief Returns true if the given point is within the bounds.
      * @param point
      * @return bool
      */
-    bool intersects(const Vector3f& point) const noexcept;
+    bool intersects(const Vector3f &point) const noexcept;
 
     /**
      * @brief Returns true if the given bounds collide with this bounds.
      * @param bounds
      * @return bool
      */
-    bool intersects(const Bounds& bounds) const noexcept;
+    bool intersects(const Bounds &bounds) const noexcept;
 
     /**
-     * @brief Returns the minimum corner of the bounds. The value is not valid if the bounds were default-constructed
-     * and ensureBounds() was not called.
+     * @brief Returns the minimum corner of the bounds.
      * @return const Vector3f &
      */
-    const Vector3f& getMin() const;
+    const Vector3f &getMin() const noexcept;
 
     /**
-     * @brief Returns the maximum corner of the bounds. The value is not valid if the bounds were default-constructed
-     * and ensureBounds() was not called.
+     * @brief Returns the maximum corner of the bounds.
      * @return const Vector3f &
      */
-    const Vector3f& getMax() const;
+    const Vector3f &getMax() const noexcept;
+
+    /**
+     * @brief Returns the bounds center
+     *
+     * @return Vector3f
+     */
+    Vector3f center() const noexcept;
 
 private:
-    Vector3f _min {std::numeric_limits<float>::max()};
-    Vector3f _max {std::numeric_limits<float>::lowest()};
+    Vector3f _min{std::numeric_limits<float>::max()};
+    Vector3f _max{std::numeric_limits<float>::lowest()};
 };
 }

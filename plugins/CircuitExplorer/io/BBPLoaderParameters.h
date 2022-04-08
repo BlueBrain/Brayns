@@ -25,24 +25,24 @@
 #include <brayns/utils/StringUtils.h>
 
 #include <io/NeuronMorphologyLoaderParameters.h>
-#include <io/bbploader/simulation/SimulationType.h>
+#include <io/bbploader/reports/ReportType.h>
 
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_ENUM(
-    bbploader::SimulationType,
-    {"none", bbploader::SimulationType::NONE},
-    {"spikes", bbploader::SimulationType::SPIKES},
-    {"compartment", bbploader::SimulationType::COMPARTMENT})
+    bbploader::ReportType,
+    {"none", bbploader::ReportType::NONE},
+    {"spikes", bbploader::ReportType::SPIKES},
+    {"compartment", bbploader::ReportType::COMPARTMENT})
 }
 
 BRAYNS_JSON_OBJECT_BEGIN(BBPLoaderParameters)
 BRAYNS_JSON_OBJECT_ENTRY(
-        float,
-        percentage,
-        "Percentage of neurons to load (Ignored if a list of gids is specified)",
-        brayns::Minimum(0.01f),
-        brayns::Maximum(1.f))
+    float,
+    percentage,
+    "Percentage of neurons to load (Ignored if a list of gids is specified)",
+    brayns::Minimum(0.01f),
+    brayns::Maximum(1.f))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<std::string>,
     targets,
@@ -54,7 +54,7 @@ BRAYNS_JSON_OBJECT_ENTRY(
     gids,
     "List of GIDs to load. Invalidates 'percentage' and 'targets' parameters",
     brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(bbploader::SimulationType, report_type, "Type of report to load.")
+BRAYNS_JSON_OBJECT_ENTRY(bbploader::ReportType, report_type, "Type of report to load.")
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     report_name,

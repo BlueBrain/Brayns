@@ -20,8 +20,9 @@
 
 #include <brayns/io/Loader.h>
 
+#include <api/reports/ReportMapping.h>
+
 #include <io/bbploader/LoadContext.h>
-#include <io/simulation/SimulationMapping.h>
 #include <io/util/ProgressUpdater.h>
 
 namespace bbploader
@@ -42,7 +43,7 @@ public:
      * @param model
      * @return
      */
-    static std::vector<CompartmentStructure>
+    static std::vector<CellCompartments>
         load(const LoadContext &context, ProgressUpdater &updater, brayns::Model &model);
 };
 } // namespace bbploader

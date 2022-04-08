@@ -29,17 +29,6 @@ namespace bbploader
 {
 struct LoadContext
 {
-    LoadContext(const brain::Circuit &circuit,
-                const brain::GIDSet &gids,
-                const brion::BlueConfig &config,
-                const BBPLoaderParameters &loadParameters)
-     : circuit(circuit)
-     , gids(gids)
-     , config(config)
-     , loadParameters(loadParameters)
-    {
-    }
-
     const brain::Circuit &circuit;
     const brain::GIDSet &gids;
     const brion::BlueConfig &config;

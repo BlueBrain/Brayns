@@ -18,13 +18,63 @@
 
 #include "NodeLoader.h"
 
+#include "LoaderTable.h"
+
 namespace
 {
+class NodePopulationLoaders
+{
+public:
+    NodePopulationLoaders()
+    {
+        _table.registerLoader<AstrocytePopulationLoader>();
+        _table.registerLoader<BiophysicalPopulationLoader>();
+        _table.registerLoader<PointNeuronPopulationLoader>();
+        _table.registerLoader<VasculaturePopulationLoader>();
+    }
+
+    const NodePopulationLoader &getNodeLoader(const std::string &name)
+    {
+        auto nlptr = _table.getLoader(name);
+        if (!nlptr)
+            throw std::invalid_argument("No node population loader for type " + name);
+
+        return *nlptr;
+    }
+
+private:
+    PopulationLoaderTable<NodePopulationLoader> _table;
+};
+
+class EdgePopulationLoaders
+{
+public:
+    EdgePopulationLoaders()
+    {
+        _table.registerLoader<ChemicalSynapsePopulationLoader>();
+        _table.registerLoader<ElectricalSynapsePopulationLoader>();
+        _table.registerLoader<EndFootPopulationLoader>();
+        _table.registerLoader<GlialGlialPopulationLoader>();
+        _table.registerLoader<SynapseAstrocytePopulationLoader>();
+    }
+
+    const EdgePopulationLoader &getEdgeLoader(const std::string &name)
+    {
+        auto elptr = _table.getLoader(name);
+        if (!elptr)
+            throw std::invalid_argument("No edge population loader for type " + name);
+
+        return *elptr;
+    }
+
+private:
+    PopulationLoaderTable<EdgePopulationLoader> _table;
+};
 }
 
 namespace sonataloader
 {
-std::vector<CompartmentStructure>
+std::vector<CellCompartments>
     NodeLoader::loadNodes(const NodeLoadContext &ctxt, ProgressUpdater &updater, brayns::Model &model)
 {
 }

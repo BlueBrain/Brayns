@@ -18,47 +18,34 @@
 
 #pragma once
 
-#include <io/simulation/SimulationMapping.h>
+#include <brayns/engine/Model.h>
+
 #include <io/sonataloader/LoadContext.h>
 #include <io/util/ProgressUpdater.h>
 
 namespace sonataloader
 {
 /**
- * @brief The EdgePopulationLoader is the base class for implementations that
- * load SONATA edge populations which must be transformed into SynapseGroups (in
- * other words, transforms edge population data into scene geometry)
+ * @brief Interface to implement edge population loader types
  */
 class EdgePopulationLoader
 {
 public:
-    EdgePopulationLoader(std::string typeName)
-        : _typeName(std::move(typeName))
-    {
-    }
-
     virtual ~EdgePopulationLoader() = default;
 
     /**
-     * @brief returns a std::string representing the type of edge population
-     * of this loader
+     * @brief Returns the population type that the loader handles. The type must match a valid population type
+     * in the SONATA specs
+     *
+     * @return std::string
      */
-    const std::string &getType() const noexcept
-    {
-        return _typeName;
-    }
+    virtual std::string getPopulationType() const noexcept = 0;
 
     /**
-     * @brief load the edge population data. The given parameters may be used to
-     * configure the load process. The SubProgressReport allows to notify
-     * progress to listening clients of the Brayns API
+     * @brief Interface to load an edge population
+     *
+     * @param ctxt
      */
-    virtual std::vector<SynapseGroup::Ptr> load(
-        const SonataNetworkConfig &networkConfig,
-        const SonataEdgePopulationParameters &lc,
-        const bbp::sonata::Selection &nodeSelection) const = 0;
-
-private:
-    const std::string _typeName;
+    void load(EdgeLoadContext &ctxt) const = 0;
 };
 } // namespace sonataloader

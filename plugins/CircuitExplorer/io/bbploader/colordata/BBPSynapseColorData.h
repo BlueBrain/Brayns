@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <api/IColorData.h>
+#include <api/coloring/IColorData.h>
 #include <io/bbploader/colordata/BBPNeuronColorData.h>
 
 namespace bbploader
@@ -39,9 +39,10 @@ public:
     std::vector<std::string> getMethods() const noexcept override;
 
     /**
-     * @brief getMethodVariables Return the possible variable specofications for
-     * a given method (For example, for layer it will return the list of loaded
-     * layers, for mtypes the list of loaded mtypes, ...)
+     * @brief Get the Method Variables object
+     *
+     * @param method
+     * @return std::vector<std::string>
      */
     std::vector<std::string> getMethodVariables(const std::string &method) const override;
 
@@ -51,10 +52,11 @@ public:
      * @param ids
      * @return std::vector<std::string>
      */
-    std::vector<std::string> getMethodValuesForIDs(const std::string &method,
-                                                   const std::vector<uint64_t>& ids) const override;
+    std::vector<std::string> getMethodValuesForIDs(const std::string &method, const std::vector<uint64_t> &ids)
+        const override;
 
 private:
-    BBPNeuronColorData _internal;
+    const std::string _circuitPath;
+    const std::string _circuitPop;
 };
 } // namespace bbploader

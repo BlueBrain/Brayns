@@ -18,8 +18,11 @@
 
 #pragma once
 
+#include <brayns/engine/Model.h>
+
 #include <io/SonataLoaderParameters.h>
 #include <io/sonataloader/data/SonataConfig.h>
+#include <io/util/ProgressUpdater.h>
 
 #include <bbp/sonata/nodes.h>
 
@@ -28,16 +31,20 @@ namespace sonataloader
 struct NodeLoadContext
 {
     const SonataNetworkConfig &config;
-    const SonataNodePopulationParmeters &params;
+    const SonataNodePopulationParameters &params;
     const bbp::sonata::NodePopulation &population;
     const bbp::sonata::Selection &selection;
+    brayns::Model &model;
+    ProgressUpdater &progress;
 };
 
 struct EdgeLoadContext
 {
     const SonataNetworkConfig &config;
-    const SonataEdgePopulationParmeters &params;
+    const SonataEdgePopulationParameters &params;
     const bbp::sonata::EdgePopulation &population;
     const bbp::sonata::Selection &selection;
+    brayns::Model &model;
+    ProgressUpdater &progress;
 };
 }

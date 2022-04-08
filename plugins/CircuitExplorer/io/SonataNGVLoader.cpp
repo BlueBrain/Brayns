@@ -21,10 +21,6 @@
 #include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
 
-#include <io/BBPLoader.h>
-#include <io/bbploader/ParameterCheck.h>
-#include <io/bbploader/simulation/SimulationType.h>
-
 #include <brion/blueConfig.h>
 
 namespace
@@ -63,9 +59,9 @@ std::vector<std::unique_ptr<brayns::Model>> SonataNGVLoader::importFromBlob(
     const brayns::LoaderProgress &cb,
     const SonataNGVLoaderParameters &params) const
 {
-    (void) blob;
-    (void) cb;
-    (void) params;
+    (void)blob;
+    (void)cb;
+    (void)params;
     throw std::runtime_error("SonataNGVLoader: Import from blob not supported");
 }
 
@@ -86,13 +82,13 @@ std::vector<std::unique_ptr<brayns::Model>> SonataNGVLoader::importFromFile(
 
         const brion::BlueConfig config = BlueConfigReader::read(name, path);
         auto models = _internal.importFromBlueConfig(cb, population.circuit_config, config);
-        for(auto &model : models)
+        for (auto &model : models)
         {
             result.push_back(std::move(model));
         }
     }
 
-    brayns::Log::info("[CE] {}: done in {} second(s).", getName(), timer.seconds());
+    brayns::Log::info("[CE] {}: loaded {} model(s) in {} second(s).", getName(), result.size(), timer.seconds());
 
     return result;
 }

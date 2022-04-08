@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <brayns/common/geometry/TriangleMesh.h>
+#include <brayns/engine/geometries/TriangleMesh.h>
 
 #include <vector>
 

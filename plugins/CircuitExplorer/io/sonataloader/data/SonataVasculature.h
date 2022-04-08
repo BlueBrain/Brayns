@@ -22,7 +22,7 @@
 
 #include <brayns/common/MathTypes.h>
 
-#include <plugin/io/morphology/vasculature/VasculatureSection.h>
+#include <api/vasculature/VasculatureSection.h>
 
 namespace sonataloader
 {

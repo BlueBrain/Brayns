@@ -22,16 +22,29 @@
 
 #include <mutex>
 
-namespace sonataloader
-{
 namespace
 {
 constexpr char rootGroup[] = "/objects";
 constexpr char endFootGroup[] = "endfoot_";
 constexpr char pointDataset[] = "points";
 constexpr char triangleDataset[] = "triangles";
+
+struct RawMeshBounds
+{
+    static brayns::Bounds compute(const brayns::TriangleMesh &mesh)
+    {
+        brayns::Bounds bounds;
+        for (const auto &vertex : mesh.vertices)
+        {
+            bounds.expand(vertex);
+        }
+        return bounds;
+    }
+};
 } // namespace
 
+namespace sonataloader
+{
 std::vector<brayns::TriangleMesh> SonataEndFeetReader::readEndFeet(
     const std::string &filePath,
     const std::vector<uint64_t> &ids,
@@ -80,10 +93,12 @@ std::vector<brayns::TriangleMesh> SonataEndFeetReader::readEndFeet(
         }
 
         // Adjust mesh position given the endfoot surface position
-        const auto meshBounds = brayns::createMeshBounds(mesh);
-        const auto translation = meshBounds.getCenter() - positions[i];
+        const auto meshBounds = RawMeshBounds::compute(mesh);
+        const auto translation = meshBounds.center() - positions[i];
         for (auto &vertex : mesh.vertices)
+        {
             vertex += translation;
+        }
     }
 
     return result;

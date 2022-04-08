@@ -22,7 +22,7 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 
-#include <api/IColorHandler.h>
+#include <api/coloring/IColorHandler.h>
 
 namespace brayns
 {

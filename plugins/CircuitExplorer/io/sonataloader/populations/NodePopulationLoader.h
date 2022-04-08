@@ -18,7 +18,8 @@
 
 #pragma once
 
-#include <io/simulation/SimulationMapping.h>
+#include <brayns/engine/Model.h>
+
 #include <io/sonataloader/LoadContext.h>
 #include <io/util/ProgressUpdater.h>
 
@@ -45,11 +46,7 @@ public:
      * @brief Interface to load a node population
      *
      * @param ctxt
-     * @param cb
-     * @param model
-     * @return std::vector<CompartmentStructure>
      */
-    virtual std::vector<CompartmentStructure>
-        load(const NodeLoadContext &ctxt, ProgressUpdater &cb, brayns::Model &model) const = 0;
+    virtual void load(NodeLoadContext &ctxt) const = 0;
 };
 } // namespace sonataloader

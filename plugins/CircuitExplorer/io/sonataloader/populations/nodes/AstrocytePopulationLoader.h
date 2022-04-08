@@ -18,22 +18,28 @@
 
 #pragma once
 
-#include <plugin/io/sonataloader/populations/nodes/CommonNodeLoader.h>
+#include <io/sonataloader/populations/NodePopulationLoader.h>
 
 namespace sonataloader
 {
 /**
- * @brief The AstrocytePopulationLoader class implements the node load
- * functionality to read 'astrocyte' node population types
+ * @brief Implementation to load astrocyte populations
  */
-class AstrocytePopulationLoader : public CommonNodeLoader
+class AstrocytePopulationLoader final : public NodePopulationLoader
 {
 public:
-    AstrocytePopulationLoader();
+    /**
+     * @brief Get the Population Type object
+     *
+     * @return std::string
+     */
+    std::string getPopulationType() const noexcept override;
 
-    std::vector<MorphologyInstance::Ptr> load(
-        const SonataNetworkConfig &networkData,
-        const SonataNodePopulationParameters &loadSettings,
-        const bbp::sonata::Selection &nodeSelection) const final;
+    /**
+     * @brief load implementation
+     *
+     * @param ctxt
+     */
+    void load(NodeLoadContext &ctxt) const override;
 };
 } // namespace sonataloader

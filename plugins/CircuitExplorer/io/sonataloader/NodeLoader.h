@@ -38,7 +38,7 @@ struct NodeLoader
      * @param model
      * @return std::vector<CompartmentStructure>
      */
-    static std::vector<CompartmentStructure>
+    static std::vector<CellCompartments>
         loadNodes(const NodeLoadContext &ctxt, ProgressUpdater &cb, brayns::Model &model);
 };
 }

@@ -18,26 +18,25 @@
 
 #include "CellLoader.h"
 
+#include <api/circuit/MorphologyCircuitBuilder.h>
+#include <api/circuit/SomaCircuitBuilder.h>
 #include <io/bbploader/colordata/BBPNeuronColorData.h>
-
-#include <io/circuit/MorphologyCircuitLoader.h>
-#include <io/circuit/SomaCircuitLoader.h>
 
 #include <brion/blueConfig.h>
 
-#include <future>
 #include <filesystem>
+#include <future>
 
 namespace
 {
 struct BBPNeuronColorCreator
 {
-    static std::unique_ptr<bbploader::BBPNeuronColorData> newData(const bbploader::LoadContext& context)
+    static std::unique_ptr<bbploader::BBPNeuronColorData> newData(const bbploader::LoadContext &context)
     {
         const auto &config = context.config;
         auto circuitURI = config.getCircuitSource();
         auto circuitPath = circuitURI.getPath();
-        if(!std::filesystem::exists(circuitPath))
+        if (!std::filesystem::exists(circuitPath))
         {
             circuitURI = config.getCellLibrarySource();
             circuitPath = circuitURI.getPath();
@@ -49,7 +48,7 @@ struct BBPNeuronColorCreator
 
 struct SomaImporter
 {
-    static std::vector<CompartmentStructure> import(const bbploader::LoadContext &context, brayns::Model &model)
+    static std::vector<CellCompartments> import(const bbploader::LoadContext &context, brayns::Model &model)
     {
         auto colorData = BBPNeuronColorCreator::newData(context);
 
@@ -63,9 +62,9 @@ struct SomaImporter
         const auto positions = circuit.getPositions(gids);
         const auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
 
-        const SomaCircuitLoader::Context loadContext(ids, positions, radius);
+        const SomaCircuitBuilder::Context loadContext(ids, positions, radius);
 
-        return SomaCircuitLoader::load(loadContext, model, std::move(colorData));
+        return SomaCircuitBuilder::load(loadContext, model, std::move(colorData));
     }
 };
 
@@ -74,10 +73,10 @@ struct MorphologyPathLoader
     static std::vector<std::string> load(const brain::Circuit &circuit, const brain::GIDSet &gids)
     {
         const auto morphPaths = circuit.getMorphologyURIs(gids);
-        std::vector<std::string> result (morphPaths.size());
+        std::vector<std::string> result(morphPaths.size());
 
 #pragma omp parallel for
-        for(size_t i = 0; i < morphPaths.size(); ++i)
+        for (size_t i = 0; i < morphPaths.size(); ++i)
         {
             const auto &uri = morphPaths[i];
             result[i] = uri.getPath();
@@ -104,17 +103,17 @@ struct MorphologyImporter
         const auto rotations = circuit.getRotations(gids);
         const auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
 
-        MorphologyCircuitLoader::Context loadContext(ids, morphPaths, positions, rotations, morphParams);
+        MorphologyCircuitBuilder::Context loadContext(ids, morphPaths, positions, rotations, morphParams);
 
-        return MorphologyCircuitLoader::load(loadContext, model, updater, std::move(colorData));
+        return MorphologyCircuitBuilder::load(loadContext, model, updater, std::move(colorData));
     }
 };
 }
 
 namespace bbploader
 {
-std::vector<CompartmentStructure> CellLoader::load(
-        const LoadContext &context, ProgressUpdater &updater, brayns::Model &model)
+std::vector<CellCompartments>
+    CellLoader::load(const LoadContext &context, ProgressUpdater &updater, brayns::Model &model)
 {
     const auto &params = context.loadParameters;
     const auto &morphSettings = params.neuron_morphology_parameters;
@@ -122,7 +121,7 @@ std::vector<CompartmentStructure> CellLoader::load(
     const auto loadAxon = morphSettings.load_axon;
     const auto loadDend = morphSettings.load_dendrites;
 
-    if(loadSoma && !loadAxon && !loadDend)
+    if (loadSoma && !loadAxon && !loadDend)
     {
         return SomaImporter::import(context, model);
     }

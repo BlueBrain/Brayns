@@ -22,8 +22,8 @@
 
 #include <brayns/engine/ModelComponents.h>
 
-#include <api/IColorData.h>
-#include <api/IColorHandler.h>
+#include <api/coloring/IColorData.h>
+#include <api/coloring/IColorHandler.h>
 
 class CircuitColorComponent final : public brayns::Component
 {

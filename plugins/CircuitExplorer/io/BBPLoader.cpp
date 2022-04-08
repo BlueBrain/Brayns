@@ -28,7 +28,7 @@
 #include <io/bbploader/GIDLoader.h>
 #include <io/bbploader/LoadContext.h>
 #include <io/bbploader/ParameterCheck.h>
-#include <io/bbploader/SimulationLoader.h>
+#include <io/bbploader/ReportLoader.h>
 #include <io/bbploader/SynapseLoader.h>
 #include <io/util/ProgressUpdater.h>
 
@@ -38,11 +38,29 @@ namespace
 {
 struct SynapseImporter
 {
-    static std::unique_ptr<brayns::Model> import(const bbploader::LoadContext &context, bool post)
+    static void import(
+        const bbploader::LoadContext &context,
+        std::vector<std::unique_ptr<brayns::Model>> &modelList,
+        ProgressUpdater &updater)
     {
-        auto model = std::make_unique<brayns::Model>();
-        bbploader::SynapseLoader::load(context, post, *model);
-        return model;
+        const auto &params = context.loadParameters;
+        const auto afferent = params.load_afferent_synapses;
+        const auto efferent = params.load_afferent_synapses;
+
+        if (afferent)
+        {
+            updater.update("Loading afferent synapses");
+            modelList.push_back(std::make_unique<brayns::Model>());
+            auto &model = *(modelList.back());
+            bbploader::SynapseLoader::load(context, true, model);
+        }
+        if (efferent)
+        {
+            updater.update("Loading efferent synapses");
+            modelList.push_back(std::make_unique<brayns::Model>());
+            auto &model = *(modelList.back());
+            bbploader::SynapseLoader::load(context, true, model);
+        }
     }
 };
 }
@@ -95,7 +113,7 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromFile(
     const brion::BlueConfig config(path);
     auto result = importFromBlueConfig(callback, params, config);
 
-    brayns::Log::info("[CE] {}: done in {} second(s).", getName(), timer.seconds());
+    brayns::Log::info("[CE] {}: Loaded {} model(s) in {} second(s).", getName(), result.size(), timer.seconds());
     return result;
 }
 
@@ -106,64 +124,31 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
 {
     bbploader::ParameterCheck::checkInput(config, params);
 
+    ProgressUpdater updater(callback, 3);
+
     const brain::Circuit circuit(config);
     const auto gids = bbploader::GIDLoader::compute(config, circuit, params);
-    const bbploader::LoadContext context(circuit, gids, config, params);
+    const bbploader::LoadContext context{circuit, gids, config, params};
 
     std::vector<std::unique_ptr<brayns::Model>> result;
 
-    // Configure progress reporter
-    const float chunk = 0.2f;
-    float total = 0.f;
-
-    // Compute GIDs
-    callback.updateProgress("Computing GIDs", total);
-
-    const std::vector<uint64_t> gidList(gids.begin(), gids.end());
+    result.push_back(std::make_unique<brayns::Model>());
+    auto &cellModel = *(result.back());
 
     // Load neurons
-    total += chunk;
-    callback.updateProgress("Loading neurons", total);
-    auto cellModel = std::make_unique<brayns::Model>();
-    ProgressUpdater updater(callback, total, total + chunk, gidList.size());
-    auto compartments = bbploader::CellLoader::load(context, updater, *cellModel);
+    updater.beginStage(gids.size());
+    auto compartments = bbploader::CellLoader::load(context, updater, cellModel);
+    updater.endStage();
 
     // Load simulation
-    total += chunk;
-    if (params.report_type != bbploader::SimulationType::NONE)
-    {
-        callback.updateProgress("Loading simulation", total);
-        bbploader::SimulationLoader::load(context, compartments, *cellModel);
-    }
-    result.push_back(std::move(cellModel));
+    updater.beginStage();
+    bbploader::ReportLoader::load(context, compartments, updater, cellModel);
+    updater.endStage();
 
-    // Load afferent synapses
-    total += chunk;
-    const auto loadAfferent = params.load_afferent_synapses;
-    if (loadAfferent)
-    {
-        brayns::Log::info("[CE] {}: loading afferent synapses.", getName());
-        callback.updateProgress("Loading afferent synapses", total);
-
-        auto model = SynapseImporter::import(context, true);
-        result.push_back(std::move(model));
-    }
-
-    // Load efferent synapses
-    total += chunk;
-    const auto loadEfferent = params.load_efferent_synapses;
-    if (loadEfferent)
-    {
-        brayns::Log::info("[CE] {}: loading efferent synapses.", getName());
-        callback.updateProgress("Loading efferent synapses", total);
-
-        auto model = SynapseImporter::import(context, false);
-        result.push_back(std::move(model));
-    }
-
-    total += chunk;
-    callback.updateProgress("Done", total);
-    brayns::Log::info("[CE] {}: loaded {} model(s).", getName(), result.size());
+    // Load synapses
+    updater.beginStage(2);
+    SynapseImporter::import(context, result, updater);
+    updater.endStage();
 
     return result;
 }

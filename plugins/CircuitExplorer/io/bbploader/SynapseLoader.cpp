@@ -1,9 +1,9 @@
 #include "SynapseLoader.h"
 
+#include <api/synapse/SynapseColorHandler.h>
 #include <components/CircuitColorComponent.h>
+#include <components/SynapseComponent.h>
 #include <io/bbploader/colordata/BBPSynapseColorData.h>
-#include <io/synapse/colorhandlers/SynapseColorHandler.h>
-#include <io/synapse/components/SynapseComponent.h>
 
 #include <brain/synapse.h>
 #include <brain/synapses.h>
@@ -22,8 +22,8 @@ struct AfferentLoader
         const auto &gids = context.gids;
 
         std::map<uint64_t, std::vector<brayns::Sphere>> synapseGeometry;
-        const brain::Synapses synapseData (circuit.getAfferentSynapses(gids));
-        for(const auto &synapse : synapseData)
+        const brain::Synapses synapseData(circuit.getAfferentSynapses(gids));
+        for (const auto &synapse : synapseData)
         {
             const auto position = synapse.getPostsynapticSurfacePosition();
             const auto gid = synapse.getPresynapticGID();
@@ -44,8 +44,8 @@ struct EfferentLoader
         const auto &gids = context.gids;
 
         std::map<uint64_t, std::vector<brayns::Sphere>> synapseGeometry;
-        const brain::Synapses synapseData (circuit.getEfferentSynapses(gids));
-        for(const auto &synapse : synapseData)
+        const brain::Synapses synapseData(circuit.getEfferentSynapses(gids));
+        for (const auto &synapse : synapseData)
         {
             const auto position = synapse.getPresynapticSurfacePosition();
             const auto gid = synapse.getPostsynapticGID();
@@ -66,7 +66,7 @@ struct SynapseColorComponentFactory
         const auto &config = context.config;
         auto circuitURI = config.getCircuitSource();
         auto path = circuitURI.getPath();
-        if(!std::filesystem::exists(path))
+        if (!std::filesystem::exists(path))
         {
             circuitURI = config.getCellLibrarySource();
             path = circuitURI.getPath();

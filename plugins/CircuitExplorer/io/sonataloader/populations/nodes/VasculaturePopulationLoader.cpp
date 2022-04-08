@@ -18,20 +18,16 @@
 
 #include "VasculaturePopulationLoader.h"
 
-#include <plugin/io/morphology/vasculature/VasculatureInstance.h>
-#include <plugin/io/sonataloader/data/SonataVasculature.h>
+#include <io/sonataloader/data/SonataVasculature.h>
 
 namespace sonataloader
 {
-VasculaturePopulationLoader::VasculaturePopulationLoader()
-    : NodePopulationLoader("vasculature")
+std::string VasculaturePopulationLoader::getPopulationType() const noexcept
 {
+    return "vasculature";
 }
 
-std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(
-    const SonataNetworkConfig &networkData,
-    const SonataNodePopulationParameters &lc,
-    const bbp::sonata::Selection &selection) const
+std::vector<MorphologyInstance::Ptr> VasculaturePopulationLoader::load(const NodeLoadContext) const
 {
     const auto &populationName = lc.node_population;
     const auto &config = networkData.circuitConfig();

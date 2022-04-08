@@ -51,10 +51,8 @@ public:
     /**
      * @brief importFromBlob imports models from a byte blob. NOT SUPPORTED
      */
-    std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
-        brayns::Blob &&,
-        const brayns::LoaderProgress &,
-        const BBPLoaderParameters &) const final;
+    std::vector<std::unique_ptr<brayns::Model>>
+        importFromBlob(brayns::Blob &&, const brayns::LoaderProgress &, const BBPLoaderParameters &) const final;
 
     /**
      * @brief importFromFile imports models from a file given by a path

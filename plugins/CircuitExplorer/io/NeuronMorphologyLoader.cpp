@@ -24,9 +24,10 @@
 #include <brayns/engine/components/GeometryRendererComponent.h>
 #include <brayns/engine/geometries/Primitive.h>
 
+#include <api/neuron/NeuronGeometryBuilder.h>
+#include <api/neuron/NeuronMorphologyProcessor.h>
+#include <api/neuron/NeuronMorphologyReader.h>
 #include <io/NeuronMorphologyLoaderParameters.h>
-#include <io/morphology/neuron/NeuronGeometryBuilder.h>
-#include <io/morphology/neuron/NeuronMorphologyProcessor.h>
 
 namespace
 {
@@ -57,9 +58,9 @@ std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromBl
     const brayns::LoaderProgress &cb,
     const NeuronMorphologyLoaderParameters &params) const
 {
-    (void) blob;
-    (void) cb;
-    (void) params;
+    (void)blob;
+    (void)cb;
+    (void)params;
     throw std::runtime_error("MorphologyLoader: Import from blob not supported");
 }
 
@@ -78,13 +79,13 @@ std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
     SectionLoadChecker::check(input);
 
     const auto radMultiplier = input.radius_multiplier;
-    const auto loadSoma = input.load_soma;
-    const auto loadAxon = input.load_axon;
-    const auto loadDend = input.load_dendrites;
+    const auto soma = input.load_soma;
+    const auto axon = input.load_axon;
+    const auto dend = input.load_dendrites;
 
-    NeuronMorphology morphology(path, loadSoma, loadAxon, loadDend);
-    NeuronMorphologyProcessor::processMorphology(morphology, radMultiplier);
-    const NeuronGeometryBuilder builder (morphology);
+    NeuronMorphology morphology = NeuronMorphologyReader::read(path, soma, axon, dend);
+    NeuronMorphologyProcessor::processMorphology(morphology, true, radMultiplier);
+    const NeuronGeometryBuilder builder(morphology);
     auto neuronGeometry = builder.instantiate({}, {});
     auto &primitives = neuronGeometry.geometry;
 

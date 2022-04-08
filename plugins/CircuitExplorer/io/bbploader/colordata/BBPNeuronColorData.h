@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <api/IColorData.h>
+#include <api/coloring/IColorData.h>
 
 namespace bbploader
 {
@@ -51,21 +51,8 @@ public:
      * @param ids
      * @return
      */
-    std::vector<std::string> getMethodValuesForIDs(const std::string &method,
-                                                   const std::vector<uint64_t>& ids) const override;
-
-    /**
-     * @brief Returns the available coloring methods at the circuit level
-     * @return std::vector<std::string>
-     */
-    std::vector<std::string> getCircuitLevelMethods() const;
-
-    /**
-     * @brief Returns the available variables for the given circuit - level method
-     * @param method
-     * @return std::vector<std::string>
-     */
-    std::vector<std::string> getCircuitLevelMethodVariables(const std::string &method) const;
+    std::vector<std::string> getMethodValuesForIDs(const std::string &method, const std::vector<uint64_t> &ids)
+        const override;
 
 private:
     const std::string _circuitPath;

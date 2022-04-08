@@ -22,36 +22,35 @@
 
 namespace brayns
 {
-Bounds::Bounds(const Vector3f& minB, const Vector3f& maxB)
- : _min(minB)
- , _max(maxB)
+Bounds::Bounds(const Vector3f &minB, const Vector3f &maxB)
+    : _min(minB)
+    , _max(maxB)
 {
-    if(glm::min(_min, _max) != _min)
+    if (glm::min(_min, _max) != _min)
     {
         throw std::invalid_argument("The min bounds must be smaller or equal to the max bounds");
     }
 }
 
-void Bounds::expand(const Vector3f& point) noexcept
+void Bounds::expand(const Vector3f &point) noexcept
 {
     _min = glm::min(_min, point);
     _max = glm::max(_max, point);
 }
 
-void Bounds::expand(const Bounds& bounds) noexcept
+void Bounds::expand(const Bounds &bounds) noexcept
 {
     _min = glm::min(_min, bounds._min);
     _max = glm::max(_max, bounds._max);
 }
 
-bool Bounds::intersects(const Vector3f& point) const noexcept
+bool Bounds::intersects(const Vector3f &point) const noexcept
 {
-    return point.x >= _min.x && point.x <= _max.x
-            && point.y >= _min.y && point.y <= _max.y
-            && point.z >= _min.z && point.z <= _max.z;
+    return point.x >= _min.x && point.x <= _max.x && point.y >= _min.y && point.y <= _max.y && point.z >= _min.z
+        && point.z <= _max.z;
 }
 
-bool Bounds::intersects(const Bounds& other) const noexcept
+bool Bounds::intersects(const Bounds &other) const noexcept
 {
     // slab comparsion
 
@@ -60,35 +59,46 @@ bool Bounds::intersects(const Bounds& other) const noexcept
     const auto otherXStart = other._min.x;
     const auto otherXEnd = other._max.x;
 
-    if(xStart > otherXEnd || xEnd < otherXStart)
+    if (xStart > otherXEnd || xEnd < otherXStart)
+    {
         return false;
+    }
 
     const auto yStart = _min.y;
     const auto yEnd = _max.y;
     const auto otherYStart = other._min.y;
     const auto otherYEnd = other._max.y;
 
-    if(yStart > otherYEnd || yEnd < otherYStart)
+    if (yStart > otherYEnd || yEnd < otherYStart)
+    {
         return false;
+    }
 
     const auto zStart = _min.z;
     const auto zEnd = _max.z;
     const auto otherZStart = other._min.z;
     const auto otherZEnd = other._max.z;
 
-    if(zStart > otherZEnd || zEnd < otherZStart)
+    if (zStart > otherZEnd || zEnd < otherZStart)
+    {
         return false;
+    }
 
     return true;
 }
 
-const Vector3f &Bounds::getMin() const
+const Vector3f &Bounds::getMin() const noexcept
 {
     return _min;
 }
 
-const Vector3f &Bounds::getMax() const
+const Vector3f &Bounds::getMax() const noexcept
 {
     return _max;
+}
+
+Vector3f Bounds::center() const noexcept
+{
+    return (_max + _min) * 0.5f;
 }
 }

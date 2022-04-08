@@ -20,8 +20,6 @@
 
 #include <bbp/sonata/node_sets.h>
 
-#include <glm/gtx/matrix_decompose.hpp>
-
 #include <brayns/common/Log.h>
 
 namespace sonataloader
@@ -113,7 +111,6 @@ std::vector<brayns::Vector3f> SonataCells::getPositions(const Nodes &nodes, cons
     const auto zPos = nodes.getAttribute<float>(attribZ, selection);
 
     std::vector<brayns::Vector3f> result(xPos.size());
-    //#pragma omp parallel for
     for (size_t i = 0; i < xPos.size(); ++i)
     {
         result[i].x = xPos[i];
@@ -133,9 +130,11 @@ std::vector<brayns::Quaternion> SonataCells::getRotations(const Nodes &nodes, co
     const auto w = nodes.getAttribute<float>(attribOrientationW, selection);
 
     std::vector<brayns::Quaternion> result(x.size());
-    //#pragma omp parallel for
+#pragma omp parallel for
     for (size_t i = 0; i < x.size(); ++i)
+    {
         result[i] = glm::normalize(brayns::Quaternion(w[i], x[i], y[i], z[i]));
+    }
 
     return result;
 }

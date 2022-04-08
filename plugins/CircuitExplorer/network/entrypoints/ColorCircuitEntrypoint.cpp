@@ -22,7 +22,7 @@
 
 #include <brayns/network/common/ExtractModel.h>
 
-#include <api/ColorIDParser.h>
+#include <api/coloring/ColorIDParser.h>
 #include <components/CircuitColorComponent.h>
 
 namespace

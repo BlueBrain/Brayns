@@ -18,48 +18,36 @@
 
 #include "PointNeuronPopulationLoader.h"
 
-#include <plugin/io/morphology/neuron/instances/SampleNeuronInstance.h>
-#include <plugin/io/sonataloader/data/SonataCells.h>
+#include <io/circuit/SomaCircuitLoader.h>
+#include <io/sonataloader/colordata/node/PointNeuronColorData.h>
+#include <io/sonataloader/data/SonataCells.h>
+#include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
+#include <io/sonataloader/populations/nodes/common/SomaImporter.h>
 
 namespace sonataloader
 {
-PointNeuronPopulationLoader::PointNeuronPopulationLoader()
-    : NodePopulationLoader("point_neuron")
+std::string NodePopulationLoader::getPopulationType() const noexcept
 {
+    return "point_neuron";
 }
 
-std::vector<MorphologyInstance::Ptr> PointNeuronPopulationLoader::load(
-    const SonataNetworkConfig &networkData,
-    const SonataNodePopulationParameters &lc,
-    const bbp::sonata::Selection &nodeSelection) const
+std::vector<CellCompartments>
+    PointNeuronPopulationLoader::load(const NodeLoadContext &ctxt, ProgressUpdater &cb, brayns::Model &model) const
 {
-    const auto &populationName = lc.node_population;
-    const auto &config = networkData.circuitConfig();
-    const auto population = config.getNodePopulation(populationName);
+    auto colorData = NodeColorDataFactory::create<PointNeuronColorData>(ctxt);
 
-    const auto nodesSize = nodeSelection.flatSize();
+    const auto &population = ctxt.population;
+    const auto &selection = ctxt.selection;
+    const auto flatSelection = selection.flatten();
 
-    const auto positions = SonataCells::getPositions(population, nodeSelection);
+    const auto positions = SonataCells::getPositions(population, selection);
 
-    const auto &neuronParameters = lc.neuron_morphology_parameters;
-    const auto radMult = neuronParameters.radius_multiplier;
-    const auto radOverride = neuronParameters.radius_override;
-    const float radius = radOverride > 0.f ? radOverride : (radMult > 0.f ? radMult : 1.f);
+    const auto &params = ctxt.params;
+    const auto &neuronParams = params.neuron_morphology_parameters;
+    const auto radius = neuronParams.radius_multiplier;
 
-    std::vector<MorphologyInstance::Ptr> result(nodesSize);
+    SomaCircuitLoader::Context context(flatSelection, positions, radius);
 
-    auto sharedData = std::make_shared<SampleSharedData>();
-    sharedData->sectionMap.insert({-1, {0}});
-    sharedData->sectionTypeMap.insert({NeuronSection::SOMA, {0}});
-
-#pragma omp parallel for
-    for (size_t i = 0; i < nodesSize; ++i)
-    {
-        result[i] = std::make_unique<SampleNeuronInstance>(
-            std::vector<brayns::Sphere>{brayns::Sphere(positions[i], radius)},
-            sharedData);
-    }
-
-    return result;
+    return SomaCircuitLoader::load(context, model, std::move(colorData));
 }
 } // namespace sonataloader
