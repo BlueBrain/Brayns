@@ -18,13 +18,37 @@
 
 #include "LoaderTable.h"
 
+#include <io/sonataloader/populations/edges/ChemicalPopulationLoader.h>
+#include <io/sonataloader/populations/edges/ElectricalSynapsePopulationLoader.h>
+#include <io/sonataloader/populations/edges/EndFootPopulationLoader.h>
+#include <io/sonataloader/populations/edges/GlialGlialPopulationLoader.h>
+#include <io/sonataloader/populations/edges/SynapseAstrocytePopulationLoader.h>
+
+#include <io/sonataloader/populations/nodes/AstrocytePopulationLoader.h>
+#include <io/sonataloader/populations/nodes/BiophysicalPopulationLoader.h>
+#include <io/sonataloader/populations/nodes/PointNeuronPopulationLoader.h>
+#include <io/sonataloader/populations/nodes/VasculaturePopulationLoader.h>
+
 namespace sonataloader
 {
 LoaderTable<NodePopulationLoader> NodeLoaderTable::create() noexcept
 {
+    LoaderTable<NodePopulationLoader> result;
+    result.registerLoader<AstrocytePopulationLoader>();
+    result.registerLoader<BiophysicalPopulationLoader>();
+    result.registerLoader<PointNeuronPopulationLoader>();
+    result.registerLoader<VasculaturePopulationLoader>();
+    return result;
 }
 
 LoaderTable<EdgePopulationLoader> EdgeLoaderTable::create() noexcept
 {
+    LoaderTable<EdgePopulationLoader> result;
+    result.registerLoader<ChemicalSynapsePopulationLoader>();
+    result.registerLoader<ElectricalSynapsePopulationLoader>();
+    result.registerLoader<EndFootPopulationLoader>();
+    result.registerLoader<GlialGlialPopulationLoader>();
+    result.registerLoader<SynapseAstrocytePopulationLoader>();
+    return result;
 }
 }

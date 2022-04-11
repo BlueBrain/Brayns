@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NodeSelector.h"
+#include "Selector.h"
 
 #include <io/sonataloader/data/SonataConfig.h>
 #include <io/sonataloader/data/SonataSimulationMapping.h>
@@ -93,7 +93,7 @@ struct NodeReportFilter
 
 namespace sonataloader
 {
-bbp::sonata::Selection NodeSelector::selectNodes(
+bbp::sonata::Selection NodeSelector::select(
     const SonataNetworkConfig &network,
     const SonataNodePopulationParameters &params)
 {
@@ -105,19 +105,19 @@ bbp::sonata::Selection NodeSelector::selectNodes(
     const auto percentage = params.node_percentage;
     const auto &config = network.circuitConfig();
 
-    bbp::sonata::Selection reportSelection ({});
+    bbp::sonata::Selection reportSelection({});
     if (reportType != ReportType::NONE && reportType != ReportType::SPIKES)
     {
         const auto &simConfig = network.simulationConfig();
         reportSelection = NodeReportFilter::filter(simConfig, reportName, nodePopulation);
     }
 
-    bbp::sonata::Selection result ({});
-    if(!nodeIds.empty())
+    bbp::sonata::Selection result({});
+    if (!nodeIds.empty())
     {
         result = bbp::sonata::Selection::fromValues(nodeIds);
 
-        if(!reportSelection.empty())
+        if (!reportSelection.empty())
         {
             result = result & reportSelection;
         }
@@ -126,12 +126,12 @@ bbp::sonata::Selection NodeSelector::selectNodes(
     {
         result = NodeSetFilter::filter(config, nodePopulation, nodeSets);
 
-        if(!reportSelection.empty())
+        if (!reportSelection.empty())
         {
             result = result & reportSelection;
         }
 
-        if(percentage < 1.f)
+        if (percentage < 1.f)
         {
             result = PercentageFilter::filter(result, percentage);
         }
@@ -143,5 +143,21 @@ bbp::sonata::Selection NodeSelector::selectNodes(
     }
 
     return result;
+}
+
+bbp::sonata::Selection EdgeSelector::select(
+    const SonataNetworkConfig &network,
+    const SonataEdgePopulationParameters &params,
+    const bbp::sonata::Selection &baseNodes)
+{
+    const auto &config = network.circuitConfig();
+    const auto &populationName = params.edge_population;
+    const auto population = config.getEdgePopulation(populationName);
+
+    const auto flatNodes = baseNodes.flatten();
+    const auto edgeSelection = population.afferentEdges(flatNodes);
+
+    const auto percentage = params.edge_percentage;
+    return PercentageFilter::filter(edgeSelection, percentage);
 }
 }

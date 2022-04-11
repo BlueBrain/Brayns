@@ -18,55 +18,10 @@
 
 #include "AstrocytePopulationLoader.h"
 
-#include <api/circuit/MorphologyCircuitBuilder.h>
 #include <io/sonataloader/colordata/node/AstrocyteColorData.h>
-#include <io/sonataloader/data/SonataCells.h>
-#include <io/sonataloader/data/SonataConfig.h>
 #include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
-#include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
+#include <io/sonataloader/populations/nodes/common/MorphologyImporter.h>
 #include <io/sonataloader/populations/nodes/common/SomaImporter.h>
-
-namespace
-{
-namespace sl = sonataloader;
-
-struct AstrocyteMorphologyImporter
-{
-    static std::vector<CellCompartments> import(sl::NodeLoadContext &ctxt, std::unique_ptr<IColorData> colorData)
-    {
-        const auto &population = ctxt.population;
-        const auto populationName = population.name();
-        const auto &selection = ctxt.selection;
-        const auto flatSelection = selection.flatten();
-
-        const auto positions = sl::SonataCells::getPositions(population, selection);
-        const auto morphologies = sl::SonataCells::getMorphologies(population, selection);
-        const auto rotations = std::vector<brayns::Quaternion>(positions.size(), brayns::Quaternion());
-
-        const auto &params = ctxt.params;
-        const auto &neuronParams = params.neuron_morphology_parameters;
-
-        const auto &network = ctxt.config;
-        const auto &config = network.circuitConfig();
-        const auto populationProperties = config.getNodePopulationProperties(populationName);
-        const auto morphologyPathBuilder = sl::SonataConfig::resolveMorphologyPath(populationProperties);
-
-        auto morphologyPaths = std::vector<std::string>(morphologies.size());
-        for (size_t i = 0; i < morphologies.size(); ++i)
-        {
-            const auto &morphology = morphologies[i];
-            morphologyPaths[i] = morphologyPathBuilder.buildPath(morphology);
-        }
-
-        auto &model = ctxt.model;
-        auto &cb = ctxt.progress;
-
-        MorphologyCircuitBuilder::Context context(flatSelection, morphologyPaths, positions, rotations, neuronParams);
-
-        return MorphologyCircuitBuilder::load(context, model, cb, std::move(colorData));
-    }
-};
-}
 
 namespace sonataloader
 {
@@ -85,17 +40,15 @@ void AstrocytePopulationLoader::load(NodeLoadContext &ctxt) const
     const auto axon = morphParams.load_axon;
     const auto dend = morphParams.load_dendrites;
 
-    std::vector<CellCompartments> compartments;
-
     if (soma && !axon && !dend)
     {
-        compartments = SomaImporter::import(ctxt, std::move(colorData));
+        SomaImporter::import(ctxt, std::move(colorData));
     }
     else
     {
-        compartments = AstrocyteMorphologyImporter::import(ctxt, std::move(colorData));
+        const auto &selection = ctxt.selection;
+        std::vector<brayns::Quaternion> dummyRotations(selection.flatSize());
+        MorphologyImporter::import(ctxt, dummyRotations, std::move(colorData));
     }
-
-    NeuronReportFactory::create(ctxt, compartments);
 }
 } // namespace sonataloader

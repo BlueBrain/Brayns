@@ -24,10 +24,10 @@
 
 namespace brayns
 {
-Model& Component::getModel()
+Model &Component::getModel()
 {
     // In case its called from the component's constructor
-    if(!_owner)
+    if (!_owner)
     {
         throw std::runtime_error("Component has not been initialized with its Model");
     }
@@ -37,15 +37,14 @@ Model& Component::getModel()
 
 void Component::onStart()
 {
-
 }
 
-void Component::onPreRender(const ParametersManager& params)
+void Component::onPreRender(const ParametersManager &params)
 {
-     (void)params;
+    (void)params;
 }
 
-void Component::onPostRender(const ParametersManager& params)
+void Component::onPostRender(const ParametersManager &params)
 {
     (void)params;
 }
@@ -59,16 +58,16 @@ void Component::onDestroyed()
 {
 }
 
-Bounds Component::computeBounds(const Matrix4f& transform) const noexcept
+Bounds Component::computeBounds(const Matrix4f &transform) const noexcept
 {
-    (void) transform;
+    (void)transform;
     return {};
 }
 
 size_t ModelComponentContainer::getSizeInBytes() const noexcept
 {
     size_t result = 0;
-    for(const auto &entry : _components)
+    for (const auto &entry : _components)
     {
         auto &component = *entry.component;
         result += component.getSizeInBytes();
@@ -76,18 +75,18 @@ size_t ModelComponentContainer::getSizeInBytes() const noexcept
     return result;
 }
 
-void ModelComponentContainer::onPreRender(const ParametersManager& params)
+void ModelComponentContainer::onPreRender(const ParametersManager &params)
 {
-    for(auto &entry : _components)
+    for (auto &entry : _components)
     {
         auto &component = *entry.component;
         component.onPreRender(params);
     }
 }
 
-void ModelComponentContainer::onPostRender(const ParametersManager& params)
+void ModelComponentContainer::onPostRender(const ParametersManager &params)
 {
-    for(auto &entry : _components)
+    for (auto &entry : _components)
     {
         auto &component = *entry.component;
         component.onPostRender(params);
@@ -97,7 +96,7 @@ void ModelComponentContainer::onPostRender(const ParametersManager& params)
 bool ModelComponentContainer::commit()
 {
     bool committed = false;
-    for(auto &entry : _components)
+    for (auto &entry : _components)
     {
         auto &component = *entry.component;
         committed = committed || component.commit();
@@ -107,7 +106,7 @@ bool ModelComponentContainer::commit()
 
 void ModelComponentContainer::onDestroyed()
 {
-    for(auto &entry : _components)
+    for (auto &entry : _components)
     {
         auto &component = *entry.component;
         component.onDestroyed();
@@ -117,7 +116,7 @@ void ModelComponentContainer::onDestroyed()
 Bounds ModelComponentContainer::computeBounds(const Matrix4f &transform) const noexcept
 {
     Bounds result;
-    for(auto &entry : _components)
+    for (auto &entry : _components)
     {
         auto &component = *entry.component;
         auto componentBounds = component.computeBounds(transform);

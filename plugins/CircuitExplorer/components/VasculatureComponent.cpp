@@ -6,12 +6,21 @@
 #include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
+VasculatureComponent::VasculatureComponent(
+    std::vector<uint64_t> ids,
+    std::vector<brayns::Primitive> geometry,
+    std::vector<VasculatureSection> sections)
+    : _ids(std::move(ids))
+    , _sections(std::move(sections))
+{
+    _geometry.set(std::move(geometry));
+    _colors.resize(_geometry.getNumGeometries());
+}
+
 size_t VasculatureComponent::getSizeInBytes() const noexcept
 {
-    return sizeof (VasculatureComponent)
-            + _geometry.getSizeInBytes()
-            + brayns::SizeHelper::vectorSize(_ids)
-            + brayns::SizeHelper::vectorSize(_colors);
+    return sizeof(VasculatureComponent) + _geometry.getSizeInBytes() + brayns::SizeHelper::vectorSize(_ids)
+        + brayns::SizeHelper::vectorSize(_colors);
 }
 
 brayns::Bounds VasculatureComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
@@ -21,35 +30,33 @@ brayns::Bounds VasculatureComponent::computeBounds(const brayns::Matrix4f &trans
 
 void VasculatureComponent::onStart()
 {
-    auto &model = getModel();
+    auto &group = getModel();
 
     _model = brayns::GeometricModelHandler::create();
-    brayns::GeometricModelHandler::addToGeometryGroup(_model, model);
+    brayns::GeometricModelHandler::addToGeometryGroup(_model, group);
 
-    model.addComponent<brayns::MaterialComponent>();
+    group.addComponent<brayns::MaterialComponent>();
 }
 
 bool VasculatureComponent::commit()
 {
-    bool needsCommit = false;
+    bool needsCommit = _colorsDirty;
+    _colorsDirty = false;
 
-    if(_geometry.commit())
+    if (_geometry.commit())
     {
         brayns::GeometricModelHandler::setGeometry(_model, _geometry);
         needsCommit = true;
     }
 
     auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
-    if(material.commit())
+    if (material.commit())
     {
         brayns::GeometricModelHandler::setMaterial(_model, material);
         needsCommit = true;
     }
 
-    needsCommit = needsCommit || _colorsDirty;
-    _colorsDirty = false;
-
-    if(needsCommit)
+    if (needsCommit)
     {
         brayns::GeometricModelHandler::commitModel(_model);
     }
@@ -61,21 +68,6 @@ void VasculatureComponent::onDestroyed()
 {
     brayns::GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
     brayns::GeometricModelHandler::destory(_model);
-}
-
-void VasculatureComponent::setNumVessels(const size_t size) noexcept
-{
-    _ids.reserve(size);
-    _sections.reserve(size);
-    _colors.reserve(size);
-}
-
-void VasculatureComponent::addVessel(uint64_t id, brayns::Primitive geometry, VasculatureSection section) noexcept
-{
-    _ids.push_back(id);
-    _geometry.add(std::move(geometry));
-    _sections.push_back(section);
-    _colors.push_back(brayns::Vector4f(1.f));
 }
 
 const std::vector<uint64_t> &VasculatureComponent::getIDs() const noexcept
@@ -94,16 +86,16 @@ void VasculatureComponent::setColor(const brayns::Vector4f &color) noexcept
 }
 
 void VasculatureComponent::setColorBySection(
-        const std::vector<std::pair<VasculatureSection, brayns::Vector4f>> &colormap) noexcept
+    const std::vector<std::pair<VasculatureSection, brayns::Vector4f>> &colormap) noexcept
 {
-    for(size_t i = 0; i < _colors.size(); ++i)
+    for (size_t i = 0; i < _colors.size(); ++i)
     {
         const auto section = _sections[i];
-        for(const auto &entry : colormap)
+        for (const auto &entry : colormap)
         {
             const auto checkSection = entry.first;
             const auto &color = entry.second;
-            if(checkSection == section)
+            if (checkSection == section)
             {
                 _colors[i] = color;
                 _colorsDirty = true;
@@ -111,7 +103,7 @@ void VasculatureComponent::setColorBySection(
         }
     }
 
-    if(_colorsDirty)
+    if (_colorsDirty)
     {
         auto colorData = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
         brayns::GeometricModelHandler::setColors(_model, colorData);
@@ -128,26 +120,25 @@ void VasculatureComponent::setColorById(std::vector<brayns::Vector4f> colors) no
 
 void VasculatureComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
 {
-
     auto idIt = _ids.begin();
     auto bufferIt = _colors.begin();
     auto colorsIt = colors.begin();
 
-    while(colorsIt != colors.end())
+    while (colorsIt != colors.end())
     {
         const auto targetId = colorsIt->first;
         const auto &targetColor = colorsIt->second;
 
-        while(idIt != _ids.end())
+        while (idIt != _ids.end())
         {
-            if(*idIt != targetId)
+            if (*idIt != targetId)
             {
                 ++idIt;
                 ++bufferIt;
             }
         }
 
-        if(idIt == _ids.end())
+        if (idIt == _ids.end())
         {
             break;
         }
@@ -158,7 +149,7 @@ void VasculatureComponent::setColorById(const std::map<uint64_t, brayns::Vector4
         ++colorsIt;
     }
 
-    if(_colorsDirty)
+    if (_colorsDirty)
     {
         auto colorBuffer = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
         brayns::GeometricModelHandler::setColors(_model, colorBuffer);
@@ -170,4 +161,9 @@ void VasculatureComponent::setSimulationColor(brayns::OSPBuffer &color, const st
     auto indexData = brayns::DataHandler::shareBuffer(mapping, OSPDataType::OSP_UCHAR);
     brayns::GeometricModelHandler::setColorMap(_model, color, indexData);
     _colorsDirty = true;
+}
+
+brayns::Geometry<brayns::Primitive> &VasculatureComponent::getGeometry() noexcept
+{
+    return _geometry;
 }

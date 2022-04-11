@@ -42,8 +42,10 @@ struct EdgeLoadContext
 {
     const SonataNetworkConfig &config;
     const SonataEdgePopulationParameters &params;
-    const bbp::sonata::EdgePopulation &population;
-    const bbp::sonata::Selection &selection;
+    const bbp::sonata::Population &nodePopulation;
+    const bbp::sonata::EdgePopulation &edgePopulation;
+    const bbp::sonata::Selection &nodeSelection;
+    const bbp::sonata::Selection &edgeSelection;
     brayns::Model &model;
     ProgressUpdater &progress;
 };

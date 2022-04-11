@@ -91,7 +91,9 @@ void SynapseComponent::addSynapses(std::map<uint64_t, std::vector<brayns::Sphere
     _cellIds.reserve(synapses.size());
     _synapses.reserve(synapses.size());
 
-    for(auto &[id, synapseGeometry] : synapses)
+    auto &group = getModel();
+
+    for (auto &[id, synapseGeometry] : synapses)
     {
         _cellIds.push_back(id);
         _synapses.emplace_back();
@@ -101,8 +103,6 @@ void SynapseComponent::addSynapses(std::map<uint64_t, std::vector<brayns::Sphere
 
         geometry.set(std::move(synapseGeometry));
         geometry.commit();
-
-        auto &group = getModel();
 
         model = brayns::GeometricModelHandler::create();
         brayns::GeometricModelHandler::addToGeometryGroup(model, group);

@@ -46,6 +46,6 @@ public:
      *
      * @param ctxt
      */
-    void load(EdgeLoadContext &ctxt) const = 0;
+    virtual void load(EdgeLoadContext &ctxt) const = 0;
 };
 } // namespace sonataloader

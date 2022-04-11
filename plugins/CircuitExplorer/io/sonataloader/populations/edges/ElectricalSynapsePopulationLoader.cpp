@@ -16,22 +16,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ElectricalSynapsePopulationLoader.h"
 
-#include <plugin/io/sonataloader/reports/NodeReportLoader.h>
+#include <io/sonataloader/populations/edges/common/SynapseImporter.h>
 
 namespace sonataloader
 {
-/**
- * @brief The EdgeCompartmentLoader class implements the simulation loader
- * functionality for compartment report type.
- */
-class NodeCompartmentLoader : public NodeReportLoader
+std::string ElectricalSynapsePopulationLoader::getPopulationType() const noexcept
 {
-public:
-    std::vector<NodeReportMapping> loadMapping(
-        const std::string &reportPath,
-        const std::string &population,
-        const bbp::sonata::Selection &) const final;
-};
-} // namespace sonataloader
+    return "electrical_synapse";
+}
+
+void ElectricalSynapsePopulationLoader::load(EdgeLoadContext &ctxt) const
+{
+    SynapseImporter::fromContext(ctxt);
+}
+}

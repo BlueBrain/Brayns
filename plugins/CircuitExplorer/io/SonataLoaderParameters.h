@@ -59,7 +59,15 @@ BRAYNS_JSON_OBJECT_ENTRY(
     float,
     edge_percentage,
     "Percentage of edges to load from all available",
-    brayns::Minimum(0.001f))
+    brayns::Minimum(0.001f),
+    brayns::Maximum(1.f),
+    brayns::Default(1.f))
+BRAYNS_JSON_OBJECT_ENTRY(
+    float,
+    radius,
+    "Radius used for the synapse sphere geometry (Ignored for endfeet)",
+    brayns::Default(2.f),
+    brayns::Minimum(0.1f))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     edge_report_name,
@@ -81,9 +89,9 @@ BRAYNS_JSON_OBJECT_ENTRY(
     node_percentage,
     "Percentage of nodes to load after filter them by whichever node sets have "
     "been specified. Ignored if a lsit of node ids is provided",
-    brayns::Required(false),
     brayns::Default(0.01f),
-    brayns::Minimum(0.001f))
+    brayns::Minimum(0.001f),
+    brayns::Maximum(1.f))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<uint64_t>,
     node_ids,
@@ -99,6 +107,13 @@ BRAYNS_JSON_OBJECT_ENTRY(
     report_name,
     "Name of the report file to load (Ignored if report_type is 'none' or 'spikes')",
     brayns::Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(
+    float,
+    spike_transition_time,
+    "When loading a spike report, fade-in and fade-out time, in milliseconds, from "
+    "resting state to spike state.",
+    brayns::Default(1.f),
+    brayns::Minimum(0.f))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<SonataEdgePopulationParameters>,
     edge_populations,

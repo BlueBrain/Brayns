@@ -11,6 +11,11 @@
 class VasculatureComponent final : public brayns::Component
 {
 public:
+    VasculatureComponent(
+        std::vector<uint64_t> ids,
+        std::vector<brayns::Primitive> geometry,
+        std::vector<VasculatureSection> sections);
+
     /**
      * @brief getSizeInBytes
      * @return
@@ -39,21 +44,6 @@ public:
      * @brief onDestroyed
      */
     void onDestroyed() override;
-
-    /**
-     * @brief setNumVessels utility function which allows to optimize memory allocation by
-     * specifying the number of vessels that will be added to this vasculature
-     * @param size
-     */
-    void setNumVessels(const size_t size) noexcept;
-
-    /**
-     * @brief addVessel adds a new vessel geometry to this vasculature
-     * @param id
-     * @param geometry
-     * @param section
-     */
-    void addVessel(uint64_t id, brayns::Primitive geometry, VasculatureSection section) noexcept;
 
     /**
      * @brief getIDs return the ids of the vessels in this vasculature
@@ -93,6 +83,13 @@ public:
      * @param mapping per geometry primitive indices into the color buffer
      */
     void setSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping) noexcept;
+
+    /**
+     * @brief Get the Geometry object
+     *
+     * @return brayns::Geometry<brayns::Primitive>
+     */
+    brayns::Geometry<brayns::Primitive> &getGeometry() noexcept;
 
 private:
     OSPGeometricModel _model = nullptr;

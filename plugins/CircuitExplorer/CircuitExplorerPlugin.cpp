@@ -28,7 +28,7 @@
 
 #include <io/BBPLoader.h>
 #include <io/NeuronMorphologyLoader.h>
-//#include <plugin/io/SonataLoader.h>
+#include <io/SonataLoader.h>
 #include <io/SonataNGVLoader.h>
 #include <network/entrypoints/ColorCircuitEntrypoint.h>
 #include <network/entrypoints/MakeMovieEntrypoint.h>
@@ -41,7 +41,7 @@ void CircuitExplorerPlugin::init()
     auto &registry = _api->getLoaderRegistry();
     registry.registerLoader(std::make_unique<BBPLoader>());
     registry.registerLoader(std::make_unique<NeuronMorphologyLoader>());
-    //registry.registerLoader(std::make_unique<SonataLoader>());
+    registry.registerLoader(std::make_unique<SonataLoader>());
     registry.registerLoader(std::make_unique<SonataNGVLoader>());
 }
 
@@ -59,7 +59,7 @@ void CircuitExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &inter
     builder.add<ColorCircuitByMethodEntrypoint>(modelManager);
     builder.add<ColorCircuitBySingleColorEntrypoint>(modelManager);
     builder.add<MakeMovieEntrypoint>();
-    //builder.add<SetCircuitThicknessEntrypoint>(modelManager);
+    // builder.add<SetCircuitThicknessEntrypoint>(modelManager);
     builder.add<TraceAnterogradeEntrypoint>(modelManager);
 }
 

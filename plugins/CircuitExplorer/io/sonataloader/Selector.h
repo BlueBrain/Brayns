@@ -18,20 +18,25 @@
 
 #pragma once
 
-#include <plugin/io/sonataloader/reports/NodeReportLoader.h>
+#include <io/SonataLoaderParameters.h>
+#include <io/sonataloader/data/SonataConfig.h>
+
+#include <bbp/sonata/population.h>
 
 namespace sonataloader
 {
-/**
- * @brief The EdgeCompartmentLoader class implements the simulation loader
- * functionality for spike report type.
- */
-class NodeSpikeLoader : public NodeReportLoader
+struct NodeSelector
 {
-public:
-    std::vector<NodeReportMapping> loadMapping(
-        const std::string &reportPath,
-        const std::string &population,
-        const bbp::sonata::Selection &) const final;
+    static bbp::sonata::Selection select(
+        const SonataNetworkConfig &network,
+        const SonataNodePopulationParameters &params);
 };
-} // namespace sonataloader
+
+struct EdgeSelector
+{
+    static bbp::sonata::Selection select(
+        const SonataNetworkConfig &network,
+        const SonataEdgePopulationParameters &params,
+        const bbp::sonata::Selection &baseNodes);
+};
+}

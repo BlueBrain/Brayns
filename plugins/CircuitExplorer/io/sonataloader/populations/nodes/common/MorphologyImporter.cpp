@@ -16,31 +16,50 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SomaImporter.h"
+#include "MorphologyImporter.h"
 
-#include <api/circuit/SomaCircuitBuilder.h>
+#include <api/circuit/MorphologyCircuitBuilder.h>
 #include <io/sonataloader/data/SonataCells.h>
 #include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
 
 namespace sonataloader
 {
-void SomaImporter::import(NodeLoadContext &ctxt, std::unique_ptr<IColorData> colorData)
+void MorphologyImporter::import(
+    NodeLoadContext &ctxt,
+    const std::vector<brayns::Quaternion> &rotations,
+    std::unique_ptr<IColorData> colorData)
 {
-    auto &progress = ctxt.progress;
-    progress.update("Loading nodes (soma only)");
+    namespace sl = sonataloader;
 
     const auto &population = ctxt.population;
+    const auto populationName = population.name();
     const auto &selection = ctxt.selection;
     const auto flatSelection = selection.flatten();
-    const auto positions = SonataCells::getPositions(population, selection);
+
+    const auto positions = sl::SonataCells::getPositions(population, selection);
+    const auto morphologies = sl::SonataCells::getMorphologies(population, selection);
+
     const auto &params = ctxt.params;
     const auto &neuronParams = params.neuron_morphology_parameters;
-    const auto radius = neuronParams.radius_multiplier;
+
+    const auto &network = ctxt.config;
+    const auto &config = network.circuitConfig();
+    const auto populationProperties = config.getNodePopulationProperties(populationName);
+    const auto morphologyPathBuilder = sl::SonataConfig::resolveMorphologyPath(populationProperties);
+
+    auto morphologyPaths = std::vector<std::string>(morphologies.size());
+    for (size_t i = 0; i < morphologies.size(); ++i)
+    {
+        const auto &morphology = morphologies[i];
+        morphologyPaths[i] = morphologyPathBuilder.buildPath(morphology);
+    }
+
     auto &model = ctxt.model;
+    auto &cb = ctxt.progress;
 
-    SomaCircuitBuilder::Context context(flatSelection, positions, radius);
+    MorphologyCircuitBuilder::Context context(flatSelection, morphologyPaths, positions, rotations, neuronParams);
 
-    const auto compartments = SomaCircuitBuilder::load(context, model, std::move(colorData));
+    const auto compartments = MorphologyCircuitBuilder::load(context, model, cb, std::move(colorData));
 
     NeuronReportFactory::create(ctxt, compartments);
 }

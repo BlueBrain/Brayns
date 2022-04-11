@@ -18,64 +18,43 @@
 
 #include "NodeLoader.h"
 
-#include "LoaderTable.h"
+#include <io/sonataloader/LoaderTable.h>
+#include <io/sonataloader/data/SonataCells.h>
 
 namespace
 {
-class NodePopulationLoaders
+namespace sl = sonataloader;
+
+struct PopulationTypeResolver
 {
-public:
-    NodePopulationLoaders()
+    static std::string resolve(sl::NodeLoadContext &ctxt)
     {
-        _table.registerLoader<AstrocytePopulationLoader>();
-        _table.registerLoader<BiophysicalPopulationLoader>();
-        _table.registerLoader<PointNeuronPopulationLoader>();
-        _table.registerLoader<VasculaturePopulationLoader>();
+        const auto &population = ctxt.population;
+        const auto populationName = population.name();
+        try
+        {
+            return sl::SonataCells::getPopulationType(population);
+        }
+        catch (...)
+        {
+            const auto &network = ctxt.config;
+            const auto &config = network.circuitConfig();
+            const auto populationProperties = config.getNodePopulationProperties(populationName);
+            return populationProperties.type;
+        }
+
+        throw std::runtime_error("Could not determine the population type of node population " + populationName);
     }
-
-    const NodePopulationLoader &getNodeLoader(const std::string &name)
-    {
-        auto nlptr = _table.getLoader(name);
-        if (!nlptr)
-            throw std::invalid_argument("No node population loader for type " + name);
-
-        return *nlptr;
-    }
-
-private:
-    PopulationLoaderTable<NodePopulationLoader> _table;
-};
-
-class EdgePopulationLoaders
-{
-public:
-    EdgePopulationLoaders()
-    {
-        _table.registerLoader<ChemicalSynapsePopulationLoader>();
-        _table.registerLoader<ElectricalSynapsePopulationLoader>();
-        _table.registerLoader<EndFootPopulationLoader>();
-        _table.registerLoader<GlialGlialPopulationLoader>();
-        _table.registerLoader<SynapseAstrocytePopulationLoader>();
-    }
-
-    const EdgePopulationLoader &getEdgeLoader(const std::string &name)
-    {
-        auto elptr = _table.getLoader(name);
-        if (!elptr)
-            throw std::invalid_argument("No edge population loader for type " + name);
-
-        return *elptr;
-    }
-
-private:
-    PopulationLoaderTable<EdgePopulationLoader> _table;
 };
 }
 
 namespace sonataloader
 {
-std::vector<CellCompartments>
-    NodeLoader::loadNodes(const NodeLoadContext &ctxt, ProgressUpdater &updater, brayns::Model &model)
+void NodeLoader::loadNodes(NodeLoadContext &ctxt)
 {
+    const auto loaderTable = NodeLoaderTable::create();
+    const auto populationType = PopulationTypeResolver::resolve(ctxt);
+    const auto &loader = loaderTable.getLoader(populationType);
+    loader.load(ctxt);
 }
 }

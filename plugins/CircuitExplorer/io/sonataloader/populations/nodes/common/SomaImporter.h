@@ -18,6 +18,7 @@
 
 #include <brayns/engine/Model.h>
 
+#include <api/coloring/IColorData.h>
 #include <api/reports/ReportMapping.h>
 #include <io/sonataloader/LoadContext.h>
 
@@ -31,6 +32,6 @@ namespace sonataloader
  */
 struct SomaImporter
 {
-    static std::vector<CellCompartments> import(const NodeLoadContext &ctxt, std::unique_ptr<IColorData> colorData);
+    static void import(NodeLoadContext &ctxt, std::unique_ptr<IColorData> colorData);
 };
 }

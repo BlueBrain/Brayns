@@ -36,85 +36,76 @@ private:
 
 public:
     /**
-     * @brief return the list of source node ids for the given selection of
-     * edges in the given edge population
+     * @brief Returns the "model_type" population entry value
+     *
+     * @param population
+     * @return std::string
+     */
+    static std::string getPopulationType(const Edges &population);
+
+    /**
+     * @brief Return the source node ids of the given edge selection
+     *
+     * @param population
+     * @param edgeSelection
+     * @return std::vector<uint64_t>
      */
     static std::vector<uint64_t> getSourceNodes(const Edges &population, const Selection &edgeSelection);
 
     /**
-     * @brief return the list of target node ids for the given selection of
-     * edges in the given edge population
+     * @brief Return the target node ids of the given edge selection
+     *
+     * @param population
+     * @param edgeSelection
+     * @return std::vector<uint64_t>
      */
     static std::vector<uint64_t> getTargetNodes(const Edges &population, const Selection &edgeSelection);
 
     /**
-     * @brief return the list of afferent section ids (afferent_section_id
-     * dataset) for the given edge selection in the given edge population
-     */
-    static std::vector<int32_t> getAfferentSectionIds(const Edges &population, const Selection &edgeSelection);
-
-    /**
-     * @brief return the list of efferent section ids (efferent_section_id
-     * dataset) for the given edge selection in the given edge population
-     */
-    static std::vector<int32_t> getEfferentSectionIds(const Edges &population, const Selection &edgeSelection);
-
-    /**
-     * @brief return the list of afferent surface 3D positions
-     * (afferent_surface_x, afferent_surface_y, afferent_surface_z dataset
-     * combined) for the given edge selection in the given edge population
+     * @brief Return the afferent surface position for the given edge selection
+     *
+     * @param population
+     * @param selection
+     * @return std::vector<brayns::Vector3f>
      */
     static std::vector<brayns::Vector3f> getAfferentSurfacePos(const Edges &population, const Selection &selection);
 
     /**
-     * @brief return the list of efferent surface 3D positions
-     * (efferent_surface_x, efferent_surface_y, efferent_surface_z dataset
-     * combined) for the given edge selection in the given edge population
+     * @brief Return the afferent surface position for the given edge selection
+     *
+     * @param population
+     * @param selection
+     * @return std::vector<brayns::Vector3f>
      */
     static std::vector<brayns::Vector3f> getEfferentSurfacePos(const Edges &population, const Selection &selection);
 
     /**
-     * @brief return the list of afferent section distances
-     * (afferent_section_pos dataset) for the given edge selection in the given
-     * edge population. The afferent section distances are a normalized paramter
-     * between 0.0 and 1.0 that denotes the relative distance from the section
-     * start and section length where an edge is positioned.
+     * @brief Return the efferent astrocyte center position from synapse_astroctye populations for the given edge
+     * selection
+     *
+     * @param population
+     * @param selection
+     * @return std::vector<brayns::Vector3f>
      */
-    static std::vector<float> getAfferentSectionDistances(const Edges &population, const Selection &selection);
+    static std::vector<brayns::Vector3f> getEfferentAstrocyteCenterPos(
+        const Edges &population,
+        const Selection &selection);
 
     /**
-     * @brief return the list of efferent section distances
-     * (efferent_section_pos dataset) for the given edge selection in the given
-     * edge population. The afferent section distances are a normalized paramter
-     * between 0.0 and 1.0 that denotes the relative distance from the section
-     * start and section length where an edge is positioned.
-     */
-    static std::vector<float> getEfferentSectionDistances(const Edges &population, const Selection &selection);
-
-    /**
-     * @brief return the list of efferent section ids (efferent_section_id
-     * dataset) for the given edge selection in the given edge synapse_astroctye
-     * population (not enforced)
-     */
-    static std::vector<int32_t> getEfferentAstrocyteSectionIds(const Edges &population, const Selection &selection);
-
-    /**
-     * @brief return the list of efferent section distances
-     * (efferent_section_pos dataset) for the given edge selection in the given
-     * edge synapse_astroctye population (not enforced)
-     */
-    static std::vector<float> getEfferentAstrocyteSectionDistances(const Edges &population, const Selection &selection);
-
-    /**
-     * @brief return the list of efferent endfeet surface 3D positions for the
-     *        given edge selection in the given edge endfeet population (not
-     * enforced)
+     * @brief Return the endfeet surface position from endfeet populations for the given edge selection
+     *
+     * @param population
+     * @param selection
+     * @return std::vector<brayns::Vector3f>
      */
     static std::vector<brayns::Vector3f> getEndFeetSurfacePos(const Edges &population, const Selection &selection);
 
     /**
-     * @brief return the list of endfeet edge ids for the given edge selection
-     *        in the given edge endfeet population (not enforced)
+     * @brief Return the endfeet ids from endfeet populations fro the given edge selection
+     *
+     * @param population
+     * @param selection
+     * @return std::vector<uint64_t>
      */
     static std::vector<uint64_t> getEndFeetIds(const Edges &population, const Selection &selection);
 };

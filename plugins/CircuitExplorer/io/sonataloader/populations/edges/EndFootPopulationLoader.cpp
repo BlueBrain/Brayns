@@ -22,126 +22,141 @@
 
 #include <brayns/json/Json.h>
 
-#include <plugin/io/sonataloader/data/SonataEndFeetReader.h>
-#include <plugin/io/sonataloader/data/SonataSelection.h>
-#include <plugin/io/sonataloader/data/SonataSynapses.h>
-#include <plugin/io/synapse/groups/EndFootGroup.h>
+#include <api/synapse/EndfeetColorHandler.h>
+#include <components/CircuitColorComponent.h>
+#include <components/EndfeetComponent.h>
+#include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
+#include <io/sonataloader/data/SonataEndFeetReader.h>
+#include <io/sonataloader/data/SonataSynapses.h>
+
+namespace
+{
+namespace sl = sonataloader;
+struct EndFeetAreasPathResolver
+{
+    // The endfeet mesh file is not retruned by bbp::sonata::CircuitConfig (by now).
+    // Get it manually from the expanded json
+    static std::string resolve(const sl::EdgeLoadContext &ctxt)
+    {
+        const auto &network = ctxt.config;
+        const auto &config = network.circuitConfig();
+        const auto basePath = std::filesystem::path(network.circuitConfigDir());
+        auto parsedJson = brayns::Json::parse(config.getExpandedJSON());
+        const auto json = parsedJson.extract<brayns::JsonObject::Ptr>();
+        const auto &population = ctxt.edgePopulation;
+        const auto edgeName = population.name();
+
+        std::string resultPath = "";
+
+        // First fetch default one, if any
+        if (const auto components = json->getObject("components"))
+        {
+            if (components->has("end_feet_area"))
+                resultPath = components->get("end_feet_area").extract<std::string>();
+        }
+
+        const auto edgeNetworkList = json->getObject("networks")->getArray("edges");
+        bool found = false;
+        for (const auto &entry : *edgeNetworkList)
+        {
+            if (found)
+                break;
+
+            const auto &entryObject = entry.extract<Poco::JSON::Object::Ptr>();
+            auto edgeFile = entryObject->get("edges_file").extract<std::string>();
+
+            if (!std::filesystem::path(edgeFile).is_absolute())
+            {
+                const auto edgeFileSubpath = std::filesystem::path(edgeFile);
+                const auto edgeFileFullPath = std::filesystem::path(basePath) / std::filesystem::path(edgeFile);
+                edgeFile = edgeFileFullPath.string();
+            }
+
+            const auto populationStorage = bbp::sonata::EdgeStorage(edgeFile);
+            for (const auto &population : populationStorage.populationNames())
+            {
+                if (population != edgeName)
+                {
+                    continue;
+                }
+
+                found = true;
+
+                if (const auto popObject = entryObject->getObject("populations"))
+                {
+                    if (const auto edgePopObject = popObject->getObject(edgeName))
+                    {
+                        if (edgePopObject->has("end_feet_area"))
+                        {
+                            resultPath = edgePopObject->get("end_feet_area").extract<std::string>();
+                        }
+                    }
+                }
+                break;
+            }
+        }
+
+        if (resultPath.empty())
+        {
+            throw std::runtime_error("EndFootPopulationLoader: Cannot locate endfeet areas H5 file");
+        }
+        else if (!std::filesystem::path(resultPath).is_absolute())
+        {
+            const auto resultSubpath = std::filesystem::path(resultPath);
+            auto fullPath = std::filesystem::path(basePath) / resultSubpath;
+            fullPath = fullPath.lexically_normal();
+            resultPath = fullPath.string();
+        }
+
+        return resultPath;
+    }
+};
+} // namespace
 
 namespace sonataloader
 {
-namespace
+std::string EndFootPopulationLoader::getPopulationType() const noexcept
 {
-// The endfeet mesh file is not retruned by bbp::sonata::CircuitConfig (by now).
-// Get it manually from the expanded json
-std::string getEndFeetAreasPath(
-    const bbp::sonata::CircuitConfig &config,
-    const std::string &edgePopulation,
-    const std::string &basePath)
-{
-    auto parsedJson = brayns::Json::parse(config.getExpandedJSON());
-    const auto json = parsedJson.extract<brayns::JsonObject::Ptr>();
-
-    std::string resultPath = "";
-
-    // First fetch default one, if any
-    if (const auto components = json->getObject("components"))
-    {
-        if (components->has("end_feet_area"))
-            resultPath = components->get("end_feet_area").extract<std::string>();
-    }
-
-    const auto edgeNetworkList = json->getObject("networks")->getArray("edges");
-    bool found = false;
-    for (const auto &entry : *edgeNetworkList)
-    {
-        if (found)
-            break;
-
-        const auto &entryObject = entry.extract<Poco::JSON::Object::Ptr>();
-        auto edgeFile = entryObject->get("edges_file").extract<std::string>();
-
-        if (!std::filesystem::path(edgeFile).is_absolute())
-            edgeFile =
-                std::filesystem::absolute(std::filesystem::path(basePath) / std::filesystem::path(edgeFile)).string();
-
-        const auto populationStorage = bbp::sonata::EdgeStorage(edgeFile);
-
-        for (const auto &population : populationStorage.populationNames())
-        {
-            if (population != edgePopulation)
-                continue;
-
-            found = true;
-
-            if (const auto popObject = entryObject->getObject("populations"))
-            {
-                if (const auto edgePopObject = popObject->getObject(edgePopulation))
-                {
-                    if (edgePopObject->has("end_feet_area"))
-                        resultPath = edgePopObject->get("end_feet_area").extract<std::string>();
-                }
-            }
-            break;
-        }
-    }
-
-    if (resultPath.empty())
-        throw std::runtime_error("EndFootPopulationLoader: Cannot locate endfeet areas H5 file");
-    else if (!std::filesystem::path(resultPath).is_absolute())
-        resultPath = std::filesystem::path(std::filesystem::path(basePath) / std::filesystem::path(resultPath))
-                         .lexically_normal()
-                         .string();
-
-    return resultPath;
-}
-} // namespace
-
-EndFootPopulationLoader::EndFootPopulationLoader()
-    : EdgePopulationLoader("endfoot")
-{
+    return "endfoot";
 }
 
-std::vector<std::unique_ptr<SynapseGroup>> EndFootPopulationLoader::load(
-    const SonataNetworkConfig &network,
-    const SonataEdgePopulationParameters &lc,
-    const bbp::sonata::Selection &nodeSelection) const
+void EndFootPopulationLoader::load(EdgeLoadContext &ctxt) const
 {
-    if (lc.load_afferent)
-        throw std::runtime_error("Afferent edges not supported on endfoot connectivity");
+    const auto path = EndFeetAreasPathResolver::resolve(ctxt);
 
-    const auto &config = network.circuitConfig();
-    const std::filesystem::path basePath(network.circuitConfigDir());
-    const auto &populationName = lc.edge_population;
-    auto path = getEndFeetAreasPath(config, populationName, basePath);
+    const auto &nodeSelection = ctxt.nodeSelection;
     const auto nodes = nodeSelection.flatten();
-    const auto percentage = lc.edge_percentage;
-    const auto population = config.getEdgePopulation(populationName);
-    const auto edgeSelection = EdgeSelection(population.efferentEdges(nodes)).intersection(percentage);
+    const auto &population = ctxt.edgePopulation;
+    const auto &edgeSelection = ctxt.edgeSelection;
     const auto flatEdges = edgeSelection.flatten();
-    const auto sourceNodes = SonataSynapses::getSourceNodes(population, edgeSelection);
+    const auto astrocyteIds = SonataSynapses::getTargetNodes(population, edgeSelection);
     const auto endFeetIds = SonataSynapses::getEndFeetIds(population, edgeSelection);
     const auto endFeetPos = SonataSynapses::getEndFeetSurfacePos(population, edgeSelection);
 
     auto meshes = SonataEndFeetReader::readEndFeet(path, endFeetIds, endFeetPos);
 
-    // Initialize for every node, so the flat result will have a group for every
-    // node (even if its empty, which allows to simply use vectors)
-    std::map<uint64_t, std::unique_ptr<SynapseGroup>> mapping;
-    for (const auto nodeId : nodes)
-        mapping[nodeId] = std::make_unique<EndFootGroup>();
-
-    // Group endfeet by the node id they belong to
-    for (size_t i = 0; i < endFeetIds.size(); ++i)
+    std::map<uint64_t, std::vector<brayns::TriangleMesh>> endfeetGeometry;
+    for (size_t i = 0; i < astrocyteIds.size(); ++i)
     {
-        EndFootGroup &group = static_cast<EndFootGroup &>(*mapping[sourceNodes[i]].get());
-        group.addSynapse(endFeetIds[i], std::move(meshes[i]));
+        const auto astrocyte = astrocyteIds[i];
+        auto &buffer = endfeetGeometry[astrocyte];
+        auto &mesh = meshes[i];
+        buffer.push_back(std::move(mesh));
     }
 
-    // Flatten
-    std::vector<std::unique_ptr<SynapseGroup>> result(nodes.size());
-    for (size_t i = 0; i < nodes.size(); ++i)
-        result[i] = std::move(mapping[nodes[i]]);
+    auto &model = ctxt.model;
 
-    return result;
+    // Geometry
+    auto &endfeet = model.addComponent<EndfeetComponent>();
+    endfeet.addEndfeet(endfeetGeometry);
+
+    // Coloring
+    const auto &network = ctxt.config;
+    const auto &config = network.circuitConfig();
+    const auto astrocytePopulationName = population.target();
+    auto astrocytePopulation = config.getNodePopulation(astrocytePopulationName);
+    auto colorData = std::make_unique<CommonEdgeColorData>(std::move(astrocytePopulation));
+    auto colorHandler = std::make_unique<EndfeetColorHandler>(endfeet);
+    model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
 }
 } // namespace sonataloader

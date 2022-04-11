@@ -39,18 +39,25 @@ public:
     template<typename TImpl>
     void registerLoader()
     {
-        _loaders.pop_back(std::make_unique<TImpl>());
+        _loaders.push_back(std::make_unique<TImpl>());
     }
 
-    Super &getLoader(const std::string &name)
+    const T &getLoader(const std::string &name) const
     {
-        auto begin = _loaders.begin();
-        auto end = _loaders.end();
-        auto it = _nodes.find_if(begin, end, [&](std::unique_ptr<T> &loader) { return loader->getName() == name; });
+        const auto begin = _loaders.begin();
+        const auto end = _loaders.end();
+        auto it = std::find_if(
+            begin,
+            end,
+            [&](const std::unique_ptr<T> &loader)
+            {
+                const auto handledType = loader->getPopulationType();
+                return handledType == name;
+            });
 
-        if (it == _nodes.end())
+        if (it == end)
         {
-            throw std::invalid_argument("No population loader with name " + name);
+            throw std::invalid_argument("No population loader for type " + name);
         }
 
         return *(*it);

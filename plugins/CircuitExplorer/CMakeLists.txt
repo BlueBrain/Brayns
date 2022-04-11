@@ -32,8 +32,10 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     components/SomaCircuitComponent.cpp
     components/SynapseComponent.cpp
     components/VasculatureComponent.cpp
+    components/VasculatureRadiiReportComponent.cpp
     io/BBPLoader.cpp
     io/NeuronMorphologyLoader.cpp
+    io/SonataLoader.cpp
     io/SonataNGVLoader.cpp
     io/bbploader/CellLoader.cpp
     io/bbploader/GIDLoader.cpp
@@ -45,6 +47,38 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     io/bbploader/colordata/ColorDataExtractor.cpp
     io/bbploader/reports/CompartmentData.cpp
     io/bbploader/reports/SpikeData.cpp
+    io/sonataloader/EdgeLoader.cpp
+    io/sonataloader/LoaderTable.cpp
+    io/sonataloader/NodeLoader.cpp
+    io/sonataloader/ParameterCheck.cpp
+    io/sonataloader/Selector.cpp
+    io/sonataloader/colordata/ColorDataExtractor.cpp
+    io/sonataloader/colordata/edge/CommonEdgeColorData.cpp
+    io/sonataloader/colordata/node/AstrocyteColorData.cpp
+    io/sonataloader/colordata/node/BiophysicalColorData.cpp
+    io/sonataloader/colordata/node/PointNeuronColorData.cpp
+    io/sonataloader/colordata/node/VasculatureColorData.cpp
+    io/sonataloader/data/SonataCells.cpp
+    io/sonataloader/data/SonataConfig.cpp
+    io/sonataloader/data/SonataEndFeetReader.cpp
+    io/sonataloader/data/SonataSimulationMapping.cpp
+    io/sonataloader/data/SonataSynapses.cpp
+    io/sonataloader/data/SonataVasculature.cpp
+    io/sonataloader/populations/edges/ChemicalPopulationLoader.cpp
+    io/sonataloader/populations/edges/ElectricalSynapsePopulationLoader.cpp
+    io/sonataloader/populations/edges/EndFootPopulationLoader.cpp
+    io/sonataloader/populations/edges/GlialGlialPopulationLoader.cpp
+    io/sonataloader/populations/edges/SynapseAstrocytePopulationLoader.cpp
+    io/sonataloader/populations/edges/common/SynapseImporter.cpp
+    io/sonataloader/populations/nodes/AstrocytePopulationLoader.cpp
+    io/sonataloader/populations/nodes/BiophysicalPopulationLoader.cpp
+    io/sonataloader/populations/nodes/PointNeuronPopulationLoader.cpp
+    io/sonataloader/populations/nodes/VasculaturePopulationLoader.cpp
+    io/sonataloader/populations/nodes/common/MorphologyImporter.cpp
+    io/sonataloader/populations/nodes/common/NeuronReportFactory.cpp
+    io/sonataloader/populations/nodes/common/SomaImporter.cpp
+    io/sonataloader/reports/SonataReportData.cpp
+    io/sonataloader/reports/SonataSpikeData.cpp
     io/util/ProgressUpdater.cpp
     movie/MovieMaker.cpp
     network/entrypoints/ColorCircuitEntrypoint.cpp
@@ -89,10 +123,13 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     components/SomaCircuitComponent.h
     components/SynapseComponent.h
     components/VasculatureComponent.h
+    components/VasculatureRadiiReportComponent.h
     io/BBPLoader.h
     io/BBPLoaderParameters.h
     io/NeuronMorphologyLoader.h
     io/NeuronMorphologyLoaderParameters.h
+    io/SonataLoader.h
+    io/SonataLoaderParameters.h
     io/SonataNGVLoader.h
     io/SonataNGVLoaderParameters.h
     io/bbploader/CellLoader.h
@@ -107,6 +144,43 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     io/bbploader/reports/CompartmentData.h
     io/bbploader/reports/ReportType.h
     io/bbploader/reports/SpikeData.h
+    io/sonataloader/EdgeLoader.h
+    io/sonataloader/LoadContext.h
+    io/sonataloader/LoaderTable.h
+    io/sonataloader/NodeLoader.h
+    io/sonataloader/ParameterCheck.h
+    io/sonataloader/Selector.h
+    io/sonataloader/colordata/ColorDataExtractor.h
+    io/sonataloader/colordata/edge/CommonEdgeColorData.h
+    io/sonataloader/colordata/node/AstrocyteColorData.h
+    io/sonataloader/colordata/node/BiophysicalColorData.h
+    io/sonataloader/colordata/node/PointNeuronColorData.h
+    io/sonataloader/colordata/node/VasculatureColorData.h
+    io/sonataloader/data/SonataCells.h
+    io/sonataloader/data/SonataConfig.h
+    io/sonataloader/data/SonataEndFeetReader.h
+    io/sonataloader/data/SonataSimulationMapping.h
+    io/sonataloader/data/SonataSynapses.h
+    io/sonataloader/data/SonataVasculature.h
+    io/sonataloader/populations/EdgePopulationLoader.h
+    io/sonataloader/populations/NodePopulationLoader.h
+    io/sonataloader/populations/edges/ChemicalPopulationLoader.h
+    io/sonataloader/populations/edges/ElectricalSynapsePopulationLoader.h
+    io/sonataloader/populations/edges/EndFootPopulationLoader.h
+    io/sonataloader/populations/edges/GlialGlialPopulationLoader.h
+    io/sonataloader/populations/edges/SynapseAstrocytePopulationLoader.h
+    io/sonataloader/populations/edges/common/SynapseImporter.h
+    io/sonataloader/populations/nodes/AstrocytePopulationLoader.h
+    io/sonataloader/populations/nodes/BiophysicalPopulationLoader.h
+    io/sonataloader/populations/nodes/PointNeuronPopulationLoader.h
+    io/sonataloader/populations/nodes/VasculaturePopulationLoader.h
+    io/sonataloader/populations/nodes/common/ColorDataFactory.h
+    io/sonataloader/populations/nodes/common/MorphologyImporter.h
+    io/sonataloader/populations/nodes/common/NeuronReportFactory.h
+    io/sonataloader/populations/nodes/common/SomaImporter.h
+    io/sonataloader/reports/ReportType.h
+    io/sonataloader/reports/SonataReportData.h
+    io/sonataloader/reports/SonataSpikeData.h
     io/util/ProgressUpdater.h
     movie/MovieMaker.h
     network/adapters/ColoringInfoAdapter.h

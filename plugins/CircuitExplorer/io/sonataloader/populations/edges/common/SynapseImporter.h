@@ -18,22 +18,22 @@
 
 #pragma once
 
-#include <plugin/io/sonataloader/reports/NodeReportLoader.h>
+#include <brayns/common/MathTypes.h>
+
+#include <io/sonataloader/LoadContext.h>
 
 namespace sonataloader
 {
 /**
- * @brief The EdgeCompartmentLoader class implements the simulation loader
- * functionality for bloodflow reports. Even though NodeCompartmentLoader could
- * handle it (since its the same format), this class allows for an optimized
- * loading.
+ * @brief Builds and adds a synapse component into the loading model
  */
-class NodeVasculatureReportLoader : public NodeReportLoader
+struct SynapseImporter
 {
-public:
-    std::vector<NodeReportMapping> loadMapping(
-        const std::string &reportPath,
-        const std::string &population,
-        const bbp::sonata::Selection &) const final;
+    static void fromContext(EdgeLoadContext &ctxt);
+
+    static void fromData(
+        EdgeLoadContext &ctxt,
+        const std::vector<uint64_t> &nodeIds,
+        const std::vector<brayns::Vector3f> &positions);
 };
-} // namespace sonataloader
+}

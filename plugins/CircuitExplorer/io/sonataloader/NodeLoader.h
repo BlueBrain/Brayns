@@ -18,9 +18,7 @@
 
 #pragma once
 
-#include <io/simulation/SimulationMapping.h>
 #include <io/sonataloader/LoadContext.h>
-#include <io/util/ProgressUpdater.h>
 
 namespace sonataloader
 {
@@ -34,11 +32,7 @@ struct NodeLoader
      * cells
      *
      * @param ctxt
-     * @param cb
-     * @param model
-     * @return std::vector<CompartmentStructure>
      */
-    static std::vector<CellCompartments>
-        loadNodes(const NodeLoadContext &ctxt, ProgressUpdater &cb, brayns::Model &model);
+    static void loadNodes(NodeLoadContext &ctxt);
 };
 }

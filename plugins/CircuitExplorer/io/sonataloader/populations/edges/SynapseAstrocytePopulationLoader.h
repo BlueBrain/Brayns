@@ -18,22 +18,28 @@
 
 #pragma once
 
-#include <plugin/io/sonataloader/populations/EdgePopulationLoader.h>
+#include <io/sonataloader/populations/EdgePopulationLoader.h>
 
 namespace sonataloader
 {
 /**
- * @brief The ChemicalSynapsePopulation class implements the edge load
- * functionality to read 'synapse_astrocyte' edge population types
+ * @brief Implements the edge load functionality to read 'synapse_astrocyte' edge population types
  */
-class SynapseAstrocytePopulationLoader : public EdgePopulationLoader
+class SynapseAstrocytePopulationLoader final : public EdgePopulationLoader
 {
 public:
-    SynapseAstrocytePopulationLoader();
+    /**
+     * @brief Get the Population Type object
+     *
+     * @return std::string
+     */
+    std::string getPopulationType() const noexcept override;
 
-    std::vector<SynapseGroup::Ptr> load(
-        const SonataNetworkConfig &networkData,
-        const SonataEdgePopulationParameters &lc,
-        const bbp::sonata::Selection &nodeSelection) const final;
+    /**
+     * @brief
+     *
+     * @param ctxt
+     */
+    void load(EdgeLoadContext &ctxt) const override;
 };
 } // namespace sonataloader

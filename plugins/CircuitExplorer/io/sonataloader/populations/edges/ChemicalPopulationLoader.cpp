@@ -16,19 +16,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ChemicalPopulationLoader.h"
 
-#include <io/SonataLoaderParameters.h>
-#include <io/sonataloader/data/SonataConfig.h>
-
-#include <bbp/sonata/population.h>
+#include <io/sonataloader/populations/edges/common/SynapseImporter.h>
 
 namespace sonataloader
 {
-struct NodeSelector
+std::string ChemicalSynapsePopulationLoader::getPopulationType() const noexcept
 {
-    static bbp::sonata::Selection selectNodes(
-        const SonataNetworkConfig &network,
-        const SonataNodePopulationParameters &params);
-};
+    return "chemical";
+}
+
+void ChemicalSynapsePopulationLoader::load(EdgeLoadContext &ctxt) const
+{
+    SynapseImporter::fromContext(ctxt);
+}
 }

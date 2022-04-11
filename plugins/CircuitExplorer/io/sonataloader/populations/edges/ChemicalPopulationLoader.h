@@ -18,20 +18,28 @@
 
 #pragma once
 
-#include <plugin/io/sonataloader/populations/edges/CommonEdgeLoader.h>
+#include <io/sonataloader/populations/EdgePopulationLoader.h>
 
 namespace sonataloader
 {
 /**
- * @brief The ChemicalSynapsePopulationLoader class implements the edge load
- * functionality to read 'chemical' edge population types
+ * @brief Implements the edge load functionality to read 'chemical' edge population types
  */
-class ChemicalSynapsePopulationLoader : public CommonEdgeLoader
+class ChemicalSynapsePopulationLoader final : public EdgePopulationLoader
 {
 public:
-    ChemicalSynapsePopulationLoader()
-        : CommonEdgeLoader("chemical")
-    {
-    }
+    /**
+     * @brief Get the Population Type object
+     *
+     * @return std::string
+     */
+    std::string getPopulationType() const noexcept override;
+
+    /**
+     * @brief
+     *
+     * @param ctxt
+     */
+    void load(EdgeLoadContext &ctxt) const override;
 };
 } // namespace sonataloader

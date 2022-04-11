@@ -56,12 +56,12 @@ public:
     const std::vector<uint64_t> &getAstroctyeIds() const noexcept;
 
     /**
-     * @brief addSynapses
-     * @param endfootId
-     * @param endfootGeometry
+     * @brief Adds the given endfeet geometry (grouped by the astroctyte id to which they are connected to) to this
+     * component
+     *
+     * @param endfeetGeometry
      */
-    void addEndfeet(uint64_t endfootId,
-                    const std::vector<brayns::TriangleMesh> &endfeetGeometry);
+    void addEndfeet(std::map<uint64_t, std::vector<brayns::TriangleMesh>> &endfeetGeometry);
 
     /**
      * @brief setColor Sets all the endfeet to the same specified color
@@ -85,5 +85,5 @@ public:
 private:
     std::vector<uint64_t> _astrocyteIds;
     std::vector<Endfeet> _endFeet;
-    bool _colorsDirty {false};
+    bool _colorsDirty{false};
 };

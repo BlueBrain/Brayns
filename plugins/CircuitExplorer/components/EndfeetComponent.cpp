@@ -9,21 +9,20 @@
 size_t EndfeetComponent::getSizeInBytes() const noexcept
 {
     size_t endfeetSize = 0;
-    for(const auto &endfoot : _endFeet)
+    for (const auto &endfoot : _endFeet)
     {
         const auto &geometry = endfoot.geometry;
         endfeetSize += geometry.getSizeInBytes();
     }
 
-    return sizeof(EndfeetComponent)
-            + brayns::SizeHelper::vectorSize(_endFeet)
-            + brayns::SizeHelper::vectorSize(_astrocyteIds);
+    return sizeof(EndfeetComponent) + brayns::SizeHelper::vectorSize(_endFeet)
+        + brayns::SizeHelper::vectorSize(_astrocyteIds);
 }
 
 brayns::Bounds EndfeetComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds result;
-    for(const auto &endfoot : _endFeet)
+    for (const auto &endfoot : _endFeet)
     {
         const auto &geometry = endfoot.geometry;
         const auto endFootBounds = geometry.computeBounds(transform);
@@ -41,11 +40,12 @@ void EndfeetComponent::onStart()
 bool EndfeetComponent::commit()
 {
     bool needsCommit = _colorsDirty;
+    _colorsDirty = false;
 
     auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
-    if(material.commit())
+    if (material.commit())
     {
-        for(auto &endfoot : _endFeet)
+        for (auto &endfoot : _endFeet)
         {
             auto model = endfoot.model;
             brayns::GeometricModelHandler::setMaterial(model, material);
@@ -53,9 +53,9 @@ bool EndfeetComponent::commit()
         }
     }
 
-    if(needsCommit)
+    if (needsCommit)
     {
-        for(auto &endfoot : _endFeet)
+        for (auto &endfoot : _endFeet)
         {
             auto model = endfoot.model;
             brayns::GeometricModelHandler::commitModel(model);
@@ -68,7 +68,7 @@ bool EndfeetComponent::commit()
 void EndfeetComponent::onDestroyed()
 {
     auto &group = getModel();
-    for(auto &endfoot : _endFeet)
+    for (auto &endfoot : _endFeet)
     {
         auto &model = endfoot.model;
         brayns::GeometricModelHandler::removeFromGeometryGroup(model, group);
@@ -81,43 +81,41 @@ const std::vector<uint64_t> &EndfeetComponent::getAstroctyeIds() const noexcept
     return _astrocyteIds;
 }
 
-void EndfeetComponent::addEndfeet(uint64_t endfootId, const std::vector<brayns::TriangleMesh> &endfeetGeometry)
+void EndfeetComponent::addEndfeet(std::map<uint64_t, std::vector<brayns::TriangleMesh>> &endfeetGeometry)
 {
-    if(endfeetGeometry.empty())
+    _astrocyteIds.reserve(endfeetGeometry.size());
+    _endFeet.reserve(endfeetGeometry.size());
+
+    auto &group = getModel();
+    auto &material = brayns::ExtractModelObject::extractMaterial(group);
+
+    for (auto &[astrocyteId, endfeets] : endfeetGeometry)
     {
-        return;
-    }
+        _astrocyteIds.push_back(astrocyteId);
+        auto &endfoot = _endFeet.emplace_back();
+        auto &geometry = endfoot.geometry;
+        auto &model = endfoot.model;
 
-    _astrocyteIds.push_back(endfootId);
-    _endFeet.emplace_back();
-
-    auto &endfoot = _endFeet.back();
-    auto &geometry = endfoot.geometry;
-    auto &model = endfoot.model;
-
-    size_t startMergeIndex = 0;
-    if(geometry.getNumGeometries() == 0)
-    {
-        geometry.add(endfeetGeometry.front());
-        startMergeIndex = 1;
-    }
-
-    for(size_t i = startMergeIndex; i < endfeetGeometry.size(); ++i)
-    {
-        const auto &currentMesh = endfeetGeometry[i];
-        geometry.manipulate(0, [&](brayns::TriangleMesh& mesh)
+        brayns::TriangleMesh mergedMeshes;
+        for (auto &mesh : endfeets)
         {
-            brayns::TriangleMeshMerger::merge(currentMesh, mesh);
-        });
-    }
+            brayns::TriangleMeshMerger::merge(mesh, mergedMeshes);
+        }
 
-    model = brayns::GeometricModelHandler::create();
-    brayns::GeometricModelHandler::setGeometry(model, geometry);
+        geometry.add(std::move(mergedMeshes));
+        geometry.commit();
+
+        model = brayns::GeometricModelHandler::create();
+        brayns::GeometricModelHandler::addToGeometryGroup(model, group);
+        brayns::GeometricModelHandler::setGeometry(model, geometry);
+        brayns::GeometricModelHandler::setMaterial(model, material);
+        brayns::GeometricModelHandler::setColor(model, brayns::Vector4f(1.f));
+    }
 }
 
 void EndfeetComponent::setColor(const brayns::Vector4f &color) noexcept
 {
-    for(auto &endfoot : _endFeet)
+    for (auto &endfoot : _endFeet)
     {
         auto model = endfoot.model;
         brayns::GeometricModelHandler::setColor(model, color);
@@ -127,7 +125,7 @@ void EndfeetComponent::setColor(const brayns::Vector4f &color) noexcept
 
 void EndfeetComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
 {
-    for(size_t i = 0; i < _endFeet.size(); ++i)
+    for (size_t i = 0; i < _endFeet.size(); ++i)
     {
         const auto &color = colors[i];
         auto &endfoot = _endFeet[i];
@@ -143,21 +141,21 @@ void EndfeetComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &
     auto efIt = _endFeet.begin();
     auto colorsIt = colorMap.begin();
 
-    while(colorsIt != colorMap.end())
+    while (colorsIt != colorMap.end())
     {
         const auto targetId = colorsIt->first;
         const auto &targetColor = colorsIt->second;
 
-        while(idIt != _astrocyteIds.end())
+        while (idIt != _astrocyteIds.end())
         {
-            if(*idIt != targetId)
+            if (*idIt != targetId)
             {
                 ++idIt;
                 ++efIt;
             }
         }
 
-        if(idIt == _astrocyteIds.end())
+        if (idIt == _astrocyteIds.end())
         {
             break;
         }

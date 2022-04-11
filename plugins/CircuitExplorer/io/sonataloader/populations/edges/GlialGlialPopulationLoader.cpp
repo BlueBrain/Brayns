@@ -16,24 +16,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "GlialGlialPopulationLoader.h"
 
-#include <plugin/io/sonataloader/reports/EdgeReportLoader.h>
+#include <io/sonataloader/populations/edges/common/SynapseImporter.h>
 
 namespace sonataloader
 {
-/**
- * @brief The EdgeCompartmentLoader class implements the simulation loader
- * functionality for synapse reports. Even though NodeCompartmentLoader could
- * handle it (since its the same format), this class allows for an optimized
- * loading.
- */
-class EdgeCompartmentLoader : public EdgeReportLoader
+std::string GlialGlialPopulationLoader::getPopulationType() const noexcept
 {
-public:
-    std::vector<EdgeReportMapping> loadMapping(
-        const std::string &reportPath,
-        const std::string &population,
-        const bbp::sonata::Selection &) const final;
-};
-} // namespace sonataloader
+    return "glialglial";
+}
+
+void GlialGlialPopulationLoader::load(EdgeLoadContext &ctxt) const
+{
+    SynapseImporter::fromContext(ctxt);
+}
+}

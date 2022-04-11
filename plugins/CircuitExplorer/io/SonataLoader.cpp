@@ -20,45 +20,33 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/common/Timer.h>
-#include <brayns/engine/Scene.h>
-#include <brayns/utils/StringUtils.h>
 
+#include <io/sonataloader/EdgeLoader.h>
 #include <io/sonataloader/LoadContext.h>
-#include <io/sonataloader/NodeSelector.h>
+#include <io/sonataloader/NodeLoader.h>
 #include <io/sonataloader/ParameterCheck.h>
-#include <io/sonataloader/colorhandlers/PopulationColorManager.h>
-#include <io/sonataloader/populations/PopulationLoadManager.h>
-#include <io/sonataloader/reports/PopulationReportManager.h>
-
-using namespace sonataloader;
+#include <io/sonataloader/Selector.h>
+#include <io/util/ProgressUpdater.h>
 
 namespace
 {
-float computeProgressChunk(const SonataLoaderParameters &loadParameters) noexcept
+struct LoadStageCountComputer
 {
-    // Compute how much progress percentage each population load will consume
-    const auto &populations = loadParameters.node_population_settings;
-    const auto numNodePopulations = populations.size();
-
-    size_t numEdgePopulations = 0u;
-    for (const auto &popLoadConfig : populations)
+    static size_t compute(const SonataLoaderParameters &params)
     {
-        const auto &edgePopulations = popLoadConfig.edge_populations;
-        numEdgePopulations += edgePopulations.size();
+        size_t count = 0;
+        const auto &nodes = params.node_population_settings;
+        for (const auto &node : nodes)
+        {
+            count += 1;
+
+            const auto &edges = node.edge_populations;
+            count += edges.size();
+        }
+        return count;
     }
-    // Each population (wether nodes or edges) have 3 step: geometry, simulation, model creation
-    const float chunk = (1.f / static_cast<float>(numNodePopulations * 3 + numEdgePopulations * 3));
-
-    return chunk;
+};
 }
-
-void informProgress(const brayns::LoaderProgress &cb, const std::string &msg, float &total, const float chunk)
-{
-    cb.updateProgress(msg, total);
-    total += chunk;
-    total = std::max(total, 1.f);
-}
-} // namespace
 
 std::vector<std::string> SonataLoader::getSupportedExtensions() const
 {
@@ -92,118 +80,57 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
     // Load config files
     const auto &circuitConfigPath = path;
     const auto &simulationConfigPath = input.simulation_config_path;
-    const auto network = SonataConfig::readNetwork(circuitConfigPath, simulationConfigPath);
+    const auto network = sonataloader::SonataConfig::readNetwork(circuitConfigPath, simulationConfigPath);
     const auto &circuitConfig = network.circuitConfig();
 
-    // Check input parameters and data available on disk
-    ParameterCheck::checkInput(network, input);
+    sonataloader::ParameterCheck::checkInput(network, input);
 
-    // Compute progress chunk per population load item
-    const float chunk = computeProgressChunk(input);
-    float total = 0.f;
+    const auto stages = LoadStageCountComputer::compute(input);
+    ProgressUpdater progress(callback, stages);
 
     std::vector<std::unique_ptr<brayns::Model>> result;
-    for (const auto &nodeSettings : input.node_population_settings)
-    {
-        const auto &nodeName = nodeSettings.node_population;
-        const auto nodePopulation = circuitConfig.getNodePopulation(nodeName);
-        const auto nodeSelection = NodeSelector::selectNodes(network, nodeSettings);
 
-        const NodeLoadContext nodeContext{network, nodeSettings, nodePopulation, nodeSelection};
+    const auto &inputNodes = input.node_population_settings;
+    for (const auto &nodeParams : inputNodes)
+    {
+        result.push_back(std::make_unique<brayns::Model>());
+        auto &nodeModel = *(result.back());
+
+        const auto &nodeName = nodeParams.node_population;
+        const auto nodes = circuitConfig.getNodePopulation(nodeName);
+        const auto nodeSelection = sonataloader::NodeSelector::select(network, nodeParams);
+        sonataloader::NodeLoadContext ctxt{network, nodeParams, nodes, nodeSelection, nodeModel, progress};
 
         brayns::Log::info("[CE] Loading {} node population.", nodeName);
+        progress.beginStage(2);
 
-        // Select nodes that are going to be loaded
+        sonataloader::NodeLoader::loadNodes(ctxt);
 
-        // Load node data
-        const auto nodeIDs = nodeSelection.flatten();
-        informProgress(callback, "Loading " + nodeName, total, chunk);
-        auto nodes = PopulationLoaderManager::loadNodes(network, nodeSettings, nodeSelection);
-        if (nodes.empty())
-        {
-            brayns::Log::warn("Skipping node population {}, no nodes were loaded", nodeName);
-            continue;
-        }
-
-        // Load node report mapping, if any
-        informProgress(callback, nodeName + ": Loading simulation", total, chunk);
-        PopulationReportManager::loadNodeMapping(network, nodeSettings, nodeSelection, nodes);
+        progress.endStage();
 
         // Load edges for this node population
-        std::vector<brayns::ModelDescriptor *> edgeModels;
-        for (const auto &edge : nodeSettings.edge_populations)
+        const auto &inputEdges = nodeParams.edge_populations;
+        for (const auto &edgeParams : inputEdges)
         {
-            const auto &edgeName = edge.edge_population;
+            result.push_back(std::make_unique<brayns::Model>());
+            auto &edgeModel = *(result.back());
+
+            const auto &edgeName = edgeParams.edge_population;
+            const auto edges = circuitConfig.getEdgePopulation(edgeName);
+            const auto edgeSelection = sonataloader::EdgeSelector::select(network, edgeParams, nodeSelection);
+            sonataloader::EdgeLoadContext
+                edgeCtxt{network, edgeParams, nodes, edges, nodeSelection, edgeSelection, edgeModel, progress};
+
             brayns::Log::info("[CE] \tLoading {} edge population.", edgeName);
+            progress.beginStage(2);
 
-            informProgress(callback, "Loading " + edgeName, total, chunk);
-            // Load edge data
-            auto edges = PopulationLoaderManager::loadEdges(network, edge, nodeSelection);
-            if (edges.empty())
-                continue;
+            sonataloader::EdgeLoader::loadEdges(edgeCtxt);
 
-            // Map edge geometry to node geometry
-            PopulationLoaderManager::mapEdgesToNodes(nodes, edges);
-
-            // Load edge report mapping, if any
-            informProgress(callback, edgeName + ": Loading simulation", total, chunk);
-            PopulationReportManager::loadEdgeMapping(network, edge, nodeSelection, edges);
-
-            // Add geometry to the edge model
-            informProgress(callback, edgeName + ": Generating edge geometry", total, chunk);
-            brayns::ModelPtr edgeModel = scene.createModel();
-            std::vector<ElementMaterialMap::Ptr> edgeMaterialMaps(nodes.size());
-            for (size_t j = 0; j < nodes.size(); ++j)
-            {
-                edgeMaterialMaps[j] = edges[j]->addToModel(*edgeModel);
-                edges[j].reset(nullptr);
-            }
-
-            result.push_back(createModelDescriptor(edgeName, path, edgeModel));
-
-            // Create simulation handler, if any
-            PopulationReportManager::addEdgeReportHandler(network, edge, nodeSelection, result.back());
-            // Add to the synapse model list to set the node simulation handler
-            // if this edge model does not have one
-            edgeModels.push_back(result.back().get());
-
-            // Create the color handler
-            auto edgeColor = PopulationColorManager::createEdgeColorHandler(network, edge);
-            _colorManager.registerHandler(result.back(), std::move(edgeColor), nodeIDs, std::move(edgeMaterialMaps));
-
-            brayns::Log::info("[CE] \tLoaded edge population {}.", edgeName);
+            progress.endStage();
         }
-
-        informProgress(callback, nodeName + ": Generating node geometry", total, chunk);
-
-        // Add geometry to the node model
-        brayns::ModelPtr nodeModel = scene.createModel();
-        std::vector<ElementMaterialMap::Ptr> materialMaps(nodes.size());
-        for (size_t i = 0; i < nodes.size(); ++i)
-        {
-            materialMaps[i] = nodes[i]->addToModel(*nodeModel);
-            nodes[i].reset(nullptr);
-        }
-
-        // Create the model descriptor
-        result.push_back(createModelDescriptor(nodeName, path, nodeModel));
-
-        // Create simulation handler
-        PopulationReportManager::addNodeReportHandler(network, nodeSettings, nodeSelection, result.back());
-        // Update all the edge populations that does not have a simulation of
-        // their own
-        PopulationReportManager::addNodeHandlerToEdges(result.back(), edgeModels);
-
-        // Create the color handler
-        auto nodeColor = PopulationColorManager::createNodeColorHandler(network, nodeSettings);
-        _colorManager.registerHandler(result.back(), std::move(nodeColor), nodeIDs, std::move(materialMaps));
-
-        brayns::Log::info("[CE] Loaded node population {}.", nodeName);
     }
 
-    TransferFunctionUtils::set(scene.getTransferFunction());
-
-    const auto time = timer.elapsed();
+    const auto time = timer.seconds();
     brayns::Log::info("[CE] {}: done in {} second(s).", getName(), time);
 
     return result;

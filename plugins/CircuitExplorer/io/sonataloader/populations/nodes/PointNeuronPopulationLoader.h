@@ -42,6 +42,6 @@ public:
      * @param cb
      * @param model
      */
-    void load(const NodeLoadContext &ctxt, ProgressUpdater &cb, brayns::Model &model) const override;
+    void load(NodeLoadContext &ctxt) const override;
 };
 } // namespace sonataloader

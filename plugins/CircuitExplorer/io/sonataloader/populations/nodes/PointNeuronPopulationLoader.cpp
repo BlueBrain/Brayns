@@ -18,36 +18,20 @@
 
 #include "PointNeuronPopulationLoader.h"
 
-#include <io/circuit/SomaCircuitLoader.h>
 #include <io/sonataloader/colordata/node/PointNeuronColorData.h>
-#include <io/sonataloader/data/SonataCells.h>
 #include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
 #include <io/sonataloader/populations/nodes/common/SomaImporter.h>
 
 namespace sonataloader
 {
-std::string NodePopulationLoader::getPopulationType() const noexcept
+std::string PointNeuronPopulationLoader::getPopulationType() const noexcept
 {
     return "point_neuron";
 }
 
-std::vector<CellCompartments>
-    PointNeuronPopulationLoader::load(const NodeLoadContext &ctxt, ProgressUpdater &cb, brayns::Model &model) const
+void PointNeuronPopulationLoader::load(NodeLoadContext &ctxt) const
 {
     auto colorData = NodeColorDataFactory::create<PointNeuronColorData>(ctxt);
-
-    const auto &population = ctxt.population;
-    const auto &selection = ctxt.selection;
-    const auto flatSelection = selection.flatten();
-
-    const auto positions = SonataCells::getPositions(population, selection);
-
-    const auto &params = ctxt.params;
-    const auto &neuronParams = params.neuron_morphology_parameters;
-    const auto radius = neuronParams.radius_multiplier;
-
-    SomaCircuitLoader::Context context(flatSelection, positions, radius);
-
-    return SomaCircuitLoader::load(context, model, std::move(colorData));
+    SomaImporter::import(ctxt, std::move(colorData));
 }
 } // namespace sonataloader

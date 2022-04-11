@@ -121,7 +121,6 @@ namespace sonataloader
 std::vector<std::string> CellNodeColorMethods::get(const bbp::sonata::NodePopulation &population)
 {
     const auto possibleMethods = AttributeMethodMapping::generate();
-    const auto &attributes = population.attributeNames();
 
     std::vector<std::string> result;
     result.reserve(possibleMethods.size());

@@ -20,101 +20,105 @@
 
 #include <bbp/sonata/node_sets.h>
 
-#include <plugin/io/sonataloader/data/SonataCells.h>
-#include <plugin/io/sonataloader/data/SonataConfig.h>
+#include <io/sonataloader/data/SonataCells.h>
+#include <io/sonataloader/data/SonataConfig.h>
 
 #include <filesystem>
 #include <unordered_set>
 
-namespace sonataloader
-{
 namespace
 {
-void checkNodePopulation(
-    const SonataNetworkConfig &network,
-    const SonataNodePopulationParameters &population,
-    const std::string &populationType)
-{
-    const auto percentage = population.node_percentage;
-    if (percentage <= 0.f || percentage > 1.f)
-    {
-        throw std::invalid_argument("node_percentage must be > 0.0 and <= 1.0");
-    }
+namespace sl = sonataloader;
 
+struct PopulationTypeExtractor
+{
+    static std::string extract(const sl::SonataNetworkConfig &network, const SonataNodePopulationParameters &params)
+    {
+        const auto &config = network.circuitConfig();
+        const auto &populationName = params.node_population;
+        const auto populationProperties = config.getNodePopulationProperties(populationName);
+        return populationProperties.type;
+    }
+};
+
+void checkNodePopulation(const sl::SonataNetworkConfig &network, const SonataNodePopulationParameters &params)
+{
     const auto &config = network.circuitConfig();
-    const auto &nodeSets = population.node_sets;
+    const auto populationType = PopulationTypeExtractor::extract(network, params);
+    const auto &nodeSets = params.node_sets;
+    const auto &population = params.node_population;
 
     if (!nodeSets.empty())
     {
         const auto &nsPath = config.getNodeSetsPath();
         if (!std::filesystem::exists(nsPath))
         {
-            throw std::invalid_argument("Cannot find nodesets file (path='" + nsPath + "')");
+            throw std::invalid_argument("Cannot find nodesets file for node population " + population);
         }
     }
 
-    const auto reportType = population.report_type;
-    const auto reportTypeStr = brayns::enumToString<ReportType>(reportType);
-    const auto &reportName = population.report_name;
-    if (reportType != ReportType::NONE)
+    const auto reportType = params.report_type;
+    const auto &reportName = params.report_name;
+
+    if (reportType != sl::ReportType::NONE)
     {
         const auto &simConfig = network.simulationConfig();
         std::string reportPath;
 
         switch (reportType)
         {
-        case ReportType::BLOODFLOW_PRESSURE:
-        case ReportType::BLOODFLOW_RADII:
-        case ReportType::BLOODFLOW_SPEED:
+        case sl::ReportType::BLOODFLOW_PRESSURE:
+        case sl::ReportType::BLOODFLOW_RADII:
+        case sl::ReportType::BLOODFLOW_SPEED:
         {
             if (populationType != "vasculature")
             {
-                throw std::invalid_argument("Report type '" + reportTypeStr + "' is allowed only for vasculature");
+                throw std::invalid_argument("Invalid report type for node population " + population);
             }
-            reportPath = SonataConfig::resolveReportPath(simConfig, reportName);
+            reportPath = sl::SonataConfig::resolveReportPath(simConfig, reportName);
             break;
         }
-        case ReportType::COMPARTMENT:
-        case ReportType::SUMMATION:
+        case sl::ReportType::COMPARTMENT:
+        case sl::ReportType::SUMMATION:
         {
             if (populationType == "vasculature")
             {
-                throw std::invalid_argument("Report type '" + reportTypeStr + "' is not allowed for vasculature");
+                throw std::invalid_argument("Invalid report type for node population " + population);
             }
-            reportPath = SonataConfig::resolveReportPath(simConfig, reportName);
+            reportPath = sl::SonataConfig::resolveReportPath(simConfig, reportName);
             break;
         }
-        case ReportType::SPIKES:
+        case sl::ReportType::SPIKES:
         {
             if (populationType == "vasculature")
             {
-                throw std::invalid_argument("Report type '" + reportTypeStr + "' is not allowed for vasculature");
+                throw std::invalid_argument("Invalid report type for node population " + population);
             }
-            reportPath = SonataConfig::resolveSpikesPath(simConfig);
+            reportPath = sl::SonataConfig::resolveSpikesPath(simConfig);
             break;
         }
-        case ReportType::SYNAPSE:
-            throw std::invalid_argument("'synapse' reports are not allowed on node populations");
+        case sl::ReportType::SYNAPSE:
+        {
+            throw std::invalid_argument("Invalid report type for node population " + population);
             break;
+        }
         default:
             break;
         }
 
         if (!std::filesystem::exists(reportPath))
         {
-            throw std::invalid_argument("Cannot find report file for report '" + reportTypeStr + "'");
+            throw std::invalid_argument("Cannot find report file for node population " + population);
         }
     }
 }
 
-void checkEdges(
-    const SonataNetworkConfig &network,
-    const SonataNodePopulationParameters &population,
-    const std::string &populationType)
+void checkEdges(const sl::SonataNetworkConfig &network, const SonataNodePopulationParameters &params)
 {
     const auto &config = network.circuitConfig();
     const auto allEdges = config.listEdgePopulations();
-    for (const auto &edge : population.edge_populations)
+    const auto &nodePopulation = params.node_population;
+    for (const auto &edge : params.edge_populations)
     {
         const auto &name = edge.edge_population;
         if (allEdges.find(name) == allEdges.end())
@@ -122,38 +126,34 @@ void checkEdges(
             throw std::invalid_argument("Edge population " + name + " does not exist");
         }
 
-        if (edge.edge_percentage <= 0.f || edge.edge_percentage > 1.f)
-        {
-            throw std::invalid_argument("edge_percentage must be > 0.0 and <= 1.0");
-        }
-
+        const auto loadAfferent = edge.load_afferent;
         const auto edgePopulation = config.getEdgePopulation(name);
-        if (edge.load_afferent && edgePopulation.target() != population.node_population)
+
+        if (loadAfferent && edgePopulation.target() != nodePopulation)
         {
             throw std::invalid_argument(
-                "Edge population " + name + " requested in afferent mode but node population "
-                + population.node_population + " is not its target");
+                "Edge population " + name + " requested in afferent mode but node population " + nodePopulation
+                + " is not its target");
         }
-        else if (!edge.load_afferent && edgePopulation.source() != population.node_population)
+        else if (!loadAfferent && edgePopulation.source() != nodePopulation)
         {
             throw std::invalid_argument(
-                "Edge population " + name + " requested in efferent mode but node population "
-                + population.node_population + " is not its source");
+                "Edge population " + name + " requested in efferent mode but node population " + nodePopulation
+                + " is not its source");
         }
 
         const auto edgeProperties = config.getEdgePopulationProperties(name);
-        if (edgeProperties.type == "synapse_astrocyte" && populationType == "biophysical")
+        if (edgeProperties.type == "synapse_astrocyte" && loadAfferent)
         {
-            throw std::invalid_argument(
-                "synapse_astrocyte edge populations are not allowed for biophysical node populations");
+            throw std::invalid_argument("synapse_astrocyte edge populations are not allowed in afferent mode");
         }
 
         const auto &reportName = edge.edge_report_name;
         if (!reportName.empty())
         {
             const auto &simConfig = network.simulationConfig();
-            const auto reportPath = SonataConfig::resolveReportPath(simConfig, reportName);
-            if (std::filesystem::exists(reportPath))
+            const auto reportPath = sl::SonataConfig::resolveReportPath(simConfig, reportName);
+            if (!std::filesystem::exists(reportPath))
             {
                 throw std::invalid_argument("Requested report for edge population " + name + " not found");
             }
@@ -161,75 +161,54 @@ void checkEdges(
     }
 }
 
-void checkNeuronMorphology(const SonataNodePopulationParameters &population, const std::string &populationType)
+void checkNeuronMorphology(const sl::SonataNetworkConfig &network, const SonataNodePopulationParameters &params)
 {
+    const auto populationType = PopulationTypeExtractor::extract(network, params);
+
     if (populationType == "vasculature")
     {
         return;
     }
 
-    const auto &neuronParameters = population.neuron_morphology_parameters;
+    const auto &neuronParameters = params.neuron_morphology_parameters;
     if (populationType == "biophysical" || populationType == "astrocyte")
     {
-        if (!neuronParameters.load_soma && !neuronParameters.load_axon && !neuronParameters.load_dendrites)
+        const auto soma = neuronParameters.load_soma;
+        const auto axon = neuronParameters.load_axon;
+        const auto dend = neuronParameters.load_dendrites;
+        if (!soma && !axon && !dend)
         {
-            throw std::invalid_argument(
-                "At least one neuron section must be requested to load 'biophysial' or 'astrocyte' population types");
+            const auto &populationName = params.node_population;
+            throw std::invalid_argument("Must enable at least one neuron morphology section for " + populationName);
         }
-    }
-
-    if (neuronParameters.radius_override < 0.f)
-    {
-        throw std::invalid_argument("'radius_override' must be >= 0.0");
-    }
-    else if (neuronParameters.radius_override == 0.f && neuronParameters.radius_multiplier <= 0.f)
-    {
-        throw std::invalid_argument("'radius_multiplier' must be > 0.0");
-    }
-}
-
-void checkVasculature(const SonataNodePopulationParameters &population, const std::string &populationType)
-{
-    if (populationType != "vasculature")
-    {
-        return;
-    }
-
-    const auto &vascParameters = population.vasculature_geometry_parameters;
-
-    if (vascParameters.radius_override < 0.f)
-    {
-        throw std::invalid_argument("'radius_override' must be >= 0.0");
-    }
-    else if (vascParameters.radius_override == 0.f && vascParameters.radius_multiplier <= 0.f)
-    {
-        throw std::invalid_argument("'radius_multiplier' must be > 0.0");
     }
 }
 } // namespace
 
+namespace sonataloader
+{
 void ParameterCheck::checkInput(const SonataNetworkConfig &network, const SonataLoaderParameters &input)
 {
-    if (input.node_population_settings.empty())
+    const auto &populations = input.node_population_settings;
+    if (populations.empty())
     {
         throw std::invalid_argument("Input load parameters are empty");
     }
 
     const auto &config = network.circuitConfig();
 
-    for (const auto &population : input.node_population_settings)
+    for (const auto &population : populations)
     {
         const auto &name = population.node_population;
         const auto allNodes = config.listNodePopulations();
         if (allNodes.find(name) == allNodes.end())
+        {
             throw std::invalid_argument("Node population " + name + " does not exist");
+        }
 
-        const auto type = config.getNodePopulationProperties(name).type;
-
-        checkNodePopulation(network, population, type);
-        checkEdges(network, population, type);
-        checkNeuronMorphology(population, type);
-        checkVasculature(population, type);
+        checkNodePopulation(network, population);
+        checkEdges(network, population);
+        checkNeuronMorphology(network, population);
     }
 }
 } // namespace sonataloader

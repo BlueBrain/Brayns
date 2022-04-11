@@ -35,6 +35,11 @@ std::optional<bbp::sonata::SimulationConfig> getSimulationConfig(
     const std::string &circuitConfigDirPath,
     const std::string &simulationConfigPath)
 {
+    if (simulationConfigPath.empty())
+    {
+        return std::nullopt;
+    }
+
     std::filesystem::path simConfigPath(simulationConfigPath);
     std::filesystem::path configDirPath(circuitConfigDirPath);
 

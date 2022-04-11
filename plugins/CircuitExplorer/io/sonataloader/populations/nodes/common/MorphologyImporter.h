@@ -16,27 +16,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NodeSpikeLoader.h"
+#pragma once
 
-// libsonata uses nonstd::optional which, if available, becomes std::optional
-// however, libsonata is compiled enforcing c++14, so their type is always nonstd::optional
-// then, symbol lookup errors happen
-#define optional_CONFIG_SELECT_OPTIONAL optional_OPTIONAL_NONSTD
-#include <bbp/sonata/report_reader.h>
+#include <brayns/common/MathTypes.h>
+
+#include <api/coloring/IColorData.h>
+#include <api/reports/ReportMapping.h>
+#include <io/sonataloader/LoadContext.h>
 
 namespace sonataloader
 {
-std::vector<NodeReportMapping> NodeSpikeLoader::loadMapping(
-    const std::string &reportPath,
-    const std::string &population,
-    const bbp::sonata::Selection &s) const
+struct MorphologyImporter
 {
-    (void)reportPath;
-    (void)population;
-
-    std::vector<NodeReportMapping> mapping(s.flatSize());
-    for (size_t i = 0; i < mapping.size(); ++i)
-        mapping[i].globalOffset = i;
-    return mapping;
+    static void import(
+        NodeLoadContext &ctxt,
+        const std::vector<brayns::Quaternion> &rotations,
+        std::unique_ptr<IColorData> colorData);
+};
 }
-} // namespace sonataloader

@@ -18,61 +18,24 @@
 
 #include "SynapseAstrocytePopulationLoader.h"
 
-#include <plugin/io/sonataloader/data/SonataSelection.h>
-#include <plugin/io/sonataloader/data/SonataSynapses.h>
-#include <plugin/io/synapse/groups/SynapseAstrocyteGroup.h>
+#include <io/sonataloader/data/SonataSynapses.h>
+#include <io/sonataloader/populations/edges/common/SynapseImporter.h>
 
 namespace sonataloader
 {
-SynapseAstrocytePopulationLoader::SynapseAstrocytePopulationLoader()
-    : EdgePopulationLoader("synapse_astrocyte")
+std::string SynapseAstrocytePopulationLoader::getPopulationType() const noexcept
 {
+    return "synapse_astrocyte";
 }
 
-std::vector<SynapseGroup::Ptr> SynapseAstrocytePopulationLoader::load(
-    const SonataNetworkConfig &network,
-    const SonataEdgePopulationParameters &lc,
-    const bbp::sonata::Selection &nodeSelection) const
+void SynapseAstrocytePopulationLoader::load(EdgeLoadContext &ctxt) const
 {
-    if (lc.load_afferent)
-        throw std::runtime_error(
-            "synapse_astrocyte population should have been splitted at "
-            "loading. "
-            "This should not have happened");
+    const auto &edgePopulation = ctxt.edgePopulation;
+    const auto &edgeSelection = ctxt.edgeSelection;
 
-    const auto baseNodeList = nodeSelection.flatten();
-    const auto &populationName = lc.edge_population;
-    const auto percentage = lc.edge_percentage;
-    const auto &config = network.circuitConfig();
-    const auto population = config.getEdgePopulation(populationName);
-    // Fill it by mapping node ID to synapse list in case there is a node Id
-    // without synapses, so we can still place an empty vector at the end
-    std::map<uint64_t, std::unique_ptr<SynapseGroup>> mapping;
-    for (const auto nodeId : baseNodeList)
-        mapping[nodeId] = std::make_unique<SynapseAstrocyteGroup>();
+    const auto srcNodes = SonataSynapses::getSourceNodes(edgePopulation, edgeSelection);
+    const auto centerPositions = SonataSynapses::getEfferentAstrocyteCenterPos(edgePopulation, edgeSelection);
 
-    const auto edgeSelection = EdgeSelection(population.efferentEdges(baseNodeList)).intersection(percentage);
-    const auto edgeIds = edgeSelection.flatten();
-    const auto srcNodes = SonataSynapses::getSourceNodes(population, edgeSelection);
-    const auto sectionIds = SonataSynapses::getEfferentAstrocyteSectionIds(population, edgeSelection);
-    const auto distances = SonataSynapses::getEfferentAstrocyteSectionDistances(population, edgeSelection);
-
-    // Group data by node id
-    for (size_t i = 0; i < srcNodes.size(); ++i)
-    {
-        auto &buffer = static_cast<SynapseAstrocyteGroup &>(*mapping[srcNodes[i]].get());
-        buffer.addSynapse(edgeIds[i], sectionIds[i], distances[i]);
-    }
-
-    // Flatten
-    std::vector<std::unique_ptr<SynapseGroup>> synapses(baseNodeList.size());
-    for (size_t i = 0; i < baseNodeList.size(); ++i)
-    {
-        auto it = mapping.find(baseNodeList[i]);
-        if (it != mapping.end())
-            synapses[i] = std::move(it->second);
-    }
-
-    return synapses;
+    SynapseImporter::fromData(ctxt, srcNodes, centerPositions);
 }
 } // namespace sonataloader

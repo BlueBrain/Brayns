@@ -8,10 +8,8 @@
 
 size_t SomaCircuitComponent::getSizeInBytes() const noexcept
 {
-    return sizeof (SomaCircuitComponent)
-            + _geometry.getSizeInBytes()
-            + brayns::SizeHelper::vectorSize(_ids)
-            + brayns::SizeHelper::vectorSize(_colors);
+    return sizeof(SomaCircuitComponent) + _geometry.getSizeInBytes() + brayns::SizeHelper::vectorSize(_ids)
+        + brayns::SizeHelper::vectorSize(_colors);
 }
 
 brayns::Bounds SomaCircuitComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
@@ -31,14 +29,8 @@ bool SomaCircuitComponent::commit()
 {
     bool needsCommit = false;
 
-    if(_geometry.commit())
-    {
-        brayns::GeometricModelHandler::setGeometry(_model, _geometry);
-        needsCommit = true;
-    }
-
     auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
-    if(material.commit())
+    if (material.commit())
     {
         brayns::GeometricModelHandler::setMaterial(_model, material);
         needsCommit = true;
@@ -47,7 +39,7 @@ bool SomaCircuitComponent::commit()
     needsCommit = needsCommit || _colorsDirty;
     _colorsDirty = false;
 
-    if(needsCommit)
+    if (needsCommit)
     {
         brayns::GeometricModelHandler::commitModel(_model);
     }
@@ -65,6 +57,8 @@ void SomaCircuitComponent::setSomas(std::vector<uint64_t> ids, std::vector<brayn
 {
     _ids = std::move(ids);
     _geometry.set(std::move(geometry));
+    _geometry.commit();
+    brayns::GeometricModelHandler::setGeometry(_model, _geometry);
     _colors.resize(_ids.size());
     setColor(brayns::Vector4f(1.f));
 }
@@ -84,7 +78,7 @@ void SomaCircuitComponent::setColor(const brayns::Vector4f &color) noexcept
 
 void SomaCircuitComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
 {
-    if(colors.size() < _geometry.getNumGeometries())
+    if (colors.size() < _geometry.getNumGeometries())
     {
         throw std::invalid_argument("Not enough colors for all geometry");
     }
@@ -102,21 +96,21 @@ void SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4
     auto bufferIt = _colors.begin();
     auto colorsIt = colors.begin();
 
-    while(colorsIt != colors.end())
+    while (colorsIt != colors.end())
     {
         const auto targetId = colorsIt->first;
         const auto &targetColor = colorsIt->second;
 
-        while(idIt != _ids.end())
+        while (idIt != _ids.end())
         {
-            if(*idIt != targetId)
+            if (*idIt != targetId)
             {
                 ++idIt;
                 ++bufferIt;
             }
         }
 
-        if(idIt == _ids.end())
+        if (idIt == _ids.end())
         {
             break;
         }
@@ -127,7 +121,7 @@ void SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4
         ++colorsIt;
     }
 
-    if(_colorsDirty)
+    if (_colorsDirty)
     {
         auto colorBuffer = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
         brayns::GeometricModelHandler::setColors(_model, colorBuffer);
@@ -136,7 +130,7 @@ void SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4
 
 void SomaCircuitComponent::setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping)
 {
-    if(color.size > 256)
+    if (color.size > 256)
     {
         throw std::invalid_argument("Color map has more than 256 values");
     }

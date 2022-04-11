@@ -18,20 +18,28 @@
 
 #pragma once
 
-#include <plugin/io/sonataloader/populations/edges/CommonEdgeLoader.h>
+#include <io/sonataloader/populations/EdgePopulationLoader.h>
 
 namespace sonataloader
 {
 /**
- * @brief The GlialGlialPopulationLoader class implements the edge load
- * functionality to read 'glialglial' edge population types
+ * @brief Implements the edge load functionality to read 'glialglial' edge population types
  */
-class GlialGlialPopulationLoader : public CommonEdgeLoader
+class GlialGlialPopulationLoader final : public EdgePopulationLoader
 {
 public:
-    GlialGlialPopulationLoader()
-        : CommonEdgeLoader("glialglial")
-    {
-    }
+    /**
+     * @brief Get the Population Type object
+     *
+     * @return std::string
+     */
+    std::string getPopulationType() const noexcept override;
+
+    /**
+     * @brief
+     *
+     * @param ctxt
+     */
+    void load(EdgeLoadContext &ctxt) const override;
 };
 } // namespace sonataloader
