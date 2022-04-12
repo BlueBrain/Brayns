@@ -32,7 +32,7 @@
 #include <io/SonataNGVLoader.h>
 #include <network/entrypoints/ColorCircuitEntrypoint.h>
 #include <network/entrypoints/MakeMovieEntrypoint.h>
-//#include <plugin/network/entrypoints/SetCircuitThicknessEntrypoint.h>
+#include <network/entrypoints/SetCircuitThicknessEntrypoint.h>
 #include <network/entrypoints/TraceAnterogradeEntrypoint.h>
 
 void CircuitExplorerPlugin::init()
@@ -59,7 +59,7 @@ void CircuitExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &inter
     builder.add<ColorCircuitByMethodEntrypoint>(modelManager);
     builder.add<ColorCircuitBySingleColorEntrypoint>(modelManager);
     builder.add<MakeMovieEntrypoint>();
-    // builder.add<SetCircuitThicknessEntrypoint>(modelManager);
+    builder.add<SetCircuitThicknessEntrypoint>(scene);
     builder.add<TraceAnterogradeEntrypoint>(modelManager);
 }
 

@@ -1,9 +1,9 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
- * This file is part of the circuit explorer for Brayns
- * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,107 +20,70 @@
  */
 
 #include "DTILoader.h"
-#include "Utils.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+
+#include "dtiloader/DTIConfiguration.h"
+#include "dtiloader/GIDRowReader.h"
 
 #include <fstream>
 
 namespace
 {
-/** Name */
-const std::string LOADER_NAME = "DTI loader";
-
-/** Supported extensions */
-const std::string SUPPORTED_EXTENTION_DTI = "dti";
-
-struct GidRow
+struct NormalColorGenerator
 {
-    uint64_t gid;
-    uint64_t row;
+    static std::vector<brayns::Vector4f> generate(const std::vector<brayns::Vector3f> &points)
+    {
+        std::vector<brayns::Vector4f> colors(points.size());
+
+        colors[0] = brayns::Vector4f(0.f, 0.f, 0.f, 1.f);
+
+        for (uint64_t i = 1; i < points.size(); ++i)
+        {
+            const auto &p1 = points[i - 1];
+            const auto &p2 = points[i];
+            const auto dir = glm::normalize(p2 - p1);
+            const auto n = brayns::Vector3f(0.5f + dir.x * 0.5f, 0.5f + dir.y * 0.5f, 0.5f + dir.z * 0.5f);
+            colors[i] = brayns::Vector4f(n, 1.f);
+        }
+
+        return colors;
+    }
 };
-
-std::istream &operator>>(std::istream &in, GidRow &gr)
-{
-    return in >> gr.gid >> gr.row;
-}
 } // namespace
 
 namespace dti
 {
 std::string DTILoader::getName() const
 {
-    return LOADER_NAME;
+    return "DTI loader";
 }
 
 std::vector<std::string> DTILoader::getSupportedExtensions() const
 {
-    return {SUPPORTED_EXTENTION_DTI};
+    return {"dti"};
 }
 
-DTIConfiguration DTILoader::_readConfiguration(const boost::property_tree::ptree &pt) const
+std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromBlob(
+    brayns::Blob &&blob,
+    const brayns::LoaderProgress &callback,
+    const DTILoaderParameters &params) const
 {
-    DTIConfiguration configuration;
-    configuration.streamlines = pt.get<std::string>("streamlines");
-    configuration.gid_to_streamline = pt.get<std::string>("gids_to_streamline_row");
-    return configuration;
-}
-
-std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromBlob(
-    brayns::Blob &&,
-    const brayns::LoaderProgress &,
-    const DTILoaderParameters &,
-    brayns::Scene &) const
-{
+    (void)blob;
+    (void)callback;
+    (void)params;
     throw std::runtime_error("Loading DTI from blob is not supported");
 }
 
-Colors DTILoader::getColorsFromPoints(
-    const std::vector<brayns::Vector3f> &points,
-    const float opacity,
-    const ColorScheme colorScheme)
-{
-    Colors colors;
-    switch (colorScheme)
-    {
-    case ColorScheme::by_normal:
-        colors.push_back({0.f, 0.f, 0.f, opacity});
-        for (uint64_t i = 0; i < points.size() - 1; ++i)
-        {
-            const auto &p1 = points[i];
-            const auto &p2 = points[i + 1];
-            const auto dir = normalize(p2 - p1);
-            const brayns::Vector3f n = {0.5f + dir.x * 0.5f, 0.5f + dir.y * 0.5f, 0.5f + dir.z * 0.5f};
-            colors.push_back({n.x, n.y, n.z, opacity});
-        }
-        break;
-    case ColorScheme::by_id:
-        colors.resize(points.size(), {rand() % 100 / 100.f, rand() % 100 / 100.f, rand() % 100 / 100.f, opacity});
-        break;
-    default:
-        colors.resize(points.size(), {1.f, 1.f, 1.f, opacity});
-        break;
-    }
-    return colors;
-}
-
-std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
-    const std::string &filename,
+std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromFile(
+    const std::string &path,
     const brayns::LoaderProgress &callback,
-    const DTILoaderParameters &input,
-    brayns::Scene &scene) const
+    const DTILoaderParameters &params) const
 {
-    boost::property_tree::ptree pt;
-    boost::property_tree::ini_parser::read_ini(filename, pt);
-    const auto config = _readConfiguration(pt);
+    const auto config = dtiloader::DTIConfigurationReader::read(path);
 
-    // Check files
-    std::ifstream gidRowfile(config.gid_to_streamline, std::ios::in);
-    if (!gidRowfile.good())
-        throw std::runtime_error("Could not open gid/row mapping file " + config.gid_to_streamline);
+    const auto &gidRowsFilePath = config.gidsToStreamlinesPath;
+    const auto gidRows = dtiloader::GIDRowReader::read(gidRowsFilePath);
 
     std::ifstream streamlinesFile(config.streamlines, std::ios::in);
     if (!streamlinesFile.good())
@@ -129,19 +92,15 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
     // Load positions
     callback.updateProgress("Loading positions ...", 0.f);
 
-    // Load mapping between GIDs and Rows
-    callback.updateProgress("Loading mapping ...", 0.2f);
-    std::vector<GidRow> gidRows(std::istream_iterator<GidRow>(gidRowfile), {});
-    gidRowfile.close();
-
     // Rows to load
-    std::set<u_int64_t> rowsToLoad;
+    std::set<uint64_t> rowsToLoad;
     for (const auto &gidRow : gidRows)
+    {
         rowsToLoad.insert(gidRow.row);
+    }
 
     // Load points
-    using Points = std::vector<brayns::Vector3f>;
-    std::map<uint64_t, Points> streamlines;
+    std::map<uint64_t, std::vector<brayns::Vector3f>> streamlines;
     uint64_t count = 0;
     callback.updateProgress("Loading streamlines ...", 0.4f);
     while (streamlinesFile.good())
@@ -154,14 +113,15 @@ std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
             std::istringstream in(line);
             uint64_t nbPoints;
             in >> nbPoints;
-            Points points;
+
+            auto &streamline = streamlines[count];
+            streamline.reserve(nbPoints);
             for (uint64_t i = 0; i < nbPoints; ++i)
             {
                 brayns::Vector3f point;
                 in >> point.x >> point.y >> point.z;
-                points.push_back(point);
+                streamline.push_back(point);
             }
-            streamlines[count] = points;
         }
         ++count;
     }

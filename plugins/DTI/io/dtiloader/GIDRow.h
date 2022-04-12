@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,29 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SetSpikeSimulationEntrypoint.h"
+#pragma once
 
-namespace dti
-{
-SetSpikeSimulationEntrypoint::SetSpikeSimulationEntrypoint(DTIPlugin &plugin)
-    : _plugin(plugin)
-{
-}
+#include <cstdint>
+#include <string>
+#include <vector>
 
-std::string SetSpikeSimulationEntrypoint::getMethod() const
+namespace dtiloader
 {
-    return "set-spike-simulation";
-}
+struct GIDRow
+{
+    uint64_t gid{};
+    uint64_t row{};
+};
 
-std::string SetSpikeSimulationEntrypoint::getDescription() const
+struct GIDRowReader
 {
-    return "Add a spike simulation to a model";
+    static std::vector<GIDRow> read(const std::string &path);
+};
 }
-
-void SetSpikeSimulationEntrypoint::onRequest(const Request &request)
-{
-    auto params = request.getParams();
-    _plugin.updateSpikeSimulation(params);
-    request.reply(brayns::EmptyMessage());
-}
-} // namespace dti

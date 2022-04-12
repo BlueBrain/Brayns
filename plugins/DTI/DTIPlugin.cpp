@@ -221,8 +221,10 @@ void DTIPlugin::_updateSimulationFrame()
 }
 } // namespace dti
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int /*argc*/, char ** /*argv*/)
+extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
 {
+    (void)argc;
+    (void)argv;
     brayns::Log::info("[DTI] Loading DTI plugin.");
     return new dti::DTIPlugin();
 }

@@ -75,7 +75,7 @@ std::vector<float> DTISimulationHandler::getFrameDataImpl(const uint32_t frame)
                             1.f,
                             std::max(static_cast<float>(_spikeSimulation.decay_speed) * (frame - timestamp), 0.f));
             }
-            data[j] = std::max(0.f, std::min(value, 1.f));
+            data[j] = std::clamp(value, 0.f, 1.f);
         }
         begin = end + 1;
     }

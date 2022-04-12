@@ -23,6 +23,8 @@
 
 #include <brayns/network/common/ExtractModel.h>
 
+#include <components/MorphologyCircuitComponent.h>
+
 namespace
 {
 class CircuitThicknessModifier
@@ -35,47 +37,35 @@ public:
         auto radiusMultiplier = params.radius_multiplier;
 
         // Extract model
-        auto &descriptor = brayns::ExtractModel::fromId(scene, modelId);
-        auto &model = descriptor.getModel();
+        auto &instance = brayns::ExtractModel::fromId(scene, modelId);
+        auto &model = instance.getModel();
 
-        // Spheres
-        auto &sphereMap = model.getSpheres();
-        for (auto &entry : sphereMap)
+        MorphologyCircuitComponent *circuit = nullptr;
+        try
         {
-            for (auto &sphere : entry.second)
-                sphere.radius *= radiusMultiplier;
+            auto &circuitComponent = model.getComponent<MorphologyCircuitComponent>();
+            circuit = &circuitComponent;
+        }
+        catch (const std::exception &e)
+        {
+            throw brayns::JsonRpcException("The model is not a morphological neuron circuit");
         }
 
-        // Cones
-        auto &conesMap = model.getCones();
-        for (auto &entry : conesMap)
+        auto &morphologies = circuit->getGeometry();
+        for (auto &morphology : morphologies)
         {
-            for (auto &cone : entry.second)
-            {
-                cone.centerRadius *= radiusMultiplier;
-                cone.upRadius *= radiusMultiplier;
-            }
+            auto &geometry = morphology.geometry;
+            geometry.mainpulateAll(
+                [radius = radiusMultiplier](uint32_t i, brayns::Primitive &primitive)
+                {
+                    (void)i;
+                    primitive.r0 *= radius;
+                    primitive.r1 *= radius;
+                });
         }
 
-        // Cylinders
-        auto &cylindersMap = model.getCylinders();
-        for (auto &entry : cylindersMap)
-        {
-            for (auto &cylinder : entry.second)
-                cylinder.radius *= radiusMultiplier;
-        }
-
-        // SDF
-        auto &sdfGeometry = model.getSDFGeometryData();
-        for (auto &geom : sdfGeometry.geometries)
-        {
-            geom.r0 *= radiusMultiplier;
-            geom.r1 *= radiusMultiplier;
-        }
-
-        // commit
-        descriptor.markModified();
-        scene.markModified();
+        // We have modified the thickness, lets recompute the bounds
+        scene.computeBounds();
     }
 };
 } // namespace

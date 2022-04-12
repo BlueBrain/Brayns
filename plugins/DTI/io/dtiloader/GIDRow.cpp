@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,10 +18,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "GIDRow.h"
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/utils/FileReader.h>
 
-BRAYNS_JSON_OBJECT_BEGIN(CIGetCellIdsFromModelParams)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the circuit model")
-BRAYNS_JSON_OBJECT_END()
+#include <iterator>
+
+namespace
+{
+std::istream &operator>>(std::istream &in, dtiloader::GIDRow &gr)
+{
+    return in >> gr.gid >> gr.row;
+}
+}
+
+namespace dtiloader
+{
+std::vector<GIDRow> GIDRowReader::read(const std::string &path)
+{
+    const auto content = brayns::FileReader::read(path);
+    std::istringstream stream(content);
+    std::vector<GIDRow> gidRows(std::istreambuf_iterator<GIDRow>(stream), {});
+    return gidRows;
+}
+}

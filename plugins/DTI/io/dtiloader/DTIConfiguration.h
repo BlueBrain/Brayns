@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,24 +20,23 @@
 
 #pragma once
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <filesystem>
+#include <optional>
 
-#include <messages/SetSpikeSimulationMessage.h>
-
-#include <DTIPlugin.h>
-
-namespace dti
+namespace dtiloader
 {
-class SetSpikeSimulationEntrypoint : public brayns::Entrypoint<SetSpikeSimulationMessage, brayns::EmptyMessage>
+struct DTIConfiguration
 {
-public:
-    SetSpikeSimulationEntrypoint(DTIPlugin &plugin);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-
-private:
-    DTIPlugin &_plugin;
+    // Streamline points (1 streamline per row)
+    std::filesystem::path streamlinesPath;
+    // Multimap Gid -> streamline it affects
+    std::filesystem::path gidsToStreamlinesPath;
+    // Optional path to a Blueconfig to load a spike report
+    std::optional<std::filesystem::path> circuitPath;
 };
-} // namespace dti
+
+struct DTIConfigurationReader
+{
+    static DTIConfiguration read(const std::string &path);
+};
+}

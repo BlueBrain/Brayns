@@ -1,9 +1,9 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
- * This file is part of the circuit explorer for Brayns
- * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -22,41 +22,26 @@
 #pragma once
 
 #include "DTILoaderParameters.h"
-#include "DTITypes.h"
 
 #include <brayns/io/Loader.h>
 
-#include <boost/property_tree/ini_parser.hpp>
-
-/**
- * Load circuit from BlueConfig or CircuitConfig file, including simulation.
- */
 namespace dti
 {
-class DTILoader : public brayns::Loader<DTILoaderParameters>
+class DTILoader final : public brayns::Loader<DTILoaderParameters>
 {
 public:
     std::string getName() const final;
 
     std::vector<std::string> getSupportedExtensions() const final;
 
-    std::vector<brayns::ModelDescriptorPtr> importFromBlob(
+    std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
         brayns::Blob &&blob,
         const brayns::LoaderProgress &callback,
-        const DTILoaderParameters &properties,
-        brayns::Scene &scene) const final;
+        const DTILoaderParameters &params) const override;
 
-    std::vector<brayns::ModelDescriptorPtr> importFromFile(
+    std::vector<std::unique_ptr<brayns::Model>> importFromFile(
         const std::string &filename,
         const brayns::LoaderProgress &callback,
-        const DTILoaderParameters &properties,
-        brayns::Scene &scene) const final;
-
-    static Colors getColorsFromPoints(const Points &points, const float opacity, const ColorScheme colorScheme);
-
-private:
-    DTIConfiguration _readConfiguration(const boost::property_tree::ptree &pt) const;
-
-    brayns::PropertyMap _defaults;
+        const DTILoaderParameters &params) const override;
 };
 } // namespace dti

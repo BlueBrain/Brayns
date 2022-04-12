@@ -98,6 +98,13 @@ public:
      */
     void setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping);
 
+    /**
+     * @brief Returns the geometry of the circuit
+     *
+     * @return brayns::Geometry<brayns::Primitive>&
+     */
+    std::vector<MorphologyGeometry> &getGeometry() noexcept;
+
 private:
     std::vector<uint64_t> _ids;
     std::vector<MorphologyGeometry> _morphologies;

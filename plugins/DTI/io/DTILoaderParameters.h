@@ -20,21 +20,8 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
 #include <brayns/json/JsonObjectMacro.h>
-#include <brayns/utils/StringUtils.h>
-
-#include "DTITypes.h"
-
-namespace brayns
-{
-BRAYNS_JSON_ADAPTER_ENUM(
-    ColorScheme,
-    {{"None", ColorScheme::none}, {"By id", ColorScheme::by_id}, {"By normal", ColorScheme::by_normal}})
-}
 
 BRAYNS_JSON_OBJECT_BEGIN(DTILoaderParameters)
 BRAYNS_JSON_OBJECT_ENTRY(float, radius, "Connectivity streamlines radius")
-BRAYNS_JSON_OBJECT_ENTRY(float, opacity, "Geometry opacity")
-BRAYNS_JSON_OBJECT_ENTRY(ColorScheme, color_scheme, "Scheme to color the geometry")
 BRAYNS_JSON_OBJECT_END()

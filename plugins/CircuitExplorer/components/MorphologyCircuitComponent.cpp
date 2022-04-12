@@ -255,3 +255,8 @@ void MorphologyCircuitComponent::setIndexedColor(brayns::OSPBuffer &color, const
     }
     _colorsDirty = true;
 }
+
+std::vector<MorphologyCircuitComponent::MorphologyGeometry> &MorphologyCircuitComponent::getGeometry() noexcept
+{
+    return _morphologies;
+}

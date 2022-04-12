@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,17 +20,18 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include "GIDRow.h"
 
-namespace dti
+#include <brayns/common/MathTypes.h>
+
+#include <map>
+
+namespace dtiloader
 {
-BRAYNS_JSON_OBJECT_BEGIN(AddStreamlinesMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Model name")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, gids, "List of cell GIDs")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint64_t>, indices, "List of indices")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<float>, vertices, "List of vertices (3 components per vertex)")
-BRAYNS_JSON_OBJECT_ENTRY(double, radius, "Streamline tube radius")
-BRAYNS_JSON_OBJECT_ENTRY(double, opacity, "Color opacity")
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, color_scheme, "Color scheme to draw the streamlines")
-BRAYNS_JSON_OBJECT_END()
-} // namespace dti
+struct StreamlinePointsReader
+{
+    static std::map<uint64_t, std::vector<brayns::Vector3f>> read(
+        const std::string &path,
+        const std::vector<GIDRow> &gidRows);
+};
+}

@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,10 +18,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "DTIConfiguration.h"
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <boost/property_tree/ini_parser.hpp>
 
-BRAYNS_JSON_OBJECT_BEGIN(CIGetCellIdsFromModelParams)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the circuit model")
-BRAYNS_JSON_OBJECT_END()
+namespace dtiloader
+{
+DTIConfiguration DTIConfigurationReader::read(const std::string &path)
+{
+    boost::property_tree::ptree pt;
+    boost::property_tree::ini_parser::read_ini(path, pt);
+
+    DTIConfiguration configuration;
+
+    configuration.streamlinesPath = pt.get<std::string>("streamlines");
+    configuration.gidsToStreamlinesPath = pt.get<std::string>("gids_to_streamline_row");
+
+    const auto circuitFile = pt.get_optional<std::string>("circuit");
+    if (circuitFile.has_value())
+    {
+        configuration.circuitPath = *circuitFile;
+    }
+
+    return configuration;
+}
+}

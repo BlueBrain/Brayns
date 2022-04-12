@@ -24,6 +24,6 @@
 #include <brayns/json/JsonObjectMacro.h>
 
 BRAYNS_JSON_OBJECT_BEGIN(SetCircuitThicknessMessage)
-BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "ID of the circuit model")
-BRAYNS_JSON_OBJECT_ENTRY(double, radius_multiplier, "Scaling factor")
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the circuit model")
+BRAYNS_JSON_OBJECT_ENTRY(float, radius_multiplier, "Scaling factor")
 BRAYNS_JSON_OBJECT_END()

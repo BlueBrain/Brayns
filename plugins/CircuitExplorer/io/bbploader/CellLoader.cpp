@@ -18,6 +18,8 @@
 
 #include "CellLoader.h"
 
+#include <brayns/utils/StringUtils.h>
+
 #include <api/circuit/MorphologyCircuitBuilder.h>
 #include <api/circuit/SomaCircuitBuilder.h>
 #include <io/bbploader/colordata/BBPNeuronColorData.h>
@@ -108,6 +110,21 @@ struct MorphologyImporter
         return MorphologyCircuitBuilder::load(loadContext, model, updater, std::move(colorData));
     }
 };
+
+struct MetadataFactory
+{
+    static void create(const bbploader::LoadContext &ctxt, brayns::Model &dst)
+    {
+        std::map<std::string, std::string> metadata;
+
+        const auto &params = ctxt.loadParameters;
+        const auto &targets = params.targets;
+        const auto targetList = brayns::string_utils::join(targets, ",");
+        metadata["Targets"] = targetList;
+
+        dst.setMetaData(std::move(metadata));
+    }
+};
 }
 
 namespace bbploader
@@ -129,5 +146,7 @@ std::vector<CellCompartments>
     {
         return MorphologyImporter::import(context, model, updater);
     }
+
+    MetadataFactory::create(context, model);
 }
 } // namespace bbploader

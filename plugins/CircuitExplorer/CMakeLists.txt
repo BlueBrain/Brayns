@@ -83,6 +83,7 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     movie/MovieMaker.cpp
     network/entrypoints/ColorCircuitEntrypoint.cpp
     network/entrypoints/MakeMovieEntrypoint.cpp
+    network/entrypoints/SetCircuitThicknessEntrypoint.cpp
     network/entrypoints/TraceAnterogradeEntrypoint.cpp
 )
 
@@ -186,10 +187,12 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     network/adapters/ColoringInfoAdapter.h
     network/entrypoints/ColorCircuitEntrypoint.h
     network/entrypoints/MakeMovieEntrypoint.h
+    network/entrypoints/SetCircuitThicknessEntrypoint.h
     network/entrypoints/TraceAnterogradeEntrypoint.h
     network/messages/AvailableColoringInfoMessage.h
     network/messages/ColorCircuitMessage.h
     network/messages/MakeMovieMessage.h
+    network/messages/SetCircuitThicknessMessage.h
     network/messages/TraceAnterogradeMessage.h
 )
 # Movie generation with FFmpeg

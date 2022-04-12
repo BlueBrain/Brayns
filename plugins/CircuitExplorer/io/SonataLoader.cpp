@@ -101,7 +101,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
         const auto nodeSelection = sonataloader::NodeSelector::select(network, nodeParams);
         sonataloader::NodeLoadContext ctxt{network, nodeParams, nodes, nodeSelection, nodeModel, progress};
 
-        brayns::Log::info("[CE] Loading {} node population.", nodeName);
+        brayns::Log::info("[CE] - Loading {} node population.", nodeName);
         progress.beginStage(2);
 
         sonataloader::NodeLoader::loadNodes(ctxt);
@@ -121,7 +121,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
             sonataloader::EdgeLoadContext
                 edgeCtxt{network, edgeParams, nodes, edges, nodeSelection, edgeSelection, edgeModel, progress};
 
-            brayns::Log::info("[CE] \tLoading {} edge population.", edgeName);
+            brayns::Log::info("[CE] \t - Loading {} edge population.", edgeName);
             progress.beginStage(2);
 
             sonataloader::EdgeLoader::loadEdges(edgeCtxt);
