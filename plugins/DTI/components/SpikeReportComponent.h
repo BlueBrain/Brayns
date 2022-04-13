@@ -21,35 +21,52 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometries/Primitive.h>
 
-#include <ospray/ospray.h>
+#include <brain/spikeReportReader.h>
+
+#include <unordered_map>
 
 namespace dti
 {
-class DTIComponent final : public brayns::Component
+class SpikeReportComponent final : public brayns::Component
 {
 public:
-    struct Streamline
-    {
-        OSPGeometricModel model{nullptr};
-        brayns::Geometry<brayns::Primitive> geometry;
-    };
+    /**
+     * @brief Construct a new Spike Report Component object
+     *
+     * @param report
+     * @param gidStreamlineMap
+     */
+    SpikeReportComponent(
+        std::unique_ptr<brain::SpikeReportReader> report,
+        std::unordered_map<uint64_t, std::vector<size_t>> gidStreamlineMap,
+        float spikeDecayTime);
 
-public:
+    /**
+     * @brief getSizeInBytes implementation
+     * @return
+     */
     size_t getSizeInBytes() const noexcept override;
 
-    brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
-
+    /**
+     * @brief
+     *
+     */
     void onStart() override;
 
-    bool commit() override;
-
-    void onDestroyed() override;
-
-    void setStreamlines(std::vector<std::vector<brayns::Primitive>> &streamlineGeometries);
+    /**
+     * @brief
+     *
+     * @param parameters
+     */
+    void onPreRender(const brayns::ParametersManager &parameters) override;
 
 private:
-    std::vector<Streamline> _streamlines;
+    const std::unique_ptr<brain::SpikeReportReader> _report;
+    const std::unordered_map<uint64_t, std::vector<size_t>> _gidStreamlineMap;
+    const float _spikeDecayTime{};
+
+    // Flag used to force the simulations color update when re-enabling a simulation after it was disabled
+    bool _lastEnabledValue{true};
 };
 }

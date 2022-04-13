@@ -1,9 +1,9 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
- * This file is part of Brayns
- * <https://github.com/BlueBrain/Brayns-UC-DTI>
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -21,43 +21,16 @@
 
 #pragma once
 
-#include <array>
-#include <vector>
-
 #include <brayns/pluginapi/ExtensionPlugin.h>
-
-#include <messages/SetSpikeSimulationFromFileMessage.h>
-#include <messages/SetSpikeSimulationMessage.h>
 
 namespace dti
 {
 /**
- * @brief The DTIPlugin class manages the loading of
- * RAW volumes as point clouds
+ * @brief The DTIPlugin adds support to load a custom Diffusion-transfer-imaging data format to visualize whitematter
  */
 class DTIPlugin : public brayns::ExtensionPlugin
 {
 public:
     void init() final;
-    void registerEntrypoints(brayns::INetworkInterface &interface) final;
-
-    /**
-     * @brief preRender Updates the scene according to latest data load
-     */
-    void preRender() final;
-
-    // Entrypoint access
-    void updateSpikeSimulation(const SetSpikeSimulationMessage &);
-    void updateSpikeSimulationFromFile(const SetSpikeSimulationFromFileMessage &);
-
-private:
-    void _updateSpikeSimulation();
-    void _updateSimulationFrame();
-
-    SetSpikeSimulationMessage _spikeSimulation;
-
-    bool _simulationDirty{false};
-    uint64_t _currentFrame{std::numeric_limits<uint64_t>::max()};
-    std::vector<size_t> _registeredModelsForSpikeSimulation;
 };
 } // namespace dti

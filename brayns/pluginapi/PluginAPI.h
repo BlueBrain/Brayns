@@ -21,10 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
-#include <brayns/engine/Renderer.h>
-#include <brayns/engine/Scene.h>
 #include <brayns/io/LoaderRegistry.h>
 #include <brayns/parameters/ParametersManager.h>
 

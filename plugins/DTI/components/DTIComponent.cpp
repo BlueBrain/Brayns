@@ -24,23 +24,59 @@
 #include <brayns/engine/common/GeometricModelHandler.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
+namespace
+{
+struct NormalColorGenerator
+{
+    static std::vector<brayns::Vector4f> generate(const std::vector<brayns::Primitive> &prims)
+    {
+        std::vector<brayns::Vector4f> colors(prims.size());
+
+        for (size_t i = 0; i < prims.size(); ++i)
+        {
+            const auto &primitive = prims[i];
+            const auto &p1 = primitive.p0;
+            const auto &p2 = primitive.p1;
+            const auto dir = glm::normalize(p2 - p1);
+            const auto n = brayns::Vector3f(0.5f + dir.x * 0.5f, 0.5f + dir.y * 0.5f, 0.5f + dir.z * 0.5f);
+            colors[i] = brayns::Vector4f(n, 1.f);
+        }
+
+        return colors;
+    }
+};
+}
+
+namespace dti
+{
 size_t DTIComponent::getSizeInBytes() const noexcept
 {
-    return sizeof(DTIComponent) + _geometry.getSizeInBytes();
+    size_t geometrySize = 0;
+    for (const auto &streamline : _streamlines)
+    {
+        const auto &geometry = streamline.geometry;
+        geometrySize += sizeof(Streamline) + geometry.getSizeInBytes();
+    }
+
+    return sizeof(DTIComponent) + geometrySize;
 }
 
 brayns::Bounds DTIComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
-    return _geometry.computeBounds(transform);
+    brayns::Bounds base;
+    for (const auto &streamline : _streamlines)
+    {
+        const auto &geometry = streamline.geometry;
+        const auto bounds = geometry.computeBounds(transform);
+        base.expand(bounds);
+    }
+
+    return base;
 }
 
 void DTIComponent::onStart()
 {
     auto &group = getModel();
-
-    _model = brayns::GeometricModelHandler::create();
-    brayns::GeometricModelHandler::addToGeometryGroup(_model, group);
-
     group.addComponent<brayns::MaterialComponent>();
 }
 
@@ -53,14 +89,59 @@ bool DTIComponent::commit()
     auto &material = brayns::ExtractModelObject::extractMaterial(group);
     if (material.commit())
     {
-        brayns::GeometricModelHandler::setMaterial(_model, material);
+        for (auto &streamline : _streamlines)
+        {
+            auto model = streamline.model;
+            brayns::GeometricModelHandler::setMaterial(model, material);
+        }
         needsCommit = true;
     }
 
     if (needsCommit)
     {
-        brayns::GeometricModelHandler::commitModel(_model);
+        for (auto &streamline : _streamlines)
+        {
+            auto model = streamline.model;
+            brayns::GeometricModelHandler::commitModel(model);
+        }
     }
 
     return needsCommit;
+}
+
+void DTIComponent::onDestroyed()
+{
+    auto &group = getModel();
+    for (auto &streamline : _streamlines)
+    {
+        auto &model = streamline.model;
+        brayns::GeometricModelHandler::removeFromGeometryGroup(model, group);
+        brayns::GeometricModelHandler::destory(model);
+    }
+}
+
+void DTIComponent::setStreamlines(std::vector<std::vector<brayns::Primitive>> &geometries)
+{
+    auto &group = getModel();
+
+    _streamlines.reserve(geometries.size());
+
+    for (auto &primitives : geometries)
+    {
+        const auto colors = NormalColorGenerator::generate(primitives);
+        auto colorBuffer = brayns::DataHandler::copyBuffer(colors, OSPDataType::OSP_VEC4F);
+
+        auto &streamline = _streamlines.emplace_back();
+
+        auto &geometry = streamline.geometry;
+        geometry.set(std::move(primitives));
+        geometry.commit();
+
+        auto &model = streamline.model;
+        model = brayns::GeometricModelHandler::create();
+        brayns::GeometricModelHandler::addToGeometryGroup(model, group);
+        brayns::GeometricModelHandler::setGeometry(model, geometry);
+        brayns::GeometricModelHandler::setColors(model, colorBuffer);
+    }
+}
 }
