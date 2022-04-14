@@ -128,9 +128,6 @@ void DTIComponent::setStreamlines(std::vector<std::vector<brayns::Primitive>> &g
 
     for (auto &primitives : geometries)
     {
-        const auto colors = NormalColorGenerator::generate(primitives);
-        auto colorBuffer = brayns::DataHandler::copyBuffer(colors, OSPDataType::OSP_VEC4F);
-
         auto &streamline = _streamlines.emplace_back();
 
         auto &geometry = streamline.geometry;
@@ -141,7 +138,71 @@ void DTIComponent::setStreamlines(std::vector<std::vector<brayns::Primitive>> &g
         model = brayns::GeometricModelHandler::create();
         brayns::GeometricModelHandler::addToGeometryGroup(model, group);
         brayns::GeometricModelHandler::setGeometry(model, geometry);
+    }
+
+    setDefaultColors();
+}
+
+size_t DTIComponent::getNumStreamlines() const noexcept
+{
+    return _streamlines.size();
+}
+
+void DTIComponent::setDefaultColors() noexcept
+{
+    for(auto &streamline : _streamlines)
+    {
+        auto &colors = streamline.colors;
+        auto &geometry = streamline.geometry;
+        const auto &primitives = geometry.getAll();
+        colors = NormalColorGenerator::generate(primitives);
+    }
+
+    _commitColors();
+}
+
+
+void DTIComponent::updateSimulation(const std::vector<std::vector<float>> &data)
+{
+    if (_streamlines.size() != data.size())
+    {
+        throw std::invalid_argument("Not enough data provided for all streamlines");
+    }
+
+    for (size_t i = 0; i < _streamlines.size(); ++i)
+    {
+        auto &streamlineData = data[i];
+        if(streamlineData.empty())
+        {
+            continue;
+        }
+
+        auto &streamline = _streamlines[i];
+        auto &colors = streamline.colors;
+
+        const auto streamlineLength = colors.size() - 1;
+
+        for(const auto value : streamlineData)
+        {
+            auto index = static_cast<size_t>(value * streamlineLength);
+            index = index > streamlineLength? streamlineLength : index;
+            colors[index] = brayns::Vector4f(1.f);
+        }
+    }
+
+    _commitColors();
+}
+
+void DTIComponent::_commitColors() noexcept
+{
+    for(auto &streamline : _streamlines)
+    {
+        auto &colors = streamline.colors;
+        auto colorBuffer = brayns::DataHandler::shareBuffer(colors, OSPDataType::OSP_VEC4F);
+
+        auto model = streamline.model;
         brayns::GeometricModelHandler::setColors(model, colorBuffer);
     }
+    _colorsDirty = true;
 }
 }

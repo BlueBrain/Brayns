@@ -128,25 +128,25 @@ void Engine::commit()
     bool needResetFramebuffer = false;
     if (_frameBuffer->commit())
     {
-        Log::critical("[Engine] Framebuffer committed");
+        Log::debug("[Engine] Framebuffer committed");
         needResetFramebuffer = true;
     }
 
     if (_camera->commit())
     {
-        Log::critical("[Engine] Camera committed");
+        Log::debug("[Engine] Camera committed");
         needResetFramebuffer = true;
     }
 
     if (_renderer->commit())
     {
-        Log::critical("[Engine] Renderer committed");
+        Log::debug("[Engine] Renderer committed");
         needResetFramebuffer = true;
     }
 
     if (_scene->commit())
     {
-        Log::critical("[Engine] Scene committed");
+        Log::debug("[Engine] Scene committed");
         needResetFramebuffer = true;
         const auto sceneSize = _scene->_getSizeBytes();
         _statistics.setSceneSizeInBytes(sceneSize);

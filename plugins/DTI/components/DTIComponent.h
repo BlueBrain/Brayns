@@ -34,6 +34,7 @@ public:
     {
         OSPGeometricModel model{nullptr};
         brayns::Geometry<brayns::Primitive> geometry;
+        std::vector<brayns::Vector4f> colors;
     };
 
 public:
@@ -49,7 +50,17 @@ public:
 
     void setStreamlines(std::vector<std::vector<brayns::Primitive>> &streamlineGeometries);
 
+    size_t getNumStreamlines() const noexcept;
+
+    void setDefaultColors() noexcept;
+
+    void updateSimulation(const std::vector<std::vector<float>> &data);
+
+private:
+    void _commitColors() noexcept;
+
 private:
     std::vector<Streamline> _streamlines;
+    bool _colorsDirty {false};
 };
 }

@@ -28,6 +28,6 @@ BRAYNS_JSON_OBJECT_ENTRY(
     float,
     spike_decay_time,
     "Time, in milliseconds, that a spikes takes to go from the beginning to the end of the streamline",
-    Brayns::Default(1.f),
-    Brayns::Minimum(0.f))
+    brayns::Default(1.f),
+    brayns::Minimum(0.f))
 BRAYNS_JSON_OBJECT_END()

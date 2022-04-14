@@ -36,6 +36,7 @@ public:
      *
      * @param report
      * @param gidStreamlineMap
+     * @param spikeDecayTIme
      */
     SpikeReportComponent(
         std::unique_ptr<brain::SpikeReportReader> report,
@@ -64,7 +65,7 @@ public:
 private:
     const std::unique_ptr<brain::SpikeReportReader> _report;
     const std::unordered_map<uint64_t, std::vector<size_t>> _gidStreamlineMap;
-    const float _spikeDecayTime{};
+    const float _invSpikeDecayTime{};
 
     // Flag used to force the simulations color update when re-enabling a simulation after it was disabled
     bool _lastEnabledValue{true};

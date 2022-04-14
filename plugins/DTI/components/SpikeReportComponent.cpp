@@ -25,6 +25,72 @@
 #include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/SimulationComponent.h>
 
+#include <components/DTIComponent.h>
+
+namespace
+{
+struct SpikeFrameProcessor
+{
+    SpikeFrameProcessor(
+        const std::unordered_map<uint64_t, std::vector<size_t>> &gidStreamlineMap,
+        brain::SpikeReportReader &reader,
+        float invDecayTime)
+        : _gidStreamlineMap(gidStreamlineMap)
+        , _reader(reader)
+        , _invDecayTime(invDecayTime)
+    {
+    }
+
+    std::vector<std::vector<float>> process(size_t numStreamlines, float frameTimestamp)
+    {
+        std::vector<std::vector<float>> data(numStreamlines);
+
+        constexpr auto dt = 0.01f;
+        const auto spikes = _reader.getSpikes(frameTimestamp, frameTimestamp + dt);
+
+        for (size_t i = 0; i < spikes.size(); ++i)
+        {
+            const auto &spike = spikes[i];
+            const auto spikeTime = spike.first;
+            const auto gid = spike.second;
+
+            const auto normalizedSpikeTime = std::max(0.f, spikeTime - frameTimestamp);
+            const auto normalizedSpikeLife = normalizedSpikeTime * _invDecayTime;
+            // Spike visualization is over
+            if (normalizedSpikeLife > 1.f)
+            {
+                continue;
+            }
+
+            auto it = _gidStreamlineMap.find(gid);
+            if (it == _gidStreamlineMap.end())
+            {
+                continue;
+            }
+
+            auto &affectedStreamlines = it->second;
+            if (affectedStreamlines.empty())
+            {
+                continue;
+            }
+
+            for (const auto streamlineIndex : affectedStreamlines)
+            {
+                auto &streamlineBuffer = data[streamlineIndex];
+                streamlineBuffer.push_back(normalizedSpikeLife);
+            }
+        }
+
+        return data;
+    }
+
+private:
+    const std::unordered_map<uint64_t, std::vector<size_t>> _gidStreamlineMap;
+    brain::SpikeReportReader &_reader;
+    float _invDecayTime{};
+};
+}
+
 namespace dti
 {
 SpikeReportComponent::SpikeReportComponent(
@@ -33,7 +99,7 @@ SpikeReportComponent::SpikeReportComponent(
     float spikeDecayTime)
     : _report(std::move(report))
     , _gidStreamlineMap(std::move(gidStreamlineMap))
-    , _spikeDecayTime(spikeDecayTime)
+    , _invSpikeDecayTime(1.f / spikeDecayTime)
 {
 }
 
@@ -63,9 +129,16 @@ void SpikeReportComponent::onStart()
 void SpikeReportComponent::onPreRender(const brayns::ParametersManager &parameters)
 {
     auto &model = getModel();
+    auto &dti = model.getComponent<DTIComponent>();
 
     if (!brayns::ExtractModelObject::isSimulationEnabled(model))
     {
+        // First onPreRender after disabling simulation - restore default colors
+        if (_lastEnabledValue)
+        {
+            dti.setDefaultColors();
+        }
+
         _lastEnabledValue = false;
         return;
     }
@@ -80,6 +153,18 @@ void SpikeReportComponent::onPreRender(const brayns::ParametersManager &paramete
     {
         return;
     }
+
+    const auto numStreamlines = dti.getNumStreamlines();
+
+    constexpr auto dt = 0.01f;
+    const auto endTime = _report->getEndTime();
+    const auto frameIndex = animationParameters.getFrame();
+    const auto frameTimestamp = std::clamp(frameIndex * dt, 0.f, endTime);
+
+    SpikeFrameProcessor processor(_gidStreamlineMap, *_report, _invSpikeDecayTime);
+    const auto data = processor.process(numStreamlines, frameTimestamp);
+
+    dti.updateSimulation(data);
 }
 
 }

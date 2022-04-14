@@ -25,6 +25,7 @@
 #include <brayns/utils/FileReader.h>
 
 #include <components/DTIComponent.h>
+#include <components/SpikeReportComponent.h>
 
 #include <filesystem>
 #include <fstream>
@@ -33,6 +34,9 @@
 #include <unordered_set>
 
 #include <boost/property_tree/ini_parser.hpp>
+
+#include <brain/spikeReportReader.h>
+#include <brion/blueConfig.h>
 
 namespace
 {
@@ -95,37 +99,72 @@ struct StreamlineData
     std::vector<brayns::Vector3f> points;
 };
 
+/**
+ * @brief Used to filter which rows to load in RowStreamlineMapReader
+ */
+struct StreamlineRowFilter
+{
+    virtual bool filter(const size_t row) const noexcept = 0;
+};
+
+// When loading without gid->row file (in other words, without simulation)
+struct NoopStreamlineRowFilter final : public StreamlineRowFilter
+{
+    bool filter(const size_t row) const noexcept override
+    {
+        return true;
+    }
+};
+
+// When loading with gid->row file (in other words, with simulation)
+struct GIDRowStreamlineRowFilter final : public StreamlineRowFilter
+{
+    GIDRowStreamlineRowFilter(const std::vector<GIDRow> &gidRows)
+    {
+        for (const auto &entry : gidRows)
+        {
+            const auto row = entry.row;
+            _whitelistedRows.insert(row);
+        }
+    }
+
+    bool filter(const size_t row) const noexcept override
+    {
+        auto it = _whitelistedRows.find(row);
+        return it != _whitelistedRows.end();
+    }
+
+private:
+    std::unordered_set<size_t> _whitelistedRows;
+};
+
 struct RowStreamlineMapReader
 {
-    static std::map<uint64_t, StreamlineData>
-        read(const std::string &path, const std::vector<GIDRow> &gidRowMapping, const brayns::LoaderProgress &callback)
+    static std::map<uint64_t, StreamlineData> read(const std::string &path, const StreamlineRowFilter &filter)
     {
-        // Load only the rows that are going to be used
-        std::unordered_set<uint64_t> rowsToLoad;
-        for (const auto &gidRow : gidRowMapping)
-        {
-            rowsToLoad.insert(gidRow.row);
-        }
-
         std::map<uint64_t, StreamlineData> result;
+
         const auto content = brayns::FileReader::read(path);
         std::istringstream stream(content);
-        const auto streamlineProgress = 0.2f / static_cast<float>(rowsToLoad.size());
-        auto overallProgress = 0.4f;
+
         size_t row = 0;
         size_t index = 0;
+
         while (stream.good())
         {
             std::string line;
             std::getline(stream, line);
 
-            const auto check = rowsToLoad.find(row);
-
-            if (check != rowsToLoad.end())
+            if (!line.empty() && filter.filter(row))
             {
                 std::istringstream lineStream(line);
                 uint64_t nbPoints;
                 lineStream >> nbPoints;
+
+                if (!lineStream.good() || nbPoints == 0)
+                {
+                    throw std::runtime_error("Row " + std::to_string(row));
+                }
 
                 auto &streamline = result[row];
 
@@ -134,15 +173,12 @@ struct RowStreamlineMapReader
                 auto &points = streamline.points;
                 points.reserve(nbPoints);
 
-                for (uint64_t i = 0; i < nbPoints; ++i)
+                for (uint64_t i = 0; i < nbPoints && lineStream.good(); ++i)
                 {
                     brayns::Vector3f point;
                     lineStream >> point.x >> point.y >> point.z;
                     points.push_back(point);
                 }
-
-                overallProgress += streamlineProgress;
-                callback.updateProgress("Loading streamlines", overallProgress);
             }
 
             ++row;
@@ -169,12 +205,12 @@ struct StreamlineComponentBuilder
             for (size_t i = 1; i < points.size(); ++i)
             {
                 const auto &start = points[i - 1];
-                const auto &end = points[i + 1];
+                const auto &end = points[i];
                 geometry.push_back(brayns::Primitive::cylinder(start, end, radius));
             }
         }
 
-        auto &dti = model.addComponent<DTIComponent>();
+        auto &dti = model.addComponent<dti::DTIComponent>();
         dti.setStreamlines(geometries);
     }
 };
@@ -199,6 +235,21 @@ struct GIDsToStreamlineIndicesMapping
         }
 
         return result;
+    }
+};
+
+struct SpikeReportComponentBuilder
+{
+    static void build(
+        std::unordered_map<uint64_t, std::vector<size_t>> gidStreamlineMap,
+        float decayTime,
+        const std::string &circuitPath,
+        brayns::Model &model)
+    {
+        const auto blueConfig = brion::BlueConfig(circuitPath);
+        const auto spikesURI = blueConfig.getSpikeSource();
+        auto spikeReport = std::make_unique<brain::SpikeReportReader>(spikesURI);
+        model.addComponent<dti::SpikeReportComponent>(std::move(spikeReport), std::move(gidStreamlineMap), decayTime);
     }
 };
 } // namespace
@@ -231,30 +282,46 @@ std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromFile(
     const brayns::LoaderProgress &callback,
     const DTILoaderParameters &params) const
 {
-    callback.updateProgress("Reading configuration", 0.f);
-    const auto config = DTIConfigurationReader::read(path);
-
-    callback.updateProgress("Reading gid to row mapping file (might take time)", 0.2f);
-    const auto &gidRowsFilePath = config.gidsToStreamlinesPath;
-    const auto gidRows = GIDRowReader::read(gidRowsFilePath);
-
-    callback.updateProgress("Loading streamlines", 0.4f);
-    const auto &streamlinesPath = config.streamlinesPath;
-    auto rowStreamlineMap = RowStreamlineMapReader::read(streamlinesPath, gidRows, callback);
-
-    callback.updateProgress("Generating geometry", 0.6f);
     std::vector<std::unique_ptr<brayns::Model>> result;
     result.push_back(std::make_unique<brayns::Model>());
     auto &model = *(result.back());
-    const auto radius = params.radius;
-    StreamlineComponentBuilder::build(rowStreamlineMap, radius, model);
 
-    const auto &circuitPath = config.circuitPath;
-    if (circuitPath.has_value())
+    callback.updateProgress("Reading configuration", 0.f);
+    const auto config = DTIConfigurationReader::read(path);
+
+    const auto &circuitPathEntry = config.circuitPath;
+
+    if (!circuitPathEntry.has_value())
     {
+        callback.updateProgress("Loading streamlines", 0.33f);
+        const NoopStreamlineRowFilter filter;
+        const auto &streamlinesPath = config.streamlinesPath;
+        auto rowStreamlineMap = RowStreamlineMapReader::read(streamlinesPath, filter);
+
+        callback.updateProgress("Generating geometry", 0.66f);
+        const auto radius = params.radius;
+        StreamlineComponentBuilder::build(rowStreamlineMap, radius, model);
+    }
+    else
+    {
+        callback.updateProgress("Reading gid to row mapping file (might take time)", 0.2f);
+        const auto &gidRowsFilePath = config.gidsToStreamlinesPath;
+        const auto gidRows = GIDRowReader::read(gidRowsFilePath);
+
+        callback.updateProgress("Loading streamlines", 0.4f);
+        const GIDRowStreamlineRowFilter filter(gidRows);
+        const auto &streamlinesPath = config.streamlinesPath;
+        auto rowStreamlineMap = RowStreamlineMapReader::read(streamlinesPath, filter);
+
+        callback.updateProgress("Generating geometry", 0.6f);
+        const auto radius = params.radius;
+        StreamlineComponentBuilder::build(rowStreamlineMap, radius, model);
+
         callback.updateProgress("Loading simulation", 0.8f);
+        const auto &circuitPath = *circuitPathEntry;
         auto gidsToStreamlineIndices = GIDsToStreamlineIndicesMapping::generate(gidRows, rowStreamlineMap);
         auto spikeDecayTime = params.spike_decay_time;
+        SpikeReportComponentBuilder::build(std::move(gidsToStreamlineIndices), spikeDecayTime, circuitPath, model);
     }
 
     callback.updateProgress("Done", 1.f);
