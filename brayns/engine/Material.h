@@ -56,15 +56,15 @@ public:
 
     /**
      * @brief Sets the base color
-     * 
-     * @param color 
+     *
+     * @param color
      */
     void setColor(const Vector3f &color) noexcept;
 
     /**
      * @brief Returns the base color
-     * 
-     * @return const Vector3f& 
+     *
+     * @return const Vector3f&
      */
     const Vector3f &getColor() const noexcept;
 
@@ -106,6 +106,6 @@ protected:
 private:
     OSPMaterial _handle{nullptr};
 
-    Vector3f _color;
+    Vector3f _color{1.f};
 };
 } // namespace brayns

@@ -29,7 +29,6 @@
 
 namespace brayns
 {
-
 /**
  * @brief The Renderer class is the base class for all renderer to be available on Brayns
  */
@@ -108,7 +107,7 @@ protected:
 
 private:
     int32_t _samplesPerPixel{1};
-    int32_t _maxRayBounces{5};
+    int32_t _maxRayBounces{3};
     Vector4f _backgroundColor{0.004f, 0.016f, 0.102f, 0.f}; // Default background color is BBP dark blue
     OSPRenderer _handle{nullptr};
 };

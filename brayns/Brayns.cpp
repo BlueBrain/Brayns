@@ -111,4 +111,19 @@ bool Brayns::commitAndRender()
 
     return _engine.isRunning();
 }
+
+Engine &Brayns::getEngine()
+{
+    return _engine;
+}
+
+ParametersManager &Brayns::getParametersManager()
+{
+    return _parametersManager;
+}
+
+LoaderRegistry &Brayns::getLoaderRegistry()
+{
+    return _loaderRegistry;
+}
 } // namespace brayns

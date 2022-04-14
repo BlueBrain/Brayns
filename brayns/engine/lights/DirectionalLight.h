@@ -45,6 +45,6 @@ protected:
     void commitLightSpecificParams() final;
 
 private:
-    Vector3f _direction{0.f, 1.f, 0.f};
+    Vector3f _direction{-0.707107f, -0.707107f, 0.f};
 };
 }

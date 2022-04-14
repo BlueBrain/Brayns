@@ -101,4 +101,9 @@ Vector3f Bounds::center() const noexcept
 {
     return (_max + _min) * 0.5f;
 }
+
+Vector3f Bounds::dimensions() const noexcept
+{
+    return _max - _min;
+}
 }

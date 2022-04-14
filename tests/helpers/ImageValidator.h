@@ -52,7 +52,7 @@ public:
     static bool validate(const brayns::Image &image, const std::string &filename)
     {
         std::cout << "Validation of image '" << filename << "'.\n";
-        auto path = BRAYNS_TESTDATA_IMAGES_PATH + filename;
+        auto path = BRAYNS_TESTDATA_REFERENCE_IMAGES_PATH + filename;
         _saveIfNeeded(image, path);
         auto reference = brayns::ImageDecoder::load(path);
         return validate(image, reference);
@@ -83,12 +83,12 @@ private:
 
     static bool _isSavePngEnabled()
     {
-        return std::getenv("BRAYNS_TEST_SAVE_PNG");
+        return true; // std::getenv("BRAYNS_TEST_SAVE_PNG");
     }
 
     static bool _isSaveRawEnabled()
     {
-        return std::getenv("BRAYNS_TEST_SAVE_RAW");
+        return false; // std::getenv("BRAYNS_TEST_SAVE_RAW");
     }
 
     static void _saveRaw(const brayns::Image &image, const std::string &path)

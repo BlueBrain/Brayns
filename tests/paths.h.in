@@ -1,32 +1,39 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Daniel.Nachbaur@epfl.ch
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
- * This file is part of BRayns
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// Do not use pragma once, this file needs to be orverriden from the
-// CircuitViewer plugin
-#ifndef BRAYNS_TEST_PATHS
-#define BRAYNS_TEST_PATHS
+#pragma once
 
 #define BRAYNS_TESTDATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/files/"
-#define BRAYNS_TESTDATA_IMAGES_PATH BRAYNS_TESTDATA_PATH "images/"
-#define BRAYNS_TESTDATA_VALID_MODELS_PATH BRAYNS_TESTDATA_PATH "modelsValid/"
+#define BRAYNS_TESTDATA_REFERENCE_IMAGES_PATH BRAYNS_TESTDATA_PATH "referenceimages/"
+#define BRAYNS_TESTDATA_MODELS_PATH BRAYNS_TESTDATA_PATH "models/"
+#define BRAYNS_TESTDATA_INVALID_MODELS_PATH BRAYNS_TESTDATA_PATH "invalidmodels/"
 
-constexpr auto BRAYNS_TESTDATA_MODEL_BENNU_PATH =
-    BRAYNS_TESTDATA_PATH "modelsValid/bennu.obj";
-constexpr auto BRAYNS_TESTDATA_MODEL_BENNU_ZIP_PATH =
-    BRAYNS_TESTDATA_PATH "modelsValid/bennu.zip";
-constexpr auto BRAYNS_TESTDATA_MODEL_MONKEY_PATH =
-    BRAYNS_TESTDATA_PATH "modelsValid/monkey.xyz";
-constexpr auto BRAYNS_TESTDATA_MODEL_LUCY_PATH =
-    BRAYNS_TESTDATA_PATH "modelsValid/lucy.ply";
-constexpr auto BRAYNS_TESTDATA_MODEL_BROKEN_PATH =
-    BRAYNS_TESTDATA_PATH "modelsInvalid/broken.xyz";
-constexpr auto BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH =
-    BRAYNS_TESTDATA_PATH "modelsInvalid/unsupported.abc";
-constexpr auto BRAYNS_TESTDATA_MODEL_PDB_PATH = BRAYNS_TESTDATA_PATH "1bna.pdb";
-constexpr auto BRAYNS_TESTDATA_MODEL_CAPSULE_PATH =
-    BRAYNS_TESTDATA_PATH "modelsValid/tex_capsule.zip";
-#endif
+// Models
+constexpr auto BRAYNS_TESTDATA_MODEL_OBJ_PATH = BRAYNS_TESTDATA_MODELS_PATH "bennu.obj";
+constexpr auto BRAYNS_TESTDATA_MODEL_XYZ_PATH = BRAYNS_TESTDATA_MODELS_PATH "monkey.xyz";
+constexpr auto BRAYNS_TESTDATA_MODEL_PLY_PATH = BRAYNS_TESTDATA_MODELS_PATH "lucy.ply";
+constexpr auto BRAYNS_TESTDATA_MODEL_PDB_PATH = BRAYNS_TESTDATA_MODELS_PATH "1bna.pdb";
+
+// Invalid models
+constexpr auto BRAYNS_TESTDATA_MODEL_BROKEN_PATH = BRAYNS_TESTDATA_INVALID_MODELS_PATH "broken.xyz";
+constexpr auto BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH = BRAYNS_TESTDATA_INVALID_MODELS_PATH "unsupported.abc";
+
+// Reference images

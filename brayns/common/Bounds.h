@@ -84,6 +84,13 @@ public:
      */
     Vector3f center() const noexcept;
 
+    /**
+     * @brief Return the length on each axis
+     *
+     * @return Vector3f
+     */
+    Vector3f dimensions() const noexcept;
+
 private:
     Vector3f _min{std::numeric_limits<float>::max()};
     Vector3f _max{std::numeric_limits<float>::lowest()};
