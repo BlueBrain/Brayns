@@ -19,25 +19,31 @@
  */
 
 #include <brayns/Brayns.h>
-#include <tests/paths.h>
 
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/geometries/Sphere.h>
+#include <brayns/engine/lights/AmbientLight.h>
+#include <brayns/engine/lights/DirectionalLight.h>
+
+#include <tests/paths.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
+#include "helpers/BraynsTestUtils.h"
 #include "helpers/ImageValidator.h"
 
 TEST_CASE("render_two_frames_and_compare_they_are_same")
 {
-    const char *argv[] = {"testImages", "--disable-accumulation", "demo"};
-    const int argc = sizeof(argv) / sizeof(char *);
+    brayns::Brayns brayns;
 
-    brayns::Brayns brayns(argc, argv);
+    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
+    BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
+    auto ambient = std::make_unique<brayns::AmbientLight>();
+    ambient->setIntensity(0.05f);
+    BraynsTestUtils::addLight(brayns, std::move(ambient));
+    BraynsTestUtils::adjustPerspectiveView(brayns);
+
     auto &engine = brayns.getEngine();
     auto &framebuffer = engine.getFrameBuffer();
 
@@ -54,22 +60,27 @@ TEST_CASE("render_two_frames_and_compare_they_are_same")
 
 TEST_CASE("render_xyz_and_compare")
 {
-    const auto path = BRAYNS_TESTDATA_MODEL_MONKEY_PATH;
-    const char *argv[] = {"testImages", path, "--disable-accumulation"};
-    const int argc = sizeof(argv) / sizeof(char *);
+    brayns::Brayns brayns;
 
-    brayns::Brayns brayns(argc, argv);
+    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_XYZ_PATH);
+    BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
+    auto ambient = std::make_unique<brayns::AmbientLight>();
+    ambient->setIntensity(0.05f);
+    BraynsTestUtils::addLight(brayns, std::move(ambient));
+    BraynsTestUtils::adjustPerspectiveView(brayns);
+
     auto &engine = brayns.getEngine();
 
     brayns.commitAndRender();
-    CHECK(ImageValidator::validate(engine, "testdataMonkey.png"));
+    CHECK(ImageValidator::validate(engine, "testImagesMonkey.png"));
 
-    auto model = engine.getScene().getModel(0);
-    auto properties = model->getProperties();
-    properties.update("radius", properties["radius"].as<double>() / 2.);
-    model->setProperties(properties);
-
-    engine.getScene().markModified();
+    auto &scene = engine.getScene();
+    auto &modelManager = scene.getModelManager();
+    auto &instance = modelManager.getModelInstance(0);
+    auto &model = instance.getModel();
+    auto &component = model.getComponent<brayns::GeometryRendererComponent<brayns::Sphere>>();
+    auto &geometry = component.getGeometry();
+    geometry.mainpulateAll([](uint32_t index, brayns::Sphere &sphere) { sphere.radius *= 0.5f; });
 
     brayns.commitAndRender();
     CHECK(ImageValidator::validate(engine, "testdataMonkey_smaller.png"));

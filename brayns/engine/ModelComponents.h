@@ -101,8 +101,7 @@ private:
     template<typename T, typename... Args>
     T &addComponent(Args &&...args)
     {
-        _components.emplace_back();
-        auto &entry = _components.back();
+        auto &entry = _components.emplace_back();
 
         auto component = std::make_unique<T>(std::forward<Args>(args)...);
         std::type_index type = typeid(T);
@@ -110,9 +109,7 @@ private:
         entry.type = type;
         entry.component = std::move(component);
 
-        auto &result = static_cast<T&>(*entry.component);
-
-        return result;
+        return static_cast<T &>(*entry.component);
     }
 
     /**
@@ -126,7 +123,7 @@ private:
         auto it = _findComponentIterator<T>();
         auto &entry = *it;
         auto &component = *entry.component;
-        return dynamic_cast<T &>(component);
+        return static_cast<T &>(component);
     }
 
     /**
@@ -142,10 +139,7 @@ private:
         const std::type_index ti = typeid(T);
         do
         {
-            it = std::find_if(
-                it,
-                end,
-                [type = ti](ComponentEntry &entry) { return entry.type = type; });
+            it = std::find_if(it, end, [type = ti](ComponentEntry &entry) { return entry.type = type; });
 
             if (it != end)
             {
@@ -169,7 +163,8 @@ private:
         auto it = _findComponentIterator<T>();
         auto &entry = *it;
 
-        auto &component = *entry.component;;
+        auto &component = *entry.component;
+        ;
         component.onDestroyed();
 
         _components.erase(it);
@@ -217,10 +212,7 @@ private:
         auto begin = _components.begin();
         auto end = _components.end();
 
-        auto it = std::find_if(
-            begin,
-            end,
-            [type = ti](ComponentEntry &entry) { return entry.type == type; });
+        auto it = std::find_if(begin, end, [type = ti](ComponentEntry &entry) { return entry.type == type; });
         if (it == _components.end())
         {
             throw std::invalid_argument("No " + TypeNameDemangler::demangle<T>() + " component registered");
@@ -238,7 +230,7 @@ private:
 
         // type_index does not have a default constructor...
         ComponentEntry()
-         : type(typeid(void))
+            : type(typeid(void))
         {
         }
     };

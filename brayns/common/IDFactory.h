@@ -33,23 +33,23 @@ public:
     IDFactory()
     {
         // Narrows it down to unsigned integer types
-        static_assert (std::is_unsigned_v<T>, "ID factory should be instantiated with unsigned integer types");
+        static_assert(std::is_unsigned_v<T>, "ID factory should be instantiated with unsigned integer types");
     }
 
     /**
      * @brief Returns an ID
      * @throws std::runtime_error if the IDs have been exhausted
      */
-    T requestID()
+    T generateID()
     {
-        if(!_releasedIDs.empty())
+        if (!_releasedIDs.empty())
         {
             auto id = _releasedIDs.front();
             _releasedIDs.pop();
             return id;
         }
 
-        if(_factory == std::numeric_limits<T>::max())
+        if (_factory == std::numeric_limits<T>::max())
         {
             throw std::runtime_error("ID factory exhausted");
         }
@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    T _factory {};
+    T _factory{};
     std::queue<T> _releasedIDs;
 };
 }

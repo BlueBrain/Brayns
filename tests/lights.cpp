@@ -19,69 +19,90 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Light.h>
-#include <brayns/engine/LightManager.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/lights/AmbientLight.h>
+#include <brayns/engine/lights/DirectionalLight.h>
+#include <brayns/engine/lights/QuadLight.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
+#include "helpers/BraynsTestUtils.h"
 #include "helpers/ImageValidator.h"
 
-namespace
+TEST_CASE("render_ambient_light")
 {
-const auto YELLOW = brayns::Vector3f(1.0f, 1.0f, 0.0f);
-const auto BLUE = brayns::Vector3f(0.0f, 0.0f, 1.0f);
+    brayns::Brayns brayns;
 
-const float lampHeight = 0.99f;
-const float lampWidth = 0.15f;
+    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
+    BraynsTestUtils::adjustPerspectiveView(brayns);
 
-const brayns::Vector3f lampCentre = {0.5f, lampHeight, 0.5f};
+    auto light = std::make_unique<brayns::AmbientLight>();
 
-const brayns::Vector3f lampPositions[4] = {
-    {lampCentre.x - lampWidth, lampHeight, lampCentre.z - lampWidth},
-    {lampCentre.x + lampWidth, lampHeight, lampCentre.z - lampWidth},
-    {lampCentre.x + lampWidth, lampHeight, lampCentre.z + lampWidth},
-    {lampCentre.x - lampWidth, lampHeight, lampCentre.z + lampWidth}};
-} // namespace
+    const auto lightIntensity = 0.5f;
+    light->setIntensity(lightIntensity);
 
-TEST_CASE("render_scivis_quadlight")
-{
-    const char *argv[] = {"lights", "demo", "--renderer", "scivis", "--no-head-light"};
-    const int argc = sizeof(argv) / sizeof(char *);
+    const auto lightColor = brayns::Vector3f(1.f);
+    light->setColor(lightColor);
 
-    brayns::Brayns brayns(argc, argv);
-    auto &engine = brayns.getEngine();
-
-    engine.getScene().getLightManager().addLight(std::make_shared<brayns::QuadLight>(
-        lampPositions[0],
-        (lampPositions[1] - lampPositions[0]),
-        (lampPositions[3] - lampPositions[0]),
-        YELLOW,
-        1.0f,
-        true));
+    BraynsTestUtils::addLight(brayns, std::move(light));
 
     brayns.commitAndRender();
 
-    CHECK(ImageValidator::validate(engine, "testLightScivisQuadLight.png"));
+    auto &engine = brayns.getEngine();
+    CHECK(ImageValidator::validate(engine, "testLightAmbient.png"));
 }
 
-TEST_CASE("render_scivis_spotlight")
+TEST_CASE("render_directional_light")
 {
-    const char *argv[] = {"lights", "demo", "--renderer", "scivis", "--no-head-light"};
-    const int argc = sizeof(argv) / sizeof(char *);
+    brayns::Brayns brayns;
 
-    brayns::Brayns brayns(argc, argv);
+    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
+    BraynsTestUtils::adjustPerspectiveView(brayns);
+
     auto &engine = brayns.getEngine();
 
-    engine.getScene().getLightManager().addLight(
-        std::make_shared<
-            brayns::SpotLight>(lampCentre, brayns::Vector3f(0, -1, 0), 90.f, 10.f, lampWidth, BLUE, 1.0f, true));
+    const auto lightDirection = glm::normalize(brayns::Vector3f(1.f, 1.f, 0.f));
+    const auto lightIntensity = 5.5f;
+    const auto lightColor = brayns::Vector3f(1.f);
+
+    auto light = std::make_unique<brayns::DirectionalLight>();
+    light->setDirection(lightDirection);
+    light->setIntensity(lightIntensity);
+    light->setColor(lightColor);
+    BraynsTestUtils::addLight(brayns, std::move(light));
+
     brayns.commitAndRender();
 
-    CHECK(ImageValidator::validate(engine, "testLightScivisSpotLight.png"));
+    CHECK(ImageValidator::validate(engine, "testLightDirectional.png"));
+}
+
+TEST_CASE("render_quad_light")
+{
+    brayns::Brayns brayns;
+
+    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
+    BraynsTestUtils::adjustPerspectiveView(brayns);
+
+    auto &engine = brayns.getEngine();
+    auto &scene = engine.getScene();
+    const auto &bounds = scene.getBounds();
+
+    const auto dimensions = bounds.dimensions();
+    const auto lightCorner = bounds.getMax() + brayns::Vector3f(0.f, dimensions.y * 0.25f, 0.f);
+    const auto lightHorizontalVector = brayns::Vector3f(-dimensions.x, 0.f, 0.f);
+    const auto lightVerticalVector = brayns::Vector3f(0.f, 0.f, -dimensions.z);
+    const auto lightIntensity = 5.5f;
+    const auto lightColor = brayns::Vector3f(1.f);
+
+    auto light = std::make_unique<brayns::QuadLight>();
+    light->setBottomLeftCorner(lightCorner);
+    light->setHorizontalDisplacement(lightHorizontalVector);
+    light->setVerticalDisplacement(lightVerticalVector);
+    light->setIntensity(lightIntensity);
+    light->setColor(lightColor);
+    BraynsTestUtils::addLight(brayns, std::move(light));
+
+    brayns.commitAndRender();
+
+    CHECK(ImageValidator::validate(engine, "testLightQuad.png"));
 }

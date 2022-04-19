@@ -24,7 +24,7 @@ namespace brayns
 {
 uint32_t SceneLightManager::addLight(std::unique_ptr<Light> light) noexcept
 {
-    const auto id = _idFactory.requestID();
+    const auto id = _idFactory.generateID();
     light->commit();
     _lights[id] = std::move(light);
     _dirty = true;

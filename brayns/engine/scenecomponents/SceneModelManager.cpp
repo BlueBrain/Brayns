@@ -27,14 +27,17 @@ decltype(auto) findModelIterator(Container &&models, const uint32_t modelId)
 {
     auto begin = models.begin();
     auto end = models.end();
-    auto it = std::find_if(begin, end, [mId = modelId](auto &modelEntry)
-    {
-        auto &model = *modelEntry.model;
-        return model.getID() == mId;
-    });
+    auto it = std::find_if(
+        begin,
+        end,
+        [mId = modelId](auto &modelEntry)
+        {
+            auto &model = *modelEntry.model;
+            return model.getID() == mId;
+        });
 
     // Shouldn't happen, but...
-    if(it == models.end())
+    if (it == models.end())
     {
         throw std::invalid_argument("No model with id " + std::to_string(modelId) + " was found");
     }
@@ -66,7 +69,7 @@ ModelInstance &SceneModelManager::addModel(ModelLoadParameters params, std::uniq
     auto &modelEntry = _models.back();
     modelEntry.params = std::move(params);
     modelEntry.model = std::move(model);
-    modelEntry.model->_modelId = _modelIdFactory.requestID();
+    modelEntry.model->_modelId = _modelIdFactory.generateID();
 
     return _createModelInstance(modelEntry);
 }
@@ -113,7 +116,7 @@ void SceneModelManager::removeModel(const uint32_t instanceID)
     _instanceIdFactory.releaseID(instanceID);
 
     // If no more instances of the model, get rid of it
-    if(modelInstanceList.empty())
+    if (modelInstanceList.empty())
     {
         _models.erase(modelIt);
         _modelIdFactory.releaseID(modelId);
@@ -153,12 +156,12 @@ bool SceneModelManager::commit()
         bool instancesChanged = false;
         for (auto &instance : instances)
         {
-            if(!instance->isVisible())
+            if (!instance->isVisible())
             {
                 continue;
             }
 
-            instancesChanged = instancesChanged || instance->commit(modelChanged);
+            instancesChanged = instance->commit(modelChanged) || instancesChanged;
         }
 
         needsRecommit = needsRecommit || instancesChanged;
@@ -190,7 +193,7 @@ Bounds SceneModelManager::getBounds() const noexcept
 
 ModelInstance &SceneModelManager::_createModelInstance(ModelEntry &modelEntry)
 {
-    const auto instanceID = _instanceIdFactory.requestID();
+    const auto instanceID = _instanceIdFactory.generateID();
     auto &model = *modelEntry.model;
     auto &modelInstanceList = modelEntry.instances;
 
@@ -207,7 +210,7 @@ std::vector<OSPInstance> SceneModelManager::getInstanceHandles() noexcept
     handles.reserve(_instances.size());
     for (auto instance : _instances)
     {
-        if(!instance->isVisible())
+        if (!instance->isVisible())
         {
             continue;
         }
@@ -227,7 +230,7 @@ size_t SceneModelManager::getSizeInBytes() const noexcept
         size += sizeof(ModelInstance) * modelEntry.instances.size();
     }
 
-    size += _instances.size() * sizeof(ModelInstance*);
+    size += _instances.size() * sizeof(ModelInstance *);
 
     return size;
 }

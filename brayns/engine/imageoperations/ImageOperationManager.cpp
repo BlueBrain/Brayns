@@ -37,7 +37,7 @@ uint32_t ImageOperationManager::addOperation(std::unique_ptr<ImageOperation> ope
     _operations.emplace_back();
     auto &entry = _operations.back();
 
-    entry.id = _idFactory.requestID();
+    entry.id = _idFactory.generateID();
     entry.operation = std::move(operation);
 
     entry.operation->commit();
@@ -49,12 +49,9 @@ void ImageOperationManager::removeOperation(const uint32_t id)
 {
     auto begin = _operations.begin();
     auto end = _operations.end();
-    auto it = std::find_if(begin, end, [opId = id](OperationEntry &entry)
-    {
-        return opId == entry.id;
-    });
+    auto it = std::find_if(begin, end, [opId = id](OperationEntry &entry) { return opId == entry.id; });
 
-    if(it == end)
+    if (it == end)
     {
         throw std::invalid_argument("No image operation exists with id " + std::to_string(id));
     }
@@ -67,7 +64,7 @@ std::vector<OSPImageOperation> ImageOperationManager::getOperationHandles() cons
     std::vector<OSPImageOperation> handles;
     handles.reserve(_operations.size());
 
-    for(const auto &entry : _operations)
+    for (const auto &entry : _operations)
     {
         auto &operation = *(entry.operation);
         auto handle = operation.handle();

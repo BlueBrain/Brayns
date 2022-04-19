@@ -36,10 +36,11 @@ namespace brayns
 class SystemPluginAPI : public PluginAPI
 {
 public:
-    SystemPluginAPI(ParametersManager& paramManager,
-                    PluginManager& pluginManager,
-                    Engine& engine,
-                    LoaderRegistry& loadRegistry);
+    SystemPluginAPI(
+        ParametersManager &paramManager,
+        PluginManager &pluginManager,
+        Engine &engine,
+        LoaderRegistry &loadRegistry);
 
     Engine &getEngine() final;
 
@@ -48,10 +49,10 @@ public:
     LoaderRegistry &getLoaderRegistry() final;
 
 private:
-    ParametersManager& _paramManager;
-    PluginManager& _pluginManager;
-    Engine& _engine;
-    LoaderRegistry& _loadRegistry;
+    ParametersManager &_paramManager;
+    PluginManager &_pluginManager;
+    Engine &_engine;
+    LoaderRegistry &_loadRegistry;
 };
 
 /**
@@ -62,7 +63,13 @@ private:
 class Brayns
 {
 public:
-    Brayns(int argc, const char **argv);
+    Brayns(int argc = 0, const char **argv = nullptr);
+
+    Brayns(const Brayns &) = delete;
+    Brayns &operator=(const Brayns &) = delete;
+
+    Brayns(Brayns &&) = default;
+    Brayns &operator=(Brayns &&) = default;
 
     ~Brayns();
 

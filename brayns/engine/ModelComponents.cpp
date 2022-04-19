@@ -99,7 +99,7 @@ bool ModelComponentContainer::commit()
     for (auto &entry : _components)
     {
         auto &component = *entry.component;
-        committed = committed || component.commit();
+        committed = component.commit() || committed;
     }
     return committed;
 }
