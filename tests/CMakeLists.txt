@@ -14,7 +14,7 @@ set(TEST_LIST
     brayns.cpp
     clipping.cpp
     lights.cpp
-    #testImages.cpp
+    images.cpp
 )
 
 set(TEST_TARGET_LIST)
@@ -35,9 +35,7 @@ foreach(TEST ${TEST_LIST})
 
     target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${PROJECT_BINARY_DIR})
 
-    target_link_libraries(${TEST_NAME} PRIVATE
-        brayns braynsEngine braynsIO ${OpenMP_CXX_LIBRARRIES}
-    )
+    target_link_libraries(${TEST_NAME} PRIVATE brayns)
 
     add_test(NAME ${TEST_NAME}
         COMMAND $<TARGET_FILE:${TEST_NAME}>  -l test_suite

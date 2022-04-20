@@ -71,7 +71,7 @@ public:
         auto center = bounds.center();
         auto dimensions = bounds.dimensions();
         auto distance = dimensions.y * 0.5 / glm::tan(glm::radians(fovy * 0.5));
-        const auto position = center + brayns::Vector3f(0.f, 0.f, distance);
+        const auto position = center + brayns::Vector3f(0.f, 0.f, distance + dimensions.z * 0.5f);
         brayns::LookAt view{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
         camera->setLookAt(view);
 

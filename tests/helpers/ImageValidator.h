@@ -83,12 +83,12 @@ private:
 
     static bool _isSavePngEnabled()
     {
-        return true; // std::getenv("BRAYNS_TEST_SAVE_PNG");
+        return std::getenv("BRAYNS_TEST_SAVE_PNG");
     }
 
     static bool _isSaveRawEnabled()
     {
-        return false; // std::getenv("BRAYNS_TEST_SAVE_RAW");
+        return std::getenv("BRAYNS_TEST_SAVE_RAW");
     }
 
     static void _saveRaw(const brayns::Image &image, const std::string &path)

@@ -37,6 +37,7 @@ TEST_CASE("render_two_frames_and_compare_they_are_same")
 {
     brayns::Brayns brayns;
 
+    BraynsTestUtils::setRenderResolution(brayns, 300, 300);
     BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
     BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
     auto ambient = std::make_unique<brayns::AmbientLight>();
@@ -62,17 +63,17 @@ TEST_CASE("render_xyz_and_compare")
 {
     brayns::Brayns brayns;
 
+    BraynsTestUtils::setRenderResolution(brayns, 300, 300);
     BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_XYZ_PATH);
     BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
     auto ambient = std::make_unique<brayns::AmbientLight>();
     ambient->setIntensity(0.05f);
     BraynsTestUtils::addLight(brayns, std::move(ambient));
     BraynsTestUtils::adjustPerspectiveView(brayns);
+    brayns.commitAndRender();
 
     auto &engine = brayns.getEngine();
-
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(engine, "testImagesMonkey.png"));
+    CHECK(ImageValidator::validate(engine, "testImagesXYZ.png"));
 
     auto &scene = engine.getScene();
     auto &modelManager = scene.getModelManager();
@@ -80,33 +81,47 @@ TEST_CASE("render_xyz_and_compare")
     auto &model = instance.getModel();
     auto &component = model.getComponent<brayns::GeometryRendererComponent<brayns::Sphere>>();
     auto &geometry = component.getGeometry();
-    geometry.mainpulateAll([](uint32_t index, brayns::Sphere &sphere) { sphere.radius *= 0.5f; });
-
+    geometry.mainpulateAll(
+        [](uint32_t index, brayns::Sphere &sphere)
+        {
+            (void)index;
+            sphere.radius *= 0.5f;
+        });
     brayns.commitAndRender();
-    CHECK(ImageValidator::validate(engine, "testdataMonkey_smaller.png"));
+
+    CHECK(ImageValidator::validate(engine, "testImagesXYZSmaller.png"));
 }
 
 TEST_CASE("render_protein_and_compare")
 {
-    const char *argv[] = {"testImages", BRAYNS_TESTDATA_MODEL_PDB_PATH, "--disable-accumulation"};
-    const int argc = sizeof(argv) / sizeof(char *);
+    brayns::Brayns brayns;
 
-    brayns::Brayns brayns(argc, argv);
-    auto &engine = brayns.getEngine();
-
+    BraynsTestUtils::setRenderResolution(brayns, 300, 300);
+    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PDB_PATH);
+    BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
+    auto ambient = std::make_unique<brayns::AmbientLight>();
+    ambient->setIntensity(0.05f);
+    BraynsTestUtils::addLight(brayns, std::move(ambient));
+    BraynsTestUtils::adjustPerspectiveView(brayns);
     brayns.commitAndRender();
-    CHECK(ImageValidator::validate(engine, "testdataProtein.png"));
+
+    auto &engine = brayns.getEngine();
+    CHECK(ImageValidator::validate(engine, "testImagesPDB.png"));
 }
 
 TEST_CASE("render_ply_and_compare")
 {
-    const auto path = BRAYNS_TESTDATA_MODEL_LUCY_PATH;
-    const char *argv[] = {"testImages", path, "--disable-accumulation"};
-    const int argc = sizeof(argv) / sizeof(char *);
+    brayns::Brayns brayns;
 
-    brayns::Brayns brayns(argc, argv);
-    auto &engine = brayns.getEngine();
-
+    BraynsTestUtils::setRenderResolution(brayns, 300, 300);
+    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
+    BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
+    auto ambient = std::make_unique<brayns::AmbientLight>();
+    ambient->setIntensity(0.05f);
+    BraynsTestUtils::addLight(brayns, std::move(ambient));
+    BraynsTestUtils::adjustPerspectiveView(brayns);
     brayns.commitAndRender();
-    CHECK(ImageValidator::validate(engine, "testdataLucy.png"));
+
+    auto &engine = brayns.getEngine();
+    CHECK(ImageValidator::validate(engine, "testImagesPLY.png"));
 }
