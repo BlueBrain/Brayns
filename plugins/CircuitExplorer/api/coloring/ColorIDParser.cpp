@@ -8,7 +8,6 @@ uint64_t parseID(const std::string &input)
 {
     try
     {
-
         return std::stoul(input);
     }
     catch (...)
@@ -40,16 +39,16 @@ std::map<uint64_t, brayns::Vector4f> ColorIDParser::parse(const std::vector<Colo
 {
     std::map<uint64_t, brayns::Vector4f> colorMap;
 
-    for(const auto &entry : colors)
+    for (const auto &entry : colors)
     {
         const auto &rawIds = entry.variable;
         const auto &color = entry.color;
 
         const auto tokens = brayns::string_utils::split(rawIds, ',');
-        for(const auto &token : tokens)
+        for (const auto &token : tokens)
         {
-            auto dashPos =  token.find("-");
-            if(dashPos == std::string::npos)
+            auto dashPos = token.find("-");
+            if (dashPos == std::string::npos)
             {
                 const auto id = parseID(token);
                 colorMap[id] = color;
@@ -57,7 +56,7 @@ std::map<uint64_t, brayns::Vector4f> ColorIDParser::parse(const std::vector<Colo
             else
             {
                 const auto range = parseIDRange(token, dashPos);
-                for(uint64_t i = range[0]; i <= range[1]; ++i)
+                for (uint64_t i = range[0]; i <= range[1]; ++i)
                 {
                     colorMap[i] = color;
                 }

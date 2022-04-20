@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/RenderableType.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/RenderableType.h>
 #include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/common/GeometricModelHandler.h>
 #include <brayns/engine/components/MaterialComponent.h>
@@ -85,7 +85,7 @@ public:
      */
     void setColors(const std::vector<brayns::Vector4f> &colors)
     {
-        if(colors.size() < _geometry.getNumGeometries())
+        if (colors.size() < _geometry.getNumGeometries())
         {
             throw std::invalid_argument("Not enough colors for all geometry");
         }
@@ -110,7 +110,7 @@ public:
      * @param transform
      * @return
      */
-    virtual Bounds computeBounds(const Matrix4f& transform) const noexcept override
+    virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
     {
         return _geometry.computeBounds(transform);
     }
@@ -137,24 +137,24 @@ public:
 
         Model &model = getModel();
 
-        if(_geometry.commit())
+        if (_geometry.commit())
         {
             GeometricModelHandler::setGeometry(_model, _geometry);
             needsCommit = true;
         }
 
         auto &material = ExtractModelObject::extractMaterial(model);
-        if(material.commit())
+        if (material.commit())
         {
             GeometricModelHandler::setMaterial(_model, material);
-            if(_useMaterialColor)
+            if (_useMaterialColor)
             {
                 GeometricModelHandler::setColor(_model, material.getColor());
             }
             needsCommit = true;
         }
 
-        if(needsCommit)
+        if (needsCommit)
         {
             GeometricModelHandler::commitModel(_model);
             return true;
@@ -173,10 +173,10 @@ public:
     }
 
 private:
-    OSPGeometricModel _model {nullptr};
+    OSPGeometricModel _model{nullptr};
     Geometry<T> _geometry;
     // Need these to flag to avoid using the material color when need to customize colors
-    bool _useMaterialColor {true};
-    bool _colorDirty {false};
+    bool _useMaterialColor{true};
+    bool _colorDirty{false};
 };
 }

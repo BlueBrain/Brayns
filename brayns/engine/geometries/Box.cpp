@@ -29,10 +29,10 @@ std::string_view RenderableOSPRayID<Box>::get()
 }
 
 template<>
-void RenderableBoundsUpdater<Box>::update(const Box& box, const Matrix4f& t, Bounds& b)
+void RenderableBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bounds &b)
 {
-    const auto& min = box.min;
-    const auto& max = box.max;
+    const auto &min = box.min;
+    const auto &max = box.max;
 
     b.expand(Vector3f(t * Vector4f(min, 1.f)));
     b.expand(Vector3f(t * Vector4f(max, 1.f)));

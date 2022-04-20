@@ -35,7 +35,7 @@ template<>
 std::string_view RenderableOSPRayID<Plane>::get();
 
 template<>
-void RenderableBoundsUpdater<Plane>::update(const Plane& p, const Matrix4f& t, Bounds& b);
+void RenderableBoundsUpdater<Plane>::update(const Plane &p, const Matrix4f &t, Bounds &b);
 
 template<>
 void Geometry<Plane>::commitGeometrySpecificParams();

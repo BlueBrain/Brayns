@@ -54,14 +54,14 @@ public:
 
     virtual void onRequest(const typename Entrypoint<T, EmptyMessage>::Request &request) override
     {
-        T* targetRenderer = nullptr;
+        T *targetRenderer = nullptr;
         try
         {
             auto &renderer = _engine.getRenderer();
-            auto &castedRenderer = dynamic_cast<T&>(renderer);
+            auto &castedRenderer = dynamic_cast<T &>(renderer);
             targetRenderer = &castedRenderer;
         }
-        catch(const std::bad_cast &)
+        catch (const std::bad_cast &)
         {
             auto newRenderer = std::make_unique<T>();
             targetRenderer = newRenderer.get();
@@ -99,8 +99,8 @@ template<typename T>
 class GetRendererEntrypoint : public Entrypoint<EmptyMessage, T>
 {
 public:
-    GetRendererEntrypoint(Engine& engine)
-     : _engine(engine)
+    GetRendererEntrypoint(Engine &engine)
+        : _engine(engine)
     {
     }
 
@@ -109,10 +109,10 @@ public:
         auto &renderer = _engine.getRenderer();
         try
         {
-            auto &castedRenderer = dynamic_cast<T&>(renderer);
+            auto &castedRenderer = dynamic_cast<T &>(renderer);
             request.reply(castedRenderer);
         }
-        catch(const std::bad_cast &)
+        catch (const std::bad_cast &)
         {
             throw JsonRpcException("Cannot cast the renderer to the requested type");
         }

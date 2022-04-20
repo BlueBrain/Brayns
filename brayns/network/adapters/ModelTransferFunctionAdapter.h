@@ -40,8 +40,8 @@ public:
 
 private:
     SceneModelManager *_smm = nullptr;
-    uint32_t _modelId {std::numeric_limits<uint32_t>::max()};
-    TransferFunction* _transferFunction;
+    uint32_t _modelId{std::numeric_limits<uint32_t>::max()};
+    TransferFunction *_transferFunction;
 };
 
 BRAYNS_JSON_ADAPTER_BEGIN(ModelTransferFunction)

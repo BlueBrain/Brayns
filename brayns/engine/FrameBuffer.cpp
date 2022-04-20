@@ -73,7 +73,7 @@ FrameBuffer FrameBuffer::clone() const noexcept
 
 void FrameBuffer::map()
 {
-    if(!_handle)
+    if (!_handle)
     {
         throw std::runtime_error("Framebuffer is not initialized. Cannot be mapped at this time");
     }
@@ -97,14 +97,14 @@ const uint8_t *FrameBuffer::getColorBuffer() const
 
 bool FrameBuffer::commit()
 {
-    if(!isModified())
+    if (!isModified())
     {
         return false;
     }
 
     unmap();
 
-    if(_handle)
+    if (_handle)
     {
         ospRelease(_handle);
     }
@@ -123,7 +123,7 @@ bool FrameBuffer::commit()
     _handle = ospNewFrameBuffer(width, height, format, channels);
 
     auto operations = _operationManager.getOperationHandles();
-    if(!operations.empty())
+    if (!operations.empty())
     {
         auto operationsBuffer = DataHandler::copyBuffer(operations, OSPDataType::OSP_IMAGE_OPERATION);
         ospSetParam(_handle, "imageOperation", OSPDataType::OSP_DATA, &operationsBuffer.handle);
@@ -155,7 +155,7 @@ const Vector2ui &FrameBuffer::getFrameSize() const noexcept
 
 void FrameBuffer::setAccumulation(const bool accumulation) noexcept
 {
-   _updateValue(_accumulation, accumulation);
+    _updateValue(_accumulation, accumulation);
 }
 
 bool FrameBuffer::isAccumulating() const noexcept

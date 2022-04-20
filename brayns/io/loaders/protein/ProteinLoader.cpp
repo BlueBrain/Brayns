@@ -311,9 +311,11 @@ static AtomicRadius atomic_radii[colorMapSize] = // atomic radii in microns
      {"P", 25.f, 113}};
 
 std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
-    const std::string &fileName, const LoaderProgress &cb, const ProteinLoaderParameters &properties) const
+    const std::string &fileName,
+    const LoaderProgress &cb,
+    const ProteinLoaderParameters &properties) const
 {
-    (void) cb;
+    (void)cb;
 
     std::ifstream file(fileName.c_str());
     if (!file.is_open())
@@ -442,7 +444,7 @@ std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
     modelColors.reserve(colorMapSize);
 
     const auto normalizationFactor = 1.f / 255.f;
-    for(const auto& colorMapEntry : colorMap)
+    for (const auto &colorMapEntry : colorMap)
     {
         const auto r = colorMapEntry.R * normalizationFactor;
         const auto g = colorMapEntry.G * normalizationFactor;
@@ -470,7 +472,9 @@ std::vector<std::string> ProteinLoader::getSupportedExtensions() const
 }
 
 std::vector<std::unique_ptr<Model>> ProteinLoader::importFromBlob(
-    Blob &&blob, const LoaderProgress &callback, const ProteinLoaderParameters &properties) const
+    Blob &&blob,
+    const LoaderProgress &callback,
+    const ProteinLoaderParameters &properties) const
 {
     (void)blob;
     (void)callback;

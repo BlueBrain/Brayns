@@ -20,10 +20,9 @@
 
 #include "CircuitColorComponent.h"
 
-CircuitColorComponent::CircuitColorComponent(
-        std::unique_ptr<IColorData> data, std::unique_ptr<IColorHandler> handler)
- : _colorData(std::move(data))
- , _colorHandler(std::move(handler))
+CircuitColorComponent::CircuitColorComponent(std::unique_ptr<IColorData> data, std::unique_ptr<IColorHandler> handler)
+    : _colorData(std::move(data))
+    , _colorHandler(std::move(handler))
 {
 }
 

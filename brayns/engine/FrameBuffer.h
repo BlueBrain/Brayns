@@ -40,11 +40,11 @@ public:
     FrameBuffer() = default;
     ~FrameBuffer();
 
-    FrameBuffer(const FrameBuffer&);
-    FrameBuffer &operator=(const FrameBuffer&);
+    FrameBuffer(const FrameBuffer &);
+    FrameBuffer &operator=(const FrameBuffer &);
 
-    FrameBuffer(FrameBuffer&&) = default;
-    FrameBuffer &operator=(FrameBuffer&&) = default;
+    FrameBuffer(FrameBuffer &&) = default;
+    FrameBuffer &operator=(FrameBuffer &&) = default;
 
     /**
      * @brief Creates a copy of this framebuffer
@@ -139,14 +139,14 @@ public:
     ImageOperationManager &getOperationsManager() noexcept;
 
 private:
-    Vector2ui _frameSize {800u, 600u};
-    PixelFormat _frameBufferFormat {PixelFormat::SRGBA_I8};
-    bool _accumulation {true};
-    int32_t _accumFrames {0};
+    Vector2ui _frameSize{800u, 600u};
+    PixelFormat _frameBufferFormat{PixelFormat::SRGBA_I8};
+    bool _accumulation{true};
+    int32_t _accumFrames{0};
 
-    OSPFrameBuffer _handle {nullptr};
+    OSPFrameBuffer _handle{nullptr};
 
-    uint8_t *_colorBuffer {nullptr};
+    uint8_t *_colorBuffer{nullptr};
 
     ImageOperationManager _operationManager;
 };

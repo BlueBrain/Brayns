@@ -46,7 +46,7 @@ Camera &Camera::operator=(const Camera &o)
 
 Camera::~Camera()
 {
-    if(_handle)
+    if (_handle)
     {
         ospRelease(_handle);
     }
@@ -54,12 +54,12 @@ Camera::~Camera()
 
 bool Camera::commit()
 {
-    if(!isModified())
+    if (!isModified())
     {
         return false;
     }
 
-    if(!_handle)
+    if (!_handle)
     {
         const auto handleName = getOSPHandleName();
         _handle = ospNewCamera(handleName.data());

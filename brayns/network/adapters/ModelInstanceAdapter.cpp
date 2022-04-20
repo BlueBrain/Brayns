@@ -18,19 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include "ModelInstanceAdapter.h"
 
 namespace brayns
 {
 ModelInstanceProxy::ModelInstanceProxy(ModelInstance &modelInstance)
- : _modelInstance(&modelInstance)
+    : _modelInstance(&modelInstance)
 {
 }
 
 uint32_t ModelInstanceProxy::getID() const noexcept
 {
-    if(_modelInstance)
+    if (_modelInstance)
     {
         return _modelInstance->getID();
     }
@@ -40,7 +39,7 @@ uint32_t ModelInstanceProxy::getID() const noexcept
 
 Bounds ModelInstanceProxy::getBounds() const noexcept
 {
-    if(_modelInstance)
+    if (_modelInstance)
     {
         return _modelInstance->getBounds();
     }
@@ -50,7 +49,7 @@ Bounds ModelInstanceProxy::getBounds() const noexcept
 
 std::map<std::string, std::string> ModelInstanceProxy::getModelMetadata() const noexcept
 {
-    if(_modelInstance)
+    if (_modelInstance)
     {
         return _modelInstance->getModelMetadata();
     }
@@ -60,7 +59,7 @@ std::map<std::string, std::string> ModelInstanceProxy::getModelMetadata() const 
 
 Transformation ModelInstanceProxy::getTransform() const noexcept
 {
-    if(_modelInstance)
+    if (_modelInstance)
     {
         return _modelInstance->getTransform();
     }
@@ -75,7 +74,7 @@ void ModelInstanceProxy::setTransform(const Transformation &transform) noexcept
 
 bool ModelInstanceProxy::isVisible() const noexcept
 {
-    if(_modelInstance)
+    if (_modelInstance)
     {
         return _modelInstance->isVisible();
     }

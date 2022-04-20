@@ -30,7 +30,6 @@
 
 namespace brayns
 {
-
 class ReadSceneProxy
 {
 public:

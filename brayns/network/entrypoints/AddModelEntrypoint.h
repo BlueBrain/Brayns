@@ -37,7 +37,7 @@ namespace brayns
 class AddModelEntrypoint : public Entrypoint<FileLoadParameters, std::vector<ModelInstanceProxy>>
 {
 public:
-    AddModelEntrypoint(Scene &scene, LoaderRegistry &loaders, AnimationParameters& animation, CancellationToken token);
+    AddModelEntrypoint(Scene &scene, LoaderRegistry &loaders, AnimationParameters &animation, CancellationToken token);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -48,7 +48,7 @@ public:
 private:
     Scene &_scene;
     LoaderRegistry &_loaders;
-    AnimationParameters  &_animation;
+    AnimationParameters &_animation;
     CancellationToken _token;
 };
 } // namespace brayns

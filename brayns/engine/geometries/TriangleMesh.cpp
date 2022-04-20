@@ -25,7 +25,7 @@
 namespace
 {
 template<typename T>
-void commitVector(OSPGeometry handle, std::vector<T>& data, OSPDataType dataType, const char* id)
+void commitVector(OSPGeometry handle, std::vector<T> &data, OSPDataType dataType, const char *id)
 {
     auto sharedData = ospNewSharedData(data.data(), dataType, data.size());
     ospSetParam(handle, id, OSPDataType::OSP_DATA, &sharedData);
@@ -64,9 +64,9 @@ void TriangleMeshMerger::merge(const TriangleMesh &src, TriangleMesh &dst)
 
     const auto srcIndicesSize = srcIndices.size();
     const auto indicesSize = indices.size();
-    const Vector3ui indexOffset (numVertices);
+    const Vector3ui indexOffset(numVertices);
     indices.reserve(indicesSize + srcIndicesSize);
-    for(const auto &srcIndex : srcIndices)
+    for (const auto &srcIndex : srcIndices)
     {
         indices.push_back(srcIndex + indexOffset);
     }
@@ -79,11 +79,11 @@ std::string_view RenderableOSPRayID<TriangleMesh>::get()
 }
 
 template<>
-void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const Matrix4f& matrix, Bounds& bounds)
+void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh &mesh, const Matrix4f &matrix, Bounds &bounds)
 {
-    const auto& vertices = mesh.vertices;
+    const auto &vertices = mesh.vertices;
 
-    for(const auto& vertex : vertices)
+    for (const auto &vertex : vertices)
     {
         auto point = Vector3f(matrix * Vector4f(vertex, 1.f));
         bounds.expand(point);
@@ -93,17 +93,17 @@ void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, con
 template<>
 uint32_t Geometry<TriangleMesh>::add(TriangleMesh geometry)
 {
-    if(!_geometries.empty())
+    if (!_geometries.empty())
     {
         throw std::runtime_error("TriangleMesh Geometry can only handle 1 mesh");
     }
 
-    if(geometry.vertices.empty())
+    if (geometry.vertices.empty())
     {
         throw std::invalid_argument("TriangleMesh must provide vertex positions");
     }
 
-    if(geometry.indices.empty())
+    if (geometry.indices.empty())
     {
         throw std::invalid_argument("TriangleMesh must provide vertex indices");
     }
@@ -115,9 +115,9 @@ uint32_t Geometry<TriangleMesh>::add(TriangleMesh geometry)
 }
 
 template<>
-std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh>& geometries)
+std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh> &geometries)
 {
-    (void) geometries;
+    (void)geometries;
     throw std::runtime_error("TriangleMesh Geometry can only handle 1 mesh. Use add() to add a single mesh");
     return {};
 }
@@ -125,7 +125,7 @@ std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh
 template<>
 std::vector<uint32_t> Geometry<TriangleMesh>::set(std::vector<TriangleMesh> geometries)
 {
-    (void) geometries;
+    (void)geometries;
     throw std::runtime_error("TriangleMesh Geometry can only handle 1 mesh. Use add() to add a single mesh");
     return {};
 }
@@ -133,20 +133,20 @@ std::vector<uint32_t> Geometry<TriangleMesh>::set(std::vector<TriangleMesh> geom
 template<>
 void Geometry<TriangleMesh>::commitGeometrySpecificParams()
 {
-    auto& mesh = _geometries[0];
+    auto &mesh = _geometries[0];
 
-    auto& vertices = mesh.vertices;
-    auto& indices = mesh.indices;
-    auto& normals = mesh.normals;
-    auto& texCoors = mesh.uvs;
-    auto& colors = mesh.colors;
+    auto &vertices = mesh.vertices;
+    auto &indices = mesh.indices;
+    auto &normals = mesh.normals;
+    auto &texCoors = mesh.uvs;
+    auto &colors = mesh.colors;
 
     commitVector(_handle, vertices, OSPDataType::OSP_VEC3F, "vertex.position");
     commitVector(_handle, indices, OSPDataType::OSP_VEC3UI, "index");
 
-    if(!normals.empty())
+    if (!normals.empty())
     {
-        if(normals.size() != vertices.size())
+        if (normals.size() != vertices.size())
         {
             Log::warn("TriangleMesh does not have a normal vector per vertex. Skipping");
         }
@@ -156,9 +156,9 @@ void Geometry<TriangleMesh>::commitGeometrySpecificParams()
         }
     }
 
-    if(!texCoors.empty())
+    if (!texCoors.empty())
     {
-        if(texCoors.size() != vertices.size())
+        if (texCoors.size() != vertices.size())
         {
             Log::warn("TriangleMesh does not have an UV coordinate per vertex. Skipping");
         }
@@ -168,9 +168,9 @@ void Geometry<TriangleMesh>::commitGeometrySpecificParams()
         }
     }
 
-    if(!colors.empty())
+    if (!colors.empty())
     {
-        if(colors.size() != vertices.size())
+        if (colors.size() != vertices.size())
         {
             Log::warn("TriangleMesh does not have a color per vertex. Skipping");
         }

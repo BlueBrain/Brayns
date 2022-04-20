@@ -68,19 +68,19 @@ void Renderer::setMaxRayBounces(const int32_t maxBounces) noexcept
     _updateValue(_maxRayBounces, maxBounces);
 }
 
-void Renderer::setBackgroundColor(const Vector4f& background) noexcept
+void Renderer::setBackgroundColor(const Vector4f &background) noexcept
 {
     _updateValue(_backgroundColor, background);
 }
 
 bool Renderer::commit()
 {
-    if(!isModified())
+    if (!isModified())
     {
         return false;
     }
 
-    if(!_handle)
+    if (!_handle)
     {
         const auto handleName = getOSPHandleName();
         _handle = ospNewRenderer(handleName.data());

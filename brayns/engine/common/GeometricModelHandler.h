@@ -38,8 +38,8 @@ struct GeometricModelHandler
     template<typename T>
     static void setGeometry(OSPGeometricModel model, Geometry<T> &geometry)
     {
-            auto geometryHandle = geometry.handle();
-            ospSetParam(model, "geometry", OSPDataType::OSP_GEOMETRY, &geometryHandle);
+        auto geometryHandle = geometry.handle();
+        ospSetParam(model, "geometry", OSPDataType::OSP_GEOMETRY, &geometryHandle);
     }
 
     static void setMaterial(OSPGeometricModel model, Material &material);

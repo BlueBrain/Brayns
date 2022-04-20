@@ -33,12 +33,12 @@
 #include <chrono>
 #include <thread>
 
-
 namespace
 {
-std::string writeSnapshotToDisk(const std::string& path, const
-                                brayns::GenericImageSettings &imageSettings,
-                                brayns::FrameBuffer &fb)
+std::string writeSnapshotToDisk(
+    const std::string &path,
+    const brayns::GenericImageSettings &imageSettings,
+    brayns::FrameBuffer &fb)
 {
     const auto &format = imageSettings.format;
     auto image = fb.getImage();
@@ -78,9 +78,7 @@ class SnapshotHandler
 public:
     using Request = brayns::SnapshotEntrypoint::Request;
 
-    static void handle(const Request &request,
-                       brayns::Engine &engine,
-                       brayns::CancellationToken &token)
+    static void handle(const Request &request, brayns::Engine &engine, brayns::CancellationToken &token)
     {
         auto progress = brayns::ProgressHandler(token, request);
 
@@ -127,14 +125,14 @@ public:
         animation.setFrame(animationFrameIndex);
 
         // Scene
-        auto& scene = engine.getScene();
+        auto &scene = engine.getScene();
         scene.preRender(parameters);
         scene.commit();
 
         // Render
         auto future = brayns::FrameRenderer::asynchronous(camera, frameBuffer, renderer, scene);
         const auto msg = "Rendering snapshot ...";
-        while(!ospIsReady(future))
+        while (!ospIsReady(future))
         {
             const auto percentage = ospGetProgress(future);
             progress.notify(msg, percentage);

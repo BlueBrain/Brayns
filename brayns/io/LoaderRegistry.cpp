@@ -33,8 +33,8 @@ namespace brayns
 LoaderRegistry::LoaderRegistry()
 {
     registerLoader(std::make_unique<ProteinLoader>());
-    //registerLoader(std::make_unique<RawVolumeLoader>());
-    //registerLoader(std::make_unique<MHDVolumeLoader>());
+    // registerLoader(std::make_unique<RawVolumeLoader>());
+    // registerLoader(std::make_unique<MHDVolumeLoader>());
     registerLoader(std::make_unique<XYZBLoader>());
     registerLoader(std::make_unique<MeshLoader>());
 }

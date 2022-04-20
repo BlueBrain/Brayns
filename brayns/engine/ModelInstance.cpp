@@ -46,7 +46,7 @@ auto glmMatrixToAffine(const brayns::Matrix4f &transform) noexcept
 
 namespace brayns
 {
-ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model& model)
+ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model &model)
     : _modelInstanceID(modelInstanceID)
     , _model(model)
 {
@@ -72,7 +72,7 @@ const Bounds &ModelInstance::getBounds() const noexcept
 void ModelInstance::computeBounds() noexcept
 {
     Log::debug("[ModelInstance {}] Computing bounds", _modelInstanceID);
-    
+
     const auto matrix = _transformation.toMatrix();
     _bounds = _model.computeBounds(matrix);
 
@@ -80,7 +80,7 @@ void ModelInstance::computeBounds() noexcept
     // The result of computeBounds() would be bounds with min > max.
     const auto &min = _bounds.getMin();
     const auto &max = _bounds.getMax();
-    if(glm::max(min, max) == min)
+    if (glm::max(min, max) == min)
     {
         _bounds = Bounds(Vector3f(0.f), Vector3f(0.f));
     }

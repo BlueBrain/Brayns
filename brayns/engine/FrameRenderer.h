@@ -36,7 +36,7 @@ struct FrameRenderer
      * @param renderer
      * @param scene
      */
-    static void synchronous(const Camera& camera, const FrameBuffer& fb, const Renderer& renderer, const Scene& scene);
+    static void synchronous(const Camera &camera, const FrameBuffer &fb, const Renderer &renderer, const Scene &scene);
 
     /**
      * @brief Renders a frame asynchronously. The function returns inmediatly with an OSPFuture, which can be used
@@ -47,6 +47,6 @@ struct FrameRenderer
      * @param scene
      * @return OSPFuture
      */
-    static OSPFuture asynchronous(const Camera& cam, const FrameBuffer& fb, const Renderer& render, const Scene& scen);
+    static OSPFuture asynchronous(const Camera &cam, const FrameBuffer &fb, const Renderer &render, const Scene &scen);
 };
 }

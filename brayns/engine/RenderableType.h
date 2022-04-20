@@ -45,12 +45,12 @@ struct RenderableBoundsUpdater
      * @param transform The matrix by which to trasnform the geometry
      * @param bounds The bounds to update
      */
-    static void update(const T& renderableType, const Matrix4f& transform, Bounds& bounds)
+    static void update(const T &renderableType, const Matrix4f &transform, Bounds &bounds)
     {
-        (void) renderableType;
-        (void) transform;
-        (void) bounds;
-        const std::string typeName (typeid(T).name());
+        (void)renderableType;
+        (void)transform;
+        (void)bounds;
+        const std::string typeName(typeid(T).name());
         throw std::runtime_error("No implementation for " + typeName);
     }
 };
@@ -66,7 +66,7 @@ struct RenderableOSPRayID
      */
     static std::string_view get()
     {
-        const std::string typeName (typeid(T).name());
+        const std::string typeName(typeid(T).name());
         throw std::runtime_error("No implementation for " + typeName);
     }
 };
@@ -84,11 +84,11 @@ public:
         _handle = ospNewGeometry(RenderableOSPRayID<T>::get().data());
     }
 
-    Geometry(const Geometry&) = delete;
-    Geometry &operator=(const Geometry& o) = delete;
+    Geometry(const Geometry &) = delete;
+    Geometry &operator=(const Geometry &o) = delete;
 
-    Geometry(Geometry&&) = default;
-    Geometry &operator=(Geometry&&) = default;
+    Geometry(Geometry &&) = default;
+    Geometry &operator=(Geometry &&) = default;
 
     ~Geometry()
     {
@@ -122,7 +122,7 @@ public:
     {
         const auto idx = _geometries.size();
         constexpr auto limit = std::numeric_limits<uint32_t>::max();
-        if(idx >= limit)
+        if (idx >= limit)
             throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
 
         _geometries.emplace_back(std::move(geometry));
@@ -137,19 +137,19 @@ public:
      * @returns A list of indices at which the given list of geometries were added to the buffer. These indices,
      * returned in the same order as the input geometries, are the same that OSPRay will use as 'primID' within itself.
      */
-    std::vector<uint32_t> add(const std::vector<T>& geometries)
+    std::vector<uint32_t> add(const std::vector<T> &geometries)
     {
         const auto idx = _geometries.size();
         const auto endIdx = idx + geometries.size();
         constexpr auto limit = std::numeric_limits<uint32_t>::max();
-        if(idx >= limit || endIdx >= limit)
+        if (idx >= limit || endIdx >= limit)
         {
             throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
         }
 
         _geometries.insert(_geometries.end(), geometries.begin(), geometries.end());
 
-        std::vector<uint32_t> result (geometries.size());
+        std::vector<uint32_t> result(geometries.size());
         std::iota(result.begin(), result.end(), static_cast<uint32_t>(idx));
         _dirty = true;
         return result;
@@ -158,30 +158,29 @@ public:
     /**
      * @brief Sets the primitives of this geometry object. Returns the list of indices that correspond
      * to the added geometries
-     * 
-     * @param geometries 
-     * @return std::vector<uint32_t> 
+     *
+     * @param geometries
+     * @return std::vector<uint32_t>
      */
     std::vector<uint32_t> set(std::vector<T> geometries)
     {
         constexpr auto limit = std::numeric_limits<uint32_t>::max();
-        if(geometries.size() >= limit)
+        if (geometries.size() >= limit)
         {
             throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
         }
         _geometries = std::move(geometries);
-        std::vector<uint32_t> result (_geometries.size());
+        std::vector<uint32_t> result(_geometries.size());
         std::iota(result.begin(), result.end(), 0u);
         _dirty = true;
         return result;
     }
 
-
     /**
      * @brief Retrieves a constant reference to a geometry given its index in the Geometry buffer.
      * @throws std::invalid_argument if the given index goes beyond the Geometry buffer size.
      */
-    const T& get(const uint32_t index) const
+    const T &get(const uint32_t index) const
     {
         _checkIndex(index);
         return _geometries[index];
@@ -200,10 +199,10 @@ public:
      * The callback must have the signature void(GeometryType&).
      * @throws std::invalid_argument if the given index goes beyond the Geometry buffer size.
      */
-    void manipulate(const uint32_t index, const std::function<void(T&)>& manipulationCallback)
+    void manipulate(const uint32_t index, const std::function<void(T &)> &manipulationCallback)
     {
         _checkIndex(index);
-        auto& geometry = _geometries[index];
+        auto &geometry = _geometries[index];
         _dirty = true;
         manipulationCallback(geometry);
     }
@@ -212,11 +211,11 @@ public:
      * @brief Allows to pass a callback to mainipulate all the geometries on thie Geometry buffer.
      * The callback must have the signature void(const uint32_t index, GeometryType&).
      */
-    void mainpulateAll(const std::function<void(const uint32_t, T&)>& mainpulationCallback)
+    void mainpulateAll(const std::function<void(const uint32_t, T &)> &mainpulationCallback)
     {
         _dirty = true;
         const auto end = static_cast<uint32_t>(_geometries.size());
-        for(uint32_t i = 0; i < end; ++i)
+        for (uint32_t i = 0; i < end; ++i)
             mainpulationCallback(i, _geometries[i]);
     }
 
@@ -242,21 +241,21 @@ public:
      * There must be a specialization of GeometryBoundsUpdater::updateBounds for the gometry type
      * handled.
      */
-    Bounds computeBounds(const Matrix4f& transform) const noexcept
+    Bounds computeBounds(const Matrix4f &transform) const noexcept
     {
         Bounds result;
-        #pragma omp parallel
+#pragma omp parallel
         {
             Bounds local;
 
-            #pragma omp for
-            for(size_t i = 0; i < _geometries.size(); ++i)
+#pragma omp for
+            for (size_t i = 0; i < _geometries.size(); ++i)
             {
-                const auto& geometry = _geometries[i];
+                const auto &geometry = _geometries[i];
                 RenderableBoundsUpdater<T>::update(geometry, transform, local);
             }
 
-            #pragma omp critical (local_bounds_merge_section)
+#pragma omp critical(local_bounds_merge_section)
             result.expand(local);
         }
 
@@ -270,12 +269,12 @@ public:
      */
     bool commit()
     {
-        if(!_dirty)
+        if (!_dirty)
         {
             return false;
         }
 
-        if(!_geometries.empty())
+        if (!_geometries.empty())
         {
             commitGeometrySpecificParams();
         }
@@ -300,7 +299,7 @@ private:
      */
     void commitGeometrySpecificParams()
     {
-        const std::string typeName (typeid(T).name());
+        const std::string typeName(typeid(T).name());
         Log::warn("No commitGeometrySpecificParams() implementation for {}", typeName);
     }
 
@@ -311,13 +310,13 @@ private:
     void _checkIndex(const uint32_t index) const
     {
         const auto size = static_cast<uint32_t>(_geometries.size());
-        if(index >= size)
+        if (index >= size)
             throw std::invalid_argument("Geometry index out of range");
     }
 
 private:
-    OSPGeometry _handle {nullptr};
-    bool _dirty {false};
+    OSPGeometry _handle{nullptr};
+    bool _dirty{false};
 
     // Shared, to allow instances to share the geometry memory
     std::vector<T> _geometries;
@@ -339,11 +338,11 @@ public:
         _handle = ospNewVolume(RenderableOSPRayID<T>::get().data());
     }
 
-    Volume(const Volume&) = delete;
-    Volume& operator=(const Volume&) = delete;
+    Volume(const Volume &) = delete;
+    Volume &operator=(const Volume &) = delete;
 
-    Volume(Volume&&) = default;
-    Volume& operator=(Volume&&) = default;
+    Volume(Volume &&) = default;
+    Volume &operator=(Volume &&) = default;
 
     ~Volume()
     {
@@ -362,7 +361,7 @@ public:
     /**
      * @brief Returns the current volume data
      */
-    const T& getData() const noexcept
+    const T &getData() const noexcept
     {
         return _volumeData;
     }
@@ -370,7 +369,7 @@ public:
     /**
      * @brief Allows to pass a callback to modify the volume data, which will trigger a commit of the data to OSPRay
      */
-    void manipulate(const std::function<void(T& volumeData)>& callback)
+    void manipulate(const std::function<void(T &volumeData)> &callback)
     {
         callback(_volumeData);
         _dirty = true;
@@ -382,7 +381,7 @@ public:
      */
     bool commit()
     {
-        if(!_dirty)
+        if (!_dirty)
         {
             return false;
         }
@@ -398,7 +397,7 @@ public:
      * @brief Computes the bounds of this volume with the given trasnformation. It will call the VolumeBoundsUpdater
      * with the type this Volume has been instantiated.
      */
-    Bounds computeBounds(const Matrix4f& transform) const noexcept
+    Bounds computeBounds(const Matrix4f &transform) const noexcept
     {
         Bounds result;
         RenderableBoundsUpdater<T>::update(_volumeData, transform, result);
@@ -424,14 +423,14 @@ private:
      */
     void commitVolumeSpecificParams()
     {
-        const std::string name (typeid(T).name());
+        const std::string name(typeid(T).name());
         throw std::runtime_error("No commitVolumeSpecificParams() specialization for " + name);
     }
 
 private:
     T _volumeData;
 
-    OSPVolume _handle {nullptr};
-    bool _dirty {false};
+    OSPVolume _handle{nullptr};
+    bool _dirty{false};
 };
 }

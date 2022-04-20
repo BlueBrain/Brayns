@@ -35,7 +35,7 @@ template<>
 std::string_view RenderableOSPRayID<Box>::get();
 
 template<>
-void RenderableBoundsUpdater<Box>::update(const Box& s, const Matrix4f& t, Bounds& b);
+void RenderableBoundsUpdater<Box>::update(const Box &s, const Matrix4f &t, Bounds &b);
 
 template<>
 void Geometry<Box>::commitGeometrySpecificParams();

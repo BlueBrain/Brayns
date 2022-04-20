@@ -33,9 +33,9 @@ namespace brayns
 {
 struct LookAt
 {
-    Vector3f position {0.f};
-    Vector3f target {0.f, 0.f, 1.f};
-    Vector3f up {0.f, 1.f, 0.f};
+    Vector3f position{0.f};
+    Vector3f target{0.f, 0.f, 1.f};
+    Vector3f up{0.f, 1.f, 0.f};
 };
 
 bool operator==(const LookAt &a, const LookAt &b) noexcept;

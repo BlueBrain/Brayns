@@ -74,7 +74,7 @@ void ColorCircuitByIdEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     const auto modelId = params.model_id;
     const auto &colorInfo = params.color_info;
-    auto& colorHandler = ColorHandlerExtractor::extract(_modelManager, modelId);
+    auto &colorHandler = ColorHandlerExtractor::extract(_modelManager, modelId);
     const auto colorMap = ColorIDParser::parse(colorInfo);
     colorHandler.updateColorById(colorMap);
     request.reply(brayns::EmptyMessage());
@@ -124,7 +124,7 @@ void AvailableColorMethodsEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     const auto modelId = params.model_id;
-    auto& colorData = ColorDataExtractor::extract(_modelManager, modelId);
+    auto &colorData = ColorDataExtractor::extract(_modelManager, modelId);
     request.reply({colorData.getMethods()});
 }
 

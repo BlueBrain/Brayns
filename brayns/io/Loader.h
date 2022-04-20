@@ -114,8 +114,8 @@ public:
      * @return a std::vector with all the brayns::ModelDescriptor loaded from
      * the file
      */
-    virtual std::vector<std::unique_ptr<Model>> loadFromFile(
-        const std::string &path, const LoaderProgress &callback, const JsonValue &params) const = 0;
+    virtual std::vector<std::unique_ptr<Model>>
+        loadFromFile(const std::string &path, const LoaderProgress &callback, const JsonValue &params) const = 0;
 };
 
 /**
@@ -145,8 +145,8 @@ public:
         return importFromBlob(std::move(blob), callback, inputParams);
     }
 
-    virtual std::vector<std::unique_ptr<Model>> loadFromFile(
-        const std::string &path, const LoaderProgress &callback, const JsonValue &params) const override
+    virtual std::vector<std::unique_ptr<Model>>
+        loadFromFile(const std::string &path, const LoaderProgress &callback, const JsonValue &params) const override
     {
         const T inputParams = _parseParameters(params);
         return importFromFile(path, callback, inputParams);
@@ -171,8 +171,8 @@ public:
      * @param properties Properties used for loading
      * @return the model that has been created by the loader
      */
-    virtual std::vector<std::unique_ptr<Model>> importFromFile(
-        const std::string &filename, const LoaderProgress &callback, const T &properties) const = 0;
+    virtual std::vector<std::unique_ptr<Model>>
+        importFromFile(const std::string &filename, const LoaderProgress &callback, const T &properties) const = 0;
 
 private:
     const JsonSchema _parameterSchema;
@@ -233,13 +233,17 @@ public:
      * @param callback a callback to update the load progress to the caller
      * @return a std::vector with the loaded ModelDescriptorPtr objects
      */
-    virtual std::vector<std::unique_ptr<Model>>
-        importFromFile(const std::string &path, const LoaderProgress &callback) const = 0;
+    virtual std::vector<std::unique_ptr<Model>> importFromFile(const std::string &path, const LoaderProgress &callback)
+        const = 0;
 
     std::vector<std::unique_ptr<Model>> importFromBlob(
-        Blob &&blob, const LoaderProgress &callback, const EmptyLoaderParameters &parameters) const final;
+        Blob &&blob,
+        const LoaderProgress &callback,
+        const EmptyLoaderParameters &parameters) const final;
 
     std::vector<std::unique_ptr<Model>> importFromFile(
-        const std::string &path, const LoaderProgress &callback, const EmptyLoaderParameters &parameters) const final;
+        const std::string &path,
+        const LoaderProgress &callback,
+        const EmptyLoaderParameters &parameters) const final;
 };
 } // namespace brayns

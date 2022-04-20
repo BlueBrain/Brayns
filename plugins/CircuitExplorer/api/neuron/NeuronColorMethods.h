@@ -32,7 +32,6 @@ inline std::vector<std::pair<std::string, NeuronColorMethods>> enumMap()
         {"morphology", NeuronColorMethods::BY_MORPHOLOGY},
         {"morphology class", NeuronColorMethods::BY_MORPHOLOGY_CLASS},
         {"morphology section", NeuronColorMethods::BY_MORPHOLOGY_SECTION},
-        {"synapse class", NeuronColorMethods::BY_SYNAPSE_CLASS}
-    };
+        {"synapse class", NeuronColorMethods::BY_SYNAPSE_CLASS}};
 }
 }

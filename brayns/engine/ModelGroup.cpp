@@ -29,9 +29,9 @@ namespace
 struct HandleCommitter
 {
     template<typename T>
-    static void commit(const std::vector<T> &handleList, OSPDataType type, OSPGroup groupHandle, const char* id)
+    static void commit(const std::vector<T> &handleList, OSPDataType type, OSPGroup groupHandle, const char *id)
     {
-        if(!handleList.empty())
+        if (!handleList.empty())
         {
             auto buffer = brayns::DataHandler::copyBuffer(handleList, type);
             ospSetParam(groupHandle, id, OSPDataType::OSP_DATA, &buffer.handle);
@@ -45,7 +45,7 @@ struct ModelEraser
     static bool removeModel(std::vector<T> &modelList, T value)
     {
         auto it = std::find(modelList.begin(), modelList.end(), value);
-        if(it != modelList.end())
+        if (it != modelList.end())
         {
             modelList.erase(it);
             return true;
@@ -65,7 +65,7 @@ ModelGroup::ModelGroup()
 
 ModelGroup::~ModelGroup()
 {
-    if(_handle)
+    if (_handle)
         ospRelease(_handle);
 }
 
@@ -109,7 +109,7 @@ OSPGroup ModelGroup::handle() const noexcept
 
 void ModelGroup::commit()
 {
-    if(!_modified)
+    if (!_modified)
     {
         return;
     }

@@ -52,7 +52,7 @@ ToneMapping &ToneMapping::operator=(ToneMapping &&other)
 
 ToneMapping::~ToneMapping()
 {
-    if(_handle)
+    if (_handle)
     {
         ospRelease(_handle);
     }

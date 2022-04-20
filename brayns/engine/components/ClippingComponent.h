@@ -36,7 +36,7 @@ template<typename T>
 class ClippingComponent : public Component
 {
 public:
-    ClippingComponent(const T& geometry)
+    ClippingComponent(const T &geometry)
     {
         _model = GeometricModelHandler::create();
         _geometry.add(geometry);
@@ -59,7 +59,7 @@ public:
 
     virtual bool commit() override
     {
-        if(_geometry.commit())
+        if (_geometry.commit())
         {
             GeometricModelHandler::setGeometry(_model, _geometry);
             GeometricModelHandler::commitModel(_model);
@@ -76,7 +76,7 @@ public:
     }
 
 private:
-    OSPGeometricModel _model {nullptr};
+    OSPGeometricModel _model{nullptr};
     Geometry<T> _geometry;
 };
 }

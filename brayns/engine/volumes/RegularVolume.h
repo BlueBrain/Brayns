@@ -29,7 +29,7 @@
 
 namespace brayns
 {
-enum class RegularVolumeDataType: uint32_t
+enum class RegularVolumeDataType : uint32_t
 {
     BYTE = OSPDataType::OSP_UCHAR,
     SHORT = OSPDataType::OSP_SHORT,
@@ -48,16 +48,16 @@ struct RegularVolume
     // Specifies how to interpret the bytes stored as data
     RegularVolumeDataType dataType;
     std::vector<uint8_t> data;
-    Vector3ui size {0u};
+    Vector3ui size{0u};
     // Specifies wether the data is scpeified as per grid vertex. If false, is specified as per grid cell center.
-    bool perVertexData {true};
+    bool perVertexData{true};
 };
 
 template<>
 std::string_view RenderableOSPRayID<RegularVolume>::get();
 
 template<>
-void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume& s, const Matrix4f& t, Bounds& b);
+void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume &s, const Matrix4f &t, Bounds &b);
 
 template<>
 uint64_t Volume<RegularVolume>::getSizeInBytes() const noexcept;

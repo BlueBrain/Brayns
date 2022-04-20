@@ -41,7 +41,7 @@ public:
         _initializeHandle();
     }
 
-    VolumeRendererComponent(const T& volume)
+    VolumeRendererComponent(const T &volume)
     {
         _initializeHandle();
         _volume.add(volume);
@@ -49,7 +49,7 @@ public:
 
     ~VolumeRendererComponent()
     {
-        if(_model)
+        if (_model)
             ospRelease(_model);
     }
 
@@ -58,28 +58,28 @@ public:
         return sizeof(VolumeRendererComponent<T>);
     }
 
-    virtual Bounds computeBounds(const Matrix4f& transform) const noexcept override
+    virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
     {
         return _volume.computeBounds(transform);
     }
 
     virtual void onStart() override
     {
-        Model& model = getModel();
-        auto& group = model.getGroup();
+        Model &model = getModel();
+        auto &group = model.getGroup();
         group.addVolumetricModel(_model);
     }
 
     virtual bool commit() override
     {
-        Model& model = getModel();
+        Model &model = getModel();
 
         bool needsCommit = false;
 
         needsCommit = needsCommit || _commitVolume();
         needsCommit = needsCommit || _commitTransferFunction();
 
-        if(needsCommit)
+        if (needsCommit)
         {
             ospCommit(_model);
         }
@@ -89,8 +89,8 @@ public:
 
     virtual void onDestroyed() override
     {
-        auto& model = getModel();
-        auto& group = model.getGroup();
+        auto &model = getModel();
+        auto &group = model.getGroup();
         group.removeVolumetricModel(_model);
         ospRelease(_model);
         _model = nullptr;
@@ -110,7 +110,7 @@ private:
 
     bool _commitVolume()
     {
-        if(_volume.commit())
+        if (_volume.commit())
         {
             auto volumeHandle = _volume.handle();
             ospSetParam(_model, "volume", OSPDataType::OSP_VOLUME, &volumeHandle);
@@ -122,10 +122,10 @@ private:
 
     bool _commitTransferFunction()
     {
-        Model& model = getModel();
+        Model &model = getModel();
         auto &tfComponent = model.getComponent<TransferFunctionRendererComponent>();
 
-        if(tfComponent.manualCommit())
+        if (tfComponent.manualCommit())
         {
             auto tfHandle = tfComponent.handle();
             ospSetParam(_model, "transferFunction", OSPDataType::OSP_TRANSFER_FUNCTION, &tfHandle);
@@ -136,7 +136,7 @@ private:
     }
 
 private:
-    OSPVolumetricModel _model {nullptr};
+    OSPVolumetricModel _model{nullptr};
     Volume<T> _volume;
 };
 }

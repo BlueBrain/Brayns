@@ -150,7 +150,7 @@ size_t DTIComponent::getNumStreamlines() const noexcept
 
 void DTIComponent::setDefaultColors() noexcept
 {
-    for(auto &streamline : _streamlines)
+    for (auto &streamline : _streamlines)
     {
         auto &colors = streamline.colors;
         auto &geometry = streamline.geometry;
@@ -160,7 +160,6 @@ void DTIComponent::setDefaultColors() noexcept
 
     _commitColors();
 }
-
 
 void DTIComponent::updateSimulation(const std::vector<std::vector<float>> &data)
 {
@@ -172,7 +171,7 @@ void DTIComponent::updateSimulation(const std::vector<std::vector<float>> &data)
     for (size_t i = 0; i < _streamlines.size(); ++i)
     {
         auto &streamlineData = data[i];
-        if(streamlineData.empty())
+        if (streamlineData.empty())
         {
             continue;
         }
@@ -182,10 +181,10 @@ void DTIComponent::updateSimulation(const std::vector<std::vector<float>> &data)
 
         const auto streamlineLength = colors.size() - 1;
 
-        for(const auto value : streamlineData)
+        for (const auto value : streamlineData)
         {
             auto index = static_cast<size_t>(value * streamlineLength);
-            index = index > streamlineLength? streamlineLength : index;
+            index = index > streamlineLength ? streamlineLength : index;
             colors[index] = brayns::Vector4f(1.f);
         }
     }
@@ -195,7 +194,7 @@ void DTIComponent::updateSimulation(const std::vector<std::vector<float>> &data)
 
 void DTIComponent::_commitColors() noexcept
 {
-    for(auto &streamline : _streamlines)
+    for (auto &streamline : _streamlines)
     {
         auto &colors = streamline.colors;
         auto colorBuffer = brayns::DataHandler::shareBuffer(colors, OSPDataType::OSP_VEC4F);

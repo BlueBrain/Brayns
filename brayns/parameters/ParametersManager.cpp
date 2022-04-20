@@ -238,7 +238,7 @@ void ParametersManager::_processUnrecognizedOptions(const std::vector<std::strin
     const auto &unrecognized = unrecognizedOptions.front();
 
     std::vector<std::string> availableOptions;
-    for (const auto& option : _allOptions.options())
+    for (const auto &option : _allOptions.options())
         availableOptions.push_back(option->format_name());
 
     const auto suggestions = findSimilarOptions(unrecognized, availableOptions);

@@ -31,12 +31,11 @@
 
 namespace
 {
-
-
-void logExportInfo(const size_t numKeyFrames,
-                   const std::string& path,
-                   const brayns::Vector2ui &frameSize,
-                   const brayns::Renderer& renderer)
+void logExportInfo(
+    const size_t numKeyFrames,
+    const std::string &path,
+    const brayns::Vector2ui &frameSize,
+    const brayns::Renderer &renderer)
 {
     const auto w = frameSize.x;
     const auto h = frameSize.y;
@@ -86,10 +85,11 @@ std::string writeFrameToDisk(const brayns::ExportFramesParams &params, const uin
 class FrameExporter
 {
 public:
-    static void exportFrames(brayns::Engine &engine,
-                             brayns::ParametersManager& paramsManager,
-                             brayns::CancellationToken &token,
-                             const brayns::ExportFramesEntrypoint::Request &request)
+    static void exportFrames(
+        brayns::Engine &engine,
+        brayns::ParametersManager &paramsManager,
+        brayns::CancellationToken &token,
+        const brayns::ExportFramesEntrypoint::Request &request)
     {
         brayns::ExportFramesEntrypoint::Result result = {};
 
@@ -97,7 +97,7 @@ public:
         const auto &systemFrameSize = systemFrameBuffer.getFrameSize();
 
         // Progress
-        brayns::ProgressHandler progress (token, request);
+        brayns::ProgressHandler progress(token, request);
 
         // Initialize parameters
         const auto params = request.getParams();
@@ -130,11 +130,11 @@ public:
         frameBuffer.commit();
 
         // Scene (committed on the loop)
-        auto& scene = engine.getScene();
+        auto &scene = engine.getScene();
 
         // Parameters manager
         auto parametersManager = paramsManager;
-        auto& animParams = parametersManager.getAnimationParameters();
+        auto &animParams = parametersManager.getAnimationParameters();
 
         // Compute for how much progress each frame accounts
         const auto progressChunk = 1.f / static_cast<float>(keyFrames.size());
@@ -190,9 +190,7 @@ public:
 
 namespace brayns
 {
-ExportFramesEntrypoint::ExportFramesEntrypoint(Engine &engine,
-                                               ParametersManager& parmManager,
-                                               CancellationToken token)
+ExportFramesEntrypoint::ExportFramesEntrypoint(Engine &engine, ParametersManager &parmManager, CancellationToken token)
     : _engine(engine)
     , _paramsManager(parmManager)
     , _token(token)

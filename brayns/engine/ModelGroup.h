@@ -42,11 +42,11 @@ public:
      */
     ~ModelGroup();
 
-    ModelGroup(const ModelGroup&) = delete;
-    ModelGroup& operator=(const ModelGroup&) = delete;
+    ModelGroup(const ModelGroup &) = delete;
+    ModelGroup &operator=(const ModelGroup &) = delete;
 
-    ModelGroup(ModelGroup&&) = default;
-    ModelGroup& operator=(ModelGroup&&) = default;
+    ModelGroup(ModelGroup &&) = default;
+    ModelGroup &operator=(ModelGroup &&) = default;
 
     /**
      * @brief Adds a new geometric model and marks the group as dirty so it gets committed
@@ -92,10 +92,10 @@ private:
     void commit();
 
 private:
-    OSPGroup _handle {nullptr};
+    OSPGroup _handle{nullptr};
     std::vector<OSPGeometricModel> _geometryModels;
     std::vector<OSPVolumetricModel> _volumeModels;
     std::vector<OSPGeometricModel> _clippingModels;
-    bool _modified {false};
+    bool _modified{false};
 };
 }

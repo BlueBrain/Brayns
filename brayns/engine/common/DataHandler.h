@@ -32,14 +32,14 @@ struct OSPBuffer
     OSPBuffer() = default;
 
     OSPBuffer(OSPData handler, size_t size)
-     : handle(handler)
-     , size(size)
+        : handle(handler)
+        , size(size)
     {
     }
 
     ~OSPBuffer()
     {
-        if(handle)
+        if (handle)
         {
             ospRelease(handle);
         }
@@ -62,7 +62,7 @@ struct OSPBuffer
     OSPBuffer &operator=(const OSPBuffer &) = delete;
 
     OSPData handle = nullptr;
-    size_t size {};
+    size_t size{};
 };
 
 struct DataHandler
@@ -70,7 +70,7 @@ struct DataHandler
     template<typename T>
     static OSPBuffer shareBuffer(const std::vector<T> &data, OSPDataType type)
     {
-        if(data.empty())
+        if (data.empty())
         {
             throw std::invalid_argument("Cannot send empty array to OSPRay");
         }
@@ -82,7 +82,7 @@ struct DataHandler
     template<typename T>
     static OSPBuffer shareBuffer(const T *data, const size_t size, OSPDataType type)
     {
-        if(size == 0)
+        if (size == 0)
         {
             throw std::invalid_argument("Cannot send empty array to OSPRay");
         }

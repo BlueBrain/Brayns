@@ -24,8 +24,12 @@
 #include <brayns/utils/StringUtils.h>
 
 BRAYNS_JSON_OBJECT_BEGIN(NeuronMorphologyLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(float, radius_multiplier, "Parameter to multiply all morphology sample radii by",
-                         brayns::Default(1.f), brayns::Minimum(0.1f))
+BRAYNS_JSON_OBJECT_ENTRY(
+    float,
+    radius_multiplier,
+    "Parameter to multiply all morphology sample radii by",
+    brayns::Default(1.f),
+    brayns::Minimum(0.1f))
 BRAYNS_JSON_OBJECT_ENTRY(bool, load_soma, "Load the soma section of the neuron", brayns::Default(true))
 BRAYNS_JSON_OBJECT_ENTRY(bool, load_axon, "Load the axon section of the neuron", brayns::Default(false))
 BRAYNS_JSON_OBJECT_ENTRY(bool, load_dendrites, "Load the dendrite secitons of the neuron", brayns::Default(true))

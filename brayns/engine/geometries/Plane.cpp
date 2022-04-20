@@ -30,14 +30,14 @@ std::string_view RenderableOSPRayID<Plane>::get()
 }
 
 template<>
-void RenderableBoundsUpdater<Plane>::update(const Plane& p, const Matrix4f& t, Bounds& b)
+void RenderableBoundsUpdater<Plane>::update(const Plane &p, const Matrix4f &t, Bounds &b)
 {
     // NOOP
     // Planes are infinite. They can be limited, but on Brayns we only use them for clipping
     // https://github.com/ospray/ospray#planes
-    (void) p;
-    (void) t;
-    (void) b;
+    (void)p;
+    (void)t;
+    (void)b;
 }
 
 template<>

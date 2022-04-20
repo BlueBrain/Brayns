@@ -61,6 +61,6 @@ private:
 
 private:
     std::vector<Streamline> _streamlines;
-    bool _colorsDirty {false};
+    bool _colorsDirty{false};
 };
 }

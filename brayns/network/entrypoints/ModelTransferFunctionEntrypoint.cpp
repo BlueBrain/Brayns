@@ -45,16 +45,16 @@ void GetModelTransferFunctionEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.id;
-    auto& modelInstance = ExtractModel::fromId(_modelManager, modelId);
-    auto& model = modelInstance.getModel();
+    auto &modelInstance = ExtractModel::fromId(_modelManager, modelId);
+    auto &model = modelInstance.getModel();
 
     try
     {
-        auto& tfComponent = model.getComponent<TransferFunctionComponent>();
+        auto &tfComponent = model.getComponent<TransferFunctionComponent>();
         auto &transferFunction = tfComponent.getTransferFunction();
         request.reply(transferFunction);
     }
-    catch(...)
+    catch (...)
     {
         throw JsonRpcException("The requested model does not have a transfer function");
     }

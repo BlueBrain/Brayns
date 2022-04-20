@@ -48,7 +48,6 @@ double _interpolatedOpacity(const std::vector<brayns::Vector2f> &controlPointsSo
     return lastPoint.y;
 }
 
-
 std::vector<float> _calculateInterpolatedOpacities(std::vector<brayns::Vector2f> controlPoints) noexcept
 {
     constexpr size_t numSamples = 256;
@@ -84,7 +83,7 @@ const std::vector<Vector2f> &TransferFunction::getControlPoints() const
 void TransferFunction::setControlPoints(const std::vector<Vector2f> &controlPoints)
 {
     _updateValue(_controlPoints, controlPoints);
-    if(isModified())
+    if (isModified())
         _opacities = _calculateInterpolatedOpacities(_controlPoints);
 }
 
@@ -105,7 +104,7 @@ const Vector2f &TransferFunction::getValuesRange() const
 
 void TransferFunction::setValuesRange(const Vector2f &valuesRange)
 {
-    if(valuesRange.x >= valuesRange.y)
+    if (valuesRange.x >= valuesRange.y)
     {
         throw std::invalid_argument("Transfer function range must define a non zero positive interval");
     }
@@ -113,7 +112,7 @@ void TransferFunction::setValuesRange(const Vector2f &valuesRange)
     _updateValue(_valuesRange, valuesRange);
 }
 
-const std::vector<float>& TransferFunction::getOpacities() const noexcept
+const std::vector<float> &TransferFunction::getOpacities() const noexcept
 {
     return _opacities;
 }
@@ -122,14 +121,14 @@ Vector4f TransferFunction::getColorForValue(const float v) const
 {
     if (v <= _valuesRange.x)
     {
-        const auto& color = *_colors.begin();
+        const auto &color = *_colors.begin();
         const auto opacity = *_opacities.begin();
         return Vector4f(color, opacity);
     }
 
     if (v >= _valuesRange.y)
     {
-        const auto& color = _colors.back();
+        const auto &color = _colors.back();
         const auto opacity = _opacities.back();
         return Vector4f(color, opacity);
     }
@@ -152,7 +151,7 @@ Vector4f TransferFunction::getColorForValue(const float v) const
     const auto opacity1 = _opacities[opacityIndex];
     const auto opacity2 = _opacities[nextOpacityIndex];
 
-    const Vector4f beginResult (color1, opacity1);
+    const Vector4f beginResult(color1, opacity1);
     const Vector4f endResult(color2, opacity2);
 
     return glm::mix(beginResult, endResult, remainder);

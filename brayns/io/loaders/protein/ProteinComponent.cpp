@@ -27,9 +27,9 @@
 namespace brayns
 {
 ProteinComponent::ProteinComponent(std::vector<Sphere> sphe, std::vector<Vector4f> colors, std::vector<uint8_t> indx)
- : _model(GeometricModelHandler::create())
- , _colors(std::move(colors))
- , _colorIndices(std::move(indx))
+    : _model(GeometricModelHandler::create())
+    , _colors(std::move(colors))
+    , _colorIndices(std::move(indx))
 {
     sphe.shrink_to_fit();
     _geometry.set(std::move(sphe));
@@ -37,10 +37,8 @@ ProteinComponent::ProteinComponent(std::vector<Sphere> sphe, std::vector<Vector4
 
 uint64_t ProteinComponent::getSizeInBytes() const noexcept
 {
-    return sizeof(ProteinComponent)
-            + _geometry.getSizeInBytes()
-            + sizeof(Vector4f) * _colors.size()
-            + sizeof(uint8_t) * _colorIndices.size();
+    return sizeof(ProteinComponent) + _geometry.getSizeInBytes() + sizeof(Vector4f) * _colors.size()
+        + sizeof(uint8_t) * _colorIndices.size();
 }
 
 Bounds ProteinComponent::computeBounds(const Matrix4f &transform) const noexcept
@@ -62,20 +60,20 @@ bool ProteinComponent::commit()
 {
     bool needsCommit = false;
 
-    if(_geometry.commit())
+    if (_geometry.commit())
     {
         GeometricModelHandler::setGeometry(_model, _geometry);
         needsCommit = true;
     }
 
     auto &material = ExtractModelObject::extractMaterial(getModel());
-    if(material.commit())
+    if (material.commit())
     {
         GeometricModelHandler::setMaterial(_model, material);
         needsCommit = true;
     }
 
-    if(needsCommit)
+    if (needsCommit)
     {
         GeometricModelHandler::commitModel(_model);
     }

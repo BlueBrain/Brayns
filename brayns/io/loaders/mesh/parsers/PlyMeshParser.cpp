@@ -1322,9 +1322,7 @@ private:
         {
             for (auto index : triangle)
             {
-                mesh.uvs.emplace_back(
-                    VectorHelper::get(buffer.txs, index),
-                    VectorHelper::get(buffer.tys, index));
+                mesh.uvs.emplace_back(VectorHelper::get(buffer.txs, index), VectorHelper::get(buffer.tys, index));
             }
         }
     }

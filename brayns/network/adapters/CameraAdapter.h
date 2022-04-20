@@ -33,14 +33,27 @@ BRAYNS_JSON_ADAPTER_GETSET("height", getHeight, setHeight, "Camera orthographic 
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(PerspectiveCamera)
-BRAYNS_JSON_ADAPTER_GETSET("fovy", getFOVY, setFOVY, "Camera vertical field of view (in degrees)", Required(false),
-                           Minimum(1.f))
-BRAYNS_JSON_ADAPTER_GETSET("aperture_radius", getApertureRadius, setApertureRadius,
-                           "Lens aperture radius (Use for depth of field effect. A value of 0.0 disables it",
-                           Required(false), Minimum(0.f))
-BRAYNS_JSON_ADAPTER_GETSET("focus_distance", getFocusDistance, setFocusDistance,
-                           "Distance at which to focus (for depth of field effect). A value of 1.0 disables it.",
-                           Required(false), Minimum(1.f))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "fovy",
+    getFOVY,
+    setFOVY,
+    "Camera vertical field of view (in degrees)",
+    Required(false),
+    Minimum(1.f))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "aperture_radius",
+    getApertureRadius,
+    setApertureRadius,
+    "Lens aperture radius (Use for depth of field effect. A value of 0.0 disables it",
+    Required(false),
+    Minimum(0.f))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "focus_distance",
+    getFocusDistance,
+    setFocusDistance,
+    "Distance at which to focus (for depth of field effect). A value of 1.0 disables it.",
+    Required(false),
+    Minimum(1.f))
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(LookAt)

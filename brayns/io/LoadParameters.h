@@ -34,7 +34,7 @@ struct FileLoadParameters
 struct BinaryLoadParameters
 {
     std::string chunksID;
-    uint64_t size {};
+    uint64_t size{};
     std::string type;
     std::string loaderName;
     JsonValue loadParameters;

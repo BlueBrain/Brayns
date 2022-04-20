@@ -25,7 +25,7 @@
 #include <typeindex>
 
 #ifdef __GNUG__
-#include <cxxabi.h>
+    #include <cxxabi.h>
 #endif
 
 namespace brayns
@@ -42,35 +42,35 @@ struct TypeNameDemangler
     {
         std::type_index ti = typeid(std::decay_t<T>);
 
-        #ifdef __GNUG__
-        int status {};
+#ifdef __GNUG__
+        int status{};
         std::string result;
 
         char *demangledName = abi::__cxa_demangle(ti.name(), 0, 0, &status);
 
-        if(status == -1)
+        if (status == -1)
         {
             throw std::runtime_error("Could not allocate memory to store the demangled name");
         }
         else
         {
-            if(status == 0)
+            if (status == 0)
             {
                 result = std::string(demangledName);
             }
 
             free(demangledName);
 
-            if(status != 0)
+            if (status != 0)
             {
                 throw std::runtime_error("Could not demangle type");
             }
         }
 
         return result;
-        #else
+#else
         return std::string(ti.name());
-        #endif
+#endif
     }
 };
 }

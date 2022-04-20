@@ -172,15 +172,16 @@ std::string MeshLoader::getName() const
     return "mesh";
 }
 
-std::vector<std::unique_ptr<Model>> MeshLoader::importFromFile(const std::string &fileName, const LoaderProgress &callback) const
+std::vector<std::unique_ptr<Model>> MeshLoader::importFromFile(
+    const std::string &fileName,
+    const LoaderProgress &callback) const
 {
     (void)callback;
     auto mesh = MeshParsingHelper::parse(_parsers, fileName);
     return MeshImporter::import(mesh);
 }
 
-std::vector<std::unique_ptr<Model>> MeshLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback)
-    const
+std::vector<std::unique_ptr<Model>> MeshLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback) const
 {
     (void)callback;
     auto mesh = MeshParsingHelper::parse(_parsers, blob);

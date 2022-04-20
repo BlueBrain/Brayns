@@ -38,6 +38,7 @@ public:
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
 private:
     SceneModelManager &_modelManager;
 };
@@ -46,14 +47,14 @@ template<typename MaterialType>
 class SetMaterialEntrypoint : public Entrypoint<ModelMaterial<MaterialType>, EmptyMessage>
 {
 public:
-    SetMaterialEntrypoint(SceneModelManager& sceneModelManager)
-     : _sceneModelManager(sceneModelManager)
+    SetMaterialEntrypoint(SceneModelManager &sceneModelManager)
+        : _sceneModelManager(sceneModelManager)
     {
     }
 
     void onRequest(const typename Entrypoint<ModelMaterial<MaterialType>, EmptyMessage>::Request &request) override
     {
-        ModelMaterial<MaterialType> updater (_sceneModelManager);
+        ModelMaterial<MaterialType> updater(_sceneModelManager);
         request.getParams(updater);
         updater.update();
         request.reply(EmptyMessage());
@@ -124,7 +125,7 @@ class GetMaterialEntrypoint : public Entrypoint<GetModelMessage, MaterialType>
 {
 public:
     GetMaterialEntrypoint(SceneModelManager &modelManager)
-     : _modelManager(modelManager)
+        : _modelManager(modelManager)
     {
     }
 
@@ -138,10 +139,10 @@ public:
         auto &material = materialComponent.getMaterial();
         try
         {
-            auto &castedMaterial = dynamic_cast<MaterialType&>(material);
+            auto &castedMaterial = dynamic_cast<MaterialType &>(material);
             request.reply(castedMaterial);
         }
-        catch(const std::bad_cast &)
+        catch (const std::bad_cast &)
         {
             throw JsonRpcException("The material cannot be casted to the requested type");
         }

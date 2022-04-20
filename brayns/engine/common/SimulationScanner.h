@@ -31,6 +31,6 @@ namespace brayns
  */
 struct SimulationScanner
 {
-    static void scanAndUpdate(SceneModelManager &modelManager, AnimationParameters& globalAnimation);
+    static void scanAndUpdate(SceneModelManager &modelManager, AnimationParameters &globalAnimation);
 };
 }

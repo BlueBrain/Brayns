@@ -23,10 +23,10 @@
 namespace brayns
 {
 SimulationComponent::SimulationComponent(float start, float end, float dt, std::string timeUnit)
- : _startTime(start)
- , _endTime(end)
- , _dt(dt)
- , _timeUnit(std::move(timeUnit))
+    : _startTime(start)
+    , _endTime(end)
+    , _dt(dt)
+    , _timeUnit(std::move(timeUnit))
 {
 }
 

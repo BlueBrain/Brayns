@@ -68,14 +68,18 @@ bool JsonAdapter<EmptyLoaderParameters>::deserialize(const JsonValue &value, Emp
 }
 
 std::vector<std::unique_ptr<Model>> NoInputLoader::importFromBlob(
-    Blob &&blob, const LoaderProgress &callback, const EmptyLoaderParameters &parameters) const
+    Blob &&blob,
+    const LoaderProgress &callback,
+    const EmptyLoaderParameters &parameters) const
 {
     (void)parameters;
     return importFromBlob(std::move(blob), callback);
 }
 
 std::vector<std::unique_ptr<Model>> NoInputLoader::importFromFile(
-    const std::string &path, const LoaderProgress &callback, const EmptyLoaderParameters &parameters) const
+    const std::string &path,
+    const LoaderProgress &callback,
+    const EmptyLoaderParameters &parameters) const
 {
     (void)parameters;
     return importFromFile(path, callback);

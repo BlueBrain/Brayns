@@ -21,8 +21,8 @@
 #pragma once
 
 #include <brayns/common/TransferFunction.h>
-#include <brayns/engine/Model.h>
 #include <brayns/engine/Material.h>
+#include <brayns/engine/Model.h>
 
 namespace brayns
 {

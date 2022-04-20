@@ -74,7 +74,7 @@ bool Light::isVisible() const noexcept
 
 bool Light::commit()
 {
-    if(!isModified())
+    if (!isModified())
     {
         return false;
     }

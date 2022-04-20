@@ -34,7 +34,7 @@ TransferFunctionRendererComponent::TransferFunctionRendererComponent()
 
 void TransferFunctionRendererComponent::onDestroyed()
 {
-    if(_handle)
+    if (_handle)
     {
         ospRelease(_handle);
         _handle = nullptr;
@@ -43,16 +43,16 @@ void TransferFunctionRendererComponent::onDestroyed()
 
 bool TransferFunctionRendererComponent::manualCommit()
 {
-    Model& model = getModel();
+    Model &model = getModel();
     auto &tf = ExtractModelObject::extractTransferFunction(model);
-    if(!tf.isModified())
+    if (!tf.isModified())
     {
         return false;
     }
 
-    auto& color = tf.getColors();
-    auto& opacity = tf.getOpacities();
-    auto& range = tf.getValuesRange();
+    auto &color = tf.getColors();
+    auto &opacity = tf.getOpacities();
+    auto &range = tf.getValuesRange();
 
     auto colorBuffer = DataHandler::shareBuffer(color, OSPDataType::OSP_VEC3F);
     auto opacityBuffer = DataHandler::shareBuffer(opacity, OSPDataType::OSP_FLOAT);

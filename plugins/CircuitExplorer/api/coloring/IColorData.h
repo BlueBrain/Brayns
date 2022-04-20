@@ -49,6 +49,6 @@ public:
      * @param ids
      * @return std::vector<std::string>
      */
-    virtual std::vector<std::string> getMethodValuesForIDs(const std::string &method,
-                                                           const std::vector<uint64_t>& ids) const = 0;
+    virtual std::vector<std::string> getMethodValuesForIDs(const std::string &method, const std::vector<uint64_t> &ids)
+        const = 0;
 };

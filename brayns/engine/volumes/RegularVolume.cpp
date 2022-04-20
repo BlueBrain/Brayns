@@ -24,7 +24,7 @@ namespace brayns
 {
 size_t getTypeByteSize(const OSPDataType type)
 {
-    switch(type)
+    switch (type)
     {
     case OSPDataType::OSP_UCHAR:
         return 1;
@@ -52,10 +52,10 @@ std::string_view RenderableOSPRayID<RegularVolume>::get()
 }
 
 template<>
-void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume& s, const Matrix4f& t, Bounds& b)
+void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume &s, const Matrix4f &t, Bounds &b)
 {
-    static const Vector3f regularVolumeMin {0.f};
-    static const Vector3f regularVolumeMax {1.f};
+    static const Vector3f regularVolumeMin{0.f};
+    static const Vector3f regularVolumeMax{1.f};
 
     const Vector3f minBound(t * Vector4f(regularVolumeMin, 1.f));
     const Vector3f maxBound(t * Vector4f(regularVolumeMax, 1.f));
@@ -75,18 +75,17 @@ void Volume<RegularVolume>::commitVolumeSpecificParams()
 {
     const auto cellCentered = !_volumeData.perVertexData;
     const auto dataType = static_cast<OSPDataType>(_volumeData.dataType);
-    const auto& volumeData = _volumeData.data;
+    const auto &volumeData = _volumeData.data;
     const auto &size = _volumeData.size;
 
     const auto dimensionSize = glm::compMul(size);
-    if(dimensionSize == 0)
+    if (dimensionSize == 0)
         throw std::runtime_error("Tried to commit volume with 0 size");
 
     const auto currentSize = volumeData.size();
     const auto expectedSize = getTypeByteSize(dataType) * dimensionSize;
-    if(currentSize != expectedSize)
+    if (currentSize != expectedSize)
         throw std::runtime_error("RegularVolume expected size and current size missmatch");
-
 
     OSPData sharedVolumeData = ospNewSharedData(volumeData.data(), dataType, size.x, 0, size.y, 0, size.z, 0);
     ospSetParam(_handle, "data", OSPDataType::OSP_DATA, &sharedVolumeData);

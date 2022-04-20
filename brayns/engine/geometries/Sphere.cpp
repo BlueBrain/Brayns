@@ -29,9 +29,9 @@ std::string_view RenderableOSPRayID<Sphere>::get()
 }
 
 template<>
-void RenderableBoundsUpdater<Sphere>::update(const Sphere& s, const Matrix4f& t, Bounds& b)
+void RenderableBoundsUpdater<Sphere>::update(const Sphere &s, const Matrix4f &t, Bounds &b)
 {
-    const Vector3f radiusDelta (s.radius);
+    const Vector3f radiusDelta(s.radius);
     auto sphereMin = s.center - radiusDelta;
     auto sphereMax = s.center + radiusDelta;
 
@@ -46,7 +46,7 @@ template<>
 void Geometry<Sphere>::commitGeometrySpecificParams()
 {
     constexpr auto stride = 4 * sizeof(float);
-    auto basePtr = reinterpret_cast<float*>(_geometries.data());
+    auto basePtr = reinterpret_cast<float *>(_geometries.data());
     auto positionPtr = basePtr;
     auto radiiPtr = basePtr + 3;
     auto size = _geometries.size();

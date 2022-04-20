@@ -23,7 +23,7 @@
 namespace brayns
 {
 GetMaterialType::GetMaterialType(SceneModelManager &modelManager)
- : _modelManager(modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -50,7 +50,7 @@ void GetMaterialType::onRequest(const Request &request)
 }
 
 SetMaterialCarPaint::SetMaterialCarPaint(SceneModelManager &modelManager)
- : SetMaterialEntrypoint<CarPaintMaterial>(modelManager)
+    : SetMaterialEntrypoint<CarPaintMaterial>(modelManager)
 {
 }
 
@@ -66,7 +66,7 @@ std::string SetMaterialCarPaint::getDescription() const
 }
 
 SetMaterialDefault::SetMaterialDefault(SceneModelManager &modelManager)
- : SetMaterialEntrypoint<DefaultMaterial>(modelManager)
+    : SetMaterialEntrypoint<DefaultMaterial>(modelManager)
 {
 }
 
@@ -82,7 +82,7 @@ std::string SetMaterialDefault::getDescription() const
 }
 
 SetMaterialEmissive::SetMaterialEmissive(SceneModelManager &modelManager)
- : SetMaterialEntrypoint<EmissiveMaterial>(modelManager)
+    : SetMaterialEntrypoint<EmissiveMaterial>(modelManager)
 {
 }
 
@@ -98,7 +98,7 @@ std::string SetMaterialEmissive::getDescription() const
 }
 
 SetMaterialGlass::SetMaterialGlass(SceneModelManager &modelManager)
- : SetMaterialEntrypoint<GlassMaterial>(modelManager)
+    : SetMaterialEntrypoint<GlassMaterial>(modelManager)
 {
 }
 
@@ -114,7 +114,7 @@ std::string SetMaterialGlass::getDescription() const
 }
 
 SetMaterialMatte::SetMaterialMatte(SceneModelManager &modelManager)
- : SetMaterialEntrypoint<MatteMaterial>(modelManager)
+    : SetMaterialEntrypoint<MatteMaterial>(modelManager)
 {
 }
 
@@ -130,7 +130,7 @@ std::string SetMaterialMatte::getDescription() const
 }
 
 SetMaterialMetal::SetMaterialMetal(SceneModelManager &modelManager)
- : SetMaterialEntrypoint<MetalMaterial>(modelManager)
+    : SetMaterialEntrypoint<MetalMaterial>(modelManager)
 {
 }
 
@@ -146,7 +146,7 @@ std::string SetMaterialMetal::getDescription() const
 }
 
 SetMaterialPlastic::SetMaterialPlastic(SceneModelManager &modelManager)
- : SetMaterialEntrypoint<PlasticMaterial>(modelManager)
+    : SetMaterialEntrypoint<PlasticMaterial>(modelManager)
 {
 }
 
@@ -162,7 +162,7 @@ std::string SetMaterialPlastic::getDescription() const
 }
 
 GetMaterialCarPaint::GetMaterialCarPaint(SceneModelManager &modelManager)
- : GetMaterialEntrypoint<CarPaintMaterial>(modelManager)
+    : GetMaterialEntrypoint<CarPaintMaterial>(modelManager)
 {
 }
 
@@ -177,7 +177,7 @@ std::string GetMaterialCarPaint::getDescription() const
 }
 
 GetMaterialDefault::GetMaterialDefault(SceneModelManager &modelManager)
- : GetMaterialEntrypoint<DefaultMaterial>(modelManager)
+    : GetMaterialEntrypoint<DefaultMaterial>(modelManager)
 {
 }
 
@@ -192,7 +192,7 @@ std::string GetMaterialDefault::getDescription() const
 }
 
 GetMaterialEmissive::GetMaterialEmissive(SceneModelManager &modelManager)
- : GetMaterialEntrypoint<EmissiveMaterial>(modelManager)
+    : GetMaterialEntrypoint<EmissiveMaterial>(modelManager)
 {
 }
 
@@ -207,7 +207,7 @@ std::string GetMaterialEmissive::getDescription() const
 }
 
 GetMaterialGlass::GetMaterialGlass(SceneModelManager &modelManager)
- : GetMaterialEntrypoint<GlassMaterial>(modelManager)
+    : GetMaterialEntrypoint<GlassMaterial>(modelManager)
 {
 }
 
@@ -222,7 +222,7 @@ std::string GetMaterialGlass::getDescription() const
 }
 
 GetMaterialMatte::GetMaterialMatte(SceneModelManager &modelManager)
- : GetMaterialEntrypoint<MatteMaterial>(modelManager)
+    : GetMaterialEntrypoint<MatteMaterial>(modelManager)
 {
 }
 
@@ -237,7 +237,7 @@ std::string GetMaterialMatte::getDescription() const
 }
 
 GetMaterialMetal::GetMaterialMetal(SceneModelManager &modelManager)
- : GetMaterialEntrypoint<MetalMaterial>(modelManager)
+    : GetMaterialEntrypoint<MetalMaterial>(modelManager)
 {
 }
 
@@ -252,7 +252,7 @@ std::string GetMaterialMetal::getDescription() const
 }
 
 GetMaterialPlastic::GetMaterialPlastic(SceneModelManager &modelManager)
- : GetMaterialEntrypoint<PlasticMaterial>(modelManager)
+    : GetMaterialEntrypoint<PlasticMaterial>(modelManager)
 {
 }
 

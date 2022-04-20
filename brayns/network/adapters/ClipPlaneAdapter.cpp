@@ -23,8 +23,8 @@
 namespace brayns
 {
 ClipPlane::ClipPlane(const uint32_t id, const Vector4f &coefficents)
- : _id(id)
- , _coefficents(coefficents)
+    : _id(id)
+    , _coefficents(coefficents)
 {
 }
 

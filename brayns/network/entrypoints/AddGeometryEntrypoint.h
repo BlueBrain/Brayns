@@ -33,20 +33,20 @@ class AddGeometryEntrypoint : public Entrypoint<std::vector<AddGeometryProxy<T>>
 {
 public:
     AddGeometryEntrypoint(Scene &scene)
-     : _scene(scene)
+        : _scene(scene)
     {
     }
 
     void onRequest(
-            const typename Entrypoint<std::vector<AddGeometryProxy<T>>, ModelInstanceProxy>::Request &req) override
+        const typename Entrypoint<std::vector<AddGeometryProxy<T>>, ModelInstanceProxy>::Request &req) override
     {
         auto params = req.getParams();
         auto numGeometries = params.size();
 
-        std::vector<T> geometries (numGeometries);
-        std::vector<brayns::Vector4f> colors (numGeometries);
+        std::vector<T> geometries(numGeometries);
+        std::vector<brayns::Vector4f> colors(numGeometries);
 
-        for(size_t i = 0; i < numGeometries; ++i)
+        for (size_t i = 0; i < numGeometries; ++i)
         {
             auto &proxy = params[i];
             geometries[i] = std::move(proxy.geometry);
@@ -62,7 +62,7 @@ public:
         // Need to compute bounds here to make sure the bounds will be updated for the next call (which may need them)
         _scene.computeBounds();
 
-        ModelInstanceProxy result (instance);
+        ModelInstanceProxy result(instance);
         req.reply(result);
     }
 

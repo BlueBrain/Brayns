@@ -29,15 +29,15 @@ namespace brayns
 class ClipPlane
 {
 public:
-    ClipPlane(const uint32_t id, const Vector4f& coefficents);
+    ClipPlane(const uint32_t id, const Vector4f &coefficents);
 
     uint32_t getID() const noexcept;
 
-    const Vector4f& getPlane() const noexcept;
+    const Vector4f &getPlane() const noexcept;
 
 private:
     const uint32_t _id;
-    const Vector4f& _coefficents;
+    const Vector4f &_coefficents;
 };
 
 BRAYNS_JSON_ADAPTER_BEGIN(ClipPlane)

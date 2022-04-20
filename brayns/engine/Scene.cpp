@@ -26,7 +26,7 @@
 namespace brayns
 {
 Scene::Scene()
- : _bounds(Vector3f(0.f), Vector3f(0.f))
+    : _bounds(Vector3f(0.f), Vector3f(0.f))
 {
 }
 
@@ -73,7 +73,7 @@ bool Scene::commit()
         auto clipInstances = _clippingManager.getInstanceHandles();
         instances.insert(instances.end(), clipInstances.begin(), clipInstances.end());
 
-        if(!instances.empty())
+        if (!instances.empty())
         {
             auto instanceBuffer = DataHandler::copyBuffer(instances, OSPDataType::OSP_INSTANCE);
             ospSetParam(_handle, "instance", OSPDataType::OSP_DATA, &instanceBuffer.handle);
@@ -84,7 +84,7 @@ bool Scene::commit()
     if (_lightManager.commit())
     {
         auto lights = _lightManager.getLightHandles();
-        if(!lights.empty())
+        if (!lights.empty())
         {
             auto lightBuffer = DataHandler::copyBuffer(lights, OSPDataType::OSP_LIGHT);
             ospSetParam(_handle, "light", OSPDataType::OSP_DATA, &lightBuffer.handle);
@@ -93,7 +93,7 @@ bool Scene::commit()
     }
 
     // Commit handle
-    if(needsCommit)
+    if (needsCommit)
     {
         ospCommit(_handle);
     }

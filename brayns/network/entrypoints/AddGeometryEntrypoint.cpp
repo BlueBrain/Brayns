@@ -23,7 +23,7 @@
 namespace brayns
 {
 AddBoxesEntrypoint::AddBoxesEntrypoint(Scene &scene)
- : AddGeometryEntrypoint<Box>(scene)
+    : AddGeometryEntrypoint<Box>(scene)
 {
 }
 
@@ -38,7 +38,7 @@ std::string AddBoxesEntrypoint::getDescription() const
 }
 
 AddPlanesEntrypoint::AddPlanesEntrypoint(Scene &scene)
- : AddGeometryEntrypoint<Plane>(scene)
+    : AddGeometryEntrypoint<Plane>(scene)
 {
 }
 
@@ -53,7 +53,7 @@ std::string AddPlanesEntrypoint::getDescription() const
 }
 
 AddCapsulesEntrypoint::AddCapsulesEntrypoint(Scene &scene)
- : AddGeometryEntrypoint<Primitive>(scene)
+    : AddGeometryEntrypoint<Primitive>(scene)
 {
 }
 
@@ -68,7 +68,7 @@ std::string AddCapsulesEntrypoint::getDescription() const
 }
 
 AddSpheresEntrypoint::AddSpheresEntrypoint(Scene &scene)
- : AddGeometryEntrypoint<Sphere>(scene)
+    : AddGeometryEntrypoint<Sphere>(scene)
 {
 }
 

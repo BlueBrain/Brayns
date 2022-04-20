@@ -58,7 +58,7 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(Blob &&blob, cons
     {
         // Handle comments
         string_utils::trim(line);
-        if(line[0] == '#')
+        if (line[0] == '#')
         {
             continue;
         }
@@ -74,16 +74,16 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(Blob &&blob, cons
 
         switch (lineData.size())
         {
-            case 3:
-            {
-                const Vector3f position(lineData[0], lineData[1], lineData[2]);
-                spheres.push_back({position, 0.15f});
-                break;
-            }
-            default:
-            {
-                throw std::runtime_error("Invalid content in line " + std::to_string(i + 1) + ": " + line);
-            }
+        case 3:
+        {
+            const Vector3f position(lineData[0], lineData[1], lineData[2]);
+            spheres.push_back({position, 0.15f});
+            break;
+        }
+        default:
+        {
+            throw std::runtime_error("Invalid content in line " + std::to_string(i + 1) + ": " + line);
+        }
         }
         callback.updateProgress(msg, i++ / static_cast<float>(numlines));
     }
@@ -98,7 +98,9 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(Blob &&blob, cons
     return result;
 }
 
-std::vector<std::unique_ptr<Model>> XYZBLoader::importFromFile(const std::string &filename, const LoaderProgress &callback) const
+std::vector<std::unique_ptr<Model>> XYZBLoader::importFromFile(
+    const std::string &filename,
+    const LoaderProgress &callback) const
 {
     std::ifstream file(filename);
     if (!file.good())

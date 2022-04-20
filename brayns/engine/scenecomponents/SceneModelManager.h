@@ -42,7 +42,7 @@ struct ModelLoadParameters
         NONE,
     };
 
-    LoadType type {LoadType::NONE};
+    LoadType type{LoadType::NONE};
     std::string path;
     std::string loaderName;
     JsonValue loadParameters;
@@ -169,10 +169,9 @@ private:
     ModelInstance &_createModelInstance(ModelEntry &modelEntry);
 
 private:
-
     IDFactory<uint32_t> _modelIdFactory;
     IDFactory<uint32_t> _instanceIdFactory;
     std::vector<ModelEntry> _models;
-    std::vector<ModelInstance*> _instances;
+    std::vector<ModelInstance *> _instances;
 };
 }

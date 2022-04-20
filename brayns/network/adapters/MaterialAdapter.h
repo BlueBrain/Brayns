@@ -37,44 +37,65 @@ namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(CarPaintMaterial)
 BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("flake_density", getFlakesDensity, setFlakesDesnity,
-                           "Normalized percentage of flakes on the surface. Will be clampled to the range [0.0, 1.0]")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "flake_density",
+    getFlakesDensity,
+    setFlakesDesnity,
+    "Normalized percentage of flakes on the surface. Will be clampled to the range [0.0, 1.0]")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(DefaultMaterial)
 BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("opacity", getOpacity, setOpacity,
-                           "Base opacity of the material. Will be clampled to the range [0.0, 1.0]")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "opacity",
+    getOpacity,
+    setOpacity,
+    "Base opacity of the material. Will be clampled to the range [0.0, 1.0]")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(EmissiveMaterial)
 BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("intensity", getIntensity, setIntensity,
-                           "Intensity of the light emitted. Will be clampled to the range [0.0, +infinite]")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "intensity",
+    getIntensity,
+    setIntensity,
+    "Intensity of the light emitted. Will be clampled to the range [0.0, +infinite]")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(GlassMaterial)
 BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("index_of_refraction", getIndexOfRefraction, setIndexOfRefraction,
-                           "Index of refraction of the glass")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "index_of_refraction",
+    getIndexOfRefraction,
+    setIndexOfRefraction,
+    "Index of refraction of the glass")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(MatteMaterial)
 BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("opacity", getOpacity, setOpacity,
-                           "Base opacity of the material. Will be clampled to the range [0.0, 1.0]")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "opacity",
+    getOpacity,
+    setOpacity,
+    "Base opacity of the material. Will be clampled to the range [0.0, 1.0]")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(MetalMaterial)
 BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("roughness", getRoughness, setRoughness,
-                           "Surface roughness. Will be clamped on the range [0-1]")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "roughness",
+    getRoughness,
+    setRoughness,
+    "Surface roughness. Will be clamped on the range [0-1]")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(PlasticMaterial)
 BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Base color of the material")
-BRAYNS_JSON_ADAPTER_GETSET("opacity", getOpacity, setOpacity,
-                           "Base opacity of the material. Will be clampled to the range [0.0, 1.0]")
+BRAYNS_JSON_ADAPTER_GETSET(
+    "opacity",
+    getOpacity,
+    setOpacity,
+    "Base opacity of the material. Will be clampled to the range [0.0, 1.0]")
 BRAYNS_JSON_ADAPTER_END()
 
 template<typename MaterialType>
@@ -83,7 +104,7 @@ class ModelMaterial
 public:
     ModelMaterial() = default;
     ModelMaterial(SceneModelManager &modelManager)
-     : _modelManager(&modelManager)
+        : _modelManager(&modelManager)
     {
     }
 
@@ -107,7 +128,7 @@ public:
 
 private:
     SceneModelManager *_modelManager;
-    uint32_t _modelId {};
+    uint32_t _modelId{};
     std::unique_ptr<MaterialType> _material;
 };
 

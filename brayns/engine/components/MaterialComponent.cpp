@@ -25,7 +25,7 @@
 namespace brayns
 {
 MaterialComponent::MaterialComponent()
- : _material(std::make_unique<DefaultMaterial>())
+    : _material(std::make_unique<DefaultMaterial>())
 {
 }
 
@@ -36,7 +36,7 @@ uint64_t MaterialComponent::getSizeInBytes() const noexcept
 
 void MaterialComponent::setMaterial(std::unique_ptr<Material> material)
 {
-    if(!material)
+    if (!material)
     {
         throw std::invalid_argument("Cannot set a null material to a MaterialComponent");
     }

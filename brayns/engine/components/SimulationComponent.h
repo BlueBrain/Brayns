@@ -79,10 +79,10 @@ public:
     void setEnabled(const bool val) noexcept;
 
 private:
-    const float _startTime {};
-    const float _endTime {};
-    const float _dt {};
+    const float _startTime{};
+    const float _endTime{};
+    const float _dt{};
     const std::string _timeUnit;
-    bool _enabled {true};
+    bool _enabled{true};
 };
 }

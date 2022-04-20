@@ -22,19 +22,19 @@
 
 namespace brayns
 {
-Primitive Primitive::cylinder(const Vector3f& p0, const Vector3f& p1, const float radius) noexcept
+Primitive Primitive::cylinder(const Vector3f &p0, const Vector3f &p1, const float radius) noexcept
 {
-    return Primitive {p0, radius, p1, radius};
+    return Primitive{p0, radius, p1, radius};
 }
 
-Primitive Primitive::cone(const Vector3f& p0, const float r0, const Vector3f& p1, const float r1) noexcept
+Primitive Primitive::cone(const Vector3f &p0, const float r0, const Vector3f &p1, const float r1) noexcept
 {
-    return Primitive {p0, r0, p1, r1};
+    return Primitive{p0, r0, p1, r1};
 }
 
-Primitive Primitive::sphere(const Vector3f& center, const float radius) noexcept
+Primitive Primitive::sphere(const Vector3f &center, const float radius) noexcept
 {
-    return Primitive {center, radius, center + Vector3f(0.f, .01f, 0.f), radius};
+    return Primitive{center, radius, center + Vector3f(0.f, .01f, 0.f), radius};
 }
 
 template<>
@@ -44,12 +44,12 @@ std::string_view RenderableOSPRayID<Primitive>::get()
 }
 
 template<>
-void RenderableBoundsUpdater<Primitive>::update(const Primitive& p, const Matrix4f& t, Bounds& b)
+void RenderableBoundsUpdater<Primitive>::update(const Primitive &p, const Matrix4f &t, Bounds &b)
 {
-    const Vector3f p0Delta (p.r0);
+    const Vector3f p0Delta(p.r0);
     const auto p0Min = p.p0 - p0Delta;
     const auto p0Max = p.p0 + p0Delta;
-    const Vector3f p1Delta (p.r1);
+    const Vector3f p1Delta(p.r1);
     const auto p1Min = p.p1 - p1Delta;
     const auto p1Max = p.p1 + p1Delta;
 
@@ -64,8 +64,8 @@ void Geometry<Primitive>::commitGeometrySpecificParams()
 {
     const auto numGeoms = _geometries.size();
 
-    std::vector<uint32_t> indexData (numGeoms);
-    for(uint32_t i = 0, index = 0; i < numGeoms; ++i, index = index + 2)
+    std::vector<uint32_t> indexData(numGeoms);
+    for (uint32_t i = 0, index = 0; i < numGeoms; ++i, index = index + 2)
     {
         indexData[i] = index;
     }

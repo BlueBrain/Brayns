@@ -24,7 +24,7 @@
 
 namespace brayns
 {
-class ToneMapping final: public ImageOperation
+class ToneMapping final : public ImageOperation
 {
 public:
     ToneMapping();
@@ -133,15 +133,15 @@ public:
     bool usesACESColor() const noexcept;
 
 private:
-    OSPImageOperation _handle {nullptr};
+    OSPImageOperation _handle{nullptr};
 
-    float _exposure {1.f};
-                     // Uncharted 2 // ACES
-    float _contrast {1.1759f};      //{1.6773f};
-    float _shoulder {0.9746f};      //{0.9714f};
-    float _midIn    {0.18f};        //{0.18f};
-    float _midOut   {0.18f};        //{0.18f};
-    float _hdrMax   {6.3704f};      //{11.0785f};
-    bool _acesColor {false};        //{true};
+    float _exposure{1.f};
+    // Uncharted 2 // ACES
+    float _contrast{1.1759f}; //{1.6773f};
+    float _shoulder{0.9746f}; //{0.9714f};
+    float _midIn{0.18f}; //{0.18f};
+    float _midOut{0.18f}; //{0.18f};
+    float _hdrMax{6.3704f}; //{11.0785f};
+    bool _acesColor{false}; //{true};
 };
 }

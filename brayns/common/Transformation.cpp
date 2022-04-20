@@ -78,7 +78,6 @@ Matrix4f Transformation::toMatrix() const
 {
     return glm::translate(Matrix4f(1.), _rotationCenter)
         * (glm::mat4_cast(_rotation)
-           * (glm::translate(Matrix4f(1.), _translation - _rotationCenter)
-              * glm::scale(Matrix4f(1.), _scale)));
+           * (glm::translate(Matrix4f(1.), _translation - _rotationCenter) * glm::scale(Matrix4f(1.), _scale)));
 }
 } // namespace brayns

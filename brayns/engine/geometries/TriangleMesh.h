@@ -45,13 +45,13 @@ template<>
 std::string_view RenderableOSPRayID<TriangleMesh>::get();
 
 template<>
-void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh& mesh, const Matrix4f& matrix, Bounds& bounds);
+void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh &mesh, const Matrix4f &matrix, Bounds &bounds);
 
 template<>
 uint32_t Geometry<TriangleMesh>::add(TriangleMesh geometry);
 
 template<>
-std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh>& geometries);
+std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh> &geometries);
 
 template<>
 std::vector<uint32_t> Geometry<TriangleMesh>::set(std::vector<TriangleMesh> geometries);

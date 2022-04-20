@@ -31,7 +31,7 @@ namespace brayns
 class ExportFramesEntrypoint : public Entrypoint<ExportFramesParams, ExportFramesResult>
 {
 public:
-    ExportFramesEntrypoint(Engine &engine, ParametersManager& paramsManager, CancellationToken token);
+    ExportFramesEntrypoint(Engine &engine, ParametersManager &paramsManager, CancellationToken token);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

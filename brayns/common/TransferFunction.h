@@ -81,7 +81,7 @@ public:
     /**
      * @brief Return the interpolated opacities computed based on the control points
      */
-    const std::vector<float>& getOpacities() const noexcept;
+    const std::vector<float> &getOpacities() const noexcept;
 
     /**
      * @brief Computes the color + opacity that corresponds to a given value

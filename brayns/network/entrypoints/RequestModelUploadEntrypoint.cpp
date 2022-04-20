@@ -53,8 +53,9 @@ public:
 class LoaderFinder
 {
 public:
-    static const brayns::AbstractLoader &find(const brayns::BinaryLoadParameters &params,
-                                              const brayns::LoaderRegistry &loaders)
+    static const brayns::AbstractLoader &find(
+        const brayns::BinaryLoadParameters &params,
+        const brayns::LoaderRegistry &loaders)
     {
         auto &name = params.loaderName;
         auto &type = params.type;
@@ -113,9 +114,8 @@ private:
 class BlobLoader
 {
 public:
-    static brayns::Blob load(const brayns::BinaryLoadParameters &params,
-                             std::string_view data,
-                             const Progress &progress)
+    static brayns::Blob
+        load(const brayns::BinaryLoadParameters &params, std::string_view data, const Progress &progress)
     {
         auto blob = _prepare(params);
         BlobValidator::throwIfTooBig(params, data);
@@ -177,9 +177,9 @@ public:
 
         std::vector<brayns::ModelInstanceProxy> result;
         result.reserve(descriptors.size());
-        for(auto& model : descriptors)
+        for (auto &model : descriptors)
         {
-            auto& instance = _modelManager.addModel(loadParameters, std::move(model));
+            auto &instance = _modelManager.addModel(loadParameters, std::move(model));
             result.emplace_back(instance);
         }
 

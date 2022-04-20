@@ -47,7 +47,7 @@ void EmissiveMaterial::commitMaterialSpecificParams()
 {
     auto ospHandle = handle();
 
-    static Vector3f baseColor (0.f);
+    static Vector3f baseColor(0.f);
     ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &baseColor);
     ospSetParam(ospHandle, "intensity", OSPDataType::OSP_FLOAT, &_intensity);
 }

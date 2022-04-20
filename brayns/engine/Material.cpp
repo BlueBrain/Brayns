@@ -23,10 +23,9 @@
 
 namespace brayns
 {
-
 const Vector3f Material::BASE_COLOR_WHITE = Vector3f(1.f);
 
-Material::Material(const Material& o)
+Material::Material(const Material &o)
 {
     (void)o;
 }
@@ -40,18 +39,18 @@ Material &Material::operator=(const Material &o)
 
 Material::~Material()
 {
-    if(_handle)
+    if (_handle)
         ospRelease(_handle);
 }
 
 bool Material::commit()
 {
-    if(!isModified())
+    if (!isModified())
     {
         return false;
     }
 
-    if(!_handle)
+    if (!_handle)
     {
         const auto handleName = getOSPHandleName();
         _handle = ospNewMaterial("", handleName.data());

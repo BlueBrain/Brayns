@@ -34,10 +34,11 @@ void FrameRenderer::synchronous(const Camera &cam, const FrameBuffer &fb, const 
     ospRenderFrameBlocking(fbHandle, rendererHandle, cameraHandle, sceneHandle);
 }
 
-OSPFuture FrameRenderer::asynchronous(const Camera& camera,
-                                      const FrameBuffer& fb,
-                                      const Renderer& renderer,
-                                      const Scene& scene)
+OSPFuture FrameRenderer::asynchronous(
+    const Camera &camera,
+    const FrameBuffer &fb,
+    const Renderer &renderer,
+    const Scene &scene)
 {
     auto cameraHandle = camera.handle();
     auto fbHandle = fb.handle();

@@ -37,6 +37,7 @@ public:
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
+
 private:
     Engine &_engine;
 };
@@ -56,10 +57,10 @@ public:
 
         try
         {
-            auto &castedCamera = dynamic_cast<T&>(currentCamera);
+            auto &castedCamera = dynamic_cast<T &>(currentCamera);
             request.getParams(castedCamera);
         }
-        catch(...)
+        catch (...)
         {
             auto currentLookAt = currentCamera.getLookAt();
 
@@ -110,10 +111,10 @@ public:
         auto &currentCamera = _engine.getCamera();
         try
         {
-            auto &castedCamera = dynamic_cast<T&>(currentCamera);
+            auto &castedCamera = dynamic_cast<T &>(currentCamera);
             request.reply(castedCamera);
         }
-        catch(const std::bad_cast &)
+        catch (const std::bad_cast &)
         {
             throw JsonRpcException("Cannot cast the current camera to the requested type");
         }

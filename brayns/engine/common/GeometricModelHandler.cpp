@@ -29,7 +29,7 @@ OSPGeometricModel GeometricModelHandler::create()
 
 void GeometricModelHandler::destory(OSPGeometricModel &model)
 {
-    if(model)
+    if (model)
     {
         ospRelease(model);
         model = nullptr;
@@ -72,13 +72,13 @@ void GeometricModelHandler::commitModel(OSPGeometricModel model)
 
 void GeometricModelHandler::addToGeometryGroup(OSPGeometricModel model, Model &group)
 {
-    auto& groupObj = group.getGroup();
+    auto &groupObj = group.getGroup();
     groupObj.addGeometricModel(model);
 }
 
 void GeometricModelHandler::removeFromGeometryGroup(OSPGeometricModel model, Model &group)
 {
-    auto& groupObj = group.getGroup();
+    auto &groupObj = group.getGroup();
     groupObj.removeGeometricModel(model);
 }
 

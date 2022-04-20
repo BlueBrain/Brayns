@@ -72,7 +72,7 @@ void ModelUploadTask::run()
         {[this](const auto &operation, auto amount) { progress(operation, 0.5 + 0.5 * amount); }},
         _params.loader_properties);
 
-    for(auto &model : models)
+    for (auto &model : models)
         scene.addModels(std::move(model.model));
 }
 

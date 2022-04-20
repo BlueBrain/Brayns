@@ -47,10 +47,11 @@ public:
 
 namespace brayns
 {
-AddModelEntrypoint::AddModelEntrypoint(Scene &scene,
-                                       LoaderRegistry &loaders,
-                                       AnimationParameters &animation,
-                                       CancellationToken token)
+AddModelEntrypoint::AddModelEntrypoint(
+    Scene &scene,
+    LoaderRegistry &loaders,
+    AnimationParameters &animation,
+    CancellationToken token)
     : _scene(scene)
     , _loaders(loaders)
     , _animation(animation)
@@ -95,9 +96,9 @@ void AddModelEntrypoint::onRequest(const Request &request)
 
     std::vector<ModelInstanceProxy> result;
     result.reserve(models.size());
-    for(auto& model : models)
+    for (auto &model : models)
     {
-        auto& modelInstance = modelManager.addModel(loadParameters, std::move(model));
+        auto &modelInstance = modelManager.addModel(loadParameters, std::move(model));
         result.emplace_back(modelInstance);
     }
 

@@ -149,7 +149,7 @@ private:
     friend class ModelInstance;
 
 private:
-    uint32_t _modelId {};
+    uint32_t _modelId{};
     std::map<std::string, std::string> _metadata;
     ModelComponentContainer _components;
     ModelGroup _group;

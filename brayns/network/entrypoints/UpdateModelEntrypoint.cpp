@@ -44,12 +44,12 @@ void UpdateModelEntrypoint::onRequest(const Request &request)
 {
     const auto params = request.getParams();
     auto &model = ExtractModel::fromId(_scene, params.model_id);
-    ModelInstanceProxy proxy (model);
+    ModelInstanceProxy proxy(model);
     params.model.deserialize(proxy);
 
     // In case the trasnform was updated, and thus the model bounds, we need to recompute scene bounds
     _scene.computeBounds();
-    
+
     request.reply(EmptyMessage());
 }
 } // namespace brayns

@@ -139,7 +139,7 @@ public:
         builder.add<brayns::GetStatisticsEntrypoint>(statistics);
         builder.add<brayns::ImageJpegEntrypoint>(application, engine);
         builder.add<brayns::ImageStreamingModeEntrypoint>(application, monitor);
-        //builder.add<brayns::InspectEntrypoint>(renderer);
+        // builder.add<brayns::InspectEntrypoint>(renderer);
         builder.add<brayns::QuitEntrypoint>(engine);
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
         builder.add<brayns::RemoveClipPlanesEntrypoint>(sceneClipManager);

@@ -37,7 +37,7 @@ public:
 
     void setMaterial(std::unique_ptr<Material> material);
 
-    Material& getMaterial() noexcept;
+    Material &getMaterial() noexcept;
 
 private:
     std::unique_ptr<Material> _material;
