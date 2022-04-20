@@ -48,7 +48,7 @@ struct SynapseReportMapping
 
         std::unordered_map<uint64_t, size_t> mapping;
         size_t offset = 0;
-        for (const auto [nodeId, synapseId] : rawMapping)
+        for (const auto &[nodeId, synapseId] : rawMapping)
         {
             mapping[synapseId] = offset++;
         }
