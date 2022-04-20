@@ -43,8 +43,8 @@ public:
     FrameBuffer(const FrameBuffer &);
     FrameBuffer &operator=(const FrameBuffer &);
 
-    FrameBuffer(FrameBuffer &&) = default;
-    FrameBuffer &operator=(FrameBuffer &&) = default;
+    FrameBuffer(FrameBuffer &&);
+    FrameBuffer &operator=(FrameBuffer &&);
 
     /**
      * @brief Creates a copy of this framebuffer

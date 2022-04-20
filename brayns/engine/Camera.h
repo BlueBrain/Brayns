@@ -48,8 +48,8 @@ public:
     Camera(const Camera &);
     Camera &operator=(const Camera &);
 
-    Camera(Camera &&) = default;
-    Camera &operator=(Camera &&) = default;
+    Camera(Camera &&);
+    Camera &operator=(Camera &&);
 
     virtual ~Camera();
 

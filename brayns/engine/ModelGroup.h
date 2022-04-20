@@ -45,8 +45,8 @@ public:
     ModelGroup(const ModelGroup &) = delete;
     ModelGroup &operator=(const ModelGroup &) = delete;
 
-    ModelGroup(ModelGroup &&) = default;
-    ModelGroup &operator=(ModelGroup &&) = default;
+    ModelGroup(ModelGroup &&) noexcept;
+    ModelGroup &operator=(ModelGroup &&) noexcept;
 
     /**
      * @brief Adds a new geometric model and marks the group as dirty so it gets committed

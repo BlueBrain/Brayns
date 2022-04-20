@@ -44,8 +44,8 @@ public:
     Material(const Material &);
     Material &operator=(const Material &);
 
-    Material(Material &&) = default;
-    Material &operator=(Material &&) = default;
+    Material(Material &&) noexcept;
+    Material &operator=(Material &&) noexcept;
 
     virtual ~Material();
 

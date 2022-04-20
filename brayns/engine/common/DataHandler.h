@@ -51,10 +51,9 @@ struct OSPBuffer
     }
     OSPBuffer &operator=(OSPBuffer &&other)
     {
-        handle = other.handle;
+        std::swap(handle, other.handle);
         size = other.size;
 
-        other.handle = nullptr;
         return *this;
     }
 

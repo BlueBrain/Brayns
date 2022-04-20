@@ -40,8 +40,8 @@ public:
     Light(const Light &);
     Light &operator=(const Light &);
 
-    Light(Light &&) noexcept = default;
-    Light &operator=(Light &&) noexcept = default;
+    Light(Light &&) noexcept;
+    Light &operator=(Light &&) noexcept;
 
     virtual ~Light();
 

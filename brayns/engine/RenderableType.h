@@ -87,8 +87,18 @@ public:
     Geometry(const Geometry &) = delete;
     Geometry &operator=(const Geometry &o) = delete;
 
-    Geometry(Geometry &&) = default;
-    Geometry &operator=(Geometry &&) = default;
+    Geometry(Geometry &&o) noexcept
+    {
+        *this = std::move(o);
+    }
+
+    Geometry &operator=(Geometry &&o) noexcept
+    {
+        std::swap(_handle, o._handle);
+        _geometries = std::move(o._geometries);
+
+        return *this;
+    }
 
     ~Geometry()
     {
@@ -341,8 +351,18 @@ public:
     Volume(const Volume &) = delete;
     Volume &operator=(const Volume &) = delete;
 
-    Volume(Volume &&) = default;
-    Volume &operator=(Volume &&) = default;
+    Volume(Volume &&o) noexcept
+    {
+        *this = std::move(o);
+    }
+
+    Volume &operator=(Volume &&o) noexcept
+    {
+        _volumeData = std::move(o._volumeData);
+        std::swap(o._handle);
+
+        return *this;
+    }
 
     ~Volume()
     {

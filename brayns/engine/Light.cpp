@@ -32,7 +32,22 @@ Light &Light::operator=(const Light &o)
     _color = o._color;
     _intensity = o._intensity;
     _visible = o._visible;
-    markModified();
+
+    return *this;
+}
+
+Light::Light(Light &&o)
+{
+    *this = std::move(o);
+}
+
+Light &Light::operator=(Light &&o)
+{
+    _color = std::move(o._color);
+    _intensity = o._intensity;
+    _visible = o._visible;
+    std::swap(_handle, o._handle);
+
     return *this;
 }
 

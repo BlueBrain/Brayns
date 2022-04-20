@@ -39,7 +39,19 @@ Camera &Camera::operator=(const Camera &o)
     _lookAtParams = o._lookAtParams;
     _aspectRatio = o._aspectRatio;
 
-    markModified();
+    return *this;
+}
+
+Camera::Camera(Camera &&other)
+{
+    *this = std::move(other);
+}
+
+Camera &Camera::operator=(Camera &&other)
+{
+    _lookAtParams = std::move(other._lookAtParams);
+    _aspectRatio = other._aspectRatio;
+    std::swap(_handle, other._handle);
 
     return *this;
 }

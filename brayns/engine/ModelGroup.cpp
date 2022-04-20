@@ -59,8 +59,23 @@ struct ModelEraser
 namespace brayns
 {
 ModelGroup::ModelGroup()
+    : _handle(ospNewGroup())
 {
-    _handle = ospNewGroup();
+}
+
+ModelGroup::ModelGroup(ModelGroup &&o)
+{
+    *this = std::move(o);
+}
+
+ModelGroup &ModelGroup::operator=(ModelGroup &&o)
+{
+    std::swap(_handle, o._handle);
+    _geometryModels = std::move(o._geometryModels);
+    _volumeModels = std::move(o._volumeModels);
+    _clippingModels = std::move(o._clippingModels);
+
+    return *this;
 }
 
 ModelGroup::~ModelGroup()

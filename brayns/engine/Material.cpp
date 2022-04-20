@@ -33,7 +33,17 @@ Material::Material(const Material &o)
 Material &Material::operator=(const Material &o)
 {
     (void)o;
-    markModified();
+    return *this;
+}
+
+Material::Material(Material &&o)
+{
+    *this = std::move(o);
+}
+
+Material &Material::operator=(Material &&o)
+{
+    std::swap(_handle, o._handle);
     return *this;
 }
 
