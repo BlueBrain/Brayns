@@ -6,9 +6,8 @@ Brayns is a large-scale scientific visualization platform. It is based on Intel 
 
 It is based on a extension-plugin architecture. The core provides basic functionalities that can be reused and/or extended on plugins, which are independent and can be loaded or disabled at start-up. This simplifies the process of adding support for new scientific visualization use cases, without compromising the reliability of the rest of the software.
 
-Brayns counts with two main applications for its usage:
+Brayns counts with a main application for its usage:
 
- * **braynsViewer**: An interactive desktop application to perform local rendering.
  * **braynsService**: A rendering backend which can be accessed over the internet and streams images to the connected clients.
 
 Brayns also comes with some already-made plugins:
@@ -31,17 +30,9 @@ The following components must be installed on the system where Brayns will be bu
 * CMake 3.15 or higher
 * Make or Ninja build systems
 * Git
-* Intel TBB development files
 * Package config
 * SSL Development files
-* ISPC compiler 1.10.0b (https://github.com/ispc/ispc/releases/tag/v1.10.0)
-* Embree 3.5.2 (https://github.com/embree/embree/tree/v3.5.2)
-* OSPRay 1.8.5 (https://github.com/ospray/OSPRay/tree/v1.8.5)
-
-To build braynsViewer, additionally, the following components must be installed:
-
-* OpenGL 3.3 or higher
-* GLEW
+* OSPRay 2.9.0 (https://github.com/ospray/OSPRay/tree/v2.9.0)
 
 Optionally, to build the core plugins of Brayns, the following components are required.
 
@@ -49,16 +40,14 @@ Optionally, to build the core plugins of Brayns, the following components are re
 
 Brayns uses further dependencies, but if they are not present on the system, it will download them by itself during build.
 
-* GLFW 3.3.5 (https://github.com/glfw/glfw/tree/3.3.5)
-* ImGui (https://github.com/ocornut/imgui)
 * glm 0.9.9.8 (https://github.com/g-truc/glm/tree/0.9.9.8)
 * Poco libraries 1.11.1 (https://github.com/pocoproject/poco/tree/poco-1.11.1-release)
 * spdlog 1.9.2 (https://github.com/gabime/spdlog/tree/v1.9.2)
 * stb (https://github.com/nothings/stb)
-* libsonata 0.1.9 (https://github.com/BlueBrain/libsonata/tree/v0.1.9)
-* MVDTool 2.4.2 (https://github.com/BlueBrain/MVDTool/tree/v2.4.2)
-* MorphIO 3.3.2 (https://github.com/BlueBrain/MorphIO/tree/v3.3.2)
-* Brion 3.3.7 (https://github.com/BlueBrain/Brion/tree/3.3.7)
+* libsonata 0.1.11 (https://github.com/BlueBrain/libsonata/tree/v0.1.11)
+* MVDTool 2.4.4 (https://github.com/BlueBrain/MVDTool/tree/v2.4.4)
+* MorphIO 3.3.3 (https://github.com/BlueBrain/MorphIO/tree/v3.3.3)
+* Brion 3.3.8 (https://github.com/BlueBrain/Brion/tree/3.3.8)
 
 ### Build command
 
@@ -67,9 +56,7 @@ Once the given dependencies are installed, Brayns can be cloned and built as fol
     $ git clone https://github.com/BlueBrain/Brayns.git
     $ cd Brayns && mkdir build && cd build
     $ cmake .. -DCMAKE_BUILD_TYPE=Release \
-      -Dospray_DIR=/path/to/OSPRay/cmake/config/folder \
-      -Dembree_DIR=/path/to/Embree/cmake/config/folder \
-      -DISPC_EXECUTABLE=/path/to/ispc/compiler/binary/file
+      -DCMAKE_PREFIX_PATH=/path/to/OSPRay/cmake/config/folder
     $ make -j
 
 This will build the core of Brayns, the braynsService application, the CircuitExplorer plugin and the unit tests.
@@ -77,12 +64,10 @@ This will build the core of Brayns, the braynsService application, the CircuitEx
 The following cmake options (shown with their default value) can be used during CMake build run to customize the components to build as *-DVARIABLE=ON|OFF* :
 
 * **BRAYNS_TESTS_ENABLED** (Default ON) - Activate unit tests
-* **BRAYNS_VIEWER_ENABLED** (Default OFF) - Activate braynsViewer app
 * **BRAYNS_SERVICE_ENABLED** (Default ON) - Activate braynsService app
 * **BRAYNS_CIRCUITEXPLORER_ENABLED** (Default ON) - Activate CircuitExplorer plugin
 * **BRAYNS_CIRCUITINFO_ENABLED** (Default OFF) - Activate CircuitInfo plugin
 * **BRAYNS_DTI_ENABLED** (Default OFF) - Activate Diffusion-Tensor Imaging plugin
-* **BRAYNS_HARDWARE_RANDOMIZER_ENABLED** (Default OFF) - Activates hardware randomizer for raytracing
 
 
 ## Running
@@ -102,14 +87,6 @@ This command will launch the braynsService app with only core functionality. To 
     $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsCircuitInfo
 
 The name that must be used when specifying a plugin will depend on the name of the library of the plugin (stripping the extension **.so** from it)
-
-### braynsViewer application
-
-The braynsViewer application is executed in a similar fashion as the braynsService app:
-
-    $ braynsViewer --plugin braynsCircuitExplorer --plugin braynsCircuitInfo
-
-Although not required, it also allows to specify the ***--uri*** parameter, although it is only used to connect to the renderer through the Python client.
 
 ### Using the Docker image
 
