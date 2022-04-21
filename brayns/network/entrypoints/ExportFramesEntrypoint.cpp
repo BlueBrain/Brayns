@@ -135,6 +135,8 @@ public:
         // Parameters manager
         auto parametersManager = paramsManager;
         auto &animParams = parametersManager.getAnimationParameters();
+        // Avoid the first frame not being triggered because the copy is in "not modified" state
+        animParams.markModified();
 
         // Compute for how much progress each frame accounts
         const auto progressChunk = 1.f / static_cast<float>(keyFrames.size());
