@@ -34,11 +34,6 @@ public:
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
     /**
-     * @brief onStart
-     */
-    void onStart() override;
-
-    /**
      * @brief commit
      * @return
      */
@@ -54,13 +49,6 @@ public:
      * @return const std::vector<uint64_t> &
      */
     const std::vector<uint64_t> &getCellIds() const noexcept;
-
-    /**
-     * @brief setNumCells Utility functions that allows to optimize memory allocation by letting the component
-     * know how many cell and, thus, synapse groups it will have to manage
-     * @param size
-     */
-    void setNumCells(const size_t size) noexcept;
 
     /**
      * @brief addSynapses Adds a new group of synapses to the component

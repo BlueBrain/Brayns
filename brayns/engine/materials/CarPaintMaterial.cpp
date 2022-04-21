@@ -51,7 +51,7 @@ void CarPaintMaterial::commitMaterialSpecificParams()
     ospSetParam(ospHandle, "flakeDensity", OSPDataType::OSP_FLOAT, &_flakeDensity);
 }
 
-std::string_view CarPaintMaterial::getOSPHandleName() const noexcept
+std::string CarPaintMaterial::getOSPHandleName() const noexcept
 {
     return "carPaint";
 }

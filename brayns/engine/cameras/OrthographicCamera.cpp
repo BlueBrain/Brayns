@@ -22,15 +22,14 @@
 
 namespace brayns
 {
-void OrthographicCamera::commitCameraSpecificParams()
-{
-    auto ospHandle = handle();
-    ospSetParam(ospHandle, "height", OSP_FLOAT, &_height);
-}
-
 std::string OrthographicCamera::getName() const noexcept
 {
     return "orthographic";
+}
+
+std::unique_ptr<Camera> OrthographicCamera::clone() const noexcept
+{
+    return std::make_unique<OrthographicCamera>(*this);
 }
 
 void OrthographicCamera::setHeight(const float height) noexcept
@@ -43,7 +42,13 @@ float OrthographicCamera::getHeight() const noexcept
     return _height;
 }
 
-std::string_view OrthographicCamera::getOSPHandleName() const noexcept
+void OrthographicCamera::commitCameraSpecificParams()
+{
+    auto ospHandle = handle();
+    ospSetParam(ospHandle, "height", OSP_FLOAT, &_height);
+}
+
+std::string OrthographicCamera::getOSPHandleName() const noexcept
 {
     return "orthographic";
 }

@@ -54,7 +54,7 @@ void MatteMaterial::commitMaterialSpecificParams()
     ospSetParam(ospHandle, "opacity", OSPDataType::OSP_FLOAT, &_opacity);
 }
 
-std::string_view MatteMaterial::getOSPHandleName() const noexcept
+std::string MatteMaterial::getOSPHandleName() const noexcept
 {
     return "principled";
 }

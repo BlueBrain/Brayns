@@ -42,12 +42,12 @@ Camera &Camera::operator=(const Camera &o)
     return *this;
 }
 
-Camera::Camera(Camera &&other)
+Camera::Camera(Camera &&other) noexcept
 {
     *this = std::move(other);
 }
 
-Camera &Camera::operator=(Camera &&other)
+Camera &Camera::operator=(Camera &&other) noexcept
 {
     _lookAtParams = std::move(other._lookAtParams);
     _aspectRatio = other._aspectRatio;

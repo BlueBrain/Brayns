@@ -32,25 +32,28 @@ Material::Material(const Material &o)
 
 Material &Material::operator=(const Material &o)
 {
-    (void)o;
+    _color = o._color;
     return *this;
 }
 
-Material::Material(Material &&o)
+Material::Material(Material &&o) noexcept
 {
     *this = std::move(o);
 }
 
-Material &Material::operator=(Material &&o)
+Material &Material::operator=(Material &&o) noexcept
 {
     std::swap(_handle, o._handle);
+    _color = std::move(o._color);
     return *this;
 }
 
 Material::~Material()
 {
     if (_handle)
+    {
         ospRelease(_handle);
+    }
 }
 
 bool Material::commit()
@@ -63,7 +66,7 @@ bool Material::commit()
     if (!_handle)
     {
         const auto handleName = getOSPHandleName();
-        _handle = ospNewMaterial("", handleName.data());
+        _handle = ospNewMaterial("", handleName.c_str());
     }
 
     commitMaterialSpecificParams();

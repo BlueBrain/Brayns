@@ -33,7 +33,20 @@ Renderer &Renderer::operator=(const Renderer &o)
     _maxRayBounces = o._maxRayBounces;
     _backgroundColor = o._backgroundColor;
 
-    markModified();
+    return *this;
+}
+
+Renderer::Renderer(Renderer &&o) noexcept
+{
+    *this = std::move(o);
+}
+
+Renderer &Renderer::operator=(Renderer &&o) noexcept
+{
+    _samplesPerPixel = o._samplesPerPixel;
+    _maxRayBounces = o._maxRayBounces;
+    _backgroundColor = o._backgroundColor;
+    std::swap(_handle, o._handle);
 
     return *this;
 }
@@ -83,7 +96,7 @@ bool Renderer::commit()
     if (!_handle)
     {
         const auto handleName = getOSPHandleName();
-        _handle = ospNewRenderer(handleName.data());
+        _handle = ospNewRenderer(handleName.c_str());
     }
 
     ospSetParam(_handle, "pixelSamples", OSPDataType::OSP_INT, &_samplesPerPixel);

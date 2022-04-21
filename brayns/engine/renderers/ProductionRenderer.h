@@ -27,11 +27,32 @@ namespace brayns
 class ProductionRenderer final : public Renderer
 {
 public:
+    /**
+     * @brief Get the Name object
+     *
+     * @return std::string
+     */
     std::string getName() const noexcept final;
 
-protected:
-    std::string_view getOSPHandleName() const noexcept final;
+    /**
+     * @brief
+     *
+     * @return std::unique_ptr<Renderer>
+     */
+    std::unique_ptr<Renderer> clone() const noexcept final;
 
+protected:
+    /**
+     * @brief
+     *
+     * @return std::string
+     */
+    std::string getOSPHandleName() const noexcept final;
+
+    /**
+     * @brief
+     *
+     */
     void commitRendererSpecificParams() final;
 };
 }

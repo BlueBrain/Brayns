@@ -21,7 +21,6 @@
 #include "ProteinLoader.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/components/MaterialComponent.h>
 #include <brayns/io/loaders/protein/ProteinComponent.h>
 
 #include <assert.h>
@@ -453,7 +452,6 @@ std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
     }
 
     auto model = std::make_unique<Model>();
-    model->addComponent<MaterialComponent>();
     model->addComponent<ProteinComponent>(std::move(spheres), std::move(modelColors), std::move(colorMapIndices));
 
     std::vector<std::unique_ptr<Model>> result;

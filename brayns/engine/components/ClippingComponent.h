@@ -38,7 +38,6 @@ class ClippingComponent : public Component
 public:
     ClippingComponent(const T &geometry)
     {
-        _model = GeometricModelHandler::create();
         _geometry.add(geometry);
     }
 
@@ -49,16 +48,18 @@ public:
 
     virtual uint64_t getSizeInBytes() const noexcept override
     {
-        return sizeof(ClippingComponent<T>) + _geometry.getNumGeometries() * sizeof(T);
+        return sizeof(ClippingComponent<T>) + _geometry.getSizeInBytes();
     }
 
     virtual void onStart() override
     {
+        _model = GeometricModelHandler::create();
         GeometricModelHandler::addToClippingGroup(_model, getModel());
     }
 
     virtual bool commit() override
     {
+        // Geometry cannot be modified, so it will be committed and setted just one time
         if (_geometry.commit())
         {
             GeometricModelHandler::setGeometry(_model, _geometry);

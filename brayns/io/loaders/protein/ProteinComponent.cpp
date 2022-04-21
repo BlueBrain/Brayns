@@ -23,22 +23,22 @@
 #include <brayns/engine/common/DataHandler.h>
 #include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/common/GeometricModelHandler.h>
+#include <brayns/engine/common/SizeHelper.h>
+#include <brayns/engine/components/MaterialComponent.h>
 
 namespace brayns
 {
 ProteinComponent::ProteinComponent(std::vector<Sphere> sphe, std::vector<Vector4f> colors, std::vector<uint8_t> indx)
-    : _model(GeometricModelHandler::create())
-    , _colors(std::move(colors))
+    : _colors(std::move(colors))
     , _colorIndices(std::move(indx))
 {
-    sphe.shrink_to_fit();
     _geometry.set(std::move(sphe));
 }
 
 uint64_t ProteinComponent::getSizeInBytes() const noexcept
 {
-    return sizeof(ProteinComponent) + _geometry.getSizeInBytes() + sizeof(Vector4f) * _colors.size()
-        + sizeof(uint8_t) * _colorIndices.size();
+    return sizeof(ProteinComponent) + _geometry.getSizeInBytes() + SizeHelper::vectorSize(_colors)
+        + SizeHelper::vectorSize(_colorIndices);
 }
 
 Bounds ProteinComponent::computeBounds(const Matrix4f &transform) const noexcept
@@ -48,11 +48,17 @@ Bounds ProteinComponent::computeBounds(const Matrix4f &transform) const noexcept
 
 void ProteinComponent::onStart()
 {
-    GeometricModelHandler::addToGeometryGroup(_model, getModel());
+    _model = GeometricModelHandler::create();
+
+    auto &group = getModel();
+    GeometricModelHandler::addToGeometryGroup(_model, group);
+
+    group.addComponent<MaterialComponent>();
+
+    GeometricModelHandler::setGeometry(_model, _geometry);
 
     auto colorData = DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
     auto indexData = DataHandler::shareBuffer(_colorIndices, OSPDataType::OSP_UCHAR);
-
     GeometricModelHandler::setColorMap(_model, colorData, indexData);
 }
 
@@ -60,16 +66,15 @@ bool ProteinComponent::commit()
 {
     bool needsCommit = false;
 
-    if (_geometry.commit())
-    {
-        GeometricModelHandler::setGeometry(_model, _geometry);
-        needsCommit = true;
-    }
-
     auto &material = ExtractModelObject::extractMaterial(getModel());
     if (material.commit())
     {
         GeometricModelHandler::setMaterial(_model, material);
+        needsCommit = true;
+    }
+
+    if (_geometry.commit())
+    {
         needsCommit = true;
     }
 

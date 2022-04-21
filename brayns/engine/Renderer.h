@@ -40,10 +40,22 @@ public:
     Renderer(const Renderer &);
     Renderer &operator=(const Renderer &);
 
-    Renderer(Renderer &&) = default;
-    Renderer &operator=(Renderer &&) = default;
+    Renderer(Renderer &&) noexcept;
+    Renderer &operator=(Renderer &&) noexcept;
 
     virtual ~Renderer();
+
+    /**
+     * @brief Returns the renderer type as a string
+     */
+    virtual std::string getName() const noexcept = 0;
+
+    /**
+     * @brief Creates a copy of the renderer object
+     *
+     * @return std::unique_ptr<Renderer>
+     */
+    virtual std::unique_ptr<Renderer> clone() const noexcept = 0;
 
     /**
      * @brief Returns the number of samples per pixel that this renderer will perform to render a complete frame
@@ -88,16 +100,11 @@ public:
      */
     bool commit();
 
-    /**
-     * @brief Returns the renderer type as a string
-     */
-    virtual std::string getName() const noexcept = 0;
-
 protected:
     /**
      * @brief Subclasses must implement this method to return the appropiate OSPRay renderer name to be instantiated.
      */
-    virtual std::string_view getOSPHandleName() const noexcept = 0;
+    virtual std::string getOSPHandleName() const noexcept = 0;
 
     /**
      * @brief Subclasses must implement this method to commit their renderer-specific data to the OSPRay counterpart.

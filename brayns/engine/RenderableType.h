@@ -94,9 +94,9 @@ public:
 
     Geometry &operator=(Geometry &&o) noexcept
     {
-        std::swap(_handle, o._handle);
         _geometries = std::move(o._geometries);
-
+        _dirty = o._dirty;
+        std::swap(_handle, o._handle);
         return *this;
     }
 
@@ -133,7 +133,9 @@ public:
         const auto idx = _geometries.size();
         constexpr auto limit = std::numeric_limits<uint32_t>::max();
         if (idx >= limit)
+        {
             throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
+        }
 
         _geometries.emplace_back(std::move(geometry));
         _dirty = true;
@@ -358,9 +360,9 @@ public:
 
     Volume &operator=(Volume &&o) noexcept
     {
+        std::swap(_handle, o._handle);
+        _dirty = o._dirty;
         _volumeData = std::move(o._volumeData);
-        std::swap(o._handle);
-
         return *this;
     }
 

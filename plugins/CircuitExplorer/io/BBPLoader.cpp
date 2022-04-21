@@ -45,7 +45,7 @@ struct SynapseImporter
     {
         const auto &params = context.loadParameters;
         const auto afferent = params.load_afferent_synapses;
-        const auto efferent = params.load_afferent_synapses;
+        const auto efferent = params.load_efferent_synapses;
 
         if (afferent)
         {

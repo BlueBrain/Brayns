@@ -60,7 +60,7 @@ void PlasticMaterial::commitMaterialSpecificParams()
     ospSetParam(ospHandle, "opacity", OSPDataType::OSP_FLOAT, &_opacity);
 }
 
-std::string_view PlasticMaterial::getOSPHandleName() const noexcept
+std::string PlasticMaterial::getOSPHandleName() const noexcept
 {
     return "principled";
 }

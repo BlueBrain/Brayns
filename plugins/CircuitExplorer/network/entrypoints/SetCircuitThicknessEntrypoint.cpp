@@ -36,6 +36,11 @@ public:
         auto modelId = params.model_id;
         auto radiusMultiplier = params.radius_multiplier;
 
+        if (radiusMultiplier == 1.f)
+        {
+            return;
+        }
+
         // Extract model
         auto &instance = brayns::ExtractModel::fromId(scene, modelId);
         auto &model = instance.getModel();
@@ -51,18 +56,7 @@ public:
             throw brayns::JsonRpcException("The model is not a morphological neuron circuit");
         }
 
-        auto &morphologies = circuit->getGeometry();
-        for (auto &morphology : morphologies)
-        {
-            auto &geometry = morphology.geometry;
-            geometry.mainpulateAll(
-                [radius = radiusMultiplier](uint32_t i, brayns::Primitive &primitive)
-                {
-                    (void)i;
-                    primitive.r0 *= radius;
-                    primitive.r1 *= radius;
-                });
-        }
+        circuit->changeThickness(radiusMultiplier);
 
         // We have modified the thickness, lets recompute the bounds
         scene.computeBounds();

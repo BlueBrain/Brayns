@@ -68,17 +68,6 @@ public:
     }
 
     /**
-     * @brief Sets all the geometry to the same color. Disables material color
-     * @param color
-     */
-    void setColor(const Vector4f &color) noexcept
-    {
-        GeometricModelHandler::setColor(_model, color);
-        _useMaterialColor = false;
-        _colorDirty = true;
-    }
-
-    /**
      * @brief Sets a color per geometry. Disables material color
      * @param colors
      * @throws std::invalid_argument if there are not enough colors for the contained geometry
@@ -120,47 +109,48 @@ public:
      */
     virtual void onStart() override
     {
-        Model &model = getModel();
         _model = GeometricModelHandler::create();
-        GeometricModelHandler::addToGeometryGroup(_model, model);
-        model.addComponent<MaterialComponent>();
+
+        Model &group = getModel();
+        GeometricModelHandler::addToGeometryGroup(_model, group);
+
+        group.addComponent<MaterialComponent>();
+
+        GeometricModelHandler::setGeometry(_model, _geometry);
     }
 
-    /**
-     * @brief commit
-     * @return
-     */
     virtual bool commit() override
     {
-        bool needsCommit = _colorDirty;
-        _colorDirty = false;
+        bool needsCommit = false;
 
-        Model &model = getModel();
-
-        if (_geometry.commit())
+        if (_colorDirty)
         {
-            GeometricModelHandler::setGeometry(_model, _geometry);
             needsCommit = true;
+            _colorDirty = false;
         }
 
-        auto &material = ExtractModelObject::extractMaterial(model);
+        auto &material = ExtractModelObject::extractMaterial(getModel());
         if (material.commit())
         {
+            needsCommit = true;
             GeometricModelHandler::setMaterial(_model, material);
             if (_useMaterialColor)
             {
                 GeometricModelHandler::setColor(_model, material.getColor());
             }
+        }
+
+        if (_geometry.commit())
+        {
             needsCommit = true;
         }
 
         if (needsCommit)
         {
             GeometricModelHandler::commitModel(_model);
-            return true;
         }
 
-        return false;
+        return needsCommit;
     }
 
     /**

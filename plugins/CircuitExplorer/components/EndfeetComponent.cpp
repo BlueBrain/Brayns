@@ -31,12 +31,6 @@ brayns::Bounds EndfeetComponent::computeBounds(const brayns::Matrix4f &transform
     return result;
 }
 
-void EndfeetComponent::onStart()
-{
-    auto &model = getModel();
-    model.addComponent<brayns::MaterialComponent>();
-}
-
 bool EndfeetComponent::commit()
 {
     bool needsCommit = _colorsDirty;
@@ -87,7 +81,8 @@ void EndfeetComponent::addEndfeet(std::map<uint64_t, std::vector<brayns::Triangl
     _endFeet.reserve(endfeetGeometry.size());
 
     auto &group = getModel();
-    auto &material = brayns::ExtractModelObject::extractMaterial(group);
+
+    group.addComponent<brayns::MaterialComponent>();
 
     for (auto &[astrocyteId, endfeets] : endfeetGeometry)
     {
@@ -108,7 +103,6 @@ void EndfeetComponent::addEndfeet(std::map<uint64_t, std::vector<brayns::Triangl
         model = brayns::GeometricModelHandler::create();
         brayns::GeometricModelHandler::addToGeometryGroup(model, group);
         brayns::GeometricModelHandler::setGeometry(model, geometry);
-        brayns::GeometricModelHandler::setMaterial(model, material);
         brayns::GeometricModelHandler::setColor(model, brayns::Vector4f(1.f));
     }
 }

@@ -27,6 +27,11 @@ std::string PerspectiveCamera::getName() const noexcept
     return "perspective";
 }
 
+std::unique_ptr<Camera> PerspectiveCamera::clone() const noexcept
+{
+    return std::make_unique<PerspectiveCamera>(*this);
+}
+
 void PerspectiveCamera::commitCameraSpecificParams()
 {
     auto ospHandle = handle();
@@ -65,7 +70,7 @@ float PerspectiveCamera::getFocusDistance() const noexcept
     return _focusDistance;
 }
 
-std::string_view PerspectiveCamera::getOSPHandleName() const noexcept
+std::string PerspectiveCamera::getOSPHandleName() const noexcept
 {
     return "perspective";
 }

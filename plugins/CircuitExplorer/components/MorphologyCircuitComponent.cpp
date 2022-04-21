@@ -42,8 +42,13 @@ void MorphologyCircuitComponent::onStart()
 
 bool MorphologyCircuitComponent::commit()
 {
-    bool needsCommit = _colorsDirty;
-    _colorsDirty = false;
+    bool needsCommit = false;
+
+    if (_colorsDirty)
+    {
+        needsCommit = true;
+        _colorsDirty = false;
+    }
 
     auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
     if (material.commit())
@@ -53,6 +58,18 @@ bool MorphologyCircuitComponent::commit()
             brayns::GeometricModelHandler::setMaterial(morphology.model, material);
         }
         needsCommit = true;
+    }
+
+    if (_geometryDirty)
+    {
+        _geometryDirty = false;
+        needsCommit = true;
+
+        for (auto &morphology : _morphologies)
+        {
+            auto &geometry = morphology.geometry;
+            geometry.commit();
+        }
     }
 
     if (needsCommit)
@@ -256,7 +273,19 @@ void MorphologyCircuitComponent::setIndexedColor(brayns::OSPBuffer &color, const
     _colorsDirty = true;
 }
 
-std::vector<MorphologyCircuitComponent::MorphologyGeometry> &MorphologyCircuitComponent::getGeometry() noexcept
+void MorphologyCircuitComponent::changeThickness(const float multiplier) noexcept
 {
-    return _morphologies;
+    for (auto &morphology : _morphologies)
+    {
+        auto &geometry = morphology.geometry;
+        geometry.mainpulateAll(
+            [mult = multiplier](uint32_t i, brayns::Primitive &primitive)
+            {
+                (void)i;
+                primitive.r0 *= mult;
+                primitive.r1 *= mult;
+            });
+    }
+
+    _geometryDirty = true;
 }

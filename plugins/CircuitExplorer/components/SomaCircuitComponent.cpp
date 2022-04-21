@@ -17,14 +17,6 @@ brayns::Bounds SomaCircuitComponent::computeBounds(const brayns::Matrix4f &trans
     return _geometry.computeBounds(transform);
 }
 
-void SomaCircuitComponent::onStart()
-{
-    auto &model = getModel();
-    _model = brayns::GeometricModelHandler::create();
-    brayns::GeometricModelHandler::addToGeometryGroup(_model, model);
-    model.addComponent<brayns::MaterialComponent>();
-}
-
 bool SomaCircuitComponent::commit()
 {
     bool needsCommit = false;
@@ -56,9 +48,21 @@ void SomaCircuitComponent::onDestroyed()
 void SomaCircuitComponent::setSomas(std::vector<uint64_t> ids, std::vector<brayns::Sphere> geometry) noexcept
 {
     _ids = std::move(ids);
+
+    _model = brayns::GeometricModelHandler::create();
+
+    auto &group = getModel();
+    brayns::GeometricModelHandler::addToGeometryGroup(_model, group);
+
+    auto &materialComponent = group.addComponent<brayns::MaterialComponent>();
+    auto &material = materialComponent.getMaterial();
+    material.commit();
+    brayns::GeometricModelHandler::setMaterial(_model, material);
+
     _geometry.set(std::move(geometry));
     _geometry.commit();
     brayns::GeometricModelHandler::setGeometry(_model, _geometry);
+
     _colors.resize(_ids.size());
     setColor(brayns::Vector4f(1.f));
 }

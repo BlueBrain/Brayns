@@ -54,7 +54,7 @@ void DefaultMaterial::commitMaterialSpecificParams()
     ospSetParam(ospHandle, "d", OSPDataType::OSP_FLOAT, &_opacity);
 }
 
-std::string_view DefaultMaterial::getOSPHandleName() const noexcept
+std::string DefaultMaterial::getOSPHandleName() const noexcept
 {
     return "obj";
 }

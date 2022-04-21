@@ -127,7 +127,7 @@ public:
     }
 
 private:
-    SceneModelManager *_modelManager;
+    SceneModelManager *_modelManager{nullptr};
     uint32_t _modelId{};
     std::unique_ptr<MaterialType> _material;
 };

@@ -25,11 +25,6 @@ public:
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
     /**
-     * @brief onStart
-     */
-    void onStart() override;
-
-    /**
      * @brief commit
      * @return
      */

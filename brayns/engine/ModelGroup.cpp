@@ -63,25 +63,12 @@ ModelGroup::ModelGroup()
 {
 }
 
-ModelGroup::ModelGroup(ModelGroup &&o)
-{
-    *this = std::move(o);
-}
-
-ModelGroup &ModelGroup::operator=(ModelGroup &&o)
-{
-    std::swap(_handle, o._handle);
-    _geometryModels = std::move(o._geometryModels);
-    _volumeModels = std::move(o._volumeModels);
-    _clippingModels = std::move(o._clippingModels);
-
-    return *this;
-}
-
 ModelGroup::~ModelGroup()
 {
     if (_handle)
+    {
         ospRelease(_handle);
+    }
 }
 
 void ModelGroup::addGeometricModel(OSPGeometricModel model)

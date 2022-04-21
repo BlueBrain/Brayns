@@ -36,12 +36,12 @@ Light &Light::operator=(const Light &o)
     return *this;
 }
 
-Light::Light(Light &&o)
+Light::Light(Light &&o) noexcept
 {
     *this = std::move(o);
 }
 
-Light &Light::operator=(Light &&o)
+Light &Light::operator=(Light &&o) noexcept
 {
     _color = std::move(o._color);
     _intensity = o._intensity;

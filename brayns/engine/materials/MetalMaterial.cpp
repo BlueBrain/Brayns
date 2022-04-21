@@ -50,7 +50,7 @@ void MetalMaterial::commitMaterialSpecificParams()
     ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &_roughness);
 }
 
-std::string_view MetalMaterial::getOSPHandleName() const noexcept
+std::string MetalMaterial::getOSPHandleName() const noexcept
 {
     return "alloy";
 }

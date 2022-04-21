@@ -99,14 +99,15 @@ public:
     void setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping);
 
     /**
-     * @brief Returns the geometry of the circuit
+     * @brief Changes the thickness (radii) of the morphology geometries
      *
-     * @return brayns::Geometry<brayns::Primitive>&
+     * @param multiplier
      */
-    std::vector<MorphologyGeometry> &getGeometry() noexcept;
+    void changeThickness(const float multiplier) noexcept;
 
 private:
     std::vector<uint64_t> _ids;
     std::vector<MorphologyGeometry> _morphologies;
     bool _colorsDirty{false};
+    bool _geometryDirty{false};
 };

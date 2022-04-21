@@ -51,7 +51,7 @@ void GlassMaterial::commitMaterialSpecificParams()
     ospSetParam(ospHandle, "eta", OSPDataType::OSP_FLOAT, &_ior);
 }
 
-std::string_view GlassMaterial::getOSPHandleName() const noexcept
+std::string GlassMaterial::getOSPHandleName() const noexcept
 {
     return "thinGlass";
 }

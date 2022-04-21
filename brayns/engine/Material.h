@@ -89,7 +89,7 @@ protected:
      * @brief Subclasses must implement this method to return the OSPRay material ID to instantiate the appropiate
      * object
      */
-    virtual std::string_view getOSPHandleName() const noexcept = 0;
+    virtual std::string getOSPHandleName() const noexcept = 0;
 
     /**
      * @brief Subclasses must implement this method to commit material specific parameters to the OSPRay material

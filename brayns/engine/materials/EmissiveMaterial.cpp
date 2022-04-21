@@ -52,7 +52,7 @@ void EmissiveMaterial::commitMaterialSpecificParams()
     ospSetParam(ospHandle, "intensity", OSPDataType::OSP_FLOAT, &_intensity);
 }
 
-std::string_view EmissiveMaterial::getOSPHandleName() const noexcept
+std::string EmissiveMaterial::getOSPHandleName() const noexcept
 {
     return "luminous";
 }

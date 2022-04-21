@@ -146,13 +146,13 @@ void SceneModelManager::preRender(const ParametersManager &parameters)
 bool SceneModelManager::commit()
 {
     bool needsRecommit = false;
+
     for (auto &entry : _models)
     {
         auto &model = *entry.model;
+        const bool modelChanged = model.commit();
+
         auto &instances = entry.instances;
-
-        bool modelChanged = model.commit();
-
         bool instancesChanged = false;
         for (auto &instance : instances)
         {
@@ -161,7 +161,10 @@ bool SceneModelManager::commit()
                 continue;
             }
 
-            instancesChanged = instance->commit(modelChanged) || instancesChanged;
+            if (instance->commit(modelChanged))
+            {
+                instancesChanged = true;
+            }
         }
 
         needsRecommit = needsRecommit || instancesChanged;

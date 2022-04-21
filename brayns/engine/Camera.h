@@ -48,8 +48,8 @@ public:
     Camera(const Camera &);
     Camera &operator=(const Camera &);
 
-    Camera(Camera &&);
-    Camera &operator=(Camera &&);
+    Camera(Camera &&) noexcept;
+    Camera &operator=(Camera &&) noexcept;
 
     virtual ~Camera();
 
@@ -57,6 +57,13 @@ public:
      * @brief Returns the camera type as a string
      */
     virtual std::string getName() const noexcept = 0;
+
+    /**
+     * @brief Creates a copy of the current camera
+     *
+     * @return std::unique_ptr<Camera>
+     */
+    virtual std::unique_ptr<Camera> clone() const noexcept = 0;
 
     /**
      * @brief Commit implementation. Derived camera types must override commitCameraSpecificParams(),
@@ -92,7 +99,7 @@ protected:
      * @brief Subclasses must implement this method so that the appropiate OSPRay camera object maight be
      * instantiated
      */
-    virtual std::string_view getOSPHandleName() const noexcept = 0;
+    virtual std::string getOSPHandleName() const noexcept = 0;
 
     /**
      * @brief Subclasses of the Camera must implement this method to commit to OSPRay camera type specific

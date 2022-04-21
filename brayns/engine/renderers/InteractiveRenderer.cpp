@@ -27,6 +27,11 @@ std::string InteractiveRenderer::getName() const noexcept
     return "interactive";
 }
 
+std::unique_ptr<Renderer> InteractiveRenderer::clone() const noexcept
+{
+    return std::make_unique<InteractiveRenderer>(*this);
+}
+
 void InteractiveRenderer::setShadowsEnabled(const bool enabled) noexcept
 {
     _updateValue(_shadowsEnabled, enabled);
@@ -47,7 +52,7 @@ int32_t InteractiveRenderer::getAmbientOcclusionSamples() const noexcept
     return _aoSamples;
 }
 
-std::string_view InteractiveRenderer::getOSPHandleName() const noexcept
+std::string InteractiveRenderer::getOSPHandleName() const noexcept
 {
     return "scivis";
 }

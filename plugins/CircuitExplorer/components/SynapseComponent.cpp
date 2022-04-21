@@ -30,12 +30,6 @@ brayns::Bounds SynapseComponent::computeBounds(const brayns::Matrix4f &transform
     return result;
 }
 
-void SynapseComponent::onStart()
-{
-    auto &model = getModel();
-    model.addComponent<brayns::MaterialComponent>();
-}
-
 bool SynapseComponent::commit()
 {
     bool needsCommit = _colorsDirty;
@@ -80,18 +74,13 @@ const std::vector<uint64_t> &SynapseComponent::getCellIds() const noexcept
     return _cellIds;
 }
 
-void SynapseComponent::setNumCells(const size_t size) noexcept
-{
-    _cellIds.reserve(size);
-    _synapses.reserve(size);
-}
-
 void SynapseComponent::addSynapses(std::map<uint64_t, std::vector<brayns::Sphere>> &synapses)
 {
     _cellIds.reserve(synapses.size());
     _synapses.reserve(synapses.size());
 
     auto &group = getModel();
+    group.addComponent<brayns::MaterialComponent>();
 
     for (auto &[id, synapseGeometry] : synapses)
     {

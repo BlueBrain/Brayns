@@ -27,7 +27,12 @@ std::string ProductionRenderer::getName() const noexcept
     return "production";
 }
 
-std::string_view ProductionRenderer::getOSPHandleName() const noexcept
+std::unique_ptr<Renderer> ProductionRenderer::clone() const noexcept
+{
+    return std::make_unique<ProductionRenderer>(*this);
+}
+
+std::string ProductionRenderer::getOSPHandleName() const noexcept
 {
     return "pathtracer";
 }

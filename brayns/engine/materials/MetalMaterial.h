@@ -43,7 +43,7 @@ public:
     float getRoughness() const noexcept;
 
 protected:
-    std::string_view getOSPHandleName() const noexcept final;
+    std::string getOSPHandleName() const noexcept final;
 
     void commitMaterialSpecificParams() final;
 

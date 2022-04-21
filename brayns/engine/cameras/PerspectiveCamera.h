@@ -27,7 +27,19 @@ namespace brayns
 class PerspectiveCamera final : public Camera
 {
 public:
+    /**
+     * @brief Get the Name object
+     *
+     * @return std::string
+     */
     std::string getName() const noexcept override;
+
+    /**
+     * @brief
+     *
+     * @return std::unique_ptr<Camera>
+     */
+    std::unique_ptr<Camera> clone() const noexcept override;
 
     /**
      * @brief Sets the perspective viertical field of view (in degrees)
@@ -62,7 +74,17 @@ public:
     float getFocusDistance() const noexcept;
 
 protected:
-    std::string_view getOSPHandleName() const noexcept final;
+    /**
+     * @brief
+     *
+     * @return std::string
+     */
+    std::string getOSPHandleName() const noexcept final;
+
+    /**
+     * @brief
+     *
+     */
     void commitCameraSpecificParams() final;
 
 private:
