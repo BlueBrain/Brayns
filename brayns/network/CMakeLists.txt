@@ -89,9 +89,9 @@ set(BRAYNSNETWORK_HEADERS
   jsonrpc/RequestId.h
   messages/ExitLaterMessage.h
   messages/ExportFramesMessage.h
-  messages/GenericImageSettingsMessage.h
   messages/GetModelMessage.h
   messages/ImageBase64Message.h
+  messages/ImageSettingsMessage.h
   messages/ImageStreamingModeMessage.h
   messages/InspectMessage.h
   messages/RemoveClipPlanesMessage.h
@@ -118,6 +118,7 @@ set(BRAYNSNETWORK_HEADERS
 )
   
 set(BRAYNSNETWORK_SOURCES
+  adapters/CameraAdapter.cpp
   adapters/ClipPlaneAdapter.cpp
   adapters/ModelInstanceAdapter.cpp
   adapters/ModelTransferFunctionAdapter.cpp

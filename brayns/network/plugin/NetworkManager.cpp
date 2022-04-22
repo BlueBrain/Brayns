@@ -23,6 +23,7 @@
 
 #include <brayns/common/Log.h>
 
+#include <brayns/network/common/EngineObjectFactory.h>
 #include <brayns/network/dispatch/RequestDispatcher.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
 #include <brayns/network/interface/NetworkInterface.h>
@@ -98,6 +99,9 @@ public:
         auto &stream = context.stream;
         auto &monitor = stream.getMonitor();
 
+        auto cameraFactory = brayns::EngineFactories::createCameraFactory();
+        auto renderFactory = brayns::EngineFactories::createRendererFactory();
+
         brayns::CancellationToken token(interface);
         brayns::EntrypointBuilder builder("Core", interface);
 
@@ -114,7 +118,7 @@ public:
         builder.add<brayns::ClearLightsEntrypoint>(sceneLightManager);
         builder.add<brayns::EnableSimulationEntrypoint>(sceneModelManager);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
-        builder.add<brayns::ExportFramesEntrypoint>(engine, parameters, token);
+        builder.add<brayns::ExportFramesEntrypoint>(engine, parameters, token, cameraFactory, renderFactory);
         builder.add<brayns::GetAnimationParametersEntrypoint>(animation);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
         builder.add<brayns::GetCameraLookAtEntrypoint>(engine);
@@ -162,7 +166,7 @@ public:
         builder.add<brayns::SetModelTransferFunctionEntrypoint>(sceneModelManager);
         builder.add<brayns::SetRendererInteractiveEntrypoint>(engine);
         builder.add<brayns::SetRendererProductionEntrypoint>(engine);
-        builder.add<brayns::SnapshotEntrypoint>(engine, interface);
+        builder.add<brayns::SnapshotEntrypoint>(engine, interface, cameraFactory, renderFactory);
         builder.add<brayns::TriggerJpegStreamEntrypoint>(monitor);
         builder.add<brayns::UpdateModelEntrypoint>(scene);
         builder.add<brayns::VersionEntrypoint>();

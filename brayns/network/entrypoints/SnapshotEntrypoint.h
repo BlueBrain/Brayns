@@ -26,6 +26,7 @@
 #include <brayns/engine/Engine.h>
 
 #include <brayns/network/common/CancellationToken.h>
+#include <brayns/network/common/EngineObjectFactory.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ImageBase64Message.h>
 #include <brayns/network/messages/SnapshotMessage.h>
@@ -35,7 +36,11 @@ namespace brayns
 class SnapshotEntrypoint : public Entrypoint<SnapshotParams, ImageBase64Message>
 {
 public:
-    SnapshotEntrypoint(Engine &engine, CancellationToken token);
+    SnapshotEntrypoint(
+        Engine &engine,
+        CancellationToken token,
+        std::shared_ptr<EngineObjectFactory<Camera>> cameraFactory,
+        std::shared_ptr<EngineObjectFactory<Renderer>> renderFactory);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -48,5 +53,8 @@ private:
     Engine &_engine;
     CancellationToken _token;
     std::optional<ClientRef> _client;
+
+    std::shared_ptr<EngineObjectFactory<Camera>> _cameraFactory;
+    std::shared_ptr<EngineObjectFactory<Renderer>> _renderFactory;
 };
 } // namespace brayns

@@ -18,17 +18,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/json/JsonObjectMacro.h>
-
-#include <optional>
+#include "CameraAdapter.h"
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(GenericImageSettings)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, format, "Image format (jpg or png)", Default("png"))
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, quality, "Image quality (0 = lowest quality, 100 = highest quality", Default(100))
-BRAYNS_JSON_OBJECT_ENTRY(std::optional<Vector2ui>, size, "Image dimensions [width, height]", Required(false))
-BRAYNS_JSON_OBJECT_END()
+GenericLookAt::GenericLookAt(LookAt baseLookAt)
+    : _lookAt(std::move(baseLookAt))
+{
+}
+
+const Vector3f &GenericLookAt::getPosition() const noexcept
+{
+    return _lookAt.position;
+}
+
+void GenericLookAt::setPosition(const Vector3f &position) noexcept
+{
+    _lookAt.position = position;
+}
+
+const Vector3f &GenericLookAt::getTarget() const noexcept
+{
+    return _lookAt.target;
+}
+
+void GenericLookAt::setTarget(const Vector3f &target) noexcept
+{
+    _lookAt.target = target;
+}
+
+const Vector3f &GenericLookAt::getUp() const noexcept
+{
+    return _lookAt.up;
+}
+
+void GenericLookAt::setUp(const Vector3f &up) noexcept
+{
+    _lookAt.up = up;
+}
+
+const LookAt &GenericLookAt::getLookAt() const noexcept
+{
+    return _lookAt;
+}
 }
