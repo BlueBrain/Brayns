@@ -6,6 +6,8 @@
 #include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
+#include <api/coloring/ColorByIDAlgorithm.h>
+
 size_t SomaCircuitComponent::getSizeInBytes() const noexcept
 {
     return sizeof(SomaCircuitComponent) + _geometry.getSizeInBytes() + brayns::SizeHelper::vectorSize(_ids)
@@ -96,39 +98,15 @@ void SomaCircuitComponent::setColorById(const std::vector<brayns::Vector4f> &col
 
 std::vector<uint64_t> SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
 {
-    auto idIt = _ids.begin();
-    auto bufferIt = _colors.begin();
-    auto colorsIt = colors.begin();
-
-    std::vector<uint64_t> skipped;
-    skipped.reserve(_ids.size());
-
-    while (colorsIt != colors.end())
-    {
-        const auto targetId = colorsIt->first;
-        const auto &targetColor = colorsIt->second;
-
-        while (idIt != _ids.end())
+    auto skipped = ColorByIDAlgorithm::execute(
+        colors,
+        _ids,
+        [&](uint64_t id, size_t index, const brayns::Vector4f &color)
         {
-            const auto somaId = *idIt;
-            if (somaId != targetId)
-            {
-                skipped.push_back(somaId);
-                ++idIt;
-                ++bufferIt;
-            }
-        }
-
-        if (idIt == _ids.end())
-        {
-            break;
-        }
-
-        _colorsDirty = true;
-        *bufferIt = targetColor;
-
-        ++colorsIt;
-    }
+            (void)id;
+            _colors[index] = color;
+            _colorsDirty = true;
+        });
 
     if (_colorsDirty)
     {
@@ -136,7 +114,6 @@ std::vector<uint64_t> SomaCircuitComponent::setColorById(const std::map<uint64_t
         brayns::GeometricModelHandler::setColors(_model, colorBuffer);
     }
 
-    skipped.shrink_to_fit();
     return skipped;
 }
 

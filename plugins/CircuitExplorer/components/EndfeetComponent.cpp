@@ -6,6 +6,8 @@
 #include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
+#include <api/coloring/ColorByIDAlgorithm.h>
+
 size_t EndfeetComponent::getSizeInBytes() const noexcept
 {
     size_t endfeetSize = 0;
@@ -131,42 +133,17 @@ void EndfeetComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
 
 std::vector<uint64_t> EndfeetComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    auto idIt = _astrocyteIds.begin();
-    auto efIt = _endFeet.begin();
-    auto colorsIt = colorMap.begin();
-
-    std::vector<uint64_t> skippedIds;
-    skippedIds.reserve(_astrocyteIds.size());
-
-    while (colorsIt != colorMap.end())
-    {
-        const auto targetId = colorsIt->first;
-        const auto &targetColor = colorsIt->second;
-
-        while (idIt != _astrocyteIds.end())
+    auto skipped = ColorByIDAlgorithm::execute(
+        colorMap,
+        _astrocyteIds,
+        [&](uint64_t id, size_t index, const brayns::Vector4f &color)
         {
-            const auto astrocyteId = *idIt;
-            if (astrocyteId != targetId)
-            {
-                skippedIds.push_back(astrocyteId);
-                ++idIt;
-                ++efIt;
-            }
-        }
+            (void)id;
+            auto &endFoot = _endFeet[index];
+            auto model = endFoot.model;
+            brayns::GeometricModelHandler::setColor(model, color);
+            _colorsDirty = true;
+        });
 
-        if (idIt == _astrocyteIds.end())
-        {
-            break;
-        }
-
-        _colorsDirty = true;
-        auto &endfoot = *efIt;
-        auto model = endfoot.model;
-        brayns::GeometricModelHandler::setColor(model, targetColor);
-
-        ++colorsIt;
-    }
-
-    skippedIds.shrink_to_fit();
-    return skippedIds;
+    return skipped;
 }

@@ -6,6 +6,8 @@
 #include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
+#include <api/coloring/ColorByIDAlgorithm.h>
+
 VasculatureComponent::VasculatureComponent(
     std::vector<uint64_t> ids,
     std::vector<brayns::Primitive> geometry,
@@ -120,39 +122,15 @@ void VasculatureComponent::setColorById(std::vector<brayns::Vector4f> colors) no
 
 std::vector<uint64_t> VasculatureComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
 {
-    auto idIt = _ids.begin();
-    auto bufferIt = _colors.begin();
-    auto colorsIt = colors.begin();
-
-    std::vector<uint64_t> skipped;
-    skipped.reserve(_ids.size());
-
-    while (colorsIt != colors.end())
-    {
-        const auto targetId = colorsIt->first;
-        const auto &targetColor = colorsIt->second;
-
-        while (idIt != _ids.end())
+    auto skipped = ColorByIDAlgorithm::execute(
+        colors,
+        _ids,
+        [&](uint64_t id, size_t index, const brayns::Vector4f &color)
         {
-            const auto vasculatureNodeId = *idIt;
-            if (vasculatureNodeId != targetId)
-            {
-                skipped.push_back(vasculatureNodeId);
-                ++idIt;
-                ++bufferIt;
-            }
-        }
-
-        if (idIt == _ids.end())
-        {
-            break;
-        }
-
-        _colorsDirty = true;
-        *bufferIt = targetColor;
-
-        ++colorsIt;
-    }
+            (void)id;
+            _colors[index] = color;
+            _colorsDirty = true;
+        });
 
     if (_colorsDirty)
     {
@@ -160,7 +138,6 @@ std::vector<uint64_t> VasculatureComponent::setColorById(const std::map<uint64_t
         brayns::GeometricModelHandler::setColors(_model, colorBuffer);
     }
 
-    skipped.shrink_to_fit();
     return skipped;
 }
 

@@ -6,6 +6,8 @@
 #include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
+#include <api/coloring/ColorByIDAlgorithm.h>
+
 size_t SynapseComponent::getSizeInBytes() const noexcept
 {
     size_t synapsesSize = brayns::SizeHelper::vectorSize(_synapses);
@@ -124,43 +126,18 @@ void SynapseComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
 
 std::vector<uint64_t> SynapseComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    auto idIt = _cellIds.begin();
-    auto synIt = _synapses.begin();
-    auto colorsIt = colorMap.begin();
-
-    std::vector<uint64_t> skipped;
-    skipped.reserve(_cellIds.size());
-
-    while (colorsIt != colorMap.end())
-    {
-        const auto targetId = colorsIt->first;
-        const auto &targetColor = colorsIt->second;
-
-        while (idIt != _cellIds.end())
+    auto skipped = ColorByIDAlgorithm::execute(
+        colorMap,
+        _cellIds,
+        [&](uint64_t id, size_t index, const brayns::Vector4f &color)
         {
-            const auto cellId = *idIt;
-            if (cellId != targetId)
-            {
-                skipped.push_back(cellId);
-                ++idIt;
-                ++synIt;
-            }
-        }
+            (void)id;
+            auto &synapse = _synapses[index];
+            auto model = synapse.model;
+            brayns::GeometricModelHandler::setColor(model, color);
+            _colorsDirty = true;
+        });
 
-        if (idIt == _cellIds.end())
-        {
-            break;
-        }
-
-        _colorsDirty = true;
-        auto &synapse = *synIt;
-        auto model = synapse.model;
-        brayns::GeometricModelHandler::setColor(model, targetColor);
-
-        ++colorsIt;
-    }
-
-    skipped.shrink_to_fit();
     return skipped;
 }
 

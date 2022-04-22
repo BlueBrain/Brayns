@@ -10,6 +10,7 @@ set(BRAYNSCIRCUITEXPLORER_SOURCES
     api/circuit/SomaCircuitBuilder.cpp
     api/circuit/colorhandlers/MorphologyColorHandler.cpp
     api/circuit/colorhandlers/SomaColorHandler.cpp
+    api/coloring/ColorByIDAlgorithm.cpp
     api/coloring/ColorIDParser.cpp
     api/coloring/ColorUtils.cpp
     api/neuron/NeuronGeometryBuilder.cpp
@@ -93,6 +94,7 @@ set(BRAYNSCIRCUITEXPLORER_PUBLIC_HEADERS
     api/circuit/SomaCircuitBuilder.h
     api/circuit/colorhandlers/MorphologyColorHandler.h
     api/circuit/colorhandlers/SomaColorHandler.h
+    api/coloring/ColorByIDAlgorithm.h
     api/coloring/ColorIDParser.h
     api/coloring/ColorUtils.h
     api/coloring/IColorData.h
