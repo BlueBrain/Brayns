@@ -27,7 +27,7 @@
 #include <network/messages/AvailableColoringInfoMessage.h>
 #include <network/messages/ColorCircuitMessage.h>
 
-class ColorCircuitByIdEntrypoint : public brayns::Entrypoint<ColorCircuitByIdMessage, brayns::EmptyMessage>
+class ColorCircuitByIdEntrypoint : public brayns::Entrypoint<ColorCircuitByIdMessage, std::vector<uint64_t>>
 {
 public:
     ColorCircuitByIdEntrypoint(brayns::SceneModelManager &modelManager);

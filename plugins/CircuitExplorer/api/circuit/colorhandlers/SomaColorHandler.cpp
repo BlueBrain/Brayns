@@ -33,9 +33,9 @@ void SomaColorHandler::updateColor(const brayns::Vector4f &color)
     _circuit.setColor(color);
 }
 
-void SomaColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
+std::vector<uint64_t> SomaColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    _circuit.setColorById(colorMap);
+    return _circuit.setColorById(colorMap);
 }
 
 void SomaColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)

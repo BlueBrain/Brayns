@@ -73,8 +73,9 @@ public:
     /**
      * @brief setColorById Sets the synapse color on ap er associated-cell-id basis.
      * @param colorMap
+     * @return std::vector<uint64_t> list of ids that were not affected
      */
-    void setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap);
+    std::vector<uint64_t> setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap);
 
     /**
      * @brief setSimulationColor sets colors based on simulation data. The color buffer is managed by the

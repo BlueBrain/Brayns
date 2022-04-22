@@ -37,8 +37,9 @@ public:
     /**
      * @brief Updates color of the elements which ID is present in the given color map
      * @param colorMap a map with the ids to update, and the color to use for each one of them
+     * @return std::vector<uint64_t>
      */
-    void updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap) override;
+    std::vector<uint64_t> updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap) override;
 
     /**
      * @brief Updates colors of the elements by assigning one to each element

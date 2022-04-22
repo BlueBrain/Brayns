@@ -73,8 +73,9 @@ public:
     /**
      * @brief setColorById sets colors on a per-id (per cell) basis
      * @param colors map of id and its corresponding color
+     * @param std::vector<uint64_t> list of vasculature node ids that were not affected
      */
-    void setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept;
+    std::vector<uint64_t> setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept;
 
     /**
      * @brief setSimulationColor sets colors based on simulation data. The color buffer is managed by the

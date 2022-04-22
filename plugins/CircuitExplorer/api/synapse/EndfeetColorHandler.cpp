@@ -30,9 +30,9 @@ void EndfeetColorHandler::updateColor(const brayns::Vector4f &color)
     _endfeet.setColor(color);
 }
 
-void EndfeetColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
+std::vector<uint64_t> EndfeetColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    _endfeet.setColorById(colorMap);
+    return _endfeet.setColorById(colorMap);
 }
 
 void EndfeetColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)

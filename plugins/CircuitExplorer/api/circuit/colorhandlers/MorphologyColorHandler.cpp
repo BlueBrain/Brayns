@@ -33,9 +33,9 @@ void MorphologyColorHandler::updateColor(const brayns::Vector4f &color)
     _circuit.setColor(color);
 }
 
-void MorphologyColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
+std::vector<uint64_t> MorphologyColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    _circuit.setColorById(colorMap);
+    return _circuit.setColorById(colorMap);
 }
 
 void MorphologyColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)

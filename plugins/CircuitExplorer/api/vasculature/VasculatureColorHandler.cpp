@@ -13,9 +13,9 @@ void VasculatureColorHandler::updateColor(const brayns::Vector4f &color)
     _vasculature.setColor(color);
 }
 
-void VasculatureColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
+std::vector<uint64_t> VasculatureColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    _vasculature.setColorById(colorMap);
+    return _vasculature.setColorById(colorMap);
 }
 
 void VasculatureColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)

@@ -74,8 +74,9 @@ public:
     /**
      * @brief setColorById Sets the synapse color on ap er associated-astrocyte-id basis.
      * @param colorMap
+     * @return std::vector<uint64_t> list of endffet astrocyte group ids that were not affected
      */
-    void setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap);
+    std::vector<uint64_t> setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap);
 
 private:
     std::vector<uint64_t> _astrocyteIds;

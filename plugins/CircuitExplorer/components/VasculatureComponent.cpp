@@ -118,11 +118,14 @@ void VasculatureComponent::setColorById(std::vector<brayns::Vector4f> colors) no
     _colorsDirty = true;
 }
 
-void VasculatureComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
+std::vector<uint64_t> VasculatureComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
 {
     auto idIt = _ids.begin();
     auto bufferIt = _colors.begin();
     auto colorsIt = colors.begin();
+
+    std::vector<uint64_t> skipped;
+    skipped.reserve(_ids.size());
 
     while (colorsIt != colors.end())
     {
@@ -131,8 +134,10 @@ void VasculatureComponent::setColorById(const std::map<uint64_t, brayns::Vector4
 
         while (idIt != _ids.end())
         {
-            if (*idIt != targetId)
+            const auto vasculatureNodeId = *idIt;
+            if (vasculatureNodeId != targetId)
             {
+                skipped.push_back(vasculatureNodeId);
                 ++idIt;
                 ++bufferIt;
             }
@@ -154,6 +159,9 @@ void VasculatureComponent::setColorById(const std::map<uint64_t, brayns::Vector4
         auto colorBuffer = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
         brayns::GeometricModelHandler::setColors(_model, colorBuffer);
     }
+
+    skipped.shrink_to_fit();
+    return skipped;
 }
 
 void VasculatureComponent::setSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping) noexcept

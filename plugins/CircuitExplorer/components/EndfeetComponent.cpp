@@ -129,11 +129,14 @@ void EndfeetComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
     _colorsDirty = true;
 }
 
-void EndfeetComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
+std::vector<uint64_t> EndfeetComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
     auto idIt = _astrocyteIds.begin();
     auto efIt = _endFeet.begin();
     auto colorsIt = colorMap.begin();
+
+    std::vector<uint64_t> skippedIds;
+    skippedIds.reserve(_astrocyteIds.size());
 
     while (colorsIt != colorMap.end())
     {
@@ -142,8 +145,10 @@ void EndfeetComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &
 
         while (idIt != _astrocyteIds.end())
         {
-            if (*idIt != targetId)
+            const auto astrocyteId = *idIt;
+            if (astrocyteId != targetId)
             {
+                skippedIds.push_back(astrocyteId);
                 ++idIt;
                 ++efIt;
             }
@@ -161,4 +166,7 @@ void EndfeetComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &
 
         ++colorsIt;
     }
+
+    skippedIds.shrink_to_fit();
+    return skippedIds;
 }

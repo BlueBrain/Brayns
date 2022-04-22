@@ -30,9 +30,9 @@ void SynapseColorHandler::updateColor(const brayns::Vector4f &color)
     _synapses.setColor(color);
 }
 
-void SynapseColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
+std::vector<uint64_t> SynapseColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    _synapses.setColorById(colorMap);
+    return _synapses.setColorById(colorMap);
 }
 
 void SynapseColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)

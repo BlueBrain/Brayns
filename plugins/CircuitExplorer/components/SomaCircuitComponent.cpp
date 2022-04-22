@@ -94,11 +94,14 @@ void SomaCircuitComponent::setColorById(const std::vector<brayns::Vector4f> &col
     _colorsDirty = true;
 }
 
-void SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
+std::vector<uint64_t> SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
 {
     auto idIt = _ids.begin();
     auto bufferIt = _colors.begin();
     auto colorsIt = colors.begin();
+
+    std::vector<uint64_t> skipped;
+    skipped.reserve(_ids.size());
 
     while (colorsIt != colors.end())
     {
@@ -107,8 +110,10 @@ void SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4
 
         while (idIt != _ids.end())
         {
-            if (*idIt != targetId)
+            const auto somaId = *idIt;
+            if (somaId != targetId)
             {
+                skipped.push_back(somaId);
                 ++idIt;
                 ++bufferIt;
             }
@@ -130,6 +135,9 @@ void SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4
         auto colorBuffer = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
         brayns::GeometricModelHandler::setColors(_model, colorBuffer);
     }
+
+    skipped.shrink_to_fit();
+    return skipped;
 }
 
 void SomaCircuitComponent::setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping)

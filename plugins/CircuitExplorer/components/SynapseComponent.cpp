@@ -122,11 +122,14 @@ void SynapseComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
     _colorsDirty = true;
 }
 
-void SynapseComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
+std::vector<uint64_t> SynapseComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
     auto idIt = _cellIds.begin();
     auto synIt = _synapses.begin();
     auto colorsIt = colorMap.begin();
+
+    std::vector<uint64_t> skipped;
+    skipped.reserve(_cellIds.size());
 
     while (colorsIt != colorMap.end())
     {
@@ -135,8 +138,10 @@ void SynapseComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &
 
         while (idIt != _cellIds.end())
         {
-            if (*idIt != targetId)
+            const auto cellId = *idIt;
+            if (cellId != targetId)
             {
+                skipped.push_back(cellId);
                 ++idIt;
                 ++synIt;
             }
@@ -154,6 +159,9 @@ void SynapseComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &
 
         ++colorsIt;
     }
+
+    skipped.shrink_to_fit();
+    return skipped;
 }
 
 void SynapseComponent::setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping)

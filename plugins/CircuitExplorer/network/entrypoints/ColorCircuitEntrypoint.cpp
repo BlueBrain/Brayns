@@ -64,9 +64,8 @@ std::string ColorCircuitByIdEntrypoint::getMethod() const
 
 std::string ColorCircuitByIdEntrypoint::getDescription() const
 {
-    return "Colors a circuit model by element ID. "
-           "Specific IDs can be targetted as single IDs or ID Ranges (being-end)."
-           "Otherwise, random colors per ID will be applied";
+    return "Colors a circuit model by element ID. Specific IDs can be targeted, "
+           "otherwise, random colors per ID will be applied. Returns a list of IDs that were not colored (if any)";
 }
 
 void ColorCircuitByIdEntrypoint::onRequest(const Request &request)
@@ -76,8 +75,10 @@ void ColorCircuitByIdEntrypoint::onRequest(const Request &request)
     const auto &colorInfo = params.color_info;
     auto &colorHandler = ColorHandlerExtractor::extract(_modelManager, modelId);
     const auto colorMap = ColorIDParser::parse(colorInfo);
-    colorHandler.updateColorById(colorMap);
-    request.reply(brayns::EmptyMessage());
+
+    auto nonColored = colorHandler.updateColorById(colorMap);
+
+    request.reply(nonColored);
 }
 
 ColorCircuitBySingleColorEntrypoint::ColorCircuitBySingleColorEntrypoint(brayns::SceneModelManager &modelManager)

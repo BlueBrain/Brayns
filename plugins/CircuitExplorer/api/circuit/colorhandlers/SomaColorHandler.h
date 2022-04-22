@@ -40,8 +40,9 @@ public:
     /**
      * @brief updateColorById
      * @param colorMap
+     * @param std::vector<uint64_t>
      */
-    void updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap) override;
+    std::vector<uint64_t> updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap) override;
 
     /**
      * @brief udpateColorById

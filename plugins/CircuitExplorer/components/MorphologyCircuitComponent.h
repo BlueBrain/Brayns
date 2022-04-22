@@ -81,8 +81,9 @@ public:
     /**
      * @brief setColorById sets colors on a per-id (per cell) basis
      * @param colors map of id and its corresponding color
+     * @return std::vector<uint64_t> list of element ids that were not affected
      */
-    void setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept;
+    std::vector<uint64_t> setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept;
 
     /**
      * @brief setSectionColor sets colors on a per morphology section basis

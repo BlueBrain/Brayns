@@ -158,11 +158,15 @@ void MorphologyCircuitComponent::setColorById(const std::vector<brayns::Vector4f
     _colorsDirty = true;
 }
 
-void MorphologyCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
+std::vector<uint64_t> MorphologyCircuitComponent::setColorById(
+    const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
 {
     auto idIt = _ids.begin();
     auto morphIt = _morphologies.begin();
     auto colorsIt = colors.begin();
+
+    std::vector<uint64_t> skipped;
+    skipped.reserve(_ids.size());
 
     while (colorsIt != colors.end())
     {
@@ -171,8 +175,10 @@ void MorphologyCircuitComponent::setColorById(const std::map<uint64_t, brayns::V
 
         while (idIt != _ids.end())
         {
-            if (*idIt != targetId)
+            const auto morphId = *idIt;
+            if (morphId != targetId)
             {
+                skipped.push_back(morphId);
                 ++idIt;
                 ++morphIt;
             }
@@ -190,6 +196,9 @@ void MorphologyCircuitComponent::setColorById(const std::map<uint64_t, brayns::V
 
         ++colorsIt;
     }
+
+    skipped.shrink_to_fit();
+    return skipped;
 }
 
 void MorphologyCircuitComponent::setColorBySection(
