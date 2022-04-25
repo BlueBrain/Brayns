@@ -59,11 +59,12 @@ RUN wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/$
 
 # Install rk common
 ARG RKCOMMON_VERSION=v1.9.0
-RUN git clone https://github.com/ospray/rkcommon \
-   && pushd rkcommon \
+ARG RKCOMMON_SRC=/app/rkcommon
+RUN git clone https://github.com/ospray/rkcommon ${RKCOMMON_SRC}} \
+   && cd ${RKCOMMON_SRC}} \
    && git checkout ${RKCOMMON_VERSION} \
    && mkdir build \
-   && pushd build \
+   && cd build \
    && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${DIST_PATH} -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
    && ninja -j4 install \
    && popd \
@@ -71,11 +72,12 @@ RUN git clone https://github.com/ospray/rkcommon \
 
 # Install open vkl
 ARG OPENVKL_VERSION=v1.2.0
-RUN git clone https://github.com/openvkl/openvkl \
-   && pushd openvkl \
+ARG OPENVKL_SRC=/app/openvkl
+RUN git clone https://github.com/openvkl/openvkl ${OPENVKL_SRC} \
+   && cd ${OPENVKL_SRC}} \
    && git checkout ${OPENVKL_VERSION} \
    && mkdir build \
-   && pushd build \
+   && cd build \
    && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_PREFIX_PATH=${DIST_PATH} \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
