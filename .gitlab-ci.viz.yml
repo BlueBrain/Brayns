@@ -15,7 +15,7 @@ ubuntu-clangformat-check:
     - apt update && apt install -y git clang-format-12
     - CLANG_FORMAT_EXTENSIONS="\.[cmh]$|\.[chi]pp$"
     - if [ -f .clang-format ]; then
-    - git pull origin develop
+    - git pull origin develop --allow-unrelated-histories
     - if git diff --name-only --diff-filter=ACMR origin/develop | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -style=file -fallback-style=none -output-replacements-xml | grep "<replacement " >/dev/null ; then
     - echo "clang-format check failed - commit does not match coding style"
     - git diff --name-only --diff-filter=ACMR origin/develop | grep -E "$CLANG_FORMAT_EXTENSIONS" >> wrong_format_files.txt
