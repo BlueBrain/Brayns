@@ -57,43 +57,8 @@ BRAYNS_JSON_ADAPTER_GETSET(
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(LookAt)
-BRAYNS_JSON_ADAPTER_ENTRY(position, "Position of the camera", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(target, "Target position at which the camera is looking", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(up, "Up vector to compute the camera orthonormal basis", Required(false))
-BRAYNS_JSON_ADAPTER_END()
-
-class GenericLookAt
-{
-public:
-    GenericLookAt() = default;
-    GenericLookAt(LookAt baseLookAt);
-
-    const Vector3f &getPosition() const noexcept;
-
-    void setPosition(const Vector3f &position) noexcept;
-
-    const Vector3f &getTarget() const noexcept;
-
-    void setTarget(const Vector3f &target) noexcept;
-
-    const Vector3f &getUp() const noexcept;
-
-    void setUp(const Vector3f &up) noexcept;
-
-    const LookAt &getLookAt() const noexcept;
-
-private:
-    LookAt _lookAt;
-};
-
-BRAYNS_JSON_ADAPTER_BEGIN(GenericLookAt)
-BRAYNS_JSON_ADAPTER_GETSET("position", getPosition, setPosition, "Position of the camera", Required(false))
-BRAYNS_JSON_ADAPTER_GETSET(
-    "target",
-    getTarget,
-    setTarget,
-    "Target position at which the camera is looking",
-    Required(false))
-BRAYNS_JSON_ADAPTER_GETSET("up", getUp, setUp, "Up vector to compute the camera orthonormal basis", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(position, "Position of the camera")
+BRAYNS_JSON_ADAPTER_ENTRY(target, "Target position at which the camera is looking")
+BRAYNS_JSON_ADAPTER_ENTRY(up, "Up vector to compute the camera orthonormal basis")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

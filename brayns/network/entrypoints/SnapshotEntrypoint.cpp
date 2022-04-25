@@ -109,7 +109,7 @@ public:
         auto camera = cameraObject.create();
         const auto aspectRatio = static_cast<float>(imageSize.x) / static_cast<float>(imageSize.y);
         camera->setAspectRatio(aspectRatio);
-        const auto &cameraLookAt = params.camera_view.getLookAt();
+        const auto &cameraLookAt = params.camera_view;
         camera->setLookAt(cameraLookAt);
         camera->commit();
 
@@ -189,14 +189,14 @@ void SnapshotEntrypoint::onRequest(const Request &request)
     params.camera = GenericObject<Camera>(systemCamera, *_cameraFactory);
 
     auto systemLookAt = systemCamera.getLookAt();
-    params.camera_view = GenericLookAt(std::move(systemLookAt));
+    params.camera_view = systemLookAt;
 
     auto &systemRenderer = _engine.getRenderer();
     params.renderer = GenericObject<Renderer>(systemRenderer, *_renderFactory);
 
     auto &systemFramebuffer = _engine.getFrameBuffer();
     auto systemSize = systemFramebuffer.getFrameSize();
-    params.image_settings = ImageSettings(std::move(systemSize));
+    params.image_settings = ImageSettings(systemSize);
 
     auto &paramsManager = _engine.getParametersManager();
     auto &animParams = paramsManager.getAnimationParameters();

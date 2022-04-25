@@ -32,8 +32,8 @@ class ImageSettings
 {
 public:
     ImageSettings() = default;
-    ImageSettings(Vector2ui baseSize)
-        : _size(std::move(baseSize))
+    ImageSettings(const Vector2ui &baseSize)
+        : _size(baseSize)
     {
     }
 

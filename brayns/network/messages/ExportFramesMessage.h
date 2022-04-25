@@ -30,7 +30,7 @@ namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(ExportFramesKeyFrame)
 BRAYNS_JSON_OBJECT_ENTRY(uint32_t, frame_index, "Integer index of the simulation frame")
-BRAYNS_JSON_OBJECT_ENTRY(LookAt, camera_view, "Camera view settings")
+BRAYNS_JSON_OBJECT_ENTRY(std::optional<LookAt>, camera_view, "Camera view settings", Required(false))
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(ExportFramesParams)

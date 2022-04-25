@@ -94,7 +94,7 @@ class FrameExporter
 {
 public:
     static brayns::ExportFramesResult exportFrames(
-        brayns::Scene &scene,
+        brayns::Engine &engine,
         brayns::ParametersManager &paramsManager,
         brayns::ExportFramesParams &params,
         ExportProgressHandler &progress)
@@ -115,6 +115,9 @@ public:
         auto &cameraObject = params.camera;
         auto camera = cameraObject.create();
 
+        auto &systemCamera = engine.getCamera();
+        const auto &systemLookAt = systemCamera.getLookAt();
+
         // Update aspect ratio to match the rendered images size
         const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
         camera->setAspectRatio(aspectRatio);
@@ -131,6 +134,8 @@ public:
         auto &animParams = parametersManager.getAnimationParameters();
         // Avoid the first frame not being triggered because the copy is in "not modified" state
         animParams.markModified();
+
+        auto &scene = engine.getScene();
 
         // Compute for how much progress each frame accounts
         const auto progressChunk = 1.f / static_cast<float>(keyFrames.size());
@@ -152,7 +157,7 @@ public:
             scene.commit();
 
             // Update camera
-            const auto &lookAt = keyFrame.camera_view;
+            const auto lookAt = keyFrame.camera_view.value_or(systemLookAt);
             camera->setLookAt(lookAt);
             camera->commit();
 
@@ -229,10 +234,8 @@ void ExportFramesEntrypoint::onRequest(const Request &request)
     // Progress handler
     brayns::ProgressHandler progress(_token, request);
 
-    auto &scene = _engine.getScene();
-
     // Do export
-    const auto result = FrameExporter::exportFrames(scene, _paramsManager, params, progress);
+    const auto result = FrameExporter::exportFrames(_engine, _paramsManager, params, progress);
 
     request.reply(result);
 }

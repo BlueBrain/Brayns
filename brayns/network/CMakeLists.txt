@@ -118,7 +118,6 @@ set(BRAYNSNETWORK_HEADERS
 )
   
 set(BRAYNSNETWORK_SOURCES
-  adapters/CameraAdapter.cpp
   adapters/ClipPlaneAdapter.cpp
   adapters/ModelInstanceAdapter.cpp
   adapters/ModelTransferFunctionAdapter.cpp

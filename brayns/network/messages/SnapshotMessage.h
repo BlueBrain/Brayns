@@ -36,7 +36,7 @@ namespace brayns
 BRAYNS_JSON_OBJECT_BEGIN(SnapshotParams)
 BRAYNS_JSON_OBJECT_ENTRY(ImageSettings, image_settings, "Image settings", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(GenericObject<Camera>, camera, "Camera definition", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(GenericLookAt, camera_view, "Camera 'look at' view settings", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(LookAt, camera_view, "Camera 'look at' view settings", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(GenericObject<Renderer>, renderer, "Renderer definition", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(GenericAnimationSettings, animation_settings, "Animation settings", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
