@@ -66,7 +66,9 @@ public:
                 throw std::invalid_argument("Cannot deserialize type " + _name + ":" + errorMessage);
             }
 
-            return Json::deserialize<std::unique_ptr<SubT>>(data);
+            auto result = std::make_unique<SubT>();
+            Json::deserialize<SubT>(data, *result);
+            return result;
         }
 
         std::string getName() const noexcept override

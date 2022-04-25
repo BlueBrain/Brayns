@@ -25,29 +25,6 @@ namespace brayns
 {
 const Vector3f Material::BASE_COLOR_WHITE = Vector3f(1.f);
 
-Material::Material(const Material &o)
-{
-    (void)o;
-}
-
-Material &Material::operator=(const Material &o)
-{
-    _color = o._color;
-    return *this;
-}
-
-Material::Material(Material &&o) noexcept
-{
-    *this = std::move(o);
-}
-
-Material &Material::operator=(Material &&o) noexcept
-{
-    std::swap(_handle, o._handle);
-    _color = std::move(o._color);
-    return *this;
-}
-
 Material::~Material()
 {
     if (_handle)

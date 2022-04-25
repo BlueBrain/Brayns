@@ -31,6 +31,7 @@
 #include <brayns/engine/materials/PlasticMaterial.h>
 #include <brayns/engine/scenecomponents/SceneModelManager.h>
 #include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/JsonBuffer.h>
 #include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
@@ -113,9 +114,10 @@ public:
         _modelId = id;
     }
 
-    void setMaterial(std::unique_ptr<MaterialType> material) noexcept
+    void setMaterial(const JsonBuffer<MaterialType> &material) noexcept
     {
-        _material = std::move(material);
+        _material = std::make_unique<MaterialType>(); // std::move(material);
+        material.deserialize(*_material);
     }
 
     void update()

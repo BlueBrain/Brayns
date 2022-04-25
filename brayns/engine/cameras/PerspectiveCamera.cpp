@@ -29,7 +29,13 @@ std::string PerspectiveCamera::getName() const noexcept
 
 std::unique_ptr<Camera> PerspectiveCamera::clone() const noexcept
 {
-    return std::make_unique<PerspectiveCamera>(*this);
+    auto result = std::make_unique<PerspectiveCamera>();
+    result->setApertureRadius(getApertureRadius());
+    result->setAspectRatio(getAspectRatio());
+    result->setFocusDistance(getFocusDistance());
+    result->setFOVY(getFOVY());
+    result->setLookAt(getLookAt());
+    return result;
 }
 
 void PerspectiveCamera::commitCameraSpecificParams()

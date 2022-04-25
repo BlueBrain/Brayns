@@ -29,7 +29,11 @@ std::string ProductionRenderer::getName() const noexcept
 
 std::unique_ptr<Renderer> ProductionRenderer::clone() const noexcept
 {
-    return std::make_unique<ProductionRenderer>(*this);
+    auto result = std::make_unique<ProductionRenderer>();
+    result->setBackgroundColor(getBackgroundColor());
+    result->setMaxRayBounces(getMaxRayBounces());
+    result->setSamplesPerPixel(getSamplesPerPixel());
+    return result;
 }
 
 std::string ProductionRenderer::getOSPHandleName() const noexcept

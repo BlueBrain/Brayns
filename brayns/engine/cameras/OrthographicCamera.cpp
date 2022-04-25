@@ -29,7 +29,11 @@ std::string OrthographicCamera::getName() const noexcept
 
 std::unique_ptr<Camera> OrthographicCamera::clone() const noexcept
 {
-    return std::make_unique<OrthographicCamera>(*this);
+    auto result = std::make_unique<OrthographicCamera>();
+    result->setLookAt(getLookAt());
+    result->setAspectRatio(getAspectRatio());
+    result->setHeight(getHeight());
+    return result;
 }
 
 void OrthographicCamera::setHeight(const float height) noexcept

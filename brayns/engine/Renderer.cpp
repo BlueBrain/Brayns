@@ -22,35 +22,6 @@
 
 namespace brayns
 {
-Renderer::Renderer(const Renderer &o)
-{
-    *this = o;
-}
-
-Renderer &Renderer::operator=(const Renderer &o)
-{
-    _samplesPerPixel = o._samplesPerPixel;
-    _maxRayBounces = o._maxRayBounces;
-    _backgroundColor = o._backgroundColor;
-
-    return *this;
-}
-
-Renderer::Renderer(Renderer &&o) noexcept
-{
-    *this = std::move(o);
-}
-
-Renderer &Renderer::operator=(Renderer &&o) noexcept
-{
-    _samplesPerPixel = o._samplesPerPixel;
-    _maxRayBounces = o._maxRayBounces;
-    _backgroundColor = o._backgroundColor;
-    std::swap(_handle, o._handle);
-
-    return *this;
-}
-
 Renderer::~Renderer()
 {
     ospRelease(_handle);

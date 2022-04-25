@@ -45,11 +45,11 @@ class Camera : public BaseObject
 public:
     Camera() = default;
 
-    Camera(const Camera &);
-    Camera &operator=(const Camera &);
+    Camera(const Camera &) = delete;
+    Camera &operator=(const Camera &) = delete;
 
-    Camera(Camera &&) noexcept;
-    Camera &operator=(Camera &&) noexcept;
+    Camera(Camera &&) = delete;
+    Camera &operator=(Camera &&) = delete;
 
     virtual ~Camera();
 
@@ -88,6 +88,13 @@ public:
      * @brief Sets the resolution aspect ratio on to which this camera will be generating rays
      */
     void setAspectRatio(const float aspectRatio) noexcept;
+
+    /**
+     * @brief Get the Aspect Ratio of the camera
+     *
+     * @return float
+     */
+    float getAspectRatio() const noexcept;
 
     /**
      * @brief Returns the OSPRay handle of this camera

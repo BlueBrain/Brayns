@@ -40,16 +40,11 @@ public:
     FrameBuffer() = default;
     ~FrameBuffer();
 
-    FrameBuffer(const FrameBuffer &);
-    FrameBuffer &operator=(const FrameBuffer &);
+    FrameBuffer(const FrameBuffer &) = delete;
+    FrameBuffer &operator=(const FrameBuffer &) = delete;
 
-    FrameBuffer(FrameBuffer &&);
-    FrameBuffer &operator=(FrameBuffer &&);
-
-    /**
-     * @brief Creates a copy of this framebuffer
-     */
-    FrameBuffer clone() const noexcept;
+    FrameBuffer(FrameBuffer &&) = delete;
+    FrameBuffer &operator=(FrameBuffer &&) = delete;
 
     /**
      * @brief Maps OSPRay backend framebuffer to an accessible system buffer

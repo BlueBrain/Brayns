@@ -41,11 +41,11 @@ class Material : public BaseObject
 public:
     Material() = default;
 
-    Material(const Material &);
-    Material &operator=(const Material &);
+    Material(const Material &) = delete;
+    Material &operator=(const Material &) = delete;
 
-    Material(Material &&) noexcept;
-    Material &operator=(Material &&) noexcept;
+    Material(Material &&) = delete;
+    Material &operator=(Material &&) = delete;
 
     virtual ~Material();
 

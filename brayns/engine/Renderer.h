@@ -37,11 +37,11 @@ class Renderer : public BaseObject
 public:
     Renderer() = default;
 
-    Renderer(const Renderer &);
-    Renderer &operator=(const Renderer &);
+    Renderer(const Renderer &) = delete;
+    Renderer &operator=(const Renderer &) = delete;
 
-    Renderer(Renderer &&) noexcept;
-    Renderer &operator=(Renderer &&) noexcept;
+    Renderer(Renderer &&) = delete;
+    Renderer &operator=(Renderer &&) = delete;
 
     virtual ~Renderer();
 

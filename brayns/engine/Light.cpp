@@ -22,35 +22,6 @@
 
 namespace brayns
 {
-Light::Light(const Light &o)
-{
-    *this = o;
-}
-
-Light &Light::operator=(const Light &o)
-{
-    _color = o._color;
-    _intensity = o._intensity;
-    _visible = o._visible;
-
-    return *this;
-}
-
-Light::Light(Light &&o) noexcept
-{
-    *this = std::move(o);
-}
-
-Light &Light::operator=(Light &&o) noexcept
-{
-    _color = std::move(o._color);
-    _intensity = o._intensity;
-    _visible = o._visible;
-    std::swap(_handle, o._handle);
-
-    return *this;
-}
-
 Light::~Light()
 {
     if (_handle)

@@ -29,7 +29,13 @@ std::string InteractiveRenderer::getName() const noexcept
 
 std::unique_ptr<Renderer> InteractiveRenderer::clone() const noexcept
 {
-    return std::make_unique<InteractiveRenderer>(*this);
+    auto result = std::make_unique<InteractiveRenderer>();
+    result->setAmbientOcclusionSamples(getAmbientOcclusionSamples());
+    result->setBackgroundColor(getBackgroundColor());
+    result->setMaxRayBounces(getMaxRayBounces());
+    result->setSamplesPerPixel(getSamplesPerPixel());
+    result->setShadowsEnabled(getShadowsEnabled());
+    return result;
 }
 
 void InteractiveRenderer::setShadowsEnabled(const bool enabled) noexcept

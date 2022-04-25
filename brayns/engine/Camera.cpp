@@ -29,33 +29,6 @@ bool operator==(const LookAt &a, const LookAt &b) noexcept
     return a.position == b.position && a.target == b.target && a.up == b.up;
 }
 
-Camera::Camera(const Camera &o)
-{
-    *this = o;
-}
-
-Camera &Camera::operator=(const Camera &o)
-{
-    _lookAtParams = o._lookAtParams;
-    _aspectRatio = o._aspectRatio;
-
-    return *this;
-}
-
-Camera::Camera(Camera &&other) noexcept
-{
-    *this = std::move(other);
-}
-
-Camera &Camera::operator=(Camera &&other) noexcept
-{
-    _lookAtParams = std::move(other._lookAtParams);
-    _aspectRatio = other._aspectRatio;
-    std::swap(_handle, other._handle);
-
-    return *this;
-}
-
 Camera::~Camera()
 {
     if (_handle)
@@ -112,6 +85,11 @@ const LookAt &Camera::getLookAt() const noexcept
 void Camera::setAspectRatio(const float aspectRatio) noexcept
 {
     _updateValue(_aspectRatio, aspectRatio);
+}
+
+float Camera::getAspectRatio() const noexcept
+{
+    return _aspectRatio;
 }
 
 OSPCamera Camera::handle() const noexcept

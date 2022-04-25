@@ -37,11 +37,11 @@ class Light : public BaseObject
 public:
     Light() = default;
 
-    Light(const Light &);
-    Light &operator=(const Light &);
+    Light(const Light &) = delete;
+    Light &operator=(const Light &) = delete;
 
-    Light(Light &&) noexcept;
-    Light &operator=(Light &&) noexcept;
+    Light(Light &&) = delete;
+    Light &operator=(Light &&) = delete;
 
     virtual ~Light();
 

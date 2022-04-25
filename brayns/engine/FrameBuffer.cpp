@@ -51,42 +51,6 @@ FrameBuffer::~FrameBuffer()
     ospRelease(_handle);
 }
 
-FrameBuffer::FrameBuffer(const FrameBuffer &o)
-{
-    *this = o;
-}
-
-FrameBuffer &FrameBuffer::operator=(const FrameBuffer &o)
-{
-    _frameSize = o._frameSize;
-    _frameBufferFormat = o._frameBufferFormat;
-    _accumulation = o._accumulation;
-    _accumFrames = 0;
-
-    return *this;
-}
-
-FrameBuffer::FrameBuffer(FrameBuffer &&o)
-{
-    *this = std::move(o);
-}
-
-FrameBuffer &FrameBuffer::operator=(FrameBuffer &&o)
-{
-    _frameSize = o._frameSize;
-    _frameBufferFormat = o._frameBufferFormat;
-    _accumulation = o._accumulation;
-    _accumFrames = 0;
-    std::swap(_handle, o._handle);
-
-    return *this;
-}
-
-FrameBuffer FrameBuffer::clone() const noexcept
-{
-    return FrameBuffer(*this);
-}
-
 void FrameBuffer::map()
 {
     if (!_handle)
