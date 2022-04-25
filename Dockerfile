@@ -66,9 +66,7 @@ RUN git clone https://github.com/ospray/rkcommon ${RKCOMMON_SRC}} \
    && mkdir build \
    && cd build \
    && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${DIST_PATH} -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   && ninja -j4 install \
-   && popd \
-   && popd
+   && ninja -j4 install
 
 # Install open vkl
 ARG OPENVKL_VERSION=v1.2.0
@@ -83,9 +81,7 @@ RUN git clone https://github.com/openvkl/openvkl ${OPENVKL_SRC} \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
    -DBUILD_EXAMPLES=OFF \
    -DISPC_EXECUTABLE=/app/ispc-v1.17.0-linux/bin/ispc \
-   && ninja -j4 install \
-   && popd \
-   && popd
+   && ninja -j4 install 
 
 # Install OSPRay
 # https://github.com/ospray/ospray/releases
