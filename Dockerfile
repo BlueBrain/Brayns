@@ -61,8 +61,8 @@ RUN wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/$
 ARG RKCOMMON_VERSION=v1.9.0
 ARG RKCOMMON_SRC=/app/rkcommon
 RUN mkdir ${RKCOMMON_SRC} \
-   && git clone https://github.com/ospray/rkcommon ${RKCOMMON_SRC}} \
-   && cd ${RKCOMMON_SRC}} \
+   && git clone https://github.com/ospray/rkcommon ${RKCOMMON_SRC} \
+   && cd ${RKCOMMON_SRC} \
    && git checkout ${RKCOMMON_VERSION} \
    && mkdir build \
    && cd build \
@@ -74,7 +74,7 @@ ARG OPENVKL_VERSION=v1.2.0
 ARG OPENVKL_SRC=/app/openvkl
 RUN mkdir ${OPENVKL_SRC} \
    && git clone https://github.com/openvkl/openvkl ${OPENVKL_SRC} \
-   && cd ${OPENVKL_SRC}} \
+   && cd ${OPENVKL_SRC} \
    && git checkout ${OPENVKL_VERSION} \
    && mkdir build \
    && cd build \
