@@ -119,9 +119,14 @@ ParametersManager::ParametersManager(const int argc, const char **argv)
     registerParameters(&_networkParameters);
 
     for (auto parameters : _parameterSets)
+    {
         _allOptions.add(parameters->parameters());
+    }
 
-    _parse(argc, argv);
+    if (argc > 0)
+    {
+        _parse(argc, argv);
+    }
 }
 
 void ParametersManager::registerParameters(AbstractParameters *parameters)
