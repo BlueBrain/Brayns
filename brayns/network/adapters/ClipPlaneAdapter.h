@@ -21,14 +21,27 @@
 
 #pragma once
 
-#include <brayns/common/scene/ClipPlane.h>
-
+#include <brayns/engine/Model.h>
 #include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
+class ClipPlane
+{
+public:
+    ClipPlane(const uint32_t id, const Vector4f &coefficents);
+
+    uint32_t getID() const noexcept;
+
+    const Vector4f &getPlane() const noexcept;
+
+private:
+    const uint32_t _id;
+    const Vector4f &_coefficents;
+};
+
 BRAYNS_JSON_ADAPTER_BEGIN(ClipPlane)
-BRAYNS_JSON_ADAPTER_GETSET("id", getID, setID, "Plane ID")
-BRAYNS_JSON_ADAPTER_GETSET("plane", getPlane, setPlane, "Plane normal vector XYZ and distance from origin")
+BRAYNS_JSON_ADAPTER_GET("id", getID, "Plane ID")
+BRAYNS_JSON_ADAPTER_GET("plane", getPlane, "Plane normal vector XYZ and distance from origin")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

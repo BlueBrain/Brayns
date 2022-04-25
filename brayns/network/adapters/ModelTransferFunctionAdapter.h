@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/scenecomponents/SceneModelManager.h>
 
 #include <brayns/json/JsonBuffer.h>
 
@@ -33,13 +33,15 @@ class ModelTransferFunction
 {
 public:
     ModelTransferFunction() = default;
-    ModelTransferFunction(Scene &scene);
+    ModelTransferFunction(SceneModelManager &smm);
 
-    void setId(size_t id);
+    void setId(const uint32_t id);
     void setTransferFunction(const JsonBuffer<TransferFunction> &buffer);
 
 private:
-    Scene *_scene = nullptr;
+    SceneModelManager *_smm = nullptr;
+    uint32_t _modelId{std::numeric_limits<uint32_t>::max()};
+    TransferFunction *_transferFunction;
 };
 
 BRAYNS_JSON_ADAPTER_BEGIN(ModelTransferFunction)

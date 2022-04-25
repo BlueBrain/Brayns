@@ -25,8 +25,7 @@ namespace brayns
 enum class PixelFormat
 {
     RGBA_I8,
-    RGB_I8,
-    RGB_F32,
-    NONE
+    SRGBA_I8,
+    RGBA_F32
 };
 }

@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * Responsible Authors: Daniel.Nachbaur@epfl.ch
+ *                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,65 +21,44 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
-#include <brayns/parameters/ParametersManager.h>
-
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
 TEST_CASE("simple_construction")
 {
-    const char *argv[] = {"brayns"};
-    CHECK_NOTHROW(brayns::Brayns(1, argv));
+    std::vector<const char *> argv = {"brayns"};
+    CHECK_NOTHROW(brayns::Brayns(static_cast<int>(argv.size()), argv.data()));
 }
 
 TEST_CASE("defaults")
 {
-    const char *argv[] = {"brayns", "demo"};
-    const int argc = sizeof(argv) / sizeof(char *);
-    brayns::Brayns brayns(argc, argv);
+    brayns::Brayns brayns(0, nullptr);
 
-    auto &camera = brayns.getEngine().getCamera();
-    CHECK_EQ(camera.getCurrentType(), "perspective");
-    CHECK_EQ(camera.getPosition(), brayns::Vector3d(0.5, 0.5, 1.5));
-    CHECK_EQ(camera.getOrientation(), brayns::Quaterniond(1, 0, 0, 0));
+    auto &engine = brayns.getEngine();
 
-    auto &fb = brayns.getEngine().getFrameBuffer();
+    auto &camera = engine.getCamera();
+    const auto &lookAt = camera.getLookAt();
+    CHECK_EQ(camera.getName(), "perspective");
+    CHECK_EQ(lookAt.position, brayns::Vector3f(0.f));
+    CHECK_EQ(lookAt.target, brayns::Vector3f(0.f, 0.f, 1.f));
+    CHECK_EQ(lookAt.up, brayns::Vector3f(0.f, 1.f, 0.f));
+
+    auto &fb = engine.getFrameBuffer();
     CHECK(!fb.getColorBuffer());
-    CHECK_EQ(fb.getColorDepth(), 4);
-    CHECK(!fb.getDepthBuffer());
-    CHECK_EQ(fb.getSize(), brayns::Vector2ui(800, 600));
+    CHECK_EQ(fb.getFrameBufferFormat(), brayns::PixelFormat::SRGBA_I8);
+    CHECK_EQ(fb.getFrameSize(), brayns::Vector2ui(800, 600));
 
-    auto &pm = brayns.getParametersManager();
+    auto &renderer = engine.getRenderer();
+    CHECK_EQ(renderer.getName(), "interactive");
+    CHECK_EQ(renderer.getSamplesPerPixel(), 1);
+    CHECK_EQ(renderer.getBackgroundColor(), brayns::Vector4f(0.004f, 0.016f, 0.102f, 0.f));
+
+    const auto &pm = brayns.getParametersManager();
     const auto &appParams = pm.getApplicationParameters();
     CHECK_EQ(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
-    CHECK(!appParams.isBenchmarking());
     CHECK_EQ(appParams.getJpegCompression(), 90);
     CHECK_EQ(appParams.getImageStreamFPS(), 60);
 
-    const auto &renderParams = pm.getRenderingParameters();
-    CHECK_EQ(renderParams.getCurrentCamera(), "perspective");
-    CHECK_EQ(renderParams.getCurrentRenderer(), "basic");
-    CHECK_EQ(renderParams.getCameras().size(), 5);
-    CHECK_EQ(renderParams.getRenderers().size(), 5);
-    CHECK_EQ(renderParams.getSamplesPerPixel(), 1);
-    CHECK_EQ(renderParams.getBackgroundColor(), brayns::Vector3f(0, 0, 0));
-
     const auto &animParams = pm.getAnimationParameters();
     CHECK_EQ(animParams.getFrame(), 0);
-
-    const auto &volumeParams = pm.getVolumeParameters();
-    CHECK_EQ(volumeParams.getDimensions(), brayns::Vector3ui(0, 0, 0));
-    CHECK_EQ(volumeParams.getElementSpacing(), brayns::Vector3d(1., 1., 1.));
-    CHECK_EQ(volumeParams.getOffset(), brayns::Vector3d(0., 0., 0.));
-
-    auto &scene = brayns.getEngine().getScene();
-    brayns::Boxd defaultBoundingBox;
-    defaultBoundingBox.merge(brayns::Vector3d(0, 0, 0));
-    defaultBoundingBox.merge(brayns::Vector3d(1, 1, 1));
-    CHECK_EQ(scene.getBounds(), defaultBoundingBox);
 }

@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -22,99 +23,74 @@
 
 namespace brayns
 {
-Material::Material(const PropertyMap &properties)
+const Vector3f Material::BASE_COLOR_WHITE = Vector3f(1.f);
+
+Material::Material(const Material &o)
 {
-    setCurrentType("default");
-    _properties.at(_currentType).merge(properties);
+    (void)o;
 }
 
-const std::string &Material::getName() const
+Material &Material::operator=(const Material &o)
 {
-    return _name;
+    _color = o._color;
+    return *this;
 }
 
-void Material::setName(const std::string &value)
+Material::Material(Material &&o) noexcept
 {
-    _updateValue(_name, value);
+    *this = std::move(o);
 }
 
-void Material::setDiffuseColor(const Vector3d &value)
+Material &Material::operator=(Material &&o) noexcept
 {
-    _updateValue(_diffuseColor, value);
+    std::swap(_handle, o._handle);
+    _color = std::move(o._color);
+    return *this;
 }
 
-const Vector3d &Material::getDiffuseColor() const
+Material::~Material()
 {
-    return _diffuseColor;
+    if (_handle)
+    {
+        ospRelease(_handle);
+    }
 }
 
-void Material::setSpecularColor(const Vector3d &value)
+bool Material::commit()
 {
-    _updateValue(_specularColor, value);
+    if (!isModified())
+    {
+        return false;
+    }
+
+    if (!_handle)
+    {
+        const auto handleName = getOSPHandleName();
+        _handle = ospNewMaterial("", handleName.c_str());
+    }
+
+    commitMaterialSpecificParams();
+
+    ospCommit(_handle);
+
+    resetModified();
+
+    return true;
 }
 
-const Vector3d &Material::getSpecularColor() const
+OSPMaterial Material::handle() const noexcept
 {
-    return _specularColor;
+    return _handle;
 }
 
-void Material::setSpecularExponent(double value)
+void Material::setColor(const Vector3f &color) noexcept
 {
-    _updateValue(_specularExponent, value);
+    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
 }
 
-double Material::getSpecularExponent() const
+const Vector3f &Material::getColor() const noexcept
 {
-    return _specularExponent;
+    return _color;
 }
 
-void Material::setReflectionIndex(double value)
-{
-    _updateValue(_reflectionIndex, value);
-}
-
-double Material::getReflectionIndex() const
-{
-    return _reflectionIndex;
-}
-
-void Material::setOpacity(double value)
-{
-    _updateValue(_opacity, value);
-}
-
-double Material::getOpacity() const
-{
-    return _opacity;
-}
-
-void Material::setRefractionIndex(double value)
-{
-    _updateValue(_refractionIndex, value);
-}
-
-double Material::getRefractionIndex() const
-{
-    return _refractionIndex;
-}
-
-void Material::setEmission(double value)
-{
-    _updateValue(_emission, value);
-}
-
-double Material::getEmission() const
-{
-    return _emission;
-}
-
-void Material::setGlossiness(double value)
-{
-    _updateValue(_glossiness, value);
-}
-
-double Material::getGlossiness() const
-{
-    return _glossiness;
-}
 } // namespace brayns

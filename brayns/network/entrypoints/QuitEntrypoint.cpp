@@ -40,7 +40,7 @@ std::string QuitEntrypoint::getDescription() const
 
 void QuitEntrypoint::onRequest(const Request &request)
 {
-    _engine.setKeepRunning(false);
+    _engine.setRunning(false);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

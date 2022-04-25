@@ -26,6 +26,6 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(RemoveLightsMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<size_t>, ids, "List of light ID to remove")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint32_t>, ids, "List of light ID to remove")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

@@ -20,16 +20,17 @@
 
 #pragma once
 
-#include "AbstractParameters.h"
-
+#include <brayns/common/Log.h>
 #include <brayns/common/MathTypes.h>
+#include <brayns/parameters/AbstractParameters.h>
 
 #include <string>
 #include <vector>
 
 namespace brayns
 {
-/** Manages application parameters
+/**
+ * @brief The ApplicationParameters class manages application parameters
  */
 class ApplicationParameters : public AbstractParameters
 {
@@ -42,20 +43,6 @@ public:
     void print() final;
 
     /**
-     * @brief getDynamicLoadBalancer returns whether dynamic load balance
-     * on the rendering backend is enabled or not
-     * @return bool
-     */
-    bool getDynamicLoadBalancer() const noexcept;
-
-    /**
-     * @brief setDynamicLoadBalancer sets whether dynamic load balance
-     * should be used on the rendering backend
-     * @param value bool
-     */
-    void setDynamicLoadBalancer(const bool value) noexcept;
-
-    /**
      * @brief getWindowSize returns the viewport size (width, height)
      * @return const Vector2ui&
      */
@@ -66,20 +53,6 @@ public:
      * @param size const Vector2ui&
      */
     void setWindowSize(const Vector2ui &size) noexcept;
-
-    /**
-     * @brief isBenchmarking returns whether the system has been initialized
-     * on benchmarking mode
-     * @return bool
-     */
-    bool isBenchmarking() const noexcept;
-
-    /**
-     * @brief setBenchmarking sets wether the system is on benchmarking
-     * mode or not
-     * @param enabled bool
-     */
-    void setBenchmarking(const bool enabled) noexcept;
 
     /**
      * @brief setJpegCompression sets the JPEG image streamming compression
@@ -126,33 +99,11 @@ public:
     void setUseQuantaRenderControl(const bool value) noexcept;
 
     /**
-     * @brief getMaxRenderFPS returns the max FPS at which the renderer should
-     * produce frames
-     * @return size_T
+     * @brief Returns the system's log level
+     *
+     * @return LogLevel
      */
-    size_t getMaxRenderFPS() const noexcept;
-
-    /**
-     * @brief getParallelRendering returns whether parallel rendering is
-     * enabled on the rendering backend
-     * @return bool
-     */
-    bool getParallelRendering() const noexcept;
-
-    /**
-     * @brief getSandboxPath returns the sandbox path with which the sytem has
-     * been initialized. THe sandbox path limits the files which can be
-     * accessed by the loaders
-     * @return const std::string&
-     */
-    const std::string &getSandboxPath() const noexcept;
-
-    /**
-     * @brief getInputPaths returns the list of paths with which the system was
-     * initialized. These paths are used to laod models at system start up.
-     * @return const std::vector<std::string>&
-     */
-    const std::vector<std::string> &getInputPaths() const noexcept;
+    LogLevel getLogLevel() const noexcept;
 
     /**
      * @brief getPlugins return the list of plugis with which brayns was
@@ -176,16 +127,11 @@ protected:
     void parse(const po::variables_map &vm) final;
 
     Vector2ui _windowSize;
-    bool _benchmarking{false};
     size_t _jpegCompression;
     size_t _imageStreamFPS{60};
-    size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
-    bool _parallelRendering{false};
-    bool _dynamicLoadBalancer{false};
-    std::string _sandBoxPath;
     bool _useQuantaRenderControl{false};
+    LogLevel _logLevel;
 
-    std::vector<std::string> _inputPaths;
     std::vector<std::string> _plugins;
 
     po::positional_options_description _positionalArgs;

@@ -446,7 +446,7 @@ private:
         }
         mesh.vertices.reserve(vertexCount);
         mesh.normals.reserve(normalCount);
-        mesh.textureCoordinates.reserve(textureCount);
+        mesh.uvs.reserve(textureCount);
         mesh.indices.reserve(indexCount);
     }
 
@@ -476,7 +476,7 @@ private:
         {
             auto textureIndex = buffer.textureIndices[index] - 1;
             auto &texture = buffer.textures[textureIndex];
-            mesh.textureCoordinates.push_back(texture);
+            mesh.uvs.push_back(texture);
         }
         if (!buffer.normalIndices.empty())
         {

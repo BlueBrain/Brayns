@@ -1,5 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,117 +22,99 @@
 
 namespace brayns
 {
-Light::Light(LightType type, const Vector3d &color, double intensity, bool isVisible)
-    : _type(type)
-    , _color(color)
-    , _intensity(intensity)
-    , _isVisible(isVisible)
+Light::Light(const Light &o)
 {
+    *this = o;
 }
 
-Light::Light(LightType type)
-    : _type(type)
-    , _color(0.0)
-    , _intensity(0.0)
-    , _isVisible(false)
+Light &Light::operator=(const Light &o)
 {
+    _color = o._color;
+    _intensity = o._intensity;
+    _visible = o._visible;
+
+    return *this;
 }
 
-DirectionalLight::DirectionalLight(
-    const Vector3d &direction,
-    double angularDiameter,
-    const Vector3d &color,
-    double intensity,
-    bool isVisible)
-    : Light(LightType::DIRECTIONAL, color, intensity, isVisible)
-    , _direction(direction)
-    , _angularDiameter(angularDiameter)
+Light::Light(Light &&o) noexcept
 {
+    *this = std::move(o);
 }
 
-DirectionalLight::DirectionalLight()
-    : Light(LightType::DIRECTIONAL)
-    , _direction(0.0)
-    , _angularDiameter(0.0)
+Light &Light::operator=(Light &&o) noexcept
 {
+    _color = std::move(o._color);
+    _intensity = o._intensity;
+    _visible = o._visible;
+    std::swap(_handle, o._handle);
+
+    return *this;
 }
 
-SphereLight::SphereLight(
-    const Vector3d &position,
-    double radius,
-    const Vector3d &color,
-    double intensity,
-    bool isVisible)
-    : Light(LightType::SPHERE, color, intensity, isVisible)
-    , _position(position)
-    , _radius(radius)
+Light::~Light()
 {
+    if (_handle)
+        ospRelease(_handle);
 }
 
-SphereLight::SphereLight()
-    : Light(LightType::SPHERE)
-    , _position(0.0)
-    , _radius(0.0)
+void Light::setColor(const Vector3f &color) noexcept
 {
+    _updateValue(_color, color);
 }
 
-QuadLight::QuadLight(
-    const Vector3d &position,
-    const Vector3d &edge1,
-    const Vector3d &edge2,
-    const Vector3d &color,
-    double intensity,
-    bool isVisible)
-    : Light(LightType::QUAD, color, intensity, isVisible)
-    , _position(position)
-    , _edge1(edge1)
-    , _edge2(edge2)
+void Light::setIntensity(const float intensity) noexcept
 {
+    _updateValue(_intensity, intensity);
 }
 
-QuadLight::QuadLight()
-    : Light(LightType::QUAD)
-    , _position(0.0)
-    , _edge1(0.0)
-    , _edge2(0.0)
+void Light::setVisible(const bool visible) noexcept
 {
+    _updateValue(_visible, visible);
 }
 
-SpotLight::SpotLight(
-    const Vector3d &position,
-    const Vector3d &direction,
-    const double openingAngle,
-    const double penumbraAngle,
-    const double radius,
-    const Vector3d &color,
-    double intensity,
-    bool isVisible)
-    : Light(LightType::SPOTLIGHT, color, intensity, isVisible)
-    , _position(position)
-    , _direction(direction)
-    , _openingAngle(openingAngle)
-    , _penumbraAngle(penumbraAngle)
-    , _radius(radius)
+const Vector3f &Light::getColor() const noexcept
 {
+    return _color;
 }
 
-SpotLight::SpotLight()
-    : Light(LightType::SPOTLIGHT)
-    , _position(0.0)
-    , _direction(0.0)
-    , _openingAngle(0.0)
-    , _penumbraAngle(0.0)
-    , _radius(0.0)
+float Light::getIntensity() const noexcept
 {
+    return _intensity;
 }
 
-AmbientLight::AmbientLight(const Vector3d &color, double intensity, bool isVisible)
-    : Light(LightType::AMBIENT, color, intensity, isVisible)
+bool Light::isVisible() const noexcept
 {
+    return _visible;
 }
 
-AmbientLight::AmbientLight()
-    : Light(LightType::AMBIENT)
+bool Light::commit()
 {
+    if (!isModified())
+    {
+        return false;
+    }
+
+    if (!_handle)
+    {
+        const auto handleName = getOSPHandleName();
+        _handle = ospNewLight(handleName.data());
+    }
+
+    ospSetParam(_handle, "color", OSPDataType::OSP_VEC3F, &_color);
+    ospSetParam(_handle, "intensity", OSPDataType::OSP_FLOAT, &_intensity);
+    ospSetParam(_handle, "visible", OSPDataType::OSP_BOOL, &_visible);
+
+    commitLightSpecificParams();
+
+    ospCommit(_handle);
+
+    resetModified();
+
+    return true;
+}
+
+OSPLight Light::handle() const noexcept
+{
+    return _handle;
 }
 } // namespace brayns

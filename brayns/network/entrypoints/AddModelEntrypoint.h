@@ -25,17 +25,19 @@
 
 #include <brayns/io/LoaderRegistry.h>
 
-#include <brayns/network/adapters/ModelDescriptorAdapter.h>
-#include <brayns/network/adapters/ModelParamsAdapter.h>
+#include <brayns/network/adapters/FileLoadParametersAdapter.h>
+#include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/common/CancellationToken.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
+#include <brayns/parameters/AnimationParameters.h>
+
 namespace brayns
 {
-class AddModelEntrypoint : public Entrypoint<ModelParams, std::vector<ModelDescriptorPtr>>
+class AddModelEntrypoint : public Entrypoint<FileLoadParameters, std::vector<ModelInstanceProxy>>
 {
 public:
-    AddModelEntrypoint(Scene &scene, LoaderRegistry &loaders, CancellationToken token);
+    AddModelEntrypoint(Scene &scene, LoaderRegistry &loaders, AnimationParameters &animation, CancellationToken token);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -46,6 +48,7 @@ public:
 private:
     Scene &_scene;
     LoaderRegistry &_loaders;
+    AnimationParameters &_animation;
     CancellationToken _token;
 };
 } // namespace brayns

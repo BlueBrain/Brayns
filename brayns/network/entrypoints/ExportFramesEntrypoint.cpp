@@ -21,175 +21,156 @@
 #include "ExportFramesEntrypoint.h"
 
 #include <brayns/common/Log.h>
-
+#include <brayns/engine/FrameRenderer.h>
 #include <brayns/network/common/ProgressHandler.h>
-
+#include <brayns/utils/StringUtils.h>
 #include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
 
 #include <spdlog/fmt/fmt.h>
 
-namespace brayns
-{
 namespace
 {
-void logExportInfo(const ExportFramesParams &info)
+struct ExportInfoLogger
 {
-    const auto numKeyFrames = info.key_frames.size();
-    const auto spp = info.spp;
-    const auto &path = info.path;
-    const auto &renderer = info.renderer_name;
-    const auto w = info.image_size.x;
-    const auto h = info.image_size.y;
-
-    brayns::Log::info(
-        "Export frame request\n"
-        "- Frame size:\t{}x{}\n"
-        "- Number of frames:\t{}\n"
-        "- Samples per pixel:\t{}\n"
-        "- Export folder:\t{}\n"
-        "- Renderer:\t{}\n",
-        w,
-        h,
-        numKeyFrames,
-        spp,
-        path,
-        renderer);
-}
-
-void initializeParameters(Engine &engine, ExportFramesParams &params)
-{
-    const auto &paramsManager = engine.getParametersManager();
-    const auto &sysVolumeParams = paramsManager.getVolumeParameters();
-    const auto &sysRenderer = engine.getRenderer();
-
-    auto &rendererName = params.renderer_name;
-    auto &renderSpecificParams = params.renderer_parameters;
-    auto &volumeParams = params.volume_parameters;
-
-    if (rendererName.empty())
-        rendererName = sysRenderer.getCurrentType();
-
-    if (renderSpecificParams.empty())
-        renderSpecificParams = sysRenderer.getPropertyMap(rendererName);
-
-    if (!volumeParams)
-        volumeParams = std::make_unique<VolumeParameters>(sysVolumeParams);
-}
-
-std::string writeFrameToDisk(const ExportFramesParams &params, const uint32_t frameName, FrameBuffer &fb)
-{
-    const auto &path = params.path;
-    const auto &format = params.format;
-    auto quality = params.quality;
-    auto image = fb.getImage();
-
-    char frame[7];
-    sprintf(frame, "%05d", static_cast<int32_t>(frameName));
-
-    auto filename = path + "/" + std::string(frame) + "." + format;
-    try
+    static void log(
+        const size_t numKeyFrames,
+        const std::string &path,
+        const brayns::Vector2ui &frameSize,
+        const brayns::Renderer &renderer)
     {
-        ImageEncoder::save(image, filename, quality);
-        Log::info("Frame saved to {}", filename);
-    }
-    catch (const std::runtime_error &e)
-    {
-        Log::error("{}", e.what());
-    }
+        const auto w = frameSize.x;
+        const auto h = frameSize.y;
+        const auto spp = renderer.getSamplesPerPixel();
+        const auto name = renderer.getName();
 
-    return {};
-}
+        brayns::Log::info(
+            "Export frame request\n"
+            "- Frame size:\t{}x{}\n"
+            "- Number of frames:\t{}\n"
+            "- Export folder:\t{}\n"
+            "- Renderer:\t{}\n"
+            "- Samples per pixel:\t{}\n",
+            w,
+            h,
+            numKeyFrames,
+            path,
+            name,
+            spp);
+    }
+};
+
+struct FrameWritter
+{
+    static void toDisk(const brayns::ExportFramesParams &params, const uint32_t frame, brayns::FrameBuffer &fb)
+    {
+        const auto &path = params.path;
+        const auto &imageSettings = params.image_settings;
+        const auto &inputFormat = imageSettings.getFormat();
+        const auto format = brayns::string_utils::toLowercase(inputFormat);
+        const auto quality = imageSettings.getQuality();
+        auto image = fb.getImage();
+
+        char frameName[64];
+        sprintf(frameName, "%05d", static_cast<int32_t>(frame));
+
+        auto filename = path + "/" + std::string(frameName) + "." + format;
+        try
+        {
+            brayns::ImageEncoder::save(image, filename, quality);
+            brayns::Log::info("Frame saved to {}", filename);
+        }
+        catch (const std::runtime_error &e)
+        {
+            brayns::Log::error("{}", e.what());
+        }
+    }
+};
+
+using ExportProgressHandler =
+    brayns::ProgressHandler<brayns::EntrypointRequest<brayns::ExportFramesParams, brayns::ExportFramesResult>>;
 
 class FrameExporter
 {
 public:
-    static void exportFrames(Engine &engine, CancellationToken &token, const ExportFramesEntrypoint::Request &request)
+    static brayns::ExportFramesResult exportFrames(
+        brayns::Scene &scene,
+        brayns::ParametersManager &paramsManager,
+        brayns::ExportFramesParams &params,
+        ExportProgressHandler &progress)
     {
-        ExportFramesEntrypoint::Result result = {};
-
-        // Progress
-        auto progress = ProgressHandler(token, request);
-
         // Initialize parameters
-        auto params = request.getParams();
-        initializeParameters(engine, params);
-
-        // Create parameter managers
-        auto &paramManager = engine.getParametersManager();
-        auto animParams = paramManager.getAnimationParameters();
-        auto renderParams = paramManager.getRenderingParameters();
-        renderParams.setSamplesPerPixel(params.spp);
-        renderParams.setSubsampling(1);
-        renderParams.setAccumulation(false);
-        auto &volumeParams = *params.volume_parameters;
-
-        const auto &rendererName = params.renderer_name;
-        const auto &rendererSettings = params.renderer_parameters;
-        const auto &imageSize = params.image_size;
-        const auto nameAfterStep = params.name_after_simulation_index;
+        const auto &path = params.path;
+        const auto &imageSettings = params.image_settings;
+        const auto &frameSize = imageSettings.getSize();
         const auto &keyFrames = params.key_frames;
+        const auto sequentialNaming = params.sequential_naming;
 
-        // Create the camera
-        auto camera = engine.createCamera();
-        const auto &systemCamera = engine.getCamera();
-        camera->clonePropertiesFrom(systemCamera);
-        const auto aspectRatio = static_cast<double>(imageSize.x) / static_cast<double>(imageSize.y);
-        camera->setBufferTarget("default");
-        camera->markModified(false);
-        camera->commit();
+        // Renderer
+        auto &rendererObject = params.renderer;
+        auto renderer = rendererObject.create();
+        renderer->commit();
 
-        // Create (clone) the scene
-        auto scene = engine.createScene(animParams, volumeParams);
-        scene->copyFrom(engine.getScene());
+        // Camera (committed on the loop)
+        auto &cameraObject = params.camera;
+        auto camera = cameraObject.create();
 
-        // Create the renderer
-        auto renderer = engine.createRenderer(animParams, renderParams);
-        renderer->setCurrentType(rendererName);
-        renderer->setProperties(rendererSettings);
-        renderer->setCamera(camera);
-        renderer->setScene(scene);
+        // Update aspect ratio to match the rendered images size
+        const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
+        camera->setAspectRatio(aspectRatio);
 
-        // Create the framebuffer
-        auto frameBuffer = engine.createFrameBuffer("default", imageSize, PixelFormat::RGBA_I8);
-        frameBuffer->setAccumulation(false);
-        frameBuffer->markModified();
+        // Framebuffer
+        brayns::FrameBuffer frameBuffer;
+        frameBuffer.setAccumulation(false);
+        frameBuffer.setFormat(brayns::PixelFormat::SRGBA_I8);
+        frameBuffer.setFrameSize(frameSize);
+        frameBuffer.commit();
 
+        // Parameters manager
+        auto parametersManager = paramsManager;
+        auto &animParams = parametersManager.getAnimationParameters();
+        // Avoid the first frame not being triggered because the copy is in "not modified" state
+        animParams.markModified();
+
+        // Compute for how much progress each frame accounts
         const auto progressChunk = 1.f / static_cast<float>(keyFrames.size());
         float totalProgress = 0.f;
 
-        logExportInfo(params);
+        // Log export info
+        ExportInfoLogger::log(keyFrames.size(), path, frameSize, *renderer);
 
+        brayns::ExportFramesEntrypoint::Result result = {};
+
+        // Render frames
         for (size_t i = 0; i < keyFrames.size(); ++i)
         {
             const auto &keyFrame = keyFrames[i];
 
+            // Update scene
             animParams.setFrame(keyFrame.frame_index);
-            scene->markModified(false);
-            scene->commit();
+            scene.preRender(parametersManager);
+            scene.commit();
 
-            *camera = keyFrame.camera;
-            camera->updateProperties(keyFrame.camera_params);
-            camera->updateProperty("aspect", aspectRatio);
-            camera->markModified(false);
+            // Update camera
+            const auto &lookAt = keyFrame.camera_view;
+            camera->setLookAt(lookAt);
             camera->commit();
 
-            renderer->commit();
+            // Render
+            brayns::FrameRenderer::synchronous(*camera, frameBuffer, *renderer, scene);
 
-            frameBuffer->clear();
-            renderer->render(frameBuffer);
-
-            auto name = nameAfterStep ? keyFrame.frame_index : i;
-            char frame[7];
+            // Write frame to disk
+            auto name = sequentialNaming ? i : keyFrame.frame_index;
+            char frame[64];
             sprintf(frame, "%05d", static_cast<int32_t>(name));
             try
             {
-                writeFrameToDisk(params, name, *frameBuffer);
+                FrameWritter::toDisk(params, name, frameBuffer);
             }
             catch (const std::exception &e)
             {
                 result = {1, e.what()};
-                return;
+                return {};
             }
 
             totalProgress += progressChunk;
@@ -197,14 +178,24 @@ public:
             progress.notify(fmt::format("Frame {} out of {} done", i, keyFrames.size()), totalProgress);
         }
 
-        request.reply(result);
+        return result;
     }
 };
 } // namespace
 
-ExportFramesEntrypoint::ExportFramesEntrypoint(Engine &engine, CancellationToken token)
+namespace brayns
+{
+ExportFramesEntrypoint::ExportFramesEntrypoint(
+    Engine &engine,
+    ParametersManager &parmManager,
+    CancellationToken token,
+    std::shared_ptr<EngineObjectFactory<Camera>> cameraFactory,
+    std::shared_ptr<EngineObjectFactory<Renderer>> renderFactory)
     : _engine(engine)
+    , _paramsManager(parmManager)
     , _token(token)
+    , _cameraFactory(std::move(cameraFactory))
+    , _renderFactory(std::move(renderFactory))
 {
 }
 
@@ -225,7 +216,25 @@ bool ExportFramesEntrypoint::isAsync() const
 
 void ExportFramesEntrypoint::onRequest(const Request &request)
 {
-    FrameExporter::exportFrames(_engine, _token, request);
+    // Params
+    ExportFramesParams params;
+    auto &systemCamera = _engine.getCamera();
+    params.camera = GenericObject<Camera>(systemCamera, *_cameraFactory);
+    auto &systemRender = _engine.getRenderer();
+    params.renderer = GenericObject<Renderer>(systemRender, *_renderFactory);
+    auto &systemFb = _engine.getFrameBuffer();
+    params.image_settings = ImageSettings(systemFb.getFrameSize());
+    request.getParams(params);
+
+    // Progress handler
+    brayns::ProgressHandler progress(_token, request);
+
+    auto &scene = _engine.getScene();
+
+    // Do export
+    const auto result = FrameExporter::exportFrames(scene, _paramsManager, params, progress);
+
+    request.reply(result);
 }
 
 void ExportFramesEntrypoint::onCancel()

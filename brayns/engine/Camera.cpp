@@ -2,6 +2,7 @@
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,90 +20,102 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/Camera.h>
+#include "Camera.h"
 
 namespace brayns
 {
-Camera::Camera(const Camera &other)
+bool operator==(const LookAt &a, const LookAt &b) noexcept
 {
-    *this = other;
+    return a.position == b.position && a.target == b.target && a.up == b.up;
 }
 
-Camera &Camera::operator=(const Camera &rhs)
+Camera::Camera(const Camera &o)
 {
-    if (this == &rhs)
-        return *this;
+    *this = o;
+}
 
-    clonePropertiesFrom(rhs);
-
-    setPosition(rhs.getPosition());
-    setOrientation(rhs.getOrientation());
-
-    _initialPosition = rhs._initialPosition;
-    _initialOrientation = rhs._initialOrientation;
+Camera &Camera::operator=(const Camera &o)
+{
+    _lookAtParams = o._lookAtParams;
+    _aspectRatio = o._aspectRatio;
 
     return *this;
 }
 
-void Camera::set(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target)
+Camera::Camera(Camera &&other) noexcept
 {
-    setPosition(position);
-    setOrientation(orientation);
-    setTarget(target);
+    *this = std::move(other);
 }
 
-void Camera::setInitialState(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target)
+Camera &Camera::operator=(Camera &&other) noexcept
 {
-    _initialPosition = position;
-    _initialTarget = target;
-    _initialOrientation = orientation;
-    _initialOrientation = glm::normalize(_initialOrientation);
-    set(position, orientation, target);
+    _lookAtParams = std::move(other._lookAtParams);
+    _aspectRatio = other._aspectRatio;
+    std::swap(_handle, other._handle);
+
+    return *this;
 }
 
-void Camera::setPosition(const Vector3d &position)
+Camera::~Camera()
 {
-    _updateValue(_position, position);
+    if (_handle)
+    {
+        ospRelease(_handle);
+    }
 }
 
-void Camera::setTarget(const Vector3d &target)
+bool Camera::commit()
 {
-    _updateValue(_target, target);
+    if (!isModified())
+    {
+        return false;
+    }
+
+    if (!_handle)
+    {
+        const auto handleName = getOSPHandleName();
+        _handle = ospNewCamera(handleName.data());
+    }
+
+    const auto &position = _lookAtParams.position;
+    const auto &target = _lookAtParams.target;
+    const auto &up = _lookAtParams.up;
+
+    const auto forward = glm::normalize(target - position);
+    const auto strafe = glm::cross(forward, up);
+    const auto realUp = glm::cross(strafe, forward);
+
+    ospSetParam(_handle, "position", OSP_VEC3F, &position[0]);
+    ospSetParam(_handle, "direction", OSP_VEC3F, &forward);
+    ospSetParam(_handle, "up", OSP_VEC3F, &realUp);
+    ospSetParam(_handle, "aspect", OSP_FLOAT, &_aspectRatio);
+
+    commitCameraSpecificParams();
+
+    ospCommit(_handle);
+
+    resetModified();
+
+    return true;
 }
 
-const Vector3d &Camera::getPosition() const
+void Camera::setLookAt(const LookAt &params) noexcept
 {
-    return _position;
+    _updateValue(_lookAtParams, params);
 }
 
-const Vector3d &Camera::getTarget() const
+const LookAt &Camera::getLookAt() const noexcept
 {
-    return _target;
+    return _lookAtParams;
 }
 
-void Camera::setOrientation(Quaterniond orientation)
+void Camera::setAspectRatio(const float aspectRatio) noexcept
 {
-    orientation = glm::normalize(orientation);
-    _updateValue(_orientation, orientation);
+    _updateValue(_aspectRatio, aspectRatio);
 }
 
-const Quaterniond &Camera::getOrientation() const
+OSPCamera Camera::handle() const noexcept
 {
-    return _orientation;
-}
-
-void Camera::reset()
-{
-    set(_initialPosition, _initialOrientation, _initialTarget);
-}
-
-void Camera::setBufferTarget(const std::string &target)
-{
-    _updateValue(_bufferTarget, target, false);
-}
-
-const std::string &Camera::getBufferTarget() const
-{
-    return _bufferTarget;
+    return _handle;
 }
 } // namespace brayns

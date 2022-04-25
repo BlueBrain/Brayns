@@ -22,16 +22,6 @@
 
 namespace brayns
 {
-double Statistics::getFPS() const
-{
-    return _fps;
-}
-
-void Statistics::setFPS(const double fps)
-{
-    _updateValue(_fps, fps);
-}
-
 size_t Statistics::getSceneSizeInBytes() const
 {
     return _sceneSizeInBytes;

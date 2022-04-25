@@ -34,4 +34,32 @@ BRAYNS_JSON_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")
 BRAYNS_JSON_ADAPTER_GET("dt", getDt, "Frame time")
 BRAYNS_JSON_ADAPTER_GET("unit", getTimeUnit, "Time unit")
 BRAYNS_JSON_ADAPTER_END()
+
+class GenericAnimationSettings
+{
+public:
+    GenericAnimationSettings() = default;
+
+    GenericAnimationSettings(const AnimationParameters &params)
+        : _frame(params.getFrame())
+    {
+    }
+
+    void setFrame(uint32_t frame) noexcept
+    {
+        _frame = frame;
+    }
+
+    uint32_t getFrame() const noexcept
+    {
+        return _frame;
+    }
+
+private:
+    uint32_t _frame{};
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(GenericAnimationSettings)
+BRAYNS_JSON_ADAPTER_GETSET("frame", getFrame, setFrame, "Animation frame index", Required(false))
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

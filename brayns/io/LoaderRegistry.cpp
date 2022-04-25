@@ -23,18 +23,18 @@
 #include <filesystem>
 
 #include <brayns/common/Log.h>
-#include <brayns/io/loaders/MeshLoader.h>
-#include <brayns/io/loaders/ProteinLoader.h>
-#include <brayns/io/loaders/VolumeLoader.h>
-#include <brayns/io/loaders/XYZBLoader.h>
+#include <brayns/io/loaders/mesh/MeshLoader.h>
+#include <brayns/io/loaders/protein/ProteinLoader.h>
+//#include <brayns/io/loaders/VolumeLoader.h>
+#include <brayns/io/loaders/xyzb/XYZBLoader.h>
 
 namespace brayns
 {
 LoaderRegistry::LoaderRegistry()
 {
     registerLoader(std::make_unique<ProteinLoader>());
-    registerLoader(std::make_unique<RawVolumeLoader>());
-    registerLoader(std::make_unique<MHDVolumeLoader>());
+    // registerLoader(std::make_unique<RawVolumeLoader>());
+    // registerLoader(std::make_unique<MHDVolumeLoader>());
     registerLoader(std::make_unique<XYZBLoader>());
     registerLoader(std::make_unique<MeshLoader>());
 }

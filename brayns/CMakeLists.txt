@@ -17,14 +17,12 @@ add_subdirectory(pluginapi)
 add_subdirectory(network)
 
 set(BRAYNS_PUBLIC_HEADERS Brayns.h)
-set(BRAYNS_HEADERS EngineFactory.h)
 set(BRAYNS_SOURCES
   Brayns.cpp
-  EngineFactory.cpp
   PluginManager.cpp
 )
 
-add_library(brayns SHARED ${BRAYNS_PUBLIC_HEADERS} ${BRAYNS_HEADERS} ${BRAYNS_SOURCES})
+add_library(brayns SHARED ${BRAYNS_PUBLIC_HEADERS} ${BRAYNS_SOURCES})
 
 target_include_directories(brayns PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>

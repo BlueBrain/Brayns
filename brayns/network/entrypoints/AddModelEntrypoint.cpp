@@ -21,6 +21,7 @@
 
 #include "AddModelEntrypoint.h"
 
+#include <brayns/engine/common/SimulationScanner.h>
 #include <brayns/network/common/ProgressHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
@@ -29,9 +30,9 @@ namespace
 class ModelParametersValidator
 {
 public:
-    static void validate(const brayns::ModelParams &params, const brayns::LoaderRegistry &loaders)
+    static void validate(const brayns::FileLoadParameters &params, const brayns::LoaderRegistry &loaders)
     {
-        auto &path = params.getPath();
+        auto &path = params.filePath;
         if (path.empty())
         {
             throw brayns::InvalidParamsException("Missing model path");
@@ -46,9 +47,14 @@ public:
 
 namespace brayns
 {
-AddModelEntrypoint::AddModelEntrypoint(Scene &scene, LoaderRegistry &loaders, CancellationToken token)
+AddModelEntrypoint::AddModelEntrypoint(
+    Scene &scene,
+    LoaderRegistry &loaders,
+    AnimationParameters &animation,
+    CancellationToken token)
     : _scene(scene)
     , _loaders(loaders)
+    , _animation(animation)
     , _token(token)
 {
 }
@@ -73,14 +79,34 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     ModelParametersValidator::validate(params, _loaders);
     auto progress = brayns::ProgressHandler(_token, request);
-    auto &path = params.getPath();
-    auto &name = params.getLoaderName();
+    auto &path = params.filePath;
+    auto &name = params.loaderName;
     auto &loader = _loaders.getSuitableLoader(path, "", name);
-    auto &parameters = params.getLoadParameters();
+    auto &parameters = params.loadParameters;
     auto callback = [&](const auto &operation, auto amount) { progress.notify(operation, amount); };
-    auto descriptors = loader.loadFromFile(path, {callback}, parameters, _scene);
-    _scene.addModels(descriptors, params);
-    request.reply(descriptors);
+    auto models = loader.loadFromFile(path, {callback}, parameters);
+
+    ModelLoadParameters loadParameters;
+    loadParameters.type = ModelLoadParameters::LoadType::FROM_FILE;
+    loadParameters.path = path;
+    loadParameters.loaderName = name;
+    loadParameters.loadParameters = parameters;
+
+    auto &modelManager = _scene.getModelManager();
+
+    std::vector<ModelInstanceProxy> result;
+    result.reserve(models.size());
+    for (auto &model : models)
+    {
+        auto &modelInstance = modelManager.addModel(loadParameters, std::move(model));
+        result.emplace_back(modelInstance);
+    }
+
+    SimulationScanner::scanAndUpdate(modelManager, _animation);
+    // Need to compute bounds here to make sure the bounds will be updated for the next call (which may need them)
+    _scene.computeBounds();
+
+    request.reply(result);
 }
 
 void AddModelEntrypoint::onCancel()

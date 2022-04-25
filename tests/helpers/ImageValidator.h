@@ -52,7 +52,7 @@ public:
     static bool validate(const brayns::Image &image, const std::string &filename)
     {
         std::cout << "Validation of image '" << filename << "'.\n";
-        auto path = BRAYNS_TESTDATA_IMAGES_PATH + filename;
+        auto path = BRAYNS_TESTDATA_REFERENCE_IMAGES_PATH + filename;
         _saveIfNeeded(image, path);
         auto reference = brayns::ImageDecoder::load(path);
         return validate(image, reference);

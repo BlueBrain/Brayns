@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/scenecomponents/SceneClipManager.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/RemoveClipPlanesMessage.h>
@@ -31,13 +31,13 @@ namespace brayns
 class RemoveClipPlanesEntrypoint : public Entrypoint<RemoveClipPlanesMessage, EmptyMessage>
 {
 public:
-    RemoveClipPlanesEntrypoint(Scene &scene);
+    RemoveClipPlanesEntrypoint(SceneClipManager &clipManager);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Scene &_scene;
+    SceneClipManager &_clipManager;
 };
 } // namespace brayns

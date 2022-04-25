@@ -22,25 +22,21 @@
 #pragma once
 
 #include <brayns/network/adapters/SceneAdapter.h>
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-class GetSceneEntrypoint : public GetEntrypoint<Scene>
+class GetSceneEntrypoint : public Entrypoint<EmptyMessage, ReadSceneProxy>
 {
 public:
     GetSceneEntrypoint(const Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
-};
 
-class SetSceneEntrypoint : public SetEntrypoint<Scene>
-{
-public:
-    SetSceneEntrypoint(Scene &scene);
+    virtual void onRequest(const Request &request) override;
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
+private:
+    const Scene &_scene;
 };
 } // namespace brayns

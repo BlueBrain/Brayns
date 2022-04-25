@@ -24,5 +24,5 @@
 #include <brayns/json/JsonObjectMacro.h>
 
 BRAYNS_JSON_OBJECT_BEGIN(CIGetCellIdsFromModelParams)
-BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "ID of the circuit model")
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the circuit model")
 BRAYNS_JSON_OBJECT_END()

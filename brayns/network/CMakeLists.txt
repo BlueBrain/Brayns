@@ -6,25 +6,21 @@
 set(BRAYNSNETWORK_HEADERS
   adapters/AnimationParametersAdapter.h
   adapters/ApplicationParametersAdapter.h
-  adapters/BinaryParamAdapter.h
-  adapters/BoxAdapter.h
+  adapters/BinaryLoadParametersAdapter.h
+  adapters/BoundsAdapter.h
   adapters/CameraAdapter.h
-  adapters/ClipPlaneAdapter.h
-  adapters/ColorMapAdapter.h
+  adapters/FileLoadParametersAdapter.h
+  adapters/GeometryAdapter.h
   adapters/LightAdapter.h
   adapters/LoaderInfoAdapter.h
-  adapters/ModelDescriptorAdapter.h
+  adapters/MaterialAdapter.h
   adapters/ModelInstanceAdapter.h
-  adapters/ModelParamsAdapter.h
   adapters/ModelTransferFunctionAdapter.h
   adapters/RendererPickResultAdapter.h
-  adapters/RenderingParametersAdapter.h
-  adapters/SceneAdapter.h
+  adapters/RendererAdapter.h
   adapters/StatisticsAdapter.h
   adapters/TransferFunctionAdapter.h
   adapters/TransformationAdapter.h
-  adapters/UpdateModelAdapter.h
-  adapters/VolumeParametersAdapter.h
   binary/BinaryManager.h
   client/ClientBuffer.h
   client/ClientManager.h
@@ -33,10 +29,10 @@ set(BRAYNSNETWORK_HEADERS
   client/ClientSender.h
   common/CancellationToken.h
   common/Clock.h
+  common/EngineObjectFactory.h
   common/ExtractMaterial.h
   common/ExtractModel.h
   common/ProgressHandler.h
-  common/PropertyObjectSchema.h
   common/RateLimiter.h
   dispatch/RequestDispatcher.h
   entrypoint/Entrypoint.h
@@ -49,25 +45,24 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/ObjectEntrypoint.h
   entrypoint/PropertyObjectEntrypoint.h
   entrypoints/AddClipPlaneEntrypoint.h
+  entrypoints/AddGeometryEntrypoint.h
   entrypoints/AddLightEntrypoint.h
   entrypoints/AddModelEntrypoint.h
   entrypoints/AnimationParametersEntrypoint.h
   entrypoints/ApplicationParametersEntrypoint.h
   entrypoints/CameraEntrypoint.h
-  entrypoints/CameraParamsEntrypoint.h
+  entrypoints/CameraLookAtEntrypoint.h
   entrypoints/CancelEntrypoint.h
   entrypoints/ClearLightsEntrypoint.h
+  entrypoints/EnableSimulationEntrypoint.h
   entrypoints/ExitLaterEntrypoint.h
   entrypoints/ExportFramesEntrypoint.h
-  entrypoints/GetClipPlanesEntrypoint.h
-  entrypoints/GetInstancesEntrypoint.h
-  entrypoints/GetLightsEntrypoint.h
   entrypoints/GetLoadersEntrypoint.h
   entrypoints/GetModelEntrypoint.h
   entrypoints/ImageJpegEntrypoint.h
   entrypoints/ImageStreamingModeEntrypoint.h
-  entrypoints/InspectEntrypoint.h
-  entrypoints/ModelPropertiesEntrypoint.h
+  #entrypoints/InspectEntrypoint.h
+  entrypoints/ModelMaterialEntrypoint.h
   entrypoints/ModelTransferFunctionEntrypoint.h
   entrypoints/QuitEntrypoint.h
   entrypoints/RegistryEntrypoint.h
@@ -75,19 +70,14 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/RemoveLightsEntrypoint.h
   entrypoints/RemoveModelEntrypoint.h
   entrypoints/RendererEntrypoint.h
-  entrypoints/RendererParamsEntrypoint.h
   entrypoints/RequestModelUploadEntrypoint.h
-  entrypoints/ResetCameraEntrypoint.h
   entrypoints/SceneEntrypoint.h
   entrypoints/SchemaEntrypoint.h
   entrypoints/SnapshotEntrypoint.h
   entrypoints/StatisticsEntrypoint.h
   entrypoints/TriggerJpegStreamEntrypoint.h
-  entrypoints/UpdateClipPlaneEntrypoint.h
-  entrypoints/UpdateInstanceEntrypoint.h
   entrypoints/UpdateModelEntrypoint.h
   entrypoints/VersionEntrypoint.h
-  entrypoints/VolumeParametersEntrypoint.h
   interface/INetworkInterface.h
   interface/NetworkInterface.h
   jsonrpc/JsonRpcException.h
@@ -97,16 +87,13 @@ set(BRAYNSNETWORK_HEADERS
   jsonrpc/JsonRpcParser.h
   jsonrpc/JsonRpcSender.h
   jsonrpc/RequestId.h
-  messages/AddClipPlaneMessage.h
   messages/ExitLaterMessage.h
   messages/ExportFramesMessage.h
-  messages/GetInstancesMessage.h
   messages/GetModelMessage.h
   messages/ImageBase64Message.h
+  messages/ImageSettingsMessage.h
   messages/ImageStreamingModeMessage.h
   messages/InspectMessage.h
-  messages/LightMessage.h
-  messages/ModelPropertiesMessage.h
   messages/RemoveClipPlanesMessage.h
   messages/RemoveLightsMessage.h
   messages/RemoveModelMessage.h
@@ -131,8 +118,11 @@ set(BRAYNSNETWORK_HEADERS
 )
   
 set(BRAYNSNETWORK_SOURCES
+  adapters/CameraAdapter.cpp
+  adapters/ClipPlaneAdapter.cpp
+  adapters/ModelInstanceAdapter.cpp
   adapters/ModelTransferFunctionAdapter.cpp
-  adapters/UpdateModelAdapter.cpp
+  adapters/SceneAdapter.cpp
   binary/BinaryManager.cpp
   client/ClientBuffer.cpp
   client/ClientManager.cpp
@@ -141,34 +131,33 @@ set(BRAYNSNETWORK_SOURCES
   client/ClientSender.cpp
   client/RequestBuffer.cpp
   common/CancellationToken.cpp
+  common/EngineObjectFactory.cpp
   common/ExtractMaterial.cpp
   common/ExtractModel.cpp
-  common/PropertyObjectSchema.cpp
   common/RateLimiter.cpp
   dispatch/RequestDispatcher.cpp
   entrypoint/EntrypointFinder.cpp
   entrypoint/EntrypointRegistry.cpp
   entrypoint/EntrypointRef.cpp
   entrypoints/AddClipPlaneEntrypoint.cpp
+  entrypoints/AddGeometryEntrypoint.cpp
   entrypoints/AddLightEntrypoint.cpp
   entrypoints/AddModelEntrypoint.cpp
   entrypoints/AnimationParametersEntrypoint.cpp
   entrypoints/ApplicationParametersEntrypoint.cpp
   entrypoints/CameraEntrypoint.cpp
-  entrypoints/CameraParamsEntrypoint.cpp
+  entrypoints/CameraLookAtEntrypoint.cpp
   entrypoints/CancelEntrypoint.cpp
   entrypoints/ClearLightsEntrypoint.cpp
+  entrypoints/EnableSimulationEntrypoint.cpp
   entrypoints/ExitLaterEntrypoint.cpp
   entrypoints/ExportFramesEntrypoint.cpp
-  entrypoints/GetClipPlanesEntrypoint.cpp
-  entrypoints/GetInstancesEntrypoint.cpp
-  entrypoints/GetLightsEntrypoint.cpp
   entrypoints/GetLoadersEntrypoint.cpp
   entrypoints/GetModelEntrypoint.cpp
   entrypoints/ImageJpegEntrypoint.cpp
   entrypoints/ImageStreamingModeEntrypoint.cpp
-  entrypoints/InspectEntrypoint.cpp
-  entrypoints/ModelPropertiesEntrypoint.cpp
+  #entrypoints/InspectEntrypoint.cpp
+  entrypoints/ModelMaterialEntrypoint.cpp
   entrypoints/ModelTransferFunctionEntrypoint.cpp
   entrypoints/QuitEntrypoint.cpp
   entrypoints/RegistryEntrypoint.cpp
@@ -176,19 +165,14 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/RemoveLightsEntrypoint.cpp
   entrypoints/RemoveModelEntrypoint.cpp
   entrypoints/RendererEntrypoint.cpp
-  entrypoints/RendererParamsEntrypoint.cpp
   entrypoints/RequestModelUploadEntrypoint.cpp
-  entrypoints/ResetCameraEntrypoint.cpp
   entrypoints/SceneEntrypoint.cpp
   entrypoints/SchemaEntrypoint.cpp
   entrypoints/SnapshotEntrypoint.cpp
   entrypoints/StatisticsEntrypoint.cpp
   entrypoints/TriggerJpegStreamEntrypoint.cpp
-  entrypoints/UpdateClipPlaneEntrypoint.cpp
-  entrypoints/UpdateInstanceEntrypoint.cpp
   entrypoints/UpdateModelEntrypoint.cpp
   entrypoints/VersionEntrypoint.cpp
-  entrypoints/VolumeParametersEntrypoint.cpp
   interface/NetworkInterface.cpp
   jsonrpc/JsonRpcException.cpp
   jsonrpc/JsonRpcFactory.cpp
@@ -196,7 +180,6 @@ set(BRAYNSNETWORK_SOURCES
   jsonrpc/JsonRpcParser.cpp
   jsonrpc/JsonRpcSender.cpp
   jsonrpc/RequestId.cpp
-  messages/LightMessage.cpp
   plugin/NetworkManager.cpp
   socket/ClientSocket.cpp
   socket/ServerSocket.cpp

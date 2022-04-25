@@ -2,6 +2,7 @@
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,106 +22,94 @@
 
 #pragma once
 
-#include <brayns/common/PropertyObject.h>
+#include <brayns/common/BaseObject.h>
+#include <brayns/common/MathTypes.h>
+
+#include <ospray/ospray.h>
 
 #include <memory>
 
 namespace brayns
 {
-/**
-   Camera object
-
-   This object in an abstract interface to a camera which is defined by a
-   position and a quaternion
-*/
-class Camera : public PropertyObject
+struct LookAt
 {
-public:
-    /** @name API for engine-specific code */
-    //@{
-    /**
-       Commits the changes held by the camera object so that
-       attributes become available to the underlying rendering engine
-    */
-    virtual void commit(){};
-    //@}
-
-    Camera() = default;
-
-    Camera(const Camera &other);
-
-    Camera &operator=(const Camera &rhs);
-
-    /**
-       Sets position, and quaternion
-       @param position The x, y, z coordinates of the camera position
-       @param orientation The x, y, z, w values of the quaternion describing
-              the camera orientation
-       @param target The x, y, z coordinates of the camera target
-    */
-    void set(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target = Vector3d(0.0));
-
-    void setInitialState(
-        const Vector3d &position,
-        const Quaterniond &orientation,
-        const Vector3d &target = Vector3d(0.0));
-
-    /**
-       Sets camera position
-       @param position The x, y, z coordinates of the camera position
-    */
-    void setPosition(const Vector3d &position);
-
-    /**
-       Sets camera target
-       @param target The x, y, z coordinates of the camera target
-    */
-    void setTarget(const Vector3d &target);
-
-    /**
-       Gets camera position
-       @return The x, y, z coordinates of the camera position
-    */
-    const Vector3d &getPosition() const;
-
-    /**
-       Gets camera target
-       @return The x, y, z coordinates of the camera target
-    */
-    const Vector3d &getTarget() const;
-
-    /**
-       Sets camera orientation quaternion.
-       @param orientation The orientation quaternion
-    */
-    void setOrientation(Quaterniond orientation);
-
-    /**
-       Gets the camera orientation quaternion
-       @return the orientation quaternion
-    */
-    const Quaterniond &getOrientation() const;
-
-    /** Resets the camera to its initial values */
-    void reset();
-
-    /** @internal Sets the name of current rendered frame buffer. */
-    void setBufferTarget(const std::string &target);
-
-    /** @internal @return the current rendererd frame buffer. */
-    const std::string &getBufferTarget() const;
-
-private:
-    Vector3d _target;
-    Vector3d _position;
-    Quaterniond _orientation;
-
-    Vector3d _initialTarget;
-    Vector3d _initialPosition;
-    Quaterniond _initialOrientation;
-
-    std::string _bufferTarget;
+    Vector3f position{0.f};
+    Vector3f target{0.f, 0.f, 1.f};
+    Vector3f up{0.f, 1.f, 0.f};
 };
 
-using CameraPtr = std::shared_ptr<Camera>;
+bool operator==(const LookAt &a, const LookAt &b) noexcept;
+
+class Camera : public BaseObject
+{
+public:
+    Camera() = default;
+
+    Camera(const Camera &);
+    Camera &operator=(const Camera &);
+
+    Camera(Camera &&) noexcept;
+    Camera &operator=(Camera &&) noexcept;
+
+    virtual ~Camera();
+
+    /**
+     * @brief Returns the camera type as a string
+     */
+    virtual std::string getName() const noexcept = 0;
+
+    /**
+     * @brief Creates a copy of the current camera
+     *
+     * @return std::unique_ptr<Camera>
+     */
+    virtual std::unique_ptr<Camera> clone() const noexcept = 0;
+
+    /**
+     * @brief Commit implementation. Derived camera types must override commitCameraSpecificParams(),
+     * which will be called during commit() to perform camera-specific synchronization with OSPRay
+     * @returns true if there was anything to commit
+     */
+    bool commit();
+
+    /**
+     * @brief Sets the look-at parameters of the camera
+     * @param params LookAt
+     */
+    void setLookAt(const LookAt &params) noexcept;
+
+    /**
+     * @brief Returns the look-at parameters of the camera
+     * @return const LookAt &
+     */
+    const LookAt &getLookAt() const noexcept;
+
+    /**
+     * @brief Sets the resolution aspect ratio on to which this camera will be generating rays
+     */
+    void setAspectRatio(const float aspectRatio) noexcept;
+
+    /**
+     * @brief Returns the OSPRay handle of this camera
+     */
+    OSPCamera handle() const noexcept;
+
+protected:
+    /**
+     * @brief Subclasses must implement this method so that the appropiate OSPRay camera object maight be
+     * instantiated
+     */
+    virtual std::string getOSPHandleName() const noexcept = 0;
+
+    /**
+     * @brief Subclasses of the Camera must implement this method to commit to OSPRay camera type specific
+     * parameters. The camera class will call ospCommit(_handle), thus sublcass may avoid calling it.
+     */
+    virtual void commitCameraSpecificParams() = 0;
+
+private:
+    LookAt _lookAtParams;
+    float _aspectRatio{1.f};
+    OSPCamera _handle{nullptr};
+};
 } // namespace brayns

@@ -23,33 +23,85 @@
 
 namespace brayns
 {
-GetRendererEntrypoint::GetRendererEntrypoint(const RenderingParameters &parameters)
-    : GetEntrypoint(parameters)
+GetRendererTypeEntrypoint::GetRendererTypeEntrypoint(Engine &engine)
+    : _engine(engine)
 {
 }
 
-std::string GetRendererEntrypoint::getMethod() const
+std::string GetRendererTypeEntrypoint::getMethod() const
 {
-    return "get-renderer";
+    return "get-renderer-type";
 }
 
-std::string GetRendererEntrypoint::getDescription() const
+std::string GetRendererTypeEntrypoint::getDescription() const
 {
-    return "Get the current state of the renderer";
+    return "Returns the type of the renderer currently being used";
 }
 
-SetRendererEntrypoint::SetRendererEntrypoint(RenderingParameters &parameters)
-    : SetEntrypoint(parameters)
+void GetRendererTypeEntrypoint::onRequest(const Request &request)
+{
+    auto &renderer = _engine.getRenderer();
+    auto name = renderer.getName();
+    request.reply(name);
+}
+
+SetRendererInteractiveEntrypoint::SetRendererInteractiveEntrypoint(Engine &engine)
+    : SetRendererEntrypoint<InteractiveRenderer>(engine)
 {
 }
 
-std::string SetRendererEntrypoint::getMethod() const
+std::string SetRendererInteractiveEntrypoint::getMethod() const
 {
-    return "set-renderer";
+    return "set-renderer-interactive";
 }
 
-std::string SetRendererEntrypoint::getDescription() const
+std::string SetRendererInteractiveEntrypoint::getDescription() const
 {
-    return "Set the current state of the renderer";
+    return "Sets the system renderer to the interactive one";
+}
+
+SetRendererProductionEntrypoint::SetRendererProductionEntrypoint(Engine &engine)
+    : SetRendererEntrypoint<ProductionRenderer>(engine)
+{
+}
+
+std::string SetRendererProductionEntrypoint::getMethod() const
+{
+    return "set-renderer-production";
+}
+
+std::string SetRendererProductionEntrypoint::getDescription() const
+{
+    return "Sets the system renderer to the production one";
+}
+
+GetRendererInteractiveEntrypoint::GetRendererInteractiveEntrypoint(Engine &engine)
+    : GetRendererEntrypoint<InteractiveRenderer>(engine)
+{
+}
+
+std::string GetRendererInteractiveEntrypoint::getMethod() const
+{
+    return "get-renderer-interactive";
+}
+
+std::string GetRendererInteractiveEntrypoint::getDescription() const
+{
+    return "Returns the current renderer as interactive renderer, if possible";
+}
+
+GetRendererProductionEntrypoint::GetRendererProductionEntrypoint(Engine &engine)
+    : GetRendererEntrypoint<ProductionRenderer>(engine)
+{
+}
+
+std::string GetRendererProductionEntrypoint::getMethod() const
+{
+    return "get-renderer-production";
+}
+
+std::string GetRendererProductionEntrypoint::getDescription() const
+{
+    return "Returns the current renderer as production renderer, if possible";
 }
 } // namespace brayns

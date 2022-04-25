@@ -21,10 +21,13 @@
 
 #include "RemoveModelEntrypoint.h"
 
+#include <brayns/engine/common/SimulationScanner.h>
+
 namespace brayns
 {
-RemoveModelEntrypoint::RemoveModelEntrypoint(Scene &scene)
+RemoveModelEntrypoint::RemoveModelEntrypoint(Scene &scene, AnimationParameters &animation)
     : _scene(scene)
+    , _animation(animation)
 {
 }
 
@@ -41,10 +44,13 @@ std::string RemoveModelEntrypoint::getDescription() const
 void RemoveModelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
+    auto &modelManager = _scene.getModelManager();
     for (auto id : params.ids)
     {
-        _scene.removeModel(id);
+        modelManager.removeModel(id);
     }
+    SimulationScanner::scanAndUpdate(modelManager, _animation);
+    _scene.computeBounds();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

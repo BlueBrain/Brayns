@@ -29,21 +29,14 @@
 namespace
 {
 constexpr auto PARAM_LOG_LEVEL = "log-level";
-constexpr auto PARAM_BENCHMARKING = "enable-benchmark";
-constexpr auto PARAM_HTTP_SERVER = "http-server";
 constexpr auto PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
-constexpr auto PARAM_INPUT_PATHS = "input-paths";
 constexpr auto PARAM_JPEG_COMPRESSION = "jpeg-compression";
-constexpr auto PARAM_MAX_RENDER_FPS = "max-render-fps";
-constexpr auto PARAM_PARALLEL_RENDERING = "parallel-rendering";
 constexpr auto PARAM_PLUGIN = "plugin";
 constexpr auto PARAM_WINDOW_SIZE = "window-size";
-constexpr auto PARAM_SANDBOX_PATH = "sandbox-path";
 
 constexpr size_t DEFAULT_WINDOW_WIDTH = 800;
 constexpr size_t DEFAULT_WINDOW_HEIGHT = 600;
 constexpr size_t DEFAULT_JPEG_COMPRESSION = 90;
-constexpr auto DEFAULT_SANDBOX_PATH = "/gpfs/bbp.cscs.ch/project";
 
 class GetLogLevel
 {
@@ -85,15 +78,11 @@ ApplicationParameters::ApplicationParameters()
     : AbstractParameters("Application")
     , _windowSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
-    , _sandBoxPath(DEFAULT_SANDBOX_PATH)
 {
     _parameters.add_options() //
         (PARAM_LOG_LEVEL,
          po::value<std::string>(),
          "Log level among [trace, debug, info, warn, error, critical] (default info).") //
-        (PARAM_INPUT_PATHS,
-         po::value<std::vector<std::string>>(&_inputPaths),
-         "List of files/folders to load data from") //
         (PARAM_PLUGIN,
          po::value<std::vector<std::string>>(&_plugins)->composing(),
          "Dynamic plugin to load from LD_LIBRARY_PATH; "
@@ -103,24 +92,10 @@ ApplicationParameters::ApplicationParameters()
         (PARAM_WINDOW_SIZE,
          po::fixed_tokens_value<std::vector<uint32_t>>(2, 2),
          "Window size [uint uint]") //
-        (PARAM_BENCHMARKING,
-         po::bool_switch(&_benchmarking)->default_value(false),
-         "Enable benchmarking") //
         (PARAM_JPEG_COMPRESSION,
          po::value<size_t>(&_jpegCompression),
          "JPEG compression rate (100 is full quality) [int]") //
-        (PARAM_PARALLEL_RENDERING,
-         po::bool_switch(&_parallelRendering)->default_value(false),
-         "Enable parallel rendering, equivalent to --osp:mpi") //
-        (PARAM_IMAGE_STREAM_FPS,
-         po::value<size_t>(&_imageStreamFPS),
-         "Image stream FPS (60 default), [int]") //
-        (PARAM_MAX_RENDER_FPS,
-         po::value<size_t>(&_maxRenderFPS),
-         "Max. render FPS") //
-        (PARAM_SANDBOX_PATH, po::value<std::string>(&_sandBoxPath), "Path to sandbox directory");
-
-    _positionalArgs.add(PARAM_INPUT_PATHS, -1);
+        (PARAM_IMAGE_STREAM_FPS, po::value<size_t>(&_imageStreamFPS), "Image stream FPS (60 default), [int]");
 }
 
 void ApplicationParameters::print()
@@ -130,21 +105,8 @@ void ApplicationParameters::print()
     for (const auto &plugin : _plugins)
         Log::info("- {}", plugin);
     Log::info("Window size                 : {}", _windowSize);
-    Log::info("Benchmarking                : {}", asString(_benchmarking));
     Log::info("JPEG Compression            : {}", _jpegCompression);
     Log::info("Image stream FPS            : {}", _imageStreamFPS);
-    Log::info("Max. render  FPS            : {}", _maxRenderFPS);
-    Log::info("Sandbox directory           : {}", _sandBoxPath);
-}
-
-bool ApplicationParameters::getDynamicLoadBalancer() const noexcept
-{
-    return _dynamicLoadBalancer;
-}
-
-void ApplicationParameters::setDynamicLoadBalancer(const bool value) noexcept
-{
-    _updateValue(_dynamicLoadBalancer, value);
 }
 
 const Vector2ui &ApplicationParameters::getWindowSize() const noexcept
@@ -155,16 +117,6 @@ const Vector2ui &ApplicationParameters::getWindowSize() const noexcept
 void ApplicationParameters::setWindowSize(const Vector2ui &size) noexcept
 {
     _updateValue(_windowSize, size);
-}
-
-bool ApplicationParameters::isBenchmarking() const noexcept
-{
-    return _benchmarking;
-}
-
-void ApplicationParameters::setBenchmarking(const bool enabled) noexcept
-{
-    _updateValue(_benchmarking, enabled);
 }
 
 void ApplicationParameters::setJpegCompression(const size_t cmpr) noexcept
@@ -197,24 +149,9 @@ void ApplicationParameters::setUseQuantaRenderControl(const bool val) noexcept
     _updateValue(_useQuantaRenderControl, val);
 }
 
-size_t ApplicationParameters::getMaxRenderFPS() const noexcept
+LogLevel ApplicationParameters::getLogLevel() const noexcept
 {
-    return _maxRenderFPS;
-}
-
-bool ApplicationParameters::getParallelRendering() const noexcept
-{
-    return _parallelRendering;
-}
-
-const std::string &ApplicationParameters::getSandboxPath() const noexcept
-{
-    return _sandBoxPath;
-}
-
-const std::vector<std::string> &ApplicationParameters::getInputPaths() const noexcept
-{
-    return _inputPaths;
+    return _logLevel;
 }
 
 const std::vector<std::string> &ApplicationParameters::getPlugins() const noexcept
@@ -239,10 +176,9 @@ void ApplicationParameters::parse(const po::variables_map &vm)
     if (i != vm.end())
     {
         auto &value = i->second.as<std::string>();
-        auto level = GetLogLevel::fromName(value);
-        Log::setLevel(level);
+        _logLevel = GetLogLevel::fromName(value);
+        Log::setLevel(_logLevel);
     }
-    markModified();
 }
 
 } // namespace brayns

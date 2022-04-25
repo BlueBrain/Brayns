@@ -22,25 +22,98 @@
 
 namespace brayns
 {
-float Renderer::getVariance() const
+Renderer::Renderer(const Renderer &o)
 {
-    return 0.0f;
+    *this = o;
 }
 
-Renderer::PickResult Renderer::pick(const Vector2f &position)
+Renderer &Renderer::operator=(const Renderer &o)
 {
-    (void)position;
-    return {};
+    _samplesPerPixel = o._samplesPerPixel;
+    _maxRayBounces = o._maxRayBounces;
+    _backgroundColor = o._backgroundColor;
+
+    return *this;
 }
 
-Renderer::Renderer(const AnimationParameters &animationParameters, const RenderingParameters &renderingParameters)
-    : _animationParameters(animationParameters)
-    , _renderingParameters(renderingParameters)
+Renderer::Renderer(Renderer &&o) noexcept
 {
+    *this = std::move(o);
 }
 
-void Renderer::setScene(ScenePtr scene)
+Renderer &Renderer::operator=(Renderer &&o) noexcept
 {
-    _scene = scene;
+    _samplesPerPixel = o._samplesPerPixel;
+    _maxRayBounces = o._maxRayBounces;
+    _backgroundColor = o._backgroundColor;
+    std::swap(_handle, o._handle);
+
+    return *this;
+}
+
+Renderer::~Renderer()
+{
+    ospRelease(_handle);
+}
+
+int32_t Renderer::getSamplesPerPixel() const noexcept
+{
+    return _samplesPerPixel;
+}
+
+int32_t Renderer::getMaxRayBounces() const noexcept
+{
+    return _maxRayBounces;
+}
+
+const Vector4f &Renderer::getBackgroundColor() const noexcept
+{
+    return _backgroundColor;
+}
+
+void Renderer::setSamplesPerPixel(const int32_t spp) noexcept
+{
+    _updateValue(_samplesPerPixel, spp);
+}
+
+void Renderer::setMaxRayBounces(const int32_t maxBounces) noexcept
+{
+    _updateValue(_maxRayBounces, maxBounces);
+}
+
+void Renderer::setBackgroundColor(const Vector4f &background) noexcept
+{
+    _updateValue(_backgroundColor, background);
+}
+
+bool Renderer::commit()
+{
+    if (!isModified())
+    {
+        return false;
+    }
+
+    if (!_handle)
+    {
+        const auto handleName = getOSPHandleName();
+        _handle = ospNewRenderer(handleName.c_str());
+    }
+
+    ospSetParam(_handle, "pixelSamples", OSPDataType::OSP_INT, &_samplesPerPixel);
+    ospSetParam(_handle, "maxPathLength", OSPDataType::OSP_INT, &_maxRayBounces);
+    ospSetParam(_handle, "backgroundColor", OSPDataType::OSP_VEC4F, &_backgroundColor);
+
+    commitRendererSpecificParams();
+
+    ospCommit(_handle);
+
+    resetModified();
+
+    return true;
+}
+
+OSPRenderer Renderer::handle() const noexcept
+{
+    return _handle;
 }
 } // namespace brayns

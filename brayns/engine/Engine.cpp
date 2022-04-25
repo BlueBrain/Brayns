@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+﻿/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,54 +20,172 @@
 
 #include "Engine.h"
 
-namespace brayns
+#include <brayns/common/Log.h>
+#include <brayns/engine/FrameRenderer.h>
+#include <brayns/engine/cameras/PerspectiveCamera.h>
+#include <brayns/engine/renderers/InteractiveRenderer.h>
+
+#include <thread>
+
+namespace
 {
-Engine::Engine(ParametersManager &parametersManager)
-    : _parametersManager(parametersManager)
+struct OSPRayLogLevelGenerator
 {
+    static OSPLogLevel generate(brayns::ApplicationParameters &params)
+    {
+        const auto systemLogLevel = params.getLogLevel();
+        switch (systemLogLevel)
+        {
+        case brayns::LogLevel::Off:
+            return OSPLogLevel::OSP_LOG_NONE;
+        case brayns::LogLevel::Critical:
+        case brayns::LogLevel::Error:
+            return OSPLogLevel::OSP_LOG_ERROR;
+        case brayns::LogLevel::Warn:
+            return OSPLogLevel::OSP_LOG_WARNING;
+        case brayns::LogLevel::Info:
+            return OSPLogLevel::OSP_LOG_INFO;
+        case brayns::LogLevel::Debug:
+        case brayns::LogLevel::Trace:
+        case brayns::LogLevel::Count:
+            return OSPLogLevel::OSP_LOG_DEBUG;
+        }
+
+        return OSPLogLevel::OSP_LOG_NONE;
+    }
+};
 }
 
-void Engine::commit()
+namespace brayns
 {
-    _renderer->commit();
+Engine::Engine(ParametersManager &parameters)
+    : _params(parameters)
+{
+    ospLoadModule("cpu");
+    _device = ospNewDevice("cpu");
+
+    auto &appParams = parameters.getApplicationParameters();
+    const auto logLevel = OSPRayLogLevelGenerator::generate(appParams);
+    const auto logOutput = "cout";
+    const auto logErrorOutput = "cerr";
+    ospDeviceSetParam(_device, "logLevel", OSPDataType::OSP_INT, &logLevel);
+    ospDeviceSetParam(_device, "logOutput", OSPDataType::OSP_STRING, logOutput);
+    ospDeviceSetParam(_device, "errorOutput", OSPDataType::OSP_STRING, logErrorOutput);
+
+    ospDeviceCommit(_device);
+    ospSetCurrentDevice(_device);
+
+    const auto error = ospDeviceGetLastErrorCode(_device);
+    if (error != OSPError::OSP_NO_ERROR)
+    {
+        const auto ospErrorMessage = ospDeviceGetLastErrorMsg(_device);
+        Log::critical("Could not initialize OSPRay device: {}", ospErrorMessage);
+        throw std::runtime_error("Could not initialize OSPRay device");
+    }
+
+    // Initialize components
+    _frameBuffer = std::make_unique<FrameBuffer>();
+    _scene = std::make_unique<Scene>();
+    _camera = std::make_unique<PerspectiveCamera>();
+    _renderer = std::make_unique<InteractiveRenderer>();
+}
+
+Engine::~Engine()
+{
+    _frameBuffer.reset();
+    _camera.reset();
+    _renderer.reset();
+    _scene.reset();
+
+    if (_device)
+    {
+        ospDeviceRelease(_device);
+    }
+
+    ospShutdown();
 }
 
 void Engine::preRender()
 {
-    if (!mustRender())
-        return;
+    _scene->preRender(_params);
+}
 
-    const auto &renderParams = _parametersManager.getRenderingParameters();
-    if (!renderParams.isModified())
-        return;
-    for (auto frameBuffer : _frameBuffers)
+void Engine::commit()
+{
+    if (!_keepRunning)
     {
-        frameBuffer->setAccumulation(renderParams.getAccumulation());
-        frameBuffer->setSubsampling(renderParams.getSubsampling());
+        return;
+    }
+
+    // Update changes on the viewport
+    auto &appParams = _params.getApplicationParameters();
+    const auto &frameSize = appParams.getWindowSize();
+    const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
+
+    _frameBuffer->setFrameSize(frameSize);
+    _camera->setAspectRatio(aspectRatio);
+
+    bool needResetFramebuffer = false;
+    if (_frameBuffer->commit())
+    {
+        Log::debug("[Engine] Framebuffer committed");
+        needResetFramebuffer = true;
+    }
+
+    if (_camera->commit())
+    {
+        Log::debug("[Engine] Camera committed");
+        needResetFramebuffer = true;
+    }
+
+    if (_renderer->commit())
+    {
+        Log::debug("[Engine] Renderer committed");
+        needResetFramebuffer = true;
+    }
+
+    if (_scene->commit())
+    {
+        Log::debug("[Engine] Scene committed");
+        needResetFramebuffer = true;
+        const auto sceneSize = _scene->_getSizeBytes();
+        _statistics.setSceneSizeInBytes(sceneSize);
+    }
+
+    if (needResetFramebuffer)
+    {
+        _frameBuffer->clear();
     }
 }
 
 void Engine::render()
 {
-    if (!mustRender())
-        return;
-
-    for (auto frameBuffer : _frameBuffers)
+    if (!_keepRunning)
     {
-        _camera->setBufferTarget(frameBuffer->getName());
-        _camera->commit();
-        _camera->resetModified();
-        _renderer->render(frameBuffer);
+        return;
     }
+
+    // Check wether we should keep rendering or not
+    const auto maxSpp = _renderer->getSamplesPerPixel();
+    const auto currentSpp = _frameBuffer->numAccumFrames();
+    if (currentSpp >= maxSpp)
+    {
+        return;
+    }
+
+    FrameRenderer::synchronous(*_camera, *_frameBuffer, *_renderer, *_scene);
+
+    _frameBuffer->incrementAccumFrames();
 }
 
 void Engine::postRender()
 {
-    if (!mustRender())
+    if (!_keepRunning)
+    {
         return;
+    }
 
-    for (auto frameBuffer : _frameBuffers)
-        frameBuffer->incrementAccumFrames();
+    _scene->postRender(_params);
 }
 
 Scene &Engine::getScene()
@@ -75,122 +193,48 @@ Scene &Engine::getScene()
     return *_scene;
 }
 
-FrameBuffer &Engine::getFrameBuffer()
+FrameBuffer &Engine::getFrameBuffer() noexcept
 {
-    return *_frameBuffers[0];
+    return *_frameBuffer;
 }
 
-const Camera &Engine::getCamera() const
+void Engine::setCamera(std::unique_ptr<Camera> camera) noexcept
+{
+    _camera = std::move(camera);
+}
+
+Camera &Engine::getCamera() noexcept
 {
     return *_camera;
 }
 
-Camera &Engine::getCamera()
+void Engine::setRenderer(std::unique_ptr<Renderer> renderer) noexcept
 {
-    return *_camera;
+    _renderer = std::move(renderer);
 }
 
-Renderer &Engine::getRenderer()
+Renderer &Engine::getRenderer() noexcept
 {
     return *_renderer;
 }
 
-void Engine::setKeepRunning(bool keepRunning)
+void Engine::setRunning(bool keepRunning) noexcept
 {
     _keepRunning = keepRunning;
 }
 
-bool Engine::getKeepRunning() const
+bool Engine::isRunning() const noexcept
 {
     return _keepRunning;
 }
 
-Statistics &Engine::getStatistics()
+const Statistics &Engine::getStatistics() const noexcept
 {
     return _statistics;
 }
 
-bool Engine::continueRendering() const
+const ParametersManager &Engine::getParametersManager() const noexcept
 {
-    auto frameBuffer = _frameBuffers[0];
-    return (
-        frameBuffer->getAccumulation()
-        && (frameBuffer->numAccumFrames() < _parametersManager.getRenderingParameters().getMaxAccumFrames()));
-}
-
-const ParametersManager &Engine::getParametersManager() const
-{
-    return _parametersManager;
-}
-
-ParametersManager &Engine::getParametersManager()
-{
-    return _parametersManager;
-}
-
-void Engine::addFrameBuffer(FrameBufferPtr frameBuffer)
-{
-    _frameBuffers.push_back(frameBuffer);
-}
-
-void Engine::removeFrameBuffer(FrameBufferPtr frameBuffer)
-{
-    _frameBuffers.erase(std::remove(_frameBuffers.begin(), _frameBuffers.end(), frameBuffer), _frameBuffers.end());
-}
-
-const std::vector<FrameBufferPtr> &Engine::getFrameBuffers() const
-{
-    return _frameBuffers;
-}
-
-void Engine::clearFrameBuffers()
-{
-    for (auto frameBuffer : _frameBuffers)
-        frameBuffer->clear();
-}
-
-void Engine::resetFrameBuffers()
-{
-    for (auto frameBuffer : _frameBuffers)
-        frameBuffer->resetModified();
-}
-
-void Engine::addRendererType(const std::string &name, const PropertyMap &properties)
-{
-    _parametersManager.getRenderingParameters().addRenderer(name);
-    getRenderer().setProperties(name, properties);
-}
-
-void Engine::addCameraType(const std::string &name, const PropertyMap &properties)
-{
-    _parametersManager.getRenderingParameters().addCamera(name);
-    getCamera().setProperties(name, properties);
-}
-
-bool Engine::mustRender()
-{
-    if (_parametersManager.getApplicationParameters().getUseQuantaRenderControl())
-    {
-        // When playing an animation:
-        //  - A frame data from the animation gets loaded
-        //  (Model::commitSimulationData())
-        //      - This triggers the scene to be marked as modified
-        //          - This triggers Brayns to clear the frame buffer accumation
-        //          frames
-        //  This is way the animations keep working even though the camera might
-        //  be fixed at a specific location and direction
-
-        // Do not render if camera hasnt been modified and either there is no
-        // accumulation frames or they are completed for the current pass
-        auto frameBuffer = _frameBuffers[0];
-        if (!_camera->isModified()
-            && (!frameBuffer->getAccumulation()
-                || (frameBuffer->getAccumulation()
-                    && frameBuffer->numAccumFrames()
-                        >= _parametersManager.getRenderingParameters().getMaxAccumFrames())))
-            return false;
-    }
-
-    return true;
+    return _params;
 }
 } // namespace brayns
