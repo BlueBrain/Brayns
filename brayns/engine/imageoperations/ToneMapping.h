@@ -37,15 +37,8 @@ public:
 
     ~ToneMapping();
 
-    /**
-     * @brief commit
-     */
     void commit() override;
 
-    /**
-     * @brief handle
-     * @return
-     */
     OSPImageOperation handle() const noexcept override;
 
     /**

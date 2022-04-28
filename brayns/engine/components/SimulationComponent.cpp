@@ -30,11 +30,6 @@ SimulationComponent::SimulationComponent(float start, float end, float dt, std::
 {
 }
 
-size_t SimulationComponent::getSizeInBytes() const noexcept
-{
-    return sizeof(SimulationComponent);
-}
-
 float SimulationComponent::getStartTime() const noexcept
 {
     return _startTime;

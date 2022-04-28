@@ -46,11 +46,6 @@ public:
         return _geometry;
     }
 
-    virtual uint64_t getSizeInBytes() const noexcept override
-    {
-        return sizeof(ClippingComponent<T>) + _geometry.getSizeInBytes();
-    }
-
     virtual void onStart() override
     {
         _model = GeometricModelHandler::create();

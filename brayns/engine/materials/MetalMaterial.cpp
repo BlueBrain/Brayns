@@ -27,12 +27,6 @@ std::string MetalMaterial::getName() const noexcept
     return "metal";
 }
 
-uint64_t MetalMaterial::getSizeInBytes() const noexcept
-{
-    // We copy all data to ospray, so we must account for that
-    return sizeof(MetalMaterial) * 2 - sizeof(OSPMaterial);
-}
-
 void MetalMaterial::setRoughness(const float roughness) noexcept
 {
     _updateValue(_roughness, glm::clamp(roughness, 0.f, 1.f));

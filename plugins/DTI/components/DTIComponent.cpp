@@ -49,18 +49,6 @@ struct NormalColorGenerator
 
 namespace dti
 {
-size_t DTIComponent::getSizeInBytes() const noexcept
-{
-    size_t geometrySize = 0;
-    for (const auto &streamline : _streamlines)
-    {
-        const auto &geometry = streamline.geometry;
-        geometrySize += sizeof(Streamline) + geometry.getSizeInBytes();
-    }
-
-    return sizeof(DTIComponent) + geometrySize;
-}
-
 brayns::Bounds DTIComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds base;

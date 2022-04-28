@@ -37,12 +37,6 @@ public:
     SimulationComponent(float start, float end, float dt, std::string timeUnit);
 
     /**
-     * @brief implementation
-     * @return size_t
-     */
-    size_t getSizeInBytes() const noexcept override;
-
-    /**
      * @brief Returns the start time of the simulation
      * @return float
      */

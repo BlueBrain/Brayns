@@ -148,8 +148,6 @@ void Engine::commit()
     {
         Log::debug("[Engine] Scene committed");
         needResetFramebuffer = true;
-        const auto sceneSize = _scene->_getSizeBytes();
-        _statistics.setSceneSizeInBytes(sceneSize);
     }
 
     if (needResetFramebuffer)
@@ -226,11 +224,6 @@ void Engine::setRunning(bool keepRunning) noexcept
 bool Engine::isRunning() const noexcept
 {
     return _keepRunning;
-}
-
-const Statistics &Engine::getStatistics() const noexcept
-{
-    return _statistics;
 }
 
 const ParametersManager &Engine::getParametersManager() const noexcept

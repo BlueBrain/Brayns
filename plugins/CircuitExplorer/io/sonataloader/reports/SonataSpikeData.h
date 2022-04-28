@@ -38,47 +38,16 @@ public:
         bbp::sonata::Selection selection,
         float interval);
 
-    /**
-     * @brief Returns the size, in bytes, of a single frame
-     *
-     * @return size_t
-     */
     size_t getFrameSize() const noexcept override;
 
-    /**
-     * @brief Returns the report start time
-     *
-     * @return float
-     */
     float getStartTime() const noexcept override;
 
-    /**
-     * @brief Returns the report end time
-     *
-     * @return float
-     */
     float getEndTime() const noexcept override;
 
-    /**
-     * @brief Returns the report time step
-     *
-     * @return float
-     */
     float getTimeStep() const noexcept override;
 
-    /**
-     * @brief Return the reports time unit
-     *
-     * @return std::string
-     */
     std::string getTimeUnit() const noexcept override;
 
-    /**
-     * @brief Returns a frame from the report
-     *
-     * @param frameIndex
-     * @return std::vector<float>
-     */
     std::vector<float> getFrame(const uint32_t frameIndex) const override;
 
 private:

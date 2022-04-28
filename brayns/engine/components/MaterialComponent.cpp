@@ -29,11 +29,6 @@ MaterialComponent::MaterialComponent()
 {
 }
 
-uint64_t MaterialComponent::getSizeInBytes() const noexcept
-{
-    return _material->getSizeInBytes();
-}
-
 void MaterialComponent::setMaterial(std::unique_ptr<Material> material)
 {
     if (!material)

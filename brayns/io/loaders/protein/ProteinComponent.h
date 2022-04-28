@@ -30,8 +30,6 @@ class ProteinComponent final : public Component
 public:
     ProteinComponent(std::vector<Sphere> spheres, std::vector<Vector4f> colors, std::vector<uint8_t> colorIndices);
 
-    uint64_t getSizeInBytes() const noexcept override;
-
     Bounds computeBounds(const Matrix4f &transform) const noexcept override;
 
     void onStart() override;

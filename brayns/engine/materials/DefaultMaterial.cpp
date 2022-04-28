@@ -27,12 +27,6 @@ std::string DefaultMaterial::getName() const noexcept
     return "default";
 }
 
-uint64_t DefaultMaterial::getSizeInBytes() const noexcept
-{
-    // We copy all data to ospray, so we must account for that
-    return sizeof(DefaultMaterial) * 2 - sizeof(OSPMaterial);
-}
-
 void DefaultMaterial::setOpacity(const float opacity) noexcept
 {
     _updateValue(_opacity, glm::clamp(opacity, 0.f, 1.f));

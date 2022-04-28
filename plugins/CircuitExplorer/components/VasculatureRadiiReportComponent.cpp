@@ -86,12 +86,6 @@ VasculatureRadiiReportComponent::VasculatureRadiiReportComponent(
 {
 }
 
-size_t VasculatureRadiiReportComponent::getSizeInBytes() const noexcept
-{
-    return sizeof(VasculatureRadiiReportComponent) + _report->getFrameSize() * sizeof(float)
-        + brayns::SizeHelper::vectorSize(_offsets) + brayns::SizeHelper::vectorSize(_originalRadii);
-}
-
 void VasculatureRadiiReportComponent::onStart()
 {
     auto &model = getModel();

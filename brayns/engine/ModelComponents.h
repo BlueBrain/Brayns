@@ -49,11 +49,6 @@ public:
 
     virtual ~Component() = default;
 
-    /**
-     * @brief Returns the size in bytes of the component.
-     */
-    virtual size_t getSizeInBytes() const noexcept = 0;
-
 protected:
     /**
      * @brief Returns a reference to the model that owns this component. This reference is only valid after the
@@ -177,12 +172,6 @@ private:
 
         _components.erase(it);
     }
-
-    /**
-     * @brief Returns the size in bytes of this component list. It will call getSizeInBytes for each
-     * component
-     */
-    size_t getSizeInBytes() const noexcept;
 
     /**
      * @brief Calls all the components 'onPreRender' in this container

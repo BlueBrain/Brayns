@@ -27,12 +27,6 @@ std::string EmissiveMaterial::getName() const noexcept
     return "emissive";
 }
 
-uint64_t EmissiveMaterial::getSizeInBytes() const noexcept
-{
-    // We copy all data to ospray, so we must account for that
-    return sizeof(EmissiveMaterial) * 2 - sizeof(OSPMaterial);
-}
-
 void EmissiveMaterial::setIntensity(const float intensity) noexcept
 {
     _updateValue(_intensity, glm::max(intensity, 0.f));

@@ -27,18 +27,8 @@ namespace brayns
 class InteractiveRenderer final : public Renderer
 {
 public:
-    /**
-     * @brief Get the Name object
-     *
-     * @return std::string
-     */
     std::string getName() const noexcept final;
 
-    /**
-     * @brief
-     *
-     * @return std::unique_ptr<Renderer>
-     */
     std::unique_ptr<Renderer> clone() const noexcept final;
 
     /**
@@ -62,17 +52,8 @@ public:
     int32_t getAmbientOcclusionSamples() const noexcept;
 
 protected:
-    /**
-     * @brief
-     *
-     * @return std::string
-     */
     std::string getOSPHandleName() const noexcept final;
 
-    /**
-     * @brief
-     *
-     */
     void commitRendererSpecificParams() final;
 
 private:

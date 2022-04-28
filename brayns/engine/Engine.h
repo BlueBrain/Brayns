@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/common/Statistics.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
@@ -109,11 +108,6 @@ public:
     bool isRunning() const noexcept;
 
     /**
-     * @brief Returns the Statistics object of the engine
-     */
-    const Statistics &getStatistics() const noexcept;
-
-    /**
      * @brief Returns the system parameters manager
      */
     const ParametersManager &getParametersManager() const noexcept;
@@ -127,9 +121,6 @@ private:
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<Camera> _camera;
     std::unique_ptr<Renderer> _renderer;
-
-    // Engine statistics
-    Statistics _statistics;
 
     // Run flag
     bool _keepRunning{true};

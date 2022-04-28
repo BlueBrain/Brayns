@@ -240,14 +240,6 @@ public:
     }
 
     /**
-     * @brief Returns the size in bytes of this Geometry object
-     */
-    size_t getSizeInBytes() const noexcept
-    {
-        return sizeof(*this) + _geometries.size() * sizeof(T);
-    }
-
-    /**
      * @brief Compute the spatial bounds of the geometry on the buffer transformed by the given
      * matrix.
      * There must be a specialization of GeometryBoundsUpdater::updateBounds for the gometry type
@@ -424,14 +416,6 @@ public:
         Bounds result;
         RenderableBoundsUpdater<T>::update(_volumeData, transform, result);
         return result;
-    }
-
-    /**
-     * @brief Returns the size in bytes of this object. Can be specialized to provide a more accurate measure
-     */
-    size_t getSizeInBytes() const noexcept
-    {
-        return sizeof(*this);
     }
 
     OSPVolume handle() const noexcept

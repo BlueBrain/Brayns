@@ -30,8 +30,6 @@ class MatteMaterial final : public Material
 public:
     std::string getName() const noexcept final;
 
-    uint64_t getSizeInBytes() const noexcept final;
-
     /**
      * @brief Sets the opacity of the material. Must be between 0.0 and 1.0, with 0.0 = fully transparent,
      * and 1.0 = fully opaque.

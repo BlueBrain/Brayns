@@ -64,17 +64,6 @@ Bounds Component::computeBounds(const Matrix4f &transform) const noexcept
     return {};
 }
 
-size_t ModelComponentContainer::getSizeInBytes() const noexcept
-{
-    size_t result = 0;
-    for (const auto &entry : _components)
-    {
-        auto &component = *entry.component;
-        result += component.getSizeInBytes();
-    }
-    return result;
-}
-
 void ModelComponentContainer::onPreRender(const ParametersManager &params)
 {
     for (auto &entry : _components)

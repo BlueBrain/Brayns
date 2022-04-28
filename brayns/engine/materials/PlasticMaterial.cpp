@@ -27,12 +27,6 @@ std::string PlasticMaterial::getName() const noexcept
     return "plastic";
 }
 
-uint64_t PlasticMaterial::getSizeInBytes() const noexcept
-{
-    // We copy all data to ospray, so we must account for that
-    return sizeof(PlasticMaterial) * 2 - sizeof(OSPMaterial);
-}
-
 void PlasticMaterial::setOpacity(const float opacity) noexcept
 {
     _updateValue(_opacity, glm::clamp(opacity, 0.f, 1.f));

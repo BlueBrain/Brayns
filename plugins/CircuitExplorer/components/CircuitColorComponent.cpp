@@ -26,11 +26,6 @@ CircuitColorComponent::CircuitColorComponent(std::unique_ptr<IColorData> data, s
 {
 }
 
-size_t CircuitColorComponent::getSizeInBytes() const noexcept
-{
-    return sizeof(CircuitColorComponent);
-}
-
 IColorData &CircuitColorComponent::getColorData() noexcept
 {
     return *_colorData;

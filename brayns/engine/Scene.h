@@ -110,13 +110,6 @@ public:
 private:
     friend class Engine;
 
-private:
-    /**
-     * @brief Returns the size in bytes of the scene
-     */
-    uint64_t _getSizeBytes() const noexcept;
-
-private:
     // Scene bounds
     Bounds _bounds;
 

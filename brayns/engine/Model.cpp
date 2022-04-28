@@ -67,11 +67,6 @@ OSPGroup Model::groupHandle() const noexcept
     return _group.handle();
 }
 
-size_t Model::getSizeInBytes() const noexcept
-{
-    return sizeof(Model) + _components.getSizeInBytes();
-}
-
 bool Model::commit()
 {
     if (_components.commit())

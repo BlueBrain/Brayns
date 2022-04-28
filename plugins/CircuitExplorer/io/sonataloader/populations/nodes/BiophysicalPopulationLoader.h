@@ -28,20 +28,8 @@ namespace sonataloader
 class BiophysicalPopulationLoader final : public NodePopulationLoader
 {
 public:
-    /**
-     * @brief Get the Population Type object
-     *
-     * @return std::string
-     */
     std::string getPopulationType() const noexcept override;
 
-    /**
-     * @brief
-     *
-     * @param ctxt
-     * @param cb
-     * @param model
-     */
     void load(NodeLoadContext &ctxt) const override;
 };
 } // namespace sonataloader

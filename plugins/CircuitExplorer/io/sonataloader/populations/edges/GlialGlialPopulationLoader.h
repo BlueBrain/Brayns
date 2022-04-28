@@ -28,18 +28,8 @@ namespace sonataloader
 class GlialGlialPopulationLoader final : public EdgePopulationLoader
 {
 public:
-    /**
-     * @brief Get the Population Type object
-     *
-     * @return std::string
-     */
     std::string getPopulationType() const noexcept override;
 
-    /**
-     * @brief
-     *
-     * @param ctxt
-     */
     void load(EdgeLoadContext &ctxt) const override;
 };
 } // namespace sonataloader

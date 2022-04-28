@@ -57,12 +57,6 @@ std::string_view QuadLight::getOSPHandleName() const noexcept
     return "quad";
 }
 
-uint64_t QuadLight::getSizeInBytes() const noexcept
-{
-    // We copy all the light data to OSPRay, so we must account for it
-    return sizeof(QuadLight) * 2 - sizeof(OSPLight);
-}
-
 void QuadLight::commitLightSpecificParams()
 {
     auto ospHandle = handle();

@@ -27,19 +27,8 @@ namespace brayns
 class AmbientLight final : public Light
 {
 protected:
-    /**
-     * @brief getOSPHandleName implementation
-     */
     std::string_view getOSPHandleName() const noexcept final;
 
-    /**
-     * @brief getSizeInBytes implementation
-     */
-    uint64_t getSizeInBytes() const noexcept final;
-
-    /**
-     * @brief commitLightSpecificParams implementation
-     */
     void commitLightSpecificParams() final;
 };
 }

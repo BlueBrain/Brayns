@@ -27,18 +27,8 @@ namespace brayns
 class PerspectiveCamera final : public Camera
 {
 public:
-    /**
-     * @brief Get the Name object
-     *
-     * @return std::string
-     */
     std::string getName() const noexcept override;
 
-    /**
-     * @brief
-     *
-     * @return std::unique_ptr<Camera>
-     */
     std::unique_ptr<Camera> clone() const noexcept override;
 
     /**
@@ -74,17 +64,8 @@ public:
     float getFocusDistance() const noexcept;
 
 protected:
-    /**
-     * @brief
-     *
-     * @return std::string
-     */
     std::string getOSPHandleName() const noexcept final;
 
-    /**
-     * @brief
-     *
-     */
     void commitCameraSpecificParams() final;
 
 private:

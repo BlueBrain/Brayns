@@ -93,11 +93,11 @@ std::string BBPLoader::getName() const
 
 std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlob(
     brayns::Blob &&blob,
-    const brayns::LoaderProgress &cb,
+    const brayns::LoaderProgress &callback,
     const BBPLoaderParameters &params) const
 {
     (void)blob;
-    (void)cb;
+    (void)callback;
     (void)params;
     throw std::runtime_error("BBP loader: import from blob not supported");
 }

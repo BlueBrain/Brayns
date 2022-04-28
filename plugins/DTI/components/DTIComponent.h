@@ -38,8 +38,6 @@ public:
     };
 
 public:
-    size_t getSizeInBytes() const noexcept override;
-
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
     void onStart() override;

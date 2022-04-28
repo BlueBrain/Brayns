@@ -35,12 +35,6 @@ ReportComponent::ReportComponent(std::unique_ptr<IReportData> data, std::unique_
 {
 }
 
-size_t ReportComponent::getSizeInBytes() const noexcept
-{
-    return sizeof(ReportComponent) + _report->getFrameSize() * sizeof(float) + sizeof(brayns::Vector4f) * 256
-        + brayns::SizeHelper::vectorSize(_indices);
-}
-
 void ReportComponent::onStart()
 {
     auto &model = getModel();

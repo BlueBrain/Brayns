@@ -16,33 +16,12 @@ public:
         std::vector<brayns::Primitive> geometry,
         std::vector<VasculatureSection> sections);
 
-    /**
-     * @brief getSizeInBytes
-     * @return
-     */
-    size_t getSizeInBytes() const noexcept override;
-
-    /**
-     * @brief computeBounds
-     * @param transform
-     * @return
-     */
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
-    /**
-     * @brief onStart
-     */
     void onStart() override;
 
-    /**
-     * @brief commit
-     * @return
-     */
     bool commit() override;
 
-    /**
-     * @brief onDestroyed
-     */
     void onDestroyed() override;
 
     /**

@@ -119,11 +119,6 @@ private:
     Bounds computeBounds(const Matrix4f &transform) const noexcept;
 
     /**
-     * @brief Subclasses should override it to provide a more accurate measure of the memory footprint.
-     */
-    size_t getSizeInBytes() const noexcept;
-
-    /**
      * @brief Returns the OSPRay handle
      */
     OSPGroup groupHandle() const noexcept;

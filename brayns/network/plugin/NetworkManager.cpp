@@ -65,7 +65,6 @@
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
 #include <brayns/network/entrypoints/SnapshotEntrypoint.h>
-#include <brayns/network/entrypoints/StatisticsEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateModelEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
@@ -89,7 +88,6 @@ public:
         auto &sceneModelManager = scene.getModelManager();
         auto &sceneLightManager = scene.getLightManager();
         auto &sceneClipManager = scene.getClipManager();
-        auto &statistics = engine.getStatistics();
 
         auto &loaders = api.getLoaderRegistry();
 
@@ -140,7 +138,6 @@ public:
         builder.add<brayns::GetRendererProductionEntrypoint>(engine);
         builder.add<brayns::GetRendererTypeEntrypoint>(engine);
         builder.add<brayns::GetSceneEntrypoint>(scene);
-        builder.add<brayns::GetStatisticsEntrypoint>(statistics);
         builder.add<brayns::ImageJpegEntrypoint>(application, engine);
         builder.add<brayns::ImageStreamingModeEntrypoint>(application, monitor);
         // builder.add<brayns::InspectEntrypoint>(renderer);

@@ -35,40 +35,17 @@ class MorphologyColorHandler final : public IColorHandler
 public:
     MorphologyColorHandler(MorphologyCircuitComponent &circuit);
 
-    /**
-     * @brief updateColor
-     * @param color
-     */
     void updateColor(const brayns::Vector4f &color) override;
 
-    /**
-     * @brief updateColorById
-     * @param colorMap
-     * @return std::vector<uint64_t>
-     */
     std::vector<uint64_t> updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap) override;
 
-    /**
-     * @brief updateColorById
-     * @param colors
-     */
     void updateColorById(const std::vector<brayns::Vector4f> &colors) override;
 
-    /**
-     * @brief updateColor
-     * @param method
-     * @param vars
-     */
     void updateColorByMethod(
         const IColorData &colorData,
         const std::string &method,
         const std::vector<ColoringInformation> &vars) override;
 
-    /**
-     * @brief updateIndexedColor
-     * @param color
-     * @param indices
-     */
     void updateIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices) override;
 
 private:

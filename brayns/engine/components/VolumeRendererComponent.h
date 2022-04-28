@@ -53,11 +53,6 @@ public:
             ospRelease(_model);
     }
 
-    virtual uint64_t getSizeInBytes() const noexcept override
-    {
-        return sizeof(VolumeRendererComponent<T>);
-    }
-
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
     {
         return _volume.computeBounds(transform);

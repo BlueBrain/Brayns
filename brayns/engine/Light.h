@@ -79,11 +79,6 @@ protected:
     friend class SceneLightManager;
 
     /**
-     * @brief Returns the size in bytes of the light
-     */
-    virtual uint64_t getSizeInBytes() const noexcept = 0;
-
-    /**
      * @brief commit() implementation
      */
     bool commit();

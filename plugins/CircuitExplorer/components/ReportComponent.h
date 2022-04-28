@@ -37,23 +37,8 @@ public:
      */
     ReportComponent(std::unique_ptr<IReportData> data, std::unique_ptr<IColormapIndexer> frameIndexer);
 
-    /**
-     * @brief getSizeInBytes implementation
-     * @return
-     */
-    size_t getSizeInBytes() const noexcept override;
-
-    /**
-     * @brief Initializes the transfer function used in the simulation, and adds a SimulationComponent to the model
-     * to access and control the simulation
-     */
     void onStart() override;
 
-    /**
-     * @brief Updates colors on the circuit if needed (simulatio enabled, new frame requested, etc.)
-     *
-     * @param parameters
-     */
     void onPreRender(const brayns::ParametersManager &parameters) override;
 
 private:

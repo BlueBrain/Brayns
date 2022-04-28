@@ -28,7 +28,6 @@ void SpikeIndexer::update(
 
     indices.resize(data.size());
 
-    // #pragma omp parallel for
     for (size_t i = 0; i < data.size(); ++i)
     {
         const auto value = data[i];

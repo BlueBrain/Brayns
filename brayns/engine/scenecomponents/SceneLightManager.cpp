@@ -71,15 +71,4 @@ std::vector<OSPLight> SceneLightManager::getLightHandles() const noexcept
 
     return handles;
 }
-
-size_t SceneLightManager::getSizeInBytes() const noexcept
-{
-    size_t size = 0;
-    for (const auto &[lightID, light] : _lights)
-    {
-        size += sizeof(lightID) + light->getSizeInBytes();
-    }
-
-    return size;
-}
 }

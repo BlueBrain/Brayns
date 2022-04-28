@@ -30,8 +30,6 @@ class MetalMaterial final : public Material
 public:
     std::string getName() const noexcept final;
 
-    uint64_t getSizeInBytes() const noexcept final;
-
     /**
      * @brief Sets the surface roughness
      */

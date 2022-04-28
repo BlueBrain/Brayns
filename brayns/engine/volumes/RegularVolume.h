@@ -60,9 +60,6 @@ template<>
 void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume &s, const Matrix4f &t, Bounds &b);
 
 template<>
-uint64_t Volume<RegularVolume>::getSizeInBytes() const noexcept;
-
-template<>
 void Volume<RegularVolume>::commitVolumeSpecificParams();
 
 }

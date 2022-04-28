@@ -81,7 +81,6 @@ std::vector<float> SonataSpikeData::getFrame(const uint32_t frameIndex) const
         nonstd::optional<double>(frameStart),
         nonstd::optional<double>(frameEnd));
 
-    // #pragma omp parallel for
     for (size_t i = 0; i < spikes.size(); ++i)
     {
         const auto &spike = spikes[i];

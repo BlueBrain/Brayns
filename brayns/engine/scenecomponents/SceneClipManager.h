@@ -77,12 +77,6 @@ private:
      */
     std::vector<OSPInstance> getInstanceHandles() noexcept;
 
-    /**
-     * @brief returns the size in bytes of this clipping model manager
-     * @return size_t
-     */
-    size_t getSizeInBytes() const noexcept;
-
 private:
     bool _dirty{false};
     IDFactory<uint32_t> _idFactory;

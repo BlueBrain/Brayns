@@ -32,26 +32,10 @@ class BBPSynapseColorData final : public IColorData
 public:
     BBPSynapseColorData(std::string circuitPath, std::string circuitPopulation);
 
-    /**
-     * @brief getMethods
-     * @return
-     */
     std::vector<std::string> getMethods() const noexcept override;
 
-    /**
-     * @brief Get the Method Variables object
-     *
-     * @param method
-     * @return std::vector<std::string>
-     */
     std::vector<std::string> getMethodVariables(const std::string &method) const override;
 
-    /**
-     * @brief Return the values corresponding to the given ids for the given method of coloring
-     * @param method
-     * @param ids
-     * @return std::vector<std::string>
-     */
     std::vector<std::string> getMethodValuesForIDs(const std::string &method, const std::vector<uint64_t> &ids)
         const override;
 

@@ -85,28 +85,11 @@ public:
         _colorDirty = true;
     }
 
-    /**
-     * @brief getSizeInBytes
-     * @return
-     */
-    virtual uint64_t getSizeInBytes() const noexcept override
-    {
-        return sizeof(GeometryRendererComponent<T>) + _geometry.getNumGeometries() * sizeof(T);
-    }
-
-    /**
-     * @brief computeBounds
-     * @param transform
-     * @return
-     */
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
     {
         return _geometry.computeBounds(transform);
     }
 
-    /**
-     * @brief onStart
-     */
     virtual void onStart() override
     {
         _model = GeometricModelHandler::create();
@@ -153,9 +136,6 @@ public:
         return needsCommit;
     }
 
-    /**
-     * @brief onDestroyed
-     */
     virtual void onDestroyed() override
     {
         GeometricModelHandler::removeFromGeometryGroup(_model, getModel());

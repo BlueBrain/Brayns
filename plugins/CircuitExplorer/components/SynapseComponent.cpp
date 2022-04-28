@@ -8,18 +8,6 @@
 
 #include <api/coloring/ColorByIDAlgorithm.h>
 
-size_t SynapseComponent::getSizeInBytes() const noexcept
-{
-    size_t synapsesSize = brayns::SizeHelper::vectorSize(_synapses);
-    for (const auto &synapse : _synapses)
-    {
-        auto &geometry = synapse.geometry;
-        synapsesSize += geometry.getSizeInBytes();
-    }
-
-    return sizeof(SynapseComponent) + synapsesSize + brayns::SizeHelper::vectorSize(_cellIds);
-}
-
 brayns::Bounds SynapseComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds result;

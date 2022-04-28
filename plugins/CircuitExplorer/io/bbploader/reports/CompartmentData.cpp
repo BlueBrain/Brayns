@@ -76,7 +76,6 @@ std::vector<CellReportMapping> CompartmentData::computeMapping() const noexcept
     const auto &gids = _report->getGIDs();
     std::vector<CellReportMapping> mapping(gids.size());
 
-    //#pragma omp parallel for
     for (size_t i = 0; i < gids.size(); ++i)
     {
         const auto &count = ccounts[i];

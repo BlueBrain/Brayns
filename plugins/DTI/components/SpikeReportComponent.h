@@ -43,23 +43,8 @@ public:
         std::unordered_map<uint64_t, std::vector<size_t>> gidStreamlineMap,
         float spikeDecayTime);
 
-    /**
-     * @brief getSizeInBytes implementation
-     * @return
-     */
-    size_t getSizeInBytes() const noexcept override;
-
-    /**
-     * @brief
-     *
-     */
     void onStart() override;
 
-    /**
-     * @brief
-     *
-     * @param parameters
-     */
     void onPreRender(const brayns::ParametersManager &parameters) override;
 
 private:

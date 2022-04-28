@@ -27,20 +27,6 @@ TransferFunctionComponent::TransferFunctionComponent(TransferFunction tf)
 {
 }
 
-uint64_t TransferFunctionComponent::getSizeInBytes() const noexcept
-{
-    const auto &colors = _transferFunction.getColors();
-    const auto &opacities = _transferFunction.getOpacities();
-    const auto &controlPoints = _transferFunction.getControlPoints();
-
-    uint64_t result = sizeof(TransferFunction);
-    result += colors.size() * sizeof(Vector3f);
-    result += opacities.size() * sizeof(float);
-    result += controlPoints.size() * sizeof(Vector2f);
-
-    return result;
-}
-
 TransferFunction &TransferFunctionComponent::getTransferFunction() noexcept
 {
     return _transferFunction;

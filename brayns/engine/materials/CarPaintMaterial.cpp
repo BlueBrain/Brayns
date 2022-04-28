@@ -27,12 +27,6 @@ std::string CarPaintMaterial::getName() const noexcept
     return "car paint";
 }
 
-uint64_t CarPaintMaterial::getSizeInBytes() const noexcept
-{
-    // We copy the data to OSPRay, so we must account for that
-    return sizeof(CarPaintMaterial) * 2 - sizeof(OSPMaterial);
-}
-
 void CarPaintMaterial::setFlakesDesnity(const float flakeDensity) noexcept
 {
     _updateValue(_flakeDensity, glm::clamp(flakeDensity, 0.f, 1.f));

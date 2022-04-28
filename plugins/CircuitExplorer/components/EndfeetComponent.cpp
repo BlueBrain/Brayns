@@ -8,19 +8,6 @@
 
 #include <api/coloring/ColorByIDAlgorithm.h>
 
-size_t EndfeetComponent::getSizeInBytes() const noexcept
-{
-    size_t endfeetSize = 0;
-    for (const auto &endfoot : _endFeet)
-    {
-        const auto &geometry = endfoot.geometry;
-        endfeetSize += geometry.getSizeInBytes();
-    }
-
-    return sizeof(EndfeetComponent) + brayns::SizeHelper::vectorSize(_endFeet)
-        + brayns::SizeHelper::vectorSize(_astrocyteIds);
-}
-
 brayns::Bounds EndfeetComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds result;

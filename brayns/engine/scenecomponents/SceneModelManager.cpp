@@ -222,19 +222,4 @@ std::vector<OSPInstance> SceneModelManager::getInstanceHandles() noexcept
     }
     return handles;
 }
-
-size_t SceneModelManager::getSizeInBytes() const noexcept
-{
-    size_t size = 0;
-    for (const auto &modelEntry : _models)
-    {
-        size += sizeof(ModelEntry);
-        size += modelEntry.model->getSizeInBytes();
-        size += sizeof(ModelInstance) * modelEntry.instances.size();
-    }
-
-    size += _instances.size() * sizeof(ModelInstance *);
-
-    return size;
-}
 }

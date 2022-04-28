@@ -19,12 +19,6 @@ VasculatureComponent::VasculatureComponent(
     _colors.resize(_geometry.getNumGeometries());
 }
 
-size_t VasculatureComponent::getSizeInBytes() const noexcept
-{
-    return sizeof(VasculatureComponent) + _geometry.getSizeInBytes() + brayns::SizeHelper::vectorSize(_ids)
-        + brayns::SizeHelper::vectorSize(_colors);
-}
-
 brayns::Bounds VasculatureComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     return _geometry.computeBounds(transform);

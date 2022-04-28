@@ -29,8 +29,6 @@ class EmissiveMaterial final : public Material
 public:
     std::string getName() const noexcept final;
 
-    uint64_t getSizeInBytes() const noexcept final;
-
     /**
      * @brief Sets the intensity of the light emitted by the material
      */

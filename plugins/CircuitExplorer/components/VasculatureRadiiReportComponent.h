@@ -35,23 +35,8 @@ public:
      */
     VasculatureRadiiReportComponent(std::unique_ptr<IReportData> data, std::vector<size_t> offsets);
 
-    /**
-     * @brief getSizeInBytes implementation
-     * @return
-     */
-    size_t getSizeInBytes() const noexcept override;
-
-    /**
-     * @brief Initializes the transfer function used in the simulation, and adds a SimulationComponent to the model
-     * to access and control the simulation
-     */
     void onStart() override;
 
-    /**
-     * @brief Updates the radii on the vasculature, if needed
-     *
-     * @param parameters
-     */
     void onPreRender(const brayns::ParametersManager &parameters) override;
 
 private:

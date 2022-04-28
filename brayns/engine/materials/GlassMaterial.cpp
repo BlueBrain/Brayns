@@ -27,12 +27,6 @@ std::string GlassMaterial::getName() const noexcept
     return "glass";
 }
 
-uint64_t GlassMaterial::getSizeInBytes() const noexcept
-{
-    // We copy all data to ospray, so we must account for that
-    return sizeof(GlassMaterial) * 2 - sizeof(OSPMaterial);
-}
-
 void GlassMaterial::setIndexOfRefraction(const float ior) noexcept
 {
     _updateValue(_ior, ior);

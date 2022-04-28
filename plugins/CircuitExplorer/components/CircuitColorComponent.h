@@ -37,12 +37,6 @@ public:
     CircuitColorComponent(std::unique_ptr<IColorData> data, std::unique_ptr<IColorHandler> handler);
 
     /**
-     * @brief getSizeInBytes implementation
-     * @return
-     */
-    size_t getSizeInBytes() const noexcept override;
-
-    /**
      * @brief Returns the circuit data interface
      * @return CircuitColorData &
      */

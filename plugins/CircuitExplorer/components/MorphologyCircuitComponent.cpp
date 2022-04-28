@@ -8,21 +8,6 @@
 
 #include <api/coloring/ColorByIDAlgorithm.h>
 
-size_t MorphologyCircuitComponent::getSizeInBytes() const noexcept
-{
-    size_t morphologiesSize = 0;
-    for (const auto &morphology : _morphologies)
-    {
-        const auto &geometry = morphology.geometry;
-        const auto &sections = morphology.sections;
-        morphologiesSize += sizeof(MorphologyGeometry);
-        morphologiesSize += geometry.getSizeInBytes();
-        morphologiesSize += brayns::SizeHelper::vectorSize(sections);
-    }
-
-    return sizeof(MorphologyCircuitComponent) + morphologiesSize + brayns::SizeHelper::vectorSize(_ids);
-}
-
 brayns::Bounds MorphologyCircuitComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds result;

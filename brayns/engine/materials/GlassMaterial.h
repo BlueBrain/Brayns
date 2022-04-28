@@ -30,8 +30,6 @@ class GlassMaterial final : public Material
 public:
     std::string getName() const noexcept final;
 
-    uint64_t getSizeInBytes() const noexcept final;
-
     /**
      * @brief Sets index of refraction of the glass.
      */

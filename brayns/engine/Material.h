@@ -69,11 +69,6 @@ public:
     const Vector3f &getColor() const noexcept;
 
     /**
-     * @brief Subclasses must implement this method returning their size in bytes
-     */
-    virtual uint64_t getSizeInBytes() const noexcept = 0;
-
-    /**
      * @brief Returns the material type as a string
      */
     virtual std::string getName() const noexcept = 0;

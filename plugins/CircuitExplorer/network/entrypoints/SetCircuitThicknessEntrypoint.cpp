@@ -51,7 +51,7 @@ public:
             auto &circuitComponent = model.getComponent<MorphologyCircuitComponent>();
             circuit = &circuitComponent;
         }
-        catch (const std::exception &e)
+        catch (const std::exception &)
         {
             throw brayns::JsonRpcException("The model is not a morphological neuron circuit");
         }

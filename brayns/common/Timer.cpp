@@ -21,8 +21,6 @@
 #include "Timer.h"
 
 #include <chrono>
-constexpr double MICRO_PER_SEC = 1000000.0;
-constexpr double FPS_UPDATE_MILLISECS = 150;
 
 namespace
 {

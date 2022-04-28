@@ -71,7 +71,6 @@ std::vector<float> SpikeData::getFrame(const uint32_t frameIndex) const
 
     const auto spikes = _report->getSpikes(frameStart, frameEnd);
 
-    // #pragma omp parallel for
     for (size_t i = 0; i < spikes.size(); ++i)
     {
         const auto &spike = spikes[i];

@@ -27,12 +27,6 @@ std::string MatteMaterial::getName() const noexcept
     return "matte";
 }
 
-uint64_t MatteMaterial::getSizeInBytes() const noexcept
-{
-    // We copy all data to ospray, so we must account for that
-    return sizeof(MatteMaterial) * 2 - sizeof(OSPMaterial);
-}
-
 void MatteMaterial::setOpacity(const float opacity) noexcept
 {
     _updateValue(_opacity, glm::clamp(opacity, 0.f, 1.f));

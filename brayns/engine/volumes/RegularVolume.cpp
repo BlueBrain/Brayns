@@ -65,12 +65,6 @@ void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume &s, cons
 }
 
 template<>
-uint64_t Volume<RegularVolume>::getSizeInBytes() const noexcept
-{
-    return sizeof(*this) + _volumeData.data.size();
-}
-
-template<>
 void Volume<RegularVolume>::commitVolumeSpecificParams()
 {
     const auto cellCentered = !_volumeData.perVertexData;

@@ -125,15 +125,4 @@ OSPWorld Scene::handle() const noexcept
 {
     return _handle;
 }
-
-uint64_t Scene::_getSizeBytes() const noexcept
-{
-    uint64_t baseSize = sizeof(Scene);
-
-    baseSize += _modelManager.getSizeInBytes();
-    baseSize += _clippingManager.getSizeInBytes();
-    baseSize += _lightManager.getSizeInBytes();
-
-    return baseSize;
-}
 } // namespace brayns

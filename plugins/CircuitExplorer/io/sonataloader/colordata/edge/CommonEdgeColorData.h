@@ -32,32 +32,12 @@ namespace sonataloader
 class CommonEdgeColorData final : public IColorData
 {
 public:
-    /**
-     * @brief Construct a new Common Edge Color Data object
-     *
-     * @param connectedNodes
-     */
     CommonEdgeColorData(bbp::sonata::NodePopulation connectedNodes);
 
-    /**
-     * @brief getMethods
-     * @return
-     */
     std::vector<std::string> getMethods() const noexcept override;
 
-    /**
-     * @brief getMethodVariables
-     * @param method
-     * @return
-     */
     std::vector<std::string> getMethodVariables(const std::string &method) const override;
 
-    /**
-     * @brief getMethodValuesForIDs
-     * @param method
-     * @param ids
-     * @return
-     */
     std::vector<std::string> getMethodValuesForIDs(const std::string &method, const std::vector<uint64_t> &ids)
         const override;
 

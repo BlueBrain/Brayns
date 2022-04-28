@@ -28,18 +28,8 @@ namespace sonataloader
 class AstrocytePopulationLoader final : public NodePopulationLoader
 {
 public:
-    /**
-     * @brief Get the Population Type object
-     *
-     * @return std::string
-     */
     std::string getPopulationType() const noexcept override;
 
-    /**
-     * @brief load implementation
-     *
-     * @param ctxt
-     */
     void load(NodeLoadContext &ctxt) const override;
 };
 } // namespace sonataloader

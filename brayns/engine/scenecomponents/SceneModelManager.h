@@ -143,12 +143,6 @@ private:
      */
     std::vector<OSPInstance> getInstanceHandles() noexcept;
 
-    /**
-     * @brief returns the size in bytes of this model manager
-     * @return size_t
-     */
-    size_t getSizeInBytes() const noexcept;
-
 private:
     /**
      * @brief The ModelEntry struct holds all the information related to a model

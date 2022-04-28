@@ -35,12 +35,6 @@ const Vector3f &DirectionalLight::getDirection() const noexcept
     return _direction;
 }
 
-uint64_t DirectionalLight::getSizeInBytes() const noexcept
-{
-    // We copy all the light data to OSPRay, so we must account for it
-    return sizeof(DirectionalLight) * 2 - sizeof(OSPLight);
-}
-
 void DirectionalLight::commitLightSpecificParams()
 {
     auto ospHandle = handle();

@@ -33,8 +33,6 @@ class MaterialComponent final : public Component
 public:
     MaterialComponent();
 
-    uint64_t getSizeInBytes() const noexcept override;
-
     void setMaterial(std::unique_ptr<Material> material);
 
     Material &getMaterial() noexcept;

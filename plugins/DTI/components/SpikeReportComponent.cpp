@@ -103,18 +103,6 @@ SpikeReportComponent::SpikeReportComponent(
 {
 }
 
-size_t SpikeReportComponent::getSizeInBytes() const noexcept
-{
-    size_t mapSize = 0;
-    for (const auto &[gid, indexList] : _gidStreamlineMap)
-    {
-        mapSize += sizeof(uint64_t);
-        mapSize += brayns::SizeHelper::vectorSize(indexList);
-    }
-
-    return sizeof(SpikeReportComponent) + mapSize + sizeof(brain::SpikeReportReader);
-}
-
 void SpikeReportComponent::onStart()
 {
     auto &model = getModel();

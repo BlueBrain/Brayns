@@ -8,12 +8,6 @@
 
 #include <api/coloring/ColorByIDAlgorithm.h>
 
-size_t SomaCircuitComponent::getSizeInBytes() const noexcept
-{
-    return sizeof(SomaCircuitComponent) + _geometry.getSizeInBytes() + brayns::SizeHelper::vectorSize(_ids)
-        + brayns::SizeHelper::vectorSize(_colors);
-}
-
 brayns::Bounds SomaCircuitComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     return _geometry.computeBounds(transform);

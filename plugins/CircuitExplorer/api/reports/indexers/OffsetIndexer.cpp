@@ -34,7 +34,6 @@ void OffsetIndexer::update(
     const auto rangeEnd = range.y;
     const auto invFactor = 1.f / std::fabs(rangeEnd - rangeStart);
 
-    //#pragma omp parallel for
     for (size_t i = 0; i < _offsets.size(); ++i)
     {
         const auto offset = _offsets[i];

@@ -18,7 +18,6 @@ set(BRAYNSNETWORK_HEADERS
   adapters/ModelTransferFunctionAdapter.h
   adapters/RendererPickResultAdapter.h
   adapters/RendererAdapter.h
-  adapters/StatisticsAdapter.h
   adapters/TransferFunctionAdapter.h
   adapters/TransformationAdapter.h
   binary/BinaryManager.h
@@ -74,7 +73,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/SceneEntrypoint.h
   entrypoints/SchemaEntrypoint.h
   entrypoints/SnapshotEntrypoint.h
-  entrypoints/StatisticsEntrypoint.h
   entrypoints/TriggerJpegStreamEntrypoint.h
   entrypoints/UpdateModelEntrypoint.h
   entrypoints/VersionEntrypoint.h
@@ -168,7 +166,6 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/SceneEntrypoint.cpp
   entrypoints/SchemaEntrypoint.cpp
   entrypoints/SnapshotEntrypoint.cpp
-  entrypoints/StatisticsEntrypoint.cpp
   entrypoints/TriggerJpegStreamEntrypoint.cpp
   entrypoints/UpdateModelEntrypoint.cpp
   entrypoints/VersionEntrypoint.cpp

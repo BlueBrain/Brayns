@@ -64,8 +64,6 @@ public:
 protected:
     std::string_view getOSPHandleName() const noexcept final;
 
-    uint64_t getSizeInBytes() const noexcept final;
-
     void commitLightSpecificParams() final;
 
 private:

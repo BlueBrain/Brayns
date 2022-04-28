@@ -28,23 +28,6 @@
 
 namespace
 {
-struct MorphIOProxy
-{
-    static morphio::Morphology readMorphology(const std::string &path)
-    {
-        /*
-        static std::mutex hdf5Mutex;
-        const auto ext = std::filesystem::path(path).extension().string();
-        if (ext == ".h5")
-        {
-            std::lock_guard<std::mutex> lock(hdf5Mutex);
-            return morphio::Morphology(path);
-        }
-        */
-        return morphio::Morphology(path);
-    }
-};
-
 struct SomaReader
 {
     static NeuronMorphology::Soma read(const morphio::Morphology &m)
@@ -167,7 +150,7 @@ NeuronMorphology NeuronMorphologyReader::read(const std::string &path, bool soma
         throw std::runtime_error("Soma-only NeuronMorphologies not allowed");
     }
 
-    const auto morph = MorphIOProxy::readMorphology(path);
+    const auto morph = morphio::Morphology(path);
 
     auto sections = NeuriteReader::read(morph, axon, dendrites);
     std::optional<NeuronMorphology::Soma> somaObject = std::nullopt;

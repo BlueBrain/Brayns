@@ -27,12 +27,6 @@ std::string_view AmbientLight::getOSPHandleName() const noexcept
     return "ambient";
 }
 
-uint64_t AmbientLight::getSizeInBytes() const noexcept
-{
-    // We copy all the light data to OSPRay, so we must account for it
-    return sizeof(AmbientLight) * 2 - sizeof(OSPLight);
-}
-
 void AmbientLight::commitLightSpecificParams()
 {
 }
