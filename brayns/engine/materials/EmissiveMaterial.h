@@ -27,6 +27,8 @@ namespace brayns
 class EmissiveMaterial final : public Material
 {
 public:
+    EmissiveMaterial();
+
     std::string getName() const noexcept final;
 
     /**
@@ -40,8 +42,6 @@ public:
     float getIntensity() const noexcept;
 
 protected:
-    std::string getOSPHandleName() const noexcept final;
-
     void commitMaterialSpecificParams() final;
 
 private:

@@ -49,8 +49,8 @@ namespace brayns
 ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model &model)
     : _modelInstanceID(modelInstanceID)
     , _model(model)
+    , _instanceHandle(ospNewInstance(model.groupHandle()))
 {
-    _instanceHandle = ospNewInstance(model.groupHandle());
     computeBounds();
 }
 

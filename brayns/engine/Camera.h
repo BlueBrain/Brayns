@@ -28,6 +28,7 @@
 #include <ospray/ospray.h>
 
 #include <memory>
+#include <string_view>
 
 namespace brayns
 {
@@ -44,7 +45,7 @@ bool operator!=(const LookAt &a, const LookAt &b) noexcept;
 class Camera : public BaseObject
 {
 public:
-    Camera() = default;
+    Camera(std::string_view handleID);
 
     Camera(const Camera &) = delete;
     Camera &operator=(const Camera &) = delete;
@@ -103,12 +104,6 @@ public:
     OSPCamera handle() const noexcept;
 
 protected:
-    /**
-     * @brief Subclasses must implement this method so that the appropiate OSPRay camera object maight be
-     * instantiated
-     */
-    virtual std::string getOSPHandleName() const noexcept = 0;
-
     /**
      * @brief Subclasses of the Camera must implement this method to commit to OSPRay camera type specific
      * parameters. The camera class will call ospCommit(_handle), thus sublcass may avoid calling it.

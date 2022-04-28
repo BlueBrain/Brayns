@@ -27,7 +27,10 @@ namespace brayns
 {
 Scene::Scene()
     : _bounds(Vector3f(0.f), Vector3f(0.f))
+    , _handle(ospNewWorld())
 {
+    // Need an initial commit until there is any content that can trigger the commit function
+    ospCommit(_handle);
 }
 
 Scene::~Scene()
@@ -58,11 +61,6 @@ void Scene::postRender(const ParametersManager &params)
 bool Scene::commit()
 {
     bool needsCommit = false;
-    if (!_handle)
-    {
-        needsCommit = true;
-        _handle = ospNewWorld();
-    }
 
     // Commit models
     if (_modelManager.commit() || _clippingManager.commit())

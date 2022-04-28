@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+DefaultMaterial::DefaultMaterial()
+    : Material("obj")
+{
+}
+
 std::string DefaultMaterial::getName() const noexcept
 {
     return "default";
@@ -39,17 +44,13 @@ float DefaultMaterial::getOpacity() const noexcept
 
 void DefaultMaterial::commitMaterialSpecificParams()
 {
-    static constexpr float ns = 2.f;
+    constexpr float ns = 2.f;
+    const auto overridedColorWhite = brayns::Vector3f(1.f);
 
     auto ospHandle = handle();
 
-    ospSetParam(ospHandle, "kd", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
+    ospSetParam(ospHandle, "kd", OSPDataType::OSP_VEC3F, &overridedColorWhite);
     ospSetParam(ospHandle, "ns", OSPDataType::OSP_FLOAT, &ns);
     ospSetParam(ospHandle, "d", OSPDataType::OSP_FLOAT, &_opacity);
-}
-
-std::string DefaultMaterial::getOSPHandleName() const noexcept
-{
-    return "obj";
 }
 }

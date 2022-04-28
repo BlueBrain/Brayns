@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+InteractiveRenderer::InteractiveRenderer()
+    : Renderer("scivis")
+{
+}
+
 std::string InteractiveRenderer::getName() const noexcept
 {
     return "interactive";
@@ -56,11 +61,6 @@ void InteractiveRenderer::setAmbientOcclusionSamples(const int32_t numSamples) n
 int32_t InteractiveRenderer::getAmbientOcclusionSamples() const noexcept
 {
     return _aoSamples;
-}
-
-std::string InteractiveRenderer::getOSPHandleName() const noexcept
-{
-    return "scivis";
 }
 
 void InteractiveRenderer::commitRendererSpecificParams()

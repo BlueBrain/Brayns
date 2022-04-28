@@ -65,10 +65,7 @@ ModelGroup::ModelGroup()
 
 ModelGroup::~ModelGroup()
 {
-    if (_handle)
-    {
-        ospRelease(_handle);
-    }
+    ospRelease(_handle);
 }
 
 void ModelGroup::addGeometricModel(OSPGeometricModel model)

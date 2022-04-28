@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+ProductionRenderer::ProductionRenderer()
+    : Renderer("pathtracer")
+{
+}
+
 std::string ProductionRenderer::getName() const noexcept
 {
     return "production";
@@ -34,11 +39,6 @@ std::unique_ptr<Renderer> ProductionRenderer::clone() const noexcept
     result->setMaxRayBounces(getMaxRayBounces());
     result->setSamplesPerPixel(getSamplesPerPixel());
     return result;
-}
-
-std::string ProductionRenderer::getOSPHandleName() const noexcept
-{
-    return "pathtracer";
 }
 
 void ProductionRenderer::commitRendererSpecificParams()

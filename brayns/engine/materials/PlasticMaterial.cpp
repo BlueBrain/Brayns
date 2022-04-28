@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+PlasticMaterial::PlasticMaterial()
+    : Material("principled")
+{
+}
+
 std::string PlasticMaterial::getName() const noexcept
 {
     return "plastic";
@@ -39,23 +44,19 @@ float PlasticMaterial::getOpacity() const noexcept
 
 void PlasticMaterial::commitMaterialSpecificParams()
 {
-    static constexpr float clearCoat = 1.f;
-    static constexpr float clearCoatThickness = 3.f;
-    static constexpr float roughness = 0.01f;
-    static constexpr float sheen = 1.f;
+    constexpr float clearCoat = 1.f;
+    constexpr float clearCoatThickness = 3.f;
+    constexpr float roughness = 0.01f;
+    constexpr float sheen = 1.f;
+    const auto overridedColorWhite = brayns::Vector3f(1.f);
 
     auto ospHandle = handle();
 
-    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
+    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &overridedColorWhite);
     ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &roughness);
     ospSetParam(ospHandle, "coat", OSPDataType::OSP_FLOAT, &clearCoat);
     ospSetParam(ospHandle, "coatThickness", OSPDataType::OSP_FLOAT, &clearCoatThickness);
     ospSetParam(ospHandle, "sheen", OSPDataType::OSP_FLOAT, &sheen);
     ospSetParam(ospHandle, "opacity", OSPDataType::OSP_FLOAT, &_opacity);
-}
-
-std::string PlasticMaterial::getOSPHandleName() const noexcept
-{
-    return "principled";
 }
 }

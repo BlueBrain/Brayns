@@ -28,6 +28,8 @@ namespace brayns
 class GlassMaterial final : public Material
 {
 public:
+    GlassMaterial();
+
     std::string getName() const noexcept final;
 
     /**
@@ -41,8 +43,6 @@ public:
     float getIndexOfRefraction() const noexcept;
 
 protected:
-    std::string getOSPHandleName() const noexcept final;
-
     void commitMaterialSpecificParams() final;
 
 private:

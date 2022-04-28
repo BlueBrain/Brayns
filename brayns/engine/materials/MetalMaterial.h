@@ -28,6 +28,8 @@ namespace brayns
 class MetalMaterial final : public Material
 {
 public:
+    MetalMaterial();
+
     std::string getName() const noexcept final;
 
     /**
@@ -41,8 +43,6 @@ public:
     float getRoughness() const noexcept;
 
 protected:
-    std::string getOSPHandleName() const noexcept final;
-
     void commitMaterialSpecificParams() final;
 
 private:

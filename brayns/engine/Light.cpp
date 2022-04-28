@@ -22,10 +22,14 @@
 
 namespace brayns
 {
+Light::Light(std::string_view handleID)
+    : _handle(ospNewLight(handleID.data()))
+{
+}
+
 Light::~Light()
 {
-    if (_handle)
-        ospRelease(_handle);
+    ospRelease(_handle);
 }
 
 void Light::setColor(const Vector3f &color) noexcept
@@ -63,12 +67,6 @@ bool Light::commit()
     if (!isModified())
     {
         return false;
-    }
-
-    if (!_handle)
-    {
-        const auto handleName = getOSPHandleName();
-        _handle = ospNewLight(handleName.data());
     }
 
     ospSetParam(_handle, "color", OSPDataType::OSP_VEC3F, &_color);

@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+QuadLight::QuadLight()
+    : Light("quad")
+{
+}
+
 void QuadLight::setBottomLeftCorner(const Vector3f &pos) noexcept
 {
     _updateValue(_bottomLeftCorner, pos);
@@ -50,11 +55,6 @@ const Vector3f &QuadLight::getVerticalDisplacement() const noexcept
 const Vector3f &QuadLight::getHorizontalDisplacement() const noexcept
 {
     return _horizontalDisplacement;
-}
-
-std::string_view QuadLight::getOSPHandleName() const noexcept
-{
-    return "quad";
 }
 
 void QuadLight::commitLightSpecificParams()

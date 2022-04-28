@@ -23,14 +23,14 @@
 
 namespace brayns
 {
-const Vector3f Material::BASE_COLOR_WHITE = Vector3f(1.f);
+Material::Material(std::string_view handleID)
+    : _handle(ospNewMaterial("", handleID.data()))
+{
+}
 
 Material::~Material()
 {
-    if (_handle)
-    {
-        ospRelease(_handle);
-    }
+    ospRelease(_handle);
 }
 
 bool Material::commit()
@@ -38,12 +38,6 @@ bool Material::commit()
     if (!isModified())
     {
         return false;
-    }
-
-    if (!_handle)
-    {
-        const auto handleName = getOSPHandleName();
-        _handle = ospNewMaterial("", handleName.c_str());
     }
 
     commitMaterialSpecificParams();

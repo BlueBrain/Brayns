@@ -26,9 +26,10 @@ namespace brayns
 {
 class AmbientLight final : public Light
 {
-protected:
-    std::string_view getOSPHandleName() const noexcept final;
+public:
+    AmbientLight();
 
+protected:
     void commitLightSpecificParams() final;
 };
 }

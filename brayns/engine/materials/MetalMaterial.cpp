@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+MetalMaterial::MetalMaterial()
+    : Material("alloy")
+{
+}
+
 std::string MetalMaterial::getName() const noexcept
 {
     return "metal";
@@ -40,12 +45,9 @@ float MetalMaterial::getRoughness() const noexcept
 void MetalMaterial::commitMaterialSpecificParams()
 {
     auto ospHandle = handle();
-    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
-    ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &_roughness);
-}
 
-std::string MetalMaterial::getOSPHandleName() const noexcept
-{
-    return "alloy";
+    const auto overridedColorWhite = brayns::Vector3f(1.f);
+    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &overridedColorWhite);
+    ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &_roughness);
 }
 }

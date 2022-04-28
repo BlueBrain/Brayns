@@ -27,6 +27,8 @@ namespace brayns
 class QuadLight final : public Light
 {
 public:
+    QuadLight();
+
     /**
      * @brief Sets the bottom left corner position of the light (in world space coordinates)
      */
@@ -62,8 +64,6 @@ public:
     const Vector3f &getHorizontalDisplacement() const noexcept;
 
 protected:
-    std::string_view getOSPHandleName() const noexcept final;
-
     void commitLightSpecificParams() final;
 
 private:

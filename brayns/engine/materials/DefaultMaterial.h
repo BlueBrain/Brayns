@@ -27,6 +27,8 @@ namespace brayns
 class DefaultMaterial final : public Material
 {
 public:
+    DefaultMaterial();
+
     std::string getName() const noexcept final;
 
     /**
@@ -41,8 +43,6 @@ public:
     float getOpacity() const noexcept;
 
 protected:
-    std::string getOSPHandleName() const noexcept final;
-
     void commitMaterialSpecificParams() final;
 
 private:

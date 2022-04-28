@@ -27,6 +27,7 @@
 #include <ospray/ospray.h>
 
 #include <memory>
+#include <string_view>
 
 namespace brayns
 {
@@ -39,7 +40,7 @@ namespace brayns
 class Material : public BaseObject
 {
 public:
-    Material() = default;
+    Material(std::string_view handleID);
 
     Material(const Material &) = delete;
     Material &operator=(const Material &) = delete;
@@ -81,22 +82,11 @@ public:
 
 protected:
     /**
-     * @brief Subclasses must implement this method to return the OSPRay material ID to instantiate the appropiate
-     * object
-     */
-    virtual std::string getOSPHandleName() const noexcept = 0;
-
-    /**
      * @brief Subclasses must implement this method to commit material specific parameters to the OSPRay material
      * counterpart. The base class will make sure to call ospCommit(handle) on the material handle, so subclasses
      * should avoid it.
      */
     virtual void commitMaterialSpecificParams() = 0;
-
-    // Geometric models blend the geometry primitive color with the material base color. To be able to fully control
-    // the color, the materials will commit a fully white base color, and the color will be used directly in the
-    // OSPGeometriModel "color" parameter, so that the blend result in the color itself
-    static const Vector3f BASE_COLOR_WHITE;
 
 private:
     OSPMaterial _handle{nullptr};

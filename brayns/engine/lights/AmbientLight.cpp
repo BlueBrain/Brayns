@@ -22,9 +22,9 @@
 
 namespace brayns
 {
-std::string_view AmbientLight::getOSPHandleName() const noexcept
+AmbientLight::AmbientLight()
+    : Light("ambient")
 {
-    return "ambient";
 }
 
 void AmbientLight::commitLightSpecificParams()

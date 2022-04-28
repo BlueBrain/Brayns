@@ -26,6 +26,7 @@
 #include <ospray/ospray.h>
 
 #include <memory>
+#include <string_view>
 
 namespace brayns
 {
@@ -35,7 +36,7 @@ namespace brayns
 class Light : public BaseObject
 {
 public:
-    Light() = default;
+    Light(std::string_view handleID);
 
     Light(const Light &) = delete;
     Light &operator=(const Light &) = delete;
@@ -87,11 +88,6 @@ protected:
      * @brief Returns this light OSPRay handle
      */
     OSPLight handle() const noexcept;
-
-    /**
-     * @brief Subclasses must implement this method to return the OSPRay handle ID so that it can be instantiated.
-     */
-    virtual std::string_view getOSPHandleName() const noexcept = 0;
 
     /**
      * @brief Subclasses must implement this method to set their light-speicfic parameters onto the OSPRay handle.

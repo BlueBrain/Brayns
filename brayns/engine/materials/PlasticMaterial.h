@@ -28,6 +28,8 @@ namespace brayns
 class PlasticMaterial final : public Material
 {
 public:
+    PlasticMaterial();
+
     std::string getName() const noexcept final;
 
     /**
@@ -42,8 +44,6 @@ public:
     float getOpacity() const noexcept;
 
 protected:
-    std::string getOSPHandleName() const noexcept final;
-
     void commitMaterialSpecificParams() final;
 
 private:

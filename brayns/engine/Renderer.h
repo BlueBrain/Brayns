@@ -26,6 +26,7 @@
 #include <ospray/ospray.h>
 
 #include <memory>
+#include <string_view>
 
 namespace brayns
 {
@@ -35,7 +36,7 @@ namespace brayns
 class Renderer : public BaseObject
 {
 public:
-    Renderer() = default;
+    Renderer(std::string_view handleID);
 
     Renderer(const Renderer &) = delete;
     Renderer &operator=(const Renderer &) = delete;
@@ -101,11 +102,6 @@ public:
     bool commit();
 
 protected:
-    /**
-     * @brief Subclasses must implement this method to return the appropiate OSPRay renderer name to be instantiated.
-     */
-    virtual std::string getOSPHandleName() const noexcept = 0;
-
     /**
      * @brief Subclasses must implement this method to commit their renderer-specific data to the OSPRay counterpart.
      * The base class will make sure to call ospCommit(handle) on the renderer handle, so subclasses should avoid it.

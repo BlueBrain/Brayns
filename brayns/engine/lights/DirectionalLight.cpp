@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+DirectionalLight::DirectionalLight()
+    : Light("distant")
+{
+}
+
 void DirectionalLight::setDirection(const Vector3f &newDirection)
 {
     if (glm::length2(newDirection) == 0.f)
@@ -45,10 +50,5 @@ void DirectionalLight::commitLightSpecificParams()
 
     ospSetParam(ospHandle, "direction", OSPDataType::OSP_VEC3F, &_direction);
     ospSetParam(ospHandle, "angularDiameter", OSPDataType::OSP_FLOAT, &angularDiameter);
-}
-
-std::string_view DirectionalLight::getOSPHandleName() const noexcept
-{
-    return "distant";
 }
 }

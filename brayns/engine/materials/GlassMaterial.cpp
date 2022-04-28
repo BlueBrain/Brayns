@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+GlassMaterial::GlassMaterial()
+    : Material("thinGlass")
+{
+}
+
 std::string GlassMaterial::getName() const noexcept
 {
     return "glass";
@@ -40,13 +45,9 @@ float GlassMaterial::getIndexOfRefraction() const noexcept
 void GlassMaterial::commitMaterialSpecificParams()
 {
     auto ospHandle = handle();
+    const auto overridedColorWhite = brayns::Vector3f(1.f);
 
-    ospSetParam(ospHandle, "attenuationColor", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
+    ospSetParam(ospHandle, "attenuationColor", OSPDataType::OSP_VEC3F, &overridedColorWhite);
     ospSetParam(ospHandle, "eta", OSPDataType::OSP_FLOAT, &_ior);
-}
-
-std::string GlassMaterial::getOSPHandleName() const noexcept
-{
-    return "thinGlass";
 }
 }

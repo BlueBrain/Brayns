@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+Renderer::Renderer(std::string_view handleID)
+    : _handle(ospNewRenderer(handleID.data()))
+{
+}
+
 Renderer::~Renderer()
 {
     ospRelease(_handle);
@@ -62,12 +67,6 @@ bool Renderer::commit()
     if (!isModified())
     {
         return false;
-    }
-
-    if (!_handle)
-    {
-        const auto handleName = getOSPHandleName();
-        _handle = ospNewRenderer(handleName.c_str());
     }
 
     ospSetParam(_handle, "pixelSamples", OSPDataType::OSP_INT, &_samplesPerPixel);

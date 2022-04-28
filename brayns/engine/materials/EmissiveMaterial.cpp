@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+EmissiveMaterial::EmissiveMaterial()
+    : Material("luminous")
+{
+}
+
 std::string EmissiveMaterial::getName() const noexcept
 {
     return "emissive";
@@ -41,13 +46,7 @@ void EmissiveMaterial::commitMaterialSpecificParams()
 {
     auto ospHandle = handle();
 
-    static Vector3f baseColor(0.f);
-    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &baseColor);
+    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &getColor());
     ospSetParam(ospHandle, "intensity", OSPDataType::OSP_FLOAT, &_intensity);
-}
-
-std::string EmissiveMaterial::getOSPHandleName() const noexcept
-{
-    return "luminous";
 }
 }

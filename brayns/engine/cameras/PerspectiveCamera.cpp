@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+PerspectiveCamera::PerspectiveCamera()
+    : Camera("perspective")
+{
+}
+
 std::string PerspectiveCamera::getName() const noexcept
 {
     return "perspective";
@@ -74,10 +79,5 @@ float PerspectiveCamera::getApertureRadius() const noexcept
 float PerspectiveCamera::getFocusDistance() const noexcept
 {
     return _focusDistance;
-}
-
-std::string PerspectiveCamera::getOSPHandleName() const noexcept
-{
-    return "perspective";
 }
 }

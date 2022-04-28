@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+CarPaintMaterial::CarPaintMaterial()
+    : Material("carPaint")
+{
+}
+
 std::string CarPaintMaterial::getName() const noexcept
 {
     return "car paint";
@@ -41,12 +46,8 @@ void CarPaintMaterial::commitMaterialSpecificParams()
 {
     auto ospHandle = handle();
 
-    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
+    const auto overridedColorWhite = brayns::Vector3f(1.f);
+    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &overridedColorWhite);
     ospSetParam(ospHandle, "flakeDensity", OSPDataType::OSP_FLOAT, &_flakeDensity);
-}
-
-std::string CarPaintMaterial::getOSPHandleName() const noexcept
-{
-    return "carPaint";
 }
 }

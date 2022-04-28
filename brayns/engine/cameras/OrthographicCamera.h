@@ -27,6 +27,8 @@ namespace brayns
 class OrthographicCamera final : public Camera
 {
 public:
+    OrthographicCamera();
+
     std::string getName() const noexcept override;
 
     std::unique_ptr<Camera> clone() const noexcept override;
@@ -42,8 +44,6 @@ public:
     float getHeight() const noexcept;
 
 protected:
-    std::string getOSPHandleName() const noexcept final;
-
     void commitCameraSpecificParams() final;
 
 private:

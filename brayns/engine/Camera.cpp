@@ -34,12 +34,14 @@ bool operator!=(const LookAt &a, const LookAt &b) noexcept
     return !(a == b);
 }
 
+Camera::Camera(std::string_view handleID)
+    : _handle(ospNewCamera(handleID.data()))
+{
+}
+
 Camera::~Camera()
 {
-    if (_handle)
-    {
-        ospRelease(_handle);
-    }
+    ospRelease(_handle);
 }
 
 bool Camera::commit()
@@ -47,12 +49,6 @@ bool Camera::commit()
     if (!isModified())
     {
         return false;
-    }
-
-    if (!_handle)
-    {
-        const auto handleName = getOSPHandleName();
-        _handle = ospNewCamera(handleName.data());
     }
 
     const auto &position = _lookAtParams.position;

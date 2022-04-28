@@ -27,6 +27,8 @@ namespace brayns
 class CarPaintMaterial final : public Material
 {
 public:
+    CarPaintMaterial();
+
     std::string getName() const noexcept final;
 
     /**
@@ -40,8 +42,6 @@ public:
     float getFlakesDensity() const noexcept;
 
 protected:
-    std::string getOSPHandleName() const noexcept final;
-
     void commitMaterialSpecificParams() final;
 
 private:

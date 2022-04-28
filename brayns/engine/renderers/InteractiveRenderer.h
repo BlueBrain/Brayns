@@ -27,6 +27,8 @@ namespace brayns
 class InteractiveRenderer final : public Renderer
 {
 public:
+    InteractiveRenderer();
+
     std::string getName() const noexcept final;
 
     std::unique_ptr<Renderer> clone() const noexcept final;
@@ -52,8 +54,6 @@ public:
     int32_t getAmbientOcclusionSamples() const noexcept;
 
 protected:
-    std::string getOSPHandleName() const noexcept final;
-
     void commitRendererSpecificParams() final;
 
 private:

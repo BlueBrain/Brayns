@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+OrthographicCamera::OrthographicCamera()
+    : Camera("orthographic")
+{
+}
+
 std::string OrthographicCamera::getName() const noexcept
 {
     return "orthographic";
@@ -50,10 +55,5 @@ void OrthographicCamera::commitCameraSpecificParams()
 {
     auto ospHandle = handle();
     ospSetParam(ospHandle, "height", OSP_FLOAT, &_height);
-}
-
-std::string OrthographicCamera::getOSPHandleName() const noexcept
-{
-    return "orthographic";
 }
 }

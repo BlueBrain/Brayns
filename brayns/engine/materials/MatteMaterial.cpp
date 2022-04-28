@@ -22,6 +22,11 @@
 
 namespace brayns
 {
+MatteMaterial::MatteMaterial()
+    : Material("principled")
+{
+}
+
 std::string MatteMaterial::getName() const noexcept
 {
     return "matte";
@@ -39,17 +44,13 @@ float MatteMaterial::getOpacity() const noexcept
 
 void MatteMaterial::commitMaterialSpecificParams()
 {
-    static constexpr float roughness = 1.f;
+    constexpr float roughness = 1.f;
+    const auto overridedColorWhite = brayns::Vector3f(1.f);
 
     auto ospHandle = handle();
 
-    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &BASE_COLOR_WHITE);
+    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &overridedColorWhite);
     ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &roughness);
     ospSetParam(ospHandle, "opacity", OSPDataType::OSP_FLOAT, &_opacity);
-}
-
-std::string MatteMaterial::getOSPHandleName() const noexcept
-{
-    return "principled";
 }
 }
