@@ -116,15 +116,15 @@ private:
     // Global system parameters used to read when updating the backend during commit() and render()
     ParametersManager &_params;
 
+    OSPDevice _device{nullptr};
+
     // System objects
-    std::unique_ptr<FrameBuffer> _frameBuffer;
-    std::unique_ptr<Scene> _scene;
+    FrameBuffer _frameBuffer;
+    Scene _scene;
     std::unique_ptr<Camera> _camera;
     std::unique_ptr<Renderer> _renderer;
 
     // Run flag
     bool _keepRunning{true};
-
-    OSPDevice _device{nullptr};
 };
 } // namespace brayns

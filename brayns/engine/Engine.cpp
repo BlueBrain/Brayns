@@ -31,7 +31,7 @@ namespace
 {
 struct OSPRayLogLevelGenerator
 {
-    static OSPLogLevel generate(brayns::ApplicationParameters &params)
+    static OSPLogLevel generate(const brayns::ApplicationParameters &params)
     {
         const auto systemLogLevel = params.getLogLevel();
         switch (systemLogLevel)
@@ -54,60 +54,61 @@ struct OSPRayLogLevelGenerator
         return OSPLogLevel::OSP_LOG_NONE;
     }
 };
+
+struct OSPRayDeviceInitializer
+{
+    static OSPDevice init(const brayns::ParametersManager &parameters)
+    {
+        ospLoadModule("cpu");
+        auto device = ospNewDevice("cpu");
+
+        auto &appParams = parameters.getApplicationParameters();
+        const auto logLevel = OSPRayLogLevelGenerator::generate(appParams);
+        const auto logOutput = "cout";
+        const auto logErrorOutput = "cerr";
+        ospDeviceSetParam(device, "logLevel", OSPDataType::OSP_INT, &logLevel);
+        ospDeviceSetParam(device, "logOutput", OSPDataType::OSP_STRING, logOutput);
+        ospDeviceSetParam(device, "errorOutput", OSPDataType::OSP_STRING, logErrorOutput);
+
+        ospDeviceCommit(device);
+        ospSetCurrentDevice(device);
+
+        const auto error = ospDeviceGetLastErrorCode(device);
+        if (error != OSPError::OSP_NO_ERROR)
+        {
+            const auto ospErrorMessage = ospDeviceGetLastErrorMsg(device);
+            brayns::Log::critical("Could not initialize OSPRay device: {}", ospErrorMessage);
+            throw std::runtime_error("Could not initialize OSPRay device");
+        }
+
+        return device;
+    }
+};
 }
 
 namespace brayns
 {
 Engine::Engine(ParametersManager &parameters)
     : _params(parameters)
+    , _device(OSPRayDeviceInitializer::init(parameters))
+    , _camera(std::make_unique<PerspectiveCamera>())
+    , _renderer(std::make_unique<InteractiveRenderer>())
 {
-    ospLoadModule("cpu");
-    _device = ospNewDevice("cpu");
-
-    auto &appParams = parameters.getApplicationParameters();
-    const auto logLevel = OSPRayLogLevelGenerator::generate(appParams);
-    const auto logOutput = "cout";
-    const auto logErrorOutput = "cerr";
-    ospDeviceSetParam(_device, "logLevel", OSPDataType::OSP_INT, &logLevel);
-    ospDeviceSetParam(_device, "logOutput", OSPDataType::OSP_STRING, logOutput);
-    ospDeviceSetParam(_device, "errorOutput", OSPDataType::OSP_STRING, logErrorOutput);
-
-    ospDeviceCommit(_device);
-    ospSetCurrentDevice(_device);
-
-    const auto error = ospDeviceGetLastErrorCode(_device);
-    if (error != OSPError::OSP_NO_ERROR)
-    {
-        const auto ospErrorMessage = ospDeviceGetLastErrorMsg(_device);
-        Log::critical("Could not initialize OSPRay device: {}", ospErrorMessage);
-        throw std::runtime_error("Could not initialize OSPRay device");
-    }
-
-    // Initialize components
-    _frameBuffer = std::make_unique<FrameBuffer>();
-    _scene = std::make_unique<Scene>();
-    _camera = std::make_unique<PerspectiveCamera>();
-    _renderer = std::make_unique<InteractiveRenderer>();
 }
 
 Engine::~Engine()
 {
-    _frameBuffer.reset();
     _camera.reset();
     _renderer.reset();
-    _scene.reset();
 
-    if (_device)
-    {
-        ospDeviceRelease(_device);
-    }
+    ospDeviceRelease(_device);
 
     ospShutdown();
 }
 
 void Engine::preRender()
 {
-    _scene->preRender(_params);
+    _scene.preRender(_params);
 }
 
 void Engine::commit()
@@ -122,11 +123,11 @@ void Engine::commit()
     const auto &frameSize = appParams.getWindowSize();
     const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
 
-    _frameBuffer->setFrameSize(frameSize);
+    _frameBuffer.setFrameSize(frameSize);
     _camera->setAspectRatio(aspectRatio);
 
     bool needResetFramebuffer = false;
-    if (_frameBuffer->commit())
+    if (_frameBuffer.commit())
     {
         Log::debug("[Engine] Framebuffer committed");
         needResetFramebuffer = true;
@@ -144,7 +145,7 @@ void Engine::commit()
         needResetFramebuffer = true;
     }
 
-    if (_scene->commit())
+    if (_scene.commit())
     {
         Log::debug("[Engine] Scene committed");
         needResetFramebuffer = true;
@@ -152,7 +153,7 @@ void Engine::commit()
 
     if (needResetFramebuffer)
     {
-        _frameBuffer->clear();
+        _frameBuffer.clear();
     }
 }
 
@@ -165,15 +166,15 @@ void Engine::render()
 
     // Check wether we should keep rendering or not
     const auto maxSpp = _renderer->getSamplesPerPixel();
-    const auto currentSpp = _frameBuffer->numAccumFrames();
+    const auto currentSpp = _frameBuffer.numAccumFrames();
     if (currentSpp >= maxSpp)
     {
         return;
     }
 
-    FrameRenderer::synchronous(*_camera, *_frameBuffer, *_renderer, *_scene);
+    FrameRenderer::synchronous(*_camera, _frameBuffer, *_renderer, _scene);
 
-    _frameBuffer->incrementAccumFrames();
+    _frameBuffer.incrementAccumFrames();
 }
 
 void Engine::postRender()
@@ -183,17 +184,17 @@ void Engine::postRender()
         return;
     }
 
-    _scene->postRender(_params);
+    _scene.postRender(_params);
 }
 
 Scene &Engine::getScene()
 {
-    return *_scene;
+    return _scene;
 }
 
 FrameBuffer &Engine::getFrameBuffer() noexcept
 {
-    return *_frameBuffer;
+    return _frameBuffer;
 }
 
 void Engine::setCamera(std::unique_ptr<Camera> camera) noexcept
