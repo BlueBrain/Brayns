@@ -29,6 +29,11 @@ bool operator==(const LookAt &a, const LookAt &b) noexcept
     return a.position == b.position && a.target == b.target && a.up == b.up;
 }
 
+bool operator!=(const LookAt &a, const LookAt &b) noexcept
+{
+    return !(a == b);
+}
+
 Camera::~Camera()
 {
     if (_handle)

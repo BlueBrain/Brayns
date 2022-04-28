@@ -39,6 +39,7 @@ struct LookAt
 };
 
 bool operator==(const LookAt &a, const LookAt &b) noexcept;
+bool operator!=(const LookAt &a, const LookAt &b) noexcept;
 
 class Camera : public BaseObject
 {
