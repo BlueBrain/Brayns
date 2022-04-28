@@ -31,22 +31,10 @@ class EnableSimulationEntrypoint final : public Entrypoint<EnableSimulationMessa
 public:
     EnableSimulationEntrypoint(SceneModelManager &modelManager);
 
-    /**
-     * @brief getMethod
-     * @return
-     */
     std::string getMethod() const override;
 
-    /**
-     * @brief getDescription
-     * @return
-     */
     std::string getDescription() const override;
 
-    /**
-     * @brief onRequest
-     * @param request
-     */
     void onRequest(const Request &request) override;
 
 private:
