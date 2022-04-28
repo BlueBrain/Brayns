@@ -106,6 +106,6 @@ private:
     PluginManager _pluginManager;
     Engine _engine;
     LoaderRegistry _loaderRegistry;
-    std::unique_ptr<SystemPluginAPI> _pluginAPI;
+    SystemPluginAPI _pluginAPI;
 };
 } // namespace brayns
