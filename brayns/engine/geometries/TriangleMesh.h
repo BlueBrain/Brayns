@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/RenderableType.h>
+#include <brayns/engine/Geometry.h>
 
 #include <vector>
 
@@ -36,26 +36,39 @@ struct TriangleMesh
     std::vector<Vector3ui> indices;
 };
 
-struct TriangleMeshMerger
+class TriangleMeshMerger
 {
+public:
     static void merge(const TriangleMesh &src, TriangleMesh &dst);
 };
 
 template<>
-std::string_view RenderableOSPRayID<TriangleMesh>::get();
+class GeometryOSPRayID<TriangleMesh>
+{
+public:
+    static std::string_view get();
+};
 
 template<>
-void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh &mesh, const Matrix4f &matrix, Bounds &bounds);
+class GeometryBoundsUpdater<TriangleMesh>
+{
+public:
+    static void update(const TriangleMesh &mesh, const Matrix4f &matrix, Bounds &bounds);
+};
 
 template<>
-uint32_t Geometry<TriangleMesh>::add(TriangleMesh geometry);
+class GeometryAddChecker<TriangleMesh>
+{
+public:
+    static void check(const std::vector<TriangleMesh> &dstGeometry, const TriangleMesh &inputGeometry);
+
+    static void check(const std::vector<TriangleMesh> &dstGeometry, const std::vector<TriangleMesh> &inputGeometries);
+};
 
 template<>
-std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh> &geometries);
-
-template<>
-std::vector<uint32_t> Geometry<TriangleMesh>::set(std::vector<TriangleMesh> geometries);
-
-template<>
-void Geometry<TriangleMesh>::commitGeometrySpecificParams();
+class GeometryCommitter<TriangleMesh>
+{
+public:
+    static void commit(OSPGeometry handle, const std::vector<TriangleMesh> &geometries);
+};
 }

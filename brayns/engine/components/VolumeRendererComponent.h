@@ -22,7 +22,7 @@
 
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/RenderableType.h>
+#include <brayns/engine/Volume.h>
 #include <brayns/engine/components/TransferFunctionRendererComponent.h>
 
 #include <ospray/ospray.h>

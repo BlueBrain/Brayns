@@ -21,11 +21,9 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/RenderableType.h>
+#include <brayns/engine/Volume.h>
 
 #include <vector>
-
-#include <ospray/ospray.h>
 
 namespace brayns
 {
@@ -54,12 +52,23 @@ struct RegularVolume
 };
 
 template<>
-std::string_view RenderableOSPRayID<RegularVolume>::get();
+class VolumeOSPRayID<RegularVolume>
+{
+public:
+    static std::string_view get();
+};
 
 template<>
-void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume &s, const Matrix4f &t, Bounds &b);
+class VolumeBoundsUpdater<RegularVolume>
+{
+public:
+    static void update(const RegularVolume &s, const Matrix4f &t, Bounds &b);
+};
 
 template<>
-void Volume<RegularVolume>::commitVolumeSpecificParams();
-
+class VolumeCommitter<RegularVolume>
+{
+public:
+    static void commit(OSPVolume handle, const RegularVolume &volumeData);
+};
 }

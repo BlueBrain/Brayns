@@ -19,18 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <brayns/engine/common/DataHandler.h>
 #include <brayns/engine/geometries/Plane.h>
 
 namespace brayns
 {
-template<>
-std::string_view RenderableOSPRayID<Plane>::get()
+std::string_view GeometryOSPRayID<Plane>::get()
 {
     return "plane";
 }
 
-template<>
-void RenderableBoundsUpdater<Plane>::update(const Plane &p, const Matrix4f &t, Bounds &b)
+void GeometryBoundsUpdater<Plane>::update(const Plane &p, const Matrix4f &t, Bounds &b)
 {
     // NOOP
     // Planes are infinite. They can be limited, but on Brayns we only use them for clipping
@@ -40,15 +39,9 @@ void RenderableBoundsUpdater<Plane>::update(const Plane &p, const Matrix4f &t, B
     (void)b;
 }
 
-template<>
-void Geometry<Plane>::commitGeometrySpecificParams()
+void GeometryCommitter<Plane>::commit(OSPGeometry handle, const std::vector<Plane> &geometry)
 {
-    const auto numGeoms = _geometries.size();
-
-    OSPData planeDataHandle = ospNewSharedData(_geometries.data(), OSPDataType::OSP_VEC4F, numGeoms);
-
-    ospSetParam(_handle, "plane.coefficients", OSP_DATA, &planeDataHandle);
-
-    ospRelease(planeDataHandle);
+    auto buffer = DataHandler::shareBuffer(geometry, OSPDataType::OSP_VEC4F);
+    ospSetParam(handle, "plane.coefficients", OSP_DATA, &buffer.handle);
 }
 }

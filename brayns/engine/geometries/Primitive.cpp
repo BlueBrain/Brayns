@@ -37,14 +37,12 @@ Primitive Primitive::sphere(const Vector3f &center, const float radius) noexcept
     return Primitive{center, radius, center + Vector3f(0.f, .01f, 0.f), radius};
 }
 
-template<>
-std::string_view RenderableOSPRayID<Primitive>::get()
+std::string_view GeometryOSPRayID<Primitive>::get()
 {
     return "curve";
 }
 
-template<>
-void RenderableBoundsUpdater<Primitive>::update(const Primitive &p, const Matrix4f &t, Bounds &b)
+void GeometryBoundsUpdater<Primitive>::update(const Primitive &p, const Matrix4f &t, Bounds &b)
 {
     const Vector3f p0Delta(p.r0);
     const auto p0Min = p.p0 - p0Delta;
@@ -59,10 +57,9 @@ void RenderableBoundsUpdater<Primitive>::update(const Primitive &p, const Matrix
     b.expand(Vector3f(t * Vector4f(p1Max, 1.f)));
 }
 
-template<>
-void Geometry<Primitive>::commitGeometrySpecificParams()
+void GeometryCommitter<Primitive>::commit(OSPGeometry handle, const std::vector<Primitive> &geometries)
 {
-    const auto numGeoms = _geometries.size();
+    const auto numGeoms = geometries.size();
 
     std::vector<uint32_t> indexData(numGeoms);
     for (uint32_t i = 0, index = 0; i < numGeoms; ++i, index = index + 2)
@@ -73,17 +70,17 @@ void Geometry<Primitive>::commitGeometrySpecificParams()
     const auto type = OSP_ROUND;
     const auto basis = OSP_LINEAR;
 
-    OSPData primitiveDataHandle = ospNewSharedData(_geometries.data(), OSPDataType::OSP_VEC4F, numGeoms * 2);
+    OSPData primitiveDataHandle = ospNewSharedData(geometries.data(), OSPDataType::OSP_VEC4F, numGeoms * 2);
 
     OSPData indexSharedDataHandle = ospNewSharedData(indexData.data(), OSPDataType::OSP_UINT, numGeoms);
     OSPData indexDataHandle = ospNewData(OSPDataType::OSP_UINT, numGeoms);
     ospCopyData(indexSharedDataHandle, indexDataHandle);
     ospRelease(indexSharedDataHandle);
 
-    ospSetParam(_handle, "type", OSP_UCHAR, &type);
-    ospSetParam(_handle, "basis", OSP_UCHAR, &basis);
-    ospSetParam(_handle, "vertex.position_radius", OSP_DATA, &primitiveDataHandle);
-    ospSetParam(_handle, "index", OSP_DATA, &indexDataHandle);
+    ospSetParam(handle, "type", OSP_UCHAR, &type);
+    ospSetParam(handle, "basis", OSP_UCHAR, &basis);
+    ospSetParam(handle, "vertex.position_radius", OSP_DATA, &primitiveDataHandle);
+    ospSetParam(handle, "index", OSP_DATA, &indexDataHandle);
 
     ospRelease(primitiveDataHandle);
     ospRelease(indexDataHandle);

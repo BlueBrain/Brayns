@@ -81,7 +81,7 @@ TEST_CASE("render_xyz_and_compare")
     auto &model = instance.getModel();
     auto &component = model.getComponent<brayns::GeometryRendererComponent<brayns::Sphere>>();
     auto &geometry = component.getGeometry();
-    geometry.mainpulateAll(
+    geometry.forEach(
         [](uint32_t index, brayns::Sphere &sphere)
         {
             (void)index;

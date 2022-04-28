@@ -55,6 +55,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     Engine.h
     FrameBuffer.h
     FrameRenderer.h
+    Geometry.h
     ImageOperation.h
     Light.h
     Material.h
@@ -63,8 +64,8 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     ModelGroup.h
     ModelInstance.h
     Renderer.h
-    RenderableType.h
     Scene.h
+    Volume.h
     cameras/OrthographicCamera.h
     cameras/PerspectiveCamera.h
     common/DataHandler.h

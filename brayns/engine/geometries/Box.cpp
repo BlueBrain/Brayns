@@ -18,18 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/engine/common/DataHandler.h>
 #include <brayns/engine/geometries/Box.h>
 
 namespace brayns
 {
-template<>
-std::string_view RenderableOSPRayID<Box>::get()
+std::string_view GeometryOSPRayID<Box>::get()
 {
     return "box";
 }
 
-template<>
-void RenderableBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bounds &b)
+void GeometryBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bounds &b)
 {
     const auto &min = box.min;
     const auto &max = box.max;
@@ -38,15 +37,9 @@ void RenderableBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bou
     b.expand(Vector3f(t * Vector4f(max, 1.f)));
 }
 
-template<>
-void Geometry<Box>::commitGeometrySpecificParams()
+void GeometryCommitter<Box>::commit(OSPGeometry handle, const std::vector<Box> &geometries)
 {
-    const auto numGeoms = _geometries.size();
-
-    OSPData boxDataHandle = ospNewSharedData(_geometries.data(), OSPDataType::OSP_BOX3F, numGeoms);
-
-    ospSetParam(_handle, "box", OSP_DATA, &boxDataHandle);
-
-    ospRelease(boxDataHandle);
+    auto buffer = DataHandler::shareBuffer(geometries, OSPDataType::OSP_BOX3F);
+    ospSetParam(handle, "box", OSP_DATA, &buffer.handle);
 }
 }

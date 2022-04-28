@@ -21,10 +21,10 @@
 #pragma once
 
 #include <brayns/common/Bounds.h>
-#include <brayns/common/Log.h>
 
 #include <ospray/ospray.h>
 
+#include <functional>
 #include <memory>
 #include <numeric>
 #include <string_view>
@@ -34,13 +34,14 @@ namespace brayns
 {
 /**
  * @brief The RenderableBoundsUpdater is a templated class that can be specialized to update bounds
- * based on a trasnformation and a given specialized renderable
+ * based on a trasnformation and a given specialized geometry
  */
 template<typename T>
-struct RenderableBoundsUpdater
+class GeometryBoundsUpdater
 {
+public:
     /**
-     * @brief Updates a Bounds object with the given renderable trasnformed by the given matrix
+     * @brief Updates a Bounds object with the given geometry trasnformed by the given matrix
      * @param renderableType The source renderable used to update the bounds
      * @param transform The matrix by which to trasnform the geometry
      * @param bounds The bounds to update
@@ -50,24 +51,59 @@ struct RenderableBoundsUpdater
         (void)renderableType;
         (void)transform;
         (void)bounds;
-        const std::string typeName(typeid(T).name());
-        throw std::runtime_error("No implementation for " + typeName);
     }
 };
 
 /**
- * @brief Utility class to deduce the OSPRay ID for a given Renderable type
+ * @brief Utility class to deduce the OSPRay ID for a given geometry type
  */
 template<typename T>
-struct RenderableOSPRayID
+class GeometryOSPRayID
 {
+public:
     /**
      * @brief Returns the OSPRay ID of the type
      */
     static std::string_view get()
     {
-        const std::string typeName(typeid(T).name());
-        throw std::runtime_error("No implementation for " + typeName);
+        return "";
+    }
+};
+
+/**
+ * @brief Utility class to commit geometry-specific parameters
+ */
+template<typename T>
+class GeometryCommitter
+{
+public:
+    /**
+     * @brief Commits the type specific parameters
+     */
+    static void commit(OSPGeometry handle, const std::vector<T> &geometries)
+    {
+        (void)handle;
+        (void)geometries;
+    }
+};
+
+/**
+ * @brief Utility class to perform custom checks when adding a new geometry to the Geometry object
+ */
+template<typename T>
+class GeometryAddChecker
+{
+public:
+    static void check(const std::vector<T> &dstGeometryList, const T &inputGeometry)
+    {
+        (void)dstGeometryList;
+        (void)inputGeometry;
+    }
+
+    static void check(const std::vector<T> &dstGeometryList, const std::vector<T> &inputGeometryList)
+    {
+        (void)dstGeometryList;
+        (void)inputGeometryList;
     }
 };
 
@@ -80,8 +116,8 @@ class Geometry
 {
 public:
     Geometry()
+        : _handle(ospNewGeometry(GeometryOSPRayID<T>::get().data()))
     {
-        _handle = ospNewGeometry(RenderableOSPRayID<T>::get().data());
     }
 
     Geometry(const Geometry &) = delete;
@@ -113,6 +149,8 @@ public:
      */
     uint32_t add(T geometry)
     {
+        GeometryAddChecker<T>::check(_geometries, geometry);
+
         const auto idx = _geometries.size();
         constexpr auto limit = std::numeric_limits<uint32_t>::max();
         if (idx >= limit)
@@ -134,6 +172,8 @@ public:
      */
     std::vector<uint32_t> add(const std::vector<T> &geometries)
     {
+        GeometryAddChecker<T>::check(_geometries, geometries);
+
         const auto idx = _geometries.size();
         const auto endIdx = idx + geometries.size();
         constexpr auto limit = std::numeric_limits<uint32_t>::max();
@@ -159,6 +199,8 @@ public:
      */
     std::vector<uint32_t> set(std::vector<T> geometries)
     {
+        GeometryAddChecker<T>::check(_geometries, geometries);
+
         constexpr auto limit = std::numeric_limits<uint32_t>::max();
         if (geometries.size() >= limit)
         {
@@ -194,7 +236,7 @@ public:
      * The callback must have the signature void(GeometryType&).
      * @throws std::invalid_argument if the given index goes beyond the Geometry buffer size.
      */
-    void manipulate(const uint32_t index, const std::function<void(T &)> &manipulationCallback)
+    void manipulateGeometry(const uint32_t index, const std::function<void(T &)> &manipulationCallback)
     {
         _checkIndex(index);
         auto &geometry = _geometries[index];
@@ -206,12 +248,14 @@ public:
      * @brief Allows to pass a callback to mainipulate all the geometries on thie Geometry buffer.
      * The callback must have the signature void(const uint32_t index, GeometryType&).
      */
-    void mainpulateAll(const std::function<void(const uint32_t, T &)> &mainpulationCallback)
+    void forEach(const std::function<void(const uint32_t, T &)> &mainpulationCallback)
     {
         _dirty = true;
         const auto end = static_cast<uint32_t>(_geometries.size());
         for (uint32_t i = 0; i < end; ++i)
+        {
             mainpulationCallback(i, _geometries[i]);
+        }
     }
 
     /**
@@ -239,7 +283,7 @@ public:
             for (size_t i = 0; i < _geometries.size(); ++i)
             {
                 const auto &geometry = _geometries[i];
-                RenderableBoundsUpdater<T>::update(geometry, transform, local);
+                GeometryBoundsUpdater<T>::update(geometry, transform, local);
             }
 
 #pragma omp critical(local_bounds_merge_section)
@@ -263,7 +307,7 @@ public:
 
         if (!_geometries.empty())
         {
-            commitGeometrySpecificParams();
+            GeometryCommitter<T>::commit(_handle, _geometries);
         }
 
         ospCommit(_handle);
@@ -281,16 +325,6 @@ public:
 
 private:
     /**
-     * @brief This method must be specialized by the supported geometries to commit the geometry data
-     * to OSPRay
-     */
-    void commitGeometrySpecificParams()
-    {
-        const std::string typeName(typeid(T).name());
-        Log::warn("No commitGeometrySpecificParams() implementation for {}", typeName);
-    }
-
-    /**
      * @brief Retrieves a geometry from the buffer given its index.
      * @throws std::invalid_argument if the index is beyond the buffer size.
      */
@@ -298,128 +332,14 @@ private:
     {
         const auto size = static_cast<uint32_t>(_geometries.size());
         if (index >= size)
+        {
             throw std::invalid_argument("Geometry index out of range");
+        }
     }
 
 private:
     OSPGeometry _handle{nullptr};
     bool _dirty{false};
-
-    // Shared, to allow instances to share the geometry memory
     std::vector<T> _geometries;
-};
-
-/**
- * @brief The Volume class is a specializable wrapper to implement different types of volumes which shares the same
- * usage (as all volumes in OSPRay)
- */
-template<typename T>
-class Volume
-{
-public:
-    /**
-     * @brief Calls initializeHandle() to create the OSPRay object
-     */
-    Volume()
-    {
-        _handle = ospNewVolume(RenderableOSPRayID<T>::get().data());
-    }
-
-    Volume(const Volume &) = delete;
-    Volume &operator=(const Volume &) = delete;
-
-    Volume(Volume &&o) noexcept
-    {
-        *this = std::move(o);
-    }
-
-    Volume &operator=(Volume &&o) noexcept
-    {
-        std::swap(_handle, o._handle);
-        _dirty = o._dirty;
-        _volumeData = std::move(o._volumeData);
-        return *this;
-    }
-
-    ~Volume()
-    {
-        ospRelease(_handle);
-    }
-
-    /**
-     * @brief Sets the data of this volume, which will trigger a commit of the data to OSPRay
-     */
-    void setData(T volumeData) noexcept
-    {
-        _volumeData = std::move(volumeData);
-        _dirty = true;
-    }
-
-    /**
-     * @brief Returns the current volume data
-     */
-    const T &getData() const noexcept
-    {
-        return _volumeData;
-    }
-
-    /**
-     * @brief Allows to pass a callback to modify the volume data, which will trigger a commit of the data to OSPRay
-     */
-    void manipulate(const std::function<void(T &volumeData)> &callback)
-    {
-        callback(_volumeData);
-        _dirty = true;
-    }
-
-    /**
-     * @brief Commits the volume data to OSPRay. Will only have effect if the volume has been modified since the last
-     * commit. If so, it will call commitVolumeSpecificParams() and clear the dirty flag.
-     */
-    bool commit()
-    {
-        if (!_dirty)
-        {
-            return false;
-        }
-
-        commitVolumeSpecificParams();
-
-        ospCommit(_handle);
-        _dirty = false;
-        return true;
-    }
-
-    /**
-     * @brief Computes the bounds of this volume with the given trasnformation. It will call the VolumeBoundsUpdater
-     * with the type this Volume has been instantiated.
-     */
-    Bounds computeBounds(const Matrix4f &transform) const noexcept
-    {
-        Bounds result;
-        RenderableBoundsUpdater<T>::update(_volumeData, transform, result);
-        return result;
-    }
-
-    OSPVolume handle() const noexcept
-    {
-        return _handle;
-    }
-
-private:
-    /**
-     * @brief Must be specialized for the supported volume types to set the appropiate data on the OSPRay object
-     */
-    void commitVolumeSpecificParams()
-    {
-        const std::string name(typeid(T).name());
-        throw std::runtime_error("No commitVolumeSpecificParams() specialization for " + name);
-    }
-
-private:
-    T _volumeData;
-
-    OSPVolume _handle{nullptr};
-    bool _dirty{false};
 };
 }

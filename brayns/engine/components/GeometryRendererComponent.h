@@ -20,9 +20,9 @@
 
 #pragma once
 
+#include <brayns/engine/Geometry.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/RenderableType.h>
 #include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/common/GeometricModelHandler.h>
 #include <brayns/engine/components/MaterialComponent.h>

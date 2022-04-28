@@ -50,7 +50,7 @@ struct OriginalRadiiManager
 
     static void restore(brayns::Geometry<brayns::Primitive> &geometry, const std::vector<float> &originalRadii)
     {
-        geometry.mainpulateAll(
+        geometry.forEach(
             [&](uint32_t i, brayns::Primitive &primitive)
             {
                 const auto index = i * 2;
@@ -67,7 +67,7 @@ struct RadiiReportUpdater
         const std::vector<size_t> offsets,
         const std::vector<float> frame)
     {
-        geometry.mainpulateAll(
+        geometry.forEach(
             [&](uint32_t i, brayns::Primitive &primitive)
             {
                 const auto offset = offsets[i];

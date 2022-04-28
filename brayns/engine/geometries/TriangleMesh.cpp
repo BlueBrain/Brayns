@@ -18,19 +18,61 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/geometries/TriangleMesh.h>
-
 #include <brayns/common/Log.h>
+#include <brayns/engine/common/DataHandler.h>
+#include <brayns/engine/geometries/TriangleMesh.h>
 
 namespace
 {
-template<typename T>
-void commitVector(OSPGeometry handle, std::vector<T> &data, OSPDataType dataType, const char *id)
+/**
+ * @brief Checks the sanity of the triangle mesh
+ */
+class TriangleMeshAttributeChecker
 {
-    auto sharedData = ospNewSharedData(data.data(), dataType, data.size());
-    ospSetParam(handle, id, OSPDataType::OSP_DATA, &sharedData);
-    ospRelease(sharedData);
-}
+public:
+    static void check(const brayns::TriangleMesh &mesh)
+    {
+        auto &indices = mesh.indices;
+        auto &positions = mesh.vertices;
+
+        if (indices.empty() || positions.empty())
+        {
+            throw std::invalid_argument("TriangleMeshes must provide at least indices and vertices");
+        }
+
+        auto &normals = mesh.normals;
+        if (!normals.empty() && normals.size() != positions.size())
+        {
+            throw std::invalid_argument("TriangleMeshes must provide one normal per vertex");
+        }
+
+        auto &uvs = mesh.uvs;
+        if (!uvs.empty() && uvs.size() != positions.size())
+        {
+            throw std::invalid_argument("TriangleMeshes must provide one uv coordinate per vertex");
+        }
+
+        auto &colors = mesh.colors;
+        if (!colors.empty() && colors.size() != positions.size())
+        {
+            throw std::invalid_argument("TriangleMeshes must provide one color per vertex");
+        }
+    }
+};
+
+/**
+ * @brief Commits vector of attributes to OSPRay
+ */
+class AttributeCommitter
+{
+public:
+    template<typename T>
+    static void commit(OSPGeometry handle, const std::vector<T> &data, OSPDataType dataType, const char *id)
+    {
+        auto buffer = brayns::DataHandler::shareBuffer(data, dataType);
+        ospSetParam(handle, id, OSPDataType::OSP_DATA, &buffer.handle);
+    }
+};
 
 template<typename T>
 void mergeVectors(const std::vector<T> &src, std::vector<T> &dst) noexcept
@@ -72,14 +114,12 @@ void TriangleMeshMerger::merge(const TriangleMesh &src, TriangleMesh &dst)
     }
 }
 
-template<>
-std::string_view RenderableOSPRayID<TriangleMesh>::get()
+std::string_view GeometryOSPRayID<TriangleMesh>::get()
 {
     return "mesh";
 }
 
-template<>
-void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh &mesh, const Matrix4f &matrix, Bounds &bounds)
+void GeometryBoundsUpdater<TriangleMesh>::update(const TriangleMesh &mesh, const Matrix4f &matrix, Bounds &bounds)
 {
     const auto &vertices = mesh.vertices;
 
@@ -90,49 +130,34 @@ void RenderableBoundsUpdater<TriangleMesh>::update(const TriangleMesh &mesh, con
     }
 }
 
-template<>
-uint32_t Geometry<TriangleMesh>::add(TriangleMesh geometry)
+void GeometryAddChecker<TriangleMesh>::check(
+    const std::vector<TriangleMesh> &dstGeometryList,
+    const TriangleMesh &inputMesh)
 {
-    if (!_geometries.empty())
+    if (!dstGeometryList.empty())
     {
-        throw std::runtime_error("TriangleMesh Geometry can only handle 1 mesh");
+        throw std::invalid_argument("Geometry<TriangleMesh> can hold only 1 mesh");
     }
 
-    if (geometry.vertices.empty())
+    TriangleMeshAttributeChecker::check(inputMesh);
+}
+
+void GeometryAddChecker<TriangleMesh>::check(
+    const std::vector<TriangleMesh> &dstGeometryList,
+    const std::vector<TriangleMesh> &inputMeshList)
+{
+    if (!dstGeometryList.empty() || inputMeshList.size() > 1)
     {
-        throw std::invalid_argument("TriangleMesh must provide vertex positions");
+        throw std::invalid_argument("Geometry<TriangleMesh> can hold only 1 mesh");
     }
 
-    if (geometry.indices.empty())
-    {
-        throw std::invalid_argument("TriangleMesh must provide vertex indices");
-    }
-
-    _geometries.push_back(std::move(geometry));
-    _dirty = true;
-    return 0;
+    const auto &mesh = inputMeshList.front();
+    TriangleMeshAttributeChecker::check(mesh);
 }
 
-template<>
-std::vector<uint32_t> Geometry<TriangleMesh>::add(const std::vector<TriangleMesh> &geometries)
+void GeometryCommitter<TriangleMesh>::commit(OSPGeometry handle, const std::vector<TriangleMesh> &geometries)
 {
-    (void)geometries;
-    throw std::runtime_error("TriangleMesh Geometry can only handle 1 mesh. Use add() to add a single mesh");
-    return {};
-}
-
-template<>
-std::vector<uint32_t> Geometry<TriangleMesh>::set(std::vector<TriangleMesh> geometries)
-{
-    (void)geometries;
-    throw std::runtime_error("TriangleMesh Geometry can only handle 1 mesh. Use add() to add a single mesh");
-    return {};
-}
-
-template<>
-void Geometry<TriangleMesh>::commitGeometrySpecificParams()
-{
-    auto &mesh = _geometries[0];
+    auto &mesh = geometries.front();
 
     auto &vertices = mesh.vertices;
     auto &indices = mesh.indices;
@@ -140,43 +165,22 @@ void Geometry<TriangleMesh>::commitGeometrySpecificParams()
     auto &texCoors = mesh.uvs;
     auto &colors = mesh.colors;
 
-    commitVector(_handle, vertices, OSPDataType::OSP_VEC3F, "vertex.position");
-    commitVector(_handle, indices, OSPDataType::OSP_VEC3UI, "index");
+    AttributeCommitter::commit(handle, vertices, OSPDataType::OSP_VEC3F, "vertex.position");
+    AttributeCommitter::commit(handle, indices, OSPDataType::OSP_VEC3UI, "index");
 
     if (!normals.empty())
     {
-        if (normals.size() != vertices.size())
-        {
-            Log::warn("TriangleMesh does not have a normal vector per vertex. Skipping");
-        }
-        else
-        {
-            commitVector(_handle, normals, OSPDataType::OSP_VEC3F, "vertex.normal");
-        }
+        AttributeCommitter::commit(handle, normals, OSPDataType::OSP_VEC3F, "vertex.normal");
     }
 
     if (!texCoors.empty())
     {
-        if (texCoors.size() != vertices.size())
-        {
-            Log::warn("TriangleMesh does not have an UV coordinate per vertex. Skipping");
-        }
-        else
-        {
-            commitVector(_handle, texCoors, OSPDataType::OSP_VEC2F, "vertex.texcoord");
-        }
+        AttributeCommitter::commit(handle, texCoors, OSPDataType::OSP_VEC2F, "vertex.texcoord");
     }
 
     if (!colors.empty())
     {
-        if (colors.size() != vertices.size())
-        {
-            Log::warn("TriangleMesh does not have a color per vertex. Skipping");
-        }
-        else
-        {
-            commitVector(_handle, colors, OSPDataType::OSP_VEC4F, "vertex.color");
-        }
+        AttributeCommitter::commit(handle, colors, OSPDataType::OSP_VEC4F, "vertex.color");
     }
 }
 }

@@ -20,6 +20,8 @@
 
 #include "RegularVolume.h"
 
+#include <brayns/engine/common/DataHandler.h>
+
 namespace brayns
 {
 size_t getTypeByteSize(const OSPDataType type)
@@ -45,14 +47,12 @@ size_t getTypeByteSize(const OSPDataType type)
 
 namespace brayns
 {
-template<>
-std::string_view RenderableOSPRayID<RegularVolume>::get()
+std::string_view VolumeOSPRayID<RegularVolume>::get()
 {
     return "structuredRegular";
 }
 
-template<>
-void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume &s, const Matrix4f &t, Bounds &b)
+void VolumeBoundsUpdater<RegularVolume>::update(const RegularVolume &s, const Matrix4f &t, Bounds &b)
 {
     static const Vector3f regularVolumeMin{0.f};
     static const Vector3f regularVolumeMax{1.f};
@@ -64,27 +64,28 @@ void RenderableBoundsUpdater<RegularVolume>::update(const RegularVolume &s, cons
     b.expand(maxBound);
 }
 
-template<>
-void Volume<RegularVolume>::commitVolumeSpecificParams()
+void VolumeCommitter<RegularVolume>::commit(OSPVolume handle, const RegularVolume &volumeData)
 {
-    const auto cellCentered = !_volumeData.perVertexData;
-    const auto dataType = static_cast<OSPDataType>(_volumeData.dataType);
-    const auto &volumeData = _volumeData.data;
-    const auto &size = _volumeData.size;
+    const auto cellCentered = !volumeData.perVertexData;
+    const auto dataType = static_cast<OSPDataType>(volumeData.dataType);
+    const auto &data = volumeData.data;
+    const auto &size = volumeData.size;
 
     const auto dimensionSize = glm::compMul(size);
     if (dimensionSize == 0)
+    {
         throw std::runtime_error("Tried to commit volume with 0 size");
+    }
 
-    const auto currentSize = volumeData.size();
+    const auto currentSize = data.size();
     const auto expectedSize = getTypeByteSize(dataType) * dimensionSize;
     if (currentSize != expectedSize)
+    {
         throw std::runtime_error("RegularVolume expected size and current size missmatch");
+    }
 
-    OSPData sharedVolumeData = ospNewSharedData(volumeData.data(), dataType, size.x, 0, size.y, 0, size.z, 0);
-    ospSetParam(_handle, "data", OSPDataType::OSP_DATA, &sharedVolumeData);
-    ospRelease(sharedVolumeData);
-
-    ospSetParam(_handle, "cellCentered", OSPDataType::OSP_BOOL, &cellCentered);
+    auto buffer = DataHandler::shareBuffer(data, dataType);
+    ospSetParam(handle, "data", OSPDataType::OSP_DATA, &buffer.handle);
+    ospSetParam(handle, "cellCentered", OSPDataType::OSP_BOOL, &cellCentered);
 }
 }

@@ -22,14 +22,12 @@
 
 namespace brayns
 {
-template<>
-std::string_view RenderableOSPRayID<Sphere>::get()
+std::string_view GeometryOSPRayID<Sphere>::get()
 {
     return "sphere";
 }
 
-template<>
-void RenderableBoundsUpdater<Sphere>::update(const Sphere &s, const Matrix4f &t, Bounds &b)
+void GeometryBoundsUpdater<Sphere>::update(const Sphere &s, const Matrix4f &t, Bounds &b)
 {
     const Vector3f radiusDelta(s.radius);
     auto sphereMin = s.center - radiusDelta;
@@ -42,20 +40,19 @@ void RenderableBoundsUpdater<Sphere>::update(const Sphere &s, const Matrix4f &t,
     b.expand(sphereMax);
 }
 
-template<>
-void Geometry<Sphere>::commitGeometrySpecificParams()
+void GeometryCommitter<Sphere>::commit(OSPGeometry handle, const std::vector<Sphere> &geometries)
 {
     constexpr auto stride = 4 * sizeof(float);
-    auto basePtr = reinterpret_cast<float *>(_geometries.data());
+    auto basePtr = reinterpret_cast<const float *>(geometries.data());
     auto positionPtr = basePtr;
     auto radiiPtr = basePtr + 3;
-    auto size = _geometries.size();
+    auto size = geometries.size();
 
     auto positionData = ospNewSharedData(positionPtr, OSP_VEC3F, size, stride);
     auto radiiData = ospNewSharedData(radiiPtr, OSP_FLOAT, size, stride);
 
-    ospSetParam(_handle, "sphere.position", OSP_DATA, &positionData);
-    ospSetParam(_handle, "sphere.radius", OSP_DATA, &radiiData);
+    ospSetParam(handle, "sphere.position", OSP_DATA, &positionData);
+    ospSetParam(handle, "sphere.radius", OSP_DATA, &radiiData);
 
     ospRelease(positionData);
     ospRelease(radiiData);
