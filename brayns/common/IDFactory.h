@@ -21,8 +21,8 @@
 #pragma once
 
 #include <limits>
-#include <queue>
 #include <stdexcept>
+#include <vector>
 
 namespace brayns
 {
@@ -44,8 +44,8 @@ public:
     {
         if (!_releasedIDs.empty())
         {
-            auto id = _releasedIDs.front();
-            _releasedIDs.pop();
+            auto id = _releasedIDs.back();
+            _releasedIDs.pop_back();
             return id;
         }
 
@@ -62,11 +62,11 @@ public:
      */
     void releaseID(T id) noexcept
     {
-        _releasedIDs.push(id);
+        _releasedIDs.push_back(id);
     }
 
 private:
     T _factory{};
-    std::queue<T> _releasedIDs;
+    std::vector<T> _releasedIDs;
 };
 }
