@@ -33,11 +33,11 @@ class TransferFunctionComponent final : public Component
 public:
     TransferFunctionComponent() = default;
 
-    TransferFunctionComponent(TransferFunction tf);
+    TransferFunctionComponent(TransferFunction transferFunction);
 
     TransferFunction &getTransferFunction() noexcept;
 
-    void setTransferFunction(TransferFunction tf) noexcept;
+    void setTransferFunction(TransferFunction transferFunction) noexcept;
 
 private:
     TransferFunction _transferFunction;

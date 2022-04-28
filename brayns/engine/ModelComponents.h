@@ -60,7 +60,7 @@ protected:
     /**
      * @brief called when the component is added to the model. Does nothing by default.
      */
-    virtual void onStart();
+    virtual void onCreate();
 
     /**
      * @brief onPreRender called before the commit+rendering process happens. Does nothing by default.
@@ -79,9 +79,9 @@ protected:
     virtual bool commit();
 
     /**
-     * @brief onDestroyed called when the component is removed from the model. Does nothing by defualt.
+     * @brief called when the component is removed from the model. Does nothing by defualt.
      */
-    virtual void onDestroyed();
+    virtual void onDestroy();
 
     /**
      * @brief Compute the bounds of the content of the component, if it applies. Does nothing by default.
@@ -174,6 +174,27 @@ private:
     }
 
     /**
+     * @brief Removes all components of a given type
+     */
+    template<typename T>
+    void removeAllComponents()
+    {
+        auto it = _components.begin();
+        auto end = _components.end();
+
+        const std::type_index ti = typeid(T);
+        do
+        {
+            it = std::find_if(it, end, [type = ti](ComponentEntry &entry) { return entry.type = type; });
+
+            if (it != end)
+            {
+                _components.erase(it);
+            }
+        } while (it != end);
+    }
+
+    /**
      * @brief Calls all the components 'onPreRender' in this container
      */
     void onPreRender(const ParametersManager &params);
@@ -190,9 +211,9 @@ private:
     bool commit();
 
     /**
-     * @brief Calls all the components 'onDestroyed' in this container
+     * @brief Calls all the components 'onDestroy' in this container
      */
-    void onDestroyed();
+    void onDestroy();
 
     /**
      * @brief compute the merged bounds of all contained components
@@ -222,14 +243,8 @@ private:
 
     struct ComponentEntry
     {
-        std::type_index type;
+        std::type_index type = typeid(void);
         std::unique_ptr<Component> component;
-
-        // type_index does not have a default constructor...
-        ComponentEntry()
-            : type(typeid(void))
-        {
-        }
     };
 
     std::vector<ComponentEntry> _components;

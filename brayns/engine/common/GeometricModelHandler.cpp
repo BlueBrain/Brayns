@@ -27,7 +27,7 @@ OSPGeometricModel GeometricModelHandler::create()
     return ospNewGeometricModel();
 }
 
-void GeometricModelHandler::destory(OSPGeometricModel &model)
+void GeometricModelHandler::destroy(OSPGeometricModel &model)
 {
     if (model)
     {

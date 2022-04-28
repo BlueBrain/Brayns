@@ -43,7 +43,7 @@ public:
         std::unordered_map<uint64_t, std::vector<size_t>> gidStreamlineMap,
         float spikeDecayTime);
 
-    void onStart() override;
+    void onCreate() override;
 
     void onPreRender(const brayns::ParametersManager &parameters) override;
 

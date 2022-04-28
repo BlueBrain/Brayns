@@ -86,7 +86,7 @@ VasculatureRadiiReportComponent::VasculatureRadiiReportComponent(
 {
 }
 
-void VasculatureRadiiReportComponent::onStart()
+void VasculatureRadiiReportComponent::onCreate()
 {
     auto &model = getModel();
 

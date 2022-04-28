@@ -44,7 +44,7 @@ public:
 
     bool commit() override;
 
-    void onDestroyed() override;
+    void onDestroy() override;
 
     /**
      * @brief getCellIds Return the cell ids by which the synapses are grouped

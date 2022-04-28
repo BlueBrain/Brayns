@@ -58,7 +58,7 @@ public:
         return _volume.computeBounds(transform);
     }
 
-    virtual void onStart() override
+    virtual void onCreate() override
     {
         Model &model = getModel();
         auto &group = model.getGroup();
@@ -71,8 +71,8 @@ public:
 
         bool needsCommit = false;
 
-        needsCommit = needsCommit || _commitVolume();
-        needsCommit = needsCommit || _commitTransferFunction();
+        needsCommit |= _commitVolume();
+        needsCommit |= _commitTransferFunction();
 
         if (needsCommit)
         {
@@ -82,7 +82,7 @@ public:
         return needsCommit;
     }
 
-    virtual void onDestroyed() override
+    virtual void onDestroy() override
     {
         auto &model = getModel();
         auto &group = model.getGroup();

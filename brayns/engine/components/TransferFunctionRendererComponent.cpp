@@ -32,7 +32,7 @@ TransferFunctionRendererComponent::TransferFunctionRendererComponent()
     _handle = ospNewTransferFunction("piecewiseLinear");
 }
 
-void TransferFunctionRendererComponent::onDestroyed()
+void TransferFunctionRendererComponent::onDestroy()
 {
     if (_handle)
     {

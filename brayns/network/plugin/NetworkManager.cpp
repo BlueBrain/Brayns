@@ -85,9 +85,9 @@ public:
 
         auto &engine = api.getEngine();
         auto &scene = engine.getScene();
-        auto &sceneModelManager = scene.getModelManager();
-        auto &sceneLightManager = scene.getLightManager();
-        auto &sceneClipManager = scene.getClipManager();
+        auto &sceneModelManager = scene.getModels();
+        auto &sceneLightManager = scene.getLights();
+        auto &sceneClipManager = scene.getClippingModels();
 
         auto &loaders = api.getLoaderRegistry();
 

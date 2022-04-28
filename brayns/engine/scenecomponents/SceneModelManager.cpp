@@ -22,43 +22,59 @@
 
 namespace
 {
-template<typename Container>
-decltype(auto) findModelIterator(Container &&models, const uint32_t modelId)
+class ModelFinder
 {
-    auto begin = models.begin();
-    auto end = models.end();
-    auto it = std::find_if(
-        begin,
-        end,
-        [mId = modelId](auto &modelEntry)
+public:
+    template<typename Container>
+    static auto findEntryIterator(Container &models, const uint32_t modelId)
+    {
+        auto begin = models.begin();
+        auto end = models.end();
+        auto it = std::find_if(
+            begin,
+            end,
+            [mId = modelId](auto &modelEntry)
+            {
+                auto &model = *modelEntry.model;
+                return model.getID() == mId;
+            });
+
+        // Shouldn't happen, but...
+        if (it == models.end())
         {
-            auto &model = *modelEntry.model;
-            return model.getID() == mId;
-        });
+            throw std::invalid_argument("No model with id " + std::to_string(modelId) + " was found");
+        }
 
-    // Shouldn't happen, but...
-    if (it == models.end())
-    {
-        throw std::invalid_argument("No model with id " + std::to_string(modelId) + " was found");
+        return it;
     }
 
-    return it;
-}
-
-template<typename Container>
-decltype(auto) findInstanceIterator(Container &&instances, const uint32_t instanceId)
-{
-    auto begin = instances.begin();
-    auto end = instances.end();
-    auto it = std::find_if(begin, end, [mId = instanceId](auto &instance) { return instance->getID() == mId; });
-
-    if (it == instances.end())
+    template<typename Container>
+    static auto &findEntry(Container &models, const uint32_t modelId)
     {
-        throw std::invalid_argument("No instance with id " + std::to_string(instanceId) + " was found");
+        return *findEntryIterator(models, modelId);
     }
 
-    return it;
-}
+    template<typename Container>
+    static auto findInstanceIterator(Container &instances, const uint32_t instanceId)
+    {
+        auto begin = instances.begin();
+        auto end = instances.end();
+        auto it = std::find_if(begin, end, [mId = instanceId](auto &instance) { return instance->getID() == mId; });
+
+        if (it == instances.end())
+        {
+            throw std::invalid_argument("No instance with id " + std::to_string(instanceId) + " was found");
+        }
+
+        return it;
+    }
+
+    template<typename Container>
+    static auto &findInstance(Container &instances, const uint32_t instanceId)
+    {
+        return **findInstanceIterator(instances, instanceId);
+    }
+};
 }
 
 namespace brayns
@@ -76,16 +92,16 @@ ModelInstance &SceneModelManager::addModel(ModelLoadParameters params, std::uniq
 
 ModelInstance &SceneModelManager::createInstance(const uint32_t instanceID)
 {
-    auto &sourceInstance = **findInstanceIterator(_instances, instanceID);
+    auto &sourceInstance = ModelFinder::findInstance(_instances, instanceID);
     auto &model = sourceInstance.getModel();
     auto modelId = model._modelId;
-    auto &modelEntry = *findModelIterator(_models, modelId);
+    auto &modelEntry = ModelFinder::findEntry(_models, modelId);
     return _createModelInstance(modelEntry);
 }
 
 ModelInstance &SceneModelManager::getModelInstance(const uint32_t modelID)
 {
-    return **findInstanceIterator(_instances, modelID);
+    return ModelFinder::findInstance(_instances, modelID);
 }
 
 std::vector<ModelInstance *> &SceneModelManager::getAllModelInstances() noexcept
@@ -100,15 +116,15 @@ const std::vector<ModelInstance *> &SceneModelManager::getAllModelInstances() co
 
 void SceneModelManager::removeModel(const uint32_t instanceID)
 {
-    auto it = findInstanceIterator(_instances, instanceID);
+    auto it = ModelFinder::findInstanceIterator(_instances, instanceID);
     auto &modelInstance = **it;
 
     auto &model = modelInstance.getModel();
     auto modelId = model.getID();
-    auto modelIt = findModelIterator(_models, modelId);
+    auto modelIt = ModelFinder::findEntryIterator(_models, modelId);
     auto &modelEntry = *modelIt;
     auto &modelInstanceList = modelEntry.instances;
-    auto instanceIterator = findInstanceIterator(modelInstanceList, instanceID);
+    auto instanceIterator = ModelFinder::findInstanceIterator(modelInstanceList, instanceID);
 
     modelInstanceList.erase(instanceIterator);
     _instances.erase(it);
@@ -125,10 +141,10 @@ void SceneModelManager::removeModel(const uint32_t instanceID)
 
 const ModelLoadParameters &SceneModelManager::getModelLoadParameters(const uint32_t instanceID) const
 {
-    auto &modelInstance = **findInstanceIterator(_instances, instanceID);
+    auto &modelInstance = ModelFinder::findInstance(_instances, instanceID);
     auto &model = modelInstance.getModel();
     auto modelId = model.getID();
-    auto &modelEntry = *findModelIterator(_models, modelId);
+    auto &modelEntry = ModelFinder::findEntry(_models, modelId);
     auto &loadParams = modelEntry.params;
 
     return loadParams;

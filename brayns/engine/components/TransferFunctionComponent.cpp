@@ -22,8 +22,8 @@
 
 namespace brayns
 {
-TransferFunctionComponent::TransferFunctionComponent(TransferFunction tf)
-    : _transferFunction(std::move(tf))
+TransferFunctionComponent::TransferFunctionComponent(TransferFunction transferFunction)
+    : _transferFunction(std::move(transferFunction))
 {
 }
 
@@ -32,8 +32,8 @@ TransferFunction &TransferFunctionComponent::getTransferFunction() noexcept
     return _transferFunction;
 }
 
-void TransferFunctionComponent::setTransferFunction(TransferFunction tf) noexcept
+void TransferFunctionComponent::setTransferFunction(TransferFunction transferFunction) noexcept
 {
-    _transferFunction = std::move(tf);
+    _transferFunction = std::move(transferFunction);
 }
 }

@@ -71,7 +71,7 @@ public:
     {
         auto &component = _components.addComponent<T>(std::forward<Args>(args)...);
         component._owner = this;
-        component.onStart();
+        component.onCreate();
         return component;
     }
 

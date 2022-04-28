@@ -32,8 +32,8 @@ public:
     ToneMapping(const ToneMapping &) = delete;
     ToneMapping &operator=(const ToneMapping &) = delete;
 
-    ToneMapping(ToneMapping &&other);
-    ToneMapping &operator=(ToneMapping &&other);
+    ToneMapping(ToneMapping &&other) = delete;
+    ToneMapping &operator=(ToneMapping &&other) = delete;
 
     ~ToneMapping();
 

@@ -79,28 +79,28 @@ public:
      *
      * @return SceneModelManager&
      */
-    SceneModelManager &getModelManager() noexcept;
+    SceneModelManager &getModels() noexcept;
 
     /**
      * @brief Get the scene model manager object
      *
      * @return const SceneModelManager&
      */
-    const SceneModelManager &getModelManager() const noexcept;
+    const SceneModelManager &getModels() const noexcept;
 
     /**
      * @brief Get the scene clipping models manager object
      *
      * @return SceneClipperManager&
      */
-    SceneClipManager &getClipManager() noexcept;
+    SceneClipManager &getClippingModels() noexcept;
 
     /**
      * @brief Get the scene light manager object
      *
      * @return SceneLightManager&
      */
-    SceneLightManager &getLightManager() noexcept;
+    SceneLightManager &getLights() noexcept;
 
     /**
      * @brief Returns the OSPRay handle of the scene

@@ -90,7 +90,7 @@ public:
         return _geometry.computeBounds(transform);
     }
 
-    virtual void onStart() override
+    virtual void onCreate() override
     {
         _model = GeometricModelHandler::create();
 
@@ -136,10 +136,10 @@ public:
         return needsCommit;
     }
 
-    virtual void onDestroyed() override
+    virtual void onDestroy() override
     {
         GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
-        GeometricModelHandler::destory(_model);
+        GeometricModelHandler::destroy(_model);
     }
 
 private:

@@ -26,21 +26,25 @@
 
 namespace
 {
-OSPFrameBufferFormat toOSPFrameBufferFormat(const brayns::PixelFormat frameBufferFormat)
+class OSPRayFrameBufferFormat
 {
-    switch (frameBufferFormat)
+public:
+    static OSPFrameBufferFormat fromPixelFormat(const brayns::PixelFormat frameBufferFormat)
     {
-    case brayns::PixelFormat::SRGBA_I8:
-        return OSP_FB_SRGBA;
-    case brayns::PixelFormat::RGBA_I8:
-        return OSP_FB_RGBA8;
-    case brayns::PixelFormat::RGBA_F32:
-        return OSP_FB_RGBA32F;
-    }
+        switch (frameBufferFormat)
+        {
+        case brayns::PixelFormat::SRGBA_I8:
+            return OSP_FB_SRGBA;
+        case brayns::PixelFormat::RGBA_I8:
+            return OSP_FB_RGBA8;
+        case brayns::PixelFormat::RGBA_F32:
+            return OSP_FB_RGBA32F;
+        }
 
-    throw std::invalid_argument("Unknown PixelFormat");
-    return OSP_FB_NONE;
-}
+        throw std::invalid_argument("Unknown PixelFormat");
+        return OSP_FB_NONE;
+    }
+};
 } // namespace
 
 namespace brayns
@@ -92,7 +96,7 @@ bool FrameBuffer::commit()
     const auto width = static_cast<int>(_frameSize.x);
     const auto height = static_cast<int>(_frameSize.y);
 
-    const auto format = toOSPFrameBufferFormat(_frameBufferFormat);
+    const auto format = OSPRayFrameBufferFormat::fromPixelFormat(_frameBufferFormat);
 
     size_t channels = OSP_FB_COLOR;
     if (_accumulation)
@@ -181,7 +185,7 @@ Image FrameBuffer::getImage()
     info.width = size.x;
     info.height = size.y;
     info.channelCount = 4;
-    info.channelSize = 1;
+    info.channelSize = PixelFormatChannelByteSize::get(_frameBufferFormat);
 
     auto data = reinterpret_cast<const char *>(colorBuffer);
     auto length = info.getSize();

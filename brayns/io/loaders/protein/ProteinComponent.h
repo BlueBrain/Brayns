@@ -32,11 +32,11 @@ public:
 
     Bounds computeBounds(const Matrix4f &transform) const noexcept override;
 
-    void onStart() override;
+    void onCreate() override;
 
     bool commit() override;
 
-    void onDestroyed() override;
+    void onDestroy() override;
 
 private:
     OSPGeometricModel _model = nullptr;

@@ -41,7 +41,7 @@ std::vector<ModelInstanceProxy> ReadSceneProxy::getModels() const noexcept
 {
     if (_scene)
     {
-        const auto &modelManager = _scene->getModelManager();
+        const auto &modelManager = _scene->getModels();
         auto &models = modelManager.getAllModelInstances();
 
         std::vector<ModelInstanceProxy> result;

@@ -55,10 +55,10 @@ bool SomaCircuitComponent::commit()
     return needsCommit;
 }
 
-void SomaCircuitComponent::onDestroyed()
+void SomaCircuitComponent::onDestroy()
 {
     brayns::GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
-    brayns::GeometricModelHandler::destory(_model);
+    brayns::GeometricModelHandler::destroy(_model);
 }
 
 void SomaCircuitComponent::setSomas(std::vector<uint64_t> ids, std::vector<brayns::Sphere> geometry) noexcept

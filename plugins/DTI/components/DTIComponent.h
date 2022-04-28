@@ -40,11 +40,11 @@ public:
 public:
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
-    void onStart() override;
+    void onCreate() override;
 
     bool commit() override;
 
-    void onDestroyed() override;
+    void onDestroy() override;
 
     void setStreamlines(std::vector<std::vector<brayns::Primitive>> &streamlineGeometries);
 

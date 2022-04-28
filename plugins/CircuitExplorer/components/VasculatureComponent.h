@@ -38,11 +38,11 @@ public:
 
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
-    void onStart() override;
+    void onCreate() override;
 
     bool commit() override;
 
-    void onDestroyed() override;
+    void onDestroy() override;
 
     /**
      * @brief getIDs return the ids of the vessels in this vasculature

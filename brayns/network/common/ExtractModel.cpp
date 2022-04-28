@@ -27,7 +27,7 @@ namespace brayns
 {
 ModelInstance &ExtractModel::fromId(Scene &scene, uint32_t id)
 {
-    auto &sceneModelManager = scene.getModelManager();
+    auto &sceneModelManager = scene.getModels();
     return fromId(sceneModelManager, id);
 }
 

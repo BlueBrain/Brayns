@@ -35,7 +35,7 @@ public:
      */
     VasculatureRadiiReportComponent(std::unique_ptr<IReportData> data, std::vector<size_t> offsets);
 
-    void onStart() override;
+    void onCreate() override;
 
     void onPreRender(const brayns::ParametersManager &parameters) override;
 

@@ -44,7 +44,7 @@ std::string RemoveModelEntrypoint::getDescription() const
 void RemoveModelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &modelManager = _scene.getModelManager();
+    auto &modelManager = _scene.getModels();
     for (auto id : params.ids)
     {
         modelManager.removeModel(id);

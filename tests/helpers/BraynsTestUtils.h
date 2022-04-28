@@ -42,7 +42,7 @@ public:
     {
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
-        auto &lightManager = scene.getLightManager();
+        auto &lightManager = scene.getLights();
         lightManager.addLight(std::move(light));
     }
 
@@ -53,7 +53,7 @@ public:
         auto models = loader.loadFromFile(path, {}, {});
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
-        auto &modelManager = scene.getModelManager();
+        auto &modelManager = scene.getModels();
         modelManager.addModel({}, std::move(models.front()));
         scene.computeBounds();
     }

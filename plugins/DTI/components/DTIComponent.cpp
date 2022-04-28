@@ -62,7 +62,7 @@ brayns::Bounds DTIComponent::computeBounds(const brayns::Matrix4f &transform) co
     return base;
 }
 
-void DTIComponent::onStart()
+void DTIComponent::onCreate()
 {
     auto &group = getModel();
     group.addComponent<brayns::MaterialComponent>();
@@ -97,14 +97,14 @@ bool DTIComponent::commit()
     return needsCommit;
 }
 
-void DTIComponent::onDestroyed()
+void DTIComponent::onDestroy()
 {
     auto &group = getModel();
     for (auto &streamline : _streamlines)
     {
         auto &model = streamline.model;
         brayns::GeometricModelHandler::removeFromGeometryGroup(model, group);
-        brayns::GeometricModelHandler::destory(model);
+        brayns::GeometricModelHandler::destroy(model);
     }
 }
 

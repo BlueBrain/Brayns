@@ -44,7 +44,7 @@ public:
 
     bool commit() override;
 
-    void onDestroyed() override;
+    void onDestroy() override;
 
     /**
      * @brief getAstroctyeIds Return the ID of the astroctyes that the endfeet are grouped by

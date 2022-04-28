@@ -36,7 +36,7 @@ class TransferFunctionRendererComponent : public Component
 public:
     TransferFunctionRendererComponent();
 
-    void onDestroyed() override;
+    void onDestroy() override;
 
     bool manualCommit();
 

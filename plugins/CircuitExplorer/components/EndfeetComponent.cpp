@@ -68,14 +68,14 @@ bool EndfeetComponent::commit()
     return needsCommit;
 }
 
-void EndfeetComponent::onDestroyed()
+void EndfeetComponent::onDestroy()
 {
     auto &group = getModel();
     for (auto &endfoot : _endFeet)
     {
         auto &model = endfoot.model;
         brayns::GeometricModelHandler::removeFromGeometryGroup(model, group);
-        brayns::GeometricModelHandler::destory(model);
+        brayns::GeometricModelHandler::destroy(model);
     }
 }
 

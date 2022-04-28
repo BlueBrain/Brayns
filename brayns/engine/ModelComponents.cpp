@@ -26,16 +26,11 @@ namespace brayns
 {
 Model &Component::getModel()
 {
-    // In case its called from the component's constructor
-    if (!_owner)
-    {
-        throw std::runtime_error("Component has not been initialized with its Model");
-    }
-
+    assert(_owner);
     return *_owner;
 }
 
-void Component::onStart()
+void Component::onCreate()
 {
 }
 
@@ -54,7 +49,7 @@ bool Component::commit()
     return false;
 }
 
-void Component::onDestroyed()
+void Component::onDestroy()
 {
 }
 
@@ -93,12 +88,12 @@ bool ModelComponentContainer::commit()
     return committed;
 }
 
-void ModelComponentContainer::onDestroyed()
+void ModelComponentContainer::onDestroy()
 {
     for (auto &entry : _components)
     {
         auto &component = *entry.component;
-        component.onDestroyed();
+        component.onDestroy();
     }
 }
 

@@ -103,7 +103,7 @@ SpikeReportComponent::SpikeReportComponent(
 {
 }
 
-void SpikeReportComponent::onStart()
+void SpikeReportComponent::onCreate()
 {
     auto &model = getModel();
 

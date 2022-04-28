@@ -92,7 +92,7 @@ void AddModelEntrypoint::onRequest(const Request &request)
     loadParameters.loaderName = name;
     loadParameters.loadParameters = parameters;
 
-    auto &modelManager = _scene.getModelManager();
+    auto &modelManager = _scene.getModels();
 
     std::vector<ModelInstanceProxy> result;
     result.reserve(models.size());

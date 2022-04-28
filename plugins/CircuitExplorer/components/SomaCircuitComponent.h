@@ -35,7 +35,7 @@ public:
 
     bool commit() override;
 
-    void onDestroyed() override;
+    void onDestroy() override;
 
     /**
      * @brief Set the soma circuit geometries

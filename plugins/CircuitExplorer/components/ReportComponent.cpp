@@ -35,7 +35,7 @@ ReportComponent::ReportComponent(std::unique_ptr<IReportData> data, std::unique_
 {
 }
 
-void ReportComponent::onStart()
+void ReportComponent::onCreate()
 {
     auto &model = getModel();
 

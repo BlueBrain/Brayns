@@ -68,14 +68,14 @@ bool SynapseComponent::commit()
     return needsCommit;
 }
 
-void SynapseComponent::onDestroyed()
+void SynapseComponent::onDestroy()
 {
     auto &group = getModel();
     for (auto &synapse : _synapses)
     {
         auto &model = synapse.model;
         brayns::GeometricModelHandler::removeFromGeometryGroup(model, group);
-        brayns::GeometricModelHandler::destory(model);
+        brayns::GeometricModelHandler::destroy(model);
     }
 }
 

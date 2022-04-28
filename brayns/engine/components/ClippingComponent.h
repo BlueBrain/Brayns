@@ -46,7 +46,7 @@ public:
         return _geometry;
     }
 
-    virtual void onStart() override
+    virtual void onCreate() override
     {
         _model = GeometricModelHandler::create();
         GeometricModelHandler::addToClippingGroup(_model, getModel());
@@ -65,10 +65,10 @@ public:
         return false;
     }
 
-    virtual void onDestroyed() override
+    virtual void onDestroy() override
     {
         GeometricModelHandler::removeFromClippingGroup(_model, getModel());
-        GeometricModelHandler::destory(_model);
+        GeometricModelHandler::destroy(_model);
     }
 
 private:

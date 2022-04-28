@@ -25,37 +25,13 @@
 namespace brayns
 {
 ToneMapping::ToneMapping()
+    : _handle(ospNewImageOperation("tonemapper"))
 {
-    _handle = ospNewImageOperation("tonemapper");
-}
-
-ToneMapping::ToneMapping(ToneMapping &&other)
-{
-    *this = std::move(other);
-}
-
-ToneMapping &ToneMapping::operator=(ToneMapping &&other)
-{
-    _handle = other._handle;
-    _exposure = other._exposure;
-    _contrast = other._contrast;
-    _shoulder = other._shoulder;
-    _midIn = other._midIn;
-    _midOut = other._midOut;
-    _hdrMax = other._hdrMax;
-    _acesColor = other._acesColor;
-
-    other._handle = nullptr;
-
-    return *this;
 }
 
 ToneMapping::~ToneMapping()
 {
-    if (_handle)
-    {
-        ospRelease(_handle);
-    }
+    ospRelease(_handle);
 }
 
 void ToneMapping::commit()

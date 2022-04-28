@@ -33,7 +33,7 @@ struct GeometricModelHandler
 {
     static OSPGeometricModel create();
 
-    static void destory(OSPGeometricModel &model);
+    static void destroy(OSPGeometricModel &model);
 
     template<typename T>
     static void setGeometry(OSPGeometricModel model, Geometry<T> &geometry)

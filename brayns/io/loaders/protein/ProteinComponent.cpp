@@ -40,7 +40,7 @@ Bounds ProteinComponent::computeBounds(const Matrix4f &transform) const noexcept
     return _geometry.computeBounds(transform);
 }
 
-void ProteinComponent::onStart()
+void ProteinComponent::onCreate()
 {
     _model = GeometricModelHandler::create();
 
@@ -80,9 +80,9 @@ bool ProteinComponent::commit()
     return needsCommit;
 }
 
-void ProteinComponent::onDestroyed()
+void ProteinComponent::onDestroy()
 {
     GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
-    GeometricModelHandler::destory(_model);
+    GeometricModelHandler::destroy(_model);
 }
 }

@@ -41,7 +41,7 @@ brayns::Bounds MorphologyCircuitComponent::computeBounds(const brayns::Matrix4f 
     return result;
 }
 
-void MorphologyCircuitComponent::onStart()
+void MorphologyCircuitComponent::onCreate()
 {
     auto &model = getModel();
     model.addComponent<brayns::MaterialComponent>();
@@ -90,14 +90,14 @@ bool MorphologyCircuitComponent::commit()
     return needsCommit;
 }
 
-void MorphologyCircuitComponent::onDestroyed()
+void MorphologyCircuitComponent::onDestroy()
 {
     auto &group = getModel();
     for (auto &morphology : _morphologies)
     {
         auto &model = morphology.model;
         brayns::GeometricModelHandler::removeFromGeometryGroup(model, group);
-        brayns::GeometricModelHandler::destory(model);
+        brayns::GeometricModelHandler::destroy(model);
     }
 }
 

@@ -99,22 +99,22 @@ bool Scene::commit()
     return needsCommit;
 }
 
-SceneModelManager &Scene::getModelManager() noexcept
+SceneModelManager &Scene::getModels() noexcept
 {
     return _modelManager;
 }
 
-const SceneModelManager &Scene::getModelManager() const noexcept
+const SceneModelManager &Scene::getModels() const noexcept
 {
     return _modelManager;
 }
 
-SceneClipManager &Scene::getClipManager() noexcept
+SceneClipManager &Scene::getClippingModels() noexcept
 {
     return _clippingManager;
 }
 
-SceneLightManager &Scene::getLightManager() noexcept
+SceneLightManager &Scene::getLights() noexcept
 {
     return _lightManager;
 }

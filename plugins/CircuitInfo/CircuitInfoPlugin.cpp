@@ -41,7 +41,7 @@ void CircuitInfoPlugin::registerEntrypoints(brayns::INetworkInterface &interface
 {
     auto &engine = _api->getEngine();
     auto &scene = engine.getScene();
-    auto &modelManager = scene.getModelManager();
+    auto &modelManager = scene.getModels();
 
     auto builder = brayns::EntrypointBuilder("Circuit Info", interface);
 

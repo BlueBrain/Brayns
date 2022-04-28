@@ -24,7 +24,7 @@ namespace brayns
 {
 Model::~Model()
 {
-    _components.onDestroyed();
+    _components.onDestroy();
 }
 
 void Model::setMetaData(std::map<std::string, std::string> metadata) noexcept

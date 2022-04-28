@@ -228,7 +228,7 @@ bool RequestModelUploadEntrypoint::isAsync() const
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
     _client = request.getClient();
-    auto &modelManager = _scene.getModelManager();
+    auto &modelManager = _scene.getModels();
     BinaryModelHandler handler(modelManager, _loaders, _binary, _token);
     SimulationScanner::scanAndUpdate(modelManager, _animation);
     _scene.computeBounds();

@@ -49,7 +49,7 @@ void CircuitExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &inter
 {
     auto &engine = _api->getEngine();
     auto &scene = engine.getScene();
-    auto &modelManager = scene.getModelManager();
+    auto &modelManager = scene.getModels();
 
     auto builder = brayns::EntrypointBuilder("Circuit Explorer", interface);
 

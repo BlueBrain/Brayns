@@ -37,7 +37,7 @@ public:
      */
     ReportComponent(std::unique_ptr<IReportData> data, std::unique_ptr<IColormapIndexer> frameIndexer);
 
-    void onStart() override;
+    void onCreate() override;
 
     void onPreRender(const brayns::ParametersManager &parameters) override;
 

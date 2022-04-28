@@ -44,7 +44,7 @@ brayns::Bounds VasculatureComponent::computeBounds(const brayns::Matrix4f &trans
     return _geometry.computeBounds(transform);
 }
 
-void VasculatureComponent::onStart()
+void VasculatureComponent::onCreate()
 {
     auto &group = getModel();
 
@@ -80,10 +80,10 @@ bool VasculatureComponent::commit()
     return needsCommit;
 }
 
-void VasculatureComponent::onDestroyed()
+void VasculatureComponent::onDestroy()
 {
     brayns::GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
-    brayns::GeometricModelHandler::destory(_model);
+    brayns::GeometricModelHandler::destroy(_model);
 }
 
 const std::vector<uint64_t> &VasculatureComponent::getIDs() const noexcept
