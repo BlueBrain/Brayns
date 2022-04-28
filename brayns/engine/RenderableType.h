@@ -106,23 +106,6 @@ public:
     }
 
     /**
-     * @brief reserve Reserves enough memory to hold the specified amount of geometry (calls std::vector::reserve())
-     * @param newSize
-     */
-    void reserve(const uint32_t newSize)
-    {
-        _geometries.reserve(newSize);
-    }
-
-    /**
-     * @brief compact Removes unused extra memory from the geometry buffer (calls std::vector::shrink_to_fit())
-     */
-    void compact()
-    {
-        _geometries.shrink_to_fit();
-    }
-
-    /**
      * @brief Adds a new gometry primitive to the list. OSPRay is limited to 2^32 geometries per model.
      * @throws std::runtime_error if the Geometry buffer is already at full capacity.
      * @returns the index at which the given geometry was added to the buffer. This index is the same that

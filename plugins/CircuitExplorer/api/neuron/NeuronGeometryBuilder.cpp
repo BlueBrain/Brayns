@@ -178,6 +178,7 @@ struct NeuronBuilder
         auto &sectionRanges = dst.sectionMapping;
 
         geometry.reserve(numPrimitives);
+        sectionRanges.reserve(4);
 
         if (morphology.hasSoma())
         {
@@ -185,9 +186,6 @@ struct NeuronBuilder
         }
 
         NeuriteBuilder::build(morphology, dst);
-
-        geometry.shrink_to_fit();
-        sectionRanges.shrink_to_fit();
     }
 };
 } // namespace

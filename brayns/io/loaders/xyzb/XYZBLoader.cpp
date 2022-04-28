@@ -88,8 +88,6 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(Blob &&blob, cons
         callback.updateProgress(msg, i++ / static_cast<float>(numlines));
     }
 
-    spheres.shrink_to_fit();
-
     auto model = std::make_unique<Model>();
     model->addComponent<GeometryRendererComponent<Sphere>>(std::move(spheres));
 

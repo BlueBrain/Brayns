@@ -109,7 +109,6 @@ uint32_t Geometry<TriangleMesh>::add(TriangleMesh geometry)
     }
 
     _geometries.push_back(std::move(geometry));
-    _geometries.shrink_to_fit();
     _dirty = true;
     return 0;
 }

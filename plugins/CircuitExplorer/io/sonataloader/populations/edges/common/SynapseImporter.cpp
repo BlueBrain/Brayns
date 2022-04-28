@@ -124,7 +124,8 @@ struct SynapseAppender
         for (auto &[nodeId, buffer] : synapseGeometry)
         {
             auto &geometryList = buffer.geometry;
-            geometryList.shrink_to_fit();
+            auto geometryListCopy = geometryList;
+            geometryList = std::move(geometryListCopy);
             geometry[nodeId] = std::move(geometryList);
 
             auto &edges = buffer.synapseIds;
