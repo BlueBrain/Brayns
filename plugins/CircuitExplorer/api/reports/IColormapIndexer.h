@@ -26,8 +26,11 @@
  * @brief Interface to implement the compuation of indices into the colormap given the transfer function range
  * and the report frame data
  */
-struct IColormapIndexer
+class IColormapIndexer
 {
+public:
+    virtual ~IColormapIndexer() = default;
+
     /**
      * @brief Updates the indices in the indices buffer
      *

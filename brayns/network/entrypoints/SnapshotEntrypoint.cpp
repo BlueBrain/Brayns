@@ -95,8 +95,7 @@ public:
         // Parameters
         auto paramsManager = engine.getParametersManager();
         auto &animParams = paramsManager.getAnimationParameters();
-        auto animSettings = params.animation_settings;
-        auto animFrame = animSettings.getFrame();
+        auto animFrame = params.simulation_frame;
         animParams.setFrame(animFrame);
 
         // Renderer
@@ -154,15 +153,11 @@ public:
 
 namespace brayns
 {
-SnapshotEntrypoint::SnapshotEntrypoint(
-    Engine &engine,
-    CancellationToken token,
-    std::shared_ptr<EngineObjectFactory<Camera>> cameraFactory,
-    std::shared_ptr<EngineObjectFactory<Renderer>> renderFactory)
+SnapshotEntrypoint::SnapshotEntrypoint(Engine &engine, CancellationToken token)
     : _engine(engine)
     , _token(token)
-    , _cameraFactory(std::move(cameraFactory))
-    , _renderFactory(std::move(renderFactory))
+    , _cameraFactory(EngineFactories::createCameraFactory())
+    , _renderFactory(EngineFactories::createRendererFactory())
 {
 }
 
@@ -186,13 +181,13 @@ void SnapshotEntrypoint::onRequest(const Request &request)
     SnapshotParams params;
 
     auto &systemCamera = _engine.getCamera();
-    params.camera = GenericObject<Camera>(systemCamera, *_cameraFactory);
+    params.camera = GenericObject<Camera>(systemCamera, _cameraFactory);
 
     auto systemLookAt = systemCamera.getLookAt();
     params.camera_view = systemLookAt;
 
     auto &systemRenderer = _engine.getRenderer();
-    params.renderer = GenericObject<Renderer>(systemRenderer, *_renderFactory);
+    params.renderer = GenericObject<Renderer>(systemRenderer, _renderFactory);
 
     auto &systemFramebuffer = _engine.getFrameBuffer();
     auto systemSize = systemFramebuffer.getFrameSize();
@@ -200,7 +195,7 @@ void SnapshotEntrypoint::onRequest(const Request &request)
 
     auto &paramsManager = _engine.getParametersManager();
     auto &animParams = paramsManager.getAnimationParameters();
-    params.animation_settings = GenericAnimationSettings(animParams);
+    params.simulation_frame = animParams.getFrame();
 
     request.getParams(params);
 

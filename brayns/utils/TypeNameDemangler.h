@@ -52,19 +52,17 @@ struct TypeNameDemangler
         {
             throw std::runtime_error("Could not allocate memory to store the demangled name");
         }
-        else
+
+        if (status == 0)
         {
-            if (status == 0)
-            {
-                result = std::string(demangledName);
-            }
+            result = std::string(demangledName);
+        }
 
-            free(demangledName);
+        free(demangledName);
 
-            if (status != 0)
-            {
-                throw std::runtime_error("Could not demangle type");
-            }
+        if (status != 0)
+        {
+            throw std::runtime_error("Could not demangle type");
         }
 
         return result;

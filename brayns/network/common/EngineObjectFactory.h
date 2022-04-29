@@ -39,16 +39,20 @@ template<typename T>
 class EngineObjectFactory
 {
 public:
-    struct IFactoryEntry
+    class IFactoryEntry
     {
+    public:
+        virtual ~IFactoryEntry() = default;
+
         virtual std::unique_ptr<T> create(const JsonValue &data) const = 0;
 
         virtual std::string getName() const noexcept = 0;
     };
 
     template<typename SubT>
-    struct FactoryEntry final : public IFactoryEntry
+    class FactoryEntry final : public IFactoryEntry
     {
+    public:
         FactoryEntry(std::string entryName)
             : _name(std::move(entryName))
         {
@@ -140,10 +144,8 @@ public:
         {
             return _systemObject->clone();
         }
-        else
-        {
-            return _factory->create(_name, _value);
-        }
+
+        return _factory->create(_name, _value);
     }
 
 private:
@@ -164,8 +166,8 @@ GENERIC_OBJECT_ADAPTER(Renderer)
 
 struct EngineFactories
 {
-    static std::shared_ptr<EngineObjectFactory<Camera>> createCameraFactory() noexcept;
+    static EngineObjectFactory<Camera> createCameraFactory() noexcept;
 
-    static std::shared_ptr<EngineObjectFactory<Renderer>> createRendererFactory() noexcept;
+    static EngineObjectFactory<Renderer> createRendererFactory() noexcept;
 };
 }

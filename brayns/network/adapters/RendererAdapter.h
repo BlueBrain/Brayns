@@ -27,7 +27,7 @@
 
 namespace brayns
 {
-#define BRAYNS_RENDERER_PARAMETERS \
+#define BRAYNS_RENDERER_PARAMETERS() \
     BRAYNS_JSON_ADAPTER_GETSET( \
         "samples_per_pixel", \
         getSamplesPerPixel, \
@@ -48,7 +48,7 @@ namespace brayns
         Required(false))
 
 BRAYNS_JSON_ADAPTER_BEGIN(InteractiveRenderer)
-BRAYNS_RENDERER_PARAMETERS
+BRAYNS_RENDERER_PARAMETERS()
 BRAYNS_JSON_ADAPTER_GETSET(
     "enable_shadows",
     getShadowsEnabled,
@@ -64,6 +64,6 @@ BRAYNS_JSON_ADAPTER_GETSET(
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(ProductionRenderer)
-BRAYNS_RENDERER_PARAMETERS
+BRAYNS_RENDERER_PARAMETERS()
 BRAYNS_JSON_ADAPTER_END()
 }

@@ -57,8 +57,7 @@ struct NeuronSectionMappingGenerator
     static void generate(NeuronGeometry &dst, NeuronSection section, size_t start, size_t end)
     {
         auto &sectionRanges = dst.sectionMapping;
-        sectionRanges.emplace_back();
-        auto &sectionRange = sectionRanges.back();
+        auto &sectionRange = sectionRanges.emplace_back();
         sectionRange.type = section;
         sectionRange.begin = start;
         sectionRange.end = end;

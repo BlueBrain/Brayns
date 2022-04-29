@@ -41,10 +41,8 @@ std::vector<std::string> VasculatureColorData::getMethodVariables(const std::str
     {
         return brayns::enumNames<VasculatureSection>();
     }
-    else
-    {
-        throw std::invalid_argument("Method " + method + " not available to color vasculature");
-    }
+
+    throw std::invalid_argument("Method " + method + " not available to color vasculature");
 }
 
 std::vector<std::string> VasculatureColorData::getMethodValuesForIDs(

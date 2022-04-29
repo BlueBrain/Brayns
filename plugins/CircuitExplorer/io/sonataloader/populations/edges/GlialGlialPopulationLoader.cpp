@@ -27,8 +27,8 @@ std::string GlialGlialPopulationLoader::getPopulationType() const noexcept
     return "glialglial";
 }
 
-void GlialGlialPopulationLoader::load(EdgeLoadContext &ctxt) const
+void GlialGlialPopulationLoader::load(EdgeLoadContext &context) const
 {
-    SynapseImporter::fromContext(ctxt);
+    SynapseImporter::fromContext(context);
 }
 }

@@ -51,9 +51,9 @@ void checkNodePopulation(const sl::SonataNetworkConfig &network, const SonataNod
     if (!nodeSets.empty())
     {
         const auto &nsPath = config.getNodeSetsPath();
-        if (!std::filesystem::exists(nsPath))
+        if (!std::filesystem::is_regular_file(nsPath))
         {
-            throw std::invalid_argument("Cannot find nodesets file for node population " + population);
+            throw std::invalid_argument("Cannot access nodesets file for node population " + population);
         }
     }
 
@@ -106,9 +106,9 @@ void checkNodePopulation(const sl::SonataNetworkConfig &network, const SonataNod
             break;
         }
 
-        if (!std::filesystem::exists(reportPath))
+        if (!std::filesystem::is_regular_file(reportPath))
         {
-            throw std::invalid_argument("Cannot find report file for node population " + population);
+            throw std::invalid_argument("Cannot access report file for node population " + population);
         }
     }
 }
@@ -153,9 +153,9 @@ void checkEdges(const sl::SonataNetworkConfig &network, const SonataNodePopulati
         {
             const auto &simConfig = network.simulationConfig();
             const auto reportPath = sl::SonataConfig::resolveReportPath(simConfig, reportName);
-            if (!std::filesystem::exists(reportPath))
+            if (!std::filesystem::is_regular_file(reportPath))
             {
-                throw std::invalid_argument("Requested report for edge population " + name + " not found");
+                throw std::invalid_argument("Cannot access report file for edge population " + name);
             }
         }
     }

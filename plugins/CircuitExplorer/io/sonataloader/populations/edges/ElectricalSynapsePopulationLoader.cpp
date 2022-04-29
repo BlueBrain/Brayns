@@ -27,8 +27,8 @@ std::string ElectricalSynapsePopulationLoader::getPopulationType() const noexcep
     return "electrical_synapse";
 }
 
-void ElectricalSynapsePopulationLoader::load(EdgeLoadContext &ctxt) const
+void ElectricalSynapsePopulationLoader::load(EdgeLoadContext &context) const
 {
-    SynapseImporter::fromContext(ctxt);
+    SynapseImporter::fromContext(context);
 }
 }

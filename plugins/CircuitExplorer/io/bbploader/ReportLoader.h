@@ -33,9 +33,9 @@ class ReportLoader
 {
 public:
     static void load(
-        const LoadContext &ctxt,
-        const std::vector<CellCompartments> &comparts,
-        ProgressUpdater &cb,
+        const LoadContext &context,
+        const std::vector<CellCompartments> &compartments,
+        ProgressUpdater &callback,
         brayns::Model &model);
 };
 }

@@ -106,6 +106,7 @@ public:
     ModelMaterial() = default;
     ModelMaterial(SceneModelManager &modelManager)
         : _modelManager(&modelManager)
+        , _material(std::make_unique<MaterialType>())
     {
     }
 
@@ -116,7 +117,6 @@ public:
 
     void setMaterial(const JsonBuffer<MaterialType> &material) noexcept
     {
-        _material = std::make_unique<MaterialType>(); // std::move(material);
         material.deserialize(*_material);
     }
 
@@ -134,35 +134,35 @@ private:
     std::unique_ptr<MaterialType> _material;
 };
 
-#define MODEL_MATERIAL_PARAMS \
+#define MODEL_MATERIAL_PARAMS() \
     BRAYNS_JSON_ADAPTER_SET("model_id", setModelId, "ID of the model") \
     BRAYNS_JSON_ADAPTER_SET("material", setMaterial, "Material parameters")
 
 BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<CarPaintMaterial>)
-MODEL_MATERIAL_PARAMS
+MODEL_MATERIAL_PARAMS()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<DefaultMaterial>)
-MODEL_MATERIAL_PARAMS
+MODEL_MATERIAL_PARAMS()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<EmissiveMaterial>)
-MODEL_MATERIAL_PARAMS
+MODEL_MATERIAL_PARAMS()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<GlassMaterial>)
-MODEL_MATERIAL_PARAMS
+MODEL_MATERIAL_PARAMS()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<MatteMaterial>)
-MODEL_MATERIAL_PARAMS
+MODEL_MATERIAL_PARAMS()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<MetalMaterial>)
-MODEL_MATERIAL_PARAMS
+MODEL_MATERIAL_PARAMS()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(ModelMaterial<PlasticMaterial>)
-MODEL_MATERIAL_PARAMS
+MODEL_MATERIAL_PARAMS()
 BRAYNS_JSON_ADAPTER_END()
 }

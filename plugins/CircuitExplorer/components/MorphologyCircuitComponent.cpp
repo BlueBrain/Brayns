@@ -270,11 +270,11 @@ void MorphologyCircuitComponent::changeThickness(const float multiplier) noexcep
     {
         auto &geometry = morphology.geometry;
         geometry.forEach(
-            [mult = multiplier](uint32_t i, brayns::Primitive &primitive)
+            [=](uint32_t i, brayns::Primitive &primitive)
             {
                 (void)i;
-                primitive.r0 *= mult;
-                primitive.r1 *= mult;
+                primitive.r0 *= multiplier;
+                primitive.r1 *= multiplier;
             });
     }
 

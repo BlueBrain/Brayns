@@ -30,6 +30,6 @@ class GlialGlialPopulationLoader final : public EdgePopulationLoader
 public:
     std::string getPopulationType() const noexcept override;
 
-    void load(EdgeLoadContext &ctxt) const override;
+    void load(EdgeLoadContext &context) const override;
 };
 } // namespace sonataloader

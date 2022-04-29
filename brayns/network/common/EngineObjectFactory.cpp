@@ -22,19 +22,19 @@
 
 namespace brayns
 {
-std::shared_ptr<EngineObjectFactory<Camera>> EngineFactories::createCameraFactory() noexcept
+EngineObjectFactory<Camera> EngineFactories::createCameraFactory() noexcept
 {
-    auto cameraFactory = std::make_shared<EngineObjectFactory<Camera>>();
-    cameraFactory->registerType<OrthographicCamera>();
-    cameraFactory->registerType<PerspectiveCamera>();
+    auto cameraFactory = EngineObjectFactory<Camera>();
+    cameraFactory.registerType<OrthographicCamera>();
+    cameraFactory.registerType<PerspectiveCamera>();
     return cameraFactory;
 }
 
-std::shared_ptr<EngineObjectFactory<Renderer>> EngineFactories::createRendererFactory() noexcept
+EngineObjectFactory<Renderer> EngineFactories::createRendererFactory() noexcept
 {
-    auto rendererFactory = std::make_shared<EngineObjectFactory<Renderer>>();
-    rendererFactory->registerType<InteractiveRenderer>();
-    rendererFactory->registerType<ProductionRenderer>();
+    auto rendererFactory = EngineObjectFactory<Renderer>();
+    rendererFactory.registerType<InteractiveRenderer>();
+    rendererFactory.registerType<ProductionRenderer>();
     return rendererFactory;
 }
 }

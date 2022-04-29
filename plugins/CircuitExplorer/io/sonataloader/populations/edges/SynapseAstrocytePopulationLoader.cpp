@@ -28,14 +28,14 @@ std::string SynapseAstrocytePopulationLoader::getPopulationType() const noexcept
     return "synapse_astrocyte";
 }
 
-void SynapseAstrocytePopulationLoader::load(EdgeLoadContext &ctxt) const
+void SynapseAstrocytePopulationLoader::load(EdgeLoadContext &context) const
 {
-    const auto &edgePopulation = ctxt.edgePopulation;
-    const auto &edgeSelection = ctxt.edgeSelection;
+    const auto &edgePopulation = context.edgePopulation;
+    const auto &edgeSelection = context.edgeSelection;
 
     const auto srcNodes = SonataSynapses::getSourceNodes(edgePopulation, edgeSelection);
     const auto centerPositions = SonataSynapses::getEfferentAstrocyteCenterPos(edgePopulation, edgeSelection);
 
-    SynapseImporter::fromData(ctxt, srcNodes, centerPositions);
+    SynapseImporter::fromData(context, srcNodes, centerPositions);
 }
 } // namespace sonataloader

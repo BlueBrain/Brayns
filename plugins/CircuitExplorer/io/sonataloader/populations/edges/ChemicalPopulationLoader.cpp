@@ -27,8 +27,8 @@ std::string ChemicalSynapsePopulationLoader::getPopulationType() const noexcept
     return "chemical";
 }
 
-void ChemicalSynapsePopulationLoader::load(EdgeLoadContext &ctxt) const
+void ChemicalSynapsePopulationLoader::load(EdgeLoadContext &context) const
 {
-    SynapseImporter::fromContext(ctxt);
+    SynapseImporter::fromContext(context);
 }
 }

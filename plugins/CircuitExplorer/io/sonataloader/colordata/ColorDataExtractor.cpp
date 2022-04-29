@@ -65,7 +65,7 @@ struct AttributeMethodMapping
             throw std::invalid_argument("Unknown method " + brayns::enumToString<NeuronColorMethods>(method));
         }
 
-        return (*it).attribute;
+        return it->attribute;
     }
 };
 

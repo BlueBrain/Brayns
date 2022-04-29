@@ -30,13 +30,13 @@ namespace brayns
 class AddClipPlaneEntrypoint : public Entrypoint<Plane, uint32_t>
 {
 public:
-    AddClipPlaneEntrypoint(SceneClipManager &scm);
+    AddClipPlaneEntrypoint(SceneClipManager &clipManager);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    SceneClipManager &_scm;
+    SceneClipManager &_clipManager;
 };
 } // namespace brayns

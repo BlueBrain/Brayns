@@ -30,11 +30,11 @@ std::string AstrocytePopulationLoader::getPopulationType() const noexcept
     return "astrocyte";
 }
 
-void AstrocytePopulationLoader::load(NodeLoadContext &ctxt) const
+void AstrocytePopulationLoader::load(NodeLoadContext &context) const
 {
-    auto colorData = NodeColorDataFactory::create<AstrocyteColorData>(ctxt);
+    auto colorData = NodeColorDataFactory::create<AstrocyteColorData>(context);
 
-    const auto &loadParams = ctxt.params;
+    const auto &loadParams = context.params;
     const auto &morphParams = loadParams.neuron_morphology_parameters;
     const auto soma = morphParams.load_soma;
     const auto axon = morphParams.load_axon;
@@ -42,13 +42,12 @@ void AstrocytePopulationLoader::load(NodeLoadContext &ctxt) const
 
     if (soma && !axon && !dend)
     {
-        SomaImporter::import(ctxt, std::move(colorData));
+        SomaImporter::import(context, std::move(colorData));
+        return;
     }
-    else
-    {
-        const auto &selection = ctxt.selection;
-        std::vector<brayns::Quaternion> dummyRotations(selection.flatSize());
-        MorphologyImporter::import(ctxt, dummyRotations, std::move(colorData));
-    }
+
+    const auto &selection = context.selection;
+    std::vector<brayns::Quaternion> dummyRotations(selection.flatSize());
+    MorphologyImporter::import(context, dummyRotations, std::move(colorData));
 }
 } // namespace sonataloader

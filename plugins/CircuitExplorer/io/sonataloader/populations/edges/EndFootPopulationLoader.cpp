@@ -36,14 +36,14 @@ struct EndFeetAreasPathResolver
 {
     // The endfeet mesh file is not retruned by bbp::sonata::CircuitConfig (by now).
     // Get it manually from the expanded json
-    static std::string resolve(const sl::EdgeLoadContext &ctxt)
+    static std::string resolve(const sl::EdgeLoadContext &context)
     {
-        const auto &network = ctxt.config;
+        const auto &network = context.config;
         const auto &config = network.circuitConfig();
         const auto basePath = std::filesystem::path(network.circuitConfigDir());
         auto parsedJson = brayns::Json::parse(config.getExpandedJSON());
         const auto json = parsedJson.extract<brayns::JsonObject::Ptr>();
-        const auto &population = ctxt.edgePopulation;
+        const auto &population = context.edgePopulation;
         const auto edgeName = population.name();
 
         std::string resultPath = "";
@@ -100,7 +100,8 @@ struct EndFeetAreasPathResolver
         {
             throw std::runtime_error("EndFootPopulationLoader: Cannot locate endfeet areas H5 file");
         }
-        else if (!std::filesystem::path(resultPath).is_absolute())
+
+        if (!std::filesystem::path(resultPath).is_absolute())
         {
             const auto resultSubpath = std::filesystem::path(resultPath);
             auto fullPath = std::filesystem::path(basePath) / resultSubpath;
@@ -120,14 +121,14 @@ std::string EndFootPopulationLoader::getPopulationType() const noexcept
     return "endfoot";
 }
 
-void EndFootPopulationLoader::load(EdgeLoadContext &ctxt) const
+void EndFootPopulationLoader::load(EdgeLoadContext &context) const
 {
-    const auto path = EndFeetAreasPathResolver::resolve(ctxt);
+    const auto path = EndFeetAreasPathResolver::resolve(context);
 
-    const auto &nodeSelection = ctxt.nodeSelection;
+    const auto &nodeSelection = context.nodeSelection;
     const auto nodes = nodeSelection.flatten();
-    const auto &population = ctxt.edgePopulation;
-    const auto &edgeSelection = ctxt.edgeSelection;
+    const auto &population = context.edgePopulation;
+    const auto &edgeSelection = context.edgeSelection;
     const auto flatEdges = edgeSelection.flatten();
     const auto astrocyteIds = SonataSynapses::getTargetNodes(population, edgeSelection);
     const auto endFeetIds = SonataSynapses::getEndFeetIds(population, edgeSelection);
@@ -144,14 +145,14 @@ void EndFootPopulationLoader::load(EdgeLoadContext &ctxt) const
         buffer.push_back(std::move(mesh));
     }
 
-    auto &model = ctxt.model;
+    auto &model = context.model;
 
     // Geometry
     auto &endfeet = model.addComponent<EndfeetComponent>();
     endfeet.addEndfeet(endfeetGeometry);
 
     // Coloring
-    const auto &network = ctxt.config;
+    const auto &network = context.config;
     const auto &config = network.circuitConfig();
     const auto astrocytePopulationName = population.target();
     auto astrocytePopulation = config.getNodePopulation(astrocytePopulationName);

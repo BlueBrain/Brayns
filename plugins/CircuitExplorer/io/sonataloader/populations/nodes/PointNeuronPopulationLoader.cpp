@@ -29,9 +29,9 @@ std::string PointNeuronPopulationLoader::getPopulationType() const noexcept
     return "point_neuron";
 }
 
-void PointNeuronPopulationLoader::load(NodeLoadContext &ctxt) const
+void PointNeuronPopulationLoader::load(NodeLoadContext &context) const
 {
-    auto colorData = NodeColorDataFactory::create<PointNeuronColorData>(ctxt);
-    SomaImporter::import(ctxt, std::move(colorData));
+    auto colorData = NodeColorDataFactory::create<PointNeuronColorData>(context);
+    SomaImporter::import(context, std::move(colorData));
 }
 } // namespace sonataloader

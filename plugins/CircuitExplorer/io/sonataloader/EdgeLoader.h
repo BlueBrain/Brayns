@@ -33,6 +33,6 @@ struct EdgeLoader
      *
      * @param ctxt
      */
-    static void loadEdges(EdgeLoadContext &ctxt);
+    static void loadEdges(EdgeLoadContext &context);
 };
 }

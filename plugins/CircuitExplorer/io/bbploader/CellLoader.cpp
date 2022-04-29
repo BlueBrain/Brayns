@@ -117,10 +117,12 @@ struct MetadataFactory
     {
         std::map<std::string, std::string> metadata;
 
+        const auto &gids = ctxt.gids;
         const auto &params = ctxt.loadParameters;
         const auto &targets = params.targets;
         const auto targetList = brayns::string_utils::join(targets, ",");
         metadata["Targets"] = targetList;
+        metadata["Neurons loaded count"] = std::to_string(gids.size());
 
         dst.setMetaData(std::move(metadata));
     }
@@ -138,15 +140,13 @@ std::vector<CellCompartments>
     const auto loadAxon = morphSettings.load_axon;
     const auto loadDend = morphSettings.load_dendrites;
 
+    MetadataFactory::create(context, model);
+
     if (loadSoma && !loadAxon && !loadDend)
     {
         return SomaImporter::import(context, model);
     }
-    else
-    {
-        return MorphologyImporter::import(context, model, updater);
-    }
 
-    MetadataFactory::create(context, model);
+    return MorphologyImporter::import(context, model, updater);
 }
 } // namespace bbploader

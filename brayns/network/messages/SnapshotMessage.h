@@ -38,7 +38,7 @@ BRAYNS_JSON_OBJECT_ENTRY(ImageSettings, image_settings, "Image settings", Requir
 BRAYNS_JSON_OBJECT_ENTRY(GenericObject<Camera>, camera, "Camera definition", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(LookAt, camera_view, "Camera 'look at' view settings", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(GenericObject<Renderer>, renderer, "Renderer definition", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(GenericAnimationSettings, animation_settings, "Animation settings", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, simulation_frame, "Simulation frame to render", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     file_path,

@@ -32,20 +32,20 @@
 namespace bbploader
 {
 void ReportLoader::load(
-    const LoadContext &ctxt,
-    const std::vector<CellCompartments> &comparts,
-    ProgressUpdater &cb,
+    const LoadContext &context,
+    const std::vector<CellCompartments> &compartments,
+    ProgressUpdater &callback,
     brayns::Model &model)
 {
-    const auto &params = ctxt.loadParameters;
+    const auto &params = context.loadParameters;
     const auto reportType = params.report_type;
     if (reportType == ReportType::NONE)
     {
         return;
     }
 
-    const auto &config = ctxt.config;
-    const auto &gids = ctxt.gids;
+    const auto &config = context.config;
+    const auto &gids = context.gids;
 
     std::unique_ptr<IReportData> data;
     std::unique_ptr<IColormapIndexer> indexer;
@@ -53,7 +53,7 @@ void ReportLoader::load(
     if (reportType == bbploader::ReportType::COMPARTMENT)
     {
         const auto &reportName = params.report_name;
-        cb.update("Loading report " + reportName);
+        callback.update("Loading report " + reportName);
 
         const auto reportPath = config.getReportSource(reportName).getPath();
         const brion::URI uri(reportPath);
@@ -62,12 +62,12 @@ void ReportLoader::load(
 
         CompartmentData &compartmentData = static_cast<CompartmentData &>(*data);
         const auto reportCompartments = compartmentData.computeMapping();
-        auto offsets = CompartmentMappingGenerator::generate(comparts, reportCompartments);
+        auto offsets = CompartmentMappingGenerator::generate(compartments, reportCompartments);
         indexer = std::make_unique<OffsetIndexer>(std::move(offsets));
     }
     else if (reportType == bbploader::ReportType::SPIKES)
     {
-        cb.update("Loading spikes");
+        callback.update("Loading spikes");
 
         const auto reportPath = config.getSpikeSource().getPath();
         const brion::URI uri(reportPath);

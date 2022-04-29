@@ -41,7 +41,7 @@ BRAYNS_JSON_OBJECT_ENTRY(
     float,
     percentage,
     "Percentage of neurons to load (Ignored if a list of gids is specified)",
-    brayns::Minimum(0.01f),
+    brayns::Minimum(0.001f),
     brayns::Maximum(1.f))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<std::string>,
@@ -54,7 +54,11 @@ BRAYNS_JSON_OBJECT_ENTRY(
     gids,
     "List of GIDs to load. Invalidates 'percentage' and 'targets' parameters",
     brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(bbploader::ReportType, report_type, "Type of report to load.")
+BRAYNS_JSON_OBJECT_ENTRY(
+    bbploader::ReportType,
+    report_type,
+    "Type of report to load.",
+    brayns::Default(bbploader::ReportType::NONE))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     report_name,

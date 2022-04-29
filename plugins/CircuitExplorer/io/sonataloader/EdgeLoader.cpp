@@ -27,9 +27,9 @@ namespace sl = sonataloader;
 
 struct PopulationTypeResolver
 {
-    static std::string resolve(sl::EdgeLoadContext &ctxt)
+    static std::string resolve(sl::EdgeLoadContext &context)
     {
-        const auto &population = ctxt.edgePopulation;
+        const auto &population = context.edgePopulation;
         const auto populationName = population.name();
         try
         {
@@ -37,24 +37,22 @@ struct PopulationTypeResolver
         }
         catch (...)
         {
-            const auto &network = ctxt.config;
+            const auto &network = context.config;
             const auto &config = network.circuitConfig();
             const auto populationProperties = config.getEdgePopulationProperties(populationName);
             return populationProperties.type;
         }
-
-        throw std::runtime_error("Could not determine the population type of edge population " + populationName);
     }
 };
 }
 
 namespace sonataloader
 {
-void EdgeLoader::loadEdges(EdgeLoadContext &ctxt)
+void EdgeLoader::loadEdges(EdgeLoadContext &context)
 {
     const auto loaderTable = EdgeLoaderTable::create();
-    const auto populationType = PopulationTypeResolver::resolve(ctxt);
+    const auto populationType = PopulationTypeResolver::resolve(context);
     const auto &loader = loaderTable.getLoader(populationType);
-    loader.load(ctxt);
+    loader.load(context);
 }
 }

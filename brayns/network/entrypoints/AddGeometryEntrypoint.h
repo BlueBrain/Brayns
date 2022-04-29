@@ -38,9 +38,9 @@ public:
     }
 
     void onRequest(
-        const typename Entrypoint<std::vector<AddGeometryProxy<T>>, ModelInstanceProxy>::Request &req) override
+        const typename Entrypoint<std::vector<AddGeometryProxy<T>>, ModelInstanceProxy>::Request &request) override
     {
-        auto params = req.getParams();
+        auto params = request.getParams();
         auto numGeometries = params.size();
 
         std::vector<T> geometries(numGeometries);
@@ -63,7 +63,7 @@ public:
         _scene.computeBounds();
 
         ModelInstanceProxy result(instance);
-        req.reply(result);
+        request.reply(result);
     }
 
 private:

@@ -59,9 +59,9 @@ struct SynapseReportMapping
 
 struct SynapseReportImporter
 {
-    static void import(sl::EdgeLoadContext &ctxt, std::vector<uint64_t> orderedEdgeIds)
+    static void import(sl::EdgeLoadContext &context, std::vector<uint64_t> orderedEdgeIds)
     {
-        const auto &params = ctxt.params;
+        const auto &params = context.params;
         const auto &reportName = params.edge_report_name;
 
         if (reportName.empty())
@@ -69,10 +69,10 @@ struct SynapseReportImporter
             return;
         }
 
-        const auto &edgePopulation = ctxt.edgePopulation;
+        const auto &edgePopulation = context.edgePopulation;
         const auto edgePopulationName = edgePopulation.name();
-        const auto &nodeSelection = ctxt.nodeSelection;
-        const auto &network = ctxt.config;
+        const auto &nodeSelection = context.nodeSelection;
+        const auto &network = context.config;
         const auto &simConfig = network.simulationConfig();
         const auto path = sl::SonataConfig::resolveReportPath(simConfig, reportName);
 
@@ -82,7 +82,7 @@ struct SynapseReportImporter
         auto offsets = ElementMappingGenerator::generate(orderedEdgeIds, mapping);
         auto indexer = std::make_unique<OffsetIndexer>(std::move(offsets));
 
-        auto &model = ctxt.model;
+        auto &model = context.model;
         model.addComponent<ReportComponent>(std::move(data), std::move(indexer));
     }
 };
@@ -143,12 +143,12 @@ struct SynapseAppender
 
 namespace sonataloader
 {
-void SynapseImporter::fromContext(EdgeLoadContext &ctxt)
+void SynapseImporter::fromContext(EdgeLoadContext &context)
 {
-    const auto &edgeSelection = ctxt.edgeSelection;
+    const auto &edgeSelection = context.edgeSelection;
     const auto edgeIds = edgeSelection.flatten();
-    const auto &population = ctxt.edgePopulation;
-    const auto &params = ctxt.params;
+    const auto &population = context.edgePopulation;
+    const auto &params = context.params;
     const auto afferent = params.load_afferent;
 
     std::vector<uint64_t> srcNodes;
@@ -165,23 +165,23 @@ void SynapseImporter::fromContext(EdgeLoadContext &ctxt)
         surfacePos = SonataSynapses::getEfferentSurfacePos(population, edgeSelection);
     }
 
-    fromData(ctxt, srcNodes, surfacePos);
+    fromData(context, srcNodes, surfacePos);
 }
 
 void SynapseImporter::fromData(
-    EdgeLoadContext &ctxt,
+    EdgeLoadContext &context,
     const std::vector<uint64_t> &nodeIds,
     const std::vector<brayns::Vector3f> &positions)
 {
-    const auto &params = ctxt.params;
+    const auto &params = context.params;
     const auto radius = params.radius;
     const auto afferent = params.load_afferent;
-    auto &model = ctxt.model;
-    const auto &network = ctxt.config;
+    auto &model = context.model;
+    const auto &network = context.config;
     const auto &config = network.circuitConfig();
-    const auto &edgePopulation = ctxt.edgePopulation;
+    const auto &edgePopulation = context.edgePopulation;
     const auto targetPopulationName = afferent ? edgePopulation.target() : edgePopulation.source();
-    const auto &edgeSelection = ctxt.edgeSelection;
+    const auto &edgeSelection = context.edgeSelection;
     const auto flatEdgeIds = edgeSelection.flatten();
 
     // Geometry
@@ -198,6 +198,6 @@ void SynapseImporter::fromData(
     model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
 
     // Simulation
-    SynapseReportImporter::import(ctxt, orderedEdgeIds);
+    SynapseReportImporter::import(context, orderedEdgeIds);
 }
 }

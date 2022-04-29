@@ -29,7 +29,7 @@
 
 namespace brayns
 {
-#define BRAYNS_LIGHT_PROPERTIES \
+#define BRAYNS_LIGHT_PROPERTIES() \
     BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Light color (Normalized RGB)") \
     BRAYNS_JSON_ADAPTER_GETSET( \
         "intensity", \
@@ -39,12 +39,12 @@ namespace brayns
     BRAYNS_JSON_ADAPTER_GETSET("visible", isVisible, setVisible, "Sets wether the light should be visible on the scene")
 
 BRAYNS_JSON_ADAPTER_BEGIN(AmbientLight)
-BRAYNS_LIGHT_PROPERTIES
+BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(DirectionalLight)
 BRAYNS_JSON_ADAPTER_GETSET("direction", getDirection, setDirection, "Light direction vector")
-BRAYNS_LIGHT_PROPERTIES
+BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(QuadLight)
@@ -63,7 +63,7 @@ BRAYNS_JSON_ADAPTER_GETSET(
     getHorizontalDisplacement,
     setHorizontalDisplacement,
     "Sets the horizontal displacement vector used to compute the bottom right corner")
-BRAYNS_LIGHT_PROPERTIES
+BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
 
 } // namespace brayns

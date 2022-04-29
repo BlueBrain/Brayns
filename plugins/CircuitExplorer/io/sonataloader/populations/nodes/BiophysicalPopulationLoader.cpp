@@ -32,11 +32,11 @@ std::string BiophysicalPopulationLoader::getPopulationType() const noexcept
     return "biophysical";
 }
 
-void BiophysicalPopulationLoader::load(NodeLoadContext &ctxt) const
+void BiophysicalPopulationLoader::load(NodeLoadContext &context) const
 {
-    auto colorData = NodeColorDataFactory::create<BiophysicalColorData>(ctxt);
+    auto colorData = NodeColorDataFactory::create<BiophysicalColorData>(context);
 
-    const auto &loadParams = ctxt.params;
+    const auto &loadParams = context.params;
     const auto &morphParams = loadParams.neuron_morphology_parameters;
     const auto soma = morphParams.load_soma;
     const auto axon = morphParams.load_axon;
@@ -44,14 +44,13 @@ void BiophysicalPopulationLoader::load(NodeLoadContext &ctxt) const
 
     if (soma && !axon && !dend)
     {
-        SomaImporter::import(ctxt, std::move(colorData));
+        SomaImporter::import(context, std::move(colorData));
+        return;
     }
-    else
-    {
-        const auto &population = ctxt.population;
-        const auto &selection = ctxt.selection;
-        const auto rotations = SonataCells::getRotations(population, selection);
-        MorphologyImporter::import(ctxt, rotations, std::move(colorData));
-    }
+
+    const auto &population = context.population;
+    const auto &selection = context.selection;
+    const auto rotations = SonataCells::getRotations(population, selection);
+    MorphologyImporter::import(context, rotations, std::move(colorData));
 }
 } // namespace sonataloader

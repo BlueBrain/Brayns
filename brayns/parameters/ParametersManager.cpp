@@ -171,13 +171,19 @@ void ParametersManager::_parse(int argc, const char **argv)
 
         _printVersion();
         if (vm.count("version"))
+        {
             exit(EXIT_SUCCESS);
+        }
 
         for (auto parameters : _parameterSets)
+        {
             parameters->parse(vm);
+        }
 
         if (vm.count("verbose"))
+        {
             print();
+        }
     }
     catch (const po::error &e)
     {
@@ -194,7 +200,9 @@ void ParametersManager::usage()
 void ParametersManager::print()
 {
     for (AbstractParameters *parameters : _parameterSets)
+    {
         parameters->print();
+    }
 }
 
 AnimationParameters &ParametersManager::getAnimationParameters()
@@ -238,20 +246,26 @@ void ParametersManager::resetModified()
 void ParametersManager::_processUnrecognizedOptions(const std::vector<std::string> &unrecognizedOptions) const
 {
     if (unrecognizedOptions.empty())
+    {
         return;
+    }
 
     const auto &unrecognized = unrecognizedOptions.front();
 
     std::vector<std::string> availableOptions;
     for (const auto &option : _allOptions.options())
+    {
         availableOptions.push_back(option->format_name());
+    }
 
     const auto suggestions = findSimilarOptions(unrecognized, availableOptions);
 
     std::string errorMessage = "Unrecognized option '" + unrecognized + "'.\n\nMost similar options are:";
 
     for (const auto &suggestion : suggestions)
+    {
         errorMessage += "\n\t" + suggestion;
+    }
 
     throw po::error(errorMessage);
 }

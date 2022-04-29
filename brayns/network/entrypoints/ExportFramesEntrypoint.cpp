@@ -71,10 +71,8 @@ struct FrameWritter
         const auto quality = imageSettings.getQuality();
         auto image = fb.getImage();
 
-        char frameName[64];
-        sprintf(frameName, "%05d", static_cast<int32_t>(frame));
-
-        auto filename = path + "/" + std::string(frameName) + "." + format;
+        auto frameName = fmt::format("{:05}", frame);
+        auto filename = path + "/" + frameName + "." + format;
         try
         {
             brayns::ImageEncoder::save(image, filename, quality);
@@ -190,17 +188,12 @@ public:
 
 namespace brayns
 {
-ExportFramesEntrypoint::ExportFramesEntrypoint(
-    Engine &engine,
-    ParametersManager &parmManager,
-    CancellationToken token,
-    std::shared_ptr<EngineObjectFactory<Camera>> cameraFactory,
-    std::shared_ptr<EngineObjectFactory<Renderer>> renderFactory)
+ExportFramesEntrypoint::ExportFramesEntrypoint(Engine &engine, ParametersManager &parmManager, CancellationToken token)
     : _engine(engine)
     , _paramsManager(parmManager)
     , _token(token)
-    , _cameraFactory(std::move(cameraFactory))
-    , _renderFactory(std::move(renderFactory))
+    , _cameraFactory(EngineFactories::createCameraFactory())
+    , _renderFactory(EngineFactories::createRendererFactory())
 {
 }
 
@@ -224,9 +217,9 @@ void ExportFramesEntrypoint::onRequest(const Request &request)
     // Params
     ExportFramesParams params;
     auto &systemCamera = _engine.getCamera();
-    params.camera = GenericObject<Camera>(systemCamera, *_cameraFactory);
+    params.camera = GenericObject<Camera>(systemCamera, _cameraFactory);
     auto &systemRender = _engine.getRenderer();
-    params.renderer = GenericObject<Renderer>(systemRender, *_renderFactory);
+    params.renderer = GenericObject<Renderer>(systemRender, _renderFactory);
     auto &systemFb = _engine.getFrameBuffer();
     params.image_settings = ImageSettings(systemFb.getFrameSize());
     request.getParams(params);

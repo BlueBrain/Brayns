@@ -30,6 +30,6 @@ class AstrocytePopulationLoader final : public NodePopulationLoader
 public:
     std::string getPopulationType() const noexcept override;
 
-    void load(NodeLoadContext &ctxt) const override;
+    void load(NodeLoadContext &context) const override;
 };
 } // namespace sonataloader

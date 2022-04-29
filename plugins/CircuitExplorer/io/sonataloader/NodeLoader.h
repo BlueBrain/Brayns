@@ -33,6 +33,6 @@ struct NodeLoader
      *
      * @param ctxt
      */
-    static void loadNodes(NodeLoadContext &ctxt);
+    static void loadNodes(NodeLoadContext &context);
 };
 }

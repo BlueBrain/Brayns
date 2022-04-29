@@ -63,9 +63,7 @@ std::vector<float> CompartmentData::getFrame(const uint32_t frameIndex) const
     auto frame = frameFuture.get();
     auto &data = frame.data;
 
-    auto &frameData = *data;
-
-    return frameData;
+    return *data;
 }
 
 std::vector<CellReportMapping> CompartmentData::computeMapping() const noexcept

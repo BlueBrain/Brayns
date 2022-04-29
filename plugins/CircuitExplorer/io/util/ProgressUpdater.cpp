@@ -1,7 +1,7 @@
 #include "ProgressUpdater.h"
 
-ProgressUpdater::ProgressUpdater(const brayns::LoaderProgress &cb, const size_t numStages)
-    : _callback(cb)
+ProgressUpdater::ProgressUpdater(const brayns::LoaderProgress &callback, const size_t numStages)
+    : _callback(callback)
     , _numStages(numStages)
     , _stageSize(1.f / static_cast<float>(_numStages))
     , _currentStage(0)

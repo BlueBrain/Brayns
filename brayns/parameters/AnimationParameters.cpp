@@ -42,6 +42,7 @@ void AnimationParameters::reset()
     _dt = 0.;
     _startFrame = 0u;
     _endFrame = 0u;
+    markModified();
 }
 
 void AnimationParameters::setStartFrame(const uint32_t startFrame) noexcept
@@ -76,7 +77,7 @@ uint32_t AnimationParameters::getFrame() const noexcept
 
 void AnimationParameters::setDt(const double dt) noexcept
 {
-    _dt = dt;
+    _updateValue(_dt, dt);
 }
 
 double AnimationParameters::getDt() const noexcept

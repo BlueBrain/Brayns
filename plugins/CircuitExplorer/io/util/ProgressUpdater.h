@@ -5,7 +5,7 @@
 class ProgressUpdater
 {
 public:
-    ProgressUpdater(const brayns::LoaderProgress &cb, const size_t stages);
+    ProgressUpdater(const brayns::LoaderProgress &callback, const size_t stages);
 
     void beginStage(const size_t numSubElements = 1);
 

@@ -29,10 +29,10 @@ namespace sonataloader
  */
 struct SynapseImporter
 {
-    static void fromContext(EdgeLoadContext &ctxt);
+    static void fromContext(EdgeLoadContext &context);
 
     static void fromData(
-        EdgeLoadContext &ctxt,
+        EdgeLoadContext &context,
         const std::vector<uint64_t> &nodeIds,
         const std::vector<brayns::Vector3f> &positions);
 };

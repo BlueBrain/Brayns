@@ -24,8 +24,11 @@
 /**
  * @brief Interface to access report data
  */
-struct IReportData
+class IReportData
 {
+public:
+    virtual ~IReportData() = default;
+
     /**
      * @brief Returns the size, in bytes, of a single frame
      *

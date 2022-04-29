@@ -27,9 +27,9 @@ namespace sl = sonataloader;
 
 struct PopulationTypeResolver
 {
-    static std::string resolve(sl::NodeLoadContext &ctxt)
+    static std::string resolve(sl::NodeLoadContext &context)
     {
-        const auto &population = ctxt.population;
+        const auto &population = context.population;
         const auto populationName = population.name();
         try
         {
@@ -37,24 +37,22 @@ struct PopulationTypeResolver
         }
         catch (...)
         {
-            const auto &network = ctxt.config;
+            const auto &network = context.config;
             const auto &config = network.circuitConfig();
             const auto populationProperties = config.getNodePopulationProperties(populationName);
             return populationProperties.type;
         }
-
-        throw std::runtime_error("Could not determine the population type of node population " + populationName);
     }
 };
 }
 
 namespace sonataloader
 {
-void NodeLoader::loadNodes(NodeLoadContext &ctxt)
+void NodeLoader::loadNodes(NodeLoadContext &context)
 {
     const auto loaderTable = NodeLoaderTable::create();
-    const auto populationType = PopulationTypeResolver::resolve(ctxt);
+    const auto populationType = PopulationTypeResolver::resolve(context);
     const auto &loader = loaderTable.getLoader(populationType);
-    loader.load(ctxt);
+    loader.load(context);
 }
 }

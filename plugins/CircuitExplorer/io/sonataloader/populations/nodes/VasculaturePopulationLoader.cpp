@@ -37,14 +37,14 @@ namespace sl = sonataloader;
 
 struct VasculatureImporter
 {
-    static void import(sl::NodeLoadContext &ctxt)
+    static void import(sl::NodeLoadContext &context)
     {
-        auto &cb = ctxt.progress;
+        auto &cb = context.progress;
         cb.update("Loading vasculature geometry");
 
-        const auto &population = ctxt.population;
-        const auto &selection = ctxt.selection;
-        const auto &params = ctxt.params;
+        const auto &population = context.population;
+        const auto &selection = context.selection;
+        const auto &params = context.params;
         const auto &vasculatureGeometrySettings = params.vasculature_geometry_parameters;
         const auto radiusMultiplier = vasculatureGeometrySettings.radius_multiplier;
 
@@ -54,18 +54,14 @@ struct VasculatureImporter
 
         auto startRadii = sl::SonataVasculature::getSegmentStartRadii(population, selection);
         auto endRadii = sl::SonataVasculature::getSegmentEndRadii(population, selection);
+
         if (radiusMultiplier != 1.f)
         {
-            std::transform(
-                startRadii.begin(),
-                startRadii.end(),
-                startRadii.begin(),
-                [mult = radiusMultiplier](const float r) { return r * mult; });
-            std::transform(
-                endRadii.begin(),
-                endRadii.end(),
-                endRadii.begin(),
-                [mult = radiusMultiplier](const float r) { return r * mult; });
+            for (size_t i = 0; i < startRadii.size(); ++i)
+            {
+                startRadii[i] *= radiusMultiplier;
+                endRadii[i] *= radiusMultiplier;
+            }
         }
 
         auto ids = selection.flatten();
@@ -82,32 +78,32 @@ struct VasculatureImporter
             geometry[i] = brayns::Primitive::cone(p0, r0, p1, r1);
         }
 
-        auto &model = ctxt.model;
+        auto &model = context.model;
         auto &vasculature =
             model.addComponent<VasculatureComponent>(std::move(ids), std::move(geometry), std::move(sections));
 
         auto colorHandler = std::make_unique<VasculatureColorHandler>(vasculature);
-        auto colorData = sl::NodeColorDataFactory::create<sl::VasculatureColorData>(ctxt);
+        auto colorData = sl::NodeColorDataFactory::create<sl::VasculatureColorData>(context);
         model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
     }
 };
 
 struct VasculatureReportImporter
 {
-    static void import(sl::NodeLoadContext &ctxt)
+    static void import(sl::NodeLoadContext &context)
     {
-        auto &cb = ctxt.progress;
-        const auto &params = ctxt.params;
+        auto &cb = context.progress;
+        const auto &params = context.params;
         const auto reportType = params.report_type;
         const auto reportName = params.report_name;
-        const auto &network = ctxt.config;
+        const auto &network = context.config;
         const auto &simConfig = network.simulationConfig();
         const auto path = sl::SonataConfig::resolveReportPath(simConfig, reportName);
 
-        const auto &population = ctxt.population;
+        const auto &population = context.population;
         const auto populationName = population.name();
 
-        const auto &selection = ctxt.selection;
+        const auto &selection = context.selection;
         const auto flatSelection = selection.flatten();
 
         const auto rawMapping = sl::SonataSimulationMapping::getCompartmentMapping(path, populationName, flatSelection);
@@ -131,19 +127,18 @@ struct VasculatureReportImporter
         }
 
         auto data = std::make_unique<sl::SonataReportData>(path, populationName, selection);
-        auto &model = ctxt.model;
+        auto &model = context.model;
 
         if (reportType == sl::ReportType::BLOODFLOW_RADII)
         {
             cb.update("Loading vasculature radii report");
             model.addComponent<VasculatureRadiiReportComponent>(std::move(data), std::move(offsets));
+            return;
         }
-        else
-        {
-            cb.update("Loading bloodflow report");
-            auto indexer = std::make_unique<OffsetIndexer>(std::move(offsets));
-            model.addComponent<ReportComponent>(std::move(data), std::move(indexer));
-        }
+
+        cb.update("Loading bloodflow report");
+        auto indexer = std::make_unique<OffsetIndexer>(std::move(offsets));
+        model.addComponent<ReportComponent>(std::move(data), std::move(indexer));
     }
 };
 }
@@ -155,15 +150,15 @@ std::string VasculaturePopulationLoader::getPopulationType() const noexcept
     return "vasculature";
 }
 
-void VasculaturePopulationLoader::load(NodeLoadContext &ctxt) const
+void VasculaturePopulationLoader::load(NodeLoadContext &context) const
 {
-    VasculatureImporter::import(ctxt);
+    VasculatureImporter::import(context);
 
-    const auto &params = ctxt.params;
+    const auto &params = context.params;
     const auto reportType = params.report_type;
     if (reportType != ReportType::NONE)
     {
-        VasculatureReportImporter::import(ctxt);
+        VasculatureReportImporter::import(context);
     }
 }
 } // namespace sonataloader
