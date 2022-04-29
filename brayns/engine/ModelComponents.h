@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/common/Bounds.h>
+#include <brayns/json/JsonType.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/utils/TypeNameDemangler.h>
 
@@ -28,6 +29,8 @@
 #include <string_view>
 #include <typeindex>
 #include <unordered_map>
+
+#include <ospray/ospray.h>
 
 namespace brayns
 {
@@ -87,6 +90,15 @@ protected:
      * @brief Compute the bounds of the content of the component, if it applies. Does nothing by default.
      */
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept;
+
+    /**
+     * @brief Called when a scene inspect event has hitted any geometry of the model that owns this component
+     */
+    virtual void onInspect(
+        const Vector3f &hit,
+        OSPGeometricModel modelHandle,
+        uint32_t primitiveID,
+        JsonObject &writeResult) const noexcept;
 
 private:
     friend class Model;
@@ -221,6 +233,18 @@ private:
      * @return Bounds
      */
     Bounds computeBounds(const Matrix4f &transform) const noexcept;
+
+    /**
+     * @brief Calls all the components for an inspect event. The components can write information
+     * into the output Json object.
+     *
+     * @param hit 3D position where the hit occoured
+     * @param modelHandle OSPGeometricModel handle that was hit
+     * @param primitiveID Index of the primitive that was hit
+     * @param writeResult Output parameter where the component might write information to send to the client
+     */
+    void onInspect(const Vector3f &hit, OSPGeometricModel modelHandle, uint32_t primitiveID, JsonObject &writeResult)
+        const noexcept;
 
 private:
     template<typename T>

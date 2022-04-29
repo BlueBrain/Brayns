@@ -37,6 +37,12 @@ public:
 
     void onDestroy() override;
 
+    void onInspect(
+        const brayns::Vector3f &hit,
+        OSPGeometricModel modelHandle,
+        uint32_t primitiveID,
+        brayns::JsonObject &writeResult) const noexcept override;
+
     /**
      * @brief Set the soma circuit geometries
      * @param ids

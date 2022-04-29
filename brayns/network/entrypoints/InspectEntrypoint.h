@@ -21,25 +21,23 @@
 
 #pragma once
 
-#include <brayns/engine/Renderer.h>
+#include <brayns/engine/Engine.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/InspectMessage.h>
 
-#include <brayns/network/adapters/RendererPickResultAdapter.h>
-
 namespace brayns
 {
-class InspectEntrypoint : public Entrypoint<InspectMessage, Renderer::PickResult>
+class InspectEntrypoint : public Entrypoint<InspectMessage, InspectResult>
 {
 public:
-    InspectEntrypoint(Renderer &renderer);
+    InspectEntrypoint(Engine &engine);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Renderer &_renderer;
+    Engine &_engine;
 };
 } // namespace brayns

@@ -28,4 +28,14 @@ namespace brayns
 BRAYNS_JSON_OBJECT_BEGIN(InspectMessage)
 BRAYNS_JSON_OBJECT_ENTRY(Vector2f, position, "Position XY (normalized)")
 BRAYNS_JSON_OBJECT_END()
+
+BRAYNS_JSON_OBJECT_BEGIN(InspectResult)
+BRAYNS_JSON_OBJECT_ENTRY(
+    bool,
+    hit,
+    "A boolean flag indicating wether there was a hit. If false, the rest of the fields must be ignored")
+BRAYNS_JSON_OBJECT_ENTRY(Vector3f, position, "3D hit position")
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model hitted")
+BRAYNS_JSON_OBJECT_ENTRY(JsonValue, metadata, "Extra attributes which vary depending on the type of model hitted")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

@@ -99,14 +99,14 @@ public:
      */
     const Transformation &getTransform() const noexcept;
 
-private:
-    friend class SceneClipManager;
-    friend class SceneModelManager;
-
     /**
      * @brief Returns the OSPRay handle of this instance.
      */
     OSPInstance handle() const noexcept;
+
+private:
+    friend class SceneClipManager;
+    friend class SceneModelManager;
 
     /**
      * @brief Commit implementation

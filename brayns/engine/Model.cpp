@@ -37,6 +37,12 @@ const std::map<std::string, std::string> &Model::getMetaData() const noexcept
     return _metadata;
 }
 
+void Model::onInspect(const Vector3f &hit, OSPGeometricModel modelHandle, uint32_t primitiveID, JsonObject &writeResult)
+    const noexcept
+{
+    _components.onInspect(hit, modelHandle, primitiveID, writeResult);
+}
+
 ModelGroup &Model::getGroup() noexcept
 {
     return _group;
