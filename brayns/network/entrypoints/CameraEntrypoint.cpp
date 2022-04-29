@@ -23,33 +23,85 @@
 
 namespace brayns
 {
-GetCameraEntrypoint::GetCameraEntrypoint(const Camera &camera)
-    : GetEntrypoint(camera)
+GetCameraTypeEntrypoint::GetCameraTypeEntrypoint(Engine &engine)
+    : _engine(engine)
 {
 }
 
-std::string GetCameraEntrypoint::getMethod() const
+std::string GetCameraTypeEntrypoint::getMethod() const
 {
-    return "get-camera";
+    return "get-camera-type";
 }
 
-std::string GetCameraEntrypoint::getDescription() const
+std::string GetCameraTypeEntrypoint::getDescription() const
 {
-    return "Get the current state of the camera";
+    return "Returns the type of the current camera";
 }
 
-SetCameraEntrypoint::SetCameraEntrypoint(Camera &camera)
-    : SetEntrypoint(camera)
+void GetCameraTypeEntrypoint::onRequest(const Request &request)
+{
+    auto &camera = _engine.getCamera();
+    auto name = camera.getName();
+    request.reply(name);
+}
+
+SetCameraPerspectiveEntrypoint::SetCameraPerspectiveEntrypoint(Engine &engine)
+    : SetCameraEntrypoint<PerspectiveCamera>(engine)
 {
 }
 
-std::string SetCameraEntrypoint::getMethod() const
+std::string SetCameraPerspectiveEntrypoint::getMethod() const
 {
-    return "set-camera";
+    return "set-camera-perspective";
 }
 
-std::string SetCameraEntrypoint::getDescription() const
+std::string SetCameraPerspectiveEntrypoint::getDescription() const
 {
-    return "Set the current state of the camera";
+    return "Sets the current camera to a perspective one, with the specified parameters";
+}
+
+SetCameraOrthographicEntrypoint::SetCameraOrthographicEntrypoint(Engine &engine)
+    : SetCameraEntrypoint<OrthographicCamera>(engine)
+{
+}
+
+std::string SetCameraOrthographicEntrypoint::getMethod() const
+{
+    return "set-camera-orthographic";
+}
+
+std::string SetCameraOrthographicEntrypoint::getDescription() const
+{
+    return "Sets the current camera to an orthographic one, with the specified parameters";
+}
+
+GetCameraPerspectiveEntrypoint::GetCameraPerspectiveEntrypoint(Engine &engine)
+    : GetCameraEntrypoint<PerspectiveCamera>(engine)
+{
+}
+
+std::string GetCameraPerspectiveEntrypoint::getMethod() const
+{
+    return "get-camera-perspective";
+}
+
+std::string GetCameraPerspectiveEntrypoint::getDescription() const
+{
+    return "Returns the current camera as perspective";
+}
+
+GetCameraOrthographicEntrypoint::GetCameraOrthographicEntrypoint(Engine &engine)
+    : GetCameraEntrypoint<OrthographicCamera>(engine)
+{
+}
+
+std::string GetCameraOrthographicEntrypoint::getMethod() const
+{
+    return "get-camera-orthographic";
+}
+
+std::string GetCameraOrthographicEntrypoint::getDescription() const
+{
+    return "Returns the current camera as orthographic";
 }
 } // namespace brayns

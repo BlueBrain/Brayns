@@ -38,14 +38,11 @@ void AnimationParameters::print()
 
 void AnimationParameters::reset()
 {
-    _updateValue(_current, 0u, false);
-    _updateValue(_dt, 0., false);
-    _updateValue(_startFrame, 0u, false);
-    _updateValue(_endFrame, 0u, false);
-
-    // trigger the modified callback only once
-    if (isModified())
-        markModified();
+    _current = 0u;
+    _dt = 0.;
+    _startFrame = 0u;
+    _endFrame = 0u;
+    markModified();
 }
 
 void AnimationParameters::setStartFrame(const uint32_t startFrame) noexcept
@@ -76,13 +73,6 @@ void AnimationParameters::setFrame(const uint32_t value) noexcept
 uint32_t AnimationParameters::getFrame() const noexcept
 {
     return _current;
-}
-
-uint32_t AnimationParameters::getAbsoluteFrame() const noexcept
-{
-    const auto numFrames = _endFrame >= _startFrame ? _endFrame - _startFrame : 0;
-    auto current = numFrames == 0 ? 0 : (_current >= numFrames ? numFrames - 1 : _current);
-    return _startFrame + current;
 }
 
 void AnimationParameters::setDt(const double dt) noexcept

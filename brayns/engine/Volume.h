@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,37 +20,174 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
-#include <brayns/common/MathTypes.h>
-#include <brayns/common/VolumeDataType.h>
+#include <brayns/common/Bounds.h>
+
+#include <ospray/ospray.h>
 
 #include <memory>
+#include <numeric>
+#include <string_view>
+#include <vector>
 
 namespace brayns
 {
-/** A base class for volumes to share common properties. */
-class Volume : public BaseObject
+/**
+ * @brief The RenderableBoundsUpdater is a templated class that can be specialized to update bounds
+ * based on a trasnformation and a given specialized volume
+ */
+template<typename T>
+class VolumeBoundsUpdater
 {
 public:
-    /** @name API for engine-specific code */
-    //@{
-    virtual void setDataRange(const Vector2f &range) = 0;
-
-    virtual void commit() = 0;
-    //@}
-
-    Volume(const Vector3ui &dimensions, const Vector3f &spacing, const VolumeDataType type);
-
-    size_t getSizeInBytes() const;
-
-    Boxd getBounds() const;
-
-protected:
-    std::atomic_size_t _sizeInBytes{0};
-    const Vector3ui _dimensions;
-    const Vector3f _spacing;
-    const VolumeDataType _dataType;
+    /**
+     * @brief Updates a Bounds object with the given volume trasnformed by the given matrix
+     * @param volume The source volume used to update the bounds
+     * @param transform The matrix by which to trasnform the geometry
+     * @param bounds The bounds to update
+     */
+    static void update(const T &volume, const Matrix4f &transform, Bounds &bounds)
+    {
+        (void)volume;
+        (void)transform;
+        (void)bounds;
+    }
 };
 
-using VolumePtr = std::shared_ptr<Volume>;
-} // namespace brayns
+/**
+ * @brief Utility class to deduce the OSPRay ID for a given volume type
+ */
+template<typename T>
+class VolumeOSPRayID
+{
+public:
+    /**
+     * @brief Returns the OSPRay ID of the type
+     */
+    static std::string_view get()
+    {
+        return "";
+    }
+};
+
+/**
+ * @brief Utility class to commit volume-specific parameters
+ */
+template<typename T>
+class VolumeCommitter
+{
+public:
+    /**
+     * @brief Commits the type specific parameters
+     */
+    static void commit(OSPVolume handle, const T &volumeData)
+    {
+        (void)handle;
+        (void)volumeData;
+    }
+};
+
+/**
+ * @brief The Volume class is a specializable wrapper to implement different types of volumes which shares the same
+ * usage (as all volumes in OSPRay)
+ */
+template<typename T>
+class Volume
+{
+public:
+    Volume()
+        : _handle(ospNewVolume(VolumeOSPRayID<T>::get().data()))
+    {
+    }
+
+    Volume(const Volume &) = delete;
+    Volume &operator=(const Volume &) = delete;
+
+    Volume(Volume &&o) noexcept
+    {
+        *this = std::move(o);
+    }
+
+    Volume &operator=(Volume &&o) noexcept
+    {
+        std::swap(_handle, o._handle);
+        _dirty = o._dirty;
+        _volumeData = std::move(o._volumeData);
+        return *this;
+    }
+
+    ~Volume()
+    {
+        ospRelease(_handle);
+    }
+
+    /**
+     * @brief Sets the data of this volume, which will trigger a commit of the data to OSPRay
+     */
+    void setData(T volumeData) noexcept
+    {
+        _volumeData = std::move(volumeData);
+        _dirty = true;
+    }
+
+    /**
+     * @brief Returns the current volume data
+     */
+    const T &getData() const noexcept
+    {
+        return _volumeData;
+    }
+
+    /**
+     * @brief Allows to pass a callback to modify the volume data, which will trigger a commit of the data to OSPRay
+     */
+    void manipulate(const std::function<void(T &volumeData)> &callback)
+    {
+        callback(_volumeData);
+        _dirty = true;
+    }
+
+    /**
+     * @brief Commits the volume data to OSPRay. Will only have effect if the volume has been modified since the last
+     * commit. If so, it will call commitVolumeSpecificParams() and clear the dirty flag.
+     */
+    bool commit()
+    {
+        if (!_dirty)
+        {
+            return false;
+        }
+
+        VolumeCommitter<T>::commit(_handle, _volumeData);
+
+        ospCommit(_handle);
+        _dirty = false;
+        return true;
+    }
+
+    /**
+     * @brief Computes the bounds of this volume with the given trasnformation. It will call the VolumeBoundsUpdater
+     * with the type this Volume has been instantiated.
+     */
+    Bounds computeBounds(const Matrix4f &transform) const noexcept
+    {
+        Bounds result;
+        VolumeBoundsUpdater<T>::update(_volumeData, transform, result);
+        return result;
+    }
+
+    /**
+     * @brief Returns the volume OSPRay handle
+     *
+     * @return OSPVolume
+     */
+    OSPVolume handle() const noexcept
+    {
+        return _handle;
+    }
+
+private:
+    OSPVolume _handle{nullptr};
+    bool _dirty{false};
+    T _volumeData;
+};
+}

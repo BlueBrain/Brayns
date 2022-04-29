@@ -13,7 +13,8 @@ ubuntu-clangformat-check:
     entrypoint: [""]
   script:
     - apt update && apt install -y git clang-format-12
-    - CLANG_FORMAT_EXTENSIONS="\.[cmh]$|\.[chi]pp$|\.frag$|\.vert$|\.glsl$|\.ispc$|\.ih$"
+    - git --version
+    - CLANG_FORMAT_EXTENSIONS="\.[cmh]$|\.[chi]pp$"
     - if [ -f .clang-format ]; then
     - git pull origin develop
     - if git diff --name-only --diff-filter=ACMR origin/develop | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -style=file -fallback-style=none -output-replacements-xml | grep "<replacement " >/dev/null ; then
@@ -34,7 +35,7 @@ ubuntu-cpp-build:
   stage: test
   variables:
     APT_PACKAGES: git libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev
-    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DISPC_EXECUTABLE=/app/ispc-v1.10.0-linux/bin/ispc -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON
+    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON
     KUBERNETES_CPU_LIMIT: 4
     KUBERNETES_CPU_REQUEST: 4
     KUBERNETES_MEMORY_LIMIT: 8Gi
@@ -45,37 +46,72 @@ ubuntu-cpp-build:
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
 
     # Install ISPC
-    - ISPC_VERSION=1.10.0b
+    - ISPC_VERSION=1.17.0
     - ISPC_DIR=ispc-v${ISPC_VERSION}-linux
-    - ISPC_PATH=/app/ispc-v1.10.0-linux
+    - ISPC_PATH=/app/ispc-v1.17.0-linux
     - export PATH=$PATH:${ISPC_PATH}
 
     - mkdir -p ${ISPC_PATH}
-    - wget https://github.com/ispc/ispc/releases/download/v1.10.0/${ISPC_DIR}.tar.gz
+    - wget https://github.com/ispc/ispc/releases/download/v${ISPC_VERSION}/${ISPC_DIR}.tar.gz
     - tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1
     - rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
 
+    - mkdir -p ${DIST_PATH}
+
+    # Install One TBB
+    - ONETBB_VERSION=2021.5.0
+    - ONETBB_FILE=oneapi-tbb-${ONETBB_VERSION}-lin.tgz
+    - wget https://github.com/oneapi-src/oneTBB/releases/download/v${ONETBB_VERSION}/${ONETBB_FILE}
+    - tar zxvf ${ONETBB_FILE} -C ${DIST_PATH} --strip-components=1
+
     # Install embree
     # https://github.com/embree/embree/releases
-    - EMBREE_VERSION=3.5.2
+    - EMBREE_VERSION=3.13.3
     - EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
-    - mkdir -p ${DIST_PATH}
     - wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE}
     - tar zxvf ${EMBREE_FILE} -C ${DIST_PATH} --strip-components=1
     - rm -rf ${DIST_PATH}/bin ${DIST_PATH}/doc
 
+    # Install rk common
+    - RKCOMMON_VERSION=v1.9.0
+    - git clone https://github.com/ospray/rkcommon
+    - pushd rkcommon
+    - git checkout ${RKCOMMON_VERSION}
+    - mkdir build
+    - pushd build
+    - cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${DIST_PATH} -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
+    - ninja -j$NUM_COMPILE_JOBS install
+    - popd
+    - popd
+
+    # Install open vkl
+    - OPENVKL_VERSION=v1.2.0
+    - git clone https://github.com/openvkl/openvkl
+    - pushd openvkl
+    - git checkout ${OPENVKL_VERSION}
+    - mkdir build
+    - pushd build
+    - cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${DIST_PATH} -DCMAKE_INSTALL_PREFIX=${DIST_PATH} -DBUILD_EXAMPLES=OFF -DISPC_EXECUTABLE=/app/ispc-v1.17.0-linux/bin/ispc
+    - ninja -j$NUM_COMPILE_JOBS install
+    - popd
+    - popd
+
     # Install OSPRay
     # https://github.com/ospray/ospray/releases
-    - OSPRAY_TAG=v1.8.5
+    - OSPRAY_TAG=v2.9.0
     - OSPRAY_SRC=/app/ospray
 
     - mkdir -p ${OSPRAY_SRC}
     - git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC}
-    - cd ${OSPRAY_SRC}
+    - pushd ${OSPRAY_SRC}
     - git checkout ${OSPRAY_TAG}
-    - mkdir -p build && cd build
-    - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
+    - mkdir -p build
+    - pushd build
+    - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_APPS_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS_BENCHMARK=OFF -DOSPRAY_ENABLE_APPS_EXAMPLES=OFF -DOSPRAY_ENABLE_APPS_TESTING=OFF -DOSPRAY_APPS_ENABLE_GLM=OFF -DOSPRAY_MODULE_DENOISER=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH} -DISPC_EXECUTABLE=/app/ispc-v1.17.0-linux/bin/ispc
     - ninja -j$NUM_COMPILE_JOBS install
+    - popd
+    - popd
+
     - cd $CI_PROJECT_DIR
   rules:
     - if: $GITHUB_PULL_REQUEST_ID

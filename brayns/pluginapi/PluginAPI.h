@@ -21,10 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Camera.h>
 #include <brayns/engine/Engine.h>
-#include <brayns/engine/Renderer.h>
-#include <brayns/engine/Scene.h>
 #include <brayns/io/LoaderRegistry.h>
 #include <brayns/parameters/ParametersManager.h>
 
@@ -47,32 +44,11 @@ public:
     virtual Engine &getEngine() = 0;
 
     /**
-     * @brief Get the scene.
-     *
-     * @return Scene& Scene.
-     */
-    virtual Scene &getScene() = 0;
-
-    /**
      * @brief Get the parameters.
      *
      * @return ParametersManager& Parameters.
      */
     virtual ParametersManager &getParametersManager() = 0;
-
-    /**
-     * @brief Get the camera.
-     *
-     * @return Camera& Camera.
-     */
-    virtual Camera &getCamera() = 0;
-
-    /**
-     * @brief Get the renderer.
-     *
-     * @return Renderer& Renderer.
-     */
-    virtual Renderer &getRenderer() = 0;
 
     /**
      * @brief Get the available loaders.

@@ -28,107 +28,10 @@
 
 namespace brayns
 {
-template<class T>
-class Box
-{
-public:
-    using vec = glm::vec<3, T>;
-
-    Box() = default;
-
-    Box(const vec &pMin, const vec &pMax)
-        : _min(glm::min(pMin, pMax))
-        , _max(glm::max(pMin, pMax))
-    {
-    }
-
-    bool operator==(const Box<T> &other) const
-    {
-        return _min == other._min && _max == other._max;
-    }
-
-    void merge(const Box<T> &aabb)
-    {
-        _min = glm::min(_min, aabb.getMin());
-        _max = glm::max(_max, aabb.getMax());
-    }
-
-    void merge(const vec &point)
-    {
-        _min = glm::min(_min, point);
-        _max = glm::max(_max, point);
-    }
-
-    void intersect(const Box<T> &aabb)
-    {
-        _min = glm::max(_min, aabb.getMin());
-        _max = glm::min(_max, aabb.getMax());
-    }
-
-    void reset()
-    {
-        _min = vec(std::numeric_limits<T>::max());
-        _max = vec(-std::numeric_limits<T>::max());
-    }
-
-    bool isEmpty() const
-    {
-        return _min.x >= _max.x || _min.y >= _max.y || _min.z >= _max.z;
-    }
-
-    vec getCenter() const
-    {
-        return (_min + _max) * .5;
-    }
-
-    vec getSize() const
-    {
-        return _max - _min;
-    }
-
-    const vec &getMin() const
-    {
-        return _min;
-    }
-
-    const vec &getMax() const
-    {
-        return _max;
-    }
-
-    void setMin(const vec &min)
-    {
-        _min = min;
-    }
-
-    void setMax(const vec &max)
-    {
-        _max = max;
-    }
-
-#ifdef __INTEL_COMPILER // Workaround for ICC. Make members public
-public:
-    vec _min{std::numeric_limits<T>::max()};
-    vec _max{-std::numeric_limits<T>::max()};
-#else
-private:
-    vec _min{std::numeric_limits<T>::max()};
-    vec _max{-std::numeric_limits<T>::max()};
-#endif
-};
-
-/**
- * AABB definitions
- */
-using Boxf = Box<float>;
-using Boxd = Box<double>;
-
 /**
  * Matrix definitions
  */
-using Matrix3d = glm::mat<3, 3, double>;
 using Matrix3f = glm::mat3;
-using Matrix4d = glm::mat<4, 4, double>;
 using Matrix4f = glm::mat4;
 
 /**
@@ -144,28 +47,9 @@ using Vector2f = glm::vec2;
 using Vector3f = glm::vec3;
 using Vector4f = glm::vec4;
 
-using Vector2d = glm::vec<2, double>;
-using Vector3d = glm::vec<3, double>;
-using Vector4d = glm::vec<4, double>;
-
-/** A clip plane is defined by a normal and a distance expressed
- * in absolute value of the coordinate system. Values are stored
- * in a Vector4, with the following order: nx, ny, nz and d
- */
-using Plane = Vector4d;
-
 /**
  * Quaternion definitions
  */
 using Quaternion = glm::quat;
-using Quaterniond = glm::tquat<double, glm::highp>; //!< Double quaternion.
-} // namespace brayns
 
-namespace std
-{
-template<typename T>
-std::ostream &operator<<(std::ostream &os, const brayns::Box<T> &box)
-{
-    return os << box.getMin() << " - " << box.getMax();
-}
-} // namespace std
+} // namespace brayns

@@ -21,24 +21,28 @@
 
 #include "ExtractMaterial.h"
 
+#include <brayns/engine/components/MaterialComponent.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace brayns
 {
-Material &ExtractMaterial::fromId(ModelDescriptor &descriptor, size_t id)
+Material &ExtractMaterial::fromModel(ModelInstance &instance)
 {
-    auto &model = descriptor.getModel();
-    auto modelId = descriptor.getModelID();
-    return fromId(model, modelId, id);
+    auto &model = instance.getModel();
+    auto modelId = instance.getID();
+    return fromModel(model, modelId);
 }
 
-Material &ExtractMaterial::fromId(Model &model, size_t modelId, size_t id)
+Material &ExtractMaterial::fromModel(Model &model, uint32_t modelId)
 {
-    auto material = model.getMaterial(id);
-    if (!material)
+    try
     {
-        throw JsonRpcException("No material with ID " + std::to_string(id) + " in model " + std::to_string(modelId));
+        auto &materialComponent = model.getComponent<MaterialComponent>();
+        return materialComponent.getMaterial();
     }
-    return *material;
+    catch (...)
+    {
+        throw JsonRpcException("Model " + std::to_string(modelId) + " does not have a material");
+    }
 }
 } // namespace brayns

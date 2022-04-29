@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -23,80 +24,125 @@
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
 #include <brayns/common/PixelFormat.h>
-#include <brayns/common/propertymap/PropertyMap.h>
+#include <brayns/engine/imageoperations/ImageOperationManager.h>
 #include <brayns/utils/image/Image.h>
 
-#include <memory>
+#include <ospray/ospray.h>
 
 namespace brayns
 {
+/**
+ * @brief The FrameBuffer class is the object that handles the frames rendered by a given renderer
+ */
 class FrameBuffer : public BaseObject
 {
 public:
-    /** @name API for engine-specific code */
-    //@{
-    /** Map the buffer for reading with get*Buffer(). */
-    virtual void map() = 0;
+    FrameBuffer() = default;
+    ~FrameBuffer();
 
-    /** Unmap the buffer for reading with get*Buffer(). */
-    virtual void unmap() = 0;
+    FrameBuffer(const FrameBuffer &) = delete;
+    FrameBuffer &operator=(const FrameBuffer &) = delete;
 
-    /** @return the color buffer, valid only after map(). */
-    virtual const uint8_t *getColorBuffer() const = 0;
+    FrameBuffer(FrameBuffer &&) = delete;
+    FrameBuffer &operator=(FrameBuffer &&) = delete;
 
-    /** @return the depth buffer, valid only after map(). */
-    virtual const float *getDepthBuffer() const = 0;
+    /**
+     * @brief Maps OSPRay backend framebuffer to an accessible system buffer
+     */
+    void map();
 
-    /** Resize the framebuffer to the new size. */
-    virtual void resize(const Vector2ui &frameSize) = 0;
+    /**
+     * @brief Removes OSPRay backend framebuffer mapping to system buffer
+     */
+    void unmap();
 
-    /** Clear the framebuffer. */
-    virtual void clear();
+    /**
+     * @brief Returns the OSPRay mapped framebuffer as a system buffer. To be valid, a call to map() must be
+     * made before calling this method. After calling unmap() the pointer returned by this method is invalidated
+     */
+    const uint8_t *getColorBuffer() const;
 
-    /** @return the current framebuffer size. */
-    virtual Vector2ui getSize() const;
+    /**
+     * @brief Syncs this object data to the OSPRay backend framebuffer
+     * @returns true if there was anything to commit
+     */
+    bool commit();
 
-    /** Enable/disable accumulation state on the framebuffer. */
-    virtual void setAccumulation(const bool accumulation);
+    /**
+     * @brief Sets the frame dimensions (width x height)
+     */
+    void setFrameSize(const Vector2ui &frameSize);
 
-    /** Set a new framebuffer format. */
-    virtual void setFormat(PixelFormat frameBufferFormat);
+    /**
+     * @brief Returns the current frame dimensions (width x height)
+     */
+    const Vector2ui &getFrameSize() const noexcept;
 
-    /** Set a new subsampling with a factor from 1 to x of the current size. */
-    virtual void setSubsampling(const size_t factor);
+    /**
+     * @brief Enables or disables accumulation. Accumulation is a proccess in which a frame is integrated
+     * over multiple calls render calls, rendering 1 sample per pixel on each call (It allows for more
+     * interactivity as it does not block the main thread).
+     */
+    void setAccumulation(const bool accumulation) noexcept;
 
-    /** Create and set a pixelop (pre/post filter) on the framebuffer. */
-    virtual void createPixelOp(const std::string &name);
+    /**
+     * @brief Returns wether this framebuffer is integrating on accumulation mode or not
+     */
+    bool isAccumulating() const noexcept;
 
-    /** Update the current pixelop with the given properties. */
-    virtual void updatePixelOp(const PropertyMap &properties);
-    //@}
+    /**
+     * @brief Sets the framebuffer pixel format
+     */
+    void setFormat(PixelFormat frameBufferFormat) noexcept;
 
-    FrameBuffer(const std::string &name, const Vector2ui &frameSize, PixelFormat frameBufferFormat);
+    /**
+     * @brief Returns the framebuffer current pixel format
+     */
+    PixelFormat getFrameBufferFormat() const noexcept;
 
-    size_t getColorDepth() const;
+    /**
+     * @brief If on accumulation mode, it resets the accumulation to 0
+     */
+    void clear() noexcept;
 
-    const Vector2ui &getFrameSize() const;
+    /**
+     * @brief Increments the number of accumulation frames currently integrated into this framebuffer.
+     * If not in accumulation mode, the action has no effect.
+     */
+    void incrementAccumFrames() noexcept;
 
-    bool getAccumulation() const;
+    /**
+     * @brief Returns the number of accumulation frames currently integrated into this framebuffer. If
+     * not in accumulation mode, the result has not value.
+     */
+    int32_t numAccumFrames() const noexcept;
 
-    PixelFormat getFrameBufferFormat() const;
-
-    const std::string &getName() const;
-
-    void incrementAccumFrames();
-
-    size_t numAccumFrames() const;
-
+    /**
+     * @brief Returns an Image object with the current contents of the framebuffer
+     */
     Image getImage();
 
-protected:
-    const std::string _name;
-    Vector2ui _frameSize;
-    PixelFormat _frameBufferFormat;
-    bool _accumulation{true};
-    std::atomic_size_t _accumFrames{0};
-};
+    /**
+     * @brief Returns the OSPRay backend framebuffer handle object
+     */
+    OSPFrameBuffer handle() const noexcept;
 
-using FrameBufferPtr = std::shared_ptr<FrameBuffer>;
+    /**
+     * @brief Returns the image operations manager
+     * @return ImageOperationManager &
+     */
+    ImageOperationManager &getOperationsManager() noexcept;
+
+private:
+    Vector2ui _frameSize{800u, 600u};
+    PixelFormat _frameBufferFormat{PixelFormat::SRGBA_I8};
+    bool _accumulation{true};
+    int32_t _accumFrames{0};
+
+    OSPFrameBuffer _handle{nullptr};
+
+    uint8_t *_colorBuffer{nullptr};
+
+    ImageOperationManager _operationManager;
+};
 } // namespace brayns

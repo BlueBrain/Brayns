@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,201 +21,109 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
-#include <brayns/common/MaterialsColorMap.h>
-#include <brayns/common/scene/ClipPlane.h>
-#include <brayns/common/transferFunction/TransferFunction.h>
-#include <brayns/engine/LightManager.h>
-#include <brayns/engine/Model.h>
-#include <brayns/parameters/AnimationParameters.h>
-#include <brayns/parameters/VolumeParameters.h>
+#include <brayns/common/Bounds.h>
+#include <brayns/engine/scenecomponents/SceneClipManager.h>
+#include <brayns/engine/scenecomponents/SceneLightManager.h>
+#include <brayns/engine/scenecomponents/SceneModelManager.h>
+#include <brayns/parameters/ParametersManager.h>
 
-#include <shared_mutex>
+#include <ospray/ospray.h>
 
 namespace brayns
 {
 /**
-
-   Scene object
-
-   This object contains collections of geometries, materials and light sources
-   that are used to describe the 3D scene to be rendered. Scene is the base
-   class for rendering-engine-specific inherited scenes.
+ * @brief The Scene class is the container of objects that are being rendered. It contains Models, which can
+ * be geometry, volumes or clipping geometry, as well as the lights.
  */
-class Scene : public BaseObject
+class Scene
 {
 public:
-    /** @name API for engine-specific code */
-    //@{
+    Scene();
+    ~Scene();
+
+    Scene(const Scene &) = delete;
+    Scene &operator=(const Scene &) = delete;
+
+    Scene(Scene &&) = delete;
+    Scene &operator=(Scene &&) = delete;
+
     /**
-     * Called after scene-related changes have been made before rendering the
-     * scene.
+     * @brief Return the bounds of the scene
      */
-    virtual void commit();
+    const Bounds &getBounds() const noexcept;
 
     /**
-     * Commits lights to renderers.
-     * @return True if lights were committed, false otherwise
+     * @brief Recompute bounds based on its current instances. It will use the current bounds of each model instance,
+     * (it will not call computeBound() on the instances)
      */
-    virtual bool commitLights() = 0;
-
-    /** Factory method to create an engine-specific model. */
-    virtual ModelPtr createModel() const = 0;
-
-    //@}
+    void computeBounds() noexcept;
 
     /**
-     * Creates a scene object responsible for handling models, simulations and
-     * light sources.
+     * @brief Called before a new frame is. Will call onPreRender on all the models of the scene
      */
-    Scene(AnimationParameters &animationParameters, VolumeParameters &volumeParameters);
+    void preRender(const ParametersManager &params);
 
     /**
-        Returns the bounding box of the scene
-    */
-    const Boxd &getBounds() const;
-
-    /** Gets the light manager */
-    LightManager &getLightManager();
-
-    /**
-        Adds a model to the scene
-        @throw std::runtime_error if model is empty
-      */
-    size_t addModel(ModelDescriptorPtr model);
-
-    /**
-     * @brief Adds a model to the scene with the specific model id
-     * @param id to be used as model identifier
-     * @param model the model itself
+     * @brief Called after a new frame is rendered. Will call onPostRender on all the models of the scene
      */
-    void addModel(const size_t id, ModelDescriptorPtr model);
+    void postRender(const ParametersManager &params);
 
     /**
-        Removes a model from the scene
-        @param id id of the model (descriptor)
-        @return True if model was found and removed, false otherwise
-      */
-    bool removeModel(const size_t id);
-
-    /**
-     * @brief Check wether a model has been marked for replacement
-     *        for a new model
-     * @param id the ID of the model to replace the current one
-     * @return true if the model is on the list to be replaced
+     * @brief commit implementation.
+     * @return True if anything changed since the last commit operation, false otherwise
      */
-    bool isMarkedForReplacement(const size_t id);
+    bool commit();
 
     /**
-     * @brief Replaces an existing model (given its ID) for a new one
-     * @param id the ID of the model to replace
-     * @param modelDescriptor The model which will replace the current one
-     * @return True if the model was found and replace, false otherwise
-     */
-    bool replaceModel(const size_t id, ModelDescriptorPtr modelDescriptor);
-
-    ModelDescriptorPtr getModel(const size_t id) const;
-
-    const std::vector<ModelDescriptorPtr> &getModels() const;
-
-    /**
-        Builds a default scene made of a Cornell box, a reflective cube, and
-        a transparent sphere
-    */
-    void buildDefault();
-
-    /**
-     * @return true if the scene does not contain any geometry, false otherwise
-     */
-    bool empty() const;
-
-    /** Add a clip plane to the scene.
-     * @param plane The coefficients of the clip plane equation.
-     * @return The clip plane ID.
-     */
-    size_t addClipPlane(const Plane &plane);
-
-    /** Get a clip plane by its ID.
-        @param id the plane ID.
-        @return A pointer to the clip plane or null if not found.
-     */
-    ClipPlanePtr getClipPlane(const size_t id) const;
-
-    /** Remove a clip plane by its ID, or nop if not found. */
-    void removeClipPlane(const size_t id);
-
-    /**
-       @return the clip planes
-    */
-    const std::vector<ClipPlanePtr> &getClipPlanes() const;
-
-    /** @return the current size in bytes of the loaded geometry. */
-    size_t getSizeInBytes() const;
-
-    /** @return the current number of models in the scene. */
-    size_t getNumModels() const;
-
-    /**
-     * @brief initializeMaterials Initializes materials for all models in the
-     * scene
-     * @param colorMap Color map to use for every individual model
-     */
-    void setMaterialsColorMap(MaterialsColorMap colorMap);
-
-    MaterialPtr getBackgroundMaterial() const;
-
-    /** @return the transfer function used for volumes and simulations. */
-    TransferFunction &getTransferFunction();
-
-    /** @return the transfer function used for volumes and simulations. */
-    const TransferFunction &getTransferFunction() const;
-
-    /**
-     * Adds the list of models to the scene
+     * @brief Get the scene model manager object
      *
-     * @param input list of models to add to the scene
-     * @param params Parameters for the model to be loaded
-     * @throws std::runtime_error if any of the models being added is not
-     * correct
+     * @return SceneModelManager&
      */
-    void addModels(std::vector<ModelDescriptorPtr> &input, const ModelParams &params);
+    SceneModelManager &getModels() noexcept;
 
-    void visitModels(const std::function<void(Model &)> &functor);
+    /**
+     * @brief Get the scene model manager object
+     *
+     * @return const SceneModelManager&
+     */
+    const SceneModelManager &getModels() const noexcept;
 
-    /** @internal */
-    std::shared_lock<std::shared_timed_mutex> acquireReadAccess() const;
+    /**
+     * @brief Get the scene clipping models manager object
+     *
+     * @return SceneClipperManager&
+     */
+    SceneClipManager &getClippingModels() noexcept;
 
-    /** @internal */
-    void copyFrom(const Scene &rhs);
+    /**
+     * @brief Get the scene light manager object
+     *
+     * @return SceneLightManager&
+     */
+    SceneLightManager &getLights() noexcept;
 
-    virtual void copyFromImpl(const Scene &rhs);
+    /**
+     * @brief Returns the OSPRay handle of the scene
+     */
+    OSPWorld handle() const noexcept;
 
-protected:
-    /** @return True if this scene supports scene updates from any thread. */
-    virtual bool supportsConcurrentSceneUpdates() const;
+private:
+    friend class Engine;
 
-    void _computeBounds();
-    void _updateAnimationParameters();
+    // Scene bounds
+    Bounds _bounds;
 
-    AnimationParameters &_animationParameters;
-    VolumeParameters &_volumeParameters;
-    MaterialPtr _backgroundMaterial;
+    // Model data
+    SceneModelManager _modelManager;
 
-    TransferFunction _transferFunction;
+    // Clipping model data
+    SceneClipManager _clippingManager;
 
-    // Model
-    size_t _modelID{0};
-    std::vector<ModelDescriptorPtr> _modelDescriptors;
-    mutable std::shared_timed_mutex _modelMutex;
+    // Lights data
+    SceneLightManager _lightManager;
 
-    std::unordered_map<size_t, ModelDescriptorPtr> _markedForReplacement;
-
-    LightManager _lightManager;
-    std::vector<ClipPlanePtr> _clipPlanes;
-
-    Boxd _bounds;
+    // OSPRRay "scene" handle
+    OSPWorld _handle{nullptr};
 };
-
-using ScenePtr = std::shared_ptr<Scene>;
 
 } // namespace brayns

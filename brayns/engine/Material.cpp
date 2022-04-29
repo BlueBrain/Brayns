@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -22,99 +23,45 @@
 
 namespace brayns
 {
-Material::Material(const PropertyMap &properties)
+Material::Material(std::string_view handleID)
+    : _handle(ospNewMaterial("", handleID.data()))
 {
-    setCurrentType("default");
-    _properties.at(_currentType).merge(properties);
 }
 
-const std::string &Material::getName() const
+Material::~Material()
 {
-    return _name;
+    ospRelease(_handle);
 }
 
-void Material::setName(const std::string &value)
+bool Material::commit()
 {
-    _updateValue(_name, value);
+    if (!isModified())
+    {
+        return false;
+    }
+
+    commitMaterialSpecificParams();
+
+    ospCommit(_handle);
+
+    resetModified();
+
+    return true;
 }
 
-void Material::setDiffuseColor(const Vector3d &value)
+OSPMaterial Material::handle() const noexcept
 {
-    _updateValue(_diffuseColor, value);
+    return _handle;
 }
 
-const Vector3d &Material::getDiffuseColor() const
+void Material::setColor(const Vector3f &color) noexcept
 {
-    return _diffuseColor;
+    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
 }
 
-void Material::setSpecularColor(const Vector3d &value)
+const Vector3f &Material::getColor() const noexcept
 {
-    _updateValue(_specularColor, value);
+    return _color;
 }
 
-const Vector3d &Material::getSpecularColor() const
-{
-    return _specularColor;
-}
-
-void Material::setSpecularExponent(double value)
-{
-    _updateValue(_specularExponent, value);
-}
-
-double Material::getSpecularExponent() const
-{
-    return _specularExponent;
-}
-
-void Material::setReflectionIndex(double value)
-{
-    _updateValue(_reflectionIndex, value);
-}
-
-double Material::getReflectionIndex() const
-{
-    return _reflectionIndex;
-}
-
-void Material::setOpacity(double value)
-{
-    _updateValue(_opacity, value);
-}
-
-double Material::getOpacity() const
-{
-    return _opacity;
-}
-
-void Material::setRefractionIndex(double value)
-{
-    _updateValue(_refractionIndex, value);
-}
-
-double Material::getRefractionIndex() const
-{
-    return _refractionIndex;
-}
-
-void Material::setEmission(double value)
-{
-    _updateValue(_emission, value);
-}
-
-double Material::getEmission() const
-{
-    return _emission;
-}
-
-void Material::setGlossiness(double value)
-{
-    _updateValue(_glossiness, value);
-}
-
-double Material::getGlossiness() const
-{
-    return _glossiness;
-}
 } // namespace brayns

@@ -22,157 +22,116 @@
 
 #include <brayns/common/Log.h>
 
+#include <brayns/engine/FrameRenderer.h>
+
 #include <brayns/network/common/ProgressHandler.h>
 
 #include <brayns/utils/StringUtils.h>
 #include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
 
-namespace brayns
-{
+#include <chrono>
+#include <thread>
+
 namespace
 {
-void initializeParameters(Engine &engine, SnapshotParams &params)
+struct SnapshotResultHandler
 {
-    const auto &paramsManager = engine.getParametersManager();
-    const auto &sysAnimParams = paramsManager.getAnimationParameters();
-    const auto &sysRenderParams = paramsManager.getRenderingParameters();
-    const auto &sysVolumeParams = paramsManager.getVolumeParameters();
-
-    auto &animParams = params.animation_parameters;
-    auto &renderParams = params.renderer;
-    auto &volumeParams = params.volume_parameters;
-
-    if (!animParams)
-        animParams = std::make_unique<AnimationParameters>(sysAnimParams);
-
-    if (!renderParams)
-        renderParams = std::make_unique<RenderingParameters>(sysRenderParams);
-
-    renderParams->setSamplesPerPixel(1);
-    renderParams->setSubsampling(1);
-    renderParams->setAccumulation(true);
-    renderParams->setMaxAccumFrames(params.samples_per_pixel);
-
-    if (!volumeParams)
-        volumeParams = std::make_unique<VolumeParameters>(sysVolumeParams);
-}
-
-std::shared_ptr<Camera> initializeCamera(Engine &engine, SnapshotParams &params)
-{
-    auto camera = engine.createCamera();
-    const auto &sysCamera = engine.getCamera();
-
-    if (params.camera)
+    static std::string
+        writeToDisk(const std::string &path, const brayns::ImageSettings &imageSettings, brayns::FrameBuffer &fb)
     {
-        *camera = *params.camera;
-        camera->setCurrentType(sysCamera.getCurrentType());
-        camera->clonePropertiesFrom(sysCamera);
-    }
-    else
-        *camera = sysCamera;
-
-    return camera;
-}
-
-std::string writeSnapshotToDisk(SnapshotParams &params, FrameBuffer &fb)
-{
-    const auto &path = params.file_path;
-    const auto &format = params.format;
-    auto image = fb.getImage();
-    auto filename = path + "." + format;
-    auto quality = params.quality;
-    try
-    {
-        ImageEncoder::save(image, filename, quality);
-    }
-    catch (const std::runtime_error &e)
-    {
-        Log::error("{}", e.what());
-    }
-
-    return {};
-}
-
-std::string encodeSnapshotToBase64(SnapshotParams &params, FrameBuffer &fb)
-{
-    try
-    {
+        const auto &formatName = imageSettings.getFormat();
+        const auto format = brayns::string_utils::toLowercase(formatName);
+        const auto filename = path + "." + format;
+        const auto quality = imageSettings.getQuality();
         auto image = fb.getImage();
-        auto format = ImageFormat::fromExtension(params.format);
-        auto quality = params.quality;
-        return {ImageEncoder::encodeToBase64(image, format, quality)};
-    }
-    catch (const std::runtime_error &e)
-    {
-        Log::error("{}", e.what());
+        try
+        {
+            brayns::ImageEncoder::save(image, filename, quality);
+        }
+        catch (const std::runtime_error &e)
+        {
+            brayns::Log::error("{}", e.what());
+        }
+
+        return {};
     }
 
-    return {};
-}
+    static std::string encodeToBase64(const brayns::ImageSettings &imageSettings, brayns::FrameBuffer &fb)
+    {
+        const auto &formatName = imageSettings.getFormat();
+        const auto fixedFormat = brayns::string_utils::toLowercase(formatName);
+        const auto format = brayns::ImageFormat::fromExtension(fixedFormat);
+        const auto quality = imageSettings.getQuality();
+        auto image = fb.getImage();
+        try
+        {
+            return {brayns::ImageEncoder::encodeToBase64(image, format, quality)};
+        }
+        catch (const std::runtime_error &e)
+        {
+            brayns::Log::error("{}", e.what());
+        }
+
+        return {};
+    }
+};
 
 class SnapshotHandler
 {
 public:
-    using Request = brayns::SnapshotEntrypoint::Request;
+    using SnapshotProgress =
+        brayns::ProgressHandler<brayns::EntrypointRequest<brayns::SnapshotParams, brayns::ImageBase64Message>>;
 
-    static void handle(const Request &request, Engine &engine, CancellationToken &token)
+    static brayns::ImageBase64Message
+        handle(brayns::SnapshotParams &params, SnapshotProgress &progress, brayns::Engine &engine)
     {
-        auto progress = brayns::ProgressHandler(token, request);
-
         // Initialize parameters
-        auto params = request.getParams();
-        initializeParameters(engine, params);
-        auto &animParams = params.animation_parameters;
-        auto &renderParams = params.renderer;
-        auto &volumeParams = params.volume_parameters;
 
-        // Initialize (Clone) scene
-        auto scene = engine.createScene(*animParams, *volumeParams);
-        scene->copyFrom(engine.getScene());
-        scene->commit();
+        auto &imageSettings = params.image_settings;
+        const auto &imageSize = imageSettings.getSize();
+        auto &imagePath = params.file_path;
 
-        // Initialize camera
-        auto camera = initializeCamera(engine, params);
-        const auto &size = params.size;
-        const auto ar = static_cast<double>(size.x) / static_cast<double>(size.y);
-        camera->updateProperty("aspect", ar);
-        camera->setBufferTarget("default");
-        camera->commit();
+        // Parameters
+        auto paramsManager = engine.getParametersManager();
+        auto &animParams = paramsManager.getAnimationParameters();
+        auto animFrame = params.simulation_frame;
+        animParams.setFrame(animFrame);
 
-        // Initialize renderer
-        auto renderer = engine.createRenderer(*animParams, *renderParams);
-        const auto &sysRenderer = engine.getRenderer();
-        renderer->setCurrentType(sysRenderer.getCurrentType());
-        renderer->clonePropertiesFrom(sysRenderer);
-        renderer->setCamera(camera);
-        renderer->setScene(scene);
+        // Renderer
+        auto &rendererObject = params.renderer;
+        auto renderer = rendererObject.create();
         renderer->commit();
 
-        // Initialize framebuffer
-        auto frameBuffer = engine.createFrameBuffer("default", size, PixelFormat::RGBA_I8);
-        frameBuffer->setAccumulation(true);
+        // Camera
+        auto &cameraObject = params.camera;
+        auto camera = cameraObject.create();
+        const auto aspectRatio = static_cast<float>(imageSize.x) / static_cast<float>(imageSize.y);
+        camera->setAspectRatio(aspectRatio);
+        const auto &cameraLookAt = params.camera_view;
+        camera->setLookAt(cameraLookAt);
+        camera->commit();
 
-        // Prepare notifications message
-        const auto name = string_utils::shortenString(params.name);
-        const auto msg = "Render snapshot " + name + " ...";
+        // Framebuffer
+        brayns::FrameBuffer frameBuffer;
+        frameBuffer.setAccumulation(false);
+        frameBuffer.setFormat(brayns::PixelFormat::SRGBA_I8);
+        frameBuffer.setFrameSize(imageSize);
+        frameBuffer.commit();
 
-        // Render snapshot
-        // TODO WITH ENGINE REFACTORING
-        // OSPRay supports a progress callback for the rendering process
-        // https://github.com/ospray/ospray/tree/v1.8.5#progress-and-cancel-progress-and-cancel-unnumbered
-        // Can be used to get progress information while using samples per pixel
-        // instead of accumulation to speed up rendering
-        size_t numAccumFrames = frameBuffer->numAccumFrames();
-        const auto spp = params.samples_per_pixel;
-        while (numAccumFrames != spp)
+        // Scene
+        auto &scene = engine.getScene();
+        scene.preRender(paramsManager);
+        scene.commit();
+
+        // Render
+        auto future = brayns::FrameRenderer::asynchronous(*camera, frameBuffer, *renderer, scene);
+        const auto msg = "Rendering snapshot ...";
+        while (!ospIsReady(future))
         {
-            renderer->render(frameBuffer);
-            frameBuffer->incrementAccumFrames();
-            numAccumFrames = frameBuffer->numAccumFrames();
-
-            const auto totalProgress = static_cast<float>(numAccumFrames) / static_cast<float>(spp);
-            progress.notify(msg, totalProgress);
+            const auto percentage = ospGetProgress(future);
+            progress.notify(msg, percentage);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
         // Handle result
@@ -180,21 +139,25 @@ public:
 
         if (!params.file_path.empty())
         {
-            image.data = writeSnapshotToDisk(params, *frameBuffer);
+            image.data = SnapshotResultHandler::writeToDisk(imagePath, imageSettings, frameBuffer);
         }
         else
         {
-            image.data = encodeSnapshotToBase64(params, *frameBuffer);
+            image.data = SnapshotResultHandler::encodeToBase64(imageSettings, frameBuffer);
         }
 
-        request.reply(image);
+        return image;
     }
 };
 } // namespace
 
+namespace brayns
+{
 SnapshotEntrypoint::SnapshotEntrypoint(Engine &engine, CancellationToken token)
     : _engine(engine)
     , _token(token)
+    , _cameraFactory(EngineFactories::createCameraFactory())
+    , _renderFactory(EngineFactories::createRendererFactory())
 {
 }
 
@@ -215,7 +178,32 @@ bool SnapshotEntrypoint::isAsync() const
 
 void SnapshotEntrypoint::onRequest(const Request &request)
 {
-    SnapshotHandler::handle(request, _engine, _token);
+    SnapshotParams params;
+
+    auto &systemCamera = _engine.getCamera();
+    params.camera = GenericObject<Camera>(systemCamera, _cameraFactory);
+
+    auto systemLookAt = systemCamera.getLookAt();
+    params.camera_view = systemLookAt;
+
+    auto &systemRenderer = _engine.getRenderer();
+    params.renderer = GenericObject<Renderer>(systemRenderer, _renderFactory);
+
+    auto &systemFramebuffer = _engine.getFrameBuffer();
+    auto systemSize = systemFramebuffer.getFrameSize();
+    params.image_settings = ImageSettings(systemSize);
+
+    auto &paramsManager = _engine.getParametersManager();
+    auto &animParams = paramsManager.getAnimationParameters();
+    params.simulation_frame = animParams.getFrame();
+
+    request.getParams(params);
+
+    brayns::ProgressHandler progress(_token, request);
+
+    auto result = SnapshotHandler::handle(params, progress, _engine);
+
+    request.reply(result);
 }
 
 void SnapshotEntrypoint::onCancel()

@@ -26,6 +26,7 @@
 #include <brayns/engine/Engine.h>
 
 #include <brayns/network/common/CancellationToken.h>
+#include <brayns/network/common/EngineObjectFactory.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ImageBase64Message.h>
 #include <brayns/network/messages/SnapshotMessage.h>
@@ -48,5 +49,8 @@ private:
     Engine &_engine;
     CancellationToken _token;
     std::optional<ClientRef> _client;
+
+    EngineObjectFactory<Camera> _cameraFactory;
+    EngineObjectFactory<Renderer> _renderFactory;
 };
 } // namespace brayns

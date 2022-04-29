@@ -21,23 +21,35 @@
 
 #include "ModelTransferFunctionAdapter.h"
 
+#include <brayns/engine/components/TransferFunctionComponent.h>
 #include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
 {
-ModelTransferFunction::ModelTransferFunction(Scene &scene)
-    : _scene(&scene)
+ModelTransferFunction::ModelTransferFunction(SceneModelManager &smm)
+    : _smm(&smm)
 {
 }
 
-void ModelTransferFunction::setId(size_t id)
+void ModelTransferFunction::setId(const uint32_t id)
 {
-    ExtractModel::fromId(*_scene, id);
+    _modelId = id;
 }
 
 void ModelTransferFunction::setTransferFunction(const JsonBuffer<TransferFunction> &buffer)
 {
-    auto &transferFunction = _scene->getTransferFunction();
-    buffer.deserialize(transferFunction);
+    auto &modelInstance = _smm->getModelInstance(_modelId);
+    auto &model = modelInstance.getModel();
+
+    try
+    {
+        auto &tfComponent = model.getComponent<TransferFunctionComponent>();
+        auto &transferFunction = tfComponent.getTransferFunction();
+        buffer.deserialize(transferFunction);
+    }
+    catch (...)
+    {
+        throw std::runtime_error("The requested model does not have a transfer function");
+    }
 }
 } // namespace brayns

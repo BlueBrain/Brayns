@@ -26,6 +26,6 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(RemoveClipPlanesMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<size_t>, ids, "Clip planes ID list")
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint32_t>, ids, "Clip planes ID list")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

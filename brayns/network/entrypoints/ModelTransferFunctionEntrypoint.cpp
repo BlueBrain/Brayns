@@ -21,12 +21,13 @@
 
 #include "ModelTransferFunctionEntrypoint.h"
 
+#include <brayns/engine/components/TransferFunctionComponent.h>
 #include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
 {
-GetModelTransferFunctionEntrypoint::GetModelTransferFunctionEntrypoint(Scene &scene)
-    : _scene(scene)
+GetModelTransferFunctionEntrypoint::GetModelTransferFunctionEntrypoint(SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -44,13 +45,23 @@ void GetModelTransferFunctionEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.id;
-    ExtractModel::fromId(_scene, modelId);
-    auto &transferFunction = _scene.getTransferFunction();
-    request.reply(transferFunction);
+    auto &modelInstance = ExtractModel::fromId(_modelManager, modelId);
+    auto &model = modelInstance.getModel();
+
+    try
+    {
+        auto &tfComponent = model.getComponent<TransferFunctionComponent>();
+        auto &transferFunction = tfComponent.getTransferFunction();
+        request.reply(transferFunction);
+    }
+    catch (...)
+    {
+        throw JsonRpcException("The requested model does not have a transfer function");
+    }
 }
 
-SetModelTransferFunctionEntrypoint::SetModelTransferFunctionEntrypoint(Scene &scene)
-    : _scene(scene)
+SetModelTransferFunctionEntrypoint::SetModelTransferFunctionEntrypoint(SceneModelManager &modelManager)
+    : _modelManager(modelManager)
 {
 }
 
@@ -66,7 +77,7 @@ std::string SetModelTransferFunctionEntrypoint::getDescription() const
 
 void SetModelTransferFunctionEntrypoint::onRequest(const Request &request)
 {
-    ModelTransferFunction transferFunction(_scene);
+    ModelTransferFunction transferFunction(_modelManager);
     request.getParams(transferFunction);
     request.reply(EmptyMessage());
 }

@@ -19,12 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AddClipPlaneEntrypoint.h"
+#include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
+
+#include <brayns/engine/components/ClippingComponent.h>
 
 namespace brayns
 {
-AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(Scene &scene)
-    : _scene(scene)
+AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(SceneClipManager &clipManager)
+    : _clipManager(clipManager)
 {
 }
 
@@ -35,22 +37,15 @@ std::string AddClipPlaneEntrypoint::getMethod() const
 
 std::string AddClipPlaneEntrypoint::getDescription() const
 {
-    return "Add a clip plane and returns the clip plane descriptor";
-}
-
-JsonSchema AddClipPlaneEntrypoint::getParamsSchema() const
-{
-    auto schema = Json::getSchema<ClipPlane>();
-    schema.properties.erase("id");
-    return schema;
+    return "Add a clip plane and returns the clip plane ID";
 }
 
 void AddClipPlaneEntrypoint::onRequest(const Request &request)
 {
-    auto params = request.getParams();
-    auto &plane = params.plane;
-    auto id = _scene.addClipPlane(plane);
-    auto clipPlane = _scene.getClipPlane(id);
-    request.reply(clipPlane);
+    auto plane = request.getParams();
+    auto model = std::make_unique<Model>();
+    model->addComponent<ClippingComponent<Plane>>(plane);
+    auto id = _clipManager.addClippingModel(std::move(model));
+    request.reply(id);
 }
 } // namespace brayns

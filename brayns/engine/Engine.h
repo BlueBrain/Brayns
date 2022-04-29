@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,162 +21,110 @@
 
 #pragma once
 
-#include <brayns/common/PixelFormat.h>
-#include <brayns/common/Statistics.h>
-#include <brayns/common/propertymap/PropertyMap.h>
-
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
-
 #include <brayns/parameters/ParametersManager.h>
-
-#include <functional>
 
 namespace brayns
 {
 /**
- * Abstract implementation of the ray-tracing engine. What we call the
- * ray-tracing engine is a 3rd party acceleration library, typically OSPRay,
- * that provides hardware acceleration.
- * An engine holds a native implementation of a scene, a camera, a frame buffer
- * and of one or several renderers according to the capatilities of the
- * acceleration library.
+ * @brief The Engine class handles, and gives access to, the system resources for rendering. These resources are the
+ * one used to stream frames to the clients, and serve as base objects when requesting snapshots ore export frames
+ * tasks, if no custom ones are specified for such tasks
  */
 class Engine
 {
 public:
-    /** @name API for engine-specific code */
-    //@{
     /**
-     * Commits changes to the engine. This include scene, camera and renderer
-     * modifications
+     * @brief Initializes OSPRay and register core engine objects available for use (cameras, renderers, materials
+     * and lights)
      */
-    virtual void commit();
+    Engine(ParametersManager &parameters);
 
-    /** Executes engine specific pre-render operations */
-    virtual void preRender();
-
-    /** Executes engine specific post-render operations */
-    virtual void postRender();
-
-    /** @return the minimum frame size in pixels supported by this engine. */
-    virtual Vector2ui getMinimumFrameSize() const = 0;
-
-    /** Factory method to create an engine-specific framebuffer. */
-    virtual FrameBufferPtr
-        createFrameBuffer(const std::string &name, const Vector2ui &frameSize, PixelFormat frameBufferFormat) const = 0;
-
-    /** Factory method to create an engine-specific scene. */
-    virtual ScenePtr createScene(AnimationParameters &animationParameters, VolumeParameters &volumeParameters)
-        const = 0;
-
-    /** Factory method to create an engine-specific camera. */
-    virtual CameraPtr createCamera() const = 0;
-
-    /** Factory method to create an engine-specific renderer. */
-    virtual RendererPtr createRenderer(
-        const AnimationParameters &animationParameters,
-        const RenderingParameters &renderingParameters) const = 0;
-    //@}
+    ~Engine();
 
     /**
-     * @brief Engine constructor
-     * @param parametersManager holds all engine parameters (geometry,
-     * rendering, etc)
+     * @brief Called before commit() and render()
      */
-    explicit Engine(ParametersManager &parametersManager);
+    void preRender();
 
-    virtual ~Engine() = default;
+    /**
+     * @brief Ensures that all the system data is updated on the OSPRay rendered backend to ensure the
+     * correct frame rendering. Called before render()
+     */
+    void commit();
 
-    /** Renders the current scene and populates the frame buffer accordingly */
+    /**
+     * @brief Attempts to render a frame (if accumulation hasnt finish integrating the current frame and/or the
+     * contents of the engine have changed). It has built-in FPS limiter.
+     */
     void render();
 
-    /** Gets the scene */
+    /**
+     * @brief Called after render()
+     */
+    void postRender();
+
+    /**
+     * @brief Returns the system's Scene object.
+     */
     Scene &getScene();
 
-    /** Gets the frame buffer */
-    FrameBuffer &getFrameBuffer();
-
-    /** Gets the camera */
-    const Camera &getCamera() const;
-
-    Camera &getCamera();
-
-    /** Gets the renderer */
-    Renderer &getRenderer();
+    /**
+     * @brief Returns the system's FrameBuffer object
+     */
+    FrameBuffer &getFrameBuffer() noexcept;
 
     /**
-     * Keep continue to run the engine, aka the user did not request to stop
-     * rendering.
+     * @brief Sets a new system Camera to use
      */
-    void setKeepRunning(bool keepRunning);
+    void setCamera(std::unique_ptr<Camera> camera) noexcept;
 
     /**
-     * @return true if the user wants to continue rendering, false otherwise.
+     * @brief Returns the system's current Camera object
      */
-    bool getKeepRunning() const;
-
-    Statistics &getStatistics();
+    Camera &getCamera() noexcept;
 
     /**
-     * @return true if render() calls shall be continued, based on current
-     *         accumulation settings.
-     * @sa RenderingParameters::setMaxAccumFrames
+     * @brief Sets a new system Renderer to use
      */
-    bool continueRendering() const;
-
-    const ParametersManager &getParametersManager() const;
-
-    ParametersManager &getParametersManager();
+    void setRenderer(std::unique_ptr<Renderer> renderer) noexcept;
 
     /**
-     * Add the given frame buffer to the list of buffers that shall be filled
-     * during rendering.
+     * @brief Returns the system's current Renderer object
      */
-    void addFrameBuffer(FrameBufferPtr frameBuffer);
+    Renderer &getRenderer() noexcept;
 
     /**
-     * Remove the given frame buffer from the list of buffers that are filled
-     * during rendering.
+     * @brief Sets wether the engine should keep running or not
      */
-    void removeFrameBuffer(FrameBufferPtr frameBuffer);
-
-    /** @return all registered frame buffers that are used during rendering. */
-    const std::vector<FrameBufferPtr> &getFrameBuffers() const;
-
-    /** @internal Clear all frame buffers. */
-    void clearFrameBuffers();
-
-    /** @internal resetModified() all frame buffers. */
-    void resetFrameBuffers();
+    void setRunning(bool running) noexcept;
 
     /**
-     * Add a new renderer type with optional properties. The renderer
-     * registration for a concrete engine is specific to the actual engine, e.g.
-     * OSP_REGISTER_RENDERER for OSPRay.
+     * @brief Returns wether the engine is running or not
      */
-    void addRendererType(const std::string &name, const PropertyMap &properties = {});
+    bool isRunning() const noexcept;
 
     /**
-     * Add a new camera type with optional properties. The camera registration
-     * for a concrete engine is specific to the actual engine, e.g.
-     * OSP_REGISTER_CAMERA for OSPRay.
+     * @brief Returns the system parameters manager
      */
-    void addCameraType(const std::string &name, const PropertyMap &properties = {});
+    const ParametersManager &getParametersManager() const noexcept;
 
 private:
-    bool mustRender();
+    // Global system parameters used to read when updating the backend during commit() and render()
+    ParametersManager &_params;
 
-protected:
-    ParametersManager &_parametersManager;
-    ScenePtr _scene;
-    CameraPtr _camera;
-    RendererPtr _renderer;
-    std::vector<FrameBufferPtr> _frameBuffers;
-    Statistics _statistics;
+    OSPDevice _device{nullptr};
 
+    // System objects
+    FrameBuffer _frameBuffer;
+    Scene _scene;
+    std::unique_ptr<Camera> _camera;
+    std::unique_ptr<Renderer> _renderer;
+
+    // Run flag
     bool _keepRunning{true};
 };
 } // namespace brayns

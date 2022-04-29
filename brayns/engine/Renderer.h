@@ -20,47 +20,98 @@
 
 #pragma once
 
-#include <brayns/common/PropertyObject.h>
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/FrameBuffer.h>
-#include <brayns/engine/Scene.h>
-#include <brayns/parameters/AnimationParameters.h>
-#include <brayns/parameters/RenderingParameters.h>
+#include <brayns/common/BaseObject.h>
+#include <brayns/common/MathTypes.h>
+
+#include <ospray/ospray.h>
+
+#include <memory>
+#include <string_view>
 
 namespace brayns
 {
-class Renderer : public PropertyObject
+/**
+ * @brief The Renderer class is the base class for all renderer to be available on Brayns
+ */
+class Renderer : public BaseObject
 {
 public:
-    struct PickResult
-    {
-        bool hit{false};
-        Vector3d pos;
-    };
+    Renderer(std::string_view handleID);
 
-    /** @name API for engine-specific code */
-    //@{
-    virtual void render(FrameBufferPtr frameBuffer) = 0;
+    Renderer(const Renderer &) = delete;
+    Renderer &operator=(const Renderer &) = delete;
 
-    /** @return the variance from the previous render(). */
-    virtual float getVariance() const;
+    Renderer(Renderer &&) = delete;
+    Renderer &operator=(Renderer &&) = delete;
 
-    virtual void commit() = 0;
+    virtual ~Renderer();
 
-    virtual void setCamera(CameraPtr camera) = 0;
+    /**
+     * @brief Returns the renderer type as a string
+     */
+    virtual std::string getName() const noexcept = 0;
 
-    virtual PickResult pick(const Vector2f &position);
-    //@}
+    /**
+     * @brief Creates a copy of the renderer object
+     *
+     * @return std::unique_ptr<Renderer>
+     */
+    virtual std::unique_ptr<Renderer> clone() const noexcept = 0;
 
-    Renderer(const AnimationParameters &animationParameters, const RenderingParameters &renderingParameters);
+    /**
+     * @brief Returns the number of samples per pixel that this renderer will perform to render a complete frame
+     */
+    int32_t getSamplesPerPixel() const noexcept;
 
-    void setScene(ScenePtr scene);
+    /**
+     * @brief Returns the max ray bounces (max recursion depth) for each ray launched from the camera.
+     */
+    int32_t getMaxRayBounces() const noexcept;
+
+    /**
+     * @brief Returns the background color of this renderer as normalized RGB. The background color is used when a ray
+     * does not intersect anything in the scene (miss)
+     */
+    const Vector4f &getBackgroundColor() const noexcept;
+
+    /**
+     * @brief Sets the number of samples per pixel that this renderer will perform to render a complete frame
+     */
+    void setSamplesPerPixel(const int32_t spp) noexcept;
+
+    /**
+     * @brief Sets the max ray bounces (max recursion depth) for each ray launched from the camera.
+     */
+    void setMaxRayBounces(const int32_t maxBounces) noexcept;
+
+    /**
+     * @brief Sets the background color of this renderer as normalized RGB. The background color is used when a ray
+     * does not intersect anything in the scene (miss)
+     */
+    void setBackgroundColor(const Vector4f &background) noexcept;
+
+    /**
+     * @brief Returns the OSPRay handle of this renderer
+     */
+    OSPRenderer handle() const noexcept;
+
+    /**
+     * @brief commit() implementation
+     * @returns true if there was anything to commit
+     */
+    bool commit();
 
 protected:
-    const AnimationParameters &_animationParameters;
-    const RenderingParameters &_renderingParameters;
-    ScenePtr _scene;
-};
+    /**
+     * @brief Subclasses must implement this method to commit their renderer-specific data to the OSPRay counterpart.
+     * The base class will make sure to call ospCommit(handle) on the renderer handle, so subclasses should avoid it.
+     */
+    virtual void commitRendererSpecificParams() = 0;
 
-using RendererPtr = std::shared_ptr<Renderer>;
+private:
+    int32_t _samplesPerPixel{1};
+    int32_t _maxRayBounces{3};
+    Vector4f _backgroundColor{0.004f, 0.016f, 0.102f, 0.f}; // Default background color is BBP dark blue
+    OSPRenderer _handle{nullptr};
+};
 } // namespace brayns

@@ -12,14 +12,9 @@ configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 
 set(TEST_LIST
     brayns.cpp
-    clipPlaneRendering.cpp
+    clipping.cpp
     lights.cpp
-    propertyMap.cpp
-    sdfGeometries.cpp
-    streamlines.cpp
-    subsampling.cpp
-    testImages.cpp
-    perf/renderingSettings.cpp
+    images.cpp
 )
 
 set(TEST_TARGET_LIST)
@@ -39,9 +34,8 @@ foreach(TEST ${TEST_LIST})
     set_target_properties(${TEST_NAME} PROPERTIES FOLDER tests OUTPUT_NAME ${TEST_NAME})
 
     target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${PROJECT_BINARY_DIR})
-    target_link_libraries(${TEST_NAME} PRIVATE
-        brayns braynsIO ${OpenMP_CXX_LIBRARRIES} braynsOSPRayEngine
-    )
+
+    target_link_libraries(${TEST_NAME} PRIVATE brayns)
 
     add_test(NAME ${TEST_NAME}
         COMMAND $<TARGET_FILE:${TEST_NAME}>  -l test_suite

@@ -6,10 +6,10 @@
 set(BRAYNSIO_SOURCES
     Loader.cpp
     LoaderRegistry.cpp
-    loaders/MeshLoader.cpp
-    loaders/ProteinLoader.cpp
-    loaders/VolumeLoader.cpp
-    loaders/XYZBLoader.cpp
+    loaders/protein/ProteinComponent.cpp
+    loaders/protein/ProteinLoader.cpp
+    loaders/xyzb/XYZBLoader.cpp
+    loaders/mesh/MeshLoader.cpp
     loaders/mesh/parsers/ObjMeshParser.cpp
     loaders/mesh/parsers/PlyMeshParser.cpp
     loaders/mesh/parsers/StlMeshParser.cpp
@@ -21,10 +21,10 @@ set(BRAYNSIO_SOURCES
 set(BRAYNSIO_PUBLIC_HEADERS
     Loader.h
     LoaderRegistry.h
-    loaders/MeshLoader.h
-    loaders/ProteinLoader.h
-    loaders/VolumeLoader.h
-    loaders/XYZBLoader.h
+    loaders/mesh/MeshLoader.h
+    loaders/protein/ProteinComponent.h
+    loaders/protein/ProteinLoader.h
+    loaders/xyzb/XYZBLoader.h
 )
 
 add_library(braynsIO SHARED ${BRAYNSIO_SOURCES} ${BRAYNSIO_PUBLIC_HEADERS})

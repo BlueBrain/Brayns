@@ -1317,14 +1317,12 @@ private:
         {
             throw std::runtime_error("Texture coordinates defined in both face and vertices");
         }
-        mesh.textureCoordinates.reserve(3 * mesh.indices.size());
+        mesh.uvs.reserve(3 * mesh.indices.size());
         for (const auto &triangle : mesh.indices)
         {
             for (auto index : triangle)
             {
-                mesh.textureCoordinates.emplace_back(
-                    VectorHelper::get(buffer.txs, index),
-                    VectorHelper::get(buffer.tys, index));
+                mesh.uvs.emplace_back(VectorHelper::get(buffer.txs, index), VectorHelper::get(buffer.tys, index));
             }
         }
     }
@@ -1339,12 +1337,12 @@ private:
         {
             throw std::runtime_error("Indices and texture coordinates mismatch");
         }
-        mesh.textureCoordinates.reserve(3 * buffer.textures.size());
+        mesh.uvs.reserve(3 * buffer.textures.size());
         for (const auto &texture : buffer.textures)
         {
-            mesh.textureCoordinates.emplace_back(texture[0]);
-            mesh.textureCoordinates.emplace_back(texture[1]);
-            mesh.textureCoordinates.emplace_back(texture[2]);
+            mesh.uvs.emplace_back(texture[0]);
+            mesh.uvs.emplace_back(texture[1]);
+            mesh.uvs.emplace_back(texture[2]);
         }
     }
 };

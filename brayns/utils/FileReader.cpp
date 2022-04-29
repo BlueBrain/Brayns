@@ -21,6 +21,7 @@
 
 #include "FileReader.h"
 
+#include <filesystem>
 #include <fstream>
 #include <stdexcept>
 
@@ -28,6 +29,16 @@ namespace brayns
 {
 std::string FileReader::read(const std::string &filename)
 {
+    if (!std::filesystem::exists(filename))
+    {
+        throw std::invalid_argument("File " + filename + " does not exists");
+    }
+
+    if (!std::filesystem::is_regular_file(filename))
+    {
+        throw std::invalid_argument("File " + filename + " is not a regular file");
+    }
+
     std::ifstream stream(filename, std::ios::ate);
     if (!stream.is_open())
     {

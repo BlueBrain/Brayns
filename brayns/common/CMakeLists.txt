@@ -6,55 +6,24 @@
 
 set(BRAYNSCOMMON_SOURCES
     BaseObject.cpp
+    Bounds.cpp
     Log.cpp
-    PropertyObject.cpp
-    Statistics.cpp
     Timer.cpp
+    TransferFunction.cpp
     Transformation.cpp
-    adapters/PropertyMapAdapter.cpp
-    geometry/SDFGeometry.cpp
-    geometry/TriangleMesh.cpp
-    material/Texture2D.cpp
-    propertymap/ConversionRegistry.cpp
-    propertymap/EnumProperty.cpp
-    propertymap/PropertyMap.cpp
-    scene/ClipPlane.cpp
-    simulation/AbstractSimulationHandler.cpp
-    transferFunction/TransferFunction.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
     BaseObject.h
     Blob.h
-    DefaultMaterialIds.h
+    Bounds.h
+    IDFactory.h
     Log.h
-    MaterialsColorMap.h
     MathTypes.h
-    PixelFormat.h  
-    PropertyObject.h
-    Statistics.h
-    TextureType.h
+    PixelFormat.h
     Timer.h
+    TransferFunction.h
     Transformation.h
-    VolumeDataType.h
-    adapters/PropertyMapAdapter.h
-    adapters/VolumeDataTypeAdapter.h
-    geometry/CommonDefines.h
-    geometry/Cone.h
-    geometry/Cylinder.h
-    geometry/SDFGeometry.h
-    geometry/Sphere.h
-    geometry/Streamline.h
-    geometry/TriangleMesh.h
-    material/Texture2D.h
-    propertymap/Any.h
-    propertymap/Converter.h
-    propertymap/ConversionRegistry.h
-    propertymap/EnumProperty.h
-    propertymap/PropertyMap.h
-    scene/ClipPlane.h
-    simulation/AbstractSimulationHandler.h
-    transferFunction/TransferFunction.h
 )
 
 add_library(braynsCommon SHARED ${BRAYNSCOMMON_PUBLIC_HEADERS} ${BRAYNSCOMMON_SOURCES})

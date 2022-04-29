@@ -35,32 +35,32 @@ public:
     Transformation() = default;
 
     Transformation(
-        const Vector3d &translation,
-        const Vector3d &scale,
-        const Quaterniond &rotation,
-        const Vector3d &rotationCenter);
+        const Vector3f &translation,
+        const Vector3f &scale,
+        const Quaternion &rotation,
+        const Vector3f &rotationCenter);
 
-    const Vector3d &getTranslation() const;
-    void setTranslation(const Vector3d &value);
-    const Vector3d &getScale() const;
-    void setScale(const Vector3d &value);
-    const Quaterniond &getRotation() const;
-    void setRotation(const Quaterniond &value);
-    const Vector3d &getRotationCenter() const;
-    void setRotationCenter(const Vector3d &value);
-    Matrix4d toMatrix() const;
+    const Vector3f &getTranslation() const noexcept;
+    void setTranslation(const Vector3f &value) noexcept;
+
+    const Vector3f &getScale() const noexcept;
+    void setScale(const Vector3f &value) noexcept;
+
+    const Quaternion &getRotation() const noexcept;
+    void setRotation(const Quaternion &value) noexcept;
+
+    const Vector3f &getRotationCenter() const noexcept;
+    void setRotationCenter(const Vector3f &value) noexcept;
+
+    Matrix4f toMatrix() const;
 
     bool operator==(const Transformation &rhs) const;
     bool operator!=(const Transformation &rhs) const;
 
 private:
-    Vector3d _translation{0, 0, 0};
-    Vector3d _scale{1, 1, 1};
-    Quaterniond _rotation{1, 0, 0, 0};
-    Vector3d _rotationCenter{0, 0, 0};
+    Vector3f _translation{0.f};
+    Vector3f _scale{1.f};
+    Quaternion _rotation{1, 0, 0, 0};
+    Vector3f _rotationCenter{0.f};
 };
-
-Transformation operator*(const Transformation &a, const Transformation &b);
-
-Boxd transformBox(const Boxd &box, const Transformation &transformation);
 } // namespace brayns

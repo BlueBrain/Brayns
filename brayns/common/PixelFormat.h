@@ -25,8 +25,26 @@ namespace brayns
 enum class PixelFormat
 {
     RGBA_I8,
-    RGB_I8,
-    RGB_F32,
-    NONE
+    SRGBA_I8,
+    RGBA_F32
+};
+
+/**
+ * @brief Returns the size, in bytes, of each color channel of a given pixel format
+ *
+ */
+class PixelFormatChannelByteSize
+{
+public:
+    static size_t get(PixelFormat format)
+    {
+        switch (format)
+        {
+        case PixelFormat::RGBA_F32:
+            return 4;
+        default:
+            return 1;
+        }
+    }
 };
 }

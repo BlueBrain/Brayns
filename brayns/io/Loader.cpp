@@ -67,23 +67,21 @@ bool JsonAdapter<EmptyLoaderParameters>::deserialize(const JsonValue &value, Emp
     return true;
 }
 
-std::vector<ModelDescriptorPtr> NoInputLoader::importFromBlob(
+std::vector<std::unique_ptr<Model>> NoInputLoader::importFromBlob(
     Blob &&blob,
     const LoaderProgress &callback,
-    const EmptyLoaderParameters &parameters,
-    Scene &scene) const
+    const EmptyLoaderParameters &parameters) const
 {
     (void)parameters;
-    return importFromBlob(std::move(blob), callback, scene);
+    return importFromBlob(std::move(blob), callback);
 }
 
-std::vector<ModelDescriptorPtr> NoInputLoader::importFromFile(
+std::vector<std::unique_ptr<Model>> NoInputLoader::importFromFile(
     const std::string &path,
     const LoaderProgress &callback,
-    const EmptyLoaderParameters &parameters,
-    Scene &scene) const
+    const EmptyLoaderParameters &parameters) const
 {
     (void)parameters;
-    return importFromFile(path, callback, scene);
+    return importFromFile(path, callback);
 }
 } // namespace brayns

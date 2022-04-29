@@ -31,7 +31,7 @@ namespace brayns
 class RemoveModelEntrypoint : public Entrypoint<RemoveModelMessage, EmptyMessage>
 {
 public:
-    RemoveModelEntrypoint(Scene &scene);
+    RemoveModelEntrypoint(Scene &scene, AnimationParameters &animation);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -39,5 +39,6 @@ public:
 
 private:
     Scene &_scene;
+    AnimationParameters &_animation;
 };
 } // namespace brayns

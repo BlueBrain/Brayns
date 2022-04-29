@@ -5,27 +5,26 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSDTI_SOURCES
-  entrypoints/AddStreamlinesEntrypoint.cpp
-  entrypoints/SetSpikeSimulationEntrypoint.cpp
-  entrypoints/SetSpikeSimulationFromFileEntrypoint.cpp
+  components/DTIComponent.cpp
+  components/SpikeReportComponent.cpp
   io/DTILoader.cpp
-  io/DTISimulationHandler.cpp
   DTIPlugin.cpp
 )
 
 set(BRAYNSDTI_HEADERS
+  components/DTIComponent.h
+  components/SpikeReportComponent.h
   io/DTILoader.h
-  io/DTISimulationHandler.h
+  io/DTILoaderParameters.h
   DTIPlugin.h
 )
 
 add_library(braynsDTI SHARED ${BRAYNSDTI_SOURCES} ${BRAYNSDTI_HEADERS})
 
-target_include_directories(braynsDTI PRIVATE ${CMAKE_CURRENT_LIST_DIR})
-
-target_link_libraries(braynsDTI PRIVATE
-  Brion Brain braynsCommon braynsParameters braynsPluginAPI braynsNetwork braynsEngine
-)
+target_include_directories(braynsDTI PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>"
+  "$<INSTALL_INTERFACE:include>")
+target_link_libraries(braynsDTI PRIVATE Brion Brain braynsPluginAPI braynsEngine braynsNetwork)
 
 set_target_properties(braynsDTI
     PROPERTIES
@@ -40,5 +39,5 @@ install(TARGETS braynsDTI
 )
 
 install(EXPORT braynsDTI-targets
-    DESTINATION share/braynsCircuitInfo/CMake
+    DESTINATION share/braynsDTI/CMake
 )

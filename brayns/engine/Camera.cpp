@@ -2,6 +2,7 @@
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,90 +20,81 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/Camera.h>
+#include "Camera.h"
 
 namespace brayns
 {
-Camera::Camera(const Camera &other)
+bool operator==(const LookAt &a, const LookAt &b) noexcept
 {
-    *this = other;
+    return a.position == b.position && a.target == b.target && a.up == b.up;
 }
 
-Camera &Camera::operator=(const Camera &rhs)
+bool operator!=(const LookAt &a, const LookAt &b) noexcept
 {
-    if (this == &rhs)
-        return *this;
-
-    clonePropertiesFrom(rhs);
-
-    setPosition(rhs.getPosition());
-    setOrientation(rhs.getOrientation());
-
-    _initialPosition = rhs._initialPosition;
-    _initialOrientation = rhs._initialOrientation;
-
-    return *this;
+    return !(a == b);
 }
 
-void Camera::set(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target)
+Camera::Camera(std::string_view handleID)
+    : _handle(ospNewCamera(handleID.data()))
 {
-    setPosition(position);
-    setOrientation(orientation);
-    setTarget(target);
 }
 
-void Camera::setInitialState(const Vector3d &position, const Quaterniond &orientation, const Vector3d &target)
+Camera::~Camera()
 {
-    _initialPosition = position;
-    _initialTarget = target;
-    _initialOrientation = orientation;
-    _initialOrientation = glm::normalize(_initialOrientation);
-    set(position, orientation, target);
+    ospRelease(_handle);
 }
 
-void Camera::setPosition(const Vector3d &position)
+bool Camera::commit()
 {
-    _updateValue(_position, position);
+    if (!isModified())
+    {
+        return false;
+    }
+
+    const auto &position = _lookAtParams.position;
+    const auto &target = _lookAtParams.target;
+    const auto &up = _lookAtParams.up;
+
+    const auto forward = glm::normalize(target - position);
+    const auto strafe = glm::cross(forward, up);
+    const auto realUp = glm::cross(strafe, forward);
+
+    ospSetParam(_handle, "position", OSP_VEC3F, &position[0]);
+    ospSetParam(_handle, "direction", OSP_VEC3F, &forward);
+    ospSetParam(_handle, "up", OSP_VEC3F, &realUp);
+    ospSetParam(_handle, "aspect", OSP_FLOAT, &_aspectRatio);
+
+    commitCameraSpecificParams();
+
+    ospCommit(_handle);
+
+    resetModified();
+
+    return true;
 }
 
-void Camera::setTarget(const Vector3d &target)
+void Camera::setLookAt(const LookAt &params) noexcept
 {
-    _updateValue(_target, target);
+    _updateValue(_lookAtParams, params);
 }
 
-const Vector3d &Camera::getPosition() const
+const LookAt &Camera::getLookAt() const noexcept
 {
-    return _position;
+    return _lookAtParams;
 }
 
-const Vector3d &Camera::getTarget() const
+void Camera::setAspectRatio(const float aspectRatio) noexcept
 {
-    return _target;
+    _updateValue(_aspectRatio, aspectRatio);
 }
 
-void Camera::setOrientation(Quaterniond orientation)
+float Camera::getAspectRatio() const noexcept
 {
-    orientation = glm::normalize(orientation);
-    _updateValue(_orientation, orientation);
+    return _aspectRatio;
 }
 
-const Quaterniond &Camera::getOrientation() const
+OSPCamera Camera::handle() const noexcept
 {
-    return _orientation;
-}
-
-void Camera::reset()
-{
-    set(_initialPosition, _initialOrientation, _initialTarget);
-}
-
-void Camera::setBufferTarget(const std::string &target)
-{
-    _updateValue(_bufferTarget, target, false);
-}
-
-const std::string &Camera::getBufferTarget() const
-{
-    return _bufferTarget;
+    return _handle;
 }
 } // namespace brayns

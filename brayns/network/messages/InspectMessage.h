@@ -26,6 +26,6 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(InspectMessage)
-BRAYNS_JSON_OBJECT_ENTRY(Vector2d, position, "Position XY (normalized)")
+BRAYNS_JSON_OBJECT_ENTRY(Vector2f, position, "Position XY (normalized)")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

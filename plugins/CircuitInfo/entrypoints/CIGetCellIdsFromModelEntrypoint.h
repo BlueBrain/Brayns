@@ -34,16 +34,25 @@
 class ModelCellIdsRetriever
 {
 public:
-    static CIGetCellIdsResult getCellIds(brayns::ModelDescriptor &model)
+    static CIGetCellIdsResult getCellIds(brayns::SceneModelManager &modelManager, uint32_t modelId)
     {
         // Circuit info
         CIGetCellIdsParams params;
 
+        const auto &loadParams = modelManager.getModelLoadParameters(modelId);
+        if (loadParams.type != brayns::ModelLoadParameters::LoadType::FROM_FILE)
+        {
+            throw brayns::JsonRpcException("Cannot retrieve cell data from blob-loaded models");
+        }
+
         // Path
-        params.path = model.getPath();
+        params.path = loadParams.path;
+
+        auto &instance = brayns::ExtractModel::fromId(modelManager, modelId);
+        auto &model = instance.getModel();
 
         // Targets
-        auto &metadata = model.getMetadata();
+        auto &metadata = model.getMetaData();
         auto i = metadata.find("Targets");
         if (i != metadata.end())
         {
@@ -69,8 +78,8 @@ public:
 class CIGetCellIdsFromModelEntrypoint : public brayns::Entrypoint<CIGetCellIdsFromModelParams, CIGetCellIdsResult>
 {
 public:
-    CIGetCellIdsFromModelEntrypoint(brayns::Scene &scene)
-        : _scene(scene)
+    CIGetCellIdsFromModelEntrypoint(brayns::SceneModelManager &modelManager)
+        : _modelManager(modelManager)
     {
     }
 
@@ -88,11 +97,10 @@ public:
     {
         auto params = request.getParams();
         auto modelId = params.model_id;
-        auto &model = brayns::ExtractModel::fromId(_scene, modelId);
-        auto result = ModelCellIdsRetriever::getCellIds(model);
+        auto result = ModelCellIdsRetriever::getCellIds(_modelManager, modelId);
         request.reply(result);
     }
 
 private:
-    brayns::Scene &_scene;
+    brayns::SceneModelManager &_modelManager;
 };

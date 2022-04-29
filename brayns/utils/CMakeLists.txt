@@ -20,6 +20,7 @@ set(BRAYNSUTILS_HEADERS
   image/ImageInfo.h
   image/ImageMerger.h
   StringUtils.h
+  TypeNameDemangler.h
 )
   
 set(BRAYNSUTILS_SOURCES

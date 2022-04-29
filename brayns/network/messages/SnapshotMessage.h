@@ -25,30 +25,24 @@
 
 #include <brayns/network/adapters/AnimationParametersAdapter.h>
 #include <brayns/network/adapters/CameraAdapter.h>
-#include <brayns/network/adapters/RenderingParametersAdapter.h>
-#include <brayns/network/adapters/VolumeParametersAdapter.h>
+#include <brayns/network/adapters/RendererAdapter.h>
+#include <brayns/network/common/EngineObjectFactory.h>
+#include <brayns/network/messages/ImageSettingsMessage.h>
+
+#include <optional>
 
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(SnapshotParams)
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::unique_ptr<AnimationParameters>,
-    animation_parameters,
-    "Animation parameters",
-    Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::unique_ptr<VolumeParameters>, volume_parameters, "Volume parameters", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::unique_ptr<Camera>, camera, "Camera parameters", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::string, format, "Image format (extension without the dot)")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Name of the snapshot", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(size_t, quality, "Image quality from 0 to 100", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::unique_ptr<RenderingParameters>, renderer, "Renderer parameters", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(uint16_t, samples_per_pixel, "Samples per pixel", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(Vector2ui, size, "Image dimensions")
+BRAYNS_JSON_OBJECT_ENTRY(ImageSettings, image_settings, "Image settings", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(GenericObject<Camera>, camera, "Camera definition", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(LookAt, camera_view, "Camera 'look at' view settings", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(GenericObject<Renderer>, renderer, "Renderer definition", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, simulation_frame, "Simulation frame to render", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     file_path,
-    "Path if saved on disk. If empty, image will be sent"
-    "to the client as a base64 encoded image",
+    "Path if saved on disk. If empty, image will be sent to the client as a base64 encoded image",
     Required(false))
 BRAYNS_JSON_OBJECT_END()
 

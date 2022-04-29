@@ -24,7 +24,7 @@
 namespace brayns
 {
 GetSceneEntrypoint::GetSceneEntrypoint(const Scene &scene)
-    : GetEntrypoint(scene)
+    : _scene(scene)
 {
 }
 
@@ -38,18 +38,9 @@ std::string GetSceneEntrypoint::getDescription() const
     return "Get the current state of the scene";
 }
 
-SetSceneEntrypoint::SetSceneEntrypoint(Scene &scene)
-    : SetEntrypoint(scene)
+void GetSceneEntrypoint::onRequest(const Request &request)
 {
-}
-
-std::string SetSceneEntrypoint::getMethod() const
-{
-    return "set-scene";
-}
-
-std::string SetSceneEntrypoint::getDescription() const
-{
-    return "Set the current state of the scene";
+    ReadSceneProxy proxy(_scene);
+    request.reply(proxy);
 }
 } // namespace brayns

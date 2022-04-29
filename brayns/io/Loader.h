@@ -101,8 +101,8 @@ public:
      * @return a std::vector with all the brayns::ModelDescriptor loaded from
      * the blob
      */
-    virtual std::vector<ModelDescriptorPtr>
-        loadFromBlob(Blob &&blob, const LoaderProgress &callback, const JsonValue &params, Scene &scene) const = 0;
+    virtual std::vector<std::unique_ptr<Model>>
+        loadFromBlob(Blob &&blob, const LoaderProgress &callback, const JsonValue &params) const = 0;
 
     /**
      * @brief Loads a model/list of models from a path to a file
@@ -114,11 +114,8 @@ public:
      * @return a std::vector with all the brayns::ModelDescriptor loaded from
      * the file
      */
-    virtual std::vector<ModelDescriptorPtr> loadFromFile(
-        const std::string &path,
-        const LoaderProgress &callback,
-        const JsonValue &params,
-        Scene &scene) const = 0;
+    virtual std::vector<std::unique_ptr<Model>>
+        loadFromFile(const std::string &path, const LoaderProgress &callback, const JsonValue &params) const = 0;
 };
 
 /**
@@ -141,21 +138,18 @@ public:
         return _parameterSchema;
     }
 
-    virtual std::vector<ModelDescriptorPtr>
-        loadFromBlob(Blob &&blob, const LoaderProgress &callback, const JsonValue &params, Scene &scene) const override
+    virtual std::vector<std::unique_ptr<Model>>
+        loadFromBlob(Blob &&blob, const LoaderProgress &callback, const JsonValue &params) const override
     {
         const T inputParams = _parseParameters(params);
-        return importFromBlob(std::move(blob), callback, inputParams, scene);
+        return importFromBlob(std::move(blob), callback, inputParams);
     }
 
-    virtual std::vector<ModelDescriptorPtr> loadFromFile(
-        const std::string &path,
-        const LoaderProgress &callback,
-        const JsonValue &params,
-        Scene &scene) const override
+    virtual std::vector<std::unique_ptr<Model>>
+        loadFromFile(const std::string &path, const LoaderProgress &callback, const JsonValue &params) const override
     {
         const T inputParams = _parseParameters(params);
-        return importFromFile(path, callback, inputParams, scene);
+        return importFromFile(path, callback, inputParams);
     }
 
     /**
@@ -166,8 +160,8 @@ public:
      * @param properties Properties used for loading
      * @return the model that has been created by the loader
      */
-    virtual std::vector<ModelDescriptorPtr>
-        importFromBlob(Blob &&blob, const LoaderProgress &callback, const T &properties, Scene &scene) const = 0;
+    virtual std::vector<std::unique_ptr<Model>>
+        importFromBlob(Blob &&blob, const LoaderProgress &callback, const T &properties) const = 0;
 
     /**
      * Import the data from the given file and return the created model.
@@ -177,11 +171,8 @@ public:
      * @param properties Properties used for loading
      * @return the model that has been created by the loader
      */
-    virtual std::vector<ModelDescriptorPtr> importFromFile(
-        const std::string &filename,
-        const LoaderProgress &callback,
-        const T &properties,
-        Scene &scene) const = 0;
+    virtual std::vector<std::unique_ptr<Model>>
+        importFromFile(const std::string &filename, const LoaderProgress &callback, const T &properties) const = 0;
 
 private:
     const JsonSchema _parameterSchema;
@@ -234,8 +225,7 @@ public:
      * @param callback a callback to update the load progress to the caller
      * @return a std::vector with the loaded ModelDescriptorPtr objects
      */
-    virtual std::vector<ModelDescriptorPtr> importFromBlob(Blob &&blob, const LoaderProgress &callback, Scene &scene)
-        const = 0;
+    virtual std::vector<std::unique_ptr<Model>> importFromBlob(Blob &&blob, const LoaderProgress &callback) const = 0;
 
     /**
      * @brief importFromFile imports a model from a file from disk
@@ -243,19 +233,17 @@ public:
      * @param callback a callback to update the load progress to the caller
      * @return a std::vector with the loaded ModelDescriptorPtr objects
      */
-    virtual std::vector<ModelDescriptorPtr>
-        importFromFile(const std::string &path, const LoaderProgress &callback, Scene &scene) const = 0;
+    virtual std::vector<std::unique_ptr<Model>> importFromFile(const std::string &path, const LoaderProgress &callback)
+        const = 0;
 
-    std::vector<ModelDescriptorPtr> importFromBlob(
+    std::vector<std::unique_ptr<Model>> importFromBlob(
         Blob &&blob,
         const LoaderProgress &callback,
-        const EmptyLoaderParameters &parameters,
-        Scene &scene) const final;
+        const EmptyLoaderParameters &parameters) const final;
 
-    std::vector<ModelDescriptorPtr> importFromFile(
+    std::vector<std::unique_ptr<Model>> importFromFile(
         const std::string &path,
         const LoaderProgress &callback,
-        const EmptyLoaderParameters &parameters,
-        Scene &scene) const final;
+        const EmptyLoaderParameters &parameters) const final;
 };
 } // namespace brayns

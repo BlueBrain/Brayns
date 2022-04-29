@@ -21,26 +21,118 @@
 
 #pragma once
 
+#include <brayns/engine/Engine.h>
+#include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/network/adapters/CameraAdapter.h>
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/utils/StringUtils.h>
 
 namespace brayns
 {
-class GetCameraEntrypoint : public GetEntrypoint<Camera>
+class GetCameraTypeEntrypoint : public Entrypoint<EmptyMessage, std::string>
 {
 public:
-    GetCameraEntrypoint(const Camera &camera);
+    GetCameraTypeEntrypoint(Engine &engine);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
+
+private:
+    Engine &_engine;
 };
 
-class SetCameraEntrypoint : public SetEntrypoint<Camera>
+template<typename T>
+class SetCameraEntrypoint : public Entrypoint<T, EmptyMessage>
 {
 public:
-    SetCameraEntrypoint(Camera &camera);
+    SetCameraEntrypoint(Engine &engine)
+        : _engine(engine)
+    {
+    }
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
+    virtual void onRequest(const typename Entrypoint<T, EmptyMessage>::Request &request) override
+    {
+        auto &currentCamera = _engine.getCamera();
+        if (auto castedSystemCamera = dynamic_cast<T *>(&currentCamera))
+        {
+            request.getParams(*castedSystemCamera);
+        }
+        else
+        {
+            auto currentLookAt = currentCamera.getLookAt();
+            auto newCamera = std::make_unique<T>();
+            request.getParams(*newCamera);
+            newCamera->setLookAt(currentLookAt);
+            _engine.setCamera(std::move(newCamera));
+        }
+
+        request.reply(EmptyMessage());
+    }
+
+private:
+    Engine &_engine;
 };
+
+class SetCameraPerspectiveEntrypoint final : public SetCameraEntrypoint<PerspectiveCamera>
+{
+public:
+    SetCameraPerspectiveEntrypoint(Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+};
+
+class SetCameraOrthographicEntrypoint final : public SetCameraEntrypoint<OrthographicCamera>
+{
+public:
+    SetCameraOrthographicEntrypoint(Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+};
+
+template<typename T>
+class GetCameraEntrypoint : public Entrypoint<EmptyMessage, T>
+{
+public:
+    GetCameraEntrypoint(Engine &engine)
+        : _engine(engine)
+    {
+    }
+
+    virtual void onRequest(const typename Entrypoint<EmptyMessage, T>::Request &request) override
+    {
+        auto &currentCamera = _engine.getCamera();
+        if (auto castedSystemCamera = dynamic_cast<T *>(&currentCamera))
+        {
+            request.reply(*castedSystemCamera);
+            return;
+        }
+
+        throw JsonRpcException("Cannot cast the current camera to the requested type");
+    }
+
+private:
+    Engine &_engine;
+};
+
+class GetCameraPerspectiveEntrypoint final : public GetCameraEntrypoint<PerspectiveCamera>
+{
+public:
+    GetCameraPerspectiveEntrypoint(Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+};
+
+class GetCameraOrthographicEntrypoint final : public GetCameraEntrypoint<OrthographicCamera>
+{
+public:
+    GetCameraOrthographicEntrypoint(Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+};
+
 } // namespace brayns

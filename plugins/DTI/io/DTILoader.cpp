@@ -1,9 +1,9 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
- * This file is part of the circuit explorer for Brayns
- * <https://github.com/favreau/Brayns-UC-CircuitExplorer>
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,188 +20,311 @@
  */
 
 #include "DTILoader.h"
-#include "Utils.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/Material.h>
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/utils/FileReader.h>
 
+#include <components/DTIComponent.h>
+#include <components/SpikeReportComponent.h>
+
+#include <filesystem>
 #include <fstream>
+#include <iterator>
+#include <optional>
+#include <unordered_set>
+
+#include <boost/property_tree/ini_parser.hpp>
+
+#include <brain/spikeReportReader.h>
+#include <brion/blueConfig.h>
 
 namespace
 {
-/** Name */
-const std::string LOADER_NAME = "DTI loader";
-
-/** Supported extensions */
-const std::string SUPPORTED_EXTENTION_DTI = "dti";
-
-struct GidRow
+struct DTIConfiguration
 {
-    uint64_t gid;
-    uint64_t row;
+    // Streamline points (1 streamline per row)
+    std::filesystem::path streamlinesPath;
+    // Multimap Gid -> streamline it affects
+    std::filesystem::path gidsToStreamlinesPath;
+    // Optional path to a Blueconfig to load a spike report
+    std::optional<std::filesystem::path> circuitPath;
 };
 
-std::istream &operator>>(std::istream &in, GidRow &gr)
+struct DTIConfigurationReader
+{
+    static DTIConfiguration read(const std::string &path)
+    {
+        boost::property_tree::ptree pt;
+        boost::property_tree::ini_parser::read_ini(path, pt);
+
+        DTIConfiguration configuration;
+
+        configuration.streamlinesPath = pt.get<std::string>("streamlines");
+        configuration.gidsToStreamlinesPath = pt.get<std::string>("gids_to_streamline_row");
+
+        const auto circuitFile = pt.get_optional<std::string>("circuit");
+        if (circuitFile.has_value())
+        {
+            configuration.circuitPath = *circuitFile;
+        }
+
+        return configuration;
+    }
+};
+
+struct GIDRow
+{
+    uint64_t gid{};
+    uint64_t row{};
+};
+
+std::istream &operator>>(std::istream &in, GIDRow &gr)
 {
     return in >> gr.gid >> gr.row;
 }
+struct GIDRowReader
+{
+    static std::vector<GIDRow> read(const std::string &path)
+    {
+        const auto content = brayns::FileReader::read(path);
+        std::istringstream stream(content);
+        std::vector<GIDRow> gidRows(std::istream_iterator<GIDRow>(stream), {});
+        return gidRows;
+    }
+};
+
+struct StreamlineData
+{
+    size_t linealIndex{};
+    std::vector<brayns::Vector3f> points;
+};
+
+/**
+ * @brief Used to filter which rows to load in RowStreamlineMapReader
+ */
+struct StreamlineRowFilter
+{
+    virtual bool filter(const size_t row) const noexcept = 0;
+};
+
+// When loading without gid->row file (in other words, without simulation)
+struct NoopStreamlineRowFilter final : public StreamlineRowFilter
+{
+    bool filter(const size_t row) const noexcept override
+    {
+        return true;
+    }
+};
+
+// When loading with gid->row file (in other words, with simulation)
+struct GIDRowStreamlineRowFilter final : public StreamlineRowFilter
+{
+    GIDRowStreamlineRowFilter(const std::vector<GIDRow> &gidRows)
+    {
+        for (const auto &entry : gidRows)
+        {
+            const auto row = entry.row;
+            _whitelistedRows.insert(row);
+        }
+    }
+
+    bool filter(const size_t row) const noexcept override
+    {
+        auto it = _whitelistedRows.find(row);
+        return it != _whitelistedRows.end();
+    }
+
+private:
+    std::unordered_set<size_t> _whitelistedRows;
+};
+
+struct RowStreamlineMapReader
+{
+    static std::map<uint64_t, StreamlineData> read(const std::string &path, const StreamlineRowFilter &filter)
+    {
+        std::map<uint64_t, StreamlineData> result;
+
+        const auto content = brayns::FileReader::read(path);
+        std::istringstream stream(content);
+
+        size_t row = 0;
+        size_t index = 0;
+
+        while (stream.good())
+        {
+            std::string line;
+            std::getline(stream, line);
+
+            if (!line.empty() && filter.filter(row))
+            {
+                std::istringstream lineStream(line);
+                uint64_t nbPoints;
+                lineStream >> nbPoints;
+
+                if (!lineStream.good() || nbPoints == 0)
+                {
+                    throw std::runtime_error("Row " + std::to_string(row));
+                }
+
+                auto &streamline = result[row];
+
+                streamline.linealIndex = index++;
+
+                auto &points = streamline.points;
+                points.reserve(nbPoints);
+
+                for (uint64_t i = 0; i < nbPoints && lineStream.good(); ++i)
+                {
+                    brayns::Vector3f point;
+                    lineStream >> point.x >> point.y >> point.z;
+                    points.push_back(point);
+                }
+            }
+
+            ++row;
+        }
+
+        return result;
+    }
+};
+
+struct StreamlineComponentBuilder
+{
+    static void build(const std::map<uint64_t, StreamlineData> &streamlines, const float radius, brayns::Model &model)
+    {
+        std::vector<std::vector<brayns::Primitive>> geometries;
+        geometries.reserve(streamlines.size());
+
+        for (const auto &[row, streamline] : streamlines)
+        {
+            const auto &points = streamline.points;
+
+            auto &geometry = geometries.emplace_back();
+            geometry.reserve(points.size() - 1);
+
+            for (size_t i = 1; i < points.size(); ++i)
+            {
+                const auto &start = points[i - 1];
+                const auto &end = points[i];
+                geometry.push_back(brayns::Primitive::cylinder(start, end, radius));
+            }
+        }
+
+        auto &dti = model.addComponent<dti::DTIComponent>();
+        dti.setStreamlines(geometries);
+    }
+};
+
+struct GIDsToStreamlineIndicesMapping
+{
+    static std::unordered_map<uint64_t, std::vector<size_t>> generate(
+        const std::vector<GIDRow> &gidRows,
+        const std::map<uint64_t, StreamlineData> &streamlinesMap)
+    {
+        std::unordered_map<uint64_t, std::vector<size_t>> result;
+        for (const auto &gidRow : gidRows)
+        {
+            const auto gid = gidRow.gid;
+            const auto row = gidRow.row;
+
+            const auto &streamline = streamlinesMap.at(row);
+            const auto streamlineIndex = streamline.linealIndex;
+
+            auto &gidIndexList = result[gid];
+            gidIndexList.push_back(streamlineIndex);
+        }
+
+        return result;
+    }
+};
+
+struct SpikeReportComponentBuilder
+{
+    static void build(
+        std::unordered_map<uint64_t, std::vector<size_t>> gidStreamlineMap,
+        float decayTime,
+        const std::string &circuitPath,
+        brayns::Model &model)
+    {
+        const auto blueConfig = brion::BlueConfig(circuitPath);
+        const auto spikesURI = blueConfig.getSpikeSource();
+        auto spikeReport = std::make_unique<brain::SpikeReportReader>(spikesURI);
+        model.addComponent<dti::SpikeReportComponent>(std::move(spikeReport), std::move(gidStreamlineMap), decayTime);
+    }
+};
 } // namespace
 
 namespace dti
 {
 std::string DTILoader::getName() const
 {
-    return LOADER_NAME;
+    return "DTI loader";
 }
 
 std::vector<std::string> DTILoader::getSupportedExtensions() const
 {
-    return {SUPPORTED_EXTENTION_DTI};
+    return {"dti"};
 }
 
-DTIConfiguration DTILoader::_readConfiguration(const boost::property_tree::ptree &pt) const
+std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromBlob(
+    brayns::Blob &&blob,
+    const brayns::LoaderProgress &callback,
+    const DTILoaderParameters &params) const
 {
-    DTIConfiguration configuration;
-    configuration.streamlines = pt.get<std::string>("streamlines");
-    configuration.gid_to_streamline = pt.get<std::string>("gids_to_streamline_row");
-    return configuration;
-}
-
-std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromBlob(
-    brayns::Blob &&,
-    const brayns::LoaderProgress &,
-    const DTILoaderParameters &,
-    brayns::Scene &) const
-{
+    (void)blob;
+    (void)callback;
+    (void)params;
     throw std::runtime_error("Loading DTI from blob is not supported");
 }
 
-Colors DTILoader::getColorsFromPoints(
-    const std::vector<brayns::Vector3f> &points,
-    const float opacity,
-    const ColorScheme colorScheme)
-{
-    Colors colors;
-    switch (colorScheme)
-    {
-    case ColorScheme::by_normal:
-        colors.push_back({0.f, 0.f, 0.f, opacity});
-        for (uint64_t i = 0; i < points.size() - 1; ++i)
-        {
-            const auto &p1 = points[i];
-            const auto &p2 = points[i + 1];
-            const auto dir = normalize(p2 - p1);
-            const brayns::Vector3f n = {0.5f + dir.x * 0.5f, 0.5f + dir.y * 0.5f, 0.5f + dir.z * 0.5f};
-            colors.push_back({n.x, n.y, n.z, opacity});
-        }
-        break;
-    case ColorScheme::by_id:
-        colors.resize(points.size(), {rand() % 100 / 100.f, rand() % 100 / 100.f, rand() % 100 / 100.f, opacity});
-        break;
-    default:
-        colors.resize(points.size(), {1.f, 1.f, 1.f, opacity});
-        break;
-    }
-    return colors;
-}
-
-std::vector<brayns::ModelDescriptorPtr> DTILoader::importFromFile(
-    const std::string &filename,
+std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromFile(
+    const std::string &path,
     const brayns::LoaderProgress &callback,
-    const DTILoaderParameters &input,
-    brayns::Scene &scene) const
+    const DTILoaderParameters &params) const
 {
-    boost::property_tree::ptree pt;
-    boost::property_tree::ini_parser::read_ini(filename, pt);
-    const auto config = _readConfiguration(pt);
+    std::vector<std::unique_ptr<brayns::Model>> result;
+    result.push_back(std::make_unique<brayns::Model>());
+    auto &model = *(result.back());
 
-    // Check files
-    std::ifstream gidRowfile(config.gid_to_streamline, std::ios::in);
-    if (!gidRowfile.good())
-        throw std::runtime_error("Could not open gid/row mapping file " + config.gid_to_streamline);
+    callback.updateProgress("Reading configuration", 0.f);
+    const auto config = DTIConfigurationReader::read(path);
 
-    std::ifstream streamlinesFile(config.streamlines, std::ios::in);
-    if (!streamlinesFile.good())
-        throw std::runtime_error("Could not open streamlines file " + config.streamlines);
+    const auto &circuitPathEntry = config.circuitPath;
 
-    // Load positions
-    callback.updateProgress("Loading positions ...", 0.f);
-
-    // Load mapping between GIDs and Rows
-    callback.updateProgress("Loading mapping ...", 0.2f);
-    std::vector<GidRow> gidRows(std::istream_iterator<GidRow>(gidRowfile), {});
-    gidRowfile.close();
-
-    // Rows to load
-    std::set<u_int64_t> rowsToLoad;
-    for (const auto &gidRow : gidRows)
-        rowsToLoad.insert(gidRow.row);
-
-    // Load points
-    using Points = std::vector<brayns::Vector3f>;
-    std::map<uint64_t, Points> streamlines;
-    uint64_t count = 0;
-    callback.updateProgress("Loading streamlines ...", 0.4f);
-    while (streamlinesFile.good())
+    if (!circuitPathEntry.has_value())
     {
-        std::string line;
-        std::getline(streamlinesFile, line);
+        callback.updateProgress("Loading streamlines", 0.33f);
+        const NoopStreamlineRowFilter filter;
+        const auto &streamlinesPath = config.streamlinesPath;
+        auto rowStreamlineMap = RowStreamlineMapReader::read(streamlinesPath, filter);
 
-        if (rowsToLoad.find(count) != rowsToLoad.end())
-        {
-            std::istringstream in(line);
-            uint64_t nbPoints;
-            in >> nbPoints;
-            Points points;
-            for (uint64_t i = 0; i < nbPoints; ++i)
-            {
-                brayns::Vector3f point;
-                in >> point.x >> point.y >> point.z;
-                points.push_back(point);
-            }
-            streamlines[count] = points;
-        }
-        ++count;
+        callback.updateProgress("Generating geometry", 0.66f);
+        const auto radius = params.radius;
+        StreamlineComponentBuilder::build(rowStreamlineMap, radius, model);
     }
-    streamlinesFile.close();
-
-    // Create model
-    auto model = scene.createModel();
-    const auto nbStreamlines = gidRows.size();
-    count = 0;
-    uint64_t i = 0;
-    std::set<u_int16_t> streamlineAdded;
-    for (const auto &gidRow : gidRows)
+    else
     {
-        const auto it = streamlines.find(gidRow.row);
-        if (it != streamlines.end() && streamlineAdded.find(gidRow.row) == streamlineAdded.end())
-        {
-            streamlineAdded.insert(gidRow.row);
-            callback.updateProgress(
-                "Creating " + std::to_string(count) + " streamlines ...",
-                0.6f + 0.2f * float(i) / float(nbStreamlines));
+        callback.updateProgress("Reading gid to row mapping file (might take time)", 0.2f);
+        const auto &gidRowsFilePath = config.gidsToStreamlinesPath;
+        const auto gidRows = GIDRowReader::read(gidRowsFilePath);
 
-            const auto &points = (*it).second;
-            const auto nbPoints = points.size();
-            const auto colors = getColorsFromPoints(points, input.opacity, input.color_scheme);
+        callback.updateProgress("Loading streamlines", 0.4f);
+        const GIDRowStreamlineRowFilter filter(gidRows);
+        const auto &streamlinesPath = config.streamlinesPath;
+        auto rowStreamlineMap = RowStreamlineMapReader::read(streamlinesPath, filter);
 
-            std::vector<float> radii;
-            radii.resize(nbPoints, input.radius);
+        callback.updateProgress("Generating geometry", 0.6f);
+        const auto radius = params.radius;
+        StreamlineComponentBuilder::build(rowStreamlineMap, radius, model);
 
-            brayns::Streamline streamline(points, colors, radii);
-            model->createMaterial(gidRow.gid, std::to_string(gidRow.gid));
-            model->addStreamline(gidRow.gid, streamline);
-            ++count;
-        }
-        ++i;
+        callback.updateProgress("Loading simulation", 0.8f);
+        const auto &circuitPath = *circuitPathEntry;
+        auto gidsToStreamlineIndices = GIDsToStreamlineIndicesMapping::generate(gidRows, rowStreamlineMap);
+        auto spikeDecayTime = params.spike_decay_time;
+        SpikeReportComponentBuilder::build(std::move(gidsToStreamlineIndices), spikeDecayTime, circuitPath, model);
     }
 
-    callback.updateProgress("Committing " + std::to_string(count) + " streamlines ...", 0.8f);
-    brayns::ModelMetadata metadata = {{"Number of streamlines", std::to_string(count)}};
-    auto modelDescriptor = std::make_shared<brayns::ModelDescriptor>(std::move(model), "DTI", metadata);
     callback.updateProgress("Done", 1.f);
-    return {modelDescriptor};
+    return result;
 }
 } // namespace dti

@@ -29,30 +29,65 @@ RUN apt-get update \
 # Get ISPC
 # https://ispc.github.io/downloads.html
 
-ARG ISPC_VERSION=1.10.0b
+ARG ISPC_VERSION=1.17.0
 ARG ISPC_DIR=ispc-v${ISPC_VERSION}-linux
-ARG ISPC_PATH=/app/ispc-v1.10.0-linux
+ARG ISPC_PATH=/app/ispc-v1.17.0-linux
 
 RUN mkdir -p ${ISPC_PATH} \
-   && wget https://github.com/ispc/ispc/releases/download/v1.10.0/${ISPC_DIR}.tar.gz \
+   && wget https://github.com/ispc/ispc/releases/download/v1.17.0/${ISPC_DIR}.tar.gz \
    && tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1 \
    && rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
 
 # Add ispc bin to the PATH
 ENV PATH $PATH:${ISPC_PATH}
 
+RUN mkdir -p ${DIST_PATH}
+
+# Install One TBB
+ARG ONETBB_VERSION=2021.5.0
+ARG ONETBB_FILE=oneapi-tbb-${ONETBB_VERSION}-lin.tgz
+RUN wget https://github.com/oneapi-src/oneTBB/releases/download/v${ONETBB_VERSION}/${ONETBB_FILE} \
+   && tar zxvf ${ONETBB_FILE} -C ${DIST_PATH} --strip-components=1
+
 # Install embree
 # https://github.com/embree/embree/releases
-ARG EMBREE_VERSION=3.5.2
+ARG EMBREE_VERSION=3.13.3
 ARG EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
-RUN mkdir -p ${DIST_PATH} \
-   && wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE} \
+RUN wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE} \
    && tar zxvf ${EMBREE_FILE} -C ${DIST_PATH} --strip-components=1 \
    && rm -rf ${DIST_PATH}/bin ${DIST_PATH}/doc
 
+# Install rk common
+ARG RKCOMMON_VERSION=v1.9.0
+ARG RKCOMMON_SRC=/app/rkcommon
+RUN mkdir ${RKCOMMON_SRC} \
+   && git clone https://github.com/ospray/rkcommon ${RKCOMMON_SRC} \
+   && cd ${RKCOMMON_SRC} \
+   && git checkout ${RKCOMMON_VERSION} \
+   && mkdir build \
+   && cd build \
+   && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${DIST_PATH} -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
+   && ninja -j4 install
+
+# Install open vkl
+ARG OPENVKL_VERSION=v1.2.0
+ARG OPENVKL_SRC=/app/openvkl
+RUN mkdir ${OPENVKL_SRC} \
+   && git clone https://github.com/openvkl/openvkl ${OPENVKL_SRC} \
+   && cd ${OPENVKL_SRC} \
+   && git checkout ${OPENVKL_VERSION} \
+   && mkdir build \
+   && cd build \
+   && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release \
+   -DCMAKE_PREFIX_PATH=${DIST_PATH} \
+   -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
+   -DBUILD_EXAMPLES=OFF \
+   -DISPC_EXECUTABLE=/app/ispc-v1.17.0-linux/bin/ispc \
+   && ninja -j4 install 
+
 # Install OSPRay
 # https://github.com/ospray/ospray/releases
-ARG OSPRAY_TAG=v1.8.5
+ARG OSPRAY_TAG=v2.9.0
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
@@ -62,9 +97,14 @@ RUN mkdir -p ${OSPRAY_SRC} \
    && mkdir -p build \
    && cd build \
    && CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
-   -DOSPRAY_ENABLE_TUTORIALS=OFF \
-   -DOSPRAY_ENABLE_APPS=OFF \
+   -DOSPRAY_ENABLE_APPS_TUTORIALS=OFF \
+   -DOSPRAY_ENABLE_APPS_BENCHMARK=OFF \
+   -DOSPRAY_ENABLE_APPS_EXAMPLES=OFF \
+   -DOSPRAY_ENABLE_APPS_TESTING=OFF \
+   -DOSPRAY_APPS_ENABLE_GLM=OFF \
+   -DOSPRAY_MODULE_DENOISER=OFF \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
+   -DISPC_EXECUTABLE=/app/ispc-v1.17.0-linux/bin/ispc \
    && ninja -j4 install
 
 # Install libwebsockets (2.0 from Debian is not reliable)
@@ -169,4 +209,4 @@ EXPOSE 8200
 # See https://docs.docker.com/engine/reference/run/#entrypoint-default-command-to-execute-at-runtime
 # for more docs
 ENTRYPOINT ["braynsService"]
-CMD ["--uri", "0.0.0.0:8200", "--plugin", "braynsCircuitExplorer", "--plugin", "braynsCircuitInfo", "--sandbox-path", "/"]
+CMD ["--uri", "0.0.0.0:8200", "--plugin", "braynsCircuitExplorer", "--plugin", "braynsCircuitInfo"]

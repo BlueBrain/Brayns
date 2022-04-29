@@ -18,13 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ParametersManager.h"
-
-#include <iostream>
-
 #include <brayns/Version.h>
 #include <brayns/common/Log.h>
-#include <brayns/parameters/AbstractParameters.h>
+#include <brayns/parameters/ParametersManager.h>
+
+#include <iostream>
 
 namespace
 {
@@ -118,14 +116,17 @@ ParametersManager::ParametersManager(const int argc, const char **argv)
 {
     registerParameters(&_animationParameters);
     registerParameters(&_applicationParameters);
-    registerParameters(&_renderingParameters);
-    registerParameters(&_volumeParameters);
     registerParameters(&_networkParameters);
 
     for (auto parameters : _parameterSets)
+    {
         _allOptions.add(parameters->parameters());
+    }
 
-    _parse(argc, argv);
+    if (argc > 0)
+    {
+        _parse(argc, argv);
+    }
 }
 
 void ParametersManager::registerParameters(AbstractParameters *parameters)
@@ -170,13 +171,19 @@ void ParametersManager::_parse(int argc, const char **argv)
 
         _printVersion();
         if (vm.count("version"))
+        {
             exit(EXIT_SUCCESS);
+        }
 
         for (auto parameters : _parameterSets)
+        {
             parameters->parse(vm);
+        }
 
         if (vm.count("verbose"))
+        {
             print();
+        }
     }
     catch (const po::error &e)
     {
@@ -193,23 +200,9 @@ void ParametersManager::usage()
 void ParametersManager::print()
 {
     for (AbstractParameters *parameters : _parameterSets)
-        parameters->print();
-}
-
-void ParametersManager::resetModified()
-{
-    for (AbstractParameters *parameters : _parameterSets)
-        parameters->resetModified();
-}
-
-bool ParametersManager::isAnyModified() const
-{
-    for (AbstractParameters *parameters : _parameterSets)
     {
-        if (parameters->isModified())
-            return true;
+        parameters->print();
     }
-    return false;
 }
 
 AnimationParameters &ParametersManager::getAnimationParameters()
@@ -232,26 +225,6 @@ const ApplicationParameters &ParametersManager::getApplicationParameters() const
     return _applicationParameters;
 }
 
-RenderingParameters &ParametersManager::getRenderingParameters()
-{
-    return _renderingParameters;
-}
-
-const RenderingParameters &ParametersManager::getRenderingParameters() const
-{
-    return _renderingParameters;
-}
-
-VolumeParameters &ParametersManager::getVolumeParameters()
-{
-    return _volumeParameters;
-}
-
-const VolumeParameters &ParametersManager::getVolumeParameters() const
-{
-    return _volumeParameters;
-}
-
 NetworkParameters &ParametersManager::getNetworkParameters()
 {
     return _networkParameters;
@@ -262,23 +235,37 @@ const NetworkParameters &ParametersManager::getNetworkParameters() const
     return _networkParameters;
 }
 
+void ParametersManager::resetModified()
+{
+    for (auto parameters : _parameterSets)
+    {
+        parameters->resetModified();
+    }
+}
+
 void ParametersManager::_processUnrecognizedOptions(const std::vector<std::string> &unrecognizedOptions) const
 {
     if (unrecognizedOptions.empty())
+    {
         return;
+    }
 
     const auto &unrecognized = unrecognizedOptions.front();
 
     std::vector<std::string> availableOptions;
-    for (auto option : _allOptions.options())
+    for (const auto &option : _allOptions.options())
+    {
         availableOptions.push_back(option->format_name());
+    }
 
     const auto suggestions = findSimilarOptions(unrecognized, availableOptions);
 
     std::string errorMessage = "Unrecognized option '" + unrecognized + "'.\n\nMost similar options are:";
 
     for (const auto &suggestion : suggestions)
+    {
         errorMessage += "\n\t" + suggestion;
+    }
 
     throw po::error(errorMessage);
 }

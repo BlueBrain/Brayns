@@ -23,15 +23,42 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/engine/Camera.h>
+#include <brayns/engine/cameras/OrthographicCamera.h>
+#include <brayns/engine/cameras/PerspectiveCamera.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Camera)
-BRAYNS_JSON_ADAPTER_GETSET("orientation", getOrientation, setOrientation, "Camera orientation XYZW")
-BRAYNS_JSON_ADAPTER_GETSET("position", getPosition, setPosition, "Camera position XYZ")
-BRAYNS_JSON_ADAPTER_GETSET("target", getTarget, setTarget, "Camera target XYZ")
-BRAYNS_JSON_ADAPTER_GETSET("current", getCurrentType, setCurrentType, "Camera current type")
-BRAYNS_JSON_ADAPTER_GET("types", getTypes, "Available camera types")
+BRAYNS_JSON_ADAPTER_BEGIN(OrthographicCamera)
+BRAYNS_JSON_ADAPTER_GETSET("height", getHeight, setHeight, "Camera orthographic projection height")
+BRAYNS_JSON_ADAPTER_END()
+
+BRAYNS_JSON_ADAPTER_BEGIN(PerspectiveCamera)
+BRAYNS_JSON_ADAPTER_GETSET(
+    "fovy",
+    getFOVY,
+    setFOVY,
+    "Camera vertical field of view (in degrees)",
+    Default(45.f),
+    Minimum(1.f))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "aperture_radius",
+    getApertureRadius,
+    setApertureRadius,
+    "Lens aperture radius (Use for depth of field effect. A value of 0.0 disables it",
+    Default(0.f),
+    Minimum(0.f))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "focus_distance",
+    getFocusDistance,
+    setFocusDistance,
+    "Distance at which to focus (for depth of field effect). A value of 1.0 disables it.",
+    Default(1.f),
+    Minimum(1.f))
+BRAYNS_JSON_ADAPTER_END()
+
+BRAYNS_JSON_ADAPTER_BEGIN(LookAt)
+BRAYNS_JSON_ADAPTER_ENTRY(position, "Position of the camera")
+BRAYNS_JSON_ADAPTER_ENTRY(target, "Target position at which the camera is looking")
+BRAYNS_JSON_ADAPTER_ENTRY(up, "Up vector to compute the camera orthonormal basis")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns
