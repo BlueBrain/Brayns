@@ -36,21 +36,25 @@ public:
         auto pickResult = _pickOSPRayScene(position);
         if (!pickResult.hasHit)
         {
-            brayns::InspectResult result;
-            result.hit = false;
-            return result;
+            return brayns::InspectResult{false};
         }
 
-        auto &instance = _findHittedModel(pickResult.instance);
+        auto instance = _findHittedInstance(pickResult.instance);
+        if (!instance)
+        {
+            _releaseOSPRayHandles(pickResult);
+            throw brayns::InternalErrorException("Could not find hitted instance");
+        }
+
         const auto inspectContext = _buildInspectContext(pickResult);
         auto metadata = brayns::JsonObject();
 
-        auto &model = instance.getModel();
+        auto &model = instance->getModel();
         model.onInspect(inspectContext, metadata);
 
         _releaseOSPRayHandles(pickResult);
 
-        return _buildResult(inspectContext, instance, metadata);
+        return _buildResult(inspectContext, *instance, std::move(metadata));
     }
 
 private:
@@ -74,7 +78,7 @@ private:
         return result;
     }
 
-    brayns::ModelInstance &_findHittedModel(OSPInstance hittedInstance)
+    brayns::ModelInstance *_findHittedInstance(OSPInstance hittedInstance)
     {
         auto &scene = _engine.getScene();
         auto &models = scene.getModels();
@@ -85,18 +89,18 @@ private:
         auto instanceIterator = std::find_if(
             begin,
             end,
-            [&](brayns::ModelInstance *instancePtr) { return instancePtr->handle() == hittedInstance; });
+            [=](brayns::ModelInstance *instancePtr) { return instancePtr->handle() == hittedInstance; });
 
         // Shouldn't happen, but..
         if (instanceIterator == end)
         {
-            throw brayns::InternalErrorException("Could not find the hitted model instance in the scene");
+            return nullptr;
         }
 
-        return **instanceIterator;
+        return *instanceIterator;
     }
 
-    brayns::InspectContext _buildInspectContext(OSPPickResult &osprayPickResult)
+    brayns::InspectContext _buildInspectContext(const OSPPickResult &osprayPickResult)
     {
         const auto &ospHitPosition = osprayPickResult.worldPosition;
         auto hitPosition = brayns::Vector3f(ospHitPosition[0], ospHitPosition[1], ospHitPosition[2]);
@@ -109,13 +113,13 @@ private:
     brayns::InspectResult _buildResult(
         const brayns::InspectContext &context,
         const brayns::ModelInstance &instance,
-        brayns::JsonObject &metadata)
+        brayns::JsonObject metadata)
     {
         brayns::InspectResult result;
         result.hit = true;
         result.model_id = instance.getID();
         result.position = context.hitPosition;
-        result.metadata = metadata;
+        result.metadata = std::move(metadata);
         return result;
     }
 
