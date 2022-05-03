@@ -102,8 +102,7 @@ public:
     /**
      * @brief Called when a scene inspect event has hitted any geometry of this model
      */
-    void onInspect(const Vector3f &hit, OSPGeometricModel modelHandle, uint32_t primitiveID, JsonObject &writeResult)
-        const noexcept;
+    void onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept;
 
     /**
      * @brief Returns the OSPRay group handler object

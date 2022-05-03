@@ -47,11 +47,7 @@ public:
 
     void onDestroy() override;
 
-    void onInspect(
-        const brayns::Vector3f &hit,
-        OSPGeometricModel modelHandle,
-        uint32_t primitiveID,
-        brayns::JsonObject &writeResult) const noexcept override;
+    void onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult) const noexcept override;
 
     /**
      * @brief Sets the morphologies of this component

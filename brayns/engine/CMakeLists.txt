@@ -57,6 +57,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     FrameRenderer.h
     Geometry.h
     ImageOperation.h
+    InspectContext.h
     Light.h
     Material.h
     Model.h

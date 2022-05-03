@@ -26,47 +26,35 @@ namespace
 class SceneInspector
 {
 public:
-    SceneInspector(brayns::Engine &engine, const brayns::Vector2f &inspectPosition)
+    SceneInspector(brayns::Engine &engine)
         : _engine(engine)
-        , _inspectPosition(inspectPosition)
     {
     }
 
-    brayns::InspectResult inspect()
+    brayns::InspectResult inspect(const brayns::Vector2f &position)
     {
-        brayns::InspectResult result;
-
-        auto pickResult = _pickOSPRayScene();
+        auto pickResult = _pickOSPRayScene(position);
         if (!pickResult.hasHit)
         {
+            brayns::InspectResult result;
             result.hit = false;
             return result;
         }
 
         auto &instance = _findHittedModel(pickResult.instance);
+        const auto inspectContext = _buildInspectContext(pickResult);
+        auto metadata = brayns::JsonObject();
+
         auto &model = instance.getModel();
+        model.onInspect(inspectContext, metadata);
 
-        result.hit = true;
-        result.model_id = instance.getID();
+        _releaseOSPRayHandles(pickResult);
 
-        auto &ospHitPosition = pickResult.worldPosition;
-        result.position = brayns::Vector3f(ospHitPosition[0], ospHitPosition[1], ospHitPosition[2]);
-
-        const auto &hitPosition = result.position;
-        auto geometricModel = pickResult.model;
-        auto primitiveID = pickResult.primID;
-
-        brayns::JsonObject data;
-        model.onInspect(hitPosition, geometricModel, primitiveID, data);
-
-        auto &metadata = result.metadata;
-        metadata = brayns::JsonValue(data);
-
-        return result;
+        return _buildResult(inspectContext, instance, metadata);
     }
 
 private:
-    OSPPickResult _pickOSPRayScene()
+    OSPPickResult _pickOSPRayScene(const brayns::Vector2f &position)
     {
         auto &frameBuffer = _engine.getFrameBuffer();
         auto &renderer = _engine.getRenderer();
@@ -78,8 +66,8 @@ private:
         auto cameraHandle = camera.handle();
         auto sceneHandle = scene.handle();
 
-        auto x = _inspectPosition.x;
-        auto y = _inspectPosition.y;
+        auto x = position.x;
+        auto y = position.y;
 
         OSPPickResult result;
         ospPick(&result, frameBufferHandle, rendererHandle, cameraHandle, sceneHandle, x, y);
@@ -102,15 +90,45 @@ private:
         // Shouldn't happen, but..
         if (instanceIterator == end)
         {
-            throw brayns::JsonRpcException("Could not find the hitted model instance in the scene");
+            throw brayns::InternalErrorException("Could not find the hitted model instance in the scene");
         }
 
         return **instanceIterator;
     }
 
+    brayns::InspectContext _buildInspectContext(OSPPickResult &osprayPickResult)
+    {
+        const auto &ospHitPosition = osprayPickResult.worldPosition;
+        auto hitPosition = brayns::Vector3f(ospHitPosition[0], ospHitPosition[1], ospHitPosition[2]);
+        auto geometricModel = osprayPickResult.model;
+        auto primitiveIndex = osprayPickResult.primID;
+
+        return brayns::InspectContext{hitPosition, geometricModel, primitiveIndex};
+    }
+
+    brayns::InspectResult _buildResult(
+        const brayns::InspectContext &context,
+        const brayns::ModelInstance &instance,
+        brayns::JsonObject &metadata)
+    {
+        brayns::InspectResult result;
+        result.hit = true;
+        result.model_id = instance.getID();
+        result.position = context.hitPosition;
+        result.metadata = metadata;
+        return result;
+    }
+
+    void _releaseOSPRayHandles(OSPPickResult &osprayPickResult)
+    {
+        auto instanceHandle = osprayPickResult.instance;
+        auto modelHandle = osprayPickResult.model;
+        ospRelease(instanceHandle);
+        ospRelease(modelHandle);
+    }
+
 private:
     brayns::Engine &_engine;
-    const brayns::Vector2f &_inspectPosition;
 };
 }
 
@@ -136,8 +154,8 @@ void InspectEntrypoint::onRequest(const Request &request)
     const auto params = request.getParams();
     const auto &position = params.position;
 
-    SceneInspector inspector(_engine, position);
-    auto result = inspector.inspect();
+    SceneInspector inspector(_engine);
+    auto result = inspector.inspect(position);
     request.reply(result);
 }
 } // namespace brayns

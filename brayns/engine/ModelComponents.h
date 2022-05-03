@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/common/Bounds.h>
+#include <brayns/engine/InspectContext.h>
 #include <brayns/json/JsonType.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/utils/TypeNameDemangler.h>
@@ -94,11 +95,7 @@ protected:
     /**
      * @brief Called when a scene inspect event has hitted any geometry of the model that owns this component
      */
-    virtual void onInspect(
-        const Vector3f &hit,
-        OSPGeometricModel modelHandle,
-        uint32_t primitiveID,
-        JsonObject &writeResult) const noexcept;
+    virtual void onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept;
 
 private:
     friend class Model;
@@ -238,13 +235,10 @@ private:
      * @brief Calls all the components for an inspect event. The components can write information
      * into the output Json object.
      *
-     * @param hit 3D position where the hit occoured
-     * @param modelHandle OSPGeometricModel handle that was hit
-     * @param primitiveID Index of the primitive that was hit
+     * @param context The ray intersection context from the inspect query
      * @param writeResult Output parameter where the component might write information to send to the client
      */
-    void onInspect(const Vector3f &hit, OSPGeometricModel modelHandle, uint32_t primitiveID, JsonObject &writeResult)
-        const noexcept;
+    void onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept;
 
 private:
     template<typename T>

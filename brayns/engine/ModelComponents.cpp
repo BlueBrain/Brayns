@@ -59,15 +59,9 @@ Bounds Component::computeBounds(const Matrix4f &transform) const noexcept
     return {};
 }
 
-void Component::onInspect(
-    const Vector3f &hit,
-    OSPGeometricModel modelHandle,
-    uint32_t primitiveID,
-    JsonObject &writeResult) const noexcept
+void Component::onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept
 {
-    (void)hit;
-    (void)modelHandle;
-    (void)primitiveID;
+    (void)context;
     (void)writeResult;
 }
 
@@ -121,16 +115,12 @@ Bounds ModelComponentContainer::computeBounds(const Matrix4f &transform) const n
     return result;
 }
 
-void ModelComponentContainer::onInspect(
-    const Vector3f &hit,
-    OSPGeometricModel modelHandle,
-    uint32_t primitiveID,
-    JsonObject &writeResult) const noexcept
+void ModelComponentContainer::onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept
 {
-    for (auto &entry : _components)
+    for (const auto &entry : _components)
     {
-        auto &component = *entry.component;
-        component.onInspect(hit, modelHandle, primitiveID, writeResult);
+        const auto &component = *entry.component;
+        component.onInspect(context, writeResult);
     }
 }
 }
