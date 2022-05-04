@@ -22,21 +22,12 @@
 
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Volume.h>
+#include <brayns/engine/VolumeDataType.h>
 
 #include <vector>
 
 namespace brayns
 {
-enum class RegularVolumeDataType : uint32_t
-{
-    BYTE = OSPDataType::OSP_UCHAR,
-    SHORT = OSPDataType::OSP_SHORT,
-    UNSIGNED_SHORT = OSPDataType::OSP_USHORT,
-    HALF_FLOAT = OSPDataType::OSP_HALF,
-    FLOAT = OSPDataType::OSP_FLOAT,
-    DOUBLE = OSPDataType::OSP_DOUBLE
-};
-
 /**
  * @brief The RegularVolume struct is a regular grid volume in which the data is laid out in XYZ order:
  * The first elements are the X values of the first row of the first frame.
@@ -44,7 +35,7 @@ enum class RegularVolumeDataType : uint32_t
 struct RegularVolume
 {
     // Specifies how to interpret the bytes stored as data
-    RegularVolumeDataType dataType;
+    VolumeDataType dataType;
     std::vector<uint8_t> data;
     Vector3ui size{0u};
     // Specifies wether the data is scpeified as per grid vertex. If false, is specified as per grid cell center.

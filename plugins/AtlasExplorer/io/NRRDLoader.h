@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,26 +18,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "DTIPlugin.h"
+#include <brayns/io/Loader.h>
 
-#include <io/DTILoader.h>
-
-#include <brayns/common/Log.h>
-#include <brayns/pluginapi/PluginAPI.h>
-
-namespace dti
+class NRRDLoader final : public brayns::NoInputLoader
 {
-void DTIPlugin::init()
-{
-    auto &registry = _api->getLoaderRegistry();
-    registry.registerLoader(std::make_unique<DTILoader>());
-}
-} // namespace dti
+public:
+    std::vector<std::string> getSupportedExtensions() const override;
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
-{
-    (void)argc;
-    (void)argv;
-    brayns::Log::info("[DTI] Loading DTI plugin.");
-    return new dti::DTIPlugin();
-}
+    std::string getName() const override;
+
+    std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
+        brayns::Blob &&blob,
+        const brayns::LoaderProgress &callback) const override;
+
+    std::vector<std::unique_ptr<brayns::Model>> importFromFile(
+        const std::string &path,
+        const brayns::LoaderProgress &callback) const override;
+};

@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,26 +18,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "DTIPlugin.h"
+#pragma once
 
-#include <io/DTILoader.h>
+#include <io/nrrdloader/NRRDHeader.h>
 
-#include <brayns/common/Log.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <functional>
+#include <unordered_map>
 
-namespace dti
+class HeaderEntryParser
 {
-void DTIPlugin::init()
-{
-    auto &registry = _api->getLoaderRegistry();
-    registry.registerLoader(std::make_unique<DTILoader>());
-}
-} // namespace dti
+public:
+    HeaderEntryParser();
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
-{
-    (void)argc;
-    (void)argv;
-    brayns::Log::info("[DTI] Loading DTI plugin.");
-    return new dti::DTIPlugin();
-}
+    void parseEntry(std::string_view value, NRRDHeader &dstHeader);
+
+private:
+    const std::unordered_map<std::string, std::function<void(std::string_view, NRRDHeader &)>> _table;
+};

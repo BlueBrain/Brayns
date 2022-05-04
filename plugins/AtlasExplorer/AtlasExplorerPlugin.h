@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,26 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "DTIPlugin.h"
+#pragma once
 
-#include <io/DTILoader.h>
+#include <brayns/pluginapi/ExtensionPlugin.h>
 
-#include <brayns/common/Log.h>
-#include <brayns/pluginapi/PluginAPI.h>
-
-namespace dti
+/**
+ * @brief The DTIPlugin adds support to load a custom Diffusion-transfer-imaging data format to visualize whitematter
+ */
+class AtlasExplorerPlugin : public brayns::ExtensionPlugin
 {
-void DTIPlugin::init()
-{
-    auto &registry = _api->getLoaderRegistry();
-    registry.registerLoader(std::make_unique<DTILoader>());
-}
-} // namespace dti
-
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
-{
-    (void)argc;
-    (void)argv;
-    brayns::Log::info("[DTI] Loading DTI plugin.");
-    return new dti::DTIPlugin();
-}
+public:
+    void init() final;
+};

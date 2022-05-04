@@ -34,3 +34,7 @@ endif()
 if(BRAYNS_CIRCUITINFO_ENABLED)
     add_subdirectory(CircuitInfo)
 endif()
+
+if(BRAYNS_ATLASEXPLORER_ENABLED)
+    add_subdirectory(AtlasExplorer)
+endif()

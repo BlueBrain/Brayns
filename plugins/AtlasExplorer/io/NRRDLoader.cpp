@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,26 +18,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "DTIPlugin.h"
+#include "NRRDLoader.h"
 
-#include <io/DTILoader.h>
-
-#include <brayns/common/Log.h>
-#include <brayns/pluginapi/PluginAPI.h>
-
-namespace dti
+std::vector<std::string> NRRDLoader::getSupportedExtensions() const
 {
-void DTIPlugin::init()
-{
-    auto &registry = _api->getLoaderRegistry();
-    registry.registerLoader(std::make_unique<DTILoader>());
+    return {".nrrd"};
 }
-} // namespace dti
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
+std::string NRRDLoader::getName() const
 {
-    (void)argc;
-    (void)argv;
-    brayns::Log::info("[DTI] Loading DTI plugin.");
-    return new dti::DTIPlugin();
+    return "NRRD Loader";
+}
+
+std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromBlob(
+    brayns::Blob &&blob,
+    const brayns::LoaderProgress &callback) const
+{
+    (void)blob;
+    (void)callback;
+    throw std::runtime_error("NRRD Loader does not support blob loading");
+}
+
+std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
+    const std::string &path,
+    const brayns::LoaderProgress &callback) const
+{
 }

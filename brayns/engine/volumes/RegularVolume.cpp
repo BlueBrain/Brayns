@@ -28,14 +28,19 @@ size_t getTypeByteSize(const OSPDataType type)
 {
     switch (type)
     {
+    case OSPDataType::OSP_CHAR:
     case OSPDataType::OSP_UCHAR:
         return 1;
     case OSPDataType::OSP_SHORT:
     case OSPDataType::OSP_USHORT:
     case OSPDataType::OSP_HALF:
         return 2;
+    case OSPDataType::OSP_INT:
+    case OSPDataType::OSP_UINT:
     case OSPDataType::OSP_FLOAT:
         return 4;
+    case OSPDataType::OSP_LONG:
+    case OSPDataType::OSP_ULONG:
     case OSPDataType::OSP_DOUBLE:
         return 8;
     default:

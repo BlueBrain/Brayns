@@ -67,6 +67,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     Renderer.h
     Scene.h
     Volume.h
+    VolumeDataType.h
     cameras/OrthographicCamera.h
     cameras/PerspectiveCamera.h
     common/DataHandler.h
