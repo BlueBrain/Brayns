@@ -59,6 +59,12 @@ Bounds Component::computeBounds(const Matrix4f &transform) const noexcept
     return {};
 }
 
+void Component::onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept
+{
+    (void)context;
+    (void)writeResult;
+}
+
 void ModelComponentContainer::onPreRender(const ParametersManager &params)
 {
     for (auto &entry : _components)
@@ -107,5 +113,14 @@ Bounds ModelComponentContainer::computeBounds(const Matrix4f &transform) const n
         result.expand(componentBounds);
     }
     return result;
+}
+
+void ModelComponentContainer::onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept
+{
+    for (const auto &entry : _components)
+    {
+        const auto &component = *entry.component;
+        component.onInspect(context, writeResult);
+    }
 }
 }

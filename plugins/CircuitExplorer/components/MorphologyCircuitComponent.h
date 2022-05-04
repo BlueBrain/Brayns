@@ -47,6 +47,8 @@ public:
 
     void onDestroy() override;
 
+    void onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult) const noexcept override;
+
     /**
      * @brief Sets the morphologies of this component
      * @param id

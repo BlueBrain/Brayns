@@ -16,7 +16,6 @@ set(BRAYNSNETWORK_HEADERS
   adapters/MaterialAdapter.h
   adapters/ModelInstanceAdapter.h
   adapters/ModelTransferFunctionAdapter.h
-  adapters/RendererPickResultAdapter.h
   adapters/RendererAdapter.h
   adapters/TransferFunctionAdapter.h
   adapters/TransformationAdapter.h
@@ -60,7 +59,7 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/GetModelEntrypoint.h
   entrypoints/ImageJpegEntrypoint.h
   entrypoints/ImageStreamingModeEntrypoint.h
-  #entrypoints/InspectEntrypoint.h
+  entrypoints/InspectEntrypoint.h
   entrypoints/ModelMaterialEntrypoint.h
   entrypoints/ModelTransferFunctionEntrypoint.h
   entrypoints/QuitEntrypoint.h
@@ -153,7 +152,7 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/GetModelEntrypoint.cpp
   entrypoints/ImageJpegEntrypoint.cpp
   entrypoints/ImageStreamingModeEntrypoint.cpp
-  #entrypoints/InspectEntrypoint.cpp
+  entrypoints/InspectEntrypoint.cpp
   entrypoints/ModelMaterialEntrypoint.cpp
   entrypoints/ModelTransferFunctionEntrypoint.cpp
   entrypoints/QuitEntrypoint.cpp

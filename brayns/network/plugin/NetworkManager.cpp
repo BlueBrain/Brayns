@@ -51,7 +51,7 @@
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
-//#include <brayns/network/entrypoints/InspectEntrypoint.h>
+#include <brayns/network/entrypoints/InspectEntrypoint.h>
 #include <brayns/network/entrypoints/ModelMaterialEntrypoint.h>
 #include <brayns/network/entrypoints/ModelTransferFunctionEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
@@ -136,7 +136,7 @@ public:
         builder.add<brayns::GetSceneEntrypoint>(scene);
         builder.add<brayns::ImageJpegEntrypoint>(application, engine);
         builder.add<brayns::ImageStreamingModeEntrypoint>(application, monitor);
-        // builder.add<brayns::InspectEntrypoint>(renderer);
+        builder.add<brayns::InspectEntrypoint>(engine);
         builder.add<brayns::QuitEntrypoint>(engine);
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
         builder.add<brayns::RemoveClipPlanesEntrypoint>(sceneClipManager);

@@ -37,6 +37,11 @@ const std::map<std::string, std::string> &Model::getMetaData() const noexcept
     return _metadata;
 }
 
+void Model::onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept
+{
+    _components.onInspect(context, writeResult);
+}
+
 ModelGroup &Model::getGroup() noexcept
 {
     return _group;

@@ -37,6 +37,8 @@ public:
 
     void onDestroy() override;
 
+    void onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult) const noexcept override;
+
     /**
      * @brief Set the soma circuit geometries
      * @param ids

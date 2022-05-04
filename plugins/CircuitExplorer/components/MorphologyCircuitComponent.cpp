@@ -101,6 +101,28 @@ void MorphologyCircuitComponent::onDestroy()
     }
 }
 
+void MorphologyCircuitComponent::onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult)
+    const noexcept
+{
+    auto modelHandle = context.modelHandle;
+    auto morphBegin = _morphologies.begin();
+    auto morphEnd = _morphologies.end();
+    auto it = std::find_if(
+        morphBegin,
+        morphEnd,
+        [=](const MorphologyGeometry &morphology) { return morphology.model == modelHandle; });
+
+    if (it == morphEnd)
+    {
+        return;
+    }
+
+    auto index = std::distance(morphBegin, it);
+
+    auto cellId = _ids[index];
+    writeResult.set("neuron_id", cellId);
+}
+
 void MorphologyCircuitComponent::setMorphologies(
     std::vector<uint64_t> ids,
     std::vector<std::vector<brayns::Primitive>> primitives,

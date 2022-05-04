@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,16 +20,16 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/common/MathTypes.h>
 
-#include <brayns/engine/Renderer.h>
+#include <ospray/ospray.h>
 
 namespace brayns
 {
-/*
-BRAYNS_NAMED_JSON_ADAPTER_BEGIN(Renderer::PickResult, "RendererPickResult")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("hit", hit, "Check if the position is picked")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("position", pos, "Picked position XYZ")
-BRAYNS_JSON_ADAPTER_END()
-*/
-} // namespace brayns
+struct InspectContext
+{
+    const Vector3f hitPosition;
+    OSPGeometricModel modelHandle;
+    uint32_t primitiveIndex;
+};
+}

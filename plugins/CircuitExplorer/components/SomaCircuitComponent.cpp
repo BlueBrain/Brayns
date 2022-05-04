@@ -61,6 +61,21 @@ void SomaCircuitComponent::onDestroy()
     brayns::GeometricModelHandler::destroy(_model);
 }
 
+void SomaCircuitComponent::onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult)
+    const noexcept
+{
+    auto modelHandle = context.modelHandle;
+
+    if (modelHandle != _model)
+    {
+        return;
+    }
+
+    auto primitiveIndex = context.primitiveIndex;
+    auto cellId = _ids[primitiveIndex];
+    writeResult.set("neuron_id", cellId);
+}
+
 void SomaCircuitComponent::setSomas(std::vector<uint64_t> ids, std::vector<brayns::Sphere> geometry) noexcept
 {
     _ids = std::move(ids);
