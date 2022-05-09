@@ -18,23 +18,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtlasExplorerPlugin.h"
+#include "HeaderLimitCheck.h"
 
-#include <brayns/common/Log.h>
-#include <brayns/pluginapi/PluginAPI.h>
-
-#include <io/NRRDLoader.h>
-
-void AtlasExplorerPlugin::init()
+void HeaderLimitCheck::check(const NRRDHeader &header)
 {
-    auto &registry = _api->getLoaderRegistry();
-    registry.registerLoader(std::make_unique<NRRDLoader>());
-}
+    auto dimensions = header.dimensions;
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
-{
-    (void)argc;
-    (void)argv;
-    brayns::Log::info("[AtlasExplorer] Loading Atlas Explorer plugin.");
-    return new AtlasExplorerPlugin();
+    if (dimensions > 4)
+    {
+        throw std::runtime_error("Only up to 4 dimensional volumes are supported");
+    }
+
+    auto &kinds = header.kinds;
+    auto &sizes = header.sizes;
+
+    if (dimensions == 4 && sizes[0] > 1 && !kinds.has_value())
+    {
+        throw std::runtime_error("Cannot interpret a non-scalar forth dimension without kinds");
+    }
+
+    if (dimensions == 4 && sizes[0] > 4)
+    {
+        throw std::runtime_error("Cannot represent voxel data of more than 4 dimenssions");
+    }
 }

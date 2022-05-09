@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <brayns/utils/EnumUtils.h>
+
 #include <cstdint>
 
 #include <ospray/ospray.h>
@@ -28,16 +30,23 @@ namespace brayns
 {
 enum class VolumeDataType : uint32_t
 {
-    CHAR = OSPDataType::OSP_CHAR,
-    BYTE = OSPDataType::OSP_UCHAR,
+    UNSIGNED_CHAR = OSPDataType::OSP_UCHAR,
     SHORT = OSPDataType::OSP_SHORT,
     UNSIGNED_SHORT = OSPDataType::OSP_USHORT,
-    INT = OSPDataType::OSP_INT,
-    UNSIGNED_INT = OSPDataType::OSP_UINT,
-    LONG = OSPDataType::OSP_LONG,
-    UNSIGNED_LONG = OSPDataType::OSP_ULONG,
     HALF_FLOAT = OSPDataType::OSP_HALF,
     FLOAT = OSPDataType::OSP_FLOAT,
     DOUBLE = OSPDataType::OSP_DOUBLE
 };
+
+template<>
+inline std::vector<std::pair<std::string, VolumeDataType>> enumMap<VolumeDataType>()
+{
+    return {
+        {"unsinged char", VolumeDataType::UNSIGNED_CHAR},
+        {"short", VolumeDataType::SHORT},
+        {"unsigned short", VolumeDataType::UNSIGNED_SHORT},
+        {"half float", VolumeDataType::HALF_FLOAT},
+        {"float", VolumeDataType::FLOAT},
+        {"double", VolumeDataType::DOUBLE}};
+}
 }

@@ -18,4 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "HeaderEntryParseTable.h"
+#pragma once
+
+#include <io/nrrdloader/data/decoders/IDecoder.h>
+
+class HexDecoder final : public IDecoder
+{
+public:
+    std::vector<uint8_t> decode(const NRRDHeader &header, std::string input) const override;
+};

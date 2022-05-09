@@ -20,6 +20,12 @@
 
 #include "NRRDLoader.h"
 
+#include <brayns/utils/EnumUtils.h>
+#include <brayns/utils/FileReader.h>
+
+#include <io/nrrdloader/header/HeaderLimitCheck.h>
+#include <io/nrrdloader/header/HeaderParser.h>
+
 std::vector<std::string> NRRDLoader::getSupportedExtensions() const
 {
     return {".nrrd"};
@@ -27,7 +33,7 @@ std::vector<std::string> NRRDLoader::getSupportedExtensions() const
 
 std::string NRRDLoader::getName() const
 {
-    return "NRRD Loader";
+    return "NRRD loader";
 }
 
 std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromBlob(
@@ -43,4 +49,17 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
     const std::string &path,
     const brayns::LoaderProgress &callback) const
 {
+    callback.updateProgress("Reading " + path, 0.f);
+    const auto fileContent = brayns::FileReader::read(path);
+    auto contentView = std::string_view(fileContent);
+
+    callback.updateProgress("Parsing NRRD header", 0.2f);
+    const auto header = HeaderParser::parse(contentView);
+    // Check the header against the limits imposed by what this plugin can render
+    HeaderLimitCheck::check(header);
+
+    auto model = std::make_unique<brayns::Model>();
+    auto result = std::vector<std::unique_ptr<brayns::Model>>();
+    result.push_back(std::move(model));
+    return result;
 }

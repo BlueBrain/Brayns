@@ -18,20 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "DecompressorTable.h"
 
-#include <io/nrrdloader/NRRDHeader.h>
+#include <io/nrrdloader/data/decompressors/BZip2Decompressor.h>
+#include <io/nrrdloader/data/decompressors/GZipDecompressor.h>
+#include <io/nrrdloader/data/decompressors/NOOPDecompressor.h>
 
-#include <functional>
-#include <unordered_map>
-
-class HeaderEntryParser
+std::unique_ptr<IDecompressor> DecompressorTable::getDecompressor(NRRDEncoding encoding) const noexcept
 {
-public:
-    HeaderEntryParser();
+    if (encoding == NRRDEncoding::BZIP2)
+    {
+        return std::make_unique<BZip2Decompressor>();
+    }
 
-    void parseEntry(std::string_view value, NRRDHeader &dstHeader);
+    if (encoding == NRRDEncoding::GZIP)
+    {
+        return std::make_unique<GZipDecompressor>();
+    }
 
-private:
-    const std::unordered_map<std::string, std::function<void(std::string_view, NRRDHeader &)>> _table;
-};
+    return std::make_unique<NOOPDecompressor>();
+}

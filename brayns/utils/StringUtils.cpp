@@ -134,5 +134,31 @@ std::vector<std::string> split(const std::string &s, char delim)
         elems.push_back(std::move(item));
     return elems;
 }
+
+std::vector<std::string_view> split(std::string_view input, std::string_view delimiters)
+{
+    std::vector<std::string_view> result;
+    size_t pos = 0;
+
+    auto data = input.data();
+
+    while (true)
+    {
+        auto nextPos = input.find_first_of(delimiters, pos);
+        if (nextPos == std::string::npos)
+        {
+            break;
+        }
+
+        if (nextPos != pos)
+        {
+            result.emplace_back(data + pos, nextPos - pos);
+        }
+
+        pos = nextPos + 1;
+    }
+
+    return result;
+}
 } // namespace string_utils
 } // namespace brayns

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace brayns
@@ -40,5 +41,7 @@ std::string toLowercase(const std::string input);
 void trim(std::string &s);
 
 std::vector<std::string> split(const std::string &s, char delim);
+
+std::vector<std::string_view> split(std::string_view input, std::string_view delimiters);
 } // namespace string_utils
 } // namespace brayns

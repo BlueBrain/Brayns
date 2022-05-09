@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/VolumeDataType.h>
-
 #include <optional>
+#include <string>
+#include <vector>
 
 enum NRRDEncoding
 {
@@ -39,13 +39,42 @@ enum NRRDEndianness
     BIG
 };
 
+enum NRRDType
+{
+    CHAR,
+    UNSIGNED_CHAR,
+    SHORT,
+    UNSIGNED_SHORT,
+    INT,
+    UNSIGNED_INT,
+    LONG,
+    UNSIGNED_LONG,
+    FLOAT,
+    DOUBLE
+};
+
+// Supported kinds (not all)
+enum NRRDKind
+{
+    DOMAIN,
+    SPACE,
+    SCALAR,
+    VECTOR2D,
+    VECTOR3D,
+    QUATERNION,
+    RGBCOLOR,
+    HSVCOLOR,
+    XYZCOLOR,
+    RGBACOLOR,
+};
+
 struct NRRDHeader
 {
     // Data dimensions
     int32_t dimensions{-1};
 
     // Data type per voxel
-    brayns::VolumeDataType type;
+    NRRDType type;
 
     // Data encoding format
     NRRDEncoding encoding;
@@ -70,6 +99,9 @@ struct NRRDHeader
 
     // Number of samples on each dimension
     std::vector<int32_t> sizes;
+
+    // Kind of data along each axis
+    std::optional<std::vector<NRRDKind>> kinds;
 
     // Determines how many components there are in the space origin and space directions fields
     std::optional<int32_t> spaceDimensions;

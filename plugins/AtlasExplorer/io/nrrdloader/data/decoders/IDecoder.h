@@ -18,23 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtlasExplorerPlugin.h"
+#pragma once
 
-#include <brayns/common/Log.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <io/nrrdloader/NRRDHeader.h>
 
-#include <io/NRRDLoader.h>
+#include <string>
+#include <vector>
 
-void AtlasExplorerPlugin::init()
+class IDecoder
 {
-    auto &registry = _api->getLoaderRegistry();
-    registry.registerLoader(std::make_unique<NRRDLoader>());
-}
+public:
+    virtual ~IDecoder() = default;
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
-{
-    (void)argc;
-    (void)argv;
-    brayns::Log::info("[AtlasExplorer] Loading Atlas Explorer plugin.");
-    return new AtlasExplorerPlugin();
-}
+    virtual std::vector<uint8_t> decode(const NRRDHeader &header, std::string input) const = 0;
+};

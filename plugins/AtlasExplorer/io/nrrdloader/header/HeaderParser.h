@@ -18,23 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtlasExplorerPlugin.h"
+#pragma once
 
-#include <brayns/common/Log.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <io/nrrdloader/NRRDHeader.h>
 
-#include <io/NRRDLoader.h>
+#include <string_view>
 
-void AtlasExplorerPlugin::init()
+class HeaderParser
 {
-    auto &registry = _api->getLoaderRegistry();
-    registry.registerLoader(std::make_unique<NRRDLoader>());
-}
-
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
-{
-    (void)argc;
-    (void)argv;
-    brayns::Log::info("[AtlasExplorer] Loading Atlas Explorer plugin.");
-    return new AtlasExplorerPlugin();
-}
+public:
+    /**
+     * @brief Parses the header of a nrrd file data. The input view is updated to point
+     * to the first element (if any) after the header
+     *
+     * @param filePath path to the nrrd file, which is used to extract the parent directory
+     * @param nrrdContentView input view of the data. Is updated during the parse process
+     * @return NRRDHeader
+     */
+    static NRRDHeader parse(std::string_view &nrrdContentView);
+};

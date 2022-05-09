@@ -20,19 +20,13 @@
 
 #pragma once
 
-#include <io/nrrdloader/NRRDHeader.h>
+#include <io/nrrdloader/data/decompressors/IDecompressor.h>
 
-#include <string_view>
-
-class HeaderParser
+class NOOPDecompressor final : public IDecompressor
 {
 public:
-    /**
-     * @brief Parses the header of a nrrd file data. The input view is updated to point
-     * to the first element (if any) after the header
-     *
-     * @param nrrdContentView input view of the data. Is updated during the parse process
-     * @return NRRDHeader
-     */
-    static NRRDHeader parse(std::string_view &nrrdContentView);
+    std::string decompress(std::string input) const override
+    {
+        return input;
+    }
 };

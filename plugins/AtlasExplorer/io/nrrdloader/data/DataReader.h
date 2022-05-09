@@ -18,23 +18,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtlasExplorerPlugin.h"
+#pragma once
 
-#include <brayns/common/Log.h>
-#include <brayns/pluginapi/PluginAPI.h>
+#include <io/nrrdloader/NRRDHeader.h>
 
-#include <io/NRRDLoader.h>
+#include <string_view>
+#include <vector>
 
-void AtlasExplorerPlugin::init()
+class DataReader
 {
-    auto &registry = _api->getLoaderRegistry();
-    registry.registerLoader(std::make_unique<NRRDLoader>());
-}
-
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
-{
-    (void)argc;
-    (void)argv;
-    brayns::Log::info("[AtlasExplorer] Loading Atlas Explorer plugin.");
-    return new AtlasExplorerPlugin();
-}
+public:
+    /**
+     * @brief Reads the NRRD volume contents into a contiguous byte array. If data files entry is present in the
+     * header, it will attempt to read the files. Otherwise, it will attempt to extract them from the remaining data
+     * content of the source NRRD file.
+     *
+     * @param header The NRRD header to configure the read
+     * @param fileName The path to the NRRD file
+     * @param dataContent The content of the main nrrd file
+     * @return std::vector<uint8_t>
+     */
+    static std::vector<uint8_t>
+        read(const NRRDHeader &header, const std::string &fileName, std::string_view dataContent);
+};
