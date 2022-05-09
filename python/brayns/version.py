@@ -18,13 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""The version of the brayns package"""
+"""Version of brayns package."""
 
-from pkg_resources import get_distribution, DistributionNotFound
+from pkg_resources import DistributionNotFound, get_distribution
 
 try:
-    VERSION = get_distribution('brayns').version
+    __version__ = get_distribution('brayns').version
 except DistributionNotFound:
-    VERSION = 'brayns-local'
-
-MINIMAL_VERSION = '2.0.0'
+    __version__ = 'brayns-local'
