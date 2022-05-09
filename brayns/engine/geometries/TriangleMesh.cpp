@@ -114,6 +114,42 @@ void TriangleMeshMerger::merge(const TriangleMesh &src, TriangleMesh &dst)
     }
 }
 
+void TriangleMeshNormalGenerator::generate(TriangleMesh &mesh)
+{
+    auto &indices = mesh.indices;
+    auto &positions = mesh.vertices;
+    auto &normals = mesh.normals;
+
+    normals.resize(positions.size());
+    std::vector<uint32_t> normalAccumulationCounter(positions.size());
+
+    for (const auto &triangle : indices)
+    {
+        const auto a = triangle.x;
+        const auto b = triangle.y;
+        const auto c = triangle.z;
+
+        const auto &aVertex = positions[a];
+        const auto &bVertex = positions[b];
+        const auto &cVertex = positions[c];
+
+        normals[a] += glm::cross((bVertex - aVertex), (cVertex - aVertex));
+        normals[b] += glm::cross((aVertex - bVertex), (cVertex - bVertex));
+        normals[c] += glm::cross((aVertex - cVertex), (bVertex - cVertex));
+
+        normalAccumulationCounter[a] += 1;
+        normalAccumulationCounter[b] += 1;
+        normalAccumulationCounter[c] += 1;
+    }
+
+    for (size_t i = 0; i < normals.size(); ++i)
+    {
+        const auto inv = 1.f / static_cast<float>(normalAccumulationCounter[i]);
+        normals[i] *= inv;
+        glm::normalize(normals[i]);
+    }
+}
+
 std::string_view GeometryOSPRayID<TriangleMesh>::get()
 {
     return "mesh";

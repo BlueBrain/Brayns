@@ -20,6 +20,7 @@
 
 #include "EndfeetComponent.h"
 
+#include <brayns/common/Log.h>
 #include <brayns/engine/common/DataHandler.h>
 #include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/common/GeometricModelHandler.h>
@@ -95,16 +96,27 @@ void EndfeetComponent::addEndfeet(std::map<uint64_t, std::vector<brayns::Triangl
 
     for (auto &[astrocyteId, endfeets] : endfeetGeometry)
     {
+        brayns::TriangleMesh mergedMeshes;
+        for (auto &mesh : endfeets)
+        {
+            if (mesh.vertices.empty() || mesh.indices.empty())
+            {
+                brayns::Log::warn("[CE] Skipping empty endfoot mesh connected to astrocyte id {}", astrocyteId);
+                continue;
+            }
+            brayns::TriangleMeshMerger::merge(mesh, mergedMeshes);
+        }
+
+        if (mergedMeshes.indices.empty() || mergedMeshes.vertices.empty())
+        {
+            brayns::Log::warn("[CE] Skipping ALL endfeet mesh connected to astrocyte id {}", astrocyteId);
+            continue;
+        }
+
         _astrocyteIds.push_back(astrocyteId);
         auto &endfoot = _endFeet.emplace_back();
         auto &geometry = endfoot.geometry;
         auto &model = endfoot.model;
-
-        brayns::TriangleMesh mergedMeshes;
-        for (auto &mesh : endfeets)
-        {
-            brayns::TriangleMeshMerger::merge(mesh, mergedMeshes);
-        }
 
         geometry.add(std::move(mergedMeshes));
         geometry.commit();

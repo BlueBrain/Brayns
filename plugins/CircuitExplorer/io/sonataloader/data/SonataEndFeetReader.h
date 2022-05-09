@@ -31,9 +31,6 @@ namespace sonataloader
 class SonataEndFeetReader
 {
 public:
-    static std::vector<brayns::TriangleMesh> readEndFeet(
-        const std::string &filePath,
-        const std::vector<uint64_t> &ids,
-        const std::vector<brayns::Vector3f> &positions);
+    static std::vector<brayns::TriangleMesh> readEndFeet(const std::string &filePath, const std::vector<uint64_t> &ids);
 };
 } // namespace sonataloader

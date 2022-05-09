@@ -119,11 +119,6 @@ std::vector<brayns::Vector3f> SonataSynapses::getEfferentAstrocyteCenterPos(
     return loadPositions(population, selection, attribAstroCenterX, attribAstroCenterY, attribAstroCenterZ);
 }
 
-std::vector<brayns::Vector3f> SonataSynapses::getEndFeetSurfacePos(const Edges &population, const Selection &selection)
-{
-    return loadPositions(population, selection, attribEndFeetSurfPosX, attribEndFeetSurfPosY, attribEndFeetSurfPosZ);
-}
-
 std::vector<uint64_t> SonataSynapses::getEndFeetIds(const Edges &population, const Selection &selection)
 {
     checkEdgeParameters(population, {attribEndFeetId});

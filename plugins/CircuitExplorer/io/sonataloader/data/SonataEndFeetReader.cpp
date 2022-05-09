@@ -24,21 +24,82 @@
 
 namespace
 {
-constexpr char rootGroup[] = "/objects";
-constexpr char endFootGroup[] = "endfoot_";
-constexpr char pointDataset[] = "points";
-constexpr char triangleDataset[] = "triangles";
+constexpr char dataGroup[] = "/data";
+constexpr char offsetGroup[] = "/offsets";
+constexpr char pointDatasetName[] = "points";
+constexpr char triangleDatasetName[] = "triangles";
 
-struct RawMeshBounds
+class DatasetExtractor
 {
-    static brayns::Bounds compute(const brayns::TriangleMesh &mesh)
+public:
+    DatasetExtractor(const std::string &filePath)
+        : _file(filePath)
+        , _data(_file.getGroup(dataGroup))
+        , _offsets(_file.getGroup(offsetGroup))
     {
-        brayns::Bounds bounds;
-        for (const auto &vertex : mesh.vertices)
+    }
+
+    std::vector<uint64_t> getVertexOffsets() const
+    {
+        return _getOffsetDataset(pointDatasetName);
+    }
+
+    std::vector<uint64_t> getTriangleOffsets() const
+    {
+        return _getOffsetDataset(triangleDatasetName);
+    }
+
+    std::vector<std::vector<float>> getVertices() const
+    {
+        return _getGeometryDataset<float>(pointDatasetName);
+    }
+
+    std::vector<std::vector<uint32_t>> getTriangles() const
+    {
+        return _getGeometryDataset<uint32_t>(triangleDatasetName);
+    }
+
+private:
+    std::vector<uint64_t> _getOffsetDataset(std::string_view name) const
+    {
+        const auto offsetsDataset = _offsets.getDataSet(std::string(name));
+        std::vector<uint64_t> offsets;
+        auto offsetsSelection = offsetsDataset.select({0}, offsetsDataset.getDimensions());
+        offsetsSelection.read(offsets);
+        return offsets;
+    }
+
+    template<typename T>
+    std::vector<std::vector<T>> _getGeometryDataset(std::string_view name) const
+    {
+        const auto geometryDataset = _data.getDataSet(std::string(name));
+        std::vector<std::vector<T>> rawGeometry;
+        const auto geometrySelection = geometryDataset.select({0, 0}, geometryDataset.getDimensions());
+        geometrySelection.read(rawGeometry);
+        return rawGeometry;
+    }
+
+private:
+    HighFive::File _file;
+    HighFive::Group _data;
+    HighFive::Group _offsets;
+};
+
+class LenghtCalculator
+{
+public:
+    static size_t compute(uint64_t id, const std::vector<uint64_t> &offsets, size_t rawDatasetSize)
+    {
+        const auto offsetSize = offsets.size();
+        const auto currentOffset = offsets[id];
+
+        // Its the last entry
+        if (id == offsetSize - 1)
         {
-            bounds.expand(vertex);
+            return rawDatasetSize - currentOffset;
         }
-        return bounds;
+
+        return offsets[id + 1] - currentOffset;
     }
 };
 } // namespace
@@ -47,58 +108,56 @@ namespace sonataloader
 {
 std::vector<brayns::TriangleMesh> SonataEndFeetReader::readEndFeet(
     const std::string &filePath,
-    const std::vector<uint64_t> &ids,
-    const std::vector<brayns::Vector3f> &positions)
+    const std::vector<uint64_t> &ids)
 {
-    static std::mutex hdf5Mutex;
-    std::unique_ptr<HighFive::File> file;
-    {
-        std::lock_guard<std::mutex> lock(hdf5Mutex);
-        file = std::make_unique<HighFive::File>(filePath);
-    }
-
-    const auto root = file->getGroup(rootGroup);
+    const auto datasetExtractor = DatasetExtractor(filePath);
+    const auto vertexOffsets = datasetExtractor.getVertexOffsets();
+    const auto triangleOffsets = datasetExtractor.getTriangleOffsets();
+    const auto vertices = datasetExtractor.getVertices();
+    const auto verticesSize = vertices.size();
+    const auto triangles = datasetExtractor.getTriangles();
+    const auto trianglesSize = triangles.size();
 
     std::vector<brayns::TriangleMesh> result(ids.size());
 
-    for (size_t i = 0; i < ids.size(); ++i)
+    for (size_t j = 0; j < ids.size(); ++j)
     {
-        auto &mesh = result[i];
+        const auto id = ids[j];
 
-        const auto endFootGroupName = endFootGroup + std::to_string(ids[i]);
-        const auto endFootGroup = root.getGroup(endFootGroupName);
+        const auto vertexOffset = vertexOffsets[id];
+        const auto vertexLength = LenghtCalculator::compute(id, vertexOffsets, verticesSize);
 
-        const auto vertexDataSet = endFootGroup.getDataSet(pointDataset);
-        std::vector<std::vector<float>> rawVertices;
-        vertexDataSet.select({0, 0}, vertexDataSet.getDimensions()).read(rawVertices);
+        const auto triangleOffset = triangleOffsets[id];
+        const auto triangleLength = LenghtCalculator::compute(id, triangleOffsets, trianglesSize);
 
-        mesh.vertices.resize(rawVertices.size());
-        for (size_t j = 0; j < rawVertices.size(); ++j)
+        if (vertexLength == 0 || triangleLength == 0)
         {
-            mesh.vertices[j].x = rawVertices[j][0];
-            mesh.vertices[j].y = rawVertices[j][1];
-            mesh.vertices[j].z = rawVertices[j][2];
+            continue;
         }
 
-        const auto triangleDataSet = endFootGroup.getDataSet(triangleDataset);
-        std::vector<std::vector<uint32_t>> rawTriangles;
-        triangleDataSet.select({0, 0}, triangleDataSet.getDimensions()).read(rawTriangles);
+        auto &mesh = result[j];
 
-        mesh.indices.resize(rawTriangles.size());
-        for (size_t j = 0; j < rawTriangles.size(); ++j)
+        auto &meshVertices = mesh.vertices;
+        meshVertices.resize(vertexLength);
+        for (size_t i = 0; i < vertexLength; ++i)
         {
-            mesh.indices[j].x = rawTriangles[j][0];
-            mesh.indices[j].y = rawTriangles[j][1];
-            mesh.indices[j].z = rawTriangles[j][2];
+            const auto currentOffset = vertexOffset + i;
+            meshVertices[i].x = vertices[currentOffset][0];
+            meshVertices[i].y = vertices[currentOffset][1];
+            meshVertices[i].z = vertices[currentOffset][2];
         }
 
-        // Adjust mesh position given the endfoot surface position
-        const auto meshBounds = RawMeshBounds::compute(mesh);
-        const auto translation = meshBounds.center() - positions[i];
-        for (auto &vertex : mesh.vertices)
+        auto &meshIndices = mesh.indices;
+        meshIndices.resize(triangleLength);
+        for (size_t i = 0; i < triangleLength; ++i)
         {
-            vertex += translation;
+            const auto faceOffset = triangleOffset + i;
+            meshIndices[i].x = triangles[faceOffset][0];
+            meshIndices[i].y = triangles[faceOffset][1];
+            meshIndices[i].z = triangles[faceOffset][2];
         }
+
+        brayns::TriangleMeshNormalGenerator::generate(mesh);
     }
 
     return result;

@@ -42,6 +42,12 @@ public:
     static void merge(const TriangleMesh &src, TriangleMesh &dst);
 };
 
+class TriangleMeshNormalGenerator
+{
+public:
+    static void generate(TriangleMesh &mesh);
+};
+
 template<>
 class GeometryOSPRayID<TriangleMesh>
 {
