@@ -60,7 +60,9 @@ struct EndFeetAreasPathResolver
         for (const auto &entry : *edgeNetworkList)
         {
             if (found)
+            {
                 break;
+            }
 
             const auto &entryObject = entry.extract<Poco::JSON::Object::Ptr>();
             auto edgeFile = entryObject->get("edges_file").extract<std::string>();
@@ -86,9 +88,14 @@ struct EndFeetAreasPathResolver
                 {
                     if (const auto edgePopObject = popObject->getObject(edgeName))
                     {
-                        if (edgePopObject->has("end_feet_area"))
+                        if (edgePopObject->has("endfeet_meshes"))
                         {
-                            resultPath = edgePopObject->get("end_feet_area").extract<std::string>();
+                            resultPath = edgePopObject->get("endfeet_meshes").extract<std::string>();
+                        }
+
+                        if (edgePopObject->has("endfeet_meshes_file"))
+                        {
+                            resultPath = edgePopObject->get("endfeet_meshes_file").extract<std::string>();
                         }
                     }
                 }
@@ -132,9 +139,8 @@ void EndFootPopulationLoader::load(EdgeLoadContext &context) const
     const auto flatEdges = edgeSelection.flatten();
     const auto astrocyteIds = SonataSynapses::getTargetNodes(population, edgeSelection);
     const auto endFeetIds = SonataSynapses::getEndFeetIds(population, edgeSelection);
-    const auto endFeetPos = SonataSynapses::getEndFeetSurfacePos(population, edgeSelection);
 
-    auto meshes = SonataEndFeetReader::readEndFeet(path, endFeetIds, endFeetPos);
+    auto meshes = SonataEndFeetReader::readEndFeet(path, endFeetIds);
 
     std::map<uint64_t, std::vector<brayns::TriangleMesh>> endfeetGeometry;
     for (size_t i = 0; i < astrocyteIds.size(); ++i)

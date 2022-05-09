@@ -92,15 +92,6 @@ public:
         const Selection &selection);
 
     /**
-     * @brief Return the endfeet surface position from endfeet populations for the given edge selection
-     *
-     * @param population
-     * @param selection
-     * @return std::vector<brayns::Vector3f>
-     */
-    static std::vector<brayns::Vector3f> getEndFeetSurfacePos(const Edges &population, const Selection &selection);
-
-    /**
      * @brief Return the endfeet ids from endfeet populations fro the given edge selection
      *
      * @param population
