@@ -24,18 +24,18 @@
 
 namespace
 {
-constexpr char dataGroup[] = "/data";
-constexpr char offsetGroup[] = "/offsets";
-constexpr char pointDatasetName[] = "points";
-constexpr char triangleDatasetName[] = "triangles";
+std::string_view dataGroup = "/data";
+std::string_view offsetGroup = "/offsets";
+std::string_view pointDatasetName = "points";
+std::string_view triangleDatasetName = "triangles";
 
 class DatasetExtractor
 {
 public:
     DatasetExtractor(const std::string &filePath)
         : _file(filePath)
-        , _data(_file.getGroup(dataGroup))
-        , _offsets(_file.getGroup(offsetGroup))
+        , _data(_file.getGroup(std::string(dataGroup)))
+        , _offsets(_file.getGroup(std::string(offsetGroup)))
     {
     }
 
