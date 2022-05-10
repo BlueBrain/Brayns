@@ -20,9 +20,17 @@
 
 """Version of brayns package."""
 
-from pkg_resources import DistributionNotFound, get_distribution
+import pkg_resources
 
-try:
-    __version__ = get_distribution('brayns').version
-except DistributionNotFound:
-    __version__ = 'brayns-local'
+DEV_VERSION = 'dev'
+
+
+def _get_version():
+    try:
+        distribution = pkg_resources.get_distribution('brayns')
+    except pkg_resources.DistributionNotFound:
+        return DEV_VERSION
+    return distribution.version
+
+
+__version__ = _get_version()

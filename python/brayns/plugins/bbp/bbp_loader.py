@@ -38,20 +38,6 @@ class BbpLoader(ModelLoader):
     load_afferent_synapses: bool = False
     load_efferent_synapses: bool = False
 
-    @staticmethod
-    def for_soma_only() -> 'BbpLoader':
-        return BbpLoader(
-            cells=BbpCells.from_density(0.1),
-            radius_multiplier=10.0
-        )
-
-    @staticmethod
-    def for_morphology() -> 'BbpLoader':
-        return BbpLoader(
-            cells=BbpCells.from_density(0.001),
-            load_dendrites=True
-        )
-
     @classmethod
     @property
     def name(cls) -> str:

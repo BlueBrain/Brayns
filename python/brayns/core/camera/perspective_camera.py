@@ -78,5 +78,6 @@ class PerspectiveCamera(Camera):
     def get_full_screen_view(self, target: Bounds) -> CameraView:
         center = target.center
         distance = target.height / 2 / math.tan(self.fovy_radians / 2)
+        distance += target.depth / 2
         position = center + distance * Vector3.forward
         return CameraView(position, center)

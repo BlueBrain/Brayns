@@ -52,10 +52,9 @@ class TestCameraView(unittest.TestCase):
 
     def test_use_for_main_camera(self) -> None:
         instance = MockInstance()
-        view = CameraView()
-        view.use_for_main_camera(instance)
+        self._view.use_for_main_camera(instance)
         self.assertEqual(instance.method, 'set-camera-look-at')
-        self.assertEqual(instance.params, view.serialize())
+        self.assertEqual(instance.params, self._message)
 
     def test_serialize(self) -> None:
         test = self._view.serialize()

@@ -54,6 +54,11 @@ class TestVersion(unittest.TestCase):
         ref = (0, 1, 2)
         self.assertEqual(test, ref)
 
+    def test_tag(self) -> None:
+        test = self._version.tag
+        ref = '0.1.2'
+        self.assertEqual(test, ref)
+
 
 if __name__ == '__main__':
     unittest.main()

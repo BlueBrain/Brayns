@@ -71,7 +71,7 @@ class TestPerspectiveCamera(unittest.TestCase):
         test = camera.get_full_screen_view(target)
         self.assertAlmostEqual(test.position.x, 0)
         self.assertAlmostEqual(test.position.y, 0)
-        self.assertAlmostEqual(test.position.z, 1)
+        self.assertAlmostEqual(test.position.z, 2.0)
         self.assertEqual(test.target, Vector3.zero)
         self.assertEqual(test.up, Vector3.up)
 

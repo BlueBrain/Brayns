@@ -22,22 +22,46 @@ import logging
 import sys
 from typing import Optional
 
+from brayns.core.version import Version
 from brayns.instance.client import Client
 from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_client import JsonRpcClient
 from brayns.instance.websocket.web_socket_client import WebSocketClient
+from brayns.version import DEV_VERSION, __version__
 
 
 def connect(
     uri: str,
     secure: bool = False,
     cafile: Optional[str] = None,
-    logger: Optional[logging.Logger] = None,
+    logger: Optional[logging.Logger] = None
 ) -> Instance:
-    if logger is None:
-        logger = logging.Logger('Brayns', logging.WARN)
-        logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger = _get_logger(logger)
+    client = _connect(uri, secure, cafile, logger)
+    _check_version(client)
+    return client
+
+
+def _get_logger(logger: Optional[logging.Logger]) -> logging.Logger:
+    if logger is not None:
+        return logger
+    logger = logging.Logger('Brayns', logging.WARN)
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    return logger
+
+
+def _connect(uri: str, secure: bool, cafile: Optional[str], logger: logging.Logger) -> Instance:
     logger.info('Connecting to instance at %s.', uri)
     websocket = WebSocketClient.connect(uri, secure, cafile)
     json_rpc_client = JsonRpcClient(websocket, logger)
     return Client(json_rpc_client)
+
+
+def _check_version(instance: Instance) -> None:
+    local = __version__
+    if local == DEV_VERSION:
+        return
+    version = Version.from_instance(instance)
+    remote = version.tag
+    if remote != local:
+        raise RuntimeError(f'Version mismatch {remote=} {local=}')

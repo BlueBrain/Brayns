@@ -28,7 +28,7 @@ from brayns.instance.instance import Instance
 class CameraView:
 
     position: Vector3 = Vector3.zero
-    target: Vector3 = Vector3.zero
+    target: Vector3 = Vector3.forward
     up: Vector3 = Vector3.up
 
     @staticmethod

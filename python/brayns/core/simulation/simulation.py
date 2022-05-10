@@ -50,19 +50,8 @@ class Simulation:
         )
 
     @staticmethod
-    def update(
-        instance: Instance,
-        start_frame: Optional[int] = None,
-        end_frame: Optional[int] = None,
-        current_frame: Optional[int] = None
-    ) -> None:
-        params = {}
-        if start_frame is not None:
-            params['start_frame'] = start_frame
-        if end_frame is not None:
-            params['end_frame'] = end_frame
-        if current_frame is not None:
-            params['current'] = current_frame
+    def set_current_frame(instance: Instance, index: int) -> None:
+        params = {'current': index}
         instance.request('set-animation-parameters', params)
 
     @staticmethod

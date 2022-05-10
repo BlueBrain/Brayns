@@ -48,3 +48,7 @@ class Version:
     @property
     def release(self) -> tuple[int, int, int]:
         return (self.major, self.minor, self.patch)
+
+    @property
+    def tag(self) -> str:
+        return '.'.join(str(i) for i in self.release)

@@ -54,20 +54,11 @@ class TestSimulation(unittest.TestCase):
         test = Simulation.deserialize(self._message)
         self.assertEqual(test, self._animation)
 
-    def test_update(self) -> None:
+    def test_set_current_frame(self) -> None:
         instance = MockInstance()
-        Simulation.update(
-            instance,
-            start_frame=0,
-            end_frame=10,
-            current_frame=5
-        )
+        Simulation.set_current_frame(instance, 5)
         self.assertEqual(instance.method, 'set-animation-parameters')
-        self.assertEqual(instance.params, {
-            'start_frame': 0,
-            'end_frame': 10,
-            'current': 5
-        })
+        self.assertEqual(instance.params, {'current': 5})
 
     def test_enable(self) -> None:
         instance = MockInstance()

@@ -57,19 +57,6 @@ class TestBbpLoader(unittest.TestCase):
         }
         self.assertEqual(loader.properties, properties)
 
-    def test_for_soma_only(self) -> None:
-        loader = BbpLoader.for_soma_only()
-        self.assertEqual(loader.cells.density, 0.1)
-        self.assertEqual(loader.radius_multiplier, 10.0)
-        self.assertTrue(loader.load_soma)
-
-    def test_for_morphology(self) -> None:
-        loader = BbpLoader.for_morphology()
-        self.assertEqual(loader.cells.density, 0.001)
-        self.assertEqual(loader.radius_multiplier, 1.0)
-        self.assertTrue(loader.load_soma)
-        self.assertTrue(loader.load_dendrites)
-
 
 if __name__ == '__main__':
     unittest.main()
