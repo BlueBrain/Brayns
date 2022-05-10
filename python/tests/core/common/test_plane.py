@@ -20,29 +20,16 @@
 
 import unittest
 
-from brayns.core.common.vector3 import Vector3
-from brayns.core.geometry.capsule import Capsule
+from brayns.core.common.plane import Plane
 
 
-class TestCapsule(unittest.TestCase):
+class TestPlane(unittest.TestCase):
 
-    def test_name(self) -> None:
-        self.assertEqual(Capsule.name, 'capsules')
-
-    def test_properties(self) -> None:
-        test = Capsule(
-            start_point=Vector3.zero,
-            start_radius=1,
-            end_point=Vector3.one,
-            end_radius=2
-        )
-        ref = {
-            'p0': [0, 0, 0],
-            'r0': 1,
-            'p1': [1, 1, 1],
-            'r1': 2
-        }
-        self.assertEqual(test.properties, ref)
+    def test_serialize(self) -> None:
+        test = Plane(1, 2, 3, 4)
+        self.assertEqual(test.serialize(), {
+            'coefficients': [1, 2, 3, 4]
+        })
 
 
 if __name__ == '__main__':

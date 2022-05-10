@@ -18,30 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+import unittest
 
-from brayns.core.common.vector3 import Vector3
-from brayns.core.geometry.geometry import Geometry
+from brayns.core.common.plane import Plane
+from brayns.core.geometry.planes import Planes
 
 
-@dataclass
-class Capsule(Geometry):
+class TestPlanes(unittest.TestCase):
 
-    start_point: Vector3
-    start_radius: float
-    end_point: Vector3
-    end_radius: float
+    def test_name(self) -> None:
+        self.assertEqual(Planes.name, 'planes')
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'capsules'
+    def test_serialize_geometry(self) -> None:
+        plane = Plane(1, 2, 3, 4)
+        test = Planes.serialize_geometry(plane)
+        ref = plane.serialize()
+        self.assertEqual(test, ref)
 
-    @property
-    def properties(self) -> dict:
-        return {
-            'p0': list(self.start_point),
-            'r0': self.start_radius,
-            'p1': list(self.end_point),
-            'r1': self.end_radius
-        }
+
+if __name__ == '__main__':
+    unittest.main()

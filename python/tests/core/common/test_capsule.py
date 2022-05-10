@@ -18,20 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+import unittest
 
-from brayns.core.common.plane import Plane
-from brayns.instance.instance import Instance
+from brayns.core.common.capsule import Capsule
+from brayns.core.common.vector3 import Vector3
 
 
-@dataclass
-class ClipPlane(Plane):
+class TestCapsule(unittest.TestCase):
 
-    @staticmethod
-    def remove(instance: Instance, ids: list[int]) -> None:
-        params = {'ids': ids}
-        instance.request('remove-clip-planes', params)
+    def test_serialize(self) -> None:
+        test = Capsule(
+            start_point=Vector3.zero,
+            start_radius=0,
+            end_point=Vector3.one,
+            end_radius=1
+        )
+        self.assertEqual(test.serialize(), {
+            'p0': [0, 0, 0],
+            'r0': 0,
+            'p1': [1, 1, 1],
+            'r1': 1
+        })
 
-    def add(self, instance: Instance) -> int:
-        params = self.serialize()
-        return instance.request('add-clip-plane', params)
+
+if __name__ == '__main__':
+    unittest.main()

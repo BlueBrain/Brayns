@@ -20,24 +20,14 @@
 
 from dataclasses import dataclass
 
-from brayns.core.common.vector3 import Vector3
-from brayns.core.geometry.geometry import Geometry
+from brayns.core.common.bounds import Bounds
 
 
 @dataclass
-class Sphere(Geometry):
+class Box(Bounds):
 
-    radius: float
-    center: Vector3 = Vector3.zero
-
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'spheres'
-
-    @property
-    def properties(self) -> dict:
+    def serialize(self) -> dict:
         return {
-            'center': list(self.center),
-            'radius': self.radius
+            'min': list(self.min),
+            'max': list(self.max)
         }

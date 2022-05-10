@@ -21,47 +21,41 @@
 import unittest
 
 from brayns.core.common.color import Color
-from tests.core.geometry.mock_geometry import MockGeometry
+from tests.core.geometry.mock_geometries import MockGeometries
 from tests.core.model.mock_model import MockModel
 from tests.instance.mock_instance import MockInstance
 
 
-class TestGeometry(unittest.TestCase):
+class TestGeometries(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self._geometries = MockGeometries([
+            (1, Color.white),
+            (2, Color.red)
+        ])
+        self._message = [
+            {
+                'geometry': 1,
+                'color': [1, 1, 1, 1]
+            },
+            {
+                'geometry': 2,
+                'color': [1, 0, 0, 1]
+            }
+        ]
 
     def test_add(self) -> None:
         ref = MockModel.model
         reply = MockModel.serialized_model
         instance = MockInstance(reply)
-        tests = [
-            MockGeometry(0, 'test0'),
-            MockGeometry(1, 'test1').with_color(Color.red)
-        ]
-        model = MockGeometry.add(instance, tests)
+        model = self._geometries.add(instance)
         self.assertEqual(model, ref)
         self.assertEqual(instance.method, 'add-tests')
-        self.assertEqual(instance.params, [
-            test.serialize()
-            for test in tests
-        ])
+        self.assertEqual(instance.params, self._message)
 
     def test_serialize(self) -> None:
-        geometry = MockGeometry(0, 'test')
-        geometry.color = Color.red
-        test = geometry.serialize()
-        ref = {
-            'geometry': {
-                'test1': 0,
-                'test2': 'test'
-            },
-            'color': [1, 0, 0, 1]
-        }
-        self.assertEqual(test, ref)
-
-    def test_with_color(self) -> None:
-        geometry = MockGeometry(0, 'test')
-        test = geometry.with_color(Color.red)
-        self.assertEqual(geometry.color, Color.white)
-        self.assertEqual(test.color, Color.red)
+        test = self._geometries.serialize()
+        self.assertEqual(test, self._message)
 
 
 if __name__ == '__main__':

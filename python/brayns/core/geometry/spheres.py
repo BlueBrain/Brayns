@@ -18,26 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-
-from brayns.core.common.vector3 import Vector3
-from brayns.core.geometry.geometry import Geometry
+from brayns.core.common.sphere import Sphere
+from brayns.core.geometry.geometries import Geometries
 
 
-@dataclass
-class Box(Geometry):
-
-    min: Vector3
-    max: Vector3
+class Spheres(Geometries[Sphere]):
 
     @classmethod
     @property
     def name(self) -> str:
-        return 'boxes'
+        return 'spheres'
 
-    @property
-    def properties(self) -> dict:
-        return {
-            'min': list(self.min),
-            'max': list(self.max)
-        }
+    @classmethod
+    def serialize_geometry(cls, sphere: Sphere) -> dict:
+        return sphere.serialize()

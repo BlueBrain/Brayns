@@ -19,17 +19,25 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.common.bounds import Bounds
+from brayns.core.common.box import Box
+from brayns.core.common.capsule import Capsule
 from brayns.core.common.color import Color
+from brayns.core.common.plane import Plane
 from brayns.core.common.quaternion import Quaternion
 from brayns.core.common.resolution import Resolution
+from brayns.core.common.sphere import Sphere
 from brayns.core.common.transform import Transform
 from brayns.core.common.vector3 import Vector3
 
 __all__ = [
     'Bounds',
+    'Box',
+    'Capsule',
     'Color',
+    'Plane',
     'Quaternion',
     'Resolution',
+    'Sphere',
     'Transform',
     'Vector3'
 ]

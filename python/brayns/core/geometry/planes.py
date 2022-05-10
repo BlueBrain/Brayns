@@ -18,26 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from brayns.core.common.plane import Plane
+from brayns.core.geometry.geometries import Geometries
 
-from brayns.core.geometry.geometry import Geometry
 
-
-@dataclass
-class Plane(Geometry):
-
-    a: float
-    b: float
-    c: float
-    d: float = 0.0
+class Planes(Geometries[Plane]):
 
     @classmethod
     @property
-    def name(cls) -> str:
+    def name(self) -> str:
         return 'planes'
 
-    @property
-    def properties(self) -> dict:
-        return {
-            'coefficients': [self.a, self.b, self.c, self.d]
-        }
+    @classmethod
+    def serialize_geometry(cls, plane: Plane) -> dict:
+        return plane.serialize()

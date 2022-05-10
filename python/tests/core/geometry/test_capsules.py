@@ -20,22 +20,26 @@
 
 import unittest
 
+from brayns.core.common.capsule import Capsule
 from brayns.core.common.vector3 import Vector3
-from brayns.core.geometry.box import Box
+from brayns.core.geometry.capsules import Capsules
 
 
-class TestBox(unittest.TestCase):
+class TestCapsules(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(Box.name, 'boxes')
+        self.assertEqual(Capsules.name, 'capsules')
 
-    def test_properties(self) -> None:
-        test = Box(-Vector3.one, Vector3.one)
-        ref = {
-            'min': [-1, -1, -1],
-            'max': [1, 1, 1],
-        }
-        self.assertEqual(test.properties, ref)
+    def test_serialize_geometry(self) -> None:
+        capsule = Capsule(
+            Vector3.zero,
+            0,
+            Vector3.one,
+            1
+        )
+        test = Capsules.serialize_geometry(capsule)
+        ref = capsule.serialize()
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

@@ -20,18 +20,16 @@
 
 from dataclasses import dataclass
 
-from brayns.core.common.plane import Plane
-from brayns.instance.instance import Instance
-
 
 @dataclass
-class ClipPlane(Plane):
+class Plane:
 
-    @staticmethod
-    def remove(instance: Instance, ids: list[int]) -> None:
-        params = {'ids': ids}
-        instance.request('remove-clip-planes', params)
+    a: float
+    b: float
+    c: float
+    d: float = 0.0
 
-    def add(self, instance: Instance) -> int:
-        params = self.serialize()
-        return instance.request('add-clip-plane', params)
+    def serialize(self) -> dict:
+        return {
+            'coefficients': [self.a, self.b, self.c, self.d]
+        }

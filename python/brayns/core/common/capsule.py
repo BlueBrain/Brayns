@@ -20,18 +20,21 @@
 
 from dataclasses import dataclass
 
-from brayns.core.common.plane import Plane
-from brayns.instance.instance import Instance
+from brayns.core.common.vector3 import Vector3
 
 
 @dataclass
-class ClipPlane(Plane):
+class Capsule:
 
-    @staticmethod
-    def remove(instance: Instance, ids: list[int]) -> None:
-        params = {'ids': ids}
-        instance.request('remove-clip-planes', params)
+    start_point: Vector3
+    start_radius: float
+    end_point: Vector3
+    end_radius: float
 
-    def add(self, instance: Instance) -> int:
-        params = self.serialize()
-        return instance.request('add-clip-plane', params)
+    def serialize(self) -> dict:
+        return {
+            'p0': list(self.start_point),
+            'r0': self.start_radius,
+            'p1': list(self.end_point),
+            'r1': self.end_radius
+        }

@@ -18,20 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-
-from brayns.core.common.plane import Plane
-from brayns.instance.instance import Instance
+from brayns.core.common.capsule import Capsule
+from brayns.core.geometry.geometries import Geometries
 
 
-@dataclass
-class ClipPlane(Plane):
+class Capsules(Geometries[Capsule]):
 
-    @staticmethod
-    def remove(instance: Instance, ids: list[int]) -> None:
-        params = {'ids': ids}
-        instance.request('remove-clip-planes', params)
+    @classmethod
+    @property
+    def name(self) -> str:
+        return 'capsules'
 
-    def add(self, instance: Instance) -> int:
-        params = self.serialize()
-        return instance.request('add-clip-plane', params)
+    @classmethod
+    def serialize_geometry(cls, capsule: Capsule) -> dict:
+        return capsule.serialize()

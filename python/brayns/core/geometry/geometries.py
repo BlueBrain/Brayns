@@ -19,20 +19,20 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field, replace
-from typing import TypeVar
+from dataclasses import dataclass
+from typing import Generic, TypeVar
 
 from brayns.core.common.color import Color
 from brayns.core.model.model import Model
 from brayns.instance.instance import Instance
 
-T = TypeVar('T', bound='Geometry')
+T = TypeVar('T')
 
 
 @dataclass
-class Geometry(ABC):
+class Geometries(ABC, Generic[T]):
 
-    color: Color = field(init=False, default=Color.white)
+    items: list[tuple[T, Color]]
 
     @classmethod
     @property
@@ -40,27 +40,21 @@ class Geometry(ABC):
     def name(cls) -> str:
         pass
 
-    @property
+    @classmethod
     @abstractmethod
-    def properties(self) -> dict:
+    def serialize_geometry(cls, geometry: T) -> dict:
         pass
 
-    @classmethod
-    def add(cls: type[T], instance: Instance, geometries: list[T]) -> Model:
-        params = [
-            geometry.serialize()
-            for geometry in geometries
-        ]
-        result = instance.request(f'add-{cls.name}', params)
+    def add(self, instance: Instance) -> Model:
+        params = self.serialize()
+        result = instance.request(f'add-{self.name}', params)
         return Model.deserialize(result)
 
-    def serialize(self) -> dict:
-        return {
-            'geometry': self.properties,
-            'color': list(self.color)
-        }
-
-    def with_color(self: T, color: Color) -> T:
-        geometry = replace(self)
-        geometry.color = color
-        return geometry
+    def serialize(self) -> list[dict]:
+        return [
+            {
+                'geometry': self.serialize_geometry(item[0]),
+                'color': list(item[1])
+            }
+            for item in self.items
+        ]

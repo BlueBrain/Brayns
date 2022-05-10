@@ -39,7 +39,7 @@ class TestClipPlane(unittest.TestCase):
         test = plane.add(instance)
         self.assertEqual(test, 0)
         self.assertEqual(instance.method, 'add-clip-plane')
-        self.assertEqual(instance.params, [1, 2, 3, 4])
+        self.assertEqual(instance.params, {'coefficients': [1, 2, 3, 4]})
 
 
 if __name__ == '__main__':

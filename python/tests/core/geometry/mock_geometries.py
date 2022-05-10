@@ -18,25 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-
-from brayns.core.geometry.geometry import Geometry
+from brayns.core.geometry.geometries import Geometries
 
 
-@dataclass
-class MockGeometry(Geometry):
-
-    test1: int = 0
-    test2: str = ''
+class MockGeometries(Geometries[int]):
 
     @classmethod
     @property
     def name(cls) -> str:
         return 'tests'
 
-    @property
-    def properties(self) -> dict:
-        return {
-            'test1': self.test1,
-            'test2': self.test2
-        }
+    @classmethod
+    def serialize_geometry(cls, geometry: int) -> dict:
+        return geometry
