@@ -70,8 +70,8 @@ class TestSnapshot(unittest.TestCase):
                 'frame': 12,
             },
             'camera_view': CameraView().serialize(),
-            'camera': MockCamera().serialize(),
-            'renderer': MockRenderer().serialize()
+            'camera': MockCamera().serialize_with_name(),
+            'renderer': MockRenderer().serialize_with_name()
         })
 
 

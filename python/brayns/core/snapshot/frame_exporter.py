@@ -34,10 +34,10 @@ class FrameExporter:
 
     frames: list[KeyFrame]
     format: ImageFormat = ImageFormat.PNG
-    jpeg_quality: int = 100
     resolution: Optional[Resolution] = None
     camera: Optional[Camera] = None
     renderer: Optional[Renderer] = None
+    jpeg_quality: int = 100
     sequential_naming: bool = True
 
     def export_frames(self, instance: Instance, destination_folder: str) -> None:
@@ -62,9 +62,9 @@ class FrameExporter:
             image_settings['size'] = list(self.resolution)
         message['image_settings'] = image_settings
         if self.camera is not None:
-            message['camera'] = self.camera.serialize()
+            message['camera'] = self.camera.serialize_with_name()
         if self.renderer is not None:
-            message['renderer'] = self.renderer.serialize()
+            message['renderer'] = self.renderer.serialize_with_name()
         return message
 
     def _request(self, instance: Instance, params: dict) -> None:

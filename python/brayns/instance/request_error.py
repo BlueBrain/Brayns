@@ -24,13 +24,13 @@ from typing import Any
 
 @dataclass
 class RequestError(Exception):
-    """Exception raised when the renderer replies an error."""
 
     code: int
-    """Error code."""
-
     message: str
-    """Error description message."""
-
     data: Any = None
-    """Optional additional error data."""
+
+    def __str__(self) -> str:
+        description = f'{self.message} (code={self.code})'
+        if self.data is None:
+            return description
+        return f'{description} (data={self.data})'

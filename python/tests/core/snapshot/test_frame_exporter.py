@@ -62,8 +62,8 @@ class TestFrameExporter(unittest.TestCase):
                 'quality': 50,
                 'size': [600, 900]
             },
-            'camera': MockCamera().serialize(),
-            'renderer': MockRenderer().serialize(),
+            'camera': MockCamera().serialize_with_name(),
+            'renderer': MockRenderer().serialize_with_name(),
             'sequential_naming': False
         })
 

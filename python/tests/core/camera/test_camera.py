@@ -57,6 +57,15 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(instance.method, 'set-camera-test')
         self.assertEqual(instance.params, test.serialize())
 
+    def test_serialize_with_name(self) -> dict:
+        camera = MockCamera()
+        test = camera.serialize_with_name()
+        ref = {
+            'name': MockCamera.name,
+            'params': camera.serialize()
+        }
+        self.assertEqual(test, ref)
+
 
 if __name__ == '__main__':
     unittest.main()

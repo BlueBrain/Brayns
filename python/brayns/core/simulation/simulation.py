@@ -61,3 +61,11 @@ class Simulation:
             'enabled': enabled
         }
         instance.request('enable-simulation', params)
+
+    @property
+    def frame_count(self) -> int:
+        return self.end_frame - self.start_frame
+
+    @property
+    def duration(self) -> float:
+        return self.frame_count * self.delta_time

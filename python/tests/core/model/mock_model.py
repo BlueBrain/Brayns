@@ -40,9 +40,9 @@ class MockModel:
     @property
     def serialized_model(cls) -> dict:
         return {
-            'id': 0,
+            'model_id': 0,
             'bounds': MockBounds.serialized_bounds,
             'metadata': {'test': 1},
-            'visible': True,
+            'is_visible': True,
             'transformation': MockTransform.serialized_transform
         }

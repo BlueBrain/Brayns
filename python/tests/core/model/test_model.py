@@ -60,9 +60,11 @@ class TestModel(unittest.TestCase):
         )
         self.assertEqual(instance.method, 'update-model')
         self.assertEqual(instance.params, {
-            'id': 0,
-            'visible': True,
-            'transformation': Transform.identity.serialize()
+            'model_id': 0,
+            'model': {
+                'is_visible': True,
+                'transformation': Transform.identity.serialize()
+            }
         })
 
 
