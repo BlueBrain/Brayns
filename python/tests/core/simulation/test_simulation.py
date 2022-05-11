@@ -28,7 +28,7 @@ from tests.instance.mock_instance import MockInstance
 class TestSimulation(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._animation = Simulation(
+        self._simulation = Simulation(
             start_frame=0,
             end_frame=10,
             current_frame=5,
@@ -46,13 +46,13 @@ class TestSimulation(unittest.TestCase):
     def test_from_instance(self) -> None:
         instance = MockInstance(self._message)
         test = Simulation.from_instance(instance)
-        self.assertEqual(test, self._animation)
+        self.assertEqual(test, self._simulation)
         self.assertEqual(instance.method, 'get-animation-parameters')
         self.assertEqual(instance.params, None)
 
     def test_deserialize(self) -> None:
         test = Simulation.deserialize(self._message)
-        self.assertEqual(test, self._animation)
+        self.assertEqual(test, self._simulation)
 
     def test_set_current_frame(self) -> None:
         instance = MockInstance()
@@ -68,6 +68,12 @@ class TestSimulation(unittest.TestCase):
             'model_id': 0,
             'enabled': True
         })
+
+    def test_frame_count(self) -> None:
+        self.assertEqual(self._simulation.frame_count, 10)
+
+    def test_duration(self) -> None:
+        self.assertEqual(self._simulation.duration, 1)
 
 
 if __name__ == '__main__':

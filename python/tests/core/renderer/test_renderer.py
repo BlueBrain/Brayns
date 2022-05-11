@@ -58,6 +58,15 @@ class TestRenderer(unittest.TestCase):
         self.assertEqual(instance.method, 'set-renderer-test')
         self.assertEqual(instance.params, renderer.serialize())
 
+    def test_serialize_with_name(self) -> dict:
+        camera = MockRenderer()
+        test = camera.serialize_with_name()
+        ref = {
+            'name': MockRenderer.name,
+            'params': camera.serialize()
+        }
+        self.assertEqual(test, ref)
+
 
 if __name__ == '__main__':
     unittest.main()

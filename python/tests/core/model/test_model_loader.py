@@ -38,7 +38,7 @@ class TestModelLoader(unittest.TestCase):
         self.assertEqual(instance.method, 'add-model')
         self.assertEqual(instance.params, {
             'path': path,
-            'loader': MockModelLoader.name,
+            'loader_name': MockModelLoader.name,
             'loader_properties': loader.properties
         })
 

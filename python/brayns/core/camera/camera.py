@@ -59,3 +59,9 @@ class Camera(ABC):
     def use_as_main_camera(self, instance: Instance) -> None:
         params = self.serialize()
         instance.request(f'set-camera-{self.name}', params)
+
+    def serialize_with_name(self) -> dict:
+        return {
+            'name': self.name,
+            'params': self.serialize()
+        }

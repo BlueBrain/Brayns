@@ -33,12 +33,12 @@ from brayns.instance.instance import Instance
 @dataclass
 class Snapshot:
 
-    jpeg_quality: int = 100
     resolution: Optional[Resolution] = None
     frame: Optional[int] = None
     view: Optional[CameraView] = None
     camera: Optional[Camera] = None
     renderer: Optional[Renderer] = None
+    jpeg_quality: int = 100
 
     def save(self, instance: Instance, path: str) -> None:
         format = ImageFormat.from_path(path)
@@ -73,9 +73,9 @@ class Snapshot:
         if self.view is not None:
             message['camera_view'] = self.view.serialize()
         if self.camera is not None:
-            message['camera'] = self.camera.serialize()
+            message['camera'] = self.camera.serialize_with_name()
         if self.renderer is not None:
-            message['renderer'] = self.renderer.serialize()
+            message['renderer'] = self.renderer.serialize_with_name()
         return message
 
     def _request(self, instance: Instance, params: dict) -> dict:

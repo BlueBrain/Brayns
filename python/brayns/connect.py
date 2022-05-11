@@ -38,7 +38,7 @@ def connect(
 ) -> Instance:
     logger = _get_logger(logger)
     client = _connect(uri, secure, cafile, logger)
-    _check_version(client)
+    _check_version(client, logger)
     return client
 
 
@@ -57,11 +57,13 @@ def _connect(uri: str, secure: bool, cafile: Optional[str], logger: logging.Logg
     return Client(json_rpc_client)
 
 
-def _check_version(instance: Instance) -> None:
+def _check_version(instance: Instance, logger: logging.Logger) -> None:
     local = __version__
-    if local == DEV_VERSION:
-        return
+    logger.info('Python package version: %s.', local)
     version = Version.from_instance(instance)
     remote = version.tag
+    logger.info('Instance version: %s.', remote)
+    if local == DEV_VERSION:
+        return
     if remote != local:
         raise RuntimeError(f'Version mismatch {remote=} {local=}')
