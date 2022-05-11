@@ -28,7 +28,7 @@ namespace brayns
 struct Plane
 {
     // A, B, C D from Ax + By + Cz + D = 0
-    Vector4f coefficents;
+    Vector4f coefficients;
 };
 
 template<>
