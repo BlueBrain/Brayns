@@ -29,7 +29,7 @@ namespace brayns
 class ClipPlane
 {
 public:
-    ClipPlane(const uint32_t id, const Vector4f &coefficents);
+    ClipPlane(const uint32_t id, const Vector4f &coefficients);
 
     uint32_t getID() const noexcept;
 

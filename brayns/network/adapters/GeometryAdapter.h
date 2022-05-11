@@ -36,7 +36,7 @@ BRAYNS_JSON_ADAPTER_ENTRY(max, "Maximum bound corner (top front right)")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(Plane)
-BRAYNS_JSON_ADAPTER_ENTRY(coefficents, "Plane equation coefficents (A, B, C, D from Ax + By + Cz + D = 0)")
+BRAYNS_JSON_ADAPTER_ENTRY(coefficients, "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(Primitive)
