@@ -22,7 +22,7 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/common/MathTypes.h>
-#include <brayns/parameters/AbstractParameters.h>
+#include <brayns/common/parameters/AbstractParameters.h>
 
 #include <string>
 #include <vector>

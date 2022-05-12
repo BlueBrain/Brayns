@@ -26,7 +26,7 @@
 #include <brayns/network/client/ClientManager.h>
 #include <brayns/network/common/RateLimiter.h>
 
-#include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/common/parameters/ApplicationParameters.h>
 
 #include "StreamMonitor.h"
 

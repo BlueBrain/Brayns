@@ -11,6 +11,11 @@ set(BRAYNSCOMMON_SOURCES
     Timer.cpp
     TransferFunction.cpp
     Transformation.cpp
+    parameters/AbstractParameters.cpp
+    parameters/AnimationParameters.cpp
+    parameters/ApplicationParameters.cpp
+    parameters/NetworkParameters.cpp
+    parameters/ParametersManager.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
@@ -24,19 +29,32 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
     Timer.h
     TransferFunction.h
     Transformation.h
+    parameters/AbstractParameters.h
+    parameters/AnimationParameters.h
+    parameters/ApplicationParameters.h
+    parameters/NetworkParameters.h
+    parameters/ParametersManager.h
 )
 
 add_library(braynsCommon SHARED ${BRAYNSCOMMON_PUBLIC_HEADERS} ${BRAYNSCOMMON_SOURCES})
 
+set(BRAYNSCOMMON_INCLUDE_DIRS_LIST
+    ${PROJECT_SOURCE_DIR}
+    ${CMAKE_BINARY_DIR}/include
+)
+
 target_include_directories(braynsCommon PUBLIC
-    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+    "$<BUILD_INTERFACE:${BRAYNSCOMMON_INCLUDE_DIRS_LIST}>"
     "$<INSTALL_INTERFACE:include>")
 
 target_link_libraries(braynsCommon PUBLIC
-  glm braynsUtils braynsJson spdlog::spdlog
+    glm
+    braynsUtils
+    braynsJson
+    spdlog::spdlog
 )
 target_link_libraries(braynsCommon PRIVATE
-    braynsParameters ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
 target_compile_options(braynsCommon PRIVATE ${BRAYNS_COMPILE_OPTIONS})

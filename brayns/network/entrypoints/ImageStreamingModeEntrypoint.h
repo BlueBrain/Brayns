@@ -25,7 +25,7 @@
 #include <brayns/network/messages/ImageStreamingModeMessage.h>
 #include <brayns/network/stream/StreamMonitor.h>
 
-#include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/common/parameters/ApplicationParameters.h>
 
 namespace brayns
 {

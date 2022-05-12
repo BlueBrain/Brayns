@@ -30,7 +30,7 @@
 #include <brayns/network/common/CancellationToken.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
-#include <brayns/parameters/AnimationParameters.h>
+#include <brayns/common/parameters/AnimationParameters.h>
 
 namespace brayns
 {

@@ -34,7 +34,6 @@ target_include_directories(braynsIO PUBLIC
    "$<INSTALL_INTERFACE:include>")
 
 target_link_libraries(braynsIO PRIVATE
-    braynsParameters
     braynsCommon
     braynsEngine
 )

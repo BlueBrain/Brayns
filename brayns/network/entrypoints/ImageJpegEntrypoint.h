@@ -26,7 +26,7 @@
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ImageBase64Message.h>
 
-#include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/common/parameters/ApplicationParameters.h>
 
 namespace brayns
 {

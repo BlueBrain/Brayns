@@ -11,4 +11,6 @@ target_include_directories(braynsPluginAPI INTERFACE
   $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(braynsPluginAPI INTERFACE
-    braynsParameters braynsEngine braynsIO)
+    braynsEngine
+    braynsIO
+)

@@ -8,7 +8,6 @@
 configure_file(Version.h.in ${CMAKE_BINARY_DIR}/include/brayns/Version.h)
 
 add_subdirectory(utils)
-add_subdirectory(parameters)
 add_subdirectory(json)
 add_subdirectory(common)
 add_subdirectory(engine)
@@ -29,10 +28,13 @@ target_include_directories(brayns PUBLIC
   $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(brayns PUBLIC
-  braynsParameters braynsCommon braynsEngine braynsNetwork
+    braynsCommon
+    braynsEngine
+    braynsNetwork
 )
 target_link_libraries(brayns PRIVATE
-    braynsIO braynsPluginAPI
+    braynsIO
+    braynsPluginAPI
 )
 
 target_compile_options(brayns PRIVATE ${BRAYNS_COMPILE_OPTIONS})

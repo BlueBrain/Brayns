@@ -23,7 +23,7 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/parameters/AnimationParameters.h>
+#include <brayns/common/parameters/AnimationParameters.h>
 
 namespace brayns
 {

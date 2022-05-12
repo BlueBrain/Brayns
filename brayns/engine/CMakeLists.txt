@@ -110,7 +110,11 @@ target_include_directories(braynsEngine PUBLIC
   "$<INSTALL_INTERFACE:include>")
 
 target_link_libraries(braynsEngine PUBLIC
-    braynsParameters braynsCommon ospray::ospray ospray::ospray_sdk ospray::ospray_module_cpu)
+    braynsCommon
+    ospray::ospray
+    ospray::ospray_sdk
+    ospray::ospray_module_cpu
+)
 
 target_compile_options(braynsEngine PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 

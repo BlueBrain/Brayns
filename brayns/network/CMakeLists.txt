@@ -200,7 +200,6 @@ target_include_directories(braynsNetwork PUBLIC
 
 target_link_libraries(braynsNetwork PRIVATE
   braynsCommon
-  braynsParameters
   braynsPluginAPI
   braynsUtils
 )

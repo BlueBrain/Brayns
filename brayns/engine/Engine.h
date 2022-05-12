@@ -21,11 +21,11 @@
 
 #pragma once
 
+#include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/Camera.h>
 #include <brayns/engine/FrameBuffer.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
-#include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {

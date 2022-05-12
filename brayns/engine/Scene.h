@@ -22,10 +22,10 @@
 #pragma once
 
 #include <brayns/common/Bounds.h>
+#include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/scenecomponents/SceneClipManager.h>
 #include <brayns/engine/scenecomponents/SceneLightManager.h>
 #include <brayns/engine/scenecomponents/SceneModelManager.h>
-#include <brayns/parameters/ParametersManager.h>
 
 #include <ospray/ospray.h>
 

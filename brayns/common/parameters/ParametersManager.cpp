@@ -20,7 +20,7 @@
 
 #include <brayns/Version.h>
 #include <brayns/common/Log.h>
-#include <brayns/parameters/ParametersManager.h>
+#include <brayns/common/parameters/ParametersManager.h>
 
 #include <iostream>
 
