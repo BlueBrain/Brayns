@@ -20,7 +20,7 @@
 
 #include <brayns/Brayns.h>
 #include <brayns/common/Log.h>
-#include <brayns/common/Timer.h>
+#include <brayns/utils/Timer.h>
 
 class BraynsService
 {

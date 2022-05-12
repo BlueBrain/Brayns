@@ -8,7 +8,6 @@ set(BRAYNSCOMMON_SOURCES
     BaseObject.cpp
     Bounds.cpp
     Log.cpp
-    Timer.cpp
     TransferFunction.cpp
     Transformation.cpp
     parameters/AbstractParameters.cpp
@@ -22,11 +21,9 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
     BaseObject.h
     Blob.h
     Bounds.h
-    IDFactory.h
     Log.h
     MathTypes.h
     PixelFormat.h
-    Timer.h
     TransferFunction.h
     Transformation.h
     parameters/AbstractParameters.h

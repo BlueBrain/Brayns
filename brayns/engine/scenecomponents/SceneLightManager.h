@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/IDFactory.h>
 #include <brayns/engine/Light.h>
+#include <brayns/utils/IDFactory.h>
 
 #include <memory>
 #include <unordered_map>

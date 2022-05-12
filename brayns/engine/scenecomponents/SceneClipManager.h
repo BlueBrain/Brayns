@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/common/IDFactory.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelInstance.h>
+#include <brayns/utils/IDFactory.h>
 
 #include <memory>
 #include <unordered_map>
