@@ -57,7 +57,7 @@ std::map<std::string, std::string> ModelInstanceProxy::getModelMetadata() const 
     return {};
 }
 
-Transformation ModelInstanceProxy::getTransform() const noexcept
+Transform ModelInstanceProxy::getTransform() const noexcept
 {
     if (_modelInstance)
     {
@@ -67,7 +67,7 @@ Transformation ModelInstanceProxy::getTransform() const noexcept
     return {};
 }
 
-void ModelInstanceProxy::setTransform(const Transformation &transform) noexcept
+void ModelInstanceProxy::setTransform(const Transform &transform) noexcept
 {
     _modelInstance->setTransform(transform);
 }

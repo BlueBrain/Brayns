@@ -44,5 +44,5 @@ class MockModel:
             'bounds': MockBounds.serialized_bounds,
             'metadata': {'test': 1},
             'is_visible': True,
-            'transformation': MockTransform.serialized_transform
+            'transform': MockTransform.serialized_transform
         }

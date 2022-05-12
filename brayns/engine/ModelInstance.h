@@ -22,7 +22,7 @@
 #pragma once
 
 #include <brayns/common/Bounds.h>
-#include <brayns/common/Transformation.h>
+#include <brayns/common/Transform.h>
 #include <brayns/engine/Model.h>
 
 #include <ospray/ospray.h>
@@ -60,7 +60,7 @@ public:
     const Bounds &getBounds() const noexcept;
 
     /**
-     * @brief Recompute the model bounds with the current transformation
+     * @brief Recompute the model bounds with the current transform
      */
     void computeBounds() noexcept;
 
@@ -90,14 +90,14 @@ public:
     bool isVisible() const noexcept;
 
     /**
-     * @brief Sets the transformation of this instance.
+     * @brief Sets the transform of this instance.
      */
-    void setTransform(const Transformation &transform) noexcept;
+    void setTransform(const Transform &transform) noexcept;
 
     /**
      * @brief Returns the trasnsformation of this instance.
      */
-    const Transformation &getTransform() const noexcept;
+    const Transform &getTransform() const noexcept;
 
     /**
      * @brief Returns the OSPRay handle of this instance.
@@ -119,7 +119,7 @@ private:
 
     bool _visible{true};
     bool _visibilityChanged{true};
-    Transformation _transformation;
+    Transform _transform;
     Bounds _bounds;
 
     OSPInstance _instanceHandle{nullptr};

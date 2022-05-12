@@ -30,7 +30,7 @@
 #include <brayns/network/messages/GetModelMessage.h>
 
 #include "BoundsAdapter.h"
-#include "TransformationAdapter.h"
+#include "TransformAdapter.h"
 
 namespace brayns
 {
@@ -46,9 +46,9 @@ public:
 
     std::map<std::string, std::string> getModelMetadata() const noexcept;
 
-    Transformation getTransform() const noexcept;
+    Transform getTransform() const noexcept;
 
-    void setTransform(const Transformation &transform) noexcept;
+    void setTransform(const Transform &transform) noexcept;
 
     bool isVisible() const noexcept;
 
@@ -62,7 +62,7 @@ BRAYNS_JSON_ADAPTER_BEGIN(ModelInstanceProxy)
 BRAYNS_JSON_ADAPTER_GET("model_id", getID, "Model ID")
 BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Model axis-aligned bounds")
 BRAYNS_JSON_ADAPTER_GET("metadata", getModelMetadata, "Model-specific metadata")
-BRAYNS_JSON_ADAPTER_GETSET("transformation", getTransform, setTransform, "Model transformation")
+BRAYNS_JSON_ADAPTER_GETSET("transform", getTransform, setTransform, "Model transform")
 BRAYNS_JSON_ADAPTER_GETSET("is_visible", isVisible, setVisible, "Wether the model is being rendered or not")
 BRAYNS_JSON_ADAPTER_END()
 

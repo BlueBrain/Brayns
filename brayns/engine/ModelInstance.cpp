@@ -73,7 +73,7 @@ void ModelInstance::computeBounds() noexcept
 {
     Log::debug("[ModelInstance {}] Computing bounds", _modelInstanceID);
 
-    const auto matrix = _transformation.toMatrix();
+    const auto matrix = _transform.toMatrix();
     _bounds = _model.computeBounds(matrix);
 
     // In the event that the model used by this instance has no geometry,
@@ -112,19 +112,19 @@ bool ModelInstance::isVisible() const noexcept
     return _visible;
 }
 
-void ModelInstance::setTransform(const Transformation &transform) noexcept
+void ModelInstance::setTransform(const Transform &transform) noexcept
 {
-    _transformation = transform;
+    _transform = transform;
     // Recompute bounds as soon as the transform changes
-    if (_transformation.isModified())
+    if (_transform.isModified())
     {
         computeBounds();
     }
 }
 
-const Transformation &ModelInstance::getTransform() const noexcept
+const Transform &ModelInstance::getTransform() const noexcept
 {
-    return _transformation;
+    return _transform;
 }
 
 OSPInstance ModelInstance::handle() const noexcept
@@ -137,11 +137,11 @@ bool ModelInstance::commit(const bool modelChanged)
     bool needsCommit = modelChanged;
 
     // Re-commit transform if needed
-    if (_transformation.isModified())
+    if (_transform.isModified())
     {
-        const auto affine = glmMatrixToAffine(_transformation.toMatrix());
+        const auto affine = glmMatrixToAffine(_transform.toMatrix());
         ospSetParam(_instanceHandle, "transform", OSPDataType::OSP_AFFINE3F, &affine);
-        _transformation.resetModified();
+        _transform.resetModified();
         needsCommit = true;
     }
 
