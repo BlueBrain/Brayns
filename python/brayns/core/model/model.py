@@ -43,10 +43,10 @@ class Model:
     @staticmethod
     def deserialize(message: dict) -> 'Model':
         return Model(
-            id=message['id'],
+            id=message['model_id'],
             bounds=Bounds.deserialize(message['bounds']),
             metadata=message['metadata'],
-            visible=message['visible'],
+            visible=message['is_visible'],
             transform=Transform.deserialize(message['transformation'])
         )
 
@@ -61,9 +61,13 @@ class Model:
         visible: Optional[bool] = None,
         transform: Optional[Transform] = None
     ) -> None:
-        params = {'id': id}
+        model = {}
+        params = {
+            'model_id': id,
+            'model': model
+        }
         if visible is not None:
-            params['visible'] = visible
+            model['is_visible'] = visible
         if transform is not None:
-            params['transformation'] = transform.serialize()
+            model['transformation'] = transform.serialize()
         instance.request('update-model', params)

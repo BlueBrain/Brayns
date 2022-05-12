@@ -67,6 +67,12 @@ class Renderer(ABC):
         params = self.serialize()
         instance.request(f'set-renderer-{self.name}', params)
 
+    def serialize_with_name(self) -> dict:
+        return {
+            'name': self.name,
+            'params': self.serialize()
+        }
+
     @classmethod
     def _from_dict(cls: type[T], message: dict, **kwargs) -> T:
         return cls(

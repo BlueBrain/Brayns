@@ -23,7 +23,8 @@ from dataclasses import dataclass
 
 @dataclass
 class WebSocketError(Exception):
-    """Error raised when a websocket error occurs."""
 
     reason: str
-    """Error description string."""
+
+    def __str__(self) -> str:
+        return self.reason

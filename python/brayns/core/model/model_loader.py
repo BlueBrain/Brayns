@@ -40,7 +40,7 @@ class ModelLoader(ABC):
     def load(self, instance: Instance, path: str) -> list[Model]:
         params = {
             'path': path,
-            'loader': self.name,
+            'loader_name': self.name,
             'loader_properties': self.properties
         }
         result = instance.request('add-model', params)

@@ -25,5 +25,10 @@ class TimeUnit(Enum):
 
     MILLISECOND = 'ms'
 
-    def to_seconds(self) -> float:
-        return 0.001
+    @property
+    def seconds(self) -> float:
+        return 1 / self.per_second
+
+    @property
+    def per_second(self) -> float:
+        return 1000.0
