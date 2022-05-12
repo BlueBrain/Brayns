@@ -40,6 +40,5 @@ class MockTransform:
         return {
             'translation': [1, 2, 3],
             'rotation': [1, 2, 3, 4],
-            'rotation_center': [1, 2, 3],
             'scale': [4, 5, 6]
         }

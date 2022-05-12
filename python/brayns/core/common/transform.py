@@ -48,6 +48,5 @@ class Transform:
         return {
             'translation': list(self.translation),
             'rotation': list(self.rotation),
-            'rotation_center': list(self.translation),
             'scale': list(self.scale)
         }
