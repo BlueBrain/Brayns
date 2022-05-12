@@ -22,7 +22,6 @@
 #include "CircuitExplorerPlugin.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
