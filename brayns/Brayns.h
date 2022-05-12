@@ -23,9 +23,9 @@
 #pragma once
 
 #include <brayns/PluginManager.h>
+#include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/Engine.h>
 #include <brayns/io/LoaderRegistry.h>
-#include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {

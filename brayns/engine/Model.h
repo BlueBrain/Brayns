@@ -22,10 +22,10 @@
 #pragma once
 
 #include <brayns/common/Bounds.h>
+#include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/ModelGroup.h>
 #include <brayns/json/JsonType.h>
-#include <brayns/parameters/ParametersManager.h>
 
 #include <ospray/ospray.h>
 

@@ -94,9 +94,9 @@ public:
 
         // Parameters
         auto paramsManager = engine.getParametersManager();
-        auto &animParams = paramsManager.getAnimationParameters();
-        auto animFrame = params.simulation_frame;
-        animParams.setFrame(animFrame);
+        auto &simulation = paramsManager.getSimulationParameters();
+        auto frame = params.simulation_frame;
+        simulation.setFrame(frame);
 
         // Renderer
         auto &rendererObject = params.renderer;
@@ -194,8 +194,8 @@ void SnapshotEntrypoint::onRequest(const Request &request)
     params.image_settings = ImageSettings(systemSize);
 
     auto &paramsManager = _engine.getParametersManager();
-    auto &animParams = paramsManager.getAnimationParameters();
-    params.simulation_frame = animParams.getFrame();
+    auto &simulation = paramsManager.getSimulationParameters();
+    params.simulation_frame = simulation.getFrame();
 
     request.getParams(params);
 

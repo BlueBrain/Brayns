@@ -19,7 +19,9 @@ set(BRAYNSUTILS_HEADERS
   image/ImageFormat.h
   image/ImageInfo.h
   image/ImageMerger.h
+  IDFactory.h
   StringUtils.h
+  Timer.h
   TypeNameDemangler.h
 )
   
@@ -40,6 +42,7 @@ set(BRAYNSUTILS_SOURCES
   image/ImageInfo.cpp
   image/ImageMerger.cpp
   StringUtils.cpp
+  Timer.cpp
 )
 
 add_library(braynsUtils SHARED ${BRAYNSUTILS_SOURCES} ${BRAYNSUTILS_HEADERS})

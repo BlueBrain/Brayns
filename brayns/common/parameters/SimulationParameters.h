@@ -25,10 +25,10 @@
 
 namespace brayns
 {
-class AnimationParameters : public AbstractParameters
+class SimulationParameters : public AbstractParameters
 {
 public:
-    AnimationParameters();
+    SimulationParameters();
 
     /**
      * @brief print implementation to print this parameters
@@ -36,7 +36,7 @@ public:
     void print() final;
 
     /**
-     * @brief reset resets the parameters to no animation state:
+     * @brief reset resets the parameters to no simulation state:
      * - dt = 0.0
      * - start frame = 0
      * - end frame = 0

@@ -23,7 +23,6 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <io/BBPLoader.h>

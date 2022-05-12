@@ -4,7 +4,6 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSNETWORK_HEADERS
-  adapters/AnimationParametersAdapter.h
   adapters/ApplicationParametersAdapter.h
   adapters/BinaryLoadParametersAdapter.h
   adapters/BoundsAdapter.h
@@ -17,14 +16,15 @@ set(BRAYNSNETWORK_HEADERS
   adapters/ModelInstanceAdapter.h
   adapters/ModelTransferFunctionAdapter.h
   adapters/RendererAdapter.h
+  adapters/SimulationParametersAdapter.h
   adapters/TransferFunctionAdapter.h
   adapters/TransformationAdapter.h
   binary/BinaryManager.h
   client/ClientBuffer.h
   client/ClientManager.h
   client/ClientRef.h
-  client/RequestBuffer.h
   client/ClientSender.h
+  client/RequestBuffer.h
   common/CancellationToken.h
   common/Clock.h
   common/EngineObjectFactory.h
@@ -36,8 +36,8 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/Entrypoint.h
   entrypoint/EntrypointBuilder.h
   entrypoint/EntrypointFinder.h
-  entrypoint/EntrypointRegistry.h
   entrypoint/EntrypointRef.h
+  entrypoint/EntrypointRegistry.h
   entrypoint/EntrypointRequest.h
   entrypoint/IEntrypoint.h
   entrypoint/ObjectEntrypoint.h
@@ -46,7 +46,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/AddGeometryEntrypoint.h
   entrypoints/AddLightEntrypoint.h
   entrypoints/AddModelEntrypoint.h
-  entrypoints/AnimationParametersEntrypoint.h
   entrypoints/ApplicationParametersEntrypoint.h
   entrypoints/CameraEntrypoint.h
   entrypoints/CameraLookAtEntrypoint.h
@@ -71,6 +70,7 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/RequestModelUploadEntrypoint.h
   entrypoints/SceneEntrypoint.h
   entrypoints/SchemaEntrypoint.h
+  entrypoints/SimulationParametersEntrypoint.h
   entrypoints/SnapshotEntrypoint.h
   entrypoints/TriggerJpegStreamEntrypoint.h
   entrypoints/UpdateModelEntrypoint.h
@@ -80,8 +80,8 @@ set(BRAYNSNETWORK_HEADERS
   jsonrpc/JsonRpcException.h
   jsonrpc/JsonRpcFactory.h
   jsonrpc/JsonRpcMessages.h
-  jsonrpc/JsonRpcRequest.h
   jsonrpc/JsonRpcParser.h
+  jsonrpc/JsonRpcRequest.h
   jsonrpc/JsonRpcSender.h
   jsonrpc/RequestId.h
   messages/ExitLaterMessage.h
@@ -133,13 +133,12 @@ set(BRAYNSNETWORK_SOURCES
   common/RateLimiter.cpp
   dispatch/RequestDispatcher.cpp
   entrypoint/EntrypointFinder.cpp
-  entrypoint/EntrypointRegistry.cpp
   entrypoint/EntrypointRef.cpp
+  entrypoint/EntrypointRegistry.cpp
   entrypoints/AddClipPlaneEntrypoint.cpp
   entrypoints/AddGeometryEntrypoint.cpp
   entrypoints/AddLightEntrypoint.cpp
   entrypoints/AddModelEntrypoint.cpp
-  entrypoints/AnimationParametersEntrypoint.cpp
   entrypoints/ApplicationParametersEntrypoint.cpp
   entrypoints/CameraEntrypoint.cpp
   entrypoints/CameraLookAtEntrypoint.cpp
@@ -164,6 +163,7 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/RequestModelUploadEntrypoint.cpp
   entrypoints/SceneEntrypoint.cpp
   entrypoints/SchemaEntrypoint.cpp
+  entrypoints/SimulationParametersEntrypoint.cpp
   entrypoints/SnapshotEntrypoint.cpp
   entrypoints/TriggerJpegStreamEntrypoint.cpp
   entrypoints/UpdateModelEntrypoint.cpp
@@ -171,8 +171,8 @@ set(BRAYNSNETWORK_SOURCES
   interface/NetworkInterface.cpp
   jsonrpc/JsonRpcException.cpp
   jsonrpc/JsonRpcFactory.cpp
-  jsonrpc/JsonRpcRequest.cpp
   jsonrpc/JsonRpcParser.cpp
+  jsonrpc/JsonRpcRequest.cpp
   jsonrpc/JsonRpcSender.cpp
   jsonrpc/RequestId.cpp
   plugin/NetworkManager.cpp
@@ -200,7 +200,6 @@ target_include_directories(braynsNetwork PUBLIC
 
 target_link_libraries(braynsNetwork PRIVATE
   braynsCommon
-  braynsParameters
   braynsPluginAPI
   braynsUtils
 )

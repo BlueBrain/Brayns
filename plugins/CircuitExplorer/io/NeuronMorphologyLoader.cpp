@@ -19,7 +19,7 @@
 #include "NeuronMorphologyLoader.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/common/Timer.h>
+#include <brayns/utils/Timer.h>
 
 #include <brayns/engine/components/GeometryRendererComponent.h>
 #include <brayns/engine/geometries/Primitive.h>

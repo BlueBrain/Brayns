@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/IDFactory.h>
 #include <brayns/engine/ImageOperation.h>
+#include <brayns/utils/IDFactory.h>
 
 #include <memory>
 

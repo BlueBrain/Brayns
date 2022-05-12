@@ -19,24 +19,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AnimationParameters.h"
+#include "SimulationParameters.h"
 
 #include <brayns/common/Log.h>
 
 namespace brayns
 {
-AnimationParameters::AnimationParameters()
-    : AbstractParameters("Animation")
+SimulationParameters::SimulationParameters()
+    : AbstractParameters("Simulation")
 {
 }
 
-void AnimationParameters::print()
+void SimulationParameters::print()
 {
     AbstractParameters::print();
-    Log::info("Animation frame          : {}.", _current);
+    Log::info("Simulation frame          : {}.", _current);
 }
 
-void AnimationParameters::reset()
+void SimulationParameters::reset()
 {
     _current = 0u;
     _dt = 0.;
@@ -45,47 +45,47 @@ void AnimationParameters::reset()
     markModified();
 }
 
-void AnimationParameters::setStartFrame(const uint32_t startFrame) noexcept
+void SimulationParameters::setStartFrame(const uint32_t startFrame) noexcept
 {
     _updateValue(_startFrame, startFrame);
 }
 
-void AnimationParameters::setEndFrame(const uint32_t endFrame) noexcept
+void SimulationParameters::setEndFrame(const uint32_t endFrame) noexcept
 {
     _updateValue(_endFrame, endFrame);
 }
 
-uint32_t AnimationParameters::getStartFrame() const noexcept
+uint32_t SimulationParameters::getStartFrame() const noexcept
 {
     return _startFrame;
 }
 
-uint32_t AnimationParameters::getEndFrame() const noexcept
+uint32_t SimulationParameters::getEndFrame() const noexcept
 {
     return _endFrame;
 }
 
-void AnimationParameters::setFrame(const uint32_t value) noexcept
+void SimulationParameters::setFrame(const uint32_t value) noexcept
 {
     _updateValue(_current, value);
 }
 
-uint32_t AnimationParameters::getFrame() const noexcept
+uint32_t SimulationParameters::getFrame() const noexcept
 {
     return _current;
 }
 
-void AnimationParameters::setDt(const double dt) noexcept
+void SimulationParameters::setDt(const double dt) noexcept
 {
     _updateValue(_dt, dt);
 }
 
-double AnimationParameters::getDt() const noexcept
+double SimulationParameters::getDt() const noexcept
 {
     return _dt;
 }
 
-const std::string &AnimationParameters::getTimeUnit() const noexcept
+const std::string &SimulationParameters::getTimeUnit() const noexcept
 {
     return _unit;
 }

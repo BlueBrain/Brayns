@@ -70,12 +70,12 @@ void ReportComponent::onPreRender(const brayns::ParametersManager &parameters)
         forceUpdate = true;
     }
 
-    const auto &animationParameters = parameters.getAnimationParameters();
-    forceUpdate = forceUpdate || animationParameters.isModified();
+    const auto &simulation = parameters.getSimulationParameters();
+    forceUpdate = forceUpdate || simulation.isModified();
 
     if (forceUpdate)
     {
-        const auto frameIndex = animationParameters.getFrame();
+        const auto frameIndex = simulation.getFrame();
         const auto frameData = _report->getFrame(frameIndex);
         const auto &range = tf.getValuesRange();
         _indexer->update(frameData, range, _indices);

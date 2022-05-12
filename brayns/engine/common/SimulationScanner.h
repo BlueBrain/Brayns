@@ -20,17 +20,17 @@
 
 #pragma once
 
+#include <brayns/common/parameters/SimulationParameters.h>
 #include <brayns/engine/scenecomponents/SceneModelManager.h>
-#include <brayns/parameters/AnimationParameters.h>
 
 namespace brayns
 {
 /**
  * @brief The SimulationScanner struct scans all models with a simulation component to update the simulation
- * global state in AnimationParameters
+ * global state in SimulationParameters
  */
 struct SimulationScanner
 {
-    static void scanAndUpdate(SceneModelManager &modelManager, AnimationParameters &globalAnimation);
+    static void scanAndUpdate(SceneModelManager &modelManager, SimulationParameters &globalSimulation);
 };
 }

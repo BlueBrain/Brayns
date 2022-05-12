@@ -22,7 +22,7 @@
 #include "BBPLoader.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/common/Timer.h>
+#include <brayns/utils/Timer.h>
 
 #include <io/bbploader/CellLoader.h>
 #include <io/bbploader/GIDLoader.h>

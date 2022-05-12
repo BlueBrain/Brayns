@@ -19,7 +19,7 @@
 #include "SonataLoader.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/common/Timer.h>
+#include <brayns/utils/Timer.h>
 
 #include <io/sonataloader/EdgeLoader.h>
 #include <io/sonataloader/LoadContext.h>

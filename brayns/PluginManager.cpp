@@ -21,7 +21,7 @@
 #include "PluginManager.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/parameters/ParametersManager.h>
+#include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/utils/StringUtils.h>
 
 #include <brayns/network/plugin/NetworkManager.h>

@@ -199,12 +199,12 @@ namespace brayns
 RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
     Scene &scene,
     const LoaderRegistry &loaders,
-    AnimationParameters &animation,
+    SimulationParameters &simulation,
     BinaryManager &binary,
     CancellationToken token)
     : _scene(scene)
     , _loaders(loaders)
-    , _animation(animation)
+    , _simulation(simulation)
     , _binary(binary)
     , _token(token)
 {
@@ -230,7 +230,7 @@ void RequestModelUploadEntrypoint::onRequest(const Request &request)
     _client = request.getClient();
     auto &modelManager = _scene.getModels();
     BinaryModelHandler handler(modelManager, _loaders, _binary, _token);
-    SimulationScanner::scanAndUpdate(modelManager, _animation);
+    SimulationScanner::scanAndUpdate(modelManager, _simulation);
     _scene.computeBounds();
     handler.handle(request);
 }

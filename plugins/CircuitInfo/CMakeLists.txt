@@ -18,7 +18,11 @@ add_library(braynsCircuitInfo SHARED ${BRAYNSCIRCUITINFO_HEADERS} ${BRAYNSCIRCUI
 target_include_directories(braynsCircuitInfo PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(braynsCircuitInfo PRIVATE
-  Brion Brain braynsCommon braynsParameters braynsPluginAPI braynsNetwork
+  Brion
+  Brain
+  braynsCommon
+  braynsPluginAPI
+  braynsNetwork
 )
 
 set_target_properties(braynsCircuitInfo

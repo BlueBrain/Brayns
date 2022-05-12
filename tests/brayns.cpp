@@ -59,6 +59,6 @@ TEST_CASE("defaults")
     CHECK_EQ(appParams.getJpegCompression(), 90);
     CHECK_EQ(appParams.getImageStreamFPS(), 60);
 
-    const auto &animParams = pm.getAnimationParameters();
-    CHECK_EQ(animParams.getFrame(), 0);
+    const auto &simulation = pm.getSimulationParameters();
+    CHECK_EQ(simulation.getFrame(), 0);
 }

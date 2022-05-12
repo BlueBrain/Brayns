@@ -23,9 +23,9 @@
 
 #include <brayns/json/JsonObjectMacro.h>
 
-#include <brayns/network/adapters/AnimationParametersAdapter.h>
 #include <brayns/network/adapters/CameraAdapter.h>
 #include <brayns/network/adapters/RendererAdapter.h>
+#include <brayns/network/adapters/SimulationParametersAdapter.h>
 #include <brayns/network/common/EngineObjectFactory.h>
 #include <brayns/network/messages/ImageSettingsMessage.h>
 

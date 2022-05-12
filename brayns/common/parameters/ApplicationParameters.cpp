@@ -24,7 +24,7 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/parameters/ParametersManager.h>
+#include <brayns/common/parameters/ParametersManager.h>
 
 namespace
 {

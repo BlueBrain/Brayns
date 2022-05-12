@@ -24,28 +24,28 @@
 
 namespace
 {
-struct AnimationUpdater
+struct SimulationUpdater
 {
-    static void update(brayns::AnimationParameters &animation, float start, float end, float dt)
+    static void update(brayns::SimulationParameters &simulation, float start, float end, float dt)
     {
         dt = std::nextafter(dt, std::numeric_limits<float>::infinity());
         const auto startFrame = uint32_t(start / dt);
         const auto endFrame = uint32_t(end / dt);
 
-        animation.setStartFrame(startFrame);
-        animation.setEndFrame(endFrame);
-        animation.setDt(dt);
+        simulation.setStartFrame(startFrame);
+        simulation.setEndFrame(endFrame);
+        simulation.setDt(dt);
 
-        auto currentFrame = animation.getFrame();
+        auto currentFrame = simulation.getFrame();
         currentFrame = std::min(endFrame, std::max(startFrame, currentFrame));
-        animation.setFrame(currentFrame);
+        simulation.setFrame(currentFrame);
     }
 };
 }
 
 namespace brayns
 {
-void SimulationScanner::scanAndUpdate(SceneModelManager &modelManager, AnimationParameters &globalAnimation)
+void SimulationScanner::scanAndUpdate(SceneModelManager &modelManager, SimulationParameters &globalSimulation)
 {
     float earlierStart = std::numeric_limits<float>::max();
     float latestEnd = std::numeric_limits<float>::lowest();
@@ -81,7 +81,7 @@ void SimulationScanner::scanAndUpdate(SceneModelManager &modelManager, Animation
     // Update only if we actually have any simulaiton
     if (foundSimulation)
     {
-        AnimationUpdater::update(globalAnimation, earlierStart, latestEnd, smallestDt);
+        SimulationUpdater::update(globalSimulation, earlierStart, latestEnd, smallestDt);
     }
 }
 }

@@ -134,8 +134,8 @@ void SpikeReportComponent::onPreRender(const brayns::ParametersManager &paramete
     bool forceUpdate = !_lastEnabledValue;
     _lastEnabledValue = true;
 
-    const auto &animationParameters = parameters.getAnimationParameters();
-    forceUpdate = forceUpdate || animationParameters.isModified();
+    const auto &simulation = parameters.getSimulationParameters();
+    forceUpdate = forceUpdate || simulation.isModified();
 
     if (!forceUpdate)
     {
@@ -146,7 +146,7 @@ void SpikeReportComponent::onPreRender(const brayns::ParametersManager &paramete
 
     constexpr auto dt = 0.01f;
     const auto endTime = _report->getEndTime();
-    const auto frameIndex = animationParameters.getFrame();
+    const auto frameIndex = simulation.getFrame();
     const auto frameTimestamp = std::clamp(frameIndex * dt, 0.f, endTime);
 
     SpikeFrameProcessor processor(_gidStreamlineMap, *_report, _invSpikeDecayTime);

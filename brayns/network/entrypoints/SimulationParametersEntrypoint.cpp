@@ -19,19 +19,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <brayns/parameters/AnimationParameters.h>
+#include "SimulationParametersEntrypoint.h"
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(AnimationParameters)
-BRAYNS_JSON_ADAPTER_GETSET("start_frame", getStartFrame, setStartFrame, "Global initial simulation frame index")
-BRAYNS_JSON_ADAPTER_GETSET("end_frame", getEndFrame, setEndFrame, "Global final simulation frame index")
-BRAYNS_JSON_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")
-BRAYNS_JSON_ADAPTER_GET("dt", getDt, "Frame time")
-BRAYNS_JSON_ADAPTER_GET("unit", getTimeUnit, "Time unit")
-BRAYNS_JSON_ADAPTER_END()
+GetSimulationParametersEntrypoint::GetSimulationParametersEntrypoint(const SimulationParameters &parameters)
+    : GetEntrypoint(parameters)
+{
+}
+
+std::string GetSimulationParametersEntrypoint::getMethod() const
+{
+    return "get-simulation-parameters";
+}
+
+std::string GetSimulationParametersEntrypoint::getDescription() const
+{
+    return "Get the current state of the simulation parameters";
+}
+
+SetSimulationParametersEntrypoint::SetSimulationParametersEntrypoint(SimulationParameters &parameters)
+    : SetEntrypoint(parameters)
+{
+}
+
+std::string SetSimulationParametersEntrypoint::getMethod() const
+{
+    return "set-simulation-parameters";
+}
+
+std::string SetSimulationParametersEntrypoint::getDescription() const
+{
+    return "Set the current state of the simulation parameters";
+}
 } // namespace brayns

@@ -19,37 +19,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AnimationParametersEntrypoint.h"
+#pragma once
+
+#include <brayns/network/adapters/SimulationParametersAdapter.h>
+#include <brayns/network/entrypoint/ObjectEntrypoint.h>
 
 namespace brayns
 {
-GetAnimationParametersEntrypoint::GetAnimationParametersEntrypoint(const AnimationParameters &parameters)
-    : GetEntrypoint(parameters)
+class GetSimulationParametersEntrypoint : public GetEntrypoint<SimulationParameters>
 {
-}
+public:
+    GetSimulationParametersEntrypoint(const SimulationParameters &parameters);
 
-std::string GetAnimationParametersEntrypoint::getMethod() const
-{
-    return "get-animation-parameters";
-}
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+};
 
-std::string GetAnimationParametersEntrypoint::getDescription() const
+class SetSimulationParametersEntrypoint : public SetEntrypoint<SimulationParameters>
 {
-    return "Get the current state of the animation parameters";
-}
+public:
+    SetSimulationParametersEntrypoint(SimulationParameters &parameters);
 
-SetAnimationParametersEntrypoint::SetAnimationParametersEntrypoint(AnimationParameters &parameters)
-    : SetEntrypoint(parameters)
-{
-}
-
-std::string SetAnimationParametersEntrypoint::getMethod() const
-{
-    return "set-animation-parameters";
-}
-
-std::string SetAnimationParametersEntrypoint::getDescription() const
-{
-    return "Set the current state of the animation parameters";
-}
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+};
 } // namespace brayns

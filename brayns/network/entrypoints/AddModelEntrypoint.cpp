@@ -50,11 +50,11 @@ namespace brayns
 AddModelEntrypoint::AddModelEntrypoint(
     Scene &scene,
     LoaderRegistry &loaders,
-    AnimationParameters &animation,
+    SimulationParameters &simulation,
     CancellationToken token)
     : _scene(scene)
     , _loaders(loaders)
-    , _animation(animation)
+    , _simulation(simulation)
     , _token(token)
 {
 }
@@ -102,7 +102,7 @@ void AddModelEntrypoint::onRequest(const Request &request)
         result.emplace_back(modelInstance);
     }
 
-    SimulationScanner::scanAndUpdate(modelManager, _animation);
+    SimulationScanner::scanAndUpdate(modelManager, _simulation);
     // Need to compute bounds here to make sure the bounds will be updated for the next call (which may need them)
     _scene.computeBounds();
 
