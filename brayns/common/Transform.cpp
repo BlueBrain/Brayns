@@ -18,38 +18,49 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/common/BaseObject.h>
-#include <brayns/common/MathTypes.h>
+#include <brayns/common/Transform.h>
 
 namespace brayns
 {
-/**
- * @brief Defines the translation, rotation and scale parameters to be applied
- * to a scene asset.
- */
-class Transformation : public BaseObject
+Transform::Transform(const Vector3f &translation, const Quaternion &rotation, const Vector3f &scale)
+    : _translation(translation)
+    , _rotation(rotation)
+    , _scale(scale)
 {
-public:
-    Transformation() = default;
+}
 
-    Transformation(const Vector3f &translation, const Quaternion &rotation, const Vector3f &scale);
+const Vector3f &Transform::getTranslation() const noexcept
+{
+    return _translation;
+}
 
-    const Vector3f &getTranslation() const noexcept;
-    void setTranslation(const Vector3f &value) noexcept;
+void Transform::setTranslation(const Vector3f &value) noexcept
+{
+    _updateValue(_translation, value);
+}
 
-    const Quaternion &getRotation() const noexcept;
-    void setRotation(const Quaternion &value) noexcept;
+const Quaternion &Transform::getRotation() const noexcept
+{
+    return _rotation;
+}
 
-    const Vector3f &getScale() const noexcept;
-    void setScale(const Vector3f &value) noexcept;
+void Transform::setRotation(const Quaternion &value) noexcept
+{
+    _updateValue(_rotation, value);
+}
 
-    Matrix4f toMatrix() const;
+const Vector3f &Transform::getScale() const noexcept
+{
+    return _scale;
+}
 
-private:
-    Vector3f _translation{0.f};
-    Quaternion _rotation{1, 0, 0, 0};
-    Vector3f _scale{1.f};
-};
+void Transform::setScale(const Vector3f &value) noexcept
+{
+    _updateValue(_scale, value);
+}
+
+Matrix4f Transform::toMatrix() const
+{
+    return glm::translate(Matrix4f(1.), _translation) * glm::mat4_cast(_rotation) * glm::scale(Matrix4f(1.), _scale);
+}
 } // namespace brayns

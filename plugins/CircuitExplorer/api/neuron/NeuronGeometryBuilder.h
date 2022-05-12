@@ -34,7 +34,7 @@ public:
     NeuronGeometryBuilder(const NeuronMorphology &morphology);
 
     /**
-     * @brief Instantiates the built geometry with the given transformation
+     * @brief Instantiates the built geometry with the given transform
      * @param position (Translation)
      * @param rotation (Rotation)
      * @return NeuronGeometry

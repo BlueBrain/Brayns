@@ -226,7 +226,7 @@ private:
 
     /**
      * @brief compute the merged bounds of all contained components
-     * @param transform The transformation to apply when computing the bounds
+     * @param transform The transform to apply when computing the bounds
      * @return Bounds
      */
     Bounds computeBounds(const Matrix4f &transform) const noexcept;

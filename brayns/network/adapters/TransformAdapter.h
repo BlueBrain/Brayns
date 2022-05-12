@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include <brayns/common/Transformation.h>
+#include <brayns/common/Transform.h>
 
 #include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Transformation)
+BRAYNS_JSON_ADAPTER_BEGIN(Transform)
 BRAYNS_JSON_ADAPTER_GETSET("translation", getTranslation, setTranslation, "Translation XYZ")
 BRAYNS_JSON_ADAPTER_GETSET("rotation", getRotation, setRotation, "Rotation XYZW")
 BRAYNS_JSON_ADAPTER_GETSET("scale", getScale, setScale, "Scale XYZ")

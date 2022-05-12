@@ -9,7 +9,7 @@ set(BRAYNSCOMMON_SOURCES
     Bounds.cpp
     Log.cpp
     TransferFunction.cpp
-    Transformation.cpp
+    Transform.cpp
     parameters/AbstractParameters.cpp
     parameters/ApplicationParameters.cpp
     parameters/NetworkParameters.cpp
@@ -25,7 +25,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
     MathTypes.h
     PixelFormat.h
     TransferFunction.h
-    Transformation.h
+    Transform.h
     parameters/AbstractParameters.h
     parameters/ApplicationParameters.h
     parameters/NetworkParameters.h

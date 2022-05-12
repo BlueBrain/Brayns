@@ -63,7 +63,7 @@ class TestModel(unittest.TestCase):
             'model_id': 0,
             'model': {
                 'is_visible': True,
-                'transformation': Transform.identity.serialize()
+                'transform': Transform.identity.serialize()
             }
         })
 

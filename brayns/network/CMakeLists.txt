@@ -18,7 +18,7 @@ set(BRAYNSNETWORK_HEADERS
   adapters/RendererAdapter.h
   adapters/SimulationParametersAdapter.h
   adapters/TransferFunctionAdapter.h
-  adapters/TransformationAdapter.h
+  adapters/TransformAdapter.h
   binary/BinaryManager.h
   client/ClientBuffer.h
   client/ClientManager.h

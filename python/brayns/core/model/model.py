@@ -47,7 +47,7 @@ class Model:
             bounds=Bounds.deserialize(message['bounds']),
             metadata=message['metadata'],
             visible=message['is_visible'],
-            transform=Transform.deserialize(message['transformation'])
+            transform=Transform.deserialize(message['transform'])
         )
 
     @staticmethod
@@ -69,5 +69,5 @@ class Model:
         if visible is not None:
             model['is_visible'] = visible
         if transform is not None:
-            model['transformation'] = transform.serialize()
+            model['transform'] = transform.serialize()
         instance.request('update-model', params)
