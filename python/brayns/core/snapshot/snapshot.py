@@ -69,7 +69,7 @@ class Snapshot:
             image_settings['size'] = list(self.resolution)
         message['image_settings'] = image_settings
         if self.frame is not None:
-            message['simulation_settings'] = self.frame
+            message['simulation_frame'] = self.frame
         if self.view is not None:
             message['camera_view'] = self.view.serialize()
         if self.camera is not None:

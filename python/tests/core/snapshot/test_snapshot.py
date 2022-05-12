@@ -38,7 +38,7 @@ class TestSnapshot(unittest.TestCase):
         snapshot.save_remotely(instance, path)
         self.assertEqual(instance.method, 'snapshot')
         self.assertEqual(instance.params, {
-            'path': path,
+            'file_path': path,
             'image_settings': {
                 'format': 'jpg',
                 'quality': 100
