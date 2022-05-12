@@ -59,7 +59,7 @@ class Snapshot:
     def _get_params(self, format: ImageFormat, path: Optional[str] = None) -> dict:
         message = {}
         if path is not None:
-            message['path'] = path
+            message['file_path'] = path
         image_settings = {
             'format': format.value
         }
@@ -69,7 +69,7 @@ class Snapshot:
             image_settings['size'] = list(self.resolution)
         message['image_settings'] = image_settings
         if self.frame is not None:
-            message['animation_settings'] = {'frame': self.frame}
+            message['simulation_settings'] = self.frame
         if self.view is not None:
             message['camera_view'] = self.view.serialize()
         if self.camera is not None:

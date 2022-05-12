@@ -121,12 +121,12 @@ void VasculatureRadiiReportComponent::onPreRender(const brayns::ParametersManage
     bool forceUpdate = !_lastEnabledValue;
     _lastEnabledValue = true;
 
-    const auto &animationParameters = parameters.getAnimationParameters();
-    forceUpdate = forceUpdate || animationParameters.isModified();
+    const auto &simulation = parameters.getSimulationParameters();
+    forceUpdate = forceUpdate || simulation.isModified();
 
     if (forceUpdate)
     {
-        const auto frameIndex = animationParameters.getFrame();
+        const auto frameIndex = simulation.getFrame();
         const auto frameData = _report->getFrame(frameIndex);
         RadiiReportUpdater::update(geometry, _offsets, frameData);
     }

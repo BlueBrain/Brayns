@@ -66,9 +66,7 @@ class TestSnapshot(unittest.TestCase):
                 'quality': 50,
                 'size': [1920, 1080]
             },
-            'animation_settings': {
-                'frame': 12,
-            },
+            'simulation_frame': 12,
             'camera_view': CameraView().serialize(),
             'camera': MockCamera().serialize_with_name(),
             'renderer': MockRenderer().serialize_with_name()

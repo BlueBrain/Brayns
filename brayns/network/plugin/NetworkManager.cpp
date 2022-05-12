@@ -38,7 +38,6 @@
 #include <brayns/network/entrypoints/AddGeometryEntrypoint.h>
 #include <brayns/network/entrypoints/AddLightEntrypoint.h>
 #include <brayns/network/entrypoints/AddModelEntrypoint.h>
-#include <brayns/network/entrypoints/AnimationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
 #include <brayns/network/entrypoints/CameraLookAtEntrypoint.h>
@@ -63,6 +62,7 @@
 #include <brayns/network/entrypoints/RequestModelUploadEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
+#include <brayns/network/entrypoints/SimulationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/SnapshotEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateModelEntrypoint.h>
@@ -80,7 +80,7 @@ public:
 
         auto &parameters = api.getParametersManager();
         auto &application = parameters.getApplicationParameters();
-        auto &animation = parameters.getAnimationParameters();
+        auto &simulation = parameters.getSimulationParameters();
 
         auto &engine = api.getEngine();
         auto &scene = engine.getScene();
@@ -107,13 +107,13 @@ public:
         builder.add<brayns::AddLightAmbientEntrypoint>(sceneLightManager);
         builder.add<brayns::AddLightDirectionalEntrypoint>(sceneLightManager);
         builder.add<brayns::AddLightQuadEntrypoint>(sceneLightManager);
-        builder.add<brayns::AddModelEntrypoint>(scene, loaders, animation, token);
+        builder.add<brayns::AddModelEntrypoint>(scene, loaders, simulation, token);
         builder.add<brayns::CancelEntrypoint>(tasks);
         builder.add<brayns::ClearLightsEntrypoint>(sceneLightManager);
         builder.add<brayns::EnableSimulationEntrypoint>(sceneModelManager);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
         builder.add<brayns::ExportFramesEntrypoint>(engine, parameters, token);
-        builder.add<brayns::GetAnimationParametersEntrypoint>(animation);
+        builder.add<brayns::GetSimulationParametersEntrypoint>(simulation);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
         builder.add<brayns::GetCameraLookAtEntrypoint>(engine);
         builder.add<brayns::GetCameraPerspectiveEntrypoint>(engine);
@@ -141,10 +141,10 @@ public:
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
         builder.add<brayns::RemoveClipPlanesEntrypoint>(sceneClipManager);
         builder.add<brayns::RemoveLightsEntrypoint>(sceneLightManager);
-        builder.add<brayns::RemoveModelEntrypoint>(scene, animation);
-        builder.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, animation, binary, token);
+        builder.add<brayns::RemoveModelEntrypoint>(scene, simulation);
+        builder.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, simulation, binary, token);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
-        builder.add<brayns::SetAnimationParametersEntrypoint>(animation);
+        builder.add<brayns::SetSimulationParametersEntrypoint>(simulation);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
         builder.add<brayns::SetCameraLookAtEntrypoint>(engine);
         builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);

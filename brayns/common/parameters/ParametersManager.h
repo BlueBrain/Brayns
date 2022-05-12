@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/common/parameters/AnimationParameters.h>
 #include <brayns/common/parameters/ApplicationParameters.h>
 #include <brayns/common/parameters/NetworkParameters.h>
+#include <brayns/common/parameters/SimulationParameters.h>
 
 namespace brayns
 {
@@ -51,11 +51,11 @@ public:
     void print();
 
     /**
-     * @brief Gets animation parameters
-     * @return Animation parameters for the current scene
+     * @brief Gets simulation parameters
+     * @return Simulation parameters for the current scene
      */
-    AnimationParameters &getAnimationParameters();
-    const AnimationParameters &getAnimationParameters() const;
+    SimulationParameters &getSimulationParameters();
+    const SimulationParameters &getSimulationParameters() const;
 
     /**
      * @brief Gets application parameters
@@ -83,7 +83,7 @@ private:
     po::options_description _allOptions;
 
     std::vector<AbstractParameters *> _parameterSets;
-    AnimationParameters _animationParameters;
+    SimulationParameters _simulationParameters;
     ApplicationParameters _applicationParameters;
     NetworkParameters _networkParameters;
 };

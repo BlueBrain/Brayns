@@ -114,7 +114,7 @@ namespace brayns
 {
 ParametersManager::ParametersManager(const int argc, const char **argv)
 {
-    registerParameters(&_animationParameters);
+    registerParameters(&_simulationParameters);
     registerParameters(&_applicationParameters);
     registerParameters(&_networkParameters);
 
@@ -205,14 +205,14 @@ void ParametersManager::print()
     }
 }
 
-AnimationParameters &ParametersManager::getAnimationParameters()
+SimulationParameters &ParametersManager::getSimulationParameters()
 {
-    return _animationParameters;
+    return _simulationParameters;
 }
 
-const AnimationParameters &ParametersManager::getAnimationParameters() const
+const SimulationParameters &ParametersManager::getSimulationParameters() const
 {
-    return _animationParameters;
+    return _simulationParameters;
 }
 
 ApplicationParameters &ParametersManager::getApplicationParameters()

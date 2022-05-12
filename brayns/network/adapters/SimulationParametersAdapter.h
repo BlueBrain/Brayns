@@ -21,26 +21,17 @@
 
 #pragma once
 
-#include <brayns/network/adapters/AnimationParametersAdapter.h>
-#include <brayns/network/entrypoint/ObjectEntrypoint.h>
+#include <brayns/json/JsonAdapterMacro.h>
+
+#include <brayns/common/parameters/SimulationParameters.h>
 
 namespace brayns
 {
-class GetAnimationParametersEntrypoint : public GetEntrypoint<AnimationParameters>
-{
-public:
-    GetAnimationParametersEntrypoint(const AnimationParameters &parameters);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-};
-
-class SetAnimationParametersEntrypoint : public SetEntrypoint<AnimationParameters>
-{
-public:
-    SetAnimationParametersEntrypoint(AnimationParameters &parameters);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-};
+BRAYNS_JSON_ADAPTER_BEGIN(SimulationParameters)
+BRAYNS_JSON_ADAPTER_GETSET("start_frame", getStartFrame, setStartFrame, "Global initial simulation frame index")
+BRAYNS_JSON_ADAPTER_GETSET("end_frame", getEndFrame, setEndFrame, "Global final simulation frame index")
+BRAYNS_JSON_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")
+BRAYNS_JSON_ADAPTER_GET("dt", getDt, "Frame time")
+BRAYNS_JSON_ADAPTER_GET("unit", getTimeUnit, "Time unit")
+BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

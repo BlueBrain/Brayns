@@ -129,9 +129,9 @@ public:
 
         // Parameters manager
         auto parametersManager = paramsManager;
-        auto &animParams = parametersManager.getAnimationParameters();
+        auto &simulation = parametersManager.getSimulationParameters();
         // Avoid the first frame not being triggered because the copy is in "not modified" state
-        animParams.markModified();
+        simulation.markModified();
 
         auto &scene = engine.getScene();
 
@@ -150,7 +150,7 @@ public:
             const auto &keyFrame = keyFrames[i];
 
             // Update scene
-            animParams.setFrame(keyFrame.frame_index);
+            simulation.setFrame(keyFrame.frame_index);
             scene.preRender(parametersManager);
             scene.commit();
 

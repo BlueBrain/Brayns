@@ -11,10 +11,10 @@ set(BRAYNSCOMMON_SOURCES
     TransferFunction.cpp
     Transformation.cpp
     parameters/AbstractParameters.cpp
-    parameters/AnimationParameters.cpp
     parameters/ApplicationParameters.cpp
     parameters/NetworkParameters.cpp
     parameters/ParametersManager.cpp
+    parameters/SimulationParameters.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
@@ -27,10 +27,10 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
     TransferFunction.h
     Transformation.h
     parameters/AbstractParameters.h
-    parameters/AnimationParameters.h
     parameters/ApplicationParameters.h
     parameters/NetworkParameters.h
     parameters/ParametersManager.h
+    parameters/SimulationParameters.h
 )
 
 add_library(braynsCommon SHARED ${BRAYNSCOMMON_PUBLIC_HEADERS} ${BRAYNSCOMMON_SOURCES})

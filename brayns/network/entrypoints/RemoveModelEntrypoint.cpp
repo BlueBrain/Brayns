@@ -25,9 +25,9 @@
 
 namespace brayns
 {
-RemoveModelEntrypoint::RemoveModelEntrypoint(Scene &scene, AnimationParameters &animation)
+RemoveModelEntrypoint::RemoveModelEntrypoint(Scene &scene, SimulationParameters &simulation)
     : _scene(scene)
-    , _animation(animation)
+    , _simulation(simulation)
 {
 }
 
@@ -49,7 +49,7 @@ void RemoveModelEntrypoint::onRequest(const Request &request)
     {
         modelManager.removeModel(id);
     }
-    SimulationScanner::scanAndUpdate(modelManager, _animation);
+    SimulationScanner::scanAndUpdate(modelManager, _simulation);
     _scene.computeBounds();
     request.reply(EmptyMessage());
 }

@@ -41,7 +41,7 @@ public:
     RequestModelUploadEntrypoint(
         Scene &scene,
         const LoaderRegistry &loaders,
-        AnimationParameters &animation,
+        SimulationParameters &simulation,
         BinaryManager &binary,
         CancellationToken token);
 
@@ -56,7 +56,7 @@ public:
 private:
     Scene &_scene;
     const LoaderRegistry &_loaders;
-    AnimationParameters &_animation;
+    SimulationParameters &_simulation;
     BinaryManager &_binary;
     CancellationToken _token;
     std::optional<ClientRef> _client;

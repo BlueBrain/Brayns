@@ -36,7 +36,7 @@ class Simulation:
 
     @staticmethod
     def from_instance(instance: Instance) -> 'Simulation':
-        result = instance.request('get-animation-parameters')
+        result = instance.request('get-simulation-parameters')
         return Simulation.deserialize(result)
 
     @staticmethod
@@ -52,7 +52,7 @@ class Simulation:
     @staticmethod
     def set_current_frame(instance: Instance, index: int) -> None:
         params = {'current': index}
-        instance.request('set-animation-parameters', params)
+        instance.request('set-simulation-parameters', params)
 
     @staticmethod
     def enable(instance: Instance, model_id: int, enabled: bool) -> None:
