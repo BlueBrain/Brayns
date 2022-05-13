@@ -28,11 +28,10 @@
 
 namespace
 {
-constexpr auto PARAM_LOG_LEVEL = "log-level";
-constexpr auto PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
-constexpr auto PARAM_JPEG_COMPRESSION = "jpeg-compression";
 constexpr auto PARAM_PLUGIN = "plugin";
+constexpr auto PARAM_LOG_LEVEL = "log-level";
 constexpr auto PARAM_WINDOW_SIZE = "window-size";
+constexpr auto PARAM_JPEG_COMPRESSION = "jpeg-compression";
 
 constexpr size_t DEFAULT_WINDOW_WIDTH = 800;
 constexpr size_t DEFAULT_WINDOW_HEIGHT = 600;
@@ -94,8 +93,7 @@ ApplicationParameters::ApplicationParameters()
          "Window size [uint uint]") //
         (PARAM_JPEG_COMPRESSION,
          po::value<size_t>(&_jpegCompression),
-         "JPEG compression rate (100 is full quality) [int]") //
-        (PARAM_IMAGE_STREAM_FPS, po::value<size_t>(&_imageStreamFPS), "Image stream FPS (60 default), [int]");
+         "JPEG compression rate (100 is full quality) [int]");
 }
 
 void ApplicationParameters::print()
@@ -103,10 +101,21 @@ void ApplicationParameters::print()
     AbstractParameters::print();
     Log::info("Plugins                     :");
     for (const auto &plugin : _plugins)
+    {
         Log::info("- {}", plugin);
+    }
     Log::info("Window size                 : {}", _windowSize);
     Log::info("JPEG Compression            : {}", _jpegCompression);
-    Log::info("Image stream FPS            : {}", _imageStreamFPS);
+}
+
+const std::vector<std::string> &ApplicationParameters::getPlugins() const noexcept
+{
+    return _plugins;
+}
+
+LogLevel ApplicationParameters::getLogLevel() const noexcept
+{
+    return _logLevel;
 }
 
 const Vector2ui &ApplicationParameters::getWindowSize() const noexcept
@@ -119,44 +128,14 @@ void ApplicationParameters::setWindowSize(const Vector2ui &size) noexcept
     _updateValue(_windowSize, size);
 }
 
-void ApplicationParameters::setJpegCompression(const size_t cmpr) noexcept
-{
-    _updateValue(_jpegCompression, cmpr);
-}
-
 size_t ApplicationParameters::getJpegCompression() const noexcept
 {
     return _jpegCompression;
 }
 
-size_t ApplicationParameters::getImageStreamFPS() const noexcept
+void ApplicationParameters::setJpegCompression(const size_t cmpr) noexcept
 {
-    return _imageStreamFPS;
-}
-
-void ApplicationParameters::setImageStreamFPS(const size_t fps) noexcept
-{
-    _updateValue(_imageStreamFPS, fps);
-}
-
-bool ApplicationParameters::getUseQuantaRenderControl() const noexcept
-{
-    return _useQuantaRenderControl;
-}
-
-void ApplicationParameters::setUseQuantaRenderControl(const bool val) noexcept
-{
-    _updateValue(_useQuantaRenderControl, val);
-}
-
-LogLevel ApplicationParameters::getLogLevel() const noexcept
-{
-    return _logLevel;
-}
-
-const std::vector<std::string> &ApplicationParameters::getPlugins() const noexcept
-{
-    return _plugins;
+    _updateValue(_jpegCompression, cmpr);
 }
 
 po::positional_options_description &ApplicationParameters::posArgs() noexcept

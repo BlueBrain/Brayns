@@ -57,7 +57,6 @@ TEST_CASE("defaults")
     const auto &appParams = pm.getApplicationParameters();
     CHECK_EQ(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
     CHECK_EQ(appParams.getJpegCompression(), 90);
-    CHECK_EQ(appParams.getImageStreamFPS(), 60);
 
     const auto &simulation = pm.getSimulationParameters();
     CHECK_EQ(simulation.getFrame(), 0);
