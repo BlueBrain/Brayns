@@ -36,7 +36,7 @@ class TestApplication(unittest.TestCase):
         self._message = {
             'plugins': ['test1', 'test2'],
             'viewport': [100, 200],
-            'jpeg_compression': 50
+            'jpeg_quality': 50
         }
 
     def test_from_instance(self) -> None:
@@ -60,7 +60,7 @@ class TestApplication(unittest.TestCase):
         self.assertEqual(instance.method, 'set-application-parameters')
         self.assertEqual(instance.params, {
             'viewport': [100, 200],
-            'jpeg_compression': 50
+            'jpeg_quality': 50
         })
 
 

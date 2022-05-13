@@ -69,18 +69,16 @@ public:
     void setWindowSize(const Vector2ui &size) noexcept;
 
     /**
-     * @brief getJpegCompression returns the JPEG image streamming compression
-     * parameter
-     * @return size_t
+     * @brief getJpegQuality return the stream JPEG quality.
+     * @return int JPEG quality from 0 (lowest) to 100 (highest).
      */
-    size_t getJpegCompression() const noexcept;
+    int getJpegQuality() const noexcept;
 
     /**
-     * @brief setJpegCompression sets the JPEG image streamming compression
-     * parameter
-     * @param compression size_t
+     * @brief setJpegQuality set the stream JPEG quality.
+     * @param quality int JPEG quality from 0 (lowest) to 100 (highest).
      */
-    void setJpegCompression(const size_t compression) noexcept;
+    void setJpegQuality(int quality) noexcept;
 
     /**
      * @brief posArgs return the positional arguments object used to initialize
@@ -100,7 +98,7 @@ private:
     std::vector<std::string> _plugins;
     LogLevel _logLevel;
     Vector2ui _windowSize;
-    size_t _jpegCompression;
+    int _jpegQuality;
     po::positional_options_description _positionalArgs;
 };
 } // namespace brayns

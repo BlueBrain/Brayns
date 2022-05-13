@@ -44,7 +44,7 @@ std::string ImageJpegEntrypoint::getDescription() const
 void ImageJpegEntrypoint::onRequest(const Request &request)
 {
     auto &framebuffer = _engine.getFrameBuffer();
-    auto quality = int(_parameters.getJpegCompression());
+    auto quality = _parameters.getJpegQuality();
     auto image = framebuffer.getImage();
     auto data = ImageEncoder::encodeToBase64(image, "jpg", quality);
     request.reply({data});
