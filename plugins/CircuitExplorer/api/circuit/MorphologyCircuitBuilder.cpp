@@ -27,8 +27,94 @@
 #include <components/CircuitColorComponent.h>
 #include <components/MorphologyCircuitComponent.h>
 
+#include <deque>
 #include <future>
 #include <unordered_map>
+
+namespace
+{
+struct MorphologyMap
+{
+    size_t cellCount{};
+    std::unordered_map<std::string, std::vector<size_t>> pathToCellIndices;
+};
+
+class MorphologyMapBuilder
+{
+public:
+    static MorphologyMap build(const std::vector<std::string> &paths)
+    {
+        MorphologyMap result;
+        result.cellCount = paths.size();
+
+        auto &mapping = result.pathToCellIndices;
+
+        for (size_t i = 0; i < paths.size(); ++i)
+        {
+            mapping[paths[i]].push_back(i);
+        }
+
+        return result;
+    }
+};
+class ParallelMorphologyLoader
+{
+public:
+    static std::vector<NeuronGeometry> load(
+        const MorphologyMap &morphologyMap,
+        const NeuronMorphologyLoaderParameters &morphologyParameters,
+        const std::vector<brayns::Vector3f> &positions,
+        const std::vector<brayns::Quaternion> &rotations,
+        ProgressUpdater &progressUpdater)
+    {
+        const auto cellCount = morphologyMap.cellCount;
+
+        std::vector<NeuronGeometry> morphologies(cellCount);
+
+        const auto soma = morphologyParameters.load_soma;
+        const auto axon = morphologyParameters.load_axon;
+        const auto dendrites = morphologyParameters.load_dendrites;
+        const auto radiusMultiplier = morphologyParameters.radius_multiplier;
+
+        const auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
+        {
+            auto morphology = NeuronMorphologyReader::read(path, soma, axon, dendrites);
+            NeuronMorphologyProcessor::processMorphology(morphology, true, radiusMultiplier);
+            const NeuronGeometryBuilder builder(morphology);
+            for (const auto idx : indices)
+            {
+                morphologies[idx] = builder.instantiate(positions[idx], rotations[idx]);
+            }
+        };
+
+        const auto updateMessage = std::string("Loading neurons");
+        const auto &pathToCellIndexMap = morphologyMap.pathToCellIndices;
+        constexpr size_t maxThreads = 800;
+
+        std::deque<std::future<void>> loadTasks;
+        for (const auto &[path, cellIndices] : pathToCellIndexMap)
+        {
+            if (loadTasks.size() == maxThreads)
+            {
+                auto &topTask = loadTasks.front();
+                topTask.get();
+                loadTasks.pop_front();
+                progressUpdater.update(updateMessage);
+            }
+
+            loadTasks.push_back(std::async(loadFn, path, cellIndices));
+        }
+
+        for (auto &task : loadTasks)
+        {
+            task.get();
+            progressUpdater.update(updateMessage);
+        }
+
+        return morphologies;
+    }
+};
+}
 
 MorphologyCircuitBuilder::Context::Context(
     const std::vector<uint64_t> &ids,
@@ -47,59 +133,17 @@ MorphologyCircuitBuilder::Context::Context(
 std::vector<CellCompartments> MorphologyCircuitBuilder::load(
     const Context &context,
     brayns::Model &model,
-    ProgressUpdater &cb,
+    ProgressUpdater &updater,
     std::unique_ptr<IColorData> colorData)
 {
     const auto &morphPaths = context.morphologyPaths;
     const auto &ids = context.ids;
     const auto &morphParams = context.morphologyParams;
-    const auto soma = morphParams.load_soma;
-    const auto axon = morphParams.load_axon;
-    const auto dendrites = morphParams.load_dendrites;
-    const auto radiusMultiplier = morphParams.radius_multiplier;
     const auto &positions = context.positions;
     const auto &rotations = context.rotations;
 
-    // Group indices by the morphology name, so we will load the morphology
-    // once, and then iterate over the indices of the corresponding cells
-    std::unordered_map<std::string, std::vector<size_t>> morphPathMap;
-    for (size_t i = 0; i < morphPaths.size(); ++i)
-    {
-        morphPathMap[morphPaths[i]].push_back(i);
-    }
-
-    std::vector<NeuronGeometry> morphologies(ids.size());
-    const auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
-    {
-        auto morphology = NeuronMorphologyReader::read(path, soma, axon, dendrites);
-        NeuronMorphologyProcessor::processMorphology(morphology, true, radiusMultiplier);
-        const NeuronGeometryBuilder builder(morphology);
-        for (const auto idx : indices)
-        {
-            morphologies[idx] = builder.instantiate(positions[idx], rotations[idx]);
-        }
-    };
-
-    std::vector<std::future<void>> loadTasks;
-    loadTasks.reserve(morphPathMap.size());
-    for (const auto &entry : morphPathMap)
-    {
-        loadTasks.push_back(std::async(loadFn, entry.first, entry.second));
-    }
-
-    const std::string updateMessage("Loading neurons");
-    for (auto &task : loadTasks)
-    {
-        if (task.valid())
-        {
-            task.get();
-            cb.update(updateMessage);
-        }
-        else
-        {
-            throw std::runtime_error("Unknown error while loading morphologies");
-        }
-    }
+    const auto morphologyPathMap = MorphologyMapBuilder::build(morphPaths);
+    auto morphologies = ParallelMorphologyLoader::load(morphologyPathMap, morphParams, positions, rotations, updater);
 
     std::vector<CellCompartments> compartments(ids.size());
     std::vector<std::vector<brayns::Primitive>> geometries(ids.size());
