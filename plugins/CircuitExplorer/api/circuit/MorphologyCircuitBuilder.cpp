@@ -88,17 +88,13 @@ public:
         };
 
         const auto updateMessage = std::string("Loading neurons");
-
         const auto &pathToCellIndexMap = morphologyMap.pathToCellIndices;
-
         constexpr size_t maxThreads = 800;
-        const auto taskCount = pathToCellIndexMap.size();
-        const auto maxTaskCount = std::min(taskCount, maxThreads);
 
         std::deque<std::future<void>> loadTasks;
         for (const auto &[path, cellIndices] : pathToCellIndexMap)
         {
-            if (loadTasks.size() == maxTaskCount)
+            if (loadTasks.size() == maxThreads)
             {
                 auto &topTask = loadTasks.front();
                 topTask.get();
