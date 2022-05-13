@@ -66,6 +66,11 @@ public:
             brayns::Log::trace("No clients to broadcast JPEG.");
             return;
         }
+        if (!framebuffer.isModified())
+        {
+            brayns::Log::trace("No JPEG frame to send.");
+            return;
+        }
         ImageStream::broadcast(framebuffer, clients, parameters);
         _triggered = false;
         brayns::Log::trace("JPEG image broadcasted.");
