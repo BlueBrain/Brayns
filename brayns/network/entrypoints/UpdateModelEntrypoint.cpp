@@ -37,7 +37,7 @@ std::string UpdateModelEntrypoint::getMethod() const
 
 std::string UpdateModelEntrypoint::getDescription() const
 {
-    return "Update the model with the given values";
+    return "Update the model with the given values and return its new state";
 }
 
 void UpdateModelEntrypoint::onRequest(const Request &request)
@@ -47,9 +47,9 @@ void UpdateModelEntrypoint::onRequest(const Request &request)
     ModelInstanceProxy proxy(model);
     params.model.deserialize(proxy);
 
-    // In case the trasnform was updated, and thus the model bounds, we need to recompute scene bounds
+    // In case the transform was updated, and thus the model bounds, we need to recompute scene bounds
     _scene.computeBounds();
 
-    request.reply(EmptyMessage());
+    request.reply(model);
 }
 } // namespace brayns

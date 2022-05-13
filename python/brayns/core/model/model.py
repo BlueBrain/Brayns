@@ -60,7 +60,7 @@ class Model:
         id: int,
         visible: Optional[bool] = None,
         transform: Optional[Transform] = None
-    ) -> None:
+    ) -> 'Model':
         model = {}
         params = {
             'model_id': id,
@@ -70,4 +70,5 @@ class Model:
             model['is_visible'] = visible
         if transform is not None:
             model['transform'] = transform.serialize()
-        instance.request('update-model', params)
+        result = instance.request('update-model', params)
+        return Model.deserialize(result)
