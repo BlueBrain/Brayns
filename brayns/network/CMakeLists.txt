@@ -57,7 +57,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/GetLoadersEntrypoint.h
   entrypoints/GetModelEntrypoint.h
   entrypoints/ImageJpegEntrypoint.h
-  entrypoints/ImageStreamingModeEntrypoint.h
   entrypoints/InspectEntrypoint.h
   entrypoints/ModelMaterialEntrypoint.h
   entrypoints/ModelTransferFunctionEntrypoint.h
@@ -89,7 +88,6 @@ set(BRAYNSNETWORK_HEADERS
   messages/GetModelMessage.h
   messages/ImageBase64Message.h
   messages/ImageSettingsMessage.h
-  messages/ImageStreamingModeMessage.h
   messages/InspectMessage.h
   messages/RemoveClipPlanesMessage.h
   messages/RemoveLightsMessage.h
@@ -104,7 +102,6 @@ set(BRAYNSNETWORK_HEADERS
   socket/SocketListener.h
   socket/SocketManager.h
   stream/StreamManager.h
-  stream/StreamMonitor.h
   task/BinaryTask.h
   task/ITask.h
   task/JsonRpcTask.h
@@ -150,7 +147,6 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/GetLoadersEntrypoint.cpp
   entrypoints/GetModelEntrypoint.cpp
   entrypoints/ImageJpegEntrypoint.cpp
-  entrypoints/ImageStreamingModeEntrypoint.cpp
   entrypoints/InspectEntrypoint.cpp
   entrypoints/ModelMaterialEntrypoint.cpp
   entrypoints/ModelTransferFunctionEntrypoint.cpp
@@ -181,7 +177,6 @@ set(BRAYNSNETWORK_SOURCES
   socket/SocketListener.cpp
   socket/SocketManager.cpp
   stream/StreamManager.cpp
-  stream/StreamMonitor.cpp
   task/BinaryTask.cpp
   task/JsonRpcTask.cpp
   task/TaskManager.cpp

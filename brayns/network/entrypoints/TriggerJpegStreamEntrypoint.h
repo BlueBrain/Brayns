@@ -22,20 +22,20 @@
 #pragma once
 
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/stream/StreamMonitor.h>
+#include <brayns/network/stream/StreamManager.h>
 
 namespace brayns
 {
 class TriggerJpegStreamEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
-    TriggerJpegStreamEntrypoint(StreamMonitor &monitor);
+    TriggerJpegStreamEntrypoint(StreamManager &stream);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    StreamMonitor &_monitor;
+    StreamManager &_stream;
 };
 } // namespace brayns

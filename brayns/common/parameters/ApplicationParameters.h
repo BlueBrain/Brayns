@@ -43,6 +43,20 @@ public:
     void print() final;
 
     /**
+     * @brief getPlugins return the list of plugis with which brayns was
+     * initialized
+     * @return const std::vector<std::string>&
+     */
+    const std::vector<std::string> &getPlugins() const noexcept;
+
+    /**
+     * @brief Returns the system's log level
+     *
+     * @return LogLevel
+     */
+    LogLevel getLogLevel() const noexcept;
+
+    /**
      * @brief getWindowSize returns the viewport size (width, height)
      * @return const Vector2ui&
      */
@@ -55,62 +69,16 @@ public:
     void setWindowSize(const Vector2ui &size) noexcept;
 
     /**
-     * @brief setJpegCompression sets the JPEG image streamming compression
-     * parameter
-     * @param compression size_t
+     * @brief getJpegQuality return the stream JPEG quality.
+     * @return int JPEG quality from 0 (lowest) to 100 (highest).
      */
-    void setJpegCompression(const size_t compression) noexcept;
+    int getJpegQuality() const noexcept;
 
     /**
-     * @brief getJpegCompression returns the JPEG image streamming compression
-     * parameter
-     * @return size_t
+     * @brief setJpegQuality set the stream JPEG quality.
+     * @param quality int JPEG quality from 0 (lowest) to 100 (highest).
      */
-    size_t getJpegCompression() const noexcept;
-
-    /**
-     * @brief getImageStreamFPS sets the max FPS at which the system should
-     * stream frames to the connected clients
-     * @return size_t
-     */
-    size_t getImageStreamFPS() const noexcept;
-
-    /**
-     * @brief setImageStreamFPS sets the max FPS at which the system should
-     * stream frames to the connected clients
-     * @param fps size_t
-     */
-    void setImageStreamFPS(const size_t fps) noexcept;
-
-    /**
-     * @brief getUseQuantaRenderControl returns whether quanta stream control
-     * is enabled or not. Quanta stream control is the mode in which images are
-     * only streamed to the clients upon explicit request
-     * @return bool
-     */
-    bool getUseQuantaRenderControl() const noexcept;
-
-    /**
-     * @brief setUseQuantaRenderControl sets whether quanta stream control
-     * is enabled or not. Quanta stream control is the mode in which images are
-     * only streamed to the clients upon explicit request
-     * @param value bool
-     */
-    void setUseQuantaRenderControl(const bool value) noexcept;
-
-    /**
-     * @brief Returns the system's log level
-     *
-     * @return LogLevel
-     */
-    LogLevel getLogLevel() const noexcept;
-
-    /**
-     * @brief getPlugins return the list of plugis with which brayns was
-     * initialized
-     * @return const std::vector<std::string>&
-     */
-    const std::vector<std::string> &getPlugins() const noexcept;
+    void setJpegQuality(int quality) noexcept;
 
     /**
      * @brief posArgs return the positional arguments object used to initialize
@@ -126,14 +94,11 @@ protected:
      */
     void parse(const po::variables_map &vm) final;
 
-    Vector2ui _windowSize;
-    size_t _jpegCompression;
-    size_t _imageStreamFPS{60};
-    bool _useQuantaRenderControl{false};
-    LogLevel _logLevel;
-
+private:
     std::vector<std::string> _plugins;
-
+    LogLevel _logLevel;
+    Vector2ui _windowSize;
+    int _jpegQuality;
     po::positional_options_description _positionalArgs;
 };
 } // namespace brayns

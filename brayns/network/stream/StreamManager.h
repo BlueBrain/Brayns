@@ -24,11 +24,8 @@
 #include <brayns/engine/FrameBuffer.h>
 
 #include <brayns/network/client/ClientManager.h>
-#include <brayns/network/common/RateLimiter.h>
 
 #include <brayns/common/parameters/ApplicationParameters.h>
-
-#include "StreamMonitor.h"
 
 namespace brayns
 {
@@ -40,23 +37,21 @@ class StreamManager
 {
 public:
     /**
-     * @brief Broadcast framebuffer image.
+     * @brief Broadcast framebuffer image if needed.
      *
-     * @param framebuffer Framebuffer containing the image to stream.
-     * @param clients Clients that will receive the image.
-     * @param parameters Stream parameters.
+     * @param framebuffer Framebuffer containing the image to broadcast.
+     * @param clients Clients to broadcast the image.
+     * @param parameters Streaming parameters.
      */
     void broadcast(FrameBuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters);
 
     /**
-     * @brief Get the image stream monitor.
+     * @brief Trigger the image stream.
      *
-     * @return StreamMonitor& Image stream monitor.
      */
-    StreamMonitor &getMonitor();
+    void trigger();
 
 private:
-    StreamMonitor _monitor;
-    RateLimiter _limiter;
+    bool _triggered = false;
 };
 } // namespace brayns

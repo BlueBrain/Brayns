@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-TriggerJpegStreamEntrypoint::TriggerJpegStreamEntrypoint(StreamMonitor &monitor)
-    : _monitor(monitor)
+TriggerJpegStreamEntrypoint::TriggerJpegStreamEntrypoint(StreamManager &stream)
+    : _stream(stream)
 {
 }
 
@@ -40,7 +40,7 @@ std::string TriggerJpegStreamEntrypoint::getDescription() const
 
 void TriggerJpegStreamEntrypoint::onRequest(const Request &request)
 {
-    _monitor.trigger();
+    _stream.trigger();
     request.reply(EmptyMessage());
 }
 } // namespace brayns
