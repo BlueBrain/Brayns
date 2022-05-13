@@ -35,9 +35,9 @@ public:
         brayns::ClientManager &clients,
         const brayns::ApplicationParameters &parameters)
     {
-        auto compression = parameters.getJpegCompression();
+        auto quality = parameters.getJpegQuality();
         auto image = framebuffer.getImage();
-        auto data = brayns::ImageEncoder::encode(image, "jpg", compression);
+        auto data = brayns::ImageEncoder::encode(image, "jpg", quality);
         auto packet = brayns::OutputPacket::fromBinary(data);
         clients.broadcast(packet);
     }
@@ -58,22 +58,17 @@ public:
     {
         if (!_triggered)
         {
-            brayns::Log::debug("JPEG stream not triggered.");
+            brayns::Log::trace("JPEG stream not triggered.");
             return;
         }
         if (clients.isEmpty())
         {
-            brayns::Log::debug("No clients to broadcast JPEG.");
-            return;
-        }
-        if (!framebuffer.isModified())
-        {
-            brayns::Log::debug("Framebuffer not modified for JPEG broadcast.");
+            brayns::Log::trace("No clients to broadcast JPEG.");
             return;
         }
         ImageStream::broadcast(framebuffer, clients, parameters);
         _triggered = false;
-        brayns::Log::debug("JPEG image broadcasted.");
+        brayns::Log::trace("JPEG image broadcasted.");
     }
 
 private:
@@ -85,7 +80,7 @@ namespace brayns
 {
 void StreamManager::broadcast(FrameBuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters)
 {
-    brayns::Log::debug("Broadcasting JPEG image.");
+    brayns::Log::trace("Broadcasting JPEG image.");
     ControlledImageStream stream(_triggered);
     stream.broadcast(framebuffer, clients, parameters);
 }
