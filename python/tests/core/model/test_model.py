@@ -51,13 +51,14 @@ class TestModel(unittest.TestCase):
         self.assertEqual(instance.params, {'ids': ids})
 
     def test_update(self) -> None:
-        instance = MockInstance()
-        Model.update(
+        instance = MockInstance(self._message)
+        model = Model.update(
             instance,
             id=0,
             visible=True,
             transform=Transform.identity
         )
+        self.assertEqual(model, self._model)
         self.assertEqual(instance.method, 'update-model')
         self.assertEqual(instance.params, {
             'model_id': 0,

@@ -28,7 +28,7 @@
 
 namespace brayns
 {
-class UpdateModelEntrypoint : public Entrypoint<UpdateModelMessage, EmptyMessage>
+class UpdateModelEntrypoint : public Entrypoint<UpdateModelMessage, ModelInstanceProxy>
 {
 public:
     UpdateModelEntrypoint(Scene &scene);
