@@ -28,15 +28,14 @@
 
 namespace
 {
-constexpr auto PARAM_LOG_LEVEL = "log-level";
-constexpr auto PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
-constexpr auto PARAM_JPEG_COMPRESSION = "jpeg-compression";
 constexpr auto PARAM_PLUGIN = "plugin";
+constexpr auto PARAM_LOG_LEVEL = "log-level";
 constexpr auto PARAM_WINDOW_SIZE = "window-size";
+constexpr auto PARAM_JPEG_QUALITY = "jpeg-quality";
 
 constexpr size_t DEFAULT_WINDOW_WIDTH = 800;
 constexpr size_t DEFAULT_WINDOW_HEIGHT = 600;
-constexpr size_t DEFAULT_JPEG_COMPRESSION = 90;
+constexpr size_t DEFAULT_JPEG_QUALITY = 90;
 
 class GetLogLevel
 {
@@ -77,25 +76,22 @@ namespace brayns
 ApplicationParameters::ApplicationParameters()
     : AbstractParameters("Application")
     , _windowSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
-    , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
+    , _jpegQuality(DEFAULT_JPEG_QUALITY)
 {
     _parameters.add_options() //
-        (PARAM_LOG_LEVEL,
-         po::value<std::string>(),
-         "Log level among [trace, debug, info, warn, error, critical] (default info).") //
         (PARAM_PLUGIN,
          po::value<std::vector<std::string>>(&_plugins)->composing(),
          "Dynamic plugin to load from LD_LIBRARY_PATH; "
          "can be repeated to load multiple plugins. "
          "Arguments to plugins can be added by inserting a space followed by "
          "the arguments like: --plugin 'myPluginName arg0 arg1'") //
+        (PARAM_LOG_LEVEL,
+         po::value<std::string>(),
+         "Log level among [trace, debug, info, warn, error, critical] (default info).") //
         (PARAM_WINDOW_SIZE,
          po::fixed_tokens_value<std::vector<uint32_t>>(2, 2),
          "Window size [uint uint]") //
-        (PARAM_JPEG_COMPRESSION,
-         po::value<size_t>(&_jpegCompression),
-         "JPEG compression rate (100 is full quality) [int]") //
-        (PARAM_IMAGE_STREAM_FPS, po::value<size_t>(&_imageStreamFPS), "Image stream FPS (60 default), [int]");
+        (PARAM_JPEG_QUALITY, po::value<int>(&_jpegQuality), "JPEG quality [0-100] (100 is full quality)");
 }
 
 void ApplicationParameters::print()
@@ -103,10 +99,21 @@ void ApplicationParameters::print()
     AbstractParameters::print();
     Log::info("Plugins                     :");
     for (const auto &plugin : _plugins)
+    {
         Log::info("- {}", plugin);
+    }
     Log::info("Window size                 : {}", _windowSize);
-    Log::info("JPEG Compression            : {}", _jpegCompression);
-    Log::info("Image stream FPS            : {}", _imageStreamFPS);
+    Log::info("JPEG quality                : {}", _jpegQuality);
+}
+
+const std::vector<std::string> &ApplicationParameters::getPlugins() const noexcept
+{
+    return _plugins;
+}
+
+LogLevel ApplicationParameters::getLogLevel() const noexcept
+{
+    return _logLevel;
 }
 
 const Vector2ui &ApplicationParameters::getWindowSize() const noexcept
@@ -119,44 +126,14 @@ void ApplicationParameters::setWindowSize(const Vector2ui &size) noexcept
     _updateValue(_windowSize, size);
 }
 
-void ApplicationParameters::setJpegCompression(const size_t cmpr) noexcept
+int ApplicationParameters::getJpegQuality() const noexcept
 {
-    _updateValue(_jpegCompression, cmpr);
+    return _jpegQuality;
 }
 
-size_t ApplicationParameters::getJpegCompression() const noexcept
+void ApplicationParameters::setJpegQuality(int quality) noexcept
 {
-    return _jpegCompression;
-}
-
-size_t ApplicationParameters::getImageStreamFPS() const noexcept
-{
-    return _imageStreamFPS;
-}
-
-void ApplicationParameters::setImageStreamFPS(const size_t fps) noexcept
-{
-    _updateValue(_imageStreamFPS, fps);
-}
-
-bool ApplicationParameters::getUseQuantaRenderControl() const noexcept
-{
-    return _useQuantaRenderControl;
-}
-
-void ApplicationParameters::setUseQuantaRenderControl(const bool val) noexcept
-{
-    _updateValue(_useQuantaRenderControl, val);
-}
-
-LogLevel ApplicationParameters::getLogLevel() const noexcept
-{
-    return _logLevel;
-}
-
-const std::vector<std::string> &ApplicationParameters::getPlugins() const noexcept
-{
-    return _plugins;
+    _updateValue(_jpegQuality, quality);
 }
 
 po::positional_options_description &ApplicationParameters::posArgs() noexcept
@@ -166,18 +143,22 @@ po::positional_options_description &ApplicationParameters::posArgs() noexcept
 
 void ApplicationParameters::parse(const po::variables_map &vm)
 {
-    if (vm.count(PARAM_WINDOW_SIZE))
-    {
-        auto values = vm[PARAM_WINDOW_SIZE].as<std::vector<uint32_t>>();
-        _windowSize.x = values[0];
-        _windowSize.y = values[1];
-    }
     auto i = vm.find(PARAM_LOG_LEVEL);
     if (i != vm.end())
     {
         auto &value = i->second.as<std::string>();
         _logLevel = GetLogLevel::fromName(value);
         Log::setLevel(_logLevel);
+    }
+    if (vm.count(PARAM_WINDOW_SIZE))
+    {
+        auto values = vm[PARAM_WINDOW_SIZE].as<std::vector<uint32_t>>();
+        _windowSize.x = values[0];
+        _windowSize.y = values[1];
+    }
+    if (_jpegQuality < 0 || _jpegQuality > 100)
+    {
+        throw std::runtime_error("Invalid JPEG quality: " + std::to_string(_jpegQuality));
     }
 }
 

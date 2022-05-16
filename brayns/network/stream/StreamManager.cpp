@@ -27,19 +27,6 @@
 
 namespace
 {
-class ImageStreamHelper
-{
-public:
-    static bool hasClientsAndNewImage(brayns::ClientManager &clients, brayns::FrameBuffer &framebuffer)
-    {
-        if (clients.isEmpty())
-        {
-            return false;
-        }
-        return framebuffer.isModified();
-    }
-};
-
 class ImageStream
 {
 public:
@@ -48,9 +35,9 @@ public:
         brayns::ClientManager &clients,
         const brayns::ApplicationParameters &parameters)
     {
-        auto compression = parameters.getJpegCompression();
+        auto quality = parameters.getJpegQuality();
         auto image = framebuffer.getImage();
-        auto data = brayns::ImageEncoder::encode(image, "jpg", compression);
+        auto data = brayns::ImageEncoder::encode(image, "jpg", quality);
         auto packet = brayns::OutputPacket::fromBinary(data);
         clients.broadcast(packet);
     }
@@ -59,8 +46,8 @@ public:
 class ControlledImageStream
 {
 public:
-    ControlledImageStream(brayns::StreamMonitor &monitor)
-        : _monitor(monitor)
+    ControlledImageStream(bool &triggered)
+        : _triggered(triggered)
     {
     }
 
@@ -69,71 +56,28 @@ public:
         brayns::ClientManager &clients,
         const brayns::ApplicationParameters &parameters) const
     {
-        if (!_monitor.isTriggered())
+        if (!_triggered)
         {
+            brayns::Log::trace("JPEG stream is not triggered.");
+            return;
+        }
+        if (clients.isEmpty())
+        {
+            brayns::Log::trace("No clients for JPEG stream.");
+            return;
+        }
+        if (!framebuffer.isModified())
+        {
+            brayns::Log::trace("No image to send through JPEG stream.");
             return;
         }
         ImageStream::broadcast(framebuffer, clients, parameters);
-        _monitor.resetTrigger();
+        _triggered = false;
+        brayns::Log::trace("JPEG image broadcasted.");
     }
 
 private:
-    brayns::StreamMonitor &_monitor;
-};
-
-class AutoImageStream
-{
-public:
-    AutoImageStream(brayns::RateLimiter &limiter)
-        : _limiter(limiter)
-    {
-    }
-
-    void broadcast(
-        brayns::FrameBuffer &framebuffer,
-        brayns::ClientManager &clients,
-        const brayns::ApplicationParameters &parameters) const
-    {
-        auto fps = parameters.getImageStreamFPS();
-        _limiter.setRate(fps);
-        _limiter.call([&] { ImageStream::broadcast(framebuffer, clients, parameters); });
-    }
-
-private:
-    brayns::RateLimiter &_limiter;
-};
-
-class StreamDispatcher
-{
-public:
-    StreamDispatcher(brayns::StreamMonitor &monitor, brayns::RateLimiter &limiter)
-        : _controlledStream(monitor)
-        , _autoStream(limiter)
-        , _monitor(monitor)
-    {
-    }
-
-    void broadcast(
-        brayns::FrameBuffer &framebuffer,
-        brayns::ClientManager &clients,
-        const brayns::ApplicationParameters &parameters) const
-    {
-        if (!ImageStreamHelper::hasClientsAndNewImage(clients, framebuffer))
-        {
-            return;
-        }
-        if (_monitor.isControlled())
-        {
-            _controlledStream.broadcast(framebuffer, clients, parameters);
-            return;
-        }
-        _autoStream.broadcast(framebuffer, clients, parameters);
-    }
-
-private:
-    ControlledImageStream _controlledStream;
-    AutoImageStream _autoStream;
-    brayns::StreamMonitor &_monitor;
+    bool &_triggered;
 };
 } // namespace
 
@@ -141,12 +85,13 @@ namespace brayns
 {
 void StreamManager::broadcast(FrameBuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters)
 {
-    StreamDispatcher dispatcher(_monitor, _limiter);
-    dispatcher.broadcast(framebuffer, clients, parameters);
+    brayns::Log::trace("Broadcasting JPEG image.");
+    ControlledImageStream stream(_triggered);
+    stream.broadcast(framebuffer, clients, parameters);
 }
 
-StreamMonitor &StreamManager::getMonitor()
+void StreamManager::trigger()
 {
-    return _monitor;
+    _triggered = true;
 }
 } // namespace brayns

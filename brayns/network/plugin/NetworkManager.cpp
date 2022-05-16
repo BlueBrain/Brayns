@@ -49,7 +49,6 @@
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
-#include <brayns/network/entrypoints/ImageStreamingModeEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
 #include <brayns/network/entrypoints/ModelMaterialEntrypoint.h>
 #include <brayns/network/entrypoints/ModelTransferFunctionEntrypoint.h>
@@ -94,7 +93,6 @@ public:
         auto &entrypoints = context.entrypoints;
         auto &tasks = context.tasks;
         auto &stream = context.stream;
-        auto &monitor = stream.getMonitor();
 
         brayns::CancellationToken token(interface);
         brayns::EntrypointBuilder builder("Core", interface);
@@ -135,7 +133,6 @@ public:
         builder.add<brayns::GetRendererTypeEntrypoint>(engine);
         builder.add<brayns::GetSceneEntrypoint>(scene);
         builder.add<brayns::ImageJpegEntrypoint>(application, engine);
-        builder.add<brayns::ImageStreamingModeEntrypoint>(application, monitor);
         builder.add<brayns::InspectEntrypoint>(engine);
         builder.add<brayns::QuitEntrypoint>(engine);
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
@@ -160,7 +157,7 @@ public:
         builder.add<brayns::SetRendererInteractiveEntrypoint>(engine);
         builder.add<brayns::SetRendererProductionEntrypoint>(engine);
         builder.add<brayns::SnapshotEntrypoint>(engine, interface);
-        builder.add<brayns::TriggerJpegStreamEntrypoint>(monitor);
+        builder.add<brayns::TriggerJpegStreamEntrypoint>(stream);
         builder.add<brayns::UpdateModelEntrypoint>(scene);
         builder.add<brayns::VersionEntrypoint>();
     }

@@ -42,7 +42,7 @@ class Application:
         return Application(
             plugins=message['plugins'],
             resolution=Resolution(*message['viewport']),
-            jpeg_stream_quality=message['jpeg_compression']
+            jpeg_stream_quality=message['jpeg_quality']
         )
 
     @staticmethod
@@ -55,5 +55,5 @@ class Application:
         if resolution is not None:
             params['viewport'] = list(resolution)
         if jpeg_stream_quality is not None:
-            params['jpeg_compression'] = jpeg_stream_quality
+            params['jpeg_quality'] = jpeg_stream_quality
         instance.request('set-application-parameters', params)

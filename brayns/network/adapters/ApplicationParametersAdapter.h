@@ -29,8 +29,7 @@ namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(ApplicationParameters)
 BRAYNS_JSON_ADAPTER_GET("plugins", getPlugins, "Loaded plugins")
-BRAYNS_JSON_ADAPTER_GETSET("jpeg_compression", getJpegCompression, setJpegCompression, "JPEG compression rate")
-BRAYNS_JSON_ADAPTER_GETSET("image_stream_fps", getImageStreamFPS, setImageStreamFPS, "Framerate of image stream")
 BRAYNS_JSON_ADAPTER_GETSET("viewport", getWindowSize, setWindowSize, "Window size")
+BRAYNS_JSON_ADAPTER_GETSET("jpeg_quality", getJpegQuality, setJpegQuality, "JPEG quality", Minimum(0), Maximum(100))
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns
