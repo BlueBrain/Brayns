@@ -33,12 +33,11 @@ template<>
 struct JsonAdapter<JsonSchema>
 {
     /**
-     * @brief Return the schema itself.
+     * @brief Return the schema of an object with any additional properties.
      *
-     * @param schema Input schema.
      * @return JsonSchema Output schema.
      */
-    static JsonSchema getSchema(const JsonSchema &schema);
+    static JsonSchema getSchema();
 
     /**
      * @brief Serialize a JSON schema as a JSON object

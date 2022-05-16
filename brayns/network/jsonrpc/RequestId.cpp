@@ -94,9 +94,8 @@ bool RequestId::operator!=(const RequestId &other) const
     return !(*this == other);
 }
 
-JsonSchema JsonAdapter<RequestId>::getSchema(const RequestId &value)
+JsonSchema JsonAdapter<RequestId>::getSchema()
 {
-    (void)value;
     JsonSchema schema;
     schema.title = "RequestId";
     schema.oneOf = {JsonSchemaHelper::getNullSchema(), Json::getSchema<int64_t>(), Json::getSchema<std::string>()};

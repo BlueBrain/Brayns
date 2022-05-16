@@ -242,7 +242,14 @@ struct JsonSchemaHelper
     static void allowAnyAdditionalProperty(JsonSchema &schema);
 
     /**
-     * @brief Get the schema of null object (not a wildcard).
+     * @brief Get a wildcard schema (allow everything)
+     *
+     * @return JsonSchema Wildcard schema.
+     */
+    static JsonSchema getWildcardSchema();
+
+    /**
+     * @brief Get the schema of null (nothing to provide).
      *
      * @return JsonSchema Null schema.
      */

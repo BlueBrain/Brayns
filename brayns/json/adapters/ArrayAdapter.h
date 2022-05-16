@@ -40,17 +40,18 @@ namespace brayns
 template<typename T>
 struct ArrayAdapter
 {
+    using ValueType = typename T::value_type;
+
     /**
      * @brief Create a schema of array type and reflected item type.
      *
      * @return JsonSchema Json schema of the container T.
      */
-    static JsonSchema getSchema(const T &value)
+    static JsonSchema getSchema()
     {
-        (void)value;
         JsonSchema schema;
         schema.type = JsonType::Array;
-        schema.items = {Json::getSchema<typename T::value_type>()};
+        schema.items = {Json::getSchema<ValueType>()};
         return schema;
     }
 
@@ -131,9 +132,9 @@ struct JsonAdapter<std::vector<bool>::reference>
      * @param value Value to get the schema from.
      * @return JsonSchema Schema of value.
      */
-    static JsonSchema getSchema(Ref value)
+    static JsonSchema getSchema()
     {
-        return Json::getSchema(bool(value));
+        return Json::getSchema<bool>();
     }
 
     /**

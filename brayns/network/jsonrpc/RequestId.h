@@ -67,7 +67,7 @@ private:
 template<>
 struct JsonAdapter<RequestId>
 {
-    static JsonSchema getSchema(const RequestId &value);
+    static JsonSchema getSchema();
     static bool serialize(const RequestId &value, JsonValue &json);
     static bool deserialize(const JsonValue &json, RequestId &value);
 };

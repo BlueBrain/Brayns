@@ -177,8 +177,11 @@ private:
 
 namespace brayns
 {
-JsonSchema JsonAdapter<JsonSchema>::getSchema(const JsonSchema &schema)
+JsonSchema JsonAdapter<JsonSchema>::getSchema()
 {
+    JsonSchema schema;
+    schema.type = JsonType::Object;
+    JsonSchemaHelper::allowAnyAdditionalProperty(schema);
     return schema;
 }
 

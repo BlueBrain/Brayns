@@ -53,9 +53,9 @@
     struct JsonAdapter<TYPE> \
     { \
     public: \
-        static JsonSchema getSchema(const TYPE &value) \
+        static JsonSchema getSchema() \
         { \
-            return _info.getSchema(&value); \
+            return _info.getSchema(); \
         } \
 \
         static bool serialize(const TYPE &value, JsonValue &json) \
@@ -91,11 +91,7 @@
         JsonObjectProperty property; \
         property.name = NAME; \
         property.options = {__VA_ARGS__}; \
-        property.getSchema = [](const void *data) \
-        { \
-            auto &object = *static_cast<const ObjectType *>(data); \
-            return SCHEMA(object); \
-        }; \
+        property.getSchema = SCHEMA; \
         property.serialize = [](const void *data, JsonValue &json) \
         { \
             auto &object = *static_cast<const ObjectType *>(data); \
@@ -116,7 +112,27 @@
  * The argument is a functor returning the property from a TYPE instance.
  *
  */
-#define BRAYNS_JSON_ADAPTER_SCHEMA(GET) [](const auto &object) { return Json::getSchema(object.GET()); }
+#define BRAYNS_JSON_ADAPTER_SCHEMA(GET) \
+    [] \
+    { \
+        using GetterType = decltype(&ObjectType::GET); \
+        using ReturnType = DecayReturnType<GetterType>; \
+        return Json::getSchema<ReturnType>(); \
+    }
+
+/**
+ * @brief Shortcut to generate a JSON schema from a setter.
+ *
+ * setStuff(const T &) -> Json::getSchema<T>().
+ *
+ */
+#define BRAYNS_JSON_ADAPTER_DEFAULT_SCHEMA(SET) \
+    [] \
+    { \
+        using SetterType = decltype(&ObjectType::SET); \
+        using ArgType = DecayFirstArgType<SetterType>; \
+        return Json::getSchema<ArgType>(); \
+    }
 
 /**
  * @brief Shortcut to create a functor to serialize an object using Json class.
@@ -128,36 +144,6 @@
     [](const auto &object, auto &json) { return Json::serialize(object.GET(), json); }
 
 /**
- * @brief Shortcut to get the decay argument type of an object method.
- *
- * The arguments are an object instance and the method name.
- *
- */
-#define BRAYNS_JSON_ADAPTER_ARGTYPE(OBJECT, METHOD) DecayArgType<decltype(&std::decay_t<decltype(OBJECT)>::METHOD), 0>
-
-/**
- * @brief Shortcut to generate a default JSON schema from a setter.
- *
- */
-#define BRAYNS_JSON_ADAPTER_DEFAULT_SCHEMA(SET) \
-    [](const auto &object) \
-    { \
-        using T = BRAYNS_JSON_ADAPTER_ARGTYPE(object, SET); \
-        return Json::getSchema<T>(); \
-    }
-
-/**
- * @brief Shortcut to generate a default value from a setter.
- *
- */
-#define BRAYNS_JSON_ADAPTER_DEFAULT_VALUE(SET) \
-    [](const auto &object) \
-    { \
-        using T = BRAYNS_JSON_ADAPTER_ARGTYPE(object, SET); \
-        return T{}; \
-    }
-
-/**
  * @brief Shortcut to create a functor to serialize an object using Json class.
  *
  * The arguments are object setter name and a default factory.
@@ -166,8 +152,7 @@
 #define BRAYNS_JSON_ADAPTER_FROMJSON(SET, DEFAULT) \
     [](const auto &json, auto &object) \
     { \
-        using T = BRAYNS_JSON_ADAPTER_ARGTYPE(object, SET); \
-        T buffer = DEFAULT(object); \
+        auto buffer = DEFAULT(object); \
         if (!Json::deserialize(json, buffer)) \
         { \
             return false; \
@@ -187,7 +172,15 @@
  * @brief Shortcut for a deserializer using only setter.
  *
  */
-#define BRAYNS_JSON_ADAPTER_SET_FROMJSON(SET) BRAYNS_JSON_ADAPTER_FROMJSON(SET, BRAYNS_JSON_ADAPTER_DEFAULT_VALUE(SET))
+#define BRAYNS_JSON_ADAPTER_SET_FROMJSON(SET) \
+    BRAYNS_JSON_ADAPTER_FROMJSON( \
+        SET, \
+        [](const auto &) \
+        { \
+            using SetterType = decltype(&ObjectType::SET); \
+            using ArgType = DecayFirstArgType<SetterType>; \
+            return ArgType{}; \
+        })
 
 /**
  * @brief Register a property that can be get and set.
@@ -239,7 +232,7 @@
 #define BRAYNS_JSON_ADAPTER_FIELD(NAME, FIELD, ...) \
     BRAYNS_JSON_ADAPTER_PROPERTY( \
         NAME, \
-        [](const auto &object) { return Json::getSchema(object.FIELD); }, \
+        [] { return Json::getSchema<decltype(ObjectType::FIELD)>(); }, \
         [](const auto &object, auto &json) { return Json::serialize(object.FIELD, json); }, \
         [](const auto &json, auto &object) { return Json::deserialize(json, object.FIELD); }, \
         __VA_ARGS__)

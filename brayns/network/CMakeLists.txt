@@ -41,7 +41,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/EntrypointRequest.h
   entrypoint/IEntrypoint.h
   entrypoint/ObjectEntrypoint.h
-  entrypoint/PropertyObjectEntrypoint.h
   entrypoints/AddClipPlaneEntrypoint.h
   entrypoints/AddGeometryEntrypoint.h
   entrypoints/AddLightEntrypoint.h

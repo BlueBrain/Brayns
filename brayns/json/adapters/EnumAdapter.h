@@ -149,16 +149,7 @@ struct EnumReflector
 template<typename T>
 struct EnumAdapter
 {
-    /**
-     * @brief Create and store a static instance of EnumMap<T>.
-     *
-     * @return const EnumMap<T>& Reference to the static EnumMap<T> instance.
-     */
-    static const EnumMap<T> &getEnumMap()
-    {
-        static const EnumMap<T> values = EnumReflector<T>::reflect();
-        return values;
-    }
+    static inline const EnumMap<T> values = EnumReflector<T>::reflect();
 
     /**
      * @brief Create an enum JSON schema.
@@ -168,15 +159,13 @@ struct EnumAdapter
      *
      * @return JsonSchema Schema of enum type.
      */
-    static JsonSchema getSchema(const T &)
+    static JsonSchema getSchema()
     {
         JsonSchema schema;
         schema.type = JsonType::String;
-        auto &enums = getEnumMap();
-        schema.enums.reserve(enums.getSize());
-        for (const auto &pair : enums)
+        schema.enums.reserve(values.getSize());
+        for (const auto &[name, value] : values)
         {
-            auto &name = pair.first;
             schema.enums.push_back(name);
         }
         return schema;
@@ -192,8 +181,7 @@ struct EnumAdapter
      */
     static bool serialize(const T &value, JsonValue &json)
     {
-        auto &enums = getEnumMap();
-        auto name = enums.getName(value);
+        auto name = values.getName(value);
         if (!name)
         {
             return false;
@@ -217,8 +205,7 @@ struct EnumAdapter
         {
             return false;
         }
-        auto &enums = getEnumMap();
-        auto newValue = enums.getValue(name);
+        auto newValue = values.getValue(name);
         if (!newValue)
         {
             return false;
@@ -245,8 +232,8 @@ struct GetEnumName
     template<typename T>
     static const std::string &of(const T &value)
     {
-        auto &enumMap = EnumAdapter<T>::getEnumMap();
-        auto name = enumMap.getName(value);
+        auto &values = EnumAdapter<T>::values;
+        auto name = values.getName(value);
         if (!name)
         {
             throw std::runtime_error("Unknown enum value");

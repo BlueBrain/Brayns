@@ -47,9 +47,8 @@ bool AbstractLoader::isSupported(const std::string &fileName, const std::string 
     return it != extensions.end();
 }
 
-JsonSchema JsonAdapter<EmptyLoaderParameters>::getSchema(const EmptyLoaderParameters &params)
+JsonSchema JsonAdapter<EmptyLoaderParameters>::getSchema()
 {
-    (void)params;
     return JsonSchema();
 }
 

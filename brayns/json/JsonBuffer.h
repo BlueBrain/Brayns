@@ -57,7 +57,7 @@ public:
      *
      * @return JsonSchema JSON schema of T.
      */
-    JsonSchema getSchema() const
+    static JsonSchema getSchema()
     {
         return Json::getSchema<T>();
     }

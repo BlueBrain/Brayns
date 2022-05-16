@@ -62,29 +62,15 @@ struct Json
     static JsonValue parse(const std::string &json);
 
     /**
-     * @brief Return the JSON schema of value using JsonAdapter<T>.
+     * @brief Return the JSON schema of T using JsonAdapter<T>::getSchema().
      *
      * @tparam T Type to get the schema from.
-     * @param value Value used to build the schema.
-     * @return const JsonSchema& JSON schema of T.
-     */
-    template<typename T>
-    static JsonSchema getSchema(const T &value)
-    {
-        return JsonAdapter<T>::getSchema(value);
-    }
-
-    /**
-     * @brief Shortcut to get the schema if no object instance is available.
-     *
-     * @tparam T Type to get the schema from.
-     * @return const JsonSchema& JSON schema of T.
+     * @return JsonSchema JSON schema of T.
      */
     template<typename T>
     static JsonSchema getSchema()
     {
-        static const T value{};
-        return getSchema(value);
+        return JsonAdapter<T>::getSchema();
     }
 
     /**
@@ -99,7 +85,7 @@ struct Json
     static JsonValue serialize(const T &value)
     {
         JsonValue json;
-        JsonAdapter<T>::serialize(value, json);
+        serialize(value, json);
         return json;
     }
 
@@ -143,7 +129,7 @@ struct Json
     static T deserialize(const JsonValue &json)
     {
         T value{};
-        JsonAdapter<T>::deserialize(json, value);
+        deserialize(json, value);
         return value;
     }
 
@@ -188,7 +174,7 @@ struct JsonAdapter<JsonValue>
      *
      * @return JsonSchema Empty schema.
      */
-    static JsonSchema getSchema(const JsonValue &value);
+    static JsonSchema getSchema();
 
     /**
      * @brief Copy value into json.

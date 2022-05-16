@@ -48,7 +48,7 @@ struct MapAdapter
      *
      * @return JsonSchema T schema.
      */
-    static JsonSchema getSchema(const T &)
+    static JsonSchema getSchema()
     {
         JsonSchema schema;
         schema.type = JsonType::Object;

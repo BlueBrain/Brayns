@@ -34,9 +34,9 @@
         static inline brayns::JsonObjectInfo _info{NAME}; \
 \
     public: \
-        brayns::JsonSchema getSchema() const \
+        static brayns::JsonSchema getSchema() \
         { \
-            return _info.getSchema(this); \
+            return _info.getSchema(); \
         } \
 \
         bool serialize(brayns::JsonValue &_json) const \
@@ -69,10 +69,10 @@ private: \
         brayns::JsonObjectProperty _property; \
         _property.name = #NAME; \
         _property.options = {__VA_ARGS__}; \
-        _property.getSchema = [](const void *_data) \
+        _property.getSchema = [] \
         { \
-            auto &_message = *static_cast<const MyType *>(_data); \
-            return brayns::Json::getSchema(_message.NAME); \
+            using T = std::decay_t<decltype(MyType::NAME)>; \
+            return brayns::Json::getSchema<T>(); \
         }; \
         _property.serialize = [](const void *_data, brayns::JsonValue &_json) \
         { \

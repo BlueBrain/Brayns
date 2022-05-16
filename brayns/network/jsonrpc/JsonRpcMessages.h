@@ -108,9 +108,8 @@ template<>
 class JsonAdapter<EmptyMessage>
 {
 public:
-    static JsonSchema getSchema(const EmptyMessage &value)
+    static JsonSchema getSchema()
     {
-        (void)value;
         return JsonSchemaHelper::getNullSchema();
     }
 

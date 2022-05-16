@@ -43,7 +43,7 @@ struct PrimitiveAdapter
      *
      * @return JsonSchema Schema.
      */
-    static JsonSchema getSchema(const T &)
+    static JsonSchema getSchema()
     {
         JsonSchema schema;
         schema.type = GetJsonType::fromPrimitive<T>();

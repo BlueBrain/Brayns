@@ -38,14 +38,13 @@ template<typename T>
 struct JsonAdapter
 {
     /**
-     * @brief Get the JSON schema using getSchema() method of value.
+     * @brief Get the JSON schema using getSchema() static method of T.
      *
-     * @param value Value to get the schema from.
      * @return JsonSchema JSON schema of value.
      */
-    static JsonSchema getSchema(const T &value)
+    static JsonSchema getSchema()
     {
-        return value.getSchema();
+        return T::getSchema();
     }
 
     /**

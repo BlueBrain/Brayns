@@ -43,13 +43,13 @@ struct GlmAdapter
      *
      * @return JsonSchema JSON schema of T.
      */
-    static JsonSchema getSchema(const T &)
+    static JsonSchema getSchema()
     {
         JsonSchema schema;
         schema.type = JsonType::Array;
         schema.items = {Json::getSchema<ValueType>()};
-        schema.minItems = size_t(T::length());
-        schema.maxItems = size_t(T::length());
+        schema.minItems = static_cast<size_t>(T::length());
+        schema.maxItems = static_cast<size_t>(T::length());
         return schema;
     }
 
@@ -98,7 +98,8 @@ struct GlmAdapter
         {
             return false;
         }
-        auto size = std::min(T::length(), glm::length_t(array->size()));
+        auto jsonSize = static_cast<glm::length_t>(array->size());
+        auto size = std::min(T::length(), jsonSize);
         for (glm::length_t i = 0; i < size; ++i)
         {
             Json::deserialize(array->get(i), value[i]);

@@ -41,13 +41,10 @@ struct PtrAdapter
      *
      * @return JsonSchema JSON schema of *T.
      */
-    static JsonSchema getSchema(const T &value)
+    static JsonSchema getSchema()
     {
-        if (!value)
-        {
-            return Json::getSchema<std::decay_t<decltype(*value)>>();
-        }
-        return Json::getSchema(*value);
+        using ElementType = std::decay_t<decltype(*T{})>;
+        return Json::getSchema<ElementType>();
     }
 
     /**

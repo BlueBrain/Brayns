@@ -28,15 +28,15 @@ namespace
 class JsonObjectHelper
 {
 public:
-    static brayns::JsonSchema getSchemaWithOptions(const brayns::JsonObjectProperty &property, const void *message)
+    static brayns::JsonSchema getSchemaWithOptions(const brayns::JsonObjectProperty &property)
     {
-        auto schema = property.getSchema(message);
+        auto schema = property.getSchema();
         auto &options = property.options;
         brayns::JsonSchemaOptions::add(schema, options);
         return schema;
     }
 
-    static void add(const brayns::JsonObjectProperty &property, brayns::JsonSchema &schema, const void *message)
+    static void add(const brayns::JsonObjectProperty &property, brayns::JsonSchema &schema)
     {
         auto &key = property.name;
         if (isRequired(property))
@@ -45,7 +45,7 @@ public:
             required.push_back(key);
         }
         auto &properties = schema.properties;
-        properties[key] = getSchemaWithOptions(property, message);
+        properties[key] = getSchemaWithOptions(property);
     }
 
     static brayns::JsonValue extract(const brayns::JsonObjectProperty &property, const brayns::JsonObject &object)
@@ -95,14 +95,14 @@ JsonObjectInfo::JsonObjectInfo(std::string title)
 {
 }
 
-JsonSchema JsonObjectInfo::getSchema(const void *message) const
+JsonSchema JsonObjectInfo::getSchema() const
 {
     JsonSchema schema;
     schema.title = _title;
     schema.type = JsonType::Object;
     for (const auto &property : _properties)
     {
-        JsonObjectHelper::add(property, schema, message);
+        JsonObjectHelper::add(property, schema);
     }
     return schema;
 }
