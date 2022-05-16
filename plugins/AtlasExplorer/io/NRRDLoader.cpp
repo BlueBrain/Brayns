@@ -54,7 +54,7 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
     auto contentView = std::string_view(fileContent);
 
     callback.updateProgress("Parsing NRRD header", 0.2f);
-    const auto header = HeaderParser::parse(contentView);
+    const auto header = HeaderParser::parse(path, contentView);
     // Check the header against the limits imposed by what this plugin can render
     HeaderLimitCheck::check(header);
 

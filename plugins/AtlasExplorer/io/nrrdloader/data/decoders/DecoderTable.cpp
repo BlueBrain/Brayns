@@ -18,12 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "DecoderTable.h"
 
-#include <io/nrrdloader/data/decoders/IDecoder.h>
+#include <io/nrrdloader/data/decoders/AsciiDecoder.h>
+#include <io/nrrdloader/data/decoders/HexDecoder.h>
+#include <io/nrrdloader/data/decoders/RawDecoder.h>
 
-class RawDecoder final : public IDecoder
+std::unique_ptr<IDecoder> DecoderTable::getDecoder(NRRDEncoding encoding)
 {
-public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
-};
+    if (encoding == NRRDEncoding::ASCII)
+    {
+        return std::make_unique<AsciiDecoder>();
+    }
+
+    if (encoding == NRRDEncoding::HEX)
+    {
+        return std::make_unique<HexDecoder>();
+    }
+
+    return std::make_unique<RawDecoder>();
+}

@@ -25,5 +25,5 @@
 class HexDecoder final : public IDecoder
 {
 public:
-    std::vector<uint8_t> decode(const NRRDHeader &header, std::string input) const override;
+    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
 };

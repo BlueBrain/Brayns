@@ -20,10 +20,22 @@
 
 #pragma once
 
-#include <io/nrrdloader/data/decoders/IDecoder.h>
+#include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/geometries/Box.h>
 
-class RawDecoder final : public IDecoder
+class NRRDColorComponent final : public brayns::Component
 {
 public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
+    NRRDColorComponent(const brayns::Vector3f &sizes, std::vector<brayns::Vector4f> colors);
+
+    brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
+
+    bool commit() override;
+
+    void onDestroy() override;
+
+private:
+    OSPGeometricModel _model = nullptr;
+    brayns::Geometry<brayns::Box> _geometry;
+    std::vector<brayns::Vector4f> _colors;
 };

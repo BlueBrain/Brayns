@@ -149,9 +149,11 @@ public:
 };
 }
 
-NRRDHeader HeaderParser::parse(std::string_view &nrrdContentView)
+NRRDHeader HeaderParser::parse(std::string nrrdPath, std::string_view &nrrdContentView)
 {
     const auto headerLines = HeaderReader::readLines(nrrdContentView);
     const auto headerEntryList = HeaderEntrySplitter::split(headerLines);
-    return EntryListParser::parse(headerEntryList);
+    auto header = EntryListParser::parse(headerEntryList);
+    header.filePath = std::move(nrrdPath);
+    return header;
 }

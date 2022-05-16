@@ -20,10 +20,13 @@
 
 #pragma once
 
-#include <io/nrrdloader/data/decoders/IDecoder.h>
+#include <io/nrrdloader/INRRDKind.h>
 
-class RawDecoder final : public IDecoder
+/**
+ * @brief Handles RGB-color, HSV-color, XYZ-color, RGBA-color, 4-color
+ */
+class ColorKind final : public INRRDKind
 {
 public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
+    void createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const override;
 };

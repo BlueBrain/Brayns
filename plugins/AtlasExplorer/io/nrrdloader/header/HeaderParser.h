@@ -31,9 +31,9 @@ public:
      * @brief Parses the header of a nrrd file data. The input view is updated to point
      * to the first element (if any) after the header
      *
-     * @param filePath path to the nrrd file, which is used to extract the parent directory
+     * @param nrrdPath path to the nrrd file
      * @param nrrdContentView input view of the data. Is updated during the parse process
      * @return NRRDHeader
      */
-    static NRRDHeader parse(std::string_view &nrrdContentView);
+    static NRRDHeader parse(std::string nrrdPath, std::string_view &nrrdContentView);
 };

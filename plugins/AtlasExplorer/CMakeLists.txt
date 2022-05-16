@@ -4,36 +4,8 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSATLASEXPLORER_SOURCES
-  AtlasExplorerPlugin.cpp
-  io/NRRDLoader.cpp
-  io/nrrdloader/data/DataParser.cpp
-  io/nrrdloader/data/DataReader.cpp
-  io/nrrdloader/data/decompressors/BZip2Decompressor.cpp
-  io/nrrdloader/data/decompressors/DecompressorTable.cpp
-  io/nrrdloader/data/decompressors/GZipDecompressor.cpp
-  io/nrrdloader/header/HeaderParser.cpp
-  io/nrrdloader/header/HeaderEntryParser.cpp
-)
-
-set(BRAYNSATLASEXPLORER_HEADERS
-  AtlasExplorerPlugin.h
-  io/NRRDLoader.h
-  io/nrrdloader/NRRDHeader.h
-  io/nrrdloader/data/DataParser.h
-  io/nrrdloader/data/DataReader.h
-  io/nrrdloader/data/decoders/AsciiDecoder.h
-  io/nrrdloader/data/decoders/HexDecoder.h
-  io/nrrdloader/data/decoders/IDecoder.h
-  io/nrrdloader/data/decoders/RawDecoder.h
-  io/nrrdloader/data/decompressors/BZip2Decompressor.h
-  io/nrrdloader/data/decompressors/DecompressorTable.h
-  io/nrrdloader/data/decompressors/GZipDecompressor.h
-  io/nrrdloader/data/decompressors/IDecompressor.h
-  io/nrrdloader/data/decompressors/NOOPDecompressor.h
-  io/nrrdloader/header/HeaderParser.h
-  io/nrrdloader/header/HeaderEntryParser.h
-)
+file(GLOB_RECURSE BRAYNSATLASEXPLORER_SOURCES *.cpp)
+file(GLOB_RECURSE BRAYNSATLASEXPLORER_HEADERS *.h)
 
 add_library(braynsAtlasExplorer SHARED ${BRAYNSATLASEXPLORER_SOURCES} ${BRAYNSATLASEXPLORER_HEADERS})
 

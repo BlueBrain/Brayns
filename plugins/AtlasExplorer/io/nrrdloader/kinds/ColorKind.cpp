@@ -18,12 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ColorKind.h"
 
-#include <io/nrrdloader/data/decoders/IDecoder.h>
-
-class RawDecoder final : public IDecoder
+void ColorKind::createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const
 {
-public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
-};
+}

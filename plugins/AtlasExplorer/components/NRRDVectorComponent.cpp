@@ -18,26 +18,4 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <io/nrrdloader/NRRDHeader.h>
-
-#include <string_view>
-#include <vector>
-
-class DataReader
-{
-public:
-    /**
-     * @brief Reads the NRRD volume contents into a contiguous byte array. If data files entry is present in the
-     * header, it will attempt to read the files. Otherwise, it will attempt to extract them from the remaining data
-     * content of the source NRRD file.
-     *
-     * @param header The NRRD header to configure the read
-     * @param fileName The path to the NRRD file
-     * @param dataContent The content of the main nrrd file
-     * @return std::vector<uint8_t>
-     */
-    static std::vector<uint8_t>
-        read(const NRRDHeader &header, const std::string &fileName, std::string_view dataContent);
-};
+#include "NRRDVectorComponent.h"

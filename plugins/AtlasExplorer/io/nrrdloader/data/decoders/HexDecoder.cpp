@@ -20,6 +20,55 @@
 
 #include "HexDecoder.h"
 
-std::vector<uint8_t> HexDecoder::decode(const NRRDHeader &header, std::string input) const
+#include <brayns/utils/StringUtils.h>
+
+#include <io/nrrdloader/data/decoders/RawDecoder.h>
+
+namespace
 {
+class HexContentParser
+{
+public:
+    static std::string toBinary(std::string_view input)
+    {
+        auto tokens = brayns::string_utils::split(input, " /r/v/f/t/n");
+
+        size_t expectedResultSize = 0;
+        for (auto token : tokens)
+        {
+            expectedResultSize += token.size();
+        }
+
+        std::string result;
+        result.reserve(expectedResultSize);
+
+        std::string hexBuffer(3, '\0');
+        size_t hexIndex = 0;
+
+        for (auto token : tokens)
+        {
+            for (size_t i = 0; i < token.size(); ++i)
+            {
+                hexBuffer[hexIndex++] = token[i];
+
+                if (hexIndex == 2)
+                {
+                    hexIndex = 0;
+                    auto byte = std::stoi(hexBuffer, nullptr, 16);
+                    result.push_back(static_cast<char>(byte));
+                }
+            }
+        }
+
+        return result;
+    }
+};
+}
+
+std::unique_ptr<INRRDData> HexDecoder::decode(const NRRDHeader &header, std::string_view input) const
+{
+    auto binaryData = HexContentParser::toBinary(input);
+
+    auto binaryParser = RawDecoder();
+    return binaryParser.decode(header, binaryData);
 }

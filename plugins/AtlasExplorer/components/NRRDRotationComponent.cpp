@@ -18,12 +18,4 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <io/nrrdloader/data/decoders/IDecoder.h>
-
-class RawDecoder final : public IDecoder
-{
-public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
-};
+#include "NRRDRotationComponent.h"

@@ -28,5 +28,5 @@
 class DecompressorTable
 {
 public:
-    std::unique_ptr<IDecompressor> getDecompressor(NRRDEncoding encoding) const noexcept;
+    static std::unique_ptr<IDecompressor> getDecompressor(NRRDEncoding encoding) const noexcept;
 };

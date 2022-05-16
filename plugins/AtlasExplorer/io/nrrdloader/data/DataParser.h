@@ -20,12 +20,22 @@
 
 #pragma once
 
-#include <brayns/engine/volumes/RegularVolume.h>
-
+#include <io/nrrdloader/INRRDData.h>
 #include <io/nrrdloader/NRRDHeader.h>
+
+#include <memory>
+#include <string_view>
+#include <vector>
 
 class DataParser
 {
 public:
-    static brayns::Volume<brayns::RegularVolume> parse(const NRRDHeader &header, std::string_view dataContentView);
+    /**
+     * @brief Parses the NRRD contents
+     *
+     * @param header The NRRD Header to configure the read
+     * @param content The left over content from the NRRD file after extracting the header
+     * @return std::unique_ptr<INRRDData>
+     */
+    static std::unique_ptr<INRRDData> parse(const NRRDHeader &header, std::string_view content);
 };

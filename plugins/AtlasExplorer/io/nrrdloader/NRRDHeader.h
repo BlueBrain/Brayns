@@ -70,6 +70,9 @@ enum NRRDKind
 
 struct NRRDHeader
 {
+    // Path to the NRRD file this header belongs to
+    std::string filePath;
+
     // Data dimensions
     int32_t dimensions{-1};
 
@@ -117,4 +120,19 @@ struct NRRDHeader
 
     // Rotation matrix (column-major)
     std::optional<std::vector<std::vector<float>>> measurementFrame;
+};
+
+class NRRDExpectedSize
+{
+public:
+    static size_t compute(const NRRDHeader &header)
+    {
+        const auto &sizes = header.sizes;
+        size_t expected = 1;
+        for (auto size : sizes)
+        {
+            expected *= size;
+        }
+        return expected;
+    }
 };

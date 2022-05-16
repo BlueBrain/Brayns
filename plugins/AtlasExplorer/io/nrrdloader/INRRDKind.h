@@ -20,10 +20,18 @@
 
 #pragma once
 
-#include <io/nrrdloader/data/decoders/IDecoder.h>
+#include <brayns/engine/Model.h>
 
-class RawDecoder final : public IDecoder
+#include <io/nrrdloader/INRRDData.h>
+#include <io/nrrdloader/NRRDHeader.h>
+
+/**
+ * @brief Base class to implement NRRD data handlers based on their type
+ */
+class INRRDKind
 {
 public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
+    virtual ~INRRDKind() = default;
+
+    virtual void createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const = 0;
 };

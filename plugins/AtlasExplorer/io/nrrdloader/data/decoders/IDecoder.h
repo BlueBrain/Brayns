@@ -20,15 +20,16 @@
 
 #pragma once
 
+#include <io/nrrdloader/INRRDData.h>
 #include <io/nrrdloader/NRRDHeader.h>
 
-#include <string>
-#include <vector>
+#include <memory>
+#include <string_view>
 
 class IDecoder
 {
 public:
     virtual ~IDecoder() = default;
 
-    virtual std::vector<uint8_t> decode(const NRRDHeader &header, std::string input) const = 0;
+    virtual std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const = 0;
 };

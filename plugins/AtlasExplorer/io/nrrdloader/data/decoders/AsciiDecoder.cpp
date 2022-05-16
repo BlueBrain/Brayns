@@ -24,9 +24,200 @@
 
 namespace
 {
+template<typename T>
+class StringCast
+{
+public:
+    static T cast(std::string_view token)
+    {
+        throw std::runtime_error("Not implemented");
+    }
+};
+
+template<>
+class StringCast<char>
+{
+public:
+    static char cast(std::string_view token)
+    {
+        return token.at(0);
+    }
+};
+
+template<>
+class StringCast<uint8_t>
+{
+public:
+    static uint8_t cast(std::string_view token)
+    {
+        return static_cast<uint8_t>(token.at(0));
+    }
+};
+
+template<>
+class StringCast<int16_t>
+{
+public:
+    static int16_t cast(std::string_view token)
+    {
+        return static_cast<int16_t>(std::stoi(std::string(token)));
+    }
+};
+
+template<>
+class StringCast<uint16_t>
+{
+public:
+    static uint16_t cast(std::string_view token)
+    {
+        return static_cast<uint16_t>(std::stoul(std::string(token)));
+    }
+};
+
+template<>
+class StringCast<int32_t>
+{
+public:
+    static uint32_t cast(std::string_view token)
+    {
+        return std::stoi(std::string(token));
+    }
+};
+
+template<>
+class StringCast<uint32_t>
+{
+public:
+    static uint32_t cast(std::string_view token)
+    {
+        return std::stoul(std::string(token));
+    }
+};
+
+template<>
+class StringCast<int64_t>
+{
+public:
+    static int64_t cast(std::string_view token)
+    {
+        return std::stol(std::string(token));
+    }
+};
+
+template<>
+class StringCast<uint64_t>
+{
+public:
+    static uint64_t cast(std::string_view token)
+    {
+        return std::stoul(std::string(token));
+    }
+};
+
+template<>
+class StringCast<float>
+{
+public:
+    static float cast(std::string_view token)
+    {
+        return std::stof(std::string(token));
+    }
+};
+
+template<>
+class StringCast<double>
+{
+public:
+    static double cast(std::string_view token)
+    {
+        return std::stod(std::string(token));
+    }
+};
+
+class AsciiParser
+{
+public:
+    template<typename T>
+    static std::vector<T> parse(const std::vector<std::string_view> &tokens)
+    {
+        std::vector<T> result(tokens.size());
+
+        for (size_t i = 0; i < tokens.size(); ++i)
+        {
+            result[i] = StringCast<T>::cast(tokens[i]);
+        }
+        return result;
+    }
+};
+
+class DecodedDataBuilder
+{
+public:
+    template<typename T>
+    static std::unique_ptr<INRRDData> parseAndBuild(const std::vector<std::string_view> &tokens)
+    {
+        auto data = AsciiParser::parse<T>(tokens);
+        return std::make_unique<NRRDData<T>>(std::move(data));
+    }
+};
 }
 
-std::vector<uint8_t> AsciiDecoder::decode(const NRRDHeader &header, std::string input) const
+std::unique_ptr<INRRDData> AsciiDecoder::decode(const NRRDHeader &header, std::string_view input) const
 {
     const auto tokens = brayns::string_utils::split(input, " /r/v/f/t/n");
+
+    const auto expectedSize = NRRDExpectedSize::compute(header);
+    if (expectedSize != tokens.size())
+    {
+        throw std::runtime_error("Expected size and parsed element count is different");
+    }
+
+    const auto type = header.type;
+
+    if (type == NRRDType::CHAR)
+    {
+        return DecodedDataBuilder::parseAndBuild<char>(tokens);
+    }
+
+    if (type == NRRDType::UNSIGNED_CHAR)
+    {
+        return DecodedDataBuilder::parseAndBuild<uint8_t>(tokens);
+    }
+
+    if (type == NRRDType::SHORT)
+    {
+        return DecodedDataBuilder::parseAndBuild<int16_t>(tokens);
+    }
+
+    if (type == NRRDType::UNSIGNED_SHORT)
+    {
+        return DecodedDataBuilder::parseAndBuild<uint16_t>(tokens);
+    }
+
+    if (type == NRRDType::INT)
+    {
+        return DecodedDataBuilder::parseAndBuild<int32_t>(tokens);
+    }
+
+    if (type == NRRDType::UNSIGNED_INT)
+    {
+        return DecodedDataBuilder::parseAndBuild<uint32_t>(tokens);
+    }
+
+    if (type == NRRDType::LONG)
+    {
+        return DecodedDataBuilder::parseAndBuild<int64_t>(tokens);
+    }
+
+    if (type == NRRDType::UNSIGNED_LONG)
+    {
+        return DecodedDataBuilder::parseAndBuild<uint64_t>(tokens);
+    }
+
+    if (type == NRRDType::FLOAT)
+    {
+        return DecodedDataBuilder::parseAndBuild<float>(tokens);
+    }
+
+    return DecodedDataBuilder::parseAndBuild<double>(tokens);
 }

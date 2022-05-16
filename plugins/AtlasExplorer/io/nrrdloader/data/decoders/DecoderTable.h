@@ -22,8 +22,8 @@
 
 #include <io/nrrdloader/data/decoders/IDecoder.h>
 
-class RawDecoder final : public IDecoder
+class DecoderTable
 {
 public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
+    static std::unique_ptr<IDecoder> getDecoder(NRRDEncoding encoding);
 };

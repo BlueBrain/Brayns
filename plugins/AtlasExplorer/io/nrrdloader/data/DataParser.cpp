@@ -20,6 +20,72 @@
 
 #include "DataParser.h"
 
-brayns::Volume<brayns::RegularVolume> DataParser::parse(const NRRDHeader &header, std::string_view dataContentView)
+#include <brayns/utils/FileReader.h>
+
+#include <io/nrrdloader/data/decoders/DecoderTable.h>
+#include <io/nrrdloader/data/decompressors/DecompressorTable.h>
+
+#include <filesystem>
+
+namespace
 {
+class DataFilePaths
+{
+public:
+    static std::vector<std::string> buildFixed(const NRRDHeader &header)
+    {
+        const auto filePath = std::filesystem::path(header.filePath);
+        const auto basePath = filePath.parent_path();
+
+        // Copy, manipulate, return
+        auto fileList = *header.dataFiles;
+
+        for (auto &file : fileList)
+        {
+            const auto filePath = basePath / std::filesystem::path(file);
+            file = filePath.string();
+        }
+
+        return fileList;
+    }
+};
+class DataFileReader
+{
+public:
+    static std::string read(const std::vector<std::string> &fileList)
+    {
+        std::string result;
+        for (const auto &file : fileList)
+        {
+            result += brayns::FileReader::read(file);
+        }
+        return result;
+    }
+};
+
+class DataContentParser
+{
+public:
+    static std::unique_ptr<INRRDData> parse(const NRRDHeader &header, std::string content)
+    {
+        const auto format = header.encoding;
+
+        const auto decompressor = DecompressorTable::getDecompressor(format);
+        const auto decompressedContent = decompressor->decompress(std::move(content));
+
+        const auto decoder = DecoderTable::getDecoder(format);
+        return decoder->decode(header, decompressedContent);
+    }
+};
+}
+
+std::unique_ptr<INRRDData> DataParser::parse(const NRRDHeader &header, std::string_view content)
+{
+    if (header.dataFiles)
+    {
+        const auto files = DataFilePaths::buildFixed(header);
+        content = DataFileReader::read(files);
+    }
+
+    return DataContentParser::parse(header, std::string(content));
 }

@@ -20,10 +20,14 @@
 
 #pragma once
 
-#include <io/nrrdloader/data/decoders/IDecoder.h>
+#include <io/nrrdloader/INRRDKind.h>
 
-class RawDecoder final : public IDecoder
+/**
+ * @brief Handles quaternion
+ *
+ */
+class RotationKind final : public INRRDKind
 {
 public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
+    void createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const override;
 };

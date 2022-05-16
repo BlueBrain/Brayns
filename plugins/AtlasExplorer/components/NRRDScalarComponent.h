@@ -19,11 +19,3 @@
  */
 
 #pragma once
-
-#include <io/nrrdloader/data/decoders/IDecoder.h>
-
-class RawDecoder final : public IDecoder
-{
-public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
-};

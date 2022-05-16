@@ -18,12 +18,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "NRRDColorComponent.h"
 
-#include <io/nrrdloader/data/decoders/IDecoder.h>
-
-class RawDecoder final : public IDecoder
+NRRDColorComponent::NRRDColorComponent(const brayns::Vector3f &sizes, std::vector<brayns::Vector4f> colors)
 {
-public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
-};
+    const auto dimensions = glm::compMul(sizes);
+    if (dimensions != _colors.size())
+    {
+        throw std::invalid_argument("Size and color count is different");
+    }
+}
+
+brayns::Bounds NRRDColorComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
+{
+}
+
+bool NRRDColorComponent::commit()
+{
+}
+
+void NRRDColorComponent::onDestroy()
+{
+}
