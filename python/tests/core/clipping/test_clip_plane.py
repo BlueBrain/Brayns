@@ -33,6 +33,12 @@ class TestClipPlane(unittest.TestCase):
         self.assertEqual(instance.method, 'remove-clip-planes')
         self.assertEqual(instance.params, {'ids': ids})
 
+    def test_clear(self) -> None:
+        instance = MockInstance()
+        ClipPlane.clear(instance)
+        self.assertEqual(instance.method, 'clear-clip-planes')
+        self.assertEqual(instance.params, None)
+
     def test_add(self) -> None:
         instance = MockInstance(0)
         plane = ClipPlane(1, 2, 3, 4)

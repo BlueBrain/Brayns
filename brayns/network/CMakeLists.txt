@@ -48,7 +48,9 @@ set(BRAYNSNETWORK_HEADERS
   entrypoints/CameraEntrypoint.h
   entrypoints/CameraLookAtEntrypoint.h
   entrypoints/CancelEntrypoint.h
+  entrypoints/ClearClipPlanesEntrypoint.h
   entrypoints/ClearLightsEntrypoint.h
+  entrypoints/ClearModelsEntrypoint.h
   entrypoints/EnableSimulationEntrypoint.h
   entrypoints/ExitLaterEntrypoint.h
   entrypoints/ExportFramesEntrypoint.h
@@ -138,7 +140,9 @@ set(BRAYNSNETWORK_SOURCES
   entrypoints/CameraEntrypoint.cpp
   entrypoints/CameraLookAtEntrypoint.cpp
   entrypoints/CancelEntrypoint.cpp
+  entrypoints/ClearClipPlanesEntrypoint.cpp
   entrypoints/ClearLightsEntrypoint.cpp
+  entrypoints/ClearModelsEntrypoint.cpp
   entrypoints/EnableSimulationEntrypoint.cpp
   entrypoints/ExitLaterEntrypoint.cpp
   entrypoints/ExportFramesEntrypoint.cpp

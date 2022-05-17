@@ -51,8 +51,25 @@ class Model:
         )
 
     @staticmethod
+    def get_all(instance: Instance) -> list['Model']:
+        scene = Model._get_scene(instance)
+        return [
+            Model.deserialize(model)
+            for model in scene['models']
+        ]
+
+    @staticmethod
+    def get_bounds(instance: Instance) -> Bounds:
+        scene = Model._get_scene(instance)
+        return Bounds.deserialize(scene['bounds'])
+
+    @staticmethod
     def remove(instance: Instance, ids: list[int]) -> None:
         instance.request('remove-model', {'ids': ids})
+
+    @staticmethod
+    def clear(instance: Instance) -> None:
+        instance.request('clear-models')
 
     @staticmethod
     def update(
@@ -72,3 +89,7 @@ class Model:
             model['transform'] = transform.serialize()
         result = instance.request('update-model', params)
         return Model.deserialize(result)
+
+    @staticmethod
+    def _get_scene(instance: Instance) -> dict:
+        return instance.request('get-scene')

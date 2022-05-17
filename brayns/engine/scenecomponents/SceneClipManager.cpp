@@ -54,11 +54,7 @@ void SceneClipManager::removeClippingModel(const uint32_t id)
 
 void SceneClipManager::removeAllClippingModels() noexcept
 {
-    for (const auto &[id, model] : _clippingModels)
-    {
-        _idFactory.releaseID(id);
-    }
-
+    _idFactory.clear();
     _clippingModels.clear();
     _dirty = true;
 }

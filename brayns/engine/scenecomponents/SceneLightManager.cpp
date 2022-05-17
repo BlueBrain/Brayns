@@ -41,13 +41,9 @@ void SceneLightManager::removeLight(const uint32_t lightId)
     _dirty = true;
 }
 
-void SceneLightManager::removeAllLigts() noexcept
+void SceneLightManager::removeAllLights() noexcept
 {
-    for (const auto &[lightId, light] : _lights)
-    {
-        _idFactory.releaseID(lightId);
-    }
-
+    _idFactory.clear();
     _lights.clear();
     _dirty = true;
 }

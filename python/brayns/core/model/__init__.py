@@ -21,11 +21,9 @@
 from brayns.core.model.mesh_loader import MeshLoader
 from brayns.core.model.model import Model
 from brayns.core.model.model_loader import ModelLoader
-from brayns.core.model.scene import Scene
 
 __all__ = [
     'MeshLoader',
     'Model',
-    'ModelLoader',
-    'Scene'
+    'ModelLoader'
 ]

@@ -42,7 +42,9 @@
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
 #include <brayns/network/entrypoints/CameraLookAtEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
+#include <brayns/network/entrypoints/ClearClipPlanesEntrypoint.h>
 #include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
+#include <brayns/network/entrypoints/ClearModelsEntrypoint.h>
 #include <brayns/network/entrypoints/EnableSimulationEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/ExportFramesEntrypoint.h>
@@ -97,25 +99,26 @@ public:
         brayns::CancellationToken token(interface);
         brayns::EntrypointBuilder builder("Core", interface);
 
-        builder.add<brayns::AddClipPlaneEntrypoint>(sceneClipManager);
         builder.add<brayns::AddBoxesEntrypoint>(scene);
         builder.add<brayns::AddCapsulesEntrypoint>(scene);
-        builder.add<brayns::AddPlanesEntrypoint>(scene);
-        builder.add<brayns::AddSpheresEntrypoint>(scene);
+        builder.add<brayns::AddClipPlaneEntrypoint>(sceneClipManager);
         builder.add<brayns::AddLightAmbientEntrypoint>(sceneLightManager);
         builder.add<brayns::AddLightDirectionalEntrypoint>(sceneLightManager);
         builder.add<brayns::AddLightQuadEntrypoint>(sceneLightManager);
         builder.add<brayns::AddModelEntrypoint>(scene, loaders, simulation, token);
+        builder.add<brayns::AddPlanesEntrypoint>(scene);
+        builder.add<brayns::AddSpheresEntrypoint>(scene);
         builder.add<brayns::CancelEntrypoint>(tasks);
+        builder.add<brayns::ClearClipPlanesEntrypoint>(sceneClipManager);
         builder.add<brayns::ClearLightsEntrypoint>(sceneLightManager);
+        builder.add<brayns::ClearModelsEntrypoint>(sceneModelManager);
         builder.add<brayns::EnableSimulationEntrypoint>(sceneModelManager);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
         builder.add<brayns::ExportFramesEntrypoint>(engine, parameters, token);
-        builder.add<brayns::GetSimulationParametersEntrypoint>(simulation);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
         builder.add<brayns::GetCameraLookAtEntrypoint>(engine);
-        builder.add<brayns::GetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::GetCameraOrthographicEntrypoint>(engine);
+        builder.add<brayns::GetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::GetCameraTypeEntrypoint>(engine);
         builder.add<brayns::GetLoadersEntrypoint>(loaders);
         builder.add<brayns::GetMaterialCarPaint>(sceneModelManager);
@@ -132,6 +135,7 @@ public:
         builder.add<brayns::GetRendererProductionEntrypoint>(engine);
         builder.add<brayns::GetRendererTypeEntrypoint>(engine);
         builder.add<brayns::GetSceneEntrypoint>(scene);
+        builder.add<brayns::GetSimulationParametersEntrypoint>(simulation);
         builder.add<brayns::ImageJpegEntrypoint>(application, engine);
         builder.add<brayns::InspectEntrypoint>(engine);
         builder.add<brayns::QuitEntrypoint>(engine);
@@ -141,7 +145,6 @@ public:
         builder.add<brayns::RemoveModelEntrypoint>(scene, simulation);
         builder.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, simulation, binary, token);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
-        builder.add<brayns::SetSimulationParametersEntrypoint>(simulation);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
         builder.add<brayns::SetCameraLookAtEntrypoint>(engine);
         builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);
@@ -156,6 +159,7 @@ public:
         builder.add<brayns::SetModelTransferFunctionEntrypoint>(sceneModelManager);
         builder.add<brayns::SetRendererInteractiveEntrypoint>(engine);
         builder.add<brayns::SetRendererProductionEntrypoint>(engine);
+        builder.add<brayns::SetSimulationParametersEntrypoint>(simulation);
         builder.add<brayns::SnapshotEntrypoint>(engine, interface);
         builder.add<brayns::TriggerJpegStreamEntrypoint>(stream);
         builder.add<brayns::UpdateModelEntrypoint>(scene);
