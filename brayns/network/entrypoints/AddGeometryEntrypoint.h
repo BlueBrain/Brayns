@@ -49,9 +49,9 @@ public:
 
         for (size_t i = 0; i < numGeometries; ++i)
         {
-            auto &proxy = params[i];
-            geometries[i] = std::move(proxy.geometry);
-            colors[i] = std::move(proxy.color);
+            auto &param = params[i];
+            geometries[i] = std::move(param.geometry);
+            colors[i] = std::move(param.color);
         }
 
         auto newModel = std::make_unique<Model>();
