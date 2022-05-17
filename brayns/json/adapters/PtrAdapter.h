@@ -71,13 +71,13 @@ struct PtrAdapter
      */
     static void deserialize(const JsonValue &json, T &value)
     {
-        if (!value)
-        {
-            return;
-        }
         if (json.isEmpty())
         {
             value = {};
+            return;
+        }
+        if (!value)
+        {
             return;
         }
         Json::deserialize(json, *value);
@@ -110,6 +110,11 @@ struct JsonAdapter<std::unique_ptr<T>> : PtrAdapter<std::unique_ptr<T>>
      */
     static void deserialize(const JsonValue &json, std::unique_ptr<T> &value)
     {
+        if (json.isEmpty())
+        {
+            value = {};
+            return;
+        }
         if (!value)
         {
             value = std::make_unique<T>();
@@ -134,6 +139,11 @@ struct JsonAdapter<std::shared_ptr<T>> : PtrAdapter<std::shared_ptr<T>>
      */
     static void deserialize(const JsonValue &json, std::shared_ptr<T> &value)
     {
+        if (json.isEmpty())
+        {
+            value = {};
+            return;
+        }
         if (!value)
         {
             value = std::make_shared<T>();
@@ -158,6 +168,11 @@ struct JsonAdapter<std::optional<T>> : PtrAdapter<std::optional<T>>
      */
     static void deserialize(const JsonValue &json, std::optional<T> &value)
     {
+        if (json.isEmpty())
+        {
+            value = std::nullopt;
+            return;
+        }
         if (!value)
         {
             value.emplace();
