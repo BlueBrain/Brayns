@@ -18,25 +18,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NRRDColorComponent.h"
+#pragma once
 
-NRRDColorComponent::NRRDColorComponent(const brayns::Vector3f &sizes, std::vector<brayns::Vector4f> colors)
-{
-    const auto dimensions = glm::compMul(sizes);
-    if (dimensions != _colors.size())
-    {
-        throw std::invalid_argument("Size and color count is different");
-    }
-}
+#include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/geometries/Primitive.h>
 
-brayns::Bounds NRRDColorComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
+class RotationVolumeComponent final : public brayns::Component
 {
-}
+public:
+    RotationVolumeComponent(
+        const brayns::Vector3ui &sizes,
+        const brayns::Vector3f &dimensions,
+        std::vector<brayns::Quaternion> &rotations);
 
-bool NRRDColorComponent::commit()
-{
-}
+    brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
-void NRRDColorComponent::onDestroy()
-{
-}
+    void onCreate() override;
+
+    bool commit() override;
+
+    void onDestroy() override;
+
+private:
+    OSPGeometricModel _model;
+    brayns::Geometry<brayns::Primitive> _xAxisGeometry;
+    brayns::Geometry<brayns::Primitive> _yAxisGeometry;
+    brayns::Geometry<brayns::Primitive> _zAxisGeometry;
+};

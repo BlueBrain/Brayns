@@ -23,12 +23,28 @@
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/geometries/Box.h>
 
-class NRRDColorComponent final : public brayns::Component
+/**
+ * @brief Represents a geometry-made volume, in which each voxel is represented by a cube
+ */
+class BlockVolumeComponent final : public brayns::Component
 {
 public:
-    NRRDColorComponent(const brayns::Vector3f &sizes, std::vector<brayns::Vector4f> colors);
+    /**
+     * @brief Construct a new Block Volume Component object
+     *
+     * @param sizes 3D grid size
+     * @param dimensions spatial size for each axis
+     * @param colors Color data for each voxel
+     * @throws std::invalid_argment if colors.size() does not match sizes.x * sizes.y * sizes.z
+     */
+    BlockVolumeComponent(
+        const brayns::Vector3ui &sizes,
+        const brayns::Vector3f &dimensions,
+        std::vector<brayns::Vector4f> colors);
 
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
+
+    void onCreate() override;
 
     bool commit() override;
 
