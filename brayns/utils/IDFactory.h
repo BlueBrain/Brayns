@@ -65,6 +65,16 @@ public:
         _releasedIDs.push_back(id);
     }
 
+    /**
+     * @brief Reset ID counter and erase ID buffer.
+     *
+     */
+    void clear()
+    {
+        _factory = {};
+        _releasedIDs.clear();
+    }
+
 private:
     T _factory{};
     std::vector<T> _releasedIDs;

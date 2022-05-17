@@ -139,6 +139,14 @@ void SceneModelManager::removeModel(const uint32_t instanceID)
     }
 }
 
+void SceneModelManager::removeAllModelInstances()
+{
+    _instanceIdFactory.clear();
+    _modelIdFactory.clear();
+    _instances.clear();
+    _models.clear();
+}
+
 const ModelLoadParameters &SceneModelManager::getModelLoadParameters(const uint32_t instanceID) const
 {
     auto &modelInstance = ModelFinder::findInstance(_instances, instanceID);

@@ -22,6 +22,7 @@ import unittest
 
 from brayns.core.common.transform import Transform
 from brayns.core.model.model import Model
+from tests.core.common.mock_bounds import MockBounds
 from tests.core.model.mock_model import MockModel
 from tests.instance.mock_instance import MockInstance
 
@@ -31,6 +32,16 @@ class TestModel(unittest.TestCase):
     def setUp(self) -> None:
         self._model = MockModel.model
         self._message = MockModel.serialized_model
+        self._bounds = MockBounds.bounds
+        self._models = [
+            MockModel.model
+        ]
+        self._scene = {
+            'bounds': MockBounds.serialized_bounds,
+            'models': [
+                MockModel.serialized_model
+            ]
+        }
 
     def test_from_instance(self) -> None:
         instance = MockInstance(self._message)
@@ -43,12 +54,32 @@ class TestModel(unittest.TestCase):
         test = Model.deserialize(self._message)
         self.assertEqual(test, self._model)
 
+    def test_get_all(self) -> None:
+        instance = MockInstance(self._scene)
+        test = Model.get_all(instance)
+        self.assertEqual(test, self._models)
+        self.assertEqual(instance.method, 'get-scene')
+        self.assertEqual(instance.params, None)
+
+    def test_get_bounds(self) -> None:
+        instance = MockInstance(self._scene)
+        test = Model.get_bounds(instance)
+        self.assertEqual(test, self._bounds)
+        self.assertEqual(instance.method, 'get-scene')
+        self.assertEqual(instance.params, None)
+
     def test_remove(self) -> None:
         instance = MockInstance()
         ids = [1, 2, 3]
         Model.remove(instance, ids)
         self.assertEqual(instance.method, 'remove-model')
         self.assertEqual(instance.params, {'ids': ids})
+
+    def test_clear(self) -> None:
+        instance = MockInstance()
+        Model.clear(instance)
+        self.assertEqual(instance.method, 'clear-models')
+        self.assertEqual(instance.params, None)
 
     def test_update(self) -> None:
         instance = MockInstance(self._message)

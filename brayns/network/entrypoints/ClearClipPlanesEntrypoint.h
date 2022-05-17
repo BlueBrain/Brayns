@@ -19,28 +19,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClearLightsEntrypoint.h"
+#pragma once
+
+#include <brayns/engine/scenecomponents/SceneClipManager.h>
+
+#include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-ClearLightsEntrypoint::ClearLightsEntrypoint(SceneLightManager &sceneLightManager)
-    : _sceneLightManager(sceneLightManager)
+class ClearClipPlanesEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
 {
-}
+public:
+    ClearClipPlanesEntrypoint(SceneClipManager &_manager);
 
-std::string ClearLightsEntrypoint::getMethod() const
-{
-    return "clear-lights";
-}
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 
-std::string ClearLightsEntrypoint::getDescription() const
-{
-    return "Clear all lights in the scene";
-}
-
-void ClearLightsEntrypoint::onRequest(const Request &request)
-{
-    _sceneLightManager.removeAllLights();
-    request.reply(EmptyMessage());
-}
+private:
+    SceneClipManager &_manager;
+};
 } // namespace brayns

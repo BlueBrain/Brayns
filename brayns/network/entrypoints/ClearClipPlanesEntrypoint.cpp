@@ -19,28 +19,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClearLightsEntrypoint.h"
+#include "ClearClipPlanesEntrypoint.h"
 
 namespace brayns
 {
-ClearLightsEntrypoint::ClearLightsEntrypoint(SceneLightManager &sceneLightManager)
-    : _sceneLightManager(sceneLightManager)
+ClearClipPlanesEntrypoint::ClearClipPlanesEntrypoint(SceneClipManager &manager)
+    : _manager(manager)
 {
 }
 
-std::string ClearLightsEntrypoint::getMethod() const
+std::string ClearClipPlanesEntrypoint::getMethod() const
 {
-    return "clear-lights";
+    return "clear-clip-planes";
 }
 
-std::string ClearLightsEntrypoint::getDescription() const
+std::string ClearClipPlanesEntrypoint::getDescription() const
 {
-    return "Clear all lights in the scene";
+    return "Clear all clip planes in the scene";
 }
 
-void ClearLightsEntrypoint::onRequest(const Request &request)
+void ClearClipPlanesEntrypoint::onRequest(const Request &request)
 {
-    _sceneLightManager.removeAllLights();
+    _manager.removeAllClippingModels();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

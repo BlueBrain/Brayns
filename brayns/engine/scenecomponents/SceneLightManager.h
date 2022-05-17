@@ -52,7 +52,7 @@ public:
     /**
      * @brief Removes all lights from the scene
      */
-    void removeAllLigts() noexcept;
+    void removeAllLights() noexcept;
 
 private:
     friend class Scene;

@@ -98,6 +98,12 @@ public:
     void removeModel(const uint32_t instanceID);
 
     /**
+     * @brief Clear all models and instances.
+     *
+     */
+    void removeAllModelInstances();
+
+    /**
      * @brief Returns the parameters with which a model referenced by the given instance was loaded
      * @param instanceID ID of the instance that owns the model to fetch the load parameters
      * @return ModelParameters &
