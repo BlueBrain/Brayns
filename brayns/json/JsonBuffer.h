@@ -46,7 +46,7 @@ namespace brayns
  * "now" is stored inside test.now while the value at "later" is (de)serialized
  * directly but now appears as an int in the JSON schema of Test.
  *
- * @tparam T Type to serialize.
+ * @tparam T Type to wrap.
  */
 template<typename T>
 class JsonBuffer
@@ -57,59 +57,57 @@ public:
      *
      * @return JsonSchema JSON schema of T.
      */
-    JsonSchema getSchema() const
+    static JsonSchema getSchema()
     {
-        return Json::getSchema<T>();
+        return Json::getSchema<std::decay_t<T>>();
+    }
+
+    /**
+     * @brief Construct an empty JSON buffer.
+     *
+     */
+    JsonBuffer() = default;
+
+    /**
+     * @brief Construct a buffer with value inside.
+     *
+     * @param value Value to store in JSON format.
+     */
+    JsonBuffer(const T &value)
+        : _json(Json::serialize(value))
+    {
     }
 
     /**
      * @brief Copy the internally stored JSON into parameter.
      *
      * @param json Output JSON.
-     * @return true Always.
-     * @return false Never.
      */
-    bool serialize(JsonValue &json) const
+    void serialize(JsonValue &json) const
     {
         json = _json;
-        return true;
     }
 
     /**
      * @brief Store JSON internally.
      *
      * @param json Input JSON.
-     * @return true Always.
-     * @return false Never.
      */
-    bool deserialize(const JsonValue &json)
+    void deserialize(const JsonValue &json)
     {
         _json = json;
-        return true;
     }
 
     /**
-     * @brief Deserialize internal json to value.
+     * @brief Deserialize stored json into value.
      *
      * Called manually when required.
      *
      * @param value Output value.
-     * @return true Success.
-     * @return false Failure.
      */
-    bool deserialize(T &value) const
+    void extract(T &value) const
     {
-        return Json::deserialize(_json, value);
-    }
-
-    /**
-     * @brief Get the internal JSON value.
-     *
-     * @return const JsonValue& Internal JSON.
-     */
-    const JsonValue &getJson() const
-    {
-        return _json;
+        Json::deserialize(_json, value);
     }
 
 private:

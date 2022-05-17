@@ -94,12 +94,12 @@ void AddModelEntrypoint::onRequest(const Request &request)
 
     auto &modelManager = _scene.getModels();
 
-    std::vector<ModelInstanceProxy> result;
+    std::vector<ModelInstance *> result;
     result.reserve(models.size());
     for (auto &model : models)
     {
         auto &modelInstance = modelManager.addModel(loadParameters, std::move(model));
-        result.emplace_back(modelInstance);
+        result.push_back(&modelInstance);
     }
 
     SimulationScanner::scanAndUpdate(modelManager, _simulation);

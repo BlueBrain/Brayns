@@ -72,9 +72,23 @@ struct FunctorInfo<R (O::*)(A...) noexcept> : FunctorTrait<R, O, A...>
 {
 };
 
+template<typename R, typename O, typename... A>
+struct FunctorInfo<R (O::*)(A...) const noexcept> : FunctorTrait<R, O, A...>
+{
+};
+
 template<typename T, size_t I>
 using GetArgType = typename FunctorInfo<T>::template ArgType<I>;
 
 template<typename T, size_t I>
 using DecayArgType = std::decay_t<GetArgType<T, I>>;
+
+template<typename T>
+using DecayFirstArgType = DecayArgType<T, 0>;
+
+template<typename T>
+using GetReturnType = typename FunctorInfo<T>::ReturnType;
+
+template<typename T>
+using DecayReturnType = std::decay_t<GetReturnType<T>>;
 } // namespace brayns

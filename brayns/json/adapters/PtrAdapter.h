@@ -41,13 +41,10 @@ struct PtrAdapter
      *
      * @return JsonSchema JSON schema of *T.
      */
-    static JsonSchema getSchema(const T &value)
+    static JsonSchema getSchema()
     {
-        if (!value)
-        {
-            return Json::getSchema<std::decay_t<decltype(*value)>>();
-        }
-        return Json::getSchema(*value);
+        using ValueType = std::decay_t<decltype(*T{})>;
+        return Json::getSchema<ValueType>();
     }
 
     /**
@@ -55,16 +52,15 @@ struct PtrAdapter
      *
      * @param value Input value.
      * @param json Output JSON.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool serialize(const T &value, JsonValue &json)
+    static void serialize(const T &value, JsonValue &json)
     {
         if (!value)
         {
-            return false;
+            json.clear();
+            return;
         }
-        return Json::serialize(*value, json);
+        Json::serialize(*value, json);
     }
 
     /**
@@ -72,16 +68,19 @@ struct PtrAdapter
      *
      * @param json Input JSON.
      * @param value Output value.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool deserialize(const JsonValue &json, T &value)
+    static void deserialize(const JsonValue &json, T &value)
     {
+        if (json.isEmpty())
+        {
+            value = {};
+            return;
+        }
         if (!value)
         {
-            return false;
+            return;
         }
-        return Json::deserialize(json, *value);
+        Json::deserialize(json, *value);
     }
 };
 
@@ -96,7 +95,7 @@ struct JsonAdapter<T *> : PtrAdapter<T *>
 };
 
 /**
- * @brief Allow JSON handling for std::unique_ptr
+ * @brief Allow JSON handling for std::unique_ptr.
  *
  * @tparam T Referenced type.
  */
@@ -104,27 +103,28 @@ template<typename T>
 struct JsonAdapter<std::unique_ptr<T>> : PtrAdapter<std::unique_ptr<T>>
 {
     /**
-     * @brief Deserialize using std::make_unique<T> and JsonAdapter<T>.
+     * @brief Create value using make_unique<T>() if empty.
      *
      * @param json Input JSON.
-     * @param value Ouput value.
-     * @return true Success.
-     * @return false Failure.
+     * @param value Output value.
      */
-    static bool deserialize(const JsonValue &json, std::unique_ptr<T> &value)
+    static void deserialize(const JsonValue &json, std::unique_ptr<T> &value)
     {
-        T buffer = {};
-        if (!Json::deserialize(json, buffer))
+        if (json.isEmpty())
         {
-            return false;
+            value = {};
+            return;
         }
-        value = std::make_unique<T>(std::move(buffer));
-        return true;
+        if (!value)
+        {
+            value = std::make_unique<T>();
+        }
+        Json::deserialize(json, *value);
     }
 };
 
 /**
- * @brief Allow JSON handling for std::shared_ptr
+ * @brief Allow JSON handling for std::shared_ptr.
  *
  * @tparam T Referenced type.
  */
@@ -132,27 +132,28 @@ template<typename T>
 struct JsonAdapter<std::shared_ptr<T>> : PtrAdapter<std::shared_ptr<T>>
 {
     /**
-     * @brief Deserialize using std::make_shared<T> and JsonAdapter<T>.
+     * @brief Create value using make_shared<T>() if empty.
      *
      * @param json Input JSON.
-     * @param value Ouput value.
-     * @return true Success.
-     * @return false Failure.
+     * @param value Output value.
      */
-    static bool deserialize(const JsonValue &json, std::shared_ptr<T> &value)
+    static void deserialize(const JsonValue &json, std::shared_ptr<T> &value)
     {
-        T buffer = {};
-        if (!Json::deserialize(json, buffer))
+        if (json.isEmpty())
         {
-            return false;
+            value = {};
+            return;
         }
-        value = std::make_shared<T>(std::move(buffer));
-        return true;
+        if (!value)
+        {
+            value = std::make_shared<T>();
+        }
+        Json::deserialize(json, *value);
     }
 };
 
 /**
- * @brief Allow JSON handling for std::optional
+ * @brief Allow JSON handling for std::optional.
  *
  * @tparam T Referenced type.
  */
@@ -160,24 +161,23 @@ template<typename T>
 struct JsonAdapter<std::optional<T>> : PtrAdapter<std::optional<T>>
 {
     /**
-     * @brief Deserialize and fill an optional value of T using JsonAdapter<T>.
-     *
-     * The output value will be left unchanged if fails.
+     * @brief Emplace object using value.emplace() if empty.
      *
      * @param json Input JSON.
-     * @param value Ouput value.
-     * @return true Success.
-     * @return false Failure.
+     * @param value Output value.
      */
-    static bool deserialize(const JsonValue &json, std::optional<T> &value)
+    static void deserialize(const JsonValue &json, std::optional<T> &value)
     {
-        T buffer = {};
-        if (!Json::deserialize(json, buffer))
+        if (json.isEmpty())
         {
-            return false;
+            value = std::nullopt;
+            return;
         }
-        value = std::move(buffer);
-        return true;
+        if (!value)
+        {
+            value.emplace();
+        }
+        Json::deserialize(json, *value);
     }
 };
 } // namespace brayns

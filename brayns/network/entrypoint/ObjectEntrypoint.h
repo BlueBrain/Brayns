@@ -65,7 +65,7 @@ public:
      */
     virtual JsonSchema getResultSchema() const override
     {
-        return Json::getSchema(_object);
+        return Json::getSchema<ObjectType>();
     }
 
     /**
@@ -109,7 +109,7 @@ public:
      */
     virtual JsonSchema getParamsSchema() const override
     {
-        return Json::getSchema(_object);
+        return Json::getSchema<ObjectType>();
     }
 
     /**

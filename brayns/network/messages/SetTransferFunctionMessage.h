@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,23 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/network/adapters/ClipPlaneAdapter.h>
+#pragma once
+
+#include <brayns/json/JsonBuffer.h>
+#include <brayns/json/JsonObjectMacro.h>
+
+#include <brayns/network/adapters/TransferFunctionAdapter.h>
 
 namespace brayns
 {
-ClipPlane::ClipPlane(const uint32_t id, const Vector4f &coefficients)
-    : _id(id)
-    , _coefficents(coefficients)
-{
-}
-
-uint32_t ClipPlane::getID() const noexcept
-{
-    return _id;
-}
-
-const Vector4f &ClipPlane::getPlane() const noexcept
-{
-    return _coefficents;
-}
-}
+BRAYNS_JSON_OBJECT_BEGIN(SetTransferFunctionMessage)
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Model ID", Required())
+BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<TransferFunction>, transfer_function, "Transfer function", Required())
+BRAYNS_JSON_OBJECT_END()
+} // namespace brayns

@@ -168,19 +168,19 @@ public:
         auto blob = BlobLoader::load(params, data, progress);
         auto parameters = params.loadParameters;
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
-        auto descriptors = loader.loadFromBlob(std::move(blob), {callback}, parameters);
+        auto models = loader.loadFromBlob(std::move(blob), {callback}, parameters);
 
         brayns::ModelLoadParameters loadParameters;
         loadParameters.type = brayns::ModelLoadParameters::LoadType::FROM_BLOB;
         loadParameters.loaderName = params.loaderName;
         loadParameters.loadParameters = parameters;
 
-        std::vector<brayns::ModelInstanceProxy> result;
-        result.reserve(descriptors.size());
-        for (auto &model : descriptors)
+        std::vector<brayns::ModelInstance *> result;
+        result.reserve(models.size());
+        for (auto &model : models)
         {
             auto &instance = _modelManager.addModel(loadParameters, std::move(model));
-            result.emplace_back(instance);
+            result.push_back(&instance);
         }
 
         request.reply(result);

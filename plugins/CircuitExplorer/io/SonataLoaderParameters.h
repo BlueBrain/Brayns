@@ -101,7 +101,7 @@ BRAYNS_JSON_OBJECT_ENTRY(
     sonataloader::ReportType,
     report_type,
     "Type of report to load for the given node population.",
-    brayns::Default(sonataloader::ReportType::NONE))
+    brayns::Default("none"))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     report_name,

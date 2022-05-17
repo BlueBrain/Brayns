@@ -33,31 +33,26 @@ template<>
 struct JsonAdapter<JsonSchema>
 {
     /**
-     * @brief Return the schema itself.
+     * @brief Return the schema of an object with any additional properties.
      *
-     * @param schema Input schema.
      * @return JsonSchema Output schema.
      */
-    static JsonSchema getSchema(const JsonSchema &schema);
+    static JsonSchema getSchema();
 
     /**
      * @brief Serialize a JSON schema as a JSON object
      *
      * @param value Input value.
      * @param json Ouput JSON.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool serialize(const JsonSchema &value, JsonValue &json);
+    static void serialize(const JsonSchema &value, JsonValue &json);
 
     /**
      * @brief Deserialize a JSON schema from a JSON object.
      *
      * @param json Input JSON.
      * @param value Ouput value.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool deserialize(const JsonValue &json, JsonSchema &value);
+    static void deserialize(const JsonValue &json, JsonSchema &value);
 };
 } // namespace brayns

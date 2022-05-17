@@ -34,7 +34,7 @@
 
 namespace brayns
 {
-class AddModelEntrypoint : public Entrypoint<FileLoadParameters, std::vector<ModelInstanceProxy>>
+class AddModelEntrypoint : public Entrypoint<FileLoadParameters, std::vector<ModelInstance *>>
 {
 public:
     AddModelEntrypoint(

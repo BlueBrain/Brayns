@@ -31,11 +31,7 @@ namespace brayns
 {
 #define BRAYNS_LIGHT_PROPERTIES() \
     BRAYNS_JSON_ADAPTER_GETSET("color", getColor, setColor, "Light color (Normalized RGB)") \
-    BRAYNS_JSON_ADAPTER_GETSET( \
-        "intensity", \
-        getIntensity, \
-        setIntensity, \
-        "Light intensity (Will be clamped on the range [0.0, +infinity)") \
+    BRAYNS_JSON_ADAPTER_GETSET("intensity", getIntensity, setIntensity, "Light intensity", Minimum(0.0)) \
     BRAYNS_JSON_ADAPTER_GETSET("visible", isVisible, setVisible, "Sets wether the light should be visible on the scene")
 
 BRAYNS_JSON_ADAPTER_BEGIN(AmbientLight)
@@ -65,5 +61,7 @@ BRAYNS_JSON_ADAPTER_GETSET(
     "Sets the horizontal displacement vector used to compute the bottom right corner")
 BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
+
+#undef BRAYNS_LIGHT_PROPERTIES
 
 } // namespace brayns

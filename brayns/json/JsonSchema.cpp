@@ -84,6 +84,11 @@ void JsonSchemaHelper::allowAnyAdditionalProperty(JsonSchema &schema)
     schema.additionalProperties = {{}};
 }
 
+JsonSchema JsonSchemaHelper::getWildcardSchema()
+{
+    return {};
+}
+
 JsonSchema JsonSchemaHelper::getNullSchema()
 {
     JsonSchema schema;

@@ -55,7 +55,7 @@ void JsonSchemaOptions::add(JsonSchema &schema, const JsonOptions &options)
     OptionalHelper::trySet(schema.maximum, options.maximum);
     OptionalHelper::trySet(schema.minItems, options.minItems);
     OptionalHelper::trySet(schema.maxItems, options.maxItems);
-    OptionalHelper::trySet(schema.defaultValue, options.defaultValue);
+    schema.defaultValue = options.defaultValue;
 }
 
 Title::Title(std::string title)

@@ -29,16 +29,17 @@
 namespace brayns
 {
 template<typename T>
-class AddGeometryEntrypoint : public Entrypoint<std::vector<AddGeometryProxy<T>>, ModelInstanceProxy>
+class AddGeometryEntrypoint : public Entrypoint<std::vector<GeometryWithColor<T>>, ModelInstance>
 {
 public:
+    using Request = typename Entrypoint<std::vector<GeometryWithColor<T>>, ModelInstance>::Request;
+
     AddGeometryEntrypoint(Scene &scene)
         : _scene(scene)
     {
     }
 
-    void onRequest(
-        const typename Entrypoint<std::vector<AddGeometryProxy<T>>, ModelInstanceProxy>::Request &request) override
+    void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         auto numGeometries = params.size();
@@ -48,9 +49,9 @@ public:
 
         for (size_t i = 0; i < numGeometries; ++i)
         {
-            auto &proxy = params[i];
-            geometries[i] = std::move(proxy.geometry);
-            colors[i] = std::move(proxy.color);
+            auto &param = params[i];
+            geometries[i] = std::move(param.geometry);
+            colors[i] = std::move(param.color);
         }
 
         auto newModel = std::make_unique<Model>();
@@ -62,8 +63,7 @@ public:
         // Need to compute bounds here to make sure the bounds will be updated for the next call (which may need them)
         _scene.computeBounds();
 
-        ModelInstanceProxy result(instance);
-        request.reply(result);
+        request.reply(instance);
     }
 
 private:

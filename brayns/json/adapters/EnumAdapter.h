@@ -26,7 +26,6 @@
 
 #include <brayns/utils/EnumUtils.h>
 
-#include "ArrayAdapter.h"
 #include "PrimitiveAdapter.h"
 
 namespace brayns
@@ -90,11 +89,11 @@ public:
      */
     const T *getValue(const std::string &name) const
     {
-        for (const auto &pair : _values)
+        for (const auto &[key, value] : _values)
         {
-            if (pair.first == name)
+            if (key == name)
             {
-                return &pair.second;
+                return &value;
             }
         }
         return nullptr;
@@ -108,11 +107,11 @@ public:
      */
     const std::string *getName(const T &value) const
     {
-        for (const auto &pair : _values)
+        for (const auto &[key, item] : _values)
         {
-            if (pair.second == value)
+            if (item == value)
             {
-                return &pair.first;
+                return &key;
             }
         }
         return nullptr;
@@ -149,16 +148,7 @@ struct EnumReflector
 template<typename T>
 struct EnumAdapter
 {
-    /**
-     * @brief Create and store a static instance of EnumMap<T>.
-     *
-     * @return const EnumMap<T>& Reference to the static EnumMap<T> instance.
-     */
-    static const EnumMap<T> &getEnumMap()
-    {
-        static const EnumMap<T> values = EnumReflector<T>::reflect();
-        return values;
-    }
+    static inline const EnumMap<T> values = EnumReflector<T>::reflect();
 
     /**
      * @brief Create an enum JSON schema.
@@ -168,15 +158,14 @@ struct EnumAdapter
      *
      * @return JsonSchema Schema of enum type.
      */
-    static JsonSchema getSchema(const T &)
+    static JsonSchema getSchema()
     {
         JsonSchema schema;
         schema.type = JsonType::String;
-        auto &enums = getEnumMap();
-        schema.enums.reserve(enums.getSize());
-        for (const auto &pair : enums)
+        auto size = values.getSize();
+        schema.enums.reserve(size);
+        for (const auto &[name, value] : values)
         {
-            auto &name = pair.first;
             schema.enums.push_back(name);
         }
         return schema;
@@ -185,21 +174,17 @@ struct EnumAdapter
     /**
      * @brief Serialize an enum value using its name.
      *
-     * @param value Value to serialize.
+     * @param value Input value.
      * @param json Output JSON.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool serialize(const T &value, JsonValue &json)
+    static void serialize(const T &value, JsonValue &json)
     {
-        auto &enums = getEnumMap();
-        auto name = enums.getName(value);
+        auto name = values.getName(value);
         if (!name)
         {
-            return false;
+            throw std::runtime_error("Invalid enum value");
         }
         json = *name;
-        return true;
     }
 
     /**
@@ -207,24 +192,16 @@ struct EnumAdapter
      *
      * @param json Input JSON.
      * @param value Output value.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool deserialize(const JsonValue &json, T &value)
+    static void deserialize(const JsonValue &json, T &value)
     {
-        std::string name;
-        if (!Json::deserialize(json, name))
-        {
-            return false;
-        }
-        auto &enums = getEnumMap();
-        auto newValue = enums.getValue(name);
+        auto name = Json::deserialize<std::string>(json);
+        auto newValue = values.getValue(name);
         if (!newValue)
         {
-            return false;
+            throw std::runtime_error("Invalid enum name: '" + name + "'");
         }
         value = *newValue;
-        return true;
     }
 };
 
@@ -245,8 +222,8 @@ struct GetEnumName
     template<typename T>
     static const std::string &of(const T &value)
     {
-        auto &enumMap = EnumAdapter<T>::getEnumMap();
-        auto name = enumMap.getName(value);
+        auto &values = EnumAdapter<T>::values;
+        auto name = values.getName(value);
         if (!name)
         {
             throw std::runtime_error("Unknown enum value");

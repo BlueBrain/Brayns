@@ -43,67 +43,60 @@ struct GlmAdapter
      *
      * @return JsonSchema JSON schema of T.
      */
-    static JsonSchema getSchema(const T &)
+    static JsonSchema getSchema()
     {
         JsonSchema schema;
         schema.type = JsonType::Array;
         schema.items = {Json::getSchema<ValueType>()};
-        schema.minItems = size_t(T::length());
-        schema.maxItems = size_t(T::length());
+        schema.minItems = static_cast<size_t>(T::length());
+        schema.maxItems = static_cast<size_t>(T::length());
         return schema;
     }
 
     /**
      * @brief Serialize value in json.
      *
-     * Derialize all elements of the GLM type using
-     * JsonAdapter<T::value_type>::serialize and put the array inside the
-     * provided JsonValue. If it fails, json is left unchanged.
+     * Derialize all elements of the GLM type using JsonAdapter<T::value_type>.
      *
      * @param value Input value.
      * @param json Output JSON.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool serialize(const T &value, JsonValue &json)
+    static void serialize(const T &value, JsonValue &json)
     {
         auto array = Poco::makeShared<JsonArray>();
         for (glm::length_t i = 0; i < T::length(); ++i)
         {
-            JsonValue jsonItem;
-            Json::serialize(value[i], jsonItem);
+            auto jsonItem = Json::serialize(value[i]);
             array->add(jsonItem);
         }
         json = array;
-        return true;
     }
 
     /**
      * @brief Deserialize json in value.
      *
-     * Deserialize all elements in the provided GLM type using
-     * JsonAdapter<T::value_type>::deserialize. If the json is not a
-     * JsonArray::Ptr, the value is left unchanged, if its size is not S, only
-     * the common indices will be updated in min(T::length(), array.size()).
+     * Deserialize all elements using JsonAdapter<T::value_type>.
      *
      * @param json Input JSON.
      * @param value Output value.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool deserialize(const JsonValue &json, T &value)
+    static void deserialize(const JsonValue &json, T &value)
     {
         auto array = JsonExtractor::extractArray(json);
         if (!array)
         {
-            return false;
+            throw std::runtime_error("Not a JSON array");
         }
-        auto size = std::min(T::length(), glm::length_t(array->size()));
-        for (glm::length_t i = 0; i < size; ++i)
+        auto size = static_cast<glm::length_t>(array->size());
+        if (size != T::length())
         {
-            Json::deserialize(array->get(i), value[i]);
+            throw std::runtime_error("Invalid array size");
         }
-        return true;
+        glm::length_t i = 0;
+        for (const auto &item : *array)
+        {
+            Json::deserialize(item, value[i++]);
+        }
     }
 };
 

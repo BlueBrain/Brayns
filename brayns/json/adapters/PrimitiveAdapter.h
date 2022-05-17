@@ -43,7 +43,7 @@ struct PrimitiveAdapter
      *
      * @return JsonSchema Schema.
      */
-    static JsonSchema getSchema(const T &)
+    static JsonSchema getSchema()
     {
         JsonSchema schema;
         schema.type = GetJsonType::fromPrimitive<T>();
@@ -57,33 +57,27 @@ struct PrimitiveAdapter
     /**
      * @brief Serialize contained value using JSON backend.
      *
-     * @param value Value to serialize.
-     * @param json Output JsonValue.
-     * @return true Success,
-     * @return false Failure.
+     * @param value Input value.
+     * @param json Output JSON.
      */
-    static bool serialize(const T &value, JsonValue &json)
+    static void serialize(const T &value, JsonValue &json)
     {
         json = value;
-        return true;
     }
 
     /**
      * @brief Deserialize contained value using JSON backend.
      *
-     * @param json JsonValue to deserialize.
+     * @param json Input JSON.
      * @param value Output value.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool deserialize(const JsonValue &json, T &value)
+    static void deserialize(const JsonValue &json, T &value)
     {
         if (!json.isNumeric() && !json.isString())
         {
-            return false;
+            throw std::runtime_error("Not a primitive type");
         }
         value = json.convert<T>();
-        return true;
     }
 };
 
@@ -100,23 +94,20 @@ struct FloatAdapter : PrimitiveAdapter<T>
      *
      * @param value Input value.
      * @param json Ouput JSON.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool serialize(T value, JsonValue &json)
+    static void serialize(T value, JsonValue &json)
     {
         if (std::isinf(value))
         {
             json = std::numeric_limits<T>::max();
-            return true;
+            return;
         }
         if (std::isnan(value))
         {
             json = T{};
-            return true;
+            return;
         }
         json = value;
-        return true;
     }
 };
 

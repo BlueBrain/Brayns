@@ -41,20 +41,18 @@ JsonValue Json::parse(const std::string &json)
     return parser.parse(json);
 }
 
-JsonSchema JsonAdapter<JsonValue>::getSchema(const JsonValue &)
+JsonSchema JsonAdapter<JsonValue>::getSchema()
 {
-    return {};
+    return JsonSchemaHelper::getWildcardSchema();
 }
 
-bool JsonAdapter<JsonValue>::serialize(const JsonValue &value, JsonValue &json)
+void JsonAdapter<JsonValue>::serialize(const JsonValue &value, JsonValue &json)
 {
     json = value;
-    return true;
 }
 
-bool JsonAdapter<JsonValue>::deserialize(const JsonValue &json, JsonValue &value)
+void JsonAdapter<JsonValue>::deserialize(const JsonValue &json, JsonValue &value)
 {
     value = json;
-    return true;
 }
 } // namespace brayns

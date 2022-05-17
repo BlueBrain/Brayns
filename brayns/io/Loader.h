@@ -181,7 +181,9 @@ private:
     {
         T inputParams;
         if (input.isEmpty())
+        {
             Json::deserialize<T>(Json::parse("{}"), inputParams);
+        }
         else
         {
             const auto errors = JsonSchemaValidator::validate(input, _parameterSchema);
@@ -207,9 +209,9 @@ struct EmptyLoaderParameters
 template<>
 struct JsonAdapter<EmptyLoaderParameters>
 {
-    static JsonSchema getSchema(const EmptyLoaderParameters &params);
-    static bool serialize(const EmptyLoaderParameters &params, JsonValue &value);
-    static bool deserialize(const JsonValue &value, EmptyLoaderParameters &params);
+    static JsonSchema getSchema();
+    static void serialize(const EmptyLoaderParameters &params, JsonValue &value);
+    static void deserialize(const JsonValue &value, EmptyLoaderParameters &params);
 };
 
 /**

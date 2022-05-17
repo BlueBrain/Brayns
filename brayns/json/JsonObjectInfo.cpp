@@ -28,15 +28,15 @@ namespace
 class JsonObjectHelper
 {
 public:
-    static brayns::JsonSchema getSchemaWithOptions(const brayns::JsonObjectProperty &property, const void *message)
+    static brayns::JsonSchema getSchemaWithOptions(const brayns::JsonObjectProperty &property)
     {
-        auto schema = property.getSchema(message);
+        auto schema = property.getSchema();
         auto &options = property.options;
         brayns::JsonSchemaOptions::add(schema, options);
         return schema;
     }
 
-    static void add(const brayns::JsonObjectProperty &property, brayns::JsonSchema &schema, const void *message)
+    static void add(const brayns::JsonObjectProperty &property, brayns::JsonSchema &schema)
     {
         auto &key = property.name;
         if (isRequired(property))
@@ -45,7 +45,7 @@ public:
             required.push_back(key);
         }
         auto &properties = schema.properties;
-        properties[key] = getSchemaWithOptions(property, message);
+        properties[key] = getSchemaWithOptions(property);
     }
 
     static brayns::JsonValue extract(const brayns::JsonObjectProperty &property, const brayns::JsonObject &object)
@@ -57,12 +57,7 @@ public:
             return json;
         }
         auto &options = property.options;
-        auto &defaultValue = options.defaultValue;
-        if (!defaultValue)
-        {
-            return json;
-        }
-        return *defaultValue;
+        return options.defaultValue;
     }
 
     static bool isRequired(const brayns::JsonObjectProperty &property)
@@ -85,6 +80,19 @@ public:
         auto &writeOnly = options.writeOnly;
         return writeOnly.value_or(false);
     }
+
+    static bool canBeOmitted(const brayns::JsonObjectProperty &property, const brayns::JsonValue &value)
+    {
+        if (!value.isEmpty())
+        {
+            return false;
+        }
+        if (isRequired(property))
+        {
+            return false;
+        }
+        return true;
+    }
 };
 } // namespace
 
@@ -95,19 +103,19 @@ JsonObjectInfo::JsonObjectInfo(std::string title)
 {
 }
 
-JsonSchema JsonObjectInfo::getSchema(const void *message) const
+JsonSchema JsonObjectInfo::getSchema() const
 {
     JsonSchema schema;
     schema.title = _title;
     schema.type = JsonType::Object;
     for (const auto &property : _properties)
     {
-        JsonObjectHelper::add(property, schema, message);
+        JsonObjectHelper::add(property, schema);
     }
     return schema;
 }
 
-bool JsonObjectInfo::serialize(const void *message, JsonValue &json) const
+void JsonObjectInfo::serialize(const void *message, JsonValue &json) const
 {
     auto object = Poco::makeShared<JsonObject>();
     for (const auto &property : _properties)
@@ -116,22 +124,23 @@ bool JsonObjectInfo::serialize(const void *message, JsonValue &json) const
         {
             continue;
         }
-        JsonValue child;
-        if (property.serialize(message, child))
+        JsonValue item;
+        property.serialize(message, item);
+        if (JsonObjectHelper::canBeOmitted(property, item))
         {
-            object->set(property.name, child);
+            continue;
         }
+        object->set(property.name, item);
     }
     json = object;
-    return true;
 }
 
-bool JsonObjectInfo::deserialize(const JsonValue &json, void *message) const
+void JsonObjectInfo::deserialize(const JsonValue &json, void *message) const
 {
     auto object = JsonExtractor::extractObject(json);
     if (!object)
     {
-        return false;
+        throw std::runtime_error("Not a JSON object");
     }
     for (const auto &property : _properties)
     {
@@ -139,10 +148,13 @@ bool JsonObjectInfo::deserialize(const JsonValue &json, void *message) const
         {
             continue;
         }
-        auto child = JsonObjectHelper::extract(property, *object);
-        property.deserialize(child, message);
+        auto item = JsonObjectHelper::extract(property, *object);
+        if (JsonObjectHelper::canBeOmitted(property, item))
+        {
+            continue;
+        }
+        property.deserialize(item, message);
     }
-    return true;
 }
 
 void JsonObjectInfo::addProperty(JsonObjectProperty property)

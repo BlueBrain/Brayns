@@ -14,7 +14,6 @@ set(BRAYNSNETWORK_HEADERS
   adapters/LoaderInfoAdapter.h
   adapters/MaterialAdapter.h
   adapters/ModelInstanceAdapter.h
-  adapters/ModelTransferFunctionAdapter.h
   adapters/RendererAdapter.h
   adapters/SimulationParametersAdapter.h
   adapters/TransferFunctionAdapter.h
@@ -41,7 +40,6 @@ set(BRAYNSNETWORK_HEADERS
   entrypoint/EntrypointRequest.h
   entrypoint/IEntrypoint.h
   entrypoint/ObjectEntrypoint.h
-  entrypoint/PropertyObjectEntrypoint.h
   entrypoints/AddClipPlaneEntrypoint.h
   entrypoints/AddGeometryEntrypoint.h
   entrypoints/AddLightEntrypoint.h
@@ -89,11 +87,15 @@ set(BRAYNSNETWORK_HEADERS
   messages/ImageBase64Message.h
   messages/ImageSettingsMessage.h
   messages/InspectMessage.h
+  messages/MaterialMessage.h
   messages/RemoveClipPlanesMessage.h
   messages/RemoveLightsMessage.h
   messages/RemoveModelMessage.h
+  messages/SceneMessage.h
   messages/SchemaMessage.h
+  messages/SetTransferFunctionMessage.h
   messages/SnapshotMessage.h
+  messages/UpdateModelMessage.h
   messages/VersionMessage.h
   plugin/NetworkManager.h
   socket/ClientSocket.h
@@ -112,10 +114,6 @@ set(BRAYNSNETWORK_HEADERS
 )
   
 set(BRAYNSNETWORK_SOURCES
-  adapters/ClipPlaneAdapter.cpp
-  adapters/ModelInstanceAdapter.cpp
-  adapters/ModelTransferFunctionAdapter.cpp
-  adapters/SceneAdapter.cpp
   binary/BinaryManager.cpp
   client/ClientBuffer.cpp
   client/ClientManager.cpp

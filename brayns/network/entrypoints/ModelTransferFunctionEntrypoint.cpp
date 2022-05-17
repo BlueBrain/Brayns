@@ -77,8 +77,23 @@ std::string SetModelTransferFunctionEntrypoint::getDescription() const
 
 void SetModelTransferFunctionEntrypoint::onRequest(const Request &request)
 {
-    ModelTransferFunction transferFunction(_modelManager);
-    request.getParams(transferFunction);
+    auto params = request.getParams();
+    auto modelId = params.id;
+    auto &buffer = params.transfer_function;
+    auto &modelInstance = _modelManager.getModelInstance(modelId);
+    auto &model = modelInstance.getModel();
+
+    try
+    {
+        auto &component = model.getComponent<TransferFunctionComponent>();
+        auto &transferFunction = component.getTransferFunction();
+        buffer.extract(transferFunction);
+    }
+    catch (...)
+    {
+        throw InvalidRequestException("The requested model does not have a transfer function");
+    }
+
     request.reply(EmptyMessage());
 }
 } // namespace brayns

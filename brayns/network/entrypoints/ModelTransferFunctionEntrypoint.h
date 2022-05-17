@@ -23,10 +23,10 @@
 
 #include <brayns/engine/Scene.h>
 
-#include <brayns/network/adapters/ModelTransferFunctionAdapter.h>
 #include <brayns/network/adapters/TransferFunctionAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetModelMessage.h>
+#include <brayns/network/messages/SetTransferFunctionMessage.h>
 
 namespace brayns
 {
@@ -43,7 +43,7 @@ private:
     SceneModelManager &_modelManager;
 };
 
-class SetModelTransferFunctionEntrypoint : public Entrypoint<ModelTransferFunction, EmptyMessage>
+class SetModelTransferFunctionEntrypoint : public Entrypoint<SetTransferFunctionMessage, EmptyMessage>
 {
 public:
     SetModelTransferFunctionEntrypoint(SceneModelManager &modelManager);
