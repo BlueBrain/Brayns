@@ -210,8 +210,8 @@ template<>
 struct JsonAdapter<EmptyLoaderParameters>
 {
     static JsonSchema getSchema();
-    static bool serialize(const EmptyLoaderParameters &params, JsonValue &value);
-    static bool deserialize(const JsonValue &value, EmptyLoaderParameters &params);
+    static void serialize(const EmptyLoaderParameters &params, JsonValue &value);
+    static void deserialize(const JsonValue &value, EmptyLoaderParameters &params);
 };
 
 /**

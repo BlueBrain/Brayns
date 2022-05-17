@@ -135,7 +135,7 @@ struct JsonOptions
      * @brief Property default value.
      *
      */
-    std::optional<JsonValue> defaultValue;
+    JsonValue defaultValue;
 
     /**
      * @brief Construct an Empty option set.

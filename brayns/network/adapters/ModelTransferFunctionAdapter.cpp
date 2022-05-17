@@ -45,7 +45,7 @@ void ModelTransferFunction::setTransferFunction(const JsonBuffer<TransferFunctio
     {
         auto &tfComponent = model.getComponent<TransferFunctionComponent>();
         auto &transferFunction = tfComponent.getTransferFunction();
-        buffer.deserialize(transferFunction);
+        buffer.extract(transferFunction);
     }
     catch (...)
     {

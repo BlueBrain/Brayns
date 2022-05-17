@@ -47,8 +47,8 @@ struct JsonObjectProperty
     std::string name;
     JsonOptions options;
     std::function<JsonSchema()> getSchema;
-    std::function<bool(const void *, JsonValue &)> serialize;
-    std::function<bool(const JsonValue &, void *)> deserialize;
+    std::function<void(const void *, JsonValue &)> serialize;
+    std::function<void(const JsonValue &, void *)> deserialize;
 };
 
 /**
@@ -62,8 +62,8 @@ public:
     JsonObjectInfo(std::string title);
 
     JsonSchema getSchema() const;
-    bool serialize(const void *message, JsonValue &json) const;
-    bool deserialize(const JsonValue &json, void *message) const;
+    void serialize(const void *message, JsonValue &json) const;
+    void deserialize(const JsonValue &json, void *message) const;
     void addProperty(JsonObjectProperty property);
 
 private:

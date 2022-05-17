@@ -185,22 +185,20 @@ JsonSchema JsonAdapter<JsonSchema>::getSchema()
     return schema;
 }
 
-bool JsonAdapter<JsonSchema>::serialize(const JsonSchema &value, JsonValue &json)
+void JsonAdapter<JsonSchema>::serialize(const JsonSchema &value, JsonValue &json)
 {
     auto object = Poco::makeShared<JsonObject>();
     JsonSchemaSerializer::serialize(value, *object);
     json = object;
-    return true;
 }
 
-bool JsonAdapter<JsonSchema>::deserialize(const JsonValue &json, JsonSchema &value)
+void JsonAdapter<JsonSchema>::deserialize(const JsonValue &json, JsonSchema &value)
 {
     auto object = JsonExtractor::extractObject(json);
     if (!object)
     {
-        return false;
+        throw std::runtime_error("Not a JSON object");
     }
     JsonSchemaDeserializer::deserialize(*object, value);
-    return true;
 }
 } // namespace brayns

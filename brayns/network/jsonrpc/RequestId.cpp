@@ -102,39 +102,37 @@ JsonSchema JsonAdapter<RequestId>::getSchema()
     return schema;
 }
 
-bool JsonAdapter<RequestId>::serialize(const RequestId &value, JsonValue &json)
+void JsonAdapter<RequestId>::serialize(const RequestId &value, JsonValue &json)
 {
     if (value.isInt())
     {
         json = value.toInt();
-        return true;
+        return;
     }
     if (value.isString())
     {
         json = value.toString();
-        return true;
+        return;
     }
-    return false;
 }
 
-bool JsonAdapter<RequestId>::deserialize(const JsonValue &json, RequestId &value)
+void JsonAdapter<RequestId>::deserialize(const JsonValue &json, RequestId &value)
 {
     if (json.isEmpty())
     {
         value = {};
-        return true;
+        return;
     }
     if (json.isInteger() && !json.isBoolean())
     {
         value = json.convert<int64_t>();
-        return true;
+        return;
     }
     if (json.isString())
     {
         value = json.extract<std::string>();
-        return true;
+        return;
     }
-    return false;
 }
 } // namespace brayns
 

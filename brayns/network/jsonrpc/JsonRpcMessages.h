@@ -113,18 +113,16 @@ public:
         return JsonSchemaHelper::getNullSchema();
     }
 
-    static bool serialize(const EmptyMessage &value, JsonValue &json)
+    static void serialize(const EmptyMessage &value, JsonValue &json)
     {
         (void)value;
         json = {};
-        return true;
     }
 
-    static bool deserialize(const JsonValue &json, EmptyMessage &value)
+    static void deserialize(const JsonValue &json, EmptyMessage &value)
     {
         (void)json;
         (void)value;
-        return true;
     }
 };
 } // namespace brayns

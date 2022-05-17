@@ -59,55 +59,38 @@ struct MapAdapter
     /**
      * @brief Create a JSON object in json with all key-value pairs from value.
      *
-     * @param value Map-like object to serialize.
+     * @param value Input value.
      * @param json Output JSON.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool serialize(const T &value, JsonValue &json)
+    static void serialize(const T &value, JsonValue &json)
     {
         auto object = Poco::makeShared<JsonObject>();
-        for (const auto &pair : value)
+        for (const auto &[key, item] : value)
         {
-            JsonValue jsonItem;
-            if (!Json::serialize(pair.second, jsonItem))
-            {
-                return false;
-            }
-            object->set(pair.first, jsonItem);
+            auto jsonItem = Json::serialize(item);
+            object->set(key, jsonItem);
         }
         json = object;
-        return true;
     }
 
     /**
      * @brief Extract a JsonObject::Ptr from json and serialize in value.
      *
-     * If successful, value will contains all key-value pairs from the JSON
-     * object, otherwise it will be unchanged.
-     *
      * @param json Input JSON.
-     * @param value Ouput map-like object.
-     * @return true Success.
-     * @return false Failure.
+     * @param value Ouput value.
      */
-    static bool deserialize(const JsonValue &json, T &value)
+    static void deserialize(const JsonValue &json, T &value)
     {
         auto object = JsonExtractor::extractObject(json);
         if (!object)
         {
-            return false;
+            throw std::runtime_error("Not a JSON object");
         }
-        T buffer;
-        for (const auto &pair : *object)
+        value.clear();
+        for (const auto &[key, item] : *object)
         {
-            if (!Json::deserialize(pair.second, buffer[pair.first]))
-            {
-                return false;
-            }
+            Json::deserialize(item, value[key]);
         }
-        value = std::move(buffer);
-        return true;
     }
 };
 

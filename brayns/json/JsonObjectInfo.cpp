@@ -57,12 +57,7 @@ public:
             return json;
         }
         auto &options = property.options;
-        auto &defaultValue = options.defaultValue;
-        if (!defaultValue)
-        {
-            return json;
-        }
-        return *defaultValue;
+        return options.defaultValue;
     }
 
     static bool isRequired(const brayns::JsonObjectProperty &property)
@@ -107,7 +102,7 @@ JsonSchema JsonObjectInfo::getSchema() const
     return schema;
 }
 
-bool JsonObjectInfo::serialize(const void *message, JsonValue &json) const
+void JsonObjectInfo::serialize(const void *message, JsonValue &json) const
 {
     auto object = Poco::makeShared<JsonObject>();
     for (const auto &property : _properties)
@@ -117,21 +112,22 @@ bool JsonObjectInfo::serialize(const void *message, JsonValue &json) const
             continue;
         }
         JsonValue child;
-        if (property.serialize(message, child))
+        property.serialize(message, child);
+        if (child.isEmpty())
         {
-            object->set(property.name, child);
+            continue;
         }
+        object->set(property.name, child);
     }
     json = object;
-    return true;
 }
 
-bool JsonObjectInfo::deserialize(const JsonValue &json, void *message) const
+void JsonObjectInfo::deserialize(const JsonValue &json, void *message) const
 {
     auto object = JsonExtractor::extractObject(json);
     if (!object)
     {
-        return false;
+        throw std::runtime_error("Not a JSON object");
     }
     for (const auto &property : _properties)
     {
@@ -140,9 +136,12 @@ bool JsonObjectInfo::deserialize(const JsonValue &json, void *message) const
             continue;
         }
         auto child = JsonObjectHelper::extract(property, *object);
+        if (child.isEmpty())
+        {
+            continue;
+        }
         property.deserialize(child, message);
     }
-    return true;
 }
 
 void JsonObjectInfo::addProperty(JsonObjectProperty property)

@@ -29,8 +29,9 @@ namespace brayns
 /**
  * @brief Default JsonAdapter intrusive implementation.
  *
- * Use methods getSchema(), serialize(JsonValue&) and deserialize(const
- * JsonValue&) of the instance of T to reflect JSON info from it.
+ * Use static method T::getSchema() to get the schema.
+ * Use value.serialize(json) to serialize.
+ * Use value.deserialize(json) to deserialize.
  *
  * @tparam T Type to reflect.
  */
@@ -52,12 +53,10 @@ struct JsonAdapter
      *
      * @param value Input value.
      * @param json Output JSON.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool serialize(const T &value, JsonValue &json)
+    static void serialize(const T &value, JsonValue &json)
     {
-        return value.serialize(json);
+        value.serialize(json);
     }
 
     /**
@@ -65,12 +64,10 @@ struct JsonAdapter
      *
      * @param json Input JSON.
      * @param value Output value.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool deserialize(const JsonValue &json, T &value)
+    static void deserialize(const JsonValue &json, T &value)
     {
-        return value.deserialize(json);
+        value.deserialize(json);
     }
 };
 } // namespace brayns

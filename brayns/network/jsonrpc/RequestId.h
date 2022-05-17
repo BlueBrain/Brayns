@@ -68,8 +68,8 @@ template<>
 struct JsonAdapter<RequestId>
 {
     static JsonSchema getSchema();
-    static bool serialize(const RequestId &value, JsonValue &json);
-    static bool deserialize(const JsonValue &json, RequestId &value);
+    static void serialize(const RequestId &value, JsonValue &json);
+    static void deserialize(const JsonValue &json, RequestId &value);
 };
 } // namespace brayns
 

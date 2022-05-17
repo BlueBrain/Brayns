@@ -88,6 +88,7 @@ set(BRAYNSNETWORK_HEADERS
   messages/ImageBase64Message.h
   messages/ImageSettingsMessage.h
   messages/InspectMessage.h
+  messages/MaterialMessage.h
   messages/RemoveClipPlanesMessage.h
   messages/RemoveLightsMessage.h
   messages/RemoveModelMessage.h

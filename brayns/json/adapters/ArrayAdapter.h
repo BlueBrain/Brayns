@@ -59,61 +59,43 @@ struct ArrayAdapter
      * @brief Serialize value in json.
      *
      * Iterate over value using begin(value) and end(value) to fill a JSON array
-     * with contained item (must be reflectable). In case of failure, json is
-     * left unchanged.
+     * with contained item (must be serializable).
      *
-     * @param value Value to serialize.
+     * @param value Input value.
      * @param json Output JSON.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool serialize(const T &value, JsonValue &json)
+    static void serialize(const T &value, JsonValue &json)
     {
         auto array = Poco::makeShared<JsonArray>();
         for (const auto &item : value)
         {
-            JsonValue jsonItem;
-            if (!Json::serialize(item, jsonItem))
-            {
-                return false;
-            }
+            auto jsonItem = Json::serialize(item);
             array->add(jsonItem);
         }
         json = array;
-        return true;
     }
 
     /**
      * @brief Deserialize json in value.
      *
-     * Extract a json array from json and fill value with its items. Use
-     * constructor(size_t) to initialize the result using the JSON array size
-     * and begin(T) and end(T) to iterate over it to fill all values with the
-     * ones of the JSON array.
+     * Extract a json array from json and deserialize elements in value.
      *
-     * @param json JSON to deserialize.
+     * @param json Input JSON.
      * @param value Output value.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool deserialize(const JsonValue &json, T &value)
+    static void deserialize(const JsonValue &json, T &value)
     {
         auto array = JsonExtractor::extractArray(json);
         if (!array)
         {
-            return false;
+            throw std::runtime_error("Not an array");
         }
-        T buffer(array->size());
-        size_t i = 0;
-        for (decltype(auto) item : buffer)
+        value.clear();
+        for (const auto &jsonItem : *array)
         {
-            if (!Json::deserialize(array->get(i++), item))
-            {
-                return false;
-            }
+            auto &item = value.emplace_back();
+            Json::deserialize(jsonItem, item);
         }
-        value = std::move(buffer);
-        return true;
     }
 };
 
@@ -140,33 +122,23 @@ struct JsonAdapter<std::vector<bool>::reference>
     /**
      * @brief Serialize value as boolean
      *
-     * @param value Value to serialize.
+     * @param value Input value.
      * @param json Output JSON.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool serialize(Ref value, JsonValue &json)
+    static void serialize(Ref value, JsonValue &json)
     {
-        json = bool(value);
-        return true;
+        json = static_cast<bool>(value);
     }
 
     /**
-     * @brief Deserialize JSON into value.
+     * @brief Deserialize boolean JSON into value.
      *
      * @param json Input JSON.
      * @param value Ouput value.
-     * @return true Success.
-     * @return false Failure.
      */
-    static bool deserialize(const JsonValue &json, Ref value)
+    static void deserialize(const JsonValue &json, Ref value)
     {
-        if (!json.isBoolean())
-        {
-            return false;
-        }
-        value = json.extract<bool>();
-        return true;
+        value = Json::deserialize<bool>(json);
     }
 };
 

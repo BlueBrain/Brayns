@@ -75,11 +75,11 @@ struct Json
 
     /**
      * @brief Serialize a given type to a JsonValue using the
-     * JsonAdapter<T>::serialize (must have a valid specialization).
+     * JsonAdapter<T>::serialize.
      *
-     * @tparam T Type of the object to serialize.
-     * @param value Object to serialize.
-     * @return JsonValue JSON source.
+     * @tparam T Input value type.
+     * @param value Input value.
+     * @return JsonValue Output JSON.
      */
     template<typename T>
     static JsonValue serialize(const T &value)
@@ -93,23 +93,22 @@ struct Json
      * @brief Serialize with default value.
      *
      * @tparam T Type of the input object.
-     * @param json JsonValue to serialize.
-     * @return true if success, false if failure, the output value is left
-     * unchanged in this case.
+     * @param value Input value.
+     * @param json Output JSON.
      */
     template<typename T>
-    static bool serialize(const T &value, JsonValue &json)
+    static void serialize(const T &value, JsonValue &json)
     {
-        return JsonAdapter<T>::serialize(value, json);
+        JsonAdapter<T>::serialize(value, json);
     }
 
     /**
      * @brief Convert a custom object to JSON string using serialize and
      * stringify.
      *
-     * @tparam T The type of the object to serialize.
-     * @param value The object to serialize.
-     * @return std::string JSON string representing the object.
+     * @tparam T Input value type.
+     * @param value Input value.
+     * @return std::string Output JSON string.
      */
     template<typename T>
     static std::string stringify(const T &value)
@@ -119,11 +118,11 @@ struct Json
 
     /**
      * @brief Convert a JsonValue to a given type using
-     * JsonAdapter<T>::serialize (must have a valid specialization).
+     * JsonAdapter<T>::serialize.
      *
-     * @tparam T Type of the resulting object.
-     * @param json JsonValue containing the object value.
-     * @return T Deserialized object.
+     * @tparam T Output value type.
+     * @param json Input JSON.
+     * @return T Output value.
      */
     template<typename T>
     static T deserialize(const JsonValue &json)
@@ -137,14 +136,13 @@ struct Json
      * @brief Deserialize with default value.
      *
      * @tparam T Type of the resulting object.
-     * @param json JsonValue containing the object value.
-     * @return true if success, false if failure, the output value is left
-     * unchanged in this case.
+     * @param json Input JSON.
+     * @param value Ouput object.
      */
     template<typename T>
-    static bool deserialize(const JsonValue &json, T &value)
+    static void deserialize(const JsonValue &json, T &value)
     {
-        return JsonAdapter<T>::deserialize(json, value);
+        JsonAdapter<T>::deserialize(json, value);
     }
 
     /**
@@ -181,19 +179,15 @@ struct JsonAdapter<JsonValue>
      *
      * @param value The input JSON.
      * @param json The output JSON.
-     * @return true if success, false if failure, the output value is left
-     * unchanged in this case.
      */
-    static bool serialize(const JsonValue &value, JsonValue &json);
+    static void serialize(const JsonValue &value, JsonValue &json);
 
     /**
      * @brief Copy json into value.
      *
      * @param json The input JSON.
      * @param value The output JSON.
-     * @return true if success, false if failure, the output value is left
-     * unchanged in this case.
      */
-    static bool deserialize(const JsonValue &json, JsonValue &value);
+    static void deserialize(const JsonValue &json, JsonValue &value);
 };
 } // namespace brayns

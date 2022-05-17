@@ -23,8 +23,8 @@
 #include <brayns/engine/components/MaterialComponent.h>
 #include <brayns/engine/scenecomponents/SceneModelManager.h>
 
-#include <brayns/network/adapters/MaterialAdapter.h>
 #include <brayns/network/messages/GetModelMessage.h>
+#include <brayns/network/messages/MaterialMessage.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -44,19 +44,27 @@ private:
 };
 
 template<typename MaterialType>
-class SetMaterialEntrypoint : public Entrypoint<ModelMaterial<MaterialType>, EmptyMessage>
+class SetMaterialEntrypoint : public Entrypoint<SetMaterialMessage<MaterialType>, EmptyMessage>
 {
 public:
+    using Request = typename Entrypoint<SetMaterialMessage<MaterialType>, EmptyMessage>::Request;
+
     SetMaterialEntrypoint(SceneModelManager &sceneModelManager)
         : _sceneModelManager(sceneModelManager)
     {
     }
 
-    void onRequest(const typename Entrypoint<ModelMaterial<MaterialType>, EmptyMessage>::Request &request) override
+    void onRequest(const Request &request) override
     {
-        ModelMaterial<MaterialType> updater(_sceneModelManager);
-        request.getParams(updater);
-        updater.update();
+        auto params = request.getParams();
+        auto modelId = params.model_id;
+        auto &buffer = params.material;
+        auto &instance = _sceneModelManager.getModelInstance(modelId);
+        Model &model = instance.getModel();
+        auto &component = model.getComponent<MaterialComponent>();
+        auto material = std::make_unique<MaterialType>();
+        buffer.extract(*material);
+        component.setMaterial(std::move(material));
         request.reply(EmptyMessage());
     }
 
@@ -124,19 +132,21 @@ template<typename MaterialType>
 class GetMaterialEntrypoint : public Entrypoint<GetModelMessage, MaterialType>
 {
 public:
+    using Request = typename Entrypoint<GetModelMessage, MaterialType>::Request;
+
     GetMaterialEntrypoint(SceneModelManager &modelManager)
         : _modelManager(modelManager)
     {
     }
 
-    virtual void onRequest(const typename Entrypoint<GetModelMessage, MaterialType>::Request &request) override
+    virtual void onRequest(const Request &request) override
     {
         auto params = request.getParams();
         auto modelId = params.id;
-        auto &modelInstance = _modelManager.getModelInstance(modelId);
-        Model &model = modelInstance.getModel();
-        auto &materialComponent = model.getComponent<MaterialComponent>();
-        auto &material = materialComponent.getMaterial();
+        auto &instance = _modelManager.getModelInstance(modelId);
+        Model &model = instance.getModel();
+        auto &component = model.getComponent<MaterialComponent>();
+        auto &material = component.getMaterial();
         try
         {
             auto &castedMaterial = dynamic_cast<MaterialType &>(material);
@@ -144,7 +154,7 @@ public:
         }
         catch (const std::bad_cast &)
         {
-            throw JsonRpcException("The material cannot be casted to the requested type");
+            throw InvalidRequestException("Invalid material type (should be '" + material.getName() + "')");
         }
     }
 

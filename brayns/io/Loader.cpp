@@ -52,18 +52,16 @@ JsonSchema JsonAdapter<EmptyLoaderParameters>::getSchema()
     return JsonSchema();
 }
 
-bool JsonAdapter<EmptyLoaderParameters>::serialize(const EmptyLoaderParameters &params, JsonValue &value)
+void JsonAdapter<EmptyLoaderParameters>::serialize(const EmptyLoaderParameters &params, JsonValue &value)
 {
     (void)params;
     (void)value;
-    return true;
 }
 
-bool JsonAdapter<EmptyLoaderParameters>::deserialize(const JsonValue &value, EmptyLoaderParameters &params)
+void JsonAdapter<EmptyLoaderParameters>::deserialize(const JsonValue &value, EmptyLoaderParameters &params)
 {
     (void)value;
     (void)params;
-    return true;
 }
 
 std::vector<std::unique_ptr<Model>> NoInputLoader::importFromBlob(
