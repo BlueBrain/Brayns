@@ -20,6 +20,7 @@
 
 #include "BlockVolumeComponent.h"
 
+#include <brayns/engine/common/DataHandler.h>
 #include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/common/GeometricModelHandler.h>
 #include <brayns/engine/components/MaterialComponent.h>
@@ -144,6 +145,9 @@ void BlockVolumeComponent::onCreate()
 
     _geometry.commit();
     brayns::GeometricModelHandler::setGeometry(_model, _geometry);
+
+    auto sharedColors = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
+    brayns::GeometricModelHandler::setColors(_model, sharedColors);
 
     brayns::GeometricModelHandler::commitModel(_model);
 }

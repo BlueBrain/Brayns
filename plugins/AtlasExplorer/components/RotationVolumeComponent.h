@@ -26,6 +26,14 @@
 class RotationVolumeComponent final : public brayns::Component
 {
 public:
+    struct RenderableAxis
+    {
+        brayns::Vector3f vector;
+        OSPGeometricModel model = nullptr;
+        brayns::Geometry<brayns::Primitive> geometry;
+    };
+
+public:
     RotationVolumeComponent(
         const brayns::Vector3ui &sizes,
         const brayns::Vector3f &dimensions,
@@ -40,8 +48,8 @@ public:
     void onDestroy() override;
 
 private:
-    OSPGeometricModel _model;
-    brayns::Geometry<brayns::Primitive> _xAxisGeometry;
-    brayns::Geometry<brayns::Primitive> _yAxisGeometry;
-    brayns::Geometry<brayns::Primitive> _zAxisGeometry;
+    std::array<RenderableAxis, 3> _axes = {
+        RenderableAxis{{1.f, 0.f, 0.f}},
+        RenderableAxis{{0.f, 1.f, 0.f}},
+        RenderableAxis{{0.f, 0.f, 1.f}}};
 };
