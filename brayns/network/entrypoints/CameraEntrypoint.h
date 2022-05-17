@@ -46,12 +46,14 @@ template<typename T>
 class SetCameraEntrypoint : public Entrypoint<T, EmptyMessage>
 {
 public:
+    using Request = typename Entrypoint<T, EmptyMessage>::Request;
+
     SetCameraEntrypoint(Engine &engine)
         : _engine(engine)
     {
     }
 
-    virtual void onRequest(const typename Entrypoint<T, EmptyMessage>::Request &request) override
+    virtual void onRequest(const Request &request) override
     {
         auto &currentCamera = _engine.getCamera();
         if (auto castedSystemCamera = dynamic_cast<T *>(&currentCamera))
@@ -96,12 +98,14 @@ template<typename T>
 class GetCameraEntrypoint : public Entrypoint<EmptyMessage, T>
 {
 public:
+    using Request = typename Entrypoint<EmptyMessage, T>::Request;
+
     GetCameraEntrypoint(Engine &engine)
         : _engine(engine)
     {
     }
 
-    virtual void onRequest(const typename Entrypoint<EmptyMessage, T>::Request &request) override
+    virtual void onRequest(const Request &request) override
     {
         auto &currentCamera = _engine.getCamera();
         if (auto castedSystemCamera = dynamic_cast<T *>(&currentCamera))
@@ -110,7 +114,7 @@ public:
             return;
         }
 
-        throw JsonRpcException("Cannot cast the current camera to the requested type");
+        throw InvalidRequestException("Invalid camera type (should be '" + currentCamera.getName() + "')");
     }
 
 private:

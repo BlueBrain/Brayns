@@ -47,12 +47,14 @@ template<typename T>
 class SetRendererEntrypoint : public Entrypoint<T, EmptyMessage>
 {
 public:
+    using Request = typename Entrypoint<T, EmptyMessage>::Request;
+
     SetRendererEntrypoint(Engine &engine)
         : _engine(engine)
     {
     }
 
-    virtual void onRequest(const typename Entrypoint<T, EmptyMessage>::Request &request) override
+    virtual void onRequest(const Request &request) override
     {
         auto &systemRenderer = _engine.getRenderer();
 
@@ -96,20 +98,23 @@ template<typename T>
 class GetRendererEntrypoint : public Entrypoint<EmptyMessage, T>
 {
 public:
+    using Request = typename Entrypoint<EmptyMessage, T>::Request;
+
     GetRendererEntrypoint(Engine &engine)
         : _engine(engine)
     {
     }
 
-    void onRequest(const typename Entrypoint<EmptyMessage, T>::Request &request) override
+    void onRequest(const Request &request) override
     {
         auto &systemRenderer = _engine.getRenderer();
         if (auto castedRenderer = dynamic_cast<T *>(&systemRenderer))
         {
             request.reply(*castedRenderer);
+            return;
         }
 
-        throw JsonRpcException("Cannot cast the renderer to the requested type");
+        throw InvalidRequestException("Invalid renderer type (should be '" + systemRenderer.getName() + "')");
     }
 
 private:

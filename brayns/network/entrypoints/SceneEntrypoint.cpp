@@ -40,7 +40,10 @@ std::string GetSceneEntrypoint::getDescription() const
 
 void GetSceneEntrypoint::onRequest(const Request &request)
 {
-    ReadSceneProxy proxy(_scene);
-    request.reply(proxy);
+    SceneMessage message;
+    message.bounds = _scene.getBounds();
+    auto &models = _scene.getModels();
+    message.models = models.getAllModelInstances();
+    request.reply(message);
 }
 } // namespace brayns

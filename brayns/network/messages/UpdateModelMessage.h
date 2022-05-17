@@ -21,31 +21,15 @@
 
 #pragma once
 
-#include <brayns/engine/scenecomponents/SceneModelManager.h>
-
 #include <brayns/json/JsonBuffer.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-#include "TransferFunctionAdapter.h"
+#include <brayns/network/adapters/ModelInstanceAdapter.h>
 
 namespace brayns
 {
-class ModelTransferFunction
-{
-public:
-    ModelTransferFunction() = default;
-    ModelTransferFunction(SceneModelManager &smm);
-
-    void setId(const uint32_t id);
-    void setTransferFunction(const JsonBuffer<TransferFunction> &buffer);
-
-private:
-    SceneModelManager *_smm = nullptr;
-    uint32_t _modelId{std::numeric_limits<uint32_t>::max()};
-    TransferFunction *_transferFunction;
-};
-
-BRAYNS_JSON_ADAPTER_BEGIN(ModelTransferFunction)
-BRAYNS_JSON_ADAPTER_SET("id", setId, "Model ID", Required())
-BRAYNS_JSON_ADAPTER_SET("transfer_function", setTransferFunction, "Transfer function", Required())
-BRAYNS_JSON_ADAPTER_END()
+BRAYNS_JSON_OBJECT_BEGIN(UpdateModelMessage)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "Model ID")
+BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<ModelInstance>, model, "Model data to update")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

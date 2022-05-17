@@ -21,12 +21,14 @@
 
 #pragma once
 
-#include <brayns/network/adapters/SceneAdapter.h>
+#include <brayns/engine/Scene.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/SceneMessage.h>
 
 namespace brayns
 {
-class GetSceneEntrypoint : public Entrypoint<EmptyMessage, ReadSceneProxy>
+class GetSceneEntrypoint : public Entrypoint<EmptyMessage, SceneMessage>
 {
 public:
     GetSceneEntrypoint(const Scene &scene);

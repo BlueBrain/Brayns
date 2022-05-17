@@ -44,8 +44,7 @@ void GetModelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.id;
-    auto &model = ExtractModel::fromId(_sceneModelManager, modelId);
-    ModelInstanceProxy proxy(model);
-    request.reply(proxy);
+    auto &instance = ExtractModel::fromId(_sceneModelManager, modelId);
+    request.reply(instance);
 }
 } // namespace brayns

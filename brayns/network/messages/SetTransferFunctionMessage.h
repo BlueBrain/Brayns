@@ -19,37 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ModelTransferFunctionAdapter.h"
+#pragma once
 
-#include <brayns/engine/components/TransferFunctionComponent.h>
-#include <brayns/network/common/ExtractModel.h>
+#include <brayns/json/JsonBuffer.h>
+#include <brayns/json/JsonObjectMacro.h>
+
+#include <brayns/network/adapters/TransferFunctionAdapter.h>
 
 namespace brayns
 {
-ModelTransferFunction::ModelTransferFunction(SceneModelManager &smm)
-    : _smm(&smm)
-{
-}
-
-void ModelTransferFunction::setId(const uint32_t id)
-{
-    _modelId = id;
-}
-
-void ModelTransferFunction::setTransferFunction(const JsonBuffer<TransferFunction> &buffer)
-{
-    auto &modelInstance = _smm->getModelInstance(_modelId);
-    auto &model = modelInstance.getModel();
-
-    try
-    {
-        auto &tfComponent = model.getComponent<TransferFunctionComponent>();
-        auto &transferFunction = tfComponent.getTransferFunction();
-        buffer.extract(transferFunction);
-    }
-    catch (...)
-    {
-        throw std::runtime_error("The requested model does not have a transfer function");
-    }
-}
+BRAYNS_JSON_OBJECT_BEGIN(SetTransferFunctionMessage)
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Model ID", Required())
+BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<TransferFunction>, transfer_function, "Transfer function", Required())
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

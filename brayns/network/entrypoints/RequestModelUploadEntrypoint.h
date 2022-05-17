@@ -35,7 +35,7 @@
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryLoadParameters, std::vector<ModelInstanceProxy>>
+class RequestModelUploadEntrypoint : public Entrypoint<BinaryLoadParameters, std::vector<ModelInstance *>>
 {
 public:
     RequestModelUploadEntrypoint(

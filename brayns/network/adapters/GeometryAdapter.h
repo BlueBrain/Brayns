@@ -60,14 +60,14 @@ BRAYNS_JSON_ADAPTER_ENTRY(indices, "Mesh triangle vertex indices")
 BRAYNS_JSON_ADAPTER_END()
 
 template<typename T>
-struct AddGeometryProxy
+struct GeometryWithColor
 {
     T geometry;
     Vector4f color;
 };
 
-#define ADD_GEOMETRY_ADAPTER(Type) \
-    BRAYNS_JSON_ADAPTER_BEGIN(AddGeometryProxy<Type>) \
+#define ADD_GEOMETRY_ADAPTER(TYPE) \
+    BRAYNS_JSON_ADAPTER_BEGIN(GeometryWithColor<TYPE>) \
     BRAYNS_JSON_ADAPTER_ENTRY(geometry, "Geometry data") \
     BRAYNS_JSON_ADAPTER_ENTRY(color, "Geometry color") \
     BRAYNS_JSON_ADAPTER_END()
@@ -76,4 +76,6 @@ ADD_GEOMETRY_ADAPTER(Box)
 ADD_GEOMETRY_ADAPTER(Plane)
 ADD_GEOMETRY_ADAPTER(Primitive)
 ADD_GEOMETRY_ADAPTER(Sphere)
+
+#undef ADD_GEOMETRY_ADAPTER
 }

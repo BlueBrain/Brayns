@@ -31,12 +31,14 @@ template<typename T>
 class AddLightEntrypoint : public Entrypoint<T, uint32_t>
 {
 public:
+    using Request = typename Entrypoint<T, uint32_t>::Request;
+
     AddLightEntrypoint(SceneLightManager &sceneLightManager)
         : _sceneLightManager(sceneLightManager)
     {
     }
 
-    virtual void onRequest(const typename Entrypoint<T, uint32_t>::Request &request) override
+    virtual void onRequest(const Request &request) override
     {
         auto light = std::make_unique<T>();
         request.getParams(*light);

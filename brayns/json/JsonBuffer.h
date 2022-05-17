@@ -46,7 +46,7 @@ namespace brayns
  * "now" is stored inside test.now while the value at "later" is (de)serialized
  * directly but now appears as an int in the JSON schema of Test.
  *
- * @tparam T Type to serialize.
+ * @tparam T Type to wrap.
  */
 template<typename T>
 class JsonBuffer
@@ -59,7 +59,23 @@ public:
      */
     static JsonSchema getSchema()
     {
-        return Json::getSchema<T>();
+        return Json::getSchema<std::decay_t<T>>();
+    }
+
+    /**
+     * @brief Construct an empty JSON buffer.
+     *
+     */
+    JsonBuffer() = default;
+
+    /**
+     * @brief Construct a buffer with value inside.
+     *
+     * @param value Value to store in JSON format.
+     */
+    JsonBuffer(const T &value)
+        : _json(Json::serialize(value))
+    {
     }
 
     /**

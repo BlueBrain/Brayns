@@ -14,7 +14,6 @@ set(BRAYNSNETWORK_HEADERS
   adapters/LoaderInfoAdapter.h
   adapters/MaterialAdapter.h
   adapters/ModelInstanceAdapter.h
-  adapters/ModelTransferFunctionAdapter.h
   adapters/RendererAdapter.h
   adapters/SimulationParametersAdapter.h
   adapters/TransferFunctionAdapter.h
@@ -92,8 +91,11 @@ set(BRAYNSNETWORK_HEADERS
   messages/RemoveClipPlanesMessage.h
   messages/RemoveLightsMessage.h
   messages/RemoveModelMessage.h
+  messages/SceneMessage.h
   messages/SchemaMessage.h
+  messages/SetTransferFunctionMessage.h
   messages/SnapshotMessage.h
+  messages/UpdateModelMessage.h
   messages/VersionMessage.h
   plugin/NetworkManager.h
   socket/ClientSocket.h
@@ -112,9 +114,6 @@ set(BRAYNSNETWORK_HEADERS
 )
   
 set(BRAYNSNETWORK_SOURCES
-  adapters/ModelInstanceAdapter.cpp
-  adapters/ModelTransferFunctionAdapter.cpp
-  adapters/SceneAdapter.cpp
   binary/BinaryManager.cpp
   client/ClientBuffer.cpp
   client/ClientManager.cpp

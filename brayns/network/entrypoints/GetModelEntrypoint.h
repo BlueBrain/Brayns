@@ -29,7 +29,7 @@
 
 namespace brayns
 {
-class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelInstanceProxy>
+class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelInstance>
 {
 public:
     GetModelEntrypoint(SceneModelManager &sceneModelManager);

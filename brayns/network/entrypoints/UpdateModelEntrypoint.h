@@ -23,12 +23,12 @@
 
 #include <brayns/engine/Scene.h>
 
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/UpdateModelMessage.h>
 
 namespace brayns
 {
-class UpdateModelEntrypoint : public Entrypoint<UpdateModelMessage, ModelInstanceProxy>
+class UpdateModelEntrypoint : public Entrypoint<UpdateModelMessage, ModelInstance>
 {
 public:
     UpdateModelEntrypoint(Scene &scene);
