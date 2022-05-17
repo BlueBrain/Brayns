@@ -80,6 +80,19 @@ public:
         auto &writeOnly = options.writeOnly;
         return writeOnly.value_or(false);
     }
+
+    static bool canBeOmitted(const brayns::JsonObjectProperty &property, const brayns::JsonValue &value)
+    {
+        if (!value.isEmpty())
+        {
+            return false;
+        }
+        if (isRequired(property))
+        {
+            return false;
+        }
+        return true;
+    }
 };
 } // namespace
 
@@ -111,13 +124,13 @@ void JsonObjectInfo::serialize(const void *message, JsonValue &json) const
         {
             continue;
         }
-        JsonValue child;
-        property.serialize(message, child);
-        if (child.isEmpty())
+        JsonValue item;
+        property.serialize(message, item);
+        if (JsonObjectHelper::canBeOmitted(property, item))
         {
             continue;
         }
-        object->set(property.name, child);
+        object->set(property.name, item);
     }
     json = object;
 }
@@ -135,12 +148,12 @@ void JsonObjectInfo::deserialize(const JsonValue &json, void *message) const
         {
             continue;
         }
-        auto child = JsonObjectHelper::extract(property, *object);
-        if (child.isEmpty())
+        auto item = JsonObjectHelper::extract(property, *object);
+        if (JsonObjectHelper::canBeOmitted(property, item))
         {
             continue;
         }
-        property.deserialize(child, message);
+        property.deserialize(item, message);
     }
 }
 
