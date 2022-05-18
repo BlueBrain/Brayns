@@ -31,16 +31,23 @@ class TestModelLoader(unittest.TestCase):
         reply = [MockModel.serialized_model]
         ref = [MockModel.model]
         instance = MockInstance(reply)
-        loader = MockModelLoader(1, 'test')
-        path = 'path/test.model'
+        loader = MockModelLoader()
+        path = 'path'
         test = loader.load(instance, path)
         self.assertEqual(test, ref)
         self.assertEqual(instance.method, 'add-model')
-        self.assertEqual(instance.params, {
-            'path': path,
-            'loader_name': MockModelLoader.name,
+        self.assertEqual(instance.params, loader.serialize(path))
+
+    def test_serialize(self) -> None:
+        path = 'test'
+        loader = MockModelLoader()
+        test = loader.serialize(path)
+        ref = {
+            'path': 'test',
+            'loader_name': loader.name,
             'loader_properties': loader.properties
-        })
+        }
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

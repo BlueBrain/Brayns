@@ -34,6 +34,16 @@ class TestFrameExporter(unittest.TestCase):
     def test_export_frames(self) -> None:
         instance = MockInstance()
         path = 'test'
+        exporter = FrameExporter([
+            KeyFrame(i, CameraView())
+            for i in range(2)
+        ])
+        ref = exporter.serialize(path)
+        exporter.export_frames(instance, path)
+        self.assertEqual(instance.method, 'export-frames')
+        self.assertEqual(instance.params, ref)
+
+    def test_serialize(self) -> None:
         exporter = FrameExporter(
             frames=[KeyFrame(i, CameraView()) for i in range(2)],
             format=ImageFormat.JPEG,
@@ -43,9 +53,8 @@ class TestFrameExporter(unittest.TestCase):
             renderer=MockRenderer(),
             sequential_naming=False
         )
-        exporter.export_frames(instance, path)
-        self.assertEqual(instance.method, 'export-frames')
-        self.assertEqual(instance.params, {
+        path = 'test'
+        ref = {
             'path': path,
             'key_frames': [
                 {
@@ -65,7 +74,9 @@ class TestFrameExporter(unittest.TestCase):
             'camera': MockCamera().serialize_with_name(),
             'renderer': MockRenderer().serialize_with_name(),
             'sequential_naming': False
-        })
+        }
+        test = exporter.serialize(path)
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':
