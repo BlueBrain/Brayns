@@ -29,7 +29,7 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(SetTransferFunctionMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Model ID", Required())
-BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<TransferFunction>, transfer_function, "Transfer function", Required())
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Model ID")
+BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<TransferFunction>, transfer_function, "Transfer function")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

@@ -121,6 +121,23 @@ private:
     bool _running = false;
     bool _cancelled = false;
 };
+
+class DisconnectionHandler
+{
+public:
+    void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
+    {
+        try
+        {
+            brayns::Log::info("Cancelling request {} because of disconnection.", request);
+            entrypoint.onDisconnect();
+        }
+        catch (...)
+        {
+            brayns::Log::error("Unexpected error during disconnection handling.");
+        }
+    }
+};
 } // namespace
 
 namespace brayns
@@ -163,13 +180,16 @@ void JsonRpcTask::run()
 
 void JsonRpcTask::cancel()
 {
-    _cancelled = true;
     CancelHandler handler(_running, _cancelled);
     handler.handle(_request, _entrypoint);
+    _cancelled = true;
 }
 
 void JsonRpcTask::disconnect()
 {
+    assert(!_disconnected);
+    DisconnectionHandler handler;
+    handler.handle(_request, _entrypoint);
     _disconnected = true;
 }
 } // namespace brayns
