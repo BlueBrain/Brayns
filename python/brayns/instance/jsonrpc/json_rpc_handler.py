@@ -50,6 +50,7 @@ class JsonRpcHandler(JsonRpcProtocol):
 
     def on_progress(self, progress: JsonRpcProgress) -> None:
         self._logger.info('Progress received: %s.', progress)
+        self._manager.add_progress(progress.id, progress.params)
 
     def on_invalid_frame(self, data: Union[bytes, str], e: Exception) -> None:
         self._logger.error('Invalid frame received (%s): %s', e, data)

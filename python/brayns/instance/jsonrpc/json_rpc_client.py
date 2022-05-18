@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
+from typing import Union
 
 from brayns.instance.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
 from brayns.instance.jsonrpc.json_rpc_handler import JsonRpcHandler
@@ -36,6 +37,9 @@ class JsonRpcClient:
         self._manager = JsonRpcManager()
         self._handler = JsonRpcHandler(self._manager, logger)
         self._dispatcher = JsonRpcDispatcher(self._handler)
+
+    def __contains__(self, id: Union[int, str]) -> bool:
+        return id in self._manager
 
     def __enter__(self) -> 'JsonRpcClient':
         return self

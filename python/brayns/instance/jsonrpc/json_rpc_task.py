@@ -18,9 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from collections import deque
 from typing import Any, Optional
 
 from brayns.instance.request_error import RequestError
+from brayns.instance.request_progress import RequestProgress
 
 
 class JsonRpcTask:
@@ -35,9 +37,13 @@ class JsonRpcTask:
         self._ready = False
         self._result: Any = None
         self._error: Optional[RequestError] = None
+        self._progresses = deque[RequestProgress]()
 
     def is_ready(self) -> bool:
         return self._ready
+
+    def has_progress(self) -> bool:
+        return bool(self._progresses)
 
     def get_result(self) -> Any:
         if not self.is_ready():
@@ -57,3 +63,13 @@ class JsonRpcTask:
             raise RuntimeError('Task already finished')
         self._error = error
         self._ready = True
+
+    def get_progress(self) -> RequestProgress:
+        if not self.has_progress():
+            raise RuntimeError('No progress received')
+        return self._progresses.popleft()
+
+    def add_progress(self, progress: RequestProgress) -> None:
+        if self.is_ready():
+            raise RuntimeError('Task already finished')
+        self._progresses.append(progress)

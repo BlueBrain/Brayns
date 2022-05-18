@@ -21,6 +21,7 @@
 from typing import Any
 
 from brayns.instance.instance import Instance
+from brayns.instance.request_future import RequestFuture
 
 
 class MockInstance(Instance):
@@ -30,7 +31,7 @@ class MockInstance(Instance):
         self.method = ''
         self.params = None
 
-    def request(self, method: str, params: Any = None) -> Any:
+    def task(self, method: str, params: Any = None) -> RequestFuture:
         self.method = method
         self.params = params
-        return self.reply
+        return RequestFuture.from_result(self.reply)

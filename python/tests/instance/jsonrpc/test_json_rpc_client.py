@@ -33,6 +33,13 @@ class TestJsonRpcClient(unittest.TestCase):
         self._logger = logging.Logger('Test')
         self._websocket = MockWebSocket()
 
+    def test_contains(self) -> None:
+        with self._connect() as client:
+            request = JsonRpcRequest(0, 'test')
+            client.send(request)
+            self.assertIn(request.id, client)
+            self.assertNotIn(request.id + 1, client)
+
     def test_context(self) -> None:
         with self._connect():
             pass

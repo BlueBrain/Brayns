@@ -22,6 +22,7 @@ import unittest
 
 from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
 from brayns.instance.request_error import RequestError
+from brayns.instance.request_progress import RequestProgress
 
 
 class TestJsonRpcTask(unittest.TestCase):
@@ -46,6 +47,13 @@ class TestJsonRpcTask(unittest.TestCase):
         task = JsonRpcTask()
         task.set_error(RequestError(0, 'test'))
         self.assertTrue(task.is_ready())
+
+    def test_has_progress(self) -> None:
+        task = JsonRpcTask()
+        self.assertFalse(task.has_progress())
+        progress = RequestProgress('test', 0.5)
+        task.add_progress(progress)
+        self.assertTrue(task.has_progress())
 
     def test_get_result(self) -> None:
         task = JsonRpcTask()
@@ -78,6 +86,22 @@ class TestJsonRpcTask(unittest.TestCase):
         self.assertEqual(context.exception, error)
         with self.assertRaises(RuntimeError):
             task.set_error(error)
+
+    def test_get_progress(self) -> None:
+        task = JsonRpcTask()
+        with self.assertRaises(RuntimeError):
+            task.get_progress()
+        progress = RequestProgress('test', 0.5)
+        task.add_progress(progress)
+        self.assertEqual(task.get_progress(), progress)
+
+    def test_add_progress(self) -> None:
+        task = JsonRpcTask()
+        progress = RequestProgress('test', 0.5)
+        for _ in range(3):
+            task.add_progress(progress)
+        for _ in range(3):
+            self.assertEqual(task.get_progress(), progress)
 
 
 if __name__ == '__main__':

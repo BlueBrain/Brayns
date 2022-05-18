@@ -23,6 +23,7 @@ from typing import Any
 from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_client import JsonRpcClient
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
+from brayns.instance.request_future import RequestFuture
 
 
 class Client(Instance):
@@ -33,9 +34,13 @@ class Client(Instance):
     def disconnect(self) -> None:
         self._client.disconnect()
 
-    def request(self, method: str, params: Any = None) -> Any:
-        request = JsonRpcRequest(0, method, params)
-        task = self._client.send(request)
-        while not task.is_ready():
-            self._client.poll()
-        return task.get_result()
+    def task(self, method: str, params: Any = None) -> RequestFuture:
+        id = 0
+        while id in self._client:
+            id += 1
+        request = JsonRpcRequest(id, method, params)
+        return RequestFuture(
+            task=self._client.send(request),
+            cancel=lambda: self.request('cancel', {'id': id}),
+            poll=self._client.poll
+        )

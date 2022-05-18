@@ -22,6 +22,7 @@ from typing import Any, Iterator, Optional, Union
 
 from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
 from brayns.instance.request_error import RequestError
+from brayns.instance.request_progress import RequestProgress
 
 
 class JsonRpcManager:
@@ -67,3 +68,9 @@ class JsonRpcManager:
             return
         task.set_error(error)
         del self._tasks[id]
+
+    def add_progress(self, id: Union[int, str], progress: RequestProgress) -> None:
+        task = self.get_task(id)
+        if task is None:
+            return
+        task.add_progress(progress)
