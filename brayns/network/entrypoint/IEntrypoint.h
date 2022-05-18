@@ -140,23 +140,13 @@ public:
     }
 
     /**
-     * @brief Called when a client connects.
+     * @brief Called when the client of the current request disconnects.
      *
-     * @param client Client ref.
-     */
-    virtual void onConnect(const ClientRef &client)
-    {
-        (void)client;
-    }
-
-    /**
-     * @brief Called when a client disconnects.
+     * Only called when the entrypoint is running.
      *
-     * @param client Client ref.
      */
-    virtual void onDisconnect(const ClientRef &client)
+    virtual void onDisconnect()
     {
-        (void)client;
     }
 };
 } // namespace brayns

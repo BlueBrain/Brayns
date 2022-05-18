@@ -84,13 +84,13 @@ void SocketManager::poll()
     {
         _listener->onConnect(client);
     }
-    for (const auto &client : _removedClients.poll())
-    {
-        _listener->onDisconnect(client);
-    }
     for (auto &request : _requests.poll())
     {
         _listener->onRequest(std::move(request));
+    }
+    for (const auto &client : _removedClients.poll())
+    {
+        _listener->onDisconnect(client);
     }
 }
 } // namespace brayns

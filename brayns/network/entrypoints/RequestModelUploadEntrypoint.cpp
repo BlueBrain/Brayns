@@ -227,7 +227,6 @@ bool RequestModelUploadEntrypoint::isAsync() const
 
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
-    _client = request.getClient();
     auto &modelManager = _scene.getModels();
     BinaryModelHandler handler(modelManager, _loaders, _binary, _token);
     SimulationScanner::scanAndUpdate(modelManager, _simulation);
@@ -245,11 +244,8 @@ void RequestModelUploadEntrypoint::onCancel()
     _token.cancel();
 }
 
-void RequestModelUploadEntrypoint::onDisconnect(const ClientRef &client)
+void RequestModelUploadEntrypoint::onDisconnect()
 {
-    if (_client && client == *_client)
-    {
-        _token.cancel();
-    }
+    _token.cancel();
 }
 } // namespace brayns

@@ -25,71 +25,6 @@
 
 #include <brayns/network/dispatch/RequestDispatcher.h>
 
-namespace
-{
-class ConnectionHandler
-{
-public:
-    static void handle(
-        brayns::ClientManager &clients,
-        const brayns::EntrypointRegistry &entrypoints,
-        const brayns::ClientRef &client)
-    {
-        brayns::Log::info("Connection of client {}.", client);
-        clients.add(client);
-        entrypoints.forEach([&](auto &entrypoint) { entrypoint.onConnect(client); });
-    }
-};
-
-class DisconnectionHandler
-{
-public:
-    static void handle(
-        brayns::ClientManager &clients,
-        const brayns::EntrypointRegistry &entrypoints,
-        const brayns::ClientRef &client)
-    {
-        brayns::Log::info("Disconnection of client {}.", client);
-        entrypoints.forEach([&](auto &entrypoint) { entrypoint.onDisconnect(client); });
-        clients.remove(client);
-    }
-};
-
-class RequestHandler
-{
-public:
-    static void handle(
-        brayns::BinaryManager &binary,
-        const brayns::EntrypointRegistry &entrypoints,
-        brayns::TaskManager &tasks,
-        brayns::ClientRequest request)
-    {
-        _log(request);
-        _dispatch(binary, entrypoints, tasks, std::move(request));
-    }
-
-private:
-    static void _log(const brayns::ClientRequest &request)
-    {
-        brayns::Log::info("Received request {}.", request);
-        if (request.isText())
-        {
-            brayns::Log::debug("Request content: '{}'.", request.getData());
-        }
-    }
-
-    static void _dispatch(
-        brayns::BinaryManager &binary,
-        const brayns::EntrypointRegistry &entrypoints,
-        brayns::TaskManager &tasks,
-        brayns::ClientRequest request)
-    {
-        brayns::RequestDispatcher dispatcher(binary, entrypoints, tasks);
-        dispatcher.dispatch(std::move(request));
-    }
-};
-} // namespace
-
 namespace brayns
 {
 SocketListener::SocketListener(
@@ -106,16 +41,25 @@ SocketListener::SocketListener(
 
 void SocketListener::onConnect(const ClientRef &client)
 {
-    ConnectionHandler::handle(_clients, _entrypoints, client);
+    Log::info("Connection of client {}.", client);
+    _clients.add(client);
 }
 
 void SocketListener::onDisconnect(const ClientRef &client)
 {
-    DisconnectionHandler::handle(_clients, _entrypoints, client);
+    Log::info("Disconnection of client {}.", client);
+    _tasks.disconnect(client);
+    _clients.remove(client);
 }
 
 void SocketListener::onRequest(ClientRequest request)
 {
-    RequestHandler::handle(_binary, _entrypoints, _tasks, std::move(request));
+    RequestDispatcher dispatcher(_binary, _entrypoints, _tasks);
+    Log::info("Received request {}.", request);
+    if (request.isText())
+    {
+        brayns::Log::debug("Request content: '{}'.", request.getData());
+    }
+    dispatcher.dispatch(std::move(request));
 }
 } // namespace brayns

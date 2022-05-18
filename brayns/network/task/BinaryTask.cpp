@@ -21,6 +21,8 @@
 
 #include "BinaryTask.h"
 
+#include <cassert>
+
 #include <brayns/common/Log.h>
 
 #include <brayns/network/jsonrpc/JsonRpcException.h>
@@ -67,7 +69,11 @@ void BinaryTask::run()
 
 void BinaryTask::cancel()
 {
-    Log::error("Try to cancel a binary request.");
-    throw TaskNotCancellableException(binaryMethod);
+    assert(false);
+}
+
+void BinaryTask::disconnect()
+{
+    assert(false);
 }
 } // namespace brayns

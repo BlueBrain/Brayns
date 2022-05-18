@@ -56,6 +56,13 @@ public:
     void runAllTasks();
 
     /**
+     * @brief Cancel all requests sent by client.
+     *
+     * @param client Client to cancel all tasks.
+     */
+    void disconnect(const ClientRef &client);
+
+    /**
      * @brief Cancel request sent by client with given ID.
      *
      * @param client Client that requested the task.

@@ -82,14 +82,9 @@ void EntrypointRef::onCancel() const
     _entrypoint->onCancel();
 }
 
-void EntrypointRef::onConnect(const ClientRef &client) const
+void EntrypointRef::onDisconnect() const
 {
-    _entrypoint->onConnect(client);
-}
-
-void EntrypointRef::onDisconnect(const ClientRef &client) const
-{
-    _entrypoint->onDisconnect(client);
+    _entrypoint->onDisconnect();
 }
 
 const std::string &EntrypointRef::getPlugin() const

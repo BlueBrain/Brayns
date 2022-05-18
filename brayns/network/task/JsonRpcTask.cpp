@@ -32,13 +32,17 @@ namespace
 class RequestHandler
 {
 public:
-    static void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint, bool cancelled)
+    RequestHandler(bool cancelled, bool disconnected)
+        : _cancelled(cancelled)
+        , _disconnected(disconnected)
+    {
+    }
+
+    void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
     {
         try
         {
-            brayns::Log::info("Execution of JSON-RPC request {}.", request);
-            _handle(request, entrypoint, cancelled);
-            brayns::Log::info("Successfully executed JSON-RPC request {}.", request);
+            _handle(request, entrypoint);
         }
         catch (const brayns::JsonRpcException &e)
         {
@@ -58,35 +62,80 @@ public:
     }
 
 private:
-    static void _handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint, bool cancelled)
+    bool _cancelled = false;
+    bool _disconnected = false;
+
+    void _handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
     {
-        if (cancelled)
+        if (_disconnected)
         {
+            brayns::Log::info("Skipping execution of JSON-RPC request {} as client is disconnected.", request);
+            return;
+        }
+        brayns::Log::info("Execution of JSON-RPC request {}.", request);
+        if (_cancelled)
+        {
+            brayns::Log::info("JSON-RPC request {} has been cancelled before execution.", request);
             throw brayns::TaskCancelledException();
         }
         entrypoint.onRequest(request);
+        brayns::Log::info("Successfully executed JSON-RPC request {}.", request);
     }
 };
 
 class CancelHandler
 {
 public:
-    static void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint, bool running)
+    CancelHandler(bool running, bool cancelled)
+        : _running(running)
+        , _cancelled(cancelled)
     {
-        brayns::Log::info("Cancel JSON-RPC request {}.", request);
+    }
+
+    void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
+    {
+        brayns::Log::info("Cancelling JSON-RPC request {}.", request);
         if (!entrypoint.isAsync())
         {
-            auto &method = request.getMethod();
-            brayns::Log::info("Entrypoint '{}' does not support cancellation.", method);
-            throw brayns::TaskNotCancellableException(method);
+            auto &method = entrypoint.getMethod();
+            brayns::Log::info("Method '{}' is not cancellable.", method);
+            throw brayns::InvalidParamsException("Method '" + method + "' is not cancellable");
         }
-        if (!running)
+        if (_cancelled)
         {
-            brayns::Log::debug("Anticipated cancellation of JSON-RPC request {}.", request);
+            auto &id = request.getId();
+            auto text = id.getDisplayText();
+            brayns::Log::info("Request {} cancelled twice.", request);
+            throw brayns::InvalidParamsException("Trying to cancel request '" + text + "' twice");
+        }
+        if (!_running)
+        {
+            brayns::Log::info("Cancelling JSON-RPC request {} before execution (entrypoint will not be called).");
             return;
         }
         brayns::Log::debug("Runtime cancellation of JSON-RPC request {}.", request);
         entrypoint.onCancel();
+    }
+
+private:
+    bool _running = false;
+    bool _cancelled = false;
+};
+
+class DisconnectionHandler
+{
+public:
+    void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
+    {
+        try
+        {
+            brayns::Log::info("Cancelling request {} because of disconnection.", request);
+            entrypoint.onDisconnect();
+        }
+        catch (...)
+        {
+            brayns::Log::error("Unexpected error during disconnection handling.");
+        }
     }
 };
 } // namespace
@@ -122,14 +171,25 @@ bool JsonRpcTask::hasPriority() const
 
 void JsonRpcTask::run()
 {
+    assert(!_running);
     _running = true;
-    RequestHandler::handle(_request, _entrypoint, _cancelled);
+    RequestHandler handler(_cancelled, _disconnected);
+    handler.handle(_request, _entrypoint);
     _running = false;
 }
 
 void JsonRpcTask::cancel()
 {
-    CancelHandler::handle(_request, _entrypoint, _running);
+    CancelHandler handler(_running, _cancelled);
+    handler.handle(_request, _entrypoint);
     _cancelled = true;
+}
+
+void JsonRpcTask::disconnect()
+{
+    assert(!_disconnected);
+    DisconnectionHandler handler;
+    handler.handle(_request, _entrypoint);
+    _disconnected = true;
 }
 } // namespace brayns

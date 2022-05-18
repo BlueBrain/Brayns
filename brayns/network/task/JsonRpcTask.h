@@ -77,14 +77,20 @@ public:
     /**
      * @brief Cancel the task.
      *
-     * @throw TaskNotCancellableException Task not cancellable.
      */
     virtual void cancel() override;
+
+    /**
+     * @brief Disable the task execution.
+     *
+     */
+    virtual void disconnect() override;
 
 private:
     JsonRpcRequest _request;
     const EntrypointRef &_entrypoint;
-    bool _cancelled = false;
     bool _running = false;
+    bool _cancelled = false;
+    bool _disconnected = false;
 };
 } // namespace brayns
