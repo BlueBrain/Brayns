@@ -28,19 +28,22 @@
 
 namespace
 {
-class ValidRotationChecker
+class VolumeValidElement
 {
 public:
     static bool isValid(const brayns::Quaternion &quaternion)
     {
-        const auto xValid = std::isfinite(quaternion.x);
-        const auto yValid = std::isfinite(quaternion.y);
-        const auto zValid = std::isfinite(quaternion.z);
-        const auto wValid = std::isfinite(quaternion.w);
-        return xValid && yValid && zValid && wValid;
+        for (size_t i = 0; i < 4; ++i)
+        {
+            if (!std::isfinite(quaternion[i]))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
-    static size_t count(const std::vector<brayns::Quaternion> &rotations)
+    static size_t countValid(const std::vector<brayns::Quaternion> &rotations)
     {
         size_t result = 0;
         for (const auto &q : rotations)
@@ -54,16 +57,22 @@ public:
     }
 };
 
-class RotatedAxisVolumeBuilder
+struct RenderableAxisGeometry
+{
+    brayns::Vector3f vector = brayns::Vector3f(0.f);
+    std::vector<brayns::Primitive> geometry;
+};
+
+class SparseRotationVolumeBuilder
 {
 public:
-    static std::array<std::vector<brayns::Primitive>, 3> build(
+    static std::vector<RenderableAxisList> build(
         const brayns::Vector3ui &sizes,
         const brayns::Vector3f &dimensions,
         const std::vector<brayns::Quaternion> &rotations)
     {
-        const auto validElementCount = ValidRotationChecker::count(rotations);
-        auto result = _allocateResult(validElementCount);
+        const auto validElementCount = VolumeValidElement::countValid(rotations);
+        auto result = _allocateTemporary(validElementCount);
 
         const auto width = sizes.x;
         const auto height = sizes.y;
@@ -74,7 +83,7 @@ public:
         for (size_t i = 0; i < linealSize; ++i)
         {
             const auto &quaternion = rotations[i];
-            if (!ValidRotationChecker::isValid(quaternion))
+            if (!VolumeValidElement::isValid(quaternion))
             {
                 continue;
             }
@@ -85,25 +94,26 @@ public:
             const auto x = localFrame % width;
 
             const auto voxelCenter = _computeVoxelCenter(dimensions, x, y, z);
-            for (size_t j = 0; j < 3; ++j)
+            for (auto &axis : result)
             {
-                auto targetAxis = brayns::Vector3f(0.f);
-                targetAxis[j] = dimensions[j];
-                auto &buffer = result[j];
-                buffer.push_back(_buildAxis(voxelCenter, targetAxis));
+                const auto vector = axis.vector * 0.5f;
+                auto &buffer = axis.geometry;
+                buffer.push_back(brayns::Primitive::cylinder(voxelCenter, voxelCenter + vector, 2.f));
             }
         }
 
-        return result;
+        return _buildResult(std::move(result));
     }
 
 private:
-    static std::array<std::vector<brayns::Primitive>, 3> _allocateResult(size_t elementCount)
+    static std::vector<RenderableAxisGeometry> _allocateTemporary(size_t elementCount)
     {
-        auto result = std::array<std::vector<brayns::Primitive>, 3>();
-        for (auto &axis : result)
+        auto result = std::vector<RenderableAxisGeometry>(3);
+        for (size_t i = 0; i < 3; ++i)
         {
-            axis.reserve(elementCount);
+            auto &axis = result[i];
+            axis.vector[i] = 1.f;
+            axis.geometry.reserve(elementCount);
         }
         return result;
     }
@@ -114,64 +124,66 @@ private:
         const auto worldX = x * dimensions.x;
         const auto worldY = y * dimensions.y;
         const auto worldZ = z * dimensions.z;
-
         const auto minCorner = brayns::Vector3f(x, y, z - dimensions.z);
         const auto maxCorner = brayns::Vector3f(x + dimensions.x, y + dimensions.y, z);
-
         return (maxCorner + minCorner) * 0.5f;
     }
-    static brayns::Primitive _buildAxis(const brayns::Vector3f &pos, const brayns::Vector3f &axis)
+
+    static std::vector<RenderableAxisList> _buildResult(std::vector<RenderableAxisGeometry> buildData)
     {
-        brayns::Primitive result;
-        result.p0 = pos;
-        result.r0 = 2.f;
-        result.p1 = pos + axis;
-        result.r1 = 2.f;
-        return result;
+        std::vector<RenderableAxisList> axes;
+        axes.reserve(buildData.size());
+        for (auto &rawAxis : buildData)
+        {
+            auto &renderableAxis = axes.emplace_back();
+            renderableAxis.vector = rawAxis.vector;
+            renderableAxis.geometry.set(std::move(rawAxis.geometry));
+        }
+        return axes;
     }
 };
+}
 
-class RenderableAxisInitializer
+RenderableAxes::RenderableAxes(std::vector<RenderableAxisList> geometry)
+    : _geometry(std::move(geometry))
 {
-public:
-    static void initialize(RotationVolumeComponent::RenderableAxis &axis, brayns::Model &group)
+}
+
+void RenderableAxes::forEach(const std::function<void(RenderableAxisList &)> &callback)
+{
+    for (auto &axis : _geometry)
     {
-        auto &model = axis.model;
-        auto &geometry = axis.geometry;
-        auto &vector = axis.vector;
-
-        geometry.commit();
-
-        model = brayns::GeometricModelHandler::create();
-        brayns::GeometricModelHandler::addToGeometryGroup(model, group);
-        brayns::GeometricModelHandler::setGeometry(model, geometry);
-        brayns::GeometricModelHandler::setColor(model, vector);
-        brayns::GeometricModelHandler::commitModel(model);
+        callback(axis);
     }
-};
+}
+
+void RenderableAxes::forEach(const std::function<void(const RenderableAxisList &)> &callback) const
+{
+    for (const auto &axis : _geometry)
+    {
+        callback(axis);
+    }
 }
 
 RotationVolumeComponent::RotationVolumeComponent(
     const brayns::Vector3ui &sizes,
     const brayns::Vector3f &dimensions,
-    std::vector<brayns::Quaternion> &rotations)
+    const std::vector<brayns::Quaternion> &rotations)
+    : _axes(SparseRotationVolumeBuilder::build(sizes, dimensions, rotations))
 {
-    if (glm::compMul(sizes) != rotations.size())
-    {
-        throw std::invalid_argument("Size and rotation count is different");
-    }
-
-    auto rawAxes = RotatedAxisVolumeBuilder::build(sizes, dimensions, rotations);
-    for (size_t i = 0; i < 3; ++i)
-    {
-        auto &rawAxisGeometry = rawAxes[i];
-        auto &axisGeometry = _axes[i];
-        axisGeometry.geometry.set(std::move(rawAxisGeometry));
-    }
 }
 
 brayns::Bounds RotationVolumeComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
+    brayns::Bounds bounds;
+    _axes.forEach(
+        [&bounds, &transform](const RenderableAxisList &axis)
+        {
+            const auto &axisGeometry = axis.geometry;
+            auto axisBounds = axisGeometry.computeBounds(transform);
+            bounds.expand(axisBounds);
+        });
+    return bounds;
 }
 
 void RotationVolumeComponent::onCreate()
@@ -179,16 +191,49 @@ void RotationVolumeComponent::onCreate()
     auto &group = getModel();
     group.addComponent<brayns::MaterialComponent>();
 
-    _geometry.commit();
-    brayns::GeometricModelHandler::setGeometry(_model, _geometry);
+    _axes.forEach(
+        [&group](RenderableAxisList &axis)
+        {
+            auto &model = axis.model;
+            auto &geometry = axis.geometry;
+            auto &vector = axis.vector;
 
-    brayns::GeometricModelHandler::commitModel(_model);
+            geometry.commit();
+
+            model = brayns::GeometricModelHandler::create();
+            brayns::GeometricModelHandler::setGeometry(model, geometry);
+            brayns::GeometricModelHandler::setColor(model, vector);
+            brayns::GeometricModelHandler::commitModel(model);
+            brayns::GeometricModelHandler::addToGeometryGroup(axis.model, group);
+        });
 }
 
 bool RotationVolumeComponent::commit()
 {
+    auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
+    if (!material.isModified())
+    {
+        return false;
+    }
+
+    material.commit();
+    _axes.forEach(
+        [&material](RenderableAxisList &axis)
+        {
+            brayns::GeometricModelHandler::setMaterial(axis.model, material);
+            brayns::GeometricModelHandler::commitModel(axis.model);
+        });
+
+    return true;
 }
 
 void RotationVolumeComponent::onDestroy()
 {
+    auto &group = getModel();
+    _axes.forEach(
+        [&group](RenderableAxisList &axis)
+        {
+            brayns::GeometricModelHandler::removeFromGeometryGroup(axis.model, group);
+            brayns::GeometricModelHandler::destroy(axis.model);
+        });
 }

@@ -56,12 +56,17 @@ enum NRRDType
 // Supported kinds (not all)
 enum NRRDKind
 {
+    NONE,
     DOMAIN,
     SPACE,
+    VECTOR,
     SCALAR,
     VECTOR2D,
     VECTOR3D,
+    NORMAL3D,
     QUATERNION,
+    GRADIENT3,
+    COLOR4,
     RGBCOLOR,
     HSVCOLOR,
     XYZCOLOR,

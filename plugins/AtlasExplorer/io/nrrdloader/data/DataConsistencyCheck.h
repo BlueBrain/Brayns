@@ -19,3 +19,12 @@
  */
 
 #pragma once
+
+#include <io/nrrdloader/INRRDData.h>
+#include <io/nrrdloader/NRRDHeader.h>
+
+class DataConsistencyCheck
+{
+public:
+    static void check(const NRRDHeader &header, const INRRDData &data);
+};

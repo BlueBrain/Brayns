@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BlockVolumeComponent.h"
+#include "VectorVolumeComponent.h"
 
 #include <brayns/engine/common/DataHandler.h>
 #include <brayns/engine/common/ExtractModelObject.h>
@@ -27,20 +27,26 @@
 
 namespace
 {
-class VolumeVisibleElement
+class VolumeValidElement
 {
 public:
-    static bool isVisible(const brayns::Vector4f &color) noexcept
+    static bool isValid(const brayns::Vector3f &vector)
     {
-        return color.a > 0.f;
+        for (size_t i = 0; i < 3; ++i)
+        {
+            if (!std::isfinite(vector[i]))
+            {
+                return false;
+            }
+        }
+        return true;
     }
-
-    static size_t countVisible(const std::vector<brayns::Vector4f> &colors) noexcept
+    static size_t countValid(const std::vector<brayns::Vector3f> &vectors)
     {
         size_t result = 0;
-        for (const auto &color : colors)
+        for (const auto &vector : vectors)
         {
-            if (isVisible(color))
+            if (isValid(vector))
             {
                 ++result;
             }
@@ -49,19 +55,13 @@ public:
     }
 };
 
-class SparseBlockVolumeBuilder
+class SparseVectorVolumeBuilder
 {
 public:
-    struct SparseBlockVolume
-    {
-        std::vector<brayns::Box> blocks;
-        std::vector<brayns::Vector4f> colors;
-    };
-
-    static SparseBlockVolume build(
+    static std::vector<brayns::Primitive> build(
         const brayns::Vector3ui &sizes,
         const brayns::Vector3f &dimensions,
-        const std::vector<brayns::Vector4f> &srcColors)
+        const std::vector<brayns::Vector3f> &vectors)
     {
         const auto width = sizes.x;
         const auto height = sizes.y;
@@ -70,19 +70,14 @@ public:
 
         const auto linealSize = width * height * depth;
 
-        const auto visibleElementCount = VolumeVisibleElement::countVisible(srcColors);
-        auto result = SparseBlockVolume();
-
-        auto &blocks = result.blocks;
-        blocks.reserve(visibleElementCount);
-
-        auto &colors = result.colors;
-        colors.reserve(visibleElementCount);
+        const auto visibleElementCount = VolumeValidElement::countValid(vectors);
+        auto result = std::vector<brayns::Primitive>();
+        result.reserve(visibleElementCount);
 
         for (size_t i = 0; i < linealSize; ++i)
         {
-            const auto &srcColor = srcColors[i];
-            if (!VolumeVisibleElement::isVisible(srcColor))
+            const auto &srcVector = vectors[i];
+            if (!VolumeValidElement::isValid(srcVector))
             {
                 continue;
             }
@@ -91,81 +86,72 @@ public:
             const auto localFrame = i % frameSize;
             const auto y = localFrame / width;
             const auto x = localFrame % width;
+            const auto voxelCenter = _computeVoxelCenter(dimensions, x, y, z);
+            const auto offset = srcVector * 0.5f;
 
-            blocks.push_back(_createVoxel(dimensions, x, y, z));
-            colors.push_back(srcColor);
+            result.push_back(brayns::Primitive::cylinder(voxelCenter, voxelCenter + offset, 2.f));
         }
 
         return result;
     }
 
 private:
-    static brayns::Box _createVoxel(const brayns::Vector3f &dimensions, size_t x, size_t y, size_t z)
+    static brayns::Vector3f _computeVoxelCenter(const brayns::Vector3f &dimensions, size_t x, size_t y, size_t z)
     {
         // Bottom front left corner
         const auto worldX = x * dimensions.x;
         const auto worldY = y * dimensions.y;
         const auto worldZ = z * dimensions.z;
-
-        brayns::Box voxel;
-        // Bottom back left corner
-        voxel.min = {x, y, z - dimensions.z};
-        voxel.max = {x + dimensions.x, y + dimensions.y, z};
-
-        return voxel;
+        const auto min = brayns::Vector3f(x, y, z - dimensions.z);
+        const auto max = brayns::Vector3f(x + dimensions.x, y + dimensions.y, z);
+        return (max + min) * 0.5f;
     }
 };
 }
 
-BlockVolumeComponent::BlockVolumeComponent(
+VectorVolumeComponent::VectorVolumeComponent(
     const brayns::Vector3ui &sizes,
     const brayns::Vector3f &dimensions,
-    const std::vector<brayns::Vector4f> &colors)
+    const std::vector<brayns::Vector3f> &vectors)
 {
-    auto volumeStructure = SparseBlockVolumeBuilder::build(sizes, dimensions, colors);
-
-    _geometry.set(std::move(volumeStructure.blocks));
-    _colors = std::move(volumeStructure.colors);
+    auto primitives = SparseVectorVolumeBuilder::build(sizes, dimensions, vectors);
+    _geometry.set(std::move(primitives));
 }
 
-brayns::Bounds BlockVolumeComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
+brayns::Bounds VectorVolumeComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     return _geometry.computeBounds(transform);
 }
 
-void BlockVolumeComponent::onCreate()
+void VectorVolumeComponent::onCreate()
 {
-    _model = brayns::GeometricModelHandler::create();
-
     auto &group = getModel();
-    brayns::GeometricModelHandler::addToGeometryGroup(_model, group);
 
     group.addComponent<brayns::MaterialComponent>();
 
     _geometry.commit();
+
+    _model = brayns::GeometricModelHandler::create();
+    brayns::GeometricModelHandler::addToGeometryGroup(_model, group);
     brayns::GeometricModelHandler::setGeometry(_model, _geometry);
-
-    auto sharedColors = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
-    brayns::GeometricModelHandler::setColors(_model, sharedColors);
-
     brayns::GeometricModelHandler::commitModel(_model);
 }
 
-bool BlockVolumeComponent::commit()
+bool VectorVolumeComponent::commit()
 {
     auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
     if (material.isModified())
     {
         material.commit();
         brayns::GeometricModelHandler::setMaterial(_model, material);
+        brayns::GeometricModelHandler::setColor(_model, material.getColor());
         brayns::GeometricModelHandler::commitModel(_model);
         return true;
     }
-
     return false;
 }
 
-void BlockVolumeComponent::onDestroy()
+void VectorVolumeComponent::onDestroy()
 {
     brayns::GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
     brayns::GeometricModelHandler::destroy(_model);

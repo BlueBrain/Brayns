@@ -158,7 +158,7 @@ public:
             throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
         }
 
-        _geometries.emplace_back(std::move(geometry));
+        _geometries.push_back(std::move(geometry));
         _dirty = true;
         return static_cast<uint32_t>(idx);
     }

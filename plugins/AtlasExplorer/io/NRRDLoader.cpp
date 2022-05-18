@@ -23,8 +23,11 @@
 #include <brayns/utils/EnumUtils.h>
 #include <brayns/utils/FileReader.h>
 
+#include <io/nrrdloader/data/DataConsistencyCheck.h>
+#include <io/nrrdloader/data/DataParser.h>
 #include <io/nrrdloader/header/HeaderLimitCheck.h>
 #include <io/nrrdloader/header/HeaderParser.h>
+#include <io/nrrdloader/kinds/KindTable.h>
 
 std::vector<std::string> NRRDLoader::getSupportedExtensions() const
 {
@@ -49,16 +52,31 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
     const std::string &path,
     const brayns::LoaderProgress &callback) const
 {
+    // Read file
     callback.updateProgress("Reading " + path, 0.f);
     const auto fileContent = brayns::FileReader::read(path);
     auto contentView = std::string_view(fileContent);
 
+    // Parse header
     callback.updateProgress("Parsing NRRD header", 0.2f);
     const auto header = HeaderParser::parse(path, contentView);
-    // Check the header against the limits imposed by what this plugin can render
     HeaderLimitCheck::check(header);
 
+    // Parse data
+    callback.updateProgress("Parsing NRRD data", 0.4f);
+    const auto data = DataParser::parse(header, contentView);
+    DataConsistencyCheck::check(header, *data);
+
+    // Interpret data
+    callback.updateProgress("Transforming data", 0.6f);
+    auto kind = KindTable::getKind(header);
+
+    // Generate visual assets
+    callback.updateProgress("Generating visualization", 0.8f);
     auto model = std::make_unique<brayns::Model>();
+    kind->createComponent(header, *data, *model);
+
+    callback.updateProgress("Done", 1.f);
     auto result = std::vector<std::unique_ptr<brayns::Model>>();
     result.push_back(std::move(model));
     return result;

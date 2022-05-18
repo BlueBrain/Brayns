@@ -130,13 +130,19 @@ public:
             {"domain", NRRDKind::DOMAIN},
             {"space", NRRDKind::SPACE},
             {"scalar", NRRDKind::SCALAR},
+            {"vector", NRRDKind::VECTOR},
             {"2-vector", NRRDKind::VECTOR2D},
             {"3-vector", NRRDKind::VECTOR3D},
+            {"3-normal", NRRDKind::NORMAL3D},
             {"quaternion", NRRDKind::QUATERNION},
+            {"3-gradient", NRRDKind::GRADIENT3},
+            {"4-color", NRRDKind::COLOR4},
             {"RGB-color", NRRDKind::RGBCOLOR},
             {"HSV-color", NRRDKind::HSVCOLOR},
             {"XYZ-color", NRRDKind::XYZCOLOR},
-            {"RGBA-color", NRRDKind::RGBACOLOR}};
+            {"RGBA-color", NRRDKind::RGBACOLOR},
+            {"none", NRRDKind::NONE},
+            {"???", NRRDKind::NONE}};
     }
 };
 

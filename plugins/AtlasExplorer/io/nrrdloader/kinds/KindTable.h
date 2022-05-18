@@ -19,3 +19,13 @@
  */
 
 #pragma once
+
+#include <io/nrrdloader/INRRDKind.h>
+
+#include <memory>
+
+class KindTable
+{
+public:
+    static std::unique_ptr<INRRDKind> getKind(const NRRDHeader &header);
+};

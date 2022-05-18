@@ -18,4 +18,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NRRDVectorComponent.h"
+#include "DataConsistencyCheck.h"
+
+void DataConsistencyCheck::check(const NRRDHeader &header, const INRRDData &data)
+{
+    const auto &sizes = header.sizes;
+    size_t expectedSize = 1;
+    for (auto size : sizes)
+    {
+        expectedSize *= size;
+    }
+
+    if (data.getNumElements() != expectedSize)
+    {
+        const auto expected = std::to_string(expectedSize);
+        const auto have = std::to_string(data.getNumElements());
+        throw std::runtime_error("Missmatch between expected size (" + expected + ") and data size (" + have + ")");
+    }
+}

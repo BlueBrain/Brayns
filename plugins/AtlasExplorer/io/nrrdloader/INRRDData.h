@@ -38,6 +38,8 @@ public:
     virtual std::vector<uint64_t> asUnsignedLongs() const = 0;
     virtual std::vector<float> asFloats() const = 0;
     virtual std::vector<double> asDoubles() const = 0;
+
+    virtual size_t getNumElements() const noexcept = 0;
 };
 
 template<typename T>
@@ -97,6 +99,11 @@ public:
     std::vector<double> asDoubles() const noexcept
     {
         return _as<double>();
+    }
+
+    size_t getNumElements() const noexcept override
+    {
+        return _data.size
     }
 
 private:

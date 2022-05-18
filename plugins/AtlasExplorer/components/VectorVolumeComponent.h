@@ -18,4 +18,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NRRDScalarComponent.h"
+#pragma once
+
+#include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/geometries/Primitive.h>
+
+class VectorVolumeComponent final : public brayns::Component
+{
+public:
+    VectorVolumeComponent(
+        const brayns::Vector3ui &sizes,
+        const brayns::Vector3f &dimensions,
+        const std::vector<brayns::Vector3f> &vectors);
+
+    brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
+
+    void onCreate() override;
+
+    bool commit() override;
+
+    void onDestroy() override;
+
+private:
+    OSPGeometricModel _model;
+    brayns::Geometry<brayns::Primitive> _geometry;
+};

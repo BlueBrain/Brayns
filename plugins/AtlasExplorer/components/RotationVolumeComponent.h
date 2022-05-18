@@ -23,21 +23,33 @@
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/geometries/Primitive.h>
 
-class RotationVolumeComponent final : public brayns::Component
+struct RenderableAxisList
+{
+    brayns::Vector3f vector;
+    OSPGeometricModel model = nullptr;
+    brayns::Geometry<brayns::Primitive> geometry;
+};
+
+class RenderableAxes
 {
 public:
-    struct RenderableAxis
-    {
-        brayns::Vector3f vector;
-        OSPGeometricModel model = nullptr;
-        brayns::Geometry<brayns::Primitive> geometry;
-    };
+    RenderableAxes(std::vector<RenderableAxisList> geometry);
 
+    void forEach(const std::function<void(RenderableAxisList &)> &callback);
+
+    void forEach(const std::function<void(const RenderableAxisList &)> &callback) const;
+
+private:
+    std::vector<RenderableAxisList> _geometry;
+};
+
+class RotationVolumeComponent final : public brayns::Component
+{
 public:
     RotationVolumeComponent(
         const brayns::Vector3ui &sizes,
         const brayns::Vector3f &dimensions,
-        std::vector<brayns::Quaternion> &rotations);
+        const std::vector<brayns::Quaternion> &rotations);
 
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
@@ -48,8 +60,5 @@ public:
     void onDestroy() override;
 
 private:
-    std::array<RenderableAxis, 3> _axes = {
-        RenderableAxis{{1.f, 0.f, 0.f}},
-        RenderableAxis{{0.f, 1.f, 0.f}},
-        RenderableAxis{{0.f, 0.f, 1.f}}};
+    RenderableAxes _axes;
 };

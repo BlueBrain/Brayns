@@ -40,7 +40,7 @@ public:
     BlockVolumeComponent(
         const brayns::Vector3ui &sizes,
         const brayns::Vector3f &dimensions,
-        std::vector<brayns::Vector4f> colors);
+        const std::vector<brayns::Vector4f> &colors);
 
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
