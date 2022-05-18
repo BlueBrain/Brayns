@@ -35,7 +35,7 @@ class JsonRpcHandler(JsonRpcProtocol):
         self._logger = logger
 
     def on_binary(self, data: bytes) -> None:
-        self._logger.info('Binary frame of %d bytes received.', len(data))
+        self._logger.info('Binary frame of %s bytes received.', len(data))
 
     def on_reply(self, reply: JsonRpcReply) -> None:
         self._logger.info('Reply received: %s.', reply)
