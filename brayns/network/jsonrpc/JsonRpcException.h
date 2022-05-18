@@ -130,26 +130,6 @@ public:
 };
 
 /**
- * @brief Method cannot be cancelled.
- *
- */
-class TaskNotCancellableException : public JsonRpcException
-{
-public:
-    TaskNotCancellableException(const std::string &method);
-};
-
-/**
- * @brief Trying to cancel a method that is not currently running.
- *
- */
-class TaskNotFoundException : public JsonRpcException
-{
-public:
-    TaskNotFoundException(const std::string &id);
-};
-
-/**
  * @brief Method has been cancelled.
  *
  */

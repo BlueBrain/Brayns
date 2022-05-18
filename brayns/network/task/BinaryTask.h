@@ -75,11 +75,16 @@ public:
     virtual void run() override;
 
     /**
-     * @brief Always throw.
+     * @brief Shouldn't be called by task manager.
      *
-     * @throw TaskNotCancellableException Task not cancellable.
      */
     virtual void cancel() override;
+
+    /**
+     * @brief Shouldn't be called by task manager.
+     *
+     */
+    virtual void disconnect() override;
 
 private:
     ClientRequest _request;

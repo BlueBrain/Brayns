@@ -199,6 +199,8 @@ void SnapshotEntrypoint::onRequest(const Request &request)
 
     request.getParams(params);
 
+    _download = params.file_path.empty();
+
     brayns::ProgressHandler progress(_token, request);
 
     auto result = SnapshotHandler::handle(params, progress, _engine);
@@ -211,9 +213,9 @@ void SnapshotEntrypoint::onCancel()
     _token.cancel();
 }
 
-void SnapshotEntrypoint::onDisconnect(const ClientRef &client)
+void SnapshotEntrypoint::onDisconnect()
 {
-    if (_client && client == *_client)
+    if (_download)
     {
         _token.cancel();
     }

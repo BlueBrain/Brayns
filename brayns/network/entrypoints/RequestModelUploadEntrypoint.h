@@ -51,7 +51,7 @@ public:
     virtual void onRequest(const Request &request) override;
     virtual void onPreRender() override;
     virtual void onCancel() override;
-    virtual void onDisconnect(const ClientRef &client) override;
+    virtual void onDisconnect() override;
 
 private:
     Scene &_scene;
@@ -59,6 +59,5 @@ private:
     SimulationParameters &_simulation;
     BinaryManager &_binary;
     CancellationToken _token;
-    std::optional<ClientRef> _client;
 };
 } // namespace brayns

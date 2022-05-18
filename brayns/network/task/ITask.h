@@ -78,5 +78,11 @@ public:
      * @throw TaskNotCancellableException Task is not cancellable.
      */
     virtual void cancel() = 0;
+
+    /**
+     * @brief Notify the task if its client disconnects.
+     *
+     */
+    virtual void disconnect() = 0;
 };
 } // namespace brayns

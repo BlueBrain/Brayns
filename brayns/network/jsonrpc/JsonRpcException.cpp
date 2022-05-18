@@ -84,18 +84,8 @@ InternalErrorException::InternalErrorException(const std::string &message)
 {
 }
 
-TaskNotCancellableException::TaskNotCancellableException(const std::string &method)
-    : JsonRpcException(20, "Task with method '" + method + "' is not asynchronous and cannot be cancelled")
-{
-}
-
-TaskNotFoundException::TaskNotFoundException(const std::string &id)
-    : JsonRpcException(21, "No tasks found with request ID " + id)
-{
-}
-
 TaskCancelledException::TaskCancelledException()
-    : JsonRpcException(22, "Task has been cancelled")
+    : JsonRpcException(20, "Task has been cancelled")
 {
 }
 } // namespace brayns

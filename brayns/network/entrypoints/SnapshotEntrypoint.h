@@ -43,12 +43,12 @@ public:
     virtual bool isAsync() const override;
     virtual void onRequest(const Request &request) override;
     virtual void onCancel() override;
-    virtual void onDisconnect(const ClientRef &client) override;
+    virtual void onDisconnect() override;
 
 private:
     Engine &_engine;
     CancellationToken _token;
-    std::optional<ClientRef> _client;
+    bool _download = false;
 
     EngineObjectFactory<Camera> _cameraFactory;
     EngineObjectFactory<Renderer> _renderFactory;

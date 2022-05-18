@@ -32,7 +32,7 @@ void TaskManager::add(std::unique_ptr<ITask> task)
     auto &method = task->getMethod();
     if (task->hasPriority())
     {
-        Log::debug("Task '{}' has priority.", method);
+        Log::debug("Task '{}' has priority and is run directly.", method);
         task->run();
         return;
     }
@@ -45,10 +45,23 @@ void TaskManager::runAllTasks()
     while (!_tasks.empty())
     {
         auto count = _tasks.size();
-        Log::debug("Flushing task queue, {} remaining.", count);
+        Log::debug("Flushing task queue: {} remaining.", count);
         auto &task = *_tasks.front();
         task.run();
         _tasks.pop_front();
+    }
+}
+
+void TaskManager::disconnect(const ClientRef &client)
+{
+    Log::debug("Cancelling all tasks from client {}.", client);
+    for (const auto &task : _tasks)
+    {
+        if (task->getClient() != client)
+        {
+            continue;
+        }
+        task->disconnect();
     }
 }
 
@@ -56,22 +69,27 @@ void TaskManager::cancel(const ClientRef &client, const RequestId &id)
 {
     if (id.isEmpty())
     {
-        throw brayns::InvalidParamsException("Empty task ID");
+        throw InvalidParamsException("Empty task ID");
     }
+    Log::debug("Cancelling task from client {} with id {}.", client, id);
     bool found = false;
     for (const auto &task : _tasks)
     {
-        if (task->getClient() != client || task->getId() != id)
+        if (task->getClient() != client)
         {
             continue;
         }
-        task->cancel();
+        if (task->getId() != id)
+        {
+            continue;
+        }
         found = true;
+        task->cancel();
     }
     if (!found)
     {
-        auto text = id.getDisplayText();
-        throw brayns::TaskNotFoundException(text);
+        auto message = fmt::format("No requests found with client {} and ID {}.", client, id);
+        throw InvalidParamsException(message);
     }
 }
 } // namespace brayns

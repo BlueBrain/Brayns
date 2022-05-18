@@ -77,18 +77,10 @@ public:
     void onCancel() const;
 
     /**
-     * @brief Call implementation onConnect(client).
+     * @brief Call implementation onDisconnect().
      *
-     * @param client Client ref.
      */
-    void onConnect(const ClientRef &client) const;
-
-    /**
-     * @brief Call implementation onDisconnect(client).
-     *
-     * @param client Client ref.
-     */
-    void onDisconnect(const ClientRef &client) const;
+    void onDisconnect() const;
 
     /**
      * @brief Get the name of the plugin that registered the entrypoint.
