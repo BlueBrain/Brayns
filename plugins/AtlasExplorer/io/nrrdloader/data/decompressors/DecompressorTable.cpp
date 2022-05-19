@@ -24,7 +24,7 @@
 #include <io/nrrdloader/data/decompressors/GZipDecompressor.h>
 #include <io/nrrdloader/data/decompressors/NOOPDecompressor.h>
 
-std::unique_ptr<IDecompressor> DecompressorTable::getDecompressor(NRRDEncoding encoding) const noexcept
+std::unique_ptr<IDecompressor> DecompressorTable::getDecompressor(NRRDEncoding encoding) noexcept
 {
     if (encoding == NRRDEncoding::BZIP2)
     {

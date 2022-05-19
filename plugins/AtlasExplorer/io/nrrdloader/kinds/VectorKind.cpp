@@ -20,6 +20,46 @@
 
 #include "VectorKind.h"
 
+#include <components/VectorVolumeComponent.h>
+#include <io/nrrdloader/kinds/common/VolumeMeasures.h>
+
+#include <cstring>
+
+namespace
+{
+class DataToVector
+{
+public:
+    static std::vector<brayns::Vector3f> convert(int32_t vectorDimension, const std::vector<float> &data)
+    {
+        assert(vectorDimension <= 3);
+
+        size_t numElements = data.size() / vectorDimension;
+        assert(numElements * 3 == data.size());
+
+        std::vector<brayns::Vector3f> vectors;
+        vectors.reserve(numElements);
+
+        for (size_t i = 0; i < numElements; ++i)
+        {
+            auto &vector = vectors.emplace_back(0.f);
+
+            const auto dataIndex = i * vectorDimension;
+            for (size_t j = 0; j < vectorDimension; ++j)
+            {
+                vector[j] = data[dataIndex + j];
+            }
+        }
+    }
+};
+}
+
 void VectorKind::createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const
 {
+    const auto &sizes = header.sizes;
+    const auto vectorDimension = sizes.front();
+    const auto floatData = data.asFloats();
+    const auto vectors = DataToVector::convert(vectorDimension, floatData);
+    const auto measures = VolumeMeasuresComputer::compute(header, 1);
+    model.addComponent<VectorVolumeComponent>(measures.sizes, measures.dimensions, vectors);
 }

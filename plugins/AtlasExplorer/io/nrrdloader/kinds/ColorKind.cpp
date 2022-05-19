@@ -20,6 +20,10 @@
 
 #include "ColorKind.h"
 
+#include <components/BlockVolumeComponent.h>
+#include <io/nrrdloader/kinds/common/DataFlipper.h>
+#include <io/nrrdloader/kinds/common/VolumeMeasures.h>
+
 #include <cstring>
 
 namespace
@@ -27,33 +31,54 @@ namespace
 class ColorSpaceConverter
 {
 public:
-    static std::vector<brayns::Vector4f> fromXYZtoRGB(const std::vector<float> &xyz)
+    static std::vector<brayns::Vector4f> fromDataToRGBA(NRRDKind kind, const std::vector<float> &data)
     {
-        std::vector<brayns::Vector4f> rgb;
-        rgb.reserve(xyz.size() / 3);
-        assert(xyz.size() * 3 == rgb.size());
+        if (kind == NRRDKind::GRADIENT3 || kind == NRRDKind::RGBCOLOR)
+        {
+            return _fromRGBtoRGBA(data);
+        }
+
+        if (kind == NRRDKind::XYZCOLOR)
+        {
+            return _fromXYZtoRGBA(data);
+        }
+
+        if (kind == NRRDKind::HSVCOLOR)
+        {
+            return _fromHSVtoRGBA(data);
+        }
+
+        return _fromRGBAtoRGBA(data);
+    }
+
+private:
+    static std::vector<brayns::Vector4f> _fromXYZtoRGBA(const std::vector<float> &xyz)
+    {
+        std::vector<brayns::Vector4f> rgba;
+        const auto numElement = _extractNumberOfElements(xyz.size(), 3);
+        rgba.reserve(numElement);
 
         const auto converter = brayns::Matrix3f(
             {3.2404542f, -0.9692660f, 0.0556434f},
             {-1.5371385f, 1.8760108f, -0.2040259},
             {-0.4985314f, 0.0415560f, 1.0572252f});
 
-        for (size_t i = 0; i < rgb.size(); ++i)
+        for (size_t i = 0; i < numElement; ++i)
         {
             const auto j = i * 3;
             const auto convertedXYZ = converter * brayns::Vector3f(xyz[j], xyz[j + 1], xyz[j + 2]);
-            auto &color = rgb.emplace_back();
+            auto &color = rgba.emplace_back();
             color = brayns::Vector4f(glm::max(brayns::Vector3f(0.f), convertedXYZ), 1.f);
         }
 
-        return rgb;
+        return rgba;
     }
 
-    static std::vector<brayns::Vector4f> fromHSVtoRGB(const std::vector<float> &hsv)
+    static std::vector<brayns::Vector4f> _fromHSVtoRGBA(const std::vector<float> &hsv)
     {
-        std::vector<brayns::Vector4f> rgb;
-        rgb.reserve(hsv.size() / 3);
-        assert(hsv.size() * 3 == rgb.size());
+        std::vector<brayns::Vector4f> rgba;
+        const auto numElement = _extractNumberOfElements(hsv.size(), 3);
+        rgba.reserve(numElement);
 
         const auto floatModulo = [](float value, int32_t dividend)
         {
@@ -69,53 +94,71 @@ public:
             return V - V * S * std::max(0.f, multiplier);
         };
 
-        for (size_t i = 0; i < rgb.size(); ++i)
+        for (size_t i = 0; i < numElement; ++i)
         {
             const auto j = i * 3;
             const auto H = hsv[j];
             const auto S = hsv[j + 1];
             const auto V = hsv[j + 2];
 
-            auto &color = rgb.emplace_back();
+            auto &color = rgba.emplace_back();
             color.r = converter(5.f, H, S, V);
             color.g = converter(3.f, H, S, V);
             color.b = converter(1.f, H, S, V);
             color.a = 1.f;
         }
 
-        return rgb;
+        return rgba;
     }
-};
 
-class ColorBuilder
-{
-public:
-    static std::vector<brayns::Vector4f> build(const std::vector<float> &data, size_t numChannels)
+    static std::vector<brayns::Vector4f> _fromRGBtoRGBA(const std::vector<float> &rgb)
     {
-        const auto numColors = data.size() / numChannels;
-        std::vector<brayns::Vector4f> result;
-        result.reserve(numColors);
+        std::vector<brayns::Vector4f> rgba;
+        const auto numElements = _extractNumberOfElements(rgb.size(), 3);
+        rgba.reserve(numElements);
 
-        for (size_t i = 0; i < data.size(); i = i + numChannels)
+        constexpr auto converter = 1.f / 255.f;
+
+        for (size_t i = 0; i < numElements; ++i)
         {
-            auto &color = result.emplace_back(1.f);
-            for (size_t j = 0; j < numChannels; ++j)
-            {
-                color[j] = data[i + j];
-            }
+            auto &color = rgba.emplace_back();
+            const auto j = i * 3;
+            color.r = rgb[j] * converter;
+            color.g = rgb[j + 1] * converter;
+            color.b = rgb[j + 2] * converter;
+            color.a = 1.f;
         }
 
-        return result;
+        return rgba;
+    }
+
+    static std::vector<brayns::Vector4f> _fromRGBAtoRGBA(const std::vector<float> &rgbaValues)
+    {
+        std::vector<brayns::Vector4f> rgba(_extractNumberOfElements(rgbaValues.size(), 4));
+
+        const auto src = rgbaValues.data();
+        auto dst = rgba.data();
+        std::memcpy(dst, src, rgbaValues.size() * sizeof(float));
+
+        return rgba;
+    }
+
+    static size_t _extractNumberOfElements(size_t dataSize, size_t elementDimension)
+    {
+        auto numElements = dataSize / elementDimension;
+        assert(numElements * elementDimension == dataSize);
+        return numElements;
     }
 };
 }
 
 void ColorKind::createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const
 {
-    auto floatData = data.asFloats();
-
-    const auto dimensions = header.dimensions;
-    const auto &sizes = header.sizes;
+    const auto floatData = data.asFloats();
     const auto &kinds = *header.kinds;
     const auto colorKind = kinds[0];
+    const auto measures = VolumeMeasuresComputer::compute(header, 1);
+    auto dataColors = ColorSpaceConverter::fromDataToRGBA(colorKind, floatData);
+    const auto colors = DataFlipper::flipVertically(measures.sizes, std::move(dataColors));
+    model.addComponent<BlockVolumeComponent>(measures.sizes, measures.dimensions, colors);
 }

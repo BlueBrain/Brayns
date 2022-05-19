@@ -39,7 +39,7 @@ public:
     VolumeRendererComponent(T volume)
         : _model(ospNewVolumetricModel())
     {
-        _volume.setData(std::move(volume))
+        _volume.setData(std::move(volume));
     }
 
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override

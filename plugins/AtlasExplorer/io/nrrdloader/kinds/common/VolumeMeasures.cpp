@@ -18,15 +18,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "VolumeMeasures.h"
 
-#include <io/nrrdloader/NRRDHeader.h>
-#include <io/nrrdloader/data/decompressors/IDecompressor.h>
-
-#include <memory>
-
-class DecompressorTable
+VolumeMeasures VolumeMeasuresComputer::compute(const NRRDHeader &header, size_t headerDataOffset)
 {
-public:
-    static std::unique_ptr<IDecompressor> getDecompressor(NRRDEncoding encoding) noexcept;
-};
+    auto &sizes = header.sizes;
+    assert(sizes.size() - headerDataOffset <= 3);
+
+    auto &spacings = header.spacings;
+
+    VolumeMeasures result;
+    auto &volumeSizes = result.sizes;
+    auto &volumeDimensions = result.dimensions;
+    for (size_t i = headerDataOffset; i < sizes.size(); ++i)
+    {
+        volumeSizes[i - headerDataOffset] = sizes[i];
+        if (spacings)
+        {
+            volumeDimensions[i - headerDataOffset] = (*spacings)[i];
+        }
+    }
+
+    return result;
+}

@@ -193,12 +193,13 @@ public:
     static std::vector<std::vector<float>> parseFloatFrame(std::string_view value)
     {
         auto tokens = parseStringArray(value);
-        std::vector<std::vector<float>> result(tokens.size());
+        std::vector<std::vector<float>> result;
+        result.reserve(tokens.size());
         for (size_t i = 0; i < tokens.size(); ++i)
         {
             if (tokens[i] != "none")
             {
-                result[i] = parseFloatVector(tokens[i]);
+                result.push_back(parseFloatVector(tokens[i]));
             }
         }
         return result;
@@ -444,6 +445,25 @@ public:
     }
 };
 
+class SpacingsParser
+{
+public:
+    static void parse(std::string_view value, NRRDHeader &header)
+    {
+        if (header.dimensions == -1)
+        {
+            throw std::invalid_argument("Ill-formed NRRD header: dimensions not setted before spacings");
+        }
+
+        header.spacings = HeaderEntryParseUtils::parseFloatArray(value);
+
+        if (header.spacings->size() != header.dimensions)
+        {
+            throw std::invalid_argument("Ill-formed NRRD header: dimensions and spacings length missmatch");
+        }
+    }
+};
+
 class KindsParser
 {
 public:
@@ -642,8 +662,9 @@ public:
         _addParser(entryParserMap, "sample units", SampleUnitsParser::parse);
         _addParser(entryParserMap, "sampleunits", SampleUnitsParser::parse);
         _addParser(entryParserMap, "sizes", SizesParser::parse);
+        _addParser(entryParserMap, "spacings", SpacingsParser::parse);
         _addParser(entryParserMap, "space", SpaceParser::parse);
-        _addParser(entryParserMap, "space dimensions", SpaceDimensionsParser::parse);
+        _addParser(entryParserMap, "space dimension", SpaceDimensionsParser::parse);
         _addParser(entryParserMap, "space units", SpaceUnitsParser::parse);
         _addParser(entryParserMap, "space origin", SpaceOriginParser::parse);
         _addParser(entryParserMap, "space directions", SpaceDirectionsParser::parse);
@@ -662,7 +683,6 @@ public:
         _addParser(entryParserMap, "byte skip", NOOPParser::parse);
         _addParser(entryParserMap, "byteskip", NOOPParser::parse);
         _addParser(entryParserMap, "number", NOOPParser::parse);
-        _addParser(entryParserMap, "spacings", NOOPParser::parse);
         _addParser(entryParserMap, "thicknesses", NOOPParser::parse);
         _addParser(entryParserMap, "axis mins", NOOPParser::parse);
         _addParser(entryParserMap, "axismins", NOOPParser::parse);

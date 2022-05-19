@@ -108,6 +108,9 @@ struct NRRDHeader
     // Number of samples on each dimension
     std::vector<int32_t> sizes;
 
+    // Spatial gap between samples on each axis
+    std::optional<std::vector<float>> spacings;
+
     // Kind of data along each axis
     std::optional<std::vector<NRRDKind>> kinds;
 

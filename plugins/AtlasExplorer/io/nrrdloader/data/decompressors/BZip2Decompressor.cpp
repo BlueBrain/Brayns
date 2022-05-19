@@ -47,6 +47,7 @@ std::string BZip2Decompressor::decompress(std::string input) const
     case BZ_PARAM_ERROR:
         throw std::runtime_error("Unknown error during decompression");
     default:
+        break;
     }
 
     result.resize(outputSize);

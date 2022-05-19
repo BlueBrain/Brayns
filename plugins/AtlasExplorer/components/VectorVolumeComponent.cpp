@@ -63,6 +63,8 @@ public:
         const brayns::Vector3f &dimensions,
         const std::vector<brayns::Vector3f> &vectors)
     {
+        const auto radius = glm::compMin(dimensions) * 0.05f;
+
         const auto width = sizes.x;
         const auto height = sizes.y;
         const auto depth = sizes.z;
@@ -89,7 +91,7 @@ public:
             const auto voxelCenter = _computeVoxelCenter(dimensions, x, y, z);
             const auto offset = srcVector * 0.5f;
 
-            result.push_back(brayns::Primitive::cylinder(voxelCenter, voxelCenter + offset, 2.f));
+            result.push_back(brayns::Primitive::cylinder(voxelCenter, voxelCenter + offset, radius));
         }
 
         return result;

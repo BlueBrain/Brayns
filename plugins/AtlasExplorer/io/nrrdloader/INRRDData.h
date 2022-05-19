@@ -103,7 +103,7 @@ public:
 
     size_t getNumElements() const noexcept override
     {
-        return _data.size
+        return _data.size();
     }
 
 private:

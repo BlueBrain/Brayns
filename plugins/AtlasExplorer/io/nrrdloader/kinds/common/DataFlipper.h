@@ -21,46 +21,39 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Volume.h>
-#include <brayns/engine/VolumeDataType.h>
 
 #include <vector>
 
-namespace brayns
-{
-/**
- * @brief The RegularVolume struct is a regular grid volume in which the data is laid out in XYZ order:
- * The first elements are the X values of the first row of the first frame.
- */
-struct RegularVolume
-{
-    // Specifies how to interpret the bytes stored as data
-    VolumeDataType dataType;
-    std::vector<uint8_t> data;
-    Vector3ui size{0u};
-    Vector3f spacing;
-    // Specifies wether the data is scpeified as per grid vertex. If false, is specified as per grid cell center.
-    bool perVertexData{true};
-};
-
-template<>
-class VolumeOSPRayID<RegularVolume>
+class DataFlipper
 {
 public:
-    static std::string_view get();
-};
+    template<typename T>
+    static std::vector<T> flipVertically(const brayns::Vector3f &sizes, std::vector<T> input) noexcept
+    {
+        const auto width = sizes.x;
+        const auto height = sizes.y;
+        const auto frameSize = width * height;
+        const auto depth = sizes.z;
 
-template<>
-class VolumeBoundsUpdater<RegularVolume>
-{
-public:
-    static void update(const RegularVolume &s, const Matrix4f &t, Bounds &b);
-};
+        std::vector<T> result;
+        result.reserve(input.size());
 
-template<>
-class VolumeCommitter<RegularVolume>
-{
-public:
-    static void commit(OSPVolume handle, const RegularVolume &volumeData);
+        for (size_t i = 0; i < depth; ++i)
+        {
+            const auto sliceStarts = frameSize * i;
+
+            for (size_t j = 0; j < height; ++j)
+            {
+                const auto rowCopyStarts = sliceStarts + frameSize - width * (j + 1);
+
+                auto begin = input.begin();
+                std::advance(begin, rowCopyStarts);
+                auto end = input.begin();
+                std::advance(end, rowCopyStarts + width);
+                result.insert(result.end(), begin, end);
+            }
+        }
+
+        return result;
+    }
 };
-}

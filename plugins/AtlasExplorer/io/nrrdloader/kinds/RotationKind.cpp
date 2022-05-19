@@ -20,6 +20,38 @@
 
 #include "RotationKind.h"
 
+#include <components/RotationVolumeComponent.h>
+#include <io/nrrdloader/kinds/common/DataFlipper.h>
+#include <io/nrrdloader/kinds/common/VolumeMeasures.h>
+
+#include <cstring>
+
+namespace
+{
+class DataToQuaternion
+{
+public:
+    static std::vector<brayns::Quaternion> convert(const std::vector<float> &data)
+    {
+        // NRRD stores quaternions as (w,x,y,z)
+        std::vector<brayns::Quaternion> quaternions(data.size() / 4);
+        assert(quaternions.size() * 4 == data.size());
+
+        const auto src = data.data();
+        auto dst = quaternions.data();
+
+        std::memcpy(dst, src, data.size() * sizeof(float));
+
+        return quaternions;
+    }
+};
+}
+
 void RotationKind::createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const
 {
+    const auto floatData = data.asFloats();
+    const auto measures = VolumeMeasuresComputer::compute(header, 1);
+    auto quaternionsData = DataToQuaternion::convert(floatData);
+    const auto quaternions = DataFlipper::flipVertically(measures.sizes, std::move(quaternionsData));
+    model.addComponent<RotationVolumeComponent>(measures.sizes, measures.dimensions, quaternions);
 }

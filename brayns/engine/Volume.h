@@ -24,6 +24,7 @@
 
 #include <ospray/ospray.h>
 
+#include <functional>
 #include <memory>
 #include <numeric>
 #include <string_view>

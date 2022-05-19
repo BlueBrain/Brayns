@@ -48,6 +48,7 @@ set(BRAYNSENGINE_SOURCES
     scenecomponents/SceneClipManager.cpp
     scenecomponents/SceneLightManager.cpp
     scenecomponents/SceneModelManager.cpp
+    volumes/RegularVolume.cpp
 )
 
 set(BRAYNSENGINE_PUBLIC_HEADERS
@@ -102,6 +103,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     scenecomponents/SceneClipManager.h
     scenecomponents/SceneLightManager.h
     scenecomponents/SceneModelManager.h
+    volumes/RegularVolume.h
 )
 
 add_library(braynsEngine SHARED ${BRAYNSENGINE_SOURCES} ${BRAYNSENGINE_PUBLIC_HEADERS})

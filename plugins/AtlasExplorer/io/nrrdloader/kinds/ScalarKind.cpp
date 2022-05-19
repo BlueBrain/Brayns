@@ -20,6 +20,95 @@
 
 #include "ScalarKind.h"
 
+#include <brayns/engine/components/VolumeRendererComponent.h>
+#include <brayns/engine/volumes/RegularVolume.h>
+
+#include <io/nrrdloader/kinds/common/DataFlipper.h>
+#include <io/nrrdloader/kinds/common/VolumeMeasures.h>
+
+namespace
+{
+class DataGridAdjuster
+{
+public:
+    template<typename T>
+    static std::vector<uint8_t> adjust(std::vector<T> input, const brayns::Vector3f &sizes)
+    {
+        const auto flipped = DataFlipper::flipVertically<T>(sizes, std::move(input));
+
+        std::vector<uint8_t> result(flipped.size() * sizeof(T));
+
+        const auto src = flipped.data();
+        auto dst = result.data();
+
+        std::memcpy(dst, src, result.size());
+
+        return result;
+    }
+};
+
+class RegularVolumeBuilder
+{
+public:
+    static brayns::RegularVolume build(const NRRDHeader &header, const INRRDData &data)
+    {
+        brayns::RegularVolume result;
+
+        const auto measures = _computeMeasures(header);
+        result.size = measures.sizes;
+        result.spacing = measures.dimensions;
+
+        const auto dataType = header.type;
+        switch (dataType)
+        {
+        case NRRDType::UNSIGNED_CHAR:
+            result.data = DataGridAdjuster::adjust(data.asBytes(), measures.sizes);
+            result.dataType = brayns::VolumeDataType::UNSIGNED_CHAR;
+            break;
+        case NRRDType::CHAR:
+        case NRRDType::SHORT:
+            result.data = DataGridAdjuster::adjust(data.asShorts(), measures.sizes);
+            result.dataType = brayns::VolumeDataType::SHORT;
+            break;
+        case NRRDType::UNSIGNED_SHORT:
+            result.data = DataGridAdjuster::adjust(data.asUnsingedShorts(), measures.sizes);
+            result.dataType = brayns::VolumeDataType::UNSIGNED_SHORT;
+            break;
+        case NRRDType::FLOAT:
+            result.data = DataGridAdjuster::adjust(data.asFloats(), measures.sizes);
+            result.dataType = brayns::VolumeDataType::FLOAT;
+            break;
+        case NRRDType::INT:
+        case NRRDType::UNSIGNED_INT:
+        case NRRDType::LONG:
+        case NRRDType::UNSIGNED_LONG:
+        case NRRDType::DOUBLE:
+            result.data = DataGridAdjuster::adjust(data.asDoubles(), measures.sizes);
+            result.dataType = brayns::VolumeDataType::DOUBLE;
+            break;
+        default:
+            assert(false);
+        }
+
+        return result;
+    };
+
+private:
+    static VolumeMeasures _computeMeasures(const NRRDHeader &header)
+    {
+        size_t offset = 0;
+        if (header.dimensions == 4)
+        {
+            offset = 1;
+        }
+
+        return VolumeMeasuresComputer::compute(header, offset);
+    }
+};
+}
+
 void ScalarKind::createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const
 {
+    auto volume = RegularVolumeBuilder::build(header, data);
+    model.addComponent<brayns::VolumeRendererComponent<brayns::RegularVolume>>(std::move(volume));
 }

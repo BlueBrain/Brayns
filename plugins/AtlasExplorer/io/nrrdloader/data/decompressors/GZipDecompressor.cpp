@@ -52,6 +52,10 @@ std::string GZipDecompressor::decompress(std::string input) const
     }
 
     const auto inputSize = input.length();
+    if (inputSize * 2 > std::numeric_limits<unsigned int>::max())
+    {
+        throw std::runtime_error("Cannot decompress volume data. Data size limit exceeded");
+    }
 
     decompressInfo.next_in = reinterpret_cast<z_const Bytef *>(input.data());
     decompressInfo.avail_in = static_cast<unsigned int>(inputSize);
@@ -66,15 +70,22 @@ std::string GZipDecompressor::decompress(std::string input) const
         const auto maxDecompressionOutput = uncompressedSize + nextDecompressionSize;
         result.resize(maxDecompressionOutput);
 
-        decompressInfo.avail_out = nextDecompressionSize;
-        decompressInfo.next_out = reinterpret_cast<Bytef *>(result.data());
+        decompressInfo.avail_out = static_cast<unsigned int>(nextDecompressionSize);
+        decompressInfo.next_out = reinterpret_cast<Bytef *>(&result[uncompressedSize]);
 
         const auto decompressResult = inflate(&decompressInfo, Z_FINISH);
+        // Z_STREAM_END - input is exhausted
+        // Z_BUF_ERROR - output is exhausted
+        // Z_OK - well
         if (decompressResult != Z_STREAM_END && decompressResult != Z_OK && decompressResult != Z_BUF_ERROR)
         {
-            const auto errorMessage = std::string(decompressInfo.msg);
+            std::string msg;
+            if (decompressInfo.msg)
+            {
+                msg = std::string(decompressInfo.msg);
+            }
             inflateEnd(&decompressInfo);
-            throw std::runtime_error("Call to inflate() failed: " + errorMessage);
+            throw std::runtime_error("Call to inflate() failed: " + msg);
         }
 
         uncompressedSize += (nextDecompressionSize - decompressInfo.avail_out);

@@ -37,11 +37,16 @@ void HeaderLimitCheck::check(const NRRDHeader &header)
     }
     if (kinds && (*kinds)[0] == NRRDKind::NONE && dimensions == 4 && sizes[0] > 1)
     {
-        throw std::runtime_error("Cannot interpret a non-scalar fourth dimension with kind 'none' or '???'");
+        throw std::runtime_error("Cannot interpret a non-scalar fourth dimension with kind 'none'");
     }
     if (dimensions == 4 && sizes[0] > 4)
     {
         throw std::runtime_error("Cannot represent voxel data of more than 4 dimenssions");
+    }
+
+    if (!kinds)
+    {
+        return;
     }
 
     std::optional<size_t> rangeIndex;

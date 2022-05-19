@@ -20,10 +20,32 @@
 
 #include "RawDecoder.h"
 
+#include <cassert>
 #include <cstring>
 
 namespace
 {
+class InputSanitizer
+{
+public:
+    static std::string_view sanitize(std::string_view input)
+    {
+        size_t startOffset = 0;
+        while (input[startOffset] == '\n')
+        {
+            ++startOffset;
+        }
+
+        size_t endOffset = 0;
+        while (input[input.size() - 1 - endOffset] == '\n')
+        {
+            ++endOffset;
+        }
+
+        return input.substr(startOffset, input.size() - startOffset - endOffset);
+    }
+};
+
 class NRRDTypeSize
 {
 public:
@@ -45,7 +67,11 @@ public:
         case NRRDType::LONG:
         case NRRDType::UNSIGNED_LONG:
             return 8;
+        default:
+            break;
         }
+
+        assert(false);
     }
 };
 
@@ -71,15 +97,15 @@ public:
 
         if (inputIsLittleEndian && systemIsLittleEndian)
         {
-            return _assembleSameEndianness(input);
+            return _assembleSameEndianness<T>(input);
         }
 
         if (!inputIsLittleEndian && !systemIsLittleEndian)
         {
-            return _assembleSameEndianness(input);
+            return _assembleSameEndianness<T>(input);
         }
 
-        return _assembleDifferentEndianness(input);
+        return _assembleDifferentEndianness<T>(input);
     }
 
 private:
@@ -87,7 +113,7 @@ private:
     static std::vector<T> _assembleSameEndianness(std::string_view input)
     {
         const auto numElements = input.size() / sizeof(T);
-        std::vector<T> result(numElements);
+        std::vector<T> result(numElements, 0);
 
         for (size_t i = 0; i < numElements; ++i)
         {
@@ -118,7 +144,7 @@ private:
 
             for (size_t j = 0; j < sizeof(T); ++j)
             {
-                byteCast[j] = inputElementData[sizeof(T) - j - 1]
+                byteCast[j] = inputElementData[sizeof(T) - j - 1];
             }
         }
 
@@ -132,7 +158,7 @@ public:
     template<typename T>
     static std::unique_ptr<INRRDData> parseAndBuild(std::string_view input, bool isLittleEndian)
     {
-        auto data = ByteAssembler::assemble(input, isLittleEndian);
+        auto data = ByteAssembler::assemble<T>(input, isLittleEndian);
         return std::make_unique<NRRDData<T>>(std::move(data));
     }
 };
@@ -140,6 +166,8 @@ public:
 
 std::unique_ptr<INRRDData> RawDecoder::decode(const NRRDHeader &header, std::string_view input) const
 {
+    input = InputSanitizer::sanitize(input);
+
     const auto type = header.type;
     const auto typeSize = NRRDTypeSize::inBytes(type);
     const auto availableSize = input.size() / typeSize;

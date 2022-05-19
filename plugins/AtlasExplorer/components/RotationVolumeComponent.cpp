@@ -33,14 +33,20 @@ class VolumeValidElement
 public:
     static bool isValid(const brayns::Quaternion &quaternion)
     {
+        size_t zeroComponents = 0;
         for (size_t i = 0; i < 4; ++i)
         {
             if (!std::isfinite(quaternion[i]))
             {
                 return false;
             }
+
+            if (quaternion[i] == 0.f)
+            {
+                ++zeroComponents;
+            }
         }
-        return true;
+        return zeroComponents < 4;
     }
 
     static size_t countValid(const std::vector<brayns::Quaternion> &rotations)
@@ -71,6 +77,8 @@ public:
         const brayns::Vector3f &dimensions,
         const std::vector<brayns::Quaternion> &rotations)
     {
+        const float radius = glm::compMin(dimensions) * 0.05f;
+
         const auto validElementCount = VolumeValidElement::countValid(rotations);
         auto result = _allocateTemporary(validElementCount);
 
@@ -82,8 +90,8 @@ public:
 
         for (size_t i = 0; i < linealSize; ++i)
         {
-            const auto &quaternion = rotations[i];
-            if (!VolumeValidElement::isValid(quaternion))
+            const auto &srcQuaternion = rotations[i];
+            if (!VolumeValidElement::isValid(srcQuaternion))
             {
                 continue;
             }
@@ -93,12 +101,14 @@ public:
             const auto y = localFrame / width;
             const auto x = localFrame % width;
 
+            const auto quaternion = glm::normalize(srcQuaternion);
+
             const auto voxelCenter = _computeVoxelCenter(dimensions, x, y, z);
             for (auto &axis : result)
             {
-                const auto vector = axis.vector * 0.5f;
+                const auto vector = (quaternion * axis.vector) * 0.5f;
                 auto &buffer = axis.geometry;
-                buffer.push_back(brayns::Primitive::cylinder(voxelCenter, voxelCenter + vector, 2.f));
+                buffer.push_back(brayns::Primitive::cylinder(voxelCenter, voxelCenter + vector, radius));
             }
         }
 

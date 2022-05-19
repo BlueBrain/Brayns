@@ -21,46 +21,25 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Volume.h>
-#include <brayns/engine/VolumeDataType.h>
 
-#include <vector>
+#include <io/nrrdloader/NRRDHeader.h>
 
-namespace brayns
+struct VolumeMeasures
 {
-/**
- * @brief The RegularVolume struct is a regular grid volume in which the data is laid out in XYZ order:
- * The first elements are the X values of the first row of the first frame.
- */
-struct RegularVolume
-{
-    // Specifies how to interpret the bytes stored as data
-    VolumeDataType dataType;
-    std::vector<uint8_t> data;
-    Vector3ui size{0u};
-    Vector3f spacing;
-    // Specifies wether the data is scpeified as per grid vertex. If false, is specified as per grid cell center.
-    bool perVertexData{true};
+    brayns::Vector3f sizes = brayns::Vector3f(1.f);
+    brayns::Vector3f dimensions = brayns::Vector3f(1.f);
 };
 
-template<>
-class VolumeOSPRayID<RegularVolume>
+class VolumeMeasuresComputer
 {
 public:
-    static std::string_view get();
+    /**
+     * @brief Compute the sizes (number of samples per axis) and dimensions (spacing between samples per axis)
+     * for a NRRD volume given its header information.
+     *
+     * @param header the NRRD header
+     * @param headerDataOffset offset to use when accessing header per-axis information
+     * @return VolumeMeasures
+     */
+    static VolumeMeasures compute(const NRRDHeader &header, size_t headerDataOffset = 0);
 };
-
-template<>
-class VolumeBoundsUpdater<RegularVolume>
-{
-public:
-    static void update(const RegularVolume &s, const Matrix4f &t, Bounds &b);
-};
-
-template<>
-class VolumeCommitter<RegularVolume>
-{
-public:
-    static void commit(OSPVolume handle, const RegularVolume &volumeData);
-};
-}
