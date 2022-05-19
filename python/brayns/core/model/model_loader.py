@@ -38,13 +38,16 @@ class ModelLoader(ABC):
         pass
 
     def load(self, instance: Instance, path: str) -> list[Model]:
-        params = {
-            'path': path,
-            'loader_name': self.name,
-            'loader_properties': self.properties
-        }
+        params = self.serialize(path)
         result = instance.request('add-model', params)
         return [
             Model.deserialize(model)
             for model in result
         ]
+
+    def serialize(self, path: str) -> dict:
+        return {
+            'path': path,
+            'loader_name': self.name,
+            'loader_properties': self.properties
+        }

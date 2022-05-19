@@ -47,16 +47,22 @@ class Snapshot:
             file.write(data)
 
     def save_remotely(self, instance: Instance, path: str) -> None:
-        format = ImageFormat.from_path(path)
-        params = self._get_params(format, path)
+        params = self.serialize_with_path(path)
         self._request(instance, params)
 
     def download(self, instance: Instance, format: ImageFormat = ImageFormat.PNG) -> bytes:
-        params = self._get_params(format)
+        params = self.serialize_with_format(format)
         result = self._request(instance, params)
         return base64.b64decode(result['data'])
 
-    def _get_params(self, format: ImageFormat, path: Optional[str] = None) -> dict:
+    def serialize_with_format(self, format: ImageFormat) -> dict:
+        return self._serialize(format)
+
+    def serialize_with_path(self, path: str) -> dict:
+        format = ImageFormat.from_path(path)
+        return self._serialize(format, path)
+
+    def _serialize(self, format: ImageFormat, path: Optional[str] = None) -> dict:
         message = {}
         if path is not None:
             message['file_path'] = path

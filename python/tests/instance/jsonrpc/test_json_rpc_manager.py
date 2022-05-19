@@ -22,6 +22,7 @@ import unittest
 
 from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.request_error import RequestError
+from brayns.instance.request_progress import RequestProgress
 
 
 class TestJsonRpcManager(unittest.TestCase):
@@ -77,6 +78,13 @@ class TestJsonRpcManager(unittest.TestCase):
         with self.assertRaises(RequestError) as context:
             task.get_result()
         self.assertEqual(context.exception, error)
+
+    def test_add_progress(self) -> None:
+        progress = RequestProgress('test', 0.5)
+        task = self._manager.add_task(0)
+        self._manager.add_progress(0, progress)
+        self.assertTrue(task.has_progress())
+        self.assertEqual(task.get_progress(), progress)
 
 
 if __name__ == '__main__':

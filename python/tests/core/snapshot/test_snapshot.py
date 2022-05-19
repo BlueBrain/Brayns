@@ -35,20 +35,23 @@ class TestSnapshot(unittest.TestCase):
         instance = MockInstance()
         snapshot = Snapshot()
         path = 'test.jpg'
+        ref = snapshot.serialize_with_path(path)
         snapshot.save_remotely(instance, path)
         self.assertEqual(instance.method, 'snapshot')
-        self.assertEqual(instance.params, {
-            'file_path': path,
-            'image_settings': {
-                'format': 'jpg',
-                'quality': 100
-            }
-        })
+        self.assertEqual(instance.params, ref)
 
     def test_download(self) -> None:
         data = b'test'
         reply = {'data': base64.b64encode(data)}
         instance = MockInstance(reply)
+        snapshot = Snapshot()
+        test = snapshot.download(instance, ImageFormat.JPEG)
+        ref = snapshot.serialize_with_format(ImageFormat.JPEG)
+        self.assertEqual(test, data)
+        self.assertEqual(instance.method, 'snapshot')
+        self.assertEqual(instance.params, ref)
+
+    def test_serialize_with_format(self) -> None:
         snapshot = Snapshot(
             jpeg_quality=50,
             resolution=(1920, 1080),
@@ -57,10 +60,7 @@ class TestSnapshot(unittest.TestCase):
             camera=MockCamera(),
             renderer=MockRenderer()
         )
-        test = snapshot.download(instance, ImageFormat.JPEG)
-        self.assertEqual(test, data)
-        self.assertEqual(instance.method, 'snapshot')
-        self.assertEqual(instance.params, {
+        ref = {
             'image_settings': {
                 'format': 'jpg',
                 'quality': 50,
@@ -70,7 +70,21 @@ class TestSnapshot(unittest.TestCase):
             'camera_view': CameraView().serialize(),
             'camera': MockCamera().serialize_with_name(),
             'renderer': MockRenderer().serialize_with_name()
-        })
+        }
+        test = snapshot.serialize_with_format(ImageFormat.JPEG)
+        self.assertEqual(test, ref)
+
+    def test_serialize_with_path(self) -> None:
+        snapshot = Snapshot()
+        path = 'test.png'
+        ref = {
+            'file_path': path,
+            'image_settings': {
+                'format': 'png'
+            }
+        }
+        test = snapshot.serialize_with_path(path)
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

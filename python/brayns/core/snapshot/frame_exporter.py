@@ -40,11 +40,11 @@ class FrameExporter:
     jpeg_quality: int = 100
     sequential_naming: bool = True
 
-    def export_frames(self, instance: Instance, destination_folder: str) -> None:
-        params = self._get_params(destination_folder)
-        self._request(instance, params)
+    def export_frames(self, instance: Instance, path: str) -> None:
+        params = self.serialize(path)
+        instance.request('export-frames', params)
 
-    def _get_params(self, path: str) -> dict:
+    def serialize(self, path: str) -> dict:
         message = {
             'path': path,
             'key_frames': [
@@ -66,6 +66,3 @@ class FrameExporter:
         if self.renderer is not None:
             message['renderer'] = self.renderer.serialize_with_name()
         return message
-
-    def _request(self, instance: Instance, params: dict) -> None:
-        instance.request('export-frames', params)

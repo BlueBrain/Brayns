@@ -72,11 +72,12 @@ class TestJsonRpcHandler(unittest.TestCase):
 
     def test_on_progress(self) -> None:
         progress = JsonRpcProgress(0, RequestProgress('test', 0.5))
-        self._manager.add_task(progress.id)
+        task = self._manager.add_task(progress.id)
         with self.assertLogs(self._logger, logging.INFO) as context:
             self._handler.on_progress(progress)
         self.assertEqual(len(context.output), 1)
         self.assertEqual(len(self._manager), 1)
+        self.assertEqual(task.get_progress(), progress.params)
 
     def test_on_invalid_frame(self) -> None:
         with self.assertLogs(self._logger, logging.ERROR) as context:

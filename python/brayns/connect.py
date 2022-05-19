@@ -34,19 +34,24 @@ def connect(
     uri: str,
     secure: bool = False,
     cafile: Optional[str] = None,
-    logger: Optional[logging.Logger] = None
+    log_level: int = logging.WARN,
+    log_handler: Optional[logging.Handler] = None
 ) -> Instance:
-    logger = _get_logger(logger)
+    logger = _get_logger(log_level, log_handler)
     client = _connect(uri, secure, cafile, logger)
     _check_version(client, logger)
     return client
 
 
-def _get_logger(logger: Optional[logging.Logger]) -> logging.Logger:
-    if logger is not None:
-        return logger
+def _get_logger(level: int = logging.WARN, handler: Optional[logging.Handler] = None) -> logging.Logger:
     logger = logging.Logger('Brayns', logging.WARN)
-    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.setLevel(level)
+    if handler is None:
+        handler = logging.StreamHandler(sys.stdout)
+    logger.addHandler(handler)
+    format = '[%(name)s][%(levelname)s] %(message)s'
+    formatter = logging.Formatter(format)
+    handler.setFormatter(formatter)
     return logger
 
 
