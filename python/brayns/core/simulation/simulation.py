@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Optional
 
 from brayns.core.simulation.time_unit import TimeUnit
 from brayns.instance.instance import Instance
