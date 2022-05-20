@@ -42,12 +42,8 @@ class Client(Instance):
         self._manager.clear()
         self._websocket.close()
 
-    def task(self, method: str, params: Any = None) -> RequestFuture:
-        id = 0
-        while self._manager.is_running(id):
-            id += 1
-        request = JsonRpcRequest(id, method, params)
-        return self.send(request)
+    def is_running(self, id: JsonRpcId) -> int:
+        return self._manager.is_running(id)
 
     def send(self, request: JsonRpcRequest) -> RequestFuture:
         self._logger.info('Sending request %s.', request)

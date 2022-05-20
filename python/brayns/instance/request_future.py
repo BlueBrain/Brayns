@@ -41,16 +41,28 @@ class RequestFuture:
 
     def __iter__(self) -> Iterator[RequestProgress]:
         while True:
-            while self._task.has_progress():
-                yield self._task.get_progress()
-            if self._task.is_ready():
+            while self.has_progress():
+                yield self.get_progress()
+            if self.is_ready():
                 return
-            self._poll()
+            self.poll()
 
-    def cancel(self) -> None:
-        self._cancel()
+    def is_ready(self) -> bool:
+        return self._task.is_ready()
+
+    def has_progress(self) -> bool:
+        return self._task.has_progress()
+
+    def get_progress(self) -> RequestProgress:
+        return self._task.get_progress()
 
     def wait_for_result(self) -> Any:
         for _ in self:
             pass
         return self._task.get_result()
+
+    def poll(self) -> None:
+        self._poll()
+
+    def cancel(self) -> None:
+        self._cancel()

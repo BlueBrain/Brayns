@@ -24,8 +24,6 @@ import unittest
 
 from brayns.instance.client import Client
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
-from brayns.instance.request_error import RequestError
-from brayns.instance.request_progress import RequestProgress
 from tests.instance.websocket.mock_web_socket import MockWebSocket
 
 
@@ -53,19 +51,6 @@ class TestClient(unittest.TestCase):
             self.assertEqual(self._websocket.request, request.to_json())
             self.assertEqual(result, 456)
 
-    def test_request_error(self) -> None:
-        self._websocket.reply = json.dumps({
-            'id': 0,
-            'error': {
-                'code': 0,
-                'message': 'test'
-            }
-        })
-        with self._connect() as client:
-            with self.assertRaises(RequestError) as context:
-                client.request('test', 123)
-            self.assertEqual(context.exception, RequestError(0, 'test'))
-
     def test_task(self) -> None:
         request = JsonRpcRequest(0, 'test', 123)
         self._websocket.reply = json.dumps({'id': 0, 'result': 456})
@@ -74,32 +59,40 @@ class TestClient(unittest.TestCase):
             self.assertEqual(self._websocket.request, request.to_json())
             self.assertEqual(future.wait_for_result(), 456)
 
-    def test_task_cancel(self) -> None:
+    def test_is_running(self) -> None:
+        request = JsonRpcRequest(0, 'test', 123)
+        self._websocket.reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
-            future = client.task('test')
-            self._websocket.reply = json.dumps({'id': 1, 'result': None})
-            future.cancel()
-            self.assertEqual(json.loads(self._websocket.request), {
-                'jsonrpc': '2.0',
-                'id': 1,
-                'method': 'cancel',
-                'params': {
-                    'id': 0
-                }
-            })
+            future = client.send(request)
+            self.assertTrue(client.is_running(0))
+            self.assertFalse(client.is_running(1))
+            future.wait_for_result()
+            self.assertFalse(client.is_running(0))
 
-    def test_task_progress(self) -> None:
+    def test_send(self) -> None:
+        request = JsonRpcRequest(0, 'test', 123)
+        self._websocket.reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
-            future = client.task('test')
-            progress = RequestProgress('test', 0.5)
-            self._websocket.reply = json.dumps({
-                'params': {
-                    'id': 0,
-                    'operation': 'test',
-                    'amount': 0.5
-                }
-            })
-            self.assertEqual(next(iter(future)), progress)
+            future = client.send(request)
+            self.assertEqual(self._websocket.request, request.to_json())
+            self.assertEqual(future.wait_for_result(), 456)
+
+    def test_poll(self) -> None:
+        request = JsonRpcRequest(0, 'test', 123)
+        self._websocket.reply = json.dumps({'id': 0, 'result': 456})
+        with self._connect() as client:
+            future = client.send(request)
+            self.assertFalse(future.is_ready())
+            client.poll()
+            self.assertTrue(future.is_ready())
+            self.assertEqual(future.wait_for_result(), 456)
+
+    def test_cancel(self) -> None:
+        ref = JsonRpcRequest(0, 'cancel', {'id': 123})
+        self._websocket.reply = json.dumps({'id': 0, 'result': None})
+        with self._connect() as client:
+            client.cancel(123)
+            self.assertEqual(self._websocket.request, ref.to_json())
 
     def _connect(self) -> Client:
         return Client(self._websocket, logging.root)
