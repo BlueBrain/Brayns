@@ -18,22 +18,7 @@
 
 #include "ColorByIDAlgorithm.h"
 
-#include <api/coloring/ColorUtils.h>
-
 std::vector<uint64_t> ColorByIDAlgorithm::execute(
-    const std::map<uint64_t, brayns::Vector4f> &colorMap,
-    const std::vector<uint64_t> &ids,
-    const std::function<void(uint64_t, size_t, const brayns::Vector4f &)> &elementCallback)
-{
-    if (colorMap.empty())
-    {
-        return _randomly(ids, elementCallback);
-    }
-
-    return _withInput(colorMap, ids, elementCallback);
-}
-
-std::vector<uint64_t> ColorByIDAlgorithm::_withInput(
     const std::map<uint64_t, brayns::Vector4f> &colorMap,
     const std::vector<uint64_t> &ids,
     const std::function<void(uint64_t, size_t, const brayns::Vector4f &)> &elementCallback)
@@ -103,18 +88,4 @@ std::vector<uint64_t> ColorByIDAlgorithm::_withInput(
 
     skipped.shrink_to_fit();
     return skipped;
-}
-
-std::vector<uint64_t> ColorByIDAlgorithm::_randomly(
-    const std::vector<uint64_t> &ids,
-    const std::function<void(uint64_t, size_t, const brayns::Vector4f &)> &elementCallback)
-{
-    const auto numCells = ids.size();
-    ColorRoulette roulette;
-    for (size_t i = 0; i < numCells; ++i)
-    {
-        elementCallback(ids[i], i, roulette.getNextColor());
-    }
-
-    return {};
 }

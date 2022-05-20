@@ -27,21 +27,10 @@
 /**
  * @brief Utility to iterate over the elements specified ona color by id request
  */
-class ColorByIDAlgorithm
+struct ColorByIDAlgorithm
 {
-public:
     static std::vector<uint64_t> execute(
         const std::map<uint64_t, brayns::Vector4f> &colorMap,
-        const std::vector<uint64_t> &ids,
-        const std::function<void(uint64_t, size_t, const brayns::Vector4f &)> &elementCallback);
-
-private:
-    static std::vector<uint64_t> _withInput(
-        const std::map<uint64_t, brayns::Vector4f> &colorMap,
-        const std::vector<uint64_t> &ids,
-        const std::function<void(uint64_t, size_t, const brayns::Vector4f &)> &elementCallback);
-
-    static std::vector<uint64_t> _randomly(
         const std::vector<uint64_t> &ids,
         const std::function<void(uint64_t, size_t, const brayns::Vector4f &)> &elementCallback);
 };
