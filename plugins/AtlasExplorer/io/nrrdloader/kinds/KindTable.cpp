@@ -46,7 +46,6 @@ std::unique_ptr<INRRDKind> KindTable::getKind(const NRRDHeader &header)
     case NRRDKind::SPACE:
         return std::make_unique<ScalarKind>();
     case NRRDKind::GRADIENT3:
-    case NRRDKind::COLOR4:
     case NRRDKind::HSVCOLOR:
     case NRRDKind::RGBACOLOR:
     case NRRDKind::RGBCOLOR:
@@ -59,5 +58,7 @@ std::unique_ptr<INRRDKind> KindTable::getKind(const NRRDHeader &header)
     case NRRDKind::VECTOR:
     case NRRDKind::NORMAL3D:
         return std::make_unique<VectorKind>();
+    default:
+        throw std::runtime_error("Unsupported kind");
     }
 }

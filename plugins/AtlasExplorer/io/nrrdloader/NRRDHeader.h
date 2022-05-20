@@ -66,7 +66,6 @@ enum NRRDKind
     NORMAL3D,
     QUATERNION,
     GRADIENT3,
-    COLOR4,
     RGBCOLOR,
     HSVCOLOR,
     XYZCOLOR,

@@ -68,10 +68,8 @@ public:
         case NRRDType::UNSIGNED_LONG:
             return 8;
         default:
-            break;
+            throw std::runtime_error("Unsupported type");
         }
-
-        assert(false);
     }
 };
 

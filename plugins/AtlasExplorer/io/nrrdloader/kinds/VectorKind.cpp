@@ -50,6 +50,8 @@ public:
                 vector[j] = data[dataIndex + j];
             }
         }
+
+        return vectors;
     }
 };
 }
