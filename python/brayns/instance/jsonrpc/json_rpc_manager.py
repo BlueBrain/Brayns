@@ -18,59 +18,37 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, Iterator, Optional, Union
+import logging
+from typing import Optional
 
+from brayns.instance.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
+from brayns.instance.jsonrpc.json_rpc_handler import JsonRpcHandler
+from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
+from brayns.instance.jsonrpc.json_rpc_tasks import JsonRpcTasks
 from brayns.instance.request_error import RequestError
-from brayns.instance.request_progress import RequestProgress
 
 
 class JsonRpcManager:
 
-    def __init__(self) -> None:
-        self._tasks: dict[Union[int, str], JsonRpcTask] = {}
+    def __init__(self, logger: logging.Logger) -> None:
+        self._logger = logger
+        self._tasks = JsonRpcTasks()
+        self._handler = JsonRpcHandler(self._tasks, self._logger)
+        self._dispatcher = JsonRpcDispatcher(self._handler)
 
-    def __len__(self) -> int:
-        return len(self._tasks)
-
-    def __iter__(self) -> Iterator[tuple[Union[int, str], JsonRpcTask]]:
-        yield from self._tasks.items()
-
-    def __contains__(self, id: Union[int, str]) -> bool:
+    def is_running(self, id: JsonRpcId) -> bool:
         return id in self._tasks
 
-    def get_task(self, id: Union[int, str]) -> Optional[JsonRpcTask]:
-        return self._tasks.get(id)
+    def clear(self) -> None:
+        self._logger.debug('Clear all JSON-RPC tasks.')
+        error = RequestError(0, 'Disconnection from client side')
+        self._tasks.add_error(None, error)
 
-    def add_task(self, id: Union[int, str]) -> JsonRpcTask:
-        if id in self._tasks:
-            raise RuntimeError('Request with same ID already running')
-        task = JsonRpcTask()
-        self._tasks[id] = task
-        return task
+    def create_task(self, id: Optional[JsonRpcId]) -> JsonRpcTask:
+        self._logger.debug('Create JSON-RPC task with ID %s.', id)
+        return self._tasks.create_task(id)
 
-    def cancel_all_tasks(self) -> None:
-        error = RequestError(0, 'Task cancelled from client side')
-        for task in self._tasks.values():
-            task.set_error(error)
-        self._tasks.clear()
-
-    def set_result(self, id: Union[int, str], result: Any) -> None:
-        task = self.get_task(id)
-        if task is None:
-            return
-        task.set_result(result)
-        del self._tasks[id]
-
-    def set_error(self, id: Union[int, str], error: RequestError) -> None:
-        task = self.get_task(id)
-        if task is None:
-            return
-        task.set_error(error)
-        del self._tasks[id]
-
-    def add_progress(self, id: Union[int, str], progress: RequestProgress) -> None:
-        task = self.get_task(id)
-        if task is None:
-            return
-        task.add_progress(progress)
+    def process_message(self, data: str) -> None:
+        self._logger.debug('Processing JSON-RPC message: %s.', data)
+        self._dispatcher.dispatch(data)

@@ -19,38 +19,34 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
-from typing import Union
 
 from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
-from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
+from brayns.instance.jsonrpc.json_rpc_listener import JsonRpcListener
 from brayns.instance.jsonrpc.json_rpc_progress import JsonRpcProgress
-from brayns.instance.jsonrpc.json_rpc_protocol import JsonRpcProtocol
 from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
+from brayns.instance.jsonrpc.json_rpc_tasks import JsonRpcTasks
+from brayns.instance.request_error import RequestError
 
 
-class JsonRpcHandler(JsonRpcProtocol):
+class JsonRpcHandler(JsonRpcListener):
 
-    def __init__(self, manager: JsonRpcManager, logger: logging.Logger) -> None:
-        self._manager = manager
+    def __init__(self, tasks: JsonRpcTasks, logger: logging.Logger) -> None:
+        self._tasks = tasks
         self._logger = logger
 
-    def on_binary(self, data: bytes) -> None:
-        self._logger.info('Binary frame of %s bytes received.', len(data))
-
     def on_reply(self, reply: JsonRpcReply) -> None:
-        self._logger.info('Reply received: %s.', reply)
-        self._manager.set_result(reply.id, reply.result)
+        self._logger.info('JSON-RPC reply received: %s.', reply)
+        self._tasks.add_result(reply.id, reply.result)
 
     def on_error(self, error: JsonRpcError) -> None:
-        self._logger.info('Error received: %s.', error)
-        if error.is_global():
-            self._manager.cancel_all_tasks()
-            return
-        self._manager.set_error(error.id, error.error)
+        self._logger.info('JSON-RPC error received: %s.', error)
+        self._tasks.add_error(error.id, error.error)
 
     def on_progress(self, progress: JsonRpcProgress) -> None:
-        self._logger.info('Progress received: %s.', progress)
-        self._manager.add_progress(progress.id, progress.params)
+        self._logger.info('JSON-RPC progress received: %s.', progress)
+        self._tasks.add_progress(progress.id, progress.params)
 
-    def on_invalid_frame(self, data: Union[bytes, str], e: Exception) -> None:
-        self._logger.error('Invalid frame received (%s): %s', e, data)
+    def on_invalid_message(self, data: str, e: Exception) -> None:
+        self._logger.error('Invalid JSON-RPC message: "%s".', data, exc_info=e)
+        error = RequestError(0, 'Invalid JSON-RPC message received')
+        self._tasks.add_error(None, error)

@@ -27,7 +27,7 @@ from brayns.instance.websocket.web_socket_error import WebSocketError
 from tests.instance.websocket.echo_server import EchoServer
 
 
-class TestWebSocket(unittest.TestCase):
+class TestWebSocketClient(unittest.TestCase):
 
     def setUp(self) -> None:
         self._uri = 'localhost:5000'

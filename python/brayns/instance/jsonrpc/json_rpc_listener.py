@@ -18,30 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json
-from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Protocol
 
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
+from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
+from brayns.instance.jsonrpc.json_rpc_progress import JsonRpcProgress
+from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
 
 
-@dataclass
-class JsonRpcRequest:
+class JsonRpcListener(Protocol):
 
-    id: Optional[JsonRpcId]
-    method: str
-    params: Any = None
+    def on_reply(self, reply: JsonRpcReply) -> None:
+        pass
 
-    def to_dict(self) -> dict:
-        message = {
-            'jsonrpc': '2.0',
-            'method': self.method
-        }
-        if self.id is not None:
-            message['id'] = self.id
-        if self.params is not None:
-            message['params'] = self.params
-        return message
+    def on_error(self, error: JsonRpcError) -> None:
+        pass
 
-    def to_json(self) -> str:
-        return json.dumps(self.to_dict())
+    def on_progress(self, progress: JsonRpcProgress) -> None:
+        pass
+
+    def on_invalid_message(self, data: str, e: Exception) -> None:
+        pass

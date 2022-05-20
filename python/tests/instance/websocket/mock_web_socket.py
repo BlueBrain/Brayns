@@ -26,9 +26,9 @@ from brayns.instance.websocket.web_socket import WebSocket
 class MockWebSocket(WebSocket):
 
     def __init__(self) -> None:
+        self.request = ''
+        self.reply = ''
         self._closed = False
-        self.request = None
-        self.reply = None
 
     @property
     def closed(self) -> bool:
