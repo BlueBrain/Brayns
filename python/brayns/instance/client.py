@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
-from typing import Any
 
 from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
