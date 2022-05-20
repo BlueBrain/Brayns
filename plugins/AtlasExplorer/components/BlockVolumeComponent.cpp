@@ -109,8 +109,8 @@ private:
 
         brayns::Box voxel;
         // Bottom back left corner
-        voxel.min = {x, y, z - dimensions.z};
-        voxel.max = {x + dimensions.x, y + dimensions.y, z};
+        voxel.min = {worldX, worldY, worldZ - dimensions.z};
+        voxel.max = {worldX + dimensions.x, worldY + dimensions.y, worldZ};
 
         return voxel;
     }

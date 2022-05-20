@@ -439,7 +439,7 @@ public:
 
         header.sizes = HeaderEntryParseUtils::parseIntArray(value);
 
-        if (header.sizes.size() != header.dimensions)
+        if (header.sizes.size() != static_cast<size_t>(header.dimensions))
         {
             throw std::invalid_argument("Ill-formed NRRD header: dimensions and sizes length missmatch");
         }
@@ -458,7 +458,7 @@ public:
 
         header.spacings = HeaderEntryParseUtils::parseFloatArray(value);
 
-        if (header.spacings->size() != header.dimensions)
+        if (header.spacings->size() != static_cast<size_t>(header.dimensions))
         {
             throw std::invalid_argument("Ill-formed NRRD header: dimensions and spacings length missmatch");
         }
@@ -476,7 +476,7 @@ public:
         }
 
         auto kindTokens = HeaderEntryParseUtils::parseStringArray(value);
-        if (kindTokens.size() != header.dimensions)
+        if (kindTokens.size() != static_cast<size_t>(header.dimensions))
         {
             throw std::invalid_argument("Ill-formed NRRD header: dimensions and kinds length missmatch");
         }

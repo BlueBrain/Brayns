@@ -30,7 +30,7 @@ namespace
 class DataToVector
 {
 public:
-    static std::vector<brayns::Vector3f> convert(int32_t vectorDimension, const std::vector<float> &data)
+    static std::vector<brayns::Vector3f> convert(size_t vectorDimension, const std::vector<float> &data)
     {
         assert(vectorDimension <= 3);
 
@@ -59,7 +59,7 @@ public:
 void VectorKind::createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const
 {
     const auto &sizes = header.sizes;
-    const auto vectorDimension = sizes.front();
+    const auto vectorDimension = static_cast<size_t>(sizes.front());
     const auto floatData = data.asFloats();
     const auto vectors = DataToVector::convert(vectorDimension, floatData);
     const auto measures = VolumeMeasuresComputer::compute(header, 1);

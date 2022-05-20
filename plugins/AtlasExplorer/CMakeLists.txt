@@ -14,6 +14,8 @@ target_include_directories(braynsAtlasExplorer PUBLIC
   "$<INSTALL_INTERFACE:include>")
 target_link_libraries(braynsAtlasExplorer PRIVATE braynsPluginAPI braynsNetwork)
 
+target_compile_options(braynsAtlasExplorer PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
 set_target_properties(braynsAtlasExplorer
     PROPERTIES
         VERSION ${BRAYNS_VERSION}

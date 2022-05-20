@@ -134,8 +134,8 @@ private:
         const auto worldX = x * dimensions.x;
         const auto worldY = y * dimensions.y;
         const auto worldZ = z * dimensions.z;
-        const auto minCorner = brayns::Vector3f(x, y, z - dimensions.z);
-        const auto maxCorner = brayns::Vector3f(x + dimensions.x, y + dimensions.y, z);
+        const auto minCorner = brayns::Vector3f(worldX, worldY, worldZ - dimensions.z);
+        const auto maxCorner = brayns::Vector3f(worldX + dimensions.x, worldY + dimensions.y, worldZ);
         return (maxCorner + minCorner) * 0.5f;
     }
 

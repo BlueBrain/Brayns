@@ -35,7 +35,7 @@ public:
     {
         if (kind == NRRDKind::GRADIENT3 || kind == NRRDKind::RGBCOLOR)
         {
-            return _fromRGBtoRGBA(data);
+            return _fromGenericColorToRGBA(data, 3);
         }
 
         if (kind == NRRDKind::XYZCOLOR)
@@ -48,7 +48,7 @@ public:
             return _fromHSVtoRGBA(data);
         }
 
-        return _fromRGBAtoRGBA(data);
+        return _fromGenericColorToRGBA(data, 4);
     }
 
 private:
@@ -111,34 +111,25 @@ private:
         return rgba;
     }
 
-    static std::vector<brayns::Vector4f> _fromRGBtoRGBA(const std::vector<float> &rgb)
+    static std::vector<brayns::Vector4f> _fromGenericColorToRGBA(const std::vector<float> &data, size_t numChannels)
     {
+        assert(numChannels <= 4);
+
         std::vector<brayns::Vector4f> rgba;
-        const auto numElements = _extractNumberOfElements(rgb.size(), 3);
+        const auto numElements = _extractNumberOfElements(data.size(), numChannels);
         rgba.reserve(numElements);
 
         constexpr auto converter = 1.f / 255.f;
 
         for (size_t i = 0; i < numElements; ++i)
         {
-            auto &color = rgba.emplace_back();
-            const auto j = i * 3;
-            color.r = rgb[j] * converter;
-            color.g = rgb[j + 1] * converter;
-            color.b = rgb[j + 2] * converter;
-            color.a = 1.f;
+            auto &color = rgba.emplace_back(1.f);
+            const auto dataIndex = i * numChannels;
+            for (size_t j = 0; j < numChannels; ++j)
+            {
+                color[j] = data[dataIndex + j] * converter;
+            }
         }
-
-        return rgba;
-    }
-
-    static std::vector<brayns::Vector4f> _fromRGBAtoRGBA(const std::vector<float> &rgbaValues)
-    {
-        std::vector<brayns::Vector4f> rgba(_extractNumberOfElements(rgbaValues.size(), 4));
-
-        const auto src = rgbaValues.data();
-        auto dst = rgba.data();
-        std::memcpy(dst, src, rgbaValues.size() * sizeof(float));
 
         return rgba;
     }

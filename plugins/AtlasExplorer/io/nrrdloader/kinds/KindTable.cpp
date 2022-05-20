@@ -27,9 +27,7 @@
 
 std::unique_ptr<INRRDKind> KindTable::getKind(const NRRDHeader &header)
 {
-    const auto dimensions = header.dimensions;
     const auto &kinds = header.kinds;
-    const auto &sizes = header.sizes;
 
     if (!kinds)
     {
