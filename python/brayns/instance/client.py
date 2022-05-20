@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
+from typing import Callable
 
 from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
@@ -31,9 +32,10 @@ from brayns.instance.websocket.web_socket_error import WebSocketError
 
 class Client(Instance):
 
-    def __init__(self, websocket: WebSocket, logger: logging.Logger) -> None:
+    def __init__(self, websocket: WebSocket, logger: logging.Logger, on_binary: Callable[[bytes], None]) -> None:
         self._websocket = websocket
         self._logger = logger
+        self._on_binary = on_binary
         self._manager = JsonRpcManager(logger)
 
     def disconnect(self) -> None:
@@ -59,6 +61,7 @@ class Client(Instance):
         data = self._websocket.receive()
         if isinstance(data, bytes):
             self._logger.info('Binary frame received of %d bytes.', len(data))
+            self._on_binary(data)
             return
         if isinstance(data, str):
             self._logger.info('Text frame received: "%s".', data)

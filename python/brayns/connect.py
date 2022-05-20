@@ -20,7 +20,7 @@
 
 import logging
 import sys
-from typing import Optional
+from typing import Callable, Optional
 
 from brayns.core.version import Version
 from brayns.instance.client import Client
@@ -33,12 +33,13 @@ def connect(
     uri: str,
     secure: bool = False,
     cafile: Optional[str] = None,
+    on_binary: Callable[[bytes], None] = lambda _: None,
     log_level: int = logging.WARN,
     log_handler: Optional[logging.Handler] = None
 ) -> Instance:
     websocket = WebSocketClient.connect(uri, secure, cafile)
     logger = _create_logger(log_level, log_handler)
-    client = Client(websocket, logger)
+    client = Client(websocket, logger, on_binary)
     _check_version(client, logger)
     return client
 
@@ -53,6 +54,7 @@ def _create_logger(level: int = logging.WARN, handler: Optional[logging.Handler]
     formatter = logging.Formatter(format)
     handler.setFormatter(formatter)
     return logger
+
 
 def _check_version(instance: Instance, logger: logging.Logger) -> None:
     local = __version__

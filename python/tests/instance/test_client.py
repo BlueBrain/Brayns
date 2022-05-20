@@ -21,6 +21,7 @@
 import json
 import logging
 import unittest
+from typing import Callable
 
 from brayns.instance.client import Client
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
@@ -31,6 +32,13 @@ class TestClient(unittest.TestCase):
 
     def setUp(self) -> None:
         self._websocket = MockWebSocket()
+        self._data = b''
+
+    def test_binary(self) -> None:
+        self._websocket.reply = b'123'
+        with self._connect(self._on_binary) as client:
+            client.poll()
+            self.assertEqual(self._data, self._websocket.reply)
 
     def test_context(self) -> None:
         with self._connect():
@@ -94,8 +102,11 @@ class TestClient(unittest.TestCase):
             client.cancel(123)
             self.assertEqual(self._websocket.request, ref.to_json())
 
-    def _connect(self) -> Client:
-        return Client(self._websocket, logging.root)
+    def _connect(self, on_binary: Callable[[bytes], None] = lambda _: None) -> Client:
+        return Client(self._websocket, logging.root, on_binary)
+
+    def _on_binary(self, data: bytes) -> None:
+        self._data = data
 
 
 if __name__ == '__main__':
