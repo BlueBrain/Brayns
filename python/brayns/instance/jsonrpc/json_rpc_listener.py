@@ -18,21 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+from typing import Protocol
 
-from brayns.instance.instance import Instance
-from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
-from brayns.instance.request_future import RequestFuture
+from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
+from brayns.instance.jsonrpc.json_rpc_progress import JsonRpcProgress
+from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
 
 
-class MockInstance(Instance):
+class JsonRpcListener(Protocol):
 
-    def __init__(self, reply: Any = None) -> None:
-        self.reply = reply
-        self.method = ''
-        self.params = None
+    def on_reply(self, reply: JsonRpcReply) -> None:
+        pass
 
-    def send(self, request: JsonRpcRequest) -> RequestFuture:
-        self.method = request.method
-        self.params = request.params
-        return RequestFuture.from_result(self.reply)
+    def on_error(self, error: JsonRpcError) -> None:
+        pass
+
+    def on_progress(self, progress: JsonRpcProgress) -> None:
+        pass
+
+    def on_invalid_message(self, data: str, e: Exception) -> None:
+        pass

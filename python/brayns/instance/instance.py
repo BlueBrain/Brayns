@@ -20,6 +20,8 @@
 
 from typing import Any, Protocol
 
+from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
+from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
 from brayns.instance.request_future import RequestFuture
 
 
@@ -35,7 +37,24 @@ class Instance(Protocol):
         pass
 
     def request(self, method: str, params: Any = None) -> Any:
-        return self.task(method, params).wait_for_result()
+        task = self.task(method, params)
+        return task.wait_for_result()
 
     def task(self, method: str, params: Any = None) -> RequestFuture:
+        id = 0
+        while self.is_running(id):
+            id += 1
+        request = JsonRpcRequest(id, method, params)
+        return self.send(request)
+
+    def is_running(self, id: JsonRpcId) -> bool:
+        return False
+
+    def send(self, request: JsonRpcRequest) -> RequestFuture:
         raise NotImplementedError()
+
+    def poll(self) -> None:
+        pass
+
+    def cancel(self, id: JsonRpcId) -> None:
+        pass

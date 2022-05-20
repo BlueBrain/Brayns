@@ -20,18 +20,17 @@
 
 import json
 from dataclasses import dataclass
-from typing import Any, Union
+from typing import Any, Optional
+
+from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 
 
 @dataclass
 class JsonRpcRequest:
 
-    id: Union[int, str, None]
+    id: Optional[JsonRpcId]
     method: str
     params: Any = None
-
-    def is_notification(self) -> bool:
-        return self.id is None
 
     def to_dict(self) -> dict:
         message = {

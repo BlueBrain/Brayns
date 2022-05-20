@@ -29,11 +29,7 @@ from brayns.instance.websocket.web_socket import WebSocket
 class WebSocketClient(WebSocket):
 
     @staticmethod
-    def connect(
-        uri: str,
-        secure: bool = False,
-        cafile: Optional[str] = None
-    ) -> 'WebSocketClient':
+    def connect(uri: str, secure: bool = False, cafile: Optional[str] = None) -> 'WebSocketClient':
         uri = ('wss://' if secure else 'ws://') + uri
         context = ssl.create_default_context(cafile=cafile) if secure else None
         loop = EventLoop()
@@ -42,11 +38,7 @@ class WebSocketClient(WebSocket):
         ).result()
         return WebSocketClient(websocket, loop)
 
-    def __init__(
-        self,
-        websocket: AsyncWebSocket,
-        loop: EventLoop
-    ) -> None:
+    def __init__(self, websocket: AsyncWebSocket, loop: EventLoop) -> None:
         self._websocket = websocket
         self._loop = loop
 
@@ -60,7 +52,7 @@ class WebSocketClient(WebSocket):
         ).result()
         self._loop.close()
 
-    def receive(self) -> Union[bytes, str]:
+    def receive(self) -> None:
         return self._loop.run(
             self._websocket.receive()
         ).result()
