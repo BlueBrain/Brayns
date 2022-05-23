@@ -23,11 +23,14 @@
 #include <brayns/utils/EnumUtils.h>
 #include <brayns/utils/FileReader.h>
 
+#include <api/NRRDImage.h>
+#include <api/kinds/KindManager.h>
+#include <components/NRRDComponent.h>
+
 #include <io/nrrdloader/data/DataConsistencyCheck.h>
 #include <io/nrrdloader/data/DataParser.h>
 #include <io/nrrdloader/header/HeaderLimitCheck.h>
 #include <io/nrrdloader/header/HeaderParser.h>
-#include <io/nrrdloader/kinds/KindTable.h>
 
 std::vector<std::string> NRRDLoader::getSupportedExtensions() const
 {
@@ -59,22 +62,22 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
 
     // Parse header
     callback.updateProgress("Parsing NRRD header", 0.2f);
-    const auto header = HeaderParser::parse(path, contentView);
+    auto header = HeaderParser::parse(path, contentView);
     HeaderLimitCheck::check(header);
 
     // Parse data
     callback.updateProgress("Parsing NRRD data", 0.4f);
-    const auto data = DataParser::parse(header, contentView);
+    auto data = DataParser::parse(header, contentView);
     DataConsistencyCheck::check(header, *data);
 
-    // Interpret data
-    callback.updateProgress("Transforming data", 0.6f);
-    auto kind = KindTable::getKind(header);
-
-    // Generate visual assets
-    callback.updateProgress("Generating visualization", 0.8f);
+    // Add data to model
     auto model = std::make_unique<brayns::Model>();
-    kind->createComponent(header, *data, *model);
+    auto image = NRRDImage(std::move(header), std::move(data));
+    model->addComponent<NRRDComponent>(std::move(image));
+
+    // Initial data interpretation
+    callback.updateProgress("Generating visualization", 0.6f);
+    KindManager::initialize(*model);
 
     callback.updateProgress("Done", 1.f);
     auto result = std::vector<std::unique_ptr<brayns::Model>>();

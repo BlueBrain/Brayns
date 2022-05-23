@@ -23,13 +23,29 @@
 #include <api/NRRDData.h>
 #include <api/NRRDHeader.h>
 
-#include <memory>
-#include <string_view>
+#include <cassert>
 
-class IDecoder
+class NRRDImage
 {
 public:
-    virtual ~IDecoder() = default;
+    NRRDImage(NRRDHeader header, std::unique_ptr<INRRDData> data)
+        : _header(std::move(header))
+        , _data(std::move(data))
+    {
+        assert(_data);
+    }
 
-    virtual std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const = 0;
+    const NRRDHeader &getHeader() const noexcept
+    {
+        return _header;
+    }
+
+    const INRRDData &getData() const noexcept
+    {
+        return *_data;
+    }
+
+private:
+    NRRDHeader _header;
+    std::unique_ptr<INRRDData> _data;
 };

@@ -18,16 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "NRRDComponent.h"
 
-#include <io/nrrdloader/INRRDKind.h>
-
-/**
- * @brief Handles quaternion
- *
- */
-class RotationKind final : public INRRDKind
+NRRDComponent::NRRDComponent(NRRDImage image)
+    : _image(std::move(image))
 {
-public:
-    void createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const override;
-};
+}
+
+const NRRDImage &NRRDComponent::getImage() const noexcept
+{
+    return _image;
+}

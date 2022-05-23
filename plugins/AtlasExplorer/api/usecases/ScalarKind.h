@@ -20,12 +20,16 @@
 
 #pragma once
 
-#include <io/nrrdloader/INRRDKind.h>
+#include <api/kinds/IKind.h>
 
-#include <memory>
-
-class KindTable
+/**
+ * @brief Handles any one-dimensional nrrd data
+ *
+ */
+class ScalarKind final : public IKind
 {
 public:
-    static std::unique_ptr<INRRDKind> getKind(const NRRDHeader &header);
+    void initialize(const NRRDImage &image, brayns::Model &model) const override;
+
+    void handleUseCase(const NRRDImage &image, const UseCaseInfo &info, brayns::Model &model) const override;
 };

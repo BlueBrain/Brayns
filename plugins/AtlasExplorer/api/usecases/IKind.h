@@ -20,13 +20,24 @@
 
 #pragma once
 
-#include <io/nrrdloader/INRRDKind.h>
+#include <brayns/engine/Model.h>
+#include <brayns/json/JsonType.h>
 
-/**
- * @brief Handles RGB-color, HSV-color, XYZ-color, RGBA-color, 4-color
- */
-class ColorKind final : public INRRDKind
+#include <api/NRRDImage.h>
+#include <api/VisualizationUseCase.h>
+
+struct UseCaseInfo
+{
+    VisualizationUseCase useCase;
+    brayns::JsonType payload;
+};
+
+class IKind
 {
 public:
-    void createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const override;
+    virtual ~IKind() = default;
+
+    virtual void initialize(const NRRDImage &image, brayns::Model &model) const = 0;
+
+    virtual void handleUseCase(const NRRDImage &image, const UseCaseInfo &info, brayns::Model &model) const = 0;
 };

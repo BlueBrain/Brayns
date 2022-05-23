@@ -20,9 +20,9 @@
 
 #include "ColorKind.h"
 
+#include <api/kinds/common/DataFlipper.h>
+#include <api/kinds/common/VolumeMeasures.h>
 #include <components/BlockVolumeComponent.h>
-#include <io/nrrdloader/kinds/common/DataFlipper.h>
-#include <io/nrrdloader/kinds/common/VolumeMeasures.h>
 
 #include <cstring>
 
@@ -143,8 +143,10 @@ private:
 };
 }
 
-void ColorKind::createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const
+void ColorKind::initialize(const NRRDImage &image, brayns::Model &model) const
 {
+    const auto &data = image.getData();
+    const auto &header = image.getHeader();
     const auto floatData = data.asFloats();
     const auto &kinds = *header.kinds;
     const auto colorKind = kinds[0];
@@ -152,4 +154,11 @@ void ColorKind::createComponent(const NRRDHeader &header, const INRRDData &data,
     auto dataColors = ColorSpaceConverter::fromDataToRGBA(colorKind, floatData);
     const auto colors = DataFlipper::flipVertically(measures.sizes, std::move(dataColors));
     model.addComponent<BlockVolumeComponent>(measures.sizes, measures.dimensions, colors);
+}
+
+void ColorKind::handleUseCase(const NRRDImage &image, const UseCaseInfo &info, brayns::Model &model) const
+{
+    (void)image;
+    (void)info;
+    (void)model;
 }

@@ -20,16 +20,17 @@
 
 #pragma once
 
-#include <api/NRRDData.h>
-#include <api/NRRDHeader.h>
+#include <brayns/engine/ModelComponents.h>
 
-#include <memory>
-#include <string_view>
+#include <api/NRRDImage.h>
 
-class IDecoder
+class NRRDComponent final : public brayns::Component
 {
 public:
-    virtual ~IDecoder() = default;
+    NRRDComponent(NRRDImage image);
 
-    virtual std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const = 0;
+    const NRRDImage &getImage() const noexcept;
+
+private:
+    NRRDImage _image;
 };

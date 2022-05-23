@@ -22,7 +22,7 @@
 
 #include <brayns/common/MathTypes.h>
 
-#include <io/nrrdloader/NRRDHeader.h>
+#include <api/NRRDHeader.h>
 
 struct VolumeMeasures
 {

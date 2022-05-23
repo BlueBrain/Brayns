@@ -20,8 +20,8 @@
 
 #include "VectorKind.h"
 
+#include <api/kinds/common/VolumeMeasures.h>
 #include <components/VectorVolumeComponent.h>
-#include <io/nrrdloader/kinds/common/VolumeMeasures.h>
 
 #include <cstring>
 
@@ -56,12 +56,21 @@ public:
 };
 }
 
-void VectorKind::createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const
+void VectorKind::initialize(const NRRDImage &image, brayns::Model &model) const
 {
+    const auto &header = image.getHeader();
+    const auto &data = image.getData();
     const auto &sizes = header.sizes;
     const auto vectorDimension = static_cast<size_t>(sizes.front());
     const auto floatData = data.asFloats();
     const auto vectors = DataToVector::convert(vectorDimension, floatData);
     const auto measures = VolumeMeasuresComputer::compute(header, 1);
     model.addComponent<VectorVolumeComponent>(measures.sizes, measures.dimensions, vectors);
+}
+
+void VectorKind::handleUseCase(const NRRDImage &image, const UseCaseInfo &info, brayns::Model &model) const
+{
+    (void)image;
+    (void)info;
+    (void)model;
 }

@@ -18,18 +18,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ExtractImage.h"
 
-#include <api/NRRDData.h>
-#include <api/NRRDHeader.h>
+#include <components/NRRDComponent.h>
 
-#include <memory>
-#include <string_view>
-
-class IDecoder
+const NRRDImage &ExtractImage::fromModel(brayns::Model &model)
 {
-public:
-    virtual ~IDecoder() = default;
+    auto &component = model.getComponent<NRRDComponent>();
+    return component.getImage();
+}
 
-    virtual std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const = 0;
-};
+bool ExtractImage::isNRRDModel(brayns::Model &model)
+{
+    try
+    {
+        auto &image = fromModel(model);
+        (void)image;
+    }
+    catch (...)
+    {
+        return false;
+    }
+
+    return true;
+}

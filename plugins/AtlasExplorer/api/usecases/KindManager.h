@@ -20,14 +20,14 @@
 
 #pragma once
 
-#include <io/nrrdloader/INRRDKind.h>
+#include <brayns/engine/Model.h>
 
-/**
- * @brief Handles any one-dimensional nrrd data
- *
- */
-class ScalarKind final : public INRRDKind
+#include <api/kinds/IKind.h>
+
+class KindManager
 {
 public:
-    void createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const override;
+    static void initialize(brayns::Model &model);
+
+    static void handleUseCase(const UseCaseInfo &info, brayns::Model &model);
 };

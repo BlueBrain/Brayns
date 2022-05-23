@@ -23,8 +23,8 @@
 #include <brayns/engine/components/VolumeRendererComponent.h>
 #include <brayns/engine/volumes/RegularVolume.h>
 
-#include <io/nrrdloader/kinds/common/DataFlipper.h>
-#include <io/nrrdloader/kinds/common/VolumeMeasures.h>
+#include <api/kinds/common/DataFlipper.h>
+#include <api/kinds/common/VolumeMeasures.h>
 
 namespace
 {
@@ -107,8 +107,17 @@ private:
 };
 }
 
-void ScalarKind::createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const
+void ScalarKind::initialize(const NRRDImage &image, brayns::Model &model) const
 {
+    const auto &header = image.getHeader();
+    const auto &data = image.getData();
     auto volume = RegularVolumeBuilder::build(header, data);
     model.addComponent<brayns::VolumeRendererComponent<brayns::RegularVolume>>(std::move(volume));
+}
+
+void ScalarKind::handleUseCase(const NRRDImage &image, const UseCaseInfo &info, brayns::Model &model) const
+{
+    (void)image;
+    (void)info;
+    (void)model;
 }

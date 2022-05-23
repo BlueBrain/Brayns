@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <io/nrrdloader/INRRDData.h>
-#include <io/nrrdloader/NRRDHeader.h>
+#include <api/NRRDData.h>
+#include <api/NRRDHeader.h>
 
 class DataConsistencyCheck
 {

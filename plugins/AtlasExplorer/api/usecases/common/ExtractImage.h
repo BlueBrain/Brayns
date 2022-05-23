@@ -20,13 +20,14 @@
 
 #pragma once
 
-#include <io/nrrdloader/INRRDKind.h>
+#include <brayns/engine/Model.h>
 
-/**
- * @brief Handles 2-vector, 3-vector
- */
-class VectorKind final : public INRRDKind
+#include <api/NRRDImage.h>
+
+class ExtractImage
 {
 public:
-    void createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const override;
+    static const NRRDImage &fromModel(brayns::Model &model);
+
+    static bool isNRRDModel(brayns::Model &model);
 };

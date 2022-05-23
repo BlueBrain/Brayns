@@ -20,9 +20,9 @@
 
 #include "RotationKind.h"
 
+#include <api/kinds/common/DataFlipper.h>
+#include <api/kinds/common/VolumeMeasures.h>
 #include <components/RotationVolumeComponent.h>
-#include <io/nrrdloader/kinds/common/DataFlipper.h>
-#include <io/nrrdloader/kinds/common/VolumeMeasures.h>
 
 #include <cstring>
 
@@ -47,11 +47,20 @@ public:
 };
 }
 
-void RotationKind::createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const
+void RotationKind::initialize(const NRRDImage &image, brayns::Model &model) const
 {
+    const auto &data = image.getData();
     const auto floatData = data.asFloats();
+    const auto &header = image.getHeader();
     const auto measures = VolumeMeasuresComputer::compute(header, 1);
     auto quaternionsData = DataToQuaternion::convert(floatData);
     const auto quaternions = DataFlipper::flipVertically(measures.sizes, std::move(quaternionsData));
     model.addComponent<RotationVolumeComponent>(measures.sizes, measures.dimensions, quaternions);
+}
+
+void RotationKind::handleUseCase(const NRRDImage &image, const UseCaseInfo &info, brayns::Model &model) const
+{
+    (void)image;
+    (void)info;
+    (void)model;
 }

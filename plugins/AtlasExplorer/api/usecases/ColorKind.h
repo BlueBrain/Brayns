@@ -20,16 +20,15 @@
 
 #pragma once
 
-#include <api/NRRDData.h>
-#include <api/NRRDHeader.h>
+#include <api/kinds/IKind.h>
 
-#include <memory>
-#include <string_view>
-
-class IDecoder
+/**
+ * @brief Handles RGB-color, HSV-color, XYZ-color, RGBA-color, 4-color
+ */
+class ColorKind final : public IKind
 {
 public:
-    virtual ~IDecoder() = default;
+    void initialize(const NRRDImage &image, brayns::Model &model) const override;
 
-    virtual std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const = 0;
+    void handleUseCase(const NRRDImage &image, const UseCaseInfo &info, brayns::Model &model) const override;
 };

@@ -73,7 +73,7 @@ public:
     }
 };
 
-class SystemEndianChecker
+class SystemEndiannessChecker
 {
 public:
     static bool isLittleEndian()
@@ -91,7 +91,7 @@ public:
     template<typename T>
     static std::vector<T> assemble(std::string_view input, bool inputIsLittleEndian)
     {
-        const bool systemIsLittleEndian = SystemEndianChecker::isLittleEndian();
+        const bool systemIsLittleEndian = SystemEndiannessChecker::isLittleEndian();
 
         if (inputIsLittleEndian && systemIsLittleEndian)
         {

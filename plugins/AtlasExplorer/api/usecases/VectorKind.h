@@ -20,18 +20,15 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
-
-#include <io/nrrdloader/INRRDData.h>
-#include <io/nrrdloader/NRRDHeader.h>
+#include <api/kinds/IKind.h>
 
 /**
- * @brief Base class to implement NRRD data handlers based on their type
+ * @brief Handles 2-vector, 3-vector
  */
-class INRRDKind
+class VectorKind final : public IKind
 {
 public:
-    virtual ~INRRDKind() = default;
+    void initialize(const NRRDImage &image, brayns::Model &model) const override;
 
-    virtual void createComponent(const NRRDHeader &header, const INRRDData &data, brayns::Model &model) const = 0;
+    void handleUseCase(const NRRDImage &image, const UseCaseInfo &info, brayns::Model &model) const override;
 };
