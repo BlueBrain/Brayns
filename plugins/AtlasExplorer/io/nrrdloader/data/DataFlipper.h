@@ -22,34 +22,43 @@
 
 #include <brayns/common/MathTypes.h>
 
+#include <io/nrrdloader/NRRDHeader.h>
+#include <io/nrrdloader/header/HeaderUtils.h>
+
 #include <vector>
 
 class DataFlipper
 {
 public:
     template<typename T>
-    static std::vector<T> flipVertically(const brayns::Vector3f &sizes, std::vector<T> input) noexcept
+    static std::vector<T> flipVertically(const NRRDHeader &header, const std::vector<T> &input) noexcept
     {
+        const auto sizes = HeaderUtils::get3DSize(header);
+        const auto voxelDimension = HeaderUtils::getVoxelDimension(header);
+
         const auto width = sizes.x;
         const auto height = sizes.y;
-        const auto frameSize = width * height;
         const auto depth = sizes.z;
+
+        const auto rowSize = width * voxelDimension;
+        const auto frameSize = height * rowSize;
 
         std::vector<T> result;
         result.reserve(input.size());
 
         for (size_t i = 0; i < depth; ++i)
         {
-            const auto sliceStarts = frameSize * i;
+            const auto sliceStart = frameSize * i;
 
             for (size_t j = 0; j < height; ++j)
             {
-                const auto rowCopyStarts = sliceStarts + frameSize - width * (j + 1);
+                const auto rowCopyStart = sliceStart + frameSize - rowSize * (j + 1);
+                const auto rowCopyEnd = rowCopyStart + rowSize;
 
                 auto begin = input.begin();
-                std::advance(begin, rowCopyStarts);
+                std::advance(begin, rowCopyStart);
                 auto end = input.begin();
-                std::advance(end, rowCopyStarts + width);
+                std::advance(end, rowCopyEnd);
                 result.insert(result.end(), begin, end);
             }
         }

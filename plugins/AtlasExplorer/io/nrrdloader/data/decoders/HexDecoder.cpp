@@ -65,7 +65,7 @@ public:
 };
 }
 
-std::unique_ptr<INRRDData> HexDecoder::decode(const NRRDHeader &header, std::string_view input) const
+std::unique_ptr<IDataMangler> HexDecoder::decode(const NRRDHeader &header, std::string_view input) const
 {
     auto binaryData = HexContentParser::toBinary(input);
 

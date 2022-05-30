@@ -78,12 +78,14 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     common/SizeHelper.h
     components/ClippingComponent.h
     components/GeometryRendererComponent.h
+    components/IsosurfaceRendererComponent.h
     components/MaterialComponent.h
     components/SimulationComponent.h
     components/TransferFunctionComponent.h
     components/TransferFunctionRendererComponent.h
     components/VolumeRendererComponent.h
     geometries/Box.h
+    geometries/Isosurface.h
     geometries/Plane.h
     geometries/Primitive.h
     geometries/Sphere.h

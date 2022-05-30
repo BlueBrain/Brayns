@@ -66,7 +66,7 @@ public:
 class DataContentParser
 {
 public:
-    static std::unique_ptr<INRRDData> parse(const NRRDHeader &header, std::string content)
+    static std::unique_ptr<IDataMangler> parse(const NRRDHeader &header, std::string content)
     {
         const auto format = header.encoding;
 
@@ -79,7 +79,7 @@ public:
 };
 }
 
-std::unique_ptr<INRRDData> DataParser::parse(const NRRDHeader &header, std::string_view content)
+std::unique_ptr<IDataMangler> DataParser::parse(const NRRDHeader &header, std::string_view content)
 {
     if (header.dataFiles)
     {

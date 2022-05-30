@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <api/NRRDData.h>
-#include <api/NRRDHeader.h>
+#include <api/DataMangler.h>
+#include <io/nrrdloader/NRRDHeader.h>
 
 #include <memory>
 #include <string_view>
@@ -35,7 +35,7 @@ public:
      *
      * @param header The NRRD Header to configure the read
      * @param content The left over content from the NRRD file after extracting the header
-     * @return std::unique_ptr<INRRDData>
+     * @return std::unique_ptr<IDataMangler>
      */
-    static std::unique_ptr<INRRDData> parse(const NRRDHeader &header, std::string_view content);
+    static std::unique_ptr<IDataMangler> parse(const NRRDHeader &header, std::string_view content);
 };

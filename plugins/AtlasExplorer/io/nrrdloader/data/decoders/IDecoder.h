@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <api/NRRDData.h>
-#include <api/NRRDHeader.h>
+#include <api/DataMangler.h>
+#include <io/nrrdloader/NRRDHeader.h>
 
 #include <memory>
 #include <string_view>
@@ -31,5 +31,5 @@ class IDecoder
 public:
     virtual ~IDecoder() = default;
 
-    virtual std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const = 0;
+    virtual std::unique_ptr<IDataMangler> decode(const NRRDHeader &header, std::string_view input) const = 0;
 };

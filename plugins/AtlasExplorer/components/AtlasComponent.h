@@ -18,26 +18,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "VolumeMeasures.h"
+#pragma once
 
-VolumeMeasures VolumeMeasuresComputer::compute(const NRRDHeader &header, size_t headerDataOffset)
+#include <brayns/engine/ModelComponents.h>
+
+#include <api/IAtlasVolume.h>
+
+#include <memory>
+
+class AtlasComponent final : public brayns::Component
 {
-    auto &sizes = header.sizes;
-    assert(sizes.size() - headerDataOffset <= 3);
+public:
+    AtlasComponent(std::unique_ptr<IAtlasVolume> volume);
 
-    auto &spacings = header.spacings;
+    const IAtlasVolume &getVolume() const noexcept;
 
-    VolumeMeasures result;
-    auto &volumeSizes = result.sizes;
-    auto &volumeDimensions = result.dimensions;
-    for (size_t i = headerDataOffset; i < sizes.size(); ++i)
-    {
-        volumeSizes[i - headerDataOffset] = sizes[i];
-        if (spacings)
-        {
-            volumeDimensions[i - headerDataOffset] = (*spacings)[i];
-        }
-    }
-
-    return result;
-}
+private:
+    std::unique_ptr<IAtlasVolume> _volume;
+};

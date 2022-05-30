@@ -20,24 +20,26 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
-#include <brayns/json/JsonType.h>
+#include <brayns/common/MathTypes.h>
 
-#include <api/NRRDImage.h>
-#include <api/VisualizationUseCase.h>
+#include <api/DataMangler.h>
+#include <api/IAtlasVolume.h>
 
-struct UseCaseInfo
-{
-    VisualizationUseCase useCase;
-    brayns::JsonType payload;
-};
-
-class IKind
+class ScalarVolume final : public IAtlasVolume
 {
 public:
-    virtual ~IKind() = default;
+    ScalarVolume(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, std::unique_ptr<IDataMangler> data);
 
-    virtual void initialize(const NRRDImage &image, brayns::Model &model) const = 0;
+    void handleUseCase(VisualizationUseCase useCase, brayns::Model &model) const override;
 
-    virtual void handleUseCase(const NRRDImage &image, const UseCaseInfo &info, brayns::Model &model) const = 0;
+    const brayns::Vector3ui &getGridSize() const noexcept;
+
+    const brayns::Vector3f &getGridSpacing() const noexcept;
+
+    const IDataMangler &getData() const noexcept;
+
+private:
+    brayns::Vector3ui _gridSize;
+    brayns::Vector3f _gridSpacing;
+    std::unique_ptr<IDataMangler> _data;
 };

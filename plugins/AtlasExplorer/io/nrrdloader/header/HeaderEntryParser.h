@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <api/NRRDHeader.h>
+#include <io/nrrdloader/NRRDHeader.h>
 
 #include <functional>
 #include <unordered_map>

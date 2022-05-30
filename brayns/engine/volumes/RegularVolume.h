@@ -40,7 +40,7 @@ struct RegularVolume
     Vector3ui size{0u};
     Vector3f spacing;
     // Specifies wether the data is scpeified as per grid vertex. If false, is specified as per grid cell center.
-    bool perVertexData{true};
+    bool perVertexData{false};
 };
 
 template<>

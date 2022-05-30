@@ -77,7 +77,8 @@ public:
         const brayns::Vector3f &dimensions,
         const std::vector<brayns::Quaternion> &rotations)
     {
-        const float radius = glm::compMin(dimensions) * 0.05f;
+        const auto minDimension = glm::compMin(dimensions);
+        const float radius = minDimension * 0.05f;
 
         const auto validElementCount = VolumeValidElement::countValid(rotations);
         auto result = _allocateTemporary(validElementCount);
@@ -106,7 +107,8 @@ public:
             const auto voxelCenter = _computeVoxelCenter(dimensions, x, y, z);
             for (auto &axis : result)
             {
-                const auto vector = (quaternion * axis.vector) * 0.5f;
+                // * 0.5f so that the axis length does not invade surronding voxels
+                const auto vector = (quaternion * axis.vector) * minDimension * 0.5f;
                 auto &buffer = axis.geometry;
                 buffer.push_back(brayns::Primitive::cylinder(voxelCenter, voxelCenter + vector, radius));
             }

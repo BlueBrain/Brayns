@@ -18,14 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NRRDComponent.h"
+#pragma once
 
-NRRDComponent::NRRDComponent(NRRDImage image)
-    : _image(std::move(image))
-{
-}
+#include <brayns/common/MathTypes.h>
 
-const NRRDImage &NRRDComponent::getImage() const noexcept
+#include <api/IAtlasVolume.h>
+
+class OrientationVolume final : public IAtlasVolume
 {
-    return _image;
-}
+public:
+    OrientationVolume(
+        const brayns::Vector3ui &size,
+        const brayns::Vector3f &spacing,
+        std::vector<brayns::Quaternion> data);
+
+    void handleUseCase(VisualizationUseCase useCase, brayns::Model &model) const override;
+
+private:
+    brayns::Vector3ui _gridSize;
+    brayns::Vector3f _gridSpacing;
+    std::vector<brayns::Quaternion> _data;
+};

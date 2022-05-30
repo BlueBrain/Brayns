@@ -23,11 +23,9 @@
 #include <brayns/utils/EnumUtils.h>
 #include <brayns/utils/FileReader.h>
 
-#include <api/NRRDImage.h>
-#include <api/kinds/KindManager.h>
-#include <components/NRRDComponent.h>
+#include <components/AtlasComponent.h>
 
-#include <io/nrrdloader/data/DataConsistencyCheck.h>
+#include <io/nrrdloader/AtlasVolumeBuilder.h>
 #include <io/nrrdloader/data/DataParser.h>
 #include <io/nrrdloader/header/HeaderLimitCheck.h>
 #include <io/nrrdloader/header/HeaderParser.h>
@@ -68,17 +66,19 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
     // Parse data
     callback.updateProgress("Parsing NRRD data", 0.4f);
     auto data = DataParser::parse(header, contentView);
-    DataConsistencyCheck::check(header, *data);
 
     // Add data to model
+    callback.updateProgress("Transforming data", 0.6f);
     auto model = std::make_unique<brayns::Model>();
-    auto image = NRRDImage(std::move(header), std::move(data));
-    model->addComponent<NRRDComponent>(std::move(image));
+    auto volumeData = AtlasVolumeBuilder::build(header, std::move(data));
+    auto &component = model->addComponent<AtlasComponent>(std::move(volumeData));
+
+    // Generate initial visual
+    callback.updateProgress("Generating visual", 0.8f);
+    const auto &volume = component.getVolume();
+    volume.handleUseCase(VisualizationUseCase::ORIENTATION_FIELD, *model);
 
     // Initial data interpretation
-    callback.updateProgress("Generating visualization", 0.6f);
-    KindManager::initialize(*model);
-
     callback.updateProgress("Done", 1.f);
     auto result = std::vector<std::unique_ptr<brayns::Model>>();
     result.push_back(std::move(model));

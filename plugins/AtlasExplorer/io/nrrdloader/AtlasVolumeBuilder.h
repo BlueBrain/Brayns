@@ -20,14 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
+#include <api/DataMangler.h>
+#include <api/IAtlasVolume.h>
+#include <io/nrrdloader/NRRDHeader.h>
 
-#include <api/kinds/IKind.h>
+#include <memory>
 
-class KindManager
+class AtlasVolumeBuilder
 {
 public:
-    static void initialize(brayns::Model &model);
-
-    static void handleUseCase(const UseCaseInfo &info, brayns::Model &model);
+    static std::unique_ptr<IAtlasVolume> build(const NRRDHeader &header, std::unique_ptr<IDataMangler> data);
 };

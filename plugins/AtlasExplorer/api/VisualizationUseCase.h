@@ -22,10 +22,9 @@
 
 #include <brayns/utils/EnumUtils.h>
 
-#include <api/NRRDHeader.h>
-
 enum class VisualizationUseCase
 {
+    OUTLINE_SHELL,
     ORIENTATION_FIELD,
     DENSITY,
     LAYER_DISTANCE,
@@ -42,6 +41,7 @@ template<>
 inline std::vector<std::pair<std::string, VisualizationUseCase>> enumMap()
 {
     return {
+        {"Outline shell mesh", VisualizationUseCase::OUTLINE_SHELL},
         {"Orientation field", VisualizationUseCase::ORIENTATION_FIELD},
         {"Density", VisualizationUseCase::DENSITY},
         {"Layer distance", VisualizationUseCase::LAYER_DISTANCE},
@@ -52,9 +52,3 @@ inline std::vector<std::pair<std::string, VisualizationUseCase>> enumMap()
         {"Colored voxels", VisualizationUseCase::COLORS}};
 }
 }
-
-class VisualizationUseCaseQuery
-{
-public:
-    static std::vector<VisualizationUseCase> availableUseCases(const NRRDHeader &header);
-};

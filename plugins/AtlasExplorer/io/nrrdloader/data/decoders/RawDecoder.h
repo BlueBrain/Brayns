@@ -25,5 +25,5 @@
 class RawDecoder final : public IDecoder
 {
 public:
-    std::unique_ptr<INRRDData> decode(const NRRDHeader &header, std::string_view input) const override;
+    std::unique_ptr<IDataMangler> decode(const NRRDHeader &header, std::string_view input) const override;
 };

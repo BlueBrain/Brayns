@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <api/NRRDHeader.h>
+#include <io/nrrdloader/NRRDHeader.h>
 #include <io/nrrdloader/data/decompressors/IDecompressor.h>
 
 #include <memory>

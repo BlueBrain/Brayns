@@ -22,6 +22,8 @@
 
 #include <brayns/utils/StringUtils.h>
 
+#include <io/nrrdloader/data/DataFlipper.h>
+
 namespace
 {
 template<typename T>
@@ -154,15 +156,18 @@ class DecodedDataBuilder
 {
 public:
     template<typename T>
-    static std::unique_ptr<INRRDData> parseAndBuild(const std::vector<std::string_view> &tokens)
+    static std::unique_ptr<IDataMangler> parseAndBuild(
+        const NRRDHeader &header,
+        const std::vector<std::string_view> &tokens)
     {
         auto data = AsciiParser::parse<T>(tokens);
-        return std::make_unique<NRRDData<T>>(std::move(data));
+        auto flippedData = DataFlipper::flipVertically(header, data);
+        return std::make_unique<DataMangler<T>>(std::move(flippedData));
     }
 };
 }
 
-std::unique_ptr<INRRDData> AsciiDecoder::decode(const NRRDHeader &header, std::string_view input) const
+std::unique_ptr<IDataMangler> AsciiDecoder::decode(const NRRDHeader &header, std::string_view input) const
 {
     const auto tokens = brayns::string_utils::split(input, " /r/v/f/t/n");
 
@@ -176,48 +181,48 @@ std::unique_ptr<INRRDData> AsciiDecoder::decode(const NRRDHeader &header, std::s
 
     if (type == NRRDType::CHAR)
     {
-        return DecodedDataBuilder::parseAndBuild<char>(tokens);
+        return DecodedDataBuilder::parseAndBuild<char>(header, tokens);
     }
 
     if (type == NRRDType::UNSIGNED_CHAR)
     {
-        return DecodedDataBuilder::parseAndBuild<uint8_t>(tokens);
+        return DecodedDataBuilder::parseAndBuild<uint8_t>(header, tokens);
     }
 
     if (type == NRRDType::SHORT)
     {
-        return DecodedDataBuilder::parseAndBuild<int16_t>(tokens);
+        return DecodedDataBuilder::parseAndBuild<int16_t>(header, tokens);
     }
 
     if (type == NRRDType::UNSIGNED_SHORT)
     {
-        return DecodedDataBuilder::parseAndBuild<uint16_t>(tokens);
+        return DecodedDataBuilder::parseAndBuild<uint16_t>(header, tokens);
     }
 
     if (type == NRRDType::INT)
     {
-        return DecodedDataBuilder::parseAndBuild<int32_t>(tokens);
+        return DecodedDataBuilder::parseAndBuild<int32_t>(header, tokens);
     }
 
     if (type == NRRDType::UNSIGNED_INT)
     {
-        return DecodedDataBuilder::parseAndBuild<uint32_t>(tokens);
+        return DecodedDataBuilder::parseAndBuild<uint32_t>(header, tokens);
     }
 
     if (type == NRRDType::LONG)
     {
-        return DecodedDataBuilder::parseAndBuild<int64_t>(tokens);
+        return DecodedDataBuilder::parseAndBuild<int64_t>(header, tokens);
     }
 
     if (type == NRRDType::UNSIGNED_LONG)
     {
-        return DecodedDataBuilder::parseAndBuild<uint64_t>(tokens);
+        return DecodedDataBuilder::parseAndBuild<uint64_t>(header, tokens);
     }
 
     if (type == NRRDType::FLOAT)
     {
-        return DecodedDataBuilder::parseAndBuild<float>(tokens);
+        return DecodedDataBuilder::parseAndBuild<float>(header, tokens);
     }
 
-    return DecodedDataBuilder::parseAndBuild<double>(tokens);
+    return DecodedDataBuilder::parseAndBuild<double>(header, tokens);
 }

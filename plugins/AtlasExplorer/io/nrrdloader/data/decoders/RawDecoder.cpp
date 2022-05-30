@@ -20,6 +20,8 @@
 
 #include "RawDecoder.h"
 
+#include <io/nrrdloader/data/DataFlipper.h>
+
 #include <cassert>
 #include <cstring>
 
@@ -111,7 +113,7 @@ private:
     static std::vector<T> _assembleSameEndianness(std::string_view input)
     {
         const auto numElements = input.size() / sizeof(T);
-        std::vector<T> result(numElements, 0);
+        std::vector<T> result(numElements, T());
 
         for (size_t i = 0; i < numElements; ++i)
         {
@@ -130,7 +132,7 @@ private:
     static std::vector<T> _assembleDifferentEndianness(std::string_view input)
     {
         const auto numElements = input.size() / sizeof(T);
-        std::vector<T> result(numElements);
+        std::vector<T> result(numElements, T());
 
         for (size_t i = 0; i < numElements; ++i)
         {
@@ -150,19 +152,53 @@ private:
     }
 };
 
+template<typename T>
+class ByteAssemblerDecorator
+{
+public:
+    static std::vector<T> assemble(std::string_view input, bool isLittleEndian)
+    {
+        return ByteAssembler::assemble<T>(input, isLittleEndian);
+    }
+};
+
+template<>
+class ByteAssemblerDecorator<char>
+{
+public:
+    static std::vector<char> assemble(std::string_view input, bool isLittleEndian)
+    {
+        (void)isLittleEndian;
+        return std::vector<char>(input.begin(), input.end());
+    }
+};
+
+template<>
+class ByteAssemblerDecorator<uint8_t>
+{
+public:
+    static std::vector<uint8_t> assemble(std::string_view input, bool isLittleEndian)
+    {
+        (void)isLittleEndian;
+        return std::vector<uint8_t>(input.begin(), input.end());
+    }
+};
+
+template<typename T>
 class DecodedDataBuilder
 {
 public:
-    template<typename T>
-    static std::unique_ptr<INRRDData> parseAndBuild(std::string_view input, bool isLittleEndian)
+    static std::unique_ptr<IDataMangler> parseAndBuild(const NRRDHeader &header, std::string_view input)
     {
-        auto data = ByteAssembler::assemble<T>(input, isLittleEndian);
-        return std::make_unique<NRRDData<T>>(std::move(data));
+        bool isLittleEndian = header.endian == NRRDEndianness::LITTLE;
+        auto data = ByteAssemblerDecorator<T>::assemble(input, isLittleEndian);
+        auto flippedData = DataFlipper::flipVertically(header, data);
+        return std::make_unique<DataMangler<T>>(std::move(flippedData));
     }
 };
 }
 
-std::unique_ptr<INRRDData> RawDecoder::decode(const NRRDHeader &header, std::string_view input) const
+std::unique_ptr<IDataMangler> RawDecoder::decode(const NRRDHeader &header, std::string_view input) const
 {
     input = InputSanitizer::sanitize(input);
 
@@ -176,54 +212,50 @@ std::unique_ptr<INRRDData> RawDecoder::decode(const NRRDHeader &header, std::str
         throw std::runtime_error("Expected size and parsed element count is different");
     }
 
-    const auto isLittleEndian = header.endian == NRRDEndianness::LITTLE;
-
     if (type == NRRDType::CHAR)
     {
-        auto data = std::vector<char>(input.begin(), input.end());
-        return std::make_unique<NRRDData<char>>(std::move(data));
+        return DecodedDataBuilder<char>::parseAndBuild(header, input);
     }
 
     if (type == NRRDType::UNSIGNED_CHAR)
     {
-        auto data = std::vector<uint8_t>(input.begin(), input.end());
-        return std::make_unique<NRRDData<uint8_t>>(std::move(data));
+        return DecodedDataBuilder<uint8_t>::parseAndBuild(header, input);
     }
 
     if (type == NRRDType::SHORT)
     {
-        return DecodedDataBuilder::parseAndBuild<int16_t>(input, isLittleEndian);
+        return DecodedDataBuilder<int16_t>::parseAndBuild(header, input);
     }
 
     if (type == NRRDType::UNSIGNED_SHORT)
     {
-        return DecodedDataBuilder::parseAndBuild<uint16_t>(input, isLittleEndian);
+        return DecodedDataBuilder<uint16_t>::parseAndBuild(header, input);
     }
 
     if (type == NRRDType::INT)
     {
-        return DecodedDataBuilder::parseAndBuild<int32_t>(input, isLittleEndian);
+        return DecodedDataBuilder<int32_t>::parseAndBuild(header, input);
     }
 
     if (type == NRRDType::UNSIGNED_INT)
     {
-        return DecodedDataBuilder::parseAndBuild<uint32_t>(input, isLittleEndian);
+        return DecodedDataBuilder<uint32_t>::parseAndBuild(header, input);
     }
 
     if (type == NRRDType::LONG)
     {
-        return DecodedDataBuilder::parseAndBuild<int64_t>(input, isLittleEndian);
+        return DecodedDataBuilder<int64_t>::parseAndBuild(header, input);
     }
 
     if (type == NRRDType::UNSIGNED_LONG)
     {
-        return DecodedDataBuilder::parseAndBuild<uint64_t>(input, isLittleEndian);
+        return DecodedDataBuilder<uint64_t>::parseAndBuild(header, input);
     }
 
     if (type == NRRDType::FLOAT)
     {
-        return DecodedDataBuilder::parseAndBuild<float>(input, isLittleEndian);
+        return DecodedDataBuilder<float>::parseAndBuild(header, input);
     }
 
-    return DecodedDataBuilder::parseAndBuild<double>(input, isLittleEndian);
+    return DecodedDataBuilder<double>::parseAndBuild(header, input);
 }

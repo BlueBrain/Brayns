@@ -22,12 +22,12 @@
 
 #include <brayns/engine/Model.h>
 
-#include <api/NRRDImage.h>
+#include <api/VisualizationUseCase.h>
 
-class ExtractImage
+class IAtlasVolume
 {
 public:
-    static const NRRDImage &fromModel(brayns::Model &model);
+    virtual ~IAtlasVolume() = default;
 
-    static bool isNRRDModel(brayns::Model &model);
+    virtual void handleUseCase(VisualizationUseCase useCase, brayns::Model &model) const = 0;
 };

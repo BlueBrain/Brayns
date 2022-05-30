@@ -23,10 +23,10 @@
 #include <cstdint>
 #include <vector>
 
-class INRRDData
+class IDataMangler
 {
 public:
-    virtual ~INRRDData() = default;
+    virtual ~IDataMangler() = default;
 
     virtual std::vector<char> asChars() const = 0;
     virtual std::vector<uint8_t> asBytes() const = 0;
@@ -39,14 +39,16 @@ public:
     virtual std::vector<float> asFloats() const = 0;
     virtual std::vector<double> asDoubles() const = 0;
 
+    virtual std::type_index getBaseType() const = 0;
+
     virtual size_t getNumElements() const noexcept = 0;
 };
 
 template<typename T>
-class NRRDData final : public INRRDData
+class DataMangler final : public IDataMangler
 {
 public:
-    NRRDData(std::vector<T> data)
+    DataMangler(std::vector<T> data)
         : _data(std::move(data))
     {
     }
@@ -99,6 +101,11 @@ public:
     std::vector<double> asDoubles() const noexcept
     {
         return _as<double>();
+    }
+
+    std::type_index getBaseType() const override
+    {
+        return typeid(T);
     }
 
     size_t getNumElements() const noexcept override

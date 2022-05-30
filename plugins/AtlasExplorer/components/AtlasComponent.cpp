@@ -18,17 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "AtlasComponent.h"
 
-#include <api/kinds/IKind.h>
+#include <cassert>
 
-/**
- * @brief Handles 2-vector, 3-vector
- */
-class VectorKind final : public IKind
+AtlasComponent::AtlasComponent(std::unique_ptr<IAtlasVolume> volume)
+    : _volume(std::move(volume))
 {
-public:
-    void initialize(const NRRDImage &image, brayns::Model &model) const override;
+    assert(_volume);
+}
 
-    void handleUseCase(const NRRDImage &image, const UseCaseInfo &info, brayns::Model &model) const override;
-};
+const IAtlasVolume &AtlasComponent::getVolume() const noexcept
+{
+    return *_volume;
+}
