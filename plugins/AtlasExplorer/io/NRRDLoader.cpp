@@ -20,15 +20,14 @@
 
 #include "NRRDLoader.h"
 
-#include <brayns/utils/EnumUtils.h>
 #include <brayns/utils/FileReader.h>
 
+#include <api/usecases/OutlineShell.h>
 #include <components/AtlasComponent.h>
-
-#include <io/nrrdloader/AtlasVolumeBuilder.h>
 #include <io/nrrdloader/data/DataParser.h>
 #include <io/nrrdloader/header/HeaderLimitCheck.h>
 #include <io/nrrdloader/header/HeaderParser.h>
+#include <io/nrrdloader/header/HeaderUtils.h>
 
 std::vector<std::string> NRRDLoader::getSupportedExtensions() const
 {
@@ -69,16 +68,17 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
 
     // Add data to model
     callback.updateProgress("Transforming data", 0.6f);
+    const auto voxelSize = HeaderUtils::getVoxelDimension(header);
+    const auto gridSize = HeaderUtils::get3DSize(header);
+    const auto gridSpacing = HeaderUtils::get3DDimensions(header);
+    auto atlasVolume = AtlasVolume(gridSize, gridSpacing, voxelSize, std::move(data));
     auto model = std::make_unique<brayns::Model>();
-    auto volumeData = AtlasVolumeBuilder::build(header, std::move(data));
-    auto &component = model->addComponent<AtlasComponent>(std::move(volumeData));
+    auto &component = model->addComponent<AtlasComponent>(std::move(atlasVolume));
 
     // Generate initial visual
     callback.updateProgress("Generating visual", 0.8f);
-    const auto &volume = component.getVolume();
-    volume.handleUseCase(VisualizationUseCase::ORIENTATION_FIELD, *model);
+    OutlineShell().execute(component.getVolume(), *model);
 
-    // Initial data interpretation
     callback.updateProgress("Done", 1.f);
     auto result = std::vector<std::unique_ptr<brayns::Model>>();
     result.push_back(std::move(model));

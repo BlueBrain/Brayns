@@ -20,19 +20,28 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-
 #include <api/AtlasVolume.h>
+#include <api/IUseCase.h>
+#include <api/VisualizationUseCase.h>
 
-#include <memory>
+#include <vector>
 
-class AtlasComponent final : public brayns::Component
+class UseCaseManager
 {
 public:
-    AtlasComponent(AtlasVolume volume);
+    struct UseCaseEntry
+    {
+        VisualizationUseCase useCase;
+        std::unique_ptr<IUseCase> handler;
+    };
 
-    const AtlasVolume &getVolume() const noexcept;
+public:
+    UseCaseManager();
+
+    std::vector<VisualizationUseCase> getValidUseCasesForVolume(const AtlasVolume &volume) const;
+
+    void executeUseCase(VisualizationUseCase useCase, const AtlasVolume &volume, brayns::Model &model) const;
 
 private:
-    AtlasVolume _volume;
+    std::vector<UseCaseEntry> _useCases;
 };

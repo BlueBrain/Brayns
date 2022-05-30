@@ -39,8 +39,8 @@ public:
     virtual std::vector<float> asFloats() const = 0;
     virtual std::vector<double> asDoubles() const = 0;
 
-    virtual std::type_index getBaseType() const = 0;
-
+    virtual bool isTypeSigned() const noexcept = 0;
+    virtual size_t getTypeSize() const noexcept = 0;
     virtual size_t getNumElements() const noexcept = 0;
 };
 
@@ -51,6 +51,7 @@ public:
     DataMangler(std::vector<T> data)
         : _data(std::move(data))
     {
+        static_assert(std::is_scalar_v<T>, "DataMangler only supports scalar values");
     }
 
     std::vector<char> asChars() const noexcept
@@ -103,9 +104,14 @@ public:
         return _as<double>();
     }
 
-    std::type_index getBaseType() const override
+    bool isTypeSigned() const noexcept override
     {
-        return typeid(T);
+        return std::is_signed_v<T>;
+    }
+
+    size_t getTypeSize() const noexcept override
+    {
+        return sizeof(T);
     }
 
     size_t getNumElements() const noexcept override

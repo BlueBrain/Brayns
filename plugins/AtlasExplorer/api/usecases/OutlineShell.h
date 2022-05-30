@@ -1,17 +1,34 @@
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-#include <brayns/engine/Model.h>
+#include <api/IUseCase.h>
+#include <api/VisualizationUseCase.h>
 
-struct OutlineShellData
-{
-    brayns::Vector3ui gridSize;
-    brayns::Vector3f gridSpacing;
-    std::vector<uint8_t> data;
-};
-
-class OutlineShell
+class OutlineShell : public IUseCase
 {
 public:
-    static void generate(brayns::Model &model, OutlineShellData data);
+    inline static const VisualizationUseCase Type = VisualizationUseCase::OUTLINE_SHELL;
+
+public:
+    bool isVolumeValid(const AtlasVolume &volume) const override;
+    void execute(const AtlasVolume &volume, brayns::Model &model) const override;
 };

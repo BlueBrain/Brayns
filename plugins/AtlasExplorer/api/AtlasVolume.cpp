@@ -18,28 +18,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "AtlasVolume.h"
 
-#include <brayns/common/MathTypes.h>
-
-#include <api/DataMangler.h>
-#include <api/IAtlasVolume.h>
-
-class ScalarVolume final : public IAtlasVolume
+AtlasVolume::AtlasVolume(
+    const brayns::Vector3ui &size,
+    const brayns::Vector3f &spacing,
+    size_t voxelSize,
+    std::unique_ptr<IDataMangler> data)
+    : _size(size)
+    , _spacing(spacing)
+    , _voxelSize(voxelSize)
+    , _data(std::move(data))
 {
-public:
-    ScalarVolume(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, std::unique_ptr<IDataMangler> data);
+    assert(_data);
+}
 
-    void handleUseCase(VisualizationUseCase useCase, brayns::Model &model) const override;
+const brayns::Vector3ui &AtlasVolume::getSize() const noexcept
+{
+    return _size;
+}
 
-    const brayns::Vector3ui &getGridSize() const noexcept;
+const brayns::Vector3f &AtlasVolume::getSpacing() const noexcept
+{
+    return _spacing;
+}
 
-    const brayns::Vector3f &getGridSpacing() const noexcept;
+size_t AtlasVolume::getVoxelSize() const noexcept
+{
+    return _voxelSize;
+}
 
-    const IDataMangler &getData() const noexcept;
-
-private:
-    brayns::Vector3ui _gridSize;
-    brayns::Vector3f _gridSpacing;
-    std::unique_ptr<IDataMangler> _data;
-};
+const IDataMangler &AtlasVolume::getData() const noexcept
+{
+    return *_data;
+}

@@ -161,6 +161,7 @@ public:
         VolumeCommitter<T>::commit(_handle, _volumeData);
 
         ospCommit(_handle);
+
         _dirty = false;
         return true;
     }

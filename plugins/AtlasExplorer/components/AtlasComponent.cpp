@@ -22,13 +22,12 @@
 
 #include <cassert>
 
-AtlasComponent::AtlasComponent(std::unique_ptr<IAtlasVolume> volume)
+AtlasComponent::AtlasComponent(AtlasVolume volume)
     : _volume(std::move(volume))
 {
-    assert(_volume);
 }
 
-const IAtlasVolume &AtlasComponent::getVolume() const noexcept
+const AtlasVolume &AtlasComponent::getVolume() const noexcept
 {
-    return *_volume;
+    return _volume;
 }

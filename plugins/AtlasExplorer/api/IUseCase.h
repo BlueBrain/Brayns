@@ -20,22 +20,16 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
+#include <brayns/engine/Model.h>
 
-#include <api/IAtlasVolume.h>
+#include <api/AtlasVolume.h>
 
-class OrientationVolume final : public IAtlasVolume
+class IUseCase
 {
 public:
-    OrientationVolume(
-        const brayns::Vector3ui &size,
-        const brayns::Vector3f &spacing,
-        std::vector<brayns::Quaternion> data);
+    virtual ~IUseCase() = default;
 
-    void handleUseCase(VisualizationUseCase useCase, brayns::Model &model) const override;
+    virtual bool isVolumeValid(const AtlasVolume &volume) const = 0;
 
-private:
-    brayns::Vector3ui _gridSize;
-    brayns::Vector3f _gridSpacing;
-    std::vector<brayns::Quaternion> _data;
+    virtual void execute(const AtlasVolume &volume, brayns::Model &model) const = 0;
 };

@@ -20,14 +20,38 @@
 
 #pragma once
 
-#include <api/DataMangler.h>
-#include <api/IAtlasVolume.h>
-#include <io/nrrdloader/NRRDHeader.h>
+#include <cstdint>
+#include <vector>
 
-#include <memory>
-
-class AtlasVolumeBuilder
+class DataMinMax
 {
 public:
-    static std::unique_ptr<IAtlasVolume> build(const NRRDHeader &header, std::unique_ptr<IDataMangler> data);
+    template<typename T>
+    static std::pair<T, T> compute(const std::vector<T> &input)
+    {
+        T min = std::numeric_limits<T>::max();
+        T max = std::numeric_limits<T>::lowest();
+
+        for (size_t i = 0; i < input.size(); ++i)
+        {
+            min = std::min(input[i], min);
+            max = std::max(input[i], max);
+        }
+
+        return std::make_pair(min, max);
+    }
+};
+
+class DataToBytes
+{
+public:
+    template<typename T>
+    static std::vector<uint8_t> convert(const std::vector<T> &input)
+    {
+        std::vector<uint8_t> result(input.size() * sizeof(T));
+        const auto src = input.data();
+        auto dst = result.data();
+        std::memcpy(dst, src, result.size());
+        return result;
+    }
 };
