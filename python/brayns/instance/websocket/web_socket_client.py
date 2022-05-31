@@ -52,7 +52,7 @@ class WebSocketClient(WebSocket):
         ).result()
         self._loop.close()
 
-    def receive(self) -> None:
+    def receive(self) -> Union[bytes, str]:
         return self._loop.run(
             self._websocket.receive()
         ).result()

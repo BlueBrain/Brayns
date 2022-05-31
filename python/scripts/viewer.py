@@ -107,7 +107,7 @@ def try_send_request(instance: brayns.Instance, window: sg.Window, values: dict)
     try:
         send_request(instance, window, values)
     except Exception as e:
-        sg.PopupError(str(e), title='Invalid request')
+        sg.PopupError(str(e), title='Request failed')
 
 
 def process_events(instance: brayns.Instance, window: sg.Window) -> None:
@@ -121,7 +121,7 @@ def process_events(instance: brayns.Instance, window: sg.Window) -> None:
             try_send_request(instance, window, values)
 
 
-def run(uri: str):
+def run(uri: str) -> None:
     window = create_window()
     with brayns.connect(
         uri=uri,
@@ -132,9 +132,16 @@ def run(uri: str):
     window.close()
 
 
+def main(uri: str) -> None:
+    try:
+        run(uri)
+    except Exception as e:
+        sg.PopupError(str(e), title='Connection failed')
+
+
 if __name__ == '__main__':
     argv = sys.argv
     uri = 'localhost:5000'
     if len(argv) > 1:
         uri = argv[1]
-    run(uri)
+    main(uri)
