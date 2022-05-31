@@ -1,3 +1,23 @@
+# Copyright (c) 2015-2022 EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+#
+# Responsible Author: adrien.fleury@epfl.ch
+#
+# This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+#
+# This library is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License version 3.0 as published
+# by the Free Software Foundation.
+#
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 import io
 import json
 import logging
@@ -30,7 +50,8 @@ def create_image_column() -> sg.Column:
     layout = [
         [sg.Image(key=IMAGE, size=(600, 400))]
     ]
-    return sg.Column(layout)
+    return sg.Column(layout, vertical_alignment='top')
+
 
 def create_control_column() -> sg.Column:
     layout = [
@@ -44,11 +65,13 @@ def create_control_column() -> sg.Column:
     ]
     return sg.Column(layout, vertical_alignment='top')
 
+
 def create_window() -> sg.Window:
     layout = [
         [create_image_column(), create_control_column()]
     ]
     return sg.Window('Brayns Viewer', layout, resizable=True)
+
 
 def convert_to_png(jpeg: bytes) -> bytes:
     jpeg_io = io.BytesIO(jpeg)
@@ -57,16 +80,19 @@ def convert_to_png(jpeg: bytes) -> bytes:
     image.save(png_io, 'png')
     return png_io.getvalue()
 
+
 def on_binary(window: sg.Window, data: bytes) -> None:
     data = convert_to_png(data)
     image: sg.Image = window[IMAGE]
     image.update(data=data)
+
 
 def get_params(values: dict) -> str:
     data: str = values[PARAMS]
     if not data or data.isspace():
         return None
     return json.loads(data)
+
 
 def send_request(instance: brayns.Instance, window: sg.Window, values: dict) -> None:
     method: str = values[METHOD]
@@ -76,11 +102,13 @@ def send_request(instance: brayns.Instance, window: sg.Window, values: dict) -> 
     element: sg.Text = window[RESULT]
     element.update(value=text)
 
+
 def try_send_request(instance: brayns.Instance, window: sg.Window, values: dict) -> None:
     try:
         send_request(instance, window, values)
     except Exception as e:
         sg.PopupError(str(e), title='Invalid request')
+
 
 def process_events(instance: brayns.Instance, window: sg.Window) -> None:
     while True:
@@ -89,9 +117,9 @@ def process_events(instance: brayns.Instance, window: sg.Window) -> None:
             return
         if event == sg.TIMEOUT_EVENT:
             continue
-        print(event, values)
         if event == SEND:
             try_send_request(instance, window, values)
+
 
 def run(uri: str):
     window = create_window()
@@ -103,9 +131,10 @@ def run(uri: str):
         process_events(instance, window)
     window.close()
 
+
 if __name__ == '__main__':
     argv = sys.argv
-    uri = '128.178.97.151:5000'
+    uri = 'localhost:5000'
     if len(argv) > 1:
         uri = argv[1]
     run(uri)
