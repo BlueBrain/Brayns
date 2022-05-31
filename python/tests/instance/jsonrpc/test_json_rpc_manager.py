@@ -22,14 +22,21 @@ import json
 import logging
 import unittest
 
+from brayns.instance.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
+from brayns.instance.jsonrpc.json_rpc_handler import JsonRpcHandler
 from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
+from brayns.instance.jsonrpc.json_rpc_tasks import JsonRpcTasks
 from brayns.instance.request_error import RequestError
 
 
 class TestJsonRpcManager(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._manager = JsonRpcManager(logging.root)
+        logger = logging.root
+        self._tasks = JsonRpcTasks()
+        self._handler = JsonRpcHandler(self._tasks, logger)
+        self._dispatcher = JsonRpcDispatcher(self._handler)
+        self._manager = JsonRpcManager(logger, self._tasks, self._dispatcher)
 
     def test_is_running(self) -> None:
         self._manager.create_task(0)
@@ -41,12 +48,13 @@ class TestJsonRpcManager(unittest.TestCase):
         self._manager.clear()
         with self.assertRaises(RequestError):
             task.get_result()
+        self.assertEqual(len(self._tasks), 0)
 
     def test_create_task(self) -> None:
-        task = self._manager.create_task(0)
-        self.assertFalse(task.is_ready())
-        task = self._manager.create_task(None)
-        self.assertIsNone(task.get_result())
+        self._manager.create_task(0)
+        self.assertEqual(len(self._tasks), 1)
+        self._manager.create_task(None)
+        self.assertEqual(len(self._tasks), 1)
 
     def test_process_message(self) -> None:
         task = self._manager.create_task(0)
@@ -56,6 +64,7 @@ class TestJsonRpcManager(unittest.TestCase):
         }
         self._manager.process_message(json.dumps(reply))
         self.assertEqual(task.get_result(), 123)
+        self.assertEqual(len(self._tasks), 0)
 
 
 if __name__ == '__main__':

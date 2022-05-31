@@ -18,16 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Union
-
 from brayns.instance.websocket.web_socket import WebSocket
+from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
 class MockWebSocket(WebSocket):
 
     def __init__(self) -> None:
-        self.request = ''
-        self.reply = ''
+        self.binary_request = b''
+        self.binary_reply = b''
+        self.text_request = ''
+        self.text_reply = ''
         self._closed = False
 
     @property
@@ -37,8 +38,14 @@ class MockWebSocket(WebSocket):
     def close(self) -> None:
         self._closed = True
 
-    def receive(self) -> Union[bytes, str]:
-        return self.reply
+    def poll(self, listener: WebSocketListener) -> None:
+        if self.binary_reply:
+            listener.on_binary(self.binary_reply)
+        if self.text_reply:
+            listener.on_text(self.text_reply)
 
-    def send(self, data: Union[bytes, str]) -> None:
-        self.request = data
+    def send_binary(self, data: bytes) -> None:
+        self.binary_request = data
+
+    def send_text(self, data: str) -> None:
+        self.text_request = data

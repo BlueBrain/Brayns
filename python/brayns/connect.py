@@ -25,6 +25,9 @@ from typing import Callable, Optional
 from brayns.core.version import Version
 from brayns.instance.client import Client
 from brayns.instance.instance import Instance
+from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
+from brayns.instance.listener import Listener
+from brayns.instance.websocket.web_socket import WebSocket
 from brayns.instance.websocket.web_socket_client import WebSocketClient
 from brayns.version import DEV_VERSION, __version__
 
@@ -39,7 +42,7 @@ def connect(
 ) -> Instance:
     websocket = WebSocketClient.connect(uri, secure, cafile)
     logger = _create_logger(log_level, log_handler)
-    client = Client(websocket, logger, on_binary)
+    client = _create_client(websocket, logger, on_binary)
     _check_version(client, logger)
     return client
 
@@ -54,6 +57,12 @@ def _create_logger(level: int = logging.WARN, handler: Optional[logging.Handler]
     formatter = logging.Formatter(format)
     handler.setFormatter(formatter)
     return logger
+
+
+def _create_client(websocket: WebSocket, logger: logging.Logger, on_binary: Callable[[bytes], None]) -> Client:
+    manager = JsonRpcManager.create(logger)
+    listener = Listener(logger, on_binary, manager)
+    return Client(websocket, logger, listener, manager)
 
 
 def _check_version(instance: Instance, logger: logging.Logger) -> None:

@@ -20,29 +20,11 @@
 
 from typing import Protocol
 
-from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
+class WebSocketListener(Protocol):
 
-class WebSocket(Protocol):
+    def on_binary(self, data: bytes) -> None:
+        pass
 
-    def __enter__(self) -> 'WebSocket':
-        return self
-
-    def __exit__(self, *_) -> None:
-        self.close()
-
-    @property
-    def closed(self) -> bool:
-        raise NotImplementedError()
-
-    def close(self) -> None:
-        raise NotImplementedError()
-
-    def poll(self, listener: WebSocketListener) -> None:
-        raise NotImplementedError()
-
-    def send_binary(self, data: bytes) -> None:
-        raise NotImplementedError()
-
-    def send_text(self, data: str) -> None:
-        raise NotImplementedError()
+    def on_text(self, data: str) -> None:
+        pass

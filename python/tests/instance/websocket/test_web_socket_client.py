@@ -19,12 +19,14 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
+import time
 import unittest
-from typing import Union
+from typing import Optional, Union
 
 from brayns.instance.websocket.web_socket_client import WebSocketClient
 from brayns.instance.websocket.web_socket_error import WebSocketError
-from tests.instance.websocket.echo_server import EchoServer
+from tests.instance.websocket.mock_listener import MockListener
+from tests.instance.websocket.mock_server import MockServer
 
 
 class TestWebSocketClient(unittest.TestCase):
@@ -35,43 +37,74 @@ class TestWebSocketClient(unittest.TestCase):
         self._certificate = str(ssl_folder / 'certificate.pem')
         self._key = str(ssl_folder / 'key.pem')
         self._password = 'test'
+        self._listener = MockListener()
 
     def test_connect_error(self) -> None:
         with self.assertRaises(WebSocketError):
             self._connect()
 
     def test_connect(self) -> None:
-        with self._start_echo_server():
+        with self._start_server(receive=True):
             with self._connect():
                 pass
 
     def test_closed(self) -> None:
-        with self._start_echo_server():
+        with self._start_server(receive=True):
             with self._connect() as websocket:
                 self.assertFalse(websocket.closed)
         self.assertTrue(websocket.closed)
 
     def test_close(self) -> None:
-        with self._start_echo_server():
+        with self._start_server(receive=True):
             websocket = self._connect()
             websocket.close()
             self.assertTrue(websocket.closed)
 
-    def test_send_receive_text(self) -> None:
-        self._send_and_receive('test')
+    def test_poll(self) -> None:
+        with self._start_server(reply='test'):
+            with self._connect() as websocket:
+                time.sleep(0.1)
+                websocket.poll(self._listener)
+                self.assertEqual(self._listener.text, 'test')
 
-    def test_send_receive_text_secure(self) -> None:
-        self._send_and_receive('test', secure=True)
+    def test_send_binary(self) -> None:
+        with self._start_server(receive=True) as server:
+            with self._connect() as websocket:
+                websocket.send_binary(b'test')
+                time.sleep(0.1)
+                self.assertEqual(server.request, b'test')
 
-    def test_send_receive_binary(self) -> None:
-        self._send_and_receive(b'test')
+    def test_send_text(self) -> None:
+        with self._start_server(receive=True) as server:
+            with self._connect() as websocket:
+                websocket.send_text('test')
+                time.sleep(0.1)
+                self.assertEqual(server.request, 'test')
 
-    def test_send_receive_binary_secure(self) -> None:
-        self._send_and_receive(b'test', secure=True)
+    def test_send_text_secure(self) -> None:
+        with self._start_server(
+            receive=True,
+            reply='test1',
+            secure=True
+        ) as server:
+            with self._connect(secure=True) as websocket:
+                websocket.send_text('test2')
+                time.sleep(0.1)
+                self.assertEqual(server.request, 'test2')
+                websocket.poll(self._listener)
+                time.sleep(0.1)
+                self.assertEqual(self._listener.text, 'test1')
 
-    def _start_echo_server(self, secure: bool = False) -> EchoServer:
-        return EchoServer.start(
+    def _start_server(
+        self,
+        receive: bool = False,
+        reply: Optional[Union[bytes, str]] = None,
+        secure: bool = False
+    ) -> MockServer:
+        return MockServer(
             uri=self._uri,
+            receive=receive,
+            reply=reply,
             certfile=self._certificate if secure else None,
             keyfile=self._key if secure else None,
             password=self._password if secure else None
@@ -84,16 +117,13 @@ class TestWebSocketClient(unittest.TestCase):
             cafile=self._certificate if secure else None
         )
 
-    def _send_and_receive(
-        self,
-        request: Union[bytes, str],
-        secure: bool = False
-    ) -> None:
-        with self._start_echo_server(secure):
+    def _send_and_receive_text(self, data: str, secure: bool = False) -> None:
+        with self._start_server(secure):
             with self._connect(secure) as websocket:
-                websocket.send(request)
-                reply = websocket.receive()
-                self.assertEqual(reply, request)
+                websocket.send_text(data)
+                websocket.poll()
+                test = self._listener.text
+                self.assertEqual(test, data)
 
 
 if __name__ == '__main__':

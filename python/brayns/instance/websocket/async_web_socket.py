@@ -18,6 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import queue
 import ssl
 from typing import Optional, Union
 
@@ -43,10 +44,17 @@ class AsyncWebSocket:
 
     def __init__(self,  websocket: websockets.WebSocketClientProtocol) -> None:
         self._websocket = websocket
+        self._queue = queue.Queue[Union[bytes, str]]()
 
     @property
     def closed(self) -> bool:
         return self._websocket.closed
+
+    def poll(self) -> Optional[Union[bytes, str]]:
+        try:
+            return self._queue.get_nowait()
+        except queue.Empty:
+            return None
 
     async def close(self) -> None:
         try:
@@ -65,3 +73,11 @@ class AsyncWebSocket:
             await self._websocket.send(data)
         except Exception as e:
             raise WebSocketError(str(e))
+
+    async def run(self) -> None:
+        while not self.closed:
+            try:
+                data = await self.receive()
+            except WebSocketError:
+                return
+            self._queue.put(data)

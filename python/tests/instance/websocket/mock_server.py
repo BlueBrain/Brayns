@@ -19,39 +19,55 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import ssl
-from typing import Optional
+from typing import Optional, Union
 
 import websockets
 from brayns.instance.websocket.event_loop import EventLoop
 
 
-class EchoServer:
+class MockServer:
 
-    @staticmethod
-    def start(
+    def __init__(
+        self,
         uri: str,
+        receive: bool = False,
+        reply: Optional[Union[bytes, str]] = None,
         certfile: Optional[str] = None,
         keyfile: Optional[str] = None,
         password: Optional[str] = None
-    ) -> 'EchoServer':
-        loop = EventLoop()
-        return EchoServer(
-            websocket=loop.run(
-                EchoServer._start(uri, certfile, keyfile, password)
-            ).result(),
-            loop=loop
-        )
+    ) -> None:
+        self._receive = receive
+        self._reply = reply
+        self._request = None
+        self._loop = EventLoop()
+        self._websocket = self._loop.run(
+            self._start(
+                uri=uri,
+                certfile=certfile,
+                keyfile=keyfile,
+                password=password
+            )
+        ).result()
 
-    @staticmethod
-    async def _echo(websocket: websockets.WebSocketServerProtocol, _) -> None:
-        try:
-            data = await websocket.recv()
-            await websocket.send(data)
-        except Exception:
-            pass
+    def __enter__(self) -> 'MockServer':
+        return self
 
-    @staticmethod
+    def __exit__(self, *_) -> None:
+        self.stop()
+
+    @property
+    def request(self) -> Optional[Union[bytes, str]]:
+        return self._request
+
+    def stop(self) -> None:
+        self._websocket.close()
+        self._loop.run(
+            self._websocket.wait_closed()
+        ).result()
+        self._loop.close()
+
     async def _start(
+        self,
         uri: str,
         certfile: Optional[str] = None,
         keyfile: Optional[str] = None,
@@ -63,7 +79,7 @@ class EchoServer:
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             context.load_cert_chain(certfile, keyfile, password)
         return await websockets.serve(
-            ws_handler=EchoServer._echo,
+            ws_handler=self._handle_connection,
             host=host,
             port=int(port),
             ssl=context,
@@ -71,23 +87,11 @@ class EchoServer:
             close_timeout=0
         )
 
-    def __init__(
-        self,
-        websocket: websockets.WebSocketServer,
-        loop: EventLoop
-    ) -> None:
-        self._websocket = websocket
-        self._loop = loop
-
-    def __enter__(self) -> 'EchoServer':
-        return self
-
-    def __exit__(self, *_) -> None:
-        self.stop()
-
-    def stop(self) -> None:
-        self._websocket.close()
-        self._loop.run(
-            self._websocket.wait_closed()
-        ).result()
-        self._loop.close()
+    async def _handle_connection(self, websocket: websockets.WebSocketServerProtocol, _) -> None:
+        try:
+            if self._receive:
+                self._request = await websocket.recv()
+            if self._reply is not None:
+                await websocket.send(self._reply)
+        except Exception:
+            pass

@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
-from typing import Callable
 
 from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
@@ -27,16 +26,16 @@ from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
 from brayns.instance.request_future import RequestFuture
 from brayns.instance.websocket.web_socket import WebSocket
-from brayns.instance.websocket.web_socket_error import WebSocketError
+from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
 class Client(Instance):
 
-    def __init__(self, websocket: WebSocket, logger: logging.Logger, on_binary: Callable[[bytes], None]) -> None:
+    def __init__(self, websocket: WebSocket, logger: logging.Logger, listener: WebSocketListener, manager: JsonRpcManager) -> None:
         self._websocket = websocket
         self._logger = logger
-        self._on_binary = on_binary
-        self._manager = JsonRpcManager(logger)
+        self._listener = listener
+        self._manager = manager
 
     def disconnect(self) -> None:
         self._logger.info('Disconnection from Brayns instance.')
@@ -49,7 +48,7 @@ class Client(Instance):
     def send(self, request: JsonRpcRequest) -> RequestFuture:
         self._logger.info('Sending request %s.', request)
         data = request.to_json()
-        self._websocket.send(data)
+        self._websocket.send_text(data)
         return RequestFuture(
             task=self._manager.create_task(request.id),
             cancel=lambda: self.cancel(request.id),
@@ -58,16 +57,7 @@ class Client(Instance):
 
     def poll(self) -> None:
         self._logger.debug('Polling messages from Brayns instance.')
-        data = self._websocket.receive()
-        if isinstance(data, bytes):
-            self._logger.info('Binary frame received of %d bytes.', len(data))
-            self._on_binary(data)
-            return
-        if isinstance(data, str):
-            self._logger.info('Text frame received: "%s".', data)
-            self._manager.process_message(data)
-            return
-        raise WebSocketError(f'Invalid frame type received: {type(data)}')
+        self._websocket.poll(self._listener)
 
     def cancel(self, id: JsonRpcId) -> None:
         self._logger.info('Cancel request with ID %s.', id)

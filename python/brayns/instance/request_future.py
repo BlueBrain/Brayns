@@ -18,6 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import time
 from typing import Any, Callable, Iterator
 
 from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
@@ -46,6 +47,7 @@ class RequestFuture:
             if self.is_ready():
                 return
             self.poll()
+            time.sleep(0.001)
 
     def is_ready(self) -> bool:
         return self._task.is_ready()

@@ -18,31 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Protocol
-
 from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
-class WebSocket(Protocol):
+class MockListener(WebSocketListener):
 
-    def __enter__(self) -> 'WebSocket':
-        return self
+    def __init__(self) -> None:
+        self.binary = b''
+        self.text = ''
 
-    def __exit__(self, *_) -> None:
-        self.close()
+    def on_binary(self, data: bytes) -> None:
+        self.binary = data
 
-    @property
-    def closed(self) -> bool:
-        raise NotImplementedError()
-
-    def close(self) -> None:
-        raise NotImplementedError()
-
-    def poll(self, listener: WebSocketListener) -> None:
-        raise NotImplementedError()
-
-    def send_binary(self, data: bytes) -> None:
-        raise NotImplementedError()
-
-    def send_text(self, data: str) -> None:
-        raise NotImplementedError()
+    def on_text(self, data: str) -> None:
+        self.text = data

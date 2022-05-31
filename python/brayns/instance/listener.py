@@ -18,31 +18,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Protocol
+import logging
+from typing import Callable
 
+from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
-class WebSocket(Protocol):
+class Listener(WebSocketListener):
 
-    def __enter__(self) -> 'WebSocket':
-        return self
+    def __init__(self, logger: logging.Logger, on_binary: Callable[[bytes], None], manager: JsonRpcManager) -> None:
+        self._logger = logger
+        self._manager = manager
+        self._on_binary = on_binary
 
-    def __exit__(self, *_) -> None:
-        self.close()
+    def on_binary(self, data: bytes) -> None:
+        self._logger.info('Binary frame received of %d bytes.', len(data))
+        self._on_binary(data)
 
-    @property
-    def closed(self) -> bool:
-        raise NotImplementedError()
-
-    def close(self) -> None:
-        raise NotImplementedError()
-
-    def poll(self, listener: WebSocketListener) -> None:
-        raise NotImplementedError()
-
-    def send_binary(self, data: bytes) -> None:
-        raise NotImplementedError()
-
-    def send_text(self, data: str) -> None:
-        raise NotImplementedError()
+    def on_text(self, data: str) -> None:
+        self._logger.info('Text frame received: "%s".', data)
+        self._manager.process_message(data)

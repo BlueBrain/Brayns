@@ -21,24 +21,29 @@
 import json
 import logging
 import unittest
-from typing import Callable
 
 from brayns.instance.client import Client
+from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
+from brayns.instance.jsonrpc.json_rpc_tasks import JsonRpcTasks
+from brayns.instance.listener import Listener
 from tests.instance.websocket.mock_web_socket import MockWebSocket
 
 
 class TestClient(unittest.TestCase):
 
     def setUp(self) -> None:
+        self._logger = logging.root
+        self._manager = JsonRpcManager.create(self._logger)
+        self._listener = Listener(self._logger, self._on_binary, self._manager)
         self._websocket = MockWebSocket()
         self._data = b''
 
     def test_binary(self) -> None:
-        self._websocket.reply = b'123'
-        with self._connect(self._on_binary) as client:
+        self._websocket.binary_reply = b'123'
+        with self._connect() as client:
             client.poll()
-            self.assertEqual(self._data, self._websocket.reply)
+            self.assertEqual(self._data, self._websocket.binary_reply)
 
     def test_context(self) -> None:
         with self._connect():
@@ -53,23 +58,23 @@ class TestClient(unittest.TestCase):
 
     def test_request(self) -> None:
         request = JsonRpcRequest(0, 'test', 123)
-        self._websocket.reply = json.dumps({'id': 0, 'result': 456})
+        self._websocket.text_reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
             result = client.request(request.method, request.params)
-            self.assertEqual(self._websocket.request, request.to_json())
+            self.assertEqual(self._websocket.text_request, request.to_json())
             self.assertEqual(result, 456)
 
     def test_task(self) -> None:
         request = JsonRpcRequest(0, 'test', 123)
-        self._websocket.reply = json.dumps({'id': 0, 'result': 456})
+        self._websocket.text_reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
             future = client.task(request.method, request.params)
-            self.assertEqual(self._websocket.request, request.to_json())
+            self.assertEqual(self._websocket.text_request, request.to_json())
             self.assertEqual(future.wait_for_result(), 456)
 
     def test_is_running(self) -> None:
         request = JsonRpcRequest(0, 'test', 123)
-        self._websocket.reply = json.dumps({'id': 0, 'result': 456})
+        self._websocket.text_reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
             future = client.send(request)
             self.assertTrue(client.is_running(0))
@@ -79,15 +84,15 @@ class TestClient(unittest.TestCase):
 
     def test_send(self) -> None:
         request = JsonRpcRequest(0, 'test', 123)
-        self._websocket.reply = json.dumps({'id': 0, 'result': 456})
+        self._websocket.text_reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
             future = client.send(request)
-            self.assertEqual(self._websocket.request, request.to_json())
+            self.assertEqual(self._websocket.text_request, request.to_json())
             self.assertEqual(future.wait_for_result(), 456)
 
     def test_poll(self) -> None:
         request = JsonRpcRequest(0, 'test', 123)
-        self._websocket.reply = json.dumps({'id': 0, 'result': 456})
+        self._websocket.text_reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
             future = client.send(request)
             self.assertFalse(future.is_ready())
@@ -97,13 +102,13 @@ class TestClient(unittest.TestCase):
 
     def test_cancel(self) -> None:
         ref = JsonRpcRequest(0, 'cancel', {'id': 123})
-        self._websocket.reply = json.dumps({'id': 0, 'result': None})
+        self._websocket.text_reply = json.dumps({'id': 0, 'result': None})
         with self._connect() as client:
             client.cancel(123)
-            self.assertEqual(self._websocket.request, ref.to_json())
+            self.assertEqual(self._websocket.text_request, ref.to_json())
 
-    def _connect(self, on_binary: Callable[[bytes], None] = lambda _: None) -> Client:
-        return Client(self._websocket, logging.root, on_binary)
+    def _connect(self) -> Client:
+        return Client(self._websocket, logging.root, self._listener, self._manager)
 
     def _on_binary(self, data: bytes) -> None:
         self._data = data

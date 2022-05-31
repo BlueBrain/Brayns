@@ -31,11 +31,17 @@ from brayns.instance.request_error import RequestError
 
 class JsonRpcManager:
 
-    def __init__(self, logger: logging.Logger) -> None:
+    @staticmethod
+    def create(logger: logging.Logger) -> 'JsonRpcManager':
+        tasks = JsonRpcTasks()
+        handler = JsonRpcHandler(tasks, logger)
+        dispatcher = JsonRpcDispatcher(handler)
+        return JsonRpcManager(logger, tasks, dispatcher)
+
+    def __init__(self, logger: logging.Logger, tasks: JsonRpcTasks, dispatcher: JsonRpcDispatcher) -> None:
         self._logger = logger
-        self._tasks = JsonRpcTasks()
-        self._handler = JsonRpcHandler(self._tasks, self._logger)
-        self._dispatcher = JsonRpcDispatcher(self._handler)
+        self._tasks = tasks
+        self._dispatcher = dispatcher
 
     def is_running(self, id: JsonRpcId) -> bool:
         return id in self._tasks
@@ -43,7 +49,7 @@ class JsonRpcManager:
     def clear(self) -> None:
         self._logger.debug('Clear all JSON-RPC tasks.')
         error = RequestError(0, 'Disconnection from client side')
-        self._tasks.add_error(None, error)
+        self._tasks.add_global_error(error)
 
     def create_task(self, id: Optional[JsonRpcId]) -> JsonRpcTask:
         self._logger.debug('Create JSON-RPC task with ID %s.', id)

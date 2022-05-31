@@ -24,6 +24,8 @@ from typing import Optional, Union
 from brayns.instance.websocket.async_web_socket import AsyncWebSocket
 from brayns.instance.websocket.event_loop import EventLoop
 from brayns.instance.websocket.web_socket import WebSocket
+from brayns.instance.websocket.web_socket_error import WebSocketError
+from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
 class WebSocketClient(WebSocket):
@@ -41,6 +43,9 @@ class WebSocketClient(WebSocket):
     def __init__(self, websocket: AsyncWebSocket, loop: EventLoop) -> None:
         self._websocket = websocket
         self._loop = loop
+        self._task = self._loop.run(
+            self._websocket.run()
+        )
 
     @property
     def closed(self) -> bool:
@@ -50,14 +55,29 @@ class WebSocketClient(WebSocket):
         self._loop.run(
             self._websocket.close()
         ).result()
+        self._task.result()
         self._loop.close()
 
-    def receive(self) -> Union[bytes, str]:
-        return self._loop.run(
-            self._websocket.receive()
-        ).result()
+    def poll(self, listener: WebSocketListener) -> bool:
+        while True:
+            data = self._websocket.poll()
+            if data is None:
+                return
+            if isinstance(data, bytes):
+                listener.on_binary(data)
+                continue
+            if isinstance(data, str):
+                listener.on_text(data)
+                continue
+            raise WebSocketError(f'Invalid packet type {type(data)}')
 
-    def send(self, data: Union[bytes, str]) -> None:
+    def send_binary(self, data: bytes) -> None:
+        self._send(data)
+
+    def send_text(self, data: str) -> None:
+        self._send(data)
+
+    def _send(self, data: Union[bytes, str]) -> None:
         self._loop.run(
             self._websocket.send(data)
         ).result()
