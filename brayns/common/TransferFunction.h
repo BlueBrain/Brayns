@@ -41,30 +41,14 @@ public:
     TransferFunction();
 
     /**
-     * @brief Return the control points. Control points are used to control and compute the opacity
-     * of the color map. Each Control point consist on 2 numbers:
-     *  - The first one indicates in which normalized value (0 - 1) of the color map list this control point starts
-     *  - The second one specifies the opacity at that point.
-     */
-    const std::vector<Vector2f> &getControlPoints() const;
-
-    /**
-     * @brief Sets the control points. Control points are used to control and compute the opacity
-     * of the color map. Each Control point consist on 2 numbers:
-     *  - The first one indicates in which normalized value (0 - 1) of the color map list this control point starts
-     *  - The second one specifies the opacity at that point.
-     */
-    void setControlPoints(const std::vector<Vector2f> &controlPoints);
-
-    /**
      * @brief Return the list of colors that make up this transfer function color map
      */
-    const std::vector<Vector3f> &getColors() const;
+    const std::vector<Vector4f> &getColors() const;
 
     /**
      * @brief Sets the color that make up the color map of this transfer function. Colors must be sorted.
      */
-    void setColors(const std::vector<Vector3f> &colorMap);
+    void setColors(const std::vector<Vector4f> &colorMap);
 
     /**
      * @brief Return the range of values in which this transfer function works. Any value outside the range
@@ -79,19 +63,12 @@ public:
     void setValuesRange(const Vector2f &valuesRange);
 
     /**
-     * @brief Return the interpolated opacities computed based on the control points
-     */
-    const std::vector<float> &getOpacities() const noexcept;
-
-    /**
      * @brief Computes the color + opacity that corresponds to a given value
      */
     Vector4f getColorForValue(const float v) const;
 
 private:
-    std::vector<Vector3f> _colors;
-    std::vector<float> _opacities;
-    std::vector<Vector2f> _controlPoints;
+    std::vector<Vector4f> _colors;
     Vector2f _valuesRange;
 };
 } // namespace brayns
