@@ -51,15 +51,22 @@ bool TransferFunctionRendererComponent::manualCommit()
     }
 
     auto &color = tf.getColors();
-    auto &opacity = tf.getOpacities();
+    auto colorPtr = color.data();
+    auto tempCast = static_cast<const void *>(colorPtr);
+    auto floatCast = static_cast<const float *>(tempCast);
+    auto colorSize = color.size();
     auto &range = tf.getValuesRange();
+    constexpr auto stride = 4 * sizeof(float);
 
-    auto colorBuffer = DataHandler::shareBuffer(color, OSPDataType::OSP_VEC3F);
-    auto opacityBuffer = DataHandler::shareBuffer(opacity, OSPDataType::OSP_FLOAT);
+    auto colorBuffer = ospNewSharedData(floatCast, OSPDataType::OSP_VEC3F, colorSize, stride);
+    auto opacityBuffer = ospNewSharedData(floatCast + 3, OSPDataType::OSP_FLOAT, colorSize, stride);
 
-    ospSetParam(_handle, "color", OSPDataType::OSP_DATA, &colorBuffer.handle);
-    ospSetParam(_handle, "opacity", OSPDataType::OSP_DATA, &opacityBuffer.handle);
+    ospSetParam(_handle, "color", OSPDataType::OSP_DATA, &colorBuffer);
+    ospSetParam(_handle, "opacity", OSPDataType::OSP_DATA, &opacityBuffer);
     ospSetParam(_handle, "valueRange", OSPDataType::OSP_VEC2F, &range);
+
+    ospRelease(colorBuffer);
+    ospRelease(opacityBuffer);
 
     ospCommit(_handle);
 

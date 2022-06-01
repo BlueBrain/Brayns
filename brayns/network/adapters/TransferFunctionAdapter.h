@@ -29,7 +29,6 @@ namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(TransferFunction)
 BRAYNS_JSON_ADAPTER_GETSET("range", getValuesRange, setValuesRange, "Values range")
-BRAYNS_JSON_ADAPTER_GETSET("opacity_curve", getControlPoints, setControlPoints, "Control points")
-BRAYNS_JSON_ADAPTER_GETSET("colors", getColors, setColors, "List of colors (RGB) to map")
+BRAYNS_JSON_ADAPTER_GETSET("colors", getColors, setColors, "List of colors (RGBA) to map")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns
