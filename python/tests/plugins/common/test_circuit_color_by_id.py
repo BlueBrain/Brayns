@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.color import Color
+from brayns.core.common.color4 import Color4
 from brayns.plugins.common.cell_id import CellId
 from brayns.plugins.common.circuit_color_by_id import CircuitColorById
 from tests.plugins.common.mock_circuit_instance import MockCircuitInstance
@@ -31,8 +31,8 @@ class TestCircuitColorById(unittest.TestCase):
     def test_apply(self) -> None:
         instance = MockCircuitInstance()
         color = CircuitColorById({
-            CellId.from_integer(3): Color.white,
-            CellId.from_range(4, 6): Color.red
+            CellId.from_integer(3): Color4.white,
+            CellId.from_range(4, 6): Color4.red
         })
         not_colored = color.apply(instance, 0)
         self.assertEqual(instance.method, 'color-circuit-by-id')

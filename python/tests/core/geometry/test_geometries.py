@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.color import Color
+from brayns.core.common.color4 import Color4
 from tests.core.geometry.mock_geometries import MockGeometries
 from tests.core.model.mock_model import MockModel
 from tests.instance.mock_instance import MockInstance
@@ -30,8 +30,8 @@ class TestGeometries(unittest.TestCase):
 
     def setUp(self) -> None:
         self._geometries = MockGeometries([
-            (1, Color.white),
-            (2, Color.red)
+            (1, Color4.white),
+            (2, Color4.red)
         ])
         self._message = [
             {

@@ -18,76 +18,64 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass, replace
-from typing import Iterator
+from dataclasses import dataclass
+from typing import Iterator, TypeVar
 
 from brayns.core.common.vector import Vector
 
+T = TypeVar('T', bound='Color3')
+
 
 @dataclass(frozen=True, order=True)
-class Color(Vector):
+class Color3(Vector):
 
     r: float = 0.0
     g: float = 0.0
     b: float = 0.0
-    a: float = 1.0
 
     @staticmethod
     def normalize_hex(value: str) -> float:
         return int(value, base=16) / 255
 
-    @staticmethod
-    def from_hex(value: str) -> 'Color':
-        return Color(
-            Color.normalize_hex(value[0:2]),
-            Color.normalize_hex(value[2:4]),
-            Color.normalize_hex(value[4:6])
+    @classmethod
+    def from_hex(cls: type[T], value: str) -> T:
+        return cls(
+            Color3.normalize_hex(value[0:2]),
+            Color3.normalize_hex(value[2:4]),
+            Color3.normalize_hex(value[4:6])
         )
 
-    @staticmethod
-    def from_int8(red: int, green: int, blue: int, alpha: int = 255) -> 'Color':
-        return Color(red, green, blue, alpha) / 255
+    @classmethod
+    @property
+    def black(cls: type[T]) -> T:
+        return cls()
 
     @classmethod
     @property
-    def black(cls) -> 'Color':
-        return Color()
+    def white(cls: type[T]) -> T:
+        return cls(1.0, 1.0, 1.0)
 
     @classmethod
     @property
-    def white(cls) -> 'Color':
-        return Color(1.0, 1.0, 1.0)
+    def red(cls: type[T]) -> T:
+        return cls(1.0, 0.0, 0.0)
 
     @classmethod
     @property
-    def red(self) -> 'Color':
-        return Color(1.0, 0.0, 0.0)
+    def green(cls: type[T]) -> T:
+        return cls(0.0, 1.0, 0.0)
 
     @classmethod
     @property
-    def green(self) -> 'Color':
-        return Color(0.0, 1.0, 0.0)
+    def blue(cls: type[T]) -> T:
+        return cls(0.0, 0.0, 1.0)
 
     @classmethod
     @property
-    def blue(self) -> 'Color':
-        return Color(0.0, 0.0, 1.0)
-
-    @classmethod
-    @property
-    def bbp_background(cls) -> 'Color':
-        return Color(0.004, 0.016, 0.102)
+    def bbp_background(cls: type[T]) -> T:
+        return cls(0.004, 0.016, 0.102)
 
     def __iter__(self) -> Iterator[float]:
         yield self.r
         yield self.g
         yield self.b
-        yield self.a
-
-    @property
-    def transparent(self) -> 'Color':
-        return replace(self, a=0.0)
-
-    @property
-    def opaque(self) -> 'Color':
-        return replace(self, a=1.0)

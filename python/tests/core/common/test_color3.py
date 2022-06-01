@@ -20,38 +20,23 @@
 
 import unittest
 
-from brayns.core.common.color import Color
+from brayns.core.common.color3 import Color3
 
 
-class TestColor(unittest.TestCase):
+class TestColor3(unittest.TestCase):
 
     def test_normalize_hex(self) -> None:
-        test = Color.normalize_hex('FF')
+        test = Color3.normalize_hex('FF')
         self.assertEqual(test, 1.0)
 
     def test_from_hex(self) -> None:
-        test = Color.from_hex('2ca02c')
-        ref = Color.from_int8(44, 160, 44)
-        self.assertEqual(test, ref)
-
-    def test_from_int8(self) -> None:
-        test = Color.from_int8(33, 160, 44)
-        ref = Color(33 / 255, 160 / 255, 44 / 255)
+        test = Color3.from_hex('2ca02c')
+        ref = Color3(44, 160, 44) / 255
         self.assertEqual(test, ref)
 
     def test_iter(self) -> None:
-        test = list(Color(1, 2, 3, 4))
-        ref = [1, 2, 3, 4]
-        self.assertEqual(test, ref)
-
-    def test_transparent(self) -> None:
-        test = Color(1, 2, 3, 4).transparent
-        ref = Color(1, 2, 3, 0)
-        self.assertEqual(test, ref)
-
-    def test_opaque(self) -> None:
-        test = Color(1, 2, 3, 0).opaque
-        ref = Color(1, 2, 3, 1)
+        test = list(Color3(1, 2, 3))
+        ref = [1, 2, 3]
         self.assertEqual(test, ref)
 
 

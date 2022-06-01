@@ -20,7 +20,7 @@
 
 from dataclasses import dataclass
 
-from brayns.core.common.color import Color
+from brayns.core.common.color4 import Color4
 from brayns.instance.instance import Instance
 from brayns.plugins.common.cell_id import CellId
 
@@ -28,7 +28,7 @@ from brayns.plugins.common.cell_id import CellId
 @dataclass
 class CircuitColorById:
 
-    colors: dict[CellId, Color]
+    colors: dict[CellId, Color4]
 
     def apply(self, instance: Instance, model_id: int) -> list[int]:
         params = {

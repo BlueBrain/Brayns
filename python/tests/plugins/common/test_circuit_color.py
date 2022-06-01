@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.color import Color
+from brayns.core.common.color4 import Color4
 from brayns.plugins.common.circuit_color import CircuitColor
 from tests.plugins.common.mock_circuit_instance import MockCircuitInstance
 
@@ -29,7 +29,7 @@ class TestCircuitColor(unittest.TestCase):
 
     def test_apply(self) -> None:
         instance = MockCircuitInstance()
-        color = CircuitColor(Color.red)
+        color = CircuitColor(Color4.red)
         color.apply(instance, 0)
         self.assertEqual(instance.method, 'color-circuit-by-single-color')
         self.assertEqual(instance.params, {

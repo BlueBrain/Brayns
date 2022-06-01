@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
-from brayns.core.common.color import Color
+from brayns.core.common.color4 import Color4
 from brayns.core.model.model import Model
 from brayns.instance.instance import Instance
 
@@ -32,7 +32,7 @@ T = TypeVar('T')
 @dataclass
 class Geometries(ABC, Generic[T]):
 
-    items: list[tuple[T, Color]]
+    items: list[tuple[T, Color4]]
 
     @classmethod
     @property

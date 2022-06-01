@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.color import Color
+from brayns.core.common.color4 import Color4
 from brayns.core.renderer.interactive_renderer import InteractiveRenderer
 
 
@@ -30,7 +30,7 @@ class TestInteractiveRenderer(unittest.TestCase):
         self._renderer = InteractiveRenderer(
             samples_per_pixel=2,
             max_ray_bounces=12,
-            background_color=Color(0, 0, 1, 1),
+            background_color=Color4(0, 0, 1, 1),
             enable_shadows=False,
             ambient_occlusion_samples=15
         )
