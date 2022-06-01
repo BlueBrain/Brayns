@@ -96,7 +96,7 @@ protected:
 
 private:
     std::vector<std::string> _plugins;
-    LogLevel _logLevel;
+    LogLevel _logLevel = LogLevel::Info;
     Vector2ui _windowSize;
     int _jpegQuality;
     po::positional_options_description _positionalArgs;
