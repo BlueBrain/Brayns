@@ -115,6 +115,7 @@ def process_events(instance: brayns.Instance, window: sg.Window) -> None:
         event, values = window.read(timeout=20)
         if event == sg.WIN_CLOSED:
             return
+        instance.poll(block=False)
         if event == sg.TIMEOUT_EVENT:
             continue
         if event == SEND:
