@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
-import time
 import unittest
 from typing import Optional, Union
 
@@ -63,23 +62,22 @@ class TestWebSocketClient(unittest.TestCase):
     def test_poll(self) -> None:
         with self._start_server(reply='test'):
             with self._connect() as websocket:
-                time.sleep(0.1)
-                websocket.poll(self._listener)
+                websocket.poll()
                 self.assertEqual(self._listener.text, 'test')
 
     def test_send_binary(self) -> None:
         with self._start_server(receive=True) as server:
             with self._connect() as websocket:
                 websocket.send_binary(b'test')
-                time.sleep(0.1)
-                self.assertEqual(server.request, b'test')
+                request = server.wait_for_request()
+                self.assertEqual(request, b'test')
 
     def test_send_text(self) -> None:
         with self._start_server(receive=True) as server:
             with self._connect() as websocket:
                 websocket.send_text('test')
-                time.sleep(0.1)
-                self.assertEqual(server.request, 'test')
+                request = server.wait_for_request()
+                self.assertEqual(request, 'test')
 
     def test_send_text_secure(self) -> None:
         with self._start_server(
@@ -89,10 +87,9 @@ class TestWebSocketClient(unittest.TestCase):
         ) as server:
             with self._connect(secure=True) as websocket:
                 websocket.send_text('test2')
-                time.sleep(0.1)
-                self.assertEqual(server.request, 'test2')
-                websocket.poll(self._listener)
-                time.sleep(0.1)
+                request = server.wait_for_request()
+                self.assertEqual(request, 'test2')
+                websocket.poll()
                 self.assertEqual(self._listener.text, 'test1')
 
     def _start_server(
@@ -113,17 +110,10 @@ class TestWebSocketClient(unittest.TestCase):
     def _connect(self, secure: bool = False) -> WebSocketClient:
         return WebSocketClient.connect(
             self._uri,
+            self._listener,
             secure=secure,
             cafile=self._certificate if secure else None
         )
-
-    def _send_and_receive_text(self, data: str, secure: bool = False) -> None:
-        with self._start_server(secure):
-            with self._connect(secure) as websocket:
-                websocket.send_text(data)
-                websocket.poll()
-                test = self._listener.text
-                self.assertEqual(test, data)
 
 
 if __name__ == '__main__':

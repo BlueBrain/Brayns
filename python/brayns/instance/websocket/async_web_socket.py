@@ -50,9 +50,9 @@ class AsyncWebSocket:
     def closed(self) -> bool:
         return self._websocket.closed
 
-    def poll(self) -> Optional[Union[bytes, str]]:
+    def poll(self, block: bool = False, timeout: Optional[float] = None) -> Optional[Union[bytes, str]]:
         try:
-            return self._queue.get_nowait()
+            return self._queue.get(block, timeout)
         except queue.Empty:
             return None
 

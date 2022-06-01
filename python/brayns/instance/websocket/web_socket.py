@@ -18,9 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Protocol
-
-from brayns.instance.websocket.web_socket_listener import WebSocketListener
+from typing import Optional, Protocol
 
 
 class WebSocket(Protocol):
@@ -38,7 +36,7 @@ class WebSocket(Protocol):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def poll(self, listener: WebSocketListener) -> None:
+    def poll(self, block: bool = True, timeout: Optional[float] = None) -> None:
         raise NotImplementedError()
 
     def send_binary(self, data: bytes) -> None:

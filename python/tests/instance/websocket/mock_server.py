@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import ssl
+import threading
 from typing import Optional, Union
 
 import websockets
@@ -40,6 +41,7 @@ class MockServer:
         self._reply = reply
         self._request = None
         self._loop = EventLoop()
+        self._condition = threading.Condition()
         self._websocket = self._loop.run(
             self._start(
                 uri=uri,
@@ -55,16 +57,20 @@ class MockServer:
     def __exit__(self, *_) -> None:
         self.stop()
 
-    @property
-    def request(self) -> Optional[Union[bytes, str]]:
-        return self._request
-
     def stop(self) -> None:
         self._websocket.close()
         self._loop.run(
             self._websocket.wait_closed()
         ).result()
         self._loop.close()
+
+    def wait_for_request(self) -> Optional[Union[bytes, str]]:
+        with self._condition:
+            if self._request is not None:
+                return self._request
+            if not self._condition.wait(timeout=1):
+                raise RuntimeError('Request timeout')
+        return self._request
 
     async def _start(
         self,
@@ -95,3 +101,5 @@ class MockServer:
                 await websocket.send(self._reply)
         except Exception:
             pass
+        with self._condition:
+            self._condition.notify_all()

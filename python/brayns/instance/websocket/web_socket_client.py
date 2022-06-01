@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import ssl
+from concurrent.futures import Future
 from typing import Optional, Union
 
 from brayns.instance.websocket.async_web_socket import AsyncWebSocket
@@ -31,21 +32,34 @@ from brayns.instance.websocket.web_socket_listener import WebSocketListener
 class WebSocketClient(WebSocket):
 
     @staticmethod
-    def connect(uri: str, secure: bool = False, cafile: Optional[str] = None) -> 'WebSocketClient':
+    def connect(
+        uri: str,
+        listener: WebSocketListener,
+        secure: bool = False,
+        cafile: Optional[str] = None
+    ) -> 'WebSocketClient':
         uri = ('wss://' if secure else 'ws://') + uri
         context = ssl.create_default_context(cafile=cafile) if secure else None
         loop = EventLoop()
         websocket = loop.run(
             AsyncWebSocket.connect(uri, context)
         ).result()
-        return WebSocketClient(websocket, loop)
+        task = loop.run(
+            websocket.run()
+        )
+        return WebSocketClient(websocket, loop, task, listener)
 
-    def __init__(self, websocket: AsyncWebSocket, loop: EventLoop) -> None:
+    def __init__(
+        self,
+        websocket: AsyncWebSocket,
+        loop: EventLoop,
+        task: Future[None],
+        listener: WebSocketListener
+    ) -> None:
         self._websocket = websocket
         self._loop = loop
-        self._task = self._loop.run(
-            self._websocket.run()
-        )
+        self._task = task
+        self._listener = listener
 
     @property
     def closed(self) -> bool:
@@ -58,18 +72,17 @@ class WebSocketClient(WebSocket):
         self._task.result()
         self._loop.close()
 
-    def poll(self, listener: WebSocketListener) -> bool:
-        while True:
-            data = self._websocket.poll()
-            if data is None:
-                return
-            if isinstance(data, bytes):
-                listener.on_binary(data)
-                continue
-            if isinstance(data, str):
-                listener.on_text(data)
-                continue
-            raise WebSocketError(f'Invalid packet type {type(data)}')
+    def poll(self, block: bool = True, timeout: Optional[float] = None) -> None:
+        data = self._websocket.poll(block, timeout)
+        if data is None:
+            return
+        if isinstance(data, bytes):
+            self._listener.on_binary(data)
+            return
+        if isinstance(data, str):
+            self._listener.on_text(data)
+            return
+        raise WebSocketError(f'Invalid packet type {type(data)}')
 
     def send_binary(self, data: bytes) -> None:
         self._send(data)

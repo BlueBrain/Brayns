@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
+from typing import Optional
 
 from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
@@ -26,15 +27,13 @@ from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
 from brayns.instance.request_future import RequestFuture
 from brayns.instance.websocket.web_socket import WebSocket
-from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
 class Client(Instance):
 
-    def __init__(self, websocket: WebSocket, logger: logging.Logger, listener: WebSocketListener, manager: JsonRpcManager) -> None:
+    def __init__(self, websocket: WebSocket, logger: logging.Logger, manager: JsonRpcManager) -> None:
         self._websocket = websocket
         self._logger = logger
-        self._listener = listener
         self._manager = manager
 
     def disconnect(self) -> None:
@@ -52,12 +51,12 @@ class Client(Instance):
         return RequestFuture(
             task=self._manager.create_task(request.id),
             cancel=lambda: self.cancel(request.id),
-            poll=self.poll
+            poll=lambda: self.poll(timeout=0.001)
         )
 
-    def poll(self) -> None:
+    def poll(self, block: bool = True, timeout: Optional[float] = None) -> None:
         self._logger.debug('Polling messages from Brayns instance.')
-        self._websocket.poll(self._listener)
+        self._websocket.poll(block, timeout)
 
     def cancel(self, id: JsonRpcId) -> None:
         self._logger.info('Cancel request with ID %s.', id)

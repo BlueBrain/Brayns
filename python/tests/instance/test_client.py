@@ -25,7 +25,6 @@ import unittest
 from brayns.instance.client import Client
 from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
-from brayns.instance.jsonrpc.json_rpc_tasks import JsonRpcTasks
 from brayns.instance.listener import Listener
 from tests.instance.websocket.mock_web_socket import MockWebSocket
 
@@ -36,7 +35,7 @@ class TestClient(unittest.TestCase):
         self._logger = logging.root
         self._manager = JsonRpcManager.create(self._logger)
         self._listener = Listener(self._logger, self._on_binary, self._manager)
-        self._websocket = MockWebSocket()
+        self._websocket = MockWebSocket(self._listener)
         self._data = b''
 
     def test_binary(self) -> None:
@@ -108,7 +107,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(self._websocket.text_request, ref.to_json())
 
     def _connect(self) -> Client:
-        return Client(self._websocket, logging.root, self._listener, self._manager)
+        return Client(self._websocket, logging.root, self._manager)
 
     def _on_binary(self, data: bytes) -> None:
         self._data = data
