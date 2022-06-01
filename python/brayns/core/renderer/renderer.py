@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TypeVar
 
-from brayns.core.common.color import Color
+from brayns.core.common.color4 import Color4
 from brayns.instance.instance import Instance
 
 T = TypeVar('T', bound='Renderer')
@@ -33,7 +33,7 @@ class Renderer(ABC):
 
     samples_per_pixel: int = 1
     max_ray_bounces: int = 3
-    background_color: Color = Color.bbp_background.transparent
+    background_color: Color4 = Color4.bbp_background.transparent
 
     @classmethod
     @property
@@ -78,7 +78,7 @@ class Renderer(ABC):
         return cls(
             samples_per_pixel=message['samples_per_pixel'],
             max_ray_bounces=message['max_ray_bounces'],
-            background_color=Color(*message['background_color']),
+            background_color=Color4(*message['background_color']),
             **kwargs
         )
 

@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TypeVar
 
-from brayns.core.common.color import Color
+from brayns.core.common.color3 import Color3
 from brayns.instance.instance import Instance
 
 T = TypeVar('T', bound='Light')
@@ -31,7 +31,7 @@ T = TypeVar('T', bound='Light')
 @dataclass
 class Light(ABC):
 
-    color: Color = Color.white
+    color: Color3 = Color3.white
     intensity: float = 1.0
     visible: bool = True
 
@@ -60,7 +60,7 @@ class Light(ABC):
 
     def _to_dict(self, properties: dict) -> dict:
         return {
-            'color': list(self.color)[:3],
+            'color': list(self.color),
             'intensity': self.intensity,
             'visible': self.visible,
         } | properties

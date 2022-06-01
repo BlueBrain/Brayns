@@ -20,32 +20,25 @@
 
 import unittest
 
-from brayns.core.common.color3 import Color3
-from brayns.core.material.emissive_material import EmissiveMaterial
+from brayns.core.common.color4 import Color4
 
 
-class TestEmissiveMaterial(unittest.TestCase):
+class TestColor4(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._material = EmissiveMaterial(
-            color=Color3.red,
-            intensity=2
-        )
-        self._message = {
-            'color': [1, 0, 0],
-            'intensity': 2
-        }
+    def test_iter(self) -> None:
+        test = list(Color4(1, 2, 3, 4))
+        ref = [1, 2, 3, 4]
+        self.assertEqual(test, ref)
 
-    def test_name(self) -> None:
-        self.assertEqual(EmissiveMaterial.name, 'emissive')
+    def test_transparent(self) -> None:
+        test = Color4(1, 2, 3, 4).transparent
+        ref = Color4(1, 2, 3, 0)
+        self.assertEqual(test, ref)
 
-    def test_deserialize(self) -> None:
-        test = EmissiveMaterial.deserialize(self._message)
-        self.assertEqual(test, self._material)
-
-    def test_serialize(self) -> None:
-        test = self._material.serialize()
-        self.assertEqual(test, self._message)
+    def test_opaque(self) -> None:
+        test = Color4(1, 2, 3, 0).opaque
+        ref = Color4(1, 2, 3, 1)
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

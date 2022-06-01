@@ -20,14 +20,14 @@
 
 from dataclasses import dataclass
 
-from brayns.core.common.color import Color
+from brayns.core.common.color4 import Color4
 from brayns.instance.instance import Instance
 
 
 @dataclass
 class CircuitColor:
 
-    color: Color = Color.white
+    color: Color4 = Color4.white
 
     def apply(self, instance: Instance, model_id: int) -> None:
         params = {

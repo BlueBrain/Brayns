@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.color import Color
+from brayns.core.common.color3 import Color3
 from brayns.core.light.light import Light
 from tests.core.light.mock_light import MockLight
 from tests.instance.mock_instance import MockInstance
@@ -42,7 +42,7 @@ class TestLight(unittest.TestCase):
 
     def test_add(self) -> None:
         instance = MockInstance(0)
-        light = MockLight(Color.red, 3, False, 'test')
+        light = MockLight(Color3.red, 3, False, 'test')
         id = light.add(instance)
         self.assertEqual(id, 0)
         self.assertEqual(instance.method, 'add-light-test')

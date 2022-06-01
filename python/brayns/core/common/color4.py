@@ -18,35 +18,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from dataclasses import dataclass, replace
+from typing import Iterator
 
 from brayns.core.common.color3 import Color3
-from brayns.core.material.emissive_material import EmissiveMaterial
 
 
-class TestEmissiveMaterial(unittest.TestCase):
+@dataclass(frozen=True, order=True)
+class Color4(Color3):
 
-    def setUp(self) -> None:
-        self._material = EmissiveMaterial(
-            color=Color3.red,
-            intensity=2
-        )
-        self._message = {
-            'color': [1, 0, 0],
-            'intensity': 2
-        }
+    a: float = 1.0
 
-    def test_name(self) -> None:
-        self.assertEqual(EmissiveMaterial.name, 'emissive')
+    def __iter__(self) -> Iterator[float]:
+        yield from super().__iter__()
+        yield self.a
 
-    def test_deserialize(self) -> None:
-        test = EmissiveMaterial.deserialize(self._message)
-        self.assertEqual(test, self._material)
+    @property
+    def transparent(self) -> 'Color4':
+        return replace(self, a=0.0)
 
-    def test_serialize(self) -> None:
-        test = self._material.serialize()
-        self.assertEqual(test, self._message)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    @property
+    def opaque(self) -> 'Color4':
+        return replace(self, a=1.0)

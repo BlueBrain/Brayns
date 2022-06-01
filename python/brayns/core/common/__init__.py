@@ -21,7 +21,8 @@
 from brayns.core.common.bounds import Bounds
 from brayns.core.common.box import Box
 from brayns.core.common.capsule import Capsule
-from brayns.core.common.color import Color
+from brayns.core.common.color3 import Color3
+from brayns.core.common.color4 import Color4
 from brayns.core.common.plane import Plane
 from brayns.core.common.quaternion import Quaternion
 from brayns.core.common.resolution import Resolution
@@ -33,7 +34,8 @@ __all__ = [
     'Bounds',
     'Box',
     'Capsule',
-    'Color',
+    'Color3',
+    'Color4',
     'Plane',
     'Quaternion',
     'Resolution',

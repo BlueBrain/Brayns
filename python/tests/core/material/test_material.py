@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.color import Color
+from brayns.core.common.color3 import Color3
 from brayns.core.material.material import Material
 from tests.core.material.mock_material import MockMaterial
 from tests.instance.mock_instance import MockInstance
@@ -51,7 +51,7 @@ class TestMaterial(unittest.TestCase):
 
     def test_apply(self) -> None:
         instance = MockInstance()
-        material = MockMaterial(Color.blue, test1='test', test2=3)
+        material = MockMaterial(Color3.blue, test1='test', test2=3)
         material.apply(instance, 0)
         self.assertEqual(instance.method, 'set-material-test')
         self.assertEqual(instance.params, {

@@ -20,7 +20,7 @@
 
 from dataclasses import dataclass
 
-from brayns.core.common.color import Color
+from brayns.core.common.color4 import Color4
 from brayns.instance.instance import Instance
 from brayns.plugins.common.color_method import ColorMethod
 
@@ -29,7 +29,7 @@ from brayns.plugins.common.color_method import ColorMethod
 class CircuitColorByMethod:
 
     method: ColorMethod
-    colors: dict[str, Color]
+    colors: dict[str, Color4]
 
     @staticmethod
     def get_available_methods(instance: Instance, model_id: int) -> list[ColorMethod]:

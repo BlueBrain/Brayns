@@ -20,7 +20,7 @@
 
 from dataclasses import dataclass
 
-from brayns.core.common.color import Color
+from brayns.core.common.color4 import Color4
 from brayns.core.transfer_function.value_range import ValueRange
 from brayns.instance.instance import Instance
 
@@ -29,7 +29,7 @@ from brayns.instance.instance import Instance
 class TransferFunction:
 
     value_range: ValueRange
-    colors: list[Color]
+    colors: list[Color4]
 
     @staticmethod
     def from_model(instance: Instance, model_id: int) -> 'TransferFunction':
@@ -42,7 +42,7 @@ class TransferFunction:
         return TransferFunction(
             value_range=ValueRange(*message['range']),
             colors=[
-                Color(*color)
+                Color4(*color)
                 for color in message['colors']
             ]
         )

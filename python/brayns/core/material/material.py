@@ -22,8 +22,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TypeVar
 
-from brayns.core.common.color import Color
 from brayns.instance.instance import Instance
+from brayns.core.common.color3 import Color3
 
 T = TypeVar('T', bound='Material')
 
@@ -31,7 +31,7 @@ T = TypeVar('T', bound='Material')
 @dataclass
 class Material(ABC):
 
-    color: Color = Color.white
+    color: Color3 = Color3.white
 
     @classmethod
     @property
@@ -73,11 +73,11 @@ class Material(ABC):
     @classmethod
     def _from_dict(cls: type[T], message: dict, **kwargs) -> T:
         return cls(
-            color=Color(*message['color']),
+            color=Color3(*message['color']),
             **kwargs
         )
 
     def _to_dict(self, properties: dict) -> dict:
         return {
-            'color': list(self.color)[:3],
+            'color': list(self.color),
         } | properties
