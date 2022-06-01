@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: nadir.romanguerrero@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,8 +20,13 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/engine/scenecomponents/SceneModelManager.h>
 
-BRAYNS_JSON_OBJECT_BEGIN(AvailableUseCasesMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model holding an atlas volume")
-BRAYNS_JSON_OBJECT_END()
+#include <api/AtlasVolume.h>
+
+class ExtractAtlas
+{
+public:
+    static const AtlasVolume &fromId(brayns::SceneModelManager &modelManager, uint32_t id);
+    static const AtlasVolume &fromModel(brayns::Model &model);
+};

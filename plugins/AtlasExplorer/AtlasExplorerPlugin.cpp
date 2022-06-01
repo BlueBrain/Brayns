@@ -21,14 +21,28 @@
 #include "AtlasExplorerPlugin.h"
 
 #include <brayns/common/Log.h>
+#include <brayns/network/entrypoint/EntrypointBuilder.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <io/NRRDLoader.h>
+
+#include <network/entrypoints/AvailableUseCasesEntrypoint.h>
 
 void AtlasExplorerPlugin::init()
 {
     auto &registry = _api->getLoaderRegistry();
     registry.registerLoader(std::make_unique<NRRDLoader>());
+}
+
+void AtlasExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
+{
+    auto &engine = _api->getEngine();
+    auto &scene = engine.getScene();
+    auto &modelManager = scene.getModels();
+
+    auto builder = brayns::EntrypointBuilder("Atlas Explorer", interface);
+
+    builder.add<AvailableUseCasesEntrypoint>(modelManager);
 }
 
 extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)

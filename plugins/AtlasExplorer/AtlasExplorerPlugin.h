@@ -23,10 +23,12 @@
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 /**
- * @brief The DTIPlugin adds support to load a custom Diffusion-transfer-imaging data format to visualize whitematter
+ * @brief The AtlasExplorer plugin offer capabilities to visualize NRRD volumes, focusing on the
+ * AIBS/BBP Atlases
  */
-class AtlasExplorerPlugin : public brayns::ExtensionPlugin
+class AtlasExplorerPlugin final : public brayns::ExtensionPlugin
 {
 public:
-    void init() final;
+    void init() override;
+    void registerEntrypoints(brayns::INetworkInterface &interface) override;
 };

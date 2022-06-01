@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: nadir.romanguerrero@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,8 +20,19 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
-BRAYNS_JSON_OBJECT_BEGIN(AvailableUseCasesMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model holding an atlas volume")
-BRAYNS_JSON_OBJECT_END()
+#include <api/VisualizationUseCase.h>
+
+namespace brayns
+{
+BRAYNS_JSON_ADAPTER_ENUM(
+    VisualizationUseCase,
+    {"Outline shell mesh", VisualizationUseCase::OUTLINE_SHELL},
+    {"Orientation field", VisualizationUseCase::ORIENTATION_FIELD},
+    {"Density", VisualizationUseCase::DENSITY},
+    {"Layer distance", VisualizationUseCase::LAYER_DISTANCE},
+    {"Highlighted column", VisualizationUseCase::HIGHLIGHT_COLUMN},
+    {"Borders between areas with shared coordinates", VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_BORDERS},
+    {"Collage of areas with shared coordinates", VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_COLLAGE})
+}

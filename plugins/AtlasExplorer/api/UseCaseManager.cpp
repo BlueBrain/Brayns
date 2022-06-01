@@ -20,9 +20,13 @@
 
 #include "UseCaseManager.h"
 
+#include <api/usecases/AreaCollage.h>
 #include <api/usecases/Density.h>
+#include <api/usecases/HighlightColumn.h>
+#include <api/usecases/LayerDistance.h>
 #include <api/usecases/OrientationField.h>
 #include <api/usecases/OutlineShell.h>
+#include <api/usecases/SharedCoordinatesAreaBorders.h>
 
 namespace
 {
@@ -41,9 +45,13 @@ public:
 
 UseCaseManager::UseCaseManager()
 {
+    UseCaseRegisterer::registerUseCase<AreaCollage>(_useCases);
     UseCaseRegisterer::registerUseCase<Density>(_useCases);
+    UseCaseRegisterer::registerUseCase<HighlightColumn>(_useCases);
+    UseCaseRegisterer::registerUseCase<LayerDistance>(_useCases);
     UseCaseRegisterer::registerUseCase<OrientationField>(_useCases);
     UseCaseRegisterer::registerUseCase<OutlineShell>(_useCases);
+    UseCaseRegisterer::registerUseCase<SharedCoordinatesAreaBorders>(_useCases);
 }
 
 std::vector<VisualizationUseCase> UseCaseManager::getValidUseCasesForVolume(const AtlasVolume &volume) const

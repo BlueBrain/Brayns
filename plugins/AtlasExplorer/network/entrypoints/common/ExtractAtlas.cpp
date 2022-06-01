@@ -18,29 +18,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ExtractAtlas.h"
 
-#include <brayns/engine/scenecomponents/SceneModelManager.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/common/ExtractModel.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 
-#include <api/UseCaseManager.h>
+#include <components/AtlasComponent.h>
 
-#include <network/adapters/VisualizationUseCaseAdapter.h>
-#include <network/messages/AvailableUseCasesMessage.h>
-
-#include <vector>
-
-class AvailableUseCasesEntrypoint
-    : public brayns::Entrypoint<AvailableUseCasesMessage, std::vector<VisualizationUseCase>>
+const AtlasVolume &ExtractAtlas::fromId(brayns::SceneModelManager &modelManager, uint32_t id)
 {
-public:
-    AvailableUseCasesEntrypoint(brayns::SceneModelManager &modelManager);
+    auto &instance = brayns::ExtractModel::fromId(modelManager, id);
+    auto &model = instance.getModel();
+    return fromModel(model);
+}
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-
-private:
-    brayns::SceneModelManager &_modelManager;
-    UseCaseManager _useCases;
-};
+const AtlasVolume &ExtractAtlas::fromModel(brayns::Model &model)
+{
+    try
+    {
+        auto &component = model.getComponent<AtlasComponent>();
+        return component.getVolume();
+    }
+    catch (...)
+    {
+        throw brayns::InvalidParamsException("The requested model does not have an Atlas component");
+    }
+}
