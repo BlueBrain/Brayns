@@ -18,19 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "SharedCoordinatesAreaBorders.h"
 
-#include <brayns/engine/Model.h>
-#include <brayns/json/JsonType.h>
-
-#include <api/AtlasVolume.h>
-
-class IUseCase
+bool SharedCoordinatesAreaBorders::isVolumeValid(const AtlasVolume &volume) const
 {
-public:
-    virtual ~IUseCase() = default;
+    (void)volume;
+    return false;
+}
 
-    virtual bool isVolumeValid(const AtlasVolume &volume) const = 0;
+void SharedCoordinatesAreaBorders::execute(
+    const AtlasVolume &volume,
+    const brayns::JsonValue &payload,
+    brayns::Model &model) const
+{
+    (void)volume;
+    (void)payload;
+    (void)model;
 
-    virtual void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const = 0;
-};
+    throw std::runtime_error("Shared coordinates area borders use case not implemented");
+}

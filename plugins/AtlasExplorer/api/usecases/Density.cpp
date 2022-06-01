@@ -111,8 +111,10 @@ bool Density::isVolumeValid(const AtlasVolume &volume) const
     return volume.getVoxelSize() == 1;
 }
 
-void Density::execute(const AtlasVolume &volume, brayns::Model &model) const
+void Density::execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const
 {
+    (void)payload;
+
     const auto voxelSize = volume.getVoxelSize();
     if (voxelSize > 1)
     {

@@ -20,26 +20,15 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometries/Primitive.h>
+#include <api/IUseCase.h>
+#include <api/VisualizationUseCase.h>
 
-class VectorVolumeComponent final : public brayns::Component
+class AreaCollage : public IUseCase
 {
 public:
-    VectorVolumeComponent(
-        const brayns::Vector3ui &sizes,
-        const brayns::Vector3f &dimensions,
-        const std::vector<brayns::Vector3f> &vectors);
+    inline static const VisualizationUseCase Type = VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_COLLAGE;
 
-    brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
-
-    void onCreate() override;
-
-    bool commit() override;
-
-    void onDestroy() override;
-
-private:
-    OSPGeometricModel _model;
-    brayns::Geometry<brayns::Primitive> _geometry;
+public:
+    bool isVolumeValid(const AtlasVolume &volume) const override;
+    void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const override;
 };

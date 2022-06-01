@@ -28,11 +28,9 @@ enum class VisualizationUseCase
     ORIENTATION_FIELD,
     DENSITY,
     LAYER_DISTANCE,
-    XY_COLUMN,
-    XY_COLUMN_NEIGHBOURHOOD,
+    HIGHLIGHT_COLUMN,
     AREAS_WITH_SHARED_COORDINATES_BORDERS,
-    AREAS_WITH_SHARED_COORDINATES_COLLAGE,
-    COLORS,
+    AREAS_WITH_SHARED_COORDINATES_COLLAGE
 };
 
 namespace brayns
@@ -45,10 +43,8 @@ inline std::vector<std::pair<std::string, VisualizationUseCase>> enumMap()
         {"Orientation field", VisualizationUseCase::ORIENTATION_FIELD},
         {"Density", VisualizationUseCase::DENSITY},
         {"Layer distance", VisualizationUseCase::LAYER_DISTANCE},
-        {"2D coordinate column", VisualizationUseCase::XY_COLUMN},
-        {"2D coordinate column neighbourhood", VisualizationUseCase::XY_COLUMN_NEIGHBOURHOOD},
+        {"Highlighted column", VisualizationUseCase::HIGHLIGHT_COLUMN},
         {"Borders between areas with shared coordinates", VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_BORDERS},
-        {"Collage of areas with shared coordinates", VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_COLLAGE},
-        {"Colored voxels", VisualizationUseCase::COLORS}};
+        {"Collage of areas with shared coordinates", VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_COLLAGE}};
 }
 }

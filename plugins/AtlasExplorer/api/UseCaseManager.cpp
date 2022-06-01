@@ -62,7 +62,11 @@ std::vector<VisualizationUseCase> UseCaseManager::getValidUseCasesForVolume(cons
     return result;
 }
 
-void UseCaseManager::executeUseCase(VisualizationUseCase useCase, const AtlasVolume &volume, brayns::Model &model) const
+void UseCaseManager::executeUseCase(
+    VisualizationUseCase useCase,
+    const AtlasVolume &volume,
+    const brayns::JsonValue &payload,
+    brayns::Model &model) const
 {
     auto it = std::find_if(
         _useCases.begin(),
@@ -75,5 +79,5 @@ void UseCaseManager::executeUseCase(VisualizationUseCase useCase, const AtlasVol
     }
 
     const auto &handler = it->handler;
-    handler->execute(volume, model);
+    handler->execute(volume, payload, model);
 }

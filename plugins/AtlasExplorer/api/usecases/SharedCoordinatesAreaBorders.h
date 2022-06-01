@@ -20,17 +20,15 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
-#include <brayns/json/JsonType.h>
+#include <api/IUseCase.h>
+#include <api/VisualizationUseCase.h>
 
-#include <api/AtlasVolume.h>
-
-class IUseCase
+class SharedCoordinatesAreaBorders : public IUseCase
 {
 public:
-    virtual ~IUseCase() = default;
+    inline static const VisualizationUseCase Type = VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_BORDERS;
 
-    virtual bool isVolumeValid(const AtlasVolume &volume) const = 0;
-
-    virtual void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const = 0;
+public:
+    bool isVolumeValid(const AtlasVolume &volume) const override;
+    void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const override;
 };

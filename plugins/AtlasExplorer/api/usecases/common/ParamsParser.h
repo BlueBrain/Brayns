@@ -18,19 +18,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include <brayns/json/Json.h>
+#include <brayns/json/JsonSchemaValidator.h>
+#include <brayns/utils/StringUtils.h>
 
-#include <brayns/engine/Model.h>
-#include <brayns/json/JsonType.h>
-
-#include <api/AtlasVolume.h>
-
-class IUseCase
+class ParamsParser
 {
 public:
-    virtual ~IUseCase() = default;
+    template<typename T>
+    static T parse(const brayns::JsonValue &payload)
+    {
+        const auto schema = brayns::Json::getSchema<T>();
+        const auto errors = brayns::JsonSchemaValidator::validate(payload, schema);
 
-    virtual bool isVolumeValid(const AtlasVolume &volume) const = 0;
+        if (errors.empty())
+        {
+            return brayns::Json::deserialize<T>(payload);
+        }
 
-    virtual void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const = 0;
+        const auto formattedErrors = brayns::string_utils::join(errors, "\n");
+        throw std::invalid_argument("Could not parse use case parameters:\n" + formattedErrors);
+    }
 };

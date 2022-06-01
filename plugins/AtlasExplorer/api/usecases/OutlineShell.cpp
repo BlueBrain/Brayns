@@ -117,8 +117,9 @@ bool OutlineShell::isVolumeValid(const AtlasVolume &volume) const
     return true;
 }
 
-void OutlineShell::execute(const AtlasVolume &volume, brayns::Model &model) const
+void OutlineShell::execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const
 {
+    (void)payload;
     brayns::RegularVolume shellVolume = FeaturesExtractor::extract(volume);
 
     // model.addComponent<brayns::VolumeRendererComponent<brayns::RegularVolume>>(std::move(shellVolume));

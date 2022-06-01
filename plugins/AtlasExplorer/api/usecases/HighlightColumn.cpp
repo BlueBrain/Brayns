@@ -18,19 +18,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "HighlightColumn.h"
 
-#include <brayns/engine/Model.h>
-#include <brayns/json/JsonType.h>
+#include <api/usecases/common/ParamsParser.h>
 
-#include <api/AtlasVolume.h>
-
-class IUseCase
+namespace
+{
+class CoordinatesValidator
 {
 public:
-    virtual ~IUseCase() = default;
-
-    virtual bool isVolumeValid(const AtlasVolume &volume) const = 0;
-
-    virtual void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const = 0;
+    static void validate(const HighlighColumParams &params, const AtlasVolume &volume)
+    {
+        // const auto &size = volume.
+        const auto &mainCoords = params.xz_coordinate;
+    }
 };
+}
+
+bool HighlightColumn::isVolumeValid(const AtlasVolume &volume) const
+{
+    (void)volume;
+    return true;
+}
+
+void HighlightColumn::execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const
+{
+    const auto params = ParamsParser::parse<HighlighColumParams>(payload);
+}

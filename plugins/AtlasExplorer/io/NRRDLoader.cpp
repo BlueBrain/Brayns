@@ -77,7 +77,7 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
 
     // Generate initial visual
     callback.updateProgress("Generating visual", 0.8f);
-    OutlineShell().execute(component.getVolume(), *model);
+    OutlineShell().execute(component.getVolume(), {}, *model);
 
     callback.updateProgress("Done", 1.f);
     auto result = std::vector<std::unique_ptr<brayns::Model>>();

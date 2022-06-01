@@ -18,19 +18,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "LayerDistance.h"
 
-#include <brayns/engine/Model.h>
-#include <brayns/json/JsonType.h>
-
-#include <api/AtlasVolume.h>
-
-class IUseCase
+bool LayerDistance::isVolumeValid(const AtlasVolume &volume) const
 {
-public:
-    virtual ~IUseCase() = default;
+    (void)volume;
+    return false;
+}
 
-    virtual bool isVolumeValid(const AtlasVolume &volume) const = 0;
+void LayerDistance::execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const
+{
+    (void)volume;
+    (void)payload;
+    (void)model;
 
-    virtual void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const = 0;
-};
+    throw std::runtime_error("Layer distance use case not implemented");
+}

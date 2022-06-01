@@ -40,7 +40,11 @@ public:
 
     std::vector<VisualizationUseCase> getValidUseCasesForVolume(const AtlasVolume &volume) const;
 
-    void executeUseCase(VisualizationUseCase useCase, const AtlasVolume &volume, brayns::Model &model) const;
+    void executeUseCase(
+        VisualizationUseCase useCase,
+        const AtlasVolume &volume,
+        const brayns::JsonValue &payload,
+        brayns::Model &model) const;
 
 private:
     std::vector<UseCaseEntry> _useCases;

@@ -30,5 +30,5 @@ public:
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;
-    void execute(const AtlasVolume &volume, brayns::Model &model) const override;
+    void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const override;
 };
