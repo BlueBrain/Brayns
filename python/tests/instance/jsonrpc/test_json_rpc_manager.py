@@ -18,73 +18,53 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import json
+import logging
 import unittest
 
+from brayns.instance.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
+from brayns.instance.jsonrpc.json_rpc_handler import JsonRpcHandler
 from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
+from brayns.instance.jsonrpc.json_rpc_tasks import JsonRpcTasks
 from brayns.instance.request_error import RequestError
-from brayns.instance.request_progress import RequestProgress
 
 
 class TestJsonRpcManager(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._manager = JsonRpcManager()
+        logger = logging.root
+        self._tasks = JsonRpcTasks()
+        self._handler = JsonRpcHandler(self._tasks, logger)
+        self._dispatcher = JsonRpcDispatcher(self._handler)
+        self._manager = JsonRpcManager(logger, self._tasks, self._dispatcher)
 
-    def test_len(self) -> None:
-        self.assertEqual(len(self._manager), 0)
-        self._manager.add_task(0)
-        self._manager.add_task('0')
-        self.assertEqual(len(self._manager), 2)
+    def test_is_running(self) -> None:
+        self._manager.create_task(0)
+        self.assertTrue(self._manager.is_running(0))
+        self.assertFalse(self._manager.is_running(1))
 
-    def test_iter(self) -> None:
-        tasks = {id: self._manager.add_task(id) for id in range(3)}
-        for id, task in self._manager:
-            self.assertFalse(task.is_ready())
-            self.assertIn(id, tasks)
-
-    def test_contains(self) -> None:
-        self._manager.add_task(0)
-        self.assertIn(0, self._manager)
-
-    def test_get_task(self) -> None:
-        self._manager.add_task(0)
-        self.assertIsNotNone(self._manager.get_task(0))
-        self.assertIsNone(self._manager.get_task(1))
-
-    def test_add_task(self) -> None:
-        task = self._manager.add_task(0)
-        self.assertFalse(task.is_ready())
-
-    def test_cancel_all_tasks(self) -> None:
-        tasks = [self._manager.add_task(i) for i in range(3)]
-        self._manager.cancel_all_tasks()
-        self.assertEqual(len(self._manager), 0)
-        for task in tasks:
-            with self.assertRaises(RequestError):
-                task.get_result()
-
-    def test_set_result(self) -> None:
-        result = 123
-        task = self._manager.add_task(0)
-        self._manager.set_result(0, result)
-        self.assertEqual(len(self._manager), 0)
-        self.assertEqual(task.get_result(), result)
-
-    def test_set_error(self) -> None:
-        error = RequestError('test', 0, 123)
-        task = self._manager.add_task(0)
-        self._manager.set_error(0, error)
-        self.assertEqual(len(self._manager), 0)
-        with self.assertRaises(RequestError) as context:
+    def test_clear(self) -> None:
+        task = self._manager.create_task(0)
+        self._manager.clear()
+        with self.assertRaises(RequestError):
             task.get_result()
-        self.assertEqual(context.exception, error)
+        self.assertEqual(len(self._tasks), 0)
 
-    def test_add_progress(self) -> None:
-        progress = RequestProgress('test', 0.5)
-        task = self._manager.add_task(0)
-        self._manager.add_progress(0, progress)
-        self.assertTrue(task.has_progress())
-        self.assertEqual(task.get_progress(), progress)
+    def test_create_task(self) -> None:
+        self._manager.create_task(0)
+        self.assertEqual(len(self._tasks), 1)
+        self._manager.create_task(None)
+        self.assertEqual(len(self._tasks), 1)
+
+    def test_process_message(self) -> None:
+        task = self._manager.create_task(0)
+        reply = {
+            'id': 0,
+            'result': 123
+        }
+        self._manager.process_message(json.dumps(reply))
+        self.assertEqual(task.get_result(), 123)
+        self.assertEqual(len(self._tasks), 0)
 
 
 if __name__ == '__main__':

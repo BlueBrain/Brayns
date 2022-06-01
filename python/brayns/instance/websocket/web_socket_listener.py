@@ -1,8 +1,7 @@
-# Copyright (c) 2015-2022, Blue Brain Project
-#                          Raphael Dumusc <raphael.dumusc@epfl.ch>
-#                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
-#                          Cyrille Favreau <cyrille.favreau@epfl.ch>
-#                          Nadir Roman <nadir.romanguerrero@epfl.ch>
+# Copyright (c) 2015-2022 EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+#
+# Responsible Author: adrien.fleury@epfl.ch
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,11 +17,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# All rights reserved. Do not distribute without further notice.
 
-websockets~=10.3
-Pillow~=9.1.1
-PySimpleGUI~=4.60.0
-Sphinx~=2.0.0
-nbsphinx~=0.7.1
-sphinx-bluebrain-theme~=0.2.2
+from typing import Protocol
+
+
+class WebSocketListener(Protocol):
+
+    def on_binary(self, data: bytes) -> None:
+        pass
+
+    def on_text(self, data: str) -> None:
+        pass

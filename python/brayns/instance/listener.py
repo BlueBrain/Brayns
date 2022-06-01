@@ -18,36 +18,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
+from typing import Callable
 
-from brayns.instance.websocket.web_socket import WebSocket
+from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
-class MockWebSocket(WebSocket):
+class Listener(WebSocketListener):
 
-    def __init__(self, listener: WebSocketListener) -> None:
-        self.binary_request = b''
-        self.binary_reply = b''
-        self.text_request = ''
-        self.text_reply = ''
-        self._listener = listener
-        self._closed = False
+    def __init__(self, logger: logging.Logger, on_binary: Callable[[bytes], None], manager: JsonRpcManager) -> None:
+        self._logger = logger
+        self._manager = manager
+        self._on_binary = on_binary
 
-    @property
-    def closed(self) -> bool:
-        return self._closed
+    def on_binary(self, data: bytes) -> None:
+        self._logger.info('Binary frame received of %d bytes.', len(data))
+        self._on_binary(data)
 
-    def close(self) -> None:
-        self._closed = True
-
-    def poll(self, *_) -> None:
-        if self.binary_reply:
-            self._listener.on_binary(self.binary_reply)
-        if self.text_reply:
-            self._listener.on_text(self.text_reply)
-
-    def send_binary(self, data: bytes) -> None:
-        self.binary_request = data
-
-    def send_text(self, data: str) -> None:
-        self.text_request = data
+    def on_text(self, data: str) -> None:
+        self._logger.info('Text frame received: "%s".', data)
+        self._manager.process_message(data)

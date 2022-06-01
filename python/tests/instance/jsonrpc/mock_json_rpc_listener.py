@@ -18,32 +18,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import asyncio
-import threading
-from concurrent.futures import Future
-from typing import Any, Coroutine, TypeVar
+from typing import Any
 
-T = TypeVar('T')
+from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
+from brayns.instance.jsonrpc.json_rpc_progress import JsonRpcProgress
+from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
 
 
-class EventLoop:
+class MockJsonRpcListener:
 
     def __init__(self) -> None:
-        self._loop = asyncio.new_event_loop()
-        self._thread = threading.Thread(
-            target=self._loop.run_forever,
-            daemon=True
-        )
-        self._thread.start()
+        self._called = False
+        self._data = None
 
-    @property
-    def closed(self) -> bool:
-        return self._loop.is_closed()
+    def get_data(self) -> Any:
+        assert self._called
+        return self._data
 
-    def close(self) -> None:
-        self._loop.call_soon_threadsafe(self._loop.stop)
-        self._thread.join()
-        self._loop.close()
+    def on_reply(self, reply: JsonRpcReply) -> None:
+        self._set_data(reply)
 
-    def run(self, coroutine: Coroutine[Any, Any, T]) -> Future[T]:
-        return asyncio.run_coroutine_threadsafe(coroutine, self._loop)
+    def on_error(self, error: JsonRpcError) -> None:
+        self._set_data(error)
+
+    def on_progress(self, progress: JsonRpcProgress) -> None:
+        self._set_data(progress)
+
+    def on_invalid_message(self, data: str, e: Exception) -> None:
+        self._set_data((data, e))
+
+    def _set_data(self, data: Any) -> None:
+        assert not self._called
+        self._called = True
+        self._data = data

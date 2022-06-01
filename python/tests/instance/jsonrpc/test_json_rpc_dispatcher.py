@@ -25,19 +25,14 @@ from brayns.instance.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
 from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
 from brayns.instance.jsonrpc.json_rpc_progress import JsonRpcProgress
 from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
-from tests.instance.jsonrpc.mock_json_rpc_protocol import MockJsonRpcProtocol
+from tests.instance.jsonrpc.mock_json_rpc_listener import MockJsonRpcListener
 
 
 class TestJsonRpcDispatcher(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._protocol = MockJsonRpcProtocol()
-        self._dispatcher = JsonRpcDispatcher(self._protocol)
-
-    def test_dispatch_binary(self) -> None:
-        data = b'test'
-        self._dispatcher.dispatch(data)
-        self.assertEqual(self._protocol.get_data(), data)
+        self._listener = MockJsonRpcListener()
+        self._dispatcher = JsonRpcDispatcher(self._listener)
 
     def test_dispatch_reply(self) -> None:
         reply = {
@@ -45,10 +40,9 @@ class TestJsonRpcDispatcher(unittest.TestCase):
             'result': [1, 2, 3]
         }
         self._dispatcher.dispatch(json.dumps(reply))
-        self.assertEqual(
-            self._protocol.get_data(),
-            JsonRpcReply.from_dict(reply)
-        )
+        test = self._listener.get_data()
+        ref = JsonRpcReply.from_dict(reply)
+        self.assertEqual(test, ref)
 
     def test_dispatch_error(self) -> None:
         error = {
@@ -59,10 +53,9 @@ class TestJsonRpcDispatcher(unittest.TestCase):
             }
         }
         self._dispatcher.dispatch(json.dumps(error))
-        self.assertEqual(
-            self._protocol.get_data(),
-            JsonRpcError.from_dict(error)
-        )
+        test = self._listener.get_data()
+        ref = JsonRpcError.from_dict(error)
+        self.assertEqual(test, ref)
 
     def test_dispatch_progress(self) -> None:
         progress = {
@@ -73,15 +66,14 @@ class TestJsonRpcDispatcher(unittest.TestCase):
             }
         }
         self._dispatcher.dispatch(json.dumps(progress))
-        self.assertEqual(
-            self._protocol.get_data(),
-            JsonRpcProgress.from_dict(progress)
-        )
+        test = self._listener.get_data()
+        ref = JsonRpcProgress.from_dict(progress)
+        self.assertEqual(test, ref)
 
     def test_dispatch_invalid_frame(self) -> None:
         invalid_frame = 'sdfbxcbxbcv'
         self._dispatcher.dispatch(invalid_frame)
-        data, e = self._protocol.get_data()
+        data, e = self._listener.get_data()
         self.assertEqual(data, invalid_frame)
         self.assertIsInstance(e, Exception)
 

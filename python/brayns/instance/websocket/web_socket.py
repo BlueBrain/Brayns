@@ -18,7 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Protocol, Union
+from typing import Optional, Protocol
 
 
 class WebSocket(Protocol):
@@ -31,13 +31,16 @@ class WebSocket(Protocol):
 
     @property
     def closed(self) -> bool:
-        return False
-
-    def close(self) -> None:
-        pass
-
-    def receive(self) -> Union[bytes, str]:
         raise NotImplementedError()
 
-    def send(self, data: Union[bytes, str]) -> None:
+    def close(self) -> None:
+        raise NotImplementedError()
+
+    def poll(self, block: bool = True, timeout: Optional[float] = None) -> None:
+        raise NotImplementedError()
+
+    def send_binary(self, data: bytes) -> None:
+        raise NotImplementedError()
+
+    def send_text(self, data: str) -> None:
         raise NotImplementedError()

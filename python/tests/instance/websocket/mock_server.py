@@ -19,67 +19,39 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import ssl
-from typing import Optional
+import threading
+from typing import Optional, Union
 
 import websockets
 from brayns.instance.websocket.event_loop import EventLoop
 
 
-class EchoServer:
-
-    @staticmethod
-    def start(
-        uri: str,
-        certfile: Optional[str] = None,
-        keyfile: Optional[str] = None,
-        password: Optional[str] = None
-    ) -> 'EchoServer':
-        loop = EventLoop()
-        return EchoServer(
-            websocket=loop.run(
-                EchoServer._start(uri, certfile, keyfile, password)
-            ).result(),
-            loop=loop
-        )
-
-    @staticmethod
-    async def _echo(websocket: websockets.WebSocketServerProtocol, _) -> None:
-        try:
-            data = await websocket.recv()
-            await websocket.send(data)
-        except Exception:
-            pass
-
-    @staticmethod
-    async def _start(
-        uri: str,
-        certfile: Optional[str] = None,
-        keyfile: Optional[str] = None,
-        password: Optional[str] = None
-    ) -> websockets.WebSocketServer:
-        host, port = uri.split(':')
-        context = None
-        if certfile is not None:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            context.load_cert_chain(certfile, keyfile, password)
-        return await websockets.serve(
-            ws_handler=EchoServer._echo,
-            host=host,
-            port=int(port),
-            ssl=context,
-            ping_interval=None,
-            close_timeout=0
-        )
+class MockServer:
 
     def __init__(
         self,
-        websocket: websockets.WebSocketServer,
-        loop: EventLoop
+        uri: str,
+        receive: bool = False,
+        reply: Optional[Union[bytes, str]] = None,
+        certfile: Optional[str] = None,
+        keyfile: Optional[str] = None,
+        password: Optional[str] = None
     ) -> None:
-        self._websocket = websocket
-        self._loop = loop
+        self._receive = receive
+        self._reply = reply
+        self._request = None
+        self._loop = EventLoop()
+        self._condition = threading.Condition()
+        self._websocket = self._loop.run(
+            self._start(
+                uri=uri,
+                certfile=certfile,
+                keyfile=keyfile,
+                password=password
+            )
+        ).result()
 
-    def __enter__(self) -> 'EchoServer':
+    def __enter__(self) -> 'MockServer':
         return self
 
     def __exit__(self, *_) -> None:
@@ -91,3 +63,43 @@ class EchoServer:
             self._websocket.wait_closed()
         ).result()
         self._loop.close()
+
+    def wait_for_request(self) -> Optional[Union[bytes, str]]:
+        with self._condition:
+            if self._request is not None:
+                return self._request
+            if not self._condition.wait(timeout=1):
+                raise RuntimeError('Request timeout')
+        return self._request
+
+    async def _start(
+        self,
+        uri: str,
+        certfile: Optional[str] = None,
+        keyfile: Optional[str] = None,
+        password: Optional[str] = None
+    ) -> websockets.WebSocketServer:
+        host, port = uri.split(':')
+        context = None
+        if certfile is not None:
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            context.load_cert_chain(certfile, keyfile, password)
+        return await websockets.serve(
+            ws_handler=self._handle_connection,
+            host=host,
+            port=int(port),
+            ssl=context,
+            ping_interval=None,
+            close_timeout=0
+        )
+
+    async def _handle_connection(self, websocket: websockets.WebSocketServerProtocol, _) -> None:
+        try:
+            if self._receive:
+                self._request = await websocket.recv()
+            if self._reply is not None:
+                await websocket.send(self._reply)
+        except Exception:
+            pass
+        with self._condition:
+            self._condition.notify_all()

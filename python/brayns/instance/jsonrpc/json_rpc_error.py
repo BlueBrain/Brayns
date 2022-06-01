@@ -19,15 +19,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Union
+from typing import Optional
 
+from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.request_error import RequestError
 
 
 @dataclass
 class JsonRpcError:
 
-    id: Union[int, str, None]
+    id: Optional[JsonRpcId]
     error: RequestError
 
     @staticmethod
@@ -41,6 +42,3 @@ class JsonRpcError:
                 data=error.get('data')
             )
         )
-
-    def is_global(self) -> bool:
-        return self.id is None

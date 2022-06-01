@@ -19,11 +19,19 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.instance.instance import Instance
+from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
+from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
 from brayns.instance.request_error import RequestError
+from brayns.instance.request_future import RequestFuture
+from brayns.instance.request_progress import RequestProgress
 from brayns.instance.websocket.web_socket_error import WebSocketError
 
 __all__ = [
     'Instance',
+    'JsonRpcId',
+    'JsonRpcRequest',
+    'RequestFuture',
+    'RequestProgress',
     'RequestError',
     'WebSocketError'
 ]

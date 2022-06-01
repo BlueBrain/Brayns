@@ -19,13 +19,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any, Union
+from typing import Any
+
+from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 
 
 @dataclass
 class JsonRpcReply:
 
-    id: Union[int, str]
+    id: JsonRpcId
     result: Any
 
     @staticmethod

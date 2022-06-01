@@ -19,11 +19,14 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import ssl
+from concurrent.futures import Future
 from typing import Optional, Union
 
 from brayns.instance.websocket.async_web_socket import AsyncWebSocket
 from brayns.instance.websocket.event_loop import EventLoop
 from brayns.instance.websocket.web_socket import WebSocket
+from brayns.instance.websocket.web_socket_error import WebSocketError
+from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
 class WebSocketClient(WebSocket):
@@ -31,6 +34,7 @@ class WebSocketClient(WebSocket):
     @staticmethod
     def connect(
         uri: str,
+        listener: WebSocketListener,
         secure: bool = False,
         cafile: Optional[str] = None
     ) -> 'WebSocketClient':
@@ -40,15 +44,22 @@ class WebSocketClient(WebSocket):
         websocket = loop.run(
             AsyncWebSocket.connect(uri, context)
         ).result()
-        return WebSocketClient(websocket, loop)
+        task = loop.run(
+            websocket.run()
+        )
+        return WebSocketClient(websocket, loop, task, listener)
 
     def __init__(
         self,
         websocket: AsyncWebSocket,
-        loop: EventLoop
+        loop: EventLoop,
+        task: Future[None],
+        listener: WebSocketListener
     ) -> None:
         self._websocket = websocket
         self._loop = loop
+        self._task = task
+        self._listener = listener
 
     @property
     def closed(self) -> bool:
@@ -58,14 +69,28 @@ class WebSocketClient(WebSocket):
         self._loop.run(
             self._websocket.close()
         ).result()
+        self._task.result()
         self._loop.close()
 
-    def receive(self) -> Union[bytes, str]:
-        return self._loop.run(
-            self._websocket.receive()
-        ).result()
+    def poll(self, block: bool = True, timeout: Optional[float] = None) -> None:
+        data = self._websocket.poll(block, timeout)
+        if data is None:
+            return
+        if isinstance(data, bytes):
+            self._listener.on_binary(data)
+            return
+        if isinstance(data, str):
+            self._listener.on_text(data)
+            return
+        raise WebSocketError(f'Invalid packet type {type(data)}')
 
-    def send(self, data: Union[bytes, str]) -> None:
+    def send_binary(self, data: bytes) -> None:
+        self._send(data)
+
+    def send_text(self, data: str) -> None:
+        self._send(data)
+
+    def _send(self, data: Union[bytes, str]) -> None:
         self._loop.run(
             self._websocket.send(data)
         ).result()

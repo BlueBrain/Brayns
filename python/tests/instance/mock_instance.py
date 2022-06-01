@@ -21,6 +21,7 @@
 from typing import Any
 
 from brayns.instance.instance import Instance
+from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
 from brayns.instance.request_future import RequestFuture
 
 
@@ -31,7 +32,7 @@ class MockInstance(Instance):
         self.method = ''
         self.params = None
 
-    def task(self, method: str, params: Any = None) -> RequestFuture:
-        self.method = method
-        self.params = params
+    def send(self, request: JsonRpcRequest) -> RequestFuture:
+        self.method = request.method
+        self.params = request.params
         return RequestFuture.from_result(self.reply)

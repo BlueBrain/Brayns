@@ -20,12 +20,13 @@
 
 import logging
 import sys
-from typing import Optional
+from typing import Callable, Optional
 
 from brayns.core.version import Version
 from brayns.instance.client import Client
 from brayns.instance.instance import Instance
-from brayns.instance.jsonrpc.json_rpc_client import JsonRpcClient
+from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
+from brayns.instance.listener import Listener
 from brayns.instance.websocket.web_socket_client import WebSocketClient
 from brayns.version import DEV_VERSION, __version__
 
@@ -34,16 +35,17 @@ def connect(
     uri: str,
     secure: bool = False,
     cafile: Optional[str] = None,
+    on_binary: Callable[[bytes], None] = lambda _: None,
     log_level: int = logging.WARN,
     log_handler: Optional[logging.Handler] = None
 ) -> Instance:
-    logger = _get_logger(log_level, log_handler)
-    client = _connect(uri, secure, cafile, logger)
+    logger = _create_logger(log_level, log_handler)
+    client = _connect(uri, secure, cafile, on_binary, logger)
     _check_version(client, logger)
     return client
 
 
-def _get_logger(level: int = logging.WARN, handler: Optional[logging.Handler] = None) -> logging.Logger:
+def _create_logger(level: int = logging.WARN, handler: Optional[logging.Handler] = None) -> logging.Logger:
     logger = logging.Logger('Brayns', logging.WARN)
     logger.setLevel(level)
     if handler is None:
@@ -55,11 +57,17 @@ def _get_logger(level: int = logging.WARN, handler: Optional[logging.Handler] = 
     return logger
 
 
-def _connect(uri: str, secure: bool, cafile: Optional[str], logger: logging.Logger) -> Instance:
-    logger.info('Connecting to instance at %s.', uri)
-    websocket = WebSocketClient.connect(uri, secure, cafile)
-    json_rpc_client = JsonRpcClient(websocket, logger)
-    return Client(json_rpc_client)
+def _connect(
+    uri: str,
+    secure: bool,
+    cafile: Optional[str],
+    on_binary: Callable[[bytes], None],
+    logger: logging.Logger
+) -> Client:
+    manager = JsonRpcManager.create(logger)
+    listener = Listener(logger, on_binary, manager)
+    websocket = WebSocketClient.connect(uri, listener, secure, cafile)
+    return Client(websocket, logger, manager)
 
 
 def _check_version(instance: Instance, logger: logging.Logger) -> None:
