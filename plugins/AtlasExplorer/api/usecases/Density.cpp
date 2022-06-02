@@ -95,6 +95,7 @@ private:
         result.dataType = type;
         result.data = DataToBytes::convert(values);
         result.minMax = _castMinMax(minMax);
+        std::cout << result.minMax << std::endl;
         return result;
     }
 
@@ -132,8 +133,8 @@ std::unique_ptr<brayns::Model> Density::execute(const AtlasVolume &volume, const
     auto model = std::make_unique<brayns::Model>();
     model->addComponent<brayns::VolumeRendererComponent<brayns::RegularVolume>>(std::move(densityVolume));
 
-    auto &transferFunction = brayns::ExtractModelObject::extractTransferFunction(*model);
-    transferFunction.setValuesRange(densityData.minMax);
+    // auto &transferFunction = brayns::ExtractModelObject::extractTransferFunction(*model);
+    // transferFunction.setValuesRange(densityData.minMax);
 
     return model;
 }

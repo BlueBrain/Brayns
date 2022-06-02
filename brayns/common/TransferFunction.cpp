@@ -28,12 +28,9 @@
 namespace brayns
 {
 TransferFunction::TransferFunction()
+    : _colors({{0, 0, 0, 0}, {1, 1, 1, 1}})
+    , _valuesRange({0, 255})
 {
-    // Default trasnfer function status:
-    // - Range 0 - 1
-    // - Colors: Grayscale from black to white
-    _colors = {{0, 0, 0, 0}, {1, 1, 1, 1}};
-    _valuesRange = {0, 255};
 }
 
 const std::vector<brayns::Vector4f> &TransferFunction::getColors() const

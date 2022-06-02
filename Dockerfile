@@ -23,6 +23,8 @@ RUN apt-get update \
    wget \
    ca-certificates \
    libssl-dev \
+   zlib1g-dev \
+   libbz2-dev \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -164,6 +166,7 @@ RUN cd ${BRAYNS_SRC} \
    -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
    -DBRAYNS_CIRCUITINFO_ENABLED=ON \
    -DBRAYNS_DTI_ENABLED=ON \
+   -DBRAYNS_ATLASEXPLORER_ENABLED=ON \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
 
