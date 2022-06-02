@@ -75,7 +75,13 @@ std::vector<float> SpikeData::getFrame(const uint32_t frameIndex) const
     {
         const auto &spike = spikes[i];
         const auto gid = spike.second;
-        const auto index = _mapping.at(gid);
+        const auto it = _mapping.find(gid);
+        if (it == _mapping.end())
+        {
+            continue;
+        }
+
+        const auto index = it->second;
         const auto spikeTime = spike.first;
 
         values[index] = _spikeCalculator.compute(spikeTime, frameTime);
