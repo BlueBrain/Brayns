@@ -56,20 +56,20 @@ class JsonRpcDispatcher:
     def _dispatch_error(self, message: dict) -> bool:
         if 'error' not in message:
             return False
-        error = JsonRpcError.from_dict(message)
+        error = JsonRpcError.deserialize(message)
         self._listener.on_error(error)
         return True
 
     def _dispatch_reply(self, message: dict) -> bool:
         if 'result' not in message:
             return False
-        reply = JsonRpcReply.from_dict(message)
+        reply = JsonRpcReply.deserialize(message)
         self._listener.on_reply(reply)
         return True
 
     def _dispatch_progress(self, message: dict) -> bool:
         if 'id' in message:
             return False
-        progress = JsonRpcProgress.from_dict(message)
+        progress = JsonRpcProgress.deserialize(message)
         self._listener.on_progress(progress)
         return True

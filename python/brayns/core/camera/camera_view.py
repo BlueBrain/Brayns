@@ -44,6 +44,10 @@ class CameraView:
             up=Vector3(*message['up'])
         )
 
+    @property
+    def direction(self) -> Vector3:
+        return self.target - self.position
+
     def use_for_main_camera(self, instance: Instance) -> None:
         params = self.serialize()
         instance.request('set-camera-look-at', params)

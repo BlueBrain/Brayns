@@ -50,6 +50,13 @@ class TestCameraView(unittest.TestCase):
         test = CameraView.deserialize(self._message)
         self.assertEqual(test, self._view)
 
+    def test_direction(self) -> None:
+        test = CameraView(
+            position=Vector3.zero,
+            target=Vector3.one
+        )
+        self.assertEqual(test.direction, Vector3.one)
+
     def test_use_for_main_camera(self) -> None:
         instance = MockInstance()
         self._view.use_for_main_camera(instance)
