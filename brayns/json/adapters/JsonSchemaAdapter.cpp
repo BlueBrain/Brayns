@@ -31,12 +31,10 @@
 
 namespace
 {
-using namespace brayns;
-
 class JsonSchemaSerializer
 {
 public:
-    static void serialize(const JsonSchema &schema, JsonObject &object)
+    static void serialize(const brayns::JsonSchema &schema, brayns::JsonObject &object)
     {
         setIfNotEmpty(object, "oneOf", schema.oneOf);
         setIfNotEmpty(object, "title", schema.title);
@@ -51,22 +49,22 @@ public:
         setIfNotEmpty(object, "properties", schema.properties);
         setIfNotEmpty(object, "required", schema.required);
         setAdditionalProperties(object, "additionalProperties", schema);
-        setAsTuple(object, "items", schema.items);
+        setItems(object, "items", schema.items);
         setIfNotNull(object, "minItems", schema.minItems);
         setIfNotNull(object, "maxItems", schema.maxItems);
     }
 
 private:
-    static void setType(JsonObject &object, const std::string &key, JsonType type)
+    static void setType(brayns::JsonObject &object, const std::string &key, brayns::JsonType type)
     {
-        if (type == JsonType::Unknown)
+        if (type == brayns::JsonType::Unknown)
         {
             return;
         }
         set(object, key, type);
     }
 
-    static void setIfNotEmpty(JsonObject &object, const std::string &key, const JsonValue &value)
+    static void setIfNotEmpty(brayns::JsonObject &object, const std::string &key, const brayns::JsonValue &value)
     {
         if (value.isEmpty())
         {
@@ -75,9 +73,10 @@ private:
         set(object, key, value);
     }
 
-    static void setAdditionalProperties(JsonObject &object, const std::string &key, const JsonSchema &value)
+    static void
+        setAdditionalProperties(brayns::JsonObject &object, const std::string &key, const brayns::JsonSchema &value)
     {
-        if (value.type != JsonType::Object)
+        if (value.type != brayns::JsonType::Object)
         {
             return;
         }
@@ -87,27 +86,32 @@ private:
             set(object, key, false);
             return;
         }
-        if (additionalProperties.size() > 1)
-        {
-            set(object, key, additionalProperties);
-            return;
-        }
         auto &schema = additionalProperties[0];
-        if (JsonSchemaHelper::isWildcard(schema))
+        if (brayns::JsonSchemaHelper::isWildcard(schema))
         {
             return;
         }
         set(object, key, schema);
     }
 
-    template<typename T>
-    static void set(JsonObject &object, const std::string &key, const T &value)
+    static void
+        setItems(brayns::JsonObject &object, const std::string &key, const std::vector<brayns::JsonSchema> &value)
     {
-        object.set(key, Json::serialize(value));
+        if (value.empty())
+        {
+            return;
+        }
+        set(object, key, value[0]);
     }
 
     template<typename T>
-    static void setIfNotNull(JsonObject &object, const std::string &key, const T &value)
+    static void set(brayns::JsonObject &object, const std::string &key, const T &value)
+    {
+        object.set(key, brayns::Json::serialize(value));
+    }
+
+    template<typename T>
+    static void setIfNotNull(brayns::JsonObject &object, const std::string &key, const T &value)
     {
         if (!value)
         {
@@ -117,25 +121,10 @@ private:
     }
 
     template<typename T>
-    static void setIfNotEmpty(JsonObject &object, const std::string &key, const T &value)
+    static void setIfNotEmpty(brayns::JsonObject &object, const std::string &key, const T &value)
     {
         if (value.empty())
         {
-            return;
-        }
-        set(object, key, value);
-    }
-
-    template<typename T>
-    static void setAsTuple(JsonObject &object, const std::string &key, const T &value)
-    {
-        if (value.empty())
-        {
-            return;
-        }
-        if (value.size() == 1)
-        {
-            set(object, key, value[0]);
             return;
         }
         set(object, key, value);
@@ -145,7 +134,7 @@ private:
 class JsonSchemaDeserializer
 {
 public:
-    static void deserialize(const JsonObject &object, JsonSchema &schema)
+    static void deserialize(const brayns::JsonObject &object, brayns::JsonSchema &schema)
     {
         get(object, "oneOf", schema.oneOf);
         get(object, "title", schema.title);
@@ -167,10 +156,10 @@ public:
 
 private:
     template<typename T>
-    static void get(const JsonObject &object, const std::string &key, T &value)
+    static void get(const brayns::JsonObject &object, const std::string &key, T &value)
     {
         auto json = object.get(key);
-        Json::deserialize(json, value);
+        brayns::Json::deserialize(json, value);
     }
 };
 } // namespace

@@ -25,8 +25,8 @@ from brayns.instance.jsonrpc.json_rpc_progress import JsonRpcProgress
 
 class TestJsonRpcProgress(unittest.TestCase):
 
-    def test_from_dict(self) -> None:
-        progress = JsonRpcProgress.from_dict({
+    def test_deserialize(self) -> None:
+        progress = JsonRpcProgress.deserialize({
             'params': {
                 'id': 1,
                 'operation': 'test',

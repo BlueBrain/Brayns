@@ -18,6 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from brayns.core.api import *
 from brayns.core.application import *
 from brayns.core.camera import *
 from brayns.core.clipping import *

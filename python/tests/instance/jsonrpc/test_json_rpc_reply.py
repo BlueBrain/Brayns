@@ -25,8 +25,8 @@ from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
 
 class TestJsonRpcReply(unittest.TestCase):
 
-    def test_from_dict(self) -> None:
-        reply = JsonRpcReply.from_dict({
+    def test_deserialize(self) -> None:
+        reply = JsonRpcReply.deserialize({
             'id': 1,
             'result': 12
         })

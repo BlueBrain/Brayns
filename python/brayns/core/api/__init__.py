@@ -18,21 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any
+from brayns.core.api.entrypoint import Entrypoint
+from brayns.core.api.json_schema import JsonSchema
+from brayns.core.api.json_type import JsonType
 
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
-
-
-@dataclass
-class JsonRpcReply:
-
-    id: JsonRpcId
-    result: Any
-
-    @staticmethod
-    def deserialize(message: dict) -> 'JsonRpcReply':
-        return JsonRpcReply(
-            id=message['id'],
-            result=message['result']
-        )
+__all__ = [
+    'Entrypoint',
+    'JsonSchema',
+    'JsonType'
+]
