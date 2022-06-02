@@ -35,13 +35,47 @@ available.
 Other plugins like CircuitExplorer or DTI might register additional entrypoints
 but they must be loaded when starting the renderer instance to be available.
 
-The functions below are generated using the entrypoints of the Core plugin.
+All entrypoints use a JSON-RPC protocol with the following scheme:
 
-All arguments are keyword arguments extracted from the entrypoint params.
+Request:
+{
+    "jsonrpc": "2.0",
+    "id": 123,
+    "method": "name",
+    "params": {
+        "field": 456
+    }
+}
 
-Renderer errors will be raised with an instance of brayns.ReplyError. This one
-can be used to extract error code, description and some optional additional data
-(mainly used to store JSON errors).
+Reply:
+{
+    "jsonrpc": "2.0",
+    "id": 123,
+    "result": {
+        "another_field": 789
+    }
+}
+
+Error:
+{
+    "jsonrpc": "2.0",
+    "id": 123,
+    "error": {
+        "code": 30,
+        "message": "An error occured",
+        "data": "Optional additional data"
+    }
+}
+
+Notification (progress):
+{
+    "jsonrpc": "2.0",
+    "params": {
+        "id": 123,
+        "operation": "Loading stuff",
+        "amount": 0.5
+    }
+}
 '''.strip()
 
 
