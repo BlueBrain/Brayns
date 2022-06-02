@@ -84,9 +84,14 @@ std::vector<float> SonataSpikeData::getFrame(const uint32_t frameIndex) const
     for (size_t i = 0; i < spikes.size(); ++i)
     {
         const auto &spike = spikes[i];
-        const auto gid = spike.first;
+        const auto nodeId = spike.first;
         const auto spikeTime = spike.second;
-        const auto index = _mapping.at(gid);
+        const auto it = _mapping.find(nodeId);
+        if (it == _mapping.end())
+        {
+            continue;
+        }
+        const auto index = it->second;
 
         data[index] = _calculator.compute(spikeTime, frameTime);
     }
