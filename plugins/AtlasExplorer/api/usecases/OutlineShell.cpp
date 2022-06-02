@@ -21,7 +21,6 @@
 #include "OutlineShell.h"
 
 #include <brayns/engine/components/IsosurfaceRendererComponent.h>
-#include <brayns/engine/components/VolumeRendererComponent.h>
 #include <brayns/engine/volumes/RegularVolume.h>
 
 #include <api/usecases/common/DataUtils.h>
@@ -117,11 +116,13 @@ bool OutlineShell::isVolumeValid(const AtlasVolume &volume) const
     return true;
 }
 
-void OutlineShell::execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const
+std::unique_ptr<brayns::Model> OutlineShell::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
 {
     (void)payload;
     brayns::RegularVolume shellVolume = FeaturesExtractor::extract(volume);
 
-    // model.addComponent<brayns::VolumeRendererComponent<brayns::RegularVolume>>(std::move(shellVolume));
-    model.addComponent<brayns::IsosurfaceRendererComponent<brayns::RegularVolume>>(std::move(shellVolume), 1.f);
+    auto model = std::make_unique<brayns::Model>();
+    model->addComponent<brayns::IsosurfaceRendererComponent<brayns::RegularVolume>>(std::move(shellVolume), 1.f);
+
+    return model;
 }

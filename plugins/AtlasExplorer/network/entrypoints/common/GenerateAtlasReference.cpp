@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ExtractAtlas.h"
+#include "GenerateAtlasReference.h"
 
 #include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
@@ -26,38 +26,43 @@
 #include <components/AtlasComponent.h>
 #include <components/AtlasReferenceComponent.h>
 
-const AtlasVolume &ExtractAtlas::fromId(brayns::SceneModelManager &modelManager, uint32_t id)
+namespace
 {
-    auto &instance = brayns::ExtractModel::fromId(modelManager, id);
-    auto &model = instance.getModel();
-    try
+class AtlasSourceModelIdFinder
+{
+public:
+    static uint32_t find(brayns::SceneModelManager &manager, uint32_t sourceModelId)
     {
-        return fromModel(model);
-    }
-    catch (...)
-    {
-    }
+        auto &instance = brayns::ExtractModel::fromId(manager, sourceModelId);
+        auto &model = instance.getModel();
+        try
+        {
+            model.getComponent<AtlasComponent>();
+            return sourceModelId;
+        }
+        catch (...)
+        {
+        }
 
-    try
-    {
-        auto &component = model.getComponent<AtlasReferenceComponent>();
-        return fromId(modelManager, component.getSourceModelId());
-    }
-    catch (...)
-    {
+        try
+        {
+            auto &component = model.getComponent<AtlasReferenceComponent>();
+            return component.getSourceModelId();
+        }
+        catch (...)
+        {
+        }
+
         throw brayns::InvalidParamsException("The requested model does not have an Atlas component");
     }
+};
 }
 
-const AtlasVolume &ExtractAtlas::fromModel(brayns::Model &model)
+void GenerateAtlasReference::generate(
+    brayns::SceneModelManager &modelManager,
+    uint32_t sourceModelId,
+    brayns::Model &target)
 {
-    try
-    {
-        auto &component = model.getComponent<AtlasComponent>();
-        return component.getVolume();
-    }
-    catch (...)
-    {
-        throw brayns::InvalidParamsException("The requested model does not have an Atlas component");
-    }
+    auto modelId = AtlasSourceModelIdFinder::find(modelManager, sourceModelId);
+    target.addComponent<AtlasReferenceComponent>(modelId);
 }

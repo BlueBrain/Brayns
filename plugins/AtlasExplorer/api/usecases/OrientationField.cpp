@@ -58,7 +58,8 @@ bool OrientationField::isVolumeValid(const AtlasVolume &volume) const
     return volume.getVoxelSize() == 4;
 }
 
-void OrientationField::execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const
+std::unique_ptr<brayns::Model> OrientationField::execute(const AtlasVolume &volume, const brayns::JsonValue &payload)
+    const
 {
     (void)payload;
     const auto voxelSize = volume.getVoxelSize();
@@ -72,5 +73,9 @@ void OrientationField::execute(const AtlasVolume &volume, const brayns::JsonValu
     const auto quaternions = QuaternionExtractor::extract(floats);
     const auto &size = volume.getSize();
     const auto &spacing = volume.getSpacing();
-    model.addComponent<RotationVolumeComponent>(size, spacing, quaternions);
+
+    auto model = std::make_unique<brayns::Model>();
+    model->addComponent<RotationVolumeComponent>(size, spacing, quaternions);
+
+    return model;
 }

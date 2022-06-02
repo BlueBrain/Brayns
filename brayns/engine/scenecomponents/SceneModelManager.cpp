@@ -20,6 +20,8 @@
 
 #include "SceneModelManager.h"
 
+#include <brayns/engine/Scene.h>
+
 namespace
 {
 class ModelFinder
@@ -79,15 +81,38 @@ public:
 
 namespace brayns
 {
+SceneModelManager::SceneModelManager(Scene &scene)
+    : _scene(scene)
+{
+}
+
 ModelInstance &SceneModelManager::addModel(ModelLoadParameters params, std::unique_ptr<Model> model)
 {
-    _models.emplace_back();
-    auto &modelEntry = _models.back();
-    modelEntry.params = std::move(params);
-    modelEntry.model = std::move(model);
-    modelEntry.model->_modelId = _modelIdFactory.generateID();
+    auto &entry = _createModelEntry(std::move(params), std::move(model));
+    auto &instance = _createModelInstance(entry);
 
-    return _createModelInstance(modelEntry);
+    _scene.computeBounds();
+
+    return instance;
+}
+
+std::vector<ModelInstance *> SceneModelManager::addModels(
+    ModelLoadParameters params,
+    std::vector<std::unique_ptr<Model>> models)
+{
+    std::vector<ModelInstance *> result;
+    result.reserve(models.size());
+
+    for (auto &model : models)
+    {
+        auto &entry = _createModelEntry(params, std::move(model));
+        auto &instance = _createModelInstance(entry);
+        result.push_back(&instance);
+    }
+
+    _scene.computeBounds();
+
+    return result;
 }
 
 ModelInstance &SceneModelManager::createInstance(const uint32_t instanceID)
@@ -114,29 +139,34 @@ const std::vector<ModelInstance *> &SceneModelManager::getAllModelInstances() co
     return _instances;
 }
 
-void SceneModelManager::removeModel(const uint32_t instanceID)
+void SceneModelManager::removeModels(const std::vector<uint32_t> &instanceIDs)
 {
-    auto it = ModelFinder::findInstanceIterator(_instances, instanceID);
-    auto &modelInstance = **it;
-
-    auto &model = modelInstance.getModel();
-    auto modelId = model.getID();
-    auto modelIt = ModelFinder::findEntryIterator(_models, modelId);
-    auto &modelEntry = *modelIt;
-    auto &modelInstanceList = modelEntry.instances;
-    auto instanceIterator = ModelFinder::findInstanceIterator(modelInstanceList, instanceID);
-
-    modelInstanceList.erase(instanceIterator);
-    _instances.erase(it);
-
-    _instanceIdFactory.releaseID(instanceID);
-
-    // If no more instances of the model, get rid of it
-    if (modelInstanceList.empty())
+    for (auto instanceID : instanceIDs)
     {
-        _models.erase(modelIt);
-        _modelIdFactory.releaseID(modelId);
+        auto it = ModelFinder::findInstanceIterator(_instances, instanceID);
+        auto &modelInstance = **it;
+
+        auto &model = modelInstance.getModel();
+        auto modelId = model.getID();
+        auto modelIt = ModelFinder::findEntryIterator(_models, modelId);
+        auto &modelEntry = *modelIt;
+        auto &modelInstanceList = modelEntry.instances;
+        auto instanceIterator = ModelFinder::findInstanceIterator(modelInstanceList, instanceID);
+
+        modelInstanceList.erase(instanceIterator);
+        _instances.erase(it);
+
+        _instanceIdFactory.releaseID(instanceID);
+
+        // If no more instances of the model, get rid of it
+        if (modelInstanceList.empty())
+        {
+            _models.erase(modelIt);
+            _modelIdFactory.releaseID(modelId);
+        }
     }
+
+    _scene.computeBounds();
 }
 
 void SceneModelManager::removeAllModelInstances()
@@ -180,11 +210,6 @@ bool SceneModelManager::commit()
         bool instancesChanged = false;
         for (auto &instance : instances)
         {
-            if (!instance->isVisible())
-            {
-                continue;
-            }
-
             if (instance->commit(modelChanged))
             {
                 instancesChanged = true;
@@ -216,6 +241,17 @@ Bounds SceneModelManager::getBounds() const noexcept
     }
 
     return result;
+}
+
+SceneModelManager::ModelEntry &SceneModelManager::_createModelEntry(
+    ModelLoadParameters params,
+    std::unique_ptr<Model> model)
+{
+    auto &modelEntry = _models.emplace_back();
+    modelEntry.params = std::move(params);
+    modelEntry.model = std::move(model);
+    modelEntry.model->_modelId = _modelIdFactory.generateID();
+    return modelEntry;
 }
 
 ModelInstance &SceneModelManager::_createModelInstance(ModelEntry &modelEntry)

@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <brayns/engine/Model.h>
+
 #include <api/AtlasVolume.h>
 #include <api/IUseCase.h>
 #include <api/VisualizationUseCase.h>
@@ -40,11 +42,8 @@ public:
 
     std::vector<VisualizationUseCase> getValidUseCasesForVolume(const AtlasVolume &volume) const;
 
-    void executeUseCase(
-        VisualizationUseCase useCase,
-        const AtlasVolume &volume,
-        const brayns::JsonValue &payload,
-        brayns::Model &model) const;
+    std::unique_ptr<brayns::Model>
+        executeUseCase(VisualizationUseCase useCase, const AtlasVolume &volume, const brayns::JsonValue &payload) const;
 
 private:
     std::vector<UseCaseEntry> _useCases;

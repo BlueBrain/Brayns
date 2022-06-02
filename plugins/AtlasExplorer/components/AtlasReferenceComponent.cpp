@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,26 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "AtlasReferenceComponent.h"
 
-#include <brayns/engine/scenecomponents/SceneModelManager.h>
-
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/RemoveModelMessage.h>
-
-namespace brayns
+AtlasReferenceComponent::AtlasReferenceComponent(uint32_t sourceModelId)
+    : _sourceModelId(sourceModelId)
 {
-class RemoveModelEntrypoint : public Entrypoint<RemoveModelMessage, EmptyMessage>
+}
+
+uint32_t AtlasReferenceComponent::getSourceModelId() const noexcept
 {
-public:
-    RemoveModelEntrypoint(SceneModelManager &models, SimulationParameters &simulation);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-
-private:
-    SceneModelManager &_models;
-    SimulationParameters &_simulation;
-};
-} // namespace brayns
+    return _sourceModelId;
+}

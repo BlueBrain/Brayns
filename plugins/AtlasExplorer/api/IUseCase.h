@@ -32,5 +32,6 @@ public:
 
     virtual bool isVolumeValid(const AtlasVolume &volume) const = 0;
 
-    virtual void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const = 0;
+    virtual std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload)
+        const = 0;
 };

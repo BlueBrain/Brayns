@@ -24,8 +24,6 @@
 
 #include <api/AtlasVolume.h>
 
-#include <memory>
-
 class AtlasComponent final : public brayns::Component
 {
 public:

@@ -23,12 +23,12 @@
 #include <api/IUseCase.h>
 #include <api/VisualizationUseCase.h>
 
-class SharedCoordinatesAreaBorders : public IUseCase
+class SharedCoordinatesAreaBorders final : public IUseCase
 {
 public:
     inline static const VisualizationUseCase Type = VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_BORDERS;
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;
-    void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const override;
+    std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const override;
 };

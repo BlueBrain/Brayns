@@ -111,7 +111,7 @@ bool Density::isVolumeValid(const AtlasVolume &volume) const
     return volume.getVoxelSize() == 1;
 }
 
-void Density::execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const
+std::unique_ptr<brayns::Model> Density::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
 {
     (void)payload;
 
@@ -128,8 +128,12 @@ void Density::execute(const AtlasVolume &volume, const brayns::JsonValue &payloa
     densityVolume.dataType = densityData.dataType;
     densityVolume.size = volume.getSize();
     densityVolume.spacing = volume.getSpacing();
-    model.addComponent<brayns::VolumeRendererComponent<brayns::RegularVolume>>(std::move(densityVolume));
 
-    auto &transferFunction = brayns::ExtractModelObject::extractTransferFunction(model);
+    auto model = std::make_unique<brayns::Model>();
+    model->addComponent<brayns::VolumeRendererComponent<brayns::RegularVolume>>(std::move(densityVolume));
+
+    auto &transferFunction = brayns::ExtractModelObject::extractTransferFunction(*model);
     transferFunction.setValuesRange(densityData.minMax);
+
+    return model;
 }

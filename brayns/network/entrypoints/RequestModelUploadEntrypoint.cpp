@@ -175,14 +175,7 @@ public:
         loadParameters.loaderName = params.loaderName;
         loadParameters.loadParameters = parameters;
 
-        std::vector<brayns::ModelInstance *> result;
-        result.reserve(models.size());
-        for (auto &model : models)
-        {
-            auto &instance = _modelManager.addModel(loadParameters, std::move(model));
-            result.push_back(&instance);
-        }
-
+        auto result = _modelManager.addModels(std::move(loadParameters), std::move(models));
         request.reply(result);
     }
 
@@ -197,12 +190,12 @@ private:
 namespace brayns
 {
 RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
-    Scene &scene,
+    SceneModelManager &models,
     const LoaderRegistry &loaders,
     SimulationParameters &simulation,
     BinaryManager &binary,
     CancellationToken token)
-    : _scene(scene)
+    : _models(models)
     , _loaders(loaders)
     , _simulation(simulation)
     , _binary(binary)
@@ -227,10 +220,8 @@ bool RequestModelUploadEntrypoint::isAsync() const
 
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
-    auto &modelManager = _scene.getModels();
-    BinaryModelHandler handler(modelManager, _loaders, _binary, _token);
-    SimulationScanner::scanAndUpdate(modelManager, _simulation);
-    _scene.computeBounds();
+    BinaryModelHandler handler(_models, _loaders, _binary, _token);
+    SimulationScanner::scanAndUpdate(_models, _simulation);
     handler.handle(request);
 }
 

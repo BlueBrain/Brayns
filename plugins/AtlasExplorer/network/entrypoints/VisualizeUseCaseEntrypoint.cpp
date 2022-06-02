@@ -20,21 +20,35 @@
 
 #include "VisualizeUseCaseEntrypoint.h"
 
-VisualizeUseCaseMessage::VisualizeUseCaseMessage(brayns::SceneModelManager &modelManager)
-    : _modelManager(modelManager)
+#include <network/entrypoints/common/ExtractAtlas.h>
+#include <network/entrypoints/common/GenerateAtlasReference.h>
+
+VisualizeUseCaseEntrypoint::VisualizeUseCaseEntrypoint(brayns::SceneModelManager &models)
+    : _modelManager(models)
 {
 }
 
-std::string VisualizeUseCaseMessage::getMethod() const
+std::string VisualizeUseCaseEntrypoint::getMethod() const
 {
     return "visualize-atlas-usecase";
 }
 
-std::string VisualizeUseCaseMessage::getDescription() const
+std::string VisualizeUseCaseEntrypoint::getDescription() const
 {
     return "Visualizes the specified use case based on the atlas data of the given model";
 }
 
-void VisualizeUseCaseMessage::onRequest(const Request &request)
+void VisualizeUseCaseEntrypoint::onRequest(const Request &request)
 {
+    auto params = request.getParams();
+
+    auto modelId = params.model_id;
+    auto useCase = params.use_case;
+    auto useCaseParams = params.params;
+
+    auto &atlas = ExtractAtlas::fromId(_modelManager, modelId);
+    auto newModel = _useCases.executeUseCase(useCase, atlas, useCaseParams);
+    GenerateAtlasReference::generate(_modelManager, modelId, *newModel);
+    auto &instance = _modelManager.addModel({}, std::move(newModel));
+    request.reply(instance);
 }

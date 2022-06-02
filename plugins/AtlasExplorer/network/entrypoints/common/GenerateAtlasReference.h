@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: nadir.romanguerrero@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,33 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "RemoveModelEntrypoint.h"
+#pragma once
 
-#include <brayns/engine/common/SimulationScanner.h>
+#include <brayns/engine/scenecomponents/SceneModelManager.h>
 
-namespace brayns
+class GenerateAtlasReference
 {
-RemoveModelEntrypoint::RemoveModelEntrypoint(SceneModelManager &models, SimulationParameters &simulation)
-    : _models(models)
-    , _simulation(simulation)
-{
-}
-
-std::string RemoveModelEntrypoint::getMethod() const
-{
-    return "remove-model";
-}
-
-std::string RemoveModelEntrypoint::getDescription() const
-{
-    return "Remove the model(s) from the ID list from the scene";
-}
-
-void RemoveModelEntrypoint::onRequest(const Request &request)
-{
-    auto params = request.getParams();
-    _models.removeModels(params.ids);
-    SimulationScanner::scanAndUpdate(_models, _simulation);
-    request.reply(EmptyMessage());
-}
-} // namespace brayns
+public:
+    static void generate(brayns::SceneModelManager &modelManager, uint32_t sourceModelId, brayns::Model &target);
+};

@@ -99,15 +99,15 @@ public:
         brayns::CancellationToken token(interface);
         brayns::EntrypointBuilder builder("Core", interface);
 
-        builder.add<brayns::AddBoxesEntrypoint>(scene);
-        builder.add<brayns::AddCapsulesEntrypoint>(scene);
+        builder.add<brayns::AddBoxesEntrypoint>(sceneModelManager);
+        builder.add<brayns::AddCapsulesEntrypoint>(sceneModelManager);
         builder.add<brayns::AddClipPlaneEntrypoint>(sceneClipManager);
         builder.add<brayns::AddLightAmbientEntrypoint>(sceneLightManager);
         builder.add<brayns::AddLightDirectionalEntrypoint>(sceneLightManager);
         builder.add<brayns::AddLightQuadEntrypoint>(sceneLightManager);
-        builder.add<brayns::AddModelEntrypoint>(scene, loaders, simulation, token);
-        builder.add<brayns::AddPlanesEntrypoint>(scene);
-        builder.add<brayns::AddSpheresEntrypoint>(scene);
+        builder.add<brayns::AddModelEntrypoint>(sceneModelManager, loaders, simulation, token);
+        builder.add<brayns::AddPlanesEntrypoint>(sceneModelManager);
+        builder.add<brayns::AddSpheresEntrypoint>(sceneModelManager);
         builder.add<brayns::CancelEntrypoint>(tasks);
         builder.add<brayns::ClearClipPlanesEntrypoint>(sceneClipManager);
         builder.add<brayns::ClearLightsEntrypoint>(sceneLightManager);
@@ -142,8 +142,8 @@ public:
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
         builder.add<brayns::RemoveClipPlanesEntrypoint>(sceneClipManager);
         builder.add<brayns::RemoveLightsEntrypoint>(sceneLightManager);
-        builder.add<brayns::RemoveModelEntrypoint>(scene, simulation);
-        builder.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, simulation, binary, token);
+        builder.add<brayns::RemoveModelEntrypoint>(sceneModelManager, simulation);
+        builder.add<brayns::RequestModelUploadEntrypoint>(sceneModelManager, loaders, simulation, binary, token);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
         builder.add<brayns::SetCameraLookAtEntrypoint>(engine);

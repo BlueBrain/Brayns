@@ -40,12 +40,12 @@ BRAYNS_JSON_OBJECT_ENTRY(
     brayns::Required(false))
 BRAYNS_JSON_OBJECT_END()
 
-class HighlightColumn : public IUseCase
+class HighlightColumn final : public IUseCase
 {
 public:
     inline static const VisualizationUseCase Type = VisualizationUseCase::HIGHLIGHT_COLUMN;
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;
-    void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const override;
+    std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const override;
 };

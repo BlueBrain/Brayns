@@ -23,10 +23,46 @@
 
 #include <brayns/engine/common/DataHandler.h>
 
+namespace
+{
+class InstanceCommitter
+{
+public:
+    static void commit(OSPWorld world, const std::vector<OSPInstance> &instances)
+    {
+        if (instances.empty())
+        {
+            ospRemoveParam(world, "instance");
+            return;
+        }
+
+        auto instanceBuffer = brayns::DataHandler::copyBuffer(instances, OSPDataType::OSP_INSTANCE);
+        ospSetParam(world, "instance", OSPDataType::OSP_DATA, &instanceBuffer.handle);
+    }
+};
+
+class LightComitter
+{
+public:
+    static void commit(OSPWorld world, const std::vector<OSPLight> &lights)
+    {
+        if (lights.empty())
+        {
+            ospRemoveParam(world, "light");
+            return;
+        }
+
+        auto lightBuffer = brayns::DataHandler::copyBuffer(lights, OSPDataType::OSP_LIGHT);
+        ospSetParam(world, "light", OSPDataType::OSP_DATA, &lightBuffer.handle);
+    }
+};
+}
+
 namespace brayns
 {
 Scene::Scene()
     : _bounds(Vector3f(0.f), Vector3f(0.f))
+    , _modelManager(*this)
     , _handle(ospNewWorld())
 {
     // Need an initial commit until there is any content that can trigger the commit function
@@ -70,24 +106,15 @@ bool Scene::commit()
         instances.insert(instances.end(), modelInstances.begin(), modelInstances.end());
         auto clipInstances = _clippingManager.getInstanceHandles();
         instances.insert(instances.end(), clipInstances.begin(), clipInstances.end());
-
-        if (!instances.empty())
-        {
-            auto instanceBuffer = DataHandler::copyBuffer(instances, OSPDataType::OSP_INSTANCE);
-            ospSetParam(_handle, "instance", OSPDataType::OSP_DATA, &instanceBuffer.handle);
-            needsCommit = true;
-        }
+        InstanceCommitter::commit(_handle, instances);
+        needsCommit = true;
     }
 
     if (_lightManager.commit())
     {
         auto lights = _lightManager.getLightHandles();
-        if (!lights.empty())
-        {
-            auto lightBuffer = DataHandler::copyBuffer(lights, OSPDataType::OSP_LIGHT);
-            ospSetParam(_handle, "light", OSPDataType::OSP_DATA, &lightBuffer.handle);
-            needsCommit = true;
-        }
+        LightComitter::commit(_handle, lights);
+        needsCommit = true;
     }
 
     // Commit handle

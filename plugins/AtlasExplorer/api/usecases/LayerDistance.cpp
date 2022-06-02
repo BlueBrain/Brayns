@@ -26,11 +26,10 @@ bool LayerDistance::isVolumeValid(const AtlasVolume &volume) const
     return false;
 }
 
-void LayerDistance::execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const
+std::unique_ptr<brayns::Model> LayerDistance::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
 {
     (void)volume;
     (void)payload;
-    (void)model;
 
     throw std::runtime_error("Layer distance use case not implemented");
 }

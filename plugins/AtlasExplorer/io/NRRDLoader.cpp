@@ -52,32 +52,26 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
     const std::string &path,
     const brayns::LoaderProgress &callback) const
 {
-    // Read file
     callback.updateProgress("Reading " + path, 0.f);
     const auto fileContent = brayns::FileReader::read(path);
     auto contentView = std::string_view(fileContent);
 
-    // Parse header
     callback.updateProgress("Parsing NRRD header", 0.2f);
     auto header = HeaderParser::parse(path, contentView);
     HeaderLimitCheck::check(header);
 
-    // Parse data
     callback.updateProgress("Parsing NRRD data", 0.4f);
     auto data = DataParser::parse(header, contentView);
 
-    // Add data to model
     callback.updateProgress("Transforming data", 0.6f);
     const auto voxelSize = HeaderUtils::getVoxelDimension(header);
     const auto gridSize = HeaderUtils::get3DSize(header);
     const auto gridSpacing = HeaderUtils::get3DDimensions(header);
     auto atlasVolume = AtlasVolume(gridSize, gridSpacing, voxelSize, std::move(data));
-    auto model = std::make_unique<brayns::Model>();
-    auto &component = model->addComponent<AtlasComponent>(std::move(atlasVolume));
 
-    // Generate initial visual
-    callback.updateProgress("Generating visual", 0.8f);
-    OutlineShell().execute(component.getVolume(), {}, *model);
+    callback.updateProgress("Generating volume mesh", 0.8f);
+    auto model = OutlineShell().execute(atlasVolume, {});
+    model->addComponent<AtlasComponent>(std::move(atlasVolume));
 
     callback.updateProgress("Done", 1.f);
     auto result = std::vector<std::unique_ptr<brayns::Model>>();

@@ -26,14 +26,12 @@ bool SharedCoordinatesAreaBorders::isVolumeValid(const AtlasVolume &volume) cons
     return false;
 }
 
-void SharedCoordinatesAreaBorders::execute(
+std::unique_ptr<brayns::Model> SharedCoordinatesAreaBorders::execute(
     const AtlasVolume &volume,
-    const brayns::JsonValue &payload,
-    brayns::Model &model) const
+    const brayns::JsonValue &payload) const
 {
     (void)volume;
     (void)payload;
-    (void)model;
 
     throw std::runtime_error("Shared coordinates area borders use case not implemented");
 }

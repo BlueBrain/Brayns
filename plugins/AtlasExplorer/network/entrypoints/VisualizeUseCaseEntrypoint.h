@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/engine/scenecomponents/SceneModelManager.h>
+#include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <api/UseCaseManager.h>
@@ -28,10 +29,10 @@
 #include <network/adapters/VisualizationUseCaseAdapter.h>
 #include <network/messages/VisualizeUseCaseMessage.h>
 
-class VisualizeUseCaseMessage : public brayns::Entrypoint<VisualizeUseCaseMessage, brayns::EmptyMessage>
+class VisualizeUseCaseEntrypoint : public brayns::Entrypoint<VisualizeUseCaseMessage, brayns::ModelInstance>
 {
 public:
-    VisualizeUseCaseMessage(brayns::SceneModelManager &modelManager);
+    VisualizeUseCaseEntrypoint(brayns::SceneModelManager &modelManager);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

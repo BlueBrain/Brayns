@@ -23,12 +23,12 @@
 #include <api/IUseCase.h>
 #include <api/VisualizationUseCase.h>
 
-class Density : public IUseCase
+class Density final : public IUseCase
 {
 public:
     inline static const VisualizationUseCase Type = VisualizationUseCase::DENSITY;
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;
-    void execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const override;
+    std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const override;
 };

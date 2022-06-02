@@ -62,74 +62,25 @@ class ColumnBoundFinder
 public:
     ColumnBoundFinder(const AtlasVolume &volume)
         : _volume(volume)
-        , _data(_volume.getData().asFloats())
     {
     }
 
     brayns::Box find(const brayns::Vector2ui &xz) const noexcept
     {
-        const auto size = _volume.getSize();
-        const auto voxelSize = _volume.getVoxelSize();
-        const auto frameSize = static_cast<size_t>(size.x * size.y * voxelSize);
-        const auto rowWidth = static_cast<size_t>(size.x * voxelSize);
-        const auto yLen = static_cast<size_t>(size.y);
-        const auto x = static_cast<size_t>(xz.x);
-        const auto z = static_cast<size_t>(xz.y);
+        const auto &size = _volume.getSize();
+        const auto &spacing = _volume.getSpacing();
+        const auto x = static_cast<float>(xz.x);
+        const auto z = static_cast<float>(xz.y);
+        const auto y = static_cast<float>(size.y);
 
-        brayns::Vector3f min(x, 0, z);
-        brayns::Vector3f max(x, yLen - 1, z);
-        for (size_t i = 0; i < yLen; ++i)
-        {
-            const auto y = i;
-            const size_t linealIndex = (frameSize * z) + (y * rowWidth) + x;
-            const auto valid = _validVoxel(linealIndex);
-            if (valid)
-            {
-                min = brayns::Vector3f(x, y, z);
-                break;
-            }
-        }
-        for (size_t i = yLen; i > 0; --i)
-        {
-            const auto y = i - 1;
-            const size_t linealIndex = (frameSize * z) + (y * rowWidth) + x;
-            const auto valid = _validVoxel(linealIndex);
-            if (valid)
-            {
-                max = brayns::Vector3f(x, y, z);
-                break;
-            }
-        }
+        brayns::Vector3f min(x, -1.f, z);
+        brayns::Vector3f max(x + 1.f, y, z + 1.f);
 
-        const auto spacing = _volume.getSpacing();
         return brayns::Box{min * spacing, max * spacing};
     }
 
 private:
-    bool _validVoxel(size_t index) const noexcept
-    {
-        const auto voxelSize = _volume.getVoxelSize();
-        const auto end = index + voxelSize;
-
-        size_t zeroes = 0;
-        for (size_t i = index; i < end; ++i)
-        {
-            if (!std::isfinite(_data[i]))
-            {
-                return false;
-            }
-            if (_data[i] == 0.f)
-            {
-                ++zeroes;
-            }
-        }
-
-        return voxelSize == 1 || zeroes < voxelSize;
-    }
-
-private:
     const AtlasVolume &_volume;
-    const std::vector<float> _data;
 };
 }
 
@@ -139,7 +90,8 @@ bool HighlightColumn::isVolumeValid(const AtlasVolume &volume) const
     return true;
 }
 
-void HighlightColumn::execute(const AtlasVolume &volume, const brayns::JsonValue &payload, brayns::Model &model) const
+std::unique_ptr<brayns::Model> HighlightColumn::execute(const AtlasVolume &volume, const brayns::JsonValue &payload)
+    const
 {
     const auto params = ParamsParser::parse<HighlighColumParams>(payload);
     CoordinatesValidator::validate(params, volume);
@@ -163,6 +115,10 @@ void HighlightColumn::execute(const AtlasVolume &volume, const brayns::JsonValue
         colors.push_back(neighbour.color);
     }
 
-    auto &component = model.addComponent<brayns::GeometryRendererComponent<brayns::Box>>(std::move(geometry));
+    auto model = std::make_unique<brayns::Model>();
+
+    auto &component = model->addComponent<brayns::GeometryRendererComponent<brayns::Box>>(std::move(geometry));
     component.setColors(colors);
+
+    return model;
 }
