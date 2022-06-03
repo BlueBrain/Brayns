@@ -20,12 +20,18 @@
 
 import pathlib
 import sys
+from collections import defaultdict
+from typing import Optional
 
 import brayns
 
+FILENAME = 'api_{plugin}_methods.rst'
+
+TITLE = '{plugin} API methods'
+
 HEADER = '''
-{plugin} API methods
-----------------
+{title}
+{underline}
 
 This page references the entrypoints of the {plugin} plugin.
 
@@ -76,7 +82,42 @@ Notification (progress):
         "amount": 0.5
     }
 }
+
+The following sections describe each entrypoints of the {plugin} plugin with
+their params and result schemas.
 '''.strip()
+
+ENTRYPOINT = '''
+{name}
+{underline}
+
+{description}.{asynchronous}
+
+Params:
+
+{params}
+
+Result:
+
+{result}{separator}
+'''.strip()
+
+ASYNCHRONOUS = '''
+This entrypoint is asynchronous, it means that it can take a long time and send
+progress notifications.
+'''.strip()
+
+NO_PARAMS = '''
+This entrypoint has no params, the "params" field can hence be omitted or set to
+null.
+'''.strip()
+
+NO_RESULT = '''
+This entrypoint has no result, the "result" field is still present but is always
+null.
+'''.strip()
+
+SEPARATOR = '\n\n----'
 
 
 def build_from_uri(uri: str, directory: str) -> None:
@@ -90,7 +131,71 @@ def build_from_instance(instance: brayns.Instance, directory: str) -> None:
 
 
 def build_from_entrypoints(entrypoints: list[brayns.Entrypoint], directory: str) -> None:
+    plugins = defaultdict[str, list[brayns.Entrypoint]](list)
+    for entrypoint in entrypoints:
+        plugins[entrypoint.plugin].append(entrypoint)
+    build_from_plugins(plugins, directory)
+
+
+def build_from_plugins(plugins: dict[str, brayns.Entrypoint], directory: str) -> None:
+    for plugin, entrypoints in plugins:
+        data = format_plugin(plugin, entrypoints)
+        path = pathlib.Path(directory) / FILENAME.format(plugin=plugin)
+        with open(path, 'w') as file:
+            file.write(data)
+
+
+def format_plugin(plugin: str, entrypoints: list[brayns.Entrypoint]) -> str:
+    title = TITLE.format(plugin=plugin)
+    header = HEADER.format(
+        title=title,
+        underline=get_underline(title),
+        plugin=plugin
+    )
+    api = format_entrypoints(entrypoints)
+    return f'{header}\n\n{api}'
+
+
+def format_entrypoints(entrypoints: list[brayns.Entrypoint]) -> str:
+    docs = list[str]()
+    for entrypoint in entrypoints[:-1]:
+        doc = format_entrypoint(entrypoint)
+        docs.append(doc)
+    last = format_entrypoint(entrypoints[-1], separator=False)
+    docs.append(last)
+    return '\n\n'.join(docs)
+
+
+def format_entrypoint(entrypoint: brayns.Entrypoint, separator: bool = True) -> str:
+    return ENTRYPOINT.format(
+        name=entrypoint.name,
+        underline=get_underline(entrypoint.name),
+        description=entrypoint.description,
+        asynchronous=ASYNCHRONOUS if entrypoint.asynchronous else '',
+        params=format_params(entrypoint.params),
+        result=format_result(entrypoint.result),
+        separator=SEPARATOR if separator else ''
+    )
+
+
+def format_params(schema: Optional[brayns.JsonSchema]) -> str:
+    if schema is None:
+        return NO_PARAMS
+    return format_schema(schema)
+
+
+def format_result(schema: Optional[brayns.JsonSchema]) -> str:
+    if schema is None:
+        return NO_RESULT
+    return format_schema(schema)
+
+
+def format_schema(schema: brayns.JsonSchema) -> str:
     pass
+
+
+def get_underline(title: str) -> str:
+    return len(title) * '~'
 
 
 if __name__ == '__main__':
