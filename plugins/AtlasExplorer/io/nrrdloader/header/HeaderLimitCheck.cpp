@@ -20,6 +20,8 @@
 
 #include "HeaderLimitCheck.h"
 
+#include <stdexcept>
+
 void HeaderLimitCheck::check(const NRRDHeader &header)
 {
     const auto dimensions = header.dimensions;

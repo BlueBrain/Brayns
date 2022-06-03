@@ -20,6 +20,7 @@
 
 #include "GZipDecompressor.h"
 
+#include <limits>
 #include <stdexcept>
 
 #include <zlib.h>

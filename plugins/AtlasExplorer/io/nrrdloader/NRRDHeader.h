@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-enum NRRDEncoding
+enum class NRRDEncoding
 {
     RAW,
     ASCII,
@@ -33,13 +33,13 @@ enum NRRDEncoding
     BZIP2
 };
 
-enum NRRDEndianness
+enum class NRRDEndianness
 {
     LITTLE,
     BIG
 };
 
-enum NRRDType
+enum class NRRDType
 {
     CHAR,
     UNSIGNED_CHAR,
@@ -54,7 +54,7 @@ enum NRRDType
 };
 
 // Supported kinds (not all)
-enum NRRDKind
+enum class NRRDKind
 {
     NONE,
     DOMAIN,
