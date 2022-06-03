@@ -33,46 +33,46 @@ public:
     static std::unordered_map<std::string, NRRDType> build()
     {
         return {
-            {"signed char", NRRDType::CHAR},
-            {"int8", NRRDType::CHAR},
-            {"int8_t", NRRDType::CHAR},
-            {"uchar", NRRDType::UNSIGNED_CHAR},
-            {"unsigned char", NRRDType::UNSIGNED_CHAR},
-            {"uint8", NRRDType::UNSIGNED_CHAR},
-            {"uint8_t", NRRDType::UNSIGNED_CHAR},
-            {"short", NRRDType::SHORT},
-            {"short int", NRRDType::SHORT},
-            {"signed short", NRRDType::SHORT},
-            {"signed short int", NRRDType::SHORT},
-            {"int16", NRRDType::SHORT},
-            {"int16_t", NRRDType::SHORT},
-            {"ushort", NRRDType::UNSIGNED_SHORT},
-            {"unsigned short", NRRDType::UNSIGNED_SHORT},
-            {"unsigned short int", NRRDType::UNSIGNED_SHORT},
-            {"uint16", NRRDType::UNSIGNED_SHORT},
-            {"uint16_t", NRRDType::UNSIGNED_SHORT},
-            {"int", NRRDType::INT},
-            {"signed int", NRRDType::INT},
-            {"int32", NRRDType::INT},
-            {"int32_t", NRRDType::INT},
-            {"uint", NRRDType::UNSIGNED_INT},
-            {"unsigned int", NRRDType::UNSIGNED_INT},
-            {"uint32", NRRDType::UNSIGNED_INT},
-            {"uint32_t", NRRDType::UNSIGNED_INT},
-            {"longlong", NRRDType::LONG},
-            {"long long", NRRDType::LONG},
-            {"long long int", NRRDType::LONG},
-            {"signed long long", NRRDType::LONG},
-            {"signed long long int", NRRDType::LONG},
-            {"int64", NRRDType::LONG},
-            {"int64_t", NRRDType::LONG},
-            {"ulonglong", NRRDType::UNSIGNED_LONG},
-            {"unsigned long long", NRRDType::UNSIGNED_LONG},
-            {"unsigned long long int", NRRDType::UNSIGNED_LONG},
-            {"uint64", NRRDType::UNSIGNED_LONG},
-            {"uint64_t", NRRDType::UNSIGNED_LONG},
-            {"float", NRRDType::FLOAT},
-            {"double", NRRDType::DOUBLE}};
+            {"signed char", NRRDType::Char},
+            {"int8", NRRDType::Char},
+            {"int8_t", NRRDType::Char},
+            {"uchar", NRRDType::UnsignedChar},
+            {"unsigned char", NRRDType::UnsignedChar},
+            {"uint8", NRRDType::UnsignedChar},
+            {"uint8_t", NRRDType::UnsignedChar},
+            {"short", NRRDType::Short},
+            {"short int", NRRDType::Short},
+            {"signed short", NRRDType::Short},
+            {"signed short int", NRRDType::Short},
+            {"int16", NRRDType::Short},
+            {"int16_t", NRRDType::Short},
+            {"ushort", NRRDType::UnsignedShort},
+            {"unsigned short", NRRDType::UnsignedShort},
+            {"unsigned short int", NRRDType::UnsignedShort},
+            {"uint16", NRRDType::UnsignedShort},
+            {"uint16_t", NRRDType::UnsignedShort},
+            {"int", NRRDType::Int},
+            {"signed int", NRRDType::Int},
+            {"int32", NRRDType::Int},
+            {"int32_t", NRRDType::Int},
+            {"uint", NRRDType::UnsignedInt},
+            {"unsigned int", NRRDType::UnsignedInt},
+            {"uint32", NRRDType::UnsignedInt},
+            {"uint32_t", NRRDType::UnsignedInt},
+            {"longlong", NRRDType::Long},
+            {"long long", NRRDType::Long},
+            {"long long int", NRRDType::Long},
+            {"signed long long", NRRDType::Long},
+            {"signed long long int", NRRDType::Long},
+            {"int64", NRRDType::Long},
+            {"int64_t", NRRDType::Long},
+            {"ulonglong", NRRDType::UnsignedLong},
+            {"unsigned long long", NRRDType::UnsignedLong},
+            {"unsigned long long int", NRRDType::UnsignedLong},
+            {"uint64", NRRDType::UnsignedLong},
+            {"uint64_t", NRRDType::UnsignedLong},
+            {"float", NRRDType::Float},
+            {"double", NRRDType::Double}};
     }
 };
 
@@ -82,15 +82,15 @@ public:
     static std::unordered_map<std::string, NRRDEncoding> build()
     {
         return {
-            {"raw", NRRDEncoding::RAW},
-            {"txt", NRRDEncoding::ASCII},
-            {"text", NRRDEncoding::ASCII},
-            {"ascii", NRRDEncoding::ASCII},
-            {"hex", NRRDEncoding::HEX},
-            {"gz", NRRDEncoding::GZIP},
-            {"gzip", NRRDEncoding::GZIP},
-            {"bz2", NRRDEncoding::BZIP2},
-            {"bzip2", NRRDEncoding::BZIP2}};
+            {"raw", NRRDEncoding::Raw},
+            {"txt", NRRDEncoding::Ascii},
+            {"text", NRRDEncoding::Ascii},
+            {"ascii", NRRDEncoding::Ascii},
+            {"hex", NRRDEncoding::Hex},
+            {"gz", NRRDEncoding::Gzip},
+            {"gzip", NRRDEncoding::Gzip},
+            {"bz2", NRRDEncoding::Bzip2},
+            {"bzip2", NRRDEncoding::Bzip2}};
     }
 };
 
@@ -127,23 +127,23 @@ public:
     static std::unordered_map<std::string, NRRDKind> build()
     {
         return {
-            {"domain", NRRDKind::DOMAIN},
-            {"space", NRRDKind::SPACE},
-            {"scalar", NRRDKind::SCALAR},
-            {"vector", NRRDKind::VECTOR},
-            {"2-vector", NRRDKind::VECTOR2D},
-            {"3-vector", NRRDKind::VECTOR3D},
-            {"3-normal", NRRDKind::NORMAL3D},
-            {"quaternion", NRRDKind::QUATERNION},
-            {"3-gradient", NRRDKind::GRADIENT3},
-            {"3-color", NRRDKind::RGBCOLOR},
-            {"4-color", NRRDKind::RGBACOLOR},
-            {"RGB-color", NRRDKind::RGBCOLOR},
-            {"HSV-color", NRRDKind::HSVCOLOR},
-            {"XYZ-color", NRRDKind::XYZCOLOR},
-            {"RGBA-color", NRRDKind::RGBACOLOR},
-            {"none", NRRDKind::NONE},
-            {"???", NRRDKind::NONE}};
+            {"domain", NRRDKind::Domain},
+            {"space", NRRDKind::Space},
+            {"scalar", NRRDKind::Scalar},
+            {"vector", NRRDKind::Vector},
+            {"2-vector", NRRDKind::Vector2D},
+            {"3-vector", NRRDKind::Vector3D},
+            {"3-normal", NRRDKind::Normal3D},
+            {"quaternion", NRRDKind::Quaternion},
+            {"3-gradient", NRRDKind::Gradient3},
+            {"3-color", NRRDKind::RgbColor},
+            {"4-color", NRRDKind::RgbaColor},
+            {"RGB-color", NRRDKind::RgbColor},
+            {"HSV-color", NRRDKind::HsvColor},
+            {"XYZ-color", NRRDKind::XyzColor},
+            {"RGBA-color", NRRDKind::RgbaColor},
+            {"none", NRRDKind::None},
+            {"???", NRRDKind::None}};
     }
 };
 
@@ -287,11 +287,11 @@ public:
 
         if (valueStr == "little")
         {
-            header.endian = NRRDEndianness::LITTLE;
+            header.endian = NRRDEndianness::Little;
             return;
         }
 
-        header.endian = NRRDEndianness::BIG;
+        header.endian = NRRDEndianness::Big;
     }
 };
 

@@ -31,6 +31,7 @@ public:
     {
         std::vector<brayns::Quaternion> result(data.size() / 4, brayns::Quaternion(0.f, 0.f, 0.f, 0.f));
 
+#pragma omp parallel for
         for (size_t i = 0; i < result.size(); ++i)
         {
             const auto index = i * 4;

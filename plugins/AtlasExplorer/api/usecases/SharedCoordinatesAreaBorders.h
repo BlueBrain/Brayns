@@ -26,7 +26,7 @@
 class SharedCoordinatesAreaBorders final : public IUseCase
 {
 public:
-    inline static const VisualizationUseCase Type = VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_BORDERS;
+    inline static const VisualizationUseCase Type = VisualizationUseCase::AreasWithSharedCoordinatesBorders;
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;

@@ -26,7 +26,7 @@
 class AreaCollage final : public IUseCase
 {
 public:
-    inline static const VisualizationUseCase Type = VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_COLLAGE;
+    inline static const VisualizationUseCase Type = VisualizationUseCase::AreasWithSHaredCoordinatesCollage;
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;

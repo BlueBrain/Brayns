@@ -26,12 +26,12 @@
 
 std::unique_ptr<IDecoder> DecoderTable::getDecoder(NRRDEncoding encoding)
 {
-    if (encoding == NRRDEncoding::ASCII)
+    if (encoding == NRRDEncoding::Ascii)
     {
         return std::make_unique<AsciiDecoder>();
     }
 
-    if (encoding == NRRDEncoding::HEX)
+    if (encoding == NRRDEncoding::Hex)
     {
         return std::make_unique<HexDecoder>();
     }

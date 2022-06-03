@@ -28,11 +28,11 @@ namespace brayns
 {
 BRAYNS_JSON_ADAPTER_ENUM(
     VisualizationUseCase,
-    {"Outline shell mesh", VisualizationUseCase::OUTLINE_SHELL},
-    {"Orientation field", VisualizationUseCase::ORIENTATION_FIELD},
-    {"Density", VisualizationUseCase::DENSITY},
-    {"Layer distance", VisualizationUseCase::LAYER_DISTANCE},
-    {"Highlighted column", VisualizationUseCase::HIGHLIGHT_COLUMN},
-    {"Borders between areas with shared coordinates", VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_BORDERS},
-    {"Collage of areas with shared coordinates", VisualizationUseCase::AREAS_WITH_SHARED_COORDINATES_COLLAGE})
+    {"Outline shell mesh", VisualizationUseCase::OutlineShell},
+    {"Orientation field", VisualizationUseCase::OrientationField},
+    {"Density", VisualizationUseCase::Density},
+    {"Layer distance", VisualizationUseCase::LayerDistance},
+    {"Highlighted column", VisualizationUseCase::HighlightColumn},
+    {"Borders between areas with shared coordinates", VisualizationUseCase::AreasWithSharedCoordinatesBorders},
+    {"Collage of areas with shared coordinates", VisualizationUseCase::AreasWithSHaredCoordinatesCollage})
 }

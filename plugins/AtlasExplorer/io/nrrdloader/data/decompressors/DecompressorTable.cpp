@@ -26,12 +26,12 @@
 
 std::unique_ptr<IDecompressor> DecompressorTable::getDecompressor(NRRDEncoding encoding) noexcept
 {
-    if (encoding == NRRDEncoding::BZIP2)
+    if (encoding == NRRDEncoding::Bzip2)
     {
         return std::make_unique<BZip2Decompressor>();
     }
 
-    if (encoding == NRRDEncoding::GZIP)
+    if (encoding == NRRDEncoding::Gzip)
     {
         return std::make_unique<GZipDecompressor>();
     }

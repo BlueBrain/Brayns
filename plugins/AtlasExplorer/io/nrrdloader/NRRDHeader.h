@@ -26,50 +26,50 @@
 
 enum class NRRDEncoding
 {
-    RAW,
-    ASCII,
-    HEX,
-    GZIP,
-    BZIP2
+    Raw,
+    Ascii,
+    Hex,
+    Gzip,
+    Bzip2
 };
 
 enum class NRRDEndianness
 {
-    LITTLE,
-    BIG
+    Little,
+    Big
 };
 
 enum class NRRDType
 {
-    CHAR,
-    UNSIGNED_CHAR,
-    SHORT,
-    UNSIGNED_SHORT,
-    INT,
-    UNSIGNED_INT,
-    LONG,
-    UNSIGNED_LONG,
-    FLOAT,
-    DOUBLE
+    Char,
+    UnsignedChar,
+    Short,
+    UnsignedShort,
+    Int,
+    UnsignedInt,
+    Long,
+    UnsignedLong,
+    Float,
+    Double
 };
 
 // Supported kinds (not all)
 enum class NRRDKind
 {
-    NONE,
-    DOMAIN,
-    SPACE,
-    VECTOR,
-    SCALAR,
-    VECTOR2D,
-    VECTOR3D,
-    NORMAL3D,
-    QUATERNION,
-    GRADIENT3,
-    RGBCOLOR,
-    HSVCOLOR,
-    XYZCOLOR,
-    RGBACOLOR,
+    None,
+    Domain,
+    Space,
+    Vector,
+    Scalar,
+    Vector2D,
+    Vector3D,
+    Normal3D,
+    Quaternion,
+    Gradient3,
+    RgbColor,
+    HsvColor,
+    XyzColor,
+    RgbaColor
 };
 
 struct NRRDHeader

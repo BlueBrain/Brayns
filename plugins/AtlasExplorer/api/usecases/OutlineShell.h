@@ -26,7 +26,7 @@
 class OutlineShell final : public IUseCase
 {
 public:
-    inline static const VisualizationUseCase Type = VisualizationUseCase::OUTLINE_SHELL;
+    inline static const VisualizationUseCase Type = VisualizationUseCase::OutlineShell;
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;

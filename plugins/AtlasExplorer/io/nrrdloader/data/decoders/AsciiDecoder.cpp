@@ -179,47 +179,47 @@ std::unique_ptr<IDataMangler> AsciiDecoder::decode(const NRRDHeader &header, std
 
     const auto type = header.type;
 
-    if (type == NRRDType::CHAR)
+    if (type == NRRDType::Char)
     {
         return DecodedDataBuilder::parseAndBuild<char>(header, tokens);
     }
 
-    if (type == NRRDType::UNSIGNED_CHAR)
+    if (type == NRRDType::UnsignedChar)
     {
         return DecodedDataBuilder::parseAndBuild<uint8_t>(header, tokens);
     }
 
-    if (type == NRRDType::SHORT)
+    if (type == NRRDType::Short)
     {
         return DecodedDataBuilder::parseAndBuild<int16_t>(header, tokens);
     }
 
-    if (type == NRRDType::UNSIGNED_SHORT)
+    if (type == NRRDType::UnsignedShort)
     {
         return DecodedDataBuilder::parseAndBuild<uint16_t>(header, tokens);
     }
 
-    if (type == NRRDType::INT)
+    if (type == NRRDType::Int)
     {
         return DecodedDataBuilder::parseAndBuild<int32_t>(header, tokens);
     }
 
-    if (type == NRRDType::UNSIGNED_INT)
+    if (type == NRRDType::UnsignedInt)
     {
         return DecodedDataBuilder::parseAndBuild<uint32_t>(header, tokens);
     }
 
-    if (type == NRRDType::LONG)
+    if (type == NRRDType::Long)
     {
         return DecodedDataBuilder::parseAndBuild<int64_t>(header, tokens);
     }
 
-    if (type == NRRDType::UNSIGNED_LONG)
+    if (type == NRRDType::UnsignedLong)
     {
         return DecodedDataBuilder::parseAndBuild<uint64_t>(header, tokens);
     }
 
-    if (type == NRRDType::FLOAT)
+    if (type == NRRDType::Float)
     {
         return DecodedDataBuilder::parseAndBuild<float>(header, tokens);
     }

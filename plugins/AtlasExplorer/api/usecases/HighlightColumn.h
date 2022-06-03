@@ -43,7 +43,7 @@ BRAYNS_JSON_OBJECT_END()
 class HighlightColumn final : public IUseCase
 {
 public:
-    inline static const VisualizationUseCase Type = VisualizationUseCase::HIGHLIGHT_COLUMN;
+    inline static const VisualizationUseCase Type = VisualizationUseCase::HighlightColumn;
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;

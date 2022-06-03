@@ -26,7 +26,7 @@
 class LayerDistance final : public IUseCase
 {
 public:
-    inline static const VisualizationUseCase Type = VisualizationUseCase::LAYER_DISTANCE;
+    inline static const VisualizationUseCase Type = VisualizationUseCase::LayerDistance;
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;

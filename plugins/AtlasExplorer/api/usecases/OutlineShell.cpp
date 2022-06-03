@@ -47,6 +47,7 @@ private:
         const auto minValue = minMax.first;
 
         std::vector<uint8_t> result(data.size(), 0u);
+#pragma omp parallel for
         for (size_t i = 0; i < data.size(); ++i)
         {
             if (!std::isfinite(data[i]) || data[i] == minValue)
@@ -63,6 +64,7 @@ private:
     static std::vector<uint8_t> _filterNDimensional(size_t voxelSize, const std::vector<double> &data)
     {
         std::vector<uint8_t> result(data.size() / voxelSize, 0u);
+#pragma omp parallel for
         for (size_t i = 0; i < result.size(); ++i)
         {
             size_t zeroCount = 0;

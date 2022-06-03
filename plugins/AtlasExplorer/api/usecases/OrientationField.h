@@ -26,7 +26,7 @@
 class OrientationField final : public IUseCase
 {
 public:
-    inline static const VisualizationUseCase Type = VisualizationUseCase::ORIENTATION_FIELD;
+    inline static const VisualizationUseCase Type = VisualizationUseCase::OrientationField;
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;

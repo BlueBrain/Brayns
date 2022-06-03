@@ -22,11 +22,11 @@
 
 enum class VisualizationUseCase
 {
-    OUTLINE_SHELL,
-    ORIENTATION_FIELD,
-    DENSITY,
-    LAYER_DISTANCE,
-    HIGHLIGHT_COLUMN,
-    AREAS_WITH_SHARED_COORDINATES_BORDERS,
-    AREAS_WITH_SHARED_COORDINATES_COLLAGE
+    OutlineShell,
+    OrientationField,
+    Density,
+    LayerDistance,
+    HighlightColumn,
+    AreasWithSharedCoordinatesBorders,
+    AreasWithSHaredCoordinatesCollage
 };

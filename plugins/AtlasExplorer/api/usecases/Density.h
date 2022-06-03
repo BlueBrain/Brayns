@@ -26,7 +26,7 @@
 class Density final : public IUseCase
 {
 public:
-    inline static const VisualizationUseCase Type = VisualizationUseCase::DENSITY;
+    inline static const VisualizationUseCase Type = VisualizationUseCase::Density;
 
 public:
     bool isVolumeValid(const AtlasVolume &volume) const override;

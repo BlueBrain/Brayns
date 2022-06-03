@@ -55,19 +55,19 @@ public:
     {
         switch (type)
         {
-        case NRRDType::CHAR:
-        case NRRDType::UNSIGNED_CHAR:
+        case NRRDType::Char:
+        case NRRDType::UnsignedChar:
             return 1;
-        case NRRDType::SHORT:
-        case NRRDType::UNSIGNED_SHORT:
+        case NRRDType::Short:
+        case NRRDType::UnsignedShort:
             return 2;
-        case NRRDType::FLOAT:
-        case NRRDType::INT:
-        case NRRDType::UNSIGNED_INT:
+        case NRRDType::Float:
+        case NRRDType::Int:
+        case NRRDType::UnsignedInt:
             return 4;
-        case NRRDType::DOUBLE:
-        case NRRDType::LONG:
-        case NRRDType::UNSIGNED_LONG:
+        case NRRDType::Double:
+        case NRRDType::Long:
+        case NRRDType::UnsignedLong:
             return 8;
         default:
             throw std::runtime_error("Unsupported type");
@@ -190,7 +190,7 @@ class DecodedDataBuilder
 public:
     static std::unique_ptr<IDataMangler> parseAndBuild(const NRRDHeader &header, std::string_view input)
     {
-        bool isLittleEndian = header.endian == NRRDEndianness::LITTLE;
+        bool isLittleEndian = header.endian == NRRDEndianness::Little;
         auto data = ByteAssemblerDecorator<T>::assemble(input, isLittleEndian);
         auto flippedData = DataFlipper::flipVertically(header, data);
         return std::make_unique<DataMangler<T>>(std::move(flippedData));
@@ -212,47 +212,47 @@ std::unique_ptr<IDataMangler> RawDecoder::decode(const NRRDHeader &header, std::
         throw std::runtime_error("Expected size and parsed element count is different");
     }
 
-    if (type == NRRDType::CHAR)
+    if (type == NRRDType::Char)
     {
         return DecodedDataBuilder<char>::parseAndBuild(header, input);
     }
 
-    if (type == NRRDType::UNSIGNED_CHAR)
+    if (type == NRRDType::UnsignedChar)
     {
         return DecodedDataBuilder<uint8_t>::parseAndBuild(header, input);
     }
 
-    if (type == NRRDType::SHORT)
+    if (type == NRRDType::Short)
     {
         return DecodedDataBuilder<int16_t>::parseAndBuild(header, input);
     }
 
-    if (type == NRRDType::UNSIGNED_SHORT)
+    if (type == NRRDType::UnsignedShort)
     {
         return DecodedDataBuilder<uint16_t>::parseAndBuild(header, input);
     }
 
-    if (type == NRRDType::INT)
+    if (type == NRRDType::Int)
     {
         return DecodedDataBuilder<int32_t>::parseAndBuild(header, input);
     }
 
-    if (type == NRRDType::UNSIGNED_INT)
+    if (type == NRRDType::UnsignedInt)
     {
         return DecodedDataBuilder<uint32_t>::parseAndBuild(header, input);
     }
 
-    if (type == NRRDType::LONG)
+    if (type == NRRDType::Long)
     {
         return DecodedDataBuilder<int64_t>::parseAndBuild(header, input);
     }
 
-    if (type == NRRDType::UNSIGNED_LONG)
+    if (type == NRRDType::UnsignedLong)
     {
         return DecodedDataBuilder<uint64_t>::parseAndBuild(header, input);
     }
 
-    if (type == NRRDType::FLOAT)
+    if (type == NRRDType::Float)
     {
         return DecodedDataBuilder<float>::parseAndBuild(header, input);
     }

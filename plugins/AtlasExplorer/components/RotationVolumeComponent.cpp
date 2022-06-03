@@ -28,7 +28,7 @@
 
 namespace
 {
-class VolumeValidElement
+class QuaternionVerifier
 {
 public:
     static bool isValid(const brayns::Quaternion &quaternion)
@@ -48,17 +48,26 @@ public:
         }
         return zeroComponents < 4;
     }
+};
 
-    static size_t countValid(const std::vector<brayns::Quaternion> &rotations)
+class QuaternionVolumeVerifier
+{
+public:
+    static std::vector<size_t> computeValidIndices(const std::vector<brayns::Quaternion> &quaternions)
     {
-        size_t result = 0;
-        for (const auto &q : rotations)
+        std::vector<size_t> result;
+        result.reserve(quaternions.size());
+
+        for (size_t i = 0; i < quaternions.size(); ++i)
         {
-            if (isValid(q))
+            if (!QuaternionVerifier::isValid(quaternions[i]))
             {
-                ++result;
+                continue;
             }
+
+            result.push_back(i);
         }
+
         return result;
     }
 };
@@ -80,29 +89,24 @@ public:
         const auto minDimension = glm::compMin(dimensions);
         const float radius = minDimension * 0.05f;
 
-        const auto validElementCount = VolumeValidElement::countValid(rotations);
-        auto result = _allocateTemporary(validElementCount);
+        const auto validQuaternions = QuaternionVolumeVerifier::computeValidIndices(rotations);
+        auto result = _allocateTemporary(validQuaternions.size());
 
         const auto width = sizes.x;
         const auto height = sizes.y;
-        const auto depth = sizes.z;
         const auto frameSize = width * height;
-        const auto linealSize = width * height * depth;
 
-        for (size_t i = 0; i < linealSize; ++i)
+#pragma omp parallel for
+        for (size_t i = 0; i < validQuaternions.size(); ++i)
         {
-            const auto &srcQuaternion = rotations[i];
-            if (!VolumeValidElement::isValid(srcQuaternion))
-            {
-                continue;
-            }
+            const auto index = validQuaternions[i];
+            const auto &srcQuaternion = rotations[index];
+            const auto quaternion = glm::normalize(srcQuaternion);
 
-            const auto z = i / frameSize;
-            const auto localFrame = i % frameSize;
+            const auto z = index / frameSize;
+            const auto localFrame = index % frameSize;
             const auto y = localFrame / width;
             const auto x = localFrame % width;
-
-            const auto quaternion = glm::normalize(srcQuaternion);
 
             const auto voxelCenter = _computeVoxelCenter(dimensions, x, y, z);
             for (auto &axis : result)
@@ -110,7 +114,7 @@ public:
                 // * 0.5f so that the axis length does not invade surronding voxels
                 const auto vector = (quaternion * axis.vector) * minDimension * 0.5f;
                 auto &buffer = axis.geometry;
-                buffer.push_back(brayns::Primitive::cylinder(voxelCenter, voxelCenter + vector, radius));
+                buffer[i] = brayns::Primitive::cylinder(voxelCenter, voxelCenter + vector, radius);
             }
         }
 
@@ -125,7 +129,7 @@ private:
         {
             auto &axis = result[i];
             axis.vector[i] = 1.f;
-            axis.geometry.reserve(elementCount);
+            axis.geometry.resize(elementCount);
         }
         return result;
     }
