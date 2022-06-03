@@ -69,12 +69,6 @@ class AsyncWebSocket:
         except Exception as e:
             raise WebSocketError(str(e))
 
-    async def receive(self) -> Union[bytes, str]:
-        try:
-            return await self._websocket.recv()
-        except Exception as e:
-            raise WebSocketError(str(e))
-
     async def send(self, data: Union[bytes, str]) -> None:
         try:
             await self._websocket.send(data)
@@ -84,10 +78,10 @@ class AsyncWebSocket:
     async def run(self) -> None:
         while True:
             try:
-                data = await self.receive()
-            except WebSocketError as e:
+                data = await self._websocket.recv()
+            except Exception as e:
                 with self._condition:
-                    self._error = e
+                    self._error = WebSocketError(str(e))
                     self._condition.notify_all()
                 return
             with self._condition:
