@@ -20,10 +20,17 @@
 
 import unittest
 
+from brayns.core.common.color3 import Color3
 from brayns.core.common.color4 import Color4
 
 
 class TestColor4(unittest.TestCase):
+
+    def test_from_color3(self) -> None:
+        ref = Color4(1, 2, 3, 4)
+        color = Color3(1, 2, 3)
+        test = Color4.from_color3(color, 4)
+        self.assertEqual(test, ref)
 
     def test_iter(self) -> None:
         test = list(Color4(1, 2, 3, 4))
@@ -38,6 +45,12 @@ class TestColor4(unittest.TestCase):
     def test_opaque(self) -> None:
         test = Color4(1, 2, 3, 0).opaque
         ref = Color4(1, 2, 3, 1)
+        self.assertEqual(test, ref)
+
+    def test_without_alpha(self) -> None:
+        color = Color4(1, 2, 3, 4)
+        ref = Color3(1, 2, 3)
+        test = color.without_alpha
         self.assertEqual(test, ref)
 
 

@@ -68,3 +68,7 @@ class Simulation:
     @property
     def duration(self) -> float:
         return self.frame_count * self.delta_time
+
+    @property
+    def fps(self) -> float:
+        return 1 / self.delta_time * self.time_unit.per_second

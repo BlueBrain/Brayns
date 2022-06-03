@@ -75,6 +75,9 @@ class TestSimulation(unittest.TestCase):
     def test_duration(self) -> None:
         self.assertEqual(self._simulation.duration, 1)
 
+    def test_fps(self) -> None:
+        self.assertEqual(self._simulation.fps, 10000)
+
 
 if __name__ == '__main__':
     unittest.main()
