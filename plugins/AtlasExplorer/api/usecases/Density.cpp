@@ -106,6 +106,11 @@ private:
 };
 }
 
+std::string Density::getName() const
+{
+    return "Density";
+}
+
 bool Density::isVolumeValid(const AtlasVolume &volume) const
 {
     return volume.getVoxelSize() == 1;
@@ -114,12 +119,6 @@ bool Density::isVolumeValid(const AtlasVolume &volume) const
 std::unique_ptr<brayns::Model> Density::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
 {
     (void)payload;
-
-    const auto voxelSize = volume.getVoxelSize();
-    if (voxelSize > 1)
-    {
-        throw std::runtime_error("A volume with 1D voxels is required to generaty a density view");
-    }
 
     auto densityData = DensityVolumeBuilder::build(volume);
 

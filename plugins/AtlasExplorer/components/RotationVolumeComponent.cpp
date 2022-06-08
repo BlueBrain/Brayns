@@ -165,22 +165,6 @@ RenderableAxes::RenderableAxes(std::vector<RenderableAxisList> geometry)
 {
 }
 
-void RenderableAxes::forEach(const std::function<void(RenderableAxisList &)> &callback)
-{
-    for (auto &axis : _geometry)
-    {
-        callback(axis);
-    }
-}
-
-void RenderableAxes::forEach(const std::function<void(const RenderableAxisList &)> &callback) const
-{
-    for (const auto &axis : _geometry)
-    {
-        callback(axis);
-    }
-}
-
 RotationVolumeComponent::RotationVolumeComponent(
     const brayns::Vector3ui &sizes,
     const brayns::Vector3f &dimensions,

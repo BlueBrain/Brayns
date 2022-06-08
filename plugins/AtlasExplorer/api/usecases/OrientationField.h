@@ -21,14 +21,11 @@
 #pragma once
 
 #include <api/IUseCase.h>
-#include <api/VisualizationUseCase.h>
 
 class OrientationField final : public IUseCase
 {
 public:
-    inline static const VisualizationUseCase Type = VisualizationUseCase::OrientationField;
-
-public:
+    std::string getName() const override;
     bool isVolumeValid(const AtlasVolume &volume) const override;
     std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const override;
 };

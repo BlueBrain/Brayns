@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include <brayns/engine/Scene.h>
 #include <brayns/engine/components/GeometryRendererComponent.h>
-#include <brayns/engine/scenecomponents/SceneModelManager.h>
 #include <brayns/network/adapters/GeometryAdapter.h>
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
@@ -34,8 +34,8 @@ class AddGeometryEntrypoint : public Entrypoint<std::vector<GeometryWithColor<T>
 public:
     using Request = typename Entrypoint<std::vector<GeometryWithColor<T>>, ModelInstance>::Request;
 
-    AddGeometryEntrypoint(SceneModelManager &models)
-        : _models(models)
+    AddGeometryEntrypoint(Scene &scene)
+        : _scene(scene)
     {
     }
 
@@ -58,19 +58,18 @@ public:
         auto &renderComponent = newModel->addComponent<GeometryRendererComponent<T>>(std::move(geometries));
         renderComponent.setColors(colors);
 
-        auto &instance = _models.addModel({}, std::move(newModel));
-
+        auto &instance = _scene.addModel({}, std::move(newModel));
         request.reply(instance);
     }
 
 private:
-    SceneModelManager &_models;
+    Scene &_scene;
 };
 
 class AddBoxesEntrypoint final : public AddGeometryEntrypoint<Box>
 {
 public:
-    AddBoxesEntrypoint(SceneModelManager &models);
+    AddBoxesEntrypoint(Scene &scene);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -79,7 +78,7 @@ public:
 class AddPlanesEntrypoint final : public AddGeometryEntrypoint<Plane>
 {
 public:
-    AddPlanesEntrypoint(SceneModelManager &models);
+    AddPlanesEntrypoint(Scene &scene);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -88,7 +87,7 @@ public:
 class AddCapsulesEntrypoint final : public AddGeometryEntrypoint<Primitive>
 {
 public:
-    AddCapsulesEntrypoint(SceneModelManager &models);
+    AddCapsulesEntrypoint(Scene &scene);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -97,7 +96,7 @@ public:
 class AddSpheresEntrypoint final : public AddGeometryEntrypoint<Sphere>
 {
 public:
-    AddSpheresEntrypoint(SceneModelManager &models);
+    AddSpheresEntrypoint(Scene &scene);
 
     std::string getMethod() const override;
     std::string getDescription() const override;

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/scenecomponents/SceneLightManager.h>
+#include <brayns/engine/Scene.h>
 #include <brayns/network/adapters/LightAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -33,8 +33,8 @@ class AddLightEntrypoint : public Entrypoint<T, uint32_t>
 public:
     using Request = typename Entrypoint<T, uint32_t>::Request;
 
-    AddLightEntrypoint(SceneLightManager &sceneLightManager)
-        : _sceneLightManager(sceneLightManager)
+    AddLightEntrypoint(Scene &scene)
+        : _scene(scene)
     {
     }
 
@@ -42,18 +42,18 @@ public:
     {
         auto light = std::make_unique<T>();
         request.getParams(*light);
-        auto lightId = _sceneLightManager.addLight(std::move(light));
+        auto lightId = _scene.addLight(std::move(light));
         request.reply(Json::serialize(lightId));
     }
 
 private:
-    SceneLightManager &_sceneLightManager;
+    Scene &_scene;
 };
 
 class AddLightAmbientEntrypoint : public AddLightEntrypoint<AmbientLight>
 {
 public:
-    AddLightAmbientEntrypoint(SceneLightManager &sceneLightManager);
+    AddLightAmbientEntrypoint(Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -62,7 +62,7 @@ public:
 class AddLightDirectionalEntrypoint : public AddLightEntrypoint<DirectionalLight>
 {
 public:
-    AddLightDirectionalEntrypoint(SceneLightManager &sceneLightManager);
+    AddLightDirectionalEntrypoint(Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -71,7 +71,7 @@ public:
 class AddLightQuadEntrypoint : public AddLightEntrypoint<QuadLight>
 {
 public:
-    AddLightQuadEntrypoint(SceneLightManager &sceneLightManager);
+    AddLightQuadEntrypoint(Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

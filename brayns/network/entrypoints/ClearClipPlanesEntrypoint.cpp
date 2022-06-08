@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-ClearClipPlanesEntrypoint::ClearClipPlanesEntrypoint(SceneClipManager &manager)
-    : _manager(manager)
+ClearClipPlanesEntrypoint::ClearClipPlanesEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -40,7 +40,7 @@ std::string ClearClipPlanesEntrypoint::getDescription() const
 
 void ClearClipPlanesEntrypoint::onRequest(const Request &request)
 {
-    _manager.removeAllClippingModels();
+    _scene.removeAllClippingModels();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

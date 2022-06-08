@@ -20,10 +20,26 @@
 
 #pragma once
 
-#include <brayns/engine/scenecomponents/SceneModelManager.h>
+#include <brayns/engine/Scene.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
 
-class GenerateAtlasReference
+#include <api/UseCaseManager.h>
+
+#include <network/messages/AvailableUseCasesMessage.h>
+
+#include <vector>
+
+class GetAvailableAtlasUseCasesEntrypoint
+    : public brayns::Entrypoint<AvailableUseCasesMessage, std::vector<std::string>>
 {
 public:
-    static void generate(brayns::SceneModelManager &modelManager, uint32_t sourceModelId, brayns::Model &target);
+    GetAvailableAtlasUseCasesEntrypoint(brayns::Scene &scene);
+
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
+
+private:
+    brayns::Scene &_scene;
+    UseCaseManager _useCases;
 };

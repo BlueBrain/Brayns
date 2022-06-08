@@ -40,15 +40,20 @@ uint32_t SceneClipManager::addClippingModel(std::unique_ptr<Model> clippingModel
     return id;
 }
 
-void SceneClipManager::removeClippingModel(const uint32_t id)
+void SceneClipManager::removeClippingModels(const std::vector<uint32_t> &ids)
 {
-    auto eraseCount = _clippingModels.erase(id);
-    if (eraseCount == 0)
+    for (auto id : ids)
     {
-        throw std::invalid_argument("No clipping model with ID " + std::to_string(id) + " exists");
+        if (_clippingModels.find(id) == _clippingModels.end())
+        {
+            throw std::invalid_argument("No clipping model with ID " + std::to_string(id) + " exists");
+        }
     }
-
-    _idFactory.releaseID(id);
+    for (auto id : ids)
+    {
+        _clippingModels.erase(id);
+        _idFactory.releaseID(id);
+    }
     _dirty = true;
 }
 

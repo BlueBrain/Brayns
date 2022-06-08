@@ -26,8 +26,8 @@
 
 #include <io/NRRDLoader.h>
 
-#include <network/entrypoints/AvailableUseCasesEntrypoint.h>
-#include <network/entrypoints/VisualizeUseCaseEntrypoint.h>
+#include <network/entrypoints/GetAvailableAtlasUseCasesEntrypoint.h>
+#include <network/entrypoints/VisualizeAtlasUseCaseEntrypoint.h>
 
 void AtlasExplorerPlugin::init()
 {
@@ -39,12 +39,11 @@ void AtlasExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &interfa
 {
     auto &engine = _api->getEngine();
     auto &scene = engine.getScene();
-    auto &modelManager = scene.getModels();
 
     auto builder = brayns::EntrypointBuilder("Atlas Explorer", interface);
 
-    builder.add<AvailableUseCasesEntrypoint>(modelManager);
-    builder.add<VisualizeUseCaseEntrypoint>(modelManager);
+    builder.add<GetAvailableAtlasUseCasesEntrypoint>(scene);
+    builder.add<VisualizeAtlasUseCaseEntrypoint>(scene);
 }
 
 extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)

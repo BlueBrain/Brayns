@@ -55,52 +55,52 @@ public:
         static_assert(std::is_scalar_v<T>, "DataMangler only supports scalar values");
     }
 
-    std::vector<char> asChars() const noexcept
+    std::vector<char> asChars() const noexcept override
     {
         return _as<char>();
     }
 
-    std::vector<uint8_t> asBytes() const noexcept
+    std::vector<uint8_t> asBytes() const noexcept override
     {
         return _as<uint8_t>();
     }
 
-    std::vector<int16_t> asShorts() const noexcept
+    std::vector<int16_t> asShorts() const noexcept override
     {
         return _as<int16_t>();
     }
 
-    std::vector<uint16_t> asUnsingedShorts() const noexcept
+    std::vector<uint16_t> asUnsingedShorts() const noexcept override
     {
         return _as<uint16_t>();
     }
 
-    std::vector<int32_t> asIntegers() const noexcept
+    std::vector<int32_t> asIntegers() const noexcept override
     {
         return _as<int32_t>();
     }
 
-    std::vector<uint32_t> asUnsignedIntegers() const noexcept
+    std::vector<uint32_t> asUnsignedIntegers() const noexcept override
     {
         return _as<uint32_t>();
     }
 
-    std::vector<int64_t> asLongs() const noexcept
+    std::vector<int64_t> asLongs() const noexcept override
     {
         return _as<int64_t>();
     }
 
-    std::vector<uint64_t> asUnsignedLongs() const noexcept
+    std::vector<uint64_t> asUnsignedLongs() const noexcept override
     {
         return _as<uint64_t>();
     }
 
-    std::vector<float> asFloats() const noexcept
+    std::vector<float> asFloats() const noexcept override
     {
         return _as<float>();
     }
 
-    std::vector<double> asDoubles() const noexcept
+    std::vector<double> asDoubles() const noexcept override
     {
         return _as<double>();
     }

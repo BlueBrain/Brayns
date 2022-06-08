@@ -24,13 +24,15 @@
 
 #include <api/AtlasVolume.h>
 
+#include <memory>
+
 class AtlasComponent final : public brayns::Component
 {
 public:
-    AtlasComponent(AtlasVolume volume);
+    AtlasComponent(const std::shared_ptr<AtlasVolume> &volume);
 
-    const AtlasVolume &getVolume() const noexcept;
+    const std::shared_ptr<AtlasVolume> &getVolume() const noexcept;
 
 private:
-    AtlasVolume _volume;
+    std::shared_ptr<AtlasVolume> _volume;
 };

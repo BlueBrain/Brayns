@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/scenecomponents/SceneModelManager.h>
+#include <brayns/engine/Scene.h>
 
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
@@ -32,13 +32,13 @@ namespace brayns
 class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelInstance>
 {
 public:
-    GetModelEntrypoint(SceneModelManager &sceneModelManager);
+    GetModelEntrypoint(Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    SceneModelManager &_sceneModelManager;
+    Scene &_scene;
 };
 } // namespace brayns

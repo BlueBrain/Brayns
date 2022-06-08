@@ -45,14 +45,14 @@ struct SimulationUpdater
 
 namespace brayns
 {
-void SimulationScanner::scanAndUpdate(SceneModelManager &modelManager, SimulationParameters &globalSimulation)
+void SimulationScanner::scanAndUpdate(Scene &scene, SimulationParameters &globalSimulation)
 {
     float earlierStart = std::numeric_limits<float>::max();
     float latestEnd = std::numeric_limits<float>::lowest();
     float smallestDt = std::numeric_limits<float>::max();
     bool foundSimulation{false};
 
-    auto &instances = modelManager.getAllModelInstances();
+    auto &instances = scene.getAllModelInstances();
     for (auto instancePtr : instances)
     {
         auto &model = instancePtr->getModel();

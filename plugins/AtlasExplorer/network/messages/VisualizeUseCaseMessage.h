@@ -23,10 +23,8 @@
 #include <brayns/json/JsonObjectMacro.h>
 #include <brayns/json/JsonType.h>
 
-#include <network/adapters/VisualizationUseCaseAdapter.h>
-
 BRAYNS_JSON_OBJECT_BEGIN(VisualizeUseCaseMessage)
 BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model holding an atlas volume")
-BRAYNS_JSON_OBJECT_ENTRY(VisualizationUseCase, use_case, "Use case name")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, use_case, "Use case name")
 BRAYNS_JSON_OBJECT_ENTRY(brayns::JsonValue, params, "Additional use case parameters")
 BRAYNS_JSON_OBJECT_END()

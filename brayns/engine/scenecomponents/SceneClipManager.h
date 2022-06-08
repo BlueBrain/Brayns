@@ -44,11 +44,11 @@ public:
     uint32_t addClippingModel(std::unique_ptr<Model> clippingModel) noexcept;
 
     /**
-     * @brief Removes a clipping model object
-     *
-     * @param id
+     * @brief Removes a list of clipping models from a list of IDs
+     * @param ids List of model ids to remove
+     * @throws std::invalid_argument if any of the id does not belong to any existing clipping model
      */
-    void removeClippingModel(const uint32_t id);
+    void removeClippingModels(const std::vector<uint32_t> &ids);
 
     /**
      * @brief Removes all clipping models from this manager

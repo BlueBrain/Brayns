@@ -21,14 +21,11 @@
 #pragma once
 
 #include <api/IUseCase.h>
-#include <api/VisualizationUseCase.h>
 
 class OutlineShell final : public IUseCase
 {
 public:
-    inline static const VisualizationUseCase Type = VisualizationUseCase::OutlineShell;
-
-public:
+    std::string getName() const override;
     bool isVolumeValid(const AtlasVolume &volume) const override;
     std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const override;
 };

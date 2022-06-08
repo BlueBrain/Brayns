@@ -43,16 +43,22 @@ public:
     uint32_t addLight(std::unique_ptr<Light> light) noexcept;
 
     /**
-     * @brief Removes a light identifid by its ID
-     * @throws std::invalid_argument if the light id does not exist
-     * @param lightId
+     * @brief Removes a list of lights identifid by their ID
+     * @param lightIds
+     * @throws std::invalid_argument if any of the light id does not belong to any existing light
      */
-    void removeLight(const uint32_t lightId);
+    void removeLights(const std::vector<uint32_t> &lightId);
 
     /**
      * @brief Removes all lights from the scene
      */
     void removeAllLights() noexcept;
+
+    /**
+     * @brief Return the bounds of all the lights in the manager
+     * @return Bounds
+     */
+    Bounds getBounds() const noexcept;
 
 private:
     friend class Scene;

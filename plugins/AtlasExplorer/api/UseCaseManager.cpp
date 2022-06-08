@@ -28,63 +28,59 @@
 #include <api/usecases/OutlineShell.h>
 #include <api/usecases/SharedCoordinatesAreaBorders.h>
 
-namespace
+UseCaseManager::UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases)
+    : _useCases(std::move(useCases))
 {
-class UseCaseRegisterer
-{
-public:
-    template<typename T>
-    static void registerUseCase(std::vector<UseCaseManager::UseCaseEntry> &dst)
-    {
-        auto &entry = dst.emplace_back();
-        entry.useCase = T::Type;
-        entry.handler = std::make_unique<T>();
-    }
-};
 }
 
-UseCaseManager::UseCaseManager()
+UseCaseManager UseCaseManager::defaultUseCases()
 {
-    UseCaseRegisterer::registerUseCase<AreaCollage>(_useCases);
-    UseCaseRegisterer::registerUseCase<Density>(_useCases);
-    UseCaseRegisterer::registerUseCase<HighlightColumn>(_useCases);
-    UseCaseRegisterer::registerUseCase<LayerDistance>(_useCases);
-    UseCaseRegisterer::registerUseCase<OrientationField>(_useCases);
-    UseCaseRegisterer::registerUseCase<OutlineShell>(_useCases);
-    UseCaseRegisterer::registerUseCase<SharedCoordinatesAreaBorders>(_useCases);
+    std::vector<std::unique_ptr<IUseCase>> useCases;
+    useCases.push_back(std::make_unique<AreaCollage>());
+    useCases.push_back(std::make_unique<Density>());
+    useCases.push_back(std::make_unique<HighlightColumn>());
+    useCases.push_back(std::make_unique<LayerDistance>());
+    useCases.push_back(std::make_unique<OrientationField>());
+    useCases.push_back(std::make_unique<OutlineShell>());
+    useCases.push_back(std::make_unique<SharedCoordinatesAreaBorders>());
+    return UseCaseManager(std::move(useCases));
 }
 
-std::vector<VisualizationUseCase> UseCaseManager::getValidUseCasesForVolume(const AtlasVolume &volume) const
+std::vector<std::string> UseCaseManager::getValidUseCasesForVolume(const AtlasVolume &volume) const
 {
-    std::vector<VisualizationUseCase> result;
+    std::vector<std::string> result;
     result.reserve(_useCases.size());
 
-    for (const auto &entry : _useCases)
+    for (const auto &useCase : _useCases)
     {
-        const auto &handler = entry.handler;
-        if (handler->isVolumeValid(volume))
+        if (useCase->isVolumeValid(volume))
         {
-            result.push_back(entry.useCase);
+            result.push_back(useCase->getName());
         }
     }
     return result;
 }
 
 std::unique_ptr<brayns::Model> UseCaseManager::executeUseCase(
-    VisualizationUseCase useCase,
+    const std::string &useCaseName,
     const AtlasVolume &volume,
     const brayns::JsonValue &payload) const
 {
     auto it = std::find_if(
         _useCases.begin(),
         _useCases.end(),
-        [useCase](const UseCaseEntry &entry) { return useCase == entry.useCase; });
+        [&](const std::unique_ptr<IUseCase> &useCase) { return useCase->getName() == useCaseName; });
 
     if (it == _useCases.end())
     {
         throw std::runtime_error("Unhandled use-case");
     }
 
-    const auto &handler = it->handler;
-    return handler->execute(volume, payload);
+    const auto &useCase = (**it);
+    if (!useCase.isVolumeValid(volume))
+    {
+        throw std::runtime_error("The volume is not valid to execute the use case " + useCaseName);
+    }
+
+    return useCase.execute(volume, payload);
 }

@@ -30,6 +30,8 @@ class IUseCase
 public:
     virtual ~IUseCase() = default;
 
+    virtual std::string getName() const = 0;
+
     virtual bool isVolumeValid(const AtlasVolume &volume) const = 0;
 
     virtual std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload)

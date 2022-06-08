@@ -84,6 +84,11 @@ private:
 };
 }
 
+std::string HighlightColumn::getName() const
+{
+    return "Highlight column";
+}
+
 bool HighlightColumn::isVolumeValid(const AtlasVolume &volume) const
 {
     (void)volume;

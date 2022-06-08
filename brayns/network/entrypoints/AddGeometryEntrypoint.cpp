@@ -22,8 +22,8 @@
 
 namespace brayns
 {
-AddBoxesEntrypoint::AddBoxesEntrypoint(SceneModelManager &models)
-    : AddGeometryEntrypoint<Box>(models)
+AddBoxesEntrypoint::AddBoxesEntrypoint(Scene &scene)
+    : AddGeometryEntrypoint<Box>(scene)
 {
 }
 
@@ -34,11 +34,11 @@ std::string AddBoxesEntrypoint::getMethod() const
 
 std::string AddBoxesEntrypoint::getDescription() const
 {
-    return "Adds a list of boxes to the models";
+    return "Adds a list of boxes to the scene";
 }
 
-AddPlanesEntrypoint::AddPlanesEntrypoint(SceneModelManager &models)
-    : AddGeometryEntrypoint<Plane>(models)
+AddPlanesEntrypoint::AddPlanesEntrypoint(Scene &scene)
+    : AddGeometryEntrypoint<Plane>(scene)
 {
 }
 
@@ -49,11 +49,11 @@ std::string AddPlanesEntrypoint::getMethod() const
 
 std::string AddPlanesEntrypoint::getDescription() const
 {
-    return "Adds a list of planes to the models";
+    return "Adds a list of planes to the scene";
 }
 
-AddCapsulesEntrypoint::AddCapsulesEntrypoint(SceneModelManager &models)
-    : AddGeometryEntrypoint<Primitive>(models)
+AddCapsulesEntrypoint::AddCapsulesEntrypoint(Scene &scene)
+    : AddGeometryEntrypoint<Primitive>(scene)
 {
 }
 
@@ -64,11 +64,11 @@ std::string AddCapsulesEntrypoint::getMethod() const
 
 std::string AddCapsulesEntrypoint::getDescription() const
 {
-    return "Adds a list of capsules to the models";
+    return "Adds a list of capsules to the scene";
 }
 
-AddSpheresEntrypoint::AddSpheresEntrypoint(SceneModelManager &models)
-    : AddGeometryEntrypoint<Sphere>(models)
+AddSpheresEntrypoint::AddSpheresEntrypoint(Scene &scene)
+    : AddGeometryEntrypoint<Sphere>(scene)
 {
 }
 
@@ -79,6 +79,6 @@ std::string AddSpheresEntrypoint::getMethod() const
 
 std::string AddSpheresEntrypoint::getDescription() const
 {
-    return "Adds a list of spheres to the models";
+    return "Adds a list of spheres to the scene";
 }
 }

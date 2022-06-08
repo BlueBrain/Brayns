@@ -24,37 +24,30 @@
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 #include <components/AtlasComponent.h>
-#include <components/AtlasReferenceComponent.h>
 
-const AtlasVolume &ExtractAtlas::fromId(brayns::SceneModelManager &modelManager, uint32_t id)
+const AtlasVolume &ExtractAtlas::atlasFromId(brayns::Scene &scene, uint32_t id)
 {
-    auto &instance = brayns::ExtractModel::fromId(modelManager, id);
-    auto &model = instance.getModel();
-    try
-    {
-        return fromModel(model);
-    }
-    catch (...)
-    {
-    }
-
-    try
-    {
-        auto &component = model.getComponent<AtlasReferenceComponent>();
-        return fromId(modelManager, component.getSourceModelId());
-    }
-    catch (...)
-    {
-        throw brayns::InvalidParamsException("The requested model does not have an Atlas component");
-    }
+    return *componentFromId(scene, id).getVolume();
 }
 
-const AtlasVolume &ExtractAtlas::fromModel(brayns::Model &model)
+const AtlasVolume &ExtractAtlas::atlasFromModel(brayns::Model &model)
+{
+    return *componentFromModel(model).getVolume();
+}
+
+const AtlasComponent &ExtractAtlas::componentFromId(brayns::Scene &scene, uint32_t id)
+{
+    auto &instance = brayns::ExtractModel::fromId(scene, id);
+    auto &model = instance.getModel();
+    return componentFromModel(model);
+}
+
+const AtlasComponent &ExtractAtlas::componentFromModel(brayns::Model &model)
 {
     try
     {
         auto &component = model.getComponent<AtlasComponent>();
-        return component.getVolume();
+        return component;
     }
     catch (...)
     {

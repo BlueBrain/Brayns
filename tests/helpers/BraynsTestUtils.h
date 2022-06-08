@@ -42,8 +42,7 @@ public:
     {
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
-        auto &lightManager = scene.getLights();
-        lightManager.addLight(std::move(light));
+        scene.addLight(std::move(light));
     }
 
     static void addModel(brayns::Brayns &brayns, const std::string &path)
@@ -53,9 +52,7 @@ public:
         auto models = loader.loadFromFile(path, {}, {});
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
-        auto &modelManager = scene.getModels();
-        modelManager.addModel({}, std::move(models.front()));
-        scene.computeBounds();
+        scene.addModels({}, std::move(models));
     }
 
     static void adjustPerspectiveView(brayns::Brayns &brayns)

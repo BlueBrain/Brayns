@@ -81,8 +81,7 @@ private:
     brayns::ModelInstance *_findHittedInstance(OSPInstance hittedInstance)
     {
         auto &scene = _engine.getScene();
-        auto &models = scene.getModels();
-        auto &instances = models.getAllModelInstances();
+        auto &instances = scene.getAllModelInstances();
 
         auto begin = instances.begin();
         auto end = instances.end();

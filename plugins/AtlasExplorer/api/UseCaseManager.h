@@ -24,27 +24,22 @@
 
 #include <api/AtlasVolume.h>
 #include <api/IUseCase.h>
-#include <api/VisualizationUseCase.h>
 
+#include <memory>
 #include <vector>
 
 class UseCaseManager
 {
 public:
-    struct UseCaseEntry
-    {
-        VisualizationUseCase useCase;
-        std::unique_ptr<IUseCase> handler;
-    };
+    UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases);
 
-public:
-    UseCaseManager();
+    static UseCaseManager defaultUseCases();
 
-    std::vector<VisualizationUseCase> getValidUseCasesForVolume(const AtlasVolume &volume) const;
+    std::vector<std::string> getValidUseCasesForVolume(const AtlasVolume &volume) const;
 
     std::unique_ptr<brayns::Model>
-        executeUseCase(VisualizationUseCase useCase, const AtlasVolume &volume, const brayns::JsonValue &payload) const;
+        executeUseCase(const std::string &useCase, const AtlasVolume &volume, const brayns::JsonValue &payload) const;
 
 private:
-    std::vector<UseCaseEntry> _useCases;
+    std::vector<std::unique_ptr<IUseCase>> _useCases;
 };

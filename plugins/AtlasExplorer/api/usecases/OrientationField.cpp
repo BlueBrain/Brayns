@@ -54,6 +54,11 @@ public:
 };
 }
 
+std::string OrientationField::getName() const
+{
+    return "Orientation field";
+}
+
 bool OrientationField::isVolumeValid(const AtlasVolume &volume) const
 {
     return volume.getVoxelSize() == 4;
@@ -63,11 +68,6 @@ std::unique_ptr<brayns::Model> OrientationField::execute(const AtlasVolume &volu
     const
 {
     (void)payload;
-    const auto voxelSize = volume.getVoxelSize();
-    if (voxelSize != 4)
-    {
-        throw std::runtime_error("A volume with 4D voxels is required to generate an orientation field");
-    }
 
     const auto &data = volume.getData();
     const auto floats = data.asFloats();

@@ -22,12 +22,12 @@
 
 #include <cassert>
 
-AtlasComponent::AtlasComponent(AtlasVolume volume)
-    : _volume(std::move(volume))
+AtlasComponent::AtlasComponent(const std::shared_ptr<AtlasVolume> &volume)
+    : _volume(volume)
 {
 }
 
-const AtlasVolume &AtlasComponent::getVolume() const noexcept
+const std::shared_ptr<AtlasVolume> &AtlasComponent::getVolume() const noexcept
 {
     return _volume;
 }

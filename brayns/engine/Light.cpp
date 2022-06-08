@@ -62,6 +62,11 @@ bool Light::isVisible() const noexcept
     return _visible;
 }
 
+Bounds Light::computeBounds() const noexcept
+{
+    return {};
+}
+
 bool Light::commit()
 {
     if (!isModified())

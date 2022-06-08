@@ -30,8 +30,6 @@
 
 namespace brayns
 {
-class Scene;
-
 /**
  * @brief The ModelsLoadParameters struct holds the information with which a group of models was loaded
  */
@@ -56,16 +54,13 @@ struct ModelLoadParameters
 class SceneModelManager
 {
 public:
-    SceneModelManager(Scene &scene);
-
     /**
-     * @brief Adds a new model to the scene and creates an instance out of it to be rendered.
-     * Will automatically trigger the scene to re-compute the bounds.
-     * @param loadParameters Parameters which were used to load the model
-     * @param model The model to add to the scene
-     * @returns ModelInstance &
+     * @brief Adds a model to the list and creates an instance out of it to be rendered.
+     * @param loadParameters Parameters with which the model was loaded
+     * @param model
+     * @return ModelInstance&
      */
-    ModelInstance &addModel(ModelLoadParameters loadParameters, std::unique_ptr<Model> model);
+    ModelInstance &addModel(ModelLoadParameters loadParameters, std::unique_ptr<brayns::Model> model);
 
     /**
      * @brief Adds a list of new model to the scene and creates instances out of them to be rendered.
@@ -194,10 +189,10 @@ private:
     ModelInstance &_createModelInstance(ModelEntry &modelEntry);
 
 private:
-    Scene &_scene;
     IDFactory<uint32_t> _modelIdFactory;
     IDFactory<uint32_t> _instanceIdFactory;
     std::vector<ModelEntry> _models;
     std::vector<ModelInstance *> _instances;
+    bool _dirty = false;
 };
 }

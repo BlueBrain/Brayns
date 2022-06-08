@@ -20,6 +20,11 @@
 
 #include "LayerDistance.h"
 
+std::string LayerDistance::getName() const
+{
+    return "Layer distance";
+}
+
 bool LayerDistance::isVolumeValid(const AtlasVolume &volume) const
 {
     (void)volume;

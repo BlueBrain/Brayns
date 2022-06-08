@@ -20,6 +20,11 @@
 
 #include "SharedCoordinatesAreaBorders.h"
 
+std::string SharedCoordinatesAreaBorders::getName() const
+{
+    return "Borders of areas with shared coordinates";
+}
+
 bool SharedCoordinatesAreaBorders::isVolumeValid(const AtlasVolume &volume) const
 {
     (void)volume;

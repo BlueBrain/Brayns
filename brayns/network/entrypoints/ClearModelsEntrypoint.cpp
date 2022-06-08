@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-ClearModelsEntrypoint::ClearModelsEntrypoint(SceneModelManager &manager)
-    : _manager(manager)
+ClearModelsEntrypoint::ClearModelsEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -40,7 +40,7 @@ std::string ClearModelsEntrypoint::getDescription() const
 
 void ClearModelsEntrypoint::onRequest(const Request &request)
 {
-    _manager.removeAllModelInstances();
+    _scene.removeAllModelInstances();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

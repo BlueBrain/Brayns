@@ -41,15 +41,5 @@ public:
      * @throw JsonRpcException Model not found.
      */
     static ModelInstance &fromId(Scene &scene, uint32_t id);
-
-    /**
-     * @brief Extract a model from a scene model manager using its ID.
-     *
-     * @param sceneModelManager The scene model manager object.
-     * @param id Model ID.
-     * @return ModelInstance& Model instance.
-     * @throw JsonRpcException Model not found.
-     */
-    static ModelInstance &fromId(SceneModelManager &sceneModelManager, uint32_t id);
 };
 } // namespace brayns

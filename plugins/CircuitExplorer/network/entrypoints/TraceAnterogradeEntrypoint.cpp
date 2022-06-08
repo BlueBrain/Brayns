@@ -25,8 +25,8 @@
 
 #include <components/CircuitColorComponent.h>
 
-TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(brayns::SceneModelManager &modelManager)
-    : _modelManager(modelManager)
+TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(brayns::Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -53,7 +53,7 @@ void TraceAnterogradeEntrypoint::onRequest(const Request &request)
 
     // Extract API data
     auto modelId = params.model_id;
-    auto &modelInstance = brayns::ExtractModel::fromId(_modelManager, modelId);
+    auto &modelInstance = brayns::ExtractModel::fromId(_scene, modelId);
     auto &model = modelInstance.getModel();
     auto &colorComponent = model.getComponent<CircuitColorComponent>();
     auto &colorHandler = colorComponent.getColorHandler();

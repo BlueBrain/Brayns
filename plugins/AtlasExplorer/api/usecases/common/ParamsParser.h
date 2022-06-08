@@ -20,6 +20,7 @@
 
 #include <brayns/json/Json.h>
 #include <brayns/json/JsonSchemaValidator.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/utils/StringUtils.h>
 
 class ParamsParser
@@ -31,12 +32,11 @@ public:
         const auto schema = brayns::Json::getSchema<T>();
         const auto errors = brayns::JsonSchemaValidator::validate(payload, schema);
 
-        if (errors.empty())
+        if (!errors.empty())
         {
-            return brayns::Json::deserialize<T>(payload);
+            throw brayns::InvalidParamsException("Could not parse use case parameters", errors);
         }
 
-        const auto formattedErrors = brayns::string_utils::join(errors, "\n");
-        throw std::invalid_argument("Could not parse use case parameters:\n" + formattedErrors);
+        return brayns::Json::deserialize<T>(payload);
     }
 };

@@ -62,7 +62,6 @@ namespace brayns
 {
 Scene::Scene()
     : _bounds(Vector3f(0.f), Vector3f(0.f))
-    , _modelManager(*this)
     , _handle(ospNewWorld())
 {
     // Need an initial commit until there is any content that can trigger the commit function
@@ -81,7 +80,9 @@ const Bounds &Scene::getBounds() const noexcept
 
 void Scene::computeBounds() noexcept
 {
-    _bounds = _modelManager.getBounds();
+    _bounds = Bounds();
+    _bounds.expand(_modelManager.getBounds());
+    _bounds.expand(_lightManager.getBounds());
 }
 
 void Scene::preRender(const ParametersManager &params)
@@ -126,24 +127,77 @@ bool Scene::commit()
     return needsCommit;
 }
 
-SceneModelManager &Scene::getModels() noexcept
+ModelInstance &Scene::addModel(ModelLoadParameters params, std::unique_ptr<Model> model)
 {
-    return _modelManager;
+    return _modelManager.addModel(std::move(params), std::move(model));
 }
 
-const SceneModelManager &Scene::getModels() const noexcept
+std::vector<ModelInstance *> Scene::addModels(ModelLoadParameters params, std::vector<std::unique_ptr<Model>> models)
 {
-    return _modelManager;
+    auto instances = _modelManager.addModels(std::move(params), std::move(models));
+    computeBounds();
+    return instances;
 }
 
-SceneClipManager &Scene::getClippingModels() noexcept
+void Scene::removeModelInstances(const std::vector<uint32_t> &instanceIds)
 {
-    return _clippingManager;
+    _modelManager.removeModels(instanceIds);
+    computeBounds();
 }
 
-SceneLightManager &Scene::getLights() noexcept
+void Scene::removeAllModelInstances() noexcept
 {
-    return _lightManager;
+    _modelManager.removeAllModelInstances();
+    computeBounds();
+}
+
+ModelInstance &Scene::getModelInstance(uint32_t instanceId)
+{
+    return _modelManager.getModelInstance(instanceId);
+}
+
+const std::vector<ModelInstance *> &Scene::getAllModelInstances() const noexcept
+{
+    return _modelManager.getAllModelInstances();
+}
+
+const ModelLoadParameters &Scene::getModelLoadParameters(uint32_t instanceId) const
+{
+    return _modelManager.getModelLoadParameters(instanceId);
+}
+
+uint32_t Scene::addLight(std::unique_ptr<Light> light)
+{
+    auto lightId = _lightManager.addLight(std::move(light));
+    computeBounds();
+    return lightId;
+}
+
+void Scene::removeLights(const std::vector<uint32_t> &lightIds)
+{
+    _lightManager.removeLights(lightIds);
+    computeBounds();
+}
+
+void Scene::removeAllLights() noexcept
+{
+    _lightManager.removeAllLights();
+    computeBounds();
+}
+
+uint32_t Scene::addClippingModel(std::unique_ptr<Model> model)
+{
+    return _clippingManager.addClippingModel(std::move(model));
+}
+
+void Scene::removeClippingModels(const std::vector<uint32_t> &modelIds)
+{
+    _clippingManager.removeClippingModels(modelIds);
+}
+
+void Scene::removeAllClippingModels() noexcept
+{
+    _clippingManager.removeAllClippingModels();
 }
 
 OSPWorld Scene::handle() const noexcept

@@ -20,6 +20,11 @@
 
 #include "AreaCollage.h"
 
+std::string AreaCollage::getName() const
+{
+    return "Area collage";
+}
+
 bool AreaCollage::isVolumeValid(const AtlasVolume &volume) const
 {
     (void)volume;

@@ -50,7 +50,9 @@ private:
 #pragma omp parallel for
         for (size_t i = 0; i < data.size(); ++i)
         {
-            if (!std::isfinite(data[i]) || data[i] == minValue)
+            auto isEmpty = data[i] == minValue;
+
+            if (!std::isfinite(data[i]) || isEmpty)
             {
                 continue;
             }
@@ -110,6 +112,11 @@ public:
         return result;
     }
 };
+}
+
+std::string OutlineShell::getName() const
+{
+    return "Outline mesh shell";
 }
 
 bool OutlineShell::isVolumeValid(const AtlasVolume &volume) const

@@ -35,9 +35,23 @@ class RenderableAxes
 public:
     RenderableAxes(std::vector<RenderableAxisList> geometry);
 
-    void forEach(const std::function<void(RenderableAxisList &)> &callback);
+    template<typename Callable>
+    void forEach(const Callable &callback)
+    {
+        for (auto &axis : _geometry)
+        {
+            callback(axis);
+        }
+    }
 
-    void forEach(const std::function<void(const RenderableAxisList &)> &callback) const;
+    template<typename Callable>
+    void forEach(const Callable &callback) const
+    {
+        for (auto &axis : _geometry)
+        {
+            callback(axis);
+        }
+    }
 
 private:
     std::vector<RenderableAxisList> _geometry;

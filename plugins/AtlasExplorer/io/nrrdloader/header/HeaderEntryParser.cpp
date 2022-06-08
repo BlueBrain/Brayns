@@ -651,48 +651,70 @@ public:
         // a static var with the entry name on each parser so that it can be registered using a template function
         // least not forget problems derived from static variable in runtime loaded libraries
         // Furhtermore, some of them has multiple possible key representations
-        _addParser(entryParserMap, "dimension", DimensionParser::parse);
-        _addParser(entryParserMap, "type", TypeParser::parse);
-        _addParser(entryParserMap, "encoding", EncodingParser::parse);
-        _addParser(entryParserMap, "endian", EndianParser::parse);
-        _addParser(entryParserMap, "content", ContentParser::parse);
-        _addParser(entryParserMap, "min", MinParser::parse);
-        _addParser(entryParserMap, "max", MaxParser::parse);
-        _addParser(entryParserMap, "data file", DatafileParser::parse);
-        _addParser(entryParserMap, "datafile", DatafileParser::parse);
-        _addParser(entryParserMap, "sample units", SampleUnitsParser::parse);
-        _addParser(entryParserMap, "sampleunits", SampleUnitsParser::parse);
-        _addParser(entryParserMap, "sizes", SizesParser::parse);
-        _addParser(entryParserMap, "spacings", SpacingsParser::parse);
-        _addParser(entryParserMap, "space", SpaceParser::parse);
-        _addParser(entryParserMap, "space dimension", SpaceDimensionsParser::parse);
-        _addParser(entryParserMap, "space units", SpaceUnitsParser::parse);
-        _addParser(entryParserMap, "space origin", SpaceOriginParser::parse);
-        _addParser(entryParserMap, "space directions", SpaceDirectionsParser::parse);
-        _addParser(entryParserMap, "measurement frame", MeasurementFrameParser::parse);
-        _addParser(entryParserMap, "kinds", KindsParser::parse);
+        _addParser(entryParserMap, "dimension", [](auto data, auto &header) { DimensionParser::parse(data, header); });
+        _addParser(entryParserMap, "type", [](auto data, auto &header) { TypeParser::parse(data, header); });
+        _addParser(entryParserMap, "encoding", [](auto data, auto &header) { EncodingParser::parse(data, header); });
+        _addParser(entryParserMap, "endian", [](auto data, auto &header) { EndianParser::parse(data, header); });
+        _addParser(entryParserMap, "content", [](auto data, auto &header) { ContentParser::parse(data, header); });
+        _addParser(entryParserMap, "min", [](auto data, auto &header) { MinParser::parse(data, header); });
+        _addParser(entryParserMap, "max", [](auto data, auto &header) { MaxParser::parse(data, header); });
+        _addParser(entryParserMap, "data file", [](auto data, auto &header) { DatafileParser::parse(data, header); });
+        _addParser(entryParserMap, "datafile", [](auto data, auto &header) { DatafileParser::parse(data, header); });
+        _addParser(
+            entryParserMap,
+            "sample units",
+            [](auto data, auto &header) { SampleUnitsParser::parse(data, header); });
+        _addParser(
+            entryParserMap,
+            "sampleunits",
+            [](auto data, auto &header) { SampleUnitsParser::parse(data, header); });
+        _addParser(entryParserMap, "sizes", [](auto data, auto &header) { SizesParser::parse(data, header); });
+        _addParser(entryParserMap, "spacings", [](auto data, auto &header) { SpacingsParser::parse(data, header); });
+        _addParser(entryParserMap, "space", [](auto data, auto &header) { SpaceParser::parse(data, header); });
+        _addParser(
+            entryParserMap,
+            "space dimension",
+            [](auto data, auto &header) { SpaceDimensionsParser::parse(data, header); });
+        _addParser(
+            entryParserMap,
+            "space units",
+            [](auto data, auto &header) { SpaceUnitsParser::parse(data, header); });
+        _addParser(
+            entryParserMap,
+            "space origin",
+            [](auto data, auto &header) { SpaceOriginParser::parse(data, header); });
+        _addParser(
+            entryParserMap,
+            "space directions",
+            [](auto data, auto &header) { SpaceDirectionsParser::parse(data, header); });
+        _addParser(
+            entryParserMap,
+            "measurement frame",
+            [](auto data, auto &header) { MeasurementFrameParser::parse(data, header); });
+        _addParser(entryParserMap, "kinds", [](auto data, auto &header) { KindsParser::parse(data, header); });
 
         // Not implemented entries
-        _addParser(entryParserMap, "block size", NOOPParser::parse);
-        _addParser(entryParserMap, "blocksize", NOOPParser::parse);
-        _addParser(entryParserMap, "old min", NOOPParser::parse);
-        _addParser(entryParserMap, "oldmin", NOOPParser::parse);
-        _addParser(entryParserMap, "old max", NOOPParser::parse);
-        _addParser(entryParserMap, "oldmax", NOOPParser::parse);
-        _addParser(entryParserMap, "line skip", NOOPParser::parse);
-        _addParser(entryParserMap, "lineskip", NOOPParser::parse);
-        _addParser(entryParserMap, "byte skip", NOOPParser::parse);
-        _addParser(entryParserMap, "byteskip", NOOPParser::parse);
-        _addParser(entryParserMap, "number", NOOPParser::parse);
-        _addParser(entryParserMap, "thicknesses", NOOPParser::parse);
-        _addParser(entryParserMap, "axis mins", NOOPParser::parse);
-        _addParser(entryParserMap, "axismins", NOOPParser::parse);
-        _addParser(entryParserMap, "axis maxs", NOOPParser::parse);
-        _addParser(entryParserMap, "axismaxs", NOOPParser::parse);
-        _addParser(entryParserMap, "centers", NOOPParser::parse);
-        _addParser(entryParserMap, "centerings", NOOPParser::parse);
-        _addParser(entryParserMap, "labels", NOOPParser::parse);
-        _addParser(entryParserMap, "units", NOOPParser::parse);
+        const auto noopCallback = [](auto data, auto &header) { NOOPParser::parse(data, header); };
+        _addParser(entryParserMap, "block size", noopCallback);
+        _addParser(entryParserMap, "blocksize", noopCallback);
+        _addParser(entryParserMap, "old min", noopCallback);
+        _addParser(entryParserMap, "oldmin", noopCallback);
+        _addParser(entryParserMap, "old max", noopCallback);
+        _addParser(entryParserMap, "oldmax", noopCallback);
+        _addParser(entryParserMap, "line skip", noopCallback);
+        _addParser(entryParserMap, "lineskip", noopCallback);
+        _addParser(entryParserMap, "byte skip", noopCallback);
+        _addParser(entryParserMap, "byteskip", noopCallback);
+        _addParser(entryParserMap, "number", noopCallback);
+        _addParser(entryParserMap, "thicknesses", noopCallback);
+        _addParser(entryParserMap, "axis mins", noopCallback);
+        _addParser(entryParserMap, "axismins", noopCallback);
+        _addParser(entryParserMap, "axis maxs", noopCallback);
+        _addParser(entryParserMap, "axismaxs", noopCallback);
+        _addParser(entryParserMap, "centers", noopCallback);
+        _addParser(entryParserMap, "centerings", noopCallback);
+        _addParser(entryParserMap, "labels", noopCallback);
+        _addParser(entryParserMap, "units", noopCallback);
 
         return entryParserMap;
     }

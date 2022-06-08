@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(SceneClipManager &clipManager)
-    : _clipManager(clipManager)
+AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -45,7 +45,7 @@ void AddClipPlaneEntrypoint::onRequest(const Request &request)
     auto plane = request.getParams();
     auto model = std::make_unique<Model>();
     model->addComponent<ClippingComponent<Plane>>(plane);
-    auto id = _clipManager.addClippingModel(std::move(model));
+    auto id = _scene.addClippingModel(std::move(model));
     request.reply(id);
 }
 } // namespace brayns

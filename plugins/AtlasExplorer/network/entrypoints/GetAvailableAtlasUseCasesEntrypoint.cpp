@@ -18,33 +18,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AvailableUseCasesEntrypoint.h"
+#include "GetAvailableAtlasUseCasesEntrypoint.h"
 
 #include <brayns/network/common/ExtractModel.h>
 
 #include <components/AtlasComponent.h>
 #include <network/entrypoints/common/ExtractAtlas.h>
 
-AvailableUseCasesEntrypoint::AvailableUseCasesEntrypoint(brayns::SceneModelManager &modelManager)
-    : _modelManager(modelManager)
+GetAvailableAtlasUseCasesEntrypoint::GetAvailableAtlasUseCasesEntrypoint(brayns::Scene &scene)
+    : _scene(scene)
+    , _useCases(UseCaseManager::defaultUseCases())
 {
 }
 
-std::string AvailableUseCasesEntrypoint::getMethod() const
+std::string GetAvailableAtlasUseCasesEntrypoint::getMethod() const
 {
     return "get-available-atlas-usecases";
 }
 
-std::string AvailableUseCasesEntrypoint::getDescription() const
+std::string GetAvailableAtlasUseCasesEntrypoint::getDescription() const
 {
     return "Returns a list of available atlas visualization usecases for the given model";
 }
 
-void AvailableUseCasesEntrypoint::onRequest(const Request &request)
+void GetAvailableAtlasUseCasesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.model_id;
-    const auto &atlas = ExtractAtlas::fromId(_modelManager, modelId);
+    const auto &atlas = ExtractAtlas::atlasFromId(_scene, modelId);
     auto useCases = _useCases.getValidUseCasesForVolume(atlas);
     request.reply(useCases);
 }

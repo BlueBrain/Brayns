@@ -43,21 +43,13 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromBlob(
     brayns::Blob &&blob,
     const brayns::LoaderProgress &callback) const
 {
-    (void)blob;
-    (void)callback;
-    throw std::runtime_error("NRRD Loader does not support blob loading");
-}
-
-std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
-    const std::string &path,
-    const brayns::LoaderProgress &callback) const
-{
-    callback.updateProgress("Reading " + path, 0.f);
-    const auto fileContent = brayns::FileReader::read(path);
-    auto contentView = std::string_view(fileContent);
+    auto &bytes = blob.data;
+    auto tempCast = static_cast<const void *>(bytes.data());
+    auto charCast = static_cast<const char *>(tempCast);
+    auto contentView = std::string_view(charCast, bytes.size());
 
     callback.updateProgress("Parsing NRRD header", 0.2f);
-    auto header = HeaderParser::parse(path, contentView);
+    auto header = HeaderParser::parse(blob.name, contentView);
     HeaderLimitCheck::check(header);
 
     callback.updateProgress("Parsing NRRD data", 0.4f);
@@ -67,14 +59,29 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
     const auto voxelSize = HeaderUtils::getVoxelDimension(header);
     const auto gridSize = HeaderUtils::get3DSize(header);
     const auto gridSpacing = HeaderUtils::get3DDimensions(header);
-    auto atlasVolume = AtlasVolume(gridSize, gridSpacing, voxelSize, std::move(data));
+    auto atlasVolume = std::make_shared<AtlasVolume>(gridSize, gridSpacing, voxelSize, std::move(data));
 
     callback.updateProgress("Generating volume mesh", 0.8f);
-    auto model = OutlineShell().execute(atlasVolume, {});
-    model->addComponent<AtlasComponent>(std::move(atlasVolume));
+    auto model = OutlineShell().execute(*atlasVolume, {});
+    model->addComponent<AtlasComponent>(atlasVolume);
 
     callback.updateProgress("Done", 1.f);
     auto result = std::vector<std::unique_ptr<brayns::Model>>();
     result.push_back(std::move(model));
     return result;
+}
+
+std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
+    const std::string &path,
+    const brayns::LoaderProgress &callback) const
+{
+    callback.updateProgress("Reading " + path, 0.f);
+    const auto fileContent = brayns::FileReader::read(path);
+
+    brayns::Blob blob;
+    blob.type = "nrrd";
+    blob.name = path;
+    blob.data = std::vector<uint8_t>(fileContent.begin(), fileContent.end());
+
+    return importFromBlob(std::move(blob), callback);
 }

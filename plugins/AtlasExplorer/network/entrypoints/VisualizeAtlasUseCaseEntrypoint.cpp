@@ -18,27 +18,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "VisualizeUseCaseEntrypoint.h"
+#include "VisualizeAtlasUseCaseEntrypoint.h"
 
 #include <network/entrypoints/common/ExtractAtlas.h>
-#include <network/entrypoints/common/GenerateAtlasReference.h>
 
-VisualizeUseCaseEntrypoint::VisualizeUseCaseEntrypoint(brayns::SceneModelManager &models)
-    : _modelManager(models)
+VisualizeAtlasUseCaseEntrypoint::VisualizeAtlasUseCaseEntrypoint(brayns::Scene &scene)
+    : _scene(scene)
+    , _useCases(UseCaseManager::defaultUseCases())
 {
 }
 
-std::string VisualizeUseCaseEntrypoint::getMethod() const
+std::string VisualizeAtlasUseCaseEntrypoint::getMethod() const
 {
     return "visualize-atlas-usecase";
 }
 
-std::string VisualizeUseCaseEntrypoint::getDescription() const
+std::string VisualizeAtlasUseCaseEntrypoint::getDescription() const
 {
     return "Visualizes the specified use case based on the atlas data of the given model";
 }
 
-void VisualizeUseCaseEntrypoint::onRequest(const Request &request)
+void VisualizeAtlasUseCaseEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
 
@@ -46,9 +46,10 @@ void VisualizeUseCaseEntrypoint::onRequest(const Request &request)
     auto useCase = params.use_case;
     auto useCaseParams = params.params;
 
-    auto &atlas = ExtractAtlas::fromId(_modelManager, modelId);
-    auto newModel = _useCases.executeUseCase(useCase, atlas, useCaseParams);
-    GenerateAtlasReference::generate(_modelManager, modelId, *newModel);
-    auto &instance = _modelManager.addModel({}, std::move(newModel));
+    auto &component = ExtractAtlas::componentFromId(_scene, modelId);
+    auto &atlas = component.getVolume();
+    auto newModel = _useCases.executeUseCase(useCase, *atlas, useCaseParams);
+    newModel->addComponent<AtlasComponent>(atlas);
+    auto &instance = _scene.addModel({}, std::move(newModel));
     request.reply(instance);
 }

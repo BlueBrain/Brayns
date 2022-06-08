@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: nadir.romanguerrero@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,15 +20,24 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/Scene.h>
+#include <brayns/network/adapters/ModelInstanceAdapter.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
 
-class AtlasReferenceComponent final : public brayns::Component
+#include <api/UseCaseManager.h>
+
+#include <network/messages/VisualizeUseCaseMessage.h>
+
+class VisualizeAtlasUseCaseEntrypoint : public brayns::Entrypoint<VisualizeUseCaseMessage, brayns::ModelInstance>
 {
 public:
-    AtlasReferenceComponent(uint32_t sourceModelId);
+    VisualizeAtlasUseCaseEntrypoint(brayns::Scene &scene);
 
-    uint32_t getSourceModelId() const noexcept;
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 
 private:
-    uint32_t _sourceModelId;
+    brayns::Scene &_scene;
+    UseCaseManager _useCases;
 };

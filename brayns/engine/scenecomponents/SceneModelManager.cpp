@@ -20,8 +20,6 @@
 
 #include "SceneModelManager.h"
 
-#include <brayns/engine/Scene.h>
-
 namespace
 {
 class ModelFinder
@@ -81,19 +79,12 @@ public:
 
 namespace brayns
 {
-SceneModelManager::SceneModelManager(Scene &scene)
-    : _scene(scene)
-{
-}
-
 ModelInstance &SceneModelManager::addModel(ModelLoadParameters params, std::unique_ptr<Model> model)
 {
-    auto &entry = _createModelEntry(std::move(params), std::move(model));
-    auto &instance = _createModelInstance(entry);
-
-    _scene.computeBounds();
-
-    return instance;
+    std::vector<std::unique_ptr<Model>> models;
+    models.push_back(std::move(model));
+    auto instances = addModels(std::move(params), std::move(models));
+    return *(instances.front());
 }
 
 std::vector<ModelInstance *> SceneModelManager::addModels(
@@ -109,8 +100,6 @@ std::vector<ModelInstance *> SceneModelManager::addModels(
         auto &instance = _createModelInstance(entry);
         result.push_back(&instance);
     }
-
-    _scene.computeBounds();
 
     return result;
 }
@@ -141,6 +130,16 @@ const std::vector<ModelInstance *> &SceneModelManager::getAllModelInstances() co
 
 void SceneModelManager::removeModels(const std::vector<uint32_t> &instanceIDs)
 {
+    if (instanceIDs.empty())
+    {
+        return;
+    }
+
+    for (auto instanceId : instanceIDs)
+    {
+        ModelFinder::findInstanceIterator(_instances, instanceId);
+    }
+
     for (auto instanceID : instanceIDs)
     {
         auto it = ModelFinder::findInstanceIterator(_instances, instanceID);
@@ -166,7 +165,7 @@ void SceneModelManager::removeModels(const std::vector<uint32_t> &instanceIDs)
         }
     }
 
-    _scene.computeBounds();
+    _dirty = true;
 }
 
 void SceneModelManager::removeAllModelInstances()
@@ -175,6 +174,7 @@ void SceneModelManager::removeAllModelInstances()
     _modelIdFactory.clear();
     _instances.clear();
     _models.clear();
+    _dirty = true;
 }
 
 const ModelLoadParameters &SceneModelManager::getModelLoadParameters(const uint32_t instanceID) const
@@ -199,7 +199,8 @@ void SceneModelManager::preRender(const ParametersManager &parameters)
 
 bool SceneModelManager::commit()
 {
-    bool needsRecommit = false;
+    bool needsRecommit = _dirty;
+    _dirty = false;
 
     for (auto &entry : _models)
     {
