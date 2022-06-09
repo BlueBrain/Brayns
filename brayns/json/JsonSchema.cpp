@@ -27,7 +27,7 @@ namespace brayns
 {
 bool JsonSchemaHelper::isWildcard(const JsonSchema &schema)
 {
-    return schema.type == JsonType::Unknown && schema.oneOf.empty();
+    return schema.type == JsonType::Undefined && schema.oneOf.empty();
 }
 
 bool JsonSchemaHelper::isNull(const JsonSchema &schema)

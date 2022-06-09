@@ -33,3 +33,10 @@ class ValueRange(Vector):
     def __iter__(self) -> Iterator[float]:
         yield self.min
         yield self.max
+
+    @property
+    def size(self) -> float:
+        return self.max - self.min
+
+    def normalize(self, value: float) -> float:
+        return value - self.min / self.size

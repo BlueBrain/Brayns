@@ -35,12 +35,18 @@ bool JsonTypeHelper::isNumeric(JsonType type)
 
 bool JsonTypeHelper::isPrimitive(JsonType type)
 {
-    return type != JsonType::Unknown && type <= JsonType::String;
+    return type > JsonType::Undefined && type <= JsonType::String;
 }
 
 bool JsonTypeHelper::isPrimitive(const JsonValue &json)
 {
     return json.isNumeric() || json.isString();
+}
+
+const std::string &JsonTypeName::ofUndefined()
+{
+    static const std::string name = "undefined";
+    return name;
 }
 
 const std::string &JsonTypeName::ofNull()
@@ -115,7 +121,7 @@ JsonType GetJsonType::fromName(const std::string &name)
     {
         return JsonType::Object;
     }
-    return JsonType::Unknown;
+    return JsonType::Undefined;
 }
 
 JsonType GetJsonType::fromJson(const JsonValue &json)
@@ -148,7 +154,7 @@ JsonType GetJsonType::fromJson(const JsonValue &json)
     {
         return JsonType::Object;
     }
-    return JsonType::Unknown;
+    return JsonType::Undefined;
 }
 
 const std::string &GetJsonTypeName::fromType(JsonType type)

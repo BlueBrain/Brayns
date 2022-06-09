@@ -51,7 +51,7 @@ class Client(Instance):
         return RequestFuture(
             task=self._manager.create_task(request.id),
             cancel=lambda: self.cancel(request.id),
-            poll=lambda: self.poll(timeout=0.001)
+            poll=lambda: self.poll()
         )
 
     def poll(self, block: bool = True, timeout: Optional[float] = None) -> None:

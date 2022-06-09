@@ -32,7 +32,7 @@ class JsonRpcError:
     error: RequestError
 
     @staticmethod
-    def from_dict(message: dict) -> 'JsonRpcError':
+    def deserialize(message: dict) -> 'JsonRpcError':
         error: dict = message['error']
         return JsonRpcError(
             id=message.get('id'),

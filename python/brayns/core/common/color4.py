@@ -29,6 +29,10 @@ class Color4(Color3):
 
     a: float = 1.0
 
+    @staticmethod
+    def from_color3(color: Color3, alpha: float = 1.0) -> 'Color4':
+        return Color4(color.r, color.g, color.b, alpha)
+
     def __iter__(self) -> Iterator[float]:
         yield from super().__iter__()
         yield self.a
@@ -40,3 +44,7 @@ class Color4(Color3):
     @property
     def opaque(self) -> 'Color4':
         return replace(self, a=1.0)
+
+    @property
+    def without_alpha(self) -> Color3:
+        return Color3(self.r, self.g, self.b)
