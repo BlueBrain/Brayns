@@ -3,31 +3,14 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSIO_SOURCES
-    Loader.cpp
-    LoaderRegistry.cpp
-    loaders/protein/ProteinComponent.cpp
-    loaders/protein/ProteinLoader.cpp
-    loaders/xyzb/XYZBLoader.cpp
-    loaders/mesh/MeshLoader.cpp
-    loaders/mesh/parsers/ObjMeshParser.cpp
-    loaders/mesh/parsers/PlyMeshParser.cpp
-    loaders/mesh/parsers/StlMeshParser.cpp
-    loaders/mesh/parsers/OffMeshParser.cpp
-    loaders/mesh/parsers/helpers/StringHelper.cpp
-    loaders/mesh/parsers/helpers/StreamHelper.cpp
-)
+file(GLOB_RECURSE BRAYNSIO_SOURCES RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.cpp)
+file(GLOB_RECURSE BRAYNSIO_HEADERS RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.h)
 
-set(BRAYNSIO_PUBLIC_HEADERS
-    Loader.h
-    LoaderRegistry.h
-    loaders/mesh/MeshLoader.h
-    loaders/protein/ProteinComponent.h
-    loaders/protein/ProteinLoader.h
-    loaders/xyzb/XYZBLoader.h
-)
+list(REMOVE_ITEM BRAYNSIO_SOURCES loaders/volume/VolumeLoader.cpp)
+list(REMOVE_ITEM BRAYNSIO_HEADERS loaders/volume/VolumeLoader.h)
+list(REMOVE_ITEM BRAYNSIO_HEADERS loaders/volume/RawVolumeLoaderParameters.h)
 
-add_library(braynsIO SHARED ${BRAYNSIO_SOURCES} ${BRAYNSIO_PUBLIC_HEADERS})
+add_library(braynsIO SHARED ${BRAYNSIO_SOURCES} ${BRAYNSIO_HEADERS})
 
 target_include_directories(braynsIO PUBLIC
    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"

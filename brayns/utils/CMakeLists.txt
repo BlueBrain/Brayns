@@ -3,47 +3,8 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSUTILS_HEADERS
-  base64/base64.h
-  DynamicLib.h
-  EnumUtils.h
-  FileReader.h
-  FileWriter.h
-  FunctorInfo.h
-  image/Image.h
-  image/ImageCodecRegistry.h
-  image/ImageCodec.h
-  image/ImageDecoder.h
-  image/ImageEncoder.h
-  image/ImageFlipper.h
-  image/ImageFormat.h
-  image/ImageInfo.h
-  image/ImageMerger.h
-  IDFactory.h
-  StringUtils.h
-  Timer.h
-  TypeNameDemangler.h
-)
-  
-set(BRAYNSUTILS_SOURCES
-  base64/base64.cpp
-  DynamicLib.cpp
-  FileReader.cpp
-  FileWriter.cpp
-  image/codecs/JpegCodec.cpp
-  image/codecs/PngCodec.cpp
-  image/codecs/StbiHelper.cpp
-  image/Image.cpp
-  image/ImageCodecRegistry.cpp
-  image/ImageDecoder.cpp
-  image/ImageEncoder.cpp
-  image/ImageFlipper.cpp
-  image/ImageFormat.cpp
-  image/ImageInfo.cpp
-  image/ImageMerger.cpp
-  StringUtils.cpp
-  Timer.cpp
-)
+file(GLOB_RECURSE BRAYNSUTILS_HEADERS RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.h)
+file(GLOB_RECURSE BRAYNSUTILS_SOURCES RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.cpp)
 
 add_library(braynsUtils SHARED ${BRAYNSUTILS_SOURCES} ${BRAYNSUTILS_HEADERS})
 

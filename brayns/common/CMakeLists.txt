@@ -4,36 +4,10 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSCOMMON_SOURCES
-    BaseObject.cpp
-    Bounds.cpp
-    Log.cpp
-    TransferFunction.cpp
-    Transform.cpp
-    parameters/AbstractParameters.cpp
-    parameters/ApplicationParameters.cpp
-    parameters/NetworkParameters.cpp
-    parameters/ParametersManager.cpp
-    parameters/SimulationParameters.cpp
-)
+file(GLOB_RECURSE BRAYNSCOMMON_SOURCES RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.cpp)
+file(GLOB_RECURSE BRAYNSCOMMON_HEADERS RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.h)
 
-set(BRAYNSCOMMON_PUBLIC_HEADERS
-    BaseObject.h
-    Blob.h
-    Bounds.h
-    Log.h
-    MathTypes.h
-    PixelFormat.h
-    TransferFunction.h
-    Transform.h
-    parameters/AbstractParameters.h
-    parameters/ApplicationParameters.h
-    parameters/NetworkParameters.h
-    parameters/ParametersManager.h
-    parameters/SimulationParameters.h
-)
-
-add_library(braynsCommon SHARED ${BRAYNSCOMMON_PUBLIC_HEADERS} ${BRAYNSCOMMON_SOURCES})
+add_library(braynsCommon SHARED ${BRAYNSCOMMON_HEADERS} ${BRAYNSCOMMON_SOURCES})
 
 set(BRAYNSCOMMON_INCLUDE_DIRS_LIST
     ${PROJECT_SOURCE_DIR}
