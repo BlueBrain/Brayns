@@ -34,6 +34,23 @@ in the command line:
     --plugin braynsCircuitExplorer
 
 
+Atlas Explorer plugin
+---------------------
+
+The Atlas Explorer plugin is used to visualize atlas data as volumes.
+
+It also adds a loader for NRRD files.
+
+For further information on the Atlas Explorer's JSON-RPC API, refer to :ref:`apiatlasexplorer-label`
+
+To load the Atlas Explorer plugin when launching the Brayns backend service, use the following argument
+in the command line:
+
+.. code-block:: console
+
+    --plugin braynsAtlasExplorer
+
+
 Circuit Info plugin
 -------------------
 
