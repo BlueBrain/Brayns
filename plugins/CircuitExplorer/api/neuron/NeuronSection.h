@@ -25,10 +25,10 @@
  */
 enum class NeuronSection
 {
-    SOMA,
-    AXON,
-    DENDRITE,
-    APICAL_DENDRITE
+    Soma,
+    Axon,
+    Dendrite,
+    ApicalDendrite
 };
 
 namespace brayns
@@ -37,9 +37,9 @@ template<>
 inline std::vector<std::pair<std::string, NeuronSection>> enumMap()
 {
     return {
-        {"soma", NeuronSection::SOMA},
-        {"axon", NeuronSection::AXON},
-        {"dendrite", NeuronSection::DENDRITE},
-        {"apical_dendrite", NeuronSection::APICAL_DENDRITE}};
+        {"soma", NeuronSection::Soma},
+        {"axon", NeuronSection::Axon},
+        {"dendrite", NeuronSection::Dendrite},
+        {"apical_dendrite", NeuronSection::ApicalDendrite}};
 }
 } // namespace brayns

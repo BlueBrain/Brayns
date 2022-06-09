@@ -31,14 +31,14 @@ namespace brayns
 {
 BRAYNS_JSON_ADAPTER_ENUM(
     sonataloader::ReportType,
-    {"none", sonataloader::ReportType::NONE},
-    {"spikes", sonataloader::ReportType::SPIKES},
-    {"compartment", sonataloader::ReportType::COMPARTMENT},
-    {"summation", sonataloader::ReportType::SUMMATION},
-    {"synapse", sonataloader::ReportType::SYNAPSE},
-    {"bloodflow_pressure", sonataloader::ReportType::BLOODFLOW_PRESSURE},
-    {"bloodflow_speed", sonataloader::ReportType::BLOODFLOW_SPEED},
-    {"bloodflow_radii", sonataloader::ReportType::BLOODFLOW_RADII})
+    {"none", sonataloader::ReportType::None},
+    {"spikes", sonataloader::ReportType::Spikes},
+    {"compartment", sonataloader::ReportType::Compartment},
+    {"summation", sonataloader::ReportType::Summation},
+    {"synapse", sonataloader::ReportType::Synapse},
+    {"bloodflow_pressure", sonataloader::ReportType::BloodflowPressure},
+    {"bloodflow_speed", sonataloader::ReportType::BloodflowSpeed},
+    {"bloodflow_radii", sonataloader::ReportType::BloodflowRadii})
 }
 
 // ---------------------------------------------------------------------------

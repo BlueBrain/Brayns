@@ -25,8 +25,8 @@ namespace bbploader
  */
 enum class ReportType
 {
-    NONE,
-    SPIKES,
-    COMPARTMENT,
+    None,
+    Spikes,
+    Compartment,
 };
 } // namespace bbploader

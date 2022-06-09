@@ -24,9 +24,9 @@ namespace brayns
 {
 enum class PixelFormat
 {
-    RGBA_I8,
-    SRGBA_I8,
-    RGBA_F32
+    RgbaI8,
+    StandardRgbaI8,
+    RgbaF32
 };
 
 /**
@@ -40,7 +40,7 @@ public:
     {
         switch (format)
         {
-        case PixelFormat::RGBA_F32:
+        case PixelFormat::RgbaF32:
             return 4;
         default:
             return 1;

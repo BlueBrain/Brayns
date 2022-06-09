@@ -135,7 +135,7 @@ public:
 
 private:
     Vector2ui _frameSize{800u, 600u};
-    PixelFormat _frameBufferFormat{PixelFormat::SRGBA_I8};
+    PixelFormat _frameBufferFormat{PixelFormat::StandardRgbaI8};
     bool _accumulation{true};
     int32_t _accumFrames{0};
 

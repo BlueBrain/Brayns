@@ -69,7 +69,7 @@ void SomaColorHandler::_colorWithInput(
     const std::vector<ColoringInformation> &vars)
 {
     const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
-    if (methodEnum == NeuronColorMethods::BY_MORPHOLOGY_SECTION)
+    if (methodEnum == NeuronColorMethods::ByMorphologySection)
     {
         // Search for soma
         for (const auto &variable : vars)
@@ -77,7 +77,7 @@ void SomaColorHandler::_colorWithInput(
             const auto &sectionName = variable.variable;
             const auto &sectionColor = variable.color;
             auto sectionType = brayns::stringToEnum<NeuronSection>(sectionName);
-            if (sectionType == NeuronSection::SOMA)
+            if (sectionType == NeuronSection::Soma)
             {
                 _circuit.setColor(sectionColor);
                 break;
@@ -120,7 +120,7 @@ void SomaColorHandler::_colorWithInput(
 void SomaColorHandler::_colorAll(const IColorData &colorData, const std::string &method)
 {
     const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
-    if (methodEnum == NeuronColorMethods::BY_MORPHOLOGY_SECTION)
+    if (methodEnum == NeuronColorMethods::ByMorphologySection)
     {
         ColorRoulette roulette;
         _circuit.setColor(roulette.getNextColor());

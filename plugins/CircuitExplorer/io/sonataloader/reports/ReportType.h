@@ -25,15 +25,15 @@ namespace sonataloader
 /**
  * @brief Enumeration of SONATA supported report types
  */
-enum class ReportType : uint8_t
+enum class ReportType
 {
-    NONE = 0,
-    SPIKES,
-    COMPARTMENT,
-    SUMMATION,
-    SYNAPSE,
-    BLOODFLOW_SPEED,
-    BLOODFLOW_PRESSURE,
-    BLOODFLOW_RADII
+    None,
+    Spikes,
+    Compartment,
+    Summation,
+    Synapse,
+    BloodflowSpeed,
+    BloodflowPressure,
+    BloodflowRadii
 };
 } // namespace sonataloader

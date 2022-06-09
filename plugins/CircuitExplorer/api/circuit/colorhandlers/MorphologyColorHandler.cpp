@@ -69,7 +69,7 @@ void MorphologyColorHandler::_colorWithInput(
     const std::vector<ColoringInformation> &vars)
 {
     const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
-    if (methodEnum == NeuronColorMethods::BY_MORPHOLOGY_SECTION)
+    if (methodEnum == NeuronColorMethods::ByMorphologySection)
     {
         std::vector<std::pair<NeuronSection, brayns::Vector4f>> sectionColorMap;
         sectionColorMap.reserve(vars.size());
@@ -120,14 +120,14 @@ void MorphologyColorHandler::_colorWithInput(
 void MorphologyColorHandler::_colorAll(const IColorData &colorData, const std::string &method)
 {
     const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
-    if (methodEnum == NeuronColorMethods::BY_MORPHOLOGY_SECTION)
+    if (methodEnum == NeuronColorMethods::ByMorphologySection)
     {
         ColorRoulette roulette;
         const std::vector<std::pair<NeuronSection, brayns::Vector4f>> sectionColorMap = {
-            std::make_pair(NeuronSection::SOMA, roulette.getNextColor()),
-            std::make_pair(NeuronSection::AXON, roulette.getNextColor()),
-            std::make_pair(NeuronSection::DENDRITE, roulette.getNextColor()),
-            std::make_pair(NeuronSection::APICAL_DENDRITE, roulette.getNextColor())};
+            std::make_pair(NeuronSection::Soma, roulette.getNextColor()),
+            std::make_pair(NeuronSection::Axon, roulette.getNextColor()),
+            std::make_pair(NeuronSection::Dendrite, roulette.getNextColor()),
+            std::make_pair(NeuronSection::ApicalDendrite, roulette.getNextColor())};
         _circuit.setColorBySection(sectionColorMap);
     }
     else

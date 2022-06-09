@@ -106,7 +106,7 @@ bbp::sonata::Selection NodeSelector::select(
     const auto &config = network.circuitConfig();
 
     bbp::sonata::Selection reportSelection({});
-    if (reportType != ReportType::NONE && reportType != ReportType::SPIKES)
+    if (reportType != ReportType::None && reportType != ReportType::Spikes)
     {
         const auto &simConfig = network.simulationConfig();
         reportSelection = NodeReportFilter::filter(simConfig, reportName, nodePopulation);

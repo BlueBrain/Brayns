@@ -62,7 +62,7 @@ void checkReport(const brion::BlueConfig &config, const BBPLoaderParameters &inp
     const auto type = input.report_type;
     switch (type)
     {
-    case ReportType::SPIKES:
+    case ReportType::Spikes:
     {
         const auto uri = config.getSpikeSource();
         if (uri.getPath().empty() || !std::filesystem::exists(uri.getPath()))
@@ -71,7 +71,7 @@ void checkReport(const brion::BlueConfig &config, const BBPLoaderParameters &inp
         }
         break;
     }
-    case ReportType::COMPARTMENT:
+    case ReportType::Compartment:
     {
         if (input.report_name.empty())
         {
@@ -85,7 +85,7 @@ void checkReport(const brion::BlueConfig &config, const BBPLoaderParameters &inp
         }
         break;
     }
-    case ReportType::NONE:
+    case ReportType::None:
         break;
     }
 }

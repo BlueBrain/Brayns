@@ -30,23 +30,23 @@ namespace brayns
 {
 enum class VolumeDataType : uint32_t
 {
-    UNSIGNED_CHAR = OSPDataType::OSP_UCHAR,
-    SHORT = OSPDataType::OSP_SHORT,
-    UNSIGNED_SHORT = OSPDataType::OSP_USHORT,
-    HALF_FLOAT = OSPDataType::OSP_HALF,
-    FLOAT = OSPDataType::OSP_FLOAT,
-    DOUBLE = OSPDataType::OSP_DOUBLE
+    UnsignedChar = OSPDataType::OSP_UCHAR,
+    Short = OSPDataType::OSP_SHORT,
+    UnsignedShort = OSPDataType::OSP_USHORT,
+    HalfFloat = OSPDataType::OSP_HALF,
+    Float = OSPDataType::OSP_FLOAT,
+    Double = OSPDataType::OSP_DOUBLE
 };
 
 template<>
 inline std::vector<std::pair<std::string, VolumeDataType>> enumMap<VolumeDataType>()
 {
     return {
-        {"unsinged char", VolumeDataType::UNSIGNED_CHAR},
-        {"short", VolumeDataType::SHORT},
-        {"unsigned short", VolumeDataType::UNSIGNED_SHORT},
-        {"half float", VolumeDataType::HALF_FLOAT},
-        {"float", VolumeDataType::FLOAT},
-        {"double", VolumeDataType::DOUBLE}};
+        {"unsinged_char", VolumeDataType::UnsignedChar},
+        {"short", VolumeDataType::Short},
+        {"unsigned_short", VolumeDataType::UnsignedShort},
+        {"half_float", VolumeDataType::HalfFloat},
+        {"float", VolumeDataType::Float},
+        {"double", VolumeDataType::Double}};
 }
 }

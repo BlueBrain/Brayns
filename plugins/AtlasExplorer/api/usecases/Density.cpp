@@ -56,15 +56,15 @@ private:
         const auto typeSize = data.getTypeSize();
         if (typeSize <= 2)
         {
-            return _buildProcessedData(brayns::VolumeDataType::SHORT, data.asShorts());
+            return _buildProcessedData(brayns::VolumeDataType::Short, data.asShorts());
         }
 
         if (typeSize <= 4)
         {
-            return _buildProcessedData(brayns::VolumeDataType::FLOAT, data.asFloats());
+            return _buildProcessedData(brayns::VolumeDataType::Float, data.asFloats());
         }
 
-        return _buildProcessedData(brayns::VolumeDataType::DOUBLE, data.asDoubles());
+        return _buildProcessedData(brayns::VolumeDataType::Double, data.asDoubles());
     }
 
     static DensityVolumeInfo _processUnsignedData(const IDataMangler &data)
@@ -72,18 +72,18 @@ private:
         const auto typeSize = data.getTypeSize();
         if (typeSize == 1)
         {
-            return _buildProcessedData(brayns::VolumeDataType::UNSIGNED_CHAR, data.asBytes());
+            return _buildProcessedData(brayns::VolumeDataType::UnsignedChar, data.asBytes());
         }
         if (typeSize == 2)
         {
-            return _buildProcessedData(brayns::VolumeDataType::UNSIGNED_SHORT, data.asUnsingedShorts());
+            return _buildProcessedData(brayns::VolumeDataType::UnsignedShort, data.asUnsingedShorts());
         }
         if (typeSize <= 4)
         {
-            return _buildProcessedData(brayns::VolumeDataType::FLOAT, data.asFloats());
+            return _buildProcessedData(brayns::VolumeDataType::Float, data.asFloats());
         }
 
-        return _buildProcessedData(brayns::VolumeDataType::DOUBLE, data.asDoubles());
+        return _buildProcessedData(brayns::VolumeDataType::Double, data.asDoubles());
     }
 
     template<typename T>

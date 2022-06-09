@@ -40,7 +40,7 @@ public:
         CIGetCellIdsParams params;
 
         const auto &loadParams = scene.getModelLoadParameters(modelId);
-        if (loadParams.type != brayns::ModelLoadParameters::LoadType::FROM_FILE)
+        if (loadParams.type != brayns::ModelLoadParameters::LoadType::FromFile)
         {
             throw brayns::JsonRpcException("Cannot retrieve cell data from blob-loaded models");
         }

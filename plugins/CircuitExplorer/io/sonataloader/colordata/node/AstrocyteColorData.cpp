@@ -35,7 +35,7 @@ std::vector<std::string> AstrocyteColorData::getMethods() const noexcept
 {
     auto base = CellNodeColorMethods::get(_nodes);
 
-    auto bySectionMethod = brayns::enumToString(NeuronColorMethods::BY_MORPHOLOGY_SECTION);
+    auto bySectionMethod = brayns::enumToString(NeuronColorMethods::ByMorphologySection);
     base.push_back(std::move(bySectionMethod));
     return base;
 }
@@ -44,7 +44,7 @@ std::vector<std::string> AstrocyteColorData::getMethodVariables(const std::strin
 {
     const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
 
-    if (methodEnum == NeuronColorMethods::BY_MORPHOLOGY_SECTION)
+    if (methodEnum == NeuronColorMethods::ByMorphologySection)
     {
         return brayns::enumNames<NeuronSection>();
     }

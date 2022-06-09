@@ -82,7 +82,7 @@ brain::GIDSet GIDLoader::_fromSimulation(
     const brain::GIDSet &src)
 {
     const auto reportType = input.report_type;
-    if (reportType == bbploader::ReportType::COMPARTMENT)
+    if (reportType == bbploader::ReportType::Compartment)
     {
         const auto &reportName = input.report_name;
         const auto reportPath = config.getReportSource(reportName).getPath();

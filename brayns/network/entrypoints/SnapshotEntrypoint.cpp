@@ -115,7 +115,7 @@ public:
         // Framebuffer
         brayns::FrameBuffer frameBuffer;
         frameBuffer.setAccumulation(false);
-        frameBuffer.setFormat(brayns::PixelFormat::SRGBA_I8);
+        frameBuffer.setFormat(brayns::PixelFormat::StandardRgbaI8);
         frameBuffer.setFrameSize(imageSize);
         frameBuffer.commit();
 

@@ -105,7 +105,7 @@ public:
         const auto voxelSize = volume.getVoxelSize();
 
         brayns::RegularVolume result;
-        result.dataType = brayns::VolumeDataType::UNSIGNED_CHAR;
+        result.dataType = brayns::VolumeDataType::UnsignedChar;
         result.data = ValidVoxelGridFilter::filter(voxelSize, doubles);
         result.size = volume.getSize();
         result.spacing = volume.getSpacing();
