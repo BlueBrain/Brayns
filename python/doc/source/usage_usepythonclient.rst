@@ -6,153 +6,120 @@ Using Brayns python client
 After launching the Brayns backend service, we will have a server to which we can connect
 and manipulate using the python client.
 
+We will assume the backend has been started with the command:
+
+.. code-block:: console
+
+    braynsService --uri 0.0.0.0:5000
+
+The port 5000 is used in this documentation but if you want to use another one,
+just make sure you use this one instead of 5000 it in all the following examples.
+
+The IP mentioned here is from the **SERVER** point of view and specifies which host can connect to this server.
+
+0.0.0.0 is a wildcard IP address which means you can connect from any machine.
+
+Use localhost if you want to allow only local connections.
+
 Initializing the client object
 ------------------------------
 
-The first step will be always to create a connection to the backend. This will allow our
-client to download the latest API which we will be using, as well as sending the necessary
-commands to it.
+The first step will be always to create a connection to the backend.
 
-We will need the address in which the backend service is running, as well as the port in which
-is listening. The following examples will assume:
+To do so, we need the URI of the backend service we want to connect to (ip:port).
 
-- Brayns backend is running on BB5, on the node r1i1n1
-- Brayns backend is listening on port 5000
+Here is the URI for typical use cases:
+
+- If Brayns and the Python script are running on the same machine then the URI is always **localhost:5000**.
+- If Brayns is running on a BB5 node and the Python script on another BB5 node, then the URI is **<node ID>:5000** (example r1i1n1:5000) where <node ID> is the ID of the node running the backend.
+- If Brayns is running on a BB5 node and the Python script outside BB5, then the URI is **<node ID>.bbp.epfl.ch:5000**.
+
+So for a renderer running on the node r1i1n1 started with URI 0.0.0.0:5000, the connection is made as follows:
 
 .. code-block:: python
 
-    from brayns import Client
+    import brayns
 
-    braynsClient = Client("r1i1n1.bbp.epfl.ch:5000")
+    with brayns.connect('r1i1n1.bbp.epfl.ch:5000') as instance:
+        print(instance.request('registry'))
 
-
-We will use the variable ``braynsClient`` to issue all our calls, or to construct any
-class specific implementation (such as those for the plugins), since all the network interface
-is implemented on the ``Client`` class.
+It will send a request to get all the existing entrypoint methods of this instance.
 
 .. attention::
 
     If you are connecting to a backend running on BB5, it will be necessary to be working within the
-    EPFL's network, either by working on-site or using a vpn connection.
+    EPFL's network, either by working on-site or using a VPN connection.
 
 Loading a model into Brayns
 ---------------------------
 
-Now, we can start performing requests to the backend. For example, we can load the mouse brain
-mesh model into it:
+Now, we can start performing requests for example loading a circuit (with circuit explorer plugin loaded during the renderer startup):
 
 .. code-block:: python
 
-    # Path to the mesh file to load
-    brainModelPath = "/gpfs/bbp.cscs.ch/project/proj3/resources/nadir/rat_brain.obj"
+    # Path to the file to load
+    path = 'path/to/BlueConfig'
 
-    # Brayns backend loader we want to use
-    loaderName = "mesh"
+    # Loader we want to use (each loader has specific params)
+    loader = brayns.BbpLoader(
+        cells=brayns.BbpCells.from_density(0.1),
+        report=brayns.BbpReport.spikes(),
+        radius_multiplier=20
+    )
 
-    # loader properties used when loading the geometry.
-    # In this case, "geometryQuality" = 2 means best quality
-    loaderProperties = { "geometryQuality": 2}
+    # Load the model(s) into the instance (some files contain multiple models)
+    models = loader.load(instance, path)
 
-    # Load the model
-    brainLoadResult = braynsClient.add_model(path=brainModelPath,
-                                             loader_name=loaderName,
-                                             loader_properties=loaderProperties)
-
-    # When loading a model, the return value will be the metadata.
-    # Among other information, we will get the model ID, which is
-    # used when requesting any operation on the given model
-    modelID = brainLoadResult["id"]
-
-    # We can also get the bounds of our model, as a min and max 3-components
-    # vector with the minimun and maximun bound
-    minBound = brainLoadResult["bounds"]["min"]
-    maxBound = brainLoadResult["bounds"]["max"]
-
+    # Use the list of brayns.Model returned
+    for model in models:
+        print(model.id)
 
 .. hint::
    When loading files from disk, by specifying a path, the backend will be able to load
-   only the files which it can find on it's filesystem. This means that, if we are running
+   only the files which it can find on its filesystem. This means that, if we are running
    the backend on BB5, we cannot specify a path in our local machine.
 
 Adjusting the camera
 --------------------
 
-When the backend is launched, the camera is positioned at the origin of the virtual world
-generated by Brayns (0, 0, 0). When we load a model, by default is positioned at the origin
-as well, which means, probably we cannot fully see (or not see at all) the model we just loaded.
+By default, the camera is not placed to look at a given model.
 
-By using some trigonometry, we can calculate the camera parameters to position the camera to
-capture the whole model, and then request the change throught ``braynsClient``
+We can position the camera using its position and the target it is looking at.
 
-.. code-block:: python
-
-    import math
-
-    # Computes the center point of a bounding box
-    def boundsCenter(minB, maxB):
-        target = [0] * 3
-        for i in range(3):
-            target[i] = (minB[i] + maxB[i]) * 0.5
-        return target
-
-    # Get the current camera and its parameters from the backend
-    cam = braynsClient.get_camera()
-    camParams = braynsClient.get_camera_params()
-
-    # Get the center of the model
-    target = boundsCenter(minBound, maxBound)
-
-    # Compute at which distance from the model we have to
-    # position the camera so that all of it fits in the screen
-    modelYlen = maxBound[1] - minBound[1]
-    fov = math.radians(camParams["fovy"] * 0.5)
-    hipoLen = (modelYlen * 0.5) / math.sin(fov)
-    dist = hipoLen * math.cos(fov)
-
-    # Compute the final camera position
-    pos = target.copy()
-
-    # The camera always faces on its local Z-axis, and we will
-    # set up the camera so its local Z-axis is aligned with the
-    # world's Z axis, so in this case, the distance must be
-    # added to the Z coordinate of the position
-    pos[2] = pos[2] + dist
-
-    braynsClient.set_camera(current = cam["current"],
-                            orientation = [0,0,0,1],
-                            target=target,
-                            position=pos,
-                            types=cam["types"])
-
-
-Rendering a screenshot
-----------------------
-
-After we have loaded the model and position the camera, we might want to generate an image of
-our piece of art. To do so, we simply request it to the backend, and it will return it to us
-as a base64 encoded string. We only need to store the result on disk.
+However, it is not necessary to change the state of the global camera as we can provide our own view when rendering snapshots.
 
 .. code-block:: python
 
-    import base64
+    # Choose the camera type we want (perspective or orthographic)
+    camera = brayns.PerspectiveCamera()
 
-    # path were to store the image
-    path = "/home/nroman/Desktop/my_first_brayns_snapshot.png"
+    # Use it to get the position and target to see the model entirely.
+    view = camera.get_full_screen_view(model.bounds)    
 
-    # We can specify the backend to render the image with any of the available renderers.
-    # However, in this case, we will use the default one
-    rend = braynsClient.get_renderer()
 
-    imgData = braynsClient.snapshot(format="PNG",
-                                    size=[3840,2160], # 4K
-                                    quality=0,        # Quality = 0 means maximum quality
-                                    samples_per_pixel=64,
-                                    renderer=rend)['data']
+Rendering a snapshot
+--------------------
 
-    binaryImgData = base64.b64decode(imgData)
-    with open(path, "wb") as fh:
-        fh.write(binaryImgData)
+After we have loaded the model and chose the camera type and view, we can get an image of the current scene.
 
+.. code-block:: python
+
+    # Path to save the image
+    path = 'snapshot.png'
+
+    # We can choose a custom renderer
+    renderer = brayns.InteractiveRenderer.default()
+
+    # Then we can setup our snapshot settings using the previous results
+    snapshot = brayns.Snapshot(
+        resolution=brayns.Resolution.full_hd,
+        view=view,
+        camera=camera,
+        renderer=renderer
+    )
+
+    # And then download and save it.
+    snapshot.save(instance, path)
 
 Further information
 -------------------
