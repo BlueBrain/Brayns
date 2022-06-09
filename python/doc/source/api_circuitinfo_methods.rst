@@ -1,318 +1,426 @@
+.. _apicircuitinfo-label:
+
 Circuit Info API methods
 ------------------------
 
-The Brayns python client API is automatically generated when connecting to a
-running backend service as shown in :ref:`usepythonclient-label`.
+This page references the entrypoints of the Circuit Info plugin.
 
-The Core plugin is always loaded so the related entrypoints are always
-available.
-
-Other plugins might register additional entrypoints but must be loaded in the
-renderer to be available.
-
-The functions below are generated using the entrypoints of the Circuit Info plugin.
-
-All arguments are keyword arguments extracted from the entrypoint params.
-
-Renderer errors will be raised with an instance of brayns.ReplyError. This one
-can be used to extract error code, description and some optional additional data
-(mainly used to store JSON errors).
-
-Example usage of some generated methods:
-
-.. code-block: python
-    import brayns
-
-    with brayns.connect(uri='localhost:5000') as client:
-        print(client.get_camera())
-        client.set_camera(current='orthographic')
-        print(client.get_camera())
-
-ci_get_afferent_cell_ids
+ci-get-afferent-cell-ids
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Return a list of afferent synapses cell GIDs from a circuit and a set of source cells.
 
-Parameters:
+**Params**:
 
-* ``path``: ``str``. Path to the circuit config file.
-* ``sources``: ``list``. Source cells GIDs.
+.. jsonschema::
 
-  * ``items``: ``int``
+    {
+        "title": "CIGetAfferentCellIdsParams",
+        "type": "object",
+        "properties": {
+            "path": {
+                "description": "Path to the circuit config file",
+                "type": "string"
+            },
+            "sources": {
+                "description": "Source cells GIDs",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "path",
+            "sources"
+        ],
+        "additionalProperties": false
+    }
 
-Return value:
+**Result**:
 
-* ``dict``. The object has the following properties.
-
-  * ``ids``: ``list``. Afferent cells unique GIDs.
-
-    * ``items``: ``int``
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_get_cell_data
+ci-get-cell-data
 ~~~~~~~~~~~~~~~~
 
 Return data attached to one or many cells.
 
-Parameters:
+**Params**:
 
-* ``ids``: ``list``. List of cell IDs.
+.. jsonschema::
 
-  * ``items``: ``int``
+    {
+        "title": "CIGetCellDataParams",
+        "type": "object",
+        "properties": {
+            "ids": {
+                "description": "List of cell IDs",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "path": {
+                "description": "Path to circuit config file",
+                "type": "string"
+            },
+            "properties": {
+                "description": "Desired properties",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": [
+            "path",
+            "ids",
+            "properties"
+        ],
+        "additionalProperties": false
+    }
 
-* ``path``: ``str``. Path to circuit config file.
-* ``properties``: ``list``. Desired properties.
+**Result**:
 
-  * ``items``: ``str``
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``etypes``: ``list``. Requested cell e-types.
-
-    * ``items``: ``str``
-
-  * ``layers``: ``list``. Requested cell layers.
-
-    * ``items``: ``str``
-
-  * ``morphology_classes``: ``list``. Requested cell morphology classes.
-
-    * ``items``: ``str``
-
-  * ``mtypes``: ``list``. Requested cell m-types.
-
-    * ``items``: ``str``
-
-  * ``orientations``: ``list``. Requested cell orientations.
-
-    * ``items``: ``float``
-
-  * ``positions``: ``list``. Requested cell positions.
-
-    * ``items``: ``float``
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_get_cell_ids
+ci-get-cell-ids
 ~~~~~~~~~~~~~~~
 
 Return the list of GIDs from a circuit.
 
-Parameters:
+**Params**:
 
-* ``path``: ``str``. Path to the circuit config file.
-* ``targets``: ``list``. Targets to query.
+.. jsonschema::
 
-  * ``items``: ``str``
+    {
+        "title": "CIGetCellIdsParams",
+        "type": "object",
+        "properties": {
+            "path": {
+                "description": "Path to the circuit config file",
+                "type": "string"
+            },
+            "targets": {
+                "description": "Targets to query",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": [
+            "path"
+        ],
+        "additionalProperties": false
+    }
 
-Return value:
+**Result**:
 
-* ``dict``. The object has the following properties.
-
-  * ``ids``: ``list``. List of cell GIDs.
-
-    * ``items``: ``int``
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_get_cell_ids_from_model
+ci-get-cell-ids-from-model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Return the list of GIDs from a loaded circuit.
 
-Parameters:
+**Params**:
 
-* ``model_id``: ``int``. ID of the circuit model.
+.. jsonschema::
 
-Return value:
+    {
+        "title": "CIGetCellIdsFromModelParams",
+        "type": "object",
+        "properties": {
+            "model_id": {
+                "description": "ID of the circuit model",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "model_id"
+        ],
+        "additionalProperties": false
+    }
 
-* ``dict``. The object has the following properties.
+**Result**:
 
-  * ``ids``: ``list``. List of cell GIDs.
-
-    * ``items``: ``int``
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_get_efferent_cell_ids
+ci-get-efferent-cell-ids
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Return a list of efferent synapses cell GIDs from a circuit and a set of source cells.
 
-Parameters:
+**Params**:
 
-* ``path``: ``str``. Path to the circuit config file.
-* ``sources``: ``list``. Source cells GIDs.
+.. jsonschema::
 
-  * ``items``: ``int``
+    {
+        "title": "CIGetEfferentCellIdsParams",
+        "type": "object",
+        "properties": {
+            "path": {
+                "description": "Path to the circuit config file",
+                "type": "string"
+            },
+            "sources": {
+                "description": "Source cells GIDs",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "path",
+            "sources"
+        ],
+        "additionalProperties": false
+    }
 
-Return value:
+**Result**:
 
-* ``dict``. The object has the following properties.
-
-  * ``ids``: ``list``. Efferent cells unique GIDs.
-
-    * ``items``: ``int``
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_get_projection_efferent_cell_ids
+ci-get-projection-efferent-cell-ids
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Return a list of efferent projected synapses cell GIDs from a circuit and a set of source cells.
 
-Parameters:
+**Params**:
 
-* ``path``: ``str``. Path to the circuit config file.
-* ``projection``: ``str``. Projection name.
-* ``sources``: ``list``. Source cells GIDs.
+.. jsonschema::
 
-  * ``items``: ``int``
+    {
+        "title": "CIGetProjectionEfferentCellIdsParams",
+        "type": "object",
+        "properties": {
+            "path": {
+                "description": "Path to the circuit config file",
+                "type": "string"
+            },
+            "projection": {
+                "description": "Projection name",
+                "type": "string"
+            },
+            "sources": {
+                "description": "Source cells GIDs",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "path",
+            "projection",
+            "sources"
+        ],
+        "additionalProperties": false
+    }
 
-Return value:
+**Result**:
 
-* ``dict``. The object has the following properties.
-
-  * ``ids``: ``list``. Efferent cells GIDs.
-
-    * ``items``: ``int``
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_get_projections
+ci-get-projections
 ~~~~~~~~~~~~~~~~~~
 
 Return a list of projection names available on a circuit.
 
-Parameters:
+**Params**:
 
-* ``path``: ``str``. Path to the circuit config file.
+.. jsonschema::
 
-Return value:
+    {
+        "title": "CIGetProjectionsParams",
+        "type": "object",
+        "properties": {
+            "path": {
+                "description": "Path to the circuit config file",
+                "type": "string"
+            }
+        },
+        "required": [
+            "path"
+        ],
+        "additionalProperties": false
+    }
 
-* ``dict``. The object has the following properties.
+**Result**:
 
-  * ``projections``: ``list``. Projections names.
-
-    * ``items``: ``str``
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_get_report_info
+ci-get-report-info
 ~~~~~~~~~~~~~~~~~~
 
 Return information about a specific report from a circuit.
 
-Parameters:
+**Params**:
 
-* ``path``: ``str``. Path to the circuit BlueConfig from which to get the report.
-* ``report``: ``str``. Name of the report from where to get the information.
+.. jsonschema::
 
-Return value:
+    {
+        "title": "CIGetReportInfoParams",
+        "type": "object",
+        "properties": {
+            "path": {
+                "description": "Path to the circuit BlueConfig from which to get the report",
+                "type": "string"
+            },
+            "report": {
+                "description": "Name of the report from where to get the information",
+                "type": "string"
+            }
+        },
+        "required": [
+            "path",
+            "report"
+        ],
+        "additionalProperties": false
+    }
 
-* ``dict``. The object has the following properties.
+**Result**:
 
-  * ``data_unit``: ``str``. Unit of the report values. Can be (mV, mA, ...).
-  * ``end_time``: ``float``. Time at which the simulation ends.
-  * ``frame_count``: ``int``. Number of simulation frames in the report.
-  * ``frame_size``: ``int``. Number of values per frame in the report.
-  * ``start_time``: ``float``. Time at which the simulation starts.
-  * ``time_step``: ``float``. Time between two consecutive simulation frames.
-  * ``time_unit``: ``str``. Unit of the report time values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_get_reports
+ci-get-reports
 ~~~~~~~~~~~~~~
 
 Return a list of reports from a circuit.
 
-Parameters:
+**Params**:
 
-* ``path``: ``str``. Path to the circuit config file.
+.. jsonschema::
 
-Return value:
+    {
+        "title": "CIGetReportsParams",
+        "type": "object",
+        "properties": {
+            "path": {
+                "description": "Path to the circuit config file",
+                "type": "string"
+            }
+        },
+        "required": [
+            "path"
+        ],
+        "additionalProperties": false
+    }
 
-* ``dict``. The object has the following properties.
+**Result**:
 
-  * ``reports``: ``list``. Report names.
-
-    * ``items``: ``str``
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_get_spike_report_info
+ci-get-spike-report-info
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Return wether the circuit has a spike report and its path.
 
-Parameters:
+**Params**:
 
-* ``path``: ``str``. Path of the circuit to test.
+.. jsonschema::
 
-Return value:
+    {
+        "title": "CIGetSpikeReportInfoParams",
+        "type": "object",
+        "properties": {
+            "path": {
+                "description": "Path of the circuit to test",
+                "type": "string"
+            }
+        },
+        "required": [
+            "path"
+        ],
+        "additionalProperties": false
+    }
 
-* ``dict``. The object has the following properties.
+**Result**:
 
-  * ``exists``: ``bool``. Check if the report exists.
-  * ``path``: ``str``. Path to the spike report.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_get_targets
+ci-get-targets
 ~~~~~~~~~~~~~~
 
 Return a list of targets from a circuit.
 
-Parameters:
+**Params**:
 
-* ``path``: ``str``. Path to the circuit config file.
+.. jsonschema::
 
-Return value:
+    {
+        "title": "CIGetTargetsParams",
+        "type": "object",
+        "properties": {
+            "path": {
+                "description": "Path to the circuit config file",
+                "type": "string"
+            }
+        },
+        "required": [
+            "path"
+        ],
+        "additionalProperties": false
+    }
 
-* ``dict``. The object has the following properties.
+**Result**:
 
-  * ``targets``: ``list``. Target names.
-
-    * ``items``: ``str``
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-ci_info
+ci-info
 ~~~~~~~
 
 Return general info about a circuit.
 
-Parameters:
+**Params**:
 
-* ``path``: ``str``. Path of the circuit config file.
+.. jsonschema::
 
-Return value:
+    {
+        "title": "CIInfoParams",
+        "type": "object",
+        "properties": {
+            "path": {
+                "description": "Path of the circuit config file",
+                "type": "string"
+            }
+        },
+        "required": [
+            "path"
+        ],
+        "additionalProperties": false
+    }
 
-* ``dict``. The object has the following properties.
+**Result**:
 
-  * ``cells_count``: ``int``. Number of cells in this circuit.
-  * ``cells_properties``: ``list``. List of available cell properties.
-
-    * ``items``: ``str``
-
-  * ``e_types``: ``list``. List of electrical types available in this circuit.
-
-    * ``items``: ``str``
-
-  * ``m_types``: ``list``. List of morphology types available in this circuit.
-
-    * ``items``: ``str``
-
-  * ``reports``: ``list``. List of report names.
-
-    * ``items``: ``str``
-
-  * ``spike_report``: ``str``. Path to the spike report file.
-  * ``targets``: ``list``. List of target names.
-
-    * ``items``: ``str``
-
+This entrypoint has no result, the "result" field is still present but is always null.

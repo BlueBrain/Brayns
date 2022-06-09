@@ -1,28 +1,20 @@
-.. Brayns documentation master file, created by
-   sphinx-quickstart on Mon Jul 23 16:11:34 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Brayns python client
-====================
+Brayns API
+==========
 
 Introduction
 ------------
 
-The Brayns python client library provides access to remote control a running Brayns instance using
-websockets and HTTP requests messaging.
+Brayns provides a JSON-RPC API accessible through a websocket to interact with a running instance (renderer backend).
 
-It provides a generated API from the current running Brayns instance. There are also some helper classes
-that encapsulate commonly used fuctions for an easy usage.
+For convenience, it also provides a Python package to wrap the websocket communication with classes to hide low level JSON-RPC messages.
 
-The Brayns python client allows to:
+Through the API (websocket or Python) use can:
 
-- Load models into brayns (circuits, DTIs, meshes, volumes, ...)
-- Load and/or attach simulations (compartment and spike reports)
-- Modify their visual appearance (color, simulation transfer function, ...)
-- Tune the renderers to achieve different visual results
-- Render images and simulation videos to disk
-- Show specific visuals (syanpse tracing, synapse visualization, ...)
+- Load models into brayns (circuits, DTIs, meshes, volumes, ...).
+- Load and/or attach simulations (compartment and spike reports).
+- Modify their visual appearance (color, simulation transfer function, ...).
+- Tune the renderers to achieve different visual results.
+- Render images and simulation videos and save it to disk.
 
 .. toctree::
    :hidden:
@@ -34,7 +26,6 @@ The Brayns python client allows to:
    usage
    plugins
    api
-
 
 Acknowledgments
 ---------------

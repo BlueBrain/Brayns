@@ -24,7 +24,7 @@ provides Brayns with extra features, such as, but not limited to:
 * Load morphology files (Ascii, SWC or H5)
 * Load BlueConfig/SONATA multi-population hybrid circuits
 
-For further information on the Circuit Explorer's python API, refer to :ref:`circuitexplorerapi-label`
+For further information on the Circuit Explorer's JSON-RPC API, refer to :ref:`apicircuitexplorer-label`
 
 To load the Circuit Explorer plugin when launching the Brayns backend service, use the following argument
 in the command line:
@@ -38,8 +38,7 @@ Circuit Info plugin
 -------------------
 
 The Circuit Info plugin provides circuit-specific information. It is used by the brayns web interface
-WebBrayns. Nonetheless, it can be used within the python API as well, if desired, to query some circuit
-information, such as:
+WebBrayns. It can be used within the JSON-RPC API to query some circuit information, such as:
 
 * List of GIDs (all, or from a list of target)
 * List of targets
@@ -49,7 +48,7 @@ information, such as:
 * Efferent and afferent synapses for a set of GIDs
 * Projected efferent synapses for a set of GIDs and a projection
 
-For information on the Circuit Info python API, refer to :ref:`circuitinfoapi-label`
+For information on the Circuit Info JSON-RPC API, refer to :ref:`apicircuitinfo-label`
 
 To load the Circuit Info plugin when launching the Brayns backend service, use the following argument
 in the command line:
@@ -85,8 +84,6 @@ The ``gids_to_streamline_row`` property points to a file that maps cell GIDs to 
 .. code-block::
 
     <GID> <row_index>
-
-For information on the DTI python API, refer to :ref:`dtipluginapi-label`
 
 To load the DTI plugin when launching the Brayns backend service, use the following argument
 in the command line:

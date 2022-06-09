@@ -13,13 +13,12 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../brayns'))
-
-from version import MINIMAL_VERSION
-
 from os import path
+
+sys.path.insert(0, os.path.abspath('../../brayns'))
 sys.path.insert(0, path.dirname(path.dirname(path.abspath('../python'))))
 
+from version import __version__
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -29,12 +28,13 @@ sys.path.insert(0, path.dirname(path.dirname(path.abspath('../python'))))
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-needs_sphinx = '1.1'
+needs_sphinx = '2.0'
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx-jsonschema',
     'sphinx.ext.autosummary'
 ]
 
@@ -59,7 +59,7 @@ project = u'Brayns'
 # built documents.
 #
 # The short X.Y version.
-version = MINIMAL_VERSION
+version = __version__
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -136,7 +136,7 @@ html_title = project
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -187,20 +187,25 @@ htmlhelp_basename = 'Braynsdoc'
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
+    # 'papersize': 'letterpaper',
 
     # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
+    # 'pointsize': '10pt',
 
     # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
+    # 'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Brayns.tex', u'Brayns Documentation',
-   u'BBP', 'manual'),
+    (
+        'index',
+        'Brayns.tex',
+        u'Brayns Documentation',
+        u'BBP',
+        'manual'
+    ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -229,8 +234,13 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'brayns', u'Brayns Documentation',
-     [u'BBP'], 1)
+    (
+        'index',
+        'brayns',
+        u'Brayns Documentation',
+        [u'BBP'],
+        1
+    )
 ]
 
 # If true, show URL addresses after external links.
@@ -243,9 +253,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Brayns', u'Brayns Documentation',
-   u'BBP', 'Brayns', 'One line description of project.',
-   'Miscellaneous'),
+    (
+        'index',
+        'Brayns',
+        u'Brayns Documentation',
+        u'BBP',
+        'Brayns',
+        'One line description of project.',
+        'Miscellaneous'
+    ),
 ]
 
 # Documents to append as an appendix to all manuals.

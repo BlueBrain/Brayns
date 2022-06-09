@@ -18,6 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import json
 import pathlib
 import sys
 from collections import defaultdict
@@ -25,66 +26,143 @@ from typing import Optional
 
 import brayns
 
+SUMMARY_FILENAME = 'api.rst'
+
+SUMMARY = '''
+.. _api-label:
+
+JSON-RPC API
+============
+
+This page references the entrypoints of Brayns JSON-RPC API.
+
+The available entrypoints depend on the plugins loaded in the renderer instance and are hence grouped by plugin.
+
+The Core plugin is always loaded as long as the renderer instance is running a websocket server (--uri provided).
+
+All entrypoints use a JSON-RPC protocol (see specifications `here <https://www.jsonrpc.org/specification>`_).
+
+Here are examples of the messages used by Brayns
+
+Request
+-------
+
+The request message includes the protocol version, an optional ID, a method name and optional params.
+
+The protocol version must always be 2.0.
+
+The Request ID can be ignored if you don't care about the reply.
+
+The Request ID must be integer or string otherwise.
+
+The method is the name of the entrypoint (for example "get-camera-look-at").
+
+The params can be anything depending on the entrypoint params schema.
+
+.. code-block:: json
+
+    {{
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "test",
+        "params": {{
+            "field": 123
+        }}
+    }}
+
+Reply
+-----
+
+The reply is sent only if the request ID is not null nor omitted.
+
+The protocol version must always be 2.0.
+
+The ID is the one of the corresponding request it is replying to.
+
+The result field is always present but can be null if nothing is replied.
+
+The result can be anything depending on the entrypoint result schema.
+
+.. code-block:: json
+
+    {{
+        "jsonrpc": "2.0",
+        "id": 0,
+        "result": {{
+            "another_field": 456
+        }}
+    }}
+
+Error
+-----
+
+The error message is sent instead of the reply if an error occurs.
+
+The protocol version must always be 2.0.
+
+The ID is the same as it would have been for the reply.
+
+The error field is always present and differentiate it from a reply.
+
+The error field contains a code, a description and optional data.
+
+The additional data is mainly used in case of invalid params to detail the schema error(s) with a list of strings.
+
+.. code-block:: json
+
+    {{
+        "jsonrpc": "2.0",
+        "id": 0,
+        "error": {{
+            "code": 12,
+            "message": "Something happened",
+            "data": [
+                '123'
+            ]
+        }}
+    }}
+
+Notification
+------------
+
+The notification message is used by asynchronous entrypoints to send progress messages.
+
+The protocol version must always be 2.0.
+
+Notifications have no ID by contrast with replies and errors.
+
+Notification params are always progress messages.
+
+Progress messages contain the ID of the request being processed, a description and a progress amount.
+
+The progress amount is a number between 0 and 1.
+
+.. code-block:: json
+
+    {{
+        "jsonrpc": "2.0",
+        "params": {{
+            "id": 0,
+            "operation": "Processing stuff...",
+            "amount": 0.5
+        }}
+    }}
+
+.. toctree::
+    :hidden:{items}
+'''.strip()
+
 FILENAME = 'api_{plugin}_methods.rst'
 
 TITLE = '{plugin} API methods'
 
 HEADER = '''
+.. _api{label}-label:
+
 {title}
 {underline}
 
 This page references the entrypoints of the {plugin} plugin.
-
-The Core plugin is always loaded so the related entrypoints are always
-available.
-
-Other plugins like CircuitExplorer or DTI might register additional entrypoints
-but they must be loaded when starting the renderer instance to be available.
-
-All entrypoints use a JSON-RPC protocol with the following scheme:
-
-Request:
-{
-    "jsonrpc": "2.0",
-    "id": 123,
-    "method": "name",
-    "params": {
-        "field": 456
-    }
-}
-
-Reply:
-{
-    "jsonrpc": "2.0",
-    "id": 123,
-    "result": {
-        "another_field": 789
-    }
-}
-
-Error:
-{
-    "jsonrpc": "2.0",
-    "id": 123,
-    "error": {
-        "code": 30,
-        "message": "An error occured",
-        "data": "Optional additional data"
-    }
-}
-
-Notification (progress):
-{
-    "jsonrpc": "2.0",
-    "params": {
-        "id": 123,
-        "operation": "Loading stuff",
-        "amount": 0.5
-    }
-}
-
-The following sections describe each entrypoints of the {plugin} plugin with
-their params and result schemas.
 '''.strip()
 
 ENTRYPOINT = '''
@@ -93,31 +171,45 @@ ENTRYPOINT = '''
 
 {description}.{asynchronous}
 
-Params:
+**Params**:
 
 {params}
 
-Result:
+**Result**:
 
 {result}{separator}
 '''.strip()
 
 ASYNCHRONOUS = '''
-This entrypoint is asynchronous, it means that it can take a long time and send
-progress notifications.
+This entrypoint is asynchronous, it means that it can take a long time and send progress notifications.
 '''.strip()
 
 NO_PARAMS = '''
-This entrypoint has no params, the "params" field can hence be omitted or set to
-null.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 '''.strip()
 
 NO_RESULT = '''
-This entrypoint has no result, the "result" field is still present but is always
-null.
+This entrypoint has no result, the "result" field is still present but is always null.
+'''.strip()
+
+SCHEMA = '''
+.. jsonschema::
+
+    {data}
 '''.strip()
 
 SEPARATOR = '\n\n----'
+
+
+def build_from_argv() -> None:
+    uri = 'localhost:5000'
+    directory = pathlib.Path(__file__).parent.parent / 'doc' / 'source'
+    argv = sys.argv
+    if len(argv) > 1:
+        uri = argv[1]
+    if len(argv) > 2:
+        directory = pathlib.Path(argv[2])
+    build_from_uri(uri, str(directory))
 
 
 def build_from_uri(uri: str, directory: str) -> None:
@@ -134,22 +226,55 @@ def build_from_entrypoints(entrypoints: list[brayns.Entrypoint], directory: str)
     plugins = defaultdict[str, list[brayns.Entrypoint]](list)
     for entrypoint in entrypoints:
         plugins[entrypoint.plugin].append(entrypoint)
+    for entrypoints in plugins.values():
+        entrypoints.sort(key=lambda entrypoint: entrypoint.name)
     build_from_plugins(plugins, directory)
 
 
-def build_from_plugins(plugins: dict[str, brayns.Entrypoint], directory: str) -> None:
-    for plugin, entrypoints in plugins:
-        data = format_plugin(plugin, entrypoints)
-        path = pathlib.Path(directory) / FILENAME.format(plugin=plugin)
-        with open(path, 'w') as file:
-            file.write(data)
+def build_from_plugins(plugins: dict[str, list[brayns.Entrypoint]], directory: str) -> None:
+    filenames = list[str]()
+    for plugin, entrypoints in plugins.items():
+        filename = FILENAME.format(plugin=plugin.lower().replace(' ', ''))
+        filenames.append(filename)
+        build_plugin(plugin, entrypoints, directory, filename)
+    build_summary(directory, filenames)
+
+
+def build_summary(directory: str, filenames: list[str]) -> None:
+    summary = format_summary(filenames) + '\n'
+    path = pathlib.Path(directory) / SUMMARY_FILENAME
+    with path.open('w') as file:
+        file.write(summary)
+
+
+def format_summary(filenames: list[str]) -> str:
+    items = format_summary_items(filenames)
+    return SUMMARY.format(items=items)
+
+
+def format_summary_items(filenames: list[str]) -> str:
+    if not filenames:
+        return ''
+    separator = '\n    '
+    return '\n' + separator + separator.join(
+        filename.replace('.rst', '')
+        for filename in filenames
+    )
+
+
+def build_plugin(plugin: str, entrypoints: list[brayns.Entrypoint], directory: str, filename: str) -> None:
+    data = format_plugin(plugin, entrypoints) + '\n'
+    path = pathlib.Path(directory) / filename
+    with path.open('w') as file:
+        file.write(data)
 
 
 def format_plugin(plugin: str, entrypoints: list[brayns.Entrypoint]) -> str:
     title = TITLE.format(plugin=plugin)
     header = HEADER.format(
+        label=plugin.lower().replace(' ', ''),
         title=title,
-        underline=get_underline(title),
+        underline=len(title) * '-',
         plugin=plugin
     )
     api = format_entrypoints(entrypoints)
@@ -169,9 +294,9 @@ def format_entrypoints(entrypoints: list[brayns.Entrypoint]) -> str:
 def format_entrypoint(entrypoint: brayns.Entrypoint, separator: bool = True) -> str:
     return ENTRYPOINT.format(
         name=entrypoint.name,
-        underline=get_underline(entrypoint.name),
+        underline=len(entrypoint.name) * '~',
         description=entrypoint.description,
-        asynchronous=ASYNCHRONOUS if entrypoint.asynchronous else '',
+        asynchronous=f'\n\n{ASYNCHRONOUS}' if entrypoint.asynchronous else '',
         params=format_params(entrypoint.params),
         result=format_result(entrypoint.result),
         separator=SEPARATOR if separator else ''
@@ -191,19 +316,10 @@ def format_result(schema: Optional[brayns.JsonSchema]) -> str:
 
 
 def format_schema(schema: brayns.JsonSchema) -> str:
-    pass
-
-
-def get_underline(title: str) -> str:
-    return len(title) * '~'
+    data = json.dumps(schema.serialize(), indent=4)
+    data = data.replace('\n', '\n    ')
+    return SCHEMA.format(data=data)
 
 
 if __name__ == '__main__':
-    uri = 'localhost:5000'
-    directory = pathlib.Path(__file__).parent.parent / 'doc' / 'source'
-    argv = sys.argv
-    if len(argv) > 1:
-        uri = argv[1]
-    if len(argv) > 2:
-        directory = pathlib.Path(argv[2])
-    build_from_uri(uri, str(directory))
+    build_from_argv()
