@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/common/BaseObject.h>
+#include <brayns/common/Bounds.h>
 #include <brayns/common/MathTypes.h>
 
 #include <ospray/ospray.h>
@@ -75,6 +76,12 @@ public:
      * @brief Returns wether the light is visible on the scene or not
      */
     bool isVisible() const noexcept;
+
+    /**
+     * @brief Compute the bounds of the light
+     * @return Bounds
+     */
+    virtual Bounds computeBounds() const noexcept;
 
 protected:
     friend class SceneLightManager;

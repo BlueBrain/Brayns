@@ -48,6 +48,7 @@ set(BRAYNSENGINE_SOURCES
     scenecomponents/SceneClipManager.cpp
     scenecomponents/SceneLightManager.cpp
     scenecomponents/SceneModelManager.cpp
+    volumes/RegularVolume.cpp
 )
 
 set(BRAYNSENGINE_PUBLIC_HEADERS
@@ -67,6 +68,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     Renderer.h
     Scene.h
     Volume.h
+    VolumeDataType.h
     cameras/OrthographicCamera.h
     cameras/PerspectiveCamera.h
     common/DataHandler.h
@@ -76,12 +78,14 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     common/SizeHelper.h
     components/ClippingComponent.h
     components/GeometryRendererComponent.h
+    components/IsosurfaceRendererComponent.h
     components/MaterialComponent.h
     components/SimulationComponent.h
     components/TransferFunctionComponent.h
     components/TransferFunctionRendererComponent.h
     components/VolumeRendererComponent.h
     geometries/Box.h
+    geometries/Isosurface.h
     geometries/Plane.h
     geometries/Primitive.h
     geometries/Sphere.h
@@ -101,6 +105,7 @@ set(BRAYNSENGINE_PUBLIC_HEADERS
     scenecomponents/SceneClipManager.h
     scenecomponents/SceneLightManager.h
     scenecomponents/SceneModelManager.h
+    volumes/RegularVolume.h
 )
 
 add_library(braynsEngine SHARED ${BRAYNSENGINE_SOURCES} ${BRAYNSENGINE_PUBLIC_HEADERS})

@@ -58,11 +58,7 @@ public:
         auto &renderComponent = newModel->addComponent<GeometryRendererComponent<T>>(std::move(geometries));
         renderComponent.setColors(colors);
 
-        auto &modelManager = _scene.getModels();
-        auto &instance = modelManager.addModel({}, std::move(newModel));
-        // Need to compute bounds here to make sure the bounds will be updated for the next call (which may need them)
-        _scene.computeBounds();
-
+        auto &instance = _scene.addModel({}, std::move(newModel));
         request.reply(instance);
     }
 

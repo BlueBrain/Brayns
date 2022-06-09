@@ -2,8 +2,7 @@
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
- * This file is part of Brayns
- * <https://github.com/BlueBrain/Brayns-UC-DTI>
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published

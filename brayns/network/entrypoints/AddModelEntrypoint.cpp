@@ -92,19 +92,9 @@ void AddModelEntrypoint::onRequest(const Request &request)
     loadParameters.loaderName = name;
     loadParameters.loadParameters = parameters;
 
-    auto &modelManager = _scene.getModels();
+    auto result = _scene.addModels(std::move(loadParameters), std::move(models));
 
-    std::vector<ModelInstance *> result;
-    result.reserve(models.size());
-    for (auto &model : models)
-    {
-        auto &modelInstance = modelManager.addModel(loadParameters, std::move(model));
-        result.push_back(&modelInstance);
-    }
-
-    SimulationScanner::scanAndUpdate(modelManager, _simulation);
-    // Need to compute bounds here to make sure the bounds will be updated for the next call (which may need them)
-    _scene.computeBounds();
+    SimulationScanner::scanAndUpdate(_scene, _simulation);
 
     request.reply(result);
 }

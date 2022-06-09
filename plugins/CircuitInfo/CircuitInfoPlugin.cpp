@@ -41,14 +41,13 @@ void CircuitInfoPlugin::registerEntrypoints(brayns::INetworkInterface &interface
 {
     auto &engine = _api->getEngine();
     auto &scene = engine.getScene();
-    auto &modelManager = scene.getModels();
 
     auto builder = brayns::EntrypointBuilder("Circuit Info", interface);
 
     builder.add<CIInfoEntrypoint>();
     builder.add<CIGetCellDataEntrypoint>();
     builder.add<CIGetCellIdsEntrypoint>();
-    builder.add<CIGetCellIdsFromModelEntrypoint>(modelManager);
+    builder.add<CIGetCellIdsFromModelEntrypoint>(scene);
     builder.add<CIGetReportsEntrypoint>();
     builder.add<CIGetReportInfoEntrypoint>();
     builder.add<CIGetSpikeReportInfoEntrypoint>();

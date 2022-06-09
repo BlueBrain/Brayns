@@ -42,8 +42,7 @@ void GetSceneEntrypoint::onRequest(const Request &request)
 {
     SceneMessage message;
     message.bounds = _scene.getBounds();
-    auto &models = _scene.getModels();
-    message.models = models.getAllModelInstances();
+    message.models = _scene.getAllModelInstances();
     request.reply(message);
 }
 } // namespace brayns

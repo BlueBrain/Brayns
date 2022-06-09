@@ -32,6 +32,12 @@ TransferFunctionRendererComponent::TransferFunctionRendererComponent()
     _handle = ospNewTransferFunction("piecewiseLinear");
 }
 
+void TransferFunctionRendererComponent::onCreate()
+{
+    auto &model = getModel();
+    model.addComponent<TransferFunctionComponent>();
+}
+
 void TransferFunctionRendererComponent::onDestroy()
 {
     if (_handle)

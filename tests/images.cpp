@@ -76,8 +76,7 @@ TEST_CASE("render_xyz_and_compare")
     CHECK(ImageValidator::validate(engine, "testImagesXYZ.png"));
 
     auto &scene = engine.getScene();
-    auto &modelManager = scene.getModels();
-    auto &instance = modelManager.getModelInstance(0);
+    auto &instance = scene.getModelInstance(0);
     auto &model = instance.getModel();
     auto &component = model.getComponent<brayns::GeometryRendererComponent<brayns::Sphere>>();
     auto &geometry = component.getGeometry();

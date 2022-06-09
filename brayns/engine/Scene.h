@@ -53,8 +53,7 @@ public:
     const Bounds &getBounds() const noexcept;
 
     /**
-     * @brief Recompute bounds based on its current instances. It will use the current bounds of each model instance,
-     * (it will not call computeBound() on the instances)
+     * @brief Recompute bounds based on its current instances and lights.
      */
     void computeBounds() noexcept;
 
@@ -75,32 +74,92 @@ public:
     bool commit();
 
     /**
-     * @brief Get the scene model manager object
-     *
-     * @return SceneModelManager&
+     * @brief Adds a model to the scene and returns its instance
+     * @param params Parameters with which the model was loaded
+     * @param model Model to add
+     * @return ModelInstance&
      */
-    SceneModelManager &getModels() noexcept;
+    ModelInstance &addModel(ModelLoadParameters params, std::unique_ptr<Model> model);
 
     /**
-     * @brief Get the scene model manager object
-     *
-     * @return const SceneModelManager&
+     * @brief Adds a list of models to the scene and returns the renderable instances made out of them.
+     * @param params Parameters used to load the added models.
+     * @param models List of models to add to the scene.
+     * @return std::vector<ModelInstance *>
      */
-    const SceneModelManager &getModels() const noexcept;
+    std::vector<ModelInstance *> addModels(ModelLoadParameters params, std::vector<std::unique_ptr<Model>> models);
 
     /**
-     * @brief Get the scene clipping models manager object
-     *
-     * @return SceneClipperManager&
+     * @brief Removes a list of model instances by their ID.
+     * @param instanceIDs List of instance IDs to remove.
+     * @throws std::invalid_argument if any of the IDs does not exists in the list of instances.
      */
-    SceneClipManager &getClippingModels() noexcept;
+    void removeModelInstances(const std::vector<uint32_t> &instanceIDs);
 
     /**
-     * @brief Get the scene light manager object
-     *
-     * @return SceneLightManager&
+     * @brief Removes all model instances in the scene.
      */
-    SceneLightManager &getLights() noexcept;
+    void removeAllModelInstances() noexcept;
+
+    /**
+     * @brief Returns a referene to a model instance identified by its ID.
+     * @param instanceId ID of the model instance to return.
+     * @return ModelInstance&
+     * @throw std::invalid_argument if the ID does not belong to any existing model instance.
+     */
+    ModelInstance &getModelInstance(uint32_t instanceId);
+
+    /**
+     * @brief Return a list of all the model instances in the scene.
+     * @return const std::vector<ModelInstance *>&
+     */
+    const std::vector<ModelInstance *> &getAllModelInstances() const noexcept;
+
+    /**
+     * @brief Returns the parameters used to load the model used by the instance denoted in the id.
+     * @param instanceId
+     * @return const ModelLoadParameters
+     * @throws std::invalid_argument if the ID does not belon to any existing model instance
+     */
+    const ModelLoadParameters &getModelLoadParameters(uint32_t instanceId) const;
+
+    /**
+     * @brief Adds a light to the scene and returns its ID/
+     * @param light Light to add.
+     * @return uint32_t ID of the light after adding it.
+     */
+    uint32_t addLight(std::unique_ptr<Light> light);
+
+    /**
+     * @brief Removes a list of lights from the scene identified by their ID.
+     * @param lightIds
+     * @throws std::invalid_argument if any of the IDs does not belong to any existing light.
+     */
+    void removeLights(const std::vector<uint32_t> &lightIds);
+
+    /**
+     * @brief Removes all lights in the scene.
+     */
+    void removeAllLights() noexcept;
+
+    /**
+     * @brief Adds a clipping model to the scene and returns its ID.
+     * @param model Model to add.
+     * @return uint32_t ID of the model after adding it to the scene.
+     */
+    uint32_t addClippingModel(std::unique_ptr<Model> model);
+
+    /**
+     * @brief Removes a list of clipping models from the scene identifid by their ID.
+     * @param modelIds
+     * @throw std::invalid_argument if any of the IDs does not belong to any existing clipping model.
+     */
+    void removeClippingModels(const std::vector<uint32_t> &modelIds);
+
+    /**
+     * @brief Removes all clipping models in the scene.
+     */
+    void removeAllClippingModels() noexcept;
 
     /**
      * @brief Returns the OSPRay handle of the scene

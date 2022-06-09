@@ -21,6 +21,11 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED)
     find_package(MorphIO QUIET)
 endif()
 
+if(BRAYNS_ATLASEXPLORER_ENABLED)
+    find_package(ZLIB REQUIRED)
+    find_package(BZip2 REQUIRED)
+endif()
+
 add_subdirectory(deps)
 
 if (BRAYNS_CIRCUITEXPLORER_ENABLED)
@@ -33,4 +38,8 @@ endif()
 
 if(BRAYNS_CIRCUITINFO_ENABLED)
     add_subdirectory(CircuitInfo)
+endif()
+
+if(BRAYNS_ATLASEXPLORER_ENABLED)
+    add_subdirectory(AtlasExplorer)
 endif()

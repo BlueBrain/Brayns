@@ -64,16 +64,14 @@ struct ZParallelSliceManager
             model->addComponent<brayns::ClippingComponent<brayns::Plane>>(planeGeometry);
         }
 
-        auto &manager = scene.getClippingModels();
-        manager.addClippingModel(std::move(model));
+        scene.addClippingModel(std::move(model));
     }
 
     static void clear(brayns::Brayns &brayns)
     {
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
-        auto &clipManager = scene.getClippingModels();
-        clipManager.removeAllClippingModels();
+        scene.removeAllClippingModels();
     }
 };
 } // namespace

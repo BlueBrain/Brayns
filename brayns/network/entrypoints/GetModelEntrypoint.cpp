@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-GetModelEntrypoint::GetModelEntrypoint(SceneModelManager &sceneModelManager)
-    : _sceneModelManager(sceneModelManager)
+GetModelEntrypoint::GetModelEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -44,7 +44,7 @@ void GetModelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.id;
-    auto &instance = ExtractModel::fromId(_sceneModelManager, modelId);
+    auto &instance = ExtractModel::fromId(_scene, modelId);
     request.reply(instance);
 }
 } // namespace brayns

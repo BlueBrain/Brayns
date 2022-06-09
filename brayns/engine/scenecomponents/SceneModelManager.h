@@ -55,12 +55,23 @@ class SceneModelManager
 {
 public:
     /**
-     * @brief Adds a new model to the scene and creates an instance out of it to be rendered.
-     * @param loadParameters Parameters which were used to load the model
-     * @param model The model to add to the scene
-     * @returns ModelInstance &
+     * @brief Adds a model to the list and creates an instance out of it to be rendered.
+     * @param loadParameters Parameters with which the model was loaded
+     * @param model
+     * @return ModelInstance&
      */
-    ModelInstance &addModel(ModelLoadParameters loadParameters, std::unique_ptr<Model> model);
+    ModelInstance &addModel(ModelLoadParameters loadParameters, std::unique_ptr<brayns::Model> model);
+
+    /**
+     * @brief Adds a list of new model to the scene and creates instances out of them to be rendered.
+     * Will automatically trigger the scene to re-compute the bounds.
+     * @param loadParameters Parameters which were used to load the model
+     * @param models The model to add to the scene
+     * @return std::vector<ModelInstance *>
+     */
+    std::vector<ModelInstance *> addModels(
+        ModelLoadParameters loadParameters,
+        std::vector<std::unique_ptr<Model>> models);
 
     /**
      * @brief Creates a new instance from the model that is being instantiated by the given instance ID
@@ -90,12 +101,12 @@ public:
     const std::vector<ModelInstance *> &getAllModelInstances() const noexcept;
 
     /**
-     * @brief Removes a model instance from the scene, identified by the given instance ID.
+     * @brief Removes all model instances from the scene, identified by the given instance IDs.
      * If the model to which the instance refers does not have any other instance, it will be deleted as well.
-     * @param instanceID the ID of the instance to re,pve
-     * @throws std::invalid_argument if modelID does not correspond to any existing model
+     * Will automatically trigger the scene to re-compute the bounds.
+     * @param instanceIDs list of IDs of instances to remove
      */
-    void removeModel(const uint32_t instanceID);
+    void removeModels(const std::vector<uint32_t> &instanceIDs);
 
     /**
      * @brief Clear all models and instances.
@@ -162,6 +173,15 @@ private:
     };
 
     /**
+     * @brief Creates a new model entry from the given load parameters and model object
+     *
+     * @param params Parameters used to load the model
+     * @param model Model object
+     * @return ModelEntry&
+     */
+    ModelEntry &_createModelEntry(ModelLoadParameters params, std::unique_ptr<Model> model);
+
+    /**
      * @brief Creates a new model instance from the given model entry
      * @param modelEntry ModelEntry &
      * @return ModelInstance &
@@ -173,5 +193,6 @@ private:
     IDFactory<uint32_t> _instanceIdFactory;
     std::vector<ModelEntry> _models;
     std::vector<ModelInstance *> _instances;
+    bool _dirty = false;
 };
 }

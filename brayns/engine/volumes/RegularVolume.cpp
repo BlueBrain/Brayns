@@ -28,14 +28,19 @@ size_t getTypeByteSize(const OSPDataType type)
 {
     switch (type)
     {
+    case OSPDataType::OSP_CHAR:
     case OSPDataType::OSP_UCHAR:
         return 1;
     case OSPDataType::OSP_SHORT:
     case OSPDataType::OSP_USHORT:
     case OSPDataType::OSP_HALF:
         return 2;
+    case OSPDataType::OSP_INT:
+    case OSPDataType::OSP_UINT:
     case OSPDataType::OSP_FLOAT:
         return 4;
+    case OSPDataType::OSP_LONG:
+    case OSPDataType::OSP_ULONG:
     case OSPDataType::OSP_DOUBLE:
         return 8;
     default:
@@ -54,11 +59,9 @@ std::string_view VolumeOSPRayID<RegularVolume>::get()
 
 void VolumeBoundsUpdater<RegularVolume>::update(const RegularVolume &s, const Matrix4f &t, Bounds &b)
 {
-    static const Vector3f regularVolumeMin{0.f};
-    static const Vector3f regularVolumeMax{1.f};
-
-    const Vector3f minBound(t * Vector4f(regularVolumeMin, 1.f));
-    const Vector3f maxBound(t * Vector4f(regularVolumeMax, 1.f));
+    const auto size = brayns::Vector3f(s.size) * s.spacing;
+    const Vector3f minBound(t * Vector4f(0.f, 0.f, 0.f, 1.f));
+    const Vector3f maxBound(t * Vector4f(size, 1.f));
 
     b.expand(minBound);
     b.expand(maxBound);
@@ -70,6 +73,7 @@ void VolumeCommitter<RegularVolume>::commit(OSPVolume handle, const RegularVolum
     const auto dataType = static_cast<OSPDataType>(volumeData.dataType);
     const auto &data = volumeData.data;
     const auto &size = volumeData.size;
+    const auto &spacing = volumeData.spacing;
 
     const auto dimensionSize = glm::compMul(size);
     if (dimensionSize == 0)
@@ -84,8 +88,11 @@ void VolumeCommitter<RegularVolume>::commit(OSPVolume handle, const RegularVolum
         throw std::runtime_error("RegularVolume expected size and current size missmatch");
     }
 
-    auto buffer = DataHandler::shareBuffer(data, dataType);
-    ospSetParam(handle, "data", OSPDataType::OSP_DATA, &buffer.handle);
+    OSPData sharedData = ospNewSharedData(data.data(), dataType, size.x, 0, size.y, 0, size.z);
+    ospSetParam(handle, "data", OSPDataType::OSP_DATA, &sharedData);
+    ospRelease(sharedData);
+
     ospSetParam(handle, "cellCentered", OSPDataType::OSP_BOOL, &cellCentered);
+    ospSetParam(handle, "gridSpacing", OSPDataType::OSP_VEC3F, &spacing);
 }
 }

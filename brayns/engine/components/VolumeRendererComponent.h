@@ -33,24 +33,13 @@ namespace brayns
  * @brief Adds a renderable volume to the model
  */
 template<typename T>
-class VolumeRendererComponent : public Component
+class VolumeRendererComponent final : public Component
 {
 public:
-    VolumeRendererComponent()
+    VolumeRendererComponent(T volume)
+        : _model(ospNewVolumetricModel())
     {
-        _initializeHandle();
-    }
-
-    VolumeRendererComponent(const T &volume)
-    {
-        _initializeHandle();
-        _volume.add(volume);
-    }
-
-    ~VolumeRendererComponent()
-    {
-        if (_model)
-            ospRelease(_model);
+        _volume.setData(std::move(volume));
     }
 
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
@@ -60,26 +49,30 @@ public:
 
     virtual void onCreate() override
     {
+        _volume.commit();
+        auto volumeHandle = _volume.handle();
+        ospSetParam(_model, "volume", OSPDataType::OSP_VOLUME, &volumeHandle);
+
         Model &model = getModel();
         auto &group = model.getGroup();
         group.addVolumetricModel(_model);
+
+        model.addComponent<TransferFunctionRendererComponent>();
     }
 
-    virtual bool commit() override
+    bool commit() override
     {
         Model &model = getModel();
-
-        bool needsCommit = false;
-
-        needsCommit |= _commitVolume();
-        needsCommit |= _commitTransferFunction();
-
-        if (needsCommit)
+        auto &tfComponent = model.getComponent<TransferFunctionRendererComponent>();
+        if (tfComponent.manualCommit())
         {
+            auto tfHandle = tfComponent.handle();
+            ospSetParam(_model, "transferFunction", OSPDataType::OSP_TRANSFER_FUNCTION, &tfHandle);
             ospCommit(_model);
+            return true;
         }
 
-        return needsCommit;
+        return false;
     }
 
     virtual void onDestroy() override
@@ -88,33 +81,9 @@ public:
         auto &group = model.getGroup();
         group.removeVolumetricModel(_model);
         ospRelease(_model);
-        _model = nullptr;
-    }
-
-protected:
-    OSPVolumetricModel handle() const noexcept
-    {
-        return _model;
     }
 
 private:
-    void _initializeHandle()
-    {
-        _model = ospNewVolumetricModel();
-    }
-
-    bool _commitVolume()
-    {
-        if (_volume.commit())
-        {
-            auto volumeHandle = _volume.handle();
-            ospSetParam(_model, "volume", OSPDataType::OSP_VOLUME, &volumeHandle);
-            return true;
-        }
-
-        return false;
-    }
-
     bool _commitTransferFunction()
     {
         Model &model = getModel();

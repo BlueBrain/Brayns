@@ -48,18 +48,17 @@ void CircuitExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &inter
 {
     auto &engine = _api->getEngine();
     auto &scene = engine.getScene();
-    auto &modelManager = scene.getModels();
 
     auto builder = brayns::EntrypointBuilder("Circuit Explorer", interface);
 
-    builder.add<AvailableColorMethodsEntrypoint>(modelManager);
-    builder.add<AvailableColorMethodVariablesEntrypoint>(modelManager);
-    builder.add<ColorCircuitByIdEntrypoint>(modelManager);
-    builder.add<ColorCircuitByMethodEntrypoint>(modelManager);
-    builder.add<ColorCircuitBySingleColorEntrypoint>(modelManager);
+    builder.add<AvailableColorMethodsEntrypoint>(scene);
+    builder.add<AvailableColorMethodVariablesEntrypoint>(scene);
+    builder.add<ColorCircuitByIdEntrypoint>(scene);
+    builder.add<ColorCircuitByMethodEntrypoint>(scene);
+    builder.add<ColorCircuitBySingleColorEntrypoint>(scene);
     builder.add<MakeMovieEntrypoint>();
     builder.add<SetCircuitThicknessEntrypoint>(scene);
-    builder.add<TraceAnterogradeEntrypoint>(modelManager);
+    builder.add<TraceAnterogradeEntrypoint>(scene);
 }
 
 extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int, char **)

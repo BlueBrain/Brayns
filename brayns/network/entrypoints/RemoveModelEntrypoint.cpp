@@ -44,13 +44,8 @@ std::string RemoveModelEntrypoint::getDescription() const
 void RemoveModelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    auto &modelManager = _scene.getModels();
-    for (auto id : params.ids)
-    {
-        modelManager.removeModel(id);
-    }
-    SimulationScanner::scanAndUpdate(modelManager, _simulation);
-    _scene.computeBounds();
+    _scene.removeModelInstances(params.ids);
+    SimulationScanner::scanAndUpdate(_scene, _simulation);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

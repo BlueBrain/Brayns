@@ -31,12 +31,19 @@ uint32_t SceneLightManager::addLight(std::unique_ptr<Light> light) noexcept
     return id;
 }
 
-void SceneLightManager::removeLight(const uint32_t lightId)
+void SceneLightManager::removeLights(const std::vector<uint32_t> &lightIds)
 {
-    const auto eraseCount = _lights.erase(lightId);
-    if (eraseCount == 0)
+    for (auto lightId : lightIds)
     {
-        throw std::invalid_argument("No light with id " + std::to_string(lightId) + " was found");
+        if (_lights.find(lightId) == _lights.end())
+        {
+            throw std::invalid_argument("No light with id " + std::to_string(lightId) + " was found");
+        }
+    }
+    for (auto lightId : lightIds)
+    {
+        _lights.erase(lightId);
+        _idFactory.releaseID(lightId);
     }
     _dirty = true;
 }
@@ -46,6 +53,16 @@ void SceneLightManager::removeAllLights() noexcept
     _idFactory.clear();
     _lights.clear();
     _dirty = true;
+}
+
+Bounds SceneLightManager::getBounds() const noexcept
+{
+    Bounds bounds;
+    for (const auto &[lightId, light] : _lights)
+    {
+        bounds.expand(light->computeBounds());
+    }
+    return bounds;
 }
 
 bool SceneLightManager::commit()

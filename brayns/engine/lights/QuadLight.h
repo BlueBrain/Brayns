@@ -63,6 +63,8 @@ public:
      */
     const Vector3f &getHorizontalDisplacement() const noexcept;
 
+    Bounds computeBounds() const noexcept override;
+
 protected:
     void commitLightSpecificParams() final;
 

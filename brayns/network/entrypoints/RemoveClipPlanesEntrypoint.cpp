@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-RemoveClipPlanesEntrypoint::RemoveClipPlanesEntrypoint(SceneClipManager &clipManager)
-    : _clipManager(clipManager)
+RemoveClipPlanesEntrypoint::RemoveClipPlanesEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -42,10 +42,7 @@ void RemoveClipPlanesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto &ids = params.ids;
-    for (auto id : ids)
-    {
-        _clipManager.removeClippingModel(id);
-    }
+    _scene.removeClippingModels(ids);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

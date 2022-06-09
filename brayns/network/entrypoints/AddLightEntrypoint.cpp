@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-AddLightAmbientEntrypoint::AddLightAmbientEntrypoint(SceneLightManager &sceneLightManager)
-    : AddLightEntrypoint(sceneLightManager)
+AddLightAmbientEntrypoint::AddLightAmbientEntrypoint(Scene &scene)
+    : AddLightEntrypoint(scene)
 {
 }
 
@@ -37,11 +37,11 @@ std::string AddLightAmbientEntrypoint::getMethod() const
 
 std::string AddLightAmbientEntrypoint::getDescription() const
 {
-    return "Add an ambient light which iluminates all the scen from all directions";
+    return "Adds an ambient light which iluminates the scene from all directions";
 }
 
-AddLightDirectionalEntrypoint::AddLightDirectionalEntrypoint(SceneLightManager &sceneLightManager)
-    : AddLightEntrypoint(sceneLightManager)
+AddLightDirectionalEntrypoint::AddLightDirectionalEntrypoint(Scene &scene)
+    : AddLightEntrypoint(scene)
 {
 }
 
@@ -52,11 +52,11 @@ std::string AddLightDirectionalEntrypoint::getMethod() const
 
 std::string AddLightDirectionalEntrypoint::getDescription() const
 {
-    return "Add a directional light and return its ID";
+    return "Adds a directional light which iluminates the scene from a given direction";
 }
 
-AddLightQuadEntrypoint::AddLightQuadEntrypoint(SceneLightManager &sceneLightManager)
-    : AddLightEntrypoint(sceneLightManager)
+AddLightQuadEntrypoint::AddLightQuadEntrypoint(Scene &scene)
+    : AddLightEntrypoint(scene)
 {
 }
 
@@ -67,6 +67,6 @@ std::string AddLightQuadEntrypoint::getMethod() const
 
 std::string AddLightQuadEntrypoint::getDescription() const
 {
-    return "Add a quad light and return its ID";
+    return "Add a quad light which iluminates the scene on a specific area";
 }
 } // namespace brayns

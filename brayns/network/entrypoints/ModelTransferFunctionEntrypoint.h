@@ -33,26 +33,26 @@ namespace brayns
 class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, TransferFunction>
 {
 public:
-    GetModelTransferFunctionEntrypoint(SceneModelManager &modelManager);
+    GetModelTransferFunctionEntrypoint(Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    SceneModelManager &_modelManager;
+    Scene &_scene;
 };
 
 class SetModelTransferFunctionEntrypoint : public Entrypoint<SetTransferFunctionMessage, EmptyMessage>
 {
 public:
-    SetModelTransferFunctionEntrypoint(SceneModelManager &modelManager);
+    SetModelTransferFunctionEntrypoint(Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    SceneModelManager &_modelManager;
+    Scene &_scene;
 };
 } // namespace brayns

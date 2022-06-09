@@ -24,6 +24,7 @@
 
 #include <ospray/ospray.h>
 
+#include <functional>
 #include <memory>
 #include <numeric>
 #include <string_view>
@@ -160,6 +161,7 @@ public:
         VolumeCommitter<T>::commit(_handle, _volumeData);
 
         ospCommit(_handle);
+
         _dirty = false;
         return true;
     }

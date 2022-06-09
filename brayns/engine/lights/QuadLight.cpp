@@ -57,6 +57,15 @@ const Vector3f &QuadLight::getHorizontalDisplacement() const noexcept
     return _horizontalDisplacement;
 }
 
+Bounds QuadLight::computeBounds() const noexcept
+{
+    Bounds bounds;
+    bounds.expand(_bottomLeftCorner);
+    bounds.expand(_bottomLeftCorner + _horizontalDisplacement);
+    bounds.expand(_bottomLeftCorner + _verticalDisplacement);
+    return bounds;
+}
+
 void QuadLight::commitLightSpecificParams()
 {
     auto ospHandle = handle();

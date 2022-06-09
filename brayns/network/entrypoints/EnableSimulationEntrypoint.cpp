@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-EnableSimulationEntrypoint::EnableSimulationEntrypoint(SceneModelManager &modelManager)
-    : _modelManager(modelManager)
+EnableSimulationEntrypoint::EnableSimulationEntrypoint(Scene &scene)
+    : _scene(scene)
 {
 }
 
@@ -45,7 +45,7 @@ void EnableSimulationEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     auto modelId = params.model_id;
     auto enableSimulation = params.enabled;
-    auto &instance = ExtractModel::fromId(_modelManager, modelId);
+    auto &instance = ExtractModel::fromId(_scene, modelId);
     auto &model = instance.getModel();
     auto &simulation = model.getComponent<SimulationComponent>();
     simulation.setEnabled(enableSimulation);
