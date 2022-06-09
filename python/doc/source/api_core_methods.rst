@@ -163,7 +163,6 @@ Add a clip plane and returns the clip plane ID.
 .. jsonschema::
 
     {
-        "title": "Plane",
         "type": "object",
         "properties": {
             "coefficients": {
@@ -198,7 +197,6 @@ Add an ambient light which iluminates all the scen from all directions.
 .. jsonschema::
 
     {
-        "title": "AmbientLight",
         "type": "object",
         "properties": {
             "color": {
@@ -239,7 +237,6 @@ Add a directional light and return its ID.
 .. jsonschema::
 
     {
-        "title": "DirectionalLight",
         "type": "object",
         "properties": {
             "color": {
@@ -289,7 +286,6 @@ Add a quad light and return its ID.
 .. jsonschema::
 
     {
-        "title": "QuadLight",
         "type": "object",
         "properties": {
             "bottom_left_corner": {
@@ -359,7 +355,6 @@ This entrypoint is asynchronous, it means that it can take a long time and send 
 .. jsonschema::
 
     {
-        "title": "FileLoadParameters",
         "type": "object",
         "properties": {
             "loader_name": {
@@ -521,7 +516,6 @@ Cancel the task started by the request with the given ID.
 .. jsonschema::
 
     {
-        "title": "CancelParams",
         "type": "object",
         "properties": {
             "id": {
@@ -607,7 +601,6 @@ A switch to enable or disable simulation on a model.
 .. jsonschema::
 
     {
-        "title": "EnableSimulationMessage",
         "type": "object",
         "properties": {
             "enabled": {
@@ -643,7 +636,6 @@ Schedules Brayns to shutdown after a given amount of minutes.
 .. jsonschema::
 
     {
-        "title": "ExitLaterMessage",
         "type": "object",
         "properties": {
             "minutes": {
@@ -676,7 +668,6 @@ This entrypoint is asynchronous, it means that it can take a long time and send 
 .. jsonschema::
 
     {
-        "title": "ExportFramesParams",
         "type": "object",
         "properties": {
             "camera": {
@@ -922,7 +913,6 @@ Returns the material of the given model as a car paint material, if possible.
 .. jsonschema::
 
     {
-        "title": "GetModelMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -953,7 +943,6 @@ Returns the material of the given model as a default material, if possible.
 .. jsonschema::
 
     {
-        "title": "GetModelMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -984,7 +973,6 @@ Returns the material of the given model as a emissive material, if possible.
 .. jsonschema::
 
     {
-        "title": "GetModelMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -1015,7 +1003,6 @@ Returns the material of the given model as a glass material, if possible.
 .. jsonschema::
 
     {
-        "title": "GetModelMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -1046,7 +1033,6 @@ Returns the material of the given model as a matte material, if possible.
 .. jsonschema::
 
     {
-        "title": "GetModelMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -1077,7 +1063,6 @@ Returns the material of the given model as a metal material, if possible.
 .. jsonschema::
 
     {
-        "title": "GetModelMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -1108,7 +1093,6 @@ Returns the material of the given model as a plastic material, if possible.
 .. jsonschema::
 
     {
-        "title": "GetModelMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -1139,7 +1123,6 @@ Returns the type of the material of a given model, if any.
 .. jsonschema::
 
     {
-        "title": "GetModelMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -1170,7 +1153,6 @@ Get all the information of the given model.
 .. jsonschema::
 
     {
-        "title": "GetModelMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -1201,7 +1183,6 @@ Get the transfer function of the given model.
 .. jsonschema::
 
     {
-        "title": "GetModelMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -1337,7 +1318,6 @@ Inspect the scene at x-y position.
 .. jsonschema::
 
     {
-        "title": "InspectMessage",
         "type": "object",
         "properties": {
             "position": {
@@ -1402,7 +1382,6 @@ Remove clip planes from the scene given their ids.
 .. jsonschema::
 
     {
-        "title": "RemoveClipPlanesMessage",
         "type": "object",
         "properties": {
             "ids": {
@@ -1436,7 +1415,6 @@ Remove the model(s) from the ID list from the scene.
 .. jsonschema::
 
     {
-        "title": "RemoveLightsMessage",
         "type": "object",
         "properties": {
             "ids": {
@@ -1470,7 +1448,6 @@ Remove the model(s) from the ID list from the scene.
 .. jsonschema::
 
     {
-        "title": "RemoveModelMessage",
         "type": "object",
         "properties": {
             "ids": {
@@ -1506,7 +1483,6 @@ This entrypoint is asynchronous, it means that it can take a long time and send 
 .. jsonschema::
 
     {
-        "title": "BinaryLoadParameters",
         "type": "object",
         "properties": {
             "chunks_id": {
@@ -1556,7 +1532,6 @@ Get the JSON schema of the given entrypoint.
 .. jsonschema::
 
     {
-        "title": "SchemaParams",
         "type": "object",
         "properties": {
             "endpoint": {
@@ -1586,7 +1561,6 @@ Set the current state of the application parameters.
 .. jsonschema::
 
     {
-        "title": "ApplicationParameters",
         "type": "object",
         "properties": {
             "jpeg_quality": {
@@ -1633,7 +1607,6 @@ Sets the camera view settings.
 .. jsonschema::
 
     {
-        "title": "LookAt",
         "type": "object",
         "properties": {
             "position": {
@@ -1688,7 +1661,6 @@ Sets the current camera to an orthographic one, with the specified parameters.
 .. jsonschema::
 
     {
-        "title": "OrthographicCamera",
         "type": "object",
         "properties": {
             "height": {
@@ -1715,7 +1687,6 @@ Sets the current camera to a perspective one, with the specified parameters.
 .. jsonschema::
 
     {
-        "title": "PerspectiveCamera",
         "type": "object",
         "properties": {
             "aperture_radius": {
@@ -1756,7 +1727,6 @@ Updates the material of the given model to a Car paint material. This material i
 .. jsonschema::
 
     {
-        "title": "SetMaterialMessage<CarPaintMaterial>",
         "type": "object",
         "properties": {
             "material": {
@@ -1809,7 +1779,6 @@ Updates the material of the given model to the Default material. This material w
 .. jsonschema::
 
     {
-        "title": "SetMaterialMessage<DefaultMaterial>",
         "type": "object",
         "properties": {
             "material": {
@@ -1862,7 +1831,6 @@ Updates the material of the given model to an Emisive material. This material is
 .. jsonschema::
 
     {
-        "title": "SetMaterialMessage<EmissiveMaterial>",
         "type": "object",
         "properties": {
             "material": {
@@ -1915,7 +1883,6 @@ Updates the material of the given model to a Glass material. This material is on
 .. jsonschema::
 
     {
-        "title": "SetMaterialMessage<GlassMaterial>",
         "type": "object",
         "properties": {
             "material": {
@@ -1968,7 +1935,6 @@ Updates the material of the given model to a Matte material. This material is on
 .. jsonschema::
 
     {
-        "title": "SetMaterialMessage<MatteMaterial>",
         "type": "object",
         "properties": {
             "material": {
@@ -2021,7 +1987,6 @@ Updates the material of the given model to a Metal material. This material is on
 .. jsonschema::
 
     {
-        "title": "SetMaterialMessage<MetalMaterial>",
         "type": "object",
         "properties": {
             "material": {
@@ -2074,7 +2039,6 @@ Updates the material of the given model to a Plastic material. This material is 
 .. jsonschema::
 
     {
-        "title": "SetMaterialMessage<PlasticMaterial>",
         "type": "object",
         "properties": {
             "material": {
@@ -2127,7 +2091,6 @@ Set the transfer function of the given model.
 .. jsonschema::
 
     {
-        "title": "SetTransferFunctionMessage",
         "type": "object",
         "properties": {
             "id": {
@@ -2188,7 +2151,6 @@ Sets the system renderer to the interactive one.
 .. jsonschema::
 
     {
-        "title": "InteractiveRenderer",
         "type": "object",
         "properties": {
             "ao_samples": {
@@ -2236,7 +2198,6 @@ Sets the system renderer to the production one.
 .. jsonschema::
 
     {
-        "title": "ProductionRenderer",
         "type": "object",
         "properties": {
             "background_color": {
@@ -2276,7 +2237,6 @@ Set the current state of the simulation parameters.
 .. jsonschema::
 
     {
-        "title": "SimulationParameters",
         "type": "object",
         "properties": {
             "current": {
@@ -2326,7 +2286,6 @@ This entrypoint is asynchronous, it means that it can take a long time and send 
 .. jsonschema::
 
     {
-        "title": "SnapshotParams",
         "type": "object",
         "properties": {
             "camera": {
@@ -2474,7 +2433,6 @@ Update the model with the given values and return its new state.
 .. jsonschema::
 
     {
-        "title": "UpdateModelMessage",
         "type": "object",
         "properties": {
             "model": {

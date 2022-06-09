@@ -15,7 +15,6 @@ Return a list of afferent synapses cell GIDs from a circuit and a set of source 
 .. jsonschema::
 
     {
-        "title": "CIGetAfferentCellIdsParams",
         "type": "object",
         "properties": {
             "path": {
@@ -54,7 +53,6 @@ Return data attached to one or many cells.
 .. jsonschema::
 
     {
-        "title": "CIGetCellDataParams",
         "type": "object",
         "properties": {
             "ids": {
@@ -101,7 +99,6 @@ Return the list of GIDs from a circuit.
 .. jsonschema::
 
     {
-        "title": "CIGetCellIdsParams",
         "type": "object",
         "properties": {
             "path": {
@@ -138,7 +135,6 @@ Return the list of GIDs from a loaded circuit.
 .. jsonschema::
 
     {
-        "title": "CIGetCellIdsFromModelParams",
         "type": "object",
         "properties": {
             "model_id": {
@@ -169,7 +165,6 @@ Return a list of efferent synapses cell GIDs from a circuit and a set of source 
 .. jsonschema::
 
     {
-        "title": "CIGetEfferentCellIdsParams",
         "type": "object",
         "properties": {
             "path": {
@@ -208,7 +203,6 @@ Return a list of efferent projected synapses cell GIDs from a circuit and a set 
 .. jsonschema::
 
     {
-        "title": "CIGetProjectionEfferentCellIdsParams",
         "type": "object",
         "properties": {
             "path": {
@@ -252,7 +246,6 @@ Return a list of projection names available on a circuit.
 .. jsonschema::
 
     {
-        "title": "CIGetProjectionsParams",
         "type": "object",
         "properties": {
             "path": {
@@ -282,7 +275,6 @@ Return information about a specific report from a circuit.
 .. jsonschema::
 
     {
-        "title": "CIGetReportInfoParams",
         "type": "object",
         "properties": {
             "path": {
@@ -317,7 +309,6 @@ Return a list of reports from a circuit.
 .. jsonschema::
 
     {
-        "title": "CIGetReportsParams",
         "type": "object",
         "properties": {
             "path": {
@@ -347,7 +338,6 @@ Return wether the circuit has a spike report and its path.
 .. jsonschema::
 
     {
-        "title": "CIGetSpikeReportInfoParams",
         "type": "object",
         "properties": {
             "path": {
@@ -377,7 +367,6 @@ Return a list of targets from a circuit.
 .. jsonschema::
 
     {
-        "title": "CIGetTargetsParams",
         "type": "object",
         "properties": {
             "path": {
@@ -407,7 +396,6 @@ Return general info about a circuit.
 .. jsonschema::
 
     {
-        "title": "CIInfoParams",
         "type": "object",
         "properties": {
             "path": {

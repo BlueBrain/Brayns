@@ -86,7 +86,7 @@ The additional data is mainly used in case of invalid params to detail the schem
             "code": 12,
             "message": "Something happened",
             "data": [
-                "Missing mandatory value 'test.field'."
+                "The field a.b.c is missing."
             ]
         }
     }

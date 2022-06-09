@@ -117,7 +117,7 @@ The additional data is mainly used in case of invalid params to detail the schem
             "code": 12,
             "message": "Something happened",
             "data": [
-                '123'
+                "The field a.b.c is missing."
             ]
         }}
     }}
@@ -316,7 +316,9 @@ def format_result(schema: Optional[brayns.JsonSchema]) -> str:
 
 
 def format_schema(schema: brayns.JsonSchema) -> str:
-    data = json.dumps(schema.serialize(), indent=4)
+    message = schema.serialize()
+    message.pop('title', None)
+    data = json.dumps(message, indent=4)
     data = data.replace('\n', '\n    ')
     return SCHEMA.format(data=data)
 

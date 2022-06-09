@@ -15,7 +15,6 @@ Colors a circuit model by element ID. Specific IDs can be targeted, otherwise, r
 .. jsonschema::
 
     {
-        "title": "ColorCircuitByIdMessage",
         "type": "object",
         "properties": {
             "color_info": {
@@ -75,7 +74,6 @@ Colors a circuit model by grouping its elements using the given method. Specific
 .. jsonschema::
 
     {
-        "title": "ColorCircuitByMethodMessage",
         "type": "object",
         "properties": {
             "color_info": {
@@ -140,7 +138,6 @@ Colors a whole circuit model with a single color.
 .. jsonschema::
 
     {
-        "title": "ColorCircuitBySingleColorMessage",
         "type": "object",
         "properties": {
             "color": {
@@ -181,7 +178,6 @@ Return the available variables which can be specified when coloring a circuit mo
 .. jsonschema::
 
     {
-        "title": "RequestCircuitColorMethodVariables",
         "type": "object",
         "properties": {
             "method": {
@@ -217,7 +213,6 @@ Return the available extra coloring methods for a circuit model.
 .. jsonschema::
 
     {
-        "title": "ColoredCircuitID",
         "type": "object",
         "properties": {
             "model_id": {
@@ -248,7 +243,6 @@ Builds a movie file from a set of frames stored on disk.
 .. jsonschema::
 
     {
-        "title": "MakeMovieMessage",
         "type": "object",
         "properties": {
             "dimensions": {
@@ -310,7 +304,6 @@ Modify the geometry radiuses (spheres, cones, cylinders and SDF geometries).
 .. jsonschema::
 
     {
-        "title": "SetCircuitThicknessMessage",
         "type": "object",
         "properties": {
             "model_id": {
@@ -346,7 +339,6 @@ Performs neuronal tracing showing efferent and afferent synapse relationship bet
 .. jsonschema::
 
     {
-        "title": "TraceAnterogradeMessage",
         "type": "object",
         "properties": {
             "cell_gids": {
