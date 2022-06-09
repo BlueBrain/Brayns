@@ -4,20 +4,8 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSDTI_SOURCES
-  components/DTIComponent.cpp
-  components/SpikeReportComponent.cpp
-  io/DTILoader.cpp
-  DTIPlugin.cpp
-)
-
-set(BRAYNSDTI_HEADERS
-  components/DTIComponent.h
-  components/SpikeReportComponent.h
-  io/DTILoader.h
-  io/DTILoaderParameters.h
-  DTIPlugin.h
-)
+file(GLOB_RECURSE BRAYNSDTI_SOURCES RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.cpp)
+file(GLOB_RECURSE BRAYNSDTI_HEADERS RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.h)
 
 add_library(braynsDTI SHARED ${BRAYNSDTI_SOURCES} ${BRAYNSDTI_HEADERS})
 

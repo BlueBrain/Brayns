@@ -15,13 +15,10 @@ add_subdirectory(io)
 add_subdirectory(pluginapi)
 add_subdirectory(network)
 
-set(BRAYNS_PUBLIC_HEADERS Brayns.h)
-set(BRAYNS_SOURCES
-  Brayns.cpp
-  PluginManager.cpp
-)
+file(GLOB BRAYNS_HEADERS RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.h)
+file(GLOB BRAYNS_SOURCES RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.cpp)
 
-add_library(brayns SHARED ${BRAYNS_PUBLIC_HEADERS} ${BRAYNS_SOURCES})
+add_library(brayns SHARED ${BRAYNS_HEADERS} ${BRAYNS_SOURCES})
 
 target_include_directories(brayns PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>

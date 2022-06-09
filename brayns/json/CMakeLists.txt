@@ -1,27 +1,5 @@
-set(BRAYNSJSON_HEADERS
-  Json.h
-  JsonAdapter.h
-  JsonAdapterMacro.h
-  JsonBuffer.h
-  JsonExtractor.h
-  JsonOptions.h
-  JsonSchema.h
-  JsonSchemaValidator.h
-  JsonType.h
-  JsonObjectInfo.h
-  JsonObjectMacro.h
-)
-
-set(BRAYNSJSON_SOURCES
-    Json.cpp
-    JsonExtractor.cpp
-    JsonObjectInfo.cpp
-    JsonOptions.cpp
-    JsonSchema.cpp
-    JsonSchemaValidator.cpp
-    JsonType.cpp
-    adapters/JsonSchemaAdapter.cpp
-)
+file(GLOB_RECURSE BRAYNSJSON_HEADERS RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.h)
+file(GLOB_RECURSE BRAYNSJSON_SOURCES RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.cpp)
 
 add_library(braynsJson SHARED ${BRAYNSJSON_SOURCES} ${BRAYNSJSON_HEADERS})
 
