@@ -57,7 +57,7 @@ public:
 private:
     static void setType(brayns::JsonObject &object, const std::string &key, brayns::JsonType type)
     {
-        if (type == brayns::JsonType::Unknown)
+        if (type == brayns::JsonType::Undefined)
         {
             return;
         }

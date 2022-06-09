@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from brayns.core.api.json_type import JsonType
 
@@ -32,7 +32,7 @@ class JsonSchema:
     type: JsonType = JsonType.UNDEFINED
     read_only: bool = False
     write_only: bool = False
-    default_value: Any = None
+    default: Any = None
     minimum: Optional[float] = None
     maximum: Optional[float] = None
     items: Optional['JsonSchema'] = None
@@ -40,73 +40,117 @@ class JsonSchema:
     max_items: Optional[int] = None
     properties: dict[str, 'JsonSchema'] = field(default_factory=dict)
     required: list[str] = field(default_factory=list)
-    additional_properties: Optional['JsonSchema'] = None
+    additional_properties: Optional[Union[bool, 'JsonSchema']] = None
     one_of: list['JsonSchema'] = field(default_factory=list)
-    enums: list[Any] = field(default_factory=list)
+    enum: list[Any] = field(default_factory=list)
 
     @staticmethod
     def deserialize(message: dict) -> 'JsonSchema':
         return JsonSchema(
             title=message.get('title', ''),
             description=message.get('description', ''),
-            type=JsonType(message.get('type', JsonType.UNDEFINED)),
+            type=_deserialize_type(message),
             read_only=message.get('readOnly', False),
             write_only=message.get('writeOnly', False),
-            default_value=message.get('default'),
+            default=message.get('default'),
             minimum=message.get('minimum'),
             maximum=message.get('maximum'),
-            items=_parse_items(message),
+            items=_deserialize_items(message),
             min_items=message.get('minItems'),
             max_items=message.get('maxItems'),
-            properties=_parse_properties(message),
+            properties=_deserialize_properties(message),
             required=message.get('required', []),
-            additional_properties=_parse_additional_properties(message),
-            one_of=_parse_one_of(message),
-            enums=message.get('enums', [])
+            additional_properties=_deserialize_additional(message),
+            one_of=_deserialize_one_of(message),
+            enum=message.get('enum', [])
         )
 
-    @classmethod
-    @property
-    def wildcard(cls) -> 'JsonSchema':
-        return JsonSchema()
+    def serialize(self) -> dict:
+        result = {}
+        if self.title:
+            result['title'] = self.title
+        if self.description:
+            result['description'] = self.description
+        if self.type is not JsonType.UNDEFINED:
+            result['type'] = self.type.value
+        if self.read_only:
+            result['readOnly'] = self.read_only
+        if self.write_only:
+            result['writeOnly'] = self.write_only
+        if self.default is not None:
+            result['default'] = self.default
+        if self.minimum is not None:
+            result['minimum'] = self.minimum
+        if self.maximum is not None:
+            result['maximum'] = self.maximum
+        if self.items is not None:
+            result['items'] = self.items.serialize()
+        if self.min_items is not None:
+            result['minItems'] = self.min_items
+        if self.max_items is not None:
+            result['maxItems'] = self.max_items
+        if self.properties:
+            result['properties'] = _serialize_properties(self)
+        if self.required:
+            result['required'] = self.required
+        if self.additional_properties is not None:
+            result['additionalProperties'] = _serialize_additional(self)
+        if self.one_of:
+            result['oneOf'] = _serialize_one_of(self)
+        if self.enum:
+            result['enum'] = self.enum
+        return result
 
-    def is_one_of(self) -> bool:
-        return bool(self.one_of)
 
-    def is_enum(self) -> bool:
-        return bool(self.enums)
-
-    def is_wildcard(self) -> bool:
-        return not self.is_one_of() and self.type is JsonType.UNDEFINED
+def _deserialize_type(message: dict) -> JsonType:
+    return JsonType(message.get('type', JsonType.UNDEFINED))
 
 
-def _parse_items(message: dict) -> JsonSchema:
+def _deserialize_items(message: dict) -> JsonSchema:
     value = message.get('items')
     if value is None:
         return None
     return JsonSchema.deserialize(value)
 
 
-def _parse_properties(message: dict) -> dict[str, JsonSchema]:
+def _deserialize_properties(message: dict) -> dict[str, JsonSchema]:
     return {
         key: JsonSchema.deserialize(value)
         for key, value in message.get('properties', {}).items()
     }
 
 
-def _parse_additional_properties(message: dict) -> Optional[JsonSchema]:
-    if message.get('type') != JsonType.OBJECT.value:
-        return None
+def _serialize_properties(schema: JsonSchema) -> dict[str, dict]:
+    return {
+        key: value.serialize()
+        for key, value in schema.properties.items()
+    }
+
+
+def _deserialize_additional(message: dict) -> Optional[Union[bool, JsonSchema]]:
     value = message.get('additionalProperties')
     if value is None:
-        return JsonSchema.wildcard
-    if not value:
         return None
+    if value is False:
+        return False
     return JsonSchema.deserialize(value)
 
 
-def _parse_one_of(message: dict) -> Optional[JsonSchema]:
+def _serialize_additional(schema: JsonSchema) -> Union[bool, dict]:
+    if schema.additional_properties is False:
+        return False
+    return schema.additional_properties.serialize()
+
+
+def _deserialize_one_of(message: dict) -> list[JsonSchema]:
     return [
         JsonSchema.deserialize(one_of)
         for one_of in message.get('oneOf', [])
+    ]
+
+
+def _serialize_one_of(schema: JsonSchema) -> list[dict]:
+    return [
+        one_of.serialize()
+        for one_of in schema.one_of
     ]

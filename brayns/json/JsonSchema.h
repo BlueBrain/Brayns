@@ -59,7 +59,7 @@ struct JsonSchema
      * @brief JSON type.
      *
      */
-    JsonType type = JsonType::Unknown;
+    JsonType type = JsonType::Undefined;
 
     /**
      * @brief Check if read only.

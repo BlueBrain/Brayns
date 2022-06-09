@@ -36,7 +36,7 @@ class Entrypoint:
     result: Optional[JsonSchema] = None
 
     @staticmethod
-    def from_instance(instance: Instance, name: str) -> 'Entrypoint':
+    def from_method(instance: Instance, name: str) -> 'Entrypoint':
         params = {'endpoint': name}
         result = instance.request('schema', params)
         return Entrypoint.deserialize(result)
@@ -53,11 +53,14 @@ class Entrypoint:
         )
 
     @staticmethod
+    def get_all_methods(instance: Instance) -> list[str]:
+        return instance.request('registry')
+
+    @staticmethod
     def get_all(instance: Instance) -> list['Entrypoint']:
-        result = instance.request('registry')
         return [
-            Entrypoint.deserialize(item)
-            for item in result
+            Entrypoint.from_method(instance, method)
+            for method in Entrypoint.get_all_methods(instance)
         ]
 
 

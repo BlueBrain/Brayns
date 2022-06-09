@@ -46,16 +46,13 @@ class TestEntrypoint(unittest.TestCase):
             description='test2',
             plugin='stuff',
             asynchronous=True,
-            params=JsonSchema(
-                type=JsonType.OBJECT,
-                additional_properties=JsonSchema.wildcard
-            ),
+            params=JsonSchema(type=JsonType.OBJECT),
             result=JsonSchema(type=JsonType.ARRAY)
         )
 
-    def test_from_instance(self) -> None:
+    def test_from_method(self) -> None:
         instance = MockInstance(self._message)
-        test = Entrypoint.from_instance(instance, 'test')
+        test = Entrypoint.from_method(instance, 'test')
         self.assertEqual(instance.method, 'schema')
         self.assertEqual(instance.params, {'endpoint': 'test'})
         self.assertEqual(test, self._entrypoint)
@@ -65,12 +62,13 @@ class TestEntrypoint(unittest.TestCase):
         ref = self._entrypoint
         self.assertEqual(test, ref)
 
-    def test_get_all(self) -> None:
-        instance = MockInstance([self._message])
-        tests = Entrypoint.get_all(instance)
+    def test_get_all_methods(self) -> None:
+        methods = ['test1', 'test2']
+        instance = MockInstance(methods)
+        tests = Entrypoint.get_all_methods(instance)
         self.assertEqual(instance.method, 'registry')
         self.assertEqual(instance.params, None)
-        self.assertEqual(tests, [self._entrypoint])
+        self.assertEqual(tests, methods)
 
 
 if __name__ == '__main__':
