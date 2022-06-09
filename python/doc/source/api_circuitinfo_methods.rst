@@ -39,7 +39,25 @@ Return a list of afferent synapses cell GIDs from a circuit and a set of source 
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "ids": {
+                "description": "Afferent cells unique GIDs",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "ids"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -85,7 +103,64 @@ Return data attached to one or many cells.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "etypes": {
+                "description": "Requested cell e-types",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "layers": {
+                "description": "Requested cell layers",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "morphology_classes": {
+                "description": "Requested cell morphology classes",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "mtypes": {
+                "description": "Requested cell m-types",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "orientations": {
+                "description": "Requested cell orientations",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                }
+            },
+            "positions": {
+                "description": "Requested cell positions",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                }
+            }
+        },
+        "required": [
+            "etypes",
+            "mtypes",
+            "morphology_classes",
+            "layers",
+            "positions",
+            "orientations"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -121,7 +196,25 @@ Return the list of GIDs from a circuit.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "ids": {
+                "description": "List of cell GIDs",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "ids"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -151,7 +244,25 @@ Return the list of GIDs from a loaded circuit.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "ids": {
+                "description": "List of cell GIDs",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "ids"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -189,7 +300,25 @@ Return a list of efferent synapses cell GIDs from a circuit and a set of source 
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "ids": {
+                "description": "Efferent cells unique GIDs",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "ids"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -232,7 +361,25 @@ Return a list of efferent projected synapses cell GIDs from a circuit and a set 
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "ids": {
+                "description": "Efferent cells GIDs",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "ids"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -261,7 +408,24 @@ Return a list of projection names available on a circuit.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "projections": {
+                "description": "Projections names",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": [
+            "projections"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -295,7 +459,53 @@ Return information about a specific report from a circuit.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "data_unit": {
+                "description": "Unit of the report values. Can be (mV, mA, ...)",
+                "type": "string"
+            },
+            "end_time": {
+                "description": "Time at which the simulation ends",
+                "type": "number"
+            },
+            "frame_count": {
+                "description": "Number of simulation frames in the report",
+                "type": "integer",
+                "minimum": 0
+            },
+            "frame_size": {
+                "description": "Number of values per frame in the report",
+                "type": "integer",
+                "minimum": 0
+            },
+            "start_time": {
+                "description": "Time at which the simulation starts",
+                "type": "number"
+            },
+            "time_step": {
+                "description": "Time between two consecutive simulation frames",
+                "type": "number"
+            },
+            "time_unit": {
+                "description": "Unit of the report time values",
+                "type": "string"
+            }
+        },
+        "required": [
+            "start_time",
+            "end_time",
+            "time_step",
+            "data_unit",
+            "time_unit",
+            "frame_count",
+            "frame_size"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -324,7 +534,24 @@ Return a list of reports from a circuit.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "reports": {
+                "description": "Report names",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": [
+            "reports"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -353,7 +580,26 @@ Return wether the circuit has a spike report and its path.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "exists": {
+                "description": "Check if the report exists",
+                "type": "boolean"
+            },
+            "path": {
+                "description": "Path to the spike report",
+                "type": "string"
+            }
+        },
+        "required": [
+            "path",
+            "exists"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -382,7 +628,24 @@ Return a list of targets from a circuit.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "targets": {
+                "description": "Target names",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": [
+            "targets"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -411,4 +674,64 @@ Return general info about a circuit.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "cells_count": {
+                "description": "Number of cells in this circuit",
+                "type": "integer",
+                "minimum": 0
+            },
+            "cells_properties": {
+                "description": "List of available cell properties",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "e_types": {
+                "description": "List of electrical types available in this circuit",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "m_types": {
+                "description": "List of morphology types available in this circuit",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "reports": {
+                "description": "List of report names",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "spike_report": {
+                "description": "Path to the spike report file",
+                "type": "string"
+            },
+            "targets": {
+                "description": "List of target names",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": [
+            "cells_count",
+            "cells_properties",
+            "m_types",
+            "e_types",
+            "targets",
+            "reports",
+            "spike_report"
+        ],
+        "additionalProperties": false
+    }

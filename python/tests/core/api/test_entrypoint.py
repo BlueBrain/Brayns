@@ -37,7 +37,7 @@ class TestEntrypoint(unittest.TestCase):
             'params': {
                 'type': 'object'
             },
-            'result': {
+            'returns': {
                 'type': 'array'
             }
         }

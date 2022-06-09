@@ -70,7 +70,96 @@ Adds a list of boxes to the scene.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -149,7 +238,96 @@ Adds a list of capsules to the scene.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -183,14 +361,19 @@ Add a clip plane and returns the clip plane ID.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "integer",
+        "minimum": 0
+    }
 
 ----
 
 add-light-ambient
 ~~~~~~~~~~~~~~~~~
 
-Add an ambient light which iluminates all the scen from all directions.
+Adds an ambient light which iluminates the scene from all directions.
 
 **Params**:
 
@@ -223,14 +406,19 @@ Add an ambient light which iluminates all the scen from all directions.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "integer",
+        "minimum": 0
+    }
 
 ----
 
 add-light-directional
 ~~~~~~~~~~~~~~~~~~~~~
 
-Add a directional light and return its ID.
+Adds a directional light which iluminates the scene from a given direction.
 
 **Params**:
 
@@ -272,14 +460,19 @@ Add a directional light and return its ID.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "integer",
+        "minimum": 0
+    }
 
 ----
 
 add-light-quad
 ~~~~~~~~~~~~~~
 
-Add a quad light and return its ID.
+Add a quad light which iluminates the scene on a specific area.
 
 **Params**:
 
@@ -339,7 +532,12 @@ Add a quad light and return its ID.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "integer",
+        "minimum": 0
+    }
 
 ----
 
@@ -379,7 +577,100 @@ This entrypoint is asynchronous, it means that it can take a long time and send 
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "title": "ModelInstance",
+            "type": "object",
+            "properties": {
+                "bounds": {
+                    "title": "Bounds",
+                    "description": "Model axis-aligned bounds",
+                    "type": "object",
+                    "readOnly": true,
+                    "properties": {
+                        "max": {
+                            "description": "Bounds maximum (top front right corner)",
+                            "type": "array",
+                            "readOnly": true,
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "min": {
+                            "description": "Bounds minimum (bottom back left corner)",
+                            "type": "array",
+                            "readOnly": true,
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "is_visible": {
+                    "description": "Wether the model is being rendered or not",
+                    "type": "boolean"
+                },
+                "metadata": {
+                    "description": "Model-specific metadata",
+                    "type": "object",
+                    "readOnly": true,
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "model_id": {
+                    "description": "Model ID",
+                    "type": "integer",
+                    "readOnly": true,
+                    "minimum": 0
+                },
+                "transform": {
+                    "title": "Transform",
+                    "description": "Model transform",
+                    "type": "object",
+                    "properties": {
+                        "rotation": {
+                            "description": "Rotation XYZW",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 4,
+                            "maxItems": 4
+                        },
+                        "scale": {
+                            "description": "Scale XYZ",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "translation": {
+                            "description": "Translation XYZ",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    }
 
 ----
 
@@ -438,7 +729,96 @@ Adds a list of planes to the scene.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -502,7 +882,96 @@ Adds a list of spheres to the scene.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -809,7 +1278,26 @@ This entrypoint is asynchronous, it means that it can take a long time and send 
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "error": {
+                "description": "Error code (0 = no error)",
+                "type": "integer"
+            },
+            "message": {
+                "description": "Message explaining the error",
+                "type": "string"
+            }
+        },
+        "required": [
+            "error",
+            "message"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -824,7 +1312,38 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "jpeg_quality": {
+                "description": "JPEG quality",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+            },
+            "plugins": {
+                "description": "Loaded plugins",
+                "type": "array",
+                "readOnly": true,
+                "items": {
+                    "type": "string"
+                }
+            },
+            "viewport": {
+                "description": "Window size",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "minItems": 2,
+                "maxItems": 2
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -839,7 +1358,46 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "position": {
+                "description": "Position of the camera",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "target": {
+                "description": "Target position at which the camera is looking",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "up": {
+                "description": "Up vector to compute the camera orthonormal basis",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            }
+        },
+        "required": [
+            "position",
+            "target",
+            "up"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -854,7 +1412,18 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "height": {
+                "description": "Camera orthographic projection height",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -869,7 +1438,32 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "aperture_radius": {
+                "description": "Lens aperture radius (Use for depth of field effect. A value of 0.0 disables it",
+                "type": "number",
+                "default": 0,
+                "minimum": 0
+            },
+            "focus_distance": {
+                "description": "Distance at which to focus (for depth of field effect). A value of 1.0 disables it.",
+                "type": "number",
+                "default": 1,
+                "minimum": 1
+            },
+            "fovy": {
+                "description": "Camera vertical field of view (in degrees)",
+                "type": "number",
+                "default": 45,
+                "minimum": 1
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -884,7 +1478,11 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "string"
+    }
 
 ----
 
@@ -899,7 +1497,38 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "title": "LoaderInfo",
+            "type": "object",
+            "properties": {
+                "extensions": {
+                    "description": "Supported file extensions",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "inputParametersSchema": {
+                    "description": "Loader properties",
+                    "type": "object"
+                },
+                "name": {
+                    "description": "Loader name",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "extensions",
+                "inputParametersSchema"
+            ],
+            "additionalProperties": false
+        }
+    }
 
 ----
 
@@ -929,7 +1558,27 @@ Returns the material of the given model as a car paint material, if possible.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "flake_density": {
+                "description": "Normalized percentage of flakes on the surface. Will be clampled to the range [0.0, 1.0]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -959,7 +1608,27 @@ Returns the material of the given model as a default material, if possible.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "opacity": {
+                "description": "Base opacity of the material. Will be clampled to the range [0.0, 1.0]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -989,7 +1658,27 @@ Returns the material of the given model as a emissive material, if possible.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "intensity": {
+                "description": "Intensity of the light emitted. Will be clampled to the range [0.0, +infinite]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1019,7 +1708,27 @@ Returns the material of the given model as a glass material, if possible.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "index_of_refraction": {
+                "description": "Index of refraction of the glass",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1049,7 +1758,27 @@ Returns the material of the given model as a matte material, if possible.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "opacity": {
+                "description": "Base opacity of the material. Will be clampled to the range [0.0, 1.0]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1079,7 +1808,27 @@ Returns the material of the given model as a metal material, if possible.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "roughness": {
+                "description": "Surface roughness. Will be clamped on the range [0-1]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1109,7 +1858,27 @@ Returns the material of the given model as a plastic material, if possible.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "opacity": {
+                "description": "Base opacity of the material. Will be clampled to the range [0.0, 1.0]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1139,7 +1908,11 @@ Returns the type of the material of a given model, if any.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "string"
+    }
 
 ----
 
@@ -1169,7 +1942,96 @@ Get all the information of the given model.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1199,7 +2061,35 @@ Get the transfer function of the given model.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "colors": {
+                "description": "List of colors (RGBA) to map",
+                "type": "array",
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                }
+            },
+            "range": {
+                "description": "Values range",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1214,7 +2104,39 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "ao_samples": {
+                "description": "Sets number of samples to compute ambient occlusion",
+                "type": "integer"
+            },
+            "background_color": {
+                "description": "Background color",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 4,
+                "maxItems": 4
+            },
+            "enable_shadows": {
+                "description": "Render casted shadows",
+                "type": "boolean"
+            },
+            "max_ray_bounces": {
+                "description": "Max ray bounces per sample",
+                "type": "integer"
+            },
+            "samples_per_pixel": {
+                "description": "Number of samples per pixel",
+                "type": "integer"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1229,7 +2151,31 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "background_color": {
+                "description": "Background color",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 4,
+                "maxItems": 4
+            },
+            "max_ray_bounces": {
+                "description": "Max ray bounces per sample",
+                "type": "integer"
+            },
+            "samples_per_pixel": {
+                "description": "Number of samples per pixel",
+                "type": "integer"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1244,7 +2190,11 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "string"
+    }
 
 ----
 
@@ -1259,7 +2209,139 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Scene bounds",
+                "type": "object",
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "models": {
+                "description": "Scene models",
+                "type": "array",
+                "items": {
+                    "title": "ModelInstance",
+                    "type": "object",
+                    "properties": {
+                        "bounds": {
+                            "title": "Bounds",
+                            "description": "Model axis-aligned bounds",
+                            "type": "object",
+                            "readOnly": true,
+                            "properties": {
+                                "max": {
+                                    "description": "Bounds maximum (top front right corner)",
+                                    "type": "array",
+                                    "readOnly": true,
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                },
+                                "min": {
+                                    "description": "Bounds minimum (bottom back left corner)",
+                                    "type": "array",
+                                    "readOnly": true,
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "is_visible": {
+                            "description": "Wether the model is being rendered or not",
+                            "type": "boolean"
+                        },
+                        "metadata": {
+                            "description": "Model-specific metadata",
+                            "type": "object",
+                            "readOnly": true,
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        },
+                        "model_id": {
+                            "description": "Model ID",
+                            "type": "integer",
+                            "readOnly": true,
+                            "minimum": 0
+                        },
+                        "transform": {
+                            "title": "Transform",
+                            "description": "Model transform",
+                            "type": "object",
+                            "properties": {
+                                "rotation": {
+                                    "description": "Rotation XYZW",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 4,
+                                    "maxItems": 4
+                                },
+                                "scale": {
+                                    "description": "Scale XYZ",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                },
+                                "translation": {
+                                    "description": "Translation XYZ",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            }
+        },
+        "required": [
+            "bounds",
+            "models"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1274,7 +2356,39 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "current": {
+                "description": "Current frame index",
+                "type": "integer",
+                "minimum": 0
+            },
+            "dt": {
+                "description": "Frame time",
+                "type": "number",
+                "readOnly": true
+            },
+            "end_frame": {
+                "description": "Global final simulation frame index",
+                "type": "integer",
+                "minimum": 0
+            },
+            "start_frame": {
+                "description": "Global initial simulation frame index",
+                "type": "integer",
+                "minimum": 0
+            },
+            "unit": {
+                "description": "Time unit",
+                "type": "string",
+                "readOnly": true
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1289,7 +2403,36 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "major": {
+                "description": "Major version",
+                "type": "integer"
+            },
+            "minor": {
+                "description": "Minor version",
+                "type": "integer"
+            },
+            "patch": {
+                "description": "Patch level",
+                "type": "integer"
+            },
+            "revision": {
+                "description": "SCM revision",
+                "type": "string"
+            }
+        },
+        "required": [
+            "major",
+            "minor",
+            "patch",
+            "revision"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1304,7 +2447,21 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "data": {
+                "description": "Image data with base64 encoding",
+                "type": "string"
+            }
+        },
+        "required": [
+            "data"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1338,7 +2495,41 @@ Inspect the scene at x-y position.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "hit": {
+                "description": "A boolean flag indicating wether there was a hit. If false, the rest of the fields must be ignored",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Extra attributes which vary depending on the type of model hitted"
+            },
+            "model_id": {
+                "description": "ID of the model hitted",
+                "type": "integer",
+                "minimum": 0
+            },
+            "position": {
+                "description": "3D hit position",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            }
+        },
+        "required": [
+            "hit",
+            "position",
+            "model_id",
+            "metadata"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1368,7 +2559,14 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "type": "string"
+        }
+    }
 
 ----
 
@@ -1518,7 +2716,100 @@ This entrypoint is asynchronous, it means that it can take a long time and send 
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "title": "ModelInstance",
+            "type": "object",
+            "properties": {
+                "bounds": {
+                    "title": "Bounds",
+                    "description": "Model axis-aligned bounds",
+                    "type": "object",
+                    "readOnly": true,
+                    "properties": {
+                        "max": {
+                            "description": "Bounds maximum (top front right corner)",
+                            "type": "array",
+                            "readOnly": true,
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "min": {
+                            "description": "Bounds minimum (bottom back left corner)",
+                            "type": "array",
+                            "readOnly": true,
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "is_visible": {
+                    "description": "Wether the model is being rendered or not",
+                    "type": "boolean"
+                },
+                "metadata": {
+                    "description": "Model-specific metadata",
+                    "type": "object",
+                    "readOnly": true,
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "model_id": {
+                    "description": "Model ID",
+                    "type": "integer",
+                    "readOnly": true,
+                    "minimum": 0
+                },
+                "transform": {
+                    "title": "Transform",
+                    "description": "Model transform",
+                    "type": "object",
+                    "properties": {
+                        "rotation": {
+                            "description": "Rotation XYZW",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 4,
+                            "maxItems": 4
+                        },
+                        "scale": {
+                            "description": "Scale XYZ",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "translation": {
+                            "description": "Translation XYZ",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    }
 
 ----
 
@@ -1547,7 +2838,44 @@ Get the JSON schema of the given entrypoint.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "async": {
+                "description": "Check if the entrypoint is asynchronous",
+                "type": "boolean"
+            },
+            "description": {
+                "description": "Description of the entrypoint",
+                "type": "string"
+            },
+            "params": {
+                "description": "Input schema",
+                "type": "object"
+            },
+            "plugin": {
+                "description": "Name of the plugin that loads the entrypoint",
+                "type": "string"
+            },
+            "returns": {
+                "description": "Output schema",
+                "type": "object"
+            },
+            "title": {
+                "description": "Name of the entrypoint",
+                "type": "string"
+            }
+        },
+        "required": [
+            "plugin",
+            "title",
+            "description",
+            "async"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -2404,7 +3732,21 @@ This entrypoint is asynchronous, it means that it can take a long time and send 
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "data": {
+                "description": "Image data with base64 encoding",
+                "type": "string"
+            }
+        },
+        "required": [
+            "data"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -2540,4 +3882,93 @@ Update the model with the given values and return its new state.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }

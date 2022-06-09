@@ -60,7 +60,15 @@ Colors a circuit model by element ID. Specific IDs can be targeted, otherwise, r
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "type": "integer",
+            "minimum": 0
+        }
+    }
 
 ----
 
@@ -199,7 +207,24 @@ Return the available variables which can be specified when coloring a circuit mo
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "variables": {
+                "description": "Available variables for the given circuit model and method",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": [
+            "variables"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -229,7 +254,24 @@ Return the available extra coloring methods for a circuit model.
 
 **Result**:
 
-This entrypoint has no result, the "result" field is still present but is always null.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "methods": {
+                "description": "Available coloring methods",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": [
+            "methods"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 

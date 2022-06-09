@@ -121,5 +121,6 @@ The progress amount is a number between 0 and 1.
     :hidden:
 
     api_circuitinfo_methods
+    api_atlasexplorer_methods
     api_circuitexplorer_methods
     api_core_methods

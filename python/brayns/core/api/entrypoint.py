@@ -49,7 +49,7 @@ class Entrypoint:
             plugin=message['plugin'],
             asynchronous=message['async'],
             params=_parse_schema(message, 'params'),
-            result=_parse_schema(message, 'result')
+            result=_parse_schema(message, 'returns')
         )
 
     @staticmethod
