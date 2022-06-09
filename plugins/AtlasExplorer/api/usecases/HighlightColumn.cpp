@@ -35,8 +35,8 @@ public:
         const auto &size = volume.getSize();
 
         const auto &mainCoords = params.xz_coordinate;
-        const auto mainX = mainCoords.x;
-        const auto mainZ = mainCoords.y;
+        const auto mainX = static_cast<uint32_t>(mainCoords.x);
+        const auto mainZ = static_cast<uint32_t>(mainCoords.y);
 
         if (size.x <= mainX || size.z <= mainZ)
         {
