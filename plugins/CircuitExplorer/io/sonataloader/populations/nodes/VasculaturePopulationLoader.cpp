@@ -129,7 +129,7 @@ struct VasculatureReportImporter
         auto data = std::make_unique<sl::SonataReportData>(path, populationName, selection);
         auto &model = context.model;
 
-        if (reportType == sl::ReportType::BLOODFLOW_RADII)
+        if (reportType == sl::ReportType::BloodflowRadii)
         {
             cb.update("Loading vasculature radii report");
             model.addComponent<VasculatureRadiiReportComponent>(std::move(data), std::move(offsets));
@@ -156,7 +156,7 @@ void VasculaturePopulationLoader::load(NodeLoadContext &context) const
 
     const auto &params = context.params;
     const auto reportType = params.report_type;
-    if (reportType != ReportType::NONE)
+    if (reportType != ReportType::None)
     {
         VasculatureReportImporter::import(context);
     }

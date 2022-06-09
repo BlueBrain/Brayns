@@ -33,11 +33,11 @@ public:
     {
         switch (frameBufferFormat)
         {
-        case brayns::PixelFormat::SRGBA_I8:
+        case brayns::PixelFormat::StandardRgbaI8:
             return OSP_FB_SRGBA;
-        case brayns::PixelFormat::RGBA_I8:
+        case brayns::PixelFormat::RgbaI8:
             return OSP_FB_RGBA8;
-        case brayns::PixelFormat::RGBA_F32:
+        case brayns::PixelFormat::RgbaF32:
             return OSP_FB_RGBA32F;
         }
 

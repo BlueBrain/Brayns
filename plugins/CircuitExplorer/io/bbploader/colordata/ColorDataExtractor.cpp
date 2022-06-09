@@ -290,25 +290,25 @@ std::vector<std::string> BBPColorMethods::get(const std::string &circuitPath, co
     const auto layerData = circuit->getLayers({1});
     if (!layerData.empty() && !layerData[0].empty())
     {
-        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::BY_LAYER));
+        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::ByLayer));
     }
 
     const auto mTypeData = circuit->getMTypes({1});
     if (!mTypeData.empty() && !mTypeData[0].empty())
     {
-        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::BY_MTYPE));
+        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::ByMtype));
     }
 
     const auto eTypeData = circuit->getETypes({1});
     if (!eTypeData.empty() && !eTypeData[0].empty())
     {
-        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::BY_ETYPE));
+        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::ByEtype));
     }
 
     const auto morphData = circuit->getMorphologyNames({1});
     if (!morphData.empty() && !morphData[0].empty())
     {
-        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::BY_MORPHOLOGY));
+        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::ByMorphology));
     }
 
     return result;
@@ -327,22 +327,22 @@ std::vector<std::string> BBPColorValues::get(
 
     switch (methodEnum)
     {
-    case NeuronColorMethods::BY_LAYER:
+    case NeuronColorMethods::ByLayer:
     {
         result = circuit->getLayers(ids);
         break;
     }
-    case NeuronColorMethods::BY_ETYPE:
+    case NeuronColorMethods::ByEtype:
     {
         result = circuit->getETypes(ids);
         break;
     }
-    case NeuronColorMethods::BY_MTYPE:
+    case NeuronColorMethods::ByMtype:
     {
         result = circuit->getMTypes(ids);
         break;
     }
-    case NeuronColorMethods::BY_MORPHOLOGY:
+    case NeuronColorMethods::ByMorphology:
     {
         result = circuit->getMorphologyNames(ids);
         break;

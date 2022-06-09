@@ -37,14 +37,14 @@ struct AttributeMethodMapping
     static std::vector<AttributeMethodEntry> generate()
     {
         return {
-            {NeuronColorMethods::BY_ETYPE, "etype"},
-            {NeuronColorMethods::BY_HEMISPHERE, "hemisphere"},
-            {NeuronColorMethods::BY_LAYER, "layer"},
-            {NeuronColorMethods::BY_MORPHOLOGY, "morphology"},
-            {NeuronColorMethods::BY_MORPHOLOGY_CLASS, "morph_class"},
-            {NeuronColorMethods::BY_MTYPE, "mtype"},
-            {NeuronColorMethods::BY_REGION, "region"},
-            {NeuronColorMethods::BY_SYNAPSE_CLASS, "synapse_class"}};
+            {NeuronColorMethods::ByEtype, "etype"},
+            {NeuronColorMethods::ByHemisphere, "hemisphere"},
+            {NeuronColorMethods::ByLayer, "layer"},
+            {NeuronColorMethods::ByMorphology, "morphology"},
+            {NeuronColorMethods::ByMorphologyClass, "morph_class"},
+            {NeuronColorMethods::ByMtype, "mtype"},
+            {NeuronColorMethods::ByRegion, "region"},
+            {NeuronColorMethods::BySynapseClass, "synapse_class"}};
     }
 
     static std::string getAttributeForMethod(const std::string &method)

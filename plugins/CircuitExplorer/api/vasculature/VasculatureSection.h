@@ -25,13 +25,13 @@
  */
 enum class VasculatureSection
 {
-    VEIN,
-    ARTERY,
-    VENULE,
-    ARTERIOLE,
-    VENOUS_CAPILLARY,
-    ARTERIAL_CAPILLARY,
-    TRANSITIONAL
+    Vein,
+    Artery,
+    Venule,
+    Arteriole,
+    VenousCapillary,
+    ArterialCapillary,
+    Transitional
 };
 
 namespace brayns
@@ -40,12 +40,12 @@ template<>
 inline std::vector<std::pair<std::string, VasculatureSection>> enumMap()
 {
     return {
-        {"vein", VasculatureSection::VEIN},
-        {"artery", VasculatureSection::ARTERY},
-        {"venule", VasculatureSection::VENULE},
-        {"arteriole", VasculatureSection::ARTERIOLE},
-        {"venous capillary", VasculatureSection::VENOUS_CAPILLARY},
-        {"arterial capillary", VasculatureSection::ARTERIAL_CAPILLARY},
-        {"transitional", VasculatureSection::TRANSITIONAL}};
+        {"vein", VasculatureSection::Vein},
+        {"artery", VasculatureSection::Artery},
+        {"venule", VasculatureSection::Venule},
+        {"arteriole", VasculatureSection::Arteriole},
+        {"venous capillary", VasculatureSection::VenousCapillary},
+        {"arterial capillary", VasculatureSection::ArterialCapillary},
+        {"transitional", VasculatureSection::Transitional}};
 }
 } // namespace brayns

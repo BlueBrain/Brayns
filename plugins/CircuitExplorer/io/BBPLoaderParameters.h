@@ -31,9 +31,9 @@ namespace brayns
 {
 BRAYNS_JSON_ADAPTER_ENUM(
     bbploader::ReportType,
-    {"none", bbploader::ReportType::NONE},
-    {"spikes", bbploader::ReportType::SPIKES},
-    {"compartment", bbploader::ReportType::COMPARTMENT})
+    {"none", bbploader::ReportType::None},
+    {"spikes", bbploader::ReportType::Spikes},
+    {"compartment", bbploader::ReportType::Compartment})
 }
 
 BRAYNS_JSON_OBJECT_BEGIN(BBPLoaderParameters)

@@ -27,7 +27,7 @@
  */
 enum class VasculatureColorMethods
 {
-    BY_SECTION
+    BySection
 };
 
 namespace brayns
@@ -35,6 +35,6 @@ namespace brayns
 template<>
 inline std::vector<std::pair<std::string, VasculatureColorMethods>> enumMap()
 {
-    return {{"vasculature section", VasculatureColorMethods::BY_SECTION}};
+    return {{"vasculature section", VasculatureColorMethods::BySection}};
 }
 }

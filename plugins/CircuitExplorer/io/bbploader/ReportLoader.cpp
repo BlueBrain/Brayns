@@ -39,7 +39,7 @@ void ReportLoader::load(
 {
     const auto &params = context.loadParameters;
     const auto reportType = params.report_type;
-    if (reportType == ReportType::NONE)
+    if (reportType == ReportType::None)
     {
         return;
     }
@@ -50,7 +50,7 @@ void ReportLoader::load(
     std::unique_ptr<IReportData> data;
     std::unique_ptr<IColormapIndexer> indexer;
 
-    if (reportType == bbploader::ReportType::COMPARTMENT)
+    if (reportType == bbploader::ReportType::Compartment)
     {
         const auto &reportName = params.report_name;
         callback.update("Loading report " + reportName);
@@ -65,7 +65,7 @@ void ReportLoader::load(
         auto offsets = CompartmentMappingGenerator::generate(compartments, reportCompartments);
         indexer = std::make_unique<OffsetIndexer>(std::move(offsets));
     }
-    else if (reportType == bbploader::ReportType::SPIKES)
+    else if (reportType == bbploader::ReportType::Spikes)
     {
         callback.update("Loading spikes");
 

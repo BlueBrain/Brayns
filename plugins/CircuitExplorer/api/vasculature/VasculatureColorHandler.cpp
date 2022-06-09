@@ -68,7 +68,7 @@ void VasculatureColorHandler::updateIndexedColor(brayns::OSPBuffer &color, const
 void VasculatureColorHandler::_colorWithInput(const std::string &method, const std::vector<ColoringInformation> &vars)
 {
     auto methodEnum = brayns::stringToEnum<VasculatureColorMethods>(method);
-    if (methodEnum != VasculatureColorMethods::BY_SECTION)
+    if (methodEnum != VasculatureColorMethods::BySection)
     {
         return;
     }
@@ -90,19 +90,19 @@ void VasculatureColorHandler::_colorWithInput(const std::string &method, const s
 void VasculatureColorHandler::_colorAll(const std::string &method)
 {
     auto methodEnum = brayns::stringToEnum<VasculatureColorMethods>(method);
-    if (methodEnum != VasculatureColorMethods::BY_SECTION)
+    if (methodEnum != VasculatureColorMethods::BySection)
     {
         return;
     }
 
     ColorRoulette roulette;
     const std::vector<std::pair<VasculatureSection, brayns::Vector4f>> sectionColorMap = {
-        std::make_pair(VasculatureSection::ARTERY, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::VEIN, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::ARTERIOLE, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::VENULE, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::ARTERIAL_CAPILLARY, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::VENOUS_CAPILLARY, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::TRANSITIONAL, roulette.getNextColor())};
+        std::make_pair(VasculatureSection::Artery, roulette.getNextColor()),
+        std::make_pair(VasculatureSection::Vein, roulette.getNextColor()),
+        std::make_pair(VasculatureSection::Arteriole, roulette.getNextColor()),
+        std::make_pair(VasculatureSection::Venule, roulette.getNextColor()),
+        std::make_pair(VasculatureSection::ArterialCapillary, roulette.getNextColor()),
+        std::make_pair(VasculatureSection::VenousCapillary, roulette.getNextColor()),
+        std::make_pair(VasculatureSection::Transitional, roulette.getNextColor())};
     _vasculature.setColorBySection(sectionColorMap);
 }

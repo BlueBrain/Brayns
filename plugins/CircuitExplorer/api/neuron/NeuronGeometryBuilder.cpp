@@ -107,7 +107,7 @@ struct SomaBuilder
 
         auto &geometry = dst.geometry;
         auto end = geometry.size();
-        NeuronSectionMappingGenerator::generate(dst, NeuronSection::SOMA, 0, end);
+        NeuronSectionMappingGenerator::generate(dst, NeuronSection::Soma, 0, end);
     }
 };
 

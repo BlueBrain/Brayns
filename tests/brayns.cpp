@@ -45,7 +45,7 @@ TEST_CASE("defaults")
 
     auto &fb = engine.getFrameBuffer();
     CHECK(!fb.getColorBuffer());
-    CHECK_EQ(fb.getFrameBufferFormat(), brayns::PixelFormat::SRGBA_I8);
+    CHECK_EQ(fb.getFrameBufferFormat(), brayns::PixelFormat::StandardRgbaI8);
     CHECK_EQ(fb.getFrameSize(), brayns::Vector2ui(800, 600));
 
     auto &renderer = engine.getRenderer();

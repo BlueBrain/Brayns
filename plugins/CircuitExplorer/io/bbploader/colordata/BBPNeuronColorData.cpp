@@ -36,7 +36,7 @@ std::vector<std::string> BBPNeuronColorData::getMethods() const noexcept
 {
     auto circuitMethods = BBPColorMethods::get(_circuitPath, _circuitPop);
 
-    constexpr auto morphologySectionMethod = NeuronColorMethods::BY_MORPHOLOGY_SECTION;
+    constexpr auto morphologySectionMethod = NeuronColorMethods::ByMorphologySection;
     const auto methodName = brayns::enumToString(morphologySectionMethod);
     circuitMethods.push_back(std::move(methodName));
 
@@ -46,7 +46,7 @@ std::vector<std::string> BBPNeuronColorData::getMethods() const noexcept
 std::vector<std::string> BBPNeuronColorData::getMethodVariables(const std::string &method) const
 {
     const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
-    if (methodEnum == NeuronColorMethods::BY_MORPHOLOGY_SECTION)
+    if (methodEnum == NeuronColorMethods::ByMorphologySection)
     {
         return brayns::enumNames<NeuronSection>();
     }

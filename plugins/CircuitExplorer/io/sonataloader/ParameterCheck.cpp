@@ -60,16 +60,16 @@ void checkNodePopulation(const sl::SonataNetworkConfig &network, const SonataNod
     const auto reportType = params.report_type;
     const auto &reportName = params.report_name;
 
-    if (reportType != sl::ReportType::NONE)
+    if (reportType != sl::ReportType::None)
     {
         const auto &simConfig = network.simulationConfig();
         std::string reportPath;
 
         switch (reportType)
         {
-        case sl::ReportType::BLOODFLOW_PRESSURE:
-        case sl::ReportType::BLOODFLOW_RADII:
-        case sl::ReportType::BLOODFLOW_SPEED:
+        case sl::ReportType::BloodflowPressure:
+        case sl::ReportType::BloodflowRadii:
+        case sl::ReportType::BloodflowSpeed:
         {
             if (populationType != "vasculature")
             {
@@ -78,8 +78,8 @@ void checkNodePopulation(const sl::SonataNetworkConfig &network, const SonataNod
             reportPath = sl::SonataConfig::resolveReportPath(simConfig, reportName);
             break;
         }
-        case sl::ReportType::COMPARTMENT:
-        case sl::ReportType::SUMMATION:
+        case sl::ReportType::Compartment:
+        case sl::ReportType::Summation:
         {
             if (populationType == "vasculature")
             {
@@ -88,7 +88,7 @@ void checkNodePopulation(const sl::SonataNetworkConfig &network, const SonataNod
             reportPath = sl::SonataConfig::resolveReportPath(simConfig, reportName);
             break;
         }
-        case sl::ReportType::SPIKES:
+        case sl::ReportType::Spikes:
         {
             if (populationType == "vasculature")
             {
@@ -97,7 +97,7 @@ void checkNodePopulation(const sl::SonataNetworkConfig &network, const SonataNod
             reportPath = sl::SonataConfig::resolveSpikesPath(simConfig);
             break;
         }
-        case sl::ReportType::SYNAPSE:
+        case sl::ReportType::Synapse:
         {
             throw std::invalid_argument("Invalid report type for node population " + population);
             break;

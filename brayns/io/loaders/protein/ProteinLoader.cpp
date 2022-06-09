@@ -398,10 +398,10 @@ std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
                     found = true;
                     switch (properties.color_scheme)
                     {
-                    case ProteinLoaderColorScheme::protein_chains:
+                    case ProteinLoaderColorScheme::ProteinChains:
                         atom.materialId = abs(atom.chainId);
                         break;
-                    case ProteinLoaderColorScheme::protein_residues:
+                    case ProteinLoaderColorScheme::ProteinResidues:
                         atom.materialId = atom.residue;
                         break;
                     default:

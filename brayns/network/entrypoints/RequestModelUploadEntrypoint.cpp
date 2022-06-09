@@ -171,7 +171,7 @@ public:
         auto models = loader.loadFromBlob(std::move(blob), {callback}, parameters);
 
         brayns::ModelLoadParameters loadParameters;
-        loadParameters.type = brayns::ModelLoadParameters::LoadType::FROM_BLOB;
+        loadParameters.type = brayns::ModelLoadParameters::LoadType::FromBlob;
         loadParameters.loaderName = params.loaderName;
         loadParameters.loadParameters = parameters;
 

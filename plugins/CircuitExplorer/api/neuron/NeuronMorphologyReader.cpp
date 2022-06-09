@@ -97,17 +97,17 @@ struct NeuriteReader
             case morphio::SectionType::SECTION_AXON:
                 if (!axon)
                     continue;
-                type = NeuronSection::AXON;
+                type = NeuronSection::Axon;
                 break;
             case morphio::SectionType::SECTION_DENDRITE:
                 if (!dendrites)
                     continue;
-                type = NeuronSection::DENDRITE;
+                type = NeuronSection::Dendrite;
                 break;
             case morphio::SectionType::SECTION_APICAL_DENDRITE:
                 if (!dendrites)
                     continue;
-                type = NeuronSection::APICAL_DENDRITE;
+                type = NeuronSection::ApicalDendrite;
                 break;
             default:
                 continue;

@@ -87,7 +87,7 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto models = loader.loadFromFile(path, {callback}, parameters);
 
     ModelLoadParameters loadParameters;
-    loadParameters.type = ModelLoadParameters::LoadType::FROM_FILE;
+    loadParameters.type = ModelLoadParameters::LoadType::FromFile;
     loadParameters.path = path;
     loadParameters.loaderName = name;
     loadParameters.loadParameters = parameters;

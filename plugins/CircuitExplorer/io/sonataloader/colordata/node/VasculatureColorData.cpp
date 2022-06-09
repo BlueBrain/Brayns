@@ -37,7 +37,7 @@ std::vector<std::string> VasculatureColorData::getMethodVariables(const std::str
 {
     const auto enumMethod = brayns::stringToEnum<VasculatureColorMethods>(method);
 
-    if (enumMethod == VasculatureColorMethods::BY_SECTION)
+    if (enumMethod == VasculatureColorMethods::BySection)
     {
         return brayns::enumNames<VasculatureSection>();
     }
@@ -51,7 +51,7 @@ std::vector<std::string> VasculatureColorData::getMethodValuesForIDs(
 {
     const auto enumMethod = brayns::stringToEnum<VasculatureColorMethods>(method);
 
-    if (enumMethod != VasculatureColorMethods::BY_SECTION)
+    if (enumMethod != VasculatureColorMethods::BySection)
     {
         throw std::invalid_argument("Method " + method + "not available to color vasculature");
     }

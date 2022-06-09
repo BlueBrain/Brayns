@@ -91,7 +91,7 @@ void NeuronReportFactory::create(NodeLoadContext &ctxt, const std::vector<CellCo
     const auto &params = ctxt.params;
     const auto reportType = params.report_type;
 
-    if (reportType == ReportType::NONE)
+    if (reportType == ReportType::None)
     {
         return;
     }
@@ -106,7 +106,7 @@ void NeuronReportFactory::create(NodeLoadContext &ctxt, const std::vector<CellCo
     std::unique_ptr<IReportData> data;
     std::unique_ptr<IColormapIndexer> indexer;
 
-    if (reportType == ReportType::SPIKES)
+    if (reportType == ReportType::Spikes)
     {
         cb.update("Loading spikes");
 

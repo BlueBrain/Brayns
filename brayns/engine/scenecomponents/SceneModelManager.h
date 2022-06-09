@@ -37,12 +37,12 @@ struct ModelLoadParameters
 {
     enum class LoadType
     {
-        FROM_FILE,
-        FROM_BLOB,
-        NONE,
+        FromFile,
+        FromBlob,
+        None,
     };
 
-    LoadType type{LoadType::NONE};
+    LoadType type{LoadType::None};
     std::string path;
     std::string loaderName;
     JsonValue loadParameters;
