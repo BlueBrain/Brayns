@@ -262,7 +262,7 @@ struct GetEnumName
  */
 BRAYNS_JSON_ADAPTER_ENUM(
     JsonType,
-    {"", JsonType::Unknown},
+    {JsonTypeName::ofUndefined(), JsonType::Undefined},
     {JsonTypeName::ofNull(), JsonType::Null},
     {JsonTypeName::ofBoolean(), JsonType::Boolean},
     {JsonTypeName::ofInteger(), JsonType::Integer},

@@ -19,20 +19,20 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any
-
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 
 
 @dataclass
-class JsonRpcReply:
+class ControlPoint:
 
-    id: JsonRpcId
-    result: Any
+    normalized_value: float
+    opacity: float
 
-    @staticmethod
-    def deserialize(message: dict) -> 'JsonRpcReply':
-        return JsonRpcReply(
-            id=message['id'],
-            result=message['result']
-        )
+    @classmethod
+    @property
+    def start(cls) -> 'ControlPoint':
+        return ControlPoint(0.0, 0.0)
+
+    @classmethod
+    @property
+    def end(cls) -> 'ControlPoint':
+        return ControlPoint(1.0, 1.0)

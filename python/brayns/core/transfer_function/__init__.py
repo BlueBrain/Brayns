@@ -18,10 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from brayns.core.transfer_function.control_point import ControlPoint
+from brayns.core.transfer_function.opacity_curve import OpacityCurve
 from brayns.core.transfer_function.transfer_function import TransferFunction
 from brayns.core.transfer_function.value_range import ValueRange
 
 __all__ = [
+    'ControlPoint',
+    'OpacityCurve',
     'TransferFunction',
     'ValueRange'
 ]

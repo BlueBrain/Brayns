@@ -103,3 +103,4 @@ class MockServer:
             pass
         with self._condition:
             self._condition.notify_all()
+        await websocket.wait_closed()

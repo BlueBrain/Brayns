@@ -18,8 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import queue
 import ssl
+import threading
+from collections import deque
 from typing import Optional, Union
 
 import websockets
@@ -44,27 +45,27 @@ class AsyncWebSocket:
 
     def __init__(self,  websocket: websockets.WebSocketClientProtocol) -> None:
         self._websocket = websocket
-        self._queue = queue.Queue[Union[bytes, str]]()
+        self._error: Optional[WebSocketError] = None
+        self._queue = deque[Union[bytes, str]]()
+        self._condition = threading.Condition()
 
     @property
     def closed(self) -> bool:
         return self._websocket.closed
 
-    def poll(self, block: bool = False, timeout: Optional[float] = None) -> Optional[Union[bytes, str]]:
-        try:
-            return self._queue.get(block, timeout)
-        except queue.Empty:
-            return None
+    def poll(self, block: bool = True, timeout: Optional[float] = None) -> Optional[Union[bytes, str]]:
+        with self._condition:
+            data = self._get_data()
+            if data is not None:
+                return data
+            if not block:
+                return None
+            self._condition.wait(timeout)
+            return self._get_data()
 
     async def close(self) -> None:
         try:
             await self._websocket.close()
-        except Exception as e:
-            raise WebSocketError(str(e))
-
-    async def receive(self) -> Union[bytes, str]:
-        try:
-            return await self._websocket.recv()
         except Exception as e:
             raise WebSocketError(str(e))
 
@@ -75,9 +76,21 @@ class AsyncWebSocket:
             raise WebSocketError(str(e))
 
     async def run(self) -> None:
-        while not self.closed:
+        while True:
             try:
-                data = await self.receive()
-            except WebSocketError:
+                data = await self._websocket.recv()
+            except Exception as e:
+                with self._condition:
+                    self._error = WebSocketError(str(e))
+                    self._condition.notify_all()
                 return
-            self._queue.put(data)
+            with self._condition:
+                self._queue.append(data)
+                self._condition.notify_all()
+
+    def _get_data(self) -> Optional[Union[bytes, str]]:
+        if self._error is not None:
+            raise self._error
+        if not self._queue:
+            return None
+        return self._queue.popleft()

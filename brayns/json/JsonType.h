@@ -71,7 +71,7 @@ using StringHash = std::unordered_map<std::string, T>;
  */
 enum class JsonType
 {
-    Unknown,
+    Undefined,
     Null,
     Boolean,
     Integer,
@@ -145,6 +145,13 @@ struct JsonTypeHelper
 class JsonTypeName
 {
 public:
+    /**
+     * @brief Undefined type name (used for wildcard).
+     *
+     * @return const std::string& Type name.
+     */
+    static const std::string &ofUndefined();
+
     /**
      * @brief Null type name.
      *
@@ -246,7 +253,7 @@ struct GetJsonType
         {
             return JsonType::String;
         }
-        return JsonType::Unknown;
+        return JsonType::Undefined;
     }
 };
 

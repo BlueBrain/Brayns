@@ -18,16 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, Optional, Protocol
+from typing import Any, Optional, Protocol, TypeVar
 
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
 from brayns.instance.request_future import RequestFuture
 
+T = TypeVar('T', bound='Instance')
+
 
 class Instance(Protocol):
 
-    def __enter__(self) -> 'Instance':
+    def __enter__(self: T) -> T:
         return self
 
     def __exit__(self, *_) -> None:

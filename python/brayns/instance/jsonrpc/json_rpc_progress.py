@@ -31,7 +31,7 @@ class JsonRpcProgress:
     params: RequestProgress
 
     @staticmethod
-    def from_dict(message: dict) -> 'JsonRpcProgress':
+    def deserialize(message: dict) -> 'JsonRpcProgress':
         params = message['params']
         return JsonRpcProgress(
             id=params['id'],

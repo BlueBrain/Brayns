@@ -18,12 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Optional, Protocol
+from typing import Optional, Protocol, TypeVar
+
+T = TypeVar('T', bound='WebSocket')
 
 
 class WebSocket(Protocol):
 
-    def __enter__(self) -> 'WebSocket':
+    def __enter__(self: T) -> T:
         return self
 
     def __exit__(self, *_) -> None:

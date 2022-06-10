@@ -25,8 +25,8 @@ from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
 
 class TestJsonRpcError(unittest.TestCase):
 
-    def test_from_dict(self) -> None:
-        error = JsonRpcError.from_dict({
+    def test_deserialize(self) -> None:
+        error = JsonRpcError.deserialize({
             'id': 1,
             'error': {
                 'message': 'test',

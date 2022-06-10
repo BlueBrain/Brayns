@@ -1,264 +1,977 @@
+.. _apicore-label:
+
 Core API methods
 ----------------
 
-The Brayns python client API is automatically generated when connecting to a
-running backend service as shown in :ref:`usepythonclient-label`.
+This page references the entrypoints of the Core plugin.
 
-The Core plugin is always loaded so the related entrypoints are always
-available.
+add-boxes
+~~~~~~~~~
 
-Other plugins might register additional entrypoints but must be loaded in the
-renderer to be available.
+Adds a list of boxes to the scene.
 
-The functions below are generated using the entrypoints of the Core plugin.
+**Params**:
 
-All arguments are keyword arguments extracted from the entrypoint params.
+.. jsonschema::
 
-Renderer errors will be raised with an instance of brayns.ReplyError. This one
-can be used to extract error code, description and some optional additional data
-(mainly used to store JSON errors).
+    {
+        "type": "array",
+        "items": {
+            "title": "GeometryWithColor<Box>",
+            "type": "object",
+            "properties": {
+                "color": {
+                    "description": "Geometry color",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                },
+                "geometry": {
+                    "title": "Box",
+                    "description": "Geometry data",
+                    "type": "object",
+                    "properties": {
+                        "max": {
+                            "description": "Maximum bound corner (top front right)",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "min": {
+                            "description": "Minimum bound corner (bottom back left)",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }
+                    },
+                    "required": [
+                        "min",
+                        "max"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "geometry",
+                "color"
+            ],
+            "additionalProperties": false
+        }
+    }
 
-Example usage of some generated methods:
+**Result**:
 
-.. code-block: python
-    import brayns
+.. jsonschema::
 
-    with brayns.connect(uri='localhost:5000') as client:
-        print(client.get_camera())
-        client.set_camera(current='orthographic')
-        print(client.get_camera())
-
-add_clip_plane
-~~~~~~~~~~~~~~
-
-Add a clip plane and returns the clip plane descriptor.
-
-Parameters:
-
-* ``plane``: ``list``. Plane normal vector XYZ and distance from origin.
-
-  * ``items``: ``float``
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``id``: ``int``. Plane ID.
-  * ``plane``: ``list``. Plane normal vector XYZ and distance from origin.
-
-    * ``items``: ``float``
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
-add_light_ambient
+add-capsules
+~~~~~~~~~~~~
+
+Adds a list of capsules to the scene.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "title": "GeometryWithColor<Primitive>",
+            "type": "object",
+            "properties": {
+                "color": {
+                    "description": "Geometry color",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                },
+                "geometry": {
+                    "title": "Primitive",
+                    "description": "Geometry data",
+                    "type": "object",
+                    "properties": {
+                        "p0": {
+                            "description": "Starting point of the primitive",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "p1": {
+                            "description": "Ending point of the primitive",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "r0": {
+                            "description": "Primitive radius at p0",
+                            "type": "number"
+                        },
+                        "r1": {
+                            "description": "Primitive radius at p1",
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "p0",
+                        "r0",
+                        "p1",
+                        "r1"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "geometry",
+                "color"
+            ],
+            "additionalProperties": false
+        }
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+add-clip-plane
+~~~~~~~~~~~~~~
+
+Add a clip plane and returns the clip plane ID.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "coefficients": {
+                "description": "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 4,
+                "maxItems": 4
+            }
+        },
+        "required": [
+            "coefficients"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "integer",
+        "minimum": 0
+    }
+
+----
+
+add-light-ambient
 ~~~~~~~~~~~~~~~~~
 
-Add an ambient light and return its ID.
+Adds an ambient light which iluminates the scene from all directions.
 
-Parameters:
+**Params**:
 
-* ``color``: ``list``. Light color RGB.
+.. jsonschema::
 
-  * ``items``: ``float``
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Light color (Normalized RGB)",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "intensity": {
+                "description": "Light intensity",
+                "type": "number",
+                "minimum": 0
+            },
+            "visible": {
+                "description": "Sets wether the light should be visible on the scene",
+                "type": "boolean"
+            }
+        },
+        "additionalProperties": false
+    }
 
-* ``intensity``: ``float``. Light intensity 0-1.
-* ``is_visible``: ``bool``. Light is visible.
+**Result**:
 
-Return value:
+.. jsonschema::
 
-* ``int``
+    {
+        "type": "integer",
+        "minimum": 0
+    }
 
 ----
 
-add_light_directional
+add-light-directional
 ~~~~~~~~~~~~~~~~~~~~~
 
-Add a directional light and return its ID.
+Adds a directional light which iluminates the scene from a given direction.
 
-Parameters:
+**Params**:
 
-* ``angular_diameter``: ``float``. Angular diameter in degrees.
-* ``color``: ``list``. Light color RGB.
+.. jsonschema::
 
-  * ``items``: ``float``
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Light color (Normalized RGB)",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "direction": {
+                "description": "Light direction vector",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "intensity": {
+                "description": "Light intensity",
+                "type": "number",
+                "minimum": 0
+            },
+            "visible": {
+                "description": "Sets wether the light should be visible on the scene",
+                "type": "boolean"
+            }
+        },
+        "additionalProperties": false
+    }
 
-* ``direction``: ``list``. Light source direction.
+**Result**:
 
-  * ``items``: ``float``
+.. jsonschema::
 
-* ``intensity``: ``float``. Light intensity 0-1.
-* ``is_visible``: ``bool``. Light is visible.
-
-Return value:
-
-* ``int``
+    {
+        "type": "integer",
+        "minimum": 0
+    }
 
 ----
 
-add_light_quad
+add-light-quad
 ~~~~~~~~~~~~~~
 
-Add a quad light and return its ID.
+Add a quad light which iluminates the scene on a specific area.
 
-Parameters:
+**Params**:
 
-* ``color``: ``list``. Light color RGB.
+.. jsonschema::
 
-  * ``items``: ``float``
+    {
+        "type": "object",
+        "properties": {
+            "bottom_left_corner": {
+                "description": "Sets the bottom left corner position of the light (in world space coordinates)",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "color": {
+                "description": "Light color (Normalized RGB)",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "horizontal_displacement": {
+                "description": "Sets the horizontal displacement vector used to compute the bottom right corner",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "intensity": {
+                "description": "Light intensity",
+                "type": "number",
+                "minimum": 0
+            },
+            "vertical_displacement": {
+                "description": "Sets the vertical displacement vector used to compute the top left corner",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "visible": {
+                "description": "Sets wether the light should be visible on the scene",
+                "type": "boolean"
+            }
+        },
+        "additionalProperties": false
+    }
 
-* ``edge1``: ``list``. First edge XYZ.
+**Result**:
 
-  * ``items``: ``float``
+.. jsonschema::
 
-* ``edge2``: ``list``. Second edge XYZ.
-
-  * ``items``: ``float``
-
-* ``intensity``: ``float``. Light intensity 0-1.
-* ``is_visible``: ``bool``. Light is visible.
-* ``position``: ``list``. Light position XYZ.
-
-  * ``items``: ``float``
-
-Return value:
-
-* ``int``
-
-----
-
-add_light_sphere
-~~~~~~~~~~~~~~~~
-
-Add a sphere light and return its ID.
-
-Parameters:
-
-* ``color``: ``list``. Light color RGB.
-
-  * ``items``: ``float``
-
-* ``intensity``: ``float``. Light intensity 0-1.
-* ``is_visible``: ``bool``. Light is visible.
-* ``position``: ``list``. Light position XYZ.
-
-  * ``items``: ``float``
-
-* ``radius``: ``float``. Sphere radius.
-
-Return value:
-
-* ``int``
-
-----
-
-add_light_spot
-~~~~~~~~~~~~~~
-
-Add a spot light and return its ID.
-
-Parameters:
-
-* ``color``: ``list``. Light color RGB.
-
-  * ``items``: ``float``
-
-* ``direction``: ``list``. Spot direction XYZ.
-
-  * ``items``: ``float``
-
-* ``intensity``: ``float``. Light intensity 0-1.
-* ``is_visible``: ``bool``. Light is visible.
-* ``opening_angle``: ``float``. Opening angle in degrees.
-* ``penumbra_angle``: ``float``. Penumbra angle in degrees.
-* ``position``: ``list``. Light position XYZ.
-
-  * ``items``: ``float``
-
-* ``radius``: ``float``. Spot radius.
-
-Return value:
-
-* ``int``
+    {
+        "type": "integer",
+        "minimum": 0
+    }
 
 ----
 
-add_model
+add-model
 ~~~~~~~~~
 
 Add model from path and return model descriptor on success.
 
-Parameters:
+This entrypoint is asynchronous, it means that it can take a long time and send progress notifications.
 
-* ``bounding_box``: ``bool``. Display bounding box.
-* ``loader_name``: ``str``. Name of the loader.
-* ``loader_properties``: ``Any``. Loader properties.
-* ``name``: ``str``. Model name.
-* ``path``: ``str``. Model file path.
-* ``transformation``: ``dict``. Model transformation. The object has the following properties.
+**Params**:
 
-  * ``rotation``: ``list``. Rotation XYZW.
+.. jsonschema::
 
-    * ``items``: ``float``
+    {
+        "type": "object",
+        "properties": {
+            "loader_name": {
+                "description": "Name of the loader to use",
+                "type": "string"
+            },
+            "loader_properties": {
+                "description": "Settings to configure the loading process"
+            },
+            "path": {
+                "description": "Path to the file to load",
+                "type": "string"
+            }
+        },
+        "required": [
+            "path",
+            "loader_name",
+            "loader_properties"
+        ],
+        "additionalProperties": false
+    }
 
-  * ``rotation_center``: ``list``. Rotation center XYZ.
+**Result**:
 
-    * ``items``: ``float``
+.. jsonschema::
 
-  * ``scale``: ``list``. Scale XYZ.
+    {
+        "type": "array",
+        "items": {
+            "title": "ModelInstance",
+            "type": "object",
+            "properties": {
+                "bounds": {
+                    "title": "Bounds",
+                    "description": "Model axis-aligned bounds",
+                    "type": "object",
+                    "readOnly": true,
+                    "properties": {
+                        "max": {
+                            "description": "Bounds maximum (top front right corner)",
+                            "type": "array",
+                            "readOnly": true,
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "min": {
+                            "description": "Bounds minimum (bottom back left corner)",
+                            "type": "array",
+                            "readOnly": true,
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "is_visible": {
+                    "description": "Wether the model is being rendered or not",
+                    "type": "boolean"
+                },
+                "metadata": {
+                    "description": "Model-specific metadata",
+                    "type": "object",
+                    "readOnly": true,
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "model_id": {
+                    "description": "Model ID",
+                    "type": "integer",
+                    "readOnly": true,
+                    "minimum": 0
+                },
+                "transform": {
+                    "title": "Transform",
+                    "description": "Model transform",
+                    "type": "object",
+                    "properties": {
+                        "rotation": {
+                            "description": "Rotation XYZW",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 4,
+                            "maxItems": 4
+                        },
+                        "scale": {
+                            "description": "Scale XYZ",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "translation": {
+                            "description": "Translation XYZ",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    }
 
-    * ``items``: ``float``
+----
 
-  * ``translation``: ``list``. Translation XYZ.
+add-planes
+~~~~~~~~~~
 
-    * ``items``: ``float``
+Adds a list of planes to the scene.
 
-* ``visible``: ``bool``. Is visible.
+**Params**:
 
-Return value:
+.. jsonschema::
 
-* ``list``
+    {
+        "type": "array",
+        "items": {
+            "title": "GeometryWithColor<Plane>",
+            "type": "object",
+            "properties": {
+                "color": {
+                    "description": "Geometry color",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                },
+                "geometry": {
+                    "title": "Plane",
+                    "description": "Geometry data",
+                    "type": "object",
+                    "properties": {
+                        "coefficients": {
+                            "description": "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 4,
+                            "maxItems": 4
+                        }
+                    },
+                    "required": [
+                        "coefficients"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "geometry",
+                "color"
+            ],
+            "additionalProperties": false
+        }
+    }
 
-  * ``items``: ``dict``. The object has the following properties.
+**Result**:
 
-    * ``bounding_box``: ``bool``. Display bounding box.
-    * ``bounds``: ``dict``. Model bounds. The object has the following properties.
+.. jsonschema::
 
-      * ``max``: ``list``. Top-right XYZ.
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
 
-        * ``items``: ``float``
+----
 
-      * ``min``: ``list``. Bottom-left XYZ.
+add-spheres
+~~~~~~~~~~~
 
-        * ``items``: ``float``
+Adds a list of spheres to the scene.
 
-    * ``id``: ``int``. Model ID.
-    * ``loader_name``: ``str``. Name of the loader.
-    * ``loader_properties``: ``Any``. Loader properties.
-    * ``metadata``: ``dict``. Key-value data.
+**Params**:
 
-      * ``items``: ``str``
+.. jsonschema::
 
-    * ``name``: ``str``. Model name.
-    * ``path``: ``str``. Model file path.
-    * ``transformation``: ``dict``. Model transformation. The object has the following properties.
+    {
+        "type": "array",
+        "items": {
+            "title": "GeometryWithColor<Sphere>",
+            "type": "object",
+            "properties": {
+                "color": {
+                    "description": "Geometry color",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                },
+                "geometry": {
+                    "title": "Sphere",
+                    "description": "Geometry data",
+                    "type": "object",
+                    "properties": {
+                        "center": {
+                            "description": "Sphere center point",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "radius": {
+                            "description": "Sphere radius",
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "center",
+                        "radius"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "geometry",
+                "color"
+            ],
+            "additionalProperties": false
+        }
+    }
 
-      * ``rotation``: ``list``. Rotation XYZW.
+**Result**:
 
-        * ``items``: ``float``
+.. jsonschema::
 
-      * ``rotation_center``: ``list``. Rotation center XYZ.
-
-        * ``items``: ``float``
-
-      * ``scale``: ``list``. Scale XYZ.
-
-        * ``items``: ``float``
-
-      * ``translation``: ``list``. Translation XYZ.
-
-        * ``items``: ``float``
-
-    * ``visible``: ``bool``. Is visible.
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
@@ -267,842 +980,1488 @@ cancel
 
 Cancel the task started by the request with the given ID.
 
-Parameters:
+**Params**:
 
-* ``id``: ``Union[None, int, str]``. ID of the request to cancel. Can be one of the following objects depending on the renderer configuration.
+.. jsonschema::
 
-  * ``params``: ``None``
-  * ``params``: ``int``
-  * ``params``: ``str``
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "title": "RequestId",
+                "description": "ID of the request to cancel",
+                "oneOf": [
+                    {
+                        "type": "null"
+                    },
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
 
-Return value:
+**Result**:
 
-This method has no return values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-clear_lights
+clear-clip-planes
+~~~~~~~~~~~~~~~~~
+
+Clear all clip planes in the scene.
+
+**Params**:
+
+This entrypoint has no params, the "params" field can hence be omitted or null.
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+clear-lights
 ~~~~~~~~~~~~
 
 Clear all lights in the scene.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-This method has no return values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-exit_later
+clear-models
+~~~~~~~~~~~~
+
+Clear all models in the scene.
+
+**Params**:
+
+This entrypoint has no params, the "params" field can hence be omitted or null.
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+enable-simulation
+~~~~~~~~~~~~~~~~~
+
+A switch to enable or disable simulation on a model.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "enabled": {
+                "description": "Bool flag enabling or disabling the simulation",
+                "type": "boolean"
+            },
+            "model_id": {
+                "description": "ID of the model to enable or disable simulation",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "model_id",
+            "enabled"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+exit-later
 ~~~~~~~~~~
 
 Schedules Brayns to shutdown after a given amount of minutes.
 
-Parameters:
+**Params**:
 
-* ``minutes``: ``int``. Number of minutes after which Brayns will shut down.
+.. jsonschema::
 
-Return value:
+    {
+        "type": "object",
+        "properties": {
+            "minutes": {
+                "description": "Number of minutes after which Brayns will shut down",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "minutes"
+        ],
+        "additionalProperties": false
+    }
 
-This method has no return values.
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-export_frames
+export-frames
 ~~~~~~~~~~~~~
 
 Export a list of keyframes as images to disk.
 
-Parameters:
+This entrypoint is asynchronous, it means that it can take a long time and send progress notifications.
 
-* ``format``: ``str``. Image format ('png' or 'jpg').
-* ``image_size``: ``list``. Image dimenssions [width, height].
+**Params**:
 
-  * ``items``: ``int``
+.. jsonschema::
 
-* ``key_frames``: ``list``. List of keyframes to export.
+    {
+        "type": "object",
+        "properties": {
+            "camera": {
+                "title": "GenericObject<Camera>",
+                "description": "Camera definition",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Type name",
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "params": {
+                        "description": "Type parameters",
+                        "writeOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "image_settings": {
+                "title": "ImageSettings",
+                "description": "Image settings",
+                "type": "object",
+                "properties": {
+                    "format": {
+                        "description": "Image format (jpg or png)",
+                        "type": "string"
+                    },
+                    "quality": {
+                        "description": "Image quality (0 = lowest quality, 100 = highest quality",
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "size": {
+                        "description": "Image dimensions [width, height]",
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "minItems": 2,
+                        "maxItems": 2
+                    }
+                },
+                "additionalProperties": false
+            },
+            "key_frames": {
+                "description": "List of keyframes to export",
+                "type": "array",
+                "items": {
+                    "title": "ExportFramesKeyFrame",
+                    "type": "object",
+                    "properties": {
+                        "camera_view": {
+                            "title": "LookAt",
+                            "description": "Camera view settings",
+                            "type": "object",
+                            "properties": {
+                                "position": {
+                                    "description": "Position of the camera",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                },
+                                "target": {
+                                    "description": "Target position at which the camera is looking",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                },
+                                "up": {
+                                    "description": "Up vector to compute the camera orthonormal basis",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                }
+                            },
+                            "required": [
+                                "position",
+                                "target",
+                                "up"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "frame_index": {
+                            "description": "Integer index of the simulation frame",
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    "required": [
+                        "frame_index"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "path": {
+                "description": "Path where the frames will be stored",
+                "type": "string"
+            },
+            "renderer": {
+                "title": "GenericObject<Renderer>",
+                "description": "Renderer definition",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Type name",
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "params": {
+                        "description": "Type parameters",
+                        "writeOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "sequential_naming": {
+                "description": "Name the image file after the frame index",
+                "type": "boolean",
+                "default": true
+            }
+        },
+        "required": [
+            "path",
+            "key_frames"
+        ],
+        "additionalProperties": false
+    }
 
-  * ``items``: ``dict``. The object has the following properties.
+**Result**:
 
-    * ``camera``: ``dict``. Camera definition. The object has the following properties.
+.. jsonschema::
 
-      * ``current``: ``str``. Camera current type.
-      * ``orientation``: ``list``. Camera orientation XYZW.
-
-        * ``items``: ``float``
-
-      * ``position``: ``list``. Camera position XYZ.
-
-        * ``items``: ``float``
-
-      * ``target``: ``list``. Camera target XYZ.
-
-        * ``items``: ``float``
-
-    * ``camera_params``: ``dict``. Camera-specific parameters.
-    * ``frame_index``: ``int``. Integer index of the simulation frame.
-
-* ``path``: ``str``. Path where the frames will be stored.
-* ``quality``: ``int``. Image quality (100 = highest quality, 0 = lowest quality).
-* ``spp``: ``int``. Samples per pixel.
-* ``name_after_simulation_index``: ``bool``. Name the frame image file after the simulation frame index.
-* ``renderer_name``: ``str``. Name of the renderer to use.
-* ``renderer_parameters``: ``dict``. Renderer-specific parameters.
-* ``volume_parameters``: ``dict``. Volume rendering parameters. The object has the following properties.
-
-  * ``adaptive_max_sampling_rate``: ``float``. Max sampling rate.
-  * ``adaptive_sampling``: ``bool``. Use adaptive sampling.
-  * ``clip_box``: ``dict``. Clip box. The object has the following properties.
-
-    * ``max``: ``list``. Top-right XYZ.
-
-      * ``items``: ``float``
-
-    * ``min``: ``list``. Bottom-left XYZ.
-
-      * ``items``: ``float``
-
-  * ``gradient_shading``: ``bool``. Use gradient shading.
-  * ``pre_integration``: ``bool``. Use pre-integration.
-  * ``sampling_rate``: ``float``. Fixed sampling rate.
-  * ``single_shade``: ``bool``. Use a single shade for the whole volume.
-  * ``specular``: ``list``. Reflectivity amount XYZ.
-
-    * ``items``: ``float``
-
-  * ``volume_dimensions``: ``list``. Dimensions XYZ.
-
-    * ``items``: ``int``
-
-  * ``volume_element_spacing``: ``list``. Element spacing XYZ.
-
-    * ``items``: ``float``
-
-  * ``volume_offset``: ``list``. Offset XYZ.
-
-    * ``items``: ``float``
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``error``: ``int``. Error code (0 = no error).
-  * ``message``: ``str``. Message explaining the error.
+    {
+        "type": "object",
+        "properties": {
+            "error": {
+                "description": "Error code (0 = no error)",
+                "type": "integer"
+            },
+            "message": {
+                "description": "Message explaining the error",
+                "type": "string"
+            }
+        },
+        "required": [
+            "error",
+            "message"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
-get_animation_parameters
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Get the current state of the animation parameters.
-
-Parameters:
-
-This method takes no parameters.
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``current``: ``int``. Current frame index.
-  * ``dt``: ``float``. Frame time.
-  * ``end_frame``: ``int``. Global final simulation frame index.
-  * ``start_frame``: ``int``. Global initial simulation frame index.
-  * ``unit``: ``str``. Time unit.
-
-----
-
-get_application_parameters
+get-application-parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Get the current state of the application parameters.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-* ``dict``. The object has the following properties.
+.. jsonschema::
 
-  * ``image_stream_fps``: ``int``. Framerate of image stream.
-  * ``jpeg_compression``: ``int``. JPEG compression rate.
-  * ``plugins``: ``list``. Loaded plugins.
-
-    * ``items``: ``str``
-
-  * ``viewport``: ``list``. Window size.
-
-    * ``items``: ``int``
-
-----
-
-get_camera
-~~~~~~~~~~
-
-Get the current state of the camera.
-
-Parameters:
-
-This method takes no parameters.
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``current``: ``str``. Camera current type.
-  * ``orientation``: ``list``. Camera orientation XYZW.
-
-    * ``items``: ``float``
-
-  * ``position``: ``list``. Camera position XYZ.
-
-    * ``items``: ``float``
-
-  * ``target``: ``list``. Camera target XYZ.
-
-    * ``items``: ``float``
-
-  * ``types``: ``list``. Available camera types.
-
-    * ``items``: ``str``
+    {
+        "type": "object",
+        "properties": {
+            "jpeg_quality": {
+                "description": "JPEG quality",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+            },
+            "plugins": {
+                "description": "Loaded plugins",
+                "type": "array",
+                "readOnly": true,
+                "items": {
+                    "type": "string"
+                }
+            },
+            "viewport": {
+                "description": "Window size",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "minItems": 2,
+                "maxItems": 2
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
-get_camera_params
-~~~~~~~~~~~~~~~~~
+get-camera-look-at
+~~~~~~~~~~~~~~~~~~
 
-Get the current properties of the camera.
+Returns the camera view settings.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-* ``dict``. Can be one of the following objects depending on the renderer configuration.
+.. jsonschema::
 
-  * ``circuit_explorer_dof_perspective``: ``dict``. The object has the following properties.
-
-    * ``apertureRadius``: ``float``
-    * ``aspect``: ``float``
-    * ``enableClippingPlanes``: ``bool``
-    * ``focusDistance``: ``float``
-    * ``fovy``: ``float``
-
-  * ``circuit_explorer_sphere_clipping``: ``dict``. The object has the following properties.
-
-    * ``apertureRadius``: ``float``
-    * ``aspect``: ``float``
-    * ``enableClippingPlanes``: ``bool``
-    * ``focusDistance``: ``float``
-    * ``fovy``: ``float``
-
-  * ``fisheye``: ``dict``. The object has the following properties.
-
-    * ``apertureRadius``: ``float``
-    * ``aspect``: ``float``
-    * ``enableClippingPlanes``: ``bool``
-    * ``focusDistance``: ``float``
-    * ``fovy``: ``float``
-
-  * ``orthographic``: ``dict``. The object has the following properties.
-
-    * ``aspect``: ``float``
-    * ``enableClippingPlanes``: ``bool``
-    * ``height``: ``float``
-
-  * ``panoramic``: ``dict``. The object has the following properties.
-
-    * ``enableClippingPlanes``: ``bool``
-    * ``half``: ``bool``
-
-  * ``perspective``: ``dict``. The object has the following properties.
-
-    * ``apertureRadius``: ``float``
-    * ``aspect``: ``float``
-    * ``enableClippingPlanes``: ``bool``
-    * ``focusDistance``: ``float``
-    * ``fovy``: ``float``
-
-  * ``perspectiveParallax``: ``dict``. The object has the following properties.
-
-    * ``aspect``: ``float``
-    * ``enableClippingPlanes``: ``bool``
-    * ``fovy``: ``float``
+    {
+        "type": "object",
+        "properties": {
+            "position": {
+                "description": "Position of the camera",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "target": {
+                "description": "Target position at which the camera is looking",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "up": {
+                "description": "Up vector to compute the camera orthonormal basis",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            }
+        },
+        "required": [
+            "position",
+            "target",
+            "up"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
-get_clip_planes
+get-camera-orthographic
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Returns the current camera as orthographic.
+
+**Params**:
+
+This entrypoint has no params, the "params" field can hence be omitted or null.
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "height": {
+                "description": "Camera orthographic projection height",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+get-camera-perspective
+~~~~~~~~~~~~~~~~~~~~~~
+
+Returns the current camera as perspective.
+
+**Params**:
+
+This entrypoint has no params, the "params" field can hence be omitted or null.
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "aperture_radius": {
+                "description": "Lens aperture radius (Use for depth of field effect. A value of 0.0 disables it",
+                "type": "number",
+                "default": 0,
+                "minimum": 0
+            },
+            "focus_distance": {
+                "description": "Distance at which to focus (for depth of field effect). A value of 1.0 disables it.",
+                "type": "number",
+                "default": 1,
+                "minimum": 1
+            },
+            "fovy": {
+                "description": "Camera vertical field of view (in degrees)",
+                "type": "number",
+                "default": 45,
+                "minimum": 1
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+get-camera-type
 ~~~~~~~~~~~~~~~
 
-Get all clip planes.
+Returns the type of the current camera.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-* ``list``
+.. jsonschema::
 
-  * ``items``: ``dict``. The object has the following properties.
-
-    * ``id``: ``int``. Plane ID.
-    * ``plane``: ``list``. Plane normal vector XYZ and distance from origin.
-
-      * ``items``: ``float``
+    {
+        "type": "string"
+    }
 
 ----
 
-get_instances
-~~~~~~~~~~~~~
-
-Get instances of the given model.
-
-Parameters:
-
-* ``id``: ``int``. Model ID.
-* ``result_range``: ``list``. Result list from/to indices.
-
-  * ``items``: ``int``
-
-Return value:
-
-* ``list``
-
-  * ``items``: ``dict``. The object has the following properties.
-
-    * ``bounding_box``: ``bool``. Display bounding box.
-    * ``instance_id``: ``int``. Instance ID.
-    * ``model_id``: ``int``. Model ID.
-    * ``transformation``: ``dict``. Model transformation. The object has the following properties.
-
-      * ``rotation``: ``list``. Rotation XYZW.
-
-        * ``items``: ``float``
-
-      * ``rotation_center``: ``list``. Rotation center XYZ.
-
-        * ``items``: ``float``
-
-      * ``scale``: ``list``. Scale XYZ.
-
-        * ``items``: ``float``
-
-      * ``translation``: ``list``. Translation XYZ.
-
-        * ``items``: ``float``
-
-    * ``visible``: ``bool``. Check if rendered.
-
-----
-
-get_lights
-~~~~~~~~~~
-
-Get all lights.
-
-Parameters:
-
-This method takes no parameters.
-
-Return value:
-
-* ``list``
-
-  * ``items``: ``dict``. The object has the following properties.
-
-    * ``id``: ``int``. Light ID.
-    * ``properties``: ``dict``. Light properties. Can be one of the following objects depending on the renderer configuration.
-
-      * ``directional``: ``dict``. The object has the following properties.
-
-        * ``angular_diameter``: ``float``. Angular diameter in degrees.
-        * ``color``: ``list``. Light color RGB.
-
-          * ``items``: ``float``
-
-        * ``direction``: ``list``. Light source direction.
-
-          * ``items``: ``float``
-
-        * ``intensity``: ``float``. Light intensity 0-1.
-        * ``is_visible``: ``bool``. Light is visible.
-
-      * ``sphere``: ``dict``. The object has the following properties.
-
-        * ``color``: ``list``. Light color RGB.
-
-          * ``items``: ``float``
-
-        * ``intensity``: ``float``. Light intensity 0-1.
-        * ``is_visible``: ``bool``. Light is visible.
-        * ``position``: ``list``. Light position XYZ.
-
-          * ``items``: ``float``
-
-        * ``radius``: ``float``. Sphere radius.
-
-      * ``quad``: ``dict``. The object has the following properties.
-
-        * ``color``: ``list``. Light color RGB.
-
-          * ``items``: ``float``
-
-        * ``edge1``: ``list``. First edge XYZ.
-
-          * ``items``: ``float``
-
-        * ``edge2``: ``list``. Second edge XYZ.
-
-          * ``items``: ``float``
-
-        * ``intensity``: ``float``. Light intensity 0-1.
-        * ``is_visible``: ``bool``. Light is visible.
-        * ``position``: ``list``. Light position XYZ.
-
-          * ``items``: ``float``
-
-      * ``spotlight``: ``dict``. The object has the following properties.
-
-        * ``color``: ``list``. Light color RGB.
-
-          * ``items``: ``float``
-
-        * ``direction``: ``list``. Spot direction XYZ.
-
-          * ``items``: ``float``
-
-        * ``intensity``: ``float``. Light intensity 0-1.
-        * ``is_visible``: ``bool``. Light is visible.
-        * ``opening_angle``: ``float``. Opening angle in degrees.
-        * ``penumbra_angle``: ``float``. Penumbra angle in degrees.
-        * ``position``: ``list``. Light position XYZ.
-
-          * ``items``: ``float``
-
-        * ``radius``: ``float``. Spot radius.
-
-      * ``ambient``: ``dict``. The object has the following properties.
-
-        * ``color``: ``list``. Light color RGB.
-
-          * ``items``: ``float``
-
-        * ``intensity``: ``float``. Light intensity 0-1.
-        * ``is_visible``: ``bool``. Light is visible.
-
-    * ``type``: ``str``. Light type.
-
-----
-
-get_loaders
+get-loaders
 ~~~~~~~~~~~
 
 Get all loaders.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-* ``list``
+.. jsonschema::
 
-  * ``items``: ``dict``. The object has the following properties.
-
-    * ``extensions``: ``list``. Supported file extensions.
-
-      * ``items``: ``str``
-
-    * ``inputParametersSchema``: ``Any``. Loader properties.
-    * ``name``: ``str``. Loader name.
+    {
+        "type": "array",
+        "items": {
+            "title": "LoaderInfo",
+            "type": "object",
+            "properties": {
+                "extensions": {
+                    "description": "Supported file extensions",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "inputParametersSchema": {
+                    "description": "Loader properties",
+                    "type": "object"
+                },
+                "name": {
+                    "description": "Loader name",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "extensions",
+                "inputParametersSchema"
+            ],
+            "additionalProperties": false
+        }
+    }
 
 ----
 
-get_model
+get-material-carpaint
+~~~~~~~~~~~~~~~~~~~~~
+
+Returns the material of the given model as a car paint material, if possible.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "flake_density": {
+                "description": "Normalized percentage of flakes on the surface. Will be clampled to the range [0.0, 1.0]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+get-material-default
+~~~~~~~~~~~~~~~~~~~~
+
+Returns the material of the given model as a default material, if possible.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "opacity": {
+                "description": "Base opacity of the material. Will be clampled to the range [0.0, 1.0]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+get-material-emissive
+~~~~~~~~~~~~~~~~~~~~~
+
+Returns the material of the given model as a emissive material, if possible.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "intensity": {
+                "description": "Intensity of the light emitted. Will be clampled to the range [0.0, +infinite]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+get-material-glass
+~~~~~~~~~~~~~~~~~~
+
+Returns the material of the given model as a glass material, if possible.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "index_of_refraction": {
+                "description": "Index of refraction of the glass",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+get-material-matte
+~~~~~~~~~~~~~~~~~~
+
+Returns the material of the given model as a matte material, if possible.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "opacity": {
+                "description": "Base opacity of the material. Will be clampled to the range [0.0, 1.0]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+get-material-metal
+~~~~~~~~~~~~~~~~~~
+
+Returns the material of the given model as a metal material, if possible.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "roughness": {
+                "description": "Surface roughness. Will be clamped on the range [0-1]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+get-material-plastic
+~~~~~~~~~~~~~~~~~~~~
+
+Returns the material of the given model as a plastic material, if possible.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Base color of the material",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "opacity": {
+                "description": "Base opacity of the material. Will be clampled to the range [0.0, 1.0]",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+get-material-type
+~~~~~~~~~~~~~~~~~
+
+Returns the type of the material of a given model, if any.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "string"
+    }
+
+----
+
+get-model
 ~~~~~~~~~
 
 Get all the information of the given model.
 
-Parameters:
+**Params**:
 
-* ``id``: ``int``. Model ID.
+.. jsonschema::
 
-Return value:
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
 
-* ``dict``. The object has the following properties.
+**Result**:
 
-  * ``bounding_box``: ``bool``. Display bounding box.
-  * ``bounds``: ``dict``. Model bounds. The object has the following properties.
+.. jsonschema::
 
-    * ``max``: ``list``. Top-right XYZ.
-
-      * ``items``: ``float``
-
-    * ``min``: ``list``. Bottom-left XYZ.
-
-      * ``items``: ``float``
-
-  * ``id``: ``int``. Model ID.
-  * ``loader_name``: ``str``. Name of the loader.
-  * ``loader_properties``: ``Any``. Loader properties.
-  * ``metadata``: ``dict``. Key-value data.
-
-    * ``items``: ``str``
-
-  * ``name``: ``str``. Model name.
-  * ``path``: ``str``. Model file path.
-  * ``transformation``: ``dict``. Model transformation. The object has the following properties.
-
-    * ``rotation``: ``list``. Rotation XYZW.
-
-      * ``items``: ``float``
-
-    * ``rotation_center``: ``list``. Rotation center XYZ.
-
-      * ``items``: ``float``
-
-    * ``scale``: ``list``. Scale XYZ.
-
-      * ``items``: ``float``
-
-    * ``translation``: ``list``. Translation XYZ.
-
-      * ``items``: ``float``
-
-  * ``visible``: ``bool``. Is visible.
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
-get_model_properties
-~~~~~~~~~~~~~~~~~~~~
-
-Get the properties of the given model.
-
-Parameters:
-
-* ``id``: ``int``. Model ID.
-
-Return value:
-
-* ``dict``
-
-----
-
-get_model_transfer_function
+get-model-transfer-function
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Get the transfer function of the given model.
 
-Parameters:
+**Params**:
 
-* ``id``: ``int``. Model ID.
+.. jsonschema::
 
-Return value:
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
 
-* ``dict``. The object has the following properties.
+**Result**:
 
-  * ``colormap``: ``dict``. Colors to map. The object has the following properties.
+.. jsonschema::
 
-    * ``colors``: ``list``. Colors to map.
-
-      * ``items``: ``list``
-
-        * ``items``: ``float``
-
-    * ``name``: ``str``. Label of the color map.
-
-  * ``opacity_curve``: ``list``. Control points.
-
-    * ``items``: ``list``
-
-      * ``items``: ``float``
-
-  * ``range``: ``list``. Values range.
-
-    * ``items``: ``float``
-
-----
-
-get_renderer
-~~~~~~~~~~~~
-
-Get the current state of the renderer.
-
-Parameters:
-
-This method takes no parameters.
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``accumulation``: ``bool``. Multiple render passes.
-  * ``background_color``: ``list``. Background color RGB.
-
-    * ``items``: ``float``
-
-  * ``current``: ``str``. Current renderer name.
-  * ``head_light``: ``bool``. Light source follows camera origin.
-  * ``max_accum_frames``: ``int``. Max render passes.
-  * ``samples_per_pixel``: ``int``. Samples per pixel.
-  * ``subsampling``: ``int``. Subsampling.
-  * ``types``: ``list``. Available renderers.
-
-    * ``items``: ``str``
-
-  * ``variance_threshold``: ``float``. Stop accumulation threshold.
+    {
+        "type": "object",
+        "properties": {
+            "colors": {
+                "description": "List of colors (RGBA) to map",
+                "type": "array",
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                }
+            },
+            "range": {
+                "description": "Values range",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
-get_renderer_params
-~~~~~~~~~~~~~~~~~~~
+get-renderer-interactive
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-Get the current properties of the renderer.
+Returns the current renderer as interactive renderer, if possible.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-* ``dict``. Can be one of the following objects depending on the renderer configuration.
+.. jsonschema::
 
-  * ``basic``: ``dict``
-  * ``circuit_explorer_advanced``: ``dict``. The object has the following properties.
-
-    * ``epsilonFactor``: ``float``
-    * ``exposure``: ``float``
-    * ``fogStart``: ``float``
-    * ``fogThickness``: ``float``
-    * ``giDistance``: ``float``
-    * ``giSamples``: ``int``
-    * ``giWeight``: ``float``
-    * ``maxBounces``: ``int``
-    * ``maxDistanceToSecondaryModel``: ``float``
-    * ``samplingThreshold``: ``float``
-    * ``shadows``: ``float``
-    * ``softShadows``: ``float``
-    * ``softShadowsSamples``: ``int``
-    * ``useHardwareRandomizer``: ``bool``
-    * ``volumeAlphaCorrection``: ``float``
-    * ``volumeSpecularExponent``: ``float``
-
-  * ``circuit_explorer_basic``: ``dict``. The object has the following properties.
-
-    * ``alphaCorrection``: ``float``
-    * ``exposure``: ``float``
-    * ``maxBounces``: ``int``
-    * ``maxDistanceToSecondaryModel``: ``float``
-    * ``simulationThreshold``: ``float``
-    * ``useHardwareRandomizer``: ``bool``
-
-  * ``pathtracer``: ``dict``. The object has the following properties.
-
-    * ``maxContribution``: ``float``
-    * ``rouletteDepth``: ``int``
-
-  * ``raycast_Ng``: ``dict``
-  * ``raycast_Ns``: ``dict``
-  * ``scivis``: ``dict``. The object has the following properties.
-
-    * ``aoDistance``: ``float``
-    * ``aoSamples``: ``int``
-    * ``aoTransparencyEnabled``: ``bool``
-    * ``aoWeight``: ``float``
-    * ``oneSidedLighting``: ``bool``
-    * ``shadowsEnabled``: ``bool``
+    {
+        "type": "object",
+        "properties": {
+            "ao_samples": {
+                "description": "Sets number of samples to compute ambient occlusion",
+                "type": "integer"
+            },
+            "background_color": {
+                "description": "Background color",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 4,
+                "maxItems": 4
+            },
+            "enable_shadows": {
+                "description": "Render casted shadows",
+                "type": "boolean"
+            },
+            "max_ray_bounces": {
+                "description": "Max ray bounces per sample",
+                "type": "integer"
+            },
+            "samples_per_pixel": {
+                "description": "Number of samples per pixel",
+                "type": "integer"
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
-get_scene
+get-renderer-production
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Returns the current renderer as production renderer, if possible.
+
+**Params**:
+
+This entrypoint has no params, the "params" field can hence be omitted or null.
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "background_color": {
+                "description": "Background color",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 4,
+                "maxItems": 4
+            },
+            "max_ray_bounces": {
+                "description": "Max ray bounces per sample",
+                "type": "integer"
+            },
+            "samples_per_pixel": {
+                "description": "Number of samples per pixel",
+                "type": "integer"
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+get-renderer-type
+~~~~~~~~~~~~~~~~~
+
+Returns the type of the renderer currently being used.
+
+**Params**:
+
+This entrypoint has no params, the "params" field can hence be omitted or null.
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "string"
+    }
+
+----
+
+get-scene
 ~~~~~~~~~
 
 Get the current state of the scene.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-* ``dict``. The object has the following properties.
+.. jsonschema::
 
-  * ``bounds``: ``dict``. Scene boundary. The object has the following properties.
-
-    * ``max``: ``list``. Top-right XYZ.
-
-      * ``items``: ``float``
-
-    * ``min``: ``list``. Bottom-left XYZ.
-
-      * ``items``: ``float``
-
-  * ``models``: ``list``. All models.
-
-    * ``items``: ``dict``. The object has the following properties.
-
-      * ``bounding_box``: ``bool``. Display bounding box.
-      * ``bounds``: ``dict``. Model bounds. The object has the following properties.
-
-        * ``max``: ``list``. Top-right XYZ.
-
-          * ``items``: ``float``
-
-        * ``min``: ``list``. Bottom-left XYZ.
-
-          * ``items``: ``float``
-
-      * ``id``: ``int``. Model ID.
-      * ``loader_name``: ``str``. Name of the loader.
-      * ``loader_properties``: ``Any``. Loader properties.
-      * ``metadata``: ``dict``. Key-value data.
-
-        * ``items``: ``str``
-
-      * ``name``: ``str``. Model name.
-      * ``path``: ``str``. Model file path.
-      * ``transformation``: ``dict``. Model transformation. The object has the following properties.
-
-        * ``rotation``: ``list``. Rotation XYZW.
-
-          * ``items``: ``float``
-
-        * ``rotation_center``: ``list``. Rotation center XYZ.
-
-          * ``items``: ``float``
-
-        * ``scale``: ``list``. Scale XYZ.
-
-          * ``items``: ``float``
-
-        * ``translation``: ``list``. Translation XYZ.
-
-          * ``items``: ``float``
-
-      * ``visible``: ``bool``. Is visible.
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Scene bounds",
+                "type": "object",
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "models": {
+                "description": "Scene models",
+                "type": "array",
+                "items": {
+                    "title": "ModelInstance",
+                    "type": "object",
+                    "properties": {
+                        "bounds": {
+                            "title": "Bounds",
+                            "description": "Model axis-aligned bounds",
+                            "type": "object",
+                            "readOnly": true,
+                            "properties": {
+                                "max": {
+                                    "description": "Bounds maximum (top front right corner)",
+                                    "type": "array",
+                                    "readOnly": true,
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                },
+                                "min": {
+                                    "description": "Bounds minimum (bottom back left corner)",
+                                    "type": "array",
+                                    "readOnly": true,
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "is_visible": {
+                            "description": "Wether the model is being rendered or not",
+                            "type": "boolean"
+                        },
+                        "metadata": {
+                            "description": "Model-specific metadata",
+                            "type": "object",
+                            "readOnly": true,
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        },
+                        "model_id": {
+                            "description": "Model ID",
+                            "type": "integer",
+                            "readOnly": true,
+                            "minimum": 0
+                        },
+                        "transform": {
+                            "title": "Transform",
+                            "description": "Model transform",
+                            "type": "object",
+                            "properties": {
+                                "rotation": {
+                                    "description": "Rotation XYZW",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 4,
+                                    "maxItems": 4
+                                },
+                                "scale": {
+                                    "description": "Scale XYZ",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                },
+                                "translation": {
+                                    "description": "Translation XYZ",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "minItems": 3,
+                                    "maxItems": 3
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            }
+        },
+        "required": [
+            "bounds",
+            "models"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
-get_statistics
-~~~~~~~~~~~~~~
+get-simulation-parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Get the current state of the statistics.
+Get the current state of the simulation parameters.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-* ``dict``. The object has the following properties.
+.. jsonschema::
 
-  * ``fps``: ``float``. Framerate.
-  * ``scene_size_in_bytes``: ``int``. Scene size.
+    {
+        "type": "object",
+        "properties": {
+            "current": {
+                "description": "Current frame index",
+                "type": "integer",
+                "minimum": 0
+            },
+            "dt": {
+                "description": "Frame time",
+                "type": "number",
+                "readOnly": true
+            },
+            "end_frame": {
+                "description": "Global final simulation frame index",
+                "type": "integer",
+                "minimum": 0
+            },
+            "start_frame": {
+                "description": "Global initial simulation frame index",
+                "type": "integer",
+                "minimum": 0
+            },
+            "unit": {
+                "description": "Time unit",
+                "type": "string",
+                "readOnly": true
+            }
+        },
+        "additionalProperties": false
+    }
 
 ----
 
-get_version
+get-version
 ~~~~~~~~~~~
 
 Get Brayns instance version.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-* ``dict``. The object has the following properties.
+.. jsonschema::
 
-  * ``major``: ``int``. Major version.
-  * ``minor``: ``int``. Minor version.
-  * ``patch``: ``int``. Patch level.
-  * ``revision``: ``str``. SCM revision.
-
-----
-
-get_volume_parameters
-~~~~~~~~~~~~~~~~~~~~~
-
-Get the current state of the volume parameters.
-
-Parameters:
-
-This method takes no parameters.
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``adaptive_max_sampling_rate``: ``float``. Max sampling rate.
-  * ``adaptive_sampling``: ``bool``. Use adaptive sampling.
-  * ``clip_box``: ``dict``. Clip box. The object has the following properties.
-
-    * ``max``: ``list``. Top-right XYZ.
-
-      * ``items``: ``float``
-
-    * ``min``: ``list``. Bottom-left XYZ.
-
-      * ``items``: ``float``
-
-  * ``gradient_shading``: ``bool``. Use gradient shading.
-  * ``pre_integration``: ``bool``. Use pre-integration.
-  * ``sampling_rate``: ``float``. Fixed sampling rate.
-  * ``single_shade``: ``bool``. Use a single shade for the whole volume.
-  * ``specular``: ``list``. Reflectivity amount XYZ.
-
-    * ``items``: ``float``
-
-  * ``volume_dimensions``: ``list``. Dimensions XYZ.
-
-    * ``items``: ``int``
-
-  * ``volume_element_spacing``: ``list``. Element spacing XYZ.
-
-    * ``items``: ``float``
-
-  * ``volume_offset``: ``list``. Offset XYZ.
-
-    * ``items``: ``float``
+    {
+        "type": "object",
+        "properties": {
+            "major": {
+                "description": "Major version",
+                "type": "integer"
+            },
+            "minor": {
+                "description": "Minor version",
+                "type": "integer"
+            },
+            "patch": {
+                "description": "Patch level",
+                "type": "integer"
+            },
+            "revision": {
+                "description": "SCM revision",
+                "type": "string"
+            }
+        },
+        "required": [
+            "major",
+            "minor",
+            "patch",
+            "revision"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
-image_jpeg
+image-jpeg
 ~~~~~~~~~~
 
 Take a snapshot at JPEG format.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-* ``dict``. The object has the following properties.
+.. jsonschema::
 
-  * ``data``: ``str``. Image data with base64 encoding.
-
-----
-
-image_streaming_mode
-~~~~~~~~~~~~~~~~~~~~
-
-Set the image streaming method between automatic or controlled.
-
-Parameters:
-
-* ``type``: ``str``. Stream mode.
-
-Return value:
-
-This method has no return values.
+    {
+        "type": "object",
+        "properties": {
+            "data": {
+                "description": "Image data with base64 encoding",
+                "type": "string"
+            }
+        },
+        "required": [
+            "data"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1111,35 +2470,66 @@ inspect
 
 Inspect the scene at x-y position.
 
-Parameters:
+**Params**:
 
-* ``position``: ``list``. Position XY (normalized).
+.. jsonschema::
 
-  * ``items``: ``float``
+    {
+        "type": "object",
+        "properties": {
+            "position": {
+                "description": "Position XY (normalized)",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+            }
+        },
+        "required": [
+            "position"
+        ],
+        "additionalProperties": false
+    }
 
-Return value:
+**Result**:
 
-* ``dict``. The object has the following properties.
+.. jsonschema::
 
-  * ``hit``: ``bool``. Check if the position is picked.
-  * ``position``: ``list``. Picked position XYZ.
-
-    * ``items``: ``float``
-
-----
-
-model_properties_schema
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Get the property schema of the model.
-
-Parameters:
-
-* ``id``: ``int``. Model ID.
-
-Return value:
-
-This method has no return values.
+    {
+        "type": "object",
+        "properties": {
+            "hit": {
+                "description": "A boolean flag indicating wether there was a hit. If false, the rest of the fields must be ignored",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Extra attributes which vary depending on the type of model hitted"
+            },
+            "model_id": {
+                "description": "ID of the model hitted",
+                "type": "integer",
+                "minimum": 0
+            },
+            "position": {
+                "description": "3D hit position",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            }
+        },
+        "required": [
+            "hit",
+            "position",
+            "model_id",
+            "metadata"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
@@ -1148,13 +2538,13 @@ quit
 
 Quit the application.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-This method has no return values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
@@ -1163,164 +2553,263 @@ registry
 
 Retreive the names of all registered entrypoints.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-* ``list``
+.. jsonschema::
 
-  * ``items``: ``str``
+    {
+        "type": "array",
+        "items": {
+            "type": "string"
+        }
+    }
 
 ----
 
-remove_clip_planes
+remove-clip-planes
 ~~~~~~~~~~~~~~~~~~
 
 Remove clip planes from the scene given their ids.
 
-Parameters:
+**Params**:
 
-* ``ids``: ``list``. Clip planes ID list.
+.. jsonschema::
 
-  * ``items``: ``int``
+    {
+        "type": "object",
+        "properties": {
+            "ids": {
+                "description": "Clip planes ID list",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "ids"
+        ],
+        "additionalProperties": false
+    }
 
-Return value:
+**Result**:
 
-This method has no return values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-remove_lights
+remove-lights
 ~~~~~~~~~~~~~
 
 Remove the model(s) from the ID list from the scene.
 
-Parameters:
+**Params**:
 
-* ``ids``: ``list``. List of light ID to remove.
+.. jsonschema::
 
-  * ``items``: ``int``
+    {
+        "type": "object",
+        "properties": {
+            "ids": {
+                "description": "List of light ID to remove",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "ids"
+        ],
+        "additionalProperties": false
+    }
 
-Return value:
+**Result**:
 
-This method has no return values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-remove_model
+remove-model
 ~~~~~~~~~~~~
 
 Remove the model(s) from the ID list from the scene.
 
-Parameters:
+**Params**:
 
-* ``ids``: ``list``. List of model ID to remove.
+.. jsonschema::
 
-  * ``items``: ``int``
+    {
+        "type": "object",
+        "properties": {
+            "ids": {
+                "description": "List of model ID to remove",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "required": [
+            "ids"
+        ],
+        "additionalProperties": false
+    }
 
-Return value:
+**Result**:
 
-This method has no return values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-request_model_upload
+request-model-upload
 ~~~~~~~~~~~~~~~~~~~~
 
 Request model upload from next binary frame received and return model descriptors on success.
 
-Parameters:
+This entrypoint is asynchronous, it means that it can take a long time and send progress notifications.
 
-* ``chunks_id``: ``str``. Chunk ID.
-* ``size``: ``int``. File size in bytes.
-* ``type``: ``str``. File extension or type (MESH, POINTS, CIRCUIT).
-* ``bounding_box``: ``bool``. Display bounds.
-* ``loader_name``: ``str``. Loader name.
-* ``loader_properties``: ``Any``. Loader properties.
-* ``name``: ``str``. Model name.
-* ``path``: ``str``. Model source path.
-* ``transformation``: ``dict``. Model transformation. The object has the following properties.
+**Params**:
 
-  * ``rotation``: ``list``. Rotation XYZW.
+.. jsonschema::
 
-    * ``items``: ``float``
+    {
+        "type": "object",
+        "properties": {
+            "chunks_id": {
+                "description": "Chunk ID",
+                "type": "string"
+            },
+            "loader_name": {
+                "description": "Loader name",
+                "type": "string"
+            },
+            "loader_properties": {
+                "description": "Loader properties"
+            },
+            "size": {
+                "description": "File size in bytes",
+                "type": "integer",
+                "minimum": 0
+            },
+            "type": {
+                "description": "File extension",
+                "type": "string"
+            }
+        },
+        "required": [
+            "chunks_id",
+            "size",
+            "type",
+            "loader_name",
+            "loader_properties"
+        ],
+        "additionalProperties": false
+    }
 
-  * ``rotation_center``: ``list``. Rotation center XYZ.
+**Result**:
 
-    * ``items``: ``float``
+.. jsonschema::
 
-  * ``scale``: ``list``. Scale XYZ.
-
-    * ``items``: ``float``
-
-  * ``translation``: ``list``. Translation XYZ.
-
-    * ``items``: ``float``
-
-* ``visible``: ``bool``. Visible.
-
-Return value:
-
-* ``list``
-
-  * ``items``: ``dict``. The object has the following properties.
-
-    * ``bounding_box``: ``bool``. Display bounding box.
-    * ``bounds``: ``dict``. Model bounds. The object has the following properties.
-
-      * ``max``: ``list``. Top-right XYZ.
-
-        * ``items``: ``float``
-
-      * ``min``: ``list``. Bottom-left XYZ.
-
-        * ``items``: ``float``
-
-    * ``id``: ``int``. Model ID.
-    * ``loader_name``: ``str``. Name of the loader.
-    * ``loader_properties``: ``Any``. Loader properties.
-    * ``metadata``: ``dict``. Key-value data.
-
-      * ``items``: ``str``
-
-    * ``name``: ``str``. Model name.
-    * ``path``: ``str``. Model file path.
-    * ``transformation``: ``dict``. Model transformation. The object has the following properties.
-
-      * ``rotation``: ``list``. Rotation XYZW.
-
-        * ``items``: ``float``
-
-      * ``rotation_center``: ``list``. Rotation center XYZ.
-
-        * ``items``: ``float``
-
-      * ``scale``: ``list``. Scale XYZ.
-
-        * ``items``: ``float``
-
-      * ``translation``: ``list``. Translation XYZ.
-
-        * ``items``: ``float``
-
-    * ``visible``: ``bool``. Is visible.
-
-----
-
-reset_camera
-~~~~~~~~~~~~
-
-Reset the camera to its initial values.
-
-Parameters:
-
-This method takes no parameters.
-
-Return value:
-
-This method has no return values.
+    {
+        "type": "array",
+        "items": {
+            "title": "ModelInstance",
+            "type": "object",
+            "properties": {
+                "bounds": {
+                    "title": "Bounds",
+                    "description": "Model axis-aligned bounds",
+                    "type": "object",
+                    "readOnly": true,
+                    "properties": {
+                        "max": {
+                            "description": "Bounds maximum (top front right corner)",
+                            "type": "array",
+                            "readOnly": true,
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "min": {
+                            "description": "Bounds minimum (bottom back left corner)",
+                            "type": "array",
+                            "readOnly": true,
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "is_visible": {
+                    "description": "Wether the model is being rendered or not",
+                    "type": "boolean"
+                },
+                "metadata": {
+                    "description": "Model-specific metadata",
+                    "type": "object",
+                    "readOnly": true,
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "model_id": {
+                    "description": "Model ID",
+                    "type": "integer",
+                    "readOnly": true,
+                    "minimum": 0
+                },
+                "transform": {
+                    "title": "Transform",
+                    "description": "Model transform",
+                    "type": "object",
+                    "properties": {
+                        "rotation": {
+                            "description": "Rotation XYZW",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 4,
+                            "maxItems": 4
+                        },
+                        "scale": {
+                            "description": "Scale XYZ",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "translation": {
+                            "description": "Translation XYZ",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    }
 
 ----
 
@@ -1329,339 +2818,787 @@ schema
 
 Get the JSON schema of the given entrypoint.
 
-Parameters:
+**Params**:
 
-* ``endpoint``: ``str``. Name of the endpoint.
+.. jsonschema::
 
-Return value:
+    {
+        "type": "object",
+        "properties": {
+            "endpoint": {
+                "description": "Name of the endpoint",
+                "type": "string"
+            }
+        },
+        "required": [
+            "endpoint"
+        ],
+        "additionalProperties": false
+    }
 
-* ``dict``. The object has the following properties.
+**Result**:
 
-  * ``async``: ``bool``. Check if the entrypoint is asynchronous.
-  * ``description``: ``str``. Description of the entrypoint.
-  * ``params``: ``Any``. Input schema.
-  * ``plugin``: ``str``. Name of the plugin that loads the entrypoint.
-  * ``returns``: ``Any``. Output schema.
-  * ``title``: ``str``. Name of the entrypoint.
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "async": {
+                "description": "Check if the entrypoint is asynchronous",
+                "type": "boolean"
+            },
+            "description": {
+                "description": "Description of the entrypoint",
+                "type": "string"
+            },
+            "params": {
+                "description": "Input schema",
+                "type": "object"
+            },
+            "plugin": {
+                "description": "Name of the plugin that loads the entrypoint",
+                "type": "string"
+            },
+            "returns": {
+                "description": "Output schema",
+                "type": "object"
+            },
+            "title": {
+                "description": "Name of the entrypoint",
+                "type": "string"
+            }
+        },
+        "required": [
+            "plugin",
+            "title",
+            "description",
+            "async"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
-set_animation_parameters
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Set the current state of the animation parameters.
-
-Parameters:
-
-* ``current``: ``int``. Current frame index.
-* ``end_frame``: ``int``. Global final simulation frame index.
-* ``start_frame``: ``int``. Global initial simulation frame index.
-
-Return value:
-
-This method has no return values.
-
-----
-
-set_application_parameters
+set-application-parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Set the current state of the application parameters.
 
-Parameters:
+**Params**:
 
-* ``image_stream_fps``: ``int``. Framerate of image stream.
-* ``jpeg_compression``: ``int``. JPEG compression rate.
-* ``viewport``: ``list``. Window size.
+.. jsonschema::
 
-  * ``items``: ``int``
+    {
+        "type": "object",
+        "properties": {
+            "jpeg_quality": {
+                "description": "JPEG quality",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+            },
+            "plugins": {
+                "description": "Loaded plugins",
+                "type": "array",
+                "readOnly": true,
+                "items": {
+                    "type": "string"
+                }
+            },
+            "viewport": {
+                "description": "Window size",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "minItems": 2,
+                "maxItems": 2
+            }
+        },
+        "additionalProperties": false
+    }
 
-Return value:
+**Result**:
 
-This method has no return values.
-
-----
-
-set_camera
-~~~~~~~~~~
-
-Set the current state of the camera.
-
-Parameters:
-
-* ``current``: ``str``. Camera current type.
-* ``orientation``: ``list``. Camera orientation XYZW.
-
-  * ``items``: ``float``
-
-* ``position``: ``list``. Camera position XYZ.
-
-  * ``items``: ``float``
-
-* ``target``: ``list``. Camera target XYZ.
-
-  * ``items``: ``float``
-
-Return value:
-
-This method has no return values.
-
-----
-
-set_camera_params
-~~~~~~~~~~~~~~~~~
-
-Set the current properties of the camera.
-
-Parameters:
-
-* ``params``: ``dict``. Can be one of the following objects depending on the renderer configuration.
-
-  * ``circuit_explorer_dof_perspective``: ``dict``. The object has the following properties.
-
-    * ``apertureRadius``: ``float``
-    * ``aspect``: ``float``
-    * ``enableClippingPlanes``: ``bool``
-    * ``focusDistance``: ``float``
-    * ``fovy``: ``float``
-
-  * ``circuit_explorer_sphere_clipping``: ``dict``. The object has the following properties.
-
-    * ``apertureRadius``: ``float``
-    * ``aspect``: ``float``
-    * ``enableClippingPlanes``: ``bool``
-    * ``focusDistance``: ``float``
-    * ``fovy``: ``float``
-
-  * ``fisheye``: ``dict``. The object has the following properties.
-
-    * ``apertureRadius``: ``float``
-    * ``enableClippingPlanes``: ``bool``
-    * ``focusDistance``: ``float``
-    * ``fovy``: ``float``
-
-  * ``orthographic``: ``dict``. The object has the following properties.
-
-    * ``enableClippingPlanes``: ``bool``
-    * ``height``: ``float``
-
-  * ``panoramic``: ``dict``. The object has the following properties.
-
-    * ``enableClippingPlanes``: ``bool``
-    * ``half``: ``bool``
-
-  * ``perspective``: ``dict``. The object has the following properties.
-
-    * ``apertureRadius``: ``float``
-    * ``enableClippingPlanes``: ``bool``
-    * ``focusDistance``: ``float``
-    * ``fovy``: ``float``
-
-  * ``perspectiveParallax``: ``dict``. The object has the following properties.
-
-    * ``enableClippingPlanes``: ``bool``
-    * ``fovy``: ``float``
-
-Return value:
-
-This method has no return values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-set_model_properties
+set-camera-look-at
+~~~~~~~~~~~~~~~~~~
+
+Sets the camera view settings.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "position": {
+                "description": "Position of the camera",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "target": {
+                "description": "Target position at which the camera is looking",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "up": {
+                "description": "Up vector to compute the camera orthonormal basis",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            }
+        },
+        "required": [
+            "position",
+            "target",
+            "up"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+set-camera-orthographic
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Sets the current camera to an orthographic one, with the specified parameters.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "height": {
+                "description": "Camera orthographic projection height",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+set-camera-perspective
+~~~~~~~~~~~~~~~~~~~~~~
+
+Sets the current camera to a perspective one, with the specified parameters.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "aperture_radius": {
+                "description": "Lens aperture radius (Use for depth of field effect. A value of 0.0 disables it",
+                "type": "number",
+                "default": 0,
+                "minimum": 0
+            },
+            "focus_distance": {
+                "description": "Distance at which to focus (for depth of field effect). A value of 1.0 disables it.",
+                "type": "number",
+                "default": 1,
+                "minimum": 1
+            },
+            "fovy": {
+                "description": "Camera vertical field of view (in degrees)",
+                "type": "number",
+                "default": 45,
+                "minimum": 1
+            }
+        },
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+set-material-carpaint
+~~~~~~~~~~~~~~~~~~~~~
+
+Updates the material of the given model to a Car paint material. This material is only usable with the production renderer.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "material": {
+                "title": "CarPaintMaterial",
+                "description": "Material parameters",
+                "type": "object",
+                "properties": {
+                    "color": {
+                        "description": "Base color of the material",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "flake_density": {
+                        "description": "Normalized percentage of flakes on the surface. Will be clampled to the range [0.0, 1.0]",
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "model_id",
+            "material"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+set-material-default
 ~~~~~~~~~~~~~~~~~~~~
 
-Set the properties of the given model.
+Updates the material of the given model to the Default material. This material works with all renderers. It has a matte appearance..
 
-Parameters:
+**Params**:
 
-* ``id``: ``int``. Model ID.
-* ``properties``: ``dict``. Model properties.
+.. jsonschema::
 
-Return value:
+    {
+        "type": "object",
+        "properties": {
+            "material": {
+                "title": "DefaultMaterial",
+                "description": "Material parameters",
+                "type": "object",
+                "properties": {
+                    "color": {
+                        "description": "Base color of the material",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "opacity": {
+                        "description": "Base opacity of the material. Will be clampled to the range [0.0, 1.0]",
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "model_id",
+            "material"
+        ],
+        "additionalProperties": false
+    }
 
-This method has no return values.
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-set_model_transfer_function
+set-material-emissive
+~~~~~~~~~~~~~~~~~~~~~
+
+Updates the material of the given model to an Emisive material. This material is only usable with the production renderer.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "material": {
+                "title": "EmissiveMaterial",
+                "description": "Material parameters",
+                "type": "object",
+                "properties": {
+                    "color": {
+                        "description": "Base color of the material",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "intensity": {
+                        "description": "Intensity of the light emitted. Will be clampled to the range [0.0, +infinite]",
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "model_id",
+            "material"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+set-material-glass
+~~~~~~~~~~~~~~~~~~
+
+Updates the material of the given model to a Glass material. This material is only usable with the production renderer.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "material": {
+                "title": "GlassMaterial",
+                "description": "Material parameters",
+                "type": "object",
+                "properties": {
+                    "color": {
+                        "description": "Base color of the material",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "index_of_refraction": {
+                        "description": "Index of refraction of the glass",
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "model_id",
+            "material"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+set-material-matte
+~~~~~~~~~~~~~~~~~~
+
+Updates the material of the given model to a Matte material. This material is only usable with the production renderer.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "material": {
+                "title": "MatteMaterial",
+                "description": "Material parameters",
+                "type": "object",
+                "properties": {
+                    "color": {
+                        "description": "Base color of the material",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "opacity": {
+                        "description": "Base opacity of the material. Will be clampled to the range [0.0, 1.0]",
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "model_id",
+            "material"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+set-material-metal
+~~~~~~~~~~~~~~~~~~
+
+Updates the material of the given model to a Metal material. This material is only usable with the production renderer.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "material": {
+                "title": "MetalMaterial",
+                "description": "Material parameters",
+                "type": "object",
+                "properties": {
+                    "color": {
+                        "description": "Base color of the material",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "roughness": {
+                        "description": "Surface roughness. Will be clamped on the range [0-1]",
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "model_id",
+            "material"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+set-material-plastic
+~~~~~~~~~~~~~~~~~~~~
+
+Updates the material of the given model to a Plastic material. This material is only usable with the production renderer.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "material": {
+                "title": "PlasticMaterial",
+                "description": "Material parameters",
+                "type": "object",
+                "properties": {
+                    "color": {
+                        "description": "Base color of the material",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "opacity": {
+                        "description": "Base opacity of the material. Will be clampled to the range [0.0, 1.0]",
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "model_id",
+            "material"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
+
+----
+
+set-model-transfer-function
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Set the transfer function of the given model.
 
-Parameters:
+**Params**:
 
-* ``id``: ``int``. Model ID.
-* ``transfer_function``: ``dict``. Transfer function. The object has the following properties.
+.. jsonschema::
 
-  * ``colormap``: ``dict``. Colors to map. The object has the following properties.
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            },
+            "transfer_function": {
+                "title": "TransferFunction",
+                "description": "Transfer function",
+                "type": "object",
+                "properties": {
+                    "colors": {
+                        "description": "List of colors (RGBA) to map",
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 4,
+                            "maxItems": 4
+                        }
+                    },
+                    "range": {
+                        "description": "Values range",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 2,
+                        "maxItems": 2
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "required": [
+            "id",
+            "transfer_function"
+        ],
+        "additionalProperties": false
+    }
 
-    * ``colors``: ``list``. Colors to map.
+**Result**:
 
-      * ``items``: ``list``
-
-        * ``items``: ``float``
-
-    * ``name``: ``str``. Label of the color map.
-
-  * ``opacity_curve``: ``list``. Control points.
-
-    * ``items``: ``list``
-
-      * ``items``: ``float``
-
-  * ``range``: ``list``. Values range.
-
-    * ``items``: ``float``
-
-Return value:
-
-This method has no return values.
-
-----
-
-set_renderer
-~~~~~~~~~~~~
-
-Set the current state of the renderer.
-
-Parameters:
-
-* ``accumulation``: ``bool``. Multiple render passes.
-* ``background_color``: ``list``. Background color RGB.
-
-  * ``items``: ``float``
-
-* ``current``: ``str``. Current renderer name.
-* ``head_light``: ``bool``. Light source follows camera origin.
-* ``max_accum_frames``: ``int``. Max render passes.
-* ``samples_per_pixel``: ``int``. Samples per pixel.
-* ``subsampling``: ``int``. Subsampling.
-* ``variance_threshold``: ``float``. Stop accumulation threshold.
-
-Return value:
-
-This method has no return values.
-
-----
-
-set_renderer_params
-~~~~~~~~~~~~~~~~~~~
-
-Set the current properties of the renderer.
-
-Parameters:
-
-* ``params``: ``dict``. Can be one of the following objects depending on the renderer configuration.
-
-  * ``basic``: ``dict``
-  * ``circuit_explorer_advanced``: ``dict``. The object has the following properties.
-
-    * ``epsilonFactor``: ``float``
-    * ``exposure``: ``float``
-    * ``fogStart``: ``float``
-    * ``fogThickness``: ``float``
-    * ``giDistance``: ``float``
-    * ``giSamples``: ``int``
-    * ``giWeight``: ``float``
-    * ``maxBounces``: ``int``
-    * ``maxDistanceToSecondaryModel``: ``float``
-    * ``samplingThreshold``: ``float``
-    * ``shadows``: ``float``
-    * ``softShadows``: ``float``
-    * ``softShadowsSamples``: ``int``
-    * ``useHardwareRandomizer``: ``bool``
-    * ``volumeAlphaCorrection``: ``float``
-    * ``volumeSpecularExponent``: ``float``
-
-  * ``circuit_explorer_basic``: ``dict``. The object has the following properties.
-
-    * ``alphaCorrection``: ``float``
-    * ``exposure``: ``float``
-    * ``maxBounces``: ``int``
-    * ``maxDistanceToSecondaryModel``: ``float``
-    * ``simulationThreshold``: ``float``
-    * ``useHardwareRandomizer``: ``bool``
-
-  * ``pathtracer``: ``dict``. The object has the following properties.
-
-    * ``maxContribution``: ``float``
-    * ``rouletteDepth``: ``int``
-
-  * ``raycast_Ng``: ``dict``
-  * ``raycast_Ns``: ``dict``
-  * ``scivis``: ``dict``. The object has the following properties.
-
-    * ``aoDistance``: ``float``
-    * ``aoSamples``: ``int``
-    * ``aoTransparencyEnabled``: ``bool``
-    * ``aoWeight``: ``float``
-    * ``oneSidedLighting``: ``bool``
-    * ``shadowsEnabled``: ``bool``
-
-Return value:
-
-This method has no return values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-set_scene
-~~~~~~~~~
+set-renderer-interactive
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-Set the current state of the scene.
+Sets the system renderer to the interactive one.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+.. jsonschema::
 
-Return value:
+    {
+        "type": "object",
+        "properties": {
+            "ao_samples": {
+                "description": "Sets number of samples to compute ambient occlusion",
+                "type": "integer"
+            },
+            "background_color": {
+                "description": "Background color",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 4,
+                "maxItems": 4
+            },
+            "enable_shadows": {
+                "description": "Render casted shadows",
+                "type": "boolean"
+            },
+            "max_ray_bounces": {
+                "description": "Max ray bounces per sample",
+                "type": "integer"
+            },
+            "samples_per_pixel": {
+                "description": "Number of samples per pixel",
+                "type": "integer"
+            }
+        },
+        "additionalProperties": false
+    }
 
-This method has no return values.
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-set_volume_parameters
-~~~~~~~~~~~~~~~~~~~~~
+set-renderer-production
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Set the current state of the volume parameters.
+Sets the system renderer to the production one.
 
-Parameters:
+**Params**:
 
-* ``adaptive_max_sampling_rate``: ``float``. Max sampling rate.
-* ``adaptive_sampling``: ``bool``. Use adaptive sampling.
-* ``clip_box``: ``dict``. Clip box. The object has the following properties.
+.. jsonschema::
 
-  * ``max``: ``list``. Top-right XYZ.
+    {
+        "type": "object",
+        "properties": {
+            "background_color": {
+                "description": "Background color",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 4,
+                "maxItems": 4
+            },
+            "max_ray_bounces": {
+                "description": "Max ray bounces per sample",
+                "type": "integer"
+            },
+            "samples_per_pixel": {
+                "description": "Number of samples per pixel",
+                "type": "integer"
+            }
+        },
+        "additionalProperties": false
+    }
 
-    * ``items``: ``float``
+**Result**:
 
-  * ``min``: ``list``. Bottom-left XYZ.
+This entrypoint has no result, the "result" field is still present but is always null.
 
-    * ``items``: ``float``
+----
 
-* ``gradient_shading``: ``bool``. Use gradient shading.
-* ``pre_integration``: ``bool``. Use pre-integration.
-* ``sampling_rate``: ``float``. Fixed sampling rate.
-* ``single_shade``: ``bool``. Use a single shade for the whole volume.
-* ``specular``: ``list``. Reflectivity amount XYZ.
+set-simulation-parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * ``items``: ``float``
+Set the current state of the simulation parameters.
 
-* ``volume_dimensions``: ``list``. Dimensions XYZ.
+**Params**:
 
-  * ``items``: ``int``
+.. jsonschema::
 
-* ``volume_element_spacing``: ``list``. Element spacing XYZ.
+    {
+        "type": "object",
+        "properties": {
+            "current": {
+                "description": "Current frame index",
+                "type": "integer",
+                "minimum": 0
+            },
+            "dt": {
+                "description": "Frame time",
+                "type": "number",
+                "readOnly": true
+            },
+            "end_frame": {
+                "description": "Global final simulation frame index",
+                "type": "integer",
+                "minimum": 0
+            },
+            "start_frame": {
+                "description": "Global initial simulation frame index",
+                "type": "integer",
+                "minimum": 0
+            },
+            "unit": {
+                "description": "Time unit",
+                "type": "string",
+                "readOnly": true
+            }
+        },
+        "additionalProperties": false
+    }
 
-  * ``items``: ``float``
+**Result**:
 
-* ``volume_offset``: ``list``. Offset XYZ.
-
-  * ``items``: ``float``
-
-Return value:
-
-This method has no return values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
@@ -1670,194 +3607,368 @@ snapshot
 
 Take a snapshot with given parameters.
 
-Parameters:
+This entrypoint is asynchronous, it means that it can take a long time and send progress notifications.
 
-* ``format``: ``str``. Image format (extension without the dot).
-* ``size``: ``list``. Image dimensions.
+**Params**:
 
-  * ``items``: ``int``
+.. jsonschema::
 
-* ``animation_parameters``: ``dict``. Animation parameters. The object has the following properties.
+    {
+        "type": "object",
+        "properties": {
+            "camera": {
+                "title": "GenericObject<Camera>",
+                "description": "Camera definition",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Type name",
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "params": {
+                        "description": "Type parameters",
+                        "writeOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "camera_view": {
+                "title": "LookAt",
+                "description": "Camera 'look at' view settings",
+                "type": "object",
+                "properties": {
+                    "position": {
+                        "description": "Position of the camera",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "target": {
+                        "description": "Target position at which the camera is looking",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "up": {
+                        "description": "Up vector to compute the camera orthonormal basis",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "required": [
+                    "position",
+                    "target",
+                    "up"
+                ],
+                "additionalProperties": false
+            },
+            "file_path": {
+                "description": "Path if saved on disk. If empty, image will be sent to the client as a base64 encoded image",
+                "type": "string"
+            },
+            "image_settings": {
+                "title": "ImageSettings",
+                "description": "Image settings",
+                "type": "object",
+                "properties": {
+                    "format": {
+                        "description": "Image format (jpg or png)",
+                        "type": "string"
+                    },
+                    "quality": {
+                        "description": "Image quality (0 = lowest quality, 100 = highest quality",
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "size": {
+                        "description": "Image dimensions [width, height]",
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "minItems": 2,
+                        "maxItems": 2
+                    }
+                },
+                "additionalProperties": false
+            },
+            "renderer": {
+                "title": "GenericObject<Renderer>",
+                "description": "Renderer definition",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Type name",
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "params": {
+                        "description": "Type parameters",
+                        "writeOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "simulation_frame": {
+                "description": "Simulation frame to render",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "additionalProperties": false
+    }
 
-  * ``current``: ``int``. Current frame index.
-  * ``end_frame``: ``int``. Global final simulation frame index.
-  * ``start_frame``: ``int``. Global initial simulation frame index.
+**Result**:
 
-* ``camera``: ``dict``. Camera parameters. The object has the following properties.
+.. jsonschema::
 
-  * ``current``: ``str``. Camera current type.
-  * ``orientation``: ``list``. Camera orientation XYZW.
-
-    * ``items``: ``float``
-
-  * ``position``: ``list``. Camera position XYZ.
-
-    * ``items``: ``float``
-
-  * ``target``: ``list``. Camera target XYZ.
-
-    * ``items``: ``float``
-
-* ``file_path``: ``str``. Path if saved on disk. If empty, image will be sentto the client as a base64 encoded image.
-* ``name``: ``str``. Name of the snapshot.
-* ``quality``: ``int``. Image quality from 0 to 100.
-* ``renderer``: ``dict``. Renderer parameters. The object has the following properties.
-
-  * ``accumulation``: ``bool``. Multiple render passes.
-  * ``background_color``: ``list``. Background color RGB.
-
-    * ``items``: ``float``
-
-  * ``current``: ``str``. Current renderer name.
-  * ``head_light``: ``bool``. Light source follows camera origin.
-  * ``max_accum_frames``: ``int``. Max render passes.
-  * ``samples_per_pixel``: ``int``. Samples per pixel.
-  * ``subsampling``: ``int``. Subsampling.
-  * ``variance_threshold``: ``float``. Stop accumulation threshold.
-
-* ``samples_per_pixel``: ``int``. Samples per pixel.
-* ``volume_parameters``: ``dict``. Volume parameters. The object has the following properties.
-
-  * ``adaptive_max_sampling_rate``: ``float``. Max sampling rate.
-  * ``adaptive_sampling``: ``bool``. Use adaptive sampling.
-  * ``clip_box``: ``dict``. Clip box. The object has the following properties.
-
-    * ``max``: ``list``. Top-right XYZ.
-
-      * ``items``: ``float``
-
-    * ``min``: ``list``. Bottom-left XYZ.
-
-      * ``items``: ``float``
-
-  * ``gradient_shading``: ``bool``. Use gradient shading.
-  * ``pre_integration``: ``bool``. Use pre-integration.
-  * ``sampling_rate``: ``float``. Fixed sampling rate.
-  * ``single_shade``: ``bool``. Use a single shade for the whole volume.
-  * ``specular``: ``list``. Reflectivity amount XYZ.
-
-    * ``items``: ``float``
-
-  * ``volume_dimensions``: ``list``. Dimensions XYZ.
-
-    * ``items``: ``int``
-
-  * ``volume_element_spacing``: ``list``. Element spacing XYZ.
-
-    * ``items``: ``float``
-
-  * ``volume_offset``: ``list``. Offset XYZ.
-
-    * ``items``: ``float``
-
-Return value:
-
-* ``dict``. The object has the following properties.
-
-  * ``data``: ``str``. Image data with base64 encoding.
+    {
+        "type": "object",
+        "properties": {
+            "data": {
+                "description": "Image data with base64 encoding",
+                "type": "string"
+            }
+        },
+        "required": [
+            "data"
+        ],
+        "additionalProperties": false
+    }
 
 ----
 
-trigger_jpeg_stream
+trigger-jpeg-stream
 ~~~~~~~~~~~~~~~~~~~
 
 Triggers the engine to stream a frame to the clients.
 
-Parameters:
+**Params**:
 
-This method takes no parameters.
+This entrypoint has no params, the "params" field can hence be omitted or null.
 
-Return value:
+**Result**:
 
-This method has no return values.
-
-----
-
-update_clip_plane
-~~~~~~~~~~~~~~~~~
-
-Update a clip plane with the given coefficients.
-
-Parameters:
-
-* ``id``: ``int``. Plane ID.
-* ``plane``: ``list``. Plane normal vector XYZ and distance from origin.
-
-  * ``items``: ``float``
-
-Return value:
-
-This method has no return values.
+This entrypoint has no result, the "result" field is still present but is always null.
 
 ----
 
-update_instance
-~~~~~~~~~~~~~~~
-
-Update the model instance with the given values.
-
-Parameters:
-
-* ``bounding_box``: ``bool``. Display bounding box.
-* ``instance_id``: ``int``. Instance ID.
-* ``model_id``: ``int``. Model ID.
-* ``transformation``: ``dict``. Model transformation. The object has the following properties.
-
-  * ``rotation``: ``list``. Rotation XYZW.
-
-    * ``items``: ``float``
-
-  * ``rotation_center``: ``list``. Rotation center XYZ.
-
-    * ``items``: ``float``
-
-  * ``scale``: ``list``. Scale XYZ.
-
-    * ``items``: ``float``
-
-  * ``translation``: ``list``. Translation XYZ.
-
-    * ``items``: ``float``
-
-* ``visible``: ``bool``. Check if rendered.
-
-Return value:
-
-This method has no return values.
-
-----
-
-update_model
+update-model
 ~~~~~~~~~~~~
 
-Update the model with the given values.
+Update the model with the given values and return its new state.
 
-Parameters:
+**Params**:
 
-* ``id``: ``int``. Model ID.
-* ``bounding_box``: ``bool``. Display model bounds.
-* ``name``: ``str``. Model name.
-* ``transformation``: ``dict``. Model transformation. The object has the following properties.
+.. jsonschema::
 
-  * ``rotation``: ``list``. Rotation XYZW.
+    {
+        "type": "object",
+        "properties": {
+            "model": {
+                "title": "ModelInstance",
+                "description": "Model data to update",
+                "type": "object",
+                "properties": {
+                    "bounds": {
+                        "title": "Bounds",
+                        "description": "Model axis-aligned bounds",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "max": {
+                                "description": "Bounds maximum (top front right corner)",
+                                "type": "array",
+                                "readOnly": true,
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            },
+                            "min": {
+                                "description": "Bounds minimum (bottom back left corner)",
+                                "type": "array",
+                                "readOnly": true,
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "is_visible": {
+                        "description": "Wether the model is being rendered or not",
+                        "type": "boolean"
+                    },
+                    "metadata": {
+                        "description": "Model-specific metadata",
+                        "type": "object",
+                        "readOnly": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "model_id": {
+                        "description": "Model ID",
+                        "type": "integer",
+                        "readOnly": true,
+                        "minimum": 0
+                    },
+                    "transform": {
+                        "title": "Transform",
+                        "description": "Model transform",
+                        "type": "object",
+                        "properties": {
+                            "rotation": {
+                                "description": "Rotation XYZW",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 4,
+                                "maxItems": 4
+                            },
+                            "scale": {
+                                "description": "Scale XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            },
+                            "translation": {
+                                "description": "Translation XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "additionalProperties": false
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "model_id",
+            "model"
+        ],
+        "additionalProperties": false
+    }
 
-    * ``items``: ``float``
+**Result**:
 
-  * ``rotation_center``: ``list``. Rotation center XYZ.
+.. jsonschema::
 
-    * ``items``: ``float``
-
-  * ``scale``: ``list``. Scale XYZ.
-
-    * ``items``: ``float``
-
-  * ``translation``: ``list``. Translation XYZ.
-
-    * ``items``: ``float``
-
-* ``visible``: ``bool``. Model visibility.
-
-Return value:
-
-This method has no return values.
-
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "metadata": {
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
