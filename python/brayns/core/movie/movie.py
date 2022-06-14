@@ -26,13 +26,14 @@ from typing import Optional
 
 from brayns.core.common.resolution import Resolution
 from brayns.core.movie.movie_error import MovieError
-from brayns.core.snapshot.exported_frames import ExportedFrames
+from brayns.core.snapshot.image_format import ImageFormat
 
 
 @dataclass
 class Movie:
 
-    frames: ExportedFrames
+    frames_folder: str
+    frames_format: ImageFormat = ImageFormat.PNG
     fps: float = 25.0
     resolution: Optional[Resolution] = None
     bitrate: Optional[int] = None
@@ -53,7 +54,7 @@ class Movie:
         return [
             *_get_global_options(),
             *_get_input_options(self),
-            _get_input(self.frames),
+            *_get_input(self.frames_folder, self.frames_format),
             *_get_output_options(self),
             path
         ]
@@ -88,31 +89,38 @@ def _get_global_options() -> list[str]:
 
 def _get_input_options(movie: Movie) -> list[str]:
     return [
-        f'-framerate {movie.fps}'
+        '-framerate',
+        str(movie.fps)
     ]
 
 
-def _get_input(frames: ExportedFrames) -> str:
-    pattern = _get_pattern(frames)
-    return f'-i {pattern}'
+def _get_input(folder: str, format: ImageFormat) -> list[str]:
+    return [
+        '-i',
+        _get_pattern(folder, format)
+    ]
 
 
-def _get_pattern(frames: ExportedFrames) -> str:
-    folder = pathlib.Path(frames.folder)
-    pattern = f'%05d.{frames.format.value}'
+def _get_pattern(folder: str, format: ImageFormat) -> str:
+    folder = pathlib.Path(folder)
+    pattern = f'%05d.{format.value}'
     return str(folder / pattern)
 
 
 def _get_output_options(movie: Movie) -> list[str]:
     args = [
+        '-vf',
         _get_video_filters(movie)
     ]
     if movie.resolution is not None:
-        args.append(f'-s {movie.resolution.width}x{movie.resolution.height}')
+        args.append('-s')
+        args.append(f'{movie.resolution.width}x{movie.resolution.height}')
     if movie.bitrate is not None:
-        args.append(f'-b {movie.bitrate}')
+        args.append('-b')
+        args.append(str(movie.bitrate))
     if movie.encoder is not None:
-        args.append(f'-c {movie.encoder}')
+        args.append('-c')
+        args.append(movie.encoder)
     return args
 
 
@@ -122,5 +130,4 @@ def _get_video_filters(movie: Movie) -> str:
     ]
     if movie.pixel_format is not None:
         filters.append(f'format={movie.pixel_format}')
-    args = ','.join(filters)
-    return f'-vf "{args}"'
+    return ','.join(filters)

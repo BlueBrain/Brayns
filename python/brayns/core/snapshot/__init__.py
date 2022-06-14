@@ -18,14 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.snapshot.exported_frames import ExportedFrames
 from brayns.core.snapshot.frame_exporter import FrameExporter
 from brayns.core.snapshot.image_format import ImageFormat
 from brayns.core.snapshot.key_frame import KeyFrame
 from brayns.core.snapshot.snapshot import Snapshot
 
 __all__ = [
-    'ExportedFrames',
     'FrameExporter',
     'ImageFormat',
     'KeyFrame',

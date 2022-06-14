@@ -24,7 +24,6 @@ from typing import Optional
 from brayns.core.camera.camera import Camera
 from brayns.core.common.resolution import Resolution
 from brayns.core.renderer.renderer import Renderer
-from brayns.core.snapshot.exported_frames import ExportedFrames
 from brayns.core.snapshot.image_format import ImageFormat
 from brayns.core.snapshot.key_frame import KeyFrame
 from brayns.instance.instance import Instance
@@ -40,10 +39,9 @@ class FrameExporter:
     renderer: Optional[Renderer] = None
     jpeg_quality: int = 100
 
-    def export_frames(self, instance: Instance, folder: str) -> ExportedFrames:
+    def export_frames(self, instance: Instance, folder: str) -> None:
         params = self.serialize(folder)
         instance.request('export-frames', params)
-        return ExportedFrames(folder, self.format)
 
     def serialize(self, folder: str) -> dict:
         message = {

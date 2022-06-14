@@ -21,7 +21,6 @@
 import unittest
 
 from brayns.core.camera.camera_view import CameraView
-from brayns.core.snapshot.exported_frames import ExportedFrames
 from brayns.core.snapshot.frame_exporter import FrameExporter
 from brayns.core.snapshot.image_format import ImageFormat
 from brayns.core.snapshot.key_frame import KeyFrame
@@ -38,8 +37,7 @@ class TestFrameExporter(unittest.TestCase):
         frames = KeyFrame.from_indices([0, 1])
         exporter = FrameExporter(frames)
         ref = exporter.serialize(path)
-        frames = exporter.export_frames(instance, path)
-        self.assertEqual(frames, ExportedFrames('test', ImageFormat.PNG))
+        exporter.export_frames(instance, path)
         self.assertEqual(instance.method, 'export-frames')
         self.assertEqual(instance.params, ref)
 

@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Iterator
 
 from brayns.core.simulation.simulation import Simulation
 
@@ -36,27 +35,12 @@ class MovieFrames:
         start_frame = self._get_frame(simulation, self.start_frame)
         end_frame = self._get_frame(simulation, self.end_frame)
         step = self._get_step(simulation)
-        return list(self._generate_frames(start_frame, end_frame, step))
-
-    def _get_start_frame(self, simulation: Simulation) -> int:
-        return simulation.clamp(self.start_frame)
-
-    def _get_end_frame(self, simulation: Simulation) -> int:
-        end_frame = self.end_frame
-        if end_frame < 0:
-            end_frame += simulation.end_frame
-        return simulation.clamp(end_frame)
+        return list(range(start_frame, end_frame + 1, step))
 
     def _get_frame(self, simulation: Simulation, frame: int) -> int:
         if frame < 0:
             frame += simulation.end_frame
         return simulation.clamp(frame)
 
-    def _get_step(self, simulation: Simulation) -> float:
-        return simulation.fps / self.fps / self.slowing_factor
-
-    def _generate_frames(self, start_frame: int, end_frame: int, step: float) -> Iterator[int]:
-        i = float(start_frame)
-        while i <= end_frame:
-            yield int(i)
-            i += step
+    def _get_step(self, simulation: Simulation) -> int:
+        return int(simulation.fps / self.fps / self.slowing_factor)

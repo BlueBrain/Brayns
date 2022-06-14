@@ -22,21 +22,21 @@ import unittest
 
 from brayns.core.common.resolution import Resolution
 from brayns.core.movie.movie import Movie
-from brayns.core.snapshot.exported_frames import ExportedFrames
 from brayns.core.snapshot.image_format import ImageFormat
 
 
 class TestMovie(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
-        movie = Movie(ExportedFrames('folder', ImageFormat.PNG))
+        movie = Movie('folder', ImageFormat.PNG)
         command = movie.get_command_line('path', 'test')
         ref = ['test', *movie.get_args('path')]
         self.assertEqual(command, ref)
 
     def test_get_args(self) -> None:
         movie = Movie(
-            frames=ExportedFrames('folder', ImageFormat.PNG),
+            frames_folder='folder',
+            frames_format=ImageFormat.PNG,
             fps=30,
             resolution=Resolution.full_hd,
             bitrate=64000,
@@ -46,12 +46,18 @@ class TestMovie(unittest.TestCase):
         args = movie.get_args('path')
         ref = [
             '-y',
-            '-framerate 30',
-            '-i folder/%05d.png',
-            '-vf "fps=30,format=pixel"',
-            '-s 1920x1080',
-            '-b 64000',
-            '-c encoder',
+            '-framerate',
+            '30',
+            '-i',
+            'folder/%05d.png',
+            '-vf',
+            'fps=30,format=pixel',
+            '-s',
+            '1920x1080',
+            '-b',
+            '64000',
+            '-c',
+            'encoder',
             'path'
         ]
         self.assertEqual(args, ref)
