@@ -27,6 +27,7 @@ from brayns.core.geometry import *
 from brayns.core.light import *
 from brayns.core.material import *
 from brayns.core.model import *
+from brayns.core.movie import *
 from brayns.core.renderer import *
 from brayns.core.simulation import *
 from brayns.core.snapshot import *

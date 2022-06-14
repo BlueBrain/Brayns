@@ -1,0 +1,126 @@
+# Copyright (c) 2015-2022 EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+#
+# Responsible Author: adrien.fleury@epfl.ch
+#
+# This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+#
+# This library is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License version 3.0 as published
+# by the Free Software Foundation.
+#
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import os
+import pathlib
+import subprocess
+from dataclasses import dataclass
+from typing import Optional
+
+from brayns.core.common.resolution import Resolution
+from brayns.core.movie.movie_error import MovieError
+from brayns.core.snapshot.exported_frames import ExportedFrames
+
+
+@dataclass
+class Movie:
+
+    frames: ExportedFrames
+    fps: float = 25.0
+    resolution: Optional[Resolution] = None
+    bitrate: Optional[int] = None
+    encoder: Optional[str] = None
+    pixel_format: Optional[str] = 'yuv420p'
+
+    def save(self, path: str, ffmpeg: str = 'ffmpeg') -> None:
+        args = self.get_command_line(path, ffmpeg)
+        _run_process(args)
+
+    def get_command_line(self, path: str, ffmpeg: str) -> list[str]:
+        return [
+            ffmpeg,
+            *self.get_args(path)
+        ]
+
+    def get_args(self, path: str) -> list[str]:
+        return [
+            *_get_global_options(),
+            *_get_input_options(self),
+            _get_input(self.frames),
+            *_get_output_options(self),
+            path
+        ]
+
+
+def _run_process(args: list[str]) -> int:
+    try:
+        process = _create_process(args)
+    except OSError as e:
+        raise MovieError(str(e))
+    stdout, stderr = process.communicate()
+    if process.returncode != 0:
+        raise MovieError('ffmpeg call failed (see stderr)', stdout, stderr)
+
+
+def _create_process(args: list[str]) -> subprocess.Popen:
+    return subprocess.Popen(
+        args=args,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        env=os.environ | {'AV_LOG_FORCE_NOCOLOR': '1'}
+    )
+
+
+def _get_global_options() -> list[str]:
+    return [
+        '-y'
+    ]
+
+
+def _get_input_options(movie: Movie) -> list[str]:
+    return [
+        f'-framerate {movie.fps}'
+    ]
+
+
+def _get_input(frames: ExportedFrames) -> str:
+    pattern = _get_pattern(frames)
+    return f'-i {pattern}'
+
+
+def _get_pattern(frames: ExportedFrames) -> str:
+    folder = pathlib.Path(frames.folder)
+    pattern = f'%05d.{frames.format.value}'
+    return str(folder / pattern)
+
+
+def _get_output_options(movie: Movie) -> list[str]:
+    args = [
+        _get_video_filters(movie)
+    ]
+    if movie.resolution is not None:
+        args.append(f'-s {movie.resolution.width}x{movie.resolution.height}')
+    if movie.bitrate is not None:
+        args.append(f'-b {movie.bitrate}')
+    if movie.encoder is not None:
+        args.append(f'-c {movie.encoder}')
+    return args
+
+
+def _get_video_filters(movie: Movie) -> str:
+    filters = [
+        f'fps={movie.fps}'
+    ]
+    if movie.pixel_format is not None:
+        filters.append(f'format={movie.pixel_format}')
+    args = ','.join(filters)
+    return f'-vf "{args}"'

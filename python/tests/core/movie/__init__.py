@@ -17,30 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from dataclasses import dataclass
-from typing import Optional
-
-from brayns.core.camera.camera_view import CameraView
-
-
-@dataclass
-class KeyFrame:
-
-    index: int
-    view: Optional[CameraView] = None
-
-    @staticmethod
-    def from_indices(indices: list[int], view: Optional[CameraView] = None) -> list['KeyFrame']:
-        return [
-            KeyFrame(index, view)
-            for index in indices
-        ]
-
-    def serialize(self) -> dict:
-        message = {
-            'frame_index': self.index,
-        }
-        if self.view is not None:
-            message['camera_view'] = self.view.serialize()
-        return message

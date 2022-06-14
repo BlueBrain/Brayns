@@ -72,3 +72,12 @@ class Simulation:
     @property
     def fps(self) -> float:
         return 1 / self.delta_time * self.time_unit.per_second
+
+    def clamp(self, frame: int) -> int:
+        return min(max(frame, self.start_frame), self.end_frame)
+
+    def get_frame(self, time: float) -> int:
+        return round(time / self.delta_time)
+
+    def get_time(self, frame: int) -> float:
+        return frame * self.delta_time

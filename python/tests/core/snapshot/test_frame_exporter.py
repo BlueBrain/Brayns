@@ -21,6 +21,7 @@
 import unittest
 
 from brayns.core.camera.camera_view import CameraView
+from brayns.core.snapshot.exported_frames import ExportedFrames
 from brayns.core.snapshot.frame_exporter import FrameExporter
 from brayns.core.snapshot.image_format import ImageFormat
 from brayns.core.snapshot.key_frame import KeyFrame
@@ -34,24 +35,22 @@ class TestFrameExporter(unittest.TestCase):
     def test_export_frames(self) -> None:
         instance = MockInstance()
         path = 'test'
-        exporter = FrameExporter([
-            KeyFrame(i, CameraView())
-            for i in range(2)
-        ])
+        frames = KeyFrame.from_indices([0, 1])
+        exporter = FrameExporter(frames)
         ref = exporter.serialize(path)
-        exporter.export_frames(instance, path)
+        frames = exporter.export_frames(instance, path)
+        self.assertEqual(frames, ExportedFrames('test', ImageFormat.PNG))
         self.assertEqual(instance.method, 'export-frames')
         self.assertEqual(instance.params, ref)
 
     def test_serialize(self) -> None:
         exporter = FrameExporter(
-            frames=[KeyFrame(i, CameraView()) for i in range(2)],
+            frames=KeyFrame.from_indices([0, 1], CameraView()),
             format=ImageFormat.JPEG,
             jpeg_quality=50,
             resolution=(600, 900),
             camera=MockCamera(),
-            renderer=MockRenderer(),
-            sequential_naming=False
+            renderer=MockRenderer()
         )
         path = 'test'
         ref = {
@@ -72,8 +71,7 @@ class TestFrameExporter(unittest.TestCase):
                 'size': [600, 900]
             },
             'camera': MockCamera().serialize_with_name(),
-            'renderer': MockRenderer().serialize_with_name(),
-            'sequential_naming': False
+            'renderer': MockRenderer().serialize_with_name()
         }
         test = exporter.serialize(path)
         self.assertEqual(test, ref)

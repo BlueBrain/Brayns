@@ -19,28 +19,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Optional
 
-from brayns.core.camera.camera_view import CameraView
+from brayns.core.snapshot.image_format import ImageFormat
 
 
 @dataclass
-class KeyFrame:
+class ExportedFrames:
 
-    index: int
-    view: Optional[CameraView] = None
-
-    @staticmethod
-    def from_indices(indices: list[int], view: Optional[CameraView] = None) -> list['KeyFrame']:
-        return [
-            KeyFrame(index, view)
-            for index in indices
-        ]
-
-    def serialize(self) -> dict:
-        message = {
-            'frame_index': self.index,
-        }
-        if self.view is not None:
-            message['camera_view'] = self.view.serialize()
-        return message
+    folder: str
+    format: ImageFormat
