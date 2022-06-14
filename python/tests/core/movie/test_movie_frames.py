@@ -18,29 +18,33 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Optional
+import unittest
 
-from brayns.core.camera.camera_view import CameraView
+from brayns.core.movie.movie_frames import MovieFrames
+from brayns.core.simulation.simulation import Simulation
+from brayns.core.simulation.time_unit import TimeUnit
 
 
-@dataclass
-class KeyFrame:
+class TestMovieFrames(unittest.TestCase):
 
-    index: int
-    view: Optional[CameraView] = None
+    def test_get_indices(self) -> None:
+        frames = MovieFrames(
+            fps=10,
+            slowing_factor=10,
+            start_frame=5000,
+            end_frame=-4000
+        )
+        simulation = Simulation(
+            start_frame=0,
+            end_frame=10000,
+            current_frame=2,
+            delta_time=0.1,
+            time_unit=TimeUnit.MILLISECOND
+        )
+        ref = list(range(5000, 6100, 100))
+        indices = frames.get_indices(simulation)
+        self.assertEqual(indices, ref)
 
-    @staticmethod
-    def from_indices(indices: list[int], view: Optional[CameraView] = None) -> list['KeyFrame']:
-        return [
-            KeyFrame(index, view)
-            for index in indices
-        ]
 
-    def serialize(self) -> dict:
-        message = {
-            'frame_index': self.index,
-        }
-        if self.view is not None:
-            message['camera_view'] = self.view.serialize()
-        return message
+if __name__ == '__main__':
+    unittest.main()

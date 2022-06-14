@@ -1,70 +1,89 @@
 # Brayns Python Client
 
-> A client for [Brayns](../README.md) based on the a websocket client to provide remote control of a running Brayns instance.
-
-[![Travis CI](https://img.shields.io/travis/BlueBrain/Brayns/master.svg?style=flat-square)](https://travis-ci.org/BlueBrain/Brayns)
-
+> A client for [Brayns](../README.md) based on a websocket client to provide remote control of a running Brayns instance.
 
 # Table of Contents
 
 * [Installation](#installation)
 * [Usage](#usage)
     * [Connection](#connection)
-    * [Properties](#properties)
-    * [Methods](#methods)
-    * [Snapshot](#snapshot)
-    * [Live rendering](#live)
-
+    * [Raw requests](#rawrequests)
+    * [API](#api)
+* [Documentation](#documentation)
 
 ### Installation
 ----------------
+
 You can install this package from [PyPI](https://pypi.org/):
+
 ```bash
 pip install brayns
+```
+
+Or from source:
+
+```bash
+git clone https://github.com/BlueBrain/Brayns.git
+cd Brayns/python
+python setup.py sdist
+pip install dist/brayns-<version>.tar.gz # Replace with current version
 ```
 
 ### Usage
 ---------
 
 #### Connection
-Create a client:
+
+Connect to a renderer backend instance:
+
 ```py
 import brayns
 
-client = brayns.Client('myhost:5000')
+with brayns.connect('localhost:5000') as instance: # Renderer host and port
+    instance.request('registry') # Some requests
 ```
 
-#### Methods
-Calling an RPC on Brayns is as simple as calling a method on the client object:
+#### Raw requests
+
+Raw JSON-RPC requests can be sent using the instance:
+
 ```py
-import brayns
-
-client = brayns.Client('myhost:5000')
-
-client.set_camera(current='orthographic')
+result = instance.request('schema', {'endpoint': 'get-version'})
 ```
 
-Methods throw a brayns.ReplyError on error.
+It will throw a brayns.RequestError if an error occurs.
 
-#### Snapshot
-Make a snapshot and return a base64 encoded image:
+#### API
+
+As raw requests can be tedious, a higher level API is also provided.
+
 ```py
-import brayns
-import base64
-
-client = brayns.Client('myhost:5000')
-
-result = client.snapshot(
-    format='png',
-    size=(1920, 1080),
-    samples_per_pixel=64
+loader = brayns.BbpLoader(
+    cells=brayns.BbpCells.all(),
+    radius_multiplier=10
 )
 
-base64_data = result['data']
+models = loader.loader(instance, 'path/to/BlueConfig')
 
-data = base64.b64decode(base64_data)
+model = models[0]
 
-with open('myImage.png', 'wb') as image:
-    image.write(data)
+camera = brayns.PerspectiveCamera()
 
+view = camera.get_full_screen_view(model.bounds)
+
+renderer = brayns.InteractiveRenderer()
+
+snapshot = brayns.Snapshot(
+    resolution=brayns.Resolution.full_hd,
+    camera=camera,
+    view=view,
+    renderer=renderer
+)
+
+snapshot.save(instance, 'path/to/snapshot.png')
 ```
+
+### Documentation
+-----------------
+
+The JSON-RPC and Python APIs are documented [here](https://brayns.readthedocs.io/en/latest/).

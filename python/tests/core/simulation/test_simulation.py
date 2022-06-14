@@ -78,6 +78,23 @@ class TestSimulation(unittest.TestCase):
     def test_fps(self) -> None:
         self.assertEqual(self._simulation.fps, 10000)
 
+    def test_clamp(self) -> None:
+        self.assertEqual(self._simulation.clamp(-1), 0)
+        self.assertEqual(self._simulation.clamp(0), 0)
+        self.assertEqual(self._simulation.clamp(1), 1)
+        self.assertEqual(self._simulation.clamp(10), 10)
+        self.assertEqual(self._simulation.clamp(11), 10)
+
+    def test_get_frame(self) -> None:
+        self.assertEqual(self._simulation.get_frame(0), 0)
+        self.assertEqual(self._simulation.get_frame(0.1), 1)
+        self.assertEqual(self._simulation.get_frame(0.5), 5)
+
+    def test_get_time(self) -> None:
+        self.assertEqual(self._simulation.get_time(0), 0)
+        self.assertEqual(self._simulation.get_time(1), 0.1)
+        self.assertEqual(self._simulation.get_time(5), 0.5)
+
 
 if __name__ == '__main__':
     unittest.main()

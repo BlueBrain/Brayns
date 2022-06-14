@@ -37,6 +37,11 @@ class Resolution(Vector):
 
     @classmethod
     @property
+    def ultra_hd(cls) -> 'Resolution':
+        return 2 * cls.full_hd
+
+    @classmethod
+    @property
     def production(cls) -> 'Resolution':
         return 8 * cls.full_hd
 
