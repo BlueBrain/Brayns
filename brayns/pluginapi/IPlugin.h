@@ -22,42 +22,41 @@
 
 #include <brayns/network/interface/INetworkInterface.h>
 
-#include <brayns/pluginapi/PluginAPI.h>
-
 namespace brayns
 {
 /**
- * Defines the abstract representation of an extension plug-in. What we mean by
- * extension is a set a functionalities that are not provided by the core of the
- * application. For example, exposing a REST interface via HTTP, or streaming
- * images to an distant display.
+ * Interface Brayns plugins have to implement.
  *
  * For a plugin to be loaded dynamically at runtime, the following function
  * must be available in the library:
  *
  * @code
- * extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int argc, const
- * char** argv)
+ * extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(PluginAPI &api)
  * @endcode
  *
- * It must return the instance of the plugin, and from hereon Brayns owns the
- * plugin and calls preRender() and postRender() accordingly.
- * In the shutdown sequence of Brayns, the plugin will be destructed properly.
+ * It receives a reference to Brayns API to access core data (engine,
+ * parameters, loaders) and must return an instance of the plugin.
+ *
+ * Brayns will monitor the plugin using this interface.
+ *
  */
-class ExtensionPlugin
+class IPlugin
 {
 public:
-    virtual ~ExtensionPlugin() = default;
+    virtual ~IPlugin() = default;
 
     /**
-     * @brief Called once when the engine is created.
+     * @brief Called once when everything is initialized.
+     *
+     * Called before all other methods.
+     *
      */
-    virtual void init()
+    virtual void onCreate()
     {
     }
 
     /**
-     * @brief Called once when the network is initialized.
+     * @brief Called once if the network plugin is enabled.
      *
      * @param interface Network access.
      */
@@ -67,24 +66,19 @@ public:
     }
 
     /**
-     * @brief Called on each update before trying to call render().
+     * @brief Called on each update before rendering.
      *
      */
-    virtual void preRender()
+    virtual void onPreRender()
     {
     }
 
     /**
-     * @brief Called once a render() is effectively called.
+     * @brief Called on each update after rendering.
      *
      */
-    virtual void postRender()
+    virtual void onPostRender()
     {
     }
-
-protected:
-    friend class PluginManager;
-
-    PluginAPI *_api = nullptr;
 };
 } // namespace brayns

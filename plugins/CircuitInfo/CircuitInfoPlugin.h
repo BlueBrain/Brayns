@@ -21,15 +21,21 @@
 
 #pragma once
 
-#include <brayns/pluginapi/ExtensionPlugin.h>
+#include <brayns/pluginapi/IPlugin.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 /**
-   The CircuitInfo plugin gives access to circuit information stored
-   in sonata-generated circuit files, those which Brion is unable
-   to read.
+ * The CircuitInfo plugin gives access to circuit information stored
+ * in sonata-generated circuit files, those which Brion is unable
+ * to read.
  */
-class CircuitInfoPlugin : public brayns::ExtensionPlugin
+class CircuitInfoPlugin : public brayns::IPlugin
 {
 public:
+    CircuitInfoPlugin(brayns::PluginAPI &api);
+
     void registerEntrypoints(brayns::INetworkInterface &interface) final;
+
+private:
+    brayns::PluginAPI &_api;
 };

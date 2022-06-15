@@ -22,7 +22,6 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/pluginapi/PluginAPI.h>
 
 #include <entrypoints/CIGetAfferentCellIdsEntrypoint.h>
 #include <entrypoints/CIGetCellDataEntrypoint.h>
@@ -37,9 +36,14 @@
 #include <entrypoints/CIGetTargetsEntrypoint.h>
 #include <entrypoints/CIInfoEntrypoint.h>
 
+CircuitInfoPlugin::CircuitInfoPlugin(brayns::PluginAPI &api)
+    : _api(api)
+{
+}
+
 void CircuitInfoPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
 {
-    auto &engine = _api->getEngine();
+    auto &engine = _api.getEngine();
     auto &scene = engine.getScene();
 
     auto builder = brayns::EntrypointBuilder("Circuit Info", interface);
@@ -58,8 +62,8 @@ void CircuitInfoPlugin::registerEntrypoints(brayns::INetworkInterface &interface
     builder.add<CIGetProjectionEfferentCellIdsEntrypoint>();
 }
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int /*argc*/, char ** /*argv*/)
+extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)
 {
-    brayns::Log::info("[CI] Loading circuit info plugin");
-    return new CircuitInfoPlugin();
+    brayns::Log::info("[CI] Loading Circuit Info plugin.");
+    return std::make_unique<CircuitInfoPlugin>(api);
 }

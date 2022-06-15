@@ -29,13 +29,14 @@
 #include <brayns/network/stream/StreamManager.h>
 #include <brayns/network/task/TaskManager.h>
 
-#include <brayns/pluginapi/ExtensionPlugin.h>
+#include <brayns/pluginapi/IPlugin.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 namespace brayns
 {
 struct NetworkContext
 {
-    PluginAPI *api = nullptr;
+    PluginAPI &api;
     std::unique_ptr<INetworkInterface> interface;
     std::unique_ptr<ISocket> socket;
     BinaryManager binary;
@@ -43,6 +44,8 @@ struct NetworkContext
     EntrypointRegistry entrypoints;
     StreamManager stream;
     TaskManager tasks;
+
+    NetworkContext(PluginAPI &pluginAPI);
 };
 
 /**
@@ -51,14 +54,14 @@ struct NetworkContext
  * Provide the network action interface and core entrypoints.
  *
  */
-class NetworkManager : public ExtensionPlugin
+class NetworkManager : public IPlugin
 {
 public:
     /**
      * @brief Construct the network manager.
      *
      */
-    NetworkManager();
+    NetworkManager(PluginAPI &api);
 
     /**
      * @brief Get the interface to access network from plugins.
@@ -81,7 +84,7 @@ public:
      * @brief Initialize network components.
      *
      */
-    virtual void init() override;
+    virtual void onCreate() override;
 
     /**
      * @brief Register core entrypoints.
@@ -94,13 +97,13 @@ public:
      * @brief Notify entrypoints.
      *
      */
-    virtual void preRender() override;
+    virtual void onPreRender() override;
 
     /**
      * @brief Notify entrypoints and stream image if needed.
      *
      */
-    virtual void postRender() override;
+    virtual void onPostRender() override;
 
 private:
     NetworkContext _context;

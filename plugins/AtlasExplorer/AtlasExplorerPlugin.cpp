@@ -22,22 +22,26 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/pluginapi/PluginAPI.h>
 
 #include <io/NRRDLoader.h>
 
 #include <network/entrypoints/GetAvailableAtlasUseCasesEntrypoint.h>
 #include <network/entrypoints/VisualizeAtlasUseCaseEntrypoint.h>
 
-void AtlasExplorerPlugin::init()
+AtlasExplorerPlugin::AtlasExplorerPlugin(brayns::PluginAPI &api)
+    : _api(api)
 {
-    auto &registry = _api->getLoaderRegistry();
+}
+
+void AtlasExplorerPlugin::onCreate()
+{
+    auto &registry = _api.getLoaderRegistry();
     registry.registerLoader(std::make_unique<NRRDLoader>());
 }
 
 void AtlasExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
 {
-    auto &engine = _api->getEngine();
+    auto &engine = _api.getEngine();
     auto &scene = engine.getScene();
 
     auto builder = brayns::EntrypointBuilder("Atlas Explorer", interface);
@@ -46,10 +50,8 @@ void AtlasExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &interfa
     builder.add<VisualizeAtlasUseCaseEntrypoint>(scene);
 }
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
+extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)
 {
-    (void)argc;
-    (void)argv;
     brayns::Log::info("[AtlasExplorer] Loading Atlas Explorer plugin.");
-    return new AtlasExplorerPlugin();
+    return std::make_unique<AtlasExplorerPlugin>(api);
 }

@@ -21,16 +21,22 @@
 
 #pragma once
 
-#include <brayns/pluginapi/ExtensionPlugin.h>
+#include <brayns/pluginapi/IPlugin.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 namespace dti
 {
 /**
  * @brief The DTIPlugin adds support to load a custom Diffusion-transfer-imaging data format to visualize whitematter
  */
-class DTIPlugin : public brayns::ExtensionPlugin
+class DTIPlugin : public brayns::IPlugin
 {
 public:
-    void init() final;
+    DTIPlugin(brayns::PluginAPI &api);
+
+    void onCreate() final;
+
+private:
+    brayns::PluginAPI &_api;
 };
 } // namespace dti

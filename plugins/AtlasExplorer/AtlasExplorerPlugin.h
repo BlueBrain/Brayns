@@ -20,15 +20,21 @@
 
 #pragma once
 
-#include <brayns/pluginapi/ExtensionPlugin.h>
+#include <brayns/pluginapi/IPlugin.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 /**
  * @brief The AtlasExplorer plugin offer capabilities to visualize NRRD volumes, focusing on the
  * AIBS/BBP Atlases
  */
-class AtlasExplorerPlugin final : public brayns::ExtensionPlugin
+class AtlasExplorerPlugin final : public brayns::IPlugin
 {
 public:
-    void init() override;
+    AtlasExplorerPlugin(brayns::PluginAPI &api);
+
+    void onCreate() override;
     void registerEntrypoints(brayns::INetworkInterface &interface) override;
+
+private:
+    brayns::PluginAPI &_api;
 };

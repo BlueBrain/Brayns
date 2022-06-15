@@ -24,23 +24,11 @@
 
 namespace brayns
 {
-SystemPluginAPI::SystemPluginAPI(
-    ParametersManager &paramManager,
-    PluginManager &pluginManager,
-    Engine &engine,
-    LoaderRegistry &loadRegistry)
+SystemPluginAPI::SystemPluginAPI(ParametersManager &paramManager, Engine &engine, LoaderRegistry &loadRegistry)
     : _paramManager(paramManager)
-    , _pluginManager(pluginManager)
     , _engine(engine)
     , _loadRegistry(loadRegistry)
 {
-    _pluginManager.initPlugins(this);
-
-    auto network = _pluginManager.getNetworkManager();
-    if (network)
-    {
-        network->start();
-    }
 }
 
 Engine &SystemPluginAPI::getEngine()
@@ -62,19 +50,11 @@ LoaderRegistry &SystemPluginAPI::getLoaderRegistry()
 
 Brayns::Brayns(int argc, const char **argv)
     : _parametersManager(argc, argv)
-    , _pluginManager(argc, argv)
     , _engine(_parametersManager)
-    , _pluginAPI(_parametersManager, _pluginManager, _engine, _loaderRegistry)
+    , _pluginAPI(_parametersManager, _engine, _loaderRegistry)
+    , _pluginManager(_pluginAPI)
 {
-    Log::info("");
-    Log::info(" _|_|_|");
-    Log::info(" _|    _|  _|  _|_|    _|_|_|  _|    _|  _|_|_|      _|_|_|  ");
-    Log::info(" _|_|_|    _|_|      _|    _|  _|    _|  _|    _|  _|_|      ");
-    Log::info(" _|    _|  _|        _|    _|  _|    _|  _|    _|      _|_|  ");
-    Log::info(" _|_|_|    _|          _|_|_|    _|_|_|  _|    _|  _|_|_|    ");
-    Log::info("                                    _|                       ");
-    Log::info("                                  _|_|                       ");
-    Log::info("");
+    _pluginManager.loadPlugins();
 }
 
 Brayns::~Brayns()

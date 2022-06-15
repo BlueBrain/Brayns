@@ -30,27 +30,20 @@
 namespace brayns
 {
 /**
- * @brief The SystemPluginAPI class is an imlementation of the PluginAPI, a class designed to give access
- * to the system resources to the plugins
+ * @brief The SystemPluginAPI class is an implementation of the PluginAPI, a class designed to give access
+ * to the system resources to the plugins.
  */
 class SystemPluginAPI : public PluginAPI
 {
 public:
-    SystemPluginAPI(
-        ParametersManager &paramManager,
-        PluginManager &pluginManager,
-        Engine &engine,
-        LoaderRegistry &loadRegistry);
-
-    Engine &getEngine() final;
+    SystemPluginAPI(ParametersManager &paramManager, Engine &engine, LoaderRegistry &loadRegistry);
 
     ParametersManager &getParametersManager() final;
-
     LoaderRegistry &getLoaderRegistry() final;
+    Engine &getEngine() final;
 
 private:
     ParametersManager &_paramManager;
-    PluginManager &_pluginManager;
     Engine &_engine;
     LoaderRegistry &_loadRegistry;
 };
@@ -81,13 +74,6 @@ public:
     bool commitAndRender();
 
     /**
-     * @brief Get engine.
-     *
-     * @return Engine& Engine.
-     */
-    Engine &getEngine();
-
-    /**
      * @brief Get parameters.
      *
      * @return ParametersManager& Brayns parameters.
@@ -101,11 +87,18 @@ public:
      */
     LoaderRegistry &getLoaderRegistry();
 
+    /**
+     * @brief Get engine.
+     *
+     * @return Engine& Engine.
+     */
+    Engine &getEngine();
+
 private:
     ParametersManager _parametersManager;
-    PluginManager _pluginManager;
-    Engine _engine;
     LoaderRegistry _loaderRegistry;
+    Engine _engine;
     SystemPluginAPI _pluginAPI;
+    PluginManager _pluginManager;
 };
 } // namespace brayns

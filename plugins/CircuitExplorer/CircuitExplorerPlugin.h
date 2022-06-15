@@ -21,15 +21,21 @@
 
 #pragma once
 
-#include <brayns/pluginapi/ExtensionPlugin.h>
+#include <brayns/pluginapi/IPlugin.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 /**
  * @brief The CircuitExplorerPlugin class manages the loading visualization and manipulation of the Blue Brain Project
  * morphologies, micro-circuits and their simulations
  */
-class CircuitExplorerPlugin : public brayns::ExtensionPlugin
+class CircuitExplorerPlugin : public brayns::IPlugin
 {
 public:
-    void init() final;
+    CircuitExplorerPlugin(brayns::PluginAPI &api);
+
+    void onCreate() final;
     void registerEntrypoints(brayns::INetworkInterface &interface) final;
+
+private:
+    brayns::PluginAPI &_api;
 };

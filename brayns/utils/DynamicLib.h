@@ -20,14 +20,14 @@
 
 #pragma once
 
-#include <string>
+#include <string_view>
 
 namespace brayns
 {
 class DynamicLib
 {
 public:
-    DynamicLib(const std::string &name);
+    DynamicLib(std::string_view name);
     ~DynamicLib();
 
     DynamicLib(DynamicLib &&other);
@@ -35,9 +35,9 @@ public:
     DynamicLib(const DynamicLib &) = delete;
     DynamicLib &operator=(const DynamicLib &) = delete;
 
-    void *getSymbolAddress(const std::string &name) const;
+    void *getSymbolAddress(const char *name) const;
 
 private:
-    void *_handler{nullptr};
+    void *_handle = nullptr;
 };
 } // namespace brayns
