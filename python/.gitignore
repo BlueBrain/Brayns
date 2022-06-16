@@ -10,3 +10,4 @@ dist/
 .tox/
 venv/
 doc/source/.ipynb_checkpoints/
+doc/html
