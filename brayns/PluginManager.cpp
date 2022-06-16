@@ -21,135 +21,175 @@
 #include "PluginManager.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/common/parameters/ParametersManager.h>
-#include <brayns/utils/StringUtils.h>
 
 #include <brayns/network/plugin/NetworkManager.h>
-#include <brayns/pluginapi/PluginAPI.h>
 
 namespace
 {
-bool containsString(const int length, const char **input, const char *toFind)
+class PluginLoader
 {
-    return std::count_if(input, input + length, [toFind](const char *arg) { return std::strcmp(arg, toFind) == 0; })
-        > 0;
-}
+public:
+    using Factory = std::unique_ptr<brayns::IPlugin> (*)(brayns::PluginAPI &);
+
+    PluginLoader(brayns::PluginAPI &api)
+        : _api(api)
+    {
+    }
+
+    void loadPlugins(std::vector<brayns::PluginRef> &plugins)
+    {
+        auto names = _findPluginsToLoad();
+        for (const auto &name : names)
+        {
+            auto plugin = _loadPlugin(name);
+            plugins.push_back(std::move(plugin));
+        }
+    }
+
+private:
+    brayns::PluginAPI &_api;
+
+    const std::vector<std::string> &_findPluginsToLoad()
+    {
+        auto &parameters = _api.getParametersManager();
+        auto &application = parameters.getApplicationParameters();
+        return application.getPlugins();
+    }
+
+    brayns::PluginRef _loadPlugin(const std::string &name)
+    {
+        brayns::Log::info("Loading plugin '{}'.", name);
+        auto library = brayns::DynamicLib(name);
+        auto plugin = _createPlugin(name, library);
+        brayns::Log::info("Plugin '{}' loaded.", name);
+        return {std::move(library), std::move(plugin)};
+    }
+
+    std::unique_ptr<brayns::IPlugin> _createPlugin(const std::string &name, const brayns::DynamicLib &library)
+    {
+        auto address = library.getSymbolAddress("brayns_create_plugin");
+        if (!address)
+        {
+            auto message = "Plugin library '" + name + "' has no symbol 'brayns_create_plugin'";
+            throw std::runtime_error(message);
+        }
+        auto factory = reinterpret_cast<Factory>(address);
+        return factory(_api);
+    }
+};
+
+class NetworkLoader
+{
+public:
+    NetworkLoader(brayns::PluginAPI &api)
+        : _api(api)
+    {
+    }
+
+    bool isEnabled() const
+    {
+        auto &parameters = _api.getParametersManager();
+        auto &networkParameters = parameters.getNetworkParameters();
+        auto &uri = networkParameters.getUri();
+        return !uri.empty();
+    }
+
+    brayns::NetworkManager &loadPlugin(std::vector<brayns::PluginRef> &plugins)
+    {
+        auto plugin = std::make_unique<brayns::NetworkManager>(_api);
+        auto &ref = *plugin;
+        plugins.push_back({std::nullopt, std::move(plugin)});
+        return ref;
+    }
+
+    void start(brayns::NetworkManager &network, const std::vector<brayns::PluginRef> &plugins)
+    {
+        auto &interface = network.getInterface();
+        for (const auto &[library, plugin] : plugins)
+        {
+            plugin->registerEntrypoints(interface);
+        }
+        network.start();
+    }
+
+private:
+    brayns::PluginAPI &_api;
+};
+
+class PluginBuilder
+{
+public:
+    PluginBuilder(brayns::PluginAPI &api)
+        : _networkLoader(api)
+        , _pluginLoader(api)
+    {
+    }
+
+    std::vector<brayns::PluginRef> buildPlugins()
+    {
+        std::vector<brayns::PluginRef> plugins;
+        if (!_networkLoader.isEnabled())
+        {
+            _createPlugins(plugins);
+            return plugins;
+        }
+        _createNetworkAndPlugins(plugins);
+        return plugins;
+    }
+
+private:
+    NetworkLoader _networkLoader;
+    PluginLoader _pluginLoader;
+
+    void _createPlugins(std::vector<brayns::PluginRef> &plugins)
+    {
+        _pluginLoader.loadPlugins(plugins);
+        for (const auto &[library, plugin] : plugins)
+        {
+            plugin->onCreate();
+        }
+    }
+
+    void _createNetworkAndPlugins(std::vector<brayns::PluginRef> &plugins)
+    {
+        auto &network = _networkLoader.loadPlugin(plugins);
+        _createPlugins(plugins);
+        _networkLoader.start(network, plugins);
+    }
+};
 } // namespace
 
 namespace brayns
 {
-typedef ExtensionPlugin *(*CreateFuncType)(int, const char **);
-
-PluginManager::PluginManager(int argc, const char **argv)
+PluginManager::PluginManager(PluginAPI &api)
+    : _api(api)
 {
-    const bool help = containsString(argc, argv, "--help");
-
-    for (int i = 0; i < argc; ++i)
-    {
-        if (std::strcmp(argv[i], "--plugin") != 0)
-            continue;
-        if (++i == argc || argv[i][0] == '\0' || argv[i][0] == '-')
-        {
-            // Do not print anything here, errors will be reported later
-            // during option parsing
-            continue;
-        }
-
-        std::string str(argv[i]);
-        string_utils::trim(str);
-        auto words = string_utils::split(str, ' ');
-
-        if (help)
-            words.push_back("--help");
-
-        const char *name = words.front().c_str();
-        std::vector<const char *> args;
-        for (const auto &w : words)
-            args.push_back(w.c_str());
-
-        _loadPlugin(name, args.size(), args.data());
-    }
 }
 
-void PluginManager::initPlugins(PluginAPI *api)
+void PluginManager::loadPlugins()
 {
-    auto &parameters = api->getParametersManager();
-    auto &networkParameters = parameters.getNetworkParameters();
-    auto &uri = networkParameters.getUri();
-
-    if (!uri.empty())
-    {
-        auto networkManager = std::make_unique<NetworkManager>();
-        _networkManager = networkManager.get();
-        _extensions.insert(_extensions.begin(), std::move(networkManager));
-    }
-
-    for (const auto &extension : _extensions)
-    {
-        extension->_api = api;
-        extension->init();
-    }
-
-    if (_networkManager)
-    {
-        auto &interface = _networkManager->getInterface();
-        for (const auto &extension : _extensions)
-        {
-            extension->registerEntrypoints(interface);
-        }
-    }
+    auto builder = PluginBuilder(_api);
+    _plugins = builder.buildPlugins();
 }
 
 void PluginManager::destroyPlugins()
 {
-    _extensions.clear();
-    _libs.clear();
+    _plugins.clear();
 }
 
 void PluginManager::preRender()
 {
-    for (const auto &extension : _extensions)
+    for (const auto &[library, plugin] : _plugins)
     {
-        extension->preRender();
+        plugin->onPreRender();
     }
 }
 
 void PluginManager::postRender()
 {
-    for (const auto &extension : _extensions)
+    for (const auto &[library, plugin] : _plugins)
     {
-        extension->postRender();
-    }
-}
-
-NetworkManager *PluginManager::getNetworkManager() const
-{
-    return _networkManager;
-}
-
-void PluginManager::_loadPlugin(const char *name, int argc, const char *argv[])
-{
-    try
-    {
-        DynamicLib library(name);
-        auto createSym = library.getSymbolAddress("brayns_plugin_create");
-        if (!createSym)
-        {
-            throw std::runtime_error(
-                std::string("Plugin '") + name + "' is not a valid Brayns plugin; missing " + "brayns_plugin_create()");
-        }
-
-        CreateFuncType createFunc = (CreateFuncType)createSym;
-        if (auto plugin = createFunc(argc, argv))
-        {
-            _extensions.emplace_back(plugin);
-            _libs.push_back(std::move(library));
-            Log::info("Loaded plugin '{}'.", name);
-        }
-    }
-    catch (const std::runtime_error &exc)
-    {
-        Log::error(exc.what());
+        plugin->onPostRender();
     }
 }
 } // namespace brayns

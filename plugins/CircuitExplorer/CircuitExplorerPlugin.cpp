@@ -23,7 +23,6 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/pluginapi/PluginAPI.h>
 
 #include <io/BBPLoader.h>
 #include <io/NeuronMorphologyLoader.h>
@@ -33,10 +32,14 @@
 #include <network/entrypoints/SetCircuitThicknessEntrypoint.h>
 #include <network/entrypoints/TraceAnterogradeEntrypoint.h>
 
-void CircuitExplorerPlugin::init()
+CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
+    : _api(api)
 {
-    // LOADERS ADDED BY THIS PLUGIN
-    auto &registry = _api->getLoaderRegistry();
+}
+
+void CircuitExplorerPlugin::onCreate()
+{
+    auto &registry = _api.getLoaderRegistry();
     registry.registerLoader(std::make_unique<BBPLoader>());
     registry.registerLoader(std::make_unique<NeuronMorphologyLoader>());
     registry.registerLoader(std::make_unique<SonataLoader>());
@@ -45,7 +48,7 @@ void CircuitExplorerPlugin::init()
 
 void CircuitExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
 {
-    auto &engine = _api->getEngine();
+    auto &engine = _api.getEngine();
     auto &scene = engine.getScene();
 
     auto builder = brayns::EntrypointBuilder("Circuit Explorer", interface);
@@ -59,8 +62,8 @@ void CircuitExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &inter
     builder.add<TraceAnterogradeEntrypoint>(scene);
 }
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int, char **)
+extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)
 {
-    brayns::Log::info("[CE] Initializing circuit explorer plugin.");
-    return new CircuitExplorerPlugin();
+    brayns::Log::info("[CE] Loading Circuit Explorer plugin.");
+    return std::make_unique<CircuitExplorerPlugin>(api);
 }

@@ -76,7 +76,7 @@ class CoreEntrypointRegistry
 public:
     static void registerEntrypoints(brayns::NetworkContext &context)
     {
-        auto &api = *context.api;
+        auto &api = context.api;
         auto &interface = *context.interface;
 
         auto &parameters = api.getParametersManager();
@@ -181,7 +181,7 @@ public:
 private:
     static const brayns::NetworkParameters &_getParameters(brayns::NetworkContext &context)
     {
-        auto &api = *context.api;
+        auto &api = context.api;
         auto &manager = api.getParametersManager();
         return manager.getNetworkParameters();
     }
@@ -290,7 +290,7 @@ private:
 
     static void _broadcastImage(brayns::NetworkContext &context)
     {
-        auto &api = *context.api;
+        auto &api = context.api;
         auto &manager = api.getParametersManager();
         auto &parameters = manager.getApplicationParameters();
         auto &engine = api.getEngine();
@@ -304,7 +304,13 @@ private:
 
 namespace brayns
 {
-NetworkManager::NetworkManager()
+NetworkContext::NetworkContext(PluginAPI &pluginAPI)
+    : api(pluginAPI)
+{
+}
+
+NetworkManager::NetworkManager(PluginAPI &api)
+    : _context(api)
 {
     Log::info("Network plugin is enabled.");
 }
@@ -320,10 +326,9 @@ void NetworkManager::start()
     NetworkStartup::run(_context);
 }
 
-void NetworkManager::init()
+void NetworkManager::onCreate()
 {
     Log::info("Initializing network plugin.");
-    _context.api = _api;
     NetworkInitialization::run(_context);
 }
 
@@ -333,13 +338,13 @@ void NetworkManager::registerEntrypoints(INetworkInterface &interface)
     CoreEntrypointRegistry::registerEntrypoints(_context);
 }
 
-void NetworkManager::preRender()
+void NetworkManager::onPreRender()
 {
     Log::trace("Network pre render.");
     NetworkPreRender::run(_context);
 }
 
-void NetworkManager::postRender()
+void NetworkManager::onPostRender()
 {
     Log::trace("Network post render.");
     NetworkPostRender::run(_context);

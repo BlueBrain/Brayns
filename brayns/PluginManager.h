@@ -20,14 +20,22 @@
 
 #pragma once
 
-#include <brayns/network/plugin/NetworkManager.h>
-#include <brayns/pluginapi/ExtensionPlugin.h>
+#include <brayns/pluginapi/IPlugin.h>
+#include <brayns/pluginapi/PluginAPI.h>
 #include <brayns/utils/DynamicLib.h>
 
+#include <memory>
+#include <optional>
 #include <vector>
 
 namespace brayns
 {
+struct PluginRef
+{
+    std::optional<DynamicLib> library;
+    std::unique_ptr<IPlugin> plugin;
+};
+
 /**
  * @brief Plugin manager to load and update plugins.
  *
@@ -36,18 +44,18 @@ class PluginManager
 {
 public:
     /**
-     * @brief Constructor
-     * @param argc Number of command line arguments
-     * @param argv Command line arguments
+     * @brief Construct with API access
+     *
+     * @param api Brayns API interface.
      */
-    PluginManager(int argc, const char **argv);
+    PluginManager(PluginAPI &api);
 
     /**
-     * @brief Load network engine if required and call init() on all plugins.
+     * @brief Load network engine if required and call onCreate() on plugins.
      *
      * @param api API access.
      */
-    void initPlugins(PluginAPI *api);
+    void loadPlugins();
 
     /**
      * @brief Destroy all plugins.
@@ -67,18 +75,8 @@ public:
      */
     void postRender();
 
-    /**
-     * @brief Get the network manager plugin.
-     *
-     * @return NetworkManager* Network manager or null if disabled.
-     */
-    NetworkManager *getNetworkManager() const;
-
 private:
-    std::vector<DynamicLib> _libs;
-    std::vector<std::unique_ptr<ExtensionPlugin>> _extensions;
-    NetworkManager *_networkManager = nullptr;
-
-    void _loadPlugin(const char *name, int argc, const char *argv[]);
+    PluginAPI &_api;
+    std::vector<PluginRef> _plugins;
 };
 } // namespace brayns

@@ -23,21 +23,23 @@
 #include <io/DTILoader.h>
 
 #include <brayns/common/Log.h>
-#include <brayns/pluginapi/PluginAPI.h>
 
 namespace dti
 {
-void DTIPlugin::init()
+DTIPlugin::DTIPlugin(brayns::PluginAPI &api)
+    : _api(api)
 {
-    auto &registry = _api->getLoaderRegistry();
+}
+
+void DTIPlugin::onCreate()
+{
+    auto &registry = _api.getLoaderRegistry();
     registry.registerLoader(std::make_unique<DTILoader>());
 }
 } // namespace dti
 
-extern "C" brayns::ExtensionPlugin *brayns_plugin_create(int argc, char **argv)
+extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)
 {
-    (void)argc;
-    (void)argv;
     brayns::Log::info("[DTI] Loading DTI plugin.");
-    return new dti::DTIPlugin();
+    return std::make_unique<dti::DTIPlugin>(api);
 }

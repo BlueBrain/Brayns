@@ -63,7 +63,7 @@ loader = brayns.BbpLoader(
     radius_multiplier=10
 )
 
-models = loader.loader(instance, 'path/to/BlueConfig')
+models = loader.load(instance, 'path/to/BlueConfig')
 
 model = models[0]
 

@@ -37,13 +37,6 @@ public:
     virtual ~PluginAPI() = default;
 
     /**
-     * @brief Get the engine.
-     *
-     * @return Engine& Engine.
-     */
-    virtual Engine &getEngine() = 0;
-
-    /**
      * @brief Get the parameters.
      *
      * @return ParametersManager& Parameters.
@@ -56,5 +49,12 @@ public:
      * @return LoaderRegistry& Loaders.
      */
     virtual LoaderRegistry &getLoaderRegistry() = 0;
+
+    /**
+     * @brief Get the engine.
+     *
+     * @return Engine& Engine.
+     */
+    virtual Engine &getEngine() = 0;
 };
 } // namespace brayns
