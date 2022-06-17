@@ -18,7 +18,7 @@
 
 #include "VasculatureColorData.h"
 
-#include <api/vasculature/VasculatureColorMethods.h>
+#include <api/vasculature/VasculatureColorMethod.h>
 #include <io/sonataloader/data/SonataVasculature.h>
 
 namespace sonataloader
@@ -30,16 +30,16 @@ VasculatureColorData::VasculatureColorData(bbp::sonata::NodePopulation nodes)
 
 std::vector<std::string> VasculatureColorData::getMethods() const noexcept
 {
-    return brayns::enumNames<VasculatureColorMethods>();
+    return brayns::EnumInfo::getNames<VasculatureColorMethod>();
 }
 
 std::vector<std::string> VasculatureColorData::getMethodVariables(const std::string &method) const
 {
-    const auto enumMethod = brayns::stringToEnum<VasculatureColorMethods>(method);
+    const auto enumMethod = brayns::EnumInfo::getValue<VasculatureColorMethod>(method);
 
-    if (enumMethod == VasculatureColorMethods::BySection)
+    if (enumMethod == VasculatureColorMethod::BySection)
     {
-        return brayns::enumNames<VasculatureSection>();
+        return brayns::EnumInfo::getNames<VasculatureSection>();
     }
 
     throw std::invalid_argument("Method " + method + " not available to color vasculature");
@@ -49,9 +49,9 @@ std::vector<std::string> VasculatureColorData::getMethodValuesForIDs(
     const std::string &method,
     const std::vector<uint64_t> &ids) const
 {
-    const auto enumMethod = brayns::stringToEnum<VasculatureColorMethods>(method);
+    const auto enumMethod = brayns::EnumInfo::getValue<VasculatureColorMethod>(method);
 
-    if (enumMethod != VasculatureColorMethods::BySection)
+    if (enumMethod != VasculatureColorMethod::BySection)
     {
         throw std::invalid_argument("Method " + method + "not available to color vasculature");
     }
@@ -62,7 +62,7 @@ std::vector<std::string> VasculatureColorData::getMethodValuesForIDs(
     result.reserve(sections.size());
     for (const auto section : sections)
     {
-        auto sectionName = brayns::enumToString<VasculatureSection>(section);
+        auto sectionName = brayns::EnumInfo::getName(section);
         result.emplace_back(std::move(sectionName));
     }
 

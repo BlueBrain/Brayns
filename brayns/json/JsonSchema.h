@@ -95,7 +95,7 @@ struct JsonSchema
      * @brief Enum description, empty if not an enum.
      *
      */
-    std::vector<JsonValue> enums;
+    std::vector<std::string> enums;
 
     /**
      * @brief List of object properties if object, else empty.

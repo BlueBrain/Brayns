@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <brayns/utils/EnumUtils.h>
+#include <brayns/utils/EnumInfo.h>
 
 /**
  * @brief The VasculatureSection enum list holds all the available vasculature section types
@@ -37,15 +37,18 @@ enum class VasculatureSection
 namespace brayns
 {
 template<>
-inline std::vector<std::pair<std::string, VasculatureSection>> enumMap()
+struct EnumReflector<VasculatureSection>
 {
-    return {
-        {"vein", VasculatureSection::Vein},
-        {"artery", VasculatureSection::Artery},
-        {"venule", VasculatureSection::Venule},
-        {"arteriole", VasculatureSection::Arteriole},
-        {"venous capillary", VasculatureSection::VenousCapillary},
-        {"arterial capillary", VasculatureSection::ArterialCapillary},
-        {"transitional", VasculatureSection::Transitional}};
-}
+    static EnumMap<VasculatureSection> reflect()
+    {
+        return {
+            {"vein", VasculatureSection::Vein},
+            {"artery", VasculatureSection::Artery},
+            {"venule", VasculatureSection::Venule},
+            {"arteriole", VasculatureSection::Arteriole},
+            {"venous capillary", VasculatureSection::VenousCapillary},
+            {"arterial capillary", VasculatureSection::ArterialCapillary},
+            {"transitional", VasculatureSection::Transitional}};
+    }
+};
 } // namespace brayns

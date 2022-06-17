@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <brayns/utils/EnumUtils.h>
+#include <brayns/utils/EnumInfo.h>
 
 /**
  * @brief The NeuronSection enum list holds all the available neuron/astrocyte morphology section types
@@ -34,12 +34,15 @@ enum class NeuronSection
 namespace brayns
 {
 template<>
-inline std::vector<std::pair<std::string, NeuronSection>> enumMap()
+struct EnumReflector<NeuronSection>
 {
-    return {
-        {"soma", NeuronSection::Soma},
-        {"axon", NeuronSection::Axon},
-        {"dendrite", NeuronSection::Dendrite},
-        {"apical_dendrite", NeuronSection::ApicalDendrite}};
-}
+    static EnumMap<NeuronSection> reflect()
+    {
+        return {
+            {"soma", NeuronSection::Soma},
+            {"axon", NeuronSection::Axon},
+            {"dendrite", NeuronSection::Dendrite},
+            {"apical_dendrite", NeuronSection::ApicalDendrite}};
+    }
+};
 } // namespace brayns

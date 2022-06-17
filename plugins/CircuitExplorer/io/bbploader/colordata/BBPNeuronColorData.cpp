@@ -18,7 +18,7 @@
 
 #include "BBPNeuronColorData.h"
 
-#include <api/neuron/NeuronColorMethods.h>
+#include <api/neuron/NeuronColorMethod.h>
 #include <api/neuron/NeuronSection.h>
 #include <io/bbploader/colordata/ColorDataExtractor.h>
 
@@ -36,8 +36,8 @@ std::vector<std::string> BBPNeuronColorData::getMethods() const noexcept
 {
     auto circuitMethods = BBPColorMethods::get(_circuitPath, _circuitPop);
 
-    constexpr auto morphologySectionMethod = NeuronColorMethods::ByMorphologySection;
-    const auto methodName = brayns::enumToString(morphologySectionMethod);
+    constexpr auto morphologySectionMethod = NeuronColorMethod::ByMorphologySection;
+    const auto methodName = brayns::EnumInfo::getName(morphologySectionMethod);
     circuitMethods.push_back(std::move(methodName));
 
     return circuitMethods;
@@ -45,10 +45,10 @@ std::vector<std::string> BBPNeuronColorData::getMethods() const noexcept
 
 std::vector<std::string> BBPNeuronColorData::getMethodVariables(const std::string &method) const
 {
-    const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
-    if (methodEnum == NeuronColorMethods::ByMorphologySection)
+    const auto methodEnum = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
+    if (methodEnum == NeuronColorMethod::ByMorphologySection)
     {
-        return brayns::enumNames<NeuronSection>();
+        return brayns::EnumInfo::getNames<NeuronSection>();
     }
 
     const auto variables = BBPColorValues::getAll(_circuitPath, _circuitPop, method);

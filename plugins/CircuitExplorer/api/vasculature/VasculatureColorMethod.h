@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include <brayns/utils/EnumUtils.h>
+#include <brayns/utils/EnumInfo.h>
 
 /**
  * @brief Methods availables to color a vasculature circuit by (if corresponding data is available as well)
  */
-enum class VasculatureColorMethods
+enum class VasculatureColorMethod
 {
     BySection
 };
@@ -33,8 +33,11 @@ enum class VasculatureColorMethods
 namespace brayns
 {
 template<>
-inline std::vector<std::pair<std::string, VasculatureColorMethods>> enumMap()
+struct EnumReflector<VasculatureColorMethod>
 {
-    return {{"vasculature section", VasculatureColorMethods::BySection}};
-}
+    static EnumMap<VasculatureColorMethod> reflect()
+    {
+        return {{"vasculature section", VasculatureColorMethod::BySection}};
+    }
+};
 }
