@@ -20,8 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/ImageOperation.h>
 #include <brayns/utils/IDFactory.h>
+
+#include "ImageOperation.h"
 
 #include <memory>
 
@@ -53,7 +54,7 @@ private:
      * @brief Returns a list of handles to the operations
      * @return std::vector<OSPImageOperation>
      */
-    std::vector<OSPImageOperation> getOperationHandles() const noexcept;
+    std::vector<ospray::cpp::ImageOperation> getOperationHandles() const noexcept;
 
 private:
     struct OperationEntry

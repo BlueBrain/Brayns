@@ -20,6 +20,29 @@
 
 #include <brayns/engine/cameras/PerspectiveCamera.h>
 
+namespace
+{
+class PerspectiveParametersUpdater
+{
+public:
+    static void update(const brayns::PerspectiveCamera &camera)
+    {
+        static const std::string fovyParam = "fovy";
+        static const std::string apertureParam = "apertureRadius";
+        static const std::string focusDistanceParam = "focusDistance";
+
+        auto fovy = camera.getFOVY();
+        auto aperture = camera.getApertureRadius();
+        auto focusDistance = camera.getFocusDistance();
+
+        const auto &osprayCamera = camera.getOsprayCamera();
+        osprayCamera.setParam(fovyParam, fovy);
+        osprayCamera.setParam(apertureParam, aperture);
+        osprayCamera.setParam(focusDistanceParam, focusDistance);
+    }
+};
+}
+
 namespace brayns
 {
 PerspectiveCamera::PerspectiveCamera()
@@ -45,10 +68,7 @@ std::unique_ptr<Camera> PerspectiveCamera::clone() const noexcept
 
 void PerspectiveCamera::commitCameraSpecificParams()
 {
-    auto ospHandle = handle();
-    ospSetParam(ospHandle, "fovy", OSP_FLOAT, &_fovy);
-    ospSetParam(ospHandle, "apertureRadius", OSP_FLOAT, &_apertureRadius);
-    ospSetParam(ospHandle, "focusDistance", OSP_FLOAT, &_focusDistance);
+    PerspectiveParametersUpdater::update(*this);
 }
 
 void PerspectiveCamera::setFOVY(const float fovy) noexcept

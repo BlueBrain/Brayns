@@ -18,9 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/Log.h>
-#include <brayns/engine/common/DataHandler.h>
-#include <brayns/engine/geometries/TriangleMesh.h>
+#include "TriangleMesh.h"
+
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+
+#include <ospray/ospray_cpp/Data.h>
 
 namespace
 {
@@ -60,25 +62,15 @@ public:
     }
 };
 
-/**
- * @brief Commits vector of attributes to OSPRay
- */
-class AttributeCommitter
+class VectorMerger
 {
 public:
     template<typename T>
-    static void commit(OSPGeometry handle, const std::vector<T> &data, OSPDataType dataType, const char *id)
+    static void merge(const std::vector<T> &src, std::vector<T> &dst) noexcept
     {
-        auto buffer = brayns::DataHandler::shareBuffer(data, dataType);
-        ospSetParam(handle, id, OSPDataType::OSP_DATA, &buffer.handle);
+        dst.insert(dst.end(), src.begin(), src.end());
     }
 };
-
-template<typename T>
-void mergeVectors(const std::vector<T> &src, std::vector<T> &dst) noexcept
-{
-    dst.insert(dst.end(), src.begin(), src.end());
-}
 } // namespace
 
 namespace brayns
@@ -99,10 +91,10 @@ void TriangleMeshMerger::merge(const TriangleMesh &src, TriangleMesh &dst)
     const auto &srcUvs = src.uvs;
     const auto &srcColors = src.colors;
 
-    mergeVectors(srcPositions, positions);
-    mergeVectors(srcNormals, normals);
-    mergeVectors(srcUvs, uvs);
-    mergeVectors(srcColors, colors);
+    VectorMerger::merge(srcPositions, positions);
+    VectorMerger::merge(srcNormals, normals);
+    VectorMerger::merge(srcUvs, uvs);
+    VectorMerger::merge(srcColors, colors);
 
     const auto srcIndicesSize = srcIndices.size();
     const auto indicesSize = indices.size();
@@ -150,7 +142,7 @@ void TriangleMeshNormalGenerator::generate(TriangleMesh &mesh)
     }
 }
 
-std::string_view GeometryOSPRayID<TriangleMesh>::get()
+std::string_view OsprayGeometryName<TriangleMesh>::get()
 {
     return "mesh";
 }
@@ -166,57 +158,47 @@ void GeometryBoundsUpdater<TriangleMesh>::update(const TriangleMesh &mesh, const
     }
 }
 
-void GeometryAddChecker<TriangleMesh>::check(
-    const std::vector<TriangleMesh> &dstGeometryList,
-    const TriangleMesh &inputMesh)
+void InputGeometryChecker<TriangleMesh>::check(const std::vector<TriangleMesh> &primitives)
 {
-    if (!dstGeometryList.empty())
+    if (primitives.size() > 1)
     {
         throw std::invalid_argument("Geometry<TriangleMesh> can hold only 1 mesh");
     }
 
-    TriangleMeshAttributeChecker::check(inputMesh);
+    TriangleMeshAttributeChecker::check(primitives.front());
 }
 
-void GeometryAddChecker<TriangleMesh>::check(
-    const std::vector<TriangleMesh> &dstGeometryList,
-    const std::vector<TriangleMesh> &inputMeshList)
+void GeometryCommitter<TriangleMesh>::commit(
+    const ospray::cpp::Geometry &osprayGeometry,
+    const std::vector<TriangleMesh> &primitives)
 {
-    if (!dstGeometryList.empty() || inputMeshList.size() > 1)
-    {
-        throw std::invalid_argument("Geometry<TriangleMesh> can hold only 1 mesh");
-    }
-
-    const auto &mesh = inputMeshList.front();
-    TriangleMeshAttributeChecker::check(mesh);
-}
-
-void GeometryCommitter<TriangleMesh>::commit(OSPGeometry handle, const std::vector<TriangleMesh> &geometries)
-{
-    auto &mesh = geometries.front();
+    auto &mesh = primitives.front();
 
     auto &vertices = mesh.vertices;
     auto &indices = mesh.indices;
     auto &normals = mesh.normals;
-    auto &texCoors = mesh.uvs;
+    auto &uvs = mesh.uvs;
     auto &colors = mesh.colors;
 
-    AttributeCommitter::commit(handle, vertices, OSPDataType::OSP_VEC3F, "vertex.position");
-    AttributeCommitter::commit(handle, indices, OSPDataType::OSP_VEC3UI, "index");
+    static const std::string positionParameter = "vertex.position";
+    static const std::string indexParameter = "index";
+    static const std::string normalParameter = "vertex.normal";
+    static const std::string uvParameter = "vertex.texcoord";
+    static const std::string colorParameter = "vertex.color";
 
+    osprayGeometry.setParam(positionParameter, ospray::cpp::SharedData(vertices));
+    osprayGeometry.setParam(indexParameter, ospray::cpp::SharedData(indices));
     if (!normals.empty())
     {
-        AttributeCommitter::commit(handle, normals, OSPDataType::OSP_VEC3F, "vertex.normal");
+        osprayGeometry.setParam(normalParameter, ospray::cpp::SharedData(normals));
     }
-
-    if (!texCoors.empty())
+    if (!uvs.empty())
     {
-        AttributeCommitter::commit(handle, texCoors, OSPDataType::OSP_VEC2F, "vertex.texcoord");
+        osprayGeometry.setParam(uvParameter, ospray::cpp::SharedData(uvs));
     }
-
     if (!colors.empty())
     {
-        AttributeCommitter::commit(handle, colors, OSPDataType::OSP_VEC4F, "vertex.color");
+        osprayGeometry.setParam(colorParameter, ospray::cpp::SharedData(colors));
     }
 }
 }

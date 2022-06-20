@@ -73,9 +73,9 @@ private:
     /**
      * @brief Get the OSPRay handles of all lights
      *
-     * @return std::vector<OSPLight>
+     * @return std::vector<ospray::cpp::Light>
      */
-    std::vector<OSPLight> getLightHandles() const noexcept;
+    std::vector<ospray::cpp::Light> getOsprayLights() const noexcept;
 
 private:
     bool _dirty{false};

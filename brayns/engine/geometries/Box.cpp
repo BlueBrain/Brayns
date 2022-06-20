@@ -18,12 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/common/DataHandler.h>
-#include <brayns/engine/geometries/Box.h>
+#include "Box.h"
+
+#include <ospray/ospray_cpp/Data.h>
 
 namespace brayns
 {
-std::string_view GeometryOSPRayID<Box>::get()
+std::string_view OsprayGeometryName<Box>::get()
 {
     return "box";
 }
@@ -37,9 +38,9 @@ void GeometryBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bound
     b.expand(Vector3f(t * Vector4f(max, 1.f)));
 }
 
-void GeometryCommitter<Box>::commit(OSPGeometry handle, const std::vector<Box> &geometries)
+void GeometryCommitter<Box>::commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Box> &primitives)
 {
-    auto buffer = DataHandler::shareBuffer(geometries, OSPDataType::OSP_BOX3F);
-    ospSetParam(handle, "box", OSP_DATA, &buffer.handle);
+    static std::string boxParameter = "box";
+    osprayGeometry.setParam(boxParameter, ospray::cpp::SharedData(primitives));
 }
 }

@@ -20,6 +20,22 @@
 
 #include <brayns/engine/cameras/OrthographicCamera.h>
 
+namespace
+{
+class OrthographicParametersUpdater
+{
+public:
+    static void update(const brayns::OrthographicCamera &camera)
+    {
+        static const std::string heightParam = "height";
+
+        auto height = camera.getHeight();
+        const auto &osprayCamera = camera.getOsprayCamera();
+        osprayCamera.setParam(heightParam, height);
+    }
+};
+}
+
 namespace brayns
 {
 OrthographicCamera::OrthographicCamera()
@@ -53,7 +69,6 @@ float OrthographicCamera::getHeight() const noexcept
 
 void OrthographicCamera::commitCameraSpecificParams()
 {
-    auto ospHandle = handle();
-    ospSetParam(ospHandle, "height", OSP_FLOAT, &_height);
+    OrthographicParametersUpdater::update(*this);
 }
 }

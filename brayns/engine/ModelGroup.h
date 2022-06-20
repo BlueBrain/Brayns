@@ -20,7 +20,10 @@
 
 #pragma once
 
-#include <ospray/ospray.h>
+#include "GeometryObject.h"
+#include "VolumeObject.h"
+
+#include <ospray/ospray_cpp/Group.h>
 
 #include <vector>
 
@@ -32,16 +35,6 @@ namespace brayns
 class ModelGroup
 {
 public:
-    /**
-     * @brief Initializes the OSPGroup handle
-     */
-    ModelGroup();
-
-    /**
-     * @brief Releases the OSPGroup handle
-     */
-    ~ModelGroup();
-
     ModelGroup(const ModelGroup &) = delete;
     ModelGroup &operator=(const ModelGroup &) = delete;
 
@@ -51,51 +44,52 @@ public:
     /**
      * @brief Adds a new geometric model and marks the group as dirty so it gets committed
      */
-    void addGeometricModel(OSPGeometricModel model);
+    void addGeometricModel(const GeometryObject &model);
 
     /**
      * @brief Removes an existing geometric model and mark the group as dirty so it gets committed
      */
-    void removeGeometricModel(OSPGeometricModel model);
+    void removeGeometricModel(const GeometryObject &model);
 
     /**
      * @brief Adds a new volumetric model and marks the group as dirty so it gets committed
      */
-    void addVolumetricModel(OSPVolumetricModel model);
+    void addVolumetricModel(const VolumeObject &model);
 
     /**
      * @brief Removes an existing volumetric model and mark the group as dirty so it gets committed
      */
-    void removeVolumetricModel(OSPVolumetricModel model);
+    void removeVolumetricModel(const VolumeObject &model);
 
     /**
      * @brief Adds a new geometric clipping model and marks the group as dirty so it gets commited
      */
-    void addClippingModel(OSPGeometricModel model);
+    void addClippingModel(const GeometryObject &model);
 
     /**
      * @brief Removes an existing clipping model and mark the group as dirty so it gets committed
      */
-    void removeClippingModel(OSPGeometricModel model);
+    void removeClippingModel(const GeometryObject &model);
+
+private:
+    friend class Model;
+    friend class ModelInstance;
 
     /**
      * @brief Returns the OSPGroup handle
      */
-    OSPGroup handle() const noexcept;
-
-private:
-    friend class Model;
+    ospray::cpp::Group &getOsprayGroup() noexcept;
 
     /**
      * @brief Synchronizes the group data with OSPRay
      */
-    void commit();
+    bool commit();
 
 private:
-    OSPGroup _handle{nullptr};
-    std::vector<OSPGeometricModel> _geometryModels;
-    std::vector<OSPVolumetricModel> _volumeModels;
-    std::vector<OSPGeometricModel> _clippingModels;
+    ospray::cpp::Group _osprayGroup;
+    std::vector<ospray::cpp::GeometricModel> _geometryModels;
+    std::vector<ospray::cpp::VolumetricModel> _volumeModels;
+    std::vector<ospray::cpp::GeometricModel> _clippingModels;
     bool _modified{false};
 };
 }

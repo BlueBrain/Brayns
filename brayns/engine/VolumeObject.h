@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
- *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,44 +18,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Material.h"
+#pragma once
+
+#include "Volume.h"
+
+#include <ospray/ospray_cpp/TransferFunction.h>
+#include <ospray/ospray_cpp/VolumetricModel.h>
 
 namespace brayns
 {
-Material::Material(const std::string &handleID)
-    : _osprayMaterial("", handleID)
+class VolumeObject
 {
-}
-
-bool Material::commit()
-{
-    if (!isModified())
+public:
+    template<typename T>
+    VolumeObject(const Volume<T> &volume)
+        : _osprayObject(volume.getOsprayVolume())
     {
-        return false;
     }
 
-    commitMaterialSpecificParams();
+    void setTransferFunction(const ospray::cpp::TransferFunction &transferFunction);
+    void commit();
+    const ospray::cpp::VolumetricModel &getOsprayObject() const noexcept;
 
-    _osprayMaterial.commit();
-
-    resetModified();
-
-    return true;
+private:
+    ospray::cpp::VolumetricModel _osprayObject;
+};
 }
-
-const ospray::cpp::Material &Material::getOsprayMaterial() const noexcept
-{
-    return _osprayMaterial;
-}
-
-void Material::setColor(const Vector3f &color) noexcept
-{
-    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
-}
-
-const Vector3f &Material::getColor() const noexcept
-{
-    return _color;
-}
-
-} // namespace brayns

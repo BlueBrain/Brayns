@@ -22,14 +22,14 @@
 
 #include <brayns/common/MathTypes.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/GeometricModel.h>
 
 namespace brayns
 {
 struct InspectContext
 {
     const Vector3f hitPosition;
-    OSPGeometricModel modelHandle;
+    ospray::cpp::GeometricModel model;
     uint32_t primitiveIndex;
 };
 }

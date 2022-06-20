@@ -25,7 +25,7 @@
 #include <brayns/common/Transform.h>
 #include <brayns/engine/Model.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/Instance.h>
 
 namespace brayns
 {
@@ -46,8 +46,6 @@ public:
 
     ModelInstance(ModelInstance &&) = delete;
     ModelInstance &operator=(ModelInstance &&) = delete;
-
-    ~ModelInstance();
 
     /**
      * @brief Returns this instance ID
@@ -102,7 +100,7 @@ public:
     /**
      * @brief Returns the OSPRay handle of this instance.
      */
-    OSPInstance handle() const noexcept;
+    const ospray::cpp::Instance &getOsprayInstance() const noexcept;
 
 private:
     friend class SceneClipManager;
@@ -122,6 +120,6 @@ private:
     Transform _transform;
     Bounds _bounds;
 
-    OSPInstance _instanceHandle{nullptr};
+    ospray::cpp::Instance _osprayInstance;
 };
 }

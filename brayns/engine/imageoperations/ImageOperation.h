@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
- *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,44 +18,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Material.h"
+#pragma once
+
+#include <ospray/ospray_cpp/ImageOperation.h>
 
 namespace brayns
 {
-Material::Material(const std::string &handleID)
-    : _osprayMaterial("", handleID)
+class ImageOperation
 {
-}
-
-bool Material::commit()
-{
-    if (!isModified())
+public:
+    ImageOperation(const std::string &name)
+        : _osprayObject(name)
     {
-        return false;
     }
 
-    commitMaterialSpecificParams();
+    /**
+     * @brief Commits the operation parameters
+     */
+    virtual void commit() = 0;
 
-    _osprayMaterial.commit();
+    /**
+     * @brief Returns the image opration OSPRay handle
+     * @return OSPImageOperation
+     */
+    const ospray::cpp::ImageOperation &getOsprayObject() const noexcept
+    {
+        return _osprayObject;
+    }
 
-    resetModified();
-
-    return true;
+private:
+    ospray::cpp::ImageOperation _osprayObject;
+};
 }
-
-const ospray::cpp::Material &Material::getOsprayMaterial() const noexcept
-{
-    return _osprayMaterial;
-}
-
-void Material::setColor(const Vector3f &color) noexcept
-{
-    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
-}
-
-const Vector3f &Material::getColor() const noexcept
-{
-    return _color;
-}
-
-} // namespace brayns

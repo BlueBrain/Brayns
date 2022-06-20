@@ -21,39 +21,35 @@
 
 #include "Scene.h"
 
-#include <brayns/engine/common/DataHandler.h>
+#include <ospray/ospray_cpp/Data.h>
 
 namespace
 {
-class InstanceCommitter
+class WorldParameterUpdater
 {
 public:
-    static void commit(OSPWorld world, const std::vector<OSPInstance> &instances)
+    static void updateInstances(const ospray::cpp::World &world, const std::vector<ospray::cpp::Instance> &instances)
     {
+        static const std::string instanceParameter = "instance";
+
         if (instances.empty())
         {
-            ospRemoveParam(world, "instance");
+            world.removeParam(instanceParameter);
             return;
         }
-
-        auto instanceBuffer = brayns::DataHandler::copyBuffer(instances, OSPDataType::OSP_INSTANCE);
-        ospSetParam(world, "instance", OSPDataType::OSP_DATA, &instanceBuffer.handle);
+        world.setParam(instanceParameter, ospray::cpp::CopiedData(instances));
     }
-};
 
-class LightComitter
-{
-public:
-    static void commit(OSPWorld world, const std::vector<OSPLight> &lights)
+    static void updateLights(const ospray::cpp::World &world, const std::vector<ospray::cpp::Light> &lights)
     {
+        static const std::string lightParameter = "light";
+
         if (lights.empty())
         {
-            ospRemoveParam(world, "light");
+            world.removeParam(lightParameter);
             return;
         }
-
-        auto lightBuffer = brayns::DataHandler::copyBuffer(lights, OSPDataType::OSP_LIGHT);
-        ospSetParam(world, "light", OSPDataType::OSP_DATA, &lightBuffer.handle);
+        world.setParam(lightParameter, ospray::cpp::CopiedData(lights));
     }
 };
 }
@@ -61,16 +57,10 @@ public:
 namespace brayns
 {
 Scene::Scene()
-    : _bounds(Vector3f(0.f), Vector3f(0.f))
-    , _handle(ospNewWorld())
 {
     // Need an initial commit until there is any content that can trigger the commit function
-    ospCommit(_handle);
-}
-
-Scene::~Scene()
-{
-    ospRelease(_handle);
+    // ospCommit(_handle);
+    Log::critical("TESTING SCENE COMMIT ON CONSTRUCTOR");
 }
 
 const Bounds &Scene::getBounds() const noexcept
@@ -102,26 +92,26 @@ bool Scene::commit()
     // Commit models
     if (_modelManager.commit() || _clippingManager.commit())
     {
-        std::vector<OSPInstance> instances;
-        auto modelInstances = _modelManager.getInstanceHandles();
+        std::vector<ospray::cpp::Instance> instances;
+        auto modelInstances = _modelManager.getOsprayInstances();
         instances.insert(instances.end(), modelInstances.begin(), modelInstances.end());
-        auto clipInstances = _clippingManager.getInstanceHandles();
+        auto clipInstances = _clippingManager.getOsprayInstances();
         instances.insert(instances.end(), clipInstances.begin(), clipInstances.end());
-        InstanceCommitter::commit(_handle, instances);
+        WorldParameterUpdater::updateInstances(_osprayWorld, instances);
         needsCommit = true;
     }
 
     if (_lightManager.commit())
     {
-        auto lights = _lightManager.getLightHandles();
-        LightComitter::commit(_handle, lights);
+        auto lights = _lightManager.getOsprayLights();
+        WorldParameterUpdater::updateLights(_osprayWorld, lights);
         needsCommit = true;
     }
 
     // Commit handle
     if (needsCommit)
     {
-        ospCommit(_handle);
+        _osprayWorld.commit();
     }
 
     return needsCommit;
@@ -200,8 +190,8 @@ void Scene::removeAllClippingModels() noexcept
     _clippingManager.removeAllClippingModels();
 }
 
-OSPWorld Scene::handle() const noexcept
+const ospray::cpp::World &Scene::getOsprayScene() const noexcept
 {
-    return _handle;
+    return _osprayWorld;
 }
 } // namespace brayns

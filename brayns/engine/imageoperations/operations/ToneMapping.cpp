@@ -20,35 +20,44 @@
 
 #include "ToneMapping.h"
 
-#include <utility>
+namespace
+{
+class ToneMappingParamsUpdater
+{
+public:
+    static void update(const brayns::ToneMapping &toneMapping)
+    {
+        static const std::string exposureParam = "exposure";
+        static const std::string contrastParam = "contrast";
+        static const std::string shoulderParam = "shoulder";
+        static const std::string midInParam = "midIn";
+        static const std::string midOutParam = "midOut";
+        static const std::string hdrMaxParam = "hdrMax";
+        static const std::string acesColorParam = "acesColor";
+
+        const auto &osprayObject = toneMapping.getOsprayObject();
+        osprayObject.setParam(exposureParam, toneMapping.getExposure());
+        osprayObject.setParam(contrastParam, toneMapping.getContrast());
+        osprayObject.setParam(shoulderParam, toneMapping.getShoulder());
+        osprayObject.setParam(midInParam, toneMapping.getMidIn());
+        osprayObject.setParam(midOutParam, toneMapping.getMidOut());
+        osprayObject.setParam(hdrMaxParam, toneMapping.getMaxHDR());
+        osprayObject.setParam(acesColorParam, toneMapping.usesACESColor());
+        osprayObject.commit();
+    }
+};
+}
 
 namespace brayns
 {
 ToneMapping::ToneMapping()
-    : _handle(ospNewImageOperation("tonemapper"))
+    : ImageOperation("tonemapper")
 {
-}
-
-ToneMapping::~ToneMapping()
-{
-    ospRelease(_handle);
 }
 
 void ToneMapping::commit()
 {
-    ospSetParam(_handle, "exposure", OSPDataType::OSP_FLOAT, &_exposure);
-    ospSetParam(_handle, "contrast", OSPDataType::OSP_FLOAT, &_contrast);
-    ospSetParam(_handle, "shoulder", OSPDataType::OSP_FLOAT, &_shoulder);
-    ospSetParam(_handle, "midIn", OSPDataType::OSP_FLOAT, &_midIn);
-    ospSetParam(_handle, "midOut", OSPDataType::OSP_FLOAT, &_midOut);
-    ospSetParam(_handle, "hdrMax", OSPDataType::OSP_FLOAT, &_hdrMax);
-    ospSetParam(_handle, "acesColor", OSPDataType::OSP_BOOL, &_acesColor);
-    ospCommit(_handle);
-}
-
-OSPImageOperation ToneMapping::handle() const noexcept
-{
-    return _handle;
+    ToneMappingParamsUpdater::update(*this);
 }
 
 void ToneMapping::setExposure(const float exposure) noexcept

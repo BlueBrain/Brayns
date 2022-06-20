@@ -20,39 +20,65 @@
 
 #include "RegularVolume.h"
 
-#include <brayns/engine/common/DataHandler.h>
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
 
-namespace brayns
+#include <ospray/ospray.h>
+
+namespace
 {
-size_t getTypeByteSize(const OSPDataType type)
+class RegularVolumeIntegrityChecker
 {
-    switch (type)
+public:
+    static void check(const brayns::RegularVolume &volumeData)
     {
-    case OSPDataType::OSP_CHAR:
-    case OSPDataType::OSP_UCHAR:
-        return 1;
-    case OSPDataType::OSP_SHORT:
-    case OSPDataType::OSP_USHORT:
-    case OSPDataType::OSP_HALF:
-        return 2;
-    case OSPDataType::OSP_INT:
-    case OSPDataType::OSP_UINT:
-    case OSPDataType::OSP_FLOAT:
-        return 4;
-    case OSPDataType::OSP_LONG:
-    case OSPDataType::OSP_ULONG:
-    case OSPDataType::OSP_DOUBLE:
-        return 8;
-    default:
-        throw std::runtime_error("Unsupported volume data type");
-        return 0;
+        const auto dataType = static_cast<OSPDataType>(volumeData.dataType);
+        const auto &data = volumeData.data;
+        const auto &size = volumeData.size;
+        const auto dimensionSize = glm::compMul(size);
+        if (dimensionSize == 0)
+        {
+            throw std::runtime_error("Tried to commit volume with 0 size");
+        }
+
+        const auto currentSize = data.size();
+        const auto expectedSize = _getTypeByteSize(dataType) * dimensionSize;
+        if (currentSize != expectedSize)
+        {
+            throw std::runtime_error("RegularVolume expected size and current size missmatch");
+        }
     }
-}
+
+private:
+    static size_t _getTypeByteSize(const OSPDataType type)
+    {
+        switch (type)
+        {
+        case OSPDataType::OSP_CHAR:
+        case OSPDataType::OSP_UCHAR:
+            return 1;
+        case OSPDataType::OSP_SHORT:
+        case OSPDataType::OSP_USHORT:
+        case OSPDataType::OSP_HALF:
+            return 2;
+        case OSPDataType::OSP_INT:
+        case OSPDataType::OSP_UINT:
+        case OSPDataType::OSP_FLOAT:
+            return 4;
+        case OSPDataType::OSP_LONG:
+        case OSPDataType::OSP_ULONG:
+        case OSPDataType::OSP_DOUBLE:
+            return 8;
+        default:
+            throw std::runtime_error("Unsupported volume data type");
+            return 0;
+        }
+    }
+};
 }
 
 namespace brayns
 {
-std::string_view VolumeOSPRayID<RegularVolume>::get()
+std::string_view OsprayVolumeName<RegularVolume>::get()
 {
     return "structuredRegular";
 }
@@ -67,7 +93,7 @@ void VolumeBoundsUpdater<RegularVolume>::update(const RegularVolume &s, const Ma
     b.expand(maxBound);
 }
 
-void VolumeCommitter<RegularVolume>::commit(OSPVolume handle, const RegularVolume &volumeData)
+void VolumeCommitter<RegularVolume>::commit(const ospray::cpp::Volume &osprayVolume, const RegularVolume &volumeData)
 {
     const auto cellCentered = !volumeData.perVertexData;
     const auto dataType = static_cast<OSPDataType>(volumeData.dataType);
@@ -75,24 +101,11 @@ void VolumeCommitter<RegularVolume>::commit(OSPVolume handle, const RegularVolum
     const auto &size = volumeData.size;
     const auto &spacing = volumeData.spacing;
 
-    const auto dimensionSize = glm::compMul(size);
-    if (dimensionSize == 0)
-    {
-        throw std::runtime_error("Tried to commit volume with 0 size");
-    }
-
-    const auto currentSize = data.size();
-    const auto expectedSize = getTypeByteSize(dataType) * dimensionSize;
-    if (currentSize != expectedSize)
-    {
-        throw std::runtime_error("RegularVolume expected size and current size missmatch");
-    }
-
     OSPData sharedData = ospNewSharedData(data.data(), dataType, size.x, 0, size.y, 0, size.z);
-    ospSetParam(handle, "data", OSPDataType::OSP_DATA, &sharedData);
+    osprayVolume.setParam("data", sharedData);
     ospRelease(sharedData);
 
-    ospSetParam(handle, "cellCentered", OSPDataType::OSP_BOOL, &cellCentered);
-    ospSetParam(handle, "gridSpacing", OSPDataType::OSP_VEC3F, &spacing);
+    osprayVolume.setParam("cellCentered", cellCentered);
+    osprayVolume.setParam("gridSpacing", spacing);
 }
 }

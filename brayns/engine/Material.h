@@ -24,7 +24,7 @@
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/Material.h>
 
 #include <memory>
 #include <string_view>
@@ -40,7 +40,7 @@ namespace brayns
 class Material : public BaseObject
 {
 public:
-    Material(std::string_view handleID);
+    Material(const std::string &handleID);
 
     Material(const Material &) = delete;
     Material &operator=(const Material &) = delete;
@@ -48,12 +48,12 @@ public:
     Material(Material &&) = delete;
     Material &operator=(Material &&) = delete;
 
-    virtual ~Material();
+    virtual ~Material() = default;
 
     /**
-     * @brief returns the handle to the OSPRay object of the material
+     * @brief returns the handle to the Ospray object of the material
      */
-    OSPMaterial handle() const noexcept;
+    const ospray::cpp::Material &getOsprayMaterial() const noexcept;
 
     /**
      * @brief Sets the base color
@@ -75,21 +75,21 @@ public:
     virtual std::string getName() const noexcept = 0;
 
     /**
-     * @brief synchronizes the material data with the OSPRay backend
+     * @brief synchronizes the material data with the Ospray backend
      * @returns true if there was anything to commit
      */
     bool commit();
 
 protected:
     /**
-     * @brief Subclasses must implement this method to commit material specific parameters to the OSPRay material
+     * @brief Subclasses must implement this method to commit material specific parameters to the Ospray material
      * counterpart. The base class will make sure to call ospCommit(handle) on the material handle, so subclasses
      * should avoid it.
      */
     virtual void commitMaterialSpecificParams() = 0;
 
 private:
-    OSPMaterial _handle{nullptr};
+    ospray::cpp::Material _osprayMaterial;
 
     Vector3f _color{1.f};
 };

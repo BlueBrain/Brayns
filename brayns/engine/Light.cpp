@@ -20,16 +20,36 @@
 
 #include "Light.h"
 
-namespace brayns
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+
+namespace
 {
-Light::Light(std::string_view handleID)
-    : _handle(ospNewLight(handleID.data()))
+class LightParameterUpdater
 {
+public:
+    static void update(const brayns::Light &light)
+    {
+        static const std::string colorParameter = "color";
+        static const std::string intensityParameter = "intensity";
+        static const std::string visibilityParameter = "visible";
+
+        auto &color = light.getColor();
+        auto intensity = light.getIntensity();
+        auto isVisible = light.isVisible();
+
+        auto &osprayLight = light.getOsprayLight();
+        osprayLight.setParam(colorParameter, color);
+        osprayLight.setParam(intensityParameter, intensity);
+        osprayLight.setParam(visibilityParameter, isVisible);
+    }
+};
 }
 
-Light::~Light()
+namespace brayns
 {
-    ospRelease(_handle);
+Light::Light(const std::string &handleID)
+    : _osprayLight(handleID)
+{
 }
 
 void Light::setColor(const Vector3f &color) noexcept
@@ -74,21 +94,19 @@ bool Light::commit()
         return false;
     }
 
-    ospSetParam(_handle, "color", OSPDataType::OSP_VEC3F, &_color);
-    ospSetParam(_handle, "intensity", OSPDataType::OSP_FLOAT, &_intensity);
-    ospSetParam(_handle, "visible", OSPDataType::OSP_BOOL, &_visible);
+    LightParameterUpdater::update(*this);
 
     commitLightSpecificParams();
 
-    ospCommit(_handle);
+    _osprayLight.commit();
 
     resetModified();
 
     return true;
 }
 
-OSPLight Light::handle() const noexcept
+const ospray::cpp::Light &Light::getOsprayLight() const noexcept
 {
-    return _handle;
+    return _osprayLight;
 }
 } // namespace brayns

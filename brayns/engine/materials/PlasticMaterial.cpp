@@ -18,7 +18,41 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/materials/PlasticMaterial.h>
+#include "PlasticMaterial.h"
+
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+
+namespace
+{
+class PlasticParameterUpdater
+{
+public:
+    static void update(const brayns::PlasticMaterial &material)
+    {
+        static const std::string colorParameter = "baseColor";
+        static const std::string roughnessParameter = "roughness";
+        static const std::string coatParameter = "coat";
+        static const std::string coatThicknessParameter = "coatThickness";
+        static const std::string sheenParameter = "sheen";
+        static const std::string opacityParameter = "opacity";
+
+        constexpr float clearCoat = 1.f;
+        constexpr float clearCoatThickness = 3.f;
+        constexpr float roughness = 0.01f;
+        constexpr float sheen = 1.f;
+        const auto overridedColorWhite = brayns::Vector3f(1.f);
+        auto opacity = material.getOpacity();
+
+        const auto &osprayMaterial = material.getOsprayMaterial();
+        osprayMaterial.setParam(colorParameter, overridedColorWhite);
+        osprayMaterial.setParam(roughnessParameter, roughness);
+        osprayMaterial.setParam(coatParameter, clearCoat);
+        osprayMaterial.setParam(coatThicknessParameter, clearCoatThickness);
+        osprayMaterial.setParam(sheenParameter, sheen);
+        osprayMaterial.setParam(opacityParameter, opacity);
+    }
+};
+}
 
 namespace brayns
 {
@@ -44,19 +78,6 @@ float PlasticMaterial::getOpacity() const noexcept
 
 void PlasticMaterial::commitMaterialSpecificParams()
 {
-    constexpr float clearCoat = 1.f;
-    constexpr float clearCoatThickness = 3.f;
-    constexpr float roughness = 0.01f;
-    constexpr float sheen = 1.f;
-    const auto overridedColorWhite = brayns::Vector3f(1.f);
-
-    auto ospHandle = handle();
-
-    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &overridedColorWhite);
-    ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &roughness);
-    ospSetParam(ospHandle, "coat", OSPDataType::OSP_FLOAT, &clearCoat);
-    ospSetParam(ospHandle, "coatThickness", OSPDataType::OSP_FLOAT, &clearCoatThickness);
-    ospSetParam(ospHandle, "sheen", OSPDataType::OSP_FLOAT, &sheen);
-    ospSetParam(ospHandle, "opacity", OSPDataType::OSP_FLOAT, &_opacity);
+    PlasticParameterUpdater::update(*this);
 }
 }

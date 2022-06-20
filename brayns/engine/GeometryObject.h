@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
- *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,44 +18,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#pragma once
+
+#include "Geometry.h"
 #include "Material.h"
+
+#include <ospray/ospray_cpp/Data.h>
+#include <ospray/ospray_cpp/GeometricModel.h>
+#include <ospray/ospray_cpp/Geometry.h>
 
 namespace brayns
 {
-Material::Material(const std::string &handleID)
-    : _osprayMaterial("", handleID)
+class GeometryObject
 {
-}
-
-bool Material::commit()
-{
-    if (!isModified())
+public:
+    template<typename T>
+    GeometryObject(const Geometry<T> &geometry)
+        : _osprayObject(geometry.getOsprayGeometry())
     {
-        return false;
     }
 
-    commitMaterialSpecificParams();
+    void setMaterial(const Material &material);
+    void setColor(const brayns::Vector3f &color);
+    void setColor(const brayns::Vector4f &color);
+    void setColorPerPrimitive(OSPData colors);
+    void setColorMap(OSPData colors, OSPData indices);
+    void commit();
+    const ospray::cpp::GeometricModel &getOsprayObject() const noexcept;
 
-    _osprayMaterial.commit();
-
-    resetModified();
-
-    return true;
+private:
+    ospray::cpp::GeometricModel _osprayObject;
+};
 }
-
-const ospray::cpp::Material &Material::getOsprayMaterial() const noexcept
-{
-    return _osprayMaterial;
-}
-
-void Material::setColor(const Vector3f &color) noexcept
-{
-    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
-}
-
-const Vector3f &Material::getColor() const noexcept
-{
-    return _color;
-}
-
-} // namespace brayns

@@ -18,7 +18,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/materials/EmissiveMaterial.h>
+#include "EmissiveMaterial.h"
+
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+
+namespace
+{
+class EmissiveParameterUpdater
+{
+public:
+    static void update(const brayns::EmissiveMaterial &material)
+    {
+        static const std::string colorParameter = "color";
+        static const std::string intenistyParameter = "intensity";
+
+        const auto &color = material.getColor();
+        auto intensity = material.getIntensity();
+
+        const auto &osprayMaterial = material.getOsprayMaterial();
+        osprayMaterial.setParam(colorParameter, color);
+        osprayMaterial.setParam(intenistyParameter, intensity);
+    }
+};
+}
 
 namespace brayns
 {
@@ -44,9 +66,6 @@ float EmissiveMaterial::getIntensity() const noexcept
 
 void EmissiveMaterial::commitMaterialSpecificParams()
 {
-    auto ospHandle = handle();
-
-    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &getColor());
-    ospSetParam(ospHandle, "intensity", OSPDataType::OSP_FLOAT, &_intensity);
+    EmissiveParameterUpdater::update(*this);
 }
 }

@@ -24,28 +24,28 @@
 
 namespace brayns
 {
-void FrameRenderer::synchronous(const Camera &cam, const FrameBuffer &fb, const Renderer &render, const Scene &scene)
-{
-    auto cameraHandle = cam.handle();
-    auto fbHandle = fb.handle();
-    auto rendererHandle = render.handle();
-    auto sceneHandle = scene.handle();
-
-    ospRenderFrameBlocking(fbHandle, rendererHandle, cameraHandle, sceneHandle);
-}
-
-OSPFuture FrameRenderer::asynchronous(
+void FrameRenderer::synchronous(
     const Camera &camera,
-    const FrameBuffer &fb,
+    const FrameBuffer &frameBuffer,
     const Renderer &renderer,
     const Scene &scene)
 {
-    auto cameraHandle = camera.handle();
-    auto fbHandle = fb.handle();
-    auto rendererHandle = renderer.handle();
-    auto sceneHandle = scene.handle();
+    auto future = asynchronous(camera, frameBuffer, renderer, scene);
+    future.wait();
+}
 
-    auto frameFuture = ospRenderFrame(fbHandle, rendererHandle, cameraHandle, sceneHandle);
-    return frameFuture;
+ospray::cpp::Future FrameRenderer::asynchronous(
+    const Camera &camera,
+    const FrameBuffer &frameBuffer,
+    const Renderer &renderer,
+    const Scene &scene)
+{
+    auto &osprayCamera = camera.getOsprayCamera();
+    auto &osprayFrameBuffer = frameBuffer.getOsprayFramebuffer();
+    auto &osprayRenderer = renderer.getOsprayRenderer();
+    auto &osprayScene = scene.getOsprayScene();
+
+    auto future = osprayFrameBuffer.renderFrame(osprayRenderer, osprayCamera, osprayScene);
+    return future;
 }
 }

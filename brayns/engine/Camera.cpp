@@ -22,6 +22,44 @@
 
 #include "Camera.h"
 
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+
+namespace
+{
+class CameraParameterUpdater
+{
+public:
+    static void updateView(const brayns::Camera &camera)
+    {
+        static const std::string positionParam = "position";
+        static const std::string directionParam = "direction";
+        static const std::string upParam = "up";
+
+        const auto &lookAt = camera.getLookAt();
+        const auto &position = lookAt.position;
+        const auto &target = lookAt.target;
+        const auto &up = lookAt.up;
+        const auto forward = glm::normalize(target - position);
+        const auto strafe = glm::cross(forward, up);
+        const auto realUp = glm::cross(strafe, forward);
+
+        const auto &osprayCamera = camera.getOsprayCamera();
+        osprayCamera.setParam(positionParam, position);
+        osprayCamera.setParam(directionParam, forward);
+        osprayCamera.setParam(upParam, realUp);
+    }
+
+    static void updateAspectRatio(const brayns::Camera &camera)
+    {
+        static const std::string aspectParam = "aspect";
+
+        const auto aspectRatio = camera.getAspectRatio();
+        const auto &osprayCamera = camera.getOsprayCamera();
+        osprayCamera.setParam(aspectParam, aspectRatio);
+    }
+};
+}
+
 namespace brayns
 {
 bool operator==(const LookAt &a, const LookAt &b) noexcept
@@ -34,14 +72,9 @@ bool operator!=(const LookAt &a, const LookAt &b) noexcept
     return !(a == b);
 }
 
-Camera::Camera(std::string_view handleID)
-    : _handle(ospNewCamera(handleID.data()))
+Camera::Camera(const std::string &handleID)
+    : _osprayCamera(handleID)
 {
-}
-
-Camera::~Camera()
-{
-    ospRelease(_handle);
 }
 
 bool Camera::commit()
@@ -51,22 +84,12 @@ bool Camera::commit()
         return false;
     }
 
-    const auto &position = _lookAtParams.position;
-    const auto &target = _lookAtParams.target;
-    const auto &up = _lookAtParams.up;
-
-    const auto forward = glm::normalize(target - position);
-    const auto strafe = glm::cross(forward, up);
-    const auto realUp = glm::cross(strafe, forward);
-
-    ospSetParam(_handle, "position", OSP_VEC3F, &position[0]);
-    ospSetParam(_handle, "direction", OSP_VEC3F, &forward);
-    ospSetParam(_handle, "up", OSP_VEC3F, &realUp);
-    ospSetParam(_handle, "aspect", OSP_FLOAT, &_aspectRatio);
+    CameraParameterUpdater::updateView(*this);
+    CameraParameterUpdater::updateAspectRatio(*this);
 
     commitCameraSpecificParams();
 
-    ospCommit(_handle);
+    _osprayCamera.commit();
 
     resetModified();
 
@@ -93,8 +116,8 @@ float Camera::getAspectRatio() const noexcept
     return _aspectRatio;
 }
 
-OSPCamera Camera::handle() const noexcept
+const ospray::cpp::Camera &Camera::getOsprayCamera() const noexcept
 {
-    return _handle;
+    return _osprayCamera;
 }
 } // namespace brayns

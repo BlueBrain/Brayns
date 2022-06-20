@@ -21,15 +21,41 @@
 #include "TransferFunctionRendererComponent.h"
 
 #include <brayns/engine/Model.h>
-#include <brayns/engine/common/DataHandler.h>
 #include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/components/TransferFunctionComponent.h>
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+
+#include <ospray/ospray_cpp/Data.h>
+
+namespace
+{
+class TransferFunctionUpdater
+{
+public:
+    static void update(const brayns::TransferFunction &source, const ospray::cpp::TransferFunction &dest)
+    {
+        static const std::string colorParameter = "color";
+        static const std::string opacityParameter = "opacity";
+        static const std::string valueRangeParameter = "valueRange";
+
+        auto &colors = source.getColors();
+        auto &color = colors.front();
+        auto colorSize = colors.size();
+        auto &range = source.getValuesRange();
+        constexpr auto stride = 4 * sizeof(float);
+
+        dest.setParam(colorParameter, ospray::cpp::SharedData(&color.x, colorSize, stride));
+        dest.setParam(opacityParameter, ospray::cpp::SharedData(&color.w, colorSize, stride));
+        dest.setParam(valueRangeParameter, range);
+    }
+};
+}
 
 namespace brayns
 {
 TransferFunctionRendererComponent::TransferFunctionRendererComponent()
+    : _osprayTransferFunction("piecewiseLinear")
 {
-    _handle = ospNewTransferFunction("piecewiseLinear");
 }
 
 void TransferFunctionRendererComponent::onCreate()
@@ -38,49 +64,25 @@ void TransferFunctionRendererComponent::onCreate()
     model.addComponent<TransferFunctionComponent>();
 }
 
-void TransferFunctionRendererComponent::onDestroy()
-{
-    if (_handle)
-    {
-        ospRelease(_handle);
-        _handle = nullptr;
-    }
-}
-
 bool TransferFunctionRendererComponent::manualCommit()
 {
     Model &model = getModel();
-    auto &tf = ExtractModelObject::extractTransferFunction(model);
-    if (!tf.isModified())
+    auto &transferFunction = ExtractModelObject::extractTransferFunction(model);
+    if (!transferFunction.isModified())
     {
         return false;
     }
 
-    auto &colors = tf.getColors();
-    auto &color = colors.front();
-    auto colorSize = colors.size();
-    auto &range = tf.getValuesRange();
-    constexpr auto stride = 4 * sizeof(float);
+    TransferFunctionUpdater::update(transferFunction, _osprayTransferFunction);
 
-    auto colorBuffer = ospNewSharedData(&color.x, OSPDataType::OSP_VEC3F, colorSize, stride);
-    auto opacityBuffer = ospNewSharedData(&color.w, OSPDataType::OSP_FLOAT, colorSize, stride);
-
-    ospSetParam(_handle, "color", OSPDataType::OSP_DATA, &colorBuffer);
-    ospSetParam(_handle, "opacity", OSPDataType::OSP_DATA, &opacityBuffer);
-    ospSetParam(_handle, "valueRange", OSPDataType::OSP_VEC2F, &range);
-
-    ospRelease(colorBuffer);
-    ospRelease(opacityBuffer);
-
-    ospCommit(_handle);
-
-    tf.resetModified();
+    _osprayTransferFunction.commit();
+    transferFunction.resetModified();
 
     return true;
 }
 
-OSPTransferFunction TransferFunctionRendererComponent::handle() const noexcept
+const ospray::cpp::TransferFunction &TransferFunctionRendererComponent::getOsprayObject() const noexcept
 {
-    return _handle;
+    return _osprayTransferFunction;
 }
 }

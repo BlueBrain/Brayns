@@ -27,7 +27,7 @@
 #include <brayns/engine/scenecomponents/SceneLightManager.h>
 #include <brayns/engine/scenecomponents/SceneModelManager.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/World.h>
 
 namespace brayns
 {
@@ -39,7 +39,6 @@ class Scene
 {
 public:
     Scene();
-    ~Scene();
 
     Scene(const Scene &) = delete;
     Scene &operator=(const Scene &) = delete;
@@ -164,7 +163,7 @@ public:
     /**
      * @brief Returns the OSPRay handle of the scene
      */
-    OSPWorld handle() const noexcept;
+    const ospray::cpp::World &getOsprayScene() const noexcept;
 
 private:
     friend class Engine;
@@ -182,7 +181,7 @@ private:
     SceneLightManager _lightManager;
 
     // OSPRRay "scene" handle
-    OSPWorld _handle{nullptr};
+    ospray::cpp::World _osprayWorld;
 };
 
 } // namespace brayns

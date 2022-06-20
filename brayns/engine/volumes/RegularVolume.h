@@ -44,7 +44,7 @@ struct RegularVolume
 };
 
 template<>
-class VolumeOSPRayID<RegularVolume>
+class OsprayVolumeName<RegularVolume>
 {
 public:
     static std::string_view get();
@@ -61,6 +61,6 @@ template<>
 class VolumeCommitter<RegularVolume>
 {
 public:
-    static void commit(OSPVolume handle, const RegularVolume &volumeData);
+    static void commit(const ospray::cpp::Volume &osprayVolumeconst, const RegularVolume &volumeData);
 };
 }

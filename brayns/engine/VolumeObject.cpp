@@ -18,24 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <ospray/ospray.h>
+#include "VolumeObject.h"
 
 namespace brayns
 {
-class ImageOperation
+void VolumeObject::setTransferFunction(const ospray::cpp::TransferFunction &transferFunction)
 {
-public:
-    /**
-     * @brief Commits the operation parameters
-     */
-    virtual void commit() = 0;
+    static const std::string transferFunctionParameter = "transferFunction";
+    _osprayObject.setParam(transferFunctionParameter, transferFunction);
+}
 
-    /**
-     * @brief Returns the image opration OSPRay handle
-     * @return OSPImageOperation
-     */
-    virtual OSPImageOperation handle() const noexcept = 0;
-};
+void VolumeObject::commit()
+{
+    _osprayObject.commit();
+}
+
+const ospray::cpp::VolumetricModel &VolumeObject::getOsprayObject() const noexcept
+{
+    return _osprayObject;
+}
 }

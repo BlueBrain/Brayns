@@ -22,7 +22,7 @@
 
 #include <brayns/engine/ModelComponents.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/TransferFunction.h>
 
 namespace brayns
 {
@@ -38,13 +38,11 @@ public:
 
     void onCreate() override;
 
-    void onDestroy() override;
-
     bool manualCommit();
 
-    OSPTransferFunction handle() const noexcept;
+    const ospray::cpp::TransferFunction &getOsprayObject() const noexcept;
 
 private:
-    OSPTransferFunction _handle;
+    ospray::cpp::TransferFunction _osprayTransferFunction;
 };
 }

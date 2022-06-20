@@ -156,9 +156,9 @@ private:
     /**
      * @brief Return a list with all the model instance handles so that the scene can commit them
      *
-     * @return std::vector<OSPInstance>
+     * @return std::vector<ospray::cpp::Instance>
      */
-    std::vector<OSPInstance> getInstanceHandles() noexcept;
+    std::vector<ospray::cpp::Instance> getOsprayInstances() noexcept;
 
 private:
     /**

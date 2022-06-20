@@ -18,7 +18,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/materials/DefaultMaterial.h>
+#include "DefaultMaterial.h"
+
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+
+namespace
+{
+class DefaultParameterUpdater
+{
+public:
+    static void update(const brayns::DefaultMaterial &material)
+    {
+        static const std::string kdParameter = "kd";
+        static const std::string nsParameter = "ns";
+        static const std::string opacityParameter = "d";
+
+        const auto kd = brayns::Vector3f(1.f);
+        constexpr float ns = 2.f;
+        auto opacity = material.getOpacity();
+
+        const auto &osprayMaterial = material.getOsprayMaterial();
+        osprayMaterial.setParam(kdParameter, kd);
+        osprayMaterial.setParam(nsParameter, ns);
+        osprayMaterial.setParam(opacityParameter, opacity);
+    }
+};
+}
 
 namespace brayns
 {
@@ -44,13 +69,6 @@ float DefaultMaterial::getOpacity() const noexcept
 
 void DefaultMaterial::commitMaterialSpecificParams()
 {
-    constexpr float ns = 2.f;
-    const auto overridedColorWhite = brayns::Vector3f(1.f);
-
-    auto ospHandle = handle();
-
-    ospSetParam(ospHandle, "kd", OSPDataType::OSP_VEC3F, &overridedColorWhite);
-    ospSetParam(ospHandle, "ns", OSPDataType::OSP_FLOAT, &ns);
-    ospSetParam(ospHandle, "d", OSPDataType::OSP_FLOAT, &_opacity);
+    DefaultParameterUpdater::update(*this);
 }
 }

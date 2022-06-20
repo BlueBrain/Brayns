@@ -20,14 +20,13 @@
 
 #pragma once
 
-#include <brayns/engine/Geometry.h>
+#include <brayns/engine/GeometryObject.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/GeometricModelHandler.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/Data.h>
 
 namespace brayns
 {
@@ -38,15 +37,14 @@ template<typename T>
 class GeometryRendererComponent final : public Component
 {
 public:
-    GeometryRendererComponent() = default;
-
     /**
      * @brief Constructs the component with a single geometry
      * @param geometry
      */
     GeometryRendererComponent(T geometry)
+        : _geometry(std::move(geometry))
+        , _object(_geometry)
     {
-        _geometry.add(std::move(geometry));
     }
 
     /**
@@ -54,13 +52,14 @@ public:
      * @param geometries
      */
     GeometryRendererComponent(std::vector<T> geometries)
+        : _geometry(std::move(geometries))
+        , _object(_geometry)
     {
-        _geometry.set(std::move(geometries));
     }
 
     /**
-     * @brief Returns the geometry
-     * @return
+     * @brief Returns a modifiable geometry reference
+     * @return Geometry<T> &
      */
     Geometry<T> &getGeometry() noexcept
     {
@@ -79,8 +78,8 @@ public:
             throw std::invalid_argument("Not enough colors for all geometry");
         }
 
-        auto buffer = DataHandler::copyBuffer(colors, OSPDataType::OSP_VEC4F);
-        GeometricModelHandler::setColors(_model, buffer);
+        auto buffer = ospray::cpp::CopiedData(colors);
+        _object.setColorPerPrimitive(buffer.handle());
         _useMaterialColor = false;
         _colorDirty = true;
     }
@@ -92,34 +91,27 @@ public:
 
     virtual void onCreate() override
     {
-        _model = GeometricModelHandler::create();
+        Model &model = getModel();
 
-        Model &group = getModel();
-        GeometricModelHandler::addToGeometryGroup(_model, group);
+        auto &group = model.getGroup();
+        group.addGeometricModel(_object);
 
-        group.addComponent<MaterialComponent>();
-
-        GeometricModelHandler::setGeometry(_model, _geometry);
+        model.addComponent<MaterialComponent>();
     }
 
     virtual bool commit() override
     {
-        bool needsCommit = false;
-
-        if (_colorDirty)
-        {
-            needsCommit = true;
-            _colorDirty = false;
-        }
+        bool needsCommit = _colorDirty;
+        _colorDirty = false;
 
         auto &material = ExtractModelObject::extractMaterial(getModel());
         if (material.commit())
         {
             needsCommit = true;
-            GeometricModelHandler::setMaterial(_model, material);
+            _object.setMaterial(material);
             if (_useMaterialColor)
             {
-                GeometricModelHandler::setColor(_model, material.getColor());
+                _object.setColor(material.getColor());
             }
         }
 
@@ -130,7 +122,7 @@ public:
 
         if (needsCommit)
         {
-            GeometricModelHandler::commitModel(_model);
+            _object.commit();
         }
 
         return needsCommit;
@@ -138,13 +130,14 @@ public:
 
     virtual void onDestroy() override
     {
-        GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
-        GeometricModelHandler::destroy(_model);
+        Model &model = getModel();
+        auto &group = model.getGroup();
+        group.removeGeometricModel(_object);
     }
 
 private:
-    OSPGeometricModel _model{nullptr};
     Geometry<T> _geometry;
+    GeometryObject _object;
     // Need these to flag to avoid using the material color when need to customize colors
     bool _useMaterialColor{true};
     bool _colorDirty{false};

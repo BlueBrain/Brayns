@@ -23,6 +23,8 @@
 #include <brayns/common/MathTypes.h>
 #include <brayns/engine/Geometry.h>
 
+#include <ospray/ospray_cpp/Traits.h>
+
 namespace brayns
 {
 struct Plane
@@ -32,7 +34,7 @@ struct Plane
 };
 
 template<>
-class GeometryOSPRayID<Plane>
+class OsprayGeometryName<Plane>
 {
 public:
     static std::string_view get();
@@ -49,6 +51,10 @@ template<>
 class GeometryCommitter<Plane>
 {
 public:
-    static void commit(OSPGeometry handle, const std::vector<Plane> &geometries);
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Plane> &primitives);
 };
 }
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::Plane, OSP_VEC4F)
+} // namespace ospray

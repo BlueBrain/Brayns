@@ -24,7 +24,7 @@
 #include <brayns/common/Bounds.h>
 #include <brayns/common/MathTypes.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/Light.h>
 
 #include <memory>
 #include <string_view>
@@ -37,7 +37,7 @@ namespace brayns
 class Light : public BaseObject
 {
 public:
-    Light(std::string_view handleID);
+    Light(const std::string &handleID);
 
     Light(const Light &) = delete;
     Light &operator=(const Light &) = delete;
@@ -45,7 +45,7 @@ public:
     Light(Light &&) = delete;
     Light &operator=(Light &&) = delete;
 
-    virtual ~Light();
+    virtual ~Light() = 0;
 
     /**
      * @brief Sets the light color as normalized RGB
@@ -83,6 +83,12 @@ public:
      */
     virtual Bounds computeBounds() const noexcept;
 
+    /**
+     * @brief Returns the Ospray light object
+     * @return const ospray::cpp::Light &
+     */
+    const ospray::cpp::Light &getOsprayLight() const noexcept;
+
 protected:
     friend class SceneLightManager;
 
@@ -92,12 +98,7 @@ protected:
     bool commit();
 
     /**
-     * @brief Returns this light OSPRay handle
-     */
-    OSPLight handle() const noexcept;
-
-    /**
-     * @brief Subclasses must implement this method to set their light-speicfic parameters onto the OSPRay handle.
+     * @brief Subclasses must implement this method to set their light-speicfic parameters onto the Ospray object.
      * The Light base class will make sure to call ospCommit(handle) on the light handle.
      */
     virtual void commitLightSpecificParams() = 0;
@@ -106,6 +107,6 @@ private:
     Vector3f _color{1.f};
     float _intensity{1.};
     bool _visible{true};
-    OSPLight _handle{nullptr};
+    ospray::cpp::Light _osprayLight;
 };
 } // namespace brayns

@@ -29,7 +29,7 @@
 
 namespace
 {
-struct OSPRayLogLevelGenerator
+struct OsprayLogLevelGenerator
 {
     static OSPLogLevel generate(const brayns::ApplicationParameters &params)
     {
@@ -55,31 +55,35 @@ struct OSPRayLogLevelGenerator
     }
 };
 
-struct OSPRayDeviceInitializer
+struct OsprayDeviceInitializer
 {
-    static OSPDevice init(const brayns::ParametersManager &parameters)
+    static ospray::cpp::Device init(const brayns::ParametersManager &parameters)
     {
         ospLoadModule("cpu");
-        auto device = ospNewDevice("cpu");
+        auto device = ospray::cpp::Device("cpu");
+
+        device.setErrorCallback(
+            [](void *data, OSPError error, const char *message)
+            {
+                (void)data;
+                brayns::Log::error("[OSPRAY] Error {}: {}", error, message);
+                throw std::runtime_error(message);
+            });
+
+        device.setStatusCallback(
+            [](void *data, const char *message)
+            {
+                (void)data;
+                brayns::Log::info("[OSPRAY] {}", message);
+            });
 
         auto &appParams = parameters.getApplicationParameters();
-        const auto logLevel = OSPRayLogLevelGenerator::generate(appParams);
-        const auto logOutput = "cout";
-        const auto logErrorOutput = "cerr";
-        ospDeviceSetParam(device, "logLevel", OSPDataType::OSP_INT, &logLevel);
-        ospDeviceSetParam(device, "logOutput", OSPDataType::OSP_STRING, logOutput);
-        ospDeviceSetParam(device, "errorOutput", OSPDataType::OSP_STRING, logErrorOutput);
-
-        ospDeviceCommit(device);
-        ospSetCurrentDevice(device);
-
-        const auto error = ospDeviceGetLastErrorCode(device);
-        if (error != OSPError::OSP_NO_ERROR)
-        {
-            const auto ospErrorMessage = ospDeviceGetLastErrorMsg(device);
-            brayns::Log::critical("Could not initialize OSPRay device: {}", ospErrorMessage);
-            throw std::runtime_error("Could not initialize OSPRay device");
-        }
+        const auto logLevel = OsprayLogLevelGenerator::generate(appParams);
+        device.setParam("loglLevel", logLevel);
+        device.setParam("logOutput", "cout");
+        device.setParam("errorOutput", "cerr");
+        device.commit();
+        device.setCurrent();
 
         return device;
     }
@@ -90,7 +94,7 @@ namespace brayns
 {
 Engine::Engine(ParametersManager &parameters)
     : _params(parameters)
-    , _device(OSPRayDeviceInitializer::init(parameters))
+    , _osprayDevice(OsprayDeviceInitializer::init(parameters))
     , _camera(std::make_unique<PerspectiveCamera>())
     , _renderer(std::make_unique<InteractiveRenderer>())
 {
@@ -98,11 +102,9 @@ Engine::Engine(ParametersManager &parameters)
 
 Engine::~Engine()
 {
-    _camera.reset();
-    _renderer.reset();
-
-    ospDeviceRelease(_device);
-
+    //_camera.reset();
+    //_renderer.reset();
+    Log::critical("TESTING ENGINE DESTRUCTOR");
     ospShutdown();
 }
 

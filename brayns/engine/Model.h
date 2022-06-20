@@ -105,7 +105,7 @@ public:
     void onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept;
 
     /**
-     * @brief Returns the OSPRay group handler object
+     * @brief Returns the Ospray group handler object
      */
     ModelGroup &getGroup() noexcept;
 
@@ -122,11 +122,6 @@ private:
      * @return Bounds of the model
      */
     Bounds computeBounds(const Matrix4f &transform) const noexcept;
-
-    /**
-     * @brief Returns the OSPRay handle
-     */
-    OSPGroup groupHandle() const noexcept;
 
     /**
      * @brief Called before the commit + rendering happens

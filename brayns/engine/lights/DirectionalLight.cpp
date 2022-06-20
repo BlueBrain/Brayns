@@ -18,7 +18,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/lights/DirectionalLight.h>
+#include "DirectionalLight.h"
+
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+
+namespace
+{
+class DirectionalLightParameterUpdater
+{
+public:
+    static void update(const brayns::DirectionalLight &light)
+    {
+        static const std::string directionParam = "direction";
+        static const std::string angularDiameterParam = "angularDiameter";
+
+        const auto &direction = light.getDirection();
+        // angularDiamter = 0.0 == HARD SHADOWS
+        constexpr float angularDiameter = 0.53f;
+
+        const auto &osprayLight = light.getOsprayLight();
+        osprayLight.setParam(directionParam, direction);
+        osprayLight.setParam(angularDiameterParam, angularDiameter);
+    }
+};
+}
 
 namespace brayns
 {
@@ -30,7 +53,9 @@ DirectionalLight::DirectionalLight()
 void DirectionalLight::setDirection(const Vector3f &newDirection)
 {
     if (glm::length2(newDirection) == 0.f)
+    {
         throw std::invalid_argument("DirectionalLight direction must be a non-zero vector");
+    }
 
     _updateValue(_direction, glm::normalize(newDirection));
 }
@@ -42,13 +67,6 @@ const Vector3f &DirectionalLight::getDirection() const noexcept
 
 void DirectionalLight::commitLightSpecificParams()
 {
-    auto ospHandle = handle();
-
-    // Only taken into account by stochastic sampling renderers.
-    // Value >= 0.f allows for soft shadows. 0.f will produce hard shadows
-    static constexpr float angularDiameter = 0.53f;
-
-    ospSetParam(ospHandle, "direction", OSPDataType::OSP_VEC3F, &_direction);
-    ospSetParam(ospHandle, "angularDiameter", OSPDataType::OSP_FLOAT, &angularDiameter);
+    DirectionalLightParameterUpdater::update(*this);
 }
 }

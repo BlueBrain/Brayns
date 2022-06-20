@@ -20,16 +20,36 @@
 
 #include "Renderer.h"
 
-namespace brayns
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+
+namespace
 {
-Renderer::Renderer(std::string_view handleID)
-    : _handle(ospNewRenderer(handleID.data()))
+class RendererParameterUpdater
 {
+public:
+    static void update(const brayns::Renderer &renderer)
+    {
+        static const std::string pixelParameter = "pixelSamples";
+        static const std::string pathLengthParameter = "maxPathLength";
+        static const std::string backgroundParameter = "backgroundColor";
+
+        auto spp = renderer.getSamplesPerPixel();
+        auto maxBounces = renderer.getMaxRayBounces();
+        auto &background = renderer.getBackgroundColor();
+
+        auto &osprayRenderer = renderer.getOsprayRenderer();
+        osprayRenderer.setParam(pixelParameter, spp);
+        osprayRenderer.setParam(pathLengthParameter, maxBounces);
+        osprayRenderer.setParam(backgroundParameter, background);
+    }
+};
 }
 
-Renderer::~Renderer()
+namespace brayns
 {
-    ospRelease(_handle);
+Renderer::Renderer(const std::string &handleID)
+    : _osprayRenderer(handleID)
+{
 }
 
 int32_t Renderer::getSamplesPerPixel() const noexcept
@@ -69,21 +89,19 @@ bool Renderer::commit()
         return false;
     }
 
-    ospSetParam(_handle, "pixelSamples", OSPDataType::OSP_INT, &_samplesPerPixel);
-    ospSetParam(_handle, "maxPathLength", OSPDataType::OSP_INT, &_maxRayBounces);
-    ospSetParam(_handle, "backgroundColor", OSPDataType::OSP_VEC4F, &_backgroundColor);
+    RendererParameterUpdater::update(*this);
 
     commitRendererSpecificParams();
 
-    ospCommit(_handle);
+    _osprayRenderer.commit();
 
     resetModified();
 
     return true;
 }
 
-OSPRenderer Renderer::handle() const noexcept
+const ospray::cpp::Renderer &Renderer::getOsprayRenderer() const noexcept
 {
-    return _handle;
+    return _osprayRenderer;
 }
 } // namespace brayns

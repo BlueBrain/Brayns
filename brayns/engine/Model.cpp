@@ -67,19 +67,10 @@ void Model::onPostRender(const ParametersManager &params)
     _components.onPostRender(params);
 }
 
-OSPGroup Model::groupHandle() const noexcept
-{
-    return _group.handle();
-}
-
 bool Model::commit()
 {
-    if (_components.commit())
-    {
-        _group.commit();
-        return true;
-    }
-
-    return false;
+    bool update = _components.commit();
+    update = _group.commit() || update;
+    return update;
 }
 } // namespace brayns

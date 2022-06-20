@@ -67,7 +67,7 @@ private:
 
         auto frameBufferHandle = frameBuffer.handle();
         auto rendererHandle = renderer.handle();
-        auto cameraHandle = camera.handle();
+        auto cameraHandle = camera.getHandle();
         auto sceneHandle = scene.handle();
 
         auto x = position.x;

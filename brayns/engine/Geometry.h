@@ -22,10 +22,8 @@
 
 #include <brayns/common/Bounds.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/Geometry.h>
 
-#include <functional>
-#include <memory>
 #include <numeric>
 #include <string_view>
 #include <vector>
@@ -55,18 +53,31 @@ public:
 };
 
 /**
- * @brief Utility class to deduce the OSPRay ID for a given geometry type
+ * @brief Utility class to deduce the Ospray geometry name for a given geometry type
  */
 template<typename T>
-class GeometryOSPRayID
+class OsprayGeometryName
 {
 public:
     /**
-     * @brief Returns the OSPRay ID of the type
+     * @brief Returns the Ospray name of the type
      */
     static std::string_view get()
     {
-        return "";
+        throw std::runtime_error("Unhandled geometry type");
+    }
+};
+
+template<typename T>
+class InputGeometryChecker
+{
+public:
+    static void check(const std::vector<T> &primitives)
+    {
+        if (primitives.size() >= std::numeric_limits<uint32_t>::max())
+        {
+            throw std::invalid_argument("Maximum number of primitives is 2^32 - 1");
+        }
     }
 };
 
@@ -80,190 +91,57 @@ public:
     /**
      * @brief Commits the type specific parameters
      */
-    static void commit(OSPGeometry handle, const std::vector<T> &geometries)
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<T> &primitives)
     {
-        (void)handle;
-        (void)geometries;
+        (void)osprayGeometry;
+        (void)primitives;
+        throw std::runtime_error("Unhandled geometry type");
     }
 };
 
 /**
- * @brief Utility class to perform custom checks when adding a new geometry to the Geometry object
- */
-template<typename T>
-class GeometryAddChecker
-{
-public:
-    static void check(const std::vector<T> &dstGeometryList, const T &inputGeometry)
-    {
-        (void)dstGeometryList;
-        (void)inputGeometry;
-    }
-
-    static void check(const std::vector<T> &dstGeometryList, const std::vector<T> &inputGeometryList)
-    {
-        (void)dstGeometryList;
-        (void)inputGeometryList;
-    }
-};
-
-/**
- * @brief The Geometry class is a templated class to easily manage OSPRay geometry at a high level.
+ * @brief The Geometry class is a templated class to easily manage Ospray geometry at a high level.
  * It allows to add, retrieve and manipulate Geometry.
  */
 template<typename T>
 class Geometry
 {
 public:
-    Geometry()
-        : _handle(ospNewGeometry(GeometryOSPRayID<T>::get().data()))
+    Geometry(T primitive)
+        : _osprayGeometry(OsprayGeometryName<T>::get().data())
     {
+        _primitives.push_back(std::move(primitive));
+        InputGeometryChecker<T>::check(_primitives);
     }
 
-    Geometry(const Geometry &) = delete;
-    Geometry &operator=(const Geometry &o) = delete;
-
-    Geometry(Geometry &&o) noexcept
+    Geometry(std::vector<T> primitives)
+        : _osprayGeometry(OsprayGeometryName<T>::get().data())
+        , _primitives(std::move(primitives))
     {
-        *this = std::move(o);
-    }
-
-    Geometry &operator=(Geometry &&o) noexcept
-    {
-        _geometries = std::move(o._geometries);
-        _dirty = o._dirty;
-        std::swap(_handle, o._handle);
-        return *this;
-    }
-
-    ~Geometry()
-    {
-        ospRelease(_handle);
-    }
-
-    /**
-     * @brief Adds a new gometry primitive to the list. OSPRay is limited to 2^32 geometries per model.
-     * @throws std::runtime_error if the Geometry buffer is already at full capacity.
-     * @returns the index at which the given geometry was added to the buffer. This index is the same that
-     * OSPRay will use as 'primID' within itself.
-     */
-    uint32_t add(T geometry)
-    {
-        GeometryAddChecker<T>::check(_geometries, geometry);
-
-        const auto idx = _geometries.size();
-        constexpr auto limit = std::numeric_limits<uint32_t>::max();
-        if (idx >= limit)
-        {
-            throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
-        }
-
-        _geometries.push_back(std::move(geometry));
-        _dirty = true;
-        return static_cast<uint32_t>(idx);
-    }
-
-    /**
-     * @brief Adds a list of geometries to the geometry buffer. OSPRay is limited to 2^32 geometries per model.
-     * @throws std::runtime_error if the contents of the Geometry buffer plus the new geometries surpass the
-     * maximum capacity.
-     * @returns A list of indices at which the given list of geometries were added to the buffer. These indices,
-     * returned in the same order as the input geometries, are the same that OSPRay will use as 'primID' within itself.
-     */
-    std::vector<uint32_t> add(const std::vector<T> &geometries)
-    {
-        GeometryAddChecker<T>::check(_geometries, geometries);
-
-        const auto idx = _geometries.size();
-        const auto endIdx = idx + geometries.size();
-        constexpr auto limit = std::numeric_limits<uint32_t>::max();
-        if (idx >= limit || endIdx >= limit)
-        {
-            throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
-        }
-
-        _geometries.insert(_geometries.end(), geometries.begin(), geometries.end());
-
-        std::vector<uint32_t> result(geometries.size());
-        std::iota(result.begin(), result.end(), static_cast<uint32_t>(idx));
-        _dirty = true;
-        return result;
-    }
-
-    /**
-     * @brief Sets the primitives of this geometry object. Returns the list of indices that correspond
-     * to the added geometries
-     *
-     * @param geometries
-     * @return std::vector<uint32_t>
-     */
-    std::vector<uint32_t> set(std::vector<T> geometries)
-    {
-        GeometryAddChecker<T>::check(_geometries, geometries);
-
-        constexpr auto limit = std::numeric_limits<uint32_t>::max();
-        if (geometries.size() >= limit)
-        {
-            throw std::runtime_error("OSPRay is limited to 2^32 geometries per model");
-        }
-        _geometries = std::move(geometries);
-        std::vector<uint32_t> result(_geometries.size());
-        std::iota(result.begin(), result.end(), 0u);
-        _dirty = true;
-        return result;
-    }
-
-    /**
-     * @brief Retrieves a constant reference to a geometry given its index in the Geometry buffer.
-     * @throws std::invalid_argument if the given index goes beyond the Geometry buffer size.
-     */
-    const T &get(const uint32_t index) const
-    {
-        _checkIndex(index);
-        return _geometries[index];
+        InputGeometryChecker<T>::check(_primitives);
     }
 
     /**
      * @brief Retrieves all geometry primitives in this Geometry object
      */
-    const std::vector<T> &getAll() const noexcept
+    const std::vector<T> &getPrimitives() const noexcept
     {
-        return _geometries;
-    }
-
-    /**
-     * @brief Allows to pass a callback to manipulate a Geometry identified by its index in the Geometry buffer.
-     * The callback must have the signature void(GeometryType&).
-     * @throws std::invalid_argument if the given index goes beyond the Geometry buffer size.
-     */
-    void manipulateGeometry(const uint32_t index, const std::function<void(T &)> &manipulationCallback)
-    {
-        _checkIndex(index);
-        auto &geometry = _geometries[index];
-        _dirty = true;
-        manipulationCallback(geometry);
+        return _primitives;
     }
 
     /**
      * @brief Allows to pass a callback to mainipulate all the geometries on thie Geometry buffer.
      * The callback must have the signature void(const uint32_t index, GeometryType&).
      */
-    void forEach(const std::function<void(const uint32_t, T &)> &mainpulationCallback)
+    template<typename Callable>
+    void forEach(const Callable &callback)
     {
         _dirty = true;
-        const auto end = static_cast<uint32_t>(_geometries.size());
+        const auto end = static_cast<uint32_t>(_primitives.size());
         for (uint32_t i = 0; i < end; ++i)
         {
-            mainpulationCallback(i, _geometries[i]);
+            callback(i, _primitives[i]);
         }
-    }
-
-    /**
-     * @brief Returns the number of geometries on the Geometry buffer
-     */
-    uint32_t getNumGeometries() const noexcept
-    {
-        return _geometries.size();
     }
 
     /**
@@ -280,9 +158,9 @@ public:
             Bounds local;
 
 #pragma omp for
-            for (size_t i = 0; i < _geometries.size(); ++i)
+            for (size_t i = 0; i < _primitives.size(); ++i)
             {
-                const auto &geometry = _geometries[i];
+                const auto &geometry = _primitives[i];
                 GeometryBoundsUpdater<T>::update(geometry, transform, local);
             }
 
@@ -294,7 +172,7 @@ public:
     }
 
     /**
-     * @brief Will attempt to synchronize the geometry data with OSPRay, if any changes since the previous
+     * @brief Will attempt to synchronize the geometry data with Ospray, if any changes since the previous
      * synchronization has happen. It will call the commitGeometrySpecificParams(), which must have been
      * specialized for the geometry type being handled.
      */
@@ -305,41 +183,25 @@ public:
             return false;
         }
 
-        if (!_geometries.empty())
-        {
-            GeometryCommitter<T>::commit(_handle, _geometries);
-        }
+        GeometryCommitter<T>::commit(_osprayGeometry, _primitives);
+        _osprayGeometry.commit();
 
-        ospCommit(_handle);
         _dirty = false;
+
         return true;
     }
 
     /**
-     * @brief Returns the OSPRay geometry object handle
+     * @brief Returns the Ospray geometry object handle
      */
-    OSPGeometry handle() const noexcept
+    const ospray::cpp::Geometry &getOsprayGeometry() const noexcept
     {
-        return _handle;
+        return _osprayGeometry;
     }
 
 private:
-    /**
-     * @brief Retrieves a geometry from the buffer given its index.
-     * @throws std::invalid_argument if the index is beyond the buffer size.
-     */
-    void _checkIndex(const uint32_t index) const
-    {
-        const auto size = static_cast<uint32_t>(_geometries.size());
-        if (index >= size)
-        {
-            throw std::invalid_argument("Geometry index out of range");
-        }
-    }
-
-private:
-    OSPGeometry _handle{nullptr};
+    ospray::cpp::Geometry _osprayGeometry;
     bool _dirty{false};
-    std::vector<T> _geometries;
+    std::vector<T> _primitives;
 };
 }

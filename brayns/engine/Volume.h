@@ -22,10 +22,8 @@
 
 #include <brayns/common/Bounds.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/Volume.h>
 
-#include <functional>
-#include <memory>
 #include <numeric>
 #include <string_view>
 #include <vector>
@@ -58,7 +56,7 @@ public:
  * @brief Utility class to deduce the OSPRay ID for a given volume type
  */
 template<typename T>
-class VolumeOSPRayID
+class OsprayVolumeName
 {
 public:
     /**
@@ -66,7 +64,7 @@ public:
      */
     static std::string_view get()
     {
-        return "";
+        throw std::runtime_error("Unhandled volume type");
     }
 };
 
@@ -80,10 +78,11 @@ public:
     /**
      * @brief Commits the type specific parameters
      */
-    static void commit(OSPVolume handle, const T &volumeData)
+    static void commit(const ospray::cpp::Volume &osprayVolume, const T &volumeData)
     {
-        (void)handle;
+        (void)osprayVolume;
         (void)volumeData;
+        throw std::runtime_error("Unhandled volume type");
     }
 };
 
@@ -95,39 +94,10 @@ template<typename T>
 class Volume
 {
 public:
-    Volume()
-        : _handle(ospNewVolume(VolumeOSPRayID<T>::get().data()))
+    Volume(T data)
+        : _osprayVolume(OsprayVolumeName<T>::get())
+        , _volumeData(std::move(data))
     {
-    }
-
-    Volume(const Volume &) = delete;
-    Volume &operator=(const Volume &) = delete;
-
-    Volume(Volume &&o) noexcept
-    {
-        *this = std::move(o);
-    }
-
-    Volume &operator=(Volume &&o) noexcept
-    {
-        std::swap(_handle, o._handle);
-        _dirty = o._dirty;
-        _volumeData = std::move(o._volumeData);
-        return *this;
-    }
-
-    ~Volume()
-    {
-        ospRelease(_handle);
-    }
-
-    /**
-     * @brief Sets the data of this volume, which will trigger a commit of the data to OSPRay
-     */
-    void setData(T volumeData) noexcept
-    {
-        _volumeData = std::move(volumeData);
-        _dirty = true;
     }
 
     /**
@@ -141,7 +111,8 @@ public:
     /**
      * @brief Allows to pass a callback to modify the volume data, which will trigger a commit of the data to OSPRay
      */
-    void manipulate(const std::function<void(T &volumeData)> &callback)
+    template<typename Callable>
+    void manipulate(const Callable &callback)
     {
         callback(_volumeData);
         _dirty = true;
@@ -158,11 +129,11 @@ public:
             return false;
         }
 
-        VolumeCommitter<T>::commit(_handle, _volumeData);
-
-        ospCommit(_handle);
+        VolumeCommitter<T>::commit(_osprayVolume, _volumeData);
+        _osprayVolume.commit();
 
         _dirty = false;
+
         return true;
     }
 
@@ -182,13 +153,13 @@ public:
      *
      * @return OSPVolume
      */
-    OSPVolume handle() const noexcept
+    const ospray::cpp::Volume &getOsprayVolume() const noexcept
     {
-        return _handle;
+        return _osprayVolume;
     }
 
 private:
-    OSPVolume _handle{nullptr};
+    ospray::cpp::Volume _osprayVolume;
     bool _dirty{false};
     T _volumeData;
 };

@@ -18,7 +18,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/materials/MatteMaterial.h>
+#include "MatteMaterial.h"
+
+#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+
+namespace
+{
+class MatteParameterUpdater
+{
+public:
+    static void update(const brayns::MatteMaterial &material)
+    {
+        static const std::string colorParameter = "baseColor";
+        static const std::string roughnessParameter = "roughness";
+        static const std::string opacityParameter = "opacity";
+
+        const auto overridedColorWhite = brayns::Vector3f(1.f);
+        constexpr float roughness = 1.f;
+        auto opacity = material.getOpacity();
+
+        const auto &osprayMaterial = material.getOsprayMaterial();
+        osprayMaterial.setParam(colorParameter, overridedColorWhite);
+        osprayMaterial.setParam(roughnessParameter, roughness);
+        osprayMaterial.setParam(opacityParameter, opacity);
+    }
+};
+}
 
 namespace brayns
 {
@@ -44,13 +69,6 @@ float MatteMaterial::getOpacity() const noexcept
 
 void MatteMaterial::commitMaterialSpecificParams()
 {
-    constexpr float roughness = 1.f;
-    const auto overridedColorWhite = brayns::Vector3f(1.f);
-
-    auto ospHandle = handle();
-
-    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &overridedColorWhite);
-    ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &roughness);
-    ospSetParam(ospHandle, "opacity", OSPDataType::OSP_FLOAT, &_opacity);
+    MatteParameterUpdater::update(*this);
 }
 }

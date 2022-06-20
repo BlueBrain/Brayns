@@ -27,6 +27,8 @@
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 
+#include <ospray/ospray_cpp/Device.h>
+
 namespace brayns
 {
 /**
@@ -38,7 +40,7 @@ class Engine
 {
 public:
     /**
-     * @brief Initializes OSPRay and register core engine objects available for use (cameras, renderers, materials
+     * @brief Initializes Ospray and register core engine objects available for use (cameras, renderers, materials
      * and lights)
      */
     Engine(ParametersManager &parameters);
@@ -51,7 +53,7 @@ public:
     void preRender();
 
     /**
-     * @brief Ensures that all the system data is updated on the OSPRay rendered backend to ensure the
+     * @brief Ensures that all the system data is updated on the Ospray rendered backend to ensure the
      * correct frame rendering. Called before render()
      */
     void commit();
@@ -116,7 +118,7 @@ private:
     // Global system parameters used to read when updating the backend during commit() and render()
     ParametersManager &_params;
 
-    OSPDevice _device{nullptr};
+    ospray::cpp::Device _osprayDevice;
 
     // System objects
     FrameBuffer _frameBuffer;

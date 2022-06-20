@@ -32,7 +32,7 @@ struct Sphere
 };
 
 template<>
-class GeometryOSPRayID<Sphere>
+class OsprayGeometryName<Sphere>
 {
 public:
     static std::string_view get();
@@ -49,6 +49,6 @@ template<>
 class GeometryCommitter<Sphere>
 {
 public:
-    static void commit(OSPGeometry handle, const std::vector<Sphere> &geometries);
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Sphere> &primitives);
 };
 }

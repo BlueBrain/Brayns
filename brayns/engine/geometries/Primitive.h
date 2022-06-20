@@ -40,7 +40,7 @@ struct Primitive
 };
 
 template<>
-class GeometryOSPRayID<Primitive>
+class OsprayGeometryName<Primitive>
 {
 public:
     static std::string_view get();
@@ -57,6 +57,6 @@ template<>
 class GeometryCommitter<Primitive>
 {
 public:
-    static void commit(OSPGeometry handle, const std::vector<Primitive> &geometries);
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Primitive> &primitives);
 };
 }

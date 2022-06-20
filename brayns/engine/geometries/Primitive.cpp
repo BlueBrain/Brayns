@@ -18,7 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/geometries/Primitive.h>
+#include "Primitive.h"
+
+#include <ospray/ospray_cpp/Data.h>
 
 namespace brayns
 {
@@ -37,7 +39,7 @@ Primitive Primitive::sphere(const Vector3f &center, const float radius) noexcept
     return Primitive{center, radius, center + Vector3f(0.f, .01f, 0.f), radius};
 }
 
-std::string_view GeometryOSPRayID<Primitive>::get()
+std::string_view OsprayGeometryName<Primitive>::get()
 {
     return "curve";
 }
@@ -57,32 +59,30 @@ void GeometryBoundsUpdater<Primitive>::update(const Primitive &p, const Matrix4f
     b.expand(Vector3f(t * Vector4f(p1Max, 1.f)));
 }
 
-void GeometryCommitter<Primitive>::commit(OSPGeometry handle, const std::vector<Primitive> &geometries)
+void GeometryCommitter<Primitive>::commit(
+    const ospray::cpp::Geometry &osprayGeometry,
+    const std::vector<Primitive> &primitives)
 {
-    const auto numGeoms = geometries.size();
+    static const std::string typeParameter = "type";
+    static const std::string basisParameter = "basis";
+    static const std::string positionRadiusParameter = "vertex.position_radius";
+    static const std::string indexParameter = "index";
 
-    std::vector<uint32_t> indexData(numGeoms);
-    for (uint32_t i = 0, index = 0; i < numGeoms; ++i, index = index + 2)
+    const auto numPrimitives = primitives.size();
+
+    std::vector<uint32_t> indexData(numPrimitives);
+    for (uint32_t i = 0, index = 0; i < numPrimitives; ++i, index = index + 2)
     {
         indexData[i] = index;
     }
 
-    const auto type = OSP_ROUND;
-    const auto basis = OSP_LINEAR;
+    const auto type = OSPCurveType::OSP_ROUND;
+    const auto basis = OSPCurveBasis::OSP_LINEAR;
 
-    OSPData primitiveDataHandle = ospNewSharedData(geometries.data(), OSPDataType::OSP_VEC4F, numGeoms * 2);
-
-    OSPData indexSharedDataHandle = ospNewSharedData(indexData.data(), OSPDataType::OSP_UINT, numGeoms);
-    OSPData indexDataHandle = ospNewData(OSPDataType::OSP_UINT, numGeoms);
-    ospCopyData(indexSharedDataHandle, indexDataHandle);
-    ospRelease(indexSharedDataHandle);
-
-    ospSetParam(handle, "type", OSP_UCHAR, &type);
-    ospSetParam(handle, "basis", OSP_UCHAR, &basis);
-    ospSetParam(handle, "vertex.position_radius", OSP_DATA, &primitiveDataHandle);
-    ospSetParam(handle, "index", OSP_DATA, &indexDataHandle);
-
-    ospRelease(primitiveDataHandle);
-    ospRelease(indexDataHandle);
+    osprayGeometry.setParam(typeParameter, type);
+    osprayGeometry.setParam(basisParameter, basis);
+    osprayGeometry.setParam(indexParameter, ospray::cpp::CopiedData(indexData));
+    ospray::cpp::SharedData primitivesData(primitives.data(), OSPDataType::OSP_VEC4F, numPrimitives * 2);
+    osprayGeometry.setParam(positionRadiusParameter, primitivesData);
 }
 }

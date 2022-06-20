@@ -20,29 +20,17 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
+#include <brayns/common/MathTypes.h>
 
-namespace brayns
+#include <ospray/ospray_cpp/Traits.h>
+
+namespace ospray
 {
-struct SizeHelper
-{
-    template<typename T>
-    static size_t vectorSize(const std::vector<T> &vector)
-    {
-        return sizeof(T) * vector.capacity();
-    }
-
-    template<typename T>
-    static size_t vectorSize(const std::vector<std::unique_ptr<T>> &vector)
-    {
-        return (sizeof(T) + sizeof(std::unique_ptr<T>)) * vector.capacity();
-    }
-
-    template<typename T>
-    static size_t vectorSize(const std::vector<std::shared_ptr<T>> &vector)
-    {
-        return (sizeof(T) + sizeof(std::shared_ptr<T>)) * vector.capacity();
-    }
-};
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector2f, OSP_VEC2F)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector2i, OSP_VEC2I)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector2ui, OSP_VEC2UI)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector3f, OSP_VEC3F)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector3i, OSP_VEC3I)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector3ui, OSP_VEC3UI)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector4f, OSP_VEC4F)
 }
