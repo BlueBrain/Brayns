@@ -28,6 +28,8 @@
 #include <stdexcept>
 #include <unordered_map>
 
+#include <brayns/utils/StringUtils.h>
+
 namespace
 {
 using Argv = std::unordered_map<std::string, std::vector<brayns::ArgvValue>>;
@@ -112,32 +114,6 @@ private:
     }
 };
 
-class ArgvTokenSplitter
-{
-public:
-    static std::vector<std::string> split(const std::string &token)
-    {
-        std::vector<std::string> tokens;
-        if (token.empty())
-        {
-            return {};
-        }
-        auto count = std::count_if(token.begin(), token.end(), [](auto c) { return std::isspace(c); });
-        tokens.reserve(count + 1);
-        size_t start = 0;
-        for (size_t i = 0; i < token.size(); ++i)
-        {
-            auto c = token[i];
-            if (std::isspace(c))
-            {
-                auto item = token.substr(start, start - i);
-                tokens.push_back(std::move(item));
-            }
-        }
-        return tokens;
-    }
-};
-
 class ArgvItemCountValidator
 {
 public:
@@ -191,7 +167,13 @@ public:
 
     double extract(const std::string &token)
     {
-        auto value = std::stod(token);
+        double value;
+        std::istringstream stream(token);
+        stream >> value;
+        if (stream.fail())
+        {
+            throw std::runtime_error(_invalidNumber(token));
+        }
         _validate(value);
         return value;
     }
@@ -450,7 +432,7 @@ private:
         {
             return {token};
         }
-        return ArgvTokenSplitter::split(token);
+        return brayns::string_utils::split(token, ' ');
     }
 
     bool _parse(const std::vector<std::string> &tokens, std::vector<brayns::ArgvValue> &values)

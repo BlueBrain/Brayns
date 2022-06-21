@@ -60,7 +60,7 @@ void ApplicationParameters::build(ArgvBuilder &builder)
 {
     builder.add("plugin", _plugins, "Plugins libraries to load").composable();
     builder.add("log-level", _logLevel, "Log level");
-    builder.add("window-size", _windowSize, "Viewport size");
+    builder.add("window-size", _windowSize, "Viewport size").minimum(64);
     builder.add("jpeg-quality", _jpegQuality, "JPEG stream quality").between(0, 100);
 }
 } // namespace brayns
