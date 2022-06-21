@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,21 +21,21 @@
 
 #pragma once
 
-#include <brayns/utils/EnumUtils.h>
+#include <string>
+#include <vector>
 
-/**
- * @brief Methods availables to color a vasculature circuit by (if corresponding data is available as well)
- */
-enum class VasculatureColorMethods
-{
-    BySection
-};
+#include "ArgvProperty.h"
 
 namespace brayns
 {
-template<>
-inline std::vector<std::pair<std::string, VasculatureColorMethods>> enumMap()
+class ArgvParser
 {
-    return {{"vasculature section", VasculatureColorMethods::BySection}};
-}
-}
+public:
+    ArgvParser(const std::vector<ArgvProperty> &properties);
+
+    void parse(int argc, const char **argv);
+
+private:
+    const std::vector<ArgvProperty> &_properties;
+};
+} // namespace brayns

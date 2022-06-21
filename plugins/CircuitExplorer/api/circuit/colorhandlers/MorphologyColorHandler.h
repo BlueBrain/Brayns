@@ -23,7 +23,7 @@
 #include <brayns/engine/Model.h>
 
 #include <api/coloring/IColorHandler.h>
-#include <api/neuron/NeuronColorMethods.h>
+#include <api/neuron/NeuronColorMethod.h>
 #include <components/MorphologyCircuitComponent.h>
 
 /**

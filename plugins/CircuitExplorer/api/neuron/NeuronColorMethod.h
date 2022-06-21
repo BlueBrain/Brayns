@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include <brayns/utils/EnumUtils.h>
+#include <brayns/utils/EnumInfo.h>
 
 /**
  * @brief Methods availables to color a neuron circuit by (if corresponding data is available as well)
  */
-enum class NeuronColorMethods
+enum class NeuronColorMethod
 {
     ByEtype,
     ByMtype,
@@ -41,17 +41,20 @@ enum class NeuronColorMethods
 namespace brayns
 {
 template<>
-inline std::vector<std::pair<std::string, NeuronColorMethods>> enumMap()
+struct EnumReflector<NeuronColorMethod>
 {
-    return {
-        {"etype", NeuronColorMethods::ByEtype},
-        {"mtype", NeuronColorMethods::ByMtype},
-        {"layer", NeuronColorMethods::ByLayer},
-        {"region", NeuronColorMethods::ByRegion},
-        {"hemisphere", NeuronColorMethods::ByHemisphere},
-        {"morphology", NeuronColorMethods::ByMorphology},
-        {"morphology class", NeuronColorMethods::ByMorphologyClass},
-        {"morphology section", NeuronColorMethods::ByMorphologySection},
-        {"synapse class", NeuronColorMethods::BySynapseClass}};
-}
+    static EnumMap<NeuronColorMethod> reflect()
+    {
+        return {
+            {"etype", NeuronColorMethod::ByEtype},
+            {"mtype", NeuronColorMethod::ByMtype},
+            {"layer", NeuronColorMethod::ByLayer},
+            {"region", NeuronColorMethod::ByRegion},
+            {"hemisphere", NeuronColorMethod::ByHemisphere},
+            {"morphology", NeuronColorMethod::ByMorphology},
+            {"morphology class", NeuronColorMethod::ByMorphologyClass},
+            {"morphology section", NeuronColorMethod::ByMorphologySection},
+            {"synapse class", NeuronColorMethod::BySynapseClass}};
+    }
+};
 }

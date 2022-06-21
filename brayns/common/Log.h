@@ -25,6 +25,8 @@
 #include <spdlog/fmt/ostr.h>
 #include <spdlog/spdlog.h>
 
+#include <brayns/utils/EnumInfo.h>
+
 namespace brayns
 {
 /**
@@ -41,6 +43,12 @@ enum class LogLevel
     Critical = spdlog::level::critical,
     Off = spdlog::level::off,
     Count = spdlog::level::n_levels
+};
+
+template<>
+struct EnumReflector<LogLevel>
+{
+    static EnumMap<LogLevel> reflect();
 };
 
 class Log

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/utils/EnumUtils.h>
+#include <brayns/utils/EnumInfo.h>
 
 #include <cstdint>
 
@@ -39,14 +39,17 @@ enum class VolumeDataType : uint32_t
 };
 
 template<>
-inline std::vector<std::pair<std::string, VolumeDataType>> enumMap<VolumeDataType>()
+struct EnumReflector<VolumeDataType>
 {
-    return {
-        {"unsinged_char", VolumeDataType::UnsignedChar},
-        {"short", VolumeDataType::Short},
-        {"unsigned_short", VolumeDataType::UnsignedShort},
-        {"half_float", VolumeDataType::HalfFloat},
-        {"float", VolumeDataType::Float},
-        {"double", VolumeDataType::Double}};
-}
+    static EnumMap<VolumeDataType> reflect()
+    {
+        return {
+            {"unsinged_char", VolumeDataType::UnsignedChar},
+            {"short", VolumeDataType::Short},
+            {"unsigned_short", VolumeDataType::UnsignedShort},
+            {"half_float", VolumeDataType::HalfFloat},
+            {"float", VolumeDataType::Float},
+            {"double", VolumeDataType::Double}};
+    }
+};
 }

@@ -1,6 +1,8 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -21,34 +23,21 @@
 #include <brayns/utils/EnumInfo.h>
 
 /**
- * @brief The VasculatureSection enum list holds all the available vasculature section types
+ * @brief Methods availables to color a vasculature circuit by (if corresponding data is available as well)
  */
-enum class VasculatureSection
+enum class VasculatureColorMethod
 {
-    Vein,
-    Artery,
-    Venule,
-    Arteriole,
-    VenousCapillary,
-    ArterialCapillary,
-    Transitional
+    BySection
 };
 
 namespace brayns
 {
 template<>
-struct EnumReflector<VasculatureSection>
+struct EnumReflector<VasculatureColorMethod>
 {
-    static EnumMap<VasculatureSection> reflect()
+    static EnumMap<VasculatureColorMethod> reflect()
     {
-        return {
-            {"vein", VasculatureSection::Vein},
-            {"artery", VasculatureSection::Artery},
-            {"venule", VasculatureSection::Venule},
-            {"arteriole", VasculatureSection::Arteriole},
-            {"venous capillary", VasculatureSection::VenousCapillary},
-            {"arterial capillary", VasculatureSection::ArterialCapillary},
-            {"transitional", VasculatureSection::Transitional}};
+        return {{"vasculature section", VasculatureColorMethod::BySection}};
     }
 };
-} // namespace brayns
+}

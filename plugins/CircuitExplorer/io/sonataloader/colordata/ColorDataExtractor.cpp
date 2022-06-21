@@ -18,14 +18,14 @@
 
 #include "ColorDataExtractor.h"
 
-#include <api/neuron/NeuronColorMethods.h>
+#include <api/neuron/NeuronColorMethod.h>
 
 namespace
 {
 // I dont like std pair
 struct AttributeMethodEntry
 {
-    NeuronColorMethods method;
+    NeuronColorMethod method;
     std::string attribute;
 };
 
@@ -37,23 +37,23 @@ struct AttributeMethodMapping
     static std::vector<AttributeMethodEntry> generate()
     {
         return {
-            {NeuronColorMethods::ByEtype, "etype"},
-            {NeuronColorMethods::ByHemisphere, "hemisphere"},
-            {NeuronColorMethods::ByLayer, "layer"},
-            {NeuronColorMethods::ByMorphology, "morphology"},
-            {NeuronColorMethods::ByMorphologyClass, "morph_class"},
-            {NeuronColorMethods::ByMtype, "mtype"},
-            {NeuronColorMethods::ByRegion, "region"},
-            {NeuronColorMethods::BySynapseClass, "synapse_class"}};
+            {NeuronColorMethod::ByEtype, "etype"},
+            {NeuronColorMethod::ByHemisphere, "hemisphere"},
+            {NeuronColorMethod::ByLayer, "layer"},
+            {NeuronColorMethod::ByMorphology, "morphology"},
+            {NeuronColorMethod::ByMorphologyClass, "morph_class"},
+            {NeuronColorMethod::ByMtype, "mtype"},
+            {NeuronColorMethod::ByRegion, "region"},
+            {NeuronColorMethod::BySynapseClass, "synapse_class"}};
     }
 
     static std::string getAttributeForMethod(const std::string &method)
     {
-        const auto enumEntry = brayns::stringToEnum<NeuronColorMethods>(method);
+        const auto enumEntry = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
         return getAttributeForMethod(enumEntry);
     }
 
-    static std::string getAttributeForMethod(const NeuronColorMethods method)
+    static std::string getAttributeForMethod(const NeuronColorMethod method)
     {
         const auto mapping = generate();
         const auto begin = mapping.begin();
@@ -62,7 +62,7 @@ struct AttributeMethodMapping
 
         if (it == mapping.end())
         {
-            throw std::invalid_argument("Unknown method " + brayns::enumToString<NeuronColorMethods>(method));
+            throw std::invalid_argument("Unknown method " + brayns::EnumInfo::getName(method));
         }
 
         return it->attribute;
@@ -133,7 +133,7 @@ std::vector<std::string> CellNodeColorMethods::get(const bbp::sonata::NodePopula
         const auto query = PopulationQuery::queryAny(population, attribute);
         if (!query.empty())
         {
-            auto methodName = brayns::enumToString<NeuronColorMethods>(method);
+            auto methodName = brayns::EnumInfo::getName(method);
             result.push_back(std::move(methodName));
         }
     }

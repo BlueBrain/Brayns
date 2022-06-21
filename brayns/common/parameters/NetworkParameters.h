@@ -36,18 +36,6 @@ class NetworkParameters : public AbstractParameters
 {
 public:
     /**
-     * @brief Register parameters.
-     *
-     */
-    NetworkParameters();
-
-    /**
-     * @brief Print the parameters.
-     *
-     */
-    virtual void print() override;
-
-    /**
      * @brief Check if the client mode is enabled.
      *
      * Default: false.
@@ -184,6 +172,20 @@ public:
      * @param caLocation CA file or directory.
      */
     void setCALocation(const std::string &caLocation) noexcept;
+
+    /**
+     * @brief Used to get a display name for the parameter set.
+     *
+     * @return std::string Display name.
+     */
+    virtual std::string getName() const override;
+
+    /**
+     * @brief Register argv properties of the parameter set.
+     *
+     * @param builder Helper class to register argv properties.
+     */
+    virtual void build(ArgvBuilder &builder) override;
 
 private:
     bool _client = false;

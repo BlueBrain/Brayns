@@ -20,7 +20,7 @@
 
 #include <brayns/utils/StringUtils.h>
 
-#include <api/neuron/NeuronColorMethods.h>
+#include <api/neuron/NeuronColorMethod.h>
 
 #include <brain/brain.h>
 #include <brion/brion.h>
@@ -290,25 +290,25 @@ std::vector<std::string> BBPColorMethods::get(const std::string &circuitPath, co
     const auto layerData = circuit->getLayers({1});
     if (!layerData.empty() && !layerData[0].empty())
     {
-        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::ByLayer));
+        result.push_back(brayns::EnumInfo::getName(NeuronColorMethod::ByLayer));
     }
 
     const auto mTypeData = circuit->getMTypes({1});
     if (!mTypeData.empty() && !mTypeData[0].empty())
     {
-        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::ByMtype));
+        result.push_back(brayns::EnumInfo::getName(NeuronColorMethod::ByMtype));
     }
 
     const auto eTypeData = circuit->getETypes({1});
     if (!eTypeData.empty() && !eTypeData[0].empty())
     {
-        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::ByEtype));
+        result.push_back(brayns::EnumInfo::getName(NeuronColorMethod::ByEtype));
     }
 
     const auto morphData = circuit->getMorphologyNames({1});
     if (!morphData.empty() && !morphData[0].empty())
     {
-        result.push_back(brayns::enumToString<NeuronColorMethods>(NeuronColorMethods::ByMorphology));
+        result.push_back(brayns::EnumInfo::getName(NeuronColorMethod::ByMorphology));
     }
 
     return result;
@@ -320,29 +320,29 @@ std::vector<std::string> BBPColorValues::get(
     const std::string &method,
     const std::vector<uint64_t> &ids)
 {
-    const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
+    const auto methodEnum = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
     const auto circuit = CircuitFactory::instantiate(circuitPath, population);
 
     std::vector<std::string> result;
 
     switch (methodEnum)
     {
-    case NeuronColorMethods::ByLayer:
+    case NeuronColorMethod::ByLayer:
     {
         result = circuit->getLayers(ids);
         break;
     }
-    case NeuronColorMethods::ByEtype:
+    case NeuronColorMethod::ByEtype:
     {
         result = circuit->getETypes(ids);
         break;
     }
-    case NeuronColorMethods::ByMtype:
+    case NeuronColorMethod::ByMtype:
     {
         result = circuit->getMTypes(ids);
         break;
     }
-    case NeuronColorMethods::ByMorphology:
+    case NeuronColorMethod::ByMorphology:
     {
         result = circuit->getMorphologyNames(ids);
         break;

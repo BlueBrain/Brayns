@@ -21,93 +21,31 @@
 
 #include <brayns/common/BaseObject.h>
 
-#include <boost/program_options.hpp>
-#include <boost/program_options/value_semantic.hpp>
-
-namespace po = boost::program_options;
+#include "argv/ArgvBuilder.h"
 
 namespace brayns
 {
 /**
-   Base class defining command line parameters
+ * @brief Base class for brayns parameter sets.
+ *
  */
 class AbstractParameters : public BaseObject
 {
 public:
-    /**
-       Constructor
-       @param name Display name for the set of parameters
-     */
-    AbstractParameters(const std::string &name);
-
     virtual ~AbstractParameters() = default;
 
     /**
-       Parses parameters managed by the class
-       @param vm the variables map of all arguments passed by the user
+     * @brief Used to get a display name for the parameter set.
+     *
+     * @return std::string Display name.
      */
-    virtual void parse(const po::variables_map &){};
+    virtual std::string getName() const = 0;
 
     /**
-       Displays values of registered parameters
+     * @brief Register argv properties of the parameter set.
+     *
+     * @param builder Helper class to register argv properties.
      */
-    virtual void print();
-
-    po::options_description &parameters();
-
-protected:
-    std::string _name;
-    po::options_description _parameters;
-
-    static std::string asString(const bool flag);
+    virtual void build(ArgvBuilder &builder) = 0;
 };
 } // namespace brayns
-
-namespace boost
-{
-namespace program_options
-{
-/**
- * Wrapper for supporting fixed size multitoken values
- */
-template<typename T, typename charT = char>
-class fixed_tokens_typed_value : public typed_value<T, charT>
-{
-    const unsigned _min;
-    const unsigned _max;
-
-    typedef typed_value<T, charT> base;
-
-public:
-    fixed_tokens_typed_value(T *t, unsigned min, unsigned max)
-        : base(t)
-        , _min(min)
-        , _max(max)
-    {
-        base::multitoken();
-    }
-
-    unsigned min_tokens() const
-    {
-        return _min;
-    }
-
-    unsigned max_tokens() const
-    {
-        return _max;
-    }
-};
-
-template<typename T>
-fixed_tokens_typed_value<T> *fixed_tokens_value(unsigned min, unsigned max)
-{
-    return new fixed_tokens_typed_value<T>(nullptr, min, max);
-}
-
-template<typename T>
-fixed_tokens_typed_value<T> *fixed_tokens_value(T *t, unsigned min, unsigned max)
-{
-    return new fixed_tokens_typed_value<T>(t, min, max);
-}
-} // namespace program_options
-} // namespace boost

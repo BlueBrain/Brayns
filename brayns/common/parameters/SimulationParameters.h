@@ -28,13 +28,6 @@ namespace brayns
 class SimulationParameters : public AbstractParameters
 {
 public:
-    SimulationParameters();
-
-    /**
-     * @brief print implementation to print this parameters
-     */
-    void print() final;
-
     /**
      * @brief reset resets the parameters to no simulation state:
      * - dt = 0.0
@@ -44,71 +37,93 @@ public:
     void reset();
 
     /**
-     * @brief setStartFrame sets the first absolute frame
+     * @brief Sets the first absolute frame
      * numbers of the loaded simulations. It is computed
      * from the loaded simulations, using the simulation with the earliest
      * start time.
-     * @param startFrame uint32_t first absolute frame
+     *
+     * @param startFrame uint32_t First absolute frame.
      */
     void setStartFrame(const uint32_t startFrame) noexcept;
 
     /**
-     * @brief setEndFrame sets the last absolute frame
+     * @brief Sets the last absolute frame
      * numbers of the loaded simulations. It is computed
      * from the loaded simulations, using the simulation with the latest
      * end time.
-     * @param startFrame uint32_t first absolute frame
+     *
+     * @param startFrame uint32_t First absolute frame.
      */
     void setEndFrame(const uint32_t endFrame) noexcept;
 
     /**
-     * @brief getStartFrame returns the first absolute frame number
-     * @return uint32_t
+     * @brief Returns the first absolute frame number.
+     *
+     * @return uint32_t Start frame index.
      */
     uint32_t getStartFrame() const noexcept;
 
     /**
-     * @brief getEndFrame returns the last absolute frame number
-     * @return uint32_t
+     * @brief getEndFrame returns the last absolute frame number.
+     *
+     * @return uint32_t End frame index.
      */
     uint32_t getEndFrame() const noexcept;
 
     /**
-     * @brief sets the current frame.
-     * @param value uint32_t
+     * @brief Sets the current frame.
+     *
+     * @param value uint32_t Current frame index.
      */
     void setFrame(const uint32_t value) noexcept;
 
     /**
-     * @brief getFrame returns the current frame.
-     * @return uint32_t
+     * @brief Returns the current frame.
+     *
+     * @return uint32_t Current frame index.
      */
     uint32_t getFrame() const noexcept;
 
     /**
-     * @brief setDt sets the simulation timestep (in milliseconds)
-     * @param dt double timestep in milliseconds
+     * @brief Sets the simulation timestep (in milliseconds).
+     *
+     * @param dt double timestep in milliseconds.
      */
     void setDt(const double dt) noexcept;
 
     /**
-     * @brief getDt returns the simulation timestep (in milliseconds)
-     * @return double
+     * @brief Returns the simulation timestep (in milliseconds).
+     *
+     * @return double Timestep.
      */
     double getDt() const noexcept;
 
     /**
-     * @brief getTimeUnit returns a string representing the time unit in which
-     * the simulation runs. It is always millisecconds ("ms")
-     * @return const std::string&
+     * @brief Return "ms".
+     *
+     * @return const std::string& Time unit used as string.
      */
     const std::string &getTimeUnit() const noexcept;
+
+    /**
+     * @brief Used to get a display name for the parameter set.
+     *
+     * @return std::string Display name.
+     */
+    virtual std::string getName() const override;
+
+    /**
+     * @brief Register argv properties of the parameter set.
+     *
+     * @param builder Helper class to register argv properties.
+     */
+    virtual void build(ArgvBuilder &builder) override;
 
 private:
     uint32_t _startFrame{0};
     uint32_t _endFrame{0};
     uint32_t _current{0};
-    double _dt{0};
+    double _dt{0.0};
     const std::string _unit = "ms";
 };
 } // namespace brayns

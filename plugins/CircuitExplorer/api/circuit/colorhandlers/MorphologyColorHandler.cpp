@@ -21,7 +21,7 @@
 #include "MorphologyColorHandler.h"
 
 #include <api/coloring/ColorUtils.h>
-#include <api/neuron/NeuronColorMethods.h>
+#include <api/neuron/NeuronColorMethod.h>
 
 MorphologyColorHandler::MorphologyColorHandler(MorphologyCircuitComponent &circuit)
     : _circuit(circuit)
@@ -68,8 +68,8 @@ void MorphologyColorHandler::_colorWithInput(
     const std::string &method,
     const std::vector<ColoringInformation> &vars)
 {
-    const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
-    if (methodEnum == NeuronColorMethods::ByMorphologySection)
+    const auto methodEnum = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
+    if (methodEnum == NeuronColorMethod::ByMorphologySection)
     {
         std::vector<std::pair<NeuronSection, brayns::Vector4f>> sectionColorMap;
         sectionColorMap.reserve(vars.size());
@@ -78,7 +78,7 @@ void MorphologyColorHandler::_colorWithInput(
         {
             const auto &sectionName = variable.variable;
             const auto &sectionColor = variable.color;
-            auto sectionType = brayns::stringToEnum<NeuronSection>(sectionName);
+            auto sectionType = brayns::EnumInfo::getValue<NeuronSection>(sectionName);
             sectionColorMap.push_back(std::make_pair(sectionType, sectionColor));
         }
 
@@ -119,8 +119,8 @@ void MorphologyColorHandler::_colorWithInput(
 
 void MorphologyColorHandler::_colorAll(const IColorData &colorData, const std::string &method)
 {
-    const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
-    if (methodEnum == NeuronColorMethods::ByMorphologySection)
+    const auto methodEnum = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
+    if (methodEnum == NeuronColorMethod::ByMorphologySection)
     {
         ColorRoulette roulette;
         const std::vector<std::pair<NeuronSection, brayns::Vector4f>> sectionColorMap = {

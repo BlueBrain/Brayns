@@ -120,8 +120,8 @@ public:
 
     void addInvalidType(JsonType type, JsonType schemaType)
     {
-        auto &typeName = GetJsonTypeName::fromType(type);
-        auto &schemaTypeName = GetJsonTypeName::fromType(schemaType);
+        auto &typeName = EnumInfo::getName(type);
+        auto &schemaTypeName = EnumInfo::getName(schemaType);
         addInvalidType(typeName, schemaTypeName);
     }
 
@@ -138,7 +138,7 @@ public:
         addError(stream.str());
     }
 
-    void addInvalidEnum(const JsonValue &json, const std::vector<JsonValue> &enums)
+    void addInvalidEnum(const JsonValue &json, const std::vector<std::string> &enums)
     {
         std::ostringstream stream;
         stream << "Invalid enum";
@@ -150,11 +150,11 @@ public:
         stream << ": '" << json.toString() << "' not in [";
         if (!enums.empty())
         {
-            stream << enums[0].toString();
+            stream << "'" << enums[0] << "'";
         }
         for (size_t i = 1; i < enums.size(); ++i)
         {
-            stream << ", " << enums[i].toString();
+            stream << ", '" << enums[i] << "'";
         }
         stream << "]";
         addError(stream.str());
@@ -296,9 +296,10 @@ private:
 
     void _validateEnum(const JsonValue &json, const JsonSchema &schema)
     {
-        for (const auto &value : schema.enums)
+        const auto &value = json.extract<std::string>();
+        for (const auto &item : schema.enums)
         {
-            if (json == value)
+            if (value == item)
             {
                 return;
             }

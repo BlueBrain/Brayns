@@ -18,7 +18,7 @@
 
 #include "AstrocyteColorData.h"
 
-#include <api/neuron/NeuronColorMethods.h>
+#include <api/neuron/NeuronColorMethod.h>
 #include <api/neuron/NeuronSection.h>
 #include <io/sonataloader/colordata/ColorDataExtractor.h>
 
@@ -35,18 +35,18 @@ std::vector<std::string> AstrocyteColorData::getMethods() const noexcept
 {
     auto base = CellNodeColorMethods::get(_nodes);
 
-    auto bySectionMethod = brayns::enumToString(NeuronColorMethods::ByMorphologySection);
+    auto bySectionMethod = brayns::EnumInfo::getName(NeuronColorMethod::ByMorphologySection);
     base.push_back(std::move(bySectionMethod));
     return base;
 }
 
 std::vector<std::string> AstrocyteColorData::getMethodVariables(const std::string &method) const
 {
-    const auto methodEnum = brayns::stringToEnum<NeuronColorMethods>(method);
+    const auto methodEnum = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
 
-    if (methodEnum == NeuronColorMethods::ByMorphologySection)
+    if (methodEnum == NeuronColorMethod::ByMorphologySection)
     {
-        return brayns::enumNames<NeuronSection>();
+        return brayns::EnumInfo::getNames<NeuronSection>();
     }
 
     auto values = CellNodeColorValues::getAll(_nodes, method);

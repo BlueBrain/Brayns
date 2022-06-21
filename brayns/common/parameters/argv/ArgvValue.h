@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,30 +19,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AbstractParameters.h"
+#pragma once
 
-#include <brayns/common/Log.h>
+#include <string>
+
+#include "ArgvType.h"
 
 namespace brayns
 {
-AbstractParameters::AbstractParameters(const std::string &name)
-    : _name(name)
-    , _parameters(name)
+class ArgvValue
 {
-}
+public:
+    ArgvValue() = default;
+    ArgvValue(bool boolean);
+    ArgvValue(int64_t integer);
+    ArgvValue(double number);
+    ArgvValue(std::string string);
 
-void AbstractParameters::print()
-{
-    Log::info("-= {} parameters =-", _name);
-}
+    ArgvType getType() const;
+    bool toBoolean() const;
+    int64_t toInteger() const;
+    double toNumber() const;
+    const std::string &toString() const;
 
-po::options_description &AbstractParameters::parameters()
-{
-    return _parameters;
-}
-
-std::string AbstractParameters::asString(const bool flag)
-{
-    return flag ? "on" : "off";
-}
+private:
+    ArgvType _type = ArgvType::String;
+    bool _boolean = false;
+    int64_t _integer = 0;
+    double _number = 0.0;
+    std::string _string;
+};
 } // namespace brayns

@@ -35,70 +35,62 @@ namespace brayns
 class ApplicationParameters : public AbstractParameters
 {
 public:
-    ApplicationParameters();
-
     /**
-     * @brief print prints these parameters on the log
-     */
-    void print() final;
-
-    /**
-     * @brief getPlugins return the list of plugis with which brayns was
-     * initialized
-     * @return const std::vector<std::string>&
+     * @brief Get the list of loaded plugins with argv.
+     *
+     * @return const std::vector<std::string>& Plugins loaded with argv.
      */
     const std::vector<std::string> &getPlugins() const noexcept;
 
     /**
      * @brief Returns the system's log level
      *
-     * @return LogLevel
+     * @return LogLevel Log level.
      */
     LogLevel getLogLevel() const noexcept;
 
     /**
-     * @brief getWindowSize returns the viewport size (width, height)
-     * @return const Vector2ui&
+     * @brief Returns the viewport size (width, height).
+     * @return const Vector2ui& Viewport.
      */
     const Vector2ui &getWindowSize() const noexcept;
 
     /**
-     * @brief setWindowSize sets the viewport size (width, height)
-     * @param size const Vector2ui&
+     * @brief Set the viewport size (width, height).
+     * @param size const Vector2ui& New viewport.
      */
     void setWindowSize(const Vector2ui &size) noexcept;
 
     /**
-     * @brief getJpegQuality return the stream JPEG quality.
+     * @brief Teturn the stream JPEG quality.
      * @return int JPEG quality from 0 (lowest) to 100 (highest).
      */
     int getJpegQuality() const noexcept;
 
     /**
-     * @brief setJpegQuality set the stream JPEG quality.
+     * @brief Set the stream JPEG quality.
      * @param quality int JPEG quality from 0 (lowest) to 100 (highest).
      */
     void setJpegQuality(int quality) noexcept;
 
     /**
-     * @brief posArgs return the positional arguments object used to initialize
-     * this object
-     * @return po::positional_options_description&
+     * @brief Used to get a display name for the parameter set.
+     *
+     * @return std::string Display name.
      */
-    po::positional_options_description &posArgs() noexcept;
+    virtual std::string getName() const override;
 
-protected:
     /**
-     * @brief parse parses the input parameters to initialize this object
-     * @param vm const po::variables_map&
+     * @brief Register argv properties of the parameter set.
+     *
+     * @param builder Helper class to register argv properties.
      */
-    void parse(const po::variables_map &vm) final;
+    virtual void build(ArgvBuilder &builder) override;
 
 private:
     std::vector<std::string> _plugins;
     LogLevel _logLevel = LogLevel::Info;
-    Vector2ui _windowSize;
-    int _jpegQuality;
-    po::positional_options_description _positionalArgs;
+    Vector2ui _windowSize = {800, 600};
+    int _jpegQuality = 90;
 };
 } // namespace brayns

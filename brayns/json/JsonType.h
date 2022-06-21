@@ -29,6 +29,8 @@
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
 
+#include <brayns/utils/EnumInfo.h>
+
 namespace brayns
 {
 /**
@@ -79,6 +81,23 @@ enum class JsonType
     String,
     Array,
     Object
+};
+
+template<>
+struct EnumReflector<JsonType>
+{
+    static EnumMap<JsonType> reflect()
+    {
+        return {
+            {"undefined", JsonType::Undefined},
+            {"null", JsonType::Null},
+            {"boolean", JsonType::Boolean},
+            {"integer", JsonType::Integer},
+            {"number", JsonType::Number},
+            {"string", JsonType::String},
+            {"array", JsonType::Array},
+            {"object", JsonType::Object}};
+    }
 };
 
 /**
@@ -139,83 +158,11 @@ struct JsonTypeHelper
 };
 
 /**
- * @brief JSON type name storage.
- *
- */
-class JsonTypeName
-{
-public:
-    /**
-     * @brief Undefined type name (used for wildcard).
-     *
-     * @return const std::string& Type name.
-     */
-    static const std::string &ofUndefined();
-
-    /**
-     * @brief Null type name.
-     *
-     * @return const std::string& Type name.
-     */
-    static const std::string &ofNull();
-
-    /**
-     * @brief Boolean type name.
-     *
-     * @return const std::string& Type name.
-     */
-    static const std::string &ofBoolean();
-
-    /**
-     * @brief Integer type name.
-     *
-     * @return const std::string& Type name.
-     */
-    static const std::string &ofInteger();
-
-    /**
-     * @brief Number type name.
-     *
-     * @return const std::string& Type name.
-     */
-    static const std::string &ofNumber();
-
-    /**
-     * @brief String type name.
-     *
-     * @return const std::string& Type name.
-     */
-    static const std::string &ofString();
-
-    /**
-     * @brief Array type name.
-     *
-     * @return const std::string& Type name.
-     */
-    static const std::string &ofArray();
-
-    /**
-     * @brief Object type name.
-     *
-     * @return const std::string& Type name.
-     */
-    static const std::string &ofObject();
-};
-
-/**
  * @brief Helper type to get JSON type.
  *
  */
 struct GetJsonType
 {
-    /**
-     * @brief Return the JSON type from its name.
-     *
-     * @param name Type name.
-     * @return JsonType JSON type.
-     */
-    static JsonType fromName(const std::string &name);
-
     /**
      * @brief Return the JSON type from a JSON value.
      *
@@ -255,20 +202,5 @@ struct GetJsonType
         }
         return JsonType::Undefined;
     }
-};
-
-/**
- * @brief Helper to get the name of a JSON type.
- *
- */
-struct GetJsonTypeName
-{
-    /**
-     * @brief Return the name of the JSON type or empty if unknown.
-     *
-     * @param type Type to name.
-     * @return const std::string& Name of type.
-     */
-    static const std::string &fromType(JsonType type);
 };
 } // namespace brayns

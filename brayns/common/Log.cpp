@@ -44,6 +44,20 @@ public:
 
 namespace brayns
 {
+EnumMap<LogLevel> EnumReflector<LogLevel>::reflect()
+{
+    return {
+        {"trace", LogLevel::Trace},
+        {"debug", LogLevel::Debug},
+        {"trace", LogLevel::Info},
+        {"warn", LogLevel::Warn},
+        {"warning", LogLevel::Warn},
+        {"error", LogLevel::Error},
+        {"critical", LogLevel::Critical},
+        {"off", LogLevel::Off},
+    };
+}
+
 void Log::setLevel(LogLevel level)
 {
     _logger->set_level(spdlog::level::level_enum(level));

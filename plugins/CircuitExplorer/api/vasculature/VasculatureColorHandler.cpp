@@ -19,7 +19,7 @@
  */
 
 #include "VasculatureColorHandler.h"
-#include "VasculatureColorMethods.h"
+#include "VasculatureColorMethod.h"
 
 #include <api/coloring/ColorUtils.h>
 
@@ -67,8 +67,8 @@ void VasculatureColorHandler::updateIndexedColor(brayns::OSPBuffer &color, const
 
 void VasculatureColorHandler::_colorWithInput(const std::string &method, const std::vector<ColoringInformation> &vars)
 {
-    auto methodEnum = brayns::stringToEnum<VasculatureColorMethods>(method);
-    if (methodEnum != VasculatureColorMethods::BySection)
+    auto methodEnum = brayns::EnumInfo::getValue<VasculatureColorMethod>(method);
+    if (methodEnum != VasculatureColorMethod::BySection)
     {
         return;
     }
@@ -80,7 +80,7 @@ void VasculatureColorHandler::_colorWithInput(const std::string &method, const s
     {
         const auto &sectionName = variable.variable;
         const auto &sectionColor = variable.color;
-        auto sectionType = brayns::stringToEnum<VasculatureSection>(sectionName);
+        auto sectionType = brayns::EnumInfo::getValue<VasculatureSection>(sectionName);
         sectionColorMap.push_back(std::make_pair(sectionType, sectionColor));
     }
 
@@ -89,8 +89,8 @@ void VasculatureColorHandler::_colorWithInput(const std::string &method, const s
 
 void VasculatureColorHandler::_colorAll(const std::string &method)
 {
-    auto methodEnum = brayns::stringToEnum<VasculatureColorMethods>(method);
-    if (methodEnum != VasculatureColorMethods::BySection)
+    auto methodEnum = brayns::EnumInfo::getValue<VasculatureColorMethod>(method);
+    if (methodEnum != VasculatureColorMethod::BySection)
     {
         return;
     }

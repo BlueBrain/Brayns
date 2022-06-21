@@ -21,21 +21,8 @@
 
 #include "SimulationParameters.h"
 
-#include <brayns/common/Log.h>
-
 namespace brayns
 {
-SimulationParameters::SimulationParameters()
-    : AbstractParameters("Simulation")
-{
-}
-
-void SimulationParameters::print()
-{
-    AbstractParameters::print();
-    Log::info("Simulation frame          : {}.", _current);
-}
-
 void SimulationParameters::reset()
 {
     _current = 0u;
@@ -90,4 +77,13 @@ const std::string &SimulationParameters::getTimeUnit() const noexcept
     return _unit;
 }
 
+std::string SimulationParameters::getName() const
+{
+    return "Simulation";
+}
+
+void SimulationParameters::build(ArgvBuilder &builder)
+{
+    (void)builder;
+}
 } // namespace brayns
