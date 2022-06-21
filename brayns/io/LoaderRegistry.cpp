@@ -30,15 +30,6 @@
 
 namespace brayns
 {
-LoaderRegistry::LoaderRegistry()
-{
-    registerLoader(std::make_unique<ProteinLoader>());
-    // registerLoader(std::make_unique<RawVolumeLoader>());
-    // registerLoader(std::make_unique<MHDVolumeLoader>());
-    registerLoader(std::make_unique<XYZBLoader>());
-    registerLoader(std::make_unique<MeshLoader>());
-}
-
 void LoaderRegistry::registerLoader(std::unique_ptr<AbstractLoader> loader)
 {
     _loaderInfos.push_back({loader->getName(), loader->getSupportedExtensions(), loader->getInputParametersSchema()});
@@ -46,6 +37,15 @@ void LoaderRegistry::registerLoader(std::unique_ptr<AbstractLoader> loader)
     brayns::Log::info("Registering loader {}.", loader->getName());
 
     _loaders.push_back(std::move(loader));
+}
+
+void LoaderRegistry::registerCoreLoaders()
+{
+    registerLoader(std::make_unique<ProteinLoader>());
+    // registerLoader(std::make_unique<RawVolumeLoader>());
+    // registerLoader(std::make_unique<MHDVolumeLoader>());
+    registerLoader(std::make_unique<XYZBLoader>());
+    registerLoader(std::make_unique<MeshLoader>());
 }
 
 const std::vector<LoaderInfo> &LoaderRegistry::getLoaderInfos() const

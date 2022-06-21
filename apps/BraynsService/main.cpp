@@ -18,6 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+
 #include <brayns/Brayns.h>
 #include <brayns/common/Log.h>
 #include <brayns/utils/Timer.h>
@@ -28,6 +30,22 @@ public:
     BraynsService(int argc, const char **argv)
         : _brayns(argc, argv)
     {
+    }
+
+    bool printVersionOrHelp()
+    {
+        auto &parameters = _brayns.getParametersManager();
+        if (parameters.hasVersion())
+        {
+            std::cout << parameters.getVersion();
+            return true;
+        }
+        if (parameters.hasHelp())
+        {
+            std::cout << parameters.getHelp();
+            return true;
+        }
+        return false;
     }
 
     void run()
@@ -47,6 +65,11 @@ int main(int argc, const char **argv)
     {
         BraynsService service(argc, argv);
 
+        if (service.printVersionOrHelp())
+        {
+            return 0;
+        }
+
         brayns::Log::info("Start Brayns service.");
 
         brayns::Timer timer;
@@ -60,5 +83,6 @@ int main(int argc, const char **argv)
         brayns::Log::critical(e.what());
         return 1;
     }
+
     return 0;
 }

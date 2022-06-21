@@ -21,11 +21,55 @@
 
 #pragma once
 
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <type_traits>
+
+#include <brayns/utils/EnumInfo.h>
 
 namespace brayns
 {
-using Argv = std::unordered_map<std::string, std::vector<std::string>>;
+enum class ArgvType
+{
+    String,
+    Boolean,
+    Integer,
+    Number
+};
+
+template<>
+struct EnumReflector<ArgvType>
+{
+    static EnumMap<ArgvType> reflect()
+    {
+        return {
+            {"string", ArgvType::String},
+            {"boolean", ArgvType::Boolean},
+            {"integer", ArgvType::Integer},
+            {"number", ArgvType::Number}};
+    }
+};
+
+struct GetArgvType
+{
+    template<typename T>
+    static constexpr ArgvType of()
+    {
+        if constexpr (std::is_enum_v<T>)
+        {
+            return ArgvType::String;
+        }
+        if constexpr (std::is_same_v<T, bool>)
+        {
+            return ArgvType::Boolean;
+        }
+        if constexpr (std::is_integral_v<T>)
+        {
+            return ArgvType::Integer;
+        }
+        if constexpr (std::is_arithmetic_v<T>)
+        {
+            return ArgvType::Number;
+        }
+        return ArgvType::String;
+    }
+};
 } // namespace brayns

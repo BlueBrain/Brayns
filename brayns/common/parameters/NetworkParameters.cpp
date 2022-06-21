@@ -21,38 +21,8 @@
 
 #include "NetworkParameters.h"
 
-#include <brayns/common/Log.h>
-
 namespace brayns
 {
-NetworkParameters::NetworkParameters()
-    : AbstractParameters("Network")
-{
-    _parameters.add_options()(
-        "client", po::value(&_client),
-        "Enable client mode (default = false), if enabled no server will be "
-        "run and a connection will be done at the given URI")(
-        "secure", po::value(&_secure),
-        "Enable HTTPS (default = false), if enabled private key and/or "
-        "certificates must be provided")(
-        "max-clients", po::value(&_maxClients),
-        "Defines the max amount of parallel clients (default = 2) that can "
-        "connect in server mode")("uri", po::value(&_uri),
-                                  "URI of the internal HTTP server or of the "
-                                  "one to connect to in client mode")(
-        "reconnection-period", po::value(&_reconnectionPeriod),
-        "Period to wait [ms] (default = 300) in client mode before doing a new "
-        "reconnection attempt")("private-key-file", po::value(&_privateKeyFile),
-                                "Private key file if a private key is used")(
-        "private-key-passphrase", po::value(&_privateKeyPassphrase),
-        "Private key file passphrase if any")(
-        "certificate-file", po::value(&_certificateFile),
-        "Certificate used for encryption in secure mode")(
-        "ca-location", po::value(&_caLocation),
-        "Certification Authority file or directory, if not set, default "
-        "OpenSSL ones will be used");
-}
-
 bool NetworkParameters::isClient() const noexcept
 {
     return _client;
@@ -143,16 +113,21 @@ void NetworkParameters::setCALocation(const std::string &caLocation) noexcept
     _updateValue(_caLocation, caLocation);
 }
 
-void NetworkParameters::print()
+std::string NetworkParameters::getName() const
 {
-    AbstractParameters::print();
-    Log::info("Client mode               : {}", _client);
-    Log::info("\nSecure                    : {}", _secure);
-    Log::info("\nMax simultaneous clients  : {}", _maxClients);
-    Log::info("\nURI                       : {}", _uri);
-    Log::info("\nPrivate key file          : {}", _privateKeyFile);
-    Log::info("\nPrivate key passphrase    : {}", _privateKeyPassphrase);
-    Log::info("\nCertificate file          : {}", _certificateFile);
-    Log::info("\nCA location               : {}", _caLocation);
+    return "Network";
+}
+
+void NetworkParameters::build(ArgvBuilder &builder)
+{
+    builder.add("client", _client, "Enable client mode");
+    builder.add("secure", _secure, "Enable SSL");
+    builder.add("max-clients", _maxClients, "Max simultaneous connections");
+    builder.add("uri", _uri, "Server URI (host:port)");
+    builder.add("reconnection-period", _reconnectionPeriod, "Reconnection period in ms (client mode)").minimum(0.0);
+    builder.add("private-key-file", _privateKeyFile, "Private key file path if secure");
+    builder.add("private-key-passphrase", _privateKeyPassphrase, "Private key password if any");
+    builder.add("certificate-file", _certificateFile, "Server or client certificate");
+    builder.add("ca-location", _caLocation, "File or folder of additional CA");
 }
 } // namespace brayns

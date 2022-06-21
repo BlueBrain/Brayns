@@ -22,68 +22,25 @@
 #pragma once
 
 #include <functional>
+#include <limits>
 #include <optional>
 #include <string>
 #include <type_traits>
 #include <vector>
 
-#include <brayns/utils/EnumInfo.h>
+#include "ArgvValue.h"
 
 namespace brayns
 {
-enum class ArgvType
-{
-    Any,
-    Boolean,
-    Integer,
-    Number,
-    String
-};
-
-template<>
-struct EnumReflector<ArgvType>
-{
-    static EnumMap<ArgvType> reflect()
-    {
-        return {
-            {"any", ArgvType::Any},
-            {"boolean", ArgvType::Boolean},
-            {"integer", ArgvType::Integer},
-            {"string", ArgvType::String}};
-    }
-};
-
-struct GetArgvType
-{
-    template<typename T>
-    static constexpr ArgvType of()
-    {
-        if constexpr (std::is_enum_v<T>)
-        {
-            return ArgvType::String;
-        }
-        if constexpr (std::is_same_v<T, bool>)
-        {
-            return ArgvType::Boolean;
-        }
-        if constexpr (std::is_integral_v<T>)
-        {
-            return ArgvType::Integer;
-        }
-        if constexpr (std::is_arithmetic_v<T>)
-        {
-            return ArgvType::Number;
-        }
-        return ArgvType::String;
-    }
-};
-
 struct ArgvProperty
 {
-    ArgvType type = ArgvType::Any;
+    ArgvType type = ArgvType::String;
     std::string name;
     std::string description;
-    std::function<void(const std::vector<std::string> &)> extract;
+    std::function<void(const std::vector<ArgvValue> &)> load;
+    std::function<std::string()> stringify;
+    bool multitoken = false;
+    bool composable = false;
     std::vector<std::string> enums;
     std::optional<double> minimum;
     std::optional<double> maximum;
@@ -98,9 +55,10 @@ struct GetArgvProperty
     {
         ArgvProperty property;
         property.type = GetArgvType::of<T>();
-        if constexpr (std::is_unsigned_v<T>)
+        if constexpr (std::is_arithmetic_v<T> && !std::is_enum_v<T>)
         {
-            property.minimum = 0.0;
+            property.minimum = std::numeric_limits<T>::min();
+            property.maximum = std::numeric_limits<T>::max();
         }
         if constexpr (std::is_enum_v<T>)
         {

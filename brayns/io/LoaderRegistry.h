@@ -40,10 +40,14 @@ struct LoaderInfo
 class LoaderRegistry
 {
 public:
-    LoaderRegistry();
-
     /** Register the given loader. */
     void registerLoader(std::unique_ptr<AbstractLoader> loader);
+
+    /**
+     * @brief Register the basic loaders of Brayns.
+     *
+     */
+    void registerCoreLoaders();
 
     /**
      * Get a list of loaders and their supported file extensions and properties

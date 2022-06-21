@@ -21,14 +21,32 @@
 
 #pragma once
 
-#include "Argv.h"
-#include "ArgvProperty.h"
+#include <string>
+
+#include "ArgvType.h"
 
 namespace brayns
 {
-class ArgvValidator
+class ArgvValue
 {
 public:
-    static std::vector<std::string> validate(const Argv &argv, const std::vector<ArgvProperty> &properties);
+    ArgvValue() = default;
+    ArgvValue(bool boolean);
+    ArgvValue(int64_t integer);
+    ArgvValue(double number);
+    ArgvValue(std::string string);
+
+    ArgvType getType() const;
+    bool toBoolean() const;
+    int64_t toInteger() const;
+    double toNumber() const;
+    const std::string &toString() const;
+
+private:
+    ArgvType _type = ArgvType::String;
+    bool _boolean = false;
+    int64_t _integer = 0;
+    double _number = 0.0;
+    std::string _string;
 };
 } // namespace brayns

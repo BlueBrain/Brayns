@@ -27,31 +27,57 @@
 namespace brayns
 {
 /**
- * @brief Class managing all parameters registered by the application. Additional parameter objects may be registered.
+ * @brief Class managing all parameters registered by the application.
+ *
  */
 class ParametersManager
 {
 public:
+    /**
+     * @brief Construct parameters by parsing argv.
+     *
+     * @param argc Argc.
+     * @param argv Argv.
+     */
     ParametersManager(int argc, const char **argv);
 
     /**
-     * @brief Registers specific parameters to the manager
-     * @param parameters to be registered
+     * @brief Check if version is required from command line.
+     *
+     * If true, the rest of the parameters is not initialized.
+     *
+     * @return true Version required.
+     * @return false No version required.
      */
-    void registerParameters(AbstractParameters *parameters);
+    bool hasVersion();
 
     /**
-     * @brief Displays usage of registered parameters
+     * @brief Build version display string.
+     *
+     * @return std::string Display string.
      */
-    void usage();
+    std::string getVersion();
 
     /**
-     * @brief Displays values registered parameters
+     * @brief Check if help is required from command line.
+     *
+     * If true, the rest of the parameters is not initialized.
+     *
+     * @return true Help required.
+     * @return false No help required.
      */
-    void print();
+    bool hasHelp();
+
+    /**
+     * @brief Build help display string.
+     *
+     * @return std::string Display string.
+     */
+    std::string getHelp();
 
     /**
      * @brief Gets simulation parameters
+     *
      * @return Simulation parameters for the current scene
      */
     SimulationParameters &getSimulationParameters();
@@ -59,6 +85,7 @@ public:
 
     /**
      * @brief Gets application parameters
+     *
      * @return Application parameters for the current scene
      */
     ApplicationParameters &getApplicationParameters();
@@ -66,23 +93,30 @@ public:
 
     /**
      * @brief Gets volume parameters
+     *
      * @return Parameters for the current volume
      */
     NetworkParameters &getNetworkParameters();
     const NetworkParameters &getNetworkParameters() const;
 
     /**
-     * @brief resetModified resets the modified status for all registered parameters
+     * @brief Resets the modified status for all registered parameters.
+     *
      */
     void resetModified();
 
+    template<typename FunctorType>
+    void forEach(FunctorType functor)
+    {
+        functor(_simulationParameters);
+        functor(_applicationParameters);
+        functor(_networkParameters);
+    }
+
 private:
-    void _parse(int argc, const char **argv);
-    void _processUnrecognizedOptions(const std::vector<std::string> &unrecognizedOptions) const;
-
-    po::options_description _allOptions;
-
-    std::vector<AbstractParameters *> _parameterSets;
+    bool _version = false;
+    bool _help = false;
+    std::vector<ArgvProperty> _properties;
     SimulationParameters _simulationParameters;
     ApplicationParameters _applicationParameters;
     NetworkParameters _networkParameters;

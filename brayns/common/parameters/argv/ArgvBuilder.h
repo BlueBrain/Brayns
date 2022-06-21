@@ -21,21 +21,40 @@
 
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "ArgvProperty.h"
+#include "ArgvReflector.h"
 
 namespace brayns
 {
-class ArgvParser
+class ArgvBuilder
 {
 public:
-    ArgvParser(const std::vector<ArgvProperty> &properties);
+    ArgvBuilder(std::vector<ArgvProperty> &properties);
 
-    void parse(int argc, const char **argv);
+    ArgvBuilder &multitoken(bool value = true);
+    ArgvBuilder &composable(bool value = true);
+    ArgvBuilder &minimum(std::optional<double> value);
+    ArgvBuilder &maximum(std::optional<double> value);
+    ArgvBuilder &between(double minValue, double maxValue);
+    ArgvBuilder &minItems(std::optional<size_t> value);
+    ArgvBuilder &maxItems(std::optional<size_t> value);
+    ArgvBuilder &itemCount(std::optional<size_t> value);
+
+    template<typename T>
+    ArgvBuilder &add(std::string name, T &value, std::string description = {})
+    {
+        auto property = ArgvReflector<T>::reflect(value);
+        property.name = std::move(name);
+        property.description = std::move(description);
+        _properties.push_back(std::move(property));
+        return *this;
+    }
 
 private:
-    const std::vector<ArgvProperty> &_properties;
+    std::vector<ArgvProperty> &_properties;
 };
 } // namespace brayns

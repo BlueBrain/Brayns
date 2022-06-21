@@ -19,23 +19,62 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ArgvValue.h"
 
-#include <string>
-#include <vector>
-
-#include "ArgvProperty.h"
+#include <cassert>
 
 namespace brayns
 {
-class ArgvParser
+ArgvValue::ArgvValue(bool boolean)
+    : _type(ArgvType::Boolean)
+    , _boolean(boolean)
 {
-public:
-    ArgvParser(const std::vector<ArgvProperty> &properties);
+}
 
-    void parse(int argc, const char **argv);
+ArgvValue::ArgvValue(int64_t integer)
+    : _type(ArgvType::Integer)
+    , _integer(integer)
+{
+}
 
-private:
-    const std::vector<ArgvProperty> &_properties;
-};
+ArgvValue::ArgvValue(double number)
+    : _type(ArgvType::Number)
+    , _number(number)
+{
+}
+
+ArgvValue::ArgvValue(std::string string)
+    : _type(ArgvType::String)
+    , _string(std::move(string))
+{
+}
+
+ArgvType ArgvValue::getType() const
+{
+    return _type;
+}
+
+bool ArgvValue::toBoolean() const
+{
+    assert(_type == ArgvType::Boolean);
+    return _boolean;
+}
+
+int64_t ArgvValue::toInteger() const
+{
+    assert(_type == ArgvType::Integer);
+    return _integer;
+}
+
+double ArgvValue::toNumber() const
+{
+    assert(_type == ArgvType::Number);
+    return _number;
+}
+
+const std::string &ArgvValue::toString() const
+{
+    assert(_type == ArgvType::String);
+    return _string;
+}
 } // namespace brayns

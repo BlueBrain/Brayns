@@ -20,6 +20,8 @@
  */
 
 #include <brayns/Brayns.h>
+#include <brayns/Version.h>
+
 #include <brayns/common/Log.h>
 
 namespace brayns
@@ -54,6 +56,13 @@ Brayns::Brayns(int argc, const char **argv)
     , _pluginAPI(_parametersManager, _engine, _loaderRegistry)
     , _pluginManager(_pluginAPI)
 {
+    brayns::Log::info(
+        "Brayns version {}.{}.{} ({}) Copyright (c) 2015-2022, EPFL/Blue Brain Project.",
+        Version::getMajor(),
+        Version::getMinor(),
+        Version::getPatch(),
+        Version::getCommitHash());
+    _loaderRegistry.registerCoreLoaders();
     _pluginManager.loadPlugins();
 }
 

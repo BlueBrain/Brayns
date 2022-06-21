@@ -18,191 +18,173 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/Version.h>
-#include <brayns/common/Log.h>
 #include <brayns/common/parameters/ParametersManager.h>
 
-#include <iostream>
+#include <sstream>
+
+#include <brayns/Version.h>
+
+#include "argv/ArgvParser.h"
 
 namespace
 {
-// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C++
-unsigned int levenshtein_distance(const std::string &s1, const std::string &s2)
+class ArgvPropertyBuilder
 {
-    const std::size_t len1 = s1.size(), len2 = s2.size();
-    std::vector<unsigned int> col(len2 + 1), prevCol(len2 + 1);
-
-    for (unsigned int i = 0; i < prevCol.size(); i++)
-        prevCol[i] = i;
-    for (unsigned int i = 0; i < len1; i++)
+public:
+    static std::vector<brayns::ArgvProperty> build(brayns::ParametersManager &manager)
     {
-        col[0] = i + 1;
-        for (unsigned int j = 0; j < len2; j++)
-            col[j + 1] = std::min({prevCol[1 + j] + 1, col[j] + 1, prevCol[j] + (s1[i] == s2[j] ? 0 : 1)});
-        col.swap(prevCol);
+        std::vector<brayns::ArgvProperty> properties;
+        brayns::ArgvBuilder builder(properties);
+        manager.forEach([&](auto &parameters) { parameters.build(builder); });
+        return properties;
     }
-    return prevCol[len2];
-}
+};
 
-std::vector<std::string> findSimilarOptions(const std::string &name, const std::vector<std::string> &options)
+class VersionFinder
 {
-    constexpr size_t MAX_SUGGESTIONS = 7;
-
-    std::vector<std::string> subStringOptions;
-    std::vector<std::string> levenshteinOptions;
-
-    // Collect substring options
+public:
+    static bool find(int argc, const char **argv)
     {
-        // Strip dashes
-        auto nameStrip = name;
-        nameStrip.erase(std::remove(nameStrip.begin(), nameStrip.end(), '-'), nameStrip.end());
-
-        // Suggest options containing the substring
-        for (const auto &optionName : options)
+        if (argc <= 1)
         {
-            if (subStringOptions.size() >= MAX_SUGGESTIONS)
-                break;
+            return false;
+        }
+        auto first = std::string_view(argv[1]);
+        return first == "-v" || first == "-?" || first == "--version";
+    }
+};
 
-            if (optionName.find(nameStrip) != std::string::npos)
-                subStringOptions.push_back(optionName);
+class VersionFormatter
+{
+public:
+    static std::string format()
+    {
+        std::ostringstream stream;
+        stream << "Brayns version ";
+        stream << brayns::Version::getMajor() << ".";
+        stream << brayns::Version::getMinor() << ".";
+        stream << brayns::Version::getPatch();
+        stream << " (" << brayns::Version::getCommitHash() << ")";
+        stream << " Copyright (c) 2015-2022 EPFL/Blue Brain Project";
+        return stream.str();
+    }
+};
+
+class HelpFinder
+{
+public:
+    static bool find(int argc, const char **argv)
+    {
+        if (argc <= 1)
+        {
+            return false;
+        }
+        auto first = std::string_view(argv[1]);
+        return first == "-h" || first == "--help";
+    }
+};
+
+class HelpFormatter
+{
+public:
+    static std::string format(const std::vector<brayns::ArgvProperty> &properties)
+    {
+        std::ostringstream stream;
+        stream << VersionFormatter::format() << '\n';
+        for (const auto &property : properties)
+        {
+            stream << '\n';
+            _format(stream, property);
+        }
+        stream << "\n\n";
+        stream << "Use '-v' or '--version' to get version info.\n";
+        stream << "Use '-h' or '-?' or '--help' to get the list of available commands.\n";
+        return stream.str();
+    }
+
+private:
+    static void _format(std::ostream &stream, const brayns::ArgvProperty &property)
+    {
+        stream << property.name << " ";
+        stream << brayns::EnumInfo::getName(property.type);
+        stream << " (default = " << property.stringify();
+        stream << "): " << property.description;
+        _formatOptions(stream, property);
+    }
+
+    static void _formatOptions(std::ostream &stream, const brayns::ArgvProperty &property)
+    {
+        if (property.multitoken)
+        {
+            stream << "\nMultitoken: this property accepts multiple tokens grouped using quotes.";
+        }
+        if (property.composable)
+        {
+            stream << "\nComposable: this property can be specified multiple times to make a list.";
+        }
+        _formatItemCount(stream, property);
+        _formatBounds(stream, property);
+    }
+
+    static void _formatItemCount(std::ostream &stream, const brayns::ArgvProperty &property)
+    {
+        if (property.minItems)
+        {
+            stream << "\nMinimum items: this property requires at least " << *property.minItems << " items.";
+        }
+        if (property.maxItems)
+        {
+            stream << "\nMaximum items: this property accepts at most " << *property.maxItems << " items.";
         }
     }
 
-    // Collect best levenshtein distance options
+    static void _formatBounds(std::ostream &stream, const brayns::ArgvProperty &property)
     {
-        size_t bestDist = UINT_MAX;
-
-        for (const auto &optionName : options)
+        if (property.minimum)
         {
-            if (levenshteinOptions.size() >= MAX_SUGGESTIONS)
-                break;
-
-            const auto dist = levenshtein_distance(name, optionName);
-            if (dist < bestDist)
-            {
-                levenshteinOptions.clear();
-                bestDist = dist;
-            }
-
-            if (dist == bestDist
-                && std::find(subStringOptions.begin(), subStringOptions.end(), optionName) == subStringOptions.end())
-                levenshteinOptions.push_back(optionName);
+            stream << "\nMinimum: the value(s) of this property must be >= " << *property.minimum << ".";
+        }
+        if (property.maximum)
+        {
+            stream << "\nMaximum: the value(s) of this property must be <= " << *property.maximum << ".";
         }
     }
-
-    // Merge suggestions giving precedence to substrings
-    auto output = subStringOptions;
-    for (const auto &option : levenshteinOptions)
-        output.push_back(option);
-    output.resize(std::min(output.size(), MAX_SUGGESTIONS));
-
-    return output;
-}
-
-void _printVersion()
-{
-    brayns::Log::info(
-        "Brayns {}.{}.{} ({})",
-        brayns::Version::getMajor(),
-        brayns::Version::getMinor(),
-        brayns::Version::getPatch(),
-        brayns::Version::getCommitHash());
-}
+};
 } // namespace
 
 namespace brayns
 {
-ParametersManager::ParametersManager(const int argc, const char **argv)
+ParametersManager::ParametersManager(int argc, const char **argv)
 {
-    registerParameters(&_simulationParameters);
-    registerParameters(&_applicationParameters);
-    registerParameters(&_networkParameters);
-
-    for (auto parameters : _parameterSets)
+    _version = VersionFinder::find(argc, argv);
+    _help = HelpFinder::find(argc, argv);
+    _properties = ArgvPropertyBuilder::build(*this);
+    if (_version || _help)
     {
-        _allOptions.add(parameters->parameters());
+        return;
     }
-
-    if (argc > 0)
-    {
-        _parse(argc, argv);
-    }
+    ArgvParser parser(_properties);
+    parser.parse(argc, argv);
 }
 
-void ParametersManager::registerParameters(AbstractParameters *parameters)
+bool ParametersManager::hasVersion()
 {
-    _parameterSets.push_back(parameters);
+    return _version;
 }
 
-void ParametersManager::_parse(int argc, const char **argv)
+std::string ParametersManager::getVersion()
 {
-    try
-    {
-        po::options_description generalOptions("General options");
-        generalOptions.add_options()("help", "Print this help")(
-            "version",
-            "Print the Brayns version")("verbose", "Print parsed parameters");
-
-        _allOptions.add(generalOptions);
-
-        po::variables_map vm;
-        po::parsed_options parsedOptions =
-            po::command_line_parser(argc, argv)
-                .options(_allOptions)
-                .allow_unregistered()
-                .positional(_applicationParameters.posArgs())
-                .style(
-                    po::command_line_style::unix_style & ~po::command_line_style::allow_short
-                    & ~po::command_line_style::allow_guessing)
-                .run();
-
-        const auto unrecognizedOptions = po::collect_unrecognized(parsedOptions.options, po::exclude_positional);
-
-        _processUnrecognizedOptions(unrecognizedOptions);
-
-        po::store(parsedOptions, vm);
-        po::notify(vm);
-
-        if (vm.count("help"))
-        {
-            usage();
-            exit(EXIT_SUCCESS);
-        }
-
-        _printVersion();
-        if (vm.count("version"))
-        {
-            exit(EXIT_SUCCESS);
-        }
-
-        for (auto parameters : _parameterSets)
-        {
-            parameters->parse(vm);
-        }
-
-        if (vm.count("verbose"))
-        {
-            print();
-        }
-    }
-    catch (const po::error &e)
-    {
-        Log::error(e.what());
-        exit(EXIT_FAILURE);
-    }
+    return VersionFormatter::format();
 }
 
-void ParametersManager::usage()
+bool ParametersManager::hasHelp()
 {
-    std::cout << _allOptions << std::endl;
+    return _help;
 }
 
-void ParametersManager::print()
+std::string ParametersManager::getHelp()
 {
-    for (AbstractParameters *parameters : _parameterSets)
-    {
-        parameters->print();
-    }
+    return HelpFormatter::format(_properties);
 }
 
 SimulationParameters &ParametersManager::getSimulationParameters()
@@ -237,36 +219,6 @@ const NetworkParameters &ParametersManager::getNetworkParameters() const
 
 void ParametersManager::resetModified()
 {
-    for (auto parameters : _parameterSets)
-    {
-        parameters->resetModified();
-    }
-}
-
-void ParametersManager::_processUnrecognizedOptions(const std::vector<std::string> &unrecognizedOptions) const
-{
-    if (unrecognizedOptions.empty())
-    {
-        return;
-    }
-
-    const auto &unrecognized = unrecognizedOptions.front();
-
-    std::vector<std::string> availableOptions;
-    for (const auto &option : _allOptions.options())
-    {
-        availableOptions.push_back(option->format_name());
-    }
-
-    const auto suggestions = findSimilarOptions(unrecognized, availableOptions);
-
-    std::string errorMessage = "Unrecognized option '" + unrecognized + "'.\n\nMost similar options are:";
-
-    for (const auto &suggestion : suggestions)
-    {
-        errorMessage += "\n\t" + suggestion;
-    }
-
-    throw po::error(errorMessage);
+    forEach([](auto &parameters) { parameters.resetModified(); });
 }
 } // namespace brayns

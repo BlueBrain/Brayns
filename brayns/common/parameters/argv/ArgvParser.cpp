@@ -21,11 +21,17 @@
 
 #include "ArgvParser.h"
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <sstream>
 #include <stdexcept>
+#include <unordered_map>
 
 namespace
 {
+using Argv = std::unordered_map<std::string, std::vector<brayns::ArgvValue>>;
+
 class ArgvStream
 {
 public:
@@ -59,7 +65,6 @@ public:
 
     void next()
     {
-        assert(hasNext());
         ++_index;
     }
 
@@ -69,61 +74,494 @@ private:
     const char **_argv = nullptr;
 };
 
-class ArgvParserHelper
+class ArgvStreamExtractor
 {
 public:
-    static brayns::Argv parse(int argc, const char **argv)
+    static std::string extractKey(ArgvStream &stream)
     {
-        brayns::Argv result;
-        ArgvStream stream(argc, argv);
-        while (stream.hasCurrent())
+        auto token = stream.getCurrent();
+        if (!_isKey(token))
         {
-            _parseKey(stream, result);
-            stream.next();
+            throw std::runtime_error("Unknown positional argument '" + std::string(token) + "'");
         }
-        return result;
+        auto key = _extractKey(token);
+        if (!stream.hasNext())
+        {
+            throw std::runtime_error("No value for keyword argument '" + key + "'");
+        }
+        stream.next();
+        return key;
+    }
+
+    static std::string extractValue(ArgvStream &stream)
+    {
+        auto token = stream.getCurrent();
+        stream.next();
+        return token;
     }
 
 private:
-    static void _parseKey(ArgvStream &stream, brayns::Argv &argv)
+    static bool _isKey(const char *token)
     {
-        auto key = stream.getCurrent();
-        if (!_isKey(key))
-        {
-            throw std::runtime_error("Only keyword arguments are supported");
-        }
-        _parseValues(stream, argv[key]);
+        return token[0] && token[0] == '-' && token[1] == '-';
     }
 
-    static void _parseValues(ArgvStream &stream, std::vector<std::string> &values)
+    static std::string _extractKey(const char *value)
     {
-        while (true)
+        return value + 2;
+    }
+};
+
+class ArgvTokenSplitter
+{
+public:
+    static std::vector<std::string> split(const std::string &token)
+    {
+        std::vector<std::string> tokens;
+        if (token.empty())
         {
-            if (!stream.hasNext())
+            return {};
+        }
+        auto count = std::count_if(token.begin(), token.end(), [](auto c) { return std::isspace(c); });
+        tokens.reserve(count + 1);
+        size_t start = 0;
+        for (size_t i = 0; i < token.size(); ++i)
+        {
+            auto c = token[i];
+            if (std::isspace(c))
             {
-                return;
+                auto item = token.substr(start, start - i);
+                tokens.push_back(std::move(item));
             }
-            auto value = stream.getNext();
-            if (_isKey(value))
+        }
+        return tokens;
+    }
+};
+
+class ArgvItemCountValidator
+{
+public:
+    ArgvItemCountValidator(const brayns::ArgvProperty &property)
+        : _property(property)
+    {
+    }
+
+    void validate(const std::vector<brayns::ArgvValue> &values)
+    {
+        auto itemCount = values.size();
+        auto minItems = _property.minItems;
+        if (minItems && itemCount < *minItems)
+        {
+            throw std::runtime_error(_notEnoughItems(itemCount, *minItems));
+        }
+        auto maxItems = _property.maxItems;
+        if (maxItems && itemCount > *maxItems)
+        {
+            throw std::runtime_error(_tooManyItems(itemCount, *maxItems));
+        }
+    }
+
+private:
+    const brayns::ArgvProperty &_property;
+
+    std::string _notEnoughItems(size_t itemCount, size_t minItems)
+    {
+        std::ostringstream stream;
+        stream << "Not enough items for keyword argument '" << _property.name;
+        stream << "': " << itemCount << " < " << minItems;
+        return stream.str();
+    }
+
+    std::string _tooManyItems(size_t itemCount, size_t maxItems)
+    {
+        std::ostringstream stream;
+        stream << "Too many items for keyword argument '" << _property.name;
+        stream << "': " << itemCount << " > " << maxItems;
+        return stream.str();
+    }
+};
+
+class ArgvNumberExtractor
+{
+public:
+    ArgvNumberExtractor(const brayns::ArgvProperty &property)
+        : _property(property)
+    {
+    }
+
+    double extract(const std::string &token)
+    {
+        auto value = std::stod(token);
+        _validate(value);
+        return value;
+    }
+
+private:
+    const brayns::ArgvProperty &_property;
+
+    std::string _invalidNumber(const std::string &token)
+    {
+        std::ostringstream stream;
+        stream << "Invalid numeric value for keyword argument '" << _property.name;
+        stream << "': '" << token << "'";
+        return stream.str();
+    }
+
+    void _validate(double value)
+    {
+        auto minimum = _property.minimum;
+        if (minimum && value < *minimum)
+        {
+            throw std::runtime_error(_belowMinimum(value, *minimum));
+        }
+        auto maximum = _property.maximum;
+        if (maximum && value > *maximum)
+        {
+            throw std::runtime_error(_aboveMaximum(value, *maximum));
+        }
+    }
+
+    std::string _belowMinimum(double value, double minimum)
+    {
+        std::ostringstream stream;
+        stream << "Value below minimum for keyword argument '" << _property.name;
+        stream << "': " << value << " < " << minimum;
+        return stream.str();
+    }
+
+    std::string _aboveMaximum(double value, double maximum)
+    {
+        std::ostringstream stream;
+        stream << "Value above maximum for keyword argument '" << _property.name;
+        stream << "': " << value << " > " << maximum;
+        return stream.str();
+    }
+};
+
+class ArgvEnumParser
+{
+public:
+    ArgvEnumParser(const brayns::ArgvProperty &property)
+        : _property(property)
+    {
+    }
+
+    bool canParse() const
+    {
+        return !_property.enums.empty();
+    }
+
+    brayns::ArgvValue parse(const std::string &token)
+    {
+        _validate(token);
+        return token;
+    }
+
+private:
+    const brayns::ArgvProperty &_property;
+
+    void _validate(const std::string &token)
+    {
+        auto &enums = _property.enums;
+        auto i = std::find(enums.begin(), enums.end(), token);
+        if (i != enums.end())
+        {
+            return;
+        }
+        throw std::runtime_error(_invalidEnum(token));
+    }
+
+    std::string _invalidEnum(const std::string &token)
+    {
+        std::ostringstream stream;
+        stream << "Invalid enum value for keyword argument '" << _property.name;
+        stream << "': '" << token << "' not in [";
+        bool first = true;
+        for (const auto &value : _property.enums)
+        {
+            if (!first)
             {
-                return;
+                stream << ", ";
             }
+            first = false;
+            stream << value;
+        }
+        stream << "]";
+        return stream.str();
+    }
+};
+
+class ArgvBooleanParser
+{
+public:
+    ArgvBooleanParser(const brayns::ArgvProperty &property)
+        : _property(property)
+    {
+    }
+
+    bool canParse() const
+    {
+        return _property.type == brayns::ArgvType::Boolean;
+    }
+
+    brayns::ArgvValue parse(const std::string &token)
+    {
+        if (token == "true" || token == "1")
+        {
+            return true;
+        }
+        if (token == "false" || token == "0")
+        {
+            return false;
+        }
+        throw std::runtime_error(_invalidBoolean(token));
+    }
+
+private:
+    const brayns::ArgvProperty &_property;
+
+    std::string _invalidBoolean(const std::string &token)
+    {
+        std::ostringstream stream;
+        stream << "Invalid boolean value for keyword argument '" << _property.name;
+        stream << "': '" << token << "'";
+        return stream.str();
+    }
+};
+
+class ArgvIntegerParser
+{
+public:
+    ArgvIntegerParser(const brayns::ArgvProperty &property)
+        : _property(property)
+    {
+    }
+
+    bool canParse() const
+    {
+        return _property.type == brayns::ArgvType::Integer;
+    }
+
+    brayns::ArgvValue parse(const std::string &token)
+    {
+        auto extractor = ArgvNumberExtractor(_property);
+        auto value = extractor.extract(token);
+        _checkIsInteger(value);
+        return static_cast<int64_t>(value);
+    }
+
+private:
+    const brayns::ArgvProperty &_property;
+
+    void _checkIsInteger(double value)
+    {
+        if (std::floor(value) != value)
+        {
+            throw std::runtime_error(_invalidInteger(value));
+        }
+    }
+
+    std::string _invalidInteger(double value)
+    {
+        std::ostringstream stream;
+        stream << "Invalid integer value for keyword argument '" << _property.name;
+        stream << "': " << value;
+        return stream.str();
+    }
+};
+
+class ArgvNumberParser
+{
+public:
+    ArgvNumberParser(const brayns::ArgvProperty &property)
+        : _property(property)
+    {
+    }
+
+    bool canParse() const
+    {
+        return _property.type == brayns::ArgvType::Number;
+    }
+
+    brayns::ArgvValue parse(const std::string &token)
+    {
+        auto extractor = ArgvNumberExtractor(_property);
+        return extractor.extract(token);
+    }
+
+private:
+    const brayns::ArgvProperty &_property;
+};
+
+class ArgvStringParser
+{
+public:
+    ArgvStringParser(const brayns::ArgvProperty &property)
+        : _property(property)
+    {
+    }
+
+    bool canParse() const
+    {
+        return _property.type == brayns::ArgvType::String;
+    }
+
+    brayns::ArgvValue parse(const std::string &token)
+    {
+        return token;
+    }
+
+private:
+    const brayns::ArgvProperty &_property;
+};
+
+class ArgvValueParser
+{
+public:
+    ArgvValueParser(const brayns::ArgvProperty &property)
+        : _property(property)
+    {
+    }
+
+    void parse(const std::string &token, std::vector<brayns::ArgvValue> &values)
+    {
+        _checkComposition(values);
+        auto tokens = _split(token);
+        if (!_parse(tokens, values))
+        {
+            throw std::runtime_error("Internal error: invalid property");
+        }
+    }
+
+private:
+    const brayns::ArgvProperty &_property;
+
+    void _checkComposition(std::vector<brayns::ArgvValue> &values)
+    {
+        if (!values.empty() && !_property.composable)
+        {
+            throw std::runtime_error("Duplicated keyword argument '" + _property.name + "'");
+        }
+    }
+
+    std::vector<std::string> _split(const std::string &token)
+    {
+        if (!_property.multitoken)
+        {
+            return {token};
+        }
+        return ArgvTokenSplitter::split(token);
+    }
+
+    bool _parse(const std::vector<std::string> &tokens, std::vector<brayns::ArgvValue> &values)
+    {
+        return _tryParse<ArgvEnumParser>(tokens, values) || _tryParse<ArgvBooleanParser>(tokens, values)
+            || _tryParse<ArgvIntegerParser>(tokens, values) || _tryParse<ArgvNumberParser>(tokens, values)
+            || _tryParse<ArgvStringParser>(tokens, values);
+    }
+
+    template<typename T>
+    bool _tryParse(const std::vector<std::string> &tokens, std::vector<brayns::ArgvValue> &values)
+    {
+        auto parser = T(_property);
+        if (!parser.canParse())
+        {
+            return false;
+        }
+        for (const auto &token : tokens)
+        {
+            auto value = parser.parse(token);
             values.push_back(value);
-            stream.next();
+        }
+        ArgvItemCountValidator validator(_property);
+        validator.validate(values);
+        return true;
+    }
+};
+
+class ArgvParserHelper
+{
+public:
+    ArgvParserHelper(const std::vector<brayns::ArgvProperty> &properties)
+        : _properties(properties)
+    {
+    }
+
+    Argv parse(ArgvStream &stream)
+    {
+        Argv argv;
+        while (stream.hasCurrent())
+        {
+            _parseArgument(stream, argv);
+        }
+        return argv;
+    }
+
+private:
+    const std::vector<brayns::ArgvProperty> &_properties;
+
+    void _parseArgument(ArgvStream &stream, Argv &argv)
+    {
+        auto key = ArgvStreamExtractor::extractKey(stream);
+        auto &property = _getProperty(key);
+        auto value = ArgvStreamExtractor::extractValue(stream);
+        auto parser = ArgvValueParser(property);
+        parser.parse(value, argv[key]);
+    }
+
+    const brayns::ArgvProperty &_getProperty(const std::string &key)
+    {
+        auto first = _properties.begin();
+        auto last = _properties.end();
+        auto predictor = [&](auto &property) { return property.name == key; };
+        auto i = std::find_if(first, last, predictor);
+        if (i == last)
+        {
+            throw std::runtime_error("Unknown keyword argument '" + key + "'");
+        }
+        return *i;
+    }
+};
+
+class ArgvLoader
+{
+public:
+    ArgvLoader(const std::vector<brayns::ArgvProperty> &properties)
+        : _properties(properties)
+    {
+    }
+
+    void load(const Argv &argv)
+    {
+        for (const auto &property : _properties)
+        {
+            auto i = argv.find(property.name);
+            if (i == argv.end())
+            {
+                continue;
+            }
+            property.load(i->second);
         }
     }
 
-    static bool _isKey(const char *value)
-    {
-        return value[0] && value[0] == '-' && value[1] == '-';
-    }
+private:
+    const std::vector<brayns::ArgvProperty> &_properties;
 };
 } // namespace
 
 namespace brayns
 {
-Argv ArgvParser::parse(int argc, const char **argv)
+ArgvParser::ArgvParser(const std::vector<ArgvProperty> &properties)
+    : _properties(properties)
 {
-    return ArgvParserHelper::parse(argc, argv);
+}
+
+void ArgvParser::parse(int argc, const char **argv)
+{
+    ArgvParserHelper parser(_properties);
+    ArgvStream stream(argc, argv);
+    auto result = parser.parse(stream);
+    ArgvLoader loader(_properties);
+    loader.load(result);
 }
 } // namespace brayns
