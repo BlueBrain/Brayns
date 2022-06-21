@@ -124,7 +124,7 @@ void NetworkParameters::build(ArgvBuilder &builder)
     builder.add("secure", _secure, "Enable SSL");
     builder.add("max-clients", _maxClients, "Max simultaneous connections");
     builder.add("uri", _uri, "Server URI (host:port)");
-    builder.add("reconnection-period", _reconnectionPeriod, "Reconnection period in ms (client mode)").minimum(0.0);
+    builder.add("reconnection-period", _reconnectionPeriod, "Client mode reconnection period in ms").minimum(0.0);
     builder.add("private-key-file", _privateKeyFile, "Private key file path if secure");
     builder.add("private-key-passphrase", _privateKeyPassphrase, "Private key password if any");
     builder.add("certificate-file", _certificateFile, "Server or client certificate");

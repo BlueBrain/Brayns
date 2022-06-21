@@ -22,8 +22,6 @@
 
 #include <brayns/io/Loader.h>
 
-#include <set>
-
 namespace brayns
 {
 struct LoaderInfo
@@ -40,14 +38,15 @@ struct LoaderInfo
 class LoaderRegistry
 {
 public:
+    /**
+     * @brief Create a registry with core loaders registered.
+     *
+     * @return LoaderRegistry Registry.
+     */
+    static LoaderRegistry createWithCoreLoaders();
+
     /** Register the given loader. */
     void registerLoader(std::unique_ptr<AbstractLoader> loader);
-
-    /**
-     * @brief Register the basic loaders of Brayns.
-     *
-     */
-    void registerCoreLoaders();
 
     /**
      * Get a list of loaders and their supported file extensions and properties

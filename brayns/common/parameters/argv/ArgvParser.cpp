@@ -32,7 +32,7 @@
 
 namespace
 {
-using Argv = std::unordered_map<std::string, std::vector<brayns::ArgvValue>>;
+using ArgvMap = std::unordered_map<std::string, std::vector<brayns::ArgvValue>>;
 
 class ArgvStream
 {
@@ -469,9 +469,9 @@ public:
     {
     }
 
-    Argv parse(ArgvStream &stream)
+    ArgvMap parse(ArgvStream &stream)
     {
-        Argv argv;
+        ArgvMap argv;
         while (stream.hasCurrent())
         {
             _parseArgument(stream, argv);
@@ -482,7 +482,7 @@ public:
 private:
     const std::vector<brayns::ArgvProperty> &_properties;
 
-    void _parseArgument(ArgvStream &stream, Argv &argv)
+    void _parseArgument(ArgvStream &stream, ArgvMap &argv)
     {
         auto key = ArgvStreamExtractor::extractKey(stream);
         auto &property = _getProperty(key);
@@ -513,7 +513,7 @@ public:
     {
     }
 
-    void load(const Argv &argv)
+    void load(const ArgvMap &argv)
     {
         for (const auto &property : _properties)
         {

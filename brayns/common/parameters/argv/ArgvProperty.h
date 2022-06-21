@@ -54,8 +54,8 @@ struct GetArgvProperty
     static ArgvProperty of()
     {
         ArgvProperty property;
-        property.type = GetArgvType::of<T>();
-        if constexpr (std::is_arithmetic_v<T> && !std::is_enum_v<T>)
+        property.type = ArgvTypeInfo::getType<T>();
+        if constexpr (ArgvTypeInfo::isNumeric<T>())
         {
             property.minimum = std::numeric_limits<T>::min();
             property.maximum = std::numeric_limits<T>::max();

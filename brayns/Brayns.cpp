@@ -62,7 +62,7 @@ Brayns::Brayns(int argc, const char **argv)
         Version::getMinor(),
         Version::getPatch(),
         Version::getCommitHash());
-    _loaderRegistry.registerCoreLoaders();
+    _loaderRegistry = LoaderRegistry::createWithCoreLoaders();
     _pluginManager.loadPlugins();
 }
 

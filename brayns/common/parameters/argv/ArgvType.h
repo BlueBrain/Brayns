@@ -48,10 +48,10 @@ struct EnumReflector<ArgvType>
     }
 };
 
-struct GetArgvType
+struct ArgvTypeInfo
 {
     template<typename T>
-    static constexpr ArgvType of()
+    static constexpr ArgvType getType()
     {
         if constexpr (std::is_enum_v<T>)
         {
@@ -70,6 +70,20 @@ struct GetArgvType
             return ArgvType::Number;
         }
         return ArgvType::String;
+    }
+
+    template<typename T>
+    static constexpr bool isNumeric()
+    {
+        if constexpr (std::is_enum_v<T>)
+        {
+            return false;
+        }
+        if constexpr (std::is_same_v<T, bool>)
+        {
+            return false;
+        }
+        return std::is_arithmetic_v<T>;
     }
 };
 } // namespace brayns

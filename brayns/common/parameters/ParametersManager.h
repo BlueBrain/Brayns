@@ -42,38 +42,11 @@ public:
     ParametersManager(int argc, const char **argv);
 
     /**
-     * @brief Check if version is required from command line.
+     * @brief Build the list of command line options.
      *
-     * If true, the rest of the parameters is not initialized.
-     *
-     * @return true Version required.
-     * @return false No version required.
+     * @return std::vector<ArgvProperty> Command line options
      */
-    bool hasVersion();
-
-    /**
-     * @brief Build version display string.
-     *
-     * @return std::string Display string.
-     */
-    std::string getVersion();
-
-    /**
-     * @brief Check if help is required from command line.
-     *
-     * If true, the rest of the parameters is not initialized.
-     *
-     * @return true Help required.
-     * @return false No help required.
-     */
-    bool hasHelp();
-
-    /**
-     * @brief Build help display string.
-     *
-     * @return std::string Display string.
-     */
-    std::string getHelp();
+    std::vector<ArgvProperty> getArgvProperties();
 
     /**
      * @brief Gets simulation parameters
@@ -114,9 +87,6 @@ public:
     }
 
 private:
-    bool _version = false;
-    bool _help = false;
-    std::vector<ArgvProperty> _properties;
     SimulationParameters _simulationParameters;
     ApplicationParameters _applicationParameters;
     NetworkParameters _networkParameters;

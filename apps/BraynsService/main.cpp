@@ -21,60 +21,38 @@
 #include <iostream>
 
 #include <brayns/Brayns.h>
+#include <brayns/CommandLine.h>
 #include <brayns/common/Log.h>
 #include <brayns/utils/Timer.h>
-
-class BraynsService
-{
-public:
-    BraynsService(int argc, const char **argv)
-        : _brayns(argc, argv)
-    {
-    }
-
-    bool printVersionOrHelp()
-    {
-        auto &parameters = _brayns.getParametersManager();
-        if (parameters.hasVersion())
-        {
-            std::cout << parameters.getVersion();
-            return true;
-        }
-        if (parameters.hasHelp())
-        {
-            std::cout << parameters.getHelp();
-            return true;
-        }
-        return false;
-    }
-
-    void run()
-    {
-        while (_brayns.commitAndRender())
-        {
-        }
-    }
-
-private:
-    brayns::Brayns _brayns;
-};
 
 int main(int argc, const char **argv)
 {
     try
     {
-        BraynsService service(argc, argv);
-
-        if (service.printVersionOrHelp())
+        auto commandLine = brayns::CommandLine(argc, argv);
+        if (commandLine.hasVersion())
         {
+            auto version = commandLine.getVersion();
+            std::cout << version << '\n';
             return 0;
         }
+        if (commandLine.hasHelp())
+        {
+            auto help = commandLine.getHelp();
+            std::cout << help << '\n';
+            return 0;
+        }
+
+        brayns::Brayns instance(argc, argv);
 
         brayns::Log::info("Start Brayns service.");
 
         brayns::Timer timer;
 
-        service.run();
+        while (instance.commitAndRender())
+        {
+            brayns::Log::trace("Service update.");
+        }
 
         brayns::Log::info("Service was running for {} seconds.", timer.seconds());
     }
