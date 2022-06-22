@@ -158,7 +158,7 @@ brayns::TransferFunction TransferFunctionUtils::createUnipolarTransferFunction()
     return tf;
 }
 
-brayns::OSPBuffer TransferFunctionUtils::createSampleBuffer(const brayns::TransferFunction &tf) noexcept
+std::vector<brayns::Vector4f> TransferFunctionUtils::createSampleBuffer(const brayns::TransferFunction &tf) noexcept
 {
     std::vector<brayns::Vector4f> colors(256);
 
@@ -172,5 +172,5 @@ brayns::OSPBuffer TransferFunctionUtils::createSampleBuffer(const brayns::Transf
         colors[i] = std::move(color);
     }
 
-    return brayns::DataHandler::copyBuffer(colors, OSPDataType::OSP_VEC4F);
+    return colors;
 }

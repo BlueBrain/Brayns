@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include <brayns/engine/GeometryObject.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/components/MaterialComponent.h>
-#include <brayns/engine/geometries/Isosurface.h>
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/types/Isosurface.h>
 
 namespace brayns
 {
@@ -37,15 +37,13 @@ class IsosurfaceRendererComponent final : public Component
 {
 public:
     IsosurfaceRendererComponent(T volumeData, float isovalue)
-        : _geometry(Isosurface<T>{Volume<T>(std::move(volumeData)), {isovalue}})
-        , _object(_geometry)
+        : _geometryObject(Isosurface<T>{Volume<T>(std::move(volumeData)), {isovalue}})
     {
-        _geometry.commit();
     }
 
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
     {
-        return _geometry.computeBounds(transform);
+        return _geometryObject.computeBounds(transform);
     }
 
     virtual void onCreate() override
@@ -55,7 +53,7 @@ public:
         model.addComponent<MaterialComponent>();
 
         auto &group = model.getGroup();
-        group.addGeometricModel(_object);
+        group.addGeometry(_geometryObject);
     }
 
     bool commit() override
@@ -64,24 +62,21 @@ public:
         auto &material = ExtractModelObject::extractMaterial(group);
         if (material.commit())
         {
-            _object.setMaterial(material);
-            _object.setColor(material.getColor());
-            _object.commit();
-            return true;
+            _geometryObject.setMaterial(material);
+            _geometryObject.setColor(material.getColor());
         }
 
-        return false;
+        return _geometryObject.commit();
     }
 
     virtual void onDestroy() override
     {
         Model &model = getModel();
         auto &group = model.getGroup();
-        group.removeGeometricModel(_object);
+        group.removeGeometry(_geometryObject);
     }
 
 private:
-    Geometry<Isosurface<T>> _geometry;
-    GeometryObject _object;
+    GeometryObject<Isosurface<T>> _geometryObject;
 };
 }

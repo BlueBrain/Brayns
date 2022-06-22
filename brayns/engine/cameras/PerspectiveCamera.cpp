@@ -18,35 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/cameras/PerspectiveCamera.h>
+#include "PerspectiveCamera.h"
 
 namespace
 {
-class PerspectiveParametersUpdater
+struct PerspectiveParameters
 {
-public:
-    static void update(const brayns::PerspectiveCamera &camera)
-    {
-        static const std::string fovyParam = "fovy";
-        static const std::string apertureParam = "apertureRadius";
-        static const std::string focusDistanceParam = "focusDistance";
-
-        auto fovy = camera.getFOVY();
-        auto aperture = camera.getApertureRadius();
-        auto focusDistance = camera.getFocusDistance();
-
-        const auto &osprayCamera = camera.getOsprayCamera();
-        osprayCamera.setParam(fovyParam, fovy);
-        osprayCamera.setParam(apertureParam, aperture);
-        osprayCamera.setParam(focusDistanceParam, focusDistance);
-    }
+    inline static const std::string osprayName = "perspective";
+    inline static const std::string fovy = "fovy";
+    inline static const std::string aperture = "apertureRadius";
+    inline static const std::string focus = "focusDistance";
 };
 }
 
 namespace brayns
 {
 PerspectiveCamera::PerspectiveCamera()
-    : Camera("perspective")
+    : Camera(PerspectiveParameters::osprayName)
 {
 }
 
@@ -68,7 +56,10 @@ std::unique_ptr<Camera> PerspectiveCamera::clone() const noexcept
 
 void PerspectiveCamera::commitCameraSpecificParams()
 {
-    PerspectiveParametersUpdater::update(*this);
+    const auto &osprayCamera = getOsprayCamera();
+    osprayCamera.setParam(PerspectiveParameters::fovy, _fovy);
+    osprayCamera.setParam(PerspectiveParameters::aperture, _apertureRadius);
+    osprayCamera.setParam(PerspectiveParameters::focus, _focusDistance);
 }
 
 void PerspectiveCamera::setFOVY(const float fovy) noexcept

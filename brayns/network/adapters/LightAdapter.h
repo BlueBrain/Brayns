@@ -44,21 +44,9 @@ BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(QuadLight)
-BRAYNS_JSON_ADAPTER_GETSET(
-    "bottom_left_corner",
-    getBottomLeftCorner,
-    setBottomLeftCorner,
-    "Sets the bottom left corner position of the light (in world space coordinates)")
-BRAYNS_JSON_ADAPTER_GETSET(
-    "vertical_displacement",
-    getVerticalDisplacement,
-    setVerticalDisplacement,
-    "Sets the vertical displacement vector used to compute the top left corner")
-BRAYNS_JSON_ADAPTER_GETSET(
-    "horizontal_displacement",
-    getHorizontalDisplacement,
-    setHorizontalDisplacement,
-    "Sets the horizontal displacement vector used to compute the bottom right corner")
+BRAYNS_JSON_ADAPTER_GETSET("position", getPosition, setPosition, "Sets the corner position of the quad light")
+BRAYNS_JSON_ADAPTER_GETSET("edge1", getEdge1, setEdge1, "Sets one of the quad light edges")
+BRAYNS_JSON_ADAPTER_GETSET("edge2", getEdge2, setEdge2, "Sets one of the quad light edges")
 BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
 

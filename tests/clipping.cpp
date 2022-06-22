@@ -23,7 +23,7 @@
 #include <brayns/engine/cameras/OrthographicCamera.h>
 #include <brayns/engine/cameras/PerspectiveCamera.h>
 #include <brayns/engine/components/ClippingComponent.h>
-#include <brayns/engine/geometries/Plane.h>
+#include <brayns/engine/geometry/types/Plane.h>
 #include <brayns/engine/lights/AmbientLight.h>
 #include <brayns/engine/lights/DirectionalLight.h>
 

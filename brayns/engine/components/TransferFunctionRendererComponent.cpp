@@ -22,8 +22,8 @@
 
 #include <brayns/engine/Model.h>
 #include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/TransferFunctionComponent.h>
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
 
 #include <ospray/ospray_cpp/Data.h>
 

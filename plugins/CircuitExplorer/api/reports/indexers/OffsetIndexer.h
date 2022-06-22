@@ -26,9 +26,7 @@ class OffsetIndexer : public IColormapIndexer
 {
 public:
     OffsetIndexer(std::vector<size_t> offsets);
-
-    void update(const std::vector<float> &data, const brayns::Vector2f &range, std::vector<uint8_t> &indices) noexcept
-        override;
+    std::vector<uint8_t> generate(const std::vector<float> &data, const brayns::Vector2f &range) noexcept override;
 
 private:
     const std::vector<size_t> _offsets;

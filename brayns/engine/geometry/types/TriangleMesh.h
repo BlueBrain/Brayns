@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,34 +21,56 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
+#include <brayns/engine/geometry/Geometry.h>
 
 namespace brayns
 {
-struct Sphere
+struct TriangleMesh
 {
-    Vector3f center;
-    float radius;
+    std::vector<Vector3f> vertices;
+    std::vector<Vector3f> normals;
+    std::vector<Vector4f> colors;
+    std::vector<Vector2f> uvs;
+    std::vector<Vector3ui> indices;
+};
+
+class TriangleMeshMerger
+{
+public:
+    static void merge(const TriangleMesh &src, TriangleMesh &dst);
+};
+
+class TriangleMeshNormalGenerator
+{
+public:
+    static void generate(TriangleMesh &mesh);
 };
 
 template<>
-class OsprayGeometryName<Sphere>
+class OsprayGeometryName<TriangleMesh>
 {
 public:
-    static std::string_view get();
+    static const std::string &get();
 };
 
 template<>
-class GeometryBoundsUpdater<Sphere>
+class GeometryBoundsUpdater<TriangleMesh>
 {
 public:
-    static void update(const Sphere &s, const Matrix4f &t, Bounds &b);
+    static void update(const TriangleMesh &mesh, const Matrix4f &matrix, Bounds &bounds);
 };
 
 template<>
-class GeometryCommitter<Sphere>
+class InputGeometryChecker<TriangleMesh>
 {
 public:
-    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Sphere> &primitives);
+    static void check(const std::vector<TriangleMesh> &primitives);
+};
+
+template<>
+class GeometryCommitter<TriangleMesh>
+{
+public:
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<TriangleMesh> &primitives);
 };
 }

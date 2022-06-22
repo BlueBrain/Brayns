@@ -20,32 +20,22 @@
 
 #include "MetalMaterial.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class MetalParameterUpdater
+struct MetalParameters
 {
-public:
-    static void update(const brayns::MetalMaterial &material)
-    {
-        static const std::string colorParameter = "baseColor";
-        static const std::string roughnessParameter = "roughness";
-
-        const auto overridedColorWhite = brayns::Vector3f(1.f);
-        auto roughness = material.getRoughness();
-
-        const auto &osprayMaterial = material.getOsprayMaterial();
-        osprayMaterial.setParam(colorParameter, overridedColorWhite);
-        osprayMaterial.setParam(roughnessParameter, roughness);
-    }
+    inline static const std::string osprayName = "alloy";
+    inline static const std::string color = "baseColor";
+    inline static const std::string roughness = "roughness";
 };
 }
 
 namespace brayns
 {
 MetalMaterial::MetalMaterial()
-    : Material("alloy")
+    : Material(MetalParameters::osprayName)
 {
 }
 
@@ -66,6 +56,10 @@ float MetalMaterial::getRoughness() const noexcept
 
 void MetalMaterial::commitMaterialSpecificParams()
 {
-    MetalParameterUpdater::update(*this);
+    const auto overridedColorWhite = brayns::Vector3f(1.f);
+
+    auto &osprayMaterial = getOsprayMaterial();
+    osprayMaterial.setParam(MetalParameters::color, overridedColorWhite);
+    osprayMaterial.setParam(MetalParameters::roughness, _roughness);
 }
 }

@@ -22,42 +22,37 @@
 
 namespace
 {
-class ToneMappingParamsUpdater
+struct ToneMappingParameters
 {
-public:
-    static void update(const brayns::ToneMapping &toneMapping)
-    {
-        static const std::string exposureParam = "exposure";
-        static const std::string contrastParam = "contrast";
-        static const std::string shoulderParam = "shoulder";
-        static const std::string midInParam = "midIn";
-        static const std::string midOutParam = "midOut";
-        static const std::string hdrMaxParam = "hdrMax";
-        static const std::string acesColorParam = "acesColor";
-
-        const auto &osprayObject = toneMapping.getOsprayObject();
-        osprayObject.setParam(exposureParam, toneMapping.getExposure());
-        osprayObject.setParam(contrastParam, toneMapping.getContrast());
-        osprayObject.setParam(shoulderParam, toneMapping.getShoulder());
-        osprayObject.setParam(midInParam, toneMapping.getMidIn());
-        osprayObject.setParam(midOutParam, toneMapping.getMidOut());
-        osprayObject.setParam(hdrMaxParam, toneMapping.getMaxHDR());
-        osprayObject.setParam(acesColorParam, toneMapping.usesACESColor());
-        osprayObject.commit();
-    }
+    inline static const std::string osprayName = "tonemapper";
+    inline static const std::string exposure = "exposure";
+    inline static const std::string contrast = "contrast";
+    inline static const std::string shoulder = "shoulder";
+    inline static const std::string midIn = "midIn";
+    inline static const std::string midOut = "midOut";
+    inline static const std::string hdrMax = "hdrMax";
+    inline static const std::string acesColor = "acesColor";
 };
 }
 
 namespace brayns
 {
 ToneMapping::ToneMapping()
-    : ImageOperation("tonemapper")
+    : ImageOperation(ToneMappingParameters::osprayName)
 {
 }
 
 void ToneMapping::commit()
 {
-    ToneMappingParamsUpdater::update(*this);
+    const auto &osprayObject = getOsprayObject();
+    osprayObject.setParam(ToneMappingParameters::exposure, _exposure);
+    osprayObject.setParam(ToneMappingParameters::contrast, _contrast);
+    osprayObject.setParam(ToneMappingParameters::shoulder, _shoulder);
+    osprayObject.setParam(ToneMappingParameters::midIn, _midIn);
+    osprayObject.setParam(ToneMappingParameters::midOut, _midOut);
+    osprayObject.setParam(ToneMappingParameters::hdrMax, _hdrMax);
+    osprayObject.setParam(ToneMappingParameters::acesColor, _acesColor);
+    osprayObject.commit();
 }
 
 void ToneMapping::setExposure(const float exposure) noexcept

@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/GeometryObject.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/geometry/GeometryObject.h>
 
 namespace brayns
 {
@@ -33,30 +33,27 @@ template<typename T>
 class ClippingComponent : public Component
 {
 public:
-    ClippingComponent(const T &geometry)
-        : _geometry(std::move(geometry))
-        , _object(_geometry)
+    ClippingComponent(const T &primitive)
+        : _clipper(std::move(primitive))
     {
-        _geometry.commit();
-        _object.commit();
+        _clipper.commit();
     }
 
     virtual void onCreate() override
     {
         auto &model = getModel();
         auto &group = model.getGroup();
-        group.addClippingModel(_object);
+        group.addClipper(_clipper);
     }
 
     virtual void onDestroy() override
     {
         auto &model = getModel();
         auto &group = model.getGroup();
-        group.removeClippingModel(_object);
+        group.removeClipper(_clipper);
     }
 
 private:
-    Geometry<T> _geometry;
-    GeometryObject _object;
+    GeometryObject<T> _clipper;
 };
 }

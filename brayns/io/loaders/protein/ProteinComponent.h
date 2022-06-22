@@ -21,7 +21,8 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometries/Sphere.h>
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/types/Sphere.h>
 
 namespace brayns
 {
@@ -39,8 +40,7 @@ public:
     void onDestroy() override;
 
 private:
-    OSPGeometricModel _model = nullptr;
-    Geometry<Sphere> _geometry;
+    GeometryObject<Sphere> _object;
     std::vector<Vector4f> _colors;
     std::vector<uint8_t> _colorIndices;
 };

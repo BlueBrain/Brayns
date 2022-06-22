@@ -23,12 +23,9 @@ OffsetIndexer::OffsetIndexer(std::vector<size_t> offsets)
 {
 }
 
-void OffsetIndexer::update(
-    const std::vector<float> &data,
-    const brayns::Vector2f &range,
-    std::vector<uint8_t> &indices) noexcept
+std::vector<uint8_t> OffsetIndexer::generate(const std::vector<float> &data, const brayns::Vector2f &range) noexcept
 {
-    indices.resize(_offsets.size());
+    std::vector<uint8_t> indices(_offsets.size());
 
     const auto rangeStart = range.x;
     const auto rangeEnd = range.y;
@@ -43,4 +40,6 @@ void OffsetIndexer::update(
         const auto normIndex = (value - rangeStart) * invFactor;
         indices[i] = static_cast<uint8_t>(normIndex * 255.f);
     }
+
+    return indices;
 }

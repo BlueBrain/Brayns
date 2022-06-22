@@ -18,8 +18,8 @@
 
 #include <api/reports/IColormapIndexer.h>
 
-struct SpikeIndexer : public IColormapIndexer
+class SpikeIndexer : public IColormapIndexer
 {
-    void update(const std::vector<float> &data, const brayns::Vector2f &range, std::vector<uint8_t> &indices) noexcept
-        override;
+public:
+    std::vector<uint8_t> generate(const std::vector<float> &data, const brayns::Vector2f &range) noexcept override;
 };

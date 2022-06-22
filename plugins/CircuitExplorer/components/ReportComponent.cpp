@@ -22,7 +22,6 @@
 
 #include <brayns/engine/Model.h>
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/SimulationComponent.h>
 #include <brayns/engine/components/TransferFunctionComponent.h>
 
@@ -59,29 +58,23 @@ void ReportComponent::onPreRender(const brayns::ParametersManager &parameters)
         return;
     }
 
-    bool forceUpdate = !_lastEnabledValue;
-    _lastEnabledValue = true;
-
     auto &tf = brayns::ExtractModelObject::extractTransferFunction(model);
-    if (tf.isModified())
-    {
-        _colors = TransferFunctionUtils::createSampleBuffer(tf);
-        tf.resetModified();
-        forceUpdate = true;
-    }
-
     const auto &simulation = parameters.getSimulationParameters();
-    forceUpdate = forceUpdate || simulation.isModified();
+    auto forceUpdate = !_lastEnabledValue || simulation.isModified() || tf.isModified();
+    _lastEnabledValue = true;
 
     if (forceUpdate)
     {
+        auto colors = TransferFunctionUtils::createSampleBuffer(tf);
+        tf.resetModified();
+
         const auto frameIndex = simulation.getFrame();
         const auto frameData = _report->getFrame(frameIndex);
         const auto &range = tf.getValuesRange();
-        _indexer->update(frameData, range, _indices);
+        auto indices = _indexer->generate(frameData, range);
 
         auto &colorComponent = model.getComponent<CircuitColorComponent>();
         auto &handler = colorComponent.getColorHandler();
-        handler.updateIndexedColor(_colors, _indices);
+        handler.updateIndexedColor(colors, indices);
     }
 }

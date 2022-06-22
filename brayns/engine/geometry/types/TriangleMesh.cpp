@@ -20,7 +20,7 @@
 
 #include "TriangleMesh.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 #include <ospray/ospray_cpp/Data.h>
 
@@ -70,6 +70,16 @@ public:
     {
         dst.insert(dst.end(), src.begin(), src.end());
     }
+};
+
+struct TriangleMeshParameters
+{
+    inline static const std::string osprayName = "mesh";
+    inline static const std::string position = "vertex.position";
+    inline static const std::string index = "index";
+    inline static const std::string normal = "vertex.normal";
+    inline static const std::string uv = "vertex.texcoord";
+    inline static const std::string color = "vertex.color";
 };
 } // namespace
 
@@ -142,9 +152,9 @@ void TriangleMeshNormalGenerator::generate(TriangleMesh &mesh)
     }
 }
 
-std::string_view OsprayGeometryName<TriangleMesh>::get()
+const std::string &OsprayGeometryName<TriangleMesh>::get()
 {
-    return "mesh";
+    return TriangleMeshParameters::osprayName;
 }
 
 void GeometryBoundsUpdater<TriangleMesh>::update(const TriangleMesh &mesh, const Matrix4f &matrix, Bounds &bounds)
@@ -180,25 +190,19 @@ void GeometryCommitter<TriangleMesh>::commit(
     auto &uvs = mesh.uvs;
     auto &colors = mesh.colors;
 
-    static const std::string positionParameter = "vertex.position";
-    static const std::string indexParameter = "index";
-    static const std::string normalParameter = "vertex.normal";
-    static const std::string uvParameter = "vertex.texcoord";
-    static const std::string colorParameter = "vertex.color";
-
-    osprayGeometry.setParam(positionParameter, ospray::cpp::SharedData(vertices));
-    osprayGeometry.setParam(indexParameter, ospray::cpp::SharedData(indices));
+    osprayGeometry.setParam(TriangleMeshParameters::position, ospray::cpp::SharedData(vertices));
+    osprayGeometry.setParam(TriangleMeshParameters::index, ospray::cpp::SharedData(indices));
     if (!normals.empty())
     {
-        osprayGeometry.setParam(normalParameter, ospray::cpp::SharedData(normals));
+        osprayGeometry.setParam(TriangleMeshParameters::normal, ospray::cpp::SharedData(normals));
     }
     if (!uvs.empty())
     {
-        osprayGeometry.setParam(uvParameter, ospray::cpp::SharedData(uvs));
+        osprayGeometry.setParam(TriangleMeshParameters::uv, ospray::cpp::SharedData(uvs));
     }
     if (!colors.empty())
     {
-        osprayGeometry.setParam(colorParameter, ospray::cpp::SharedData(colors));
+        osprayGeometry.setParam(TriangleMeshParameters::uv, ospray::cpp::SharedData(colors));
     }
 }
 }

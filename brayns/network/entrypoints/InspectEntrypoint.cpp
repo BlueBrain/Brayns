@@ -42,7 +42,6 @@ public:
         auto instance = _findHittedInstance(pickResult.instance);
         if (!instance)
         {
-            _releaseOSPRayHandles(pickResult);
             throw brayns::InternalErrorException("Could not find hitted instance");
         }
 
@@ -52,34 +51,31 @@ public:
         auto &model = instance->getModel();
         model.onInspect(inspectContext, metadata);
 
-        _releaseOSPRayHandles(pickResult);
-
         return _buildResult(inspectContext, *instance, std::move(metadata));
     }
 
 private:
-    OSPPickResult _pickOSPRayScene(const brayns::Vector2f &position)
+    ospray::cpp::PickResult _pickOSPRayScene(const brayns::Vector2f &position)
     {
+        auto x = position.x;
+        auto y = position.y;
+
         auto &frameBuffer = _engine.getFrameBuffer();
         auto &renderer = _engine.getRenderer();
         auto &camera = _engine.getCamera();
         auto &scene = _engine.getScene();
 
-        auto frameBufferHandle = frameBuffer.handle();
-        auto rendererHandle = renderer.handle();
-        auto cameraHandle = camera.getHandle();
-        auto sceneHandle = scene.handle();
-
-        auto x = position.x;
-        auto y = position.y;
-
-        OSPPickResult result;
-        ospPick(&result, frameBufferHandle, rendererHandle, cameraHandle, sceneHandle, x, y);
-        return result;
+        auto &osprayFrameBuffer = frameBuffer.getOsprayFramebuffer();
+        auto &osprayRenderer = renderer.getOsprayRenderer();
+        auto &osprayCamera = camera.getOsprayCamera();
+        auto &osprayWorld = scene.getOsprayScene();
+        return osprayFrameBuffer.pick(osprayRenderer, osprayCamera, osprayWorld, x, y);
     }
 
-    brayns::ModelInstance *_findHittedInstance(OSPInstance hittedInstance)
+    brayns::ModelInstance *_findHittedInstance(const ospray::cpp::Instance &pickedInstance)
     {
+        auto pickedInstanceHandle = pickedInstance.handle();
+
         auto &scene = _engine.getScene();
         auto &instances = scene.getAllModelInstances();
 
@@ -88,7 +84,12 @@ private:
         auto instanceIterator = std::find_if(
             begin,
             end,
-            [=](brayns::ModelInstance *instancePtr) { return instancePtr->handle() == hittedInstance; });
+            [&](brayns::ModelInstance *instancePtr)
+            {
+                auto &osprayInstance = instancePtr->getOsprayInstance();
+                auto handle = osprayInstance.handle();
+                return handle == pickedInstanceHandle;
+            });
 
         // Shouldn't happen, but..
         if (instanceIterator == end)
@@ -99,7 +100,7 @@ private:
         return *instanceIterator;
     }
 
-    brayns::InspectContext _buildInspectContext(const OSPPickResult &osprayPickResult)
+    brayns::InspectContext _buildInspectContext(const ospray::cpp::PickResult &osprayPickResult)
     {
         const auto &ospHitPosition = osprayPickResult.worldPosition;
         auto hitPosition = brayns::Vector3f(ospHitPosition[0], ospHitPosition[1], ospHitPosition[2]);
@@ -120,14 +121,6 @@ private:
         result.position = context.hitPosition;
         result.metadata = std::move(metadata);
         return result;
-    }
-
-    void _releaseOSPRayHandles(OSPPickResult &osprayPickResult)
-    {
-        auto instanceHandle = osprayPickResult.instance;
-        auto modelHandle = osprayPickResult.model;
-        ospRelease(instanceHandle);
-        ospRelease(modelHandle);
     }
 
 private:

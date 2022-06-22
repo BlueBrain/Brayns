@@ -21,10 +21,8 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/common/DataHandler.h>
-#include <brayns/engine/geometries/Sphere.h>
-
-#include <ospray/ospray.h>
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/types/Sphere.h>
 
 /**
  * @brief The SynapseComponent class is a synapse geometry rendering component in which the synapse geometries are
@@ -32,13 +30,6 @@
  */
 class SynapseComponent final : public brayns::Component
 {
-public:
-    struct CellSynapses
-    {
-        OSPGeometricModel model;
-        brayns::Geometry<brayns::Sphere> geometry;
-    };
-
 public:
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
@@ -85,9 +76,11 @@ public:
      * @param color
      * @param mapping per geometry primitive indices into the color buffer
      */
-    void setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping);
+    void setIndexedColor(const std::vector<brayns::Vector4f> &color, const std::vector<uint8_t> &mapping);
 
 private:
+    using CellSynapses = brayns::GeometryObject<brayns::Sphere>;
+
     std::vector<uint64_t> _cellIds;
     std::vector<CellSynapses> _synapses;
     bool _colorsDirty{false};

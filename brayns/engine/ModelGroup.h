@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "GeometryObject.h"
-#include "VolumeObject.h"
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/volume/VolumeObject.h>
 
 #include <ospray/ospray_cpp/Group.h>
 
@@ -35,6 +35,8 @@ namespace brayns
 class ModelGroup
 {
 public:
+    ModelGroup() = default;
+
     ModelGroup(const ModelGroup &) = delete;
     ModelGroup &operator=(const ModelGroup &) = delete;
 
@@ -44,36 +46,80 @@ public:
     /**
      * @brief Adds a new geometric model and marks the group as dirty so it gets committed
      */
-    void addGeometricModel(const GeometryObject &model);
+    template<typename T>
+    void addGeometry(const GeometryObject<T> &geometry)
+    {
+        _addObject(_geometries, geometry.getOsprayObject());
+    }
 
     /**
      * @brief Removes an existing geometric model and mark the group as dirty so it gets committed
      */
-    void removeGeometricModel(const GeometryObject &model);
+    template<typename T>
+    void removeGeometry(const GeometryObject<T> &geometry)
+    {
+        _removeObject(_geometries, geometry.getOsprayObject());
+    }
 
     /**
      * @brief Adds a new volumetric model and marks the group as dirty so it gets committed
      */
-    void addVolumetricModel(const VolumeObject &model);
+    template<typename T>
+    void addVolume(const VolumeObject<T> &volume)
+    {
+        _addObject(_volumes, volume.getOsprayObject());
+    }
 
     /**
      * @brief Removes an existing volumetric model and mark the group as dirty so it gets committed
      */
-    void removeVolumetricModel(const VolumeObject &model);
+    template<typename T>
+    void removeVolume(const VolumeObject<T> &volume)
+    {
+        _removeObject(_volumes, volume.getOsprayObject());
+    }
 
     /**
      * @brief Adds a new geometric clipping model and marks the group as dirty so it gets commited
      */
-    void addClippingModel(const GeometryObject &model);
+    template<typename T>
+    void addClipper(const GeometryObject<T> &clipper)
+    {
+        _addObject(_clippers, clipper.getOsprayObject());
+    }
 
     /**
      * @brief Removes an existing clipping model and mark the group as dirty so it gets committed
      */
-    void removeClippingModel(const GeometryObject &model);
+    template<typename T>
+    void removeClipper(const GeometryObject<T> &clipper)
+    {
+        _removeObject(_clippers, clipper.getOsprayObject());
+    }
 
 private:
     friend class Model;
     friend class ModelInstance;
+
+    template<typename T>
+    void _addObject(std::vector<T> &list, const T &object)
+    {
+        list.push_back(object);
+        _modified = true;
+    }
+
+    template<typename T>
+    void _removeObject(std::vector<T> &list, const T &object)
+    {
+        auto handle = object.handle();
+        auto it = std::find_if(list.begin(), list.end(), [&](const T &item) { return item.handle() == handle; });
+
+        if (it != list.end())
+        {
+            list.erase(it);
+            _modified = true;
+        }
+    }
 
     /**
      * @brief Returns the OSPGroup handle
@@ -87,9 +133,9 @@ private:
 
 private:
     ospray::cpp::Group _osprayGroup;
-    std::vector<ospray::cpp::GeometricModel> _geometryModels;
-    std::vector<ospray::cpp::VolumetricModel> _volumeModels;
-    std::vector<ospray::cpp::GeometricModel> _clippingModels;
+    std::vector<ospray::cpp::GeometricModel> _geometries;
+    std::vector<ospray::cpp::VolumetricModel> _volumes;
+    std::vector<ospray::cpp::GeometricModel> _clippers;
     bool _modified{false};
 };
 }

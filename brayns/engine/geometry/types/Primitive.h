@@ -18,24 +18,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OsprayUtils.h"
+#pragma once
+
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/geometry/Geometry.h>
 
 namespace brayns
 {
-rkcommon::math::affine3f OsprayAffineConverter::fromTransform(const Transform &transform) noexcept
+struct Primitive
 {
-    auto matrix = transform.toMatrix();
-    auto &strafe = matrix[0];
-    auto &up = matrix[1];
-    auto &forward = matrix[2];
-    auto &position = matrix[3];
+    Vector3f p0;
+    float r0;
+    Vector3f p1;
+    float r1;
 
-    rkcommon::math::affine3f result;
-    result.l.vx = rkcommon::math::vec3f(strafe.x, strafe.y, strafe.z);
-    result.l.vy = rkcommon::math::vec3f(up.x, up.y, up.z);
-    result.l.vz = rkcommon::math::vec3f(forward.x, forward.y, forward.z);
-    result.p = rkcommon::math::vec3f(position.x, position.y, position.z);
+    static Primitive cylinder(const Vector3f &p0, const Vector3f &p1, const float radius) noexcept;
 
-    return result;
-}
+    static Primitive cone(const Vector3f &p0, const float r0, const Vector3f &p1, const float r1) noexcept;
+
+    static Primitive sphere(const Vector3f &center, const float radius) noexcept;
+};
+
+template<>
+class OsprayGeometryName<Primitive>
+{
+public:
+    static const std::string &get();
+};
+
+template<>
+class GeometryBoundsUpdater<Primitive>
+{
+public:
+    static void update(const Primitive &s, const Matrix4f &t, Bounds &b);
+};
+
+template<>
+class GeometryCommitter<Primitive>
+{
+public:
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Primitive> &primitives);
+};
 }

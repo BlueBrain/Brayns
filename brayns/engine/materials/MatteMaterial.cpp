@@ -20,35 +20,23 @@
 
 #include "MatteMaterial.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class MatteParameterUpdater
+struct MatteParameters
 {
-public:
-    static void update(const brayns::MatteMaterial &material)
-    {
-        static const std::string colorParameter = "baseColor";
-        static const std::string roughnessParameter = "roughness";
-        static const std::string opacityParameter = "opacity";
-
-        const auto overridedColorWhite = brayns::Vector3f(1.f);
-        constexpr float roughness = 1.f;
-        auto opacity = material.getOpacity();
-
-        const auto &osprayMaterial = material.getOsprayMaterial();
-        osprayMaterial.setParam(colorParameter, overridedColorWhite);
-        osprayMaterial.setParam(roughnessParameter, roughness);
-        osprayMaterial.setParam(opacityParameter, opacity);
-    }
+    inline static const std::string osprayName = "principled";
+    inline static const std::string color = "baseColor";
+    inline static const std::string roughness = "roughness";
+    inline static const std::string opacity = "opacity";
 };
 }
 
 namespace brayns
 {
 MatteMaterial::MatteMaterial()
-    : Material("principled")
+    : Material(MatteParameters::osprayName)
 {
 }
 
@@ -69,6 +57,12 @@ float MatteMaterial::getOpacity() const noexcept
 
 void MatteMaterial::commitMaterialSpecificParams()
 {
-    MatteParameterUpdater::update(*this);
+    const auto overridedColorWhite = brayns::Vector3f(1.f);
+    constexpr float roughness = 1.f;
+
+    auto &osprayMaterial = getOsprayMaterial();
+    osprayMaterial.setParam(MatteParameters::color, overridedColorWhite);
+    osprayMaterial.setParam(MatteParameters::roughness, roughness);
+    osprayMaterial.setParam(MatteParameters::opacity, _opacity);
 }
 }

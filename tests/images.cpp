@@ -21,7 +21,7 @@
 #include <brayns/Brayns.h>
 
 #include <brayns/engine/components/GeometryRendererComponent.h>
-#include <brayns/engine/geometries/Sphere.h>
+#include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/lights/AmbientLight.h>
 #include <brayns/engine/lights/DirectionalLight.h>
 

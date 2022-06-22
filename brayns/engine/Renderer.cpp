@@ -20,28 +20,15 @@
 
 #include "Renderer.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class RendererParameterUpdater
+struct RendererParameters
 {
-public:
-    static void update(const brayns::Renderer &renderer)
-    {
-        static const std::string pixelParameter = "pixelSamples";
-        static const std::string pathLengthParameter = "maxPathLength";
-        static const std::string backgroundParameter = "backgroundColor";
-
-        auto spp = renderer.getSamplesPerPixel();
-        auto maxBounces = renderer.getMaxRayBounces();
-        auto &background = renderer.getBackgroundColor();
-
-        auto &osprayRenderer = renderer.getOsprayRenderer();
-        osprayRenderer.setParam(pixelParameter, spp);
-        osprayRenderer.setParam(pathLengthParameter, maxBounces);
-        osprayRenderer.setParam(backgroundParameter, background);
-    }
+    inline static const std::string spp = "pixelSamples";
+    inline static const std::string pathLength = "maxPathLength";
+    inline static const std::string background = "backgroundColor";
 };
 }
 
@@ -89,7 +76,9 @@ bool Renderer::commit()
         return false;
     }
 
-    RendererParameterUpdater::update(*this);
+    _osprayRenderer.setParam(RendererParameters::spp, _samplesPerPixel);
+    _osprayRenderer.setParam(RendererParameters::pathLength, _maxRayBounces);
+    _osprayRenderer.setParam(RendererParameters::background, _backgroundColor);
 
     commitRendererSpecificParams();
 

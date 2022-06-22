@@ -20,15 +20,41 @@
 
 #pragma once
 
-#include <brayns/common/Transform.h>
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/geometry/Geometry.h>
 
-#include <ospray/SDK/common/OSPCommon.h>
+#include <ospray/ospray_cpp/Traits.h>
 
 namespace brayns
 {
-class OsprayAffineConverter
+struct Plane
+{
+    // A, B, C D from Ax + By + Cz + D = 0
+    Vector4f coefficients;
+};
+
+template<>
+class OsprayGeometryName<Plane>
 {
 public:
-    static rkcommon::math::affine3f fromTransform(const Transform &transform) noexcept;
+    static const std::string &get();
+};
+
+template<>
+class GeometryBoundsUpdater<Plane>
+{
+public:
+    static void update(const Plane &p, const Matrix4f &t, Bounds &b);
+};
+
+template<>
+class GeometryCommitter<Plane>
+{
+public:
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Plane> &primitives);
 };
 }
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::Plane, OSP_VEC4F)
+} // namespace ospray

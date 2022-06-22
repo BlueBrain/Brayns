@@ -25,7 +25,7 @@
 #include <ospray/ospray_cpp/Volume.h>
 
 #include <numeric>
-#include <string_view>
+#include <string>
 #include <vector>
 
 namespace brayns
@@ -62,7 +62,7 @@ public:
     /**
      * @brief Returns the OSPRay ID of the type
      */
-    static std::string_view get()
+    static const std::string &get()
     {
         throw std::runtime_error("Unhandled volume type");
     }

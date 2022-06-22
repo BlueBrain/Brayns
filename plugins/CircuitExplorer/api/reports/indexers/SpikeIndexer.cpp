@@ -18,19 +18,18 @@
 
 #include "SpikeIndexer.h"
 
-void SpikeIndexer::update(
-    const std::vector<float> &data,
-    const brayns::Vector2f &range,
-    std::vector<uint8_t> &indices) noexcept
+std::vector<uint8_t> SpikeIndexer::generate(const std::vector<float> &data, const brayns::Vector2f &range) noexcept
 {
     // Spike values are hardcoed in range 0 - 1
     (void)range;
 
-    indices.resize(data.size());
+    std::vector<uint8_t> indices(data.size());
 
     for (size_t i = 0; i < data.size(); ++i)
     {
         const auto value = data[i];
         indices[i] = static_cast<uint8_t>(value * 255);
     }
+
+    return indices;
 }

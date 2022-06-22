@@ -21,13 +21,20 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
-#include <brayns/engine/Volume.h>
+#include <brayns/engine/geometry/Geometry.h>
+#include <brayns/engine/volume/Volume.h>
 
 #include <ospray/ospray_cpp/Data.h>
 
 namespace brayns
 {
+struct IsosurfaceParameters
+{
+    inline static const std::string osprayName = "isosurface";
+    inline static const std::string volume = "volume";
+    inline static const std::string isovalue = "isovalue";
+};
+
 template<typename T>
 struct Isosurface
 {
@@ -39,9 +46,9 @@ template<typename T>
 class OsprayGeometryName<Isosurface<T>>
 {
 public:
-    static std::string_view get()
+    static const std::string &get()
     {
-        return "isosurface";
+        return IsosurfaceParameters::osprayName;
     }
 };
 
@@ -76,15 +83,12 @@ class GeometryCommitter<Isosurface<T>>
 public:
     static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Isosurface<T>> &primitives)
     {
-        static const std::string volumeParameter = "volume";
-        static const std::string isoValueParameter = "isovalue";
-
         const auto &primitive = primitives.front();
         auto &isoValues = primitive.isovalues;
         auto &volume = primitive.volume;
 
-        osprayGeometry.setParam(volumeParameter, volume.getOsprayVolume());
-        osprayGeometry.setParam(isoValueParameter, ospray::cpp::SharedData(isoValues));
+        osprayGeometry.setParam(IsosurfaceParameters::volume, volume.getOsprayVolume());
+        osprayGeometry.setParam(IsosurfaceParameters::isovalue, ospray::cpp::SharedData(isoValues));
     }
 };
 

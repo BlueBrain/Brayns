@@ -20,32 +20,22 @@
 
 #include "CarPaintMaterial.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class CarPaintParameterUpdater
+struct CarPaintParameters
 {
-public:
-    static void update(const brayns::CarPaintMaterial &material)
-    {
-        static const std::string baseColorParameter = "baseColor";
-        static const std::string flakeDensityParameter = "flakeDensity";
-
-        const auto overridedColorWhite = brayns::Vector3f(1.f);
-        auto flakeDensity = material.getFlakesDensity();
-
-        const auto &osprayMaterial = material.getOsprayMaterial();
-        osprayMaterial.setParam(baseColorParameter, overridedColorWhite);
-        osprayMaterial.setParam(flakeDensityParameter, flakeDensity);
-    }
+    inline static const std::string osprayName = "carPaint";
+    inline static const std::string baseColor = "baseColor";
+    inline static const std::string flakeDensity = "flakeDensity";
 };
 }
 
 namespace brayns
 {
 CarPaintMaterial::CarPaintMaterial()
-    : Material("carPaint")
+    : Material(CarPaintParameters::osprayName)
 {
 }
 
@@ -66,6 +56,10 @@ float CarPaintMaterial::getFlakesDensity() const noexcept
 
 void CarPaintMaterial::commitMaterialSpecificParams()
 {
-    CarPaintParameterUpdater::update(*this);
+    const auto overridedColorWhite = brayns::Vector3f(1.f);
+
+    const auto &osprayMaterial = getOsprayMaterial();
+    osprayMaterial.setParam(CarPaintParameters::baseColor, overridedColorWhite);
+    osprayMaterial.setParam(CarPaintParameters::flakeDensity, _flakeDensity);
 }
 }

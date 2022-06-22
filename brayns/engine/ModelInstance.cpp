@@ -139,7 +139,7 @@ bool ModelInstance::commit(const bool modelChanged)
     if (_transform.isModified())
     {
         auto affine = MatrixConverter::glmToOspray(_transform.toMatrix());
-        _osprayInstance.setParam("transform", &affine);
+        _osprayInstance.setParam("transform", affine);
         _transform.resetModified();
         needsCommit = true;
     }

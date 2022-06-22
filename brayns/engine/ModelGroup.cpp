@@ -55,65 +55,10 @@ public:
 private:
     const ospray::cpp::Group &_group;
 };
-
-class ModelEraser
-{
-public:
-    template<typename StoredData, typename SourceData>
-    static bool removeModel(std::vector<StoredData> &modelList, const SourceData &value)
-    {
-        const auto &object = value.getOsprayObject();
-        auto handle = object.handle();
-        auto it = std::find_if(
-            modelList.begin(),
-            modelList.end(),
-            [&](auto &osprayObject) { return osprayObject.handle() == handle; });
-        if (it != modelList.end())
-        {
-            modelList.erase(it);
-            return true;
-        }
-
-        return false;
-    }
-};
 }
 
 namespace brayns
 {
-void ModelGroup::addGeometricModel(const GeometryObject &model)
-{
-    _geometryModels.push_back(model.getOsprayObject());
-    _modified = true;
-}
-
-void ModelGroup::removeGeometricModel(const GeometryObject &model)
-{
-    _modified = ModelEraser::removeModel(_geometryModels, model) || _modified;
-}
-
-void ModelGroup::addVolumetricModel(const VolumeObject &model)
-{
-    _volumeModels.push_back(model.getOsprayObject());
-    _modified = true;
-}
-
-void ModelGroup::removeVolumetricModel(const VolumeObject &model)
-{
-    _modified = ModelEraser::removeModel(_volumeModels, model) || _modified;
-}
-
-void ModelGroup::addClippingModel(const GeometryObject &model)
-{
-    _clippingModels.push_back(model.getOsprayObject());
-    _modified = true;
-}
-
-void ModelGroup::removeClippingModel(const GeometryObject &model)
-{
-    _modified = ModelEraser::removeModel(_clippingModels, model) || _modified;
-}
-
 ospray::cpp::Group &ModelGroup::getOsprayGroup() noexcept
 {
     return _osprayGroup;
@@ -125,11 +70,13 @@ bool ModelGroup::commit()
     {
         return false;
     }
+
     GroupParameterUpdater updater(_osprayGroup);
-    updater.update(GroupParameters::geometry, _geometryModels);
-    updater.update(GroupParameters::volume, _volumeModels);
-    updater.update(GroupParameters::clipping, _clippingModels);
+    updater.update(GroupParameters::geometry, _geometries);
+    updater.update(GroupParameters::volume, _volumes);
+    updater.update(GroupParameters::clipping, _clippers);
     _osprayGroup.commit();
+    _modified = false;
     return true;
 }
 }

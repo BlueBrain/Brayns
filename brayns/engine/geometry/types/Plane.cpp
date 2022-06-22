@@ -18,29 +18,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Box.h"
+#include "Plane.h"
 
 #include <ospray/ospray_cpp/Data.h>
 
+namespace
+{
+struct PlaneParameters
+{
+    inline static const std::string osprayName = "plane";
+    inline static const std::string coefficients = "plane.coefficients";
+};
+}
+
 namespace brayns
 {
-std::string_view OsprayGeometryName<Box>::get()
+const std::string &OsprayGeometryName<Plane>::get()
 {
-    return "box";
+    return PlaneParameters::osprayName;
 }
 
-void GeometryBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bounds &b)
+void GeometryBoundsUpdater<Plane>::update(const Plane &p, const Matrix4f &t, Bounds &b)
 {
-    const auto &min = box.min;
-    const auto &max = box.max;
-
-    b.expand(Vector3f(t * Vector4f(min, 1.f)));
-    b.expand(Vector3f(t * Vector4f(max, 1.f)));
+    // NOOP
+    // Planes are infinite. They can be limited, but on Brayns we only use them for clipping
+    // https://github.com/ospray/ospray#planes
+    (void)p;
+    (void)t;
+    (void)b;
 }
 
-void GeometryCommitter<Box>::commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Box> &primitives)
+void GeometryCommitter<Plane>::commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Plane> &primitives)
 {
-    static std::string boxParameter = "box";
-    osprayGeometry.setParam(boxParameter, ospray::cpp::SharedData(primitives));
+    osprayGeometry.setParam(PlaneParameters::coefficients, ospray::cpp::SharedData(primitives));
 }
 }

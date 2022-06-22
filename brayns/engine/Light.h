@@ -45,7 +45,7 @@ public:
     Light(Light &&) = delete;
     Light &operator=(Light &&) = delete;
 
-    virtual ~Light() = 0;
+    virtual ~Light() = default;
 
     /**
      * @brief Sets the light color as normalized RGB

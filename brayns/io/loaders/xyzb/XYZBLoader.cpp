@@ -23,7 +23,7 @@
 #include <brayns/common/Log.h>
 
 #include <brayns/engine/components/GeometryRendererComponent.h>
-#include <brayns/engine/geometries/Sphere.h>
+#include <brayns/engine/geometry/types/Sphere.h>
 
 #include <brayns/utils/StringUtils.h>
 

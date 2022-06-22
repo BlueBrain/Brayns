@@ -27,20 +27,50 @@
 
 namespace brayns
 {
+template<typename T>
 class VolumeObject
 {
 public:
-    template<typename T>
-    VolumeObject(const Volume<T> &volume)
-        : _osprayObject(volume.getOsprayVolume())
+    VolumeObject(T data)
+        : VolumeObject(Volume<T>(std::move(data)))
     {
     }
 
-    void setTransferFunction(const ospray::cpp::TransferFunction &transferFunction);
-    void commit();
-    const ospray::cpp::VolumetricModel &getOsprayObject() const noexcept;
+    void setTransferFunction(const ospray::cpp::TransferFunction &transferFunction)
+    {
+        _osprayObject.setParam("transferFunction", transferFunction);
+        _modified = true;
+    }
+
+    bool commit()
+    {
+        if (_volume.commit() || _modified)
+        {
+            _osprayObject.commit();
+            _modified = false;
+            return true;
+        }
+        return false;
+    }
+
+    Bounds computeBounds(const Matrix4f &transform) const noexcept
+    {
+        return _volume.computeBounds(transform);
+    }
+
+    Volume<T> &getVolume() noexcept
+    {
+        return _volume;
+    }
+
+    const ospray::cpp::VolumetricModel &getOsprayObject() const noexcept
+    {
+        return _osprayObject;
+    }
 
 private:
+    Volume<T> _volume;
     ospray::cpp::VolumetricModel _osprayObject;
+    bool _modified = true;
 };
 }

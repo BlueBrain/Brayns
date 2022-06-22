@@ -20,35 +20,23 @@
 
 #include "DefaultMaterial.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class DefaultParameterUpdater
+struct DefaultParameters
 {
-public:
-    static void update(const brayns::DefaultMaterial &material)
-    {
-        static const std::string kdParameter = "kd";
-        static const std::string nsParameter = "ns";
-        static const std::string opacityParameter = "d";
-
-        const auto kd = brayns::Vector3f(1.f);
-        constexpr float ns = 2.f;
-        auto opacity = material.getOpacity();
-
-        const auto &osprayMaterial = material.getOsprayMaterial();
-        osprayMaterial.setParam(kdParameter, kd);
-        osprayMaterial.setParam(nsParameter, ns);
-        osprayMaterial.setParam(opacityParameter, opacity);
-    }
+    inline static const std::string osprayName = "obj";
+    inline static const std::string kd = "kd";
+    inline static const std::string ns = "ns";
+    inline static const std::string opacity = "d";
 };
 }
 
 namespace brayns
 {
 DefaultMaterial::DefaultMaterial()
-    : Material("obj")
+    : Material(DefaultParameters::osprayName)
 {
 }
 
@@ -69,6 +57,12 @@ float DefaultMaterial::getOpacity() const noexcept
 
 void DefaultMaterial::commitMaterialSpecificParams()
 {
-    DefaultParameterUpdater::update(*this);
+    const auto kd = brayns::Vector3f(1.f);
+    constexpr float ns = 2.f;
+
+    const auto &osprayMaterial = getOsprayMaterial();
+    osprayMaterial.setParam(DefaultParameters::kd, kd);
+    osprayMaterial.setParam(DefaultParameters::ns, ns);
+    osprayMaterial.setParam(DefaultParameters::opacity, _opacity);
 }
 }

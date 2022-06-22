@@ -20,15 +20,25 @@
 
 #include "Sphere.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 #include <ospray/ospray_cpp/Data.h>
 
+namespace
+{
+struct SphereParameters
+{
+    inline static const std::string osprayName = "sphere";
+    inline static const std::string position = "sphere.position";
+    inline static const std::string radius = "sphere.radius";
+};
+}
+
 namespace brayns
 {
-std::string_view OsprayGeometryName<Sphere>::get()
+const std::string &OsprayGeometryName<Sphere>::get()
 {
-    return "sphere";
+    return SphereParameters::osprayName;
 }
 
 void GeometryBoundsUpdater<Sphere>::update(const Sphere &s, const Matrix4f &t, Bounds &b)
@@ -48,9 +58,6 @@ void GeometryCommitter<Sphere>::commit(
     const ospray::cpp::Geometry &osprayGeometry,
     const std::vector<Sphere> &primitives)
 {
-    static const std::string positionParameter = "sphere.position";
-    static const std::string radiusParameter = "sphere.radius";
-
     constexpr auto stride = 4 * sizeof(float);
     auto basePtr = &(primitives.front().center.x);
     auto positionPtr = basePtr;
@@ -59,7 +66,7 @@ void GeometryCommitter<Sphere>::commit(
 
     ospray::cpp::SharedData positionData(positionPtr, OSP_VEC3F, size, stride);
     ospray::cpp::SharedData radiiData(radiiPtr, OSP_FLOAT, size, stride);
-    osprayGeometry.setParam(positionParameter, positionData);
-    osprayGeometry.setParam(radiusParameter, radiiData);
+    osprayGeometry.setParam(SphereParameters::position, positionData);
+    osprayGeometry.setParam(SphereParameters::radius, radiiData);
 }
 }

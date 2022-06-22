@@ -20,35 +20,23 @@
 
 #include "QuadLight.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class QuadLightParameterUpdater
+struct QuadLightParameters
 {
-public:
-    static void update(const brayns::QuadLight &light)
-    {
-        static const std::string positionParam = "position";
-        static const std::string edge1Param = "edge1";
-        static const std::string edge2Param = "edge2";
-
-        const auto &position = light.getPosition();
-        const auto &edge1 = light.getEdge1();
-        const auto &edge2 = light.getEdge2();
-
-        const auto &osprayLight = light.getOsprayLight();
-        osprayLight.setParam(positionParam, position);
-        osprayLight.setParam(edge1Param, edge1);
-        osprayLight.setParam(edge2Param, edge2);
-    }
+    inline static const std::string osprayName = "quad";
+    inline static const std::string position = "position";
+    inline static const std::string edge1 = "edge1";
+    inline static const std::string edge2 = "edge2";
 };
 }
 
 namespace brayns
 {
 QuadLight::QuadLight()
-    : Light("quad")
+    : Light(QuadLightParameters::osprayName)
 {
 }
 
@@ -94,6 +82,9 @@ Bounds QuadLight::computeBounds() const noexcept
 
 void QuadLight::commitLightSpecificParams()
 {
-    QuadLightParameterUpdater::update(*this);
+    const auto &osprayLight = getOsprayLight();
+    osprayLight.setParam(QuadLightParameters::position, _position);
+    osprayLight.setParam(QuadLightParameters::edge1, _edge1);
+    osprayLight.setParam(QuadLightParameters::edge2, _edge2);
 }
 }

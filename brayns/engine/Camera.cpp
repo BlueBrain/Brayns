@@ -22,41 +22,16 @@
 
 #include "Camera.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class CameraParameterUpdater
+struct CameraParameters
 {
-public:
-    static void updateView(const brayns::Camera &camera)
-    {
-        static const std::string positionParam = "position";
-        static const std::string directionParam = "direction";
-        static const std::string upParam = "up";
-
-        const auto &lookAt = camera.getLookAt();
-        const auto &position = lookAt.position;
-        const auto &target = lookAt.target;
-        const auto &up = lookAt.up;
-        const auto forward = glm::normalize(target - position);
-        const auto strafe = glm::cross(forward, up);
-        const auto realUp = glm::cross(strafe, forward);
-
-        const auto &osprayCamera = camera.getOsprayCamera();
-        osprayCamera.setParam(positionParam, position);
-        osprayCamera.setParam(directionParam, forward);
-        osprayCamera.setParam(upParam, realUp);
-    }
-
-    static void updateAspectRatio(const brayns::Camera &camera)
-    {
-        static const std::string aspectParam = "aspect";
-
-        const auto aspectRatio = camera.getAspectRatio();
-        const auto &osprayCamera = camera.getOsprayCamera();
-        osprayCamera.setParam(aspectParam, aspectRatio);
-    }
+    inline static const std::string position = "position";
+    inline static const std::string direction = "direction";
+    inline static const std::string up = "up";
+    inline static const std::string aspect = "aspect";
 };
 }
 
@@ -84,8 +59,17 @@ bool Camera::commit()
         return false;
     }
 
-    CameraParameterUpdater::updateView(*this);
-    CameraParameterUpdater::updateAspectRatio(*this);
+    const auto &position = _lookAtParams.position;
+    const auto &target = _lookAtParams.target;
+    const auto &up = _lookAtParams.up;
+    const auto forward = glm::normalize(target - position);
+    const auto strafe = glm::cross(forward, up);
+    const auto realUp = glm::cross(strafe, forward);
+
+    _osprayCamera.setParam(CameraParameters::position, position);
+    _osprayCamera.setParam(CameraParameters::direction, forward);
+    _osprayCamera.setParam(CameraParameters::up, realUp);
+    _osprayCamera.setParam(CameraParameters::aspect, _aspectRatio);
 
     commitCameraSpecificParams();
 

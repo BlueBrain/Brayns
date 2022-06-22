@@ -21,20 +21,16 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/common/DataHandler.h>
-#include <brayns/engine/geometries/Primitive.h>
+#include <brayns/engine/geometry/GeometryObject.h>
 
 #include <api/neuron/NeuronGeometry.h>
-
-#include <ospray/ospray.h>
 
 class MorphologyCircuitComponent final : public brayns::Component
 {
 public:
     struct MorphologyGeometry
     {
-        OSPGeometricModel model{nullptr};
-        brayns::Geometry<brayns::Primitive> geometry;
+        brayns::GeometryObject<brayns::Primitive> geometry;
         std::vector<NeuronSectionMapping> sections;
     };
 
@@ -98,7 +94,7 @@ public:
      * @param color
      * @param mapping per geometry primitive indices into the color buffer
      */
-    void setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping);
+    void setIndexedColor(const std::vector<brayns::Vector4f> &color, const std::vector<uint8_t> &mapping);
 
     /**
      * @brief Changes the thickness (radii) of the morphology geometries

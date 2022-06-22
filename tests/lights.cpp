@@ -95,9 +95,9 @@ TEST_CASE("render_quad_light")
     const auto lightColor = brayns::Vector3f(1.f);
 
     auto light = std::make_unique<brayns::QuadLight>();
-    light->setBottomLeftCorner(lightCorner);
-    light->setHorizontalDisplacement(lightHorizontalVector);
-    light->setVerticalDisplacement(lightVerticalVector);
+    light->setPosition(lightCorner);
+    light->setEdge1(lightHorizontalVector);
+    light->setEdge2(lightVerticalVector);
     light->setIntensity(lightIntensity);
     light->setColor(lightColor);
     BraynsTestUtils::addLight(brayns, std::move(light));

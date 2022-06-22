@@ -20,32 +20,22 @@
 
 #include "GlassMaterial.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class GlassParameterUpdater
+struct GlassParameters
 {
-public:
-    static void update(const brayns::GlassMaterial &material)
-    {
-        static const std::string colorParameter = "attenuationColor";
-        static const std::string iorParameter = "eta";
-
-        const auto overridedColorWhite = brayns::Vector3f(1.f);
-        auto ior = material.getIndexOfRefraction();
-
-        const auto &osprayMaterial = material.getOsprayMaterial();
-        osprayMaterial.setParam(colorParameter, overridedColorWhite);
-        osprayMaterial.setParam(iorParameter, ior);
-    }
+    inline static const std::string osprayName = "thinGlass";
+    inline static const std::string attenuation = "attenuationColor";
+    inline static const std::string ior = "eta";
 };
 }
 
 namespace brayns
 {
 GlassMaterial::GlassMaterial()
-    : Material("thinGlass")
+    : Material(GlassParameters::osprayName)
 {
 }
 
@@ -66,6 +56,10 @@ float GlassMaterial::getIndexOfRefraction() const noexcept
 
 void GlassMaterial::commitMaterialSpecificParams()
 {
-    GlassParameterUpdater::update(*this);
+    const auto overridedColorWhite = brayns::Vector3f(1.f);
+
+    auto &osprayMaterial = getOsprayMaterial();
+    osprayMaterial.setParam(GlassParameters::attenuation, overridedColorWhite);
+    osprayMaterial.setParam(GlassParameters::ior, _ior);
 }
 }

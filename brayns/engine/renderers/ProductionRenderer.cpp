@@ -20,10 +20,17 @@
 
 #include <brayns/engine/renderers/ProductionRenderer.h>
 
+namespace
+{
+struct ProductionParameters
+{
+    inline static const std::string osprayName = "pathtracer";
+};
+}
 namespace brayns
 {
 ProductionRenderer::ProductionRenderer()
-    : Renderer("pathtracer")
+    : Renderer(ProductionParameters::osprayName)
 {
 }
 

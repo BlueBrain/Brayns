@@ -20,7 +20,7 @@
 
 #include "RegularVolume.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 #include <ospray/ospray.h>
 
@@ -74,13 +74,21 @@ private:
         }
     }
 };
+
+struct RegularVolumeParameters
+{
+    inline static const std::string osprayName = "structuredRegular";
+    inline static const std::string data = "data";
+    inline static const std::string cellCentered = "cellCentered";
+    inline static const std::string gridSpacing = "gridSpacing";
+};
 }
 
 namespace brayns
 {
-std::string_view OsprayVolumeName<RegularVolume>::get()
+const std::string &OsprayVolumeName<RegularVolume>::get()
 {
-    return "structuredRegular";
+    return RegularVolumeParameters::osprayName;
 }
 
 void VolumeBoundsUpdater<RegularVolume>::update(const RegularVolume &s, const Matrix4f &t, Bounds &b)
@@ -102,10 +110,10 @@ void VolumeCommitter<RegularVolume>::commit(const ospray::cpp::Volume &osprayVol
     const auto &spacing = volumeData.spacing;
 
     OSPData sharedData = ospNewSharedData(data.data(), dataType, size.x, 0, size.y, 0, size.z);
-    osprayVolume.setParam("data", sharedData);
+    osprayVolume.setParam(RegularVolumeParameters::data, sharedData);
     ospRelease(sharedData);
 
-    osprayVolume.setParam("cellCentered", cellCentered);
-    osprayVolume.setParam("gridSpacing", spacing);
+    osprayVolume.setParam(RegularVolumeParameters::cellCentered, cellCentered);
+    osprayVolume.setParam(RegularVolumeParameters::gridSpacing, spacing);
 }
 }

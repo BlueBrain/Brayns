@@ -21,12 +21,10 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/common/DataHandler.h>
-#include <brayns/engine/geometries/Sphere.h>
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/types/Sphere.h>
 
 #include <api/neuron/NeuronSection.h>
-
-#include <ospray/ospray.h>
 
 class SomaCircuitComponent final : public brayns::Component
 {
@@ -78,12 +76,10 @@ public:
      * @param color
      * @param mapping per geometry primitive indices into the color buffer
      */
-    void setIndexedColor(brayns::OSPBuffer &colors, const std::vector<uint8_t> &mapping);
+    void setIndexedColor(const std::vector<brayns::Vector4f> &colors, const std::vector<uint8_t> &mapping);
 
 private:
-    OSPGeometricModel _model = nullptr;
-    brayns::Geometry<brayns::Sphere> _geometry;
+    brayns::GeometryObject<brayns::Sphere> _geometry;
     std::vector<uint64_t> _ids;
     std::vector<brayns::Vector4f> _colors;
-    bool _colorsDirty{false};
 };

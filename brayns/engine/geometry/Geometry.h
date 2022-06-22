@@ -62,7 +62,7 @@ public:
     /**
      * @brief Returns the Ospray name of the type
      */
-    static std::string_view get()
+    static const std::string &get()
     {
         throw std::runtime_error("Unhandled geometry type");
     }
@@ -107,15 +107,17 @@ template<typename T>
 class Geometry
 {
 public:
+    Geometry() = default;
+
     Geometry(T primitive)
-        : _osprayGeometry(OsprayGeometryName<T>::get().data())
+        : _osprayGeometry(OsprayGeometryName<T>::get())
     {
         _primitives.push_back(std::move(primitive));
         InputGeometryChecker<T>::check(_primitives);
     }
 
     Geometry(std::vector<T> primitives)
-        : _osprayGeometry(OsprayGeometryName<T>::get().data())
+        : _osprayGeometry(OsprayGeometryName<T>::get())
         , _primitives(std::move(primitives))
     {
         InputGeometryChecker<T>::check(_primitives);
@@ -178,7 +180,7 @@ public:
      */
     bool commit()
     {
-        if (!_dirty)
+        if (!_dirty || _primitives.empty())
         {
             return false;
         }
@@ -201,7 +203,7 @@ public:
 
 private:
     ospray::cpp::Geometry _osprayGeometry;
-    bool _dirty{false};
+    bool _dirty{true};
     std::vector<T> _primitives;
 };
 }

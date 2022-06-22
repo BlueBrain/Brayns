@@ -20,33 +20,22 @@
 
 #include "DirectionalLight.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class DirectionalLightParameterUpdater
+struct DirectionalLightParameters
 {
-public:
-    static void update(const brayns::DirectionalLight &light)
-    {
-        static const std::string directionParam = "direction";
-        static const std::string angularDiameterParam = "angularDiameter";
-
-        const auto &direction = light.getDirection();
-        // angularDiamter = 0.0 == HARD SHADOWS
-        constexpr float angularDiameter = 0.53f;
-
-        const auto &osprayLight = light.getOsprayLight();
-        osprayLight.setParam(directionParam, direction);
-        osprayLight.setParam(angularDiameterParam, angularDiameter);
-    }
+    inline static const std::string osprayName = "distant";
+    inline static const std::string direction = "direction";
+    inline static const std::string angularDiameter = "angularDiameter";
 };
 }
 
 namespace brayns
 {
 DirectionalLight::DirectionalLight()
-    : Light("distant")
+    : Light(DirectionalLightParameters::osprayName)
 {
 }
 
@@ -67,6 +56,10 @@ const Vector3f &DirectionalLight::getDirection() const noexcept
 
 void DirectionalLight::commitLightSpecificParams()
 {
-    DirectionalLightParameterUpdater::update(*this);
+    constexpr float angularDiameter = 0.53f;
+
+    const auto &osprayLight = getOsprayLight();
+    osprayLight.setParam(DirectionalLightParameters::direction, _direction);
+    osprayLight.setParam(DirectionalLightParameters::angularDiameter, angularDiameter);
 }
 }

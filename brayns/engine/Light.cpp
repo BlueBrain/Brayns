@@ -20,28 +20,15 @@
 
 #include "Light.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class LightParameterUpdater
+struct LightParameters
 {
-public:
-    static void update(const brayns::Light &light)
-    {
-        static const std::string colorParameter = "color";
-        static const std::string intensityParameter = "intensity";
-        static const std::string visibilityParameter = "visible";
-
-        auto &color = light.getColor();
-        auto intensity = light.getIntensity();
-        auto isVisible = light.isVisible();
-
-        auto &osprayLight = light.getOsprayLight();
-        osprayLight.setParam(colorParameter, color);
-        osprayLight.setParam(intensityParameter, intensity);
-        osprayLight.setParam(visibilityParameter, isVisible);
-    }
+    inline static const std::string color = "color";
+    inline static const std::string intensity = "intensity";
+    inline static const std::string visibility = "visible";
 };
 }
 
@@ -94,7 +81,9 @@ bool Light::commit()
         return false;
     }
 
-    LightParameterUpdater::update(*this);
+    _osprayLight.setParam(LightParameters::color, _color);
+    _osprayLight.setParam(LightParameters::intensity, _intensity);
+    _osprayLight.setParam(LightParameters::visibility, _visible);
 
     commitLightSpecificParams();
 

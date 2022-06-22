@@ -26,6 +26,11 @@
 
 namespace
 {
+struct FrameBufferParameters
+{
+    inline static const std::string operations = "imageOperation";
+};
+
 class OsprayFrameBufferFormat
 {
 public:
@@ -56,8 +61,11 @@ void FrameBuffer::map()
 
 void FrameBuffer::unmap()
 {
-    _osprayFramebuffer.unmap(_colorBuffer);
-    _colorBuffer = nullptr;
+    if (_colorBuffer)
+    {
+        _osprayFramebuffer.unmap(_colorBuffer);
+        _colorBuffer = nullptr;
+    }
 }
 
 const uint8_t *FrameBuffer::getColorBuffer() const
@@ -90,7 +98,7 @@ bool FrameBuffer::commit()
     auto operations = _operationManager.getOperationHandles();
     if (!operations.empty())
     {
-        _osprayFramebuffer.setParam("imageOperation", ospray::cpp::CopiedData(operations));
+        _osprayFramebuffer.setParam(FrameBufferParameters::operations, ospray::cpp::CopiedData(operations));
     }
 
     _osprayFramebuffer.commit();

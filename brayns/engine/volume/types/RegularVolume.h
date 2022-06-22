@@ -21,41 +21,46 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
+#include <brayns/engine/volume/Volume.h>
+#include <brayns/engine/volume/VolumeDataType.h>
 
-#include <ospray/ospray_cpp/Traits.h>
+#include <vector>
 
 namespace brayns
 {
-struct Box
+/**
+ * @brief The RegularVolume struct is a regular grid volume in which the data is laid out in XYZ order:
+ * The first elements are the X values of the first row of the first frame.
+ */
+struct RegularVolume
 {
-    Vector3f min;
-    Vector3f max;
+    // Specifies how to interpret the bytes stored as data
+    VolumeDataType dataType;
+    std::vector<uint8_t> data;
+    Vector3ui size{0u};
+    Vector3f spacing;
+    // Specifies wether the data is scpeified as per grid vertex. If false, is specified as per grid cell center.
+    bool perVertexData{false};
 };
 
 template<>
-class OsprayGeometryName<Box>
+class OsprayVolumeName<RegularVolume>
 {
 public:
-    static std::string_view get();
+    static const std::string &get();
 };
 
 template<>
-class GeometryBoundsUpdater<Box>
+class VolumeBoundsUpdater<RegularVolume>
 {
 public:
-    static void update(const Box &s, const Matrix4f &t, Bounds &b);
+    static void update(const RegularVolume &s, const Matrix4f &t, Bounds &b);
 };
 
 template<>
-class GeometryCommitter<Box>
+class VolumeCommitter<RegularVolume>
 {
 public:
-    static void commit(const ospray::cpp::Geometry &osparyGeometry, const std::vector<Box> &primitives);
+    static void commit(const ospray::cpp::Volume &osprayVolumeconst, const RegularVolume &volumeData);
 };
-
-} // namespace brayns
-namespace ospray
-{
-OSPTYPEFOR_SPECIALIZATION(brayns::Box, OSP_BOX3F)
-} // namespace ospray
+}

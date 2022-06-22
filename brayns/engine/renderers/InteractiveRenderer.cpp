@@ -22,28 +22,18 @@
 
 namespace
 {
-class InteractiveParameterUpdater
+struct InteractiveParameters
 {
-public:
-    static void update(brayns::InteractiveRenderer &renderer)
-    {
-        static const std::string shadowParameter = "shadow";
-        static const std::string aoParameter = "aoSamples";
-
-        auto shadows = renderer.getShadowsEnabled();
-        auto aoSamples = renderer.getAmbientOcclusionSamples();
-
-        const auto &osprayRenderer = renderer.getOsprayRenderer();
-        osprayRenderer.setParam(shadowParameter, shadows);
-        osprayRenderer.setParam(aoParameter, aoSamples);
-    }
+    inline static const std::string osprayName = "scivis";
+    inline static const std::string shadow = "shadows";
+    inline static const std::string aoSamples = "aoSamples";
 };
 }
 
 namespace brayns
 {
 InteractiveRenderer::InteractiveRenderer()
-    : Renderer("scivis")
+    : Renderer(InteractiveParameters::osprayName)
 {
 }
 
@@ -85,6 +75,8 @@ int32_t InteractiveRenderer::getAmbientOcclusionSamples() const noexcept
 
 void InteractiveRenderer::commitRendererSpecificParams()
 {
-    InteractiveParameterUpdater::update(*this);
+    auto &osprayRenderer = getOsprayRenderer();
+    osprayRenderer.setParam(InteractiveParameters::shadow, _shadowsEnabled);
+    osprayRenderer.setParam(InteractiveParameters::aoSamples, _aoSamples);
 }
 }

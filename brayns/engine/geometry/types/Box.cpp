@@ -18,43 +18,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Box.h"
 
-#include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
+#include <ospray/ospray_cpp/Data.h>
 
-#include <ospray/ospray_cpp/Traits.h>
+namespace
+{
+struct BoxParameters
+{
+    inline static const std::string osprayName = "box";
+    inline static const std::string box = "box";
+};
+}
 
 namespace brayns
 {
-struct Plane
+const std::string &OsprayGeometryName<Box>::get()
 {
-    // A, B, C D from Ax + By + Cz + D = 0
-    Vector4f coefficients;
-};
-
-template<>
-class OsprayGeometryName<Plane>
-{
-public:
-    static std::string_view get();
-};
-
-template<>
-class GeometryBoundsUpdater<Plane>
-{
-public:
-    static void update(const Plane &p, const Matrix4f &t, Bounds &b);
-};
-
-template<>
-class GeometryCommitter<Plane>
-{
-public:
-    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Plane> &primitives);
-};
+    return BoxParameters::osprayName;
 }
-namespace ospray
+
+void GeometryBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bounds &b)
 {
-OSPTYPEFOR_SPECIALIZATION(brayns::Plane, OSP_VEC4F)
-} // namespace ospray
+    const auto &min = box.min;
+    const auto &max = box.max;
+
+    b.expand(Vector3f(t * Vector4f(min, 1.f)));
+    b.expand(Vector3f(t * Vector4f(max, 1.f)));
+}
+
+void GeometryCommitter<Box>::commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Box> &primitives)
+{
+    osprayGeometry.setParam(BoxParameters::box, ospray::cpp::SharedData(primitives));
+}
+}

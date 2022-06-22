@@ -20,11 +20,12 @@
 
 #pragma once
 
-#include <brayns/engine/GeometryObject.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
+#include <brayns/engine/geometry/GeometryObject.h>
 
 #include <ospray/ospray_cpp/Data.h>
 
@@ -41,9 +42,8 @@ public:
      * @brief Constructs the component with a single geometry
      * @param geometry
      */
-    GeometryRendererComponent(T geometry)
-        : _geometry(std::move(geometry))
-        , _object(_geometry)
+    GeometryRendererComponent(T primitive)
+        : _geometryObject(std::move(primitive))
     {
     }
 
@@ -51,9 +51,8 @@ public:
      * @brief Constructs the component with a list of geometries
      * @param geometries
      */
-    GeometryRendererComponent(std::vector<T> geometries)
-        : _geometry(std::move(geometries))
-        , _object(_geometry)
+    GeometryRendererComponent(std::vector<T> primitives)
+        : _geometryObject(std::move(primitives))
     {
     }
 
@@ -63,7 +62,7 @@ public:
      */
     Geometry<T> &getGeometry() noexcept
     {
-        return _geometry;
+        return _geometryObject.getGeometry();
     }
 
     /**
@@ -73,20 +72,19 @@ public:
      */
     void setColors(const std::vector<brayns::Vector4f> &colors)
     {
-        if (colors.size() < _geometry.getNumGeometries())
+        auto &geometry = _geometryObject.getGeometry();
+        if (colors.size() < geometry.getPrimitives().size())
         {
             throw std::invalid_argument("Not enough colors for all geometry");
         }
 
-        auto buffer = ospray::cpp::CopiedData(colors);
-        _object.setColorPerPrimitive(buffer.handle());
+        _geometryObject.setColorPerPrimitive(ospray::cpp::CopiedData(colors));
         _useMaterialColor = false;
-        _colorDirty = true;
     }
 
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
     {
-        return _geometry.computeBounds(transform);
+        return _geometryObject.computeBounds(transform);
     }
 
     virtual void onCreate() override
@@ -94,52 +92,35 @@ public:
         Model &model = getModel();
 
         auto &group = model.getGroup();
-        group.addGeometricModel(_object);
+        group.addGeometry(_geometryObject);
 
         model.addComponent<MaterialComponent>();
     }
 
     virtual bool commit() override
     {
-        bool needsCommit = _colorDirty;
-        _colorDirty = false;
-
         auto &material = ExtractModelObject::extractMaterial(getModel());
         if (material.commit())
         {
-            needsCommit = true;
-            _object.setMaterial(material);
+            _geometryObject.setMaterial(material);
             if (_useMaterialColor)
             {
-                _object.setColor(material.getColor());
+                _geometryObject.setColor(material.getColor());
             }
         }
 
-        if (_geometry.commit())
-        {
-            needsCommit = true;
-        }
-
-        if (needsCommit)
-        {
-            _object.commit();
-        }
-
-        return needsCommit;
+        return _geometryObject.commit();
     }
 
     virtual void onDestroy() override
     {
         Model &model = getModel();
         auto &group = model.getGroup();
-        group.removeGeometricModel(_object);
+        group.removeGeometry(_geometryObject);
     }
 
 private:
-    Geometry<T> _geometry;
-    GeometryObject _object;
-    // Need these to flag to avoid using the material color when need to customize colors
-    bool _useMaterialColor{true};
-    bool _colorDirty{false};
+    GeometryObject<T> _geometryObject;
+    bool _useMaterialColor = true;
 };
 }

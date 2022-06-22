@@ -21,10 +21,8 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/common/DataHandler.h>
-#include <brayns/engine/geometries/TriangleMesh.h>
-
-#include <ospray/ospray.h>
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/types/TriangleMesh.h>
 
 /**
  * @brief The EndfeetComponent class is a endfeet connectivity geometry rendering component in which the endfeet
@@ -32,13 +30,6 @@
  */
 class EndfeetComponent final : public brayns::Component
 {
-public:
-    struct Endfeet
-    {
-        OSPGeometricModel model;
-        brayns::Geometry<brayns::TriangleMesh> geometry;
-    };
-
 public:
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
@@ -81,6 +72,8 @@ public:
     std::vector<uint64_t> setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap);
 
 private:
+    using Endfeet = brayns::GeometryObject<brayns::TriangleMesh>;
+
     std::vector<uint64_t> _astrocyteIds;
     std::vector<Endfeet> _endFeet;
     bool _colorsDirty{false};

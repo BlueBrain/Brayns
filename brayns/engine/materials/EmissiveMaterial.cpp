@@ -20,32 +20,22 @@
 
 #include "EmissiveMaterial.h"
 
-#include <brayns/engine/ospray/OsprayMathtypesTraits.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 namespace
 {
-class EmissiveParameterUpdater
+struct EmissiveParameters
 {
-public:
-    static void update(const brayns::EmissiveMaterial &material)
-    {
-        static const std::string colorParameter = "color";
-        static const std::string intenistyParameter = "intensity";
-
-        const auto &color = material.getColor();
-        auto intensity = material.getIntensity();
-
-        const auto &osprayMaterial = material.getOsprayMaterial();
-        osprayMaterial.setParam(colorParameter, color);
-        osprayMaterial.setParam(intenistyParameter, intensity);
-    }
+    inline static const std::string osprayName = "luminous";
+    inline static const std::string color = "color";
+    inline static const std::string intenisty = "intensity";
 };
 }
 
 namespace brayns
 {
 EmissiveMaterial::EmissiveMaterial()
-    : Material("luminous")
+    : Material(EmissiveParameters::osprayName)
 {
 }
 
@@ -66,6 +56,9 @@ float EmissiveMaterial::getIntensity() const noexcept
 
 void EmissiveMaterial::commitMaterialSpecificParams()
 {
-    EmissiveParameterUpdater::update(*this);
+    const auto &osprayMaterial = getOsprayMaterial();
+    auto &color = getColor();
+    osprayMaterial.setParam(EmissiveParameters::color, color);
+    osprayMaterial.setParam(EmissiveParameters::intenisty, _intensity);
 }
 }

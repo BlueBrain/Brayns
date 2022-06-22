@@ -20,10 +20,18 @@
 
 #include <brayns/engine/lights/AmbientLight.h>
 
+namespace
+{
+struct AmbientLightParameters
+{
+    inline static const std::string osprayName = "ambient";
+};
+}
+
 namespace brayns
 {
 AmbientLight::AmbientLight()
-    : Light("ambient")
+    : Light(AmbientLightParameters::osprayName)
 {
 }
 

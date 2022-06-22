@@ -21,12 +21,10 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/common/DataHandler.h>
-#include <brayns/engine/geometries/Primitive.h>
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/types/Primitive.h>
 
 #include <api/vasculature/VasculatureSection.h>
-
-#include <ospray/ospray.h>
 
 class VasculatureComponent final : public brayns::Component
 {
@@ -92,8 +90,7 @@ public:
     brayns::Geometry<brayns::Primitive> &getGeometry() noexcept;
 
 private:
-    OSPGeometricModel _model = nullptr;
-    brayns::Geometry<brayns::Primitive> _geometry;
+    brayns::GeometryObject<brayns::Primitive> _geometry;
     std::vector<uint64_t> _ids;
     std::vector<VasculatureSection> _sections;
     std::vector<brayns::Vector4f> _colors;

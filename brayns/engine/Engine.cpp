@@ -74,7 +74,7 @@ struct OsprayDeviceInitializer
             [](void *data, const char *message)
             {
                 (void)data;
-                brayns::Log::info("[OSPRAY] {}", message);
+                brayns::Log::debug("[OSPRAY] {}", message);
             });
 
         auto &appParams = parameters.getApplicationParameters();
@@ -92,20 +92,22 @@ struct OsprayDeviceInitializer
 
 namespace brayns
 {
+OsprayModuleHandler::OsprayModuleHandler()
+{
+    ospLoadModule("cpu");
+}
+
+OsprayModuleHandler::~OsprayModuleHandler()
+{
+    ospShutdown();
+}
+
 Engine::Engine(ParametersManager &parameters)
     : _params(parameters)
     , _osprayDevice(OsprayDeviceInitializer::init(parameters))
     , _camera(std::make_unique<PerspectiveCamera>())
     , _renderer(std::make_unique<InteractiveRenderer>())
 {
-}
-
-Engine::~Engine()
-{
-    //_camera.reset();
-    //_renderer.reset();
-    Log::critical("TESTING ENGINE DESTRUCTOR");
-    ospShutdown();
 }
 
 void Engine::preRender()

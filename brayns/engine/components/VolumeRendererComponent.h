@@ -22,8 +22,8 @@
 
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/VolumeObject.h>
 #include <brayns/engine/components/TransferFunctionRendererComponent.h>
+#include <brayns/engine/volume/VolumeObject.h>
 
 namespace brayns
 {
@@ -35,22 +35,20 @@ class VolumeRendererComponent final : public Component
 {
 public:
     VolumeRendererComponent(T volumeData)
-        : _volume(std::move(volumeData))
-        , _object(_volume)
+        : _object(std::move(volumeData))
     {
-        _volume.commit();
     }
 
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
     {
-        return _volume.computeBounds(transform);
+        return _object.computeBounds(transform);
     }
 
     virtual void onCreate() override
     {
         Model &model = getModel();
         auto &group = model.getGroup();
-        group.addVolumetricModel(_object);
+        group.addVolume(_object);
 
         model.addComponent<TransferFunctionRendererComponent>();
     }
@@ -62,22 +60,19 @@ public:
         if (tfComponent.manualCommit())
         {
             _object.setTransferFunction(tfComponent.getOsprayObject());
-            _object.commit();
-            return true;
         }
 
-        return false;
+        return _object.commit();
     }
 
     virtual void onDestroy() override
     {
         auto &model = getModel();
         auto &group = model.getGroup();
-        group.removeVolumetricModel(_object);
+        group.removeVolume(_object);
     }
 
 private:
-    Volume<T> _volume;
-    VolumeObject _object;
+    VolumeObject<T> _object;
 };
 }
