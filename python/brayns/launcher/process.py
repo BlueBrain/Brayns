@@ -21,12 +21,11 @@
 import subprocess
 import threading
 from collections import deque
-from typing import Optional
 
 
 class Process:
 
-    def __init__(self, args: list[str], env: Optional[dict[str, str]] = None) -> None:
+    def __init__(self, args: list[str], env: dict[str, str]) -> None:
         self._process = subprocess.Popen(
             args=args,
             env=env,

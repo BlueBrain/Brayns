@@ -22,6 +22,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from brayns.launcher.log_level import LogLevel
+from brayns.launcher.plugin import Plugin
 from brayns.launcher.process import Process
 from brayns.launcher.ssl_context import SslContext
 
@@ -32,19 +33,9 @@ class Launcher:
     executable: str
     uri: str = 'localhost:5000'
     loglevel: LogLevel = LogLevel.WARN
-    plugins: list[str] = field(default_factory=lambda: Launcher.all_plugins)
+    plugins: list[Plugin] = field(default_factory=lambda: list(Plugin))
     ssl: Optional[SslContext] = None
-    env: Optional[dict[str, str]] = None
-
-    @classmethod
-    @property
-    def all_plugins(cls) -> list[str]:
-        return [
-            'braynsCircuitExplorer',
-            'braynsAtlasExplorer',
-            'braynsCircuitInfo',
-            'braynsDTI'
-        ]
+    env: dict[str, str] = field(default_factory=dict)
 
     def get_command_line(self) -> list[str]:
         args = [
@@ -57,7 +48,7 @@ class Launcher:
         args.extend(
             item
             for plugin in self.plugins
-            for item in ('--plugin', plugin)
+            for item in ('--plugin', plugin.value)
         )
         if self.ssl is not None:
             args.append('--secure')
