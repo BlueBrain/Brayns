@@ -35,13 +35,6 @@ public:
     virtual ~AbstractParameters() = default;
 
     /**
-     * @brief Used to get a display name for the parameter set.
-     *
-     * @return std::string Display name.
-     */
-    virtual std::string getName() const = 0;
-
-    /**
      * @brief Register argv properties of the parameter set.
      *
      * @param builder Helper class to register argv properties.

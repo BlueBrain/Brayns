@@ -51,11 +51,6 @@ void ApplicationParameters::setJpegQuality(int quality) noexcept
     _updateValue(_jpegQuality, quality);
 }
 
-std::string ApplicationParameters::getName() const
-{
-    return "Application";
-}
-
 void ApplicationParameters::build(ArgvBuilder &builder)
 {
     builder.add("plugin", _plugins, "Plugins libraries to load").composable();
