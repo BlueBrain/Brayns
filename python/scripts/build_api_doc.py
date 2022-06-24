@@ -227,7 +227,7 @@ def build_from_entrypoints(entrypoints: list[brayns.Entrypoint], directory: str)
     for entrypoint in entrypoints:
         plugins[entrypoint.plugin].append(entrypoint)
     for entrypoints in plugins.values():
-        entrypoints.sort(key=lambda entrypoint: entrypoint.name)
+        entrypoints.sort(key=lambda entrypoint: entrypoint.method)
     build_from_plugins(plugins, directory)
 
 
@@ -293,8 +293,8 @@ def format_entrypoints(entrypoints: list[brayns.Entrypoint]) -> str:
 
 def format_entrypoint(entrypoint: brayns.Entrypoint, separator: bool = True) -> str:
     return ENTRYPOINT.format(
-        name=entrypoint.name,
-        underline=len(entrypoint.name) * '~',
+        name=entrypoint.method,
+        underline=len(entrypoint.method) * '~',
         description=entrypoint.description,
         asynchronous=f'\n\n{ASYNCHRONOUS}' if entrypoint.asynchronous else '',
         params=format_params(entrypoint.params),
