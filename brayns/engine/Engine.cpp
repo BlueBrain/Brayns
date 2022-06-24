@@ -92,12 +92,12 @@ struct OsprayDeviceInitializer
 
 namespace brayns
 {
-OsprayModuleHandler::OsprayModuleHandler()
+Engine::OsprayModuleHandler::OsprayModuleHandler()
 {
     ospLoadModule("cpu");
 }
 
-OsprayModuleHandler::~OsprayModuleHandler()
+Engine::OsprayModuleHandler::~OsprayModuleHandler()
 {
     ospShutdown();
 }

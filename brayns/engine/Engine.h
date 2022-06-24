@@ -32,16 +32,6 @@
 namespace brayns
 {
 /**
- * @brief In charge of managing the lifetime of ospray modules
- */
-class OsprayModuleHandler
-{
-public:
-    OsprayModuleHandler();
-    ~OsprayModuleHandler();
-};
-
-/**
  * @brief The Engine class handles, and gives access to, the system resources for rendering. These resources are the
  * one used to stream frames to the clients, and serve as base objects when requesting snapshots ore export frames
  * tasks, if no custom ones are specified for such tasks
@@ -121,6 +111,17 @@ public:
      * @brief Returns the system parameters manager
      */
     const ParametersManager &getParametersManager() const noexcept;
+
+private:
+    /**
+     * @brief In charge of managing the lifetime of ospray modules
+     */
+    class OsprayModuleHandler
+    {
+    public:
+        OsprayModuleHandler();
+        ~OsprayModuleHandler();
+    };
 
 private:
     // Global system parameters used to read when updating the backend during commit() and render()

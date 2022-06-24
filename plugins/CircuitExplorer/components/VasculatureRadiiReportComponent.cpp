@@ -22,7 +22,6 @@
 
 #include <brayns/engine/Model.h>
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/SimulationComponent.h>
 
 #include <components/VasculatureComponent.h>
@@ -33,7 +32,7 @@ struct OriginalRadiiManager
 {
     static std::vector<float> save(brayns::Geometry<brayns::Primitive> &geometry)
     {
-        const auto &primitives = geometry.getAll();
+        const auto &primitives = geometry.getPrimitives();
         std::vector<float> result(primitives.size() * 2);
 
         for (size_t i = 0; i < primitives.size(); ++i)

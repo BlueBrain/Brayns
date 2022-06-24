@@ -56,13 +56,6 @@ public:
 
 namespace brayns
 {
-Scene::Scene()
-{
-    // Need an initial commit until there is any content that can trigger the commit function
-    // ospCommit(_handle);
-    Log::critical("TESTING SCENE COMMIT ON CONSTRUCTOR");
-}
-
 const Bounds &Scene::getBounds() const noexcept
 {
     return _bounds;

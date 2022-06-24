@@ -26,6 +26,13 @@
 
 #include <api/coloring/ColorByIDAlgorithm.h>
 
+SomaCircuitComponent::SomaCircuitComponent(std::vector<uint64_t> ids, std::vector<brayns::Sphere> geometry)
+    : _ids(std::move(ids))
+    , _geometry(std::move(geometry))
+    , _colors(_ids.size(), brayns::Vector4f(1.f))
+{
+}
+
 brayns::Bounds SomaCircuitComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     return _geometry.computeBounds(transform);
@@ -40,6 +47,15 @@ bool SomaCircuitComponent::commit()
     }
 
     return _geometry.commit();
+}
+
+void SomaCircuitComponent::onCreate()
+{
+    auto &model = getModel();
+    model.addComponent<brayns::MaterialComponent>();
+
+    auto &group = model.getGroup();
+    group.addGeometry(_geometry);
 }
 
 void SomaCircuitComponent::onDestroy()
@@ -63,21 +79,6 @@ void SomaCircuitComponent::onInspect(const brayns::InspectContext &context, bray
     auto primitiveIndex = context.primitiveIndex;
     auto cellId = _ids[primitiveIndex];
     writeResult.set("neuron_id", cellId);
-}
-
-void SomaCircuitComponent::setSomas(std::vector<uint64_t> ids, std::vector<brayns::Sphere> geometry) noexcept
-{
-    _ids = std::move(ids);
-    _geometry = brayns::GeometryObject<brayns::Sphere>(std::move(geometry));
-
-    auto &model = getModel();
-    model.addComponent<brayns::MaterialComponent>();
-
-    auto &group = model.getGroup();
-    group.addGeometry(_geometry);
-
-    _colors.resize(_ids.size());
-    setColor(brayns::Vector4f(1.f));
 }
 
 const std::vector<uint64_t> &SomaCircuitComponent::getIDs() const noexcept

@@ -22,7 +22,7 @@
 #include <brayns/utils/Timer.h>
 
 #include <brayns/engine/components/GeometryRendererComponent.h>
-#include <brayns/engine/geometries/Primitive.h>
+#include <brayns/engine/geometry/types/Primitive.h>
 
 #include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyProcessor.h>

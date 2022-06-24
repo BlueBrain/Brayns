@@ -209,9 +209,7 @@ struct StreamlineComponentBuilder
                 geometry.push_back(brayns::Primitive::cylinder(start, end, radius));
             }
         }
-
-        auto &dti = model.addComponent<dti::DTIComponent>();
-        dti.setStreamlines(geometries);
+        model.addComponent<dti::DTIComponent>(std::move(geometries));
     }
 };
 

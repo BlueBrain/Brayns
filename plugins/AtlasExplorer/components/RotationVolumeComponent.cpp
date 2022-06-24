@@ -21,7 +21,7 @@
 #include "RotationVolumeComponent.h"
 
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/GeometricModelHandler.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
 #include <cmath>
@@ -151,9 +151,8 @@ private:
         axes.reserve(buildData.size());
         for (auto &rawAxis : buildData)
         {
-            auto &renderableAxis = axes.emplace_back();
-            renderableAxis.vector = rawAxis.vector;
-            renderableAxis.geometry.set(std::move(rawAxis.geometry));
+            RenderableAxisList renderableAxis{rawAxis.vector, {std::move(rawAxis.geometry)}};
+            axes.push_back(std::move(renderableAxis));
         }
         return axes;
     }
@@ -188,40 +187,33 @@ brayns::Bounds RotationVolumeComponent::computeBounds(const brayns::Matrix4f &tr
 
 void RotationVolumeComponent::onCreate()
 {
-    auto &group = getModel();
-    group.addComponent<brayns::MaterialComponent>();
+    auto &model = getModel();
+    model.addComponent<brayns::MaterialComponent>();
 
+    auto &group = model.getGroup();
     _axes.forEach(
-        [&group](RenderableAxisList &axis)
+        [&](RenderableAxisList &axis)
         {
-            auto &model = axis.model;
             auto &geometry = axis.geometry;
-            auto &vector = axis.vector;
-
-            geometry.commit();
-
-            model = brayns::GeometricModelHandler::create();
-            brayns::GeometricModelHandler::setGeometry(model, geometry);
-            brayns::GeometricModelHandler::setColor(model, vector);
-            brayns::GeometricModelHandler::commitModel(model);
-            brayns::GeometricModelHandler::addToGeometryGroup(axis.model, group);
+            geometry.setColor(axis.vector);
+            group.addGeometry(geometry);
         });
 }
 
 bool RotationVolumeComponent::commit()
 {
     auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
-    if (!material.isModified())
+    if (!material.commit())
     {
         return false;
     }
 
-    material.commit();
     _axes.forEach(
-        [&material](RenderableAxisList &axis)
+        [&](RenderableAxisList &axis)
         {
-            brayns::GeometricModelHandler::setMaterial(axis.model, material);
-            brayns::GeometricModelHandler::commitModel(axis.model);
+            auto &geometry = axis.geometry;
+            geometry.setMaterial(material);
+            geometry.commit();
         });
 
     return true;
@@ -229,11 +221,7 @@ bool RotationVolumeComponent::commit()
 
 void RotationVolumeComponent::onDestroy()
 {
-    auto &group = getModel();
-    _axes.forEach(
-        [&group](RenderableAxisList &axis)
-        {
-            brayns::GeometricModelHandler::removeFromGeometryGroup(axis.model, group);
-            brayns::GeometricModelHandler::destroy(axis.model);
-        });
+    auto &model = getModel();
+    auto &group = model.getGroup();
+    _axes.forEach([&](RenderableAxisList &axis) { group.removeGeometry(axis.geometry); });
 }

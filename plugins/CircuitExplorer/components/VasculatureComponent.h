@@ -80,7 +80,7 @@ public:
      * @param color
      * @param mapping per geometry primitive indices into the color buffer
      */
-    void setSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping) noexcept;
+    void setSimulationColor(const std::vector<brayns::Vector4f> &color, const std::vector<uint8_t> &mapping) noexcept;
 
     /**
      * @brief Get the Geometry object
@@ -90,9 +90,8 @@ public:
     brayns::Geometry<brayns::Primitive> &getGeometry() noexcept;
 
 private:
-    brayns::GeometryObject<brayns::Primitive> _geometry;
     std::vector<uint64_t> _ids;
+    brayns::GeometryObject<brayns::Primitive> _geometry;
     std::vector<VasculatureSection> _sections;
     std::vector<brayns::Vector4f> _colors;
-    bool _colorsDirty{false};
 };

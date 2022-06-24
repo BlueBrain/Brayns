@@ -18,17 +18,51 @@
 
 #include "SpikeIndexer.h"
 
+#include <numeric>
+
+namespace
+{
+class CellSubElementCount
+{
+public:
+    static std::vector<size_t> fromCellComparments(const std::vector<CellCompartments> &cellCompartments)
+    {
+        std::vector<size_t> cellSubElements;
+        cellSubElements.reserve(cellCompartments.size());
+        for (auto &comparment : cellCompartments)
+        {
+            cellSubElements.push_back(comparment.numItems);
+        }
+        return cellSubElements;
+    }
+};
+}
+
+SpikeIndexer::SpikeIndexer(const std::vector<CellCompartments> &cellCompartments)
+    : _cellSubElements(CellSubElementCount::fromCellComparments(cellCompartments))
+    , _totalElements(std::accumulate(_cellSubElements.begin(), _cellSubElements.end(), 0))
+{
+}
+
 std::vector<uint8_t> SpikeIndexer::generate(const std::vector<float> &data, const brayns::Vector2f &range) noexcept
 {
     // Spike values are hardcoed in range 0 - 1
     (void)range;
 
-    std::vector<uint8_t> indices(data.size());
-
+    std::vector<uint8_t> indices(_totalElements, 0);
+    size_t writeIndex = 0;
     for (size_t i = 0; i < data.size(); ++i)
     {
-        const auto value = data[i];
-        indices[i] = static_cast<uint8_t>(value * 255);
+        auto value = data[i];
+        auto index = static_cast<uint8_t>(value * 255);
+
+        auto writeCount = _cellSubElements[i];
+        auto begin = indices.begin();
+        std::advance(begin, writeIndex);
+        auto end = indices.begin();
+        std::advance(end, writeIndex + writeCount);
+        std::fill(begin, end, index);
+        writeIndex += writeCount;
     }
 
     return indices;

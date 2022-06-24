@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/engine/Material.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 #include "Geometry.h"
 
@@ -44,8 +45,6 @@ template<typename T>
 class GeometryObject
 {
 public:
-    GeometryObject() = default;
-
     GeometryObject(T primitive)
         : _geometry(std::move(primitive))
         , _osprayObject(_geometry.getOsprayGeometry())

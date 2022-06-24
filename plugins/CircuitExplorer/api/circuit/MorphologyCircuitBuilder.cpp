@@ -166,10 +166,8 @@ std::vector<CellCompartments> MorphologyCircuitBuilder::load(
         geometries[i] = std::move(geometry);
     }
 
-    auto &morphologyCircuit = model.addComponent<MorphologyCircuitComponent>();
-    morphologyCircuit.setMorphologies(ids, std::move(geometries), std::move(mappings));
-
-    auto colorHandler = std::make_unique<MorphologyColorHandler>(morphologyCircuit);
+    auto &circuit = model.addComponent<MorphologyCircuitComponent>(ids, std::move(geometries), std::move(mappings));
+    auto colorHandler = std::make_unique<MorphologyColorHandler>(circuit);
     model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
 
     return compartments;

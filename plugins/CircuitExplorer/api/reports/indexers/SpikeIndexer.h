@@ -17,9 +17,16 @@
  */
 
 #include <api/reports/IColormapIndexer.h>
+#include <api/reports/ReportMapping.h>
 
 class SpikeIndexer : public IColormapIndexer
 {
 public:
+    SpikeIndexer(const std::vector<CellCompartments> &cellCompartments);
     std::vector<uint8_t> generate(const std::vector<float> &data, const brayns::Vector2f &range) noexcept override;
+
+private:
+    // How many items to map for each cell
+    std::vector<size_t> _cellSubElements;
+    size_t _totalElements;
 };

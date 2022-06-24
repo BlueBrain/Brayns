@@ -21,7 +21,7 @@
 #include "HighlightColumn.h"
 
 #include <brayns/engine/components/GeometryRendererComponent.h>
-#include <brayns/engine/geometries/Box.h>
+#include <brayns/engine/geometry/types/Box.h>
 
 #include <api/usecases/common/ParamsParser.h>
 

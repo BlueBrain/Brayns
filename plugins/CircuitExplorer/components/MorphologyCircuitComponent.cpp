@@ -26,6 +26,41 @@
 
 #include <api/coloring/ColorByIDAlgorithm.h>
 
+namespace
+{
+class MorphologyGeometryInitializer
+{
+public:
+    static auto init(
+        std::vector<std::vector<brayns::Primitive>> primitives,
+        std::vector<std::vector<NeuronSectionMapping>> map)
+    {
+        std::vector<MorphologyGeometry> morphologies;
+        morphologies.reserve(primitives.size());
+
+        for (size_t i = 0; i < primitives.size(); ++i)
+        {
+            auto &morphGeometry = primitives[i];
+            auto &morphSections = map[i];
+
+            MorphologyGeometry morphology{{std::move(morphGeometry)}, std::move(morphSections)};
+            morphologies.push_back(std::move(morphology));
+        }
+
+        return morphologies;
+    }
+};
+}
+
+MorphologyCircuitComponent::MorphologyCircuitComponent(
+    std::vector<uint64_t> ids,
+    std::vector<std::vector<brayns::Primitive>> primitives,
+    std::vector<std::vector<NeuronSectionMapping>> map)
+    : _ids(std::move(ids))
+    , _morphologies(MorphologyGeometryInitializer::init(std::move(primitives), std::move(map)))
+{
+}
+
 brayns::Bounds MorphologyCircuitComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds result;
@@ -43,6 +78,12 @@ void MorphologyCircuitComponent::onCreate()
 {
     auto &model = getModel();
     model.addComponent<brayns::MaterialComponent>();
+
+    auto &group = model.getGroup();
+    for (auto &morphology : _morphologies)
+    {
+        group.addGeometry(morphology.geometry);
+    }
 }
 
 bool MorphologyCircuitComponent::commit()
@@ -97,7 +138,7 @@ void MorphologyCircuitComponent::onInspect(const brayns::InspectContext &context
         {
             auto &geometry = morphology.geometry;
             auto &osprayObject = geometry.getOsprayObject();
-            osprayObject.handle() == modelHandle;
+            return osprayObject.handle() == modelHandle;
         });
 
     if (it == morphEnd)
@@ -109,30 +150,6 @@ void MorphologyCircuitComponent::onInspect(const brayns::InspectContext &context
 
     auto cellId = _ids[index];
     writeResult.set("neuron_id", cellId);
-}
-
-void MorphologyCircuitComponent::setMorphologies(
-    std::vector<uint64_t> ids,
-    std::vector<std::vector<brayns::Primitive>> primitives,
-    std::vector<std::vector<NeuronSectionMapping>> map) noexcept
-{
-    auto &model = getModel();
-    auto &group = model.getGroup();
-
-    _ids = std::move(ids);
-    _morphologies.reserve(_ids.size());
-
-    for (size_t i = 0; i < _ids.size(); ++i)
-    {
-        auto &morphGeometry = primitives[i];
-        auto &morphSections = map[i];
-
-        MorphologyGeometry morphology{{std::move(morphGeometry)}, std::move(morphSections)};
-        auto &geometry = morphology.geometry;
-        geometry.setColor(brayns::Vector4f(1.f));
-        group.addGeometry(geometry);
-        _morphologies.push_back(std::move(morphology));
-    }
 }
 
 const std::vector<uint64_t> &MorphologyCircuitComponent::getIDs() const noexcept

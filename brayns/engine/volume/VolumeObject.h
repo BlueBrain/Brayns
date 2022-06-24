@@ -22,6 +22,8 @@
 
 #include "Volume.h"
 
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+
 #include <ospray/ospray_cpp/TransferFunction.h>
 #include <ospray/ospray_cpp/VolumetricModel.h>
 
@@ -32,7 +34,8 @@ class VolumeObject
 {
 public:
     VolumeObject(T data)
-        : VolumeObject(Volume<T>(std::move(data)))
+        : _volume(std::move(data))
+        , _osprayObject(_volume.getOsprayVolume())
     {
     }
 

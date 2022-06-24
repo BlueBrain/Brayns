@@ -41,7 +41,7 @@ public:
         const std::string &method,
         const std::vector<ColoringInformation> &vars) override;
 
-    void updateIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices) override;
+    void updateIndexedColor(const std::vector<brayns::Vector4f> &color, const std::vector<uint8_t> &indices) override;
 
 private:
     void _colorWithInput(const std::string &method, const std::vector<ColoringInformation> &vars);

@@ -22,7 +22,6 @@
 
 #include <brayns/engine/Model.h>
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/SizeHelper.h>
 #include <brayns/engine/components/SimulationComponent.h>
 
 #include <components/DTIComponent.h>

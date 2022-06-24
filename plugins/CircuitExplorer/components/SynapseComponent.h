@@ -31,10 +31,11 @@
 class SynapseComponent final : public brayns::Component
 {
 public:
+    SynapseComponent(std::map<uint64_t, std::vector<brayns::Sphere>> &synapses);
+
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
-
     bool commit() override;
-
+    void onCreate() override;
     void onDestroy() override;
 
     /**
@@ -42,13 +43,6 @@ public:
      * @return const std::vector<uint64_t> &
      */
     const std::vector<uint64_t> &getCellIds() const noexcept;
-
-    /**
-     * @brief addSynapses Adds a new group of synapses to the component
-     * @param cellId
-     * @param synapseGeometry
-     */
-    void addSynapses(std::map<uint64_t, std::vector<brayns::Sphere>> &synapses);
 
     /**
      * @brief setColor Sets all the synapses to the same specified color

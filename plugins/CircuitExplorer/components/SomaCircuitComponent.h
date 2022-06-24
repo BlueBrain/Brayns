@@ -29,20 +29,17 @@
 class SomaCircuitComponent final : public brayns::Component
 {
 public:
+    SomaCircuitComponent(std::vector<uint64_t> ids, std::vector<brayns::Sphere> geometry);
+
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
     bool commit() override;
 
+    void onCreate() override;
+
     void onDestroy() override;
 
     void onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult) const noexcept override;
-
-    /**
-     * @brief Set the soma circuit geometries
-     * @param ids
-     * @param geometry
-     */
-    void setSomas(std::vector<uint64_t> ids, std::vector<brayns::Sphere> geometry) noexcept;
 
     /**
      * @brief getIDs return the ID of the cells in this circuit
@@ -79,7 +76,7 @@ public:
     void setIndexedColor(const std::vector<brayns::Vector4f> &colors, const std::vector<uint8_t> &mapping);
 
 private:
-    brayns::GeometryObject<brayns::Sphere> _geometry;
     std::vector<uint64_t> _ids;
+    brayns::GeometryObject<brayns::Sphere> _geometry;
     std::vector<brayns::Vector4f> _colors;
 };

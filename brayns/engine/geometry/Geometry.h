@@ -24,6 +24,7 @@
 
 #include <ospray/ospray_cpp/Geometry.h>
 
+#include <cassert>
 #include <numeric>
 #include <string_view>
 #include <vector>
@@ -107,8 +108,6 @@ template<typename T>
 class Geometry
 {
 public:
-    Geometry() = default;
-
     Geometry(T primitive)
         : _osprayGeometry(OsprayGeometryName<T>::get())
     {
@@ -120,6 +119,7 @@ public:
         : _osprayGeometry(OsprayGeometryName<T>::get())
         , _primitives(std::move(primitives))
     {
+        assert(!_primitives.empty());
         InputGeometryChecker<T>::check(_primitives);
     }
 

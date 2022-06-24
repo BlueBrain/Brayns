@@ -18,7 +18,7 @@
 
 #include "SynapseImporter.h"
 
-#include <brayns/engine/geometries/Sphere.h>
+#include <brayns/engine/geometry/types/Sphere.h>
 
 #include <api/reports/ReportMapping.h>
 #include <api/reports/indexers/OffsetIndexer.h>
@@ -34,6 +34,34 @@
 
 namespace
 {
+class SynapseOffsetGenerator
+{
+public:
+    static std::vector<size_t> generate(
+        const std::vector<uint64_t> &elementIds,
+        const std::unordered_map<uint64_t, size_t> &mapping)
+    {
+        std::vector<size_t> result(elementIds.size());
+
+        for (size_t i = 0; i < elementIds.size(); ++i)
+        {
+            const auto elementId = elementIds[i];
+
+            auto it = mapping.find(elementId);
+            if (it == mapping.end())
+            {
+                throw std::runtime_error("No report mapping information for element " + std::to_string(elementId));
+            }
+
+            const auto &entry = *it;
+            const auto offset = entry.second;
+            result[i] = offset;
+        }
+
+        return result;
+    }
+};
+
 namespace sl = sonataloader;
 
 struct SynapseReportMapping
@@ -79,7 +107,7 @@ struct SynapseReportImporter
         auto data = std::make_unique<sl::SonataReportData>(path, edgePopulationName, nodeSelection);
 
         const auto mapping = SynapseReportMapping::generate(path, edgePopulationName, nodeSelection);
-        auto offsets = ElementMappingGenerator::generate(orderedEdgeIds, mapping);
+        auto offsets = SynapseOffsetGenerator::generate(orderedEdgeIds, mapping);
         auto indexer = std::make_unique<OffsetIndexer>(std::move(offsets));
 
         auto &model = context.model;
@@ -189,8 +217,7 @@ void SynapseImporter::fromData(
     auto &synapseGeometry = appender.geometry;
     auto &orderedEdgeIds = appender.orderedSynapseIds;
 
-    auto &synapses = model.addComponent<SynapseComponent>();
-    synapses.addSynapses(synapseGeometry);
+    auto &synapses = model.addComponent<SynapseComponent>(synapseGeometry);
 
     // Coloring
     auto colorHandler = std::make_unique<SynapseColorHandler>(synapses);
