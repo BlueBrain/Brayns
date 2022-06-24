@@ -31,7 +31,7 @@ class Launcher:
 
     executable: str
     uri: str = 'localhost:5000'
-    loglevel: LogLevel = LogLevel.INFO
+    loglevel: LogLevel = LogLevel.WARN
     plugins: list[str] = field(default_factory=lambda: Launcher.all_plugins)
     ssl: Optional[SslContext] = None
     env: Optional[dict[str, str]] = None
