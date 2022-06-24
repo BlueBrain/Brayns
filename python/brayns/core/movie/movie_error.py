@@ -25,8 +25,8 @@ from dataclasses import dataclass
 class MovieError(Exception):
 
     reason: str
-    stdout: str = ''
-    stderr: str = ''
+    code: int = 0
+    logs: str = ''
 
     def __str__(self) -> str:
         return self.reason

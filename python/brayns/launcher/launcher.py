@@ -31,10 +31,9 @@ class Launcher:
 
     executable: str
     uri: str = 'localhost:5000'
-    loglevel: LogLevel = LogLevel.DEBUG
+    loglevel: LogLevel = LogLevel.INFO
     plugins: list[str] = field(default_factory=lambda: Launcher.all_plugins)
     ssl: Optional[SslContext] = None
-    cwd: Optional[str] = None
     env: Optional[dict] = None
 
     @classmethod
@@ -69,4 +68,4 @@ class Launcher:
 
     def start(self) -> Process:
         args = self.get_command_line()
-        return Process.from_command_line(args, self.cwd, self.env)
+        return Process(args, self.env)

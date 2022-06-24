@@ -19,27 +19,28 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import subprocess
+import threading
+from collections import deque
 from typing import Optional
 
 
 class Process:
 
-    @staticmethod
-    def from_command_line(args: list[str], cwd: Optional[str] = None, env: Optional[dict] = None) -> 'Process':
-        process = subprocess.Popen(
+    def __init__(self, args: list[str], env: Optional[dict] = None) -> None:
+        self._process = subprocess.Popen(
             args=args,
-            cwd=cwd,
             env=env,
-            text=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.STDOUT,
+            text=True
         )
-        return Process(process)
-
-    def __init__(self, process: subprocess.Popen) -> None:
-        self._process = process
-        self._logs = ''
+        self._thread = threading.Thread(
+            target=self._poll
+        )
+        self._logs = deque[str](maxlen=1000)
+        self._lock = threading.RLock()
+        self._thread.start()
 
     def __enter__(self) -> 'Process':
         return self
@@ -53,9 +54,15 @@ class Process:
 
     @property
     def logs(self) -> str:
-        return self._logs
+        with self._lock:
+            return ''.join(self._logs)
 
     def terminate(self) -> None:
         self._process.terminate()
-        stdout, _ = self._process.communicate()
-        self.logs = stdout
+        self._process.wait()
+        self._thread.join()
+
+    def _poll(self) -> None:
+        for line in self._process.stdout:
+            with self._lock:
+                self._logs.append(line)

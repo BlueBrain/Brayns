@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os
 import pathlib
 import subprocess
+from collections import deque
 from dataclasses import dataclass
 from typing import Optional
 
@@ -39,19 +39,15 @@ class Movie:
     bitrate: Optional[int] = None
     encoder: Optional[str] = None
     pixel_format: Optional[str] = 'yuv420p'
+    ffmpeg_executable: str = 'ffmpeg'
 
-    def save(self, path: str, ffmpeg: str = 'ffmpeg') -> None:
-        args = self.get_command_line(path, ffmpeg)
-        _run_process(args)
+    def save(self, path: str) -> str:
+        args = self.get_command_line(path)
+        return _run_process(args)
 
-    def get_command_line(self, path: str, ffmpeg: str) -> list[str]:
+    def get_command_line(self, path: str) -> list[str]:
         return [
-            ffmpeg,
-            *self.get_args(path)
-        ]
-
-    def get_args(self, path: str) -> list[str]:
-        return [
+            self.ffmpeg_executable,
             *_get_global_options(),
             *_get_input_options(self),
             *_get_input(self.frames_folder, self.frames_format),
@@ -60,14 +56,17 @@ class Movie:
         ]
 
 
-def _run_process(args: list[str]) -> int:
+def _run_process(args: list[str]) -> str:
     try:
         process = _create_process(args)
     except OSError as e:
         raise MovieError(str(e))
-    stdout, stderr = process.communicate()
-    if process.returncode != 0:
-        raise MovieError('ffmpeg call failed (see stderr)', stdout, stderr)
+    lines = deque[str](process.stdout, maxlen=1000)
+    code = process.wait()
+    logs = ''.join(lines)
+    if code != 0:
+        raise MovieError(f'ffmpeg call failed (see logs)', code, logs)
+    return logs
 
 
 def _create_process(args: list[str]) -> subprocess.Popen:
@@ -75,9 +74,9 @@ def _create_process(args: list[str]) -> subprocess.Popen:
         args=args,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         text=True,
-        env=os.environ | {'AV_LOG_FORCE_NOCOLOR': '1'}
+        env={'AV_LOG_FORCE_NOCOLOR': '1'}
     )
 
 
@@ -113,8 +112,9 @@ def _get_output_options(movie: Movie) -> list[str]:
         _get_video_filters(movie)
     ]
     if movie.resolution is not None:
+        width, height = movie.resolution
         args.append('-s')
-        args.append(f'{movie.resolution.width}x{movie.resolution.height}')
+        args.append(f'{width:d}x{height:d}')
     if movie.bitrate is not None:
         args.append('-b')
         args.append(str(movie.bitrate))

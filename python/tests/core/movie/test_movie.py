@@ -28,12 +28,6 @@ from brayns.core.snapshot.image_format import ImageFormat
 class TestMovie(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
-        movie = Movie('folder', ImageFormat.PNG)
-        command = movie.get_command_line('path', 'test')
-        ref = ['test', *movie.get_args('path')]
-        self.assertEqual(command, ref)
-
-    def test_get_args(self) -> None:
         movie = Movie(
             frames_folder='folder',
             frames_format=ImageFormat.PNG,
@@ -41,10 +35,12 @@ class TestMovie(unittest.TestCase):
             resolution=Resolution.full_hd,
             bitrate=64000,
             encoder='encoder',
-            pixel_format='pixel'
+            pixel_format='pixel',
+            ffmpeg_executable='test'
         )
-        args = movie.get_args('path')
+        args = movie.get_command_line('path')
         ref = [
+            'test',
             '-y',
             '-framerate',
             '30',
