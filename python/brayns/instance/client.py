@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
-from typing import Optional
 
 from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
@@ -54,9 +53,9 @@ class Client(Instance):
             poll=lambda: self.poll()
         )
 
-    def poll(self, block: bool = True, timeout: Optional[float] = None) -> None:
+    def poll(self, block: bool = True) -> None:
         self._logger.debug('Polling messages from Brayns instance.')
-        self._websocket.poll(block, timeout)
+        self._websocket.poll(block)
 
     def cancel(self, id: JsonRpcId) -> None:
         self._logger.info('Cancel request with ID %s.', id)

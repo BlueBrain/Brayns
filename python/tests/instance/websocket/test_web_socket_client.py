@@ -23,6 +23,7 @@ import unittest
 from typing import Optional, Union
 
 from brayns.instance.websocket.web_socket_client import WebSocketClient
+from brayns.instance.websocket.web_socket_connector import WebSocketConnector
 from brayns.instance.websocket.web_socket_error import WebSocketError
 from tests.instance.websocket.mock_listener import MockListener
 from tests.instance.websocket.mock_server import MockServer
@@ -62,7 +63,7 @@ class TestWebSocketClient(unittest.TestCase):
     def test_poll(self) -> None:
         with self._start_server(reply='test'):
             with self._connect() as websocket:
-                websocket.poll()
+                websocket.poll(block=True)
                 self.assertEqual(self._listener.text, 'test')
 
     def test_send_binary(self) -> None:
@@ -89,7 +90,7 @@ class TestWebSocketClient(unittest.TestCase):
                 websocket.send_text('test2')
                 request = server.wait_for_request()
                 self.assertEqual(request, 'test2')
-                websocket.poll()
+                websocket.poll(block=True)
                 self.assertEqual(self._listener.text, 'test1')
 
     def _start_server(
@@ -108,12 +109,13 @@ class TestWebSocketClient(unittest.TestCase):
         )
 
     def _connect(self, secure: bool = False) -> WebSocketClient:
-        return WebSocketClient.connect(
+        connector = WebSocketConnector(
             self._uri,
             self._listener,
             secure=secure,
             cafile=self._certificate if secure else None
         )
+        return connector.connect()
 
 
 if __name__ == '__main__':

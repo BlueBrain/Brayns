@@ -26,7 +26,7 @@ from typing import Optional
 
 class Process:
 
-    def __init__(self, args: list[str], env: Optional[dict] = None) -> None:
+    def __init__(self, args: list[str], env: Optional[dict[str, str]] = None) -> None:
         self._process = subprocess.Popen(
             args=args,
             env=env,

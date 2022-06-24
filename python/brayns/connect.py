@@ -20,6 +20,7 @@
 
 import logging
 import sys
+import time
 from typing import Callable, Optional
 
 from brayns.core.version import Version
@@ -28,6 +29,8 @@ from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.listener import Listener
 from brayns.instance.websocket.web_socket_client import WebSocketClient
+from brayns.instance.websocket.web_socket_connector import WebSocketConnector
+from brayns.instance.websocket.web_socket_error import WebSocketError
 from brayns.version import DEV_VERSION, __version__
 
 
@@ -37,10 +40,15 @@ def connect(
     cafile: Optional[str] = None,
     on_binary: Callable[[bytes], None] = lambda _: None,
     log_level: int = logging.WARN,
-    log_handler: Optional[logging.Handler] = None
+    log_handler: Optional[logging.Handler] = None,
+    max_attempts: Optional[int] = None
 ) -> Instance:
     logger = _create_logger(log_level, log_handler)
-    client = _connect(uri, secure, cafile, on_binary, logger)
+    manager = JsonRpcManager.create(logger)
+    listener = Listener(logger, on_binary, manager)
+    connector = WebSocketConnector(uri, listener, secure, cafile)
+    websocket = _open_websocket(connector, max_attempts)
+    client = Client(websocket, logger, manager)
     _check_version(client, logger)
     return client
 
@@ -57,17 +65,16 @@ def _create_logger(level: int = logging.WARN, handler: Optional[logging.Handler]
     return logger
 
 
-def _connect(
-    uri: str,
-    secure: bool,
-    cafile: Optional[str],
-    on_binary: Callable[[bytes], None],
-    logger: logging.Logger
-) -> Client:
-    manager = JsonRpcManager.create(logger)
-    listener = Listener(logger, on_binary, manager)
-    websocket = WebSocketClient.connect(uri, listener, secure, cafile)
-    return Client(websocket, logger, manager)
+def _open_websocket(connector: WebSocketConnector, max_attempts: Optional[int]) -> WebSocketClient:
+    count = 0
+    while True:
+        try:
+            return connector.connect()
+        except WebSocketError as e:
+            count += 1
+            if max_attempts is not None and count >= max_attempts:
+                raise e
+        time.sleep(0.1)
 
 
 def _check_version(instance: Instance, logger: logging.Logger) -> None:

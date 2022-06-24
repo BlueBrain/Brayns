@@ -18,7 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Optional, Protocol, TypeVar
+from typing import Protocol, TypeVar
 
 T = TypeVar('T', bound='WebSocket')
 
@@ -38,7 +38,7 @@ class WebSocket(Protocol):
     def close(self) -> None:
         raise NotImplementedError()
 
-    def poll(self, block: bool = True, timeout: Optional[float] = None) -> None:
+    def poll(self, block: bool) -> None:
         raise NotImplementedError()
 
     def send_binary(self, data: bytes) -> None:

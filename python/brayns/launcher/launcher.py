@@ -34,7 +34,7 @@ class Launcher:
     loglevel: LogLevel = LogLevel.INFO
     plugins: list[str] = field(default_factory=lambda: Launcher.all_plugins)
     ssl: Optional[SslContext] = None
-    env: Optional[dict] = None
+    env: Optional[dict[str, str]] = None
 
     @classmethod
     @property
