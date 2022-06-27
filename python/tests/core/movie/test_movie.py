@@ -50,7 +50,7 @@ class TestMovie(unittest.TestCase):
             'fps=30,format=pixel',
             '-s',
             '1920x1080',
-            '-b',
+            '-b:v',
             '64000',
             '-c',
             'encoder',
