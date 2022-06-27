@@ -160,7 +160,7 @@ public:
 
 private:
     ospray::cpp::Volume _osprayVolume;
-    bool _dirty{false};
+    bool _dirty = true;
     T _volumeData;
 };
 }

@@ -38,7 +38,9 @@ struct IsosurfaceParameters
 template<typename T>
 struct Isosurface
 {
-    Volume<T> volume;
+    // As owner of the volume, the isosurface needs to commit it during its own commit(), where
+    // the data is const, thus volume must be mutable. Temporary until commit is changed
+    mutable Volume<T> volume;
     std::vector<float> isovalues;
 };
 
@@ -87,6 +89,7 @@ public:
         auto &isoValues = primitive.isovalues;
         auto &volume = primitive.volume;
 
+        volume.commit();
         osprayGeometry.setParam(IsosurfaceParameters::volume, volume.getOsprayVolume());
         osprayGeometry.setParam(IsosurfaceParameters::isovalue, ospray::cpp::SharedData(isoValues));
     }

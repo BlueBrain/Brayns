@@ -43,8 +43,20 @@ void GeometryBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bound
     const auto &min = box.min;
     const auto &max = box.max;
 
-    b.expand(Vector3f(t * Vector4f(min, 1.f)));
-    b.expand(Vector3f(t * Vector4f(max, 1.f)));
+    std::vector<Vector3f> corners = {
+        min,
+        Vector3f(max.x, min.y, min.z),
+        Vector3f(min.x, min.y, max.z),
+        Vector3f(max.x, min.y, max.z),
+        Vector3f(min.x, max.y, min.z),
+        Vector3f(max.x, max.y, min.z),
+        Vector3f(min.x, max.y, max.z),
+        max};
+
+    for (const auto &corner : corners)
+    {
+        b.expand(Vector3f(t * Vector4f(corner, 1.f)));
+    }
 }
 
 void GeometryCommitter<Box>::commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Box> &primitives)
