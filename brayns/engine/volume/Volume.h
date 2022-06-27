@@ -53,14 +53,14 @@ public:
 };
 
 /**
- * @brief Utility class to deduce the OSPRay ID for a given volume type
+ * @brief Utility class to deduce the Ospray ID for a given volume type
  */
 template<typename T>
 class OsprayVolumeName
 {
 public:
     /**
-     * @brief Returns the OSPRay ID of the type
+     * @brief Returns the Ospray ID of the type
      */
     static const std::string &get()
     {
@@ -88,7 +88,7 @@ public:
 
 /**
  * @brief The Volume class is a specializable wrapper to implement different types of volumes which shares the same
- * usage (as all volumes in OSPRay)
+ * usage (as all volumes in Ospray)
  */
 template<typename T>
 class Volume
@@ -109,7 +109,7 @@ public:
     }
 
     /**
-     * @brief Allows to pass a callback to modify the volume data, which will trigger a commit of the data to OSPRay
+     * @brief Allows to pass a callback to modify the volume data, which will trigger a commit of the data to Ospray
      */
     template<typename Callable>
     void manipulate(const Callable &callback)
@@ -119,7 +119,7 @@ public:
     }
 
     /**
-     * @brief Commits the volume data to OSPRay. Will only have effect if the volume has been modified since the last
+     * @brief Commits the volume data to Ospray. Will only have effect if the volume has been modified since the last
      * commit. If so, it will call commitVolumeSpecificParams() and clear the dirty flag.
      */
     bool commit()
@@ -149,7 +149,7 @@ public:
     }
 
     /**
-     * @brief Returns the volume OSPRay handle
+     * @brief Returns the volume Ospray handle
      *
      * @return OSPVolume
      */

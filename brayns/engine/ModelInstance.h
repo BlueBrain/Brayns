@@ -98,7 +98,7 @@ public:
     const Transform &getTransform() const noexcept;
 
     /**
-     * @brief Returns the OSPRay handle of this instance.
+     * @brief Returns the Ospray handle of this instance.
      */
     const ospray::cpp::Instance &getOsprayInstance() const noexcept;
 

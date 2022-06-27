@@ -127,7 +127,7 @@ private:
     ospray::cpp::Group &getOsprayGroup() noexcept;
 
     /**
-     * @brief Synchronizes the group data with OSPRay
+     * @brief Synchronizes the group data with Ospray
      */
     bool commit();
 

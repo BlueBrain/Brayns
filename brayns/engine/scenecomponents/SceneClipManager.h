@@ -65,7 +65,7 @@ private:
     };
 
     /**
-     * @brief Will commit any not synced data with OSPRay
+     * @brief Will commit any not synced data with Ospray
      *
      * @return true if there was anything to commit, false otherwise
      */

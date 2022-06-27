@@ -133,9 +133,9 @@ private:
     void preRender(const ParametersManager &parameters);
 
     /**
-     * @brief Attempts to commit any unsynced data to OSPRay.
+     * @brief Attempts to commit any unsynced data to Ospray.
      *
-     * @return true if anything was commited to OSPRay, false otherwise
+     * @return true if anything was commited to Ospray, false otherwise
      */
     bool commit();
 

@@ -91,7 +91,7 @@ public:
     void setBackgroundColor(const Vector4f &background) noexcept;
 
     /**
-     * @brief Returns the OSPRay handle of this renderer
+     * @brief Returns the Ospray handle of this renderer
      */
     const ospray::cpp::Renderer &getOsprayRenderer() const noexcept;
 
@@ -103,7 +103,7 @@ public:
 
 protected:
     /**
-     * @brief Subclasses must implement this method to commit their renderer-specific data to the OSPRay counterpart.
+     * @brief Subclasses must implement this method to commit their renderer-specific data to the Ospray counterpart.
      * The base class will make sure to call ospCommit(handle) on the renderer handle, so subclasses should avoid it.
      */
     virtual void commitRendererSpecificParams() = 0;

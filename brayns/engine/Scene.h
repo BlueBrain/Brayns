@@ -161,7 +161,7 @@ public:
     void removeAllClippingModels() noexcept;
 
     /**
-     * @brief Returns the OSPRay handle of the scene
+     * @brief Returns the Ospray handle of the scene
      */
     const ospray::cpp::World &getOsprayScene() const noexcept;
 

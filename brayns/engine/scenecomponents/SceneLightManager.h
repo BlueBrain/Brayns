@@ -64,14 +64,14 @@ private:
     friend class Scene;
 
     /**
-     * @brief Will commit any not synced data with OSPRay.
+     * @brief Will commit any not synced data with Ospray.
      *
      * @return true if there was anything to commit, false otherwise
      */
     bool commit();
 
     /**
-     * @brief Get the OSPRay handles of all lights
+     * @brief Get the Ospray handles of all lights
      *
      * @return std::vector<ospray::cpp::Light>
      */

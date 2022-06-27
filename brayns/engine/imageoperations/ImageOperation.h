@@ -38,7 +38,7 @@ public:
     virtual void commit() = 0;
 
     /**
-     * @brief Returns the image opration OSPRay handle
+     * @brief Returns the image opration Ospray handle
      * @return OSPImageOperation
      */
     const ospray::cpp::ImageOperation &getOsprayObject() const noexcept
