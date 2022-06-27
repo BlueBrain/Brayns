@@ -29,25 +29,11 @@
 
 namespace
 {
-class TransferFunctionUpdater
+struct TransferFunctionParameters
 {
-public:
-    static void update(const brayns::TransferFunction &source, const ospray::cpp::TransferFunction &dest)
-    {
-        static const std::string colorParameter = "color";
-        static const std::string opacityParameter = "opacity";
-        static const std::string valueRangeParameter = "valueRange";
-
-        auto &colors = source.getColors();
-        auto &color = colors.front();
-        auto colorSize = colors.size();
-        auto &range = source.getValuesRange();
-        constexpr auto stride = 4 * sizeof(float);
-
-        dest.setParam(colorParameter, ospray::cpp::SharedData(&color.x, colorSize, stride));
-        dest.setParam(opacityParameter, ospray::cpp::SharedData(&color.w, colorSize, stride));
-        dest.setParam(valueRangeParameter, range);
-    }
+    inline static const std::string color = "color";
+    inline static const std::string opacity = "opacity";
+    inline static const std::string valueRange = "valueRange";
 };
 }
 
@@ -73,7 +59,16 @@ bool TransferFunctionRendererComponent::manualCommit()
         return false;
     }
 
-    TransferFunctionUpdater::update(transferFunction, _osprayTransferFunction);
+    constexpr auto stride = 4 * sizeof(float);
+    auto &colors = transferFunction.getColors();
+    auto &color = colors.front();
+    auto colorSize = colors.size();
+    auto &range = transferFunction.getValuesRange();
+    auto colorData = ospray::cpp::SharedData(&color.x, colorSize, stride);
+    auto opacityData = ospray::cpp::SharedData(&color.w, colorSize, stride);
+    _osprayTransferFunction.setParam(TransferFunctionParameters::color, colorData);
+    _osprayTransferFunction.setParam(TransferFunctionParameters::opacity, opacityData);
+    _osprayTransferFunction.setParam(TransferFunctionParameters::valueRange, range);
 
     _osprayTransferFunction.commit();
     transferFunction.resetModified();
