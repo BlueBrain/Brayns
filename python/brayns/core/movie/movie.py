@@ -57,12 +57,9 @@ class Movie:
 
 
 def _run_process(args: list[str]) -> str:
-    try:
-        process = _create_process(args)
-    except OSError as e:
-        raise MovieError(str(e))
-    lines = deque[str](process.stdout, maxlen=1000)
-    code = process.wait()
+    with _create_process(args) as process:
+        lines = deque[str](process.stdout, maxlen=1000)
+        code = process.wait()
     logs = ''.join(lines)
     if code != 0:
         raise MovieError(f'ffmpeg call failed (see logs)', code, logs)
@@ -70,14 +67,17 @@ def _run_process(args: list[str]) -> str:
 
 
 def _create_process(args: list[str]) -> subprocess.Popen:
-    return subprocess.Popen(
-        args=args,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        env={'AV_LOG_FORCE_NOCOLOR': '1'}
-    )
+    try:
+        return subprocess.Popen(
+            args=args,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            env={'AV_LOG_FORCE_NOCOLOR': '1'}
+        )
+    except OSError as e:
+        raise MovieError(f'Failed to start ffmpeg process {str(e)}')
 
 
 def _get_global_options() -> list[str]:
@@ -116,7 +116,7 @@ def _get_output_options(movie: Movie) -> list[str]:
         args.append('-s')
         args.append(f'{width:d}x{height:d}')
     if movie.bitrate is not None:
-        args.append('-b')
+        args.append('-b:v')
         args.append(str(movie.bitrate))
     if movie.encoder is not None:
         args.append('-c')

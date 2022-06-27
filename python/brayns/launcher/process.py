@@ -59,6 +59,8 @@ class Process:
     def terminate(self) -> None:
         self._process.terminate()
         self._process.wait()
+        self._process.stdin.close()
+        self._process.stdout.close()
         self._thread.join()
 
     def _poll(self) -> None:
