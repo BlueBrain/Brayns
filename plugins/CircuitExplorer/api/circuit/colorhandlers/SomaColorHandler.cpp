@@ -58,7 +58,9 @@ void SomaColorHandler::updateColorByMethod(
     }
 }
 
-void SomaColorHandler::updateIndexedColor(const std::vector<brayns::Vector4f> &color, const std::vector<uint8_t> &indices)
+void SomaColorHandler::updateIndexedColor(
+    const std::vector<brayns::Vector4f> &color,
+    const std::vector<uint8_t> &indices)
 {
     _circuit.setIndexedColor(color, indices);
 }

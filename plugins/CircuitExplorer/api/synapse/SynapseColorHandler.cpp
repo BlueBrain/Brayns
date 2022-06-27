@@ -55,7 +55,9 @@ void SynapseColorHandler::updateColorByMethod(
     }
 }
 
-void SynapseColorHandler::updateIndexedColor(const std::vector<brayns::Vector4f> &color, const std::vector<uint8_t> &indices)
+void SynapseColorHandler::updateIndexedColor(
+    const std::vector<brayns::Vector4f> &color,
+    const std::vector<uint8_t> &indices)
 {
     _synapses.setIndexedColor(color, indices);
 }
