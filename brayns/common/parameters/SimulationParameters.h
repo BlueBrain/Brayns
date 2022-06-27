@@ -106,13 +106,6 @@ public:
     const std::string &getTimeUnit() const noexcept;
 
     /**
-     * @brief Used to get a display name for the parameter set.
-     *
-     * @return std::string Display name.
-     */
-    virtual std::string getName() const override;
-
-    /**
      * @brief Register argv properties of the parameter set.
      *
      * @param builder Helper class to register argv properties.

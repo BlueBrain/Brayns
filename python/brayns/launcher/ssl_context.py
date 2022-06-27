@@ -19,14 +19,29 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
-class MovieError(Exception):
+class SslContext:
 
-    reason: str
-    code: int = 0
-    logs: str = ''
+    private_key_file: Optional[str] = None
+    private_key_passphrase: Optional[str] = None
+    certificate_file: Optional[str] = None
+    ca_location: Optional[str] = None
 
-    def __str__(self) -> str:
-        return self.reason
+    def get_command_line(self) -> list[str]:
+        args = []
+        if self.private_key_file is not None:
+            args.append('--private-key-file')
+            args.append(self.private_key_file)
+        if self.private_key_passphrase is not None:
+            args.append('--private-key-passphrase')
+            args.append(self.private_key_passphrase)
+        if self.certificate_file is not None:
+            args.append('--certificate-file')
+            args.append(self.certificate_file)
+        if self.ca_location is not None:
+            args.append('--ca-location')
+            args.append(self.ca_location)
+        return args

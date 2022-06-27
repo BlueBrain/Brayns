@@ -62,7 +62,7 @@ public:
     void setWindowSize(const Vector2ui &size) noexcept;
 
     /**
-     * @brief Teturn the stream JPEG quality.
+     * @brief Return the stream JPEG quality.
      * @return int JPEG quality from 0 (lowest) to 100 (highest).
      */
     int getJpegQuality() const noexcept;
@@ -72,13 +72,6 @@ public:
      * @param quality int JPEG quality from 0 (lowest) to 100 (highest).
      */
     void setJpegQuality(int quality) noexcept;
-
-    /**
-     * @brief Used to get a display name for the parameter set.
-     *
-     * @return std::string Display name.
-     */
-    virtual std::string getName() const override;
 
     /**
      * @brief Register argv properties of the parameter set.

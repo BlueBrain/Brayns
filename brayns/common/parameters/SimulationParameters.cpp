@@ -77,11 +77,6 @@ const std::string &SimulationParameters::getTimeUnit() const noexcept
     return _unit;
 }
 
-std::string SimulationParameters::getName() const
-{
-    return "Simulation";
-}
-
 void SimulationParameters::build(ArgvBuilder &builder)
 {
     (void)builder;

@@ -114,18 +114,16 @@ public:
     static std::string stringifyVector(const std::vector<T> &values)
     {
         std::ostringstream stream;
-        stream << '[';
         bool first = true;
         for (const auto &value : values)
         {
             if (!first)
             {
-                stream << ", ";
+                stream << " ";
             }
             first = false;
             stream << stringify(value);
         }
-        stream << ']';
         return stream.str();
     }
 
@@ -133,18 +131,16 @@ public:
     static std::string stringifyGlm(const glm::vec<S, T> &value)
     {
         std::ostringstream stream;
-        stream << '[';
         bool first = true;
         for (glm::length_t i = 0; i < S; ++i)
         {
             if (!first)
             {
-                stream << ", ";
+                stream << " ";
             }
             first = false;
             stream << value[i];
         }
-        stream << ']';
         return stream.str();
     }
 };

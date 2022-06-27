@@ -49,7 +49,7 @@ EnumMap<LogLevel> EnumReflector<LogLevel>::reflect()
     return {
         {"trace", LogLevel::Trace},
         {"debug", LogLevel::Debug},
-        {"trace", LogLevel::Info},
+        {"info", LogLevel::Info},
         {"warn", LogLevel::Warn},
         {"warning", LogLevel::Warn},
         {"error", LogLevel::Error},

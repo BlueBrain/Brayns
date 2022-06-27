@@ -18,9 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import ssl
 from concurrent.futures import Future
-from typing import Optional, Union
+from typing import Union
 
 from brayns.instance.websocket.async_web_socket import AsyncWebSocket
 from brayns.instance.websocket.event_loop import EventLoop
@@ -30,24 +29,6 @@ from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
 class WebSocketClient(WebSocket):
-
-    @staticmethod
-    def connect(
-        uri: str,
-        listener: WebSocketListener,
-        secure: bool = False,
-        cafile: Optional[str] = None
-    ) -> 'WebSocketClient':
-        uri = ('wss://' if secure else 'ws://') + uri
-        context = ssl.create_default_context(cafile=cafile) if secure else None
-        loop = EventLoop()
-        websocket = loop.run(
-            AsyncWebSocket.connect(uri, context)
-        ).result()
-        task = loop.run(
-            websocket.run()
-        )
-        return WebSocketClient(websocket, loop, task, listener)
 
     def __init__(
         self,
@@ -72,8 +53,8 @@ class WebSocketClient(WebSocket):
         self._task.result()
         self._loop.close()
 
-    def poll(self, block: bool = True, timeout: Optional[float] = None) -> None:
-        data = self._websocket.poll(block, timeout)
+    def poll(self, block: bool) -> None:
+        data = self._websocket.poll(block)
         if data is None:
             return
         if isinstance(data, bytes):

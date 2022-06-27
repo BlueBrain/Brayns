@@ -20,43 +20,40 @@
 
 import unittest
 
-from brayns.core.common.resolution import Resolution
-from brayns.core.movie.movie import Movie
-from brayns.core.snapshot.image_format import ImageFormat
+from brayns.launcher.launcher import Launcher
+from brayns.launcher.log_level import LogLevel
+from brayns.launcher.plugin import Plugin
+from brayns.launcher.ssl_context import SslContext
 
 
-class TestMovie(unittest.TestCase):
+class TestLauncher(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
-        movie = Movie(
-            frames_folder='folder',
-            frames_format=ImageFormat.PNG,
-            fps=30,
-            resolution=Resolution.full_hd,
-            bitrate=64000,
-            encoder='encoder',
-            pixel_format='pixel',
-            ffmpeg_executable='test'
+        launcher = Launcher(
+            executable='service',
+            uri='uri',
+            loglevel=LogLevel.CRITICAL,
+            plugins=[
+                Plugin.ATLAS_EXPLORER,
+                Plugin.CIRCUIT_EXPLORER
+            ],
+            ssl=SslContext()
         )
-        args = movie.get_command_line('path')
+        test = launcher.get_command_line()
         ref = [
-            'test',
-            '-y',
-            '-framerate',
-            '30',
-            '-i',
-            'folder/%05d.png',
-            '-vf',
-            'fps=30,format=pixel',
-            '-s',
-            '1920x1080',
-            '-b:v',
-            '64000',
-            '-c',
-            'encoder',
-            'path'
+            'service',
+            '--uri',
+            'uri',
+            '--log-level',
+            'critical',
+            '--plugin',
+            Plugin.ATLAS_EXPLORER.value,
+            '--plugin',
+            Plugin.CIRCUIT_EXPLORER.value,
+            '--secure',
+            'true'
         ]
-        self.assertEqual(args, ref)
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

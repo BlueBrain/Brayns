@@ -113,11 +113,6 @@ void NetworkParameters::setCALocation(const std::string &caLocation) noexcept
     _updateValue(_caLocation, caLocation);
 }
 
-std::string NetworkParameters::getName() const
-{
-    return "Network";
-}
-
 void NetworkParameters::build(ArgvBuilder &builder)
 {
     builder.add("client", _client, "Enable client mode");

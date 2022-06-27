@@ -24,6 +24,50 @@
 
 #include <brayns/common/Log.h>
 
+namespace
+{
+class LoggingStartup
+{
+public:
+    static void run(brayns::ParametersManager &parameters)
+    {
+        _applyLevel(parameters);
+        _logVersion();
+        _logParameters(parameters);
+    }
+
+private:
+    static void _applyLevel(brayns::ParametersManager &parameters)
+    {
+        auto &application = parameters.getApplicationParameters();
+        auto level = application.getLogLevel();
+        brayns::Log::setLevel(level);
+    }
+
+    static void _logVersion()
+    {
+        brayns::Log::info(
+            "Brayns version {}.{}.{} ({}) Copyright (c) 2015-2022, EPFL/Blue Brain Project.",
+            brayns::Version::getMajor(),
+            brayns::Version::getMinor(),
+            brayns::Version::getPatch(),
+            brayns::Version::getCommitHash());
+    }
+
+    static void _logParameters(brayns::ParametersManager &parameters)
+    {
+        brayns::Log::info("Command line parameters values:");
+        auto properties = parameters.getArgvProperties();
+        for (const auto &property : properties)
+        {
+            auto &name = property.name;
+            auto value = property.stringify();
+            brayns::Log::info("'{}' = '{}'", name, value);
+        }
+    }
+};
+} // namespace
+
 namespace brayns
 {
 SystemPluginAPI::SystemPluginAPI(ParametersManager &paramManager, Engine &engine, LoaderRegistry &loadRegistry)
@@ -56,12 +100,7 @@ Brayns::Brayns(int argc, const char **argv)
     , _pluginAPI(_parametersManager, _engine, _loaderRegistry)
     , _pluginManager(_pluginAPI)
 {
-    brayns::Log::info(
-        "Brayns version {}.{}.{} ({}) Copyright (c) 2015-2022, EPFL/Blue Brain Project.",
-        Version::getMajor(),
-        Version::getMinor(),
-        Version::getPatch(),
-        Version::getCommitHash());
+    LoggingStartup::run(_parametersManager);
     _loaderRegistry = LoaderRegistry::createWithCoreLoaders();
     _pluginManager.loadPlugins();
 }

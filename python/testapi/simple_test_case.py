@@ -18,9 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.connect import connect
-from brayns.core import *
-from brayns.instance import *
-from brayns.launcher import *
-from brayns.plugins import *
-from brayns.version import __version__
+import brayns
+
+from testapi.api_test_case import ApiTestCase
+
+
+class SimpleTestCase(ApiTestCase):
+
+    @property
+    def instance(self) -> brayns.Instance:
+        return self.__instance
+
+    def setUp(self) -> None:
+        launcher = self.create_launcher()
+        self.__process = launcher.start()
+        self.__instance = brayns.connect(launcher.uri)
+
+    def tearDown(self) -> None:
+        self.__instance.disconnect()
+        self.__process.terminate()

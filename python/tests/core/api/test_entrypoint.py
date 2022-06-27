@@ -42,7 +42,7 @@ class TestEntrypoint(unittest.TestCase):
             }
         }
         self._entrypoint = Entrypoint(
-            name='test',
+            method='test',
             description='test2',
             plugin='stuff',
             asynchronous=True,

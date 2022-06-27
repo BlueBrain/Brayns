@@ -28,7 +28,7 @@ from brayns.instance.instance import Instance
 @dataclass
 class Entrypoint:
 
-    name: str
+    method: str
     description: str
     plugin: str
     asynchronous: bool
@@ -36,15 +36,15 @@ class Entrypoint:
     result: Optional[JsonSchema] = None
 
     @staticmethod
-    def from_method(instance: Instance, name: str) -> 'Entrypoint':
-        params = {'endpoint': name}
+    def from_method(instance: Instance, method: str) -> 'Entrypoint':
+        params = {'endpoint': method}
         result = instance.request('schema', params)
         return Entrypoint.deserialize(result)
 
     @staticmethod
     def deserialize(message: dict) -> 'Entrypoint':
         return Entrypoint(
-            name=message['title'],
+            method=message['title'],
             description=message['description'],
             plugin=message['plugin'],
             asynchronous=message['async'],

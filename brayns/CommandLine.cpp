@@ -24,7 +24,10 @@
 #include <sstream>
 
 #include <brayns/Version.h>
+
 #include <brayns/common/parameters/ParametersManager.h>
+
+#include <brayns/utils/StringUtils.h>
 
 namespace
 {
@@ -80,7 +83,7 @@ public:
         std::ostringstream stream;
         stream << VersionFormatter::format();
         stream << "\n\nBrayns can be configured using command line options with keyword arguments (--name value).";
-        stream << "\n\nExample: braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer";
+        stream << "\n\nExample: braynsService --uri 0.0.0.0:5000 --window-size '1920 1080'";
         stream << "\n\nThe supported options are the following:";
         for (const auto &property : properties)
         {
@@ -128,8 +131,8 @@ private:
         {
             return;
         }
-        stream << "\n    Enumeration: this option must be one of the following values ";
-        stream << brayns::ArgvStringifier::stringifyVector(enums) << ".";
+        stream << "\n    Enumeration: this option must be one of the following values: [";
+        stream << brayns::string_utils::join(enums, ", ") << "].";
     }
 
     static void _formatItemCount(std::ostream &stream, const brayns::ArgvProperty &property)

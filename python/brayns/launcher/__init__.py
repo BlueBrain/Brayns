@@ -18,9 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.connect import connect
-from brayns.core import *
-from brayns.instance import *
-from brayns.launcher import *
-from brayns.plugins import *
-from brayns.version import __version__
+from brayns.launcher.launcher import Launcher
+from brayns.launcher.log_level import LogLevel
+from brayns.launcher.plugin import Plugin
+from brayns.launcher.process import Process
+from brayns.launcher.ssl_context import SslContext
+
+__all__ = [
+    'Launcher',
+    'LogLevel',
+    'Plugin',
+    'Process',
+    'SslContext'
+]

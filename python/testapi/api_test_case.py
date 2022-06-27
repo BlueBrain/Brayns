@@ -18,9 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.connect import connect
-from brayns.core import *
-from brayns.instance import *
-from brayns.launcher import *
-from brayns.plugins import *
-from brayns.version import __version__
+import os
+import unittest
+
+import brayns
+
+
+class ApiTestCase(unittest.TestCase):
+
+    @property
+    def executable(self) -> str:
+        return os.environ['BRAYNS_TEST_EXECUTABLE']
+
+    @property
+    def env(self) -> dict[str, str]:
+        result = dict[str, str]()
+        ospray = os.environ.get('BRAYNS_TEST_OSPRAY_DIR')
+        if ospray is not None:
+            result['LD_LIBRARY_PATH'] = ospray
+        return result
+
+    def create_launcher(self) -> brayns.Launcher:
+        return brayns.Launcher(
+            executable=self.executable,
+            env=self.env
+        )

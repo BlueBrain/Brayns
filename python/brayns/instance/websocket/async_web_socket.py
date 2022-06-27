@@ -53,14 +53,14 @@ class AsyncWebSocket:
     def closed(self) -> bool:
         return self._websocket.closed
 
-    def poll(self, block: bool = True, timeout: Optional[float] = None) -> Optional[Union[bytes, str]]:
+    def poll(self, block: bool) -> Optional[Union[bytes, str]]:
         with self._condition:
             data = self._get_data()
             if data is not None:
                 return data
             if not block:
                 return None
-            self._condition.wait(timeout)
+            self._condition.wait()
             return self._get_data()
 
     async def close(self) -> None:

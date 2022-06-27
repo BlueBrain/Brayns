@@ -18,9 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.connect import connect
-from brayns.core import *
-from brayns.instance import *
-from brayns.launcher import *
-from brayns.plugins import *
-from brayns.version import __version__
+import brayns
+from testapi.simple_test_case import SimpleTestCase
+
+
+class TestEntrypoint(SimpleTestCase):
+
+    def test_from_method(self) -> None:
+        method = 'get-camera-perspective'
+        entrypoint = brayns.Entrypoint.from_method(self.instance, method)
+        self.assertEqual(entrypoint.method, method)
+
+    def test_get_all_methods(self) -> None:
+        methods = brayns.Entrypoint.get_all_methods(self.instance)
+        self.assertTrue(methods)
+
+    def test_get_all(self) -> None:
+        entrypoints = brayns.Entrypoint.get_all(self.instance)
+        self.assertTrue(entrypoints)
