@@ -33,7 +33,7 @@ template<typename T>
 class ClippingComponent : public Component
 {
 public:
-    ClippingComponent(const T &primitive)
+    ClippingComponent(T primitive)
         : _clipper(std::move(primitive))
     {
         _clipper.commit();

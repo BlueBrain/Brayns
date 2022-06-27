@@ -25,31 +25,24 @@
 
 namespace
 {
+struct WorldParameters
+{
+    inline static const std::string instanceParameter = "instance";
+    inline static const std::string lightParameter = "light";
+};
+
 class WorldParameterUpdater
 {
 public:
-    static void updateInstances(const ospray::cpp::World &world, const std::vector<ospray::cpp::Instance> &instances)
+    template<typename T>
+    static void update(const ospray::cpp::World &world, const std::string &parameter, const std::vector<T> &objects)
     {
-        static const std::string instanceParameter = "instance";
-
-        if (instances.empty())
+        if (objects.empty())
         {
-            world.removeParam(instanceParameter);
+            world.removeParam(parameter);
             return;
         }
-        world.setParam(instanceParameter, ospray::cpp::CopiedData(instances));
-    }
-
-    static void updateLights(const ospray::cpp::World &world, const std::vector<ospray::cpp::Light> &lights)
-    {
-        static const std::string lightParameter = "light";
-
-        if (lights.empty())
-        {
-            world.removeParam(lightParameter);
-            return;
-        }
-        world.setParam(lightParameter, ospray::cpp::CopiedData(lights));
+        world.setParam(parameter, ospray::cpp::CopiedData(objects));
     }
 };
 }
@@ -90,14 +83,14 @@ bool Scene::commit()
         instances.insert(instances.end(), modelInstances.begin(), modelInstances.end());
         auto clipInstances = _clippingManager.getOsprayInstances();
         instances.insert(instances.end(), clipInstances.begin(), clipInstances.end());
-        WorldParameterUpdater::updateInstances(_osprayWorld, instances);
+        WorldParameterUpdater::update(_osprayWorld, WorldParameters::instanceParameter, instances);
         needsCommit = true;
     }
 
     if (_lightManager.commit())
     {
         auto lights = _lightManager.getOsprayLights();
-        WorldParameterUpdater::updateLights(_osprayWorld, lights);
+        WorldParameterUpdater::update(_osprayWorld, WorldParameters::lightParameter, lights);
         needsCommit = true;
     }
 
