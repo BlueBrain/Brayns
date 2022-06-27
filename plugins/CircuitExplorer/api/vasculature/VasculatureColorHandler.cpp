@@ -60,7 +60,9 @@ void VasculatureColorHandler::updateColorByMethod(
     }
 }
 
-void VasculatureColorHandler::updateIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices)
+void VasculatureColorHandler::updateIndexedColor(
+    const std::vector<brayns::Vector4f> &color,
+    const std::vector<uint8_t> &indices)
 {
     _vasculature.setSimulationColor(color, indices);
 }

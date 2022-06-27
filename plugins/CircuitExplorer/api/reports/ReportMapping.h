@@ -45,37 +45,3 @@ struct CellReportMapping
     // For each section (0...N), number of compartments
     std::vector<uint16_t> compartments;
 };
-
-/**
- * @brief Report mapping generation for compartmented elements
- */
-struct CompartmentMappingGenerator
-{
-    /**
-     * @brief Generates the array of offsets into the report frame for a set of compartmented elements
-     *
-     * @param structure
-     * @param mapping
-     * @return std::vector<size_t>
-     */
-    static std::vector<size_t> generate(
-        const std::vector<CellCompartments> &structure,
-        const std::vector<CellReportMapping> &mapping);
-};
-
-/**
- * @brief Report mapping generation for opaque individual elements
- */
-struct ElementMappingGenerator
-{
-    /**
-     * @brief Generates the array of offsets into the report frame for a set of opaque elements
-     *
-     * @param elementIds
-     * @param mapping
-     * @return std::vector<size_t>
-     */
-    static std::vector<size_t> generate(
-        const std::vector<uint64_t> &elementIds,
-        const std::unordered_map<uint64_t, size_t> &mapping);
-};

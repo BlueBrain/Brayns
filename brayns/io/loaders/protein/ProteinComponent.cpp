@@ -20,69 +20,54 @@
 
 #include "ProteinComponent.h"
 
-#include <brayns/engine/common/DataHandler.h>
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/GeometricModelHandler.h>
-#include <brayns/engine/common/SizeHelper.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
+
+#include <ospray/ospray_cpp/Data.h>
 
 namespace brayns
 {
-ProteinComponent::ProteinComponent(std::vector<Sphere> sphe, std::vector<Vector4f> colors, std::vector<uint8_t> indx)
-    : _colors(std::move(colors))
-    , _colorIndices(std::move(indx))
+ProteinComponent::ProteinComponent(
+    std::vector<Sphere> spheres,
+    std::vector<Vector4f> colors,
+    std::vector<uint8_t> indices)
+    : _object(std::move(spheres))
+    , _colors(std::move(colors))
+    , _colorIndices(std::move(indices))
 {
-    _geometry.set(std::move(sphe));
+    _object.setColorMap(ospray::cpp::SharedData(_colors), ospray::cpp::SharedData(_colorIndices));
 }
 
 Bounds ProteinComponent::computeBounds(const Matrix4f &transform) const noexcept
 {
-    return _geometry.computeBounds(transform);
+    return _object.computeBounds(transform);
 }
 
 void ProteinComponent::onCreate()
 {
-    _model = GeometricModelHandler::create();
+    auto &model = getModel();
+    auto &group = model.getGroup();
+    group.addGeometry(_object);
 
-    auto &group = getModel();
-    GeometricModelHandler::addToGeometryGroup(_model, group);
-
-    group.addComponent<MaterialComponent>();
-
-    GeometricModelHandler::setGeometry(_model, _geometry);
-
-    auto colorData = DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
-    auto indexData = DataHandler::shareBuffer(_colorIndices, OSPDataType::OSP_UCHAR);
-    GeometricModelHandler::setColorMap(_model, colorData, indexData);
+    model.addComponent<MaterialComponent>();
 }
 
 bool ProteinComponent::commit()
 {
-    bool needsCommit = false;
-
     auto &material = ExtractModelObject::extractMaterial(getModel());
     if (material.commit())
     {
-        GeometricModelHandler::setMaterial(_model, material);
-        needsCommit = true;
+        _object.setMaterial(material);
     }
 
-    if (_geometry.commit())
-    {
-        needsCommit = true;
-    }
-
-    if (needsCommit)
-    {
-        GeometricModelHandler::commitModel(_model);
-    }
-
-    return needsCommit;
+    return _object.commit();
 }
 
 void ProteinComponent::onDestroy()
 {
-    GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
-    GeometricModelHandler::destroy(_model);
+    auto &model = getModel();
+    auto &group = model.getGroup();
+    group.removeGeometry(_object);
 }
 }

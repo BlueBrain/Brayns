@@ -19,8 +19,7 @@
  */
 
 #include "ImageOperationManager.h"
-
-#include "ToneMapping.h"
+#include "operations/ToneMapping.h"
 
 #include <algorithm>
 
@@ -59,16 +58,16 @@ void ImageOperationManager::removeOperation(const uint32_t id)
     _operations.erase(it);
 }
 
-std::vector<OSPImageOperation> ImageOperationManager::getOperationHandles() const noexcept
+std::vector<ospray::cpp::ImageOperation> ImageOperationManager::getOperationHandles() const noexcept
 {
-    std::vector<OSPImageOperation> handles;
+    std::vector<ospray::cpp::ImageOperation> handles;
     handles.reserve(_operations.size());
 
     for (const auto &entry : _operations)
     {
         auto &operation = *(entry.operation);
-        auto handle = operation.handle();
-        handles.push_back(handle);
+        const auto &object = operation.getOsprayObject();
+        handles.push_back(object);
     }
     return handles;
 }

@@ -18,12 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/materials/MetalMaterial.h>
+#include "MetalMaterial.h"
+
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+
+namespace
+{
+struct MetalParameters
+{
+    inline static const std::string osprayName = "alloy";
+    inline static const std::string color = "baseColor";
+    inline static const std::string roughness = "roughness";
+};
+}
 
 namespace brayns
 {
 MetalMaterial::MetalMaterial()
-    : Material("alloy")
+    : Material(MetalParameters::osprayName)
 {
 }
 
@@ -44,10 +56,10 @@ float MetalMaterial::getRoughness() const noexcept
 
 void MetalMaterial::commitMaterialSpecificParams()
 {
-    auto ospHandle = handle();
-
     const auto overridedColorWhite = brayns::Vector3f(1.f);
-    ospSetParam(ospHandle, "color", OSPDataType::OSP_VEC3F, &overridedColorWhite);
-    ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &_roughness);
+
+    auto &osprayMaterial = getOsprayMaterial();
+    osprayMaterial.setParam(MetalParameters::color, overridedColorWhite);
+    osprayMaterial.setParam(MetalParameters::roughness, _roughness);
 }
 }

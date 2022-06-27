@@ -113,7 +113,7 @@ void NeuronReportFactory::create(NodeLoadContext &ctxt, const std::vector<CellCo
         const auto path = SonataConfig::resolveSpikesPath(simConfig);
         auto spikeTransition = params.spike_transition_time;
         data = std::make_unique<SonataSpikeData>(path, populationName, selection, spikeTransition);
-        indexer = std::make_unique<SpikeIndexer>();
+        indexer = std::make_unique<SpikeIndexer>(compartments);
     }
     else
     {
@@ -125,8 +125,7 @@ void NeuronReportFactory::create(NodeLoadContext &ctxt, const std::vector<CellCo
 
         const auto flatSelection = selection.flatten();
         const auto reportMapping = SonataCompartmentMapping::generate(path, populationName, flatSelection);
-        auto offsets = CompartmentMappingGenerator::generate(compartments, reportMapping);
-        indexer = std::make_unique<OffsetIndexer>(std::move(offsets));
+        indexer = std::make_unique<OffsetIndexer>(compartments, reportMapping);
     }
 
     auto &model = ctxt.model;

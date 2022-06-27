@@ -59,9 +59,7 @@ std::vector<CellCompartments>
         compartment.sectionSegments[-1].push_back(0);
     }
 
-    auto &somaCircuit = model.addComponent<SomaCircuitComponent>();
-    somaCircuit.setSomas(ids, std::move(geometry));
-
+    auto &somaCircuit = model.addComponent<SomaCircuitComponent>(ids, std::move(geometry));
     auto colorHandler = std::make_unique<SomaColorHandler>(somaCircuit);
     model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
 

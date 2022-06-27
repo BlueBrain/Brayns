@@ -22,6 +22,19 @@
 
 #include "Camera.h"
 
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+
+namespace
+{
+struct CameraParameters
+{
+    inline static const std::string position = "position";
+    inline static const std::string direction = "direction";
+    inline static const std::string up = "up";
+    inline static const std::string aspect = "aspect";
+};
+}
+
 namespace brayns
 {
 bool operator==(const LookAt &a, const LookAt &b) noexcept
@@ -34,14 +47,9 @@ bool operator!=(const LookAt &a, const LookAt &b) noexcept
     return !(a == b);
 }
 
-Camera::Camera(std::string_view handleID)
-    : _handle(ospNewCamera(handleID.data()))
+Camera::Camera(const std::string &handleID)
+    : _osprayCamera(handleID)
 {
-}
-
-Camera::~Camera()
-{
-    ospRelease(_handle);
 }
 
 bool Camera::commit()
@@ -54,19 +62,18 @@ bool Camera::commit()
     const auto &position = _lookAtParams.position;
     const auto &target = _lookAtParams.target;
     const auto &up = _lookAtParams.up;
-
     const auto forward = glm::normalize(target - position);
     const auto strafe = glm::cross(forward, up);
     const auto realUp = glm::cross(strafe, forward);
 
-    ospSetParam(_handle, "position", OSP_VEC3F, &position[0]);
-    ospSetParam(_handle, "direction", OSP_VEC3F, &forward);
-    ospSetParam(_handle, "up", OSP_VEC3F, &realUp);
-    ospSetParam(_handle, "aspect", OSP_FLOAT, &_aspectRatio);
+    _osprayCamera.setParam(CameraParameters::position, position);
+    _osprayCamera.setParam(CameraParameters::direction, forward);
+    _osprayCamera.setParam(CameraParameters::up, realUp);
+    _osprayCamera.setParam(CameraParameters::aspect, _aspectRatio);
 
     commitCameraSpecificParams();
 
-    ospCommit(_handle);
+    _osprayCamera.commit();
 
     resetModified();
 
@@ -93,8 +100,8 @@ float Camera::getAspectRatio() const noexcept
     return _aspectRatio;
 }
 
-OSPCamera Camera::handle() const noexcept
+const ospray::cpp::Camera &Camera::getOsprayCamera() const noexcept
 {
-    return _handle;
+    return _osprayCamera;
 }
 } // namespace brayns

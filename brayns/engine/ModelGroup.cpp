@@ -20,103 +20,63 @@
 
 #include "ModelGroup.h"
 
-#include <brayns/engine/common/DataHandler.h>
+#include <ospray/ospray_cpp/Data.h>
 
 #include <algorithm>
 
 namespace
 {
-struct HandleCommitter
+struct GroupParameters
 {
-    template<typename T>
-    static void commit(const std::vector<T> &handleList, OSPDataType type, OSPGroup groupHandle, const char *id)
-    {
-        if (!handleList.empty())
-        {
-            auto buffer = brayns::DataHandler::copyBuffer(handleList, type);
-            ospSetParam(groupHandle, id, OSPDataType::OSP_DATA, &buffer.handle);
-        }
-    }
+    inline static const std::string geometry = "geometry";
+    inline static const std::string volume = "volume";
+    inline static const std::string clipping = "clippingGeometry";
 };
 
-struct ModelEraser
+class GroupParameterUpdater
 {
-    template<typename T>
-    static bool removeModel(std::vector<T> &modelList, T value)
+public:
+    GroupParameterUpdater(const ospray::cpp::Group &group)
+        : _group(group)
     {
-        auto it = std::find(modelList.begin(), modelList.end(), value);
-        if (it != modelList.end())
-        {
-            modelList.erase(it);
-            return true;
-        }
-
-        return false;
     }
+
+    template<typename T>
+    void update(const std::string &name, const std::vector<T> &handleList)
+    {
+        if (handleList.empty())
+        {
+            _group.removeParam(name);
+            return;
+        }
+        _group.setParam(name, ospray::cpp::CopiedData(handleList));
+    }
+
+private:
+    const ospray::cpp::Group &_group;
 };
 }
 
 namespace brayns
 {
-ModelGroup::ModelGroup()
-    : _handle(ospNewGroup())
+ospray::cpp::Group &ModelGroup::getOsprayGroup() noexcept
 {
+    return _osprayGroup;
 }
 
-ModelGroup::~ModelGroup()
-{
-    ospRelease(_handle);
-}
-
-void ModelGroup::addGeometricModel(OSPGeometricModel model)
-{
-    _geometryModels.push_back(model);
-    _modified = true;
-}
-
-void ModelGroup::removeGeometricModel(OSPGeometricModel model)
-{
-    _modified = _modified || ModelEraser::removeModel(_geometryModels, model);
-}
-
-void ModelGroup::addVolumetricModel(OSPVolumetricModel model)
-{
-    _volumeModels.push_back(model);
-    _modified = true;
-}
-
-void ModelGroup::removeVolumetricModel(OSPVolumetricModel model)
-{
-    _modified = _modified || ModelEraser::removeModel(_volumeModels, model);
-}
-
-void ModelGroup::addClippingModel(OSPGeometricModel model)
-{
-    _clippingModels.push_back(model);
-    _modified = true;
-}
-
-void ModelGroup::removeClippingModel(OSPGeometricModel model)
-{
-    _modified = _modified || ModelEraser::removeModel(_clippingModels, model);
-}
-
-OSPGroup ModelGroup::handle() const noexcept
-{
-    return _handle;
-}
-
-void ModelGroup::commit()
+bool ModelGroup::commit()
 {
     if (!_modified)
     {
-        return;
+        return false;
     }
 
-    HandleCommitter::commit(_geometryModels, OSPDataType::OSP_GEOMETRIC_MODEL, _handle, "geometry");
-    HandleCommitter::commit(_volumeModels, OSPDataType::OSP_VOLUMETRIC_MODEL, _handle, "volume");
-    HandleCommitter::commit(_clippingModels, OSPDataType::OSP_GEOMETRIC_MODEL, _handle, "clippingGeometry");
-
-    ospCommit(_handle);
+    GroupParameterUpdater updater(_osprayGroup);
+    updater.update(GroupParameters::geometry, _geometries);
+    updater.update(GroupParameters::volume, _volumes);
+    updater.update(GroupParameters::clipping, _clippers);
+    _osprayGroup.commit();
+    _modified = false;
+    return true;
 }
 }

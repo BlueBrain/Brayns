@@ -58,7 +58,9 @@ void MorphologyColorHandler::updateColorByMethod(
     }
 }
 
-void MorphologyColorHandler::updateIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices)
+void MorphologyColorHandler::updateIndexedColor(
+    const std::vector<brayns::Vector4f> &color,
+    const std::vector<uint8_t> &indices)
 {
     _circuit.setIndexedColor(color, indices);
 }

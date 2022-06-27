@@ -133,9 +133,9 @@ private:
     void preRender(const ParametersManager &parameters);
 
     /**
-     * @brief Attempts to commit any unsynced data to OSPRay.
+     * @brief Attempts to commit any unsynced data to Ospray.
      *
-     * @return true if anything was commited to OSPRay, false otherwise
+     * @return true if anything was commited to Ospray, false otherwise
      */
     bool commit();
 
@@ -156,9 +156,9 @@ private:
     /**
      * @brief Return a list with all the model instance handles so that the scene can commit them
      *
-     * @return std::vector<OSPInstance>
+     * @return std::vector<ospray::cpp::Instance>
      */
-    std::vector<OSPInstance> getInstanceHandles() noexcept;
+    std::vector<ospray::cpp::Instance> getOsprayInstances() noexcept;
 
 private:
     /**

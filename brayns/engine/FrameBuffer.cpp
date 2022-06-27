@@ -21,12 +21,17 @@
 
 #include "FrameBuffer.h"
 
-#include <brayns/engine/common/DataHandler.h>
 #include <brayns/utils/image/ImageFlipper.h>
+#include <ospray/ospray_cpp/Data.h>
 
 namespace
 {
-class OSPRayFrameBufferFormat
+struct FrameBufferParameters
+{
+    inline static const std::string operations = "imageOperation";
+};
+
+class OsprayFrameBufferFormat
 {
 public:
     static OSPFrameBufferFormat fromPixelFormat(const brayns::PixelFormat frameBufferFormat)
@@ -49,27 +54,16 @@ public:
 
 namespace brayns
 {
-FrameBuffer::~FrameBuffer()
-{
-    unmap();
-    ospRelease(_handle);
-}
-
 void FrameBuffer::map()
 {
-    if (!_handle)
-    {
-        throw std::runtime_error("Framebuffer is not initialized. Cannot be mapped at this time");
-    }
-
-    _colorBuffer = (uint8_t *)ospMapFrameBuffer(_handle, OSP_FB_COLOR);
+    _colorBuffer = static_cast<uint8_t *>(_osprayFramebuffer.map(OSP_FB_COLOR));
 }
 
 void FrameBuffer::unmap()
 {
-    if (_handle && _colorBuffer)
+    if (_colorBuffer)
     {
-        ospUnmapFrameBuffer(_colorBuffer, _handle);
+        _osprayFramebuffer.unmap(_colorBuffer);
         _colorBuffer = nullptr;
     }
 }
@@ -88,15 +82,10 @@ bool FrameBuffer::commit()
 
     unmap();
 
-    if (_handle)
-    {
-        ospRelease(_handle);
-    }
-
     const auto width = static_cast<int>(_frameSize.x);
     const auto height = static_cast<int>(_frameSize.y);
 
-    const auto format = OSPRayFrameBufferFormat::fromPixelFormat(_frameBufferFormat);
+    const auto format = OsprayFrameBufferFormat::fromPixelFormat(_frameBufferFormat);
 
     size_t channels = OSP_FB_COLOR;
     if (_accumulation)
@@ -104,16 +93,15 @@ bool FrameBuffer::commit()
         channels |= OSP_FB_ACCUM;
     }
 
-    _handle = ospNewFrameBuffer(width, height, format, channels);
+    _osprayFramebuffer = ospray::cpp::FrameBuffer(width, height, format, channels);
 
     auto operations = _operationManager.getOperationHandles();
     if (!operations.empty())
     {
-        auto operationsBuffer = DataHandler::copyBuffer(operations, OSPDataType::OSP_IMAGE_OPERATION);
-        ospSetParam(_handle, "imageOperation", OSPDataType::OSP_DATA, &operationsBuffer.handle);
+        _osprayFramebuffer.setParam(FrameBufferParameters::operations, ospray::cpp::CopiedData(operations));
     }
 
-    ospCommit(_handle);
+    _osprayFramebuffer.commit();
 
     clear();
 
@@ -160,7 +148,7 @@ PixelFormat FrameBuffer::getFrameBufferFormat() const noexcept
 void FrameBuffer::clear() noexcept
 {
     _accumFrames = 0;
-    ospResetAccumulation(_handle);
+    _osprayFramebuffer.clear();
 }
 
 void FrameBuffer::incrementAccumFrames() noexcept
@@ -197,9 +185,9 @@ Image FrameBuffer::getImage()
     return image;
 }
 
-OSPFrameBuffer FrameBuffer::handle() const noexcept
+const ospray::cpp::FrameBuffer &FrameBuffer::getOsprayFramebuffer() const noexcept
 {
-    return _handle;
+    return _osprayFramebuffer;
 }
 
 ImageOperationManager &FrameBuffer::getOperationsManager() noexcept

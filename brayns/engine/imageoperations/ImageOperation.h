@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,36 +20,33 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
+#include <ospray/ospray_cpp/ImageOperation.h>
 
 namespace brayns
 {
-struct Box
-{
-    Vector3f min;
-    Vector3f max;
-};
-
-template<>
-class GeometryOSPRayID<Box>
+class ImageOperation
 {
 public:
-    static std::string_view get();
-};
+    ImageOperation(const std::string &name)
+        : _osprayObject(name)
+    {
+    }
 
-template<>
-class GeometryBoundsUpdater<Box>
-{
-public:
-    static void update(const Box &s, const Matrix4f &t, Bounds &b);
-};
+    /**
+     * @brief Commits the operation parameters
+     */
+    virtual void commit() = 0;
 
-template<>
-class GeometryCommitter<Box>
-{
-public:
-    static void commit(OSPGeometry handle, const std::vector<Box> &geometries);
-};
+    /**
+     * @brief Returns the image opration Ospray handle
+     * @return OSPImageOperation
+     */
+    const ospray::cpp::ImageOperation &getOsprayObject() const noexcept
+    {
+        return _osprayObject;
+    }
 
+private:
+    ospray::cpp::ImageOperation _osprayObject;
+};
 }

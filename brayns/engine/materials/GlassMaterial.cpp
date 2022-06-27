@@ -18,12 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/materials/GlassMaterial.h>
+#include "GlassMaterial.h"
+
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+
+namespace
+{
+struct GlassParameters
+{
+    inline static const std::string osprayName = "thinGlass";
+    inline static const std::string attenuation = "attenuationColor";
+    inline static const std::string ior = "eta";
+};
+}
 
 namespace brayns
 {
 GlassMaterial::GlassMaterial()
-    : Material("thinGlass")
+    : Material(GlassParameters::osprayName)
 {
 }
 
@@ -44,10 +56,10 @@ float GlassMaterial::getIndexOfRefraction() const noexcept
 
 void GlassMaterial::commitMaterialSpecificParams()
 {
-    auto ospHandle = handle();
     const auto overridedColorWhite = brayns::Vector3f(1.f);
 
-    ospSetParam(ospHandle, "attenuationColor", OSPDataType::OSP_VEC3F, &overridedColorWhite);
-    ospSetParam(ospHandle, "eta", OSPDataType::OSP_FLOAT, &_ior);
+    auto &osprayMaterial = getOsprayMaterial();
+    osprayMaterial.setParam(GlassParameters::attenuation, overridedColorWhite);
+    osprayMaterial.setParam(GlassParameters::ior, _ior);
 }
 }

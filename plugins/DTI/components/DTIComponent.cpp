@@ -21,13 +21,14 @@
 #include "DTIComponent.h"
 
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/GeometricModelHandler.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
 namespace
 {
-struct NormalColorGenerator
+class NormalColorGenerator
 {
+public:
     static std::vector<brayns::Vector4f> generate(const std::vector<brayns::Primitive> &prims)
     {
         std::vector<brayns::Vector4f> colors(prims.size());
@@ -49,6 +50,19 @@ struct NormalColorGenerator
 
 namespace dti
 {
+DTIComponent::DTIComponent(std::vector<std::vector<brayns::Primitive>> streamlineGeometries)
+{
+    auto &group = getModel();
+
+    _streamlines.reserve(streamlineGeometries.size());
+    for (auto &primitives : streamlineGeometries)
+    {
+        Streamline streamline{{std::move(primitives)}};
+        _streamlines.push_back(std::move(streamline));
+    }
+    setDefaultColors();
+}
+
 brayns::Bounds DTIComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds base;
@@ -64,23 +78,27 @@ brayns::Bounds DTIComponent::computeBounds(const brayns::Matrix4f &transform) co
 
 void DTIComponent::onCreate()
 {
-    auto &group = getModel();
-    group.addComponent<brayns::MaterialComponent>();
+    auto &model = getModel();
+    model.addComponent<brayns::MaterialComponent>();
+
+    auto &group = model.getGroup();
+    for (auto &streamline : _streamlines)
+    {
+        group.addGeometry(streamline.geometry);
+    }
 }
 
 bool DTIComponent::commit()
 {
-    bool needsCommit = false;
+    bool needsCommit = _colorsDirty;
+    _colorsDirty = false;
 
-    auto &group = getModel();
-
-    auto &material = brayns::ExtractModelObject::extractMaterial(group);
+    auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
     if (material.commit())
     {
         for (auto &streamline : _streamlines)
         {
-            auto model = streamline.model;
-            brayns::GeometricModelHandler::setMaterial(model, material);
+            streamline.geometry.setMaterial(material);
         }
         needsCommit = true;
     }
@@ -89,8 +107,7 @@ bool DTIComponent::commit()
     {
         for (auto &streamline : _streamlines)
         {
-            auto model = streamline.model;
-            brayns::GeometricModelHandler::commitModel(model);
+            streamline.geometry.commit();
         }
     }
 
@@ -99,36 +116,12 @@ bool DTIComponent::commit()
 
 void DTIComponent::onDestroy()
 {
-    auto &group = getModel();
+    auto &model = getModel();
+    auto &group = model.getGroup();
     for (auto &streamline : _streamlines)
     {
-        auto &model = streamline.model;
-        brayns::GeometricModelHandler::removeFromGeometryGroup(model, group);
-        brayns::GeometricModelHandler::destroy(model);
+        group.removeGeometry(streamline.geometry);
     }
-}
-
-void DTIComponent::setStreamlines(std::vector<std::vector<brayns::Primitive>> &geometries)
-{
-    auto &group = getModel();
-
-    _streamlines.reserve(geometries.size());
-
-    for (auto &primitives : geometries)
-    {
-        auto &streamline = _streamlines.emplace_back();
-
-        auto &geometry = streamline.geometry;
-        geometry.set(std::move(primitives));
-        geometry.commit();
-
-        auto &model = streamline.model;
-        model = brayns::GeometricModelHandler::create();
-        brayns::GeometricModelHandler::addToGeometryGroup(model, group);
-        brayns::GeometricModelHandler::setGeometry(model, geometry);
-    }
-
-    setDefaultColors();
 }
 
 size_t DTIComponent::getNumStreamlines() const noexcept
@@ -140,10 +133,10 @@ void DTIComponent::setDefaultColors() noexcept
 {
     for (auto &streamline : _streamlines)
     {
-        auto &colors = streamline.colors;
         auto &geometry = streamline.geometry;
-        const auto &primitives = geometry.getAll();
-        colors = NormalColorGenerator::generate(primitives);
+        auto &geometryData = geometry.getGeometry();
+        auto &primitives = geometryData.getPrimitives();
+        streamline.colors = NormalColorGenerator::generate(primitives);
     }
 
     _commitColors();
@@ -185,10 +178,8 @@ void DTIComponent::_commitColors() noexcept
     for (auto &streamline : _streamlines)
     {
         auto &colors = streamline.colors;
-        auto colorBuffer = brayns::DataHandler::shareBuffer(colors, OSPDataType::OSP_VEC4F);
-
-        auto model = streamline.model;
-        brayns::GeometricModelHandler::setColors(model, colorBuffer);
+        auto &geometry = streamline.geometry;
+        geometry.setColorPerPrimitive(ospray::cpp::SharedData(colors));
     }
     _colorsDirty = true;
 }

@@ -21,13 +21,13 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometries/Primitive.h>
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/types/Primitive.h>
 
 struct RenderableAxisList
 {
     brayns::Vector3f vector;
-    OSPGeometricModel model = nullptr;
-    brayns::Geometry<brayns::Primitive> geometry;
+    brayns::GeometryObject<brayns::Primitive> geometry;
 };
 
 class RenderableAxes

@@ -20,12 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/Geometry.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/common/GeometricModelHandler.h>
-
-#include <ospray/ospray.h>
+#include <brayns/engine/geometry/GeometryObject.h>
 
 namespace brayns
 {
@@ -36,43 +33,27 @@ template<typename T>
 class ClippingComponent : public Component
 {
 public:
-    ClippingComponent(const T &geometry)
+    ClippingComponent(T primitive)
+        : _clipper(std::move(primitive))
     {
-        _geometry.add(geometry);
-    }
-
-    Geometry<T> &getGeometry() noexcept
-    {
-        return _geometry;
+        _clipper.commit();
     }
 
     virtual void onCreate() override
     {
-        _model = GeometricModelHandler::create();
-        GeometricModelHandler::addToClippingGroup(_model, getModel());
-    }
-
-    virtual bool commit() override
-    {
-        // Geometry cannot be modified, so it will be committed and setted just one time
-        if (_geometry.commit())
-        {
-            GeometricModelHandler::setGeometry(_model, _geometry);
-            GeometricModelHandler::commitModel(_model);
-            return true;
-        }
-
-        return false;
+        auto &model = getModel();
+        auto &group = model.getGroup();
+        group.addClipper(_clipper);
     }
 
     virtual void onDestroy() override
     {
-        GeometricModelHandler::removeFromClippingGroup(_model, getModel());
-        GeometricModelHandler::destroy(_model);
+        auto &model = getModel();
+        auto &group = model.getGroup();
+        group.removeClipper(_clipper);
     }
 
 private:
-    OSPGeometricModel _model{nullptr};
-    Geometry<T> _geometry;
+    GeometryObject<T> _clipper;
 };
 }

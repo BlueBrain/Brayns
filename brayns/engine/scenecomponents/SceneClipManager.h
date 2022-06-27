@@ -65,7 +65,7 @@ private:
     };
 
     /**
-     * @brief Will commit any not synced data with OSPRay
+     * @brief Will commit any not synced data with Ospray
      *
      * @return true if there was anything to commit, false otherwise
      */
@@ -73,9 +73,9 @@ private:
 
     /**
      * @brief Return the handles of the instances of the clipping geometry
-     * @return std::vector<OSPInstance>
+     * @return std::vector<ospray::cpp::Instance>
      */
-    std::vector<OSPInstance> getInstanceHandles() noexcept;
+    std::vector<ospray::cpp::Instance> getOsprayInstances() noexcept;
 
 private:
     bool _dirty{false};

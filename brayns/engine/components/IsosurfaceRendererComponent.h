@@ -23,11 +23,9 @@
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/GeometricModelHandler.h>
 #include <brayns/engine/components/MaterialComponent.h>
-#include <brayns/engine/geometries/Isosurface.h>
-
-#include <ospray/ospray.h>
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/types/Isosurface.h>
 
 namespace brayns
 {
@@ -39,32 +37,23 @@ class IsosurfaceRendererComponent final : public Component
 {
 public:
     IsosurfaceRendererComponent(T volumeData, float isovalue)
-        : _model(ospNewGeometricModel())
+        : _geometryObject(Isosurface<T>{Volume<T>(std::move(volumeData)), {isovalue}})
     {
-        Isosurface<T> isosurface;
-        auto &volume = isosurface.volume;
-        volume.setData(std::move(volumeData));
-        volume.commit();
-        isosurface.isovalues.push_back(isovalue);
-
-        _geometry.add(std::move(isosurface));
-        _geometry.commit();
-
-        GeometricModelHandler::setGeometry(_model, _geometry);
     }
 
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
     {
-        return _geometry.computeBounds(transform);
+        return _geometryObject.computeBounds(transform);
     }
 
     virtual void onCreate() override
     {
-        Model &group = getModel();
-        auto &component = group.addComponent<MaterialComponent>();
-        auto &material = component.getMaterial();
-        material.setColor(brayns::Vector3f(0.5f));
-        GeometricModelHandler::addToGeometryGroup(_model, group);
+        Model &model = getModel();
+
+        model.addComponent<MaterialComponent>();
+
+        auto &group = model.getGroup();
+        group.addGeometry(_geometryObject);
     }
 
     bool commit() override
@@ -73,24 +62,21 @@ public:
         auto &material = ExtractModelObject::extractMaterial(group);
         if (material.commit())
         {
-            GeometricModelHandler::setMaterial(_model, material);
-            GeometricModelHandler::setColor(_model, material.getColor());
-            GeometricModelHandler::commitModel(_model);
-            return true;
+            _geometryObject.setMaterial(material);
+            _geometryObject.setColor(material.getColor());
         }
 
-        return false;
+        return _geometryObject.commit();
     }
 
     virtual void onDestroy() override
     {
-        auto &model = getModel();
-        GeometricModelHandler::removeFromGeometryGroup(_model, model);
-        GeometricModelHandler::destroy(_model);
+        Model &model = getModel();
+        auto &group = model.getGroup();
+        group.removeGeometry(_geometryObject);
     }
 
 private:
-    OSPGeometricModel _model = nullptr;
-    Geometry<Isosurface<T>> _geometry;
+    GeometryObject<Isosurface<T>> _geometryObject;
 };
 }

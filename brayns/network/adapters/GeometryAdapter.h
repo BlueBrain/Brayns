@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include <brayns/engine/geometries/Box.h>
-#include <brayns/engine/geometries/Plane.h>
-#include <brayns/engine/geometries/Primitive.h>
-#include <brayns/engine/geometries/Sphere.h>
-#include <brayns/engine/geometries/TriangleMesh.h>
+#include <brayns/engine/geometry/types/Box.h>
+#include <brayns/engine/geometry/types/Plane.h>
+#include <brayns/engine/geometry/types/Primitive.h>
+#include <brayns/engine/geometry/types/Sphere.h>
+#include <brayns/engine/geometry/types/TriangleMesh.h>
 #include <brayns/json/JsonAdapterMacro.h>
 #include <brayns/json/JsonObjectMacro.h>
 

@@ -21,26 +21,36 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
-#include <brayns/engine/Volume.h>
-#include <brayns/engine/common/DataHandler.h>
+#include <brayns/engine/geometry/Geometry.h>
+#include <brayns/engine/volume/Volume.h>
+
+#include <ospray/ospray_cpp/Data.h>
 
 namespace brayns
 {
-template<typename T>
-struct Isosurface
+struct IsosurfaceParameters
 {
-    std::vector<float> isovalues;
-    Volume<T> volume;
+    inline static const std::string osprayName = "isosurface";
+    inline static const std::string volume = "volume";
+    inline static const std::string isovalue = "isovalue";
 };
 
 template<typename T>
-class GeometryOSPRayID<Isosurface<T>>
+struct Isosurface
+{
+    // As owner of the volume, the isosurface needs to commit it during its own commit(), where
+    // the data is const, thus volume must be mutable. Temporary until commit is changed
+    mutable Volume<T> volume;
+    std::vector<float> isovalues;
+};
+
+template<typename T>
+class OsprayGeometryName<Isosurface<T>>
 {
 public:
-    static std::string_view get()
+    static const std::string &get()
     {
-        return "isosurface";
+        return IsosurfaceParameters::osprayName;
     }
 };
 
@@ -57,21 +67,12 @@ public:
 };
 
 template<typename T>
-class GeometryAddChecker<Isosurface<T>>
+class InputGeometryChecker<Isosurface<T>>
 {
 public:
-    static void check(const std::vector<Isosurface<T>> &dstGeometry, const Isosurface<T> &inputGeometry)
+    static void check(const std::vector<Isosurface<T>> &primitives)
     {
-        (void)inputGeometry;
-        if (!dstGeometry.empty())
-        {
-            throw std::runtime_error("Geometry<Isosurface<T>> only accepts 1 geometry");
-        }
-    }
-
-    static void check(const std::vector<Isosurface<T>> &dstGeometry, const std::vector<Isosurface<T>> &inputGeometries)
-    {
-        if (!dstGeometry.empty() || inputGeometries.size() > 1)
+        if (primitives.size() > 1)
         {
             throw std::runtime_error("Geometry<Isosurface<T>> only accepts 1 geometry");
         }
@@ -82,16 +83,15 @@ template<typename T>
 class GeometryCommitter<Isosurface<T>>
 {
 public:
-    static void commit(OSPGeometry handle, const std::vector<Isosurface<T>> &geometries)
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Isosurface<T>> &primitives)
     {
-        const auto &geometry = geometries.front();
-        const auto &volume = geometry.volume;
+        const auto &primitive = primitives.front();
+        auto &isoValues = primitive.isovalues;
+        auto &volume = primitive.volume;
 
-        const auto volumeHandle = volume.handle();
-        ospSetParam(handle, "volume", OSPDataType::OSP_VOLUME, &volumeHandle);
-
-        auto sharedIsoValues = DataHandler::shareBuffer(geometry.isovalues, OSPDataType::OSP_FLOAT);
-        ospSetParam(handle, "isovalue", OSPDataType::OSP_DATA, &sharedIsoValues.handle);
+        volume.commit();
+        osprayGeometry.setParam(IsosurfaceParameters::volume, volume.getOsprayVolume());
+        osprayGeometry.setParam(IsosurfaceParameters::isovalue, ospray::cpp::SharedData(isoValues));
     }
 };
 

@@ -21,9 +21,8 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometries/Primitive.h>
-
-#include <ospray/ospray.h>
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/types/Primitive.h>
 
 namespace dti
 {
@@ -32,12 +31,13 @@ class DTIComponent final : public brayns::Component
 public:
     struct Streamline
     {
-        OSPGeometricModel model{nullptr};
-        brayns::Geometry<brayns::Primitive> geometry;
+        brayns::GeometryObject<brayns::Primitive> geometry;
         std::vector<brayns::Vector4f> colors;
     };
 
 public:
+    DTIComponent(std::vector<std::vector<brayns::Primitive>> streamlineGeometries);
+
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
     void onCreate() override;
@@ -45,8 +45,6 @@ public:
     bool commit() override;
 
     void onDestroy() override;
-
-    void setStreamlines(std::vector<std::vector<brayns::Primitive>> &streamlineGeometries);
 
     size_t getNumStreamlines() const noexcept;
 

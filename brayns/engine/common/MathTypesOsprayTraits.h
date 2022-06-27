@@ -21,42 +21,16 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
 
-namespace brayns
+#include <ospray/ospray_cpp/Traits.h>
+
+namespace ospray
 {
-struct Primitive
-{
-    Vector3f p0;
-    float r0;
-    Vector3f p1;
-    float r1;
-
-    static Primitive cylinder(const Vector3f &p0, const Vector3f &p1, const float radius) noexcept;
-
-    static Primitive cone(const Vector3f &p0, const float r0, const Vector3f &p1, const float r1) noexcept;
-
-    static Primitive sphere(const Vector3f &center, const float radius) noexcept;
-};
-
-template<>
-class GeometryOSPRayID<Primitive>
-{
-public:
-    static std::string_view get();
-};
-
-template<>
-class GeometryBoundsUpdater<Primitive>
-{
-public:
-    static void update(const Primitive &s, const Matrix4f &t, Bounds &b);
-};
-
-template<>
-class GeometryCommitter<Primitive>
-{
-public:
-    static void commit(OSPGeometry handle, const std::vector<Primitive> &geometries);
-};
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector2f, OSP_VEC2F)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector2i, OSP_VEC2I)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector2ui, OSP_VEC2UI)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector3f, OSP_VEC3F)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector3i, OSP_VEC3I)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector3ui, OSP_VEC3UI)
+OSPTYPEFOR_SPECIALIZATION(brayns::Vector4f, OSP_VEC4F)
 }

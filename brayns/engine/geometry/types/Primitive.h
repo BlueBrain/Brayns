@@ -21,34 +21,42 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
+#include <brayns/engine/geometry/Geometry.h>
 
 namespace brayns
 {
-struct Sphere
+struct Primitive
 {
-    Vector3f center;
-    float radius;
+    Vector3f p0;
+    float r0;
+    Vector3f p1;
+    float r1;
+
+    static Primitive cylinder(const Vector3f &p0, const Vector3f &p1, const float radius) noexcept;
+
+    static Primitive cone(const Vector3f &p0, const float r0, const Vector3f &p1, const float r1) noexcept;
+
+    static Primitive sphere(const Vector3f &center, const float radius) noexcept;
 };
 
 template<>
-class GeometryOSPRayID<Sphere>
+class OsprayGeometryName<Primitive>
 {
 public:
-    static std::string_view get();
+    static const std::string &get();
 };
 
 template<>
-class GeometryBoundsUpdater<Sphere>
+class GeometryBoundsUpdater<Primitive>
 {
 public:
-    static void update(const Sphere &s, const Matrix4f &t, Bounds &b);
+    static void update(const Primitive &s, const Matrix4f &t, Bounds &b);
 };
 
 template<>
-class GeometryCommitter<Sphere>
+class GeometryCommitter<Primitive>
 {
 public:
-    static void commit(OSPGeometry handle, const std::vector<Sphere> &geometries);
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Primitive> &primitives);
 };
 }

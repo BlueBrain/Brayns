@@ -268,9 +268,9 @@ ModelInstance &SceneModelManager::_createModelInstance(ModelEntry &modelEntry)
     return *(_instances.back());
 }
 
-std::vector<OSPInstance> SceneModelManager::getInstanceHandles() noexcept
+std::vector<ospray::cpp::Instance> SceneModelManager::getOsprayInstances() noexcept
 {
-    std::vector<OSPInstance> handles;
+    std::vector<ospray::cpp::Instance> handles;
     handles.reserve(_instances.size());
     for (auto instance : _instances)
     {
@@ -278,8 +278,8 @@ std::vector<OSPInstance> SceneModelManager::getInstanceHandles() noexcept
         {
             continue;
         }
-        auto handle = instance->handle();
-        handles.push_back(handle);
+        const auto &osprayInstance = instance->getOsprayInstance();
+        handles.push_back(osprayInstance);
     }
     return handles;
 }

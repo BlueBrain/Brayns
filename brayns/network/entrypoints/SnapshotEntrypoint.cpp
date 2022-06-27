@@ -127,9 +127,9 @@ public:
         // Render
         auto future = brayns::FrameRenderer::asynchronous(*camera, frameBuffer, *renderer, scene);
         const auto msg = "Rendering snapshot ...";
-        while (!ospIsReady(future))
+        while (!future.isReady())
         {
-            const auto percentage = ospGetProgress(future);
+            const auto percentage = future.progress();
             progress.notify(msg, percentage);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }

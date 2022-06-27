@@ -21,12 +21,10 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/common/DataHandler.h>
-#include <brayns/engine/geometries/Primitive.h>
+#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/types/Primitive.h>
 
 #include <api/vasculature/VasculatureSection.h>
-
-#include <ospray/ospray.h>
 
 class VasculatureComponent final : public brayns::Component
 {
@@ -82,7 +80,7 @@ public:
      * @param color
      * @param mapping per geometry primitive indices into the color buffer
      */
-    void setSimulationColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping) noexcept;
+    void setSimulationColor(const std::vector<brayns::Vector4f> &color, const std::vector<uint8_t> &mapping) noexcept;
 
     /**
      * @brief Get the Geometry object
@@ -92,10 +90,8 @@ public:
     brayns::Geometry<brayns::Primitive> &getGeometry() noexcept;
 
 private:
-    OSPGeometricModel _model = nullptr;
-    brayns::Geometry<brayns::Primitive> _geometry;
     std::vector<uint64_t> _ids;
+    brayns::GeometryObject<brayns::Primitive> _geometry;
     std::vector<VasculatureSection> _sections;
     std::vector<brayns::Vector4f> _colors;
-    bool _colorsDirty{false};
 };

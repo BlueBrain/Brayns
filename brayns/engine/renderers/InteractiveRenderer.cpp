@@ -18,12 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/renderers/InteractiveRenderer.h>
+#include "InteractiveRenderer.h"
+
+namespace
+{
+struct InteractiveParameters
+{
+    inline static const std::string osprayName = "scivis";
+    inline static const std::string shadow = "shadows";
+    inline static const std::string aoSamples = "aoSamples";
+};
+}
 
 namespace brayns
 {
 InteractiveRenderer::InteractiveRenderer()
-    : Renderer("scivis")
+    : Renderer(InteractiveParameters::osprayName)
 {
 }
 
@@ -65,9 +75,8 @@ int32_t InteractiveRenderer::getAmbientOcclusionSamples() const noexcept
 
 void InteractiveRenderer::commitRendererSpecificParams()
 {
-    auto ospHandle = handle();
-
-    ospSetParam(ospHandle, "shadows", OSPDataType::OSP_BOOL, &_shadowsEnabled);
-    ospSetParam(ospHandle, "aoSamples", OSPDataType::OSP_INT, &_aoSamples);
+    auto &osprayRenderer = getOsprayRenderer();
+    osprayRenderer.setParam(InteractiveParameters::shadow, _shadowsEnabled);
+    osprayRenderer.setParam(InteractiveParameters::aoSamples, _aoSamples);
 }
 }

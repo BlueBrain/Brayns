@@ -38,8 +38,5 @@ public:
      * @param range
      * @param indices
      */
-    virtual void update(
-        const std::vector<float> &data,
-        const brayns::Vector2f &range,
-        std::vector<uint8_t> &indices) noexcept = 0;
+    virtual std::vector<uint8_t> generate(const std::vector<float> &data, const brayns::Vector2f &range) noexcept = 0;
 };

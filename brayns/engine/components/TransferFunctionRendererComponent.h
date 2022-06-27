@@ -22,13 +22,13 @@
 
 #include <brayns/engine/ModelComponents.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/TransferFunction.h>
 
 namespace brayns
 {
 /**
  * @brief Takes (or adds, if not present) the transfer function from the model and converts it
- * to an OSPRay transfer function. Modified and committment is done manually to allow the components
+ * to an Ospray transfer function. Modified and committment is done manually to allow the components
  * that make use of this to control its life cylce
  */
 class TransferFunctionRendererComponent : public Component
@@ -38,13 +38,11 @@ public:
 
     void onCreate() override;
 
-    void onDestroy() override;
-
     bool manualCommit();
 
-    OSPTransferFunction handle() const noexcept;
+    const ospray::cpp::TransferFunction &getOsprayObject() const noexcept;
 
 private:
-    OSPTransferFunction _handle;
+    ospray::cpp::TransferFunction _osprayTransferFunction;
 };
 }

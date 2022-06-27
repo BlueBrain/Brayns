@@ -18,14 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/common/DataHandler.h>
-#include <brayns/engine/geometries/Box.h>
+#include "Box.h"
+
+#include <ospray/ospray_cpp/Data.h>
+
+namespace
+{
+struct BoxParameters
+{
+    inline static const std::string osprayName = "box";
+    inline static const std::string box = "box";
+};
+}
 
 namespace brayns
 {
-std::string_view GeometryOSPRayID<Box>::get()
+const std::string &OsprayGeometryName<Box>::get()
 {
-    return "box";
+    return BoxParameters::osprayName;
 }
 
 void GeometryBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bounds &b)
@@ -33,13 +43,24 @@ void GeometryBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bound
     const auto &min = box.min;
     const auto &max = box.max;
 
-    b.expand(Vector3f(t * Vector4f(min, 1.f)));
-    b.expand(Vector3f(t * Vector4f(max, 1.f)));
+    std::vector<Vector3f> corners = {
+        min,
+        Vector3f(max.x, min.y, min.z),
+        Vector3f(min.x, min.y, max.z),
+        Vector3f(max.x, min.y, max.z),
+        Vector3f(min.x, max.y, min.z),
+        Vector3f(max.x, max.y, min.z),
+        Vector3f(min.x, max.y, max.z),
+        max};
+
+    for (const auto &corner : corners)
+    {
+        b.expand(Vector3f(t * Vector4f(corner, 1.f)));
+    }
 }
 
-void GeometryCommitter<Box>::commit(OSPGeometry handle, const std::vector<Box> &geometries)
+void GeometryCommitter<Box>::commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Box> &primitives)
 {
-    auto buffer = DataHandler::shareBuffer(geometries, OSPDataType::OSP_BOX3F);
-    ospSetParam(handle, "box", OSP_DATA, &buffer.handle);
+    osprayGeometry.setParam(BoxParameters::box, ospray::cpp::SharedData(primitives));
 }
 }

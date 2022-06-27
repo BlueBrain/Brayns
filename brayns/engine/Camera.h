@@ -25,7 +25,7 @@
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/Camera.h>
 
 #include <memory>
 #include <string_view>
@@ -45,7 +45,7 @@ bool operator!=(const LookAt &a, const LookAt &b) noexcept;
 class Camera : public BaseObject
 {
 public:
-    Camera(std::string_view handleID);
+    Camera(const std::string &handleID);
 
     Camera(const Camera &) = delete;
     Camera &operator=(const Camera &) = delete;
@@ -53,7 +53,7 @@ public:
     Camera(Camera &&) = delete;
     Camera &operator=(Camera &&) = delete;
 
-    virtual ~Camera();
+    virtual ~Camera() = default;
 
     /**
      * @brief Returns the camera type as a string
@@ -69,7 +69,7 @@ public:
 
     /**
      * @brief Commit implementation. Derived camera types must override commitCameraSpecificParams(),
-     * which will be called during commit() to perform camera-specific synchronization with OSPRay
+     * which will be called during commit() to perform camera-specific synchronization with Ospray
      * @returns true if there was anything to commit
      */
     bool commit();
@@ -99,20 +99,19 @@ public:
     float getAspectRatio() const noexcept;
 
     /**
-     * @brief Returns the OSPRay handle of this camera
+     * @brief Returns the Ospray Object of this camera
      */
-    OSPCamera handle() const noexcept;
+    const ospray::cpp::Camera &getOsprayCamera() const noexcept;
 
 protected:
     /**
-     * @brief Subclasses of the Camera must implement this method to commit to OSPRay camera type specific
-     * parameters. The camera class will call ospCommit(_handle), thus sublcass may avoid calling it.
+     * @brief Subclasses of the Camera must implement this method to set camera type specific parameters.
      */
     virtual void commitCameraSpecificParams() = 0;
 
 private:
     LookAt _lookAtParams;
     float _aspectRatio{1.f};
-    OSPCamera _handle{nullptr};
+    ospray::cpp::Camera _osprayCamera;
 };
 } // namespace brayns

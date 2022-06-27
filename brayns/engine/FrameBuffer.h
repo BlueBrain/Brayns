@@ -27,7 +27,7 @@
 #include <brayns/engine/imageoperations/ImageOperationManager.h>
 #include <brayns/utils/image/Image.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/FrameBuffer.h>
 
 namespace brayns
 {
@@ -38,7 +38,6 @@ class FrameBuffer : public BaseObject
 {
 public:
     FrameBuffer() = default;
-    ~FrameBuffer();
 
     FrameBuffer(const FrameBuffer &) = delete;
     FrameBuffer &operator=(const FrameBuffer &) = delete;
@@ -47,23 +46,23 @@ public:
     FrameBuffer &operator=(FrameBuffer &&) = delete;
 
     /**
-     * @brief Maps OSPRay backend framebuffer to an accessible system buffer
+     * @brief Maps Ospray backend framebuffer to an accessible system buffer
      */
     void map();
 
     /**
-     * @brief Removes OSPRay backend framebuffer mapping to system buffer
+     * @brief Removes Ospray backend framebuffer mapping to system buffer
      */
     void unmap();
 
     /**
-     * @brief Returns the OSPRay mapped framebuffer as a system buffer. To be valid, a call to map() must be
+     * @brief Returns the Ospray mapped framebuffer as a system buffer. To be valid, a call to map() must be
      * made before calling this method. After calling unmap() the pointer returned by this method is invalidated
      */
     const uint8_t *getColorBuffer() const;
 
     /**
-     * @brief Syncs this object data to the OSPRay backend framebuffer
+     * @brief Syncs this object data to the Ospray backend framebuffer
      * @returns true if there was anything to commit
      */
     bool commit();
@@ -123,9 +122,9 @@ public:
     Image getImage();
 
     /**
-     * @brief Returns the OSPRay backend framebuffer handle object
+     * @brief Returns the Ospray backend framebuffer handle object
      */
-    OSPFrameBuffer handle() const noexcept;
+    const ospray::cpp::FrameBuffer &getOsprayFramebuffer() const noexcept;
 
     /**
      * @brief Returns the image operations manager
@@ -139,7 +138,7 @@ private:
     bool _accumulation{true};
     int32_t _accumFrames{0};
 
-    OSPFrameBuffer _handle{nullptr};
+    ospray::cpp::FrameBuffer _osprayFramebuffer;
 
     uint8_t *_colorBuffer{nullptr};
 

@@ -22,7 +22,7 @@
 
 #include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/components/VolumeRendererComponent.h>
-#include <brayns/engine/volumes/RegularVolume.h>
+#include <brayns/engine/volume/types/RegularVolume.h>
 
 #include <api/usecases/common/DataUtils.h>
 

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/geometries/Primitive.h>
+#include <brayns/engine/geometry/types/Primitive.h>
 
 #include "NeuronSection.h"
 

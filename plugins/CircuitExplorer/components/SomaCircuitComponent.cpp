@@ -20,13 +20,18 @@
 
 #include "SomaCircuitComponent.h"
 
-#include <brayns/engine/common/DataHandler.h>
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/GeometricModelHandler.h>
-#include <brayns/engine/common/SizeHelper.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
 #include <api/coloring/ColorByIDAlgorithm.h>
+
+SomaCircuitComponent::SomaCircuitComponent(std::vector<uint64_t> ids, std::vector<brayns::Sphere> geometry)
+    : _ids(std::move(ids))
+    , _geometry(std::move(geometry))
+    , _colors(_ids.size(), brayns::Vector4f(1.f))
+{
+}
 
 brayns::Bounds SomaCircuitComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
@@ -35,38 +40,38 @@ brayns::Bounds SomaCircuitComponent::computeBounds(const brayns::Matrix4f &trans
 
 bool SomaCircuitComponent::commit()
 {
-    bool needsCommit = false;
-
     auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
     if (material.commit())
     {
-        brayns::GeometricModelHandler::setMaterial(_model, material);
-        needsCommit = true;
+        _geometry.setMaterial(material);
     }
 
-    needsCommit = needsCommit || _colorsDirty;
-    _colorsDirty = false;
+    return _geometry.commit();
+}
 
-    if (needsCommit)
-    {
-        brayns::GeometricModelHandler::commitModel(_model);
-    }
+void SomaCircuitComponent::onCreate()
+{
+    auto &model = getModel();
+    model.addComponent<brayns::MaterialComponent>();
 
-    return needsCommit;
+    auto &group = model.getGroup();
+    group.addGeometry(_geometry);
 }
 
 void SomaCircuitComponent::onDestroy()
 {
-    brayns::GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
-    brayns::GeometricModelHandler::destroy(_model);
+    auto &model = getModel();
+    auto &group = model.getGroup();
+    group.addGeometry(_geometry);
 }
 
 void SomaCircuitComponent::onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult)
     const noexcept
 {
-    auto modelHandle = context.modelHandle;
+    auto &hittedModel = context.model;
+    auto &currentModel = _geometry.getOsprayObject();
 
-    if (modelHandle != _model)
+    if (hittedModel.handle() != currentModel.handle())
     {
         return;
     }
@@ -74,28 +79,6 @@ void SomaCircuitComponent::onInspect(const brayns::InspectContext &context, bray
     auto primitiveIndex = context.primitiveIndex;
     auto cellId = _ids[primitiveIndex];
     writeResult.set("neuron_id", cellId);
-}
-
-void SomaCircuitComponent::setSomas(std::vector<uint64_t> ids, std::vector<brayns::Sphere> geometry) noexcept
-{
-    _ids = std::move(ids);
-
-    _model = brayns::GeometricModelHandler::create();
-
-    auto &group = getModel();
-    brayns::GeometricModelHandler::addToGeometryGroup(_model, group);
-
-    auto &materialComponent = group.addComponent<brayns::MaterialComponent>();
-    auto &material = materialComponent.getMaterial();
-    material.commit();
-    brayns::GeometricModelHandler::setMaterial(_model, material);
-
-    _geometry.set(std::move(geometry));
-    _geometry.commit();
-    brayns::GeometricModelHandler::setGeometry(_model, _geometry);
-
-    _colors.resize(_ids.size());
-    setColor(brayns::Vector4f(1.f));
 }
 
 const std::vector<uint64_t> &SomaCircuitComponent::getIDs() const noexcept
@@ -106,23 +89,18 @@ const std::vector<uint64_t> &SomaCircuitComponent::getIDs() const noexcept
 void SomaCircuitComponent::setColor(const brayns::Vector4f &color) noexcept
 {
     std::fill(_colors.begin(), _colors.end(), color);
-    auto colorBuffer = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
-    brayns::GeometricModelHandler::setColors(_model, colorBuffer);
-    _colorsDirty = true;
+    _geometry.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
 }
 
 void SomaCircuitComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
 {
-    if (colors.size() < _geometry.getNumGeometries())
+    if (colors.size() < _geometry.getNumPrimitives())
     {
         throw std::invalid_argument("Not enough colors for all geometry");
     }
 
     _colors = colors;
-
-    auto colorBuffer = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
-    brayns::GeometricModelHandler::setColors(_model, colorBuffer);
-    _colorsDirty = true;
+    _geometry.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
 }
 
 std::vector<uint64_t> SomaCircuitComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
@@ -134,25 +112,23 @@ std::vector<uint64_t> SomaCircuitComponent::setColorById(const std::map<uint64_t
         {
             (void)id;
             _colors[index] = color;
-            _colorsDirty = true;
         });
 
-    if (_colorsDirty)
+    if (skipped.size() < _ids.size())
     {
-        auto colorBuffer = brayns::DataHandler::shareBuffer(_colors, OSPDataType::OSP_VEC4F);
-        brayns::GeometricModelHandler::setColors(_model, colorBuffer);
+        _geometry.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
     }
 
     return skipped;
 }
 
-void SomaCircuitComponent::setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping)
+void SomaCircuitComponent::setIndexedColor(
+    const std::vector<brayns::Vector4f> &color,
+    const std::vector<uint8_t> &mapping)
 {
-    if (color.size > 256)
+    if (color.size() > 256)
     {
         throw std::invalid_argument("Color map has more than 256 values");
     }
-    auto indexData = brayns::DataHandler::shareBuffer(mapping, OSPDataType::OSP_UCHAR);
-    brayns::GeometricModelHandler::setColorMap(_model, color, indexData);
-    _colorsDirty = true;
+    _geometry.setColorMap(ospray::cpp::CopiedData(color), ospray::cpp::CopiedData(mapping));
 }

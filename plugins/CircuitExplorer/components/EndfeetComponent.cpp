@@ -21,10 +21,8 @@
 #include "EndfeetComponent.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/common/DataHandler.h>
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/GeometricModelHandler.h>
-#include <brayns/engine/common/SizeHelper.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
 #include <api/coloring/ColorByIDAlgorithm.h>
@@ -34,8 +32,7 @@ brayns::Bounds EndfeetComponent::computeBounds(const brayns::Matrix4f &transform
     brayns::Bounds result;
     for (const auto &endfoot : _endFeet)
     {
-        const auto &geometry = endfoot.geometry;
-        const auto endFootBounds = geometry.computeBounds(transform);
+        const auto endFootBounds = endfoot.computeBounds(transform);
         result.expand(endFootBounds);
     }
     return result;
@@ -51,8 +48,7 @@ bool EndfeetComponent::commit()
     {
         for (auto &endfoot : _endFeet)
         {
-            auto model = endfoot.model;
-            brayns::GeometricModelHandler::setMaterial(model, material);
+            endfoot.setMaterial(material);
             needsCommit = true;
         }
     }
@@ -61,8 +57,7 @@ bool EndfeetComponent::commit()
     {
         for (auto &endfoot : _endFeet)
         {
-            auto model = endfoot.model;
-            brayns::GeometricModelHandler::commitModel(model);
+            endfoot.commit();
         }
     }
 
@@ -71,12 +66,11 @@ bool EndfeetComponent::commit()
 
 void EndfeetComponent::onDestroy()
 {
-    auto &group = getModel();
+    auto &model = getModel();
+    auto &group = model.getGroup();
     for (auto &endfoot : _endFeet)
     {
-        auto &model = endfoot.model;
-        brayns::GeometricModelHandler::removeFromGeometryGroup(model, group);
-        brayns::GeometricModelHandler::destroy(model);
+        group.addGeometry(endfoot);
     }
 }
 
@@ -90,9 +84,10 @@ void EndfeetComponent::addEndfeet(std::map<uint64_t, std::vector<brayns::Triangl
     _astrocyteIds.reserve(endfeetGeometry.size());
     _endFeet.reserve(endfeetGeometry.size());
 
-    auto &group = getModel();
+    auto &model = getModel();
+    model.addComponent<brayns::MaterialComponent>();
 
-    group.addComponent<brayns::MaterialComponent>();
+    auto &group = model.getGroup();
 
     for (auto &[astrocyteId, endfeets] : endfeetGeometry)
     {
@@ -114,17 +109,9 @@ void EndfeetComponent::addEndfeet(std::map<uint64_t, std::vector<brayns::Triangl
         }
 
         _astrocyteIds.push_back(astrocyteId);
-        auto &endfoot = _endFeet.emplace_back();
-        auto &geometry = endfoot.geometry;
-        auto &model = endfoot.model;
-
-        geometry.add(std::move(mergedMeshes));
-        geometry.commit();
-
-        model = brayns::GeometricModelHandler::create();
-        brayns::GeometricModelHandler::addToGeometryGroup(model, group);
-        brayns::GeometricModelHandler::setGeometry(model, geometry);
-        brayns::GeometricModelHandler::setColor(model, brayns::Vector4f(1.f));
+        auto &endfoot = _endFeet.emplace_back(std::move(mergedMeshes));
+        endfoot.setColor(brayns::Vector4f(1.f));
+        group.addGeometry(endfoot);
     }
 }
 
@@ -132,8 +119,7 @@ void EndfeetComponent::setColor(const brayns::Vector4f &color) noexcept
 {
     for (auto &endfoot : _endFeet)
     {
-        auto model = endfoot.model;
-        brayns::GeometricModelHandler::setColor(model, color);
+        endfoot.setColor(color);
     }
     _colorsDirty = true;
 }
@@ -143,9 +129,8 @@ void EndfeetComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
     for (size_t i = 0; i < _endFeet.size(); ++i)
     {
         const auto &color = colors[i];
-        auto &endfoot = _endFeet[i];
-        auto model = endfoot.model;
-        brayns::GeometricModelHandler::setColor(model, color);
+        auto &endFoot = _endFeet[i];
+        endFoot.setColor(color);
     }
     _colorsDirty = true;
 }
@@ -159,8 +144,7 @@ std::vector<uint64_t> EndfeetComponent::setColorById(const std::map<uint64_t, br
         {
             (void)id;
             auto &endFoot = _endFeet[index];
-            auto model = endFoot.model;
-            brayns::GeometricModelHandler::setColor(model, color);
+            endFoot.setColor(color);
             _colorsDirty = true;
         });
 

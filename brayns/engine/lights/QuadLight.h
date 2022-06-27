@@ -31,37 +31,36 @@ public:
 
     /**
      * @brief Sets the bottom left corner position of the light (in world space coordinates)
+     * @param position The new light corner position
      */
-    void setBottomLeftCorner(const Vector3f &pos) noexcept;
+    void setPosition(const Vector3f &position) noexcept;
 
     /**
-     * @brief Sets a displacement vector to compute the top left corner, computed as
-     * top left corner = bottom left corner + vertical displacement.
+     * @brief Sets one of the square light edges
+     * @param edge1 Edge vector
      */
-    void setVerticalDisplacement(const Vector3f &verticalVector) noexcept;
+    void setEdge1(const Vector3f &edge1) noexcept;
 
     /**
-     * @brief Sets a displacement vector to compute the bottom right corner, computed as
-     * bottom right corner = bottom left corner + horizontal displacement.
+     * @brief Sets one of the square light edges
+     * @param edge2 Edge vector
      */
-    void setHorizontalDisplacement(const Vector3f &horizontalVector) noexcept;
+    void setEdge2(const Vector3f &edge2) noexcept;
 
     /**
-     * @brief Returns the bottom left corner position of the light
+     * @brief Returns the light corner position
      */
-    const Vector3f &getBottomLeftCorner() const noexcept;
+    const Vector3f &getPosition() const noexcept;
 
     /**
-     * @brief Returns the vertical displacement vector of the light (used to compute the top left corner from
-     * the bottom left corner)
+     * @brief Returns one of the light edges
      */
-    const Vector3f &getVerticalDisplacement() const noexcept;
+    const Vector3f &getEdge1() const noexcept;
 
     /**
-     * @brief Returns the horizontal displacement vector of the light (used to compute the bottom right corner
-     * from the bottom left corner)
+     * @brief Returns one of the light edges
      */
-    const Vector3f &getHorizontalDisplacement() const noexcept;
+    const Vector3f &getEdge2() const noexcept;
 
     Bounds computeBounds() const noexcept override;
 
@@ -70,8 +69,8 @@ protected:
 
 private:
     // Default crates a X-Plane parallel light of size 1 x 1
-    Vector3f _bottomLeftCorner{0.f};
-    Vector3f _verticalDisplacement{0.f, 1.f, 0.f};
-    Vector3f _horizontalDisplacement{1.f, 0.f, 1.f};
+    Vector3f _position{0.f};
+    Vector3f _edge1{0.f, 1.f, 0.f};
+    Vector3f _edge2{1.f, 0.f, 1.f};
 };
 }

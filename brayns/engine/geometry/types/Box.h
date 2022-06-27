@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,22 +20,42 @@
 
 #pragma once
 
-#include <ospray/ospray.h>
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/geometry/Geometry.h>
+
+#include <ospray/ospray_cpp/Traits.h>
 
 namespace brayns
 {
-class ImageOperation
+struct Box
+{
+    Vector3f min;
+    Vector3f max;
+};
+
+template<>
+class OsprayGeometryName<Box>
 {
 public:
-    /**
-     * @brief Commits the operation parameters
-     */
-    virtual void commit() = 0;
-
-    /**
-     * @brief Returns the image opration OSPRay handle
-     * @return OSPImageOperation
-     */
-    virtual OSPImageOperation handle() const noexcept = 0;
+    static const std::string &get();
 };
-}
+
+template<>
+class GeometryBoundsUpdater<Box>
+{
+public:
+    static void update(const Box &s, const Matrix4f &t, Bounds &b);
+};
+
+template<>
+class GeometryCommitter<Box>
+{
+public:
+    static void commit(const ospray::cpp::Geometry &osparyGeometry, const std::vector<Box> &primitives);
+};
+
+} // namespace brayns
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::Box, OSP_BOX3F)
+} // namespace ospray

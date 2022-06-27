@@ -18,12 +18,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/cameras/OrthographicCamera.h>
+#include "OrthographicCamera.h"
+
+namespace
+{
+struct OrhtographicParameters
+{
+    inline static const std::string osprayName = "orthographic";
+    inline static const std::string height = "height";
+};
+}
 
 namespace brayns
 {
 OrthographicCamera::OrthographicCamera()
-    : Camera("orthographic")
+    : Camera(OrhtographicParameters::osprayName)
 {
 }
 
@@ -53,7 +62,7 @@ float OrthographicCamera::getHeight() const noexcept
 
 void OrthographicCamera::commitCameraSpecificParams()
 {
-    auto ospHandle = handle();
-    ospSetParam(ospHandle, "height", OSP_FLOAT, &_height);
+    auto &osprayCamera = getOsprayCamera();
+    osprayCamera.setParam(OrhtographicParameters::height, _height);
 }
 }

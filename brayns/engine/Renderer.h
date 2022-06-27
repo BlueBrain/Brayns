@@ -23,7 +23,7 @@
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/Renderer.h>
 
 #include <memory>
 #include <string_view>
@@ -36,7 +36,7 @@ namespace brayns
 class Renderer : public BaseObject
 {
 public:
-    Renderer(std::string_view handleID);
+    Renderer(const std::string &handleID);
 
     Renderer(const Renderer &) = delete;
     Renderer &operator=(const Renderer &) = delete;
@@ -44,7 +44,7 @@ public:
     Renderer(Renderer &&) = delete;
     Renderer &operator=(Renderer &&) = delete;
 
-    virtual ~Renderer();
+    virtual ~Renderer() = default;
 
     /**
      * @brief Returns the renderer type as a string
@@ -91,9 +91,9 @@ public:
     void setBackgroundColor(const Vector4f &background) noexcept;
 
     /**
-     * @brief Returns the OSPRay handle of this renderer
+     * @brief Returns the Ospray handle of this renderer
      */
-    OSPRenderer handle() const noexcept;
+    const ospray::cpp::Renderer &getOsprayRenderer() const noexcept;
 
     /**
      * @brief commit() implementation
@@ -103,7 +103,7 @@ public:
 
 protected:
     /**
-     * @brief Subclasses must implement this method to commit their renderer-specific data to the OSPRay counterpart.
+     * @brief Subclasses must implement this method to commit their renderer-specific data to the Ospray counterpart.
      * The base class will make sure to call ospCommit(handle) on the renderer handle, so subclasses should avoid it.
      */
     virtual void commitRendererSpecificParams() = 0;
@@ -112,6 +112,6 @@ private:
     int32_t _samplesPerPixel{1};
     int32_t _maxRayBounces{3};
     Vector4f _backgroundColor{0.004f, 0.016f, 0.102f, 0.f}; // Default background color is BBP dark blue
-    OSPRenderer _handle{nullptr};
+    ospray::cpp::Renderer _osprayRenderer;
 };
 } // namespace brayns

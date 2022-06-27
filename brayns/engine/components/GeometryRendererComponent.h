@@ -20,14 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/Geometry.h>
 #include <brayns/engine/Model.h>
 #include <brayns/engine/ModelComponents.h>
 #include <brayns/engine/common/ExtractModelObject.h>
-#include <brayns/engine/common/GeometricModelHandler.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
+#include <brayns/engine/geometry/GeometryObject.h>
 
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/Data.h>
 
 namespace brayns
 {
@@ -38,33 +38,31 @@ template<typename T>
 class GeometryRendererComponent final : public Component
 {
 public:
-    GeometryRendererComponent() = default;
-
     /**
      * @brief Constructs the component with a single geometry
      * @param geometry
      */
-    GeometryRendererComponent(T geometry)
+    GeometryRendererComponent(T primitive)
+        : _geometryObject(std::move(primitive))
     {
-        _geometry.add(std::move(geometry));
     }
 
     /**
      * @brief Constructs the component with a list of geometries
      * @param geometries
      */
-    GeometryRendererComponent(std::vector<T> geometries)
+    GeometryRendererComponent(std::vector<T> primitives)
+        : _geometryObject(std::move(primitives))
     {
-        _geometry.set(std::move(geometries));
     }
 
     /**
-     * @brief Returns the geometry
-     * @return
+     * @brief Returns a modifiable geometry reference
+     * @return Geometry<T> &
      */
     Geometry<T> &getGeometry() noexcept
     {
-        return _geometry;
+        return _geometryObject.getGeometry();
     }
 
     /**
@@ -74,79 +72,55 @@ public:
      */
     void setColors(const std::vector<brayns::Vector4f> &colors)
     {
-        if (colors.size() < _geometry.getNumGeometries())
+        auto &geometry = _geometryObject.getGeometry();
+        if (colors.size() < geometry.getPrimitives().size())
         {
             throw std::invalid_argument("Not enough colors for all geometry");
         }
 
-        auto buffer = DataHandler::copyBuffer(colors, OSPDataType::OSP_VEC4F);
-        GeometricModelHandler::setColors(_model, buffer);
+        _geometryObject.setColorPerPrimitive(ospray::cpp::CopiedData(colors));
         _useMaterialColor = false;
-        _colorDirty = true;
     }
 
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
     {
-        return _geometry.computeBounds(transform);
+        return _geometryObject.computeBounds(transform);
     }
 
     virtual void onCreate() override
     {
-        _model = GeometricModelHandler::create();
+        Model &model = getModel();
 
-        Model &group = getModel();
-        GeometricModelHandler::addToGeometryGroup(_model, group);
+        auto &group = model.getGroup();
+        group.addGeometry(_geometryObject);
 
-        group.addComponent<MaterialComponent>();
-
-        GeometricModelHandler::setGeometry(_model, _geometry);
+        model.addComponent<MaterialComponent>();
     }
 
     virtual bool commit() override
     {
-        bool needsCommit = false;
-
-        if (_colorDirty)
-        {
-            needsCommit = true;
-            _colorDirty = false;
-        }
-
         auto &material = ExtractModelObject::extractMaterial(getModel());
         if (material.commit())
         {
-            needsCommit = true;
-            GeometricModelHandler::setMaterial(_model, material);
+            _geometryObject.setMaterial(material);
             if (_useMaterialColor)
             {
-                GeometricModelHandler::setColor(_model, material.getColor());
+                _geometryObject.setColor(material.getColor());
             }
         }
 
-        if (_geometry.commit())
-        {
-            needsCommit = true;
-        }
-
-        if (needsCommit)
-        {
-            GeometricModelHandler::commitModel(_model);
-        }
-
-        return needsCommit;
+        return _geometryObject.commit();
     }
 
     virtual void onDestroy() override
     {
-        GeometricModelHandler::removeFromGeometryGroup(_model, getModel());
-        GeometricModelHandler::destroy(_model);
+        Model &model = getModel();
+        auto &group = model.getGroup();
+        group.removeGeometry(_geometryObject);
     }
 
 private:
-    OSPGeometricModel _model{nullptr};
-    Geometry<T> _geometry;
-    // Need these to flag to avoid using the material color when need to customize colors
-    bool _useMaterialColor{true};
-    bool _colorDirty{false};
+    GeometryObject<T> _geometryObject;
+    bool _useMaterialColor = true;
 };
 }

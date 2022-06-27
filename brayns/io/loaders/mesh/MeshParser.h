@@ -25,7 +25,7 @@
 #include <string_view>
 #include <vector>
 
-#include <brayns/engine/geometries/TriangleMesh.h>
+#include <brayns/engine/geometry/types/TriangleMesh.h>
 
 namespace brayns
 {

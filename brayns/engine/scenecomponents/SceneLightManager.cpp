@@ -72,14 +72,14 @@ bool SceneLightManager::commit()
     return result;
 }
 
-std::vector<OSPLight> SceneLightManager::getLightHandles() const noexcept
+std::vector<ospray::cpp::Light> SceneLightManager::getOsprayLights() const noexcept
 {
-    std::vector<OSPLight> handles;
+    std::vector<ospray::cpp::Light> handles;
     handles.reserve(_lights.size());
     for (const auto &[lightId, light] : _lights)
     {
-        const auto handle = light->handle();
-        handles.push_back(handle);
+        const auto &osprayLight = light->getOsprayLight();
+        handles.push_back(osprayLight);
     }
 
     return handles;

@@ -20,7 +20,6 @@
 
 #include <brayns/common/Log.h>
 
-#include <api/reports/ReportMapping.h>
 #include <api/reports/indexers/OffsetIndexer.h>
 #include <api/reports/indexers/SpikeIndexer.h>
 
@@ -62,8 +61,7 @@ void ReportLoader::load(
 
         CompartmentData &compartmentData = static_cast<CompartmentData &>(*data);
         const auto reportCompartments = compartmentData.computeMapping();
-        auto offsets = CompartmentMappingGenerator::generate(compartments, reportCompartments);
-        indexer = std::make_unique<OffsetIndexer>(std::move(offsets));
+        indexer = std::make_unique<OffsetIndexer>(compartments, reportCompartments);
     }
     else if (reportType == bbploader::ReportType::Spikes)
     {
@@ -75,8 +73,7 @@ void ReportLoader::load(
         auto spikeTransition = params.spike_transition_time;
         const std::vector<uint64_t> flatGids(gids.begin(), gids.end());
         data = std::make_unique<SpikeData>(std::move(report), flatGids, spikeTransition);
-
-        indexer = std::make_unique<SpikeIndexer>();
+        indexer = std::make_unique<SpikeIndexer>(compartments);
     }
 
     model.addComponent<ReportComponent>(std::move(data), std::move(indexer));

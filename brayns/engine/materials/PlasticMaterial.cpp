@@ -18,12 +18,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/materials/PlasticMaterial.h>
+#include "PlasticMaterial.h"
+
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+
+namespace
+{
+struct PlasticParameters
+{
+    inline static const std::string osprayName = "principled";
+    inline static const std::string color = "baseColor";
+    inline static const std::string roughness = "roughness";
+    inline static const std::string coat = "coat";
+    inline static const std::string coatThickness = "coatThickness";
+    inline static const std::string sheen = "sheen";
+    inline static const std::string opacity = "opacity";
+};
+}
 
 namespace brayns
 {
 PlasticMaterial::PlasticMaterial()
-    : Material("principled")
+    : Material(PlasticParameters::osprayName)
 {
 }
 
@@ -50,13 +66,12 @@ void PlasticMaterial::commitMaterialSpecificParams()
     constexpr float sheen = 1.f;
     const auto overridedColorWhite = brayns::Vector3f(1.f);
 
-    auto ospHandle = handle();
-
-    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &overridedColorWhite);
-    ospSetParam(ospHandle, "roughness", OSPDataType::OSP_FLOAT, &roughness);
-    ospSetParam(ospHandle, "coat", OSPDataType::OSP_FLOAT, &clearCoat);
-    ospSetParam(ospHandle, "coatThickness", OSPDataType::OSP_FLOAT, &clearCoatThickness);
-    ospSetParam(ospHandle, "sheen", OSPDataType::OSP_FLOAT, &sheen);
-    ospSetParam(ospHandle, "opacity", OSPDataType::OSP_FLOAT, &_opacity);
+    auto &osprayMaterial = getOsprayMaterial();
+    osprayMaterial.setParam(PlasticParameters::color, overridedColorWhite);
+    osprayMaterial.setParam(PlasticParameters::roughness, roughness);
+    osprayMaterial.setParam(PlasticParameters::coat, clearCoat);
+    osprayMaterial.setParam(PlasticParameters::coatThickness, clearCoatThickness);
+    osprayMaterial.setParam(PlasticParameters::sheen, sheen);
+    osprayMaterial.setParam(PlasticParameters::opacity, _opacity);
 }
 }

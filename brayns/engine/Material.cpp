@@ -23,14 +23,9 @@
 
 namespace brayns
 {
-Material::Material(std::string_view handleID)
-    : _handle(ospNewMaterial("", handleID.data()))
+Material::Material(const std::string &handleID)
+    : _osprayMaterial("", handleID)
 {
-}
-
-Material::~Material()
-{
-    ospRelease(_handle);
 }
 
 bool Material::commit()
@@ -42,16 +37,16 @@ bool Material::commit()
 
     commitMaterialSpecificParams();
 
-    ospCommit(_handle);
+    _osprayMaterial.commit();
 
     resetModified();
 
     return true;
 }
 
-OSPMaterial Material::handle() const noexcept
+const ospray::cpp::Material &Material::getOsprayMaterial() const noexcept
 {
-    return _handle;
+    return _osprayMaterial;
 }
 
 void Material::setColor(const Vector3f &color) noexcept

@@ -51,8 +51,7 @@ struct AfferentLoader
             buffer.push_back({position, 2.f});
         }
 
-        auto &synapses = model.addComponent<SynapseComponent>();
-        synapses.addSynapses(synapseGeometry);
+        model.addComponent<SynapseComponent>(synapseGeometry);
     }
 };
 
@@ -73,8 +72,7 @@ struct EfferentLoader
             buffer.push_back({position, 2.f});
         }
 
-        auto &synapses = model.addComponent<SynapseComponent>();
-        synapses.addSynapses(synapseGeometry);
+        model.addComponent<SynapseComponent>(synapseGeometry);
     }
 };
 

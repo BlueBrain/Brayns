@@ -21,44 +21,29 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/common/DataHandler.h>
-#include <brayns/engine/geometries/Primitive.h>
+#include <brayns/engine/geometry/GeometryObject.h>
 
 #include <api/neuron/NeuronGeometry.h>
 
-#include <ospray/ospray.h>
+struct MorphologyGeometry
+{
+    brayns::GeometryObject<brayns::Primitive> geometry;
+    std::vector<NeuronSectionMapping> sections;
+};
 
 class MorphologyCircuitComponent final : public brayns::Component
 {
 public:
-    struct MorphologyGeometry
-    {
-        OSPGeometricModel model{nullptr};
-        brayns::Geometry<brayns::Primitive> geometry;
-        std::vector<NeuronSectionMapping> sections;
-    };
-
-public:
-    brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
-
-    void onCreate() override;
-
-    bool commit() override;
-
-    void onDestroy() override;
-
-    void onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult) const noexcept override;
-
-    /**
-     * @brief Sets the morphologies of this component
-     * @param id
-     * @param primitives
-     * @param map
-     */
-    void setMorphologies(
-        std::vector<uint64_t> id,
+    MorphologyCircuitComponent(
+        std::vector<uint64_t> ids,
         std::vector<std::vector<brayns::Primitive>> primitives,
-        std::vector<std::vector<NeuronSectionMapping>> map) noexcept;
+        std::vector<std::vector<NeuronSectionMapping>> map);
+
+    brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
+    void onCreate() override;
+    bool commit() override;
+    void onDestroy() override;
+    void onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult) const noexcept override;
 
     /**
      * @brief getIDs return the cell IDs in this circuit
@@ -98,7 +83,7 @@ public:
      * @param color
      * @param mapping per geometry primitive indices into the color buffer
      */
-    void setIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &mapping);
+    void setIndexedColor(const std::vector<brayns::Vector4f> &color, const std::vector<uint8_t> &mapping);
 
     /**
      * @brief Changes the thickness (radii) of the morphology geometries

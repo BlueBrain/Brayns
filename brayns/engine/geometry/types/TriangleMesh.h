@@ -21,9 +21,7 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Geometry.h>
-
-#include <vector>
+#include <brayns/engine/geometry/Geometry.h>
 
 namespace brayns
 {
@@ -49,10 +47,10 @@ public:
 };
 
 template<>
-class GeometryOSPRayID<TriangleMesh>
+class OsprayGeometryName<TriangleMesh>
 {
 public:
-    static std::string_view get();
+    static const std::string &get();
 };
 
 template<>
@@ -63,18 +61,16 @@ public:
 };
 
 template<>
-class GeometryAddChecker<TriangleMesh>
+class InputGeometryChecker<TriangleMesh>
 {
 public:
-    static void check(const std::vector<TriangleMesh> &dstGeometry, const TriangleMesh &inputGeometry);
-
-    static void check(const std::vector<TriangleMesh> &dstGeometry, const std::vector<TriangleMesh> &inputGeometries);
+    static void check(const std::vector<TriangleMesh> &primitives);
 };
 
 template<>
 class GeometryCommitter<TriangleMesh>
 {
 public:
-    static void commit(OSPGeometry handle, const std::vector<TriangleMesh> &geometries);
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<TriangleMesh> &primitives);
 };
 }

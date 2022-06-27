@@ -71,15 +71,15 @@ bool SceneClipManager::commit()
     return result;
 }
 
-std::vector<OSPInstance> SceneClipManager::getInstanceHandles() noexcept
+std::vector<ospray::cpp::Instance> SceneClipManager::getOsprayInstances() noexcept
 {
-    std::vector<OSPInstance> result;
+    std::vector<ospray::cpp::Instance> result;
     result.reserve(_clippingModels.size());
     for (auto &[id, entry] : _clippingModels)
     {
         auto &instance = *entry.instance;
-        auto handle = instance.handle();
-        result.push_back(handle);
+        const auto &osprayInstance = instance.getOsprayInstance();
+        result.push_back(osprayInstance);
     }
 
     return result;

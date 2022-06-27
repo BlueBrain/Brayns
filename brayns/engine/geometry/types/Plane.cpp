@@ -18,31 +18,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Plane.h"
 
-#include <memory>
-#include <vector>
+#include <ospray/ospray_cpp/Data.h>
+
+namespace
+{
+struct PlaneParameters
+{
+    inline static const std::string osprayName = "plane";
+    inline static const std::string coefficients = "plane.coefficients";
+};
+}
 
 namespace brayns
 {
-struct SizeHelper
+const std::string &OsprayGeometryName<Plane>::get()
 {
-    template<typename T>
-    static size_t vectorSize(const std::vector<T> &vector)
-    {
-        return sizeof(T) * vector.capacity();
-    }
+    return PlaneParameters::osprayName;
+}
 
-    template<typename T>
-    static size_t vectorSize(const std::vector<std::unique_ptr<T>> &vector)
-    {
-        return (sizeof(T) + sizeof(std::unique_ptr<T>)) * vector.capacity();
-    }
+void GeometryBoundsUpdater<Plane>::update(const Plane &p, const Matrix4f &t, Bounds &b)
+{
+    // NOOP
+    // Planes are infinite. They can be limited, but on Brayns we only use them for clipping
+    // https://github.com/ospray/ospray#planes
+    (void)p;
+    (void)t;
+    (void)b;
+}
 
-    template<typename T>
-    static size_t vectorSize(const std::vector<std::shared_ptr<T>> &vector)
-    {
-        return (sizeof(T) + sizeof(std::shared_ptr<T>)) * vector.capacity();
-    }
-};
+void GeometryCommitter<Plane>::commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Plane> &primitives)
+{
+    osprayGeometry.setParam(PlaneParameters::coefficients, ospray::cpp::SharedData(primitives));
+}
 }

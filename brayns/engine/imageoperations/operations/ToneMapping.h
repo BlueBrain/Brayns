@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/ImageOperation.h>
+#include <brayns/engine/imageoperations/ImageOperation.h>
 
 namespace brayns
 {
@@ -29,17 +29,7 @@ class ToneMapping final : public ImageOperation
 public:
     ToneMapping();
 
-    ToneMapping(const ToneMapping &) = delete;
-    ToneMapping &operator=(const ToneMapping &) = delete;
-
-    ToneMapping(ToneMapping &&other) = delete;
-    ToneMapping &operator=(ToneMapping &&other) = delete;
-
-    ~ToneMapping();
-
     void commit() override;
-
-    OSPImageOperation handle() const noexcept override;
 
     /**
      * @brief Sets the amount of light per unit area
@@ -126,8 +116,6 @@ public:
     bool usesACESColor() const noexcept;
 
 private:
-    OSPImageOperation _handle{nullptr};
-
     float _exposure{1.f};
     // Uncharted 2 // ACES
     float _contrast{1.1759f}; //{1.6773f};

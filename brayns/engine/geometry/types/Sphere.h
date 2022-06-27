@@ -21,46 +21,34 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Volume.h>
-#include <brayns/engine/VolumeDataType.h>
-
-#include <vector>
+#include <brayns/engine/geometry/Geometry.h>
 
 namespace brayns
 {
-/**
- * @brief The RegularVolume struct is a regular grid volume in which the data is laid out in XYZ order:
- * The first elements are the X values of the first row of the first frame.
- */
-struct RegularVolume
+struct Sphere
 {
-    // Specifies how to interpret the bytes stored as data
-    VolumeDataType dataType;
-    std::vector<uint8_t> data;
-    Vector3ui size{0u};
-    Vector3f spacing;
-    // Specifies wether the data is scpeified as per grid vertex. If false, is specified as per grid cell center.
-    bool perVertexData{false};
+    Vector3f center;
+    float radius;
 };
 
 template<>
-class VolumeOSPRayID<RegularVolume>
+class OsprayGeometryName<Sphere>
 {
 public:
-    static std::string_view get();
+    static const std::string &get();
 };
 
 template<>
-class VolumeBoundsUpdater<RegularVolume>
+class GeometryBoundsUpdater<Sphere>
 {
 public:
-    static void update(const RegularVolume &s, const Matrix4f &t, Bounds &b);
+    static void update(const Sphere &s, const Matrix4f &t, Bounds &b);
 };
 
 template<>
-class VolumeCommitter<RegularVolume>
+class GeometryCommitter<Sphere>
 {
 public:
-    static void commit(OSPVolume handle, const RegularVolume &volumeData);
+    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Sphere> &primitives);
 };
 }

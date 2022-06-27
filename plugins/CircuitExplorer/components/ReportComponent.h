@@ -21,7 +21,6 @@
 #pragma once
 
 #include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/common/DataHandler.h>
 
 #include <api/reports/IColormapIndexer.h>
 #include <api/reports/IReportData.h>
@@ -44,9 +43,6 @@ public:
 private:
     const std::unique_ptr<IReportData> _report;
     const std::unique_ptr<IColormapIndexer> _indexer;
-
-    brayns::OSPBuffer _colors;
-    std::vector<uint8_t> _indices;
 
     // Flag used to force the simulations color update when re-enabling a simulation after it was disabled
     bool _lastEnabledValue{true};

@@ -19,7 +19,6 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/common/DataHandler.h>
 
 #include <api/coloring/IColorData.h>
 
@@ -81,5 +80,7 @@ public:
      * @param color the color map
      * @param indices the indices into the color map
      */
-    virtual void updateIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices) = 0;
+    virtual void updateIndexedColor(
+        const std::vector<brayns::Vector4f> &color,
+        const std::vector<uint8_t> &indices) = 0;
 };

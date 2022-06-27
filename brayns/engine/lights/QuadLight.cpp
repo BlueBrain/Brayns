@@ -18,60 +18,73 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/lights/QuadLight.h>
+#include "QuadLight.h"
+
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+
+namespace
+{
+struct QuadLightParameters
+{
+    inline static const std::string osprayName = "quad";
+    inline static const std::string position = "position";
+    inline static const std::string edge1 = "edge1";
+    inline static const std::string edge2 = "edge2";
+};
+}
 
 namespace brayns
 {
 QuadLight::QuadLight()
-    : Light("quad")
+    : Light(QuadLightParameters::osprayName)
 {
 }
 
-void QuadLight::setBottomLeftCorner(const Vector3f &pos) noexcept
+void QuadLight::setPosition(const Vector3f &position) noexcept
 {
-    _updateValue(_bottomLeftCorner, pos);
+    _updateValue(_position, position);
 }
 
-void QuadLight::setVerticalDisplacement(const Vector3f &verticalVector) noexcept
+void QuadLight::setEdge1(const Vector3f &edge1) noexcept
 {
-    _updateValue(_verticalDisplacement, verticalVector);
+    _updateValue(_edge1, edge1);
 }
 
-void QuadLight::setHorizontalDisplacement(const Vector3f &horizontalVector) noexcept
+void QuadLight::setEdge2(const Vector3f &edge2) noexcept
 {
-    _updateValue(_horizontalDisplacement, horizontalVector);
+    _updateValue(_edge2, edge2);
 }
 
-const Vector3f &QuadLight::getBottomLeftCorner() const noexcept
+const Vector3f &QuadLight::getPosition() const noexcept
 {
-    return _bottomLeftCorner;
+    return _position;
 }
 
-const Vector3f &QuadLight::getVerticalDisplacement() const noexcept
+const Vector3f &QuadLight::getEdge1() const noexcept
 {
-    return _verticalDisplacement;
+    return _edge1;
 }
 
-const Vector3f &QuadLight::getHorizontalDisplacement() const noexcept
+const Vector3f &QuadLight::getEdge2() const noexcept
 {
-    return _horizontalDisplacement;
+    return _edge2;
 }
 
 Bounds QuadLight::computeBounds() const noexcept
 {
     Bounds bounds;
-    bounds.expand(_bottomLeftCorner);
-    bounds.expand(_bottomLeftCorner + _horizontalDisplacement);
-    bounds.expand(_bottomLeftCorner + _verticalDisplacement);
+    bounds.expand(_position);
+    bounds.expand(_position + _edge1);
+    bounds.expand(_position + _edge2);
+    bounds.expand(_position + _edge1 + _edge2);
     return bounds;
 }
 
 void QuadLight::commitLightSpecificParams()
 {
-    auto ospHandle = handle();
-
-    ospSetParam(ospHandle, "position", OSPDataType::OSP_VEC3F, &_bottomLeftCorner);
-    ospSetParam(ospHandle, "edge1", OSPDataType::OSP_VEC3F, &_horizontalDisplacement);
-    ospSetParam(ospHandle, "edge2", OSPDataType::OSP_VEC3F, &_verticalDisplacement);
+    const auto &osprayLight = getOsprayLight();
+    osprayLight.setParam(QuadLightParameters::position, _position);
+    osprayLight.setParam(QuadLightParameters::edge1, _edge1);
+    osprayLight.setParam(QuadLightParameters::edge2, _edge2);
 }
 }

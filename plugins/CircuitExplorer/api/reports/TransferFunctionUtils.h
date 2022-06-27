@@ -21,11 +21,10 @@
 #pragma once
 
 #include <brayns/common/TransferFunction.h>
-#include <brayns/engine/common/DataHandler.h>
 
 struct TransferFunctionUtils
 {
     static brayns::TransferFunction createUnipolarTransferFunction() noexcept;
 
-    static brayns::OSPBuffer createSampleBuffer(const brayns::TransferFunction &tf) noexcept;
+    static std::vector<brayns::Vector4f> createSampleBuffer(const brayns::TransferFunction &tf) noexcept;
 };

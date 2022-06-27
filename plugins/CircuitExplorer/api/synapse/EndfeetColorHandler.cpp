@@ -55,7 +55,9 @@ void EndfeetColorHandler::updateColorByMethod(
     }
 }
 
-void EndfeetColorHandler::updateIndexedColor(brayns::OSPBuffer &color, const std::vector<uint8_t> &indices)
+void EndfeetColorHandler::updateIndexedColor(
+    const std::vector<brayns::Vector4f> &color,
+    const std::vector<uint8_t> &indices)
 {
     (void)color;
     (void)indices;

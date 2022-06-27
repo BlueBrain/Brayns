@@ -17,6 +17,7 @@
  */
 
 #include <api/reports/IColormapIndexer.h>
+#include <api/reports/ReportMapping.h>
 
 /**
  * @brief Compute color map
@@ -26,9 +27,8 @@ class OffsetIndexer : public IColormapIndexer
 {
 public:
     OffsetIndexer(std::vector<size_t> offsets);
-
-    void update(const std::vector<float> &data, const brayns::Vector2f &range, std::vector<uint8_t> &indices) noexcept
-        override;
+    OffsetIndexer(const std::vector<CellCompartments> &structure, const std::vector<CellReportMapping> &mapping);
+    std::vector<uint8_t> generate(const std::vector<float> &data, const brayns::Vector2f &range) noexcept override;
 
 private:
     const std::vector<size_t> _offsets;

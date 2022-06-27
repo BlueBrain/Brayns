@@ -18,12 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/materials/CarPaintMaterial.h>
+#include "CarPaintMaterial.h"
+
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+
+namespace
+{
+struct CarPaintParameters
+{
+    inline static const std::string osprayName = "carPaint";
+    inline static const std::string baseColor = "baseColor";
+    inline static const std::string flakeDensity = "flakeDensity";
+};
+}
 
 namespace brayns
 {
 CarPaintMaterial::CarPaintMaterial()
-    : Material("carPaint")
+    : Material(CarPaintParameters::osprayName)
 {
 }
 
@@ -44,10 +56,10 @@ float CarPaintMaterial::getFlakesDensity() const noexcept
 
 void CarPaintMaterial::commitMaterialSpecificParams()
 {
-    auto ospHandle = handle();
-
     const auto overridedColorWhite = brayns::Vector3f(1.f);
-    ospSetParam(ospHandle, "baseColor", OSPDataType::OSP_VEC3F, &overridedColorWhite);
-    ospSetParam(ospHandle, "flakeDensity", OSPDataType::OSP_FLOAT, &_flakeDensity);
+
+    const auto &osprayMaterial = getOsprayMaterial();
+    osprayMaterial.setParam(CarPaintParameters::baseColor, overridedColorWhite);
+    osprayMaterial.setParam(CarPaintParameters::flakeDensity, _flakeDensity);
 }
 }

@@ -27,21 +27,25 @@
 
 namespace
 {
-auto glmMatrixToAffine(const brayns::Matrix4f &transform) noexcept
+class MatrixConverter
 {
-    const auto &strafe = transform[0];
-    const auto &up = transform[1];
-    const auto &forward = transform[2];
-    const auto &position = transform[3];
+public:
+    static auto glmToOspray(const brayns::Matrix4f &transform) noexcept
+    {
+        const auto &strafe = transform[0];
+        const auto &up = transform[1];
+        const auto &forward = transform[2];
+        const auto &position = transform[3];
 
-    rkcommon::math::affine3f result;
-    result.l.vx = rkcommon::math::vec3f(strafe.x, strafe.y, strafe.z);
-    result.l.vy = rkcommon::math::vec3f(up.x, up.y, up.z);
-    result.l.vz = rkcommon::math::vec3f(forward.x, forward.y, forward.z);
-    result.p = rkcommon::math::vec3f(position.x, position.y, position.z);
+        rkcommon::math::affine3f result;
+        result.l.vx = rkcommon::math::vec3f(strafe.x, strafe.y, strafe.z);
+        result.l.vy = rkcommon::math::vec3f(up.x, up.y, up.z);
+        result.l.vz = rkcommon::math::vec3f(forward.x, forward.y, forward.z);
+        result.p = rkcommon::math::vec3f(position.x, position.y, position.z);
 
-    return result;
-}
+        return result;
+    }
+};
 }
 
 namespace brayns
@@ -49,14 +53,9 @@ namespace brayns
 ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model &model)
     : _modelInstanceID(modelInstanceID)
     , _model(model)
-    , _instanceHandle(ospNewInstance(model.groupHandle()))
+    , _osprayInstance(model.getGroup().getOsprayGroup())
 {
     computeBounds();
-}
-
-ModelInstance::~ModelInstance()
-{
-    ospRelease(_instanceHandle);
 }
 
 uint32_t ModelInstance::getID() const noexcept
@@ -127,9 +126,9 @@ const Transform &ModelInstance::getTransform() const noexcept
     return _transform;
 }
 
-OSPInstance ModelInstance::handle() const noexcept
+const ospray::cpp::Instance &ModelInstance::getOsprayInstance() const noexcept
 {
-    return _instanceHandle;
+    return _osprayInstance;
 }
 
 bool ModelInstance::commit(const bool modelChanged)
@@ -139,15 +138,15 @@ bool ModelInstance::commit(const bool modelChanged)
     // Re-commit transform if needed
     if (_transform.isModified())
     {
-        const auto affine = glmMatrixToAffine(_transform.toMatrix());
-        ospSetParam(_instanceHandle, "transform", OSPDataType::OSP_AFFINE3F, &affine);
+        auto affine = MatrixConverter::glmToOspray(_transform.toMatrix());
+        _osprayInstance.setParam("transform", affine);
         _transform.resetModified();
         needsCommit = true;
     }
 
     if (needsCommit)
     {
-        ospCommit(_instanceHandle);
+        _osprayInstance.commit();
     }
 
     needsCommit = needsCommit || _visibilityChanged;

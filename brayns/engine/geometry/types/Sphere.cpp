@@ -18,13 +18,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/geometries/Sphere.h>
+#include "Sphere.h"
+
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+
+#include <ospray/ospray_cpp/Data.h>
+
+namespace
+{
+struct SphereParameters
+{
+    inline static const std::string osprayName = "sphere";
+    inline static const std::string position = "sphere.position";
+    inline static const std::string radius = "sphere.radius";
+};
+}
 
 namespace brayns
 {
-std::string_view GeometryOSPRayID<Sphere>::get()
+const std::string &OsprayGeometryName<Sphere>::get()
 {
-    return "sphere";
+    return SphereParameters::osprayName;
 }
 
 void GeometryBoundsUpdater<Sphere>::update(const Sphere &s, const Matrix4f &t, Bounds &b)
@@ -40,21 +54,19 @@ void GeometryBoundsUpdater<Sphere>::update(const Sphere &s, const Matrix4f &t, B
     b.expand(sphereMax);
 }
 
-void GeometryCommitter<Sphere>::commit(OSPGeometry handle, const std::vector<Sphere> &geometries)
+void GeometryCommitter<Sphere>::commit(
+    const ospray::cpp::Geometry &osprayGeometry,
+    const std::vector<Sphere> &primitives)
 {
     constexpr auto stride = 4 * sizeof(float);
-    auto basePtr = reinterpret_cast<const float *>(geometries.data());
+    auto basePtr = &(primitives.front().center.x);
     auto positionPtr = basePtr;
     auto radiiPtr = basePtr + 3;
-    auto size = geometries.size();
+    auto size = primitives.size();
 
-    auto positionData = ospNewSharedData(positionPtr, OSP_VEC3F, size, stride);
-    auto radiiData = ospNewSharedData(radiiPtr, OSP_FLOAT, size, stride);
-
-    ospSetParam(handle, "sphere.position", OSP_DATA, &positionData);
-    ospSetParam(handle, "sphere.radius", OSP_DATA, &radiiData);
-
-    ospRelease(positionData);
-    ospRelease(radiiData);
+    ospray::cpp::SharedData positionData(positionPtr, OSP_VEC3F, size, stride);
+    ospray::cpp::SharedData radiiData(radiiPtr, OSP_FLOAT, size, stride);
+    osprayGeometry.setParam(SphereParameters::position, positionData);
+    osprayGeometry.setParam(SphereParameters::radius, radiiData);
 }
 }
