@@ -59,7 +59,6 @@ struct OsprayDeviceInitializer
 {
     static ospray::cpp::Device init(const brayns::ParametersManager &parameters)
     {
-        ospLoadModule("cpu");
         auto device = ospray::cpp::Device("cpu");
 
         device.setErrorCallback(
@@ -79,9 +78,7 @@ struct OsprayDeviceInitializer
 
         auto &appParams = parameters.getApplicationParameters();
         const auto logLevel = OsprayLogLevelGenerator::generate(appParams);
-        device.setParam("loglLevel", logLevel);
-        device.setParam("logOutput", "cout");
-        device.setParam("errorOutput", "cerr");
+        device.setParam("logLevel", logLevel);
         device.commit();
         device.setCurrent();
 
