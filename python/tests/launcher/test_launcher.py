@@ -22,6 +22,7 @@ import unittest
 
 from brayns.launcher.launcher import Launcher
 from brayns.launcher.log_level import LogLevel
+from brayns.launcher.plugin import Plugin
 from brayns.launcher.ssl_context import SslContext
 
 
@@ -33,8 +34,8 @@ class TestLauncher(unittest.TestCase):
             uri='uri',
             loglevel=LogLevel.CRITICAL,
             plugins=[
-                'plugin1',
-                'plugin2'
+                Plugin.ATLAS_EXPLORER,
+                Plugin.CIRCUIT_EXPLORER
             ],
             ssl=SslContext()
         )
@@ -46,9 +47,9 @@ class TestLauncher(unittest.TestCase):
             '--log-level',
             'critical',
             '--plugin',
-            'plugin1',
+            Plugin.ATLAS_EXPLORER.value,
             '--plugin',
-            'plugin2',
+            Plugin.CIRCUIT_EXPLORER.value,
             '--secure',
             'true'
         ]
