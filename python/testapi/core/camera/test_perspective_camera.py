@@ -18,48 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-from brayns.core.common.vector3 import Vector3
 
+class TestPerspectiveCamera(SimpleTestCase):
 
-@dataclass
-class Bounds:
-
-    min: Vector3
-    max: Vector3
-
-    @staticmethod
-    def deserialize(message: dict) -> 'Bounds':
-        return Bounds(
-            min=Vector3(*message['min']),
-            max=Vector3(*message['max'])
-        )
-
-    @classmethod
-    @property
-    def empty(cls) -> 'Bounds':
-        return cls(
-            min=Vector3.zero,
-            max=Vector3.zero
-        )
-
-    @property
-    def center(self) -> Vector3:
-        return (self.min + self.max) / 2
-
-    @property
-    def size(self) -> Vector3:
-        return self.max - self.min
-
-    @property
-    def width(self) -> float:
-        return self.size.x
-
-    @property
-    def height(self) -> float:
-        return self.size.y
-
-    @property
-    def depth(self) -> float:
-        return self.size.z
+    def test_all(self) -> None:
+        camera = brayns.PerspectiveCamera()
+        camera.use_as_main_camera(self.instance)
+        name = brayns.Camera.get_main_camera_name(self.instance)
+        self.assertEqual(name, camera.name)
+        current = brayns.PerspectiveCamera.is_main_camera(self.instance)
+        self.assertTrue(current)
+        test = brayns.PerspectiveCamera.from_instance(self.instance)
+        self.assertEqual(test, camera)

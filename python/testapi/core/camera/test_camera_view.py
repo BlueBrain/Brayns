@@ -18,48 +18,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-from brayns.core.common.vector3 import Vector3
 
+class TestCameraView(SimpleTestCase):
 
-@dataclass
-class Bounds:
-
-    min: Vector3
-    max: Vector3
-
-    @staticmethod
-    def deserialize(message: dict) -> 'Bounds':
-        return Bounds(
-            min=Vector3(*message['min']),
-            max=Vector3(*message['max'])
+    def test_from_instance(self) -> None:
+        test = brayns.CameraView.from_instance(self.instance)
+        ref = brayns.CameraView(
+            target=brayns.Vector3.forward
         )
+        self.assertEqual(test, ref)
 
-    @classmethod
-    @property
-    def empty(cls) -> 'Bounds':
-        return cls(
-            min=Vector3.zero,
-            max=Vector3.zero
+    def test_use_for_main_camera(self) -> None:
+        view = brayns.CameraView(
+            position=brayns.Vector3(1, 2, 3),
+            target=brayns.Vector3(4, 5, 6),
+            up=brayns.Vector3(7, 8, 9)
         )
-
-    @property
-    def center(self) -> Vector3:
-        return (self.min + self.max) / 2
-
-    @property
-    def size(self) -> Vector3:
-        return self.max - self.min
-
-    @property
-    def width(self) -> float:
-        return self.size.x
-
-    @property
-    def height(self) -> float:
-        return self.size.y
-
-    @property
-    def depth(self) -> float:
-        return self.size.z
+        view.use_for_main_camera(self.instance)
+        ref = brayns.CameraView.from_instance(self.instance)
+        self.assertEqual(view, ref)

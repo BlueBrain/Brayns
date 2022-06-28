@@ -31,7 +31,7 @@ class TestApplication(unittest.TestCase):
         self._application = Application(
             plugins=['test1', 'test2'],
             resolution=Resolution(100, 200),
-            jpeg_stream_quality=50
+            jpeg_quality=50
         )
         self._message = {
             'plugins': ['test1', 'test2'],
