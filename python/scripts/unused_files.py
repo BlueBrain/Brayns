@@ -136,6 +136,7 @@ def get_unused_files() -> list[str]:
 def main():
     unused = get_unused_files()
     if not unused:
+        print('No unused headers have been found')
         return
     print('Unused header files have been found')
     print('\n'.join(unused))
