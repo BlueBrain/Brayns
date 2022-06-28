@@ -22,24 +22,12 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestApplication(SimpleTestCase):
+class TestSimulation(SimpleTestCase):
 
     def test_from_instance(self) -> None:
-        application = brayns.Application.from_instance(self.instance)
-        launcher = self.create_launcher()
-        self.assertEqual(application.plugins, [
-            plugin.value
-            for plugin in launcher.plugins
-        ])
-        self.assertEqual(application.resolution, launcher.resolution)
-        self.assertEqual(application.jpeg_quality, launcher.jpeg_quality)
+        brayns.Simulation.from_instance(self.instance)
 
     def test_update(self) -> None:
-        brayns.Application.update(
-            self.instance,
-            resolution=brayns.Resolution.ultra_hd,
-            jpeg_quality=60
-        )
-        test = brayns.Application.from_instance(self.instance)
-        self.assertEqual(test.resolution, brayns.Resolution.ultra_hd)
-        self.assertEqual(test.jpeg_quality, 60)
+        brayns.Simulation.set_current_frame(self.instance, 0)
+        simulation = brayns.Simulation.from_instance(self.instance)
+        self.assertEqual(simulation.current_frame, 0)

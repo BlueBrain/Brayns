@@ -55,7 +55,7 @@ class TestApplication(unittest.TestCase):
         Application.update(
             instance,
             resolution=Resolution(100, 200),
-            jpeg_stream_quality=50
+            jpeg_quality=50
         )
         self.assertEqual(instance.method, 'set-application-parameters')
         self.assertEqual(instance.params, {
