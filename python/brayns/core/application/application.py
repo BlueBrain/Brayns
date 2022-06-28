@@ -30,7 +30,7 @@ class Application:
 
     plugins: list[str]
     resolution: Resolution
-    jpeg_stream_quality: int
+    jpeg_quality: int
 
     @staticmethod
     def from_instance(instance: Instance) -> 'Application':
@@ -42,7 +42,7 @@ class Application:
         return Application(
             plugins=message['plugins'],
             resolution=Resolution(*message['viewport']),
-            jpeg_stream_quality=message['jpeg_quality']
+            jpeg_quality=message['jpeg_quality']
         )
 
     @staticmethod
