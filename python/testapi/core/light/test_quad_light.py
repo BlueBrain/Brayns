@@ -18,31 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-
-from brayns.core.common.vector3 import Vector3
-from brayns.core.light.light import Light
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
 
-@dataclass
-class QuadLight(Light):
+class TestQuadLight(SimpleTestCase):
 
-    bottom_left: Vector3 = Vector3.zero
-    edge1: Vector3 = Vector3.right
-    edge2: Vector3 = Vector3.up
-
-    @classmethod
-    @property
-    def name(self) -> str:
-        return 'quad'
-
-    @property
-    def emission_direction(self) -> Vector3:
-        return self.edge1.cross(self.edge2)
-
-    def serialize(self) -> dict:
-        return self._to_dict({
-            'position': list(self.bottom_left),
-            'edge1': list(self.edge2),
-            'edge2': list(self.edge1)
-        })
+    def test_add(self) -> None:
+        light = brayns.QuadLight(
+            color=brayns.Color3.red,
+            intensity=5,
+            visible=True,
+            bottom_left=brayns.Vector3.zero,
+            edge1=brayns.Vector3.up,
+            edge2=brayns.Vector3.right
+        )
+        id = light.add(self.instance)
+        self.assertEqual(id, 0)

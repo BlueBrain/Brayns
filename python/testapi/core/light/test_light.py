@@ -18,31 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-
-from brayns.core.common.vector3 import Vector3
-from brayns.core.light.light import Light
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
 
-@dataclass
-class QuadLight(Light):
+class TestLight(SimpleTestCase):
 
-    bottom_left: Vector3 = Vector3.zero
-    edge1: Vector3 = Vector3.right
-    edge2: Vector3 = Vector3.up
+    def test_remove(self) -> None:
+        ids = self._add_lights()
+        self.assertEqual(ids, [0, 1, 2])
+        brayns.Light.remove(self.instance, [1, 2])
+        id = brayns.AmbientLight().add(self.instance)
+        self.assertIn(id, [1, 2])
 
-    @classmethod
-    @property
-    def name(self) -> str:
-        return 'quad'
+    def test_clear(self) -> None:
+        ids = self._add_lights()
+        self.assertEqual(ids, [0, 1, 2])
+        brayns.Light.clear(self.instance)
+        id = brayns.AmbientLight().add(self.instance)
+        self.assertEqual(id, 0)
 
-    @property
-    def emission_direction(self) -> Vector3:
-        return self.edge1.cross(self.edge2)
-
-    def serialize(self) -> dict:
-        return self._to_dict({
-            'position': list(self.bottom_left),
-            'edge1': list(self.edge2),
-            'edge2': list(self.edge1)
-        })
+    def _add_lights(self) -> list[int]:
+        light = brayns.AmbientLight()
+        return [
+            light.add(self.instance)
+            for _ in range(3)
+        ]
