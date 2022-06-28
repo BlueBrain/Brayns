@@ -17,18 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-import brayns
-from testapi.core.camera.camera_test_case import CameraTestCase
-
-
-class TestPerspectiveCamera(CameraTestCase):
-
-    def test_all(self) -> None:
-        camera = brayns.PerspectiveCamera(
-            fovy=30,
-            aperture_radius=1,
-            focus_distance=2,
-            degrees=True
-        )
-        self.run_tests(camera)

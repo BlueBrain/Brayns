@@ -19,17 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+from testapi.core.camera.camera_test_case import CameraTestCase
 
 
-class TestOrthographicCamera(SimpleTestCase):
+class TestOrthographicCamera(CameraTestCase):
 
     def test_all(self) -> None:
-        camera = brayns.OrthographicCamera()
-        camera.use_as_main_camera(self.instance)
-        name = brayns.Camera.get_main_camera_name(self.instance)
-        self.assertEqual(name, camera.name)
-        current = brayns.OrthographicCamera.is_main_camera(self.instance)
-        self.assertTrue(current)
-        test = brayns.OrthographicCamera.from_instance(self.instance)
-        self.assertEqual(test, camera)
+        camera = brayns.OrthographicCamera(height=10)
+        self.run_tests(camera)

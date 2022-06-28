@@ -18,17 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import TypeVar
-
 import brayns
 from testapi.simple_test_case import SimpleTestCase
-
-T = TypeVar('T', bound=brayns.Material)
 
 
 class MaterialTestCase(SimpleTestCase):
 
-    def run_tests(self, material: T) -> None:
+    def run_tests(self, material: brayns.Material) -> None:
         boxes = brayns.Boxes([
             (
                 brayns.Box(-brayns.Vector3.one, brayns.Vector3.one),

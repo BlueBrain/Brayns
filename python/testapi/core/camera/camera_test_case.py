@@ -19,16 +19,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.core.camera.camera_test_case import CameraTestCase
+from testapi.simple_test_case import SimpleTestCase
 
 
-class TestPerspectiveCamera(CameraTestCase):
+class CameraTestCase(SimpleTestCase):
 
-    def test_all(self) -> None:
-        camera = brayns.PerspectiveCamera(
-            fovy=30,
-            aperture_radius=1,
-            focus_distance=2,
-            degrees=True
-        )
-        self.run_tests(camera)
+    def run_tests(self, camera: brayns.Camera) -> None:
+        camera.use_as_main_camera(self.instance)
+        name = camera.get_main_camera_name(self.instance)
+        self.assertEqual(name, camera.name)
+        current = camera.is_main_camera(self.instance)
+        self.assertTrue(current)
+        test = camera.from_instance(self.instance)
+        self.assertEqual(test, camera)
