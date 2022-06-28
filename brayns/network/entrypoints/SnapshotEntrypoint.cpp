@@ -38,7 +38,7 @@ namespace
 struct SnapshotResultHandler
 {
     static std::string
-        writeToDisk(const std::string &path, const brayns::ImageSettings &imageSettings, brayns::FrameBuffer &fb)
+        writeToDisk(const std::string &path, const brayns::ImageSettings &imageSettings, brayns::Framebuffer &fb)
     {
         const auto &formatName = imageSettings.getFormat();
         const auto format = brayns::string_utils::toLowercase(formatName);
@@ -57,7 +57,7 @@ struct SnapshotResultHandler
         return {};
     }
 
-    static std::string encodeToBase64(const brayns::ImageSettings &imageSettings, brayns::FrameBuffer &fb)
+    static std::string encodeToBase64(const brayns::ImageSettings &imageSettings, brayns::Framebuffer &fb)
     {
         const auto &formatName = imageSettings.getFormat();
         const auto fixedFormat = brayns::string_utils::toLowercase(formatName);
@@ -113,11 +113,11 @@ public:
         camera->commit();
 
         // Framebuffer
-        brayns::FrameBuffer frameBuffer;
-        frameBuffer.setAccumulation(false);
-        frameBuffer.setFormat(brayns::PixelFormat::StandardRgbaI8);
-        frameBuffer.setFrameSize(imageSize);
-        frameBuffer.commit();
+        brayns::Framebuffer framebuffer;
+        framebuffer.setAccumulation(false);
+        framebuffer.setFormat(brayns::PixelFormat::StandardRgbaI8);
+        framebuffer.setFrameSize(imageSize);
+        framebuffer.commit();
 
         // Scene
         auto &scene = engine.getScene();
@@ -125,7 +125,7 @@ public:
         scene.commit();
 
         // Render
-        auto future = brayns::FrameRenderer::asynchronous(*camera, frameBuffer, *renderer, scene);
+        auto future = brayns::FrameRenderer::asynchronous(*camera, framebuffer, *renderer, scene);
         const auto msg = "Rendering snapshot ...";
         while (!future.isReady())
         {
@@ -139,11 +139,11 @@ public:
 
         if (!params.file_path.empty())
         {
-            image.data = SnapshotResultHandler::writeToDisk(imagePath, imageSettings, frameBuffer);
+            image.data = SnapshotResultHandler::writeToDisk(imagePath, imageSettings, framebuffer);
         }
         else
         {
-            image.data = SnapshotResultHandler::encodeToBase64(imageSettings, frameBuffer);
+            image.data = SnapshotResultHandler::encodeToBase64(imageSettings, framebuffer);
         }
 
         return image;
@@ -189,7 +189,7 @@ void SnapshotEntrypoint::onRequest(const Request &request)
     auto &systemRenderer = _engine.getRenderer();
     params.renderer = GenericObject<Renderer>(systemRenderer, _renderFactory);
 
-    auto &systemFramebuffer = _engine.getFrameBuffer();
+    auto &systemFramebuffer = _engine.getFramebuffer();
     auto systemSize = systemFramebuffer.getFrameSize();
     params.image_settings = ImageSettings(systemSize);
 

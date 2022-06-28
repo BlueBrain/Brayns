@@ -23,7 +23,7 @@
 
 #include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/Camera.h>
-#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Framebuffer.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 
@@ -73,9 +73,9 @@ public:
     Scene &getScene();
 
     /**
-     * @brief Returns the system's FrameBuffer object
+     * @brief Returns the system's Framebuffer object
      */
-    FrameBuffer &getFrameBuffer() noexcept;
+    Framebuffer &getFramebuffer() noexcept;
 
     /**
      * @brief Sets a new system Camera to use
@@ -132,7 +132,7 @@ private:
     ospray::cpp::Device _osprayDevice;
 
     // System objects
-    FrameBuffer _frameBuffer;
+    Framebuffer _frameBuffer;
     Scene _scene;
     std::unique_ptr<Camera> _camera;
     std::unique_ptr<Renderer> _renderer;

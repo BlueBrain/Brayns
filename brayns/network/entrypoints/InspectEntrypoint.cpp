@@ -60,12 +60,12 @@ private:
         auto x = position.x;
         auto y = position.y;
 
-        auto &frameBuffer = _engine.getFrameBuffer();
+        auto &framebuffer = _engine.getFramebuffer();
         auto &renderer = _engine.getRenderer();
         auto &camera = _engine.getCamera();
         auto &scene = _engine.getScene();
 
-        auto &osprayFrameBuffer = frameBuffer.getOsprayFramebuffer();
+        auto &osprayFrameBuffer = framebuffer.getOsprayFramebuffer();
         auto &osprayRenderer = renderer.getOsprayRenderer();
         auto &osprayCamera = camera.getOsprayCamera();
         auto &osprayWorld = scene.getOsprayScene();

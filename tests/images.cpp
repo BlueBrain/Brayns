@@ -46,7 +46,7 @@ TEST_CASE("render_two_frames_and_compare_they_are_same")
     BraynsTestUtils::adjustPerspectiveView(brayns);
 
     auto &engine = brayns.getEngine();
-    auto &framebuffer = engine.getFrameBuffer();
+    auto &framebuffer = engine.getFramebuffer();
 
     brayns.commitAndRender();
     auto oldImage = framebuffer.getImage();

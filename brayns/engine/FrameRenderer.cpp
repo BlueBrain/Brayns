@@ -26,22 +26,22 @@ namespace brayns
 {
 void FrameRenderer::synchronous(
     const Camera &camera,
-    const FrameBuffer &frameBuffer,
+    const Framebuffer &framebuffer,
     const Renderer &renderer,
     const Scene &scene)
 {
-    auto future = asynchronous(camera, frameBuffer, renderer, scene);
+    auto future = asynchronous(camera, framebuffer, renderer, scene);
     future.wait();
 }
 
 ospray::cpp::Future FrameRenderer::asynchronous(
     const Camera &camera,
-    const FrameBuffer &frameBuffer,
+    const Framebuffer &framebuffer,
     const Renderer &renderer,
     const Scene &scene)
 {
     auto &osprayCamera = camera.getOsprayCamera();
-    auto &osprayFrameBuffer = frameBuffer.getOsprayFramebuffer();
+    auto &osprayFrameBuffer = framebuffer.getOsprayFramebuffer();
     auto &osprayRenderer = renderer.getOsprayRenderer();
     auto &osprayScene = scene.getOsprayScene();
 

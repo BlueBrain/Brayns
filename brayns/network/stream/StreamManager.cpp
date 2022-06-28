@@ -31,7 +31,7 @@ class ImageStream
 {
 public:
     static void broadcast(
-        brayns::FrameBuffer &framebuffer,
+        brayns::Framebuffer &framebuffer,
         brayns::ClientManager &clients,
         const brayns::ApplicationParameters &parameters)
     {
@@ -52,7 +52,7 @@ public:
     }
 
     void broadcast(
-        brayns::FrameBuffer &framebuffer,
+        brayns::Framebuffer &framebuffer,
         brayns::ClientManager &clients,
         const brayns::ApplicationParameters &parameters) const
     {
@@ -66,8 +66,14 @@ public:
             brayns::Log::trace("No clients for JPEG stream.");
             return;
         }
+        if (!framebuffer.hasNewAccumulationFrame())
+        {
+            brayns::Log::trace("No new frame on the framebuffer");
+            return;
+        }
         ImageStream::broadcast(framebuffer, clients, parameters);
         _triggered = false;
+        framebuffer.resetNewAccumulationFrame();
         brayns::Log::trace("JPEG image broadcasted.");
     }
 
@@ -78,7 +84,7 @@ private:
 
 namespace brayns
 {
-void StreamManager::broadcast(FrameBuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters)
+void StreamManager::broadcast(Framebuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters)
 {
     brayns::Log::trace("Broadcasting JPEG image.");
     ControlledImageStream stream(_triggered);

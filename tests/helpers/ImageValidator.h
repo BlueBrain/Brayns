@@ -39,11 +39,11 @@ class ImageValidator
 public:
     static bool validate(brayns::Engine &engine, const std::string &filename)
     {
-        auto &framebuffer = engine.getFrameBuffer();
+        auto &framebuffer = engine.getFramebuffer();
         return validate(framebuffer, filename);
     }
 
-    static bool validate(brayns::FrameBuffer &framebuffer, const std::string &filename)
+    static bool validate(brayns::Framebuffer &framebuffer, const std::string &filename)
     {
         auto image = framebuffer.getImage();
         return validate(image, filename);
