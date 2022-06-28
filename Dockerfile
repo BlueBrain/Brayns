@@ -31,12 +31,12 @@ RUN apt-get update \
 # Get ISPC
 # https://ispc.github.io/downloads.html
 
-ARG ISPC_VERSION=1.17.0
+ARG ISPC_VERSION=1.18.0
 ARG ISPC_DIR=ispc-v${ISPC_VERSION}-linux
-ARG ISPC_PATH=/app/ispc-v1.17.0-linux
+ARG ISPC_PATH=/app/ispc-v1.18.0-linux
 
 RUN mkdir -p ${ISPC_PATH} \
-   && wget https://github.com/ispc/ispc/releases/download/v1.17.0/${ISPC_DIR}.tar.gz \
+   && wget https://github.com/ispc/ispc/releases/download/v1.18.0/${ISPC_DIR}.tar.gz \
    && tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1 \
    && rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
 
@@ -60,7 +60,7 @@ RUN wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/$
    && rm -rf ${DIST_PATH}/bin ${DIST_PATH}/doc
 
 # Install rk common
-ARG RKCOMMON_VERSION=v1.9.0
+ARG RKCOMMON_VERSION=v1.10.0
 ARG RKCOMMON_SRC=/app/rkcommon
 RUN mkdir ${RKCOMMON_SRC} \
    && git clone https://github.com/ospray/rkcommon ${RKCOMMON_SRC} \
@@ -72,7 +72,7 @@ RUN mkdir ${RKCOMMON_SRC} \
    && ninja -j4 install
 
 # Install open vkl
-ARG OPENVKL_VERSION=v1.2.0
+ARG OPENVKL_VERSION=v1.3.0
 ARG OPENVKL_SRC=/app/openvkl
 RUN mkdir ${OPENVKL_SRC} \
    && git clone https://github.com/openvkl/openvkl ${OPENVKL_SRC} \
@@ -84,12 +84,12 @@ RUN mkdir ${OPENVKL_SRC} \
    -DCMAKE_PREFIX_PATH=${DIST_PATH} \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
    -DBUILD_EXAMPLES=OFF \
-   -DISPC_EXECUTABLE=/app/ispc-v1.17.0-linux/bin/ispc \
+   -DISPC_EXECUTABLE=${ISPC_PATH}/bin/ispc \
    && ninja -j4 install 
 
 # Install OSPRay
 # https://github.com/ospray/ospray/releases
-ARG OSPRAY_TAG=v2.9.0
+ARG OSPRAY_TAG=v2.10.0
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
@@ -106,7 +106,7 @@ RUN mkdir -p ${OSPRAY_SRC} \
    -DOSPRAY_APPS_ENABLE_GLM=OFF \
    -DOSPRAY_MODULE_DENOISER=OFF \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   -DISPC_EXECUTABLE=/app/ispc-v1.17.0-linux/bin/ispc \
+   -DISPC_EXECUTABLE=${ISPC_PATH}/bin/ispc \
    && ninja -j4 install
 
 # Install libwebsockets (2.0 from Debian is not reliable)
