@@ -32,6 +32,7 @@ option(BRAYNS_ATLASEXPLORER_ENABLED "Activate Atlas explorer plugin" OFF)
 
 # Core dependencies
 find_package(Git REQUIRED)
+find_package(Python3 3.9 REQUIRED)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_USE_STATIC_LIBS OFF)
 find_package(Boost REQUIRED COMPONENTS program_options)
@@ -66,3 +67,6 @@ add_subdirectory(plugins)
 if(BRAYNS_TESTS_ENABLED)
   add_subdirectory(tests)
 endif()
+
+# BRAYNS python client
+add_subdirectory(python)
