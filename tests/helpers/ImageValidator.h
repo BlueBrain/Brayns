@@ -43,7 +43,7 @@ public:
         return validate(framebuffer, filename);
     }
 
-    static bool validate(brayns::FrameBuffer &framebuffer, const std::string &filename)
+    static bool validate(brayns::Framebuffer &framebuffer, const std::string &filename)
     {
         auto image = framebuffer.getImage();
         return validate(image, filename);

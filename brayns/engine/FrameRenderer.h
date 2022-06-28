@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/engine/Camera.h>
-#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Framebuffer.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
 
@@ -38,7 +38,7 @@ public:
      * @param scene
      */
     static void
-        synchronous(const Camera &camera, const FrameBuffer &frameBuffer, const Renderer &renderer, const Scene &scene);
+        synchronous(const Camera &camera, const Framebuffer &framebuffer, const Renderer &renderer, const Scene &scene);
 
     /**
      * @brief Renders a frame asynchronously. The function returns inmediatly with an OSPFuture, which can be used
@@ -51,7 +51,7 @@ public:
      */
     static ospray::cpp::Future asynchronous(
         const Camera &camera,
-        const FrameBuffer &frameBuffer,
+        const Framebuffer &framebuffer,
         const Renderer &renderer,
         const Scene &scene);
 };

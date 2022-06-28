@@ -32,18 +32,18 @@
 namespace brayns
 {
 /**
- * @brief The FrameBuffer class is the object that handles the frames rendered by a given renderer
+ * @brief The Framebuffer class is the object that handles the frames rendered by a given renderer
  */
-class FrameBuffer : public BaseObject
+class Framebuffer : public BaseObject
 {
 public:
-    FrameBuffer() = default;
+    Framebuffer() = default;
 
-    FrameBuffer(const FrameBuffer &) = delete;
-    FrameBuffer &operator=(const FrameBuffer &) = delete;
+    Framebuffer(const Framebuffer &) = delete;
+    Framebuffer &operator=(const Framebuffer &) = delete;
 
-    FrameBuffer(FrameBuffer &&) = delete;
-    FrameBuffer &operator=(FrameBuffer &&) = delete;
+    Framebuffer(Framebuffer &&) = delete;
+    Framebuffer &operator=(Framebuffer &&) = delete;
 
     /**
      * @brief Maps Ospray backend framebuffer to an accessible system buffer
@@ -117,6 +117,19 @@ public:
     int32_t numAccumFrames() const noexcept;
 
     /**
+     * @brief Return true if a new frame was rendered since the last reset
+     *
+     * @return true A new frame was rendred into the framebuffer since the last reset
+     * @return false No new frames was rendered
+     */
+    bool hasNewAccumulationFrame() const noexcept;
+
+    /**
+     * @brief Sets the new accumulation frame flag to false
+     */
+    void resetNewAccumulationFrame() noexcept;
+
+    /**
      * @brief Returns an Image object with the current contents of the framebuffer
      */
     Image getImage();
@@ -135,13 +148,11 @@ public:
 private:
     Vector2ui _frameSize{800u, 600u};
     PixelFormat _frameBufferFormat{PixelFormat::StandardRgbaI8};
-    bool _accumulation{true};
+    bool _accumulation = true;
     int32_t _accumFrames{0};
-
+    bool _newAccumulationFrame = false;
     ospray::cpp::FrameBuffer _osprayFramebuffer;
-
-    uint8_t *_colorBuffer{nullptr};
-
+    uint8_t *_colorBuffer = nullptr;
     ImageOperationManager _operationManager;
 };
 } // namespace brayns

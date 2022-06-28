@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/FrameBuffer.h>
+#include <brayns/engine/Framebuffer.h>
 
 #include <brayns/network/client/ClientManager.h>
 
@@ -43,7 +43,7 @@ public:
      * @param clients Clients to broadcast the image.
      * @param parameters Streaming parameters.
      */
-    void broadcast(FrameBuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters);
+    void broadcast(Framebuffer &framebuffer, ClientManager &clients, const ApplicationParameters &parameters);
 
     /**
      * @brief Trigger the image stream.

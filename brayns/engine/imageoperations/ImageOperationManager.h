@@ -48,7 +48,7 @@ public:
     void removeOperation(const uint32_t id);
 
 private:
-    friend class FrameBuffer;
+    friend class Framebuffer;
 
     /**
      * @brief Returns a list of handles to the operations

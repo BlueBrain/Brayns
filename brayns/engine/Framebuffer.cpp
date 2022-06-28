@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FrameBuffer.h"
+#include "Framebuffer.h"
 
 #include <brayns/utils/image/ImageFlipper.h>
 #include <ospray/ospray_cpp/Data.h>
@@ -54,12 +54,12 @@ public:
 
 namespace brayns
 {
-void FrameBuffer::map()
+void Framebuffer::map()
 {
     _colorBuffer = static_cast<uint8_t *>(_osprayFramebuffer.map(OSP_FB_COLOR));
 }
 
-void FrameBuffer::unmap()
+void Framebuffer::unmap()
 {
     if (_colorBuffer)
     {
@@ -68,12 +68,12 @@ void FrameBuffer::unmap()
     }
 }
 
-const uint8_t *FrameBuffer::getColorBuffer() const
+const uint8_t *Framebuffer::getColorBuffer() const
 {
     return _colorBuffer;
 }
 
-bool FrameBuffer::commit()
+bool Framebuffer::commit()
 {
     if (!isModified())
     {
@@ -110,7 +110,7 @@ bool FrameBuffer::commit()
     return true;
 }
 
-void FrameBuffer::setFrameSize(const Vector2ui &frameSize)
+void Framebuffer::setFrameSize(const Vector2ui &frameSize)
 {
     if (glm::compMul(frameSize) == 0 || frameSize.x < 64 || frameSize.y < 64)
     {
@@ -120,48 +120,59 @@ void FrameBuffer::setFrameSize(const Vector2ui &frameSize)
     _updateValue(_frameSize, frameSize);
 }
 
-const Vector2ui &FrameBuffer::getFrameSize() const noexcept
+const Vector2ui &Framebuffer::getFrameSize() const noexcept
 {
     return _frameSize;
 }
 
-void FrameBuffer::setAccumulation(const bool accumulation) noexcept
+void Framebuffer::setAccumulation(const bool accumulation) noexcept
 {
     _updateValue(_accumulation, accumulation);
 }
 
-bool FrameBuffer::isAccumulating() const noexcept
+bool Framebuffer::isAccumulating() const noexcept
 {
     return _accumulation;
 }
 
-void FrameBuffer::setFormat(PixelFormat frameBufferFormat) noexcept
+void Framebuffer::setFormat(PixelFormat frameBufferFormat) noexcept
 {
     _updateValue(_frameBufferFormat, frameBufferFormat);
 }
 
-PixelFormat FrameBuffer::getFrameBufferFormat() const noexcept
+PixelFormat Framebuffer::getFrameBufferFormat() const noexcept
 {
     return _frameBufferFormat;
 }
 
-void FrameBuffer::clear() noexcept
+void Framebuffer::clear() noexcept
 {
     _accumFrames = 0;
     _osprayFramebuffer.clear();
 }
 
-void FrameBuffer::incrementAccumFrames() noexcept
+void Framebuffer::incrementAccumFrames() noexcept
 {
     ++_accumFrames;
+    _newAccumulationFrame = true;
 }
 
-int32_t FrameBuffer::numAccumFrames() const noexcept
+int32_t Framebuffer::numAccumFrames() const noexcept
 {
     return _accumFrames;
 }
 
-Image FrameBuffer::getImage()
+bool Framebuffer::hasNewAccumulationFrame() const noexcept
+{
+    return _newAccumulationFrame;
+}
+
+void Framebuffer::resetNewAccumulationFrame() noexcept
+{
+    _newAccumulationFrame = false;
+}
+
+Image Framebuffer::getImage()
 {
     map();
 
@@ -185,12 +196,12 @@ Image FrameBuffer::getImage()
     return image;
 }
 
-const ospray::cpp::FrameBuffer &FrameBuffer::getOsprayFramebuffer() const noexcept
+const ospray::cpp::FrameBuffer &Framebuffer::getOsprayFramebuffer() const noexcept
 {
     return _osprayFramebuffer;
 }
 
-ImageOperationManager &FrameBuffer::getOperationsManager() noexcept
+ImageOperationManager &Framebuffer::getOperationsManager() noexcept
 {
     return _operationManager;
 }

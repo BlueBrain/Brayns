@@ -62,7 +62,7 @@ struct ExportInfoLogger
 
 struct FrameWritter
 {
-    static void toDisk(const brayns::ExportFramesParams &params, const uint32_t frame, brayns::FrameBuffer &fb)
+    static void toDisk(const brayns::ExportFramesParams &params, const uint32_t frame, brayns::Framebuffer &fb)
     {
         const auto &path = params.path;
         const auto &imageSettings = params.image_settings;
@@ -121,11 +121,11 @@ public:
         camera->setAspectRatio(aspectRatio);
 
         // Framebuffer
-        brayns::FrameBuffer frameBuffer;
-        frameBuffer.setAccumulation(false);
-        frameBuffer.setFormat(brayns::PixelFormat::StandardRgbaI8);
-        frameBuffer.setFrameSize(frameSize);
-        frameBuffer.commit();
+        brayns::Framebuffer framebuffer;
+        framebuffer.setAccumulation(false);
+        framebuffer.setFormat(brayns::PixelFormat::StandardRgbaI8);
+        framebuffer.setFrameSize(frameSize);
+        framebuffer.commit();
 
         // Parameters manager
         auto parametersManager = paramsManager;
@@ -160,7 +160,7 @@ public:
             camera->commit();
 
             // Render
-            brayns::FrameRenderer::synchronous(*camera, frameBuffer, *renderer, scene);
+            brayns::FrameRenderer::synchronous(*camera, framebuffer, *renderer, scene);
 
             // Write frame to disk
             auto name = sequentialNaming ? i : keyFrame.frame_index;
@@ -168,7 +168,7 @@ public:
             sprintf(frame, "%05d", static_cast<int32_t>(name));
             try
             {
-                FrameWritter::toDisk(params, name, frameBuffer);
+                FrameWritter::toDisk(params, name, framebuffer);
             }
             catch (const std::exception &e)
             {
