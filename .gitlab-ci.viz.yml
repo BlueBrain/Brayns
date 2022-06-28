@@ -13,14 +13,12 @@ ubuntu-clangformat-check:
     entrypoint: [""]
   script:
     - apt update && apt install -y git clang-format-12
-    - git --version
+    - cd $CI_PROJECT_DIR
     - CLANG_FORMAT_EXTENSIONS="\.[cmh]$|\.[chi]pp$"
     - if [ -f .clang-format ]; then
-    - git pull origin develop
-    - if git diff --name-only --diff-filter=ACMR origin/develop | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -style=file -fallback-style=none -output-replacements-xml | grep "<replacement " >/dev/null ; then
+    - if find . | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -style=file -fallback-style=none -output-replacements-xml | grep "<replacement " >/dev/null ; then
     - echo "clang-format check failed - commit does not match coding style"
-    - git diff --name-only --diff-filter=ACMR origin/develop | grep -E "$CLANG_FORMAT_EXTENSIONS" >> wrong_format_files.txt
-    - cat wrong_format_files.txt | xargs -n1 clang-format-12 -i -style=file -fallback-style=none
+    - find . | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-12 -i -style=file -fallback-style=none
     - git diff
     - exit 1
     - else
@@ -46,9 +44,9 @@ ubuntu-cpp-build:
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
 
     # Install ISPC
-    - ISPC_VERSION=1.17.0
+    - ISPC_VERSION=1.18.0
     - ISPC_DIR=ispc-v${ISPC_VERSION}-linux
-    - ISPC_PATH=/app/ispc-v1.17.0-linux
+    - ISPC_PATH=/app/ispc-v1.18.0-linux
     - export PATH=$PATH:${ISPC_PATH}
 
     - mkdir -p ${ISPC_PATH}
@@ -73,7 +71,7 @@ ubuntu-cpp-build:
     - rm -rf ${DIST_PATH}/bin ${DIST_PATH}/doc
 
     # Install rk common
-    - RKCOMMON_VERSION=v1.9.0
+    - RKCOMMON_VERSION=v1.10.0
     - git clone https://github.com/ospray/rkcommon
     - pushd rkcommon
     - git checkout ${RKCOMMON_VERSION}
@@ -85,20 +83,20 @@ ubuntu-cpp-build:
     - popd
 
     # Install open vkl
-    - OPENVKL_VERSION=v1.2.0
+    - OPENVKL_VERSION=v1.3.0
     - git clone https://github.com/openvkl/openvkl
     - pushd openvkl
     - git checkout ${OPENVKL_VERSION}
     - mkdir build
     - pushd build
-    - cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${DIST_PATH} -DCMAKE_INSTALL_PREFIX=${DIST_PATH} -DBUILD_EXAMPLES=OFF -DISPC_EXECUTABLE=/app/ispc-v1.17.0-linux/bin/ispc
+    - cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${DIST_PATH} -DCMAKE_INSTALL_PREFIX=${DIST_PATH} -DBUILD_EXAMPLES=OFF -DISPC_EXECUTABLE=${ISPC_PATH}/bin/ispc
     - ninja -j$NUM_COMPILE_JOBS install
     - popd
     - popd
 
     # Install OSPRay
     # https://github.com/ospray/ospray/releases
-    - OSPRAY_TAG=v2.9.0
+    - OSPRAY_TAG=v2.10.0
     - OSPRAY_SRC=/app/ospray
 
     - mkdir -p ${OSPRAY_SRC}
@@ -107,7 +105,7 @@ ubuntu-cpp-build:
     - git checkout ${OSPRAY_TAG}
     - mkdir -p build
     - pushd build
-    - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_APPS_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS_BENCHMARK=OFF -DOSPRAY_ENABLE_APPS_EXAMPLES=OFF -DOSPRAY_ENABLE_APPS_TESTING=OFF -DOSPRAY_APPS_ENABLE_GLM=OFF -DOSPRAY_MODULE_DENOISER=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH} -DISPC_EXECUTABLE=/app/ispc-v1.17.0-linux/bin/ispc
+    - CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja -DOSPRAY_ENABLE_APPS_TUTORIALS=OFF -DOSPRAY_ENABLE_APPS_BENCHMARK=OFF -DOSPRAY_ENABLE_APPS_EXAMPLES=OFF -DOSPRAY_ENABLE_APPS_TESTING=OFF -DOSPRAY_APPS_ENABLE_GLM=OFF -DOSPRAY_MODULE_DENOISER=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH} -DISPC_EXECUTABLE=${ISPC_PATH}/bin/ispc
     - ninja -j$NUM_COMPILE_JOBS install
     - popd
     - popd

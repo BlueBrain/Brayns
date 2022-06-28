@@ -25,6 +25,7 @@
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/TransferFunctionComponent.h>
 
+#include <ospray/SDK/common/OSPCommon.h>
 #include <ospray/ospray_cpp/Data.h>
 
 namespace
@@ -33,7 +34,7 @@ struct TransferFunctionParameters
 {
     inline static const std::string color = "color";
     inline static const std::string opacity = "opacity";
-    inline static const std::string valueRange = "valueRange";
+    inline static const std::string valueRange = "value";
 };
 }
 
@@ -63,12 +64,14 @@ bool TransferFunctionRendererComponent::manualCommit()
     auto &colors = transferFunction.getColors();
     auto &color = colors.front();
     auto colorSize = colors.size();
-    auto &range = transferFunction.getValuesRange();
     auto colorData = ospray::cpp::SharedData(&color.x, colorSize, stride);
     auto opacityData = ospray::cpp::SharedData(&color.w, colorSize, stride);
     _osprayTransferFunction.setParam(TransferFunctionParameters::color, colorData);
     _osprayTransferFunction.setParam(TransferFunctionParameters::opacity, opacityData);
-    _osprayTransferFunction.setParam(TransferFunctionParameters::valueRange, range);
+
+    auto &range = transferFunction.getValuesRange();
+    auto ospRange = rkcommon::math::range1f(range.x, range.y);
+    _osprayTransferFunction.setParam(TransferFunctionParameters::valueRange, ospRange);
 
     _osprayTransferFunction.commit();
     transferFunction.resetModified();

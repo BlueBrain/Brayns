@@ -15,6 +15,7 @@ Brayns also comes with some already-made plugins:
 * **CircuitExplorer**: The main plugin used at BBP. Allows for neuronal circuit visualization and simulation rendering.
 * **CircuitInfo (Deprecated)**: A plugin which accepts queries to extract information from neuronal circuits.
 * **DTI**: A diffuse-tensor imaging visualization plugin.
+* **AtlasExplorer**: A plugin capable of interpreting and render NRRD volumes.
 
 ## Building
 
@@ -32,11 +33,13 @@ The following components must be installed on the system where Brayns will be bu
 * Git
 * Package config
 * SSL Development files
-* OSPRay 2.9.0 (https://github.com/ospray/OSPRay/tree/v2.9.0)
+* OSPRay 2.10.0 (https://github.com/ospray/OSPRay/tree/v2.10.0)
 
 Optionally, to build the core plugins of Brayns, the following components are required.
 
 * HDF5 development files
+* Bzip2
+* zlib
 
 Brayns uses further dependencies, but if they are not present on the system, it will download them by itself during build.
 
@@ -68,6 +71,7 @@ The following cmake options (shown with their default value) can be used during 
 * **BRAYNS_CIRCUITEXPLORER_ENABLED** (Default ON) - Activate CircuitExplorer plugin
 * **BRAYNS_CIRCUITINFO_ENABLED** (Default OFF) - Activate CircuitInfo plugin
 * **BRAYNS_DTI_ENABLED** (Default OFF) - Activate Diffusion-Tensor Imaging plugin
+* **BRAYNS_ATLASEXPLORER_ENABLED** - Activate AtlasExplorer plugin
 
 
 ## Running
