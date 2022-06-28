@@ -75,7 +75,7 @@ public:
     /**
      * @brief Returns the system's Framebuffer object
      */
-    Framebuffer &getFrameBuffer() noexcept;
+    Framebuffer &getFramebuffer() noexcept;
 
     /**
      * @brief Sets a new system Camera to use

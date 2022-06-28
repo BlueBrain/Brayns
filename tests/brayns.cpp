@@ -43,7 +43,7 @@ TEST_CASE("defaults")
     CHECK_EQ(lookAt.target, brayns::Vector3f(0.f, 0.f, 1.f));
     CHECK_EQ(lookAt.up, brayns::Vector3f(0.f, 1.f, 0.f));
 
-    auto &fb = engine.getFrameBuffer();
+    auto &fb = engine.getFramebuffer();
     CHECK(!fb.getColorBuffer());
     CHECK_EQ(fb.getFrameBufferFormat(), brayns::PixelFormat::StandardRgbaI8);
     CHECK_EQ(fb.getFrameSize(), brayns::Vector2ui(800, 600));

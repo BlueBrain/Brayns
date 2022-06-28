@@ -193,7 +193,7 @@ Scene &Engine::getScene()
     return _scene;
 }
 
-Framebuffer &Engine::getFrameBuffer() noexcept
+Framebuffer &Engine::getFramebuffer() noexcept
 {
     return _frameBuffer;
 }

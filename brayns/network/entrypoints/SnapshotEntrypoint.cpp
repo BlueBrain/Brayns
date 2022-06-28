@@ -189,7 +189,7 @@ void SnapshotEntrypoint::onRequest(const Request &request)
     auto &systemRenderer = _engine.getRenderer();
     params.renderer = GenericObject<Renderer>(systemRenderer, _renderFactory);
 
-    auto &systemFramebuffer = _engine.getFrameBuffer();
+    auto &systemFramebuffer = _engine.getFramebuffer();
     auto systemSize = systemFramebuffer.getFrameSize();
     params.image_settings = ImageSettings(systemSize);
 

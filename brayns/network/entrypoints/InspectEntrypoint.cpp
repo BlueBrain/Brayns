@@ -60,7 +60,7 @@ private:
         auto x = position.x;
         auto y = position.y;
 
-        auto &framebuffer = _engine.getFrameBuffer();
+        auto &framebuffer = _engine.getFramebuffer();
         auto &renderer = _engine.getRenderer();
         auto &camera = _engine.getCamera();
         auto &scene = _engine.getScene();

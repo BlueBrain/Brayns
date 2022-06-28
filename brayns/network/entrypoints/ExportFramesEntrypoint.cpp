@@ -220,7 +220,7 @@ void ExportFramesEntrypoint::onRequest(const Request &request)
     params.camera = GenericObject<Camera>(systemCamera, _cameraFactory);
     auto &systemRender = _engine.getRenderer();
     params.renderer = GenericObject<Renderer>(systemRender, _renderFactory);
-    auto &systemFb = _engine.getFrameBuffer();
+    auto &systemFb = _engine.getFramebuffer();
     params.image_settings = ImageSettings(systemFb.getFrameSize());
     request.getParams(params);
 

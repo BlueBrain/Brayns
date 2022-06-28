@@ -295,7 +295,7 @@ private:
         auto &parameters = manager.getApplicationParameters();
         auto &engine = api.getEngine();
         auto &stream = context.stream;
-        auto &framebuffer = engine.getFrameBuffer();
+        auto &framebuffer = engine.getFramebuffer();
         auto &clients = context.clients;
         stream.broadcast(framebuffer, clients, parameters);
     }
