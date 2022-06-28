@@ -30,6 +30,11 @@ class TestBounds(unittest.TestCase):
     def setUp(self) -> None:
         self._box = Bounds(Vector3(1, 2, 3), Vector3(4, 5, 6))
 
+    def test_empty(self) -> None:
+        test = Bounds.empty
+        self.assertEqual(test.min, Vector3.zero)
+        self.assertEqual(test.max, Vector3.zero)
+
     def test_deserialize(self) -> None:
         test = Bounds.deserialize(MockBounds.serialized_bounds)
         self.assertEqual(test, MockBounds.bounds)
