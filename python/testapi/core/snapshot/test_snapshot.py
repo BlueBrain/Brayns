@@ -33,7 +33,7 @@ class TestSnapshot(SimpleTestCase):
 
     @property
     def ref(self) -> pathlib.Path:
-        return self.asset_folder / 'ref_snapshot.png'
+        return self.asset_folder / 'snapshot.png'
 
     def test_save(self) -> None:
         snapshot = self._prepare_snapshot()

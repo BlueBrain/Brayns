@@ -18,8 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pathlib
-
 import brayns
 
 from testapi.api_test_case import ApiTestCase
@@ -30,11 +28,6 @@ class SimpleTestCase(ApiTestCase):
     @property
     def instance(self) -> brayns.Instance:
         return self.__instance
-
-    @property
-    def asset_folder(self) -> pathlib.Path:
-        testapi = pathlib.Path(__file__).parent
-        return testapi / 'assets'
 
     def setUp(self) -> None:
         launcher = self.create_launcher()
