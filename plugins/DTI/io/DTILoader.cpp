@@ -22,7 +22,10 @@
 #include "DTILoader.h"
 
 #include <brayns/common/Log.h>
+#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/utils/FileReader.h>
+#include <brayns/utils/StringUtils.h>
 
 #include <components/DTIComponent.h>
 #include <components/SpikeReportComponent.h>
@@ -33,42 +36,38 @@
 #include <optional>
 #include <unordered_set>
 
-#include <boost/property_tree/ini_parser.hpp>
-
 #include <brain/spikeReportReader.h>
 #include <brion/blueConfig.h>
 
 namespace
 {
-struct DTIConfiguration
-{
-    // Streamline points (1 streamline per row)
-    std::filesystem::path streamlinesPath;
-    // Multimap Gid -> streamline it affects
-    std::filesystem::path gidsToStreamlinesPath;
-    // Optional path to a Blueconfig to load a spike report
-    std::optional<std::filesystem::path> circuitPath;
-};
+BRAYNS_JSON_OBJECT_BEGIN(DTIConfiguration)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, streamlines_path, "Path to the streamlines file")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, gids_to_streamlines_path, "Path to the gid-streamline mapping file")
+BRAYNS_JSON_OBJECT_ENTRY(
+    std::string,
+    circuit_path,
+    "Path to the source circuit for spike simulation",
+    brayns::Default(""))
+BRAYNS_JSON_OBJECT_END()
 
-struct DTIConfigurationReader
+class DTIConfigurationReader
 {
+public:
     static DTIConfiguration read(const std::string &path)
     {
-        boost::property_tree::ptree pt;
-        boost::property_tree::ini_parser::read_ini(path, pt);
+        auto jsonString = brayns::FileReader::read(path);
+        auto json = brayns::Json::parse(jsonString);
+        auto schema = brayns::Json::getSchema<DTIConfiguration>();
+        auto jsonErrors = brayns::JsonSchemaValidator::validate(json, schema);
 
-        DTIConfiguration configuration;
-
-        configuration.streamlinesPath = pt.get<std::string>("streamlines");
-        configuration.gidsToStreamlinesPath = pt.get<std::string>("gids_to_streamline_row");
-
-        const auto circuitFile = pt.get_optional<std::string>("circuit");
-        if (circuitFile.has_value())
+        if (!jsonErrors.empty())
         {
-            configuration.circuitPath = *circuitFile;
+            auto errorString = brayns::string_utils::join(jsonErrors, "\n");
+            throw std::invalid_argument("Ill-formed dti config file: " + errorString);
         }
 
-        return configuration;
+        return brayns::Json::deserialize<DTIConfiguration>(json);
     }
 };
 
@@ -82,8 +81,9 @@ std::istream &operator>>(std::istream &in, GIDRow &gr)
 {
     return in >> gr.gid >> gr.row;
 }
-struct GIDRowReader
+class GIDRowReader
 {
+public:
     static std::vector<GIDRow> read(const std::string &path)
     {
         const auto content = brayns::FileReader::read(path);
@@ -102,14 +102,16 @@ struct StreamlineData
 /**
  * @brief Used to filter which rows to load in RowStreamlineMapReader
  */
-struct StreamlineRowFilter
+class StreamlineRowFilter
 {
+public:
     virtual bool filter(const size_t row) const noexcept = 0;
 };
 
 // When loading without gid->row file (in other words, without simulation)
-struct NoopStreamlineRowFilter final : public StreamlineRowFilter
+class NoopStreamlineRowFilter final : public StreamlineRowFilter
 {
+public:
     bool filter(const size_t row) const noexcept override
     {
         return true;
@@ -117,8 +119,9 @@ struct NoopStreamlineRowFilter final : public StreamlineRowFilter
 };
 
 // When loading with gid->row file (in other words, with simulation)
-struct GIDRowStreamlineRowFilter final : public StreamlineRowFilter
+class GIDRowStreamlineRowFilter final : public StreamlineRowFilter
 {
+public:
     GIDRowStreamlineRowFilter(const std::vector<GIDRow> &gidRows)
     {
         for (const auto &entry : gidRows)
@@ -138,8 +141,9 @@ private:
     std::unordered_set<size_t> _whitelistedRows;
 };
 
-struct RowStreamlineMapReader
+class RowStreamlineMapReader
 {
+public:
     static std::map<uint64_t, StreamlineData> read(const std::string &path, const StreamlineRowFilter &filter)
     {
         std::map<uint64_t, StreamlineData> result;
@@ -188,8 +192,9 @@ struct RowStreamlineMapReader
     }
 };
 
-struct StreamlineComponentBuilder
+class StreamlineComponentBuilder
 {
+public:
     static void build(const std::map<uint64_t, StreamlineData> &streamlines, const float radius, brayns::Model &model)
     {
         std::vector<std::vector<brayns::Primitive>> geometries;
@@ -213,8 +218,9 @@ struct StreamlineComponentBuilder
     }
 };
 
-struct GIDsToStreamlineIndicesMapping
+class GIDsToStreamlineIndicesMapping
 {
+public:
     static std::unordered_map<uint64_t, std::vector<size_t>> generate(
         const std::vector<GIDRow> &gidRows,
         const std::map<uint64_t, StreamlineData> &streamlinesMap)
@@ -236,8 +242,9 @@ struct GIDsToStreamlineIndicesMapping
     }
 };
 
-struct SpikeReportComponentBuilder
+class SpikeReportComponentBuilder
 {
+public:
     static void build(
         std::unordered_map<uint64_t, std::vector<size_t>> gidStreamlineMap,
         float decayTime,
@@ -250,6 +257,7 @@ struct SpikeReportComponentBuilder
         model.addComponent<dti::SpikeReportComponent>(std::move(spikeReport), std::move(gidStreamlineMap), decayTime);
     }
 };
+
 } // namespace
 
 namespace dti
@@ -287,9 +295,9 @@ std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromFile(
     callback.updateProgress("Reading configuration", 0.f);
     const auto config = DTIConfigurationReader::read(path);
 
-    const auto &circuitPathEntry = config.circuitPath;
+    const auto &circuitPath = config.circuitPath;
 
-    if (!circuitPathEntry.has_value())
+    if (circuitPath.empty())
     {
         callback.updateProgress("Loading streamlines", 0.33f);
         const NoopStreamlineRowFilter filter;
@@ -299,6 +307,9 @@ std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromFile(
         callback.updateProgress("Generating geometry", 0.66f);
         const auto radius = params.radius;
         StreamlineComponentBuilder::build(rowStreamlineMap, radius, model);
+
+        callback.updateProgress("Done", 1.f);
+        return result;
     }
     else
     {
@@ -316,7 +327,6 @@ std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromFile(
         StreamlineComponentBuilder::build(rowStreamlineMap, radius, model);
 
         callback.updateProgress("Loading simulation", 0.8f);
-        const auto &circuitPath = *circuitPathEntry;
         auto gidsToStreamlineIndices = GIDsToStreamlineIndicesMapping::generate(gidRows, rowStreamlineMap);
         auto spikeDecayTime = params.spike_decay_time;
         SpikeReportComponentBuilder::build(std::move(gidsToStreamlineIndices), spikeDecayTime, circuitPath, model);
