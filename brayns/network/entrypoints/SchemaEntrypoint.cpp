@@ -47,7 +47,7 @@ void SchemaEntrypoint::onRequest(const Request &request)
     auto entrypoint = _entrypoints.find(endpoint);
     if (!entrypoint)
     {
-        throw MethodNotFoundException("Unknown entrypoint '" + endpoint + "'");
+        throw MethodNotFoundException(endpoint);
     }
     auto &schema = entrypoint->getSchema();
     request.reply(schema);
