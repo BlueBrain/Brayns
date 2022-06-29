@@ -32,8 +32,8 @@ ubuntu-cpp-build:
   extends: .cmake-ubuntu
   stage: test
   variables:
-    APT_PACKAGES: git libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev zlib1g-dev libbz2-dev wget libreadline-dev libncursesw5-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libffi-dev
-    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_ATLASEXPLORER_ENABLED=ON -DPython3_EXECUTABLE=/app/python/bin/python3.9
+    APT_PACKAGES: git libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev zlib1g-dev libbz2-dev python3.9
+    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_ATLASEXPLORER_ENABLED=ON -DPython3_EXECUTABLE=/usr/bin/python3.9
     KUBERNETES_CPU_LIMIT: 5
     KUBERNETES_CPU_REQUEST: 5
     KUBERNETES_MEMORY_LIMIT: 8Gi
@@ -42,18 +42,6 @@ ubuntu-cpp-build:
     DIST_PATH: /app/dist
   before_script:
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
-
-    # Install python 3.9.7
-    - PYTHON_ROOT_DIR=/app/python
-    - mkdir -p ${PYTHON_ROOT_DIR}
-    - PYTHON_STAGE_DIR=${PYTHON_ROOT_DIR}/stage
-    - mkdir -p ${PYTHON_STAGE_DIR}
-    - cd ${PYTHON_STAGE_DIR}
-    - wget -c https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tar.xz
-    - tar -Jxf Python-3.9.7.tar.xz
-    - cd Python-3.9.7
-    - ./configure --enable-optimizations --prefix=${PYTHON_ROOT_DIR}
-    - make altinstall -j5
 
     # Install ISPC
     - ISPC_VERSION=1.18.0
