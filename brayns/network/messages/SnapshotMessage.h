@@ -42,7 +42,7 @@ BRAYNS_JSON_OBJECT_ENTRY(uint32_t, simulation_frame, "Simulation frame to render
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     file_path,
-    "Path if saved on disk. If empty, image will be sent to the client as a base64 encoded image",
+    "Snapshot will be saved at this path if specified, otherwise it will be returned encoded in base64 with format from image_settings",
     Required(false))
 BRAYNS_JSON_OBJECT_END()
 

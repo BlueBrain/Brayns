@@ -27,8 +27,7 @@ from testapi.simple_test_case import SimpleTestCase
 class TestMeshLoader(SimpleTestCase):
 
     def test_load(self) -> None:
-        folder = pathlib.Path(__file__).parent
-        path = folder / 'assets' / 'cube.ply'
+        path = self.asset_folder / 'cube.ply'
         loader = brayns.MeshLoader()
         models = loader.load(self.instance, str(path))
         self.assertEqual(len(models), 1)
