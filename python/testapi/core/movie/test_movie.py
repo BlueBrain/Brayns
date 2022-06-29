@@ -18,42 +18,38 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os
 import pathlib
-import unittest
 
 import brayns
+from testapi.simple_test_case import SimpleTestCase
 
 
-class ApiTestCase(unittest.TestCase):
-
-    @property
-    def executable(self) -> str:
-        return os.environ['BRAYNS_TEST_EXECUTABLE']
+class TestMovie(SimpleTestCase):
 
     @property
-    def env(self) -> dict[str, str]:
-        result = dict[str, str]()
-        ospray = os.environ.get('BRAYNS_TEST_OSPRAY_DIR')
-        if ospray is not None:
-            result['LD_LIBRARY_PATH'] = ospray
-        return result
+    def input(self) -> pathlib.Path:
+        return self.asset_folder / 'frames'
 
     @property
-    def circuit(self) -> str:
-        return os.environ['BRAYNS_TEST_CIRCUIT']
+    def output(self) -> pathlib.Path:
+        folder = pathlib.Path(__file__).parent
+        return folder / 'movie.mp4'
 
     @property
-    def ffmpeg(self) -> str:
-        return os.environ.get('BRAYNS_TEST_FFMPEG', 'ffmpeg')
+    def ref(self) -> pathlib.Path:
+        return self.asset_folder / 'movie.mp4'
 
-    @property
-    def asset_folder(self) -> pathlib.Path:
-        testapi = pathlib.Path(__file__).parent
-        return testapi / 'assets'
-
-    def create_launcher(self) -> brayns.Launcher:
-        return brayns.Launcher(
-            executable=self.executable,
-            env=self.env
+    def test_save(self) -> None:
+        movie = brayns.Movie(
+            frames_folder=str(self.input),
+            fps=1,
+            ffmpeg_executable=self.ffmpeg
         )
+        path = self.output
+        movie.save(str(path))
+        with path.open('rb') as file:
+            test = file.read()
+        path.unlink()
+        with self.ref.open('rb') as file:
+            ref = file.read()
+        self.assertEqual(test, ref)
