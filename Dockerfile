@@ -25,8 +25,30 @@ RUN apt-get update \
    libssl-dev \
    zlib1g-dev \
    libbz2-dev \
+   wget \
+   libreadline-dev \
+   libncursesw5-dev \
+   libsqlite3-dev \
+   tk-dev \
+   libgdbm-dev \
+   libc6-dev \
+   libffi-dev \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Build and install python
+ARG PYTHON_ROOT_DIR=/app/python
+ARG PYTHON_STAGE_DIR=4{PYTHON_ROOT_DIR}/stage
+ARG PYTHON3_EXECUTABLE=${PYTHON_ROOT_DIR}/bin/python3.9
+
+RUN mkdir -p ${PYTHON_STAGE_DIR} \
+   && cd ${PYTHON_STAGE_DIR} \
+   && wget -c https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tar.xz \
+   && tar -Jxf Python-3.9.7.tar.xz \
+   && cd Python-3.9.7 \
+   && ./configure --enable-optimizations --prefix=${PYTHON_ROOT_DIR} \
+   && make altinstall -j5 \
+   && cd /
 
 # Get ISPC
 # https://ispc.github.io/downloads.html
@@ -167,6 +189,7 @@ RUN cd ${BRAYNS_SRC} \
    -DBRAYNS_CIRCUITINFO_ENABLED=ON \
    -DBRAYNS_DTI_ENABLED=ON \
    -DBRAYNS_ATLASEXPLORER_ENABLED=ON \
+   -DPython3_EXECUTABLE=${PYTHON3_EXECUTABLE} \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
 
