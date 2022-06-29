@@ -1,0 +1,16 @@
+name: Test inter-step affectance
+
+on: [push]
+
+jobs:
+  test-my-stuff:
+    name: Test if everything is ok
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print dir and cd into python
+        run: |
+            pwd
+            cd python
+      - name: Check if other steps are afected by cd
+        run: |
+            pwd
