@@ -9,8 +9,8 @@ jobs:
     steps:
       - name: Print dir and cd into python
         run: |
-            pwd
+            ls -la
             cd python
       - name: Check if other steps are afected by cd
         run: |
-            pwd
+            ls -la
