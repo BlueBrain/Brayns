@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: 3.9
       - name: Build a source tarball
-        run:
+        run: |
             cd python
             python setup.py sdist
 
