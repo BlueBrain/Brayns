@@ -26,14 +26,14 @@
 
 namespace dti
 {
-class DTIBuilder : public IDTIBuilder
+class DTIBuilder final : public IDTIBuilder
 {
 public:
-    virtual void reset();
-    virtual void readGidRowFile(const std::string &path);
-    virtual void readStreamlinesFile(const std::string &path);
-    virtual void buildGeometry(float radius, brayns::Model &model);
-    virtual void buildSimulation(const std::string &path, float spikeDecayTime, brayns::Model &model);
+    void reset();
+    void readGidRowFile(const std::string &path) override;
+    void readStreamlinesFile(const std::string &path) override;
+    void buildGeometry(float radius, brayns::Model &model) override;
+    void buildSimulation(const std::string &path, float spikeDecayTime, brayns::Model &model) override;
 
 private:
     std::map<uint64_t, StreamlineData> _streamlines;

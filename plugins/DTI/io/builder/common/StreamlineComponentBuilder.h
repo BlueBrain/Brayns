@@ -21,11 +21,13 @@
 
 #pragma once
 
-#include "IDTIBuilder.h"
+#include "StreamlineData.h"
 
 namespace dti
 {
-class SimulatedDTIBuilder : public IDTIBuilder
+class StreamlineComponentBuilder
 {
+public:
+    static void build(const std::map<uint64_t, StreamlineData> &streamlines, float radius, brayns::Model &model);
 };
 }
