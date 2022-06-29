@@ -10,8 +10,8 @@ jobs:
       - uses: actions/checkout@master
       - name: Print dir and cd into python
         run: |
-            ls -la
             cd python
+            ls -la
       - name: Check if other steps are afected by cd
         run: |
             ls -la
