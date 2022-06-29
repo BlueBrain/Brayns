@@ -21,7 +21,6 @@
 import pathlib
 
 import brayns
-from brayns.core.camera.camera_view import CameraView
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -68,7 +67,7 @@ class TestFrameExporter(SimpleTestCase):
             renderer=renderer
         )
 
-    def _adjust_lights(self, view: CameraView) -> None:
+    def _adjust_lights(self, view: brayns.CameraView) -> None:
         light = brayns.DirectionalLight(
             intensity=5,
             direction=view.direction
