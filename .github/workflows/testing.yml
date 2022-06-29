@@ -7,6 +7,7 @@ jobs:
     name: Test if everything is ok
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@master
       - name: Print dir and cd into python
         run: |
             ls -la
