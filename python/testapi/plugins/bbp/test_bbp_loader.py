@@ -1,0 +1,82 @@
+# Copyright (c) 2015-2022 EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+#
+# Responsible Author: adrien.fleury@epfl.ch
+#
+# This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+#
+# This library is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License version 3.0 as published
+# by the Free Software Foundation.
+#
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import pathlib
+
+import brayns
+from brayns.core.camera.camera_view import CameraView
+from testapi.simple_test_case import SimpleTestCase
+
+
+class TestBbpLoader(SimpleTestCase):
+
+    @property
+    def ref(self) -> pathlib.Path:
+        return self.asset_folder / 'bbp.png'
+
+    @property
+    def output(self) -> pathlib.Path:
+        folder = pathlib.Path(__file__).parent
+        return folder / 'bbp.png'
+
+    def test_load(self) -> None:
+        loader = brayns.BbpLoader(
+            cells=brayns.BbpCells.from_density(0.5),
+            report=brayns.BbpReport.compartment('somas'),
+            load_dendrites=True
+        )
+        models = loader.load(self.instance, self.circuit)
+        self.assertEqual(len(models), 1)
+        model = models[0]
+        self._snapshot(model.bounds)
+        self._check_snapshot()
+
+    def _check_snapshot(self) -> None:
+        path = self.output
+        with path.open('rb') as file:
+            test = file.read()
+        path.unlink()
+        with self.ref.open('rb') as file:
+            ref = file.read()
+        self.assertEqual(test, ref)
+
+    def _snapshot(self, bounds: brayns.Bounds) -> None:
+        snapshot = self._create_snapshot(bounds)
+        self._adjust_lights(snapshot.view)
+        snapshot.save(self.instance, self.output)
+
+    def _create_snapshot(self, bounds: brayns.Bounds) -> brayns.Snapshot:
+        camera = brayns.PerspectiveCamera()
+        view = camera.get_full_screen_view(bounds)
+        renderer = brayns.InteractiveRenderer()
+        return brayns.Snapshot(
+            resolution=brayns.Resolution.full_hd,
+            frame=50,
+            view=view,
+            camera=camera,
+            renderer=renderer
+        )
+
+    def _adjust_lights(self, view: CameraView) -> None:
+        light = brayns.DirectionalLight(
+            intensity=5,
+            direction=view.direction
+        )
+        light.add(self.instance)
