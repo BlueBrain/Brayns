@@ -18,7 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, Callable, Iterator
+from collections.abc import Callable, Iterator
+from typing import Any
 
 from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
 from brayns.instance.request_progress import RequestProgress

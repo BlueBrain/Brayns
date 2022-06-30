@@ -20,7 +20,8 @@
 
 import math
 from abc import ABC, abstractmethod
-from typing import Callable, Iterable, Iterator, TypeVar, Union
+from collections.abc import Callable, Iterable, Iterator
+from typing import TypeVar, Union
 
 T = TypeVar('T', bound='Vector')
 
