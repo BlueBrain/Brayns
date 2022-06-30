@@ -31,7 +31,7 @@ public:
 
     std::string getName() const final;
 
-    std::vector<std::unique_ptr<Model>> importFromBlob(Blob &&blob, const LoaderProgress &callback) const final;
+    std::vector<std::unique_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback) const final;
 
     std::vector<std::unique_ptr<Model>> importFromFile(const std::string &filename, const LoaderProgress &callback)
         const final;

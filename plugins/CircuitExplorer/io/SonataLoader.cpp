@@ -59,7 +59,7 @@ std::string SonataLoader::getName() const
 }
 
 std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromBlob(
-    brayns::Blob &&blob,
+    const brayns::Blob &blob,
     const brayns::LoaderProgress &cb,
     const SonataLoaderParameters &params) const
 {

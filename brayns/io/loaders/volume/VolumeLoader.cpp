@@ -137,7 +137,7 @@ bool RawVolumeLoader::isSupported(const std::string &, const std::string &extens
 }
 
 std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromBlob(
-    Blob &&blob,
+    const Blob &blob,
     const LoaderProgress &callback,
     const RawVolumeLoaderParameters &properties,
     Scene &scene) const
@@ -146,7 +146,7 @@ std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromBlob(
         blob.name,
         callback,
         properties,
-        [&blob](auto volume) { volume->mapData(std::move(blob.data)); },
+        [&blob](auto volume) { volume->mapData(blob.data); },
         scene)};
 }
 
@@ -214,7 +214,7 @@ bool MHDVolumeLoader::isSupported(const std::string &, const std::string &extens
     return extension == "mhd";
 }
 
-std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromBlob(Blob &&, const LoaderProgress &, Scene &) const
+std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromBlob(const Blob &, const LoaderProgress &, Scene &) const
 {
     throw std::runtime_error("Volume loading from blob is not supported");
 }

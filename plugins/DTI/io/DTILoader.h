@@ -35,7 +35,7 @@ public:
     std::vector<std::string> getSupportedExtensions() const final;
 
     std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
-        brayns::Blob &&blob,
+        const brayns::Blob &blob,
         const brayns::LoaderProgress &callback,
         const DTILoaderParameters &params) const override;
 

@@ -55,7 +55,7 @@ std::string SonataNGVLoader::getName() const
 }
 
 std::vector<std::unique_ptr<brayns::Model>> SonataNGVLoader::importFromBlob(
-    brayns::Blob &&blob,
+    const brayns::Blob &blob,
     const brayns::LoaderProgress &cb,
     const SonataNGVLoaderParameters &params) const
 {
