@@ -21,12 +21,8 @@
 
 #include "DTIBuilder.h"
 
-#include <brayns/engine/geometry/types/Primitive.h>
-
-#include <components/DTIComponent.h>
-#include <io/builder/common/RowTreamlineMapReader.h>
-
-#include <map>
+#include "common/RowTreamlineMapReader.h"
+#include "common/StreamlineComponentBuilder.h"
 
 namespace dti
 {
@@ -53,24 +49,7 @@ void DTIBuilder::readStreamlinesFile(const std::string &path)
 
 void DTIBuilder::buildGeometry(float radius, brayns::Model &model)
 {
-    std::vector<std::vector<brayns::Primitive>> geometries;
-    geometries.reserve(_streamlines.size());
-
-    for (const auto &[row, streamline] : _streamlines)
-    {
-        const auto &points = streamline.points;
-
-        auto &geometry = geometries.emplace_back();
-        geometry.reserve(points.size() - 1);
-
-        for (size_t i = 1; i < points.size(); ++i)
-        {
-            const auto &start = points[i - 1];
-            const auto &end = points[i];
-            geometry.push_back(brayns::Primitive::cylinder(start, end, radius));
-        }
-    }
-    model.addComponent<dti::DTIComponent>(std::move(geometries));
+    StreamlineComponentBuilder::build(_streamlines, radius, model);
 }
 
 void DTIBuilder::buildSimulation(const std::string &path, float spikeDecayTime, brayns::Model &model)

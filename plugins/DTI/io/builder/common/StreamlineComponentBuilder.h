@@ -23,6 +23,10 @@
 
 #include "StreamlineData.h"
 
+#include <brayns/engine/Model.h>
+
+#include <map>
+
 namespace dti
 {
 class StreamlineComponentBuilder

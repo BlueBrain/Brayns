@@ -22,10 +22,24 @@
 #pragma once
 
 #include "IDTIBuilder.h"
+#include "common/StreamlineData.h"
+
+#include <map>
+#include <unordered_set>
 
 namespace dti
 {
-class SimulatedDTIBuilder : public IDTIBuilder
+class SimulatedDTIBuilder final : public IDTIBuilder
 {
+public:
+    void reset();
+    void readGidRowFile(const std::string &path) override;
+    void readStreamlinesFile(const std::string &path) override;
+    void buildGeometry(float radius, brayns::Model &model) override;
+    void buildSimulation(const std::string &path, float spikeDecayTime, brayns::Model &model) override;
+
+private:
+    std::unordered_set<size_t> _whitelistedRows;
+    std::map<uint64_t, StreamlineData> _streamlines;
 };
 }

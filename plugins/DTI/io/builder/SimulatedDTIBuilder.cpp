@@ -20,3 +20,61 @@
  */
 
 #include "SimulatedDTIBuilder.h"
+
+#include "common/RowTreamlineMapReader.h"
+#include "common/StreamlineComponentBuilder.h"
+
+#include <brayns/utils/FileReader.h>
+
+namespace
+{
+struct GIDRow
+{
+    uint64_t gid{};
+    uint64_t row{};
+};
+
+std::istream &operator>>(std::istream &in, GIDRow &gr)
+{
+    return in >> gr.gid >> gr.row;
+}
+}
+
+namespace dti
+{
+void SimulatedDTIBuilder::reset()
+{
+    _whitelistedRows.clear();
+    _streamlines.clear();
+}
+
+void SimulatedDTIBuilder::readGidRowFile(const std::string &path)
+{
+    const auto content = brayns::FileReader::read(path);
+    std::istringstream stream(content);
+    std::vector<GIDRow> gidRows(std::istream_iterator<GIDRow>(stream), {});
+    return gidRows;
+}
+
+void SimulatedDTIBuilder::readStreamlinesFile(const std::string &path)
+{
+    _streamlines = RowStreamlineMapReader::read(
+        path,
+        [](size_t row)
+        {
+            (void)row;
+            return true;
+        });
+}
+
+void SimulatedDTIBuilder::buildGeometry(float radius, brayns::Model &model)
+{
+    StreamlineComponentBuilder::build(_streamlines, radius, model);
+}
+
+void SimulatedDTIBuilder::buildSimulation(const std::string &path, float spikeDecayTime, brayns::Model &model)
+{
+    (void)path;
+    (void)spikeDecayTime;
+    (void)model;
+}
