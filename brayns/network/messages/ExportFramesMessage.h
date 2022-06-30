@@ -41,10 +41,4 @@ BRAYNS_JSON_OBJECT_ENTRY(GenericObject<Renderer>, renderer, "Renderer definition
 BRAYNS_JSON_OBJECT_ENTRY(std::vector<ExportFramesKeyFrame>, key_frames, "List of keyframes to export")
 BRAYNS_JSON_OBJECT_ENTRY(bool, sequential_naming, "Name the image file after the frame index", Default(true))
 BRAYNS_JSON_OBJECT_END()
-
-BRAYNS_JSON_OBJECT_BEGIN(ExportFramesResult)
-BRAYNS_JSON_OBJECT_ENTRY(int32_t, error, "Error code (0 = no error)")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, message, "Message explaining the error")
-BRAYNS_JSON_OBJECT_END()
-
 } // namespace brayns

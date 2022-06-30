@@ -20,6 +20,8 @@
 
 #include "ExportFramesEntrypoint.h"
 
+#include <filesystem>
+
 #include <brayns/common/Log.h>
 #include <brayns/engine/FrameRenderer.h>
 #include <brayns/network/common/ProgressHandler.h>
@@ -65,6 +67,12 @@ struct FrameWritter
     static void toDisk(const brayns::ExportFramesParams &params, const uint32_t frame, brayns::Framebuffer &fb)
     {
         const auto &path = params.path;
+
+        if (!std::filesystem::is_directory(path))
+        {
+            throw brayns::InvalidParamsException("'" + path + "' is not a directory.");
+        }
+
         const auto &imageSettings = params.image_settings;
         const auto &inputFormat = imageSettings.getFormat();
         const auto format = brayns::string_utils::toLowercase(inputFormat);
@@ -78,24 +86,24 @@ struct FrameWritter
             brayns::ImageEncoder::save(image, filename, quality);
             brayns::Log::info("Frame saved to {}", filename);
         }
-        catch (const std::runtime_error &e)
+        catch (const std::exception &e)
         {
-            brayns::Log::error("{}", e.what());
+            brayns::Log::error("Error while saving frame to '{}': '{}'", filename, e.what());
+            throw brayns::InternalErrorException(e.what());
         }
     }
 };
 
-using ExportProgressHandler =
-    brayns::ProgressHandler<brayns::EntrypointRequest<brayns::ExportFramesParams, brayns::ExportFramesResult>>;
+using Progress = brayns::ProgressHandler<brayns::ExportFramesEntrypoint::Request>;
 
 class FrameExporter
 {
 public:
-    static brayns::ExportFramesResult exportFrames(
+    static void exportFrames(
         brayns::Engine &engine,
         brayns::ParametersManager &paramsManager,
         brayns::ExportFramesParams &params,
-        ExportProgressHandler &progress)
+        Progress &progress)
     {
         // Initialize parameters
         const auto &path = params.path;
@@ -142,8 +150,6 @@ public:
         // Log export info
         ExportInfoLogger::log(keyFrames.size(), path, frameSize, *renderer);
 
-        brayns::ExportFramesEntrypoint::Result result = {};
-
         // Render frames
         for (size_t i = 0; i < keyFrames.size(); ++i)
         {
@@ -164,24 +170,12 @@ public:
 
             // Write frame to disk
             auto name = sequentialNaming ? i : keyFrame.frame_index;
-            char frame[64];
-            sprintf(frame, "%05d", static_cast<int32_t>(name));
-            try
-            {
-                FrameWritter::toDisk(params, name, framebuffer);
-            }
-            catch (const std::exception &e)
-            {
-                result = {1, e.what()};
-                return {};
-            }
+            FrameWritter::toDisk(params, name, framebuffer);
 
             totalProgress += progressChunk;
 
             progress.notify(fmt::format("Frame {} out of {} done", i, keyFrames.size()), totalProgress);
         }
-
-        return result;
     }
 };
 } // namespace
@@ -228,9 +222,9 @@ void ExportFramesEntrypoint::onRequest(const Request &request)
     brayns::ProgressHandler progress(_token, request);
 
     // Do export
-    const auto result = FrameExporter::exportFrames(_engine, _paramsManager, params, progress);
+    FrameExporter::exportFrames(_engine, _paramsManager, params, progress);
 
-    request.reply(result);
+    request.reply(EmptyMessage());
 }
 
 void ExportFramesEntrypoint::onCancel()
