@@ -32,13 +32,13 @@ ubuntu-cpp-build:
   extends: .cmake-ubuntu
   stage: test
   variables:
-    APT_PACKAGES: git libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev zlib1g-dev libbz2-dev
-    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_ATLASEXPLORER_ENABLED=ON
-    KUBERNETES_CPU_LIMIT: 4
-    KUBERNETES_CPU_REQUEST: 4
+    APT_PACKAGES: git libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev zlib1g-dev libbz2-dev python3.9
+    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_CIRCUITINFO_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_ATLASEXPLORER_ENABLED=ON -DPython3_EXECUTABLE=/usr/bin/python3.9
+    KUBERNETES_CPU_LIMIT: 5
+    KUBERNETES_CPU_REQUEST: 5
     KUBERNETES_MEMORY_LIMIT: 8Gi
     KUBERNETES_MEMORY_REQUEST: 8Gi
-    NUM_COMPILE_JOBS: 4
+    NUM_COMPILE_JOBS: 5
     DIST_PATH: /app/dist
   before_script:
     - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
