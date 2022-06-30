@@ -41,14 +41,12 @@ class ImageValidator:
         self.validate(test, data)
 
     def validate(self, test: bytes, ref: bytes) -> None:
-        if len(test) != len(ref):
-            raise RuntimeError(f'Image size {len(test)} != {len(ref)}')
-        diff = self._get_diff(test, ref)
-        if diff > self.threshold:
-            raise RuntimeError(f'Image difference {diff} > {self.threshold}')
+        mse = self._get_mse(test, ref)
+        if mse > self.threshold:
+            raise RuntimeError(f'Image difference {mse} > {self.threshold}')
 
-    def _get_diff(self, data1: bytes, data2: bytes) -> int:
+    def _get_mse(self, data1: bytes, data2: bytes) -> int:
         return sum(
-            abs(i - j)
+            (i - j) ** 2
             for i, j in zip(data1, data2)
-        ) / len(data1)
+        ) / len(data1) / len(data2)
