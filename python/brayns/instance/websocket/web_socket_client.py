@@ -47,6 +47,8 @@ class WebSocketClient(WebSocket):
         return self._websocket.closed and self._loop.closed
 
     def close(self) -> None:
+        if self.closed:
+            return
         self._loop.run(
             self._websocket.close()
         ).result()
@@ -54,6 +56,7 @@ class WebSocketClient(WebSocket):
         self._loop.close()
 
     def poll(self, block: bool) -> None:
+        self._check_closed()
         data = self._websocket.poll(block)
         if data is None:
             return
@@ -72,6 +75,11 @@ class WebSocketClient(WebSocket):
         self._send(data)
 
     def _send(self, data: Union[bytes, str]) -> None:
+        self._check_closed()
         self._loop.run(
             self._websocket.send(data)
         ).result()
+
+    def _check_closed(self) -> None:
+        if self.closed:
+            raise WebSocketError('Connection closed')

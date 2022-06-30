@@ -36,6 +36,14 @@ class Bounds:
             max=Vector3(*message['max'])
         )
 
+    @classmethod
+    @property
+    def empty(cls) -> 'Bounds':
+        return cls(
+            min=Vector3.zero,
+            max=Vector3.zero
+        )
+
     @property
     def center(self) -> Vector3:
         return (self.min + self.max) / 2

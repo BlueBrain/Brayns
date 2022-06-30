@@ -42,12 +42,11 @@ struct SnapshotResultHandler
     {
         const auto &formatName = imageSettings.getFormat();
         const auto format = brayns::string_utils::toLowercase(formatName);
-        const auto filename = path + "." + format;
         const auto quality = imageSettings.getQuality();
         auto image = fb.getImage();
         try
         {
-            brayns::ImageEncoder::save(image, filename, quality);
+            brayns::ImageEncoder::save(image, path, quality);
         }
         catch (const std::runtime_error &e)
         {

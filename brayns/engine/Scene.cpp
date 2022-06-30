@@ -105,7 +105,9 @@ bool Scene::commit()
 
 ModelInstance &Scene::addModel(ModelLoadParameters params, std::unique_ptr<Model> model)
 {
-    return _modelManager.addModel(std::move(params), std::move(model));
+    auto &instance = _modelManager.addModel(std::move(params), std::move(model));
+    computeBounds();
+    return instance;
 }
 
 std::vector<ModelInstance *> Scene::addModels(ModelLoadParameters params, std::vector<std::unique_ptr<Model>> models)

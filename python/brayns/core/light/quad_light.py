@@ -42,7 +42,7 @@ class QuadLight(Light):
 
     def serialize(self) -> dict:
         return self._to_dict({
-            'bottom_left_corner': list(self.bottom_left),
-            'vertical_displacement': list(self.edge2),
-            'horizontal_displacement': list(self.edge1)
+            'position': list(self.bottom_left),
+            'edge1': list(self.edge2),
+            'edge2': list(self.edge1)
         })
