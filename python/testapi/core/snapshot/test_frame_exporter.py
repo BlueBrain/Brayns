@@ -21,6 +21,7 @@
 import pathlib
 
 import brayns
+from testapi.image_validator import ImageValidator
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -84,17 +85,13 @@ class TestFrameExporter(SimpleTestCase):
         return brayns.KeyFrame.from_indices(indices, view)
 
     def _check_frames(self) -> None:
-        folder = self.output
-        frames = self.ref
-        diffs = list[str]()
-        for path in folder.glob('*.png'):
-            with path.open('rb') as file:
-                test = file.read()
-            path.unlink()
-            frame = frames / path.name
-            with frame.open('rb') as file:
-                ref = file.read()
-            if test != ref:
-                diffs.append(str(path))
-        folder.rmdir()
-        self.assertFalse(diffs)
+        errors = list[str]()
+        validator = ImageValidator()
+        for test in self.output.glob('*.png'):
+            ref = self.ref / test.name
+            try:
+                validator.validate_file(test, ref)
+            except RuntimeError as e:
+                errors.append(str(e))
+        self.output.rmdir()
+        self.assertFalse(errors)

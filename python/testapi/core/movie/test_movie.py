@@ -21,6 +21,7 @@
 import pathlib
 
 import brayns
+from testapi.image_validator import ImageValidator
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -45,11 +46,6 @@ class TestMovie(SimpleTestCase):
             fps=1,
             ffmpeg_executable=self.ffmpeg
         )
-        path = self.output
-        movie.save(str(path))
-        with path.open('rb') as file:
-            test = file.read()
-        path.unlink()
-        with self.ref.open('rb') as file:
-            ref = file.read()
-        self.assertEqual(test, ref)
+        movie.save(str(self.output))
+        validator = ImageValidator()
+        validator.validate_file(self.output, self.ref)

@@ -21,6 +21,7 @@
 import pathlib
 
 import brayns
+from testapi.image_validator import ImageValidator
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -45,16 +46,8 @@ class TestBbpLoader(SimpleTestCase):
         self.assertEqual(len(models), 1)
         model = models[0]
         self._snapshot(model.bounds)
-        self._check_snapshot()
-
-    def _check_snapshot(self) -> None:
-        path = self.output
-        with path.open('rb') as file:
-            test = file.read()
-        path.unlink()
-        with self.ref.open('rb') as file:
-            ref = file.read()
-        self.assertEqual(test, ref)
+        validator = ImageValidator()
+        validator.validate_file(self.output, self.ref)
 
     def _snapshot(self, bounds: brayns.Bounds) -> None:
         snapshot = self._create_snapshot(bounds)

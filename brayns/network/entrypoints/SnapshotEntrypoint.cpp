@@ -37,23 +37,20 @@ namespace
 {
 struct SnapshotResultHandler
 {
-    static std::string
+    static void
         writeToDisk(const std::string &path, const brayns::ImageSettings &imageSettings, brayns::Framebuffer &fb)
     {
-        const auto &formatName = imageSettings.getFormat();
-        const auto format = brayns::string_utils::toLowercase(formatName);
         const auto quality = imageSettings.getQuality();
         auto image = fb.getImage();
         try
         {
             brayns::ImageEncoder::save(image, path, quality);
         }
-        catch (const std::runtime_error &e)
+        catch (const std::exception &e)
         {
-            brayns::Log::error("{}", e.what());
+            brayns::Log::error("Error while saving image: '{}'.", e.what());
+            throw brayns::InternalErrorException(e.what());
         }
-
-        return {};
     }
 
     static std::string encodeToBase64(const brayns::ImageSettings &imageSettings, brayns::Framebuffer &fb)
@@ -65,14 +62,13 @@ struct SnapshotResultHandler
         auto image = fb.getImage();
         try
         {
-            return {brayns::ImageEncoder::encodeToBase64(image, format, quality)};
+            return brayns::ImageEncoder::encodeToBase64(image, format, quality);
         }
-        catch (const std::runtime_error &e)
+        catch (const std::exception &e)
         {
-            brayns::Log::error("{}", e.what());
+            brayns::Log::error("Error while encoding image to base64: '{}'.", e.what());
+            throw brayns::InternalErrorException(e.what());
         }
-
-        return {};
     }
 };
 
@@ -138,7 +134,7 @@ public:
 
         if (!params.file_path.empty())
         {
-            image.data = SnapshotResultHandler::writeToDisk(imagePath, imageSettings, framebuffer);
+            SnapshotResultHandler::writeToDisk(imagePath, imageSettings, framebuffer);
         }
         else
         {

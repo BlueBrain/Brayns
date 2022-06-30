@@ -21,6 +21,7 @@
 import pathlib
 
 import brayns
+from testapi.image_validator import ImageValidator
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -38,28 +39,20 @@ class TestSnapshot(SimpleTestCase):
     def test_save(self) -> None:
         snapshot = self._prepare_snapshot()
         snapshot.save(self.instance, str(self.output))
-        self._check_snapshot()
+        validator = ImageValidator()
+        validator.validate_file(self.output, self.ref)
 
     def test_save_remotely(self) -> None:
         snapshot = self._prepare_snapshot()
         snapshot.save_remotely(self.instance, str(self.output))
-        self._check_snapshot()
+        validator = ImageValidator()
+        validator.validate_file(self.output, self.ref)
 
     def test_download(self) -> None:
         snapshot = self._prepare_snapshot()
-        data = snapshot.download(self.instance)
-        self._check_snapshot_data(data)
-
-    def _check_snapshot(self) -> None:
-        with self.output.open('rb') as file:
-            data = file.read()
-        self.output.unlink()
-        self._check_snapshot_data(data)
-
-    def _check_snapshot_data(self, data: bytes) -> None:
-        with self.ref.open('rb') as file:
-            ref = file.read()
-        self.assertEqual(data, ref)
+        test = snapshot.download(self.instance)
+        validator = ImageValidator()
+        validator.validate_data(test, self.ref)
 
     def _prepare_snapshot(self) -> brayns.Snapshot:
         model = self._load_model()
