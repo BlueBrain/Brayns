@@ -25,12 +25,19 @@
 #include "common/StreamlineData.h"
 
 #include <map>
-#include <unordered_set>
+#include <vector>
 
 namespace dti
 {
 class SimulatedDTIBuilder final : public IDTIBuilder
 {
+public:
+    struct GIDRow
+    {
+        uint64_t gid{};
+        uint64_t row{};
+    };
+
 public:
     void reset();
     void readGidRowFile(const std::string &path) override;
@@ -39,7 +46,7 @@ public:
     void buildSimulation(const std::string &path, float spikeDecayTime, brayns::Model &model) override;
 
 private:
-    std::unordered_set<size_t> _whitelistedRows;
+    std::vector<GIDRow> _gidRows;
     std::map<uint64_t, StreamlineData> _streamlines;
 };
 }
