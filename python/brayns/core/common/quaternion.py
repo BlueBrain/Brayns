@@ -19,8 +19,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import math
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator, Union
+from typing import Union
 
 from brayns.core.common.vector import Vector
 from brayns.core.common.vector3 import Vector3

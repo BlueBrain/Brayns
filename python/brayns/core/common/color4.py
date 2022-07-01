@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from collections.abc import Iterator
 from dataclasses import dataclass, replace
-from typing import Iterator
 
 from brayns.core.common.color3 import Color3
 

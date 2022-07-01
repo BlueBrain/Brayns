@@ -29,7 +29,7 @@
 
 namespace brayns
 {
-class ExportFramesEntrypoint : public Entrypoint<ExportFramesParams, ExportFramesResult>
+class ExportFramesEntrypoint : public Entrypoint<ExportFramesParams, EmptyMessage>
 {
 public:
     ExportFramesEntrypoint(Engine &engine, ParametersManager &paramsManager, CancellationToken token);

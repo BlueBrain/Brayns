@@ -21,7 +21,8 @@
 import logging
 import sys
 import time
-from typing import Callable, Optional
+from collections.abc import Callable
+from typing import Optional
 
 from brayns.core.version import Version
 from brayns.instance.client import Client

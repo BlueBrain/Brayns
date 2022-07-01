@@ -41,7 +41,7 @@ CarPaintMaterial::CarPaintMaterial()
 
 std::string CarPaintMaterial::getName() const noexcept
 {
-    return "car paint";
+    return "carpaint";
 }
 
 void CarPaintMaterial::setFlakesDesnity(const float flakeDensity) noexcept

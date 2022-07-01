@@ -56,24 +56,24 @@ class Snapshot:
         return base64.b64decode(result['data'])
 
     def serialize_with_format(self, format: ImageFormat) -> dict:
-        return self._serialize(format)
+        return self._serialize(format=format)
 
     def serialize_with_path(self, path: str) -> dict:
-        format = ImageFormat.from_path(path)
-        return self._serialize(format, path)
+        return self._serialize(path=path)
 
-    def _serialize(self, format: ImageFormat, path: Optional[str] = None) -> dict:
+    def _serialize(self, format: Optional[ImageFormat] = None, path: Optional[str] = None) -> dict:
         message = {}
         if path is not None:
             message['file_path'] = path
-        image_settings = {
-            'format': format.value
-        }
+        image_settings = {}
+        if format is not None:
+            image_settings['format'] = format.value
         if format is ImageFormat.JPEG:
             image_settings['quality'] = self.jpeg_quality
         if self.resolution is not None:
             image_settings['size'] = list(self.resolution)
-        message['image_settings'] = image_settings
+        if image_settings:
+            message['image_settings'] = image_settings
         if self.frame is not None:
             message['simulation_frame'] = self.frame
         if self.view is not None:

@@ -30,7 +30,7 @@ class Application:
 
     plugins: list[str]
     resolution: Resolution
-    jpeg_stream_quality: int
+    jpeg_quality: int
 
     @staticmethod
     def from_instance(instance: Instance) -> 'Application':
@@ -42,18 +42,18 @@ class Application:
         return Application(
             plugins=message['plugins'],
             resolution=Resolution(*message['viewport']),
-            jpeg_stream_quality=message['jpeg_quality']
+            jpeg_quality=message['jpeg_quality']
         )
 
     @staticmethod
     def update(
         instance: Instance,
         resolution: Optional[Resolution] = None,
-        jpeg_stream_quality: Optional[int] = None
+        jpeg_quality: Optional[int] = None
     ) -> None:
         params = {}
         if resolution is not None:
             params['viewport'] = list(resolution)
-        if jpeg_stream_quality is not None:
-            params['jpeg_quality'] = jpeg_stream_quality
+        if jpeg_quality is not None:
+            params['jpeg_quality'] = jpeg_quality
         instance.request('set-application-parameters', params)

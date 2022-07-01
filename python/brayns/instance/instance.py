@@ -35,6 +35,10 @@ class Instance(Protocol):
     def __exit__(self, *_) -> None:
         self.disconnect()
 
+    @property
+    def connected(self) -> bool:
+        return True
+
     def disconnect(self) -> None:
         pass
 

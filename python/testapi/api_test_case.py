@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import os
+import pathlib
 import unittest
 
 import brayns
@@ -37,6 +38,19 @@ class ApiTestCase(unittest.TestCase):
         if ospray is not None:
             result['LD_LIBRARY_PATH'] = ospray
         return result
+
+    @property
+    def circuit(self) -> str:
+        return os.environ['BRAYNS_TEST_CIRCUIT']
+
+    @property
+    def ffmpeg(self) -> str:
+        return os.environ.get('BRAYNS_TEST_FFMPEG', 'ffmpeg')
+
+    @property
+    def asset_folder(self) -> pathlib.Path:
+        testapi = pathlib.Path(__file__).parent
+        return testapi / 'assets'
 
     def create_launcher(self) -> brayns.Launcher:
         return brayns.Launcher(

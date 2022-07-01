@@ -35,6 +35,10 @@ class Client(Instance):
         self._logger = logger
         self._manager = manager
 
+    @property
+    def connected(self) -> bool:
+        return not self._websocket.closed
+
     def disconnect(self) -> None:
         self._logger.info('Disconnection from Brayns instance.')
         self._manager.clear()

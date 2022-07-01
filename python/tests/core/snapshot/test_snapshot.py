@@ -78,10 +78,7 @@ class TestSnapshot(unittest.TestCase):
         snapshot = Snapshot()
         path = 'test.png'
         ref = {
-            'file_path': path,
-            'image_settings': {
-                'format': 'png'
-            }
+            'file_path': path
         }
         test = snapshot.serialize_with_path(path)
         self.assertEqual(test, ref)
