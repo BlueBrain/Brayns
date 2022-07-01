@@ -35,11 +35,6 @@
 
 namespace
 {
-std::istream &operator>>(std::istream &in, dti::SimulatedDTIBuilder::GIDRow &gr)
-{
-    return in >> gr.gid >> gr.row;
-}
-
 class GIDsToStreamlineIndicesMapping
 {
 public:
@@ -67,6 +62,11 @@ public:
 
 namespace dti
 {
+std::istream &operator>>(std::istream &in, SimulatedDTIBuilder::GIDRow &gr)
+{
+    return in >> gr.gid >> gr.row;
+}
+
 void SimulatedDTIBuilder::reset()
 {
     _gidRows.clear();

@@ -52,8 +52,6 @@ namespace dti
 {
 DTIComponent::DTIComponent(std::vector<std::vector<brayns::Primitive>> streamlineGeometries)
 {
-    auto &group = getModel();
-
     _streamlines.reserve(streamlineGeometries.size());
     for (auto &primitives : streamlineGeometries)
     {

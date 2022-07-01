@@ -29,6 +29,9 @@
 
 namespace dti
 {
+/**
+ * @brief Creates and adds the DTIComponent to a model
+ */
 class StreamlineComponentBuilder
 {
 public:

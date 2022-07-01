@@ -23,10 +23,15 @@
 
 #include "StreamlineData.h"
 
+#include <brayns/utils/FileReader.h>
+
 #include <map>
 
 namespace dti
 {
+/**
+ * @brief Read the streamline geometry file by line, ignore those lines for which the RowFilterCallback returns false
+ */
 class RowStreamlineMapReader
 {
 public:

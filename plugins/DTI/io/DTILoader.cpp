@@ -86,7 +86,7 @@ std::string DTILoader::getName() const
 
 std::vector<std::string> DTILoader::getSupportedExtensions() const
 {
-    return {"dti"};
+    return {"json"};
 }
 
 std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromBlob(

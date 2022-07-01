@@ -27,6 +27,11 @@
 
 namespace dti
 {
+/**
+ * @brief Streamline geometry data
+ * linealIndex: row at which the geometry was found
+ * points: Point string that forms the geometry
+ */
 struct StreamlineData
 {
     size_t linealIndex{};

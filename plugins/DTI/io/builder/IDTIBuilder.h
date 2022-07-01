@@ -27,15 +27,44 @@
 
 namespace dti
 {
+/**
+ * @brief Builder interface for DTI models
+ */
 class IDTIBuilder
 {
 public:
     virtual ~IDTIBuilder() = default;
 
+    /**
+     * @brief Resets the builder to initial state
+     */
     virtual void reset() = 0;
+
+    /**
+     * @brief Process the step to reads the gid to row mapping file
+     * @param path Path to the gid to row mapping file
+     */
     virtual void readGidRowFile(const std::string &path) = 0;
+
+    /**
+     * @brief Process the step to read the streamline geometry file
+     * @param path Path to the streamline geometry file
+     */
     virtual void readStreamlinesFile(const std::string &path) = 0;
+
+    /**
+     * @brief Process the step to build the geometry from stored data
+     * @param radius Radius of the streamline cylinder geoemtries
+     * @param model Target model where the DTIComponent with the geometry will be added
+     */
     virtual void buildGeometry(float radius, brayns::Model &model) = 0;
+
+    /**
+     * @brief Process the step to generate a simulation renderer from a given circuit and stored data
+     * @param path Path to a BlueConfig based circuit with a spike report
+     * @param spikeDecayTime Decay time (in report time unit) for a spike
+     * @param model Target model where the SpikeReportComponent will be addded
+     */
     virtual void buildSimulation(const std::string &path, float spikeDecayTime, brayns::Model &model) = 0;
 };
 }
