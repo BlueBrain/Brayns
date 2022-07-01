@@ -1,8 +1,9 @@
 # Copyright (c) 2015-2022, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
-#                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
-#                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+# Responsible Authors:
+# Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+# Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
@@ -33,9 +34,6 @@ option(BRAYNS_ATLASEXPLORER_ENABLED "Activate Atlas explorer plugin" OFF)
 # Core dependencies
 find_package(Git REQUIRED)
 find_package(Python3 3.9 REQUIRED)
-set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_USE_STATIC_LIBS OFF)
-find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(OpenMP REQUIRED)
 find_package(ospray 2.10 REQUIRED)
 find_package(Poco QUIET COMPONENTS Foundation JSON Net NetSSL)
