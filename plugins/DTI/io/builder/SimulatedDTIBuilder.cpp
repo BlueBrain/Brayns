@@ -24,27 +24,52 @@
 #include "common/RowTreamlineMapReader.h"
 #include "common/StreamlineComponentBuilder.h"
 
+#include <components/SpikeReportComponent.h>
+
 #include <brayns/utils/FileReader.h>
+
+#include <brain/spikeReportReader.h>
+#include <brion/blueConfig.h>
+
+#include <unordered_set>
 
 namespace
 {
-struct GIDRow
-{
-    uint64_t gid{};
-    uint64_t row{};
-};
-
-std::istream &operator>>(std::istream &in, GIDRow &gr)
+std::istream &operator>>(std::istream &in, dti::SimulatedDTIBuilder::GIDRow &gr)
 {
     return in >> gr.gid >> gr.row;
 }
+
+class GIDsToStreamlineIndicesMapping
+{
+public:
+    static std::unordered_map<uint64_t, std::vector<size_t>> generate(
+        const std::vector<dti::SimulatedDTIBuilder::GIDRow> &gidRows,
+        const std::map<uint64_t, dti::StreamlineData> &streamlinesMap)
+    {
+        std::unordered_map<uint64_t, std::vector<size_t>> result;
+        for (const auto &gidRow : gidRows)
+        {
+            const auto gid = gidRow.gid;
+            const auto row = gidRow.row;
+
+            const auto &streamline = streamlinesMap.at(row);
+            const auto streamlineIndex = streamline.linealIndex;
+
+            auto &gidIndexList = result[gid];
+            gidIndexList.push_back(streamlineIndex);
+        }
+
+        return result;
+    }
+};
 }
 
 namespace dti
 {
 void SimulatedDTIBuilder::reset()
 {
-    _whitelistedRows.clear();
+    _gidRows.clear();
     _streamlines.clear();
 }
 
@@ -52,19 +77,21 @@ void SimulatedDTIBuilder::readGidRowFile(const std::string &path)
 {
     const auto content = brayns::FileReader::read(path);
     std::istringstream stream(content);
-    std::vector<GIDRow> gidRows(std::istream_iterator<GIDRow>(stream), {});
-    return gidRows;
+    _gidRows = std::vector<GIDRow>(std::istream_iterator<GIDRow>(stream), {});
 }
 
 void SimulatedDTIBuilder::readStreamlinesFile(const std::string &path)
 {
+    std::unordered_set<size_t> whitelistedRows;
+    for (const auto &entry : _gidRows)
+    {
+        const auto row = entry.row;
+        whitelistedRows.insert(row);
+    }
+
     _streamlines = RowStreamlineMapReader::read(
         path,
-        [](size_t row)
-        {
-            (void)row;
-            return true;
-        });
+        [&](size_t row) { return whitelistedRows.find(row) != whitelistedRows.end(); });
 }
 
 void SimulatedDTIBuilder::buildGeometry(float radius, brayns::Model &model)
@@ -74,7 +101,10 @@ void SimulatedDTIBuilder::buildGeometry(float radius, brayns::Model &model)
 
 void SimulatedDTIBuilder::buildSimulation(const std::string &path, float spikeDecayTime, brayns::Model &model)
 {
-    (void)path;
-    (void)spikeDecayTime;
-    (void)model;
+    auto gidStreamlineMap = GIDsToStreamlineIndicesMapping::generate(_gidRows, _streamlines);
+    const auto blueConfig = brion::BlueConfig(path);
+    const auto spikesURI = blueConfig.getSpikeSource();
+    auto spikeReport = std::make_unique<brain::SpikeReportReader>(spikesURI);
+    model.addComponent<dti::SpikeReportComponent>(std::move(spikeReport), std::move(gidStreamlineMap), spikeDecayTime);
+}
 }
