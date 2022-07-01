@@ -30,10 +30,8 @@ struct ProductionParameters
 namespace brayns
 {
 ProductionRenderer::ProductionRenderer()
-    : Renderer("pathtracer")
+    : Renderer(ProductionParameters::osprayName)
 {
-    int a;
-    (void)a;
 }
 
 std::string ProductionRenderer::getName() const noexcept
