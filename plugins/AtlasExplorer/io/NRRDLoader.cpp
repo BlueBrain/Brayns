@@ -40,7 +40,7 @@ std::string NRRDLoader::getName() const
 }
 
 std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromBlob(
-    brayns::Blob &&blob,
+    const brayns::Blob &blob,
     const brayns::LoaderProgress &callback) const
 {
     auto &bytes = blob.data;
@@ -83,5 +83,5 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
     blob.name = path;
     blob.data = std::vector<uint8_t>(fileContent.begin(), fileContent.end());
 
-    return importFromBlob(std::move(blob), callback);
+    return importFromBlob(blob, callback);
 }

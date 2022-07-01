@@ -143,7 +143,7 @@ public:
      * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
      * @throw std::runtime_error An error occurs.
      */
-    std::vector<std::unique_ptr<Model>> importFromBlob(Blob &&blob, const LoaderProgress &callback) const final;
+    std::vector<std::unique_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback) const final;
 
 private:
     MeshParserRegistry _parsers;

@@ -41,7 +41,7 @@ public:
         const ProteinLoaderParameters &properties) const final;
 
     std::vector<std::unique_ptr<Model>> importFromBlob(
-        Blob &&blob,
+        const Blob &blob,
         const LoaderProgress &callback,
         const ProteinLoaderParameters &properties) const final;
 };

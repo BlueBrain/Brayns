@@ -470,7 +470,7 @@ std::vector<std::string> ProteinLoader::getSupportedExtensions() const
 }
 
 std::vector<std::unique_ptr<Model>> ProteinLoader::importFromBlob(
-    Blob &&blob,
+    const Blob &blob,
     const LoaderProgress &callback,
     const ProteinLoaderParameters &properties) const
 {

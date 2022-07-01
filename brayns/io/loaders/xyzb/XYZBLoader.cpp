@@ -33,7 +33,7 @@
 
 namespace brayns
 {
-std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(Blob &&blob, const LoaderProgress &callback) const
+std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob, const LoaderProgress &callback) const
 {
     Log::info("Loading xyz {}.", blob.name);
 

@@ -34,7 +34,7 @@ public:
     std::string getName() const final;
 
     bool isSupported(const std::string &filename, const std::string &extension) const final;
-    std::vector<ModelDescriptorPtr> importFromBlob(Blob &&blob, const LoaderProgress &callback, Scene &scene)
+    std::vector<ModelDescriptorPtr> importFromBlob(const Blob &blob, const LoaderProgress &callback, Scene &scene)
         const final;
 
     std::vector<ModelDescriptorPtr>
@@ -52,7 +52,7 @@ public:
 
     bool isSupported(const std::string &filename, const std::string &extension) const final;
     std::vector<ModelDescriptorPtr> importFromBlob(
-        Blob &&blob,
+        const Blob &blob,
         const LoaderProgress &callback,
         const RawVolumeLoaderParameters &properties,
         Scene &scene) const final;

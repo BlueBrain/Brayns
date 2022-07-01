@@ -37,7 +37,7 @@ public:
     std::string getName() const final;
 
     std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
-        brayns::Blob &&blob,
+        const brayns::Blob &blob,
         const brayns::LoaderProgress &callback,
         const BBPLoaderParameters &params) const final;
 

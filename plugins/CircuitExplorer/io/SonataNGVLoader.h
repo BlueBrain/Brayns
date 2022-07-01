@@ -33,7 +33,7 @@ public:
     std::string getName() const final;
 
     std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
-        brayns::Blob &&blobl,
+        const brayns::Blob &blobl,
         const brayns::LoaderProgress &cb,
         const SonataNGVLoaderParameters &params) const final;
 

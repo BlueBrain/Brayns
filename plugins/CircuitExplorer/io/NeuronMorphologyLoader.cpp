@@ -54,7 +54,7 @@ std::string NeuronMorphologyLoader::getName() const
 }
 
 std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromBlob(
-    brayns::Blob &&blob,
+    const brayns::Blob &blob,
     const brayns::LoaderProgress &cb,
     const NeuronMorphologyLoaderParameters &params) const
 {

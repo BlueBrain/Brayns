@@ -265,7 +265,7 @@ std::vector<std::string> DTILoader::getSupportedExtensions() const
 }
 
 std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromBlob(
-    brayns::Blob &&blob,
+    const brayns::Blob &blob,
     const brayns::LoaderProgress &callback,
     const DTILoaderParameters &params) const
 {

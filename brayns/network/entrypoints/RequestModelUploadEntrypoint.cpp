@@ -168,7 +168,7 @@ public:
         auto blob = BlobLoader::load(params, data, progress);
         auto parameters = params.loadParameters;
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
-        auto models = loader.loadFromBlob(std::move(blob), {callback}, parameters);
+        auto models = loader.loadFromBlob(blob, {callback}, parameters);
 
         brayns::ModelLoadParameters loadParameters;
         loadParameters.type = brayns::ModelLoadParameters::LoadType::FromBlob;

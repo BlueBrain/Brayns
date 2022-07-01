@@ -102,7 +102,7 @@ public:
      * the blob
      */
     virtual std::vector<std::unique_ptr<Model>>
-        loadFromBlob(Blob &&blob, const LoaderProgress &callback, const JsonValue &params) const = 0;
+        loadFromBlob(const Blob &blob, const LoaderProgress &callback, const JsonValue &params) const = 0;
 
     /**
      * @brief Loads a model/list of models from a path to a file
@@ -139,10 +139,10 @@ public:
     }
 
     virtual std::vector<std::unique_ptr<Model>>
-        loadFromBlob(Blob &&blob, const LoaderProgress &callback, const JsonValue &params) const override
+        loadFromBlob(const Blob &blob, const LoaderProgress &callback, const JsonValue &params) const override
     {
         const T inputParams = _parseParameters(params);
-        return importFromBlob(std::move(blob), callback, inputParams);
+        return importFromBlob(blob, callback, inputParams);
     }
 
     virtual std::vector<std::unique_ptr<Model>>
@@ -161,7 +161,7 @@ public:
      * @return the model that has been created by the loader
      */
     virtual std::vector<std::unique_ptr<Model>>
-        importFromBlob(Blob &&blob, const LoaderProgress &callback, const T &properties) const = 0;
+        importFromBlob(const Blob &blob, const LoaderProgress &callback, const T &properties) const = 0;
 
     /**
      * Import the data from the given file and return the created model.
@@ -227,7 +227,8 @@ public:
      * @param callback a callback to update the load progress to the caller
      * @return a std::vector with the loaded ModelDescriptorPtr objects
      */
-    virtual std::vector<std::unique_ptr<Model>> importFromBlob(Blob &&blob, const LoaderProgress &callback) const = 0;
+    virtual std::vector<std::unique_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback)
+        const = 0;
 
     /**
      * @brief importFromFile imports a model from a file from disk
@@ -239,7 +240,7 @@ public:
         const = 0;
 
     std::vector<std::unique_ptr<Model>> importFromBlob(
-        Blob &&blob,
+        const Blob &blob,
         const LoaderProgress &callback,
         const EmptyLoaderParameters &parameters) const final;
 
