@@ -19,10 +19,10 @@
 
 #include <brayns/utils/string/StringConverter.h>
 #include <brayns/utils/string/StringCounter.h>
-#include <brayns/utils/string/StringExtractor.h>
 #include <brayns/utils/string/StringInfo.h>
 #include <brayns/utils/string/StringJoiner.h>
 #include <brayns/utils/string/StringParser.h>
+#include <brayns/utils/string/StringStream.h>
 #include <brayns/utils/string/StringTrimmer.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
@@ -69,70 +69,6 @@ TEST_CASE("string_counter")
 
     auto countLines = brayns::StringCounter::countLines("   one\n\ttwo three \rfour\n\n");
     CHECK_EQ(countLines, 4);
-}
-
-TEST_CASE("string_extractor")
-{
-    std::string_view data;
-    std::string_view extracted;
-
-    data = " test1 test2 ";
-    extracted = brayns::StringExtractor::extract(data, ' ');
-    CHECK_EQ(extracted, "");
-    extracted = brayns::StringExtractor::extract(data, ' ');
-    CHECK_EQ(extracted, "test1");
-    extracted = brayns::StringExtractor::extract(data, ' ');
-    CHECK_EQ(extracted, "test2");
-    extracted = brayns::StringExtractor::extract(data, ' ');
-    CHECK_EQ(extracted, "");
-    extracted = brayns::StringExtractor::extract(data, ' ');
-    CHECK_EQ(extracted, "");
-
-    data = "septest1septest2sep";
-    extracted = brayns::StringExtractor::extract(data, "sep");
-    CHECK_EQ(extracted, "");
-    extracted = brayns::StringExtractor::extract(data, "sep");
-    CHECK_EQ(extracted, "test1");
-    extracted = brayns::StringExtractor::extract(data, "sep");
-    CHECK_EQ(extracted, "test2");
-    extracted = brayns::StringExtractor::extract(data, "sep");
-    CHECK_EQ(extracted, "");
-    extracted = brayns::StringExtractor::extract(data, "sep");
-    CHECK_EQ(extracted, "");
-
-    data = "atest1btest2c";
-    extracted = brayns::StringExtractor::extractOneOf(data, "abc");
-    CHECK_EQ(extracted, "");
-    extracted = brayns::StringExtractor::extractOneOf(data, "abc");
-    CHECK_EQ(extracted, "test1");
-    extracted = brayns::StringExtractor::extractOneOf(data, "abc");
-    CHECK_EQ(extracted, "test2");
-    extracted = brayns::StringExtractor::extractOneOf(data, "abc");
-    CHECK_EQ(extracted, "");
-    extracted = brayns::StringExtractor::extractOneOf(data, "abc");
-    CHECK_EQ(extracted, "");
-
-    data = "\n test1  \r\vtest2\t ";
-    extracted = brayns::StringExtractor::extractToken(data);
-    CHECK_EQ(extracted, "test1");
-    extracted = brayns::StringExtractor::extractToken(data);
-    CHECK_EQ(extracted, "test2");
-    extracted = brayns::StringExtractor::extractToken(data);
-    CHECK_EQ(extracted, "");
-    extracted = brayns::StringExtractor::extractToken(data);
-    CHECK_EQ(extracted, "");
-
-    data = "\n test1  \n\r\vtest2\t \n";
-    extracted = brayns::StringExtractor::extractLine(data);
-    CHECK_EQ(extracted, "");
-    extracted = brayns::StringExtractor::extractLine(data);
-    CHECK_EQ(extracted, " test1  ");
-    extracted = brayns::StringExtractor::extractLine(data);
-    CHECK_EQ(extracted, "\r\vtest2\t ");
-    extracted = brayns::StringExtractor::extractLine(data);
-    CHECK_EQ(extracted, "");
-    extracted = brayns::StringExtractor::extractLine(data);
-    CHECK_EQ(extracted, "");
 }
 
 TEST_CASE("string_info")
@@ -194,6 +130,70 @@ TEST_CASE("string_parser")
     CHECK_THROWS_AS(brayns::StringParser<uint32_t>::parse("-123"), std::runtime_error);
 
     CHECK_THROWS_AS(brayns::StringParser<int8_t>::parse("5000"), std::runtime_error);
+}
+
+TEST_CASE("string_extractor")
+{
+    auto stream = brayns::StringStream();
+    auto extracted = std::string_view();
+
+    stream = {" test1 test2 "};
+    extracted = stream.extract(' ');
+    CHECK_EQ(extracted, "");
+    extracted = stream.extract(' ');
+    CHECK_EQ(extracted, "test1");
+    extracted = stream.extract(' ');
+    CHECK_EQ(extracted, "test2");
+    extracted = stream.extract(' ');
+    CHECK_EQ(extracted, "");
+    extracted = stream.extract(' ');
+    CHECK_EQ(extracted, "");
+
+    stream = {"septest1septest2sep"};
+    extracted = stream.extract("sep");
+    CHECK_EQ(extracted, "");
+    extracted = stream.extract("sep");
+    CHECK_EQ(extracted, "test1");
+    extracted = stream.extract("sep");
+    CHECK_EQ(extracted, "test2");
+    extracted = stream.extract("sep");
+    CHECK_EQ(extracted, "");
+    extracted = stream.extract("sep");
+    CHECK_EQ(extracted, "");
+
+    stream = {"atest1btest2c"};
+    extracted = stream.extractOneOf("abc");
+    CHECK_EQ(extracted, "");
+    extracted = stream.extractOneOf("abc");
+    CHECK_EQ(extracted, "test1");
+    extracted = stream.extractOneOf("abc");
+    CHECK_EQ(extracted, "test2");
+    extracted = stream.extractOneOf("abc");
+    CHECK_EQ(extracted, "");
+    extracted = stream.extractOneOf("abc");
+    CHECK_EQ(extracted, "");
+
+    stream = {"\n test1  \r\vtest2\t "};
+    extracted = stream.extractToken();
+    CHECK_EQ(extracted, "test1");
+    extracted = stream.extractToken();
+    CHECK_EQ(extracted, "test2");
+    extracted = stream.extractToken();
+    CHECK_EQ(extracted, "");
+    extracted = stream.extractToken();
+    CHECK_EQ(extracted, "");
+
+    stream = {"\n test1  \n\r\vtest2\t \n"};
+    extracted = stream.extractLine();
+    CHECK_EQ(extracted, "");
+    extracted = stream.extractLine();
+    CHECK_EQ(extracted, " test1  ");
+    extracted = stream.extractLine();
+    CHECK_EQ(extracted, "\r\vtest2\t ");
+    extracted = stream.extractLine();
+    CHECK_EQ(extracted, "");
+    extracted = stream.extractLine();
+    CHECK_EQ(extracted, "");
 }
 
 TEST_CASE("string_trimmer")

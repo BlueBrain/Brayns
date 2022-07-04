@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "StringExtractor.h"
+#include "StringStream.h"
 
 #include <algorithm>
 
@@ -28,54 +28,64 @@
 
 namespace brayns
 {
-std::string_view StringExtractor::extract(std::string_view &data, char separator)
+StringStream::StringStream(std::string_view data)
+    : _data(data)
 {
-    return extract(data, {&separator, 1});
 }
 
-std::string_view StringExtractor::extract(std::string_view &data, std::string_view separator)
+bool StringStream::isEmpty() const
 {
-    auto index = data.find(separator);
+    return _data.empty();
+}
+
+std::string_view StringStream::extract(char separator)
+{
+    return extract({&separator, 1});
+}
+
+std::string_view StringStream::extract(std::string_view separator)
+{
+    auto index = _data.find(separator);
     if (index == std::string_view::npos)
     {
-        return std::exchange(data, {});
+        return std::exchange(_data, {});
     }
-    auto result = data.substr(0, index);
+    auto result = _data.substr(0, index);
     auto start = index + separator.size();
-    data = data.substr(start);
+    _data = _data.substr(start);
     return result;
 }
 
-std::string_view StringExtractor::extractOneOf(std::string_view &data, std::string_view separators)
+std::string_view StringStream::extractOneOf(std::string_view separators)
 {
-    auto index = data.find_first_of(separators);
+    auto index = _data.find_first_of(separators);
     if (index == std::string_view::npos)
     {
-        return std::exchange(data, {});
+        return std::exchange(_data, {});
     }
-    auto result = data.substr(0, index);
-    data = data.substr(index + 1);
+    auto result = _data.substr(0, index);
+    _data = _data.substr(index + 1);
     return result;
 }
 
-std::string_view StringExtractor::extractToken(std::string_view &data)
+std::string_view StringStream::extractToken()
 {
-    data = StringTrimmer::trimLeft(data);
-    for (size_t i = 0; i < data.size(); ++i)
+    _data = StringTrimmer::trimLeft(_data);
+    for (size_t i = 0; i < _data.size(); ++i)
     {
-        if (!StringInfo::isSpace(data[i]))
+        if (!StringInfo::isSpace(_data[i]))
         {
             continue;
         }
-        auto result = data.substr(0, i);
-        data = data.substr(i);
+        auto result = _data.substr(0, i);
+        _data = _data.substr(i);
         return result;
     }
-    return std::exchange(data, {});
+    return std::exchange(_data, {});
 }
 
-std::string_view StringExtractor::extractLine(std::string_view &data)
+std::string_view StringStream::extractLine()
 {
-    return extract(data, '\n');
+    return extract('\n');
 }
 } // namespace brayns

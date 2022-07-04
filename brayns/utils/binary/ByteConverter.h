@@ -21,17 +21,39 @@
 
 #pragma once
 
-#include <string_view>
+#include <cstdint>
 
 namespace brayns
 {
-class StringExtractor
+class ByteConverter
 {
 public:
-    static std::string_view extract(std::string_view &data, char separator);
-    static std::string_view extract(std::string_view &data, std::string_view separator);
-    static std::string_view extractOneOf(std::string_view &data, std::string_view separators);
-    static std::string_view extractToken(std::string_view &data);
-    static std::string_view extractLine(std::string_view &data);
+    template<typename T>
+    static constexpr const char *getBytes(const T &value)
+    {
+        auto address = static_cast<const void *>(&value);
+        return static_cast<const char *>(address);
+    }
+
+    template<typename T>
+    static constexpr char *getBytes(T &value)
+    {
+        auto address = static_cast<void *>(&value);
+        return static_cast<char *>(address);
+    }
+
+    template<typename T>
+    static constexpr T swapBytes(T value)
+    {
+        T result;
+        auto from = getBytes(value);
+        auto to = getBytes(result);
+        auto stride = sizeof(T);
+        for (size_t i = 0; i < stride; ++i)
+        {
+            to[i] = from[stride - i - 1];
+        }
+        return result;
+    }
 };
 } // namespace brayns
