@@ -20,101 +20,112 @@
 
 #include <brion/compartmentReport.h>
 
+namespace
+{
+class TargetGIDReader
+{
+public:
+    static brain::GIDSet read(const brain::Circuit &circuit, const std::vector<std::string> &targets)
+    {
+        brain::GIDSet result;
+        for (const auto &target : targets)
+        {
+            auto tempGids = circuit.getGIDs(target);
+            result.insert(tempGids.begin(), tempGids.end());
+        }
+        return result;
+    }
+};
+
+class BaseGIDsFetcher
+{
+public:
+    static brain::GIDSet
+        fromParameters(const brion::BlueConfig &config, const brain::Circuit &circuit, const BBPLoaderParameters &input)
+    {
+        if (input.gids.has_value())
+        {
+            auto &gids = *input.gids;
+            return brain::GIDSet(gids.begin(), gids.end());
+        }
+
+        if (input.targets.has_value())
+        {
+            auto &targets = *input.targets;
+            return TargetGIDReader::read(circuit, targets);
+        }
+
+        if (auto circuitTarget = config.getCircuitTarget(); !circuitTarget.empty())
+        {
+            return TargetGIDReader::read(circuit, {circuitTarget});
+        }
+
+        return circuit.getGIDs();
+    };
+};
+class ReportGIDIntersector
+{
+public:
+    static brain::GIDSet
+        intersect(const brion::BlueConfig &config, const std::string &reportName, const brain::GIDSet &source)
+    {
+        auto reportPath = config.getReportSource(reportName).getPath();
+        const brion::URI uri(reportPath);
+        const brion::CompartmentReport report(uri, brion::AccessMode::MODE_READ, source);
+        return report.getGIDs();
+    }
+};
+
+class GIDSampler
+{
+public:
+    static brain::GIDSet subSample(const brain::GIDSet &input, float percentage)
+    {
+        auto nbGids = input.size();
+        const auto expectedSize = static_cast<size_t>(nbGids * percentage);
+        const auto skipFactor = static_cast<size_t>(static_cast<float>(nbGids) / static_cast<float>(expectedSize));
+        brain::GIDSet subsampled;
+        auto it = subsampled.begin();
+        auto allIt = input.begin();
+        while (allIt != input.end())
+        {
+            subsampled.insert(it, *allIt);
+            ++it;
+            size_t counter{0};
+            while (counter++ < skipFactor && allIt != input.end())
+            {
+                ++allIt;
+            }
+        }
+
+        return subsampled;
+    }
+};
+}
+
 namespace bbploader
 {
 brain::GIDSet
     GIDLoader::compute(const brion::BlueConfig &config, const brain::Circuit &circuit, const BBPLoaderParameters &input)
 {
-    brain::GIDSet allGids;
-    allGids = _fromParameters(config, circuit, input);
-    allGids = _fromSimulation(config, input, allGids);
-    allGids = _fromPercentage(allGids, input.percentage);
+    auto inputGidList = input.gids.has_value();
+    auto baseGids = BaseGIDsFetcher::fromParameters(config, circuit, input);
 
-    if (allGids.empty())
+    if (input.report_type == bbploader::ReportType::Compartment)
     {
-        throw std::runtime_error("No GIDs were selected with the input parameters");
+        baseGids = ReportGIDIntersector::intersect(config, input.report_name, baseGids);
     }
 
-    return allGids;
-}
-
-brain::GIDSet GIDLoader::_fromParameters(
-    const brion::BlueConfig &config,
-    const brain::Circuit &circuit,
-    const BBPLoaderParameters &input)
-{
-    if (!input.gids.empty())
+    if (!inputGidList && input.percentage < 1.f)
     {
-        return brain::GIDSet(input.gids.begin(), input.gids.end());
+        baseGids = GIDSampler::subSample(baseGids, input.percentage);
     }
 
-    brain::GIDSet result;
-    std::vector<std::string> targets;
-    if (!input.targets.empty())
+    if (baseGids.empty())
     {
-        targets = input.targets;
-    }
-    else if (const auto defaultTarget = config.getCircuitTarget(); !defaultTarget.empty())
-    {
-        targets = {defaultTarget};
+        throw std::runtime_error("Empty list of GIDs computed");
     }
 
-    brain::GIDSet allGids;
-    if (!targets.empty())
-    {
-        for (const auto &target : targets)
-        {
-            const auto tempGids = circuit.getGIDs(target);
-            allGids.insert(tempGids.begin(), tempGids.end());
-        }
-    }
-    else
-    {
-        allGids = circuit.getGIDs();
-    }
-
-    return allGids;
-}
-
-brain::GIDSet GIDLoader::_fromSimulation(
-    const brion::BlueConfig &config,
-    const BBPLoaderParameters &input,
-    const brain::GIDSet &src)
-{
-    const auto reportType = input.report_type;
-    if (reportType == bbploader::ReportType::Compartment)
-    {
-        const auto &reportName = input.report_name;
-        const auto reportPath = config.getReportSource(reportName).getPath();
-        const brion::URI uri(reportPath);
-        const brion::CompartmentReport report(uri, brion::AccessMode::MODE_READ, src);
-        return report.getGIDs();
-    }
-
-    return src;
-}
-
-brain::GIDSet GIDLoader::_fromPercentage(const brain::GIDSet &src, const float percentage)
-{
-    if (percentage >= 1.f)
-    {
-        return src;
-    }
-
-    const auto expectedSize = static_cast<size_t>(src.size() * percentage);
-    const auto skipFactor = static_cast<size_t>(static_cast<float>(src.size()) / static_cast<float>(expectedSize));
-    brain::GIDSet finalList;
-    auto it = finalList.begin();
-    auto allIt = src.begin();
-    while (allIt != src.end())
-    {
-        finalList.insert(it, *allIt);
-        ++it;
-        size_t counter{0};
-        while (counter++ < skipFactor && allIt != src.end())
-            ++allIt;
-    }
-
-    return finalList;
+    return baseGids;
 }
 }

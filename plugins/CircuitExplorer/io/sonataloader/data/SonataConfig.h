@@ -18,6 +18,8 @@
 
 #pragma once
 
+#undef variant_CONFIG_SELECT_VARIANT
+#define variant_CONFIG_SELECT_VARIANT variant_VARIANT_NONSTD
 #include <bbp/sonata/config.h>
 
 #include <filesystem>

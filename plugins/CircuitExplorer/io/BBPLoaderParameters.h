@@ -27,6 +27,8 @@
 #include <io/NeuronMorphologyLoaderParameters.h>
 #include <io/bbploader/reports/ReportType.h>
 
+#include <optional>
+
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_ENUM(
@@ -42,15 +44,16 @@ BRAYNS_JSON_OBJECT_ENTRY(
     percentage,
     "Percentage of neurons to load (Ignored if a list of gids is specified)",
     brayns::Minimum(0.001f),
-    brayns::Maximum(1.f))
+    brayns::Maximum(1.f),
+    brayns::Default(0.1f))
 BRAYNS_JSON_OBJECT_ENTRY(
-    std::vector<std::string>,
+    std::optional<std::vector<std::string>>,
     targets,
     "List of targets to load. If empty, circuit's default target will be used "
     "(Ignored if a list of gids is specified",
     brayns::Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
-    std::vector<uint64_t>,
+    std::optional<std::vector<uint64_t>>,
     gids,
     "List of GIDs to load. Invalidates 'percentage' and 'targets' parameters",
     brayns::Required(false))

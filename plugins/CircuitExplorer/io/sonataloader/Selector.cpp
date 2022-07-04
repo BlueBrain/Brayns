@@ -21,7 +21,6 @@
 #include <io/sonataloader/data/SonataConfig.h>
 #include <io/sonataloader/data/SonataSimulationMapping.h>
 
-#include <bbp/sonata/config.h>
 #include <bbp/sonata/node_sets.h>
 
 namespace

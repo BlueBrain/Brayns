@@ -120,8 +120,11 @@ struct MetadataFactory
         const auto &gids = ctxt.gids;
         const auto &params = ctxt.loadParameters;
         const auto &targets = params.targets;
-        const auto targetList = brayns::string_utils::join(targets, ",");
-        metadata["Targets"] = targetList;
+        if (targets.has_value())
+        {
+            const auto targetList = brayns::string_utils::join(*targets, ",");
+            metadata["Targets"] = targetList;
+        }
         metadata["Neurons loaded count"] = std::to_string(gids.size());
 
         dst.setMetaData(std::move(metadata));

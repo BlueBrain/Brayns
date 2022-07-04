@@ -30,16 +30,5 @@ class GIDLoader
 public:
     static brain::GIDSet
         compute(const brion::BlueConfig &config, const brain::Circuit &circuit, const BBPLoaderParameters &input);
-
-private:
-    static brain::GIDSet _fromParameters(
-        const brion::BlueConfig &config,
-        const brain::Circuit &circuit,
-        const BBPLoaderParameters &input);
-
-    static brain::GIDSet
-        _fromSimulation(const brion::BlueConfig &config, const BBPLoaderParameters &input, const brain::GIDSet &src);
-
-    static brain::GIDSet _fromPercentage(const brain::GIDSet &src, const float percentage);
 };
 }
