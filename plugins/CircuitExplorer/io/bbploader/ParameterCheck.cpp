@@ -26,87 +26,116 @@ namespace bbploader
 {
 namespace
 {
-void checkTargets(const brion::BlueConfig &config, const BBPLoaderParameters &input)
+class InputGidSettingsChecker
 {
-    if (input.targets.empty())
+public:
+    static void check(const BBPLoaderParameters &input)
     {
-        return;
-    }
-
-    const auto targetParsers = config.getTargets();
-    for (const auto &trg : input.targets)
-    {
-        if (trg.empty())
+        if (input.gids.has_value() && (*input.gids).empty())
         {
-            throw std::invalid_argument("Specified an empty target name");
+            throw std::invalid_argument("Cannot specify an empty list of GIDs");
         }
 
-        bool exists = false;
-        for (const auto &parser : targetParsers)
+        if (input.targets.has_value() && (*input.targets).empty())
         {
-            if (parser.contains(trg))
+            throw std::invalid_argument("Cannot specify an empty list of targets");
+        }
+    }
+};
+class TargetChecker
+{
+public:
+    static void check(const brion::BlueConfig &config, const BBPLoaderParameters &input)
+    {
+        if (!input.targets.has_value() || (*input.targets).empty())
+        {
+            return;
+        }
+
+        const auto targetParsers = config.getTargets();
+        for (const auto &trg : *input.targets)
+        {
+            if (trg.empty())
             {
-                exists = true;
-                break;
+                throw std::invalid_argument("Specified an empty target name");
+            }
+
+            bool exists = false;
+            for (const auto &parser : targetParsers)
+            {
+                if (parser.contains(trg))
+                {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists)
+            {
+                throw std::invalid_argument("Invalid or empty target: '" + trg + "'");
             }
         }
-        if (!exists)
-        {
-            throw std::invalid_argument("Invalid or empty target: '" + trg + "'");
-        }
     }
-}
+};
 
-void checkReport(const brion::BlueConfig &config, const BBPLoaderParameters &input)
+class ReportChecker
 {
-    const auto type = input.report_type;
-    switch (type)
+public:
+    static void check(const brion::BlueConfig &config, const BBPLoaderParameters &input)
     {
-    case ReportType::Spikes:
-    {
-        const auto uri = config.getSpikeSource();
-        if (uri.getPath().empty() || !std::filesystem::exists(uri.getPath()))
+        const auto type = input.report_type;
+        switch (type)
         {
-            throw std::invalid_argument("Unable to find Spike report file");
-        }
-        break;
-    }
-    case ReportType::Compartment:
-    {
-        if (input.report_name.empty())
+        case ReportType::Spikes:
         {
-            throw std::invalid_argument("A compartment report was requested, but no report_name was provided");
+            const auto uri = config.getSpikeSource();
+            if (uri.getPath().empty() || !std::filesystem::exists(uri.getPath()))
+            {
+                throw std::invalid_argument("Unable to find Spike report file");
+            }
+            break;
         }
+        case ReportType::Compartment:
+        {
+            if (input.report_name.empty())
+            {
+                throw std::invalid_argument("A compartment report was requested, but no report_name was provided");
+            }
 
-        const auto uri = config.getReportSource(input.report_name);
-        if (uri.getPath().empty() || !std::filesystem::exists(uri.getPath()))
-        {
-            throw std::invalid_argument("Unable to find Voltage report file for '" + input.report_name + "'");
+            const auto uri = config.getReportSource(input.report_name);
+            if (uri.getPath().empty() || !std::filesystem::exists(uri.getPath()))
+            {
+                throw std::invalid_argument("Unable to find Voltage report file for '" + input.report_name + "'");
+            }
+            break;
         }
-        break;
+        case ReportType::None:
+            break;
+        }
     }
-    case ReportType::None:
-        break;
-    }
-}
+};
 
-void checkNeuronSections(const BBPLoaderParameters &input)
+class NeuronSectionsChecker
 {
-    const auto &morphSettings = input.neuron_morphology_parameters;
-    const auto loadSoma = morphSettings.load_soma;
-    const auto loadAxon = morphSettings.load_axon;
-    const auto loadDend = morphSettings.load_dendrites;
-    if (!loadSoma && !loadAxon && !loadDend)
+public:
+    static void check(const BBPLoaderParameters &input)
     {
-        throw std::invalid_argument("All neuron sections cannot be disabled");
+        const auto &morphSettings = input.neuron_morphology_parameters;
+        const auto loadSoma = morphSettings.load_soma;
+        const auto loadAxon = morphSettings.load_axon;
+        const auto loadDend = morphSettings.load_dendrites;
+        if (!loadSoma && !loadAxon && !loadDend)
+        {
+            throw std::invalid_argument("All neuron sections cannot be disabled");
+        }
     }
-}
+};
 } // namespace
 
 void ParameterCheck::checkInput(const brion::BlueConfig &config, const BBPLoaderParameters &input)
 {
-    checkTargets(config, input);
-    checkReport(config, input);
-    checkNeuronSections(input);
+    InputGidSettingsChecker::check(input);
+    TargetChecker::check(config, input);
+    ReportChecker::check(config, input);
+    NeuronSectionsChecker::check(input);
 }
 } // namespace bbploader
