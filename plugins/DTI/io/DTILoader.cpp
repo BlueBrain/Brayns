@@ -39,7 +39,7 @@ BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     circuit_path,
     "Path to the source circuit for spike simulation",
-    brayns::Default(""))
+    brayns::Required(false))
 BRAYNS_JSON_OBJECT_END()
 
 class DTIConfigurationReader
