@@ -132,7 +132,7 @@ TEST_CASE("string_parser")
     CHECK_THROWS_AS(brayns::StringParser<int8_t>::parse("5000"), std::runtime_error);
 }
 
-TEST_CASE("string_extractor")
+TEST_CASE("string_strean")
 {
     auto stream = brayns::StringStream();
     auto extracted = std::string_view();

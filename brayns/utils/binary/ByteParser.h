@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <stdexcept>
 #include <string_view>
 
 #include "ByteConverter.h"
@@ -33,14 +32,9 @@ struct ByteParser
 {
     static T parse(std::string_view data)
     {
-        auto stride = sizeof(T);
-        if (data.size() < stride)
-        {
-            throw std::runtime_error("Not enough bytes");
-        }
         T value;
         auto bytes = ByteConverter::getBytes(value);
-        for (size_t i = 0; i < stride; ++i)
+        for (size_t i = 0; i < sizeof(T); ++i)
         {
             bytes[i] = data[i];
         }
