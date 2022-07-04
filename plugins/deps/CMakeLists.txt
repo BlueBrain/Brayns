@@ -77,6 +77,9 @@ endif()
 # MVDTool
 # =============================================================================
 if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT MVDTool_FOUND AND NOT TARGET MVDTool)
+
+    find_package(Boost 1.41 QUIET REQUIRED COMPONENTS system)
+
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/MVDTool")
         message(STATUS "Downloading MVDTool from submodules")
         FetchContent_Declare(
