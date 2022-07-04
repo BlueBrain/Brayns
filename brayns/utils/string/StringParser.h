@@ -21,22 +21,40 @@
 
 #pragma once
 
+#include <limits>
 #include <string_view>
+#include <type_traits>
 
 namespace brayns
 {
-class StringInfo
+class StringParserHelper
 {
 public:
-    static bool isSpace(char data);
-    static bool isSpace(std::string_view data);
-    static bool isLower(char data);
-    static bool isLower(std::string_view data);
-    static bool isUpper(char data);
-    static bool isUpper(std::string_view data);
-    static bool startsWith(std::string_view data, char prefix);
-    static bool startsWith(std::string_view data, std::string_view prefix);
-    static bool endsWith(std::string_view data, char suffix);
-    static bool endsWith(std::string_view data, std::string_view suffix);
+    static double parse(std::string_view data);
+    static void checkLimits(double value, double min, double max);
+    static void checkIsInteger(double value);
+};
+
+template<typename T>
+struct StringParser
+{
+    static T parse(std::string_view data)
+    {
+        auto value = StringParserHelper::parse(data);
+        auto min = static_cast<double>(std::numeric_limits<T>::min());
+        auto max = static_cast<double>(std::numeric_limits<T>::max());
+        StringParserHelper::checkLimits(value, min, max);
+        if constexpr (std::is_integral_v<T>)
+        {
+            StringParserHelper::checkIsInteger(value);
+        }
+        return static_cast<T>(value);
+    }
+};
+
+template<>
+struct StringParser<bool>
+{
+    static bool parse(std::string_view data);
 };
 } // namespace brayns

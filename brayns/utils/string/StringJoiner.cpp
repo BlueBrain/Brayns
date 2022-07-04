@@ -23,12 +23,12 @@
 
 namespace brayns
 {
-std::string join(const std::vector<std::string> &values, char separator)
+std::string StringJoiner::join(const std::vector<std::string> &values, char separator)
 {
     return join(values, {&separator, 1});
 }
 
-std::string join(const std::vector<std::string> &values, std::string_view separator)
+std::string StringJoiner::join(const std::vector<std::string> &values, std::string_view separator)
 {
     auto count = values.size();
     if (count == 0)

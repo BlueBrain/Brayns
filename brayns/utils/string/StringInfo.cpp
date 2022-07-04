@@ -36,6 +36,26 @@ bool StringInfo::isSpace(std::string_view data)
     return std::all_of(data.begin(), data.end(), [](auto c) { return isSpace(c); });
 }
 
+bool StringInfo::isLower(char data)
+{
+    return std::islower(static_cast<unsigned char>(data));
+}
+
+bool StringInfo::isLower(std::string_view data)
+{
+    return std::all_of(data.begin(), data.end(), [](auto c) { return isLower(c); });
+}
+
+bool StringInfo::isUpper(char data)
+{
+    return std::isupper(static_cast<unsigned char>(data));
+}
+
+bool StringInfo::isUpper(std::string_view data)
+{
+    return std::all_of(data.begin(), data.end(), [](auto c) { return isUpper(c); });
+}
+
 bool StringInfo::startsWith(std::string_view data, char prefix)
 {
     return !data.empty() && data[0] == prefix;
@@ -43,7 +63,8 @@ bool StringInfo::startsWith(std::string_view data, char prefix)
 
 bool StringInfo::startsWith(std::string_view data, std::string_view prefix)
 {
-    return !data.empty() && data.substr(0) == prefix;
+    auto step = prefix.size();
+    return !data.empty() && data.substr(0, step) == prefix;
 }
 
 bool StringInfo::endsWith(std::string_view data, char suffix)
