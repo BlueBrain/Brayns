@@ -31,9 +31,11 @@ namespace brayns
 class ByteStream
 {
 public:
+    ByteStream() = default;
     ByteStream(std::string_view data);
 
     bool canExtract(size_t size) const;
+    std::string_view extractAll();
     std::string_view extract(size_t size);
 
     template<typename T>

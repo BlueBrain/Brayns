@@ -34,30 +34,46 @@ public:
     StringStream(std::string_view data);
 
     bool isEmpty() const;
-    std::string_view extract(char separator);
-    std::string_view extract(std::string_view separator);
-    std::string_view extractOneOf(std::string_view separators);
+    std::string_view extractAll();
+    std::string_view extract(size_t count);
+    std::string_view extractUntil(char separator);
+    std::string_view extractUntil(std::string_view separator);
+    std::string_view extractUntilOneOf(std::string_view separators);
     std::string_view extractToken();
     std::string_view extractLine();
 
     template<typename T>
-    T extract(char separator)
+    T extractAll()
     {
-        auto data = extract(separator);
+        auto data = extractAll();
         return StringParser<T>::parse(data);
     }
 
     template<typename T>
-    T extract(std::string_view separator)
+    T extract(size_t count)
     {
-        auto data = extract(separator);
+        auto data = extract(count);
         return StringParser<T>::parse(data);
     }
 
     template<typename T>
-    T extractOneOf(std::string_view separators)
+    T extractUntil(char separator)
     {
-        auto data = extractOneOf(separators);
+        auto data = extractUntil(separator);
+        return StringParser<T>::parse(data);
+    }
+
+    template<typename T>
+    T extractUntil(std::string_view separator)
+    {
+        auto data = extractUntil(separator);
+        return StringParser<T>::parse(data);
+    }
+
+    template<typename T>
+    T extractUntilOneOf(std::string_view separators)
+    {
+        auto data = extractUntilOneOf(separators);
         return StringParser<T>::parse(data);
     }
 

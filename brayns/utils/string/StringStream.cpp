@@ -38,33 +38,40 @@ bool StringStream::isEmpty() const
     return _data.empty();
 }
 
-std::string_view StringStream::extract(char separator)
+std::string_view StringStream::extractAll()
 {
-    return extract({&separator, 1});
+    return std::exchange(_data, {});
 }
 
-std::string_view StringStream::extract(std::string_view separator)
+std::string_view StringStream::extract(size_t count)
 {
-    auto index = _data.find(separator);
-    if (index == std::string_view::npos)
+    if (count >= _data.size())
     {
-        return std::exchange(_data, {});
+        return extractAll();
     }
-    auto result = _data.substr(0, index);
-    auto start = index + separator.size();
-    _data = _data.substr(start);
+    auto result = _data.substr(0, count);
+    _data.remove_prefix(count);
     return result;
 }
 
-std::string_view StringStream::extractOneOf(std::string_view separators)
+std::string_view StringStream::extractUntil(char separator)
+{
+    return extractUntil({&separator, 1});
+}
+
+std::string_view StringStream::extractUntil(std::string_view separator)
+{
+    auto index = _data.find(separator);
+    auto result = extract(index);
+    extract(separator.size());
+    return result;
+}
+
+std::string_view StringStream::extractUntilOneOf(std::string_view separators)
 {
     auto index = _data.find_first_of(separators);
-    if (index == std::string_view::npos)
-    {
-        return std::exchange(_data, {});
-    }
-    auto result = _data.substr(0, index);
-    _data = _data.substr(index + 1);
+    auto result = extract(index);
+    extract(1);
     return result;
 }
 
@@ -77,15 +84,13 @@ std::string_view StringStream::extractToken()
         {
             continue;
         }
-        auto result = _data.substr(0, i);
-        _data = _data.substr(i);
-        return result;
+        return extract(i);
     }
-    return std::exchange(_data, {});
+    return extractAll();
 }
 
 std::string_view StringStream::extractLine()
 {
-    return extract('\n');
+    return extractUntil('\n');
 }
 } // namespace brayns

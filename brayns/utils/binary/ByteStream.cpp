@@ -21,6 +21,7 @@
 
 #include "ByteStream.h"
 
+#include <algorithm>
 #include <cassert>
 
 namespace brayns
@@ -33,6 +34,11 @@ ByteStream::ByteStream(std::string_view data)
 bool ByteStream::canExtract(size_t size) const
 {
     return _data.size() >= size;
+}
+
+std::string_view ByteStream::extractAll()
+{
+    return std::exchange(_data, {});
 }
 
 std::string_view ByteStream::extract(size_t size)

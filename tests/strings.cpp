@@ -132,45 +132,45 @@ TEST_CASE("string_parser")
     CHECK_THROWS_AS(brayns::StringParser<int8_t>::parse("5000"), std::runtime_error);
 }
 
-TEST_CASE("string_strean")
+TEST_CASE("string_stream")
 {
     auto stream = brayns::StringStream();
     auto extracted = std::string_view();
 
     stream = {" test1 test2 "};
-    extracted = stream.extract(' ');
+    extracted = stream.extractUntil(' ');
     CHECK_EQ(extracted, "");
-    extracted = stream.extract(' ');
+    extracted = stream.extractUntil(' ');
     CHECK_EQ(extracted, "test1");
-    extracted = stream.extract(' ');
+    extracted = stream.extractUntil(' ');
     CHECK_EQ(extracted, "test2");
-    extracted = stream.extract(' ');
+    extracted = stream.extractUntil(' ');
     CHECK_EQ(extracted, "");
-    extracted = stream.extract(' ');
+    extracted = stream.extractUntil(' ');
     CHECK_EQ(extracted, "");
 
     stream = {"septest1septest2sep"};
-    extracted = stream.extract("sep");
+    extracted = stream.extractUntil("sep");
     CHECK_EQ(extracted, "");
-    extracted = stream.extract("sep");
+    extracted = stream.extractUntil("sep");
     CHECK_EQ(extracted, "test1");
-    extracted = stream.extract("sep");
+    extracted = stream.extractUntil("sep");
     CHECK_EQ(extracted, "test2");
-    extracted = stream.extract("sep");
+    extracted = stream.extractUntil("sep");
     CHECK_EQ(extracted, "");
-    extracted = stream.extract("sep");
+    extracted = stream.extractUntil("sep");
     CHECK_EQ(extracted, "");
 
     stream = {"atest1btest2c"};
-    extracted = stream.extractOneOf("abc");
+    extracted = stream.extractUntilOneOf("abc");
     CHECK_EQ(extracted, "");
-    extracted = stream.extractOneOf("abc");
+    extracted = stream.extractUntilOneOf("abc");
     CHECK_EQ(extracted, "test1");
-    extracted = stream.extractOneOf("abc");
+    extracted = stream.extractUntilOneOf("abc");
     CHECK_EQ(extracted, "test2");
-    extracted = stream.extractOneOf("abc");
+    extracted = stream.extractUntilOneOf("abc");
     CHECK_EQ(extracted, "");
-    extracted = stream.extractOneOf("abc");
+    extracted = stream.extractUntilOneOf("abc");
     CHECK_EQ(extracted, "");
 
     stream = {"\n test1  \r\vtest2\t "};
