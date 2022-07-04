@@ -33,7 +33,8 @@ struct PercentageFilter
 
         const auto size = static_cast<float>(src.size());
         const auto expectedSize = size * percentage;
-        const auto skipFactor = static_cast<size_t>(size / expectedSize);
+        auto skipFactor = static_cast<size_t>(size / expectedSize);
+        skipFactor = std::max(skipFactor, 1ul);
 
         std::vector<uint64_t> finalList;
         finalList.reserve(expectedSize);

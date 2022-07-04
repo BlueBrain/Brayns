@@ -83,7 +83,8 @@ public:
     {
         auto nbGids = input.size();
         const auto expectedSize = static_cast<size_t>(nbGids * percentage);
-        const auto skipFactor = static_cast<size_t>(static_cast<float>(nbGids) / static_cast<float>(expectedSize));
+        auto skipFactor = static_cast<size_t>(static_cast<float>(nbGids) / static_cast<float>(expectedSize));
+        skipFactor = std::max(skipFactor, 1ul);
         brain::GIDSet subsampled;
         auto it = subsampled.begin();
         auto allIt = input.begin();
