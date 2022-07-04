@@ -123,9 +123,9 @@ struct MetadataFactory
         if (targets.has_value())
         {
             const auto targetList = brayns::string_utils::join(*targets, ",");
-            metadata["Targets"] = targetList;
+            metadata["targets"] = targetList;
         }
-        metadata["Neurons loaded count"] = std::to_string(gids.size());
+        metadata["loaded_neuron_count"] = std::to_string(gids.size());
 
         dst.setMetaData(std::move(metadata));
     }
