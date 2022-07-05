@@ -22,17 +22,18 @@
 
 #include <brayns/json/Json.h>
 #include <brayns/json/JsonSchemaValidator.h>
-
-#include <brayns/network/adapters/CameraAdapter.h>
-#include <brayns/network/adapters/RendererAdapter.h>
-
 #include <brayns/utils/StringUtils.h>
 
 namespace brayns
 {
+struct EngineObjectData
+{
+    std::string name;
+    JsonValue params;
+};
+
 /**
  * @brief Utility class to deserialize object sub types based on their names
- *
  * @tparam T Abstract type
  */
 template<typename T>
@@ -85,14 +86,12 @@ public:
     };
 
 public:
-    std::unique_ptr<T> create(const std::string &name, const JsonValue &data) const
+    std::unique_ptr<T> create(const EngineObjectData &payload) const
     {
-        const auto begin = _items.begin();
-        const auto end = _items.end();
-        auto it = std::find_if(
-            begin,
-            end,
-            [&](const std::unique_ptr<IFactoryEntry> &entry) { return entry->getName() == name; });
+        auto &name = payload.name;
+        auto begin = _items.begin();
+        auto end = _items.end();
+        auto it = std::find_if(begin, end, [&](const auto &entry) { return entry->getName() == name; });
 
         if (it == end)
         {
@@ -101,73 +100,28 @@ public:
 
         const auto &creator = *it;
 
-        return creator->create(data);
+        return creator->create(payload.params);
+    }
+
+    std::unique_ptr<T> createOr(const EngineObjectData &payload, const T &defaultValue) const
+    {
+        auto &name = payload.name;
+        if (name.empty())
+        {
+            return defaultValue.clone();
+        }
+
+        return create(payload);
     }
 
     template<typename SubT>
     void registerType()
     {
-        auto temp = std::make_unique<SubT>();
-        auto name = temp->getName();
+        auto name = SubT().getName();
         _items.push_back(std::make_unique<FactoryEntry<SubT>>(name));
     }
 
 private:
     std::vector<std::unique_ptr<IFactoryEntry>> _items;
-};
-
-template<typename T>
-class GenericObject
-{
-public:
-    GenericObject() = default;
-    GenericObject(T &object, EngineObjectFactory<T> &factory)
-        : _systemObject(&object)
-        , _factory(&factory)
-        , _value(Json::parse("{}"))
-    {
-    }
-
-    void setName(const std::string &name)
-    {
-        _name = name;
-    }
-
-    void setValue(const JsonValue &value)
-    {
-        _value = value;
-    }
-
-    std::unique_ptr<T> create()
-    {
-        if (_name.empty())
-        {
-            return _systemObject->clone();
-        }
-
-        return _factory->create(_name, _value);
-    }
-
-private:
-    T *_systemObject{nullptr};
-    EngineObjectFactory<T> *_factory{nullptr};
-    std::string _name;
-    JsonValue _value;
-};
-
-#define GENERIC_OBJECT_ADAPTER(TYPE) \
-    BRAYNS_JSON_ADAPTER_BEGIN(GenericObject<TYPE>) \
-    BRAYNS_JSON_ADAPTER_SET("name", setName, "Type name", Required(false)) \
-    BRAYNS_JSON_ADAPTER_SET("params", setValue, "Type parameters", Required(false)) \
-    BRAYNS_JSON_ADAPTER_END()
-
-GENERIC_OBJECT_ADAPTER(Camera)
-GENERIC_OBJECT_ADAPTER(Renderer)
-
-struct EngineFactories
-{
-    static EngineObjectFactory<Camera> createCameraFactory() noexcept;
-
-    static EngineObjectFactory<Renderer> createRendererFactory() noexcept;
 };
 }

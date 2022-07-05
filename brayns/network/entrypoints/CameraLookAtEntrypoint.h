@@ -21,7 +21,6 @@
 #pragma once
 
 #include <brayns/engine/Engine.h>
-#include <brayns/network/adapters/CameraAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns

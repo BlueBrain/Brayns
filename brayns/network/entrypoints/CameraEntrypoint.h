@@ -22,8 +22,9 @@
 #pragma once
 
 #include <brayns/engine/Engine.h>
+#include <brayns/engine/cameras/OrthographicCamera.h>
+#include <brayns/engine/cameras/PerspectiveCamera.h>
 #include <brayns/json/JsonSchemaValidator.h>
-#include <brayns/network/adapters/CameraAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/utils/StringUtils.h>
 

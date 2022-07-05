@@ -18,23 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "EngineObjectFactory.h"
+#pragma once
+
+#include <brayns/engine/EngineObjectFactory.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-EngineObjectFactory<Camera> EngineFactories::createCameraFactory() noexcept
-{
-    auto cameraFactory = EngineObjectFactory<Camera>();
-    cameraFactory.registerType<OrthographicCamera>();
-    cameraFactory.registerType<PerspectiveCamera>();
-    return cameraFactory;
-}
-
-EngineObjectFactory<Renderer> EngineFactories::createRendererFactory() noexcept
-{
-    auto rendererFactory = EngineObjectFactory<Renderer>();
-    rendererFactory.registerType<InteractiveRenderer>();
-    rendererFactory.registerType<ProductionRenderer>();
-    return rendererFactory;
-}
+BRAYNS_JSON_ADAPTER_BEGIN(EngineObjectData)
+BRAYNS_JSON_ADAPTER_ENTRY(name, "Engine object type name", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(params, "Object parameters", Required(false))
+BRAYNS_JSON_ADAPTER_END()
 }

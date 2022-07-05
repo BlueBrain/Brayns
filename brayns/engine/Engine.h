@@ -23,6 +23,7 @@
 
 #include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/Camera.h>
+#include <brayns/engine/EngineObjectFactory.h>
 #include <brayns/engine/Framebuffer.h>
 #include <brayns/engine/Renderer.h>
 #include <brayns/engine/Scene.h>
@@ -97,6 +98,16 @@ public:
      */
     Renderer &getRenderer() noexcept;
 
+    EngineObjectFactory<Camera> &getCameraFactory() noexcept
+    {
+        return _cameraFactory;
+    }
+
+    EngineObjectFactory<Renderer> &getRendererFactory() noexcept
+    {
+        return _rendererFactory;
+    }
+
     /**
      * @brief Sets wether the engine should keep running or not
      */
@@ -136,6 +147,9 @@ private:
     Scene _scene;
     std::unique_ptr<Camera> _camera;
     std::unique_ptr<Renderer> _renderer;
+
+    EngineObjectFactory<Camera> _cameraFactory;
+    EngineObjectFactory<Renderer> _rendererFactory;
 
     // Run flag
     bool _keepRunning{true};

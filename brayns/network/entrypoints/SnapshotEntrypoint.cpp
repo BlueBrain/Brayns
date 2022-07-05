@@ -94,13 +94,15 @@ public:
         simulation.setFrame(frame);
 
         // Renderer
-        auto &rendererObject = params.renderer;
-        auto renderer = rendererObject.create();
+        auto &rendererData = params.renderer;
+        auto &rendererFactory = engine.getRendererFactory();
+        auto renderer = rendererFactory.createOr(rendererData, engine.getRenderer());
         renderer->commit();
 
         // Camera
-        auto &cameraObject = params.camera;
-        auto camera = cameraObject.create();
+        auto &cameraData = params.camera;
+        auto &cameraFactory = engine.getCameraFactory();
+        auto camera = cameraFactory.createOr(cameraData, engine.getCamera());
         const auto aspectRatio = static_cast<float>(imageSize.x) / static_cast<float>(imageSize.y);
         camera->setAspectRatio(aspectRatio);
         const auto &cameraLookAt = params.camera_view;
@@ -151,8 +153,6 @@ namespace brayns
 SnapshotEntrypoint::SnapshotEntrypoint(Engine &engine, CancellationToken token)
     : _engine(engine)
     , _token(token)
-    , _cameraFactory(EngineFactories::createCameraFactory())
-    , _renderFactory(EngineFactories::createRendererFactory())
 {
 }
 
@@ -176,13 +176,8 @@ void SnapshotEntrypoint::onRequest(const Request &request)
     SnapshotParams params;
 
     auto &systemCamera = _engine.getCamera();
-    params.camera = GenericObject<Camera>(systemCamera, _cameraFactory);
-
     auto systemLookAt = systemCamera.getLookAt();
     params.camera_view = systemLookAt;
-
-    auto &systemRenderer = _engine.getRenderer();
-    params.renderer = GenericObject<Renderer>(systemRenderer, _renderFactory);
 
     auto &systemFramebuffer = _engine.getFramebuffer();
     auto systemSize = systemFramebuffer.getFrameSize();

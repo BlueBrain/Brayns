@@ -23,7 +23,6 @@
 #include <brayns/engine/Engine.h>
 
 #include <brayns/network/common/CancellationToken.h>
-#include <brayns/network/common/EngineObjectFactory.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/ExportFramesMessage.h>
 
@@ -44,8 +43,5 @@ private:
     Engine &_engine;
     ParametersManager &_paramsManager;
     CancellationToken _token;
-
-    EngineObjectFactory<Camera> _cameraFactory;
-    EngineObjectFactory<Renderer> _renderFactory;
 };
 } // namespace brayns

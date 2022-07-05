@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/engine/Renderer.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
@@ -60,4 +61,37 @@ private:
     bool _shadowsEnabled{true};
     int32_t _aoSamples{0u};
 };
+
+BRAYNS_JSON_ADAPTER_BEGIN(InteractiveRenderer)
+BRAYNS_JSON_ADAPTER_GETSET(
+    "samples_per_pixel",
+    getSamplesPerPixel,
+    setSamplesPerPixel,
+    "Number of samples per pixel",
+    Required(false))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "max_ray_bounces",
+    getMaxRayBounces,
+    setMaxRayBounces,
+    "Max ray bounces per sample",
+    Required(false))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "background_color",
+    getBackgroundColor,
+    setBackgroundColor,
+    "Background color",
+    Required(false))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "enable_shadows",
+    getShadowsEnabled,
+    setShadowsEnabled,
+    "Render casted shadows",
+    Required(false))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "ao_samples",
+    getAmbientOcclusionSamples,
+    setAmbientOcclusionSamples,
+    "Sets number of samples to compute ambient occlusion",
+    Required(false))
+BRAYNS_JSON_ADAPTER_END()
 }

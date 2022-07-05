@@ -21,9 +21,7 @@
 #pragma once
 
 #include <brayns/json/JsonObjectMacro.h>
-#include <brayns/network/adapters/CameraAdapter.h>
-#include <brayns/network/adapters/RendererAdapter.h>
-#include <brayns/network/common/EngineObjectFactory.h>
+#include <brayns/network/adapters/EngineObjectDataAdapter.h>
 #include <brayns/network/messages/ImageSettingsMessage.h>
 
 namespace brayns
@@ -36,8 +34,8 @@ BRAYNS_JSON_OBJECT_END()
 BRAYNS_JSON_OBJECT_BEGIN(ExportFramesParams)
 BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path where the frames will be stored")
 BRAYNS_JSON_OBJECT_ENTRY(ImageSettings, image_settings, "Image settings", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(GenericObject<Camera>, camera, "Camera definition", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(GenericObject<Renderer>, renderer, "Renderer definition", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(EngineObjectData, camera, "Camera definition", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(EngineObjectData, renderer, "Renderer definition", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(std::vector<ExportFramesKeyFrame>, key_frames, "List of keyframes to export")
 BRAYNS_JSON_OBJECT_ENTRY(bool, sequential_naming, "Name the image file after the frame index", Default(true))
 BRAYNS_JSON_OBJECT_END()

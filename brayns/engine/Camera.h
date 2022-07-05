@@ -24,6 +24,7 @@
 
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 #include <ospray/ospray_cpp/Camera.h>
 
@@ -38,6 +39,12 @@ struct LookAt
     Vector3f target{0.f, 0.f, 1.f};
     Vector3f up{0.f, 1.f, 0.f};
 };
+
+BRAYNS_JSON_ADAPTER_BEGIN(LookAt)
+BRAYNS_JSON_ADAPTER_ENTRY(position, "Position of the camera")
+BRAYNS_JSON_ADAPTER_ENTRY(target, "Target position at which the camera is looking")
+BRAYNS_JSON_ADAPTER_ENTRY(up, "Up vector to compute the camera orthonormal basis")
+BRAYNS_JSON_ADAPTER_END()
 
 bool operator==(const LookAt &a, const LookAt &b) noexcept;
 bool operator!=(const LookAt &a, const LookAt &b) noexcept;
