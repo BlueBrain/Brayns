@@ -23,8 +23,6 @@
 
 #include <string_view>
 
-#include "StringParser.h"
-
 namespace brayns
 {
 class StringStream
@@ -34,62 +32,14 @@ public:
     StringStream(std::string_view data);
 
     bool isEmpty() const;
+    bool canExtract(size_t size) const;
     std::string_view extractAll();
-    std::string_view extract(size_t count);
+    std::string_view extract(size_t size);
     std::string_view extractUntil(char separator);
     std::string_view extractUntil(std::string_view separator);
     std::string_view extractUntilOneOf(std::string_view separators);
     std::string_view extractToken();
     std::string_view extractLine();
-
-    template<typename T>
-    T extractAll()
-    {
-        auto data = extractAll();
-        return StringParser<T>::parse(data);
-    }
-
-    template<typename T>
-    T extract(size_t count)
-    {
-        auto data = extract(count);
-        return StringParser<T>::parse(data);
-    }
-
-    template<typename T>
-    T extractUntil(char separator)
-    {
-        auto data = extractUntil(separator);
-        return StringParser<T>::parse(data);
-    }
-
-    template<typename T>
-    T extractUntil(std::string_view separator)
-    {
-        auto data = extractUntil(separator);
-        return StringParser<T>::parse(data);
-    }
-
-    template<typename T>
-    T extractUntilOneOf(std::string_view separators)
-    {
-        auto data = extractUntilOneOf(separators);
-        return StringParser<T>::parse(data);
-    }
-
-    template<typename T>
-    T extractToken()
-    {
-        auto data = extractToken();
-        return StringParser<T>::parse(data);
-    }
-
-    template<typename T>
-    T extractLine()
-    {
-        auto data = extractLine();
-        return StringParser<T>::parse(data);
-    }
 
 private:
     std::string_view _data;

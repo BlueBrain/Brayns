@@ -19,9 +19,9 @@
 
 #include <array>
 
+#include <brayns/utils/Convert.h>
 #include <brayns/utils/binary/ByteConverter.h>
 #include <brayns/utils/binary/ByteParser.h>
-#include <brayns/utils/binary/ByteStream.h>
 #include <brayns/utils/binary/Endian.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
@@ -29,8 +29,14 @@
 
 TEST_CASE("byte_converter")
 {
-    uint32_t test = 1;
-    CHECK_EQ(brayns::ByteConverter::swapBytes(test), 0x01000000);
+    uint32_t integer = 1;
+    brayns::ByteConverter::swapBytes(integer);
+    CHECK_EQ(integer, 0x01000000);
+
+    double from = 1.23;
+    double to = 0.0;
+    brayns::ByteConverter::copyBytes(from, to);
+    CHECK_EQ(from, to);
 }
 
 TEST_CASE("byte_parser")
@@ -38,52 +44,40 @@ TEST_CASE("byte_parser")
     constexpr int32_t integer = 1234;
     auto bytes = brayns::ByteConverter::getBytes(integer);
     auto data = std::string_view(bytes, sizeof(integer));
-    CHECK_EQ(brayns::ByteParser<int32_t>::parse(bytes), integer);
+    CHECK_EQ(brayns::Convert::fromLocalEndian<int32_t>(data), integer);
 
     constexpr double number = 1.234;
     bytes = brayns::ByteConverter::getBytes(number);
     data = std::string_view(bytes, sizeof(number));
-    CHECK_EQ(brayns::ByteParser<double>::parse(bytes), number);
+    CHECK_EQ(brayns::Convert::fromLocalEndian<double>(data), number);
 
     constexpr uint8_t byte = 123;
     bytes = brayns::ByteConverter::getBytes(byte);
     data = std::string_view(bytes, sizeof(byte));
-    CHECK_EQ(brayns::ByteParser<uint8_t>::parse(bytes), byte);
-}
-
-TEST_CASE("byte_stream")
-{
-    std::array<double, 3> tests = {1.2, 2.0, 3.5};
-    auto bytes = brayns::ByteConverter::getBytes(tests[0]);
-    auto data = std::string_view(bytes, 3 * sizeof(double));
-    auto stream = brayns::ByteStream(data);
-    for (auto test : tests)
-    {
-        CHECK_EQ(stream.extract<double>(), test);
-    }
-    CHECK_FALSE(stream.canExtract(1));
+    CHECK_EQ(brayns::Convert::fromLocalEndian<uint8_t>(data), byte);
 }
 
 TEST_CASE("endian")
 {
     uint32_t test = 1;
-    auto swapped = brayns::Endian::convertLittleEndianToLocalEndian(test);
+    brayns::Endian::convertLittleEndianToLocalEndian(test);
     if (brayns::Endian::isBigEndian())
     {
-        CHECK_EQ(swapped, brayns::ByteConverter::swapBytes(test));
+        CHECK_EQ(test, 0x01000000);
     }
     if (brayns::Endian::isLittleEndian())
     {
-        CHECK_EQ(swapped, test);
+        CHECK_EQ(test, 1);
     }
 
-    swapped = brayns::Endian::convertBigEndianToLocalEndian(test);
+    test = 1;
+    brayns::Endian::convertBigEndianToLocalEndian(test);
     if (brayns::Endian::isBigEndian())
     {
-        CHECK_EQ(swapped, test);
+        CHECK_EQ(test, 1);
     }
     if (brayns::Endian::isLittleEndian())
     {
-        CHECK_EQ(swapped, brayns::ByteConverter::swapBytes(test));
+        CHECK_EQ(test, 0x01000000);
     }
 }

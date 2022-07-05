@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-double StringParserHelper::parse(std::string_view data)
+double StringParserHelper::parseNumber(std::string_view data)
 {
     auto buffer = std::string(data);
     try
@@ -35,7 +35,7 @@ double StringParserHelper::parse(std::string_view data)
     }
     catch (const std::exception &e)
     {
-        throw std::runtime_error("'" + buffer + "' is not a numeric value");
+        throw std::runtime_error("Cannot parse number from '" + buffer + "'");
     }
 }
 
@@ -43,11 +43,11 @@ void StringParserHelper::checkLimits(double value, double min, double max)
 {
     if (value < min)
     {
-        throw std::runtime_error(std::to_string(value) + " < " + std::to_string(min));
+        throw std::runtime_error("Range error: " + std::to_string(value) + " < " + std::to_string(min));
     }
     if (value > max)
     {
-        throw std::runtime_error(std::to_string(value) + " > " + std::to_string(max));
+        throw std::runtime_error("Range error: " + std::to_string(value) + " > " + std::to_string(max));
     }
 }
 
@@ -59,16 +59,18 @@ void StringParserHelper::checkIsInteger(double value)
     }
 }
 
-bool StringParser<bool>::parse(std::string_view data)
+void StringParser<bool>::parse(std::string_view data, bool &value)
 {
     if (data == "1" || data == "true")
     {
-        return true;
+        value = true;
+        return;
     }
     if (data == "0" || data == "false")
     {
-        return false;
+        value = false;
+        return;
     }
-    throw std::runtime_error(std::string(data) + " is not a boolean");
+    throw std::runtime_error("Cannot parse boolean from '" + std::string(data) + "'");
 }
 } // namespace brayns

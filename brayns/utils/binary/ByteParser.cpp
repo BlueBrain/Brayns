@@ -19,53 +19,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <string_view>
-
 #include "ByteParser.h"
-#include "Endian.h"
+
+#include <stdexcept>
 
 namespace brayns
 {
-class ByteStream
+void ByteParserHelper::copyBytes(std::string_view from, char *to, size_t stride)
 {
-public:
-    ByteStream() = default;
-    ByteStream(std::string_view data);
-
-    bool canExtract(size_t size) const;
-    std::string_view extractAll();
-    std::string_view extract(size_t size);
-
-    template<typename T>
-    bool canExtract() const
+    if (from.size() < stride)
     {
-        return canExtract(sizeof(T));
+        throw std::runtime_error("Not enough bytes to parse value");
     }
-
-    template<typename T>
-    T extractBigEndian()
-    {
-        auto value = extract<T>();
-        return Endian::convertBigEndianToLocalEndian(value);
-    }
-
-    template<typename T>
-    T extractLittleEndian()
-    {
-        auto value = extract<T>();
-        return Endian::convertLittleEndianToLocalEndian(value);
-    }
-
-    template<typename T>
-    T extract()
-    {
-        auto data = extract(sizeof(T));
-        return ByteParser<T>::parse(data);
-    }
-
-private:
-    std::string_view _data;
-};
+    auto bytes = from.data();
+    ByteConverter::copyBytes(bytes, to, stride);
+}
 } // namespace brayns

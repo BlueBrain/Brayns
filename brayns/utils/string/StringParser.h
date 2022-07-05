@@ -30,7 +30,7 @@ namespace brayns
 class StringParserHelper
 {
 public:
-    static double parse(std::string_view data);
+    static double parseNumber(std::string_view data);
     static void checkLimits(double value, double min, double max);
     static void checkIsInteger(double value);
 };
@@ -38,23 +38,23 @@ public:
 template<typename T>
 struct StringParser
 {
-    static T parse(std::string_view data)
+    static void parse(std::string_view data, T &value)
     {
-        auto value = StringParserHelper::parse(data);
+        auto number = StringParserHelper::parseNumber(data);
         auto min = static_cast<double>(std::numeric_limits<T>::min());
         auto max = static_cast<double>(std::numeric_limits<T>::max());
-        StringParserHelper::checkLimits(value, min, max);
+        StringParserHelper::checkLimits(number, min, max);
         if constexpr (std::is_integral_v<T>)
         {
-            StringParserHelper::checkIsInteger(value);
+            StringParserHelper::checkIsInteger(number);
         }
-        return static_cast<T>(value);
+        value = static_cast<T>(number);
     }
 };
 
 template<>
 struct StringParser<bool>
 {
-    static bool parse(std::string_view data);
+    static void parse(std::string_view data, bool &value);
 };
 } // namespace brayns

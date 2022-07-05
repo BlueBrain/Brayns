@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 
 namespace brayns
@@ -28,6 +29,22 @@ namespace brayns
 class ByteConverter
 {
 public:
+    static constexpr void copyBytes(const char *from, char *to, size_t stride)
+    {
+        for (size_t i = 0; i < stride; ++i)
+        {
+            to[i] = from[i];
+        }
+    }
+
+    static constexpr void swapBytes(char *bytes, size_t stride)
+    {
+        for (size_t i = 0; i < stride / 2; ++i)
+        {
+            std::swap(bytes[i], bytes[stride - 1 - i]);
+        }
+    }
+
     template<typename T>
     static constexpr const char *getBytes(const T &value)
     {
@@ -43,17 +60,18 @@ public:
     }
 
     template<typename T>
-    static constexpr T swapBytes(T value)
+    static constexpr void copyBytes(const T &from, T &to)
     {
-        T result;
-        auto from = getBytes(value);
-        auto to = getBytes(result);
-        auto stride = sizeof(T);
-        for (size_t i = 0; i < stride; ++i)
-        {
-            to[i] = from[stride - i - 1];
-        }
-        return result;
+        auto source = getBytes(from);
+        auto destination = getBytes(to);
+        return copyBytes(source, destination, sizeof(T));
+    }
+
+    template<typename T>
+    static constexpr void swapBytes(T &value)
+    {
+        auto bytes = getBytes(value);
+        swapBytes(bytes, sizeof(T));
     }
 };
 } // namespace brayns

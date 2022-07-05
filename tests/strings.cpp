@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/utils/Convert.h>
 #include <brayns/utils/string/StringConverter.h>
 #include <brayns/utils/string/StringCounter.h>
 #include <brayns/utils/string/StringInfo.h>
@@ -118,18 +119,15 @@ TEST_CASE("string_joiner")
 
 TEST_CASE("string_parser")
 {
-    auto integer = brayns::StringParser<int>::parse("123");
-    CHECK_EQ(integer, 123);
+    CHECK_EQ(brayns::Convert::fromString<int>("123"), 123);
 
-    auto number = brayns::StringParser<float>::parse("1.23");
-    CHECK_EQ(number, 1.23f);
+    CHECK_EQ(brayns::Convert::fromString<float>("1.23"), 1.23f);
 
-    auto intAsNumber = brayns::StringParser<double>::parse("1");
-    CHECK_EQ(intAsNumber, 1.0);
+    CHECK_EQ(brayns::Convert::fromString<double>("1"), 1.0);
 
-    CHECK_THROWS_AS(brayns::StringParser<uint32_t>::parse("-123"), std::runtime_error);
+    CHECK_THROWS_AS(brayns::Convert::fromString<uint32_t>("-1"), std::runtime_error);
 
-    CHECK_THROWS_AS(brayns::StringParser<int8_t>::parse("5000"), std::runtime_error);
+    CHECK_THROWS_AS(brayns::Convert::fromString<uint8_t>("5000"), std::runtime_error);
 }
 
 TEST_CASE("string_stream")

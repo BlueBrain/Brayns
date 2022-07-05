@@ -43,15 +43,21 @@ public:
     }
 
     template<typename T>
-    static constexpr T convertLittleEndianToLocalEndian(T value)
+    static constexpr void convertLittleEndianToLocalEndian(T &value)
     {
-        return isLittleEndian() ? value : ByteConverter::swapBytes(value);
+        if (!isLittleEndian())
+        {
+            ByteConverter::swapBytes(value);
+        }
     }
 
     template<typename T>
-    static constexpr T convertBigEndianToLocalEndian(T value)
+    static constexpr void convertBigEndianToLocalEndian(T &value)
     {
-        return isBigEndian() ? value : ByteConverter::swapBytes(value);
+        if (!isBigEndian())
+        {
+            ByteConverter::swapBytes(value);
+        }
     }
 };
 } // namespace brayns

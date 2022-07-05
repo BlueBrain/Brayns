@@ -38,19 +38,24 @@ bool StringStream::isEmpty() const
     return _data.empty();
 }
 
+bool StringStream::canExtract(size_t size) const
+{
+    return _data.size() >= size;
+}
+
 std::string_view StringStream::extractAll()
 {
     return std::exchange(_data, {});
 }
 
-std::string_view StringStream::extract(size_t count)
+std::string_view StringStream::extract(size_t size)
 {
-    if (count >= _data.size())
+    if (size >= _data.size())
     {
         return extractAll();
     }
-    auto result = _data.substr(0, count);
-    _data.remove_prefix(count);
+    auto result = _data.substr(0, size);
+    _data.remove_prefix(size);
     return result;
 }
 

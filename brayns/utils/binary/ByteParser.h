@@ -24,21 +24,35 @@
 #include <string_view>
 
 #include "ByteConverter.h"
+#include "Endian.h"
 
 namespace brayns
 {
+class ByteParserHelper
+{
+public:
+    static void copyBytes(std::string_view from, char *to, size_t stride);
+};
+
 template<typename T>
 struct ByteParser
 {
-    static T parse(std::string_view data)
+    static void parseLocalEndian(std::string_view data, T &value)
     {
-        T value;
         auto bytes = ByteConverter::getBytes(value);
-        for (size_t i = 0; i < sizeof(T); ++i)
-        {
-            bytes[i] = data[i];
-        }
-        return value;
+        ByteParserHelper::copyBytes(data, bytes, sizeof(T));
+    }
+
+    static void parseLittleEndian(std::string_view data, T &value)
+    {
+        parseLocalEndian(data, value);
+        Endian::convertLittleEndianToLocalEndian(value);
+    }
+
+    static void parseBigEndian(std::string_view data, T &value)
+    {
+        parseLocalEndian(data, value);
+        Endian::convertBigEndianToLocalEndian(value);
     }
 };
 } // namespace brayns
