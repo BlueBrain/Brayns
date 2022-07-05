@@ -43,6 +43,11 @@ bool StringStream::canExtract(size_t size) const
     return _data.size() >= size;
 }
 
+std::string_view StringStream::getData() const
+{
+    return _data;
+}
+
 std::string_view StringStream::extractAll()
 {
     return std::exchange(_data, {});

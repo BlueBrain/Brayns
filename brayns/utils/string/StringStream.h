@@ -33,6 +33,7 @@ public:
 
     bool isEmpty() const;
     bool canExtract(size_t size) const;
+    std::string_view getData() const;
     std::string_view extractAll();
     std::string_view extract(size_t size);
     std::string_view extractUntil(char separator);
