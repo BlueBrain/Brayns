@@ -98,15 +98,17 @@ public:
      */
     Renderer &getRenderer() noexcept;
 
-    EngineObjectFactory<Camera> &getCameraFactory() noexcept
-    {
-        return _cameraFactory;
-    }
+    /**
+     * @brief Returns the system's camera factory object
+     * @return EngineObjectFactory<Camera>&
+     */
+    EngineObjectFactory<Camera> &getCameraFactory() noexcept;
 
-    EngineObjectFactory<Renderer> &getRendererFactory() noexcept
-    {
-        return _rendererFactory;
-    }
+    /**
+     * @brief Returns the system's renderer factory object
+     * @return EngineObjectFactory<Renderer>&
+     */
+    EngineObjectFactory<Renderer> &getRendererFactory() noexcept;
 
     /**
      * @brief Sets wether the engine should keep running or not

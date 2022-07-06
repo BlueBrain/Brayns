@@ -238,6 +238,16 @@ Renderer &Engine::getRenderer() noexcept
     return *_renderer;
 }
 
+EngineObjectFactory<Camera> &Engine::getCameraFactory() noexcept
+{
+    return _cameraFactory;
+}
+
+EngineObjectFactory<Renderer> &Engine::getRendererFactory() noexcept
+{
+    return _rendererFactory;
+}
+
 void Engine::setRunning(bool keepRunning) noexcept
 {
     _keepRunning = keepRunning;
