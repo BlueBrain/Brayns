@@ -18,31 +18,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "CylindricCameraEntrypoint.h"
 
-#include <brayns/engine/Camera.h>
-#include <brayns/json/JsonAdapterMacro.h>
-
-class CylindricalCamera final : public brayns::Camera
+SetCylindricCameraEntrypoint::SetCylindricCameraEntrypoint(brayns::Engine &engine)
+    : brayns::SetCameraEntrypoint<CylindricCamera>(engine)
 {
-public:
-    CylindricalCamera();
+}
 
-    std::string getName() const noexcept override;
-
-    std::unique_ptr<brayns::Camera> clone() const noexcept override;
-
-    void setFovy(float fovy) noexcept;
-
-protected:
-    void commitCameraSpecificParams() override;
-
-private:
-    float _fovy = 48.549f; // Opendeck fovy
-};
-
-namespace brayns
+std::string SetCylindricCameraEntrypoint::getMethod() const
 {
-BRAYNS_JSON_ADAPTER_BEGIN(CylindricalCamera)
-BRAYNS_JSON_ADAPTER_END()
+    return "set-camera-cylindric";
+}
+
+std::string SetCylindricCameraEntrypoint::getDescription() const
+{
+    return "Sets the current camera to a cylindric one, with the specified parameters";
+}
+
+GetCylindricCameraEntrypoint::GetCylindricCameraEntrypoint(brayns::Engine &engine)
+    : brayns::GetCameraEntrypoint<CylindricCamera>(engine)
+{
+}
+
+std::string GetCylindricCameraEntrypoint::getMethod() const
+{
+    return "get-camera-cylindric";
+}
+
+std::string GetCylindricCameraEntrypoint::getDescription() const
+{
+    return "Returns the current camera as cylindric";
 }

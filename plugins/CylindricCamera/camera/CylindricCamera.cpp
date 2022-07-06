@@ -18,29 +18,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CylindricalCamera.h"
+#include "CylindricCamera.h"
 
 namespace
 {
-struct CylindricalParameters
+struct CylindricParameters
 {
-    inline static const std::string osprayName = "cylindrical";
+    inline static const std::string fovy = "fovy";
 };
 }
 
-CylindricalCamera::CylindricalCamera()
-    : brayns::Camera(CylindricalParameters::osprayName)
+CylindricCamera::CylindricCamera()
+    : brayns::Camera(osprayName)
 {
 }
 
-std::string CylindricalCamera::getName() const noexcept
+std::string CylindricCamera::getName() const noexcept
 {
+    return osprayName;
 }
 
-std::unique_ptr<brayns::Camera> CylindricalCamera::clone() const noexcept
+std::unique_ptr<brayns::Camera> CylindricCamera::clone() const noexcept
 {
+    auto result = std::make_unique<CylindricCamera>();
+    result->setLookAt(getLookAt());
+    result->setAspectRatio(getAspectRatio());
+    result->setFovy(_fovy);
+    return result;
 }
 
-void CylindricalCamera::commitCameraSpecificParams()
+void CylindricCamera::setFovy(float fovy) noexcept
 {
+    _updateValue(_fovy, fovy);
+}
+
+float CylindricCamera::getFovy() const noexcept
+{
+    return _fovy;
+}
+
+void CylindricCamera::commitCameraSpecificParams()
+{
+    auto &osprayCamera = getOsprayCamera();
+    osprayCamera.setParam(CylindricParameters::fovy, _fovy);
 }
