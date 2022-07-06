@@ -21,8 +21,10 @@
  */
 
 #include "ospray/SDK/modules/cpu/camera/Camera.ih"
-#include "rkcommon/math/math.ih"
 #include "ospray/SDK/modules/cpu/math/LinearSpace.ih"
+
+#include "rkcommon/math/math.ih"
+
 #include "OsprayCylindricCameraShared.h"
 
 void OsprayCylindricCamera_initRay(const Camera *uniform _self, varying Ray &ray, const varying CameraSample &sample)
@@ -46,5 +48,5 @@ void OsprayCylindricCamera_initRay(const Camera *uniform _self, varying Ray &ray
 
 export void *uniform OsprayCylindricCamera_initRay_addr()
 {
-  return OsprayCylindricCamera_initRay;
+    return OsprayCylindricCamera_initRay;
 }
