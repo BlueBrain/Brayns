@@ -19,15 +19,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ParsingException.h"
 
-#include <istream>
+#include <sstream>
 
 namespace brayns
 {
-class StreamHelper
+ParsingException::ParsingException(const std::string &message, size_t lineNumber, std::string line)
+    : std::runtime_error(message)
+    , _lineNumber(lineNumber)
+    , _line(std::move(line))
 {
-public:
-    static bool getLine(std::string_view &data, std::string_view &line);
-};
+}
+
+ParsingException::ParsingException(const std::string &message, const FileStream &stream)
+    : ParsingException(std::move(message), stream.getLineNumber(), std::string(stream.getLine()))
+{
+}
+
+size_t ParsingException::getLineNumber() const
+{
+    return _lineNumber;
+}
+
+const std::string &ParsingException::getLine() const
+{
+    return _line;
+}
+
+std::string ParsingException::format() const
+{
+    std::ostringstream stream;
+    stream << "Parsing error at line " << _lineNumber;
+    stream << ": '" << what() << "'";
+    stream << ". Line content: '" << _line << "'";
+    return stream.str();
+}
 } // namespace brayns

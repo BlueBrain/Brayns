@@ -19,31 +19,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "StreamHelper.h"
+#pragma once
 
-#include <stdexcept>
+#include <string_view>
+
+#include "StringStream.h"
 
 namespace brayns
 {
-bool StreamHelper::getLine(std::string_view &data, std::string_view &line)
+class FileStream
 {
-    line = {};
-    if (data.empty())
-    {
-        return false;
-    }
-    for (size_t i = 0; i < data.size(); ++i)
-    {
-        auto c = data[i];
-        if (c == '\n')
-        {
-            line = data.substr(0, i);
-            data = data.substr(i + 1);
-            return true;
-        }
-    }
-    line = data;
-    data = {};
-    return true;
-}
+public:
+    FileStream() = default;
+    FileStream(std::string_view data);
+
+    size_t getLineNumber() const;
+    std::string_view getLine() const;
+    bool nextLine();
+
+private:
+    StringStream _stream;
+    size_t _lineNumber = 0;
+    std::string_view _line;
+};
 } // namespace brayns

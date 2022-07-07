@@ -87,7 +87,7 @@ std::string_view StringStream::extractUntilOneOf(std::string_view separators)
 
 std::string_view StringStream::extractToken()
 {
-    _data = StringTrimmer::trimLeft(_data);
+    extractSpaces();
     for (size_t i = 0; i < _data.size(); ++i)
     {
         if (!StringInfo::isSpace(_data[i]))
@@ -102,5 +102,10 @@ std::string_view StringStream::extractToken()
 std::string_view StringStream::extractLine()
 {
     return extractUntil('\n');
+}
+
+void StringStream::extractSpaces()
+{
+    _data = StringTrimmer::trimLeft(_data);
 }
 } // namespace brayns

@@ -27,7 +27,13 @@
 
 namespace brayns
 {
-class Endian
+enum class Endian
+{
+    Little,
+    Big
+};
+
+class EndianHelper
 {
 public:
     static constexpr bool isLittleEndian()
@@ -42,19 +48,15 @@ public:
         return bytes[0] == '\0';
     }
 
-    template<typename T>
-    static constexpr void convertLittleEndianToLocalEndian(T &value)
+    static constexpr Endian getLocalEndian()
     {
-        if (!isLittleEndian())
-        {
-            ByteConverter::swapBytes(value);
-        }
+        return isLittleEndian() ? Endian::Little : Endian::Big;
     }
 
     template<typename T>
-    static constexpr void convertBigEndianToLocalEndian(T &value)
+    static constexpr void convertToLocalEndian(T &value, Endian endian)
     {
-        if (!isBigEndian())
+        if (endian != getLocalEndian())
         {
             ByteConverter::swapBytes(value);
         }

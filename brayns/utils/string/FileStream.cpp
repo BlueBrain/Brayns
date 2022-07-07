@@ -19,44 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <stdexcept>
-#include <string_view>
-
-#include "EndianHelper.h"
+#include "FileStream.h"
 
 namespace brayns
 {
-class BinaryHelper
+FileStream::FileStream(std::string_view data)
+    : _stream(data)
 {
-public:
-    template<typename T>
-    static T extractBigEndian(std::string_view &line)
-    {
-        auto value = extract<T>(line);
-        return EndianHelper::convertBigEndianToLocalEndian(value);
-    }
+}
 
-    template<typename T>
-    static T extractLittleEndian(std::string_view &line)
-    {
-        auto value = extract<T>(line);
-        return EndianHelper::convertLittleEndianToLocalEndian(value);
-    }
+size_t FileStream::getLineNumber() const
+{
+    return _lineNumber;
+}
 
-    template<typename T>
-    static T extract(std::string_view &line)
+std::string_view FileStream::getLine() const
+{
+    return _line;
+}
+
+bool FileStream::nextLine()
+{
+    if (_stream.isEmpty())
     {
-        auto stride = sizeof(T);
-        if (line.size() < stride)
-        {
-            throw std::runtime_error("Line too short");
-        }
-        T value;
-        std::memcpy(&value, line.data(), stride);
-        line = line.substr(stride);
-        return value;
+        return false;
     }
-};
+    _line = _stream.extractLine();
+    ++_lineNumber;
+    return true;
+}
 } // namespace brayns

@@ -41,6 +41,7 @@ public:
     std::string_view extractUntilOneOf(std::string_view separators);
     std::string_view extractToken();
     std::string_view extractLine();
+    void extractSpaces();
 
 private:
     std::string_view _data;

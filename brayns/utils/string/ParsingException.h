@@ -21,43 +21,25 @@
 
 #pragma once
 
-#include <cstdint>
+#include <stdexcept>
+#include <string>
+
+#include "FileStream.h"
 
 namespace brayns
 {
-class EndianHelper
+class ParsingException : public std::runtime_error
 {
 public:
-    static bool isBigEndian()
-    {
-        int32_t test = 1;
-        return *reinterpret_cast<char *>(&test) == 0;
-    }
+    ParsingException(const std::string &message, size_t lineNumber, std::string line);
+    ParsingException(const std::string &message, const FileStream &stream);
 
-    template<typename T>
-    static T convertLittleEndianToLocalEndian(T value)
-    {
-        return isBigEndian() ? swapBytes(value) : value;
-    }
+    size_t getLineNumber() const;
+    const std::string &getLine() const;
+    std::string format() const;
 
-    template<typename T>
-    static T convertBigEndianToLocalEndian(T value)
-    {
-        return isBigEndian() ? value : swapBytes(value);
-    }
-
-    template<typename T>
-    static T swapBytes(T value)
-    {
-        T copy;
-        auto from = reinterpret_cast<const char *>(&value);
-        auto to = reinterpret_cast<char *>(&copy);
-        auto stride = sizeof(T);
-        for (size_t i = 0; i < stride; ++i)
-        {
-            to[i] = from[stride - i - 1];
-        }
-        return copy;
-    }
+private:
+    size_t _lineNumber = 0;
+    std::string _line;
 };
 } // namespace brayns

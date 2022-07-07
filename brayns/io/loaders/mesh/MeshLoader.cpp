@@ -28,6 +28,7 @@
 #include <brayns/io/loaders/mesh/parsers/StlMeshParser.h>
 
 #include <brayns/utils/FileReader.h>
+#include <brayns/utils/string/ParsingException.h>
 
 #include <filesystem>
 #include <fstream>
@@ -62,12 +63,25 @@ public:
         parse(const brayns::MeshParserRegistry &parsers, const std::string &format, std::string_view data)
     {
         auto &parser = parsers.getParser(format);
-        auto mesh = parser.parse(data);
+        auto mesh = _parse(parser, data);
         if (mesh.indices.empty())
         {
             throw std::runtime_error("No meshes found");
         }
         return mesh;
+    }
+
+private:
+    static brayns::TriangleMesh _parse(const brayns::MeshParser &parser, std::string_view data)
+    {
+        try
+        {
+            return parser.parse(data);
+        }
+        catch (const brayns::ParsingException &e)
+        {
+            throw std::runtime_error(e.format());
+        }
     }
 };
 

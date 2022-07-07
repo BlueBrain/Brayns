@@ -21,10 +21,13 @@
 
 #include "OffMeshParser.h"
 
-#include <brayns/utils/Convert.h>
+#include <brayns/utils/string/FileStream.h>
+#include <brayns/utils/string/ParsingException.h>
 #include <brayns/utils/string/StringCounter.h>
 #include <brayns/utils/string/StringStream.h>
 #include <brayns/utils/string/StringTrimmer.h>
+
+#include <brayns/common/TokenParser.h>
 
 namespace
 {
@@ -36,12 +39,6 @@ struct MeshBuffer
     std::vector<Vector3ui> indices;
 };
 
-struct Context
-{
-    size_t lineNumber = 0;
-    std::string_view line;
-};
-
 struct Dimensions
 {
     size_t vertexCount = 0;
@@ -49,25 +46,10 @@ struct Dimensions
     size_t edgeCount = 0;
 };
 
-class LineReader
-{
-public:
-    static bool read(Context &context, StringStream &stream)
-    {
-        if (stream.isEmpty())
-        {
-            return false;
-        }
-        context.line = stream.extractLine();
-        ++context.lineNumber;
-        return true;
-    }
-};
-
 class LineFormatter
 {
 public:
-    static std::string_view format(std::string_view data)
+    static std::string_view removeCommentsAndTrim(std::string_view data)
     {
         auto stream = StringStream(data);
         auto result = stream.extractUntil('#');
@@ -78,18 +60,19 @@ public:
 class LineExtractor
 {
 public:
-    static bool nextNonEmptyLine(Context &context, StringStream &stream)
+    static std::string_view nextLine(FileStream &stream)
     {
         while (true)
         {
-            if (!LineReader::read(context, stream))
+            if (!stream.nextLine())
             {
-                return false;
+                return {};
             }
-            auto line = LineFormatter::format(context.line);
+            auto line = stream.getLine();
+            line = LineFormatter::removeCommentsAndTrim(line);
             if (!line.empty())
             {
-                return true;
+                return line;
             }
         }
         throw std::runtime_error("Internal error");
@@ -99,17 +82,19 @@ public:
 class HeaderParser
 {
 public:
-    static void skipHeaderIfPresent(Context &context, StringStream &stream)
+    static void skipHeaderIfPresent(FileStream &stream)
     {
-        if (!LineExtractor::nextNonEmptyLine(context, stream))
+        auto line = LineExtractor::nextLine(stream);
+        if (line.empty())
         {
             throw std::runtime_error("Empty file");
         }
-        if (context.line != "OFF")
+        if (line != "OFF")
         {
             return;
         }
-        if (!LineExtractor::nextNonEmptyLine(context, stream))
+        line = LineExtractor::nextLine(stream);
+        if (line.empty())
         {
             throw std::runtime_error("Empty file after OFF header");
         }
@@ -124,38 +109,33 @@ public:
         auto count = StringCounter::countTokens(line);
         if (count != 3)
         {
-            throw std::runtime_error("Expected 3 tokens for dimensions, got " + std::to_string(count));
+            throw std::runtime_error("Invalid dimensions, expected 3 tokens, got " + std::to_string(count));
         }
         Dimensions dimensions;
         auto stream = StringStream(line);
-        dimensions.vertexCount = _extractDimension(stream);
-        dimensions.faceCount = _extractDimension(stream);
-        dimensions.edgeCount = _extractDimension(stream);
+        TokenParser::parse(stream, dimensions.vertexCount);
+        TokenParser::parse(stream, dimensions.faceCount);
+        TokenParser::parse(stream, dimensions.edgeCount);
         return dimensions;
-    }
-
-private:
-    static size_t _extractDimension(StringStream &stream)
-    {
-        auto token = stream.extractToken();
-        return Convert::fromString<size_t>(token);
     }
 };
 
 class VertexParser
 {
 public:
-    static std::vector<Vector3f> parseAll(Context &context, StringStream &stream, size_t count)
+    static std::vector<Vector3f> parseAll(FileStream &stream, size_t count)
     {
         std::vector<Vector3f> vertices;
         vertices.reserve(count);
         for (size_t i = 0; i < count; ++i)
         {
-            if (!LineExtractor::nextNonEmptyLine(context, stream))
+            auto line = LineExtractor::nextLine(stream);
+            if (line.empty())
             {
-                throw std::runtime_error("Expected " + std::to_string(count) + " vertices");
+                auto message = "Not enough vertices, expected " + std::to_string(count) + ", got " + std::to_string(i);
+                throw std::runtime_error(message);
             }
-            auto vertex = parse(context.line);
+            auto vertex = parse(line);
             vertices.push_back(vertex);
         }
         return vertices;
@@ -166,39 +146,29 @@ public:
         auto count = StringCounter::countTokens(line);
         if (count != 3)
         {
-            throw std::runtime_error("Expected 3 tokens for a vertex, got " + std::to_string(count));
+            throw std::runtime_error("Invalid vertex, expected 3 tokens, got " + std::to_string(count));
         }
-        Vector3f vertex;
-        auto stream = StringStream(line);
-        vertex.x = _extractFloat(stream);
-        vertex.y = _extractFloat(stream);
-        vertex.z = _extractFloat(stream);
-        return vertex;
-    }
-
-private:
-    static float _extractFloat(StringStream &stream)
-    {
-        auto token = stream.extractToken();
-        return Convert::fromString<float>(token);
+        return TokenParser::parse<Vector3f>(line);
     }
 };
 
 class FaceParser
 {
 public:
-    static std::vector<Vector3ui> parseAll(Context &context, StringStream &stream, const Dimensions &dimensions)
+    static std::vector<Vector3ui> parseAll(FileStream &stream, const Dimensions &dimensions)
     {
         std::vector<Vector3ui> faces;
         auto count = dimensions.faceCount;
         faces.reserve(count);
         for (size_t i = 0; i < count; ++i)
         {
-            if (!LineExtractor::nextNonEmptyLine(context, stream))
+            auto line = LineExtractor::nextLine(stream);
+            if (line.empty())
             {
-                throw std::runtime_error("Expected " + std::to_string(count) + " faces");
+                auto message = "Not enough faces, expected " + std::to_string(count) + ", got " + std::to_string(i);
+                throw std::runtime_error(message);
             }
-            auto indices = parse(context.line, dimensions.vertexCount);
+            auto indices = parse(line, dimensions.vertexCount);
             faces.push_back(indices);
         }
         return faces;
@@ -207,9 +177,9 @@ public:
     static Vector3ui parse(std::string_view line, size_t vertexCount)
     {
         auto count = StringCounter::countTokens(line);
-        if (count != 4)
+        if (count == 0)
         {
-            throw std::runtime_error("Expected 4 tokens for a face, got " + std::to_string(count));
+            throw std::runtime_error("Invalid face, expected at least one token, got " + std::to_string(count));
         }
         auto stream = StringStream(line);
         _extractSize(stream);
@@ -219,8 +189,7 @@ public:
 private:
     static size_t _extractSize(StringStream &stream)
     {
-        auto token = stream.extractToken();
-        auto size = Convert::fromString<size_t>(token);
+        auto size = TokenParser::parse<size_t>(stream);
         if (size != 3)
         {
             throw std::runtime_error("Non triangular face with " + std::to_string(size) + " indices");
@@ -228,37 +197,18 @@ private:
         return size;
     }
 
-    static Vector3f _extractIndices(StringStream &stream, size_t vertexCount)
+    static Vector3ui _extractIndices(StringStream &stream, size_t vertexCount)
     {
-        Vector3ui indices;
-        indices[0] = _extractIndex(stream, vertexCount);
-        indices[1] = _extractIndex(stream, vertexCount);
-        indices[2] = _extractIndex(stream, vertexCount);
-        return indices;
-    }
-
-    static uint32_t _extractIndex(StringStream &stream, size_t vertexCount)
-    {
-        auto token = stream.extractToken();
-        auto index = Convert::fromString<uint32_t>(token);
-        if (index >= vertexCount)
+        auto indices = TokenParser::parse<Vector3ui>(stream);
+        for (auto index : indices)
         {
-            throw std::runtime_error("Invalid index " + std::to_string(index));
+            if (index >= vertexCount)
+            {
+                auto message = "Invalid index: " + std::to_string(index) + " > " + std::to_string(vertexCount);
+                throw std::runtime_error(message);
+            }
         }
-        return index;
-    }
-};
-
-class ErrorMessage
-{
-public:
-    static std::string format(const Context &context, const char *message)
-    {
-        std::ostringstream stream;
-        stream << "Parsing error at line " << context.lineNumber;
-        stream << ": '" << message << "'";
-        stream << ". Line content: '" << context.line << "'";
-        return stream.str();
+        return indices;
     }
 };
 
@@ -267,27 +217,26 @@ class OffParser
 public:
     static MeshBuffer parse(std::string_view data)
     {
-        Context context;
+        FileStream stream(data);
         try
         {
-            return _parse(context, data);
+            return _parse(stream);
         }
         catch (const std::exception &e)
         {
-            auto message = ErrorMessage::format(context, e.what());
-            throw std::runtime_error(message);
+            throw ParsingException(e.what(), stream);
         }
     }
 
 private:
-    static MeshBuffer _parse(Context &context, std::string_view data)
+    static MeshBuffer _parse(FileStream &stream)
     {
         auto mesh = MeshBuffer();
-        auto stream = StringStream(data);
-        HeaderParser::skipHeaderIfPresent(context, stream);
-        auto dimensions = DimensionsParser::parse(context.line);
-        VertexParser::parseAll(context, stream, dimensions.vertexCount);
-        FaceParser::parseAll(context, stream, dimensions);
+        HeaderParser::skipHeaderIfPresent(stream);
+        auto line = stream.getLine();
+        auto dimensions = DimensionsParser::parse(line);
+        VertexParser::parseAll(stream, dimensions.vertexCount);
+        FaceParser::parseAll(stream, dimensions);
         return mesh;
     }
 };

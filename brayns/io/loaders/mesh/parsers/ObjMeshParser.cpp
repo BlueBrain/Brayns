@@ -21,16 +21,18 @@
 
 #include "ObjMeshParser.h"
 
-#include <sstream>
 #include <utility>
 
 #include <brayns/common/Log.h>
 
 #include <brayns/utils/Convert.h>
+#include <brayns/utils/string/FileStream.h>
+#include <brayns/utils/string/ParsingException.h>
 #include <brayns/utils/string/StringCounter.h>
-#include <brayns/utils/string/StringInfo.h>
 #include <brayns/utils/string/StringStream.h>
 #include <brayns/utils/string/StringTrimmer.h>
+
+#include <brayns/common/TokenParser.h>
 
 namespace
 {
@@ -47,41 +49,20 @@ struct MeshBuffer
     std::vector<uint32_t> normalIndices;
 };
 
-struct Context
-{
-    size_t lineNumber = 0;
-    std::string_view line;
-};
-
 struct Line
 {
     std::string_view key;
     std::string_view value;
 };
 
-class LineReader
-{
-public:
-    static bool read(Context &context, StringStream &stream)
-    {
-        if (stream.isEmpty())
-        {
-            return false;
-        }
-        context.line = stream.extractLine();
-        ++context.lineNumber;
-        return true;
-    }
-};
-
 class LineFormatter
 {
 public:
-    static std::string_view format(std::string_view data)
+    static std::string_view removeCommentsAndTrim(std::string_view line)
     {
-        auto stream = StringStream(data);
-        auto result = stream.extractUntil('#');
-        return StringTrimmer::trim(result);
+        auto stream = StringStream(line);
+        line = stream.extractUntil('#');
+        return StringTrimmer::trim(line);
     }
 };
 
@@ -93,41 +74,9 @@ public:
         auto stream = StringStream(data);
         Line line;
         line.key = stream.extractToken();
-        line.value = stream.extractToken();
+        stream.extractSpaces();
+        line.value = stream.extractAll();
         return line;
-    }
-};
-
-class CurrentMesh
-{
-public:
-    static MeshBuffer &get(std::vector<MeshBuffer> &meshes)
-    {
-        if (meshes.empty())
-        {
-            return meshes.emplace_back();
-        }
-        return meshes.back();
-    }
-};
-
-class VectorParser
-{
-public:
-    template<glm::length_t S, typename T>
-    static void parse(std::string_view data, glm::vec<S, T> &value)
-    {
-        if (StringCounter::countTokens(data) != S)
-        {
-            auto size = std::to_string(S);
-            throw std::runtime_error("Expected " + size + " numbers for a vector" + size);
-        }
-        auto stream = StringStream(data);
-        for (glm::length_t i = 0; i < S; ++i)
-        {
-            auto token = stream.extractToken();
-            Convert::fromString(token, value[i]);
-        }
     }
 };
 
@@ -155,7 +104,7 @@ private:
         auto count = StringCounter::count(token, '/');
         if (count > 2)
         {
-            throw std::runtime_error("Invalid index count of " + std::to_string(count) + " in a vertex");
+            throw std::runtime_error("Invalid face element with " + std::to_string(count + 1) + "indices");
         }
         auto stream = StringStream(token);
         _parseIndex(stream, mesh.vertexIndices, mesh.vertices.size());
@@ -212,109 +161,119 @@ private:
     }
 };
 
-class NewObjectParser
+class ObjectParser
 {
 public:
-    static bool canParse(std::string_view key)
+    static MeshBuffer parse(std::string_view value)
     {
-        return key == "o";
-    }
-
-    static void parse(std::string_view value, std::vector<MeshBuffer> &meshes)
-    {
-        auto &mesh = meshes.emplace_back();
+        MeshBuffer mesh;
         mesh.name = value;
+        return mesh;
     }
 };
 
 class VertexParser
 {
 public:
-    static bool canParse(std::string_view key)
+    static Vector3f parse(std::string_view value)
     {
-        return key == "v";
-    }
-
-    static void parse(std::string_view value, std::vector<MeshBuffer> &meshes)
-    {
-        auto &mesh = CurrentMesh::get(meshes);
-        auto &vertex = mesh.vertices.emplace_back();
-        VectorParser::parse(value, vertex);
+        auto count = StringCounter::countTokens(value);
+        if (count != 3 || count != 4)
+        {
+            throw std::runtime_error("Invalid vertex, expected 3 or 4 tokens, got " + std::to_string(count));
+        }
+        return TokenParser::parse<Vector3f>(value);
     }
 };
 
 class TextureParser
 {
 public:
-    static bool canParse(std::string_view key)
+    static Vector2f parse(std::string_view value)
     {
-        return key == "vt";
-    }
-
-    static void parse(std::string_view value, std::vector<MeshBuffer> &meshes)
-    {
-        auto &mesh = CurrentMesh::get(meshes);
-        auto &texture = mesh.textures.emplace_back();
-        VectorParser::parse(value, texture);
+        auto count = StringCounter::countTokens(value);
+        if (count != 2)
+        {
+            throw std::runtime_error("Invalid texture, expected 2 tokens, got " + std::to_string(count));
+        }
+        return TokenParser::parse<Vector2f>(value);
     }
 };
 
 class NormalParser
 {
 public:
-    static bool canParse(std::string_view key)
+    static Vector3f parse(std::string_view value)
     {
-        return key == "vn";
-    }
-
-    static void parse(std::string_view value, std::vector<MeshBuffer> &meshes)
-    {
-        auto &mesh = CurrentMesh::get(meshes);
-        auto &normal = mesh.normals.emplace_back();
-        VectorParser::parse(value, normal);
+        auto count = StringCounter::countTokens(value);
+        if (count != 3)
+        {
+            throw std::runtime_error("Invalid normal, expected 3 tokens, got " + std::to_string(count));
+        }
+        return TokenParser::parse<Vector3f>(value);
     }
 };
 
 class FaceParser
 {
 public:
-    static bool canParse(std::string_view key)
+    static void parse(std::string_view value, MeshBuffer &mesh)
     {
-        return key == "f";
-    }
-
-    static void parse(std::string_view value, std::vector<MeshBuffer> &meshes)
-    {
-        auto &mesh = CurrentMesh::get(meshes);
         IndicesParser::parse(value, mesh);
         IndicesValidator::validate(mesh);
     }
 };
 
-class LineExtractor
+class CurrentMesh
 {
 public:
-    static bool extract(const Line &line, std::vector<MeshBuffer> &meshes)
+    static MeshBuffer &get(std::vector<MeshBuffer> &meshes)
     {
-        bool result = false;
-        result |= _tryParseWith<NewObjectParser>(line, meshes);
-        result |= _tryParseWith<VertexParser>(line, meshes);
-        result |= _tryParseWith<TextureParser>(line, meshes);
-        result |= _tryParseWith<NormalParser>(line, meshes);
-        result |= _tryParseWith<FaceParser>(line, meshes);
-        return result;
-    }
-
-private:
-    template<typename T>
-    static bool _tryParseWith(const Line &line, std::vector<MeshBuffer> &meshes)
-    {
-        if (!T::canParse(line.key))
+        if (meshes.empty())
         {
-            return false;
+            return meshes.emplace_back();
         }
-        T::parse(line.value, meshes);
-        return true;
+        return meshes.back();
+    }
+};
+
+class MeshLineParser
+{
+public:
+    static bool parse(const Line &line, std::vector<MeshBuffer> &meshes)
+    {
+        auto &[key, value] = line;
+        if (key == "o")
+        {
+            auto object = ObjectParser::parse(value);
+            meshes.push_back(std::move(object));
+            return true;
+        }
+        auto &mesh = CurrentMesh::get(meshes);
+        if (key == "v")
+        {
+            auto vertex = VertexParser::parse(value);
+            mesh.vertices.push_back(vertex);
+            return true;
+        }
+        if (key == "vt")
+        {
+            auto texture = TextureParser::parse(value);
+            mesh.textures.push_back(texture);
+            return true;
+        }
+        if (key == "vn")
+        {
+            auto normal = NormalParser::parse(value);
+            mesh.normals.push_back(normal);
+            return true;
+        }
+        if (key == "f")
+        {
+            FaceParser::parse(value, mesh);
+            return true;
+        }
+        return false;
     }
 };
 
@@ -361,57 +320,39 @@ private:
     }
 };
 
-class ErrorMessage
-{
-public:
-    static std::string format(const Context &context, const std::string &message)
-    {
-        std::ostringstream stream;
-        stream << "Parsing error at line ";
-        stream << context.lineNumber;
-        stream << ": '";
-        stream << message;
-        stream << "'. Line content: '";
-        stream << context.line;
-        stream << "'";
-        return stream.str();
-    }
-};
-
 class ObjParser
 {
 public:
     static std::vector<MeshBuffer> parse(std::string_view data)
     {
-        Context context;
+        FileStream stream(data);
         try
         {
-            return _parse(context, data);
+            return _parse(stream);
         }
         catch (const std::exception &e)
         {
-            auto message = ErrorMessage::format(context, e.what());
-            throw std::runtime_error(message);
+            throw ParsingException(e.what(), stream);
         }
     }
 
 private:
-    static std::vector<MeshBuffer> _parse(Context &context, std::string_view data)
+    static std::vector<MeshBuffer> _parse(FileStream &stream)
     {
         std::vector<MeshBuffer> meshes;
-        auto stream = StringStream(data);
-        while (LineReader::read(context, stream))
+        while (stream.nextLine())
         {
-            auto data = LineFormatter::format(context.line);
+            auto data = stream.getLine();
+            data = LineFormatter::removeCommentsAndTrim(data);
             if (data.empty())
             {
-                Log::debug("Skip empty line {} '{}'.", context.lineNumber, context.line);
+                Log::debug("Skip empty line {} '{}'.", stream.getLineNumber(), stream.getLine());
                 continue;
             }
             auto line = LineParser::parse(data);
-            if (!LineExtractor::extract(line, meshes))
+            if (!MeshLineParser::parse(line, meshes))
             {
-                Log::debug("Skip unknown line {} '{}'", context.lineNumber, context.line);
+                Log::debug("Skip unknown line {} '{}'", stream.getLineNumber(), stream.getLine());
             }
         }
         MeshValidator::validate(meshes);

@@ -37,22 +37,11 @@ public:
 template<typename T>
 struct ByteParser
 {
-    static void parseLocalEndian(std::string_view data, T &value)
+    static void parse(std::string_view data, Endian endian, T &value)
     {
         auto bytes = ByteConverter::getBytes(value);
         ByteParserHelper::copyBytes(data, bytes, sizeof(T));
-    }
-
-    static void parseLittleEndian(std::string_view data, T &value)
-    {
-        parseLocalEndian(data, value);
-        Endian::convertLittleEndianToLocalEndian(value);
-    }
-
-    static void parseBigEndian(std::string_view data, T &value)
-    {
-        parseLocalEndian(data, value);
-        Endian::convertBigEndianToLocalEndian(value);
+        EndianHelper::convertToLocalEndian(value, endian);
     }
 };
 } // namespace brayns
