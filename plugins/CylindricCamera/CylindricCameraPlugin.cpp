@@ -23,13 +23,14 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 #include "camera/CylindricCamera.h"
 #include "camera/ospray/OsprayCylindricCamera.h"
 #include "network/entrypoints/CylindricCameraEntrypoint.h"
 
-CylindricCameraPlugin::CylindricCameraPlugin(brayns::PluginAPI &api)
-    : _engine(api.getEngine())
+CylindricCameraPlugin::CylindricCameraPlugin(brayns::Engine &engine)
+    : _engine(engine)
 {
 }
 
@@ -51,5 +52,5 @@ void CylindricCameraPlugin::registerEntrypoints(brayns::INetworkInterface &inter
 extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)
 {
     brayns::Log::info("[CC] Loading Cylindric Camera plugin.");
-    return std::make_unique<CylindricCameraPlugin>(api);
+    return std::make_unique<CylindricCameraPlugin>(api.getEngine());
 }
