@@ -22,8 +22,10 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/engine/FrameRenderer.h>
+#include <brayns/engine/cameras/OrthographicCamera.h>
 #include <brayns/engine/cameras/PerspectiveCamera.h>
 #include <brayns/engine/renderers/InteractiveRenderer.h>
+#include <brayns/engine/renderers/ProductionRenderer.h>
 
 #include <thread>
 
@@ -85,6 +87,22 @@ struct OsprayDeviceInitializer
         return device;
     }
 };
+
+class FactoryInitializer
+{
+public:
+    static void addRenderers(brayns::EngineObjectFactory<brayns::Renderer> &factory)
+    {
+        factory.registerType<brayns::InteractiveRenderer>();
+        factory.registerType<brayns::ProductionRenderer>();
+    }
+
+    static void addCameras(brayns::EngineObjectFactory<brayns::Camera> &factory)
+    {
+        factory.registerType<brayns::OrthographicCamera>();
+        factory.registerType<brayns::PerspectiveCamera>();
+    }
+};
 }
 
 namespace brayns
@@ -105,6 +123,8 @@ Engine::Engine(ParametersManager &parameters)
     , _camera(std::make_unique<PerspectiveCamera>())
     , _renderer(std::make_unique<InteractiveRenderer>())
 {
+    FactoryInitializer::addRenderers(_rendererFactory);
+    FactoryInitializer::addCameras(_cameraFactory);
 }
 
 void Engine::preRender()
@@ -216,6 +236,16 @@ void Engine::setRenderer(std::unique_ptr<Renderer> renderer) noexcept
 Renderer &Engine::getRenderer() noexcept
 {
     return *_renderer;
+}
+
+EngineObjectFactory<Camera> &Engine::getCameraFactory() noexcept
+{
+    return _cameraFactory;
+}
+
+EngineObjectFactory<Renderer> &Engine::getRendererFactory() noexcept
+{
+    return _rendererFactory;
 }
 
 void Engine::setRunning(bool keepRunning) noexcept

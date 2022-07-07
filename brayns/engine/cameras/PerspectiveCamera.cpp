@@ -40,7 +40,7 @@ PerspectiveCamera::PerspectiveCamera()
 
 std::string PerspectiveCamera::getName() const noexcept
 {
-    return "perspective";
+    return typeName;
 }
 
 std::unique_ptr<Camera> PerspectiveCamera::clone() const noexcept

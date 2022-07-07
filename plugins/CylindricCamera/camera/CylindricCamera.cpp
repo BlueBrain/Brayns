@@ -18,43 +18,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "CylindricCamera.h"
 
-#include <brayns/engine/Camera.h>
-#include <brayns/json/JsonAdapterMacro.h>
-
-namespace brayns
+namespace
 {
-class OrthographicCamera final : public Camera
+struct CylindricParameters
 {
-public:
-    inline static const std::string typeName = "orthographic";
-
-public:
-    OrthographicCamera();
-
-    std::string getName() const noexcept override;
-
-    std::unique_ptr<Camera> clone() const noexcept override;
-
-    /**
-     * @brief Sets the orthographic projection height
-     */
-    void setHeight(const float height) noexcept;
-
-    /**
-     * @brief Returns the orthographic projection height
-     */
-    float getHeight() const noexcept;
-
-protected:
-    void commitCameraSpecificParams() final;
-
-private:
-    float _height{1.f};
+    inline static const std::string fovy = "fovy";
 };
+}
 
-BRAYNS_JSON_ADAPTER_BEGIN(OrthographicCamera)
-BRAYNS_JSON_ADAPTER_GETSET("height", getHeight, setHeight, "Camera orthographic projection height")
-BRAYNS_JSON_ADAPTER_END()
+CylindricCamera::CylindricCamera()
+    : brayns::Camera(typeName)
+{
+}
+
+std::string CylindricCamera::getName() const noexcept
+{
+    return typeName;
+}
+
+std::unique_ptr<brayns::Camera> CylindricCamera::clone() const noexcept
+{
+    auto result = std::make_unique<CylindricCamera>();
+    result->setLookAt(getLookAt());
+    result->setAspectRatio(getAspectRatio());
+    result->setFovy(_fovy);
+    return result;
+}
+
+void CylindricCamera::setFovy(float fovy) noexcept
+{
+    _updateValue(_fovy, fovy);
+}
+
+float CylindricCamera::getFovy() const noexcept
+{
+    return _fovy;
+}
+
+void CylindricCamera::commitCameraSpecificParams()
+{
+    auto &osprayCamera = getOsprayCamera();
+    osprayCamera.setParam(CylindricParameters::fovy, _fovy);
 }

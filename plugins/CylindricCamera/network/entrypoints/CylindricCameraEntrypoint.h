@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -20,28 +20,23 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
+#include <brayns/network/entrypoints/CameraEntrypoint.h>
+#include <camera/CylindricCamera.h>
 
-#include <brayns/network/common/CancellationToken.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ExportFramesMessage.h>
-
-namespace brayns
-{
-class ExportFramesEntrypoint : public Entrypoint<ExportFramesParams, EmptyMessage>
+class SetCylindricCameraEntrypoint : public brayns::SetCameraEntrypoint<CylindricCamera>
 {
 public:
-    ExportFramesEntrypoint(Engine &engine, ParametersManager &paramsManager, CancellationToken token);
+    SetCylindricCameraEntrypoint(brayns::Engine &engine);
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-    virtual void onCancel() override;
-
-private:
-    Engine &_engine;
-    ParametersManager &_paramsManager;
-    CancellationToken _token;
+    std::string getMethod() const override;
+    std::string getDescription() const override;
 };
-} // namespace brayns
+
+class GetCylindricCameraEntrypoint : public brayns::GetCameraEntrypoint<CylindricCamera>
+{
+public:
+    GetCylindricCameraEntrypoint(brayns::Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+};

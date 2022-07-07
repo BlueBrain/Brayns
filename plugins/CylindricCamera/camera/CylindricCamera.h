@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -20,28 +20,35 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engine/Camera.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/network/common/CancellationToken.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ExportFramesMessage.h>
+class CylindricCamera final : public brayns::Camera
+{
+public:
+    inline static const std::string typeName = "cylindric";
+
+public:
+    CylindricCamera();
+
+    std::string getName() const noexcept override;
+
+    std::unique_ptr<brayns::Camera> clone() const noexcept override;
+
+    void setFovy(float fovy) noexcept;
+
+    float getFovy() const noexcept;
+
+protected:
+    void commitCameraSpecificParams() override;
+
+private:
+    float _fovy = 48.549f; // Opendeck fovy
+};
 
 namespace brayns
 {
-class ExportFramesEntrypoint : public Entrypoint<ExportFramesParams, EmptyMessage>
-{
-public:
-    ExportFramesEntrypoint(Engine &engine, ParametersManager &paramsManager, CancellationToken token);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-    virtual void onCancel() override;
-
-private:
-    Engine &_engine;
-    ParametersManager &_paramsManager;
-    CancellationToken _token;
-};
-} // namespace brayns
+BRAYNS_JSON_ADAPTER_BEGIN(CylindricCamera)
+BRAYNS_JSON_ADAPTER_GETSET("fovy", getFovy, setFovy, "Vertical field of view (in degrees)")
+BRAYNS_JSON_ADAPTER_END()
+}

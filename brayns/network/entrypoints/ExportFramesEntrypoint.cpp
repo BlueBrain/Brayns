@@ -113,13 +113,15 @@ public:
         const auto sequentialNaming = params.sequential_naming;
 
         // Renderer
-        auto &rendererObject = params.renderer;
-        auto renderer = rendererObject.create();
+        auto &rendererData = params.renderer;
+        auto &rendererFactory = engine.getRendererFactory();
+        auto renderer = rendererFactory.createOr(rendererData, engine.getRenderer());
         renderer->commit();
 
         // Camera (committed on the loop)
-        auto &cameraObject = params.camera;
-        auto camera = cameraObject.create();
+        auto &cameraData = params.camera;
+        auto &cameraFactory = engine.getCameraFactory();
+        auto camera = cameraFactory.createOr(cameraData, engine.getCamera());
 
         auto &systemCamera = engine.getCamera();
         const auto &systemLookAt = systemCamera.getLookAt();
@@ -186,8 +188,6 @@ ExportFramesEntrypoint::ExportFramesEntrypoint(Engine &engine, ParametersManager
     : _engine(engine)
     , _paramsManager(parmManager)
     , _token(token)
-    , _cameraFactory(EngineFactories::createCameraFactory())
-    , _renderFactory(EngineFactories::createRendererFactory())
 {
 }
 
@@ -210,10 +210,6 @@ void ExportFramesEntrypoint::onRequest(const Request &request)
 {
     // Params
     ExportFramesParams params;
-    auto &systemCamera = _engine.getCamera();
-    params.camera = GenericObject<Camera>(systemCamera, _cameraFactory);
-    auto &systemRender = _engine.getRenderer();
-    params.renderer = GenericObject<Renderer>(systemRender, _renderFactory);
     auto &systemFb = _engine.getFramebuffer();
     params.image_settings = ImageSettings(systemFb.getFrameSize());
     request.getParams(params);

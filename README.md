@@ -16,6 +16,7 @@ Brayns also comes with some already-made plugins:
 * **CircuitInfo (Deprecated)**: A plugin which accepts queries to extract information from neuronal circuits.
 * **DTI**: A diffuse-tensor imaging visualization plugin.
 * **AtlasExplorer**: A plugin capable of interpreting and render NRRD volumes.
+* **CylindricCamera**: A plugin that adds a cylindric camera projection for inmersive environments.
 
 ## Building
 
@@ -33,6 +34,7 @@ The following components must be installed on the system where Brayns will be bu
 * Git
 * Package config
 * SSL Development files
+* Python 3.9 or higher
 * OSPRay 2.10.0 (https://github.com/ospray/OSPRay/tree/v2.10.0)
 
 Optionally, to build the core plugins of Brayns, the following components are required.
@@ -47,10 +49,10 @@ Brayns uses further dependencies, but if they are not present on the system, it 
 * Poco libraries 1.11.1 (https://github.com/pocoproject/poco/tree/poco-1.11.1-release)
 * spdlog 1.9.2 (https://github.com/gabime/spdlog/tree/v1.9.2)
 * stb (https://github.com/nothings/stb)
-* libsonata 0.1.11 (https://github.com/BlueBrain/libsonata/tree/v0.1.11)
+* libsonata 0.1.13 (https://github.com/BlueBrain/libsonata/tree/v0.1.11)
 * MVDTool 2.4.4 (https://github.com/BlueBrain/MVDTool/tree/v2.4.4)
 * MorphIO 3.3.3 (https://github.com/BlueBrain/MorphIO/tree/v3.3.3)
-* Brion 3.3.8 (https://github.com/BlueBrain/Brion/tree/3.3.8)
+* Brion 3.3.9 (https://github.com/BlueBrain/Brion/tree/3.3.8)
 
 ### Build command
 

@@ -20,28 +20,13 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
-
-#include <brayns/network/common/CancellationToken.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ExportFramesMessage.h>
+#include <brayns/engine/EngineObjectFactory.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-class ExportFramesEntrypoint : public Entrypoint<ExportFramesParams, EmptyMessage>
-{
-public:
-    ExportFramesEntrypoint(Engine &engine, ParametersManager &paramsManager, CancellationToken token);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-    virtual void onCancel() override;
-
-private:
-    Engine &_engine;
-    ParametersManager &_paramsManager;
-    CancellationToken _token;
-};
-} // namespace brayns
+BRAYNS_JSON_ADAPTER_BEGIN(EngineObjectData)
+BRAYNS_JSON_ADAPTER_ENTRY(name, "Engine object type name", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(params, "Object parameters", Required(false))
+BRAYNS_JSON_ADAPTER_END()
+}

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -18,23 +18,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "EngineObjectFactory.h"
+#include "CylindricCameraEntrypoint.h"
 
-namespace brayns
+SetCylindricCameraEntrypoint::SetCylindricCameraEntrypoint(brayns::Engine &engine)
+    : brayns::SetCameraEntrypoint<CylindricCamera>(engine)
 {
-EngineObjectFactory<Camera> EngineFactories::createCameraFactory() noexcept
-{
-    auto cameraFactory = EngineObjectFactory<Camera>();
-    cameraFactory.registerType<OrthographicCamera>();
-    cameraFactory.registerType<PerspectiveCamera>();
-    return cameraFactory;
 }
 
-EngineObjectFactory<Renderer> EngineFactories::createRendererFactory() noexcept
+std::string SetCylindricCameraEntrypoint::getMethod() const
 {
-    auto rendererFactory = EngineObjectFactory<Renderer>();
-    rendererFactory.registerType<InteractiveRenderer>();
-    rendererFactory.registerType<ProductionRenderer>();
-    return rendererFactory;
+    return "set-camera-cylindric";
 }
+
+std::string SetCylindricCameraEntrypoint::getDescription() const
+{
+    return "Sets the current camera to a cylindric one, with the specified parameters";
+}
+
+GetCylindricCameraEntrypoint::GetCylindricCameraEntrypoint(brayns::Engine &engine)
+    : brayns::GetCameraEntrypoint<CylindricCamera>(engine)
+{
+}
+
+std::string GetCylindricCameraEntrypoint::getMethod() const
+{
+    return "get-camera-cylindric";
+}
+
+std::string GetCylindricCameraEntrypoint::getDescription() const
+{
+    return "Returns the current camera as cylindric";
 }

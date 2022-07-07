@@ -38,7 +38,7 @@ OrthographicCamera::OrthographicCamera()
 
 std::string OrthographicCamera::getName() const noexcept
 {
-    return "orthographic";
+    return typeName;
 }
 
 std::unique_ptr<Camera> OrthographicCamera::clone() const noexcept

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -17,31 +17,36 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 #pragma once
 
-#include <brayns/engine/Engine.h>
+#include <ospray/SDK/modules/cpu/camera/CameraShared.h>
 
-#include <brayns/network/common/CancellationToken.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ExportFramesMessage.h>
-
-namespace brayns
+#ifdef __cplusplus
+namespace ispc
 {
-class ExportFramesEntrypoint : public Entrypoint<ExportFramesParams, EmptyMessage>
+#endif // __cplusplus
+
+struct OsprayCylindricCamera
 {
-public:
-    ExportFramesEntrypoint(Engine &engine, ParametersManager &paramsManager, CancellationToken token);
+    Camera super;
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isAsync() const override;
-    virtual void onRequest(const Request &request) override;
-    virtual void onCancel() override;
+    vec3f org;
+    vec3f dirCam;
+    vec3f dirDu;
+    vec3f dirDv;
+    float imgPlaneSizeY;
 
-private:
-    Engine &_engine;
-    ParametersManager &_paramsManager;
-    CancellationToken _token;
+#ifdef __cplusplus
+    OsprayCylindricCamera()
+        : org(0.f)
+        , dirCam(0.f)
+        , dirDu(0.f)
+        , dirDv(0.f)
+        , imgPlaneSizeY(0.f)
+    {
+    }
 };
-} // namespace brayns
+} // namespace ispc
+#else
+};
+#endif // __cplusplus

@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,37 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/renderers/ProductionRenderer.h>
+#pragma once
 
-namespace
+#include <ospray/SDK/modules/cpu/camera/Camera.h>
+
+#include "OsprayCylindricCameraShared.h"
+
+/**
+ * This camera is designed for the opendeck. It has a fixed
+ * vertical field of view of 48.549 degrees. The rays are using
+ * cylindrical projection for the x axis and perspective projection
+ * for the y axis of an image.
+ */
+class OsprayCylindricCamera : public ospray::AddStructShared<ospray::Camera, ispc::OsprayCylindricCamera>
 {
-struct ProductionParameters
-{
-    inline static const std::string osprayName = "pathtracer";
+public:
+    OsprayCylindricCamera();
+
+    std::string toString() const override;
+    void commit() override;
 };
-}
-namespace brayns
-{
-ProductionRenderer::ProductionRenderer()
-    : Renderer(ProductionParameters::osprayName)
-{
-}
-
-std::string ProductionRenderer::getName() const noexcept
-{
-    return typeName;
-}
-
-std::unique_ptr<Renderer> ProductionRenderer::clone() const noexcept
-{
-    auto result = std::make_unique<ProductionRenderer>();
-    result->setBackgroundColor(getBackgroundColor());
-    result->setMaxRayBounces(getMaxRayBounces());
-    result->setSamplesPerPixel(getSamplesPerPixel());
-    return result;
-}
-
-void ProductionRenderer::commitRendererSpecificParams()
-{
-}
-}

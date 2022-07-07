@@ -21,11 +21,15 @@
 #pragma once
 
 #include <brayns/engine/Renderer.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
 class ProductionRenderer final : public Renderer
 {
+public:
+    inline static const std::string typeName = "production";
+
 public:
     ProductionRenderer();
 
@@ -36,4 +40,25 @@ public:
 protected:
     void commitRendererSpecificParams() final;
 };
+
+BRAYNS_JSON_ADAPTER_BEGIN(ProductionRenderer)
+BRAYNS_JSON_ADAPTER_GETSET(
+    "samples_per_pixel",
+    getSamplesPerPixel,
+    setSamplesPerPixel,
+    "Number of samples per pixel",
+    Required(false))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "max_ray_bounces",
+    getMaxRayBounces,
+    setMaxRayBounces,
+    "Max ray bounces per sample",
+    Required(false))
+BRAYNS_JSON_ADAPTER_GETSET(
+    "background_color",
+    getBackgroundColor,
+    setBackgroundColor,
+    "Background color",
+    Required(false))
+BRAYNS_JSON_ADAPTER_END()
 }

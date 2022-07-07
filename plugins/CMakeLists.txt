@@ -43,3 +43,7 @@ endif()
 if(BRAYNS_ATLASEXPLORER_ENABLED)
     add_subdirectory(AtlasExplorer)
 endif()
+
+if(BRAYNS_CYLINDRICCAMERA_ENABLED)
+    add_subdirectory(CylindricCamera)
+endif()

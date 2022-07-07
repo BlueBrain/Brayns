@@ -39,7 +39,7 @@ InteractiveRenderer::InteractiveRenderer()
 
 std::string InteractiveRenderer::getName() const noexcept
 {
-    return "interactive";
+    return typeName;
 }
 
 std::unique_ptr<Renderer> InteractiveRenderer::clone() const noexcept
