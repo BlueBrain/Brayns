@@ -35,5 +35,5 @@ public:
     void registerEntrypoints(brayns::INetworkInterface &interface) final;
 
 private:
-    brayns::PluginAPI &_api;
+    brayns::Engine &_engine;
 };

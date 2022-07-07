@@ -28,6 +28,9 @@ namespace brayns
 class OrthographicCamera final : public Camera
 {
 public:
+    inline static const std::string typeName = "orthographic";
+
+public:
     OrthographicCamera();
 
     std::string getName() const noexcept override;

@@ -28,6 +28,9 @@ namespace brayns
 class InteractiveRenderer final : public Renderer
 {
 public:
+    inline static const std::string typeName = "interactive";
+
+public:
     InteractiveRenderer();
 
     std::string getName() const noexcept final;

@@ -28,6 +28,9 @@ namespace brayns
 class PerspectiveCamera final : public Camera
 {
 public:
+    inline static const std::string typeName = "perspective";
+
+public:
     PerspectiveCamera();
 
     std::string getName() const noexcept override;

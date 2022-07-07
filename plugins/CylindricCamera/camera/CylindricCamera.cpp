@@ -29,13 +29,13 @@ struct CylindricParameters
 }
 
 CylindricCamera::CylindricCamera()
-    : brayns::Camera(osprayName)
+    : brayns::Camera(typeName)
 {
 }
 
 std::string CylindricCamera::getName() const noexcept
 {
-    return osprayName;
+    return typeName;
 }
 
 std::unique_ptr<brayns::Camera> CylindricCamera::clone() const noexcept

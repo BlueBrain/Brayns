@@ -29,26 +29,23 @@
 #include "network/entrypoints/CylindricCameraEntrypoint.h"
 
 CylindricCameraPlugin::CylindricCameraPlugin(brayns::PluginAPI &api)
-    : _api(api)
+    : _engine(api.getEngine())
 {
 }
 
 void CylindricCameraPlugin::onCreate()
 {
-    ospray::Camera::registerType<OsprayCylindricCamera>(CylindricCamera::osprayName.c_str());
+    ospray::Camera::registerType<OsprayCylindricCamera>(CylindricCamera::typeName.c_str());
 
-    auto &engine = _api.getEngine();
-    auto &cameraFactory = engine.getCameraFactory();
+    auto &cameraFactory = _engine.getCameraFactory();
     cameraFactory.registerType<CylindricCamera>();
 }
 
 void CylindricCameraPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
 {
-    auto &engine = _api.getEngine();
-
     auto builder = brayns::EntrypointBuilder("Cylindric Camera", interface);
-    builder.add<SetCylindricCameraEntrypoint>(engine);
-    builder.add<GetCylindricCameraEntrypoint>(engine);
+    builder.add<SetCylindricCameraEntrypoint>(_engine);
+    builder.add<GetCylindricCameraEntrypoint>(_engine);
 }
 
 extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)

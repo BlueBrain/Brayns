@@ -117,8 +117,7 @@ public:
     template<typename SubT>
     void registerType()
     {
-        auto name = SubT().getName();
-        _items.push_back(std::make_unique<FactoryEntry<SubT>>(name));
+        _items.push_back(std::make_unique<FactoryEntry<SubT>>(SubT::typeName));
     }
 
 private:

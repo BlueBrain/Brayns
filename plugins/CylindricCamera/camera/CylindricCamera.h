@@ -26,7 +26,7 @@
 class CylindricCamera final : public brayns::Camera
 {
 public:
-    inline static const std::string osprayName = "cylindric";
+    inline static const std::string typeName = "cylindric";
 
 public:
     CylindricCamera();

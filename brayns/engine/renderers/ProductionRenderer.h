@@ -28,6 +28,9 @@ namespace brayns
 class ProductionRenderer final : public Renderer
 {
 public:
+    inline static const std::string typeName = "production";
+
+public:
     ProductionRenderer();
 
     std::string getName() const noexcept final;

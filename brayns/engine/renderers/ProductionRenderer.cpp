@@ -36,7 +36,7 @@ ProductionRenderer::ProductionRenderer()
 
 std::string ProductionRenderer::getName() const noexcept
 {
-    return "production";
+    return typeName;
 }
 
 std::unique_ptr<Renderer> ProductionRenderer::clone() const noexcept
