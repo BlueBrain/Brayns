@@ -1,7 +1,8 @@
 # Copyright (c) 2015-2022, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-# Responsible Authors: Cyrille Favreau <cyrille.favreau@epfl.ch>
-#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+# Responsible Authors:
+# Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
@@ -26,13 +27,17 @@ if(BRAYNS_ATLASEXPLORER_ENABLED)
     find_package(BZip2 REQUIRED)
 endif()
 
+if(BRAYNS_CYLINDRICCAMERA_ENABLED)
+    find_package(rkcommon REQUIRED)
+endif()
+
 add_subdirectory(deps)
 
-if (BRAYNS_CIRCUITEXPLORER_ENABLED)
+if(BRAYNS_CIRCUITEXPLORER_ENABLED)
     add_subdirectory(CircuitExplorer)
 endif()
 
-if (BRAYNS_DTI_ENABLED)
+if(BRAYNS_DTI_ENABLED)
     add_subdirectory(DTI)
 endif()
 
