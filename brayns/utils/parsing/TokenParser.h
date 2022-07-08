@@ -45,7 +45,7 @@ struct TokenParser<std::vector<T>>
 {
     static void parse(StringStream &stream, std::vector<T> &values)
     {
-        while (!stream.isEmpty())
+        while (!stream.isSpace())
         {
             auto &value = values.emplace_back();
             TokenParser<T>::parse(stream, value);

@@ -41,63 +41,51 @@ struct StringParser<bool>
 };
 
 template<>
-struct StringParser<char>
+struct StringParser<int8_t>
 {
-    static void parse(std::string_view data, char &value);
+    static void parse(std::string_view data, int8_t &value);
 };
 
 template<>
-struct StringParser<unsigned char>
+struct StringParser<uint8_t>
 {
-    static void parse(std::string_view data, unsigned char &value);
+    static void parse(std::string_view data, uint8_t &value);
 };
 
 template<>
-struct StringParser<short>
+struct StringParser<int16_t>
 {
-    static void parse(std::string_view data, short &value);
+    static void parse(std::string_view data, int16_t &value);
 };
 
 template<>
-struct StringParser<unsigned short>
+struct StringParser<uint16_t>
 {
-    static void parse(std::string_view data, unsigned short &value);
+    static void parse(std::string_view data, uint16_t &value);
 };
 
 template<>
-struct StringParser<int>
+struct StringParser<int32_t>
 {
-    static void parse(std::string_view data, int &value);
+    static void parse(std::string_view data, int32_t &value);
 };
 
 template<>
-struct StringParser<unsigned int>
+struct StringParser<uint32_t>
 {
-    static void parse(std::string_view data, unsigned int &value);
+    static void parse(std::string_view data, uint32_t &value);
 };
 
 template<>
-struct StringParser<long>
+struct StringParser<int64_t>
 {
-    static void parse(std::string_view data, long &value);
+    static void parse(std::string_view data, int64_t &value);
 };
 
 template<>
-struct StringParser<unsigned long>
+struct StringParser<uint64_t>
 {
-    static void parse(std::string_view data, unsigned long &value);
-};
-
-template<>
-struct StringParser<long long>
-{
-    static void parse(std::string_view data, long long &value);
-};
-
-template<>
-struct StringParser<unsigned long long>
-{
-    static void parse(std::string_view data, unsigned long long &value);
+    static void parse(std::string_view data, uint64_t &value);
 };
 
 template<>
@@ -110,11 +98,5 @@ template<>
 struct StringParser<double>
 {
     static void parse(std::string_view data, double &value);
-};
-
-template<>
-struct StringParser<long double>
-{
-    static void parse(std::string_view data, long double &value);
 };
 } // namespace brayns

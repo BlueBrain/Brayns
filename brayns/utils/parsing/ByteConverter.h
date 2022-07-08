@@ -29,7 +29,7 @@ namespace brayns
 class ByteConverter
 {
 public:
-    static constexpr void copyBytes(const char *from, char *to, size_t stride)
+    static void copyBytes(const char *from, char *to, size_t stride)
     {
         for (size_t i = 0; i < stride; ++i)
         {
@@ -37,7 +37,7 @@ public:
         }
     }
 
-    static constexpr void swapBytes(char *bytes, size_t stride)
+    static void swapBytes(char *bytes, size_t stride)
     {
         for (size_t i = 0; i < stride / 2; ++i)
         {
@@ -46,21 +46,21 @@ public:
     }
 
     template<typename T>
-    static constexpr const char *getBytes(const T &value)
+    static const char *getBytes(const T &value)
     {
         auto address = static_cast<const void *>(&value);
         return static_cast<const char *>(address);
     }
 
     template<typename T>
-    static constexpr char *getBytes(T &value)
+    static char *getBytes(T &value)
     {
         auto address = static_cast<void *>(&value);
         return static_cast<char *>(address);
     }
 
     template<typename T>
-    static constexpr void copyBytes(const T &from, T &to)
+    static void copyBytes(const T &from, T &to)
     {
         auto source = getBytes(from);
         auto destination = getBytes(to);
@@ -68,7 +68,7 @@ public:
     }
 
     template<typename T>
-    static constexpr void swapBytes(T &value)
+    static void swapBytes(T &value)
     {
         auto bytes = getBytes(value);
         swapBytes(bytes, sizeof(T));

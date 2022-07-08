@@ -31,11 +31,11 @@ namespace brayns
 template<glm::length_t S, typename T>
 struct ByteParser<glm::vec<S, T>>
 {
-    static void parse(StringStream &stream, Endian endian, glm::vec<S, T> &value)
+    static void parse(StringStream &stream, glm::vec<S, T> &value, Endian endian)
     {
         for (glm::length_t i = 0; i < S; ++i)
         {
-            ByteParser<T>::parse(stream, endian, value[i]);
+            ByteParser<T>::parse(stream, value[i], endian);
         }
     }
 };

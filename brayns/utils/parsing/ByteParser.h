@@ -39,23 +39,23 @@ public:
 template<typename T>
 struct ByteParser
 {
-    static void parse(StringStream &stream, Endian endian, T &value)
+    static void parse(StringStream &stream, T &value, Endian endian)
     {
         auto bytes = ByteConverter::getBytes(value);
         ByteParserHelper::copyBytes(stream, bytes, sizeof(T));
-        EndianHelper::convertToLocalEndian(value, endian);
+        EndianConverter::convertToLocalEndian(value, endian);
     }
 };
 
 template<typename T>
 struct ByteParser<std::vector<T>>
 {
-    static void parse(StringStream &stream, Endian endian, std::vector<T> &values)
+    static void parse(StringStream &stream, std::vector<T> &values, Endian endian)
     {
-        while (!stream.isEmpty())
+        while (!stream.isSpace())
         {
             auto &value = values.emplace_back();
-            ByteParser<T>::parse(stream, endian, value);
+            ByteParser<T>::parse(stream, value, endian);
         }
     }
 };
@@ -63,11 +63,11 @@ struct ByteParser<std::vector<T>>
 template<typename T, size_t S>
 struct ByteParser<std::array<T, S>>
 {
-    static void parse(StringStream &stream, Endian endian, std::array<T, S> &values)
+    static void parse(StringStream &stream, std::array<T, S> &values, Endian endian)
     {
         for (auto &value : values)
         {
-            ByteParser<T>::parse(stream, endian, value);
+            ByteParser<T>::parse(stream, value, endian);
         }
     }
 };

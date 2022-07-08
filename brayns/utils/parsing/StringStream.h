@@ -32,6 +32,7 @@ public:
     StringStream(std::string_view data);
 
     bool isEmpty() const;
+    bool isSpace() const;
     bool canExtract(size_t size) const;
     size_t getSize() const;
     std::string_view getData() const;

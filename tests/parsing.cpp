@@ -17,17 +17,98 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/utils/Convert.h>
-#include <brayns/utils/string/StringConverter.h>
-#include <brayns/utils/string/StringCounter.h>
-#include <brayns/utils/string/StringInfo.h>
-#include <brayns/utils/string/StringJoiner.h>
-#include <brayns/utils/string/StringParser.h>
-#include <brayns/utils/string/StringStream.h>
-#include <brayns/utils/string/StringTrimmer.h>
+#include <brayns/common/GlmParsers.h>
+
+#include <brayns/utils/parsing/ByteConverter.h>
+#include <brayns/utils/parsing/Endian.h>
+#include <brayns/utils/parsing/FileStream.h>
+#include <brayns/utils/parsing/Parse.h>
+#include <brayns/utils/parsing/StringConverter.h>
+#include <brayns/utils/parsing/StringCounter.h>
+#include <brayns/utils/parsing/StringInfo.h>
+#include <brayns/utils/parsing/StringJoiner.h>
+#include <brayns/utils/parsing/StringStream.h>
+#include <brayns/utils/parsing/StringTrimmer.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
+
+TEST_CASE("byte_converter")
+{
+    int32_t test = 1;
+    int32_t copy = ~0;
+
+    brayns::ByteConverter::copyBytes(test, copy);
+    CHECK_EQ(test, copy);
+
+    brayns::ByteConverter::swapBytes(test);
+    CHECK_EQ(test, 0x01000000);
+}
+
+TEST_CASE("endian")
+{
+    int32_t test = 1;
+
+    brayns::EndianConverter::convertToLocalEndian(test, brayns::Endian::Local);
+    CHECK_EQ(test, 1);
+
+    brayns::EndianConverter::convertFromLocalEndian(test, brayns::Endian::Local);
+    CHECK_EQ(test, 1);
+
+    brayns::EndianConverter::convertFromLocalEndian(test, ~brayns::Endian::Local);
+    CHECK_EQ(test, 0x01000000);
+}
+
+TEST_CASE("file_stream")
+{
+    auto test = "test1\ntest2\n";
+    auto stream = brayns::FileStream(test);
+
+    CHECK_EQ(stream.getLine(), "");
+
+    CHECK(stream.nextLine());
+    CHECK_EQ(stream.getLine(), "test1");
+
+    CHECK(stream.nextLine());
+    CHECK_EQ(stream.getLine(), "test2");
+
+    CHECK(stream.nextLine());
+    CHECK_EQ(stream.getLine(), "");
+
+    CHECK_FALSE(stream.nextLine());
+    CHECK_EQ(stream.getLine(), "");
+}
+
+TEST_CASE("parse")
+{
+    std::string_view data;
+
+    data = "123";
+    CHECK_EQ(brayns::Parse::fromString<int64_t>(data), 123);
+
+    data = "agss";
+    CHECK_THROWS_AS(brayns::Parse::fromString<int64_t>(data), std::invalid_argument);
+
+    data = "1.22";
+    CHECK_EQ(brayns::Parse::fromString<double>(data), 1.22);
+    CHECK_THROWS_AS(brayns::Parse::fromString<int32_t>(data), std::invalid_argument);
+
+    data = "1234";
+    CHECK_THROWS_AS(brayns::Parse::fromString<int8_t>(data), std::out_of_range);
+
+    int32_t test = 123;
+    auto bytes = brayns::ByteConverter::getBytes(test);
+    data = {bytes, sizeof(test)};
+    CHECK_EQ(brayns::Parse::fromBytes<int32_t>(data), test);
+
+    data = "1 2 3";
+    auto ref = brayns::Vector3f(1, 2, 3);
+    CHECK_EQ(brayns::Parse::fromTokens<brayns::Vector3f>(data), ref);
+
+    bytes = brayns::ByteConverter::getBytes(ref);
+    data = {bytes, sizeof(ref)};
+    CHECK_EQ(brayns::Parse::fromBytes<brayns::Vector3f>(data), ref);
+}
 
 TEST_CASE("string_converter")
 {
@@ -115,19 +196,6 @@ TEST_CASE("string_joiner")
 
     auto joinString = brayns::StringJoiner::join({"1", "2", "3"}, "--");
     CHECK_EQ(joinString, "1--2--3");
-}
-
-TEST_CASE("string_parser")
-{
-    CHECK_EQ(brayns::Convert::fromString<int>("123"), 123);
-
-    CHECK_EQ(brayns::Convert::fromString<float>("1.23"), 1.23f);
-
-    CHECK_EQ(brayns::Convert::fromString<double>("1"), 1.0);
-
-    CHECK_THROWS_AS(brayns::Convert::fromString<uint32_t>("-1"), std::runtime_error);
-
-    CHECK_THROWS_AS(brayns::Convert::fromString<uint8_t>("5000"), std::runtime_error);
 }
 
 TEST_CASE("string_stream")

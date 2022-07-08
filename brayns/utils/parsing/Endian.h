@@ -27,39 +27,50 @@
 
 namespace brayns
 {
-enum class Endian
-{
-    Little,
-    Big
-};
-
-class EndianHelper
+class NativeEndian
 {
 public:
-    static constexpr bool isLittleEndian()
+    static constexpr uint32_t test = 0x01020304;
+
+    static bool isBigEndian()
     {
-        return !isBigEndian();
+    }
+};
+
+enum class Endian
+{
+    Little = 0,
+    Big = 1,
+    Local = EndianHelper::isBigEndian() ? Big : Little
+};
+
+class EndianConverter
+{
+public:
+    static void convertToLocalEndian(char *bytes, size_t stride, Endian endian)
+    {
+        if (endian != Endian::Local)
+        {
+            ByteConverter::swapBytes(bytes, stride);
+        }
     }
 
-    static constexpr bool isBigEndian()
+    static void convertFromLocalEndian(char *bytes, size_t stride, Endian endian)
     {
-        constexpr int32_t test = 1;
-        auto bytes = ByteConverter::getBytes(test);
-        return bytes[0] == '\0';
-    }
-
-    static constexpr Endian getLocalEndian()
-    {
-        return isLittleEndian() ? Endian::Little : Endian::Big;
+        convertToLocalEndian(bytes, stride, endian);
     }
 
     template<typename T>
-    static constexpr void convertToLocalEndian(T &value, Endian endian)
+    static void convertToLocalEndian(T &value, Endian endian)
     {
-        if (endian != getLocalEndian())
-        {
-            ByteConverter::swapBytes(value);
-        }
+        auto bytes = ByteConverter::getBytes(value);
+        convertToLocalEndian(bytes, sizeof(T), endian);
+    }
+
+    template<typename T>
+    static void convertFromLocalEndian(T &value, Endian endian)
+    {
+        convertToLocalEndian(value, endian);
     }
 };
 } // namespace brayns

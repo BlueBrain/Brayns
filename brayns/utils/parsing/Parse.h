@@ -73,31 +73,31 @@ public:
     }
 
     template<typename T>
-    static T fromBytes(std::string_view data, Endian endian)
+    static T fromBytes(std::string_view data, Endian endian = Endian::Local)
     {
         auto stream = StringStream(data);
         return fromBytes<T>(stream, endian);
     }
 
     template<typename T>
-    static void fromBytes(std::string_view data, Endian endian, T &value)
+    static void fromBytes(std::string_view data, T &value, Endian endian = Endian::Local)
     {
         auto stream = StringStream(data);
-        fromBytes(stream, endian, value);
+        fromBytes(stream, value, endian);
     }
 
     template<typename T>
-    static T fromBytes(StringStream &stream, Endian endian)
+    static T fromBytes(StringStream &stream, Endian endian = Endian::Local)
     {
         T value{};
-        fromBytes(stream, endian, value);
+        fromBytes(stream, value, endian);
         return value;
     }
 
     template<typename T>
-    static void fromBytes(StringStream &stream, Endian endian, T &value)
+    static void fromBytes(StringStream &stream, T &value, Endian endian = Endian::Local)
     {
-        ByteParser<T>::parse(stream, endian, value);
+        ByteParser<T>::parse(stream, value, endian);
     }
 };
 } // namespace brayns

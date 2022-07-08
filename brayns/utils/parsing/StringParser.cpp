@@ -21,43 +21,78 @@
 
 #include "StringParser.h"
 
+#include <cmath>
+#include <limits>
+#include <sstream>
 #include <stdexcept>
-#include <string>
 #include <type_traits>
 
 namespace
 {
-template<typename T>
-struct BufferType
-{
-    static_assert(std::is_integral_v<T> && sizeof(T) <= sizeof(long));
-
-    using Type = std::conditional_t<std::is_unsigned_v<T>, unsigned long, long>;
-};
-
-template<typename T>
-using GetBufferType = typename BufferType<T>::Type;
-
-class IntegerStringParser
+class NumberParser
 {
 public:
     template<typename T>
     static void parse(std::string_view data, T &value)
     {
-        using Buffer = GetBufferType<T>;
-        Buffer buffer;
-        brayns::StringParser<Buffer>::parse(data, buffer);
-        auto min = std::numeric_limits<T>::min();
-        auto max = std::numeric_limits<T>::max();
-        if (buffer < min)
+        auto buffer = std::string(data);
+        size_t index = 0;
+        auto number = _parseDouble(buffer, index);
+        _enforceFullMatch(buffer, index);
+        _checkLimits<T>(buffer, number);
+        if (std::is_integral_v<T>)
         {
-            throw std::out_of_range("Value " + std::to_string(buffer) + " < " + std::to_string(min));
+            _checkIsInteger(buffer, number);
         }
-        if (buffer > max)
+        value = static_cast<T>(number);
+    }
+
+private:
+    static double _parseDouble(const std::string &data, size_t &index)
+    {
+        try
         {
-            throw std::out_of_range("Value " + std::to_string(buffer) + " < " + std::to_string(max));
+            return std::stod(data, &index);
         }
-        return static_cast<T>(buffer);
+        catch (const std::invalid_argument &)
+        {
+            throw std::invalid_argument("Cannot parse '" + data + "' as a number");
+        }
+        catch (const std::out_of_range &)
+        {
+            throw std::out_of_range("Value '" + data + "' outside 64 bits range");
+        }
+    }
+
+    static void _enforceFullMatch(const std::string &data, size_t index)
+    {
+        if (index != data.size())
+        {
+            throw std::invalid_argument("Invalid numeric characters in '" + data + "'");
+        }
+    }
+
+    static void _checkIsInteger(const std::string &data, double value)
+    {
+        if (std::floor(value) != value)
+        {
+            throw std::invalid_argument("Cannot parse '" + data + "' as an integer");
+        }
+    }
+
+    template<typename T>
+    static void _checkLimits(const std::string &data, double value)
+    {
+        auto min = static_cast<double>(std::numeric_limits<T>::min());
+        if (value < min)
+        {
+            throw std::out_of_range("Out of range: '" + data + "' < " + std::to_string(min));
+        }
+        auto max = static_cast<double>(std::numeric_limits<T>::max());
+        if (value > max)
+        {
+            throw std::out_of_range("Out of range: '" + data + "' > " + std::to_string(max));
+        }
     }
 };
 } // namespace
@@ -79,68 +114,53 @@ void StringParser<bool>::parse(std::string_view data, bool &value)
     throw std::invalid_argument("Cannot parse boolean from '" + std::string(data) + "'");
 }
 
-void StringParser<char>::parse(std::string_view data, char &value)
+void StringParser<int8_t>::parse(std::string_view data, int8_t &value)
 {
-    IntegerStringParser::parse(data, value);
+    NumberParser::parse(data, value);
 }
 
-void StringParser<unsigned char>::parse(std::string_view data, unsigned char &value)
+void StringParser<uint8_t>::parse(std::string_view data, uint8_t &value)
 {
-    IntegerStringParser::parse(data, value);
+    NumberParser::parse(data, value);
 }
 
-void StringParser<short>::parse(std::string_view data, short &value)
+void StringParser<int16_t>::parse(std::string_view data, int16_t &value)
 {
-    IntegerStringParser::parse(data, value);
+    NumberParser::parse(data, value);
 }
 
-void StringParser<unsigned short>::parse(std::string_view data, unsigned short &value)
+void StringParser<uint16_t>::parse(std::string_view data, uint16_t &value)
 {
-    IntegerStringParser::parse(data, value);
+    NumberParser::parse(data, value);
 }
 
-void StringParser<int>::parse(std::string_view data, int &value)
+void StringParser<int32_t>::parse(std::string_view data, int32_t &value)
 {
-    value = std::stoi(std::string(data));
+    NumberParser::parse(data, value);
 }
 
-void StringParser<unsigned int>::parse(std::string_view data, unsigned int &value)
+void StringParser<uint32_t>::parse(std::string_view data, uint32_t &value)
 {
-    IntegerStringParser::parse(data, value);
+    NumberParser::parse(data, value);
 }
 
-void StringParser<long>::parse(std::string_view data, long &value)
+void StringParser<int64_t>::parse(std::string_view data, int64_t &value)
 {
-    value = std::stol(std::string(data));
+    NumberParser::parse(data, value);
 }
 
-void StringParser<unsigned long>::parse(std::string_view data, unsigned long &value)
+void StringParser<uint64_t>::parse(std::string_view data, uint64_t &value)
 {
-    value = std::stoul(std::string(data));
-}
-
-void StringParser<long long>::parse(std::string_view data, long long &value)
-{
-    value = std::stoll(std::string(data));
-}
-
-void StringParser<unsigned long long>::parse(std::string_view data, unsigned long long &value)
-{
-    value = std::stoull(std::string(data));
+    NumberParser::parse(data, value);
 }
 
 void StringParser<float>::parse(std::string_view data, float &value)
 {
-    value = std::stof(std::string(data));
+    NumberParser::parse(data, value);
 }
 
 void StringParser<double>::parse(std::string_view data, double &value)
 {
-    value = std::stod(std::string(data));
-}
-
-void StringParser<long double>::parse(std::string_view data, long double &value)
-{
-    value = std::stold(std::string(data));
+    NumberParser::parse(data, value);
 }
 } // namespace brayns

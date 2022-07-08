@@ -38,6 +38,11 @@ bool StringStream::isEmpty() const
     return _data.empty();
 }
 
+bool StringStream::isSpace() const
+{
+    return StringInfo::isSpace(_data);
+}
+
 bool StringStream::canExtract(size_t size) const
 {
     return getSize() >= size;

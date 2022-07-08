@@ -299,8 +299,8 @@ public:
     static Facet parse(StringStream &stream)
     {
         Facet facet;
-        Parse::fromBytes(stream, Endian::Little, facet.normal);
-        Parse::fromBytes(stream, Endian::Little, facet.vertices);
+        Parse::fromBytes(stream, facet.normal, Endian::Little);
+        Parse::fromBytes(stream, facet.vertices, Endian::Little);
         stream.extract(2);
         return facet;
     }
