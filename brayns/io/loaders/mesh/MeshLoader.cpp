@@ -28,7 +28,7 @@
 #include <brayns/io/loaders/mesh/parsers/StlMeshParser.h>
 
 #include <brayns/utils/FileReader.h>
-#include <brayns/utils/string/ParsingException.h>
+#include <brayns/utils/parsing/ParsingException.h>
 
 #include <filesystem>
 #include <fstream>

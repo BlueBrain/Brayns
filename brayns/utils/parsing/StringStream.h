@@ -21,40 +21,30 @@
 
 #pragma once
 
-#include <limits>
 #include <string_view>
-#include <type_traits>
 
 namespace brayns
 {
-class StringParserHelper
+class StringStream
 {
 public:
-    static double parseNumber(std::string_view data);
-    static void checkLimits(double value, double min, double max);
-    static void checkIsInteger(double value);
-};
+    StringStream() = default;
+    StringStream(std::string_view data);
 
-template<typename T>
-struct StringParser
-{
-    static void parse(std::string_view data, T &value)
-    {
-        auto number = StringParserHelper::parseNumber(data);
-        auto min = static_cast<double>(std::numeric_limits<T>::min());
-        auto max = static_cast<double>(std::numeric_limits<T>::max());
-        StringParserHelper::checkLimits(number, min, max);
-        if constexpr (std::is_integral_v<T>)
-        {
-            StringParserHelper::checkIsInteger(number);
-        }
-        value = static_cast<T>(number);
-    }
-};
+    bool isEmpty() const;
+    bool canExtract(size_t size) const;
+    size_t getSize() const;
+    std::string_view getData() const;
+    std::string_view extractAll();
+    std::string_view extract(size_t size);
+    std::string_view extractUntil(char separator);
+    std::string_view extractUntil(std::string_view separator);
+    std::string_view extractUntilOneOf(std::string_view separators);
+    std::string_view extractToken();
+    std::string_view extractLine();
+    void extractSpaces();
 
-template<>
-struct StringParser<bool>
-{
-    static void parse(std::string_view data, bool &value);
+private:
+    std::string_view _data;
 };
 } // namespace brayns

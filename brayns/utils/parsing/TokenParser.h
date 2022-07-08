@@ -19,19 +19,49 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ByteParser.h"
+#pragma once
 
-#include <stdexcept>
+#include <array>
+#include <string_view>
+#include <vector>
+
+#include "StringParser.h"
+#include "StringStream.h"
 
 namespace brayns
 {
-void ByteParserHelper::copyBytes(std::string_view from, char *to, size_t stride)
+template<typename T>
+struct TokenParser
 {
-    if (from.size() < stride)
+    static void parse(StringStream &stream, T &value)
     {
-        throw std::runtime_error("Not enough bytes to parse value");
+        auto token = stream.extractToken();
+        StringParser<T>::parse(token, value);
     }
-    auto bytes = from.data();
-    ByteConverter::copyBytes(bytes, to, stride);
-}
+};
+
+template<typename T>
+struct TokenParser<std::vector<T>>
+{
+    static void parse(StringStream &stream, std::vector<T> &values)
+    {
+        while (!stream.isEmpty())
+        {
+            auto &value = values.emplace_back();
+            TokenParser<T>::parse(stream, value);
+        }
+    }
+};
+
+template<typename T, size_t S>
+struct TokenParser<std::array<T, S>>
+{
+    static void parse(StringStream &stream, std::array<T, S> &values)
+    {
+        for (auto &value : values)
+        {
+            TokenParser<T>::parse(stream, value);
+        }
+    }
+};
 } // namespace brayns

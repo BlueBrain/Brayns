@@ -21,13 +21,14 @@
 
 #include "OffMeshParser.h"
 
-#include <brayns/utils/string/FileStream.h>
-#include <brayns/utils/string/ParsingException.h>
-#include <brayns/utils/string/StringCounter.h>
-#include <brayns/utils/string/StringStream.h>
-#include <brayns/utils/string/StringTrimmer.h>
+#include <brayns/common/GlmParsers.h>
 
-#include <brayns/common/TokenParser.h>
+#include <brayns/utils/parsing/FileStream.h>
+#include <brayns/utils/parsing/Parse.h>
+#include <brayns/utils/parsing/ParsingException.h>
+#include <brayns/utils/parsing/StringCounter.h>
+#include <brayns/utils/parsing/StringStream.h>
+#include <brayns/utils/parsing/StringTrimmer.h>
 
 namespace
 {
@@ -113,9 +114,9 @@ public:
         }
         Dimensions dimensions;
         auto stream = StringStream(line);
-        TokenParser::parse(stream, dimensions.vertexCount);
-        TokenParser::parse(stream, dimensions.faceCount);
-        TokenParser::parse(stream, dimensions.edgeCount);
+        Parse::fromTokens(stream, dimensions.vertexCount);
+        Parse::fromTokens(stream, dimensions.faceCount);
+        Parse::fromTokens(stream, dimensions.edgeCount);
         return dimensions;
     }
 };
@@ -148,7 +149,7 @@ public:
         {
             throw std::runtime_error("Invalid vertex, expected 3 tokens, got " + std::to_string(count));
         }
-        return TokenParser::parse<Vector3f>(line);
+        return Parse::fromTokens<Vector3f>(line);
     }
 };
 
@@ -189,7 +190,7 @@ public:
 private:
     static size_t _extractSize(StringStream &stream)
     {
-        auto size = TokenParser::parse<size_t>(stream);
+        auto size = Parse::fromTokens<size_t>(stream);
         if (size != 3)
         {
             throw std::runtime_error("Non triangular face with " + std::to_string(size) + " indices");
@@ -199,7 +200,7 @@ private:
 
     static Vector3ui _extractIndices(StringStream &stream, size_t vertexCount)
     {
-        auto indices = TokenParser::parse<Vector3ui>(stream);
+        auto indices = Parse::fromTokens<Vector3ui>(stream);
         for (auto index : indices)
         {
             if (index >= vertexCount)

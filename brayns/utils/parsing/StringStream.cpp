@@ -40,7 +40,12 @@ bool StringStream::isEmpty() const
 
 bool StringStream::canExtract(size_t size) const
 {
-    return _data.size() >= size;
+    return getSize() >= size;
+}
+
+size_t StringStream::getSize() const
+{
+    return _data.size();
 }
 
 std::string_view StringStream::getData() const
@@ -55,7 +60,7 @@ std::string_view StringStream::extractAll()
 
 std::string_view StringStream::extract(size_t size)
 {
-    if (size >= _data.size())
+    if (!canExtract(size))
     {
         return extractAll();
     }

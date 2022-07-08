@@ -25,13 +25,14 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/utils/string/FileStream.h>
-#include <brayns/utils/string/ParsingException.h>
-#include <brayns/utils/string/StringCounter.h>
-#include <brayns/utils/string/StringStream.h>
-#include <brayns/utils/string/StringTrimmer.h>
+#include <brayns/common/GlmParsers.h>
 
-#include <brayns/common/TokenParser.h>
+#include <brayns/utils/parsing/FileStream.h>
+#include <brayns/utils/parsing/Parse.h>
+#include <brayns/utils/parsing/ParsingException.h>
+#include <brayns/utils/parsing/StringCounter.h>
+#include <brayns/utils/parsing/StringStream.h>
+#include <brayns/utils/parsing/StringTrimmer.h>
 
 namespace
 {
@@ -118,7 +119,7 @@ private:
         {
             return;
         }
-        auto index = TokenParser::parse<uint32_t>(data);
+        auto index = Parse::fromString<uint32_t>(data);
         if (index < 1 || index > elementCount)
         {
             throw std::runtime_error("Invalid index " + std::to_string(index));
@@ -181,7 +182,7 @@ public:
         {
             throw std::runtime_error("Invalid vertex, expected 3 or 4 tokens, got " + std::to_string(count));
         }
-        return TokenParser::parse<Vector3f>(value);
+        return Parse::fromTokens<Vector3f>(value);
     }
 };
 
@@ -195,7 +196,7 @@ public:
         {
             throw std::runtime_error("Invalid texture, expected 2 tokens, got " + std::to_string(count));
         }
-        return TokenParser::parse<Vector2f>(value);
+        return Parse::fromTokens<Vector2f>(value);
     }
 };
 
@@ -209,7 +210,7 @@ public:
         {
             throw std::runtime_error("Invalid normal, expected 3 tokens, got " + std::to_string(count));
         }
-        return TokenParser::parse<Vector3f>(value);
+        return Parse::fromTokens<Vector3f>(value);
     }
 };
 

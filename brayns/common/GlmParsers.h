@@ -21,27 +21,34 @@
 
 #pragma once
 
-#include <string_view>
+#include "MathTypes.h"
 
-#include "ByteConverter.h"
-#include "Endian.h"
+#include <brayns/utils/parsing/ByteParser.h>
+#include <brayns/utils/parsing/TokenParser.h>
 
 namespace brayns
 {
-class ByteParserHelper
+template<glm::length_t S, typename T>
+struct ByteParser<glm::vec<S, T>>
 {
-public:
-    static void copyBytes(std::string_view from, char *to, size_t stride);
+    static void parse(StringStream &stream, Endian endian, glm::vec<S, T> &value)
+    {
+        for (glm::length_t i = 0; i < S; ++i)
+        {
+            ByteParser<T>::parse(stream, endian, value[i]);
+        }
+    }
 };
 
-template<typename T>
-struct ByteParser
+template<glm::length_t S, typename T>
+struct TokenParser<glm::vec<S, T>>
 {
-    static void parse(std::string_view data, Endian endian, T &value)
+    static void parse(StringStream &stream, glm::vec<S, T> &value)
     {
-        auto bytes = ByteConverter::getBytes(value);
-        ByteParserHelper::copyBytes(data, bytes, sizeof(T));
-        EndianHelper::convertToLocalEndian(value, endian);
+        for (glm::length_t i = 0; i < S; ++i)
+        {
+            TokenParser<T>::parse(stream, value[i]);
+        }
     }
 };
 } // namespace brayns

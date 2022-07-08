@@ -19,31 +19,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ByteParser.h"
 
-#include <string_view>
+#include <stdexcept>
 
 namespace brayns
 {
-class StringStream
+void ByteParserHelper::copyBytes(StringStream &stream, char *bytes, size_t stride)
 {
-public:
-    StringStream() = default;
-    StringStream(std::string_view data);
-
-    bool isEmpty() const;
-    bool canExtract(size_t size) const;
-    std::string_view getData() const;
-    std::string_view extractAll();
-    std::string_view extract(size_t size);
-    std::string_view extractUntil(char separator);
-    std::string_view extractUntil(std::string_view separator);
-    std::string_view extractUntilOneOf(std::string_view separators);
-    std::string_view extractToken();
-    std::string_view extractLine();
-    void extractSpaces();
-
-private:
-    std::string_view _data;
-};
+    if (!stream.canExtract(stride))
+    {
+        throw std::invalid_argument("Not enough bytes to parse value");
+    }
+    auto data = stream.extract(stride);
+    auto source = data.data();
+    ByteConverter::copyBytes(source, bytes, stride);
+}
 } // namespace brayns

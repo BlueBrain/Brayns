@@ -29,15 +29,15 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/utils/binary/Endian.h>
-#include <brayns/utils/string/FileStream.h>
-#include <brayns/utils/string/ParsingException.h>
-#include <brayns/utils/string/StringCounter.h>
-#include <brayns/utils/string/StringStream.h>
-#include <brayns/utils/string/StringTrimmer.h>
+#include <brayns/common/GlmParsers.h>
 
-#include <brayns/common/BinaryParser.h>
-#include <brayns/common/TokenParser.h>
+#include <brayns/utils/parsing/Endian.h>
+#include <brayns/utils/parsing/FileStream.h>
+#include <brayns/utils/parsing/Parse.h>
+#include <brayns/utils/parsing/ParsingException.h>
+#include <brayns/utils/parsing/StringCounter.h>
+#include <brayns/utils/parsing/StringStream.h>
+#include <brayns/utils/parsing/StringTrimmer.h>
 
 namespace
 {
@@ -410,7 +410,7 @@ public:
         auto name = stream.extractToken();
         element.name = name;
         element.semantic = GetElementSemantic::fromName(name);
-        element.count = TokenParser::parse<size_t>(stream);
+        element.count = Parse::fromTokens<size_t>(stream);
         return element;
     }
 };
@@ -664,11 +664,11 @@ public:
         switch (format)
         {
         case Format::Ascii:
-            return TokenParser::parse<T>(stream);
+            return Parse::fromTokens<T>(stream);
         case Format::BinaryLittleEndian:
-            return BinaryParser::parse<T>(stream, Endian::Little);
+            return Parse::fromBytes<T>(stream, Endian::Little);
         case Format::BinaryBigEndian:
-            return BinaryParser::parse<T>(stream, Endian::Big);
+            return Parse::fromBytes<T>(stream, Endian::Big);
         default:
             throw std::runtime_error("Invalid format");
         }

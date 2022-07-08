@@ -23,15 +23,15 @@
 
 #include <array>
 
-#include <brayns/utils/binary/Endian.h>
-#include <brayns/utils/string/FileStream.h>
-#include <brayns/utils/string/ParsingException.h>
-#include <brayns/utils/string/StringCounter.h>
-#include <brayns/utils/string/StringStream.h>
-#include <brayns/utils/string/StringTrimmer.h>
+#include <brayns/common/GlmParsers.h>
 
-#include <brayns/common/BinaryParser.h>
-#include <brayns/common/TokenParser.h>
+#include <brayns/utils/parsing/Endian.h>
+#include <brayns/utils/parsing/FileStream.h>
+#include <brayns/utils/parsing/Parse.h>
+#include <brayns/utils/parsing/ParsingException.h>
+#include <brayns/utils/parsing/StringCounter.h>
+#include <brayns/utils/parsing/StringStream.h>
+#include <brayns/utils/parsing/StringTrimmer.h>
 
 namespace
 {
@@ -115,7 +115,7 @@ public:
         auto stream = StringStream(line);
         FixedStringExtractor::extractToken(stream, "facet");
         FixedStringExtractor::extractToken(stream, "normal");
-        return TokenParser::parse<Vector3f>(stream);
+        return Parse::fromTokens<Vector3f>(stream);
     }
 };
 
@@ -135,7 +135,7 @@ public:
         {
             throw std::runtime_error("Invalid vertex, expected 'vertex', got " + std::string(vertex));
         }
-        return TokenParser::parse<Vector3f>(stream);
+        return Parse::fromTokens<Vector3f>(stream);
     }
 };
 
@@ -277,7 +277,7 @@ private:
         {
             throw std::runtime_error("Expected 4 bytes triangle count");
         }
-        return BinaryParser::parse<uint32_t>(stream, Endian::Little);
+        return Parse::fromBytes<uint32_t>(stream, Endian::Little);
     }
 };
 
@@ -299,8 +299,8 @@ public:
     static Facet parse(StringStream &stream)
     {
         Facet facet;
-        BinaryParser::parse(stream, Endian::Little, facet.normal);
-        BinaryParser::parse(stream, Endian::Little, facet.vertices);
+        Parse::fromBytes(stream, Endian::Little, facet.normal);
+        Parse::fromBytes(stream, Endian::Little, facet.vertices);
         stream.extract(2);
         return facet;
     }
