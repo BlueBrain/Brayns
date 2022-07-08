@@ -75,7 +75,7 @@ const uint8_t *Framebuffer::getColorBuffer() const
 
 bool Framebuffer::commit()
 {
-    if (!isModified())
+    if (!_flag)
     {
         return false;
     }
@@ -105,7 +105,7 @@ bool Framebuffer::commit()
 
     clear();
 
-    resetModified();
+    _flag = false;
 
     return true;
 }
@@ -117,7 +117,7 @@ void Framebuffer::setFrameSize(const Vector2ui &frameSize)
         throw std::invalid_argument("Frame size must be greather than or equal to 64x64");
     }
 
-    _updateValue(_frameSize, frameSize);
+    _flag.update(_frameSize, frameSize);
 }
 
 const Vector2ui &Framebuffer::getFrameSize() const noexcept
@@ -127,7 +127,7 @@ const Vector2ui &Framebuffer::getFrameSize() const noexcept
 
 void Framebuffer::setAccumulation(const bool accumulation) noexcept
 {
-    _updateValue(_accumulation, accumulation);
+    _flag.update(_accumulation, accumulation);
 }
 
 bool Framebuffer::isAccumulating() const noexcept
@@ -137,7 +137,7 @@ bool Framebuffer::isAccumulating() const noexcept
 
 void Framebuffer::setFormat(PixelFormat frameBufferFormat) noexcept
 {
-    _updateValue(_frameBufferFormat, frameBufferFormat);
+    _flag.update(_frameBufferFormat, frameBufferFormat);
 }
 
 PixelFormat Framebuffer::getFrameBufferFormat() const noexcept

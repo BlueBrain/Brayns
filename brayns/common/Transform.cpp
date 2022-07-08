@@ -36,7 +36,7 @@ const Vector3f &Transform::getTranslation() const noexcept
 
 void Transform::setTranslation(const Vector3f &value) noexcept
 {
-    _updateValue(_translation, value);
+    _translation = value;
 }
 
 const Quaternion &Transform::getRotation() const noexcept
@@ -46,7 +46,7 @@ const Quaternion &Transform::getRotation() const noexcept
 
 void Transform::setRotation(const Quaternion &value) noexcept
 {
-    _updateValue(_rotation, value);
+    _rotation = value;
 }
 
 const Vector3f &Transform::getScale() const noexcept
@@ -56,11 +56,29 @@ const Vector3f &Transform::getScale() const noexcept
 
 void Transform::setScale(const Vector3f &value) noexcept
 {
-    _updateValue(_scale, value);
+    _scale = value;
 }
 
 Matrix4f Transform::toMatrix() const
 {
     return glm::translate(Matrix4f(1.), _translation) * glm::mat4_cast(_rotation) * glm::scale(Matrix4f(1.), _scale);
+}
+
+bool operator==(const Transform &lhs, const Transform &rhs)
+{
+    auto &lhsT = lhs.getTranslation();
+    auto &lhsR = lhs.getRotation();
+    auto &lhsS = lhs.getScale();
+
+    auto &rhsT = rhs.getTranslation();
+    auto &rhsR = rhs.getRotation();
+    auto &rhsS = rhs.getScale();
+
+    return lhsT == rhsT && lhsR == rhsR && lhsS == rhsS;
+}
+
+bool operator!=(const Transform &lhs, const Transform &rhs)
+{
+    return !(lhs == rhs);
 }
 } // namespace brayns

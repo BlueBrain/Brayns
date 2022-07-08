@@ -141,7 +141,7 @@ public:
         auto parametersManager = paramsManager;
         auto &simulation = parametersManager.getSimulationParameters();
         // Avoid the first frame not being triggered because the copy is in "not modified" state
-        simulation.markModified();
+        // simulation.markModified();
 
         auto &scene = engine.getScene();
 

@@ -52,7 +52,7 @@ std::unique_ptr<Camera> OrthographicCamera::clone() const noexcept
 
 void OrthographicCamera::setHeight(const float height) noexcept
 {
-    _updateValue(_height, height);
+    getModifiedFlag().update(_height, height);
 }
 
 float OrthographicCamera::getHeight() const noexcept

@@ -206,6 +206,7 @@ bool SceneModelManager::commit()
     {
         auto &model = *entry.model;
         const bool modelChanged = model.commit();
+        needsRecommit = modelChanged || needsRecommit;
 
         auto &instances = entry.instances;
         bool instancesChanged = false;

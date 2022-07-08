@@ -46,7 +46,7 @@ std::string GlassMaterial::getName() const noexcept
 
 void GlassMaterial::setIndexOfRefraction(const float ior) noexcept
 {
-    _updateValue(_ior, ior);
+    getModifiedFlag().update(_ior, ior);
 }
 
 float GlassMaterial::getIndexOfRefraction() const noexcept

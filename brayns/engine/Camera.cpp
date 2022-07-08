@@ -54,7 +54,7 @@ Camera::Camera(const std::string &handleID)
 
 bool Camera::commit()
 {
-    if (!isModified())
+    if (!_flag)
     {
         return false;
     }
@@ -75,14 +75,14 @@ bool Camera::commit()
 
     _osprayCamera.commit();
 
-    resetModified();
+    _flag = false;
 
     return true;
 }
 
 void Camera::setLookAt(const LookAt &params) noexcept
 {
-    _updateValue(_lookAtParams, params);
+    _flag.update(_lookAtParams, params);
 }
 
 const LookAt &Camera::getLookAt() const noexcept
@@ -92,7 +92,7 @@ const LookAt &Camera::getLookAt() const noexcept
 
 void Camera::setAspectRatio(const float aspectRatio) noexcept
 {
-    _updateValue(_aspectRatio, aspectRatio);
+    _flag.update(_aspectRatio, aspectRatio);
 }
 
 float Camera::getAspectRatio() const noexcept
@@ -103,5 +103,10 @@ float Camera::getAspectRatio() const noexcept
 const ospray::cpp::Camera &Camera::getOsprayCamera() const noexcept
 {
     return _osprayCamera;
+}
+
+ModifiedFlag &Camera::getModifiedFlag() noexcept
+{
+    return _flag;
 }
 } // namespace brayns

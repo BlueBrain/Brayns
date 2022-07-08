@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
+#include <brayns/common/ModifiedFlag.h>
 
 #include <vector>
 
@@ -32,7 +32,7 @@ namespace brayns
  * @brief The TransferFunction class is an utility object which transform maps a value within a range, and from that
  * range, maps it into a color map scale.
  */
-class TransferFunction : public BaseObject
+class TransferFunction
 {
 public:
     /**
@@ -48,7 +48,7 @@ public:
     /**
      * @brief Sets the color that make up the color map of this transfer function. Colors must be sorted.
      */
-    void setColors(const std::vector<Vector4f> &colorMap);
+    void setColors(std::vector<Vector4f> colorMap);
 
     /**
      * @brief Return the range of values in which this transfer function works. Any value outside the range
@@ -67,8 +67,15 @@ public:
      */
     Vector4f getColorForValue(const float v) const;
 
+    /**
+     * @brief Returns the modified flag status object
+     */
+    ModifiedFlag &getModifiedFlag() noexcept;
+    const ModifiedFlag &getModifiedFlag() const noexcept;
+
 private:
     std::vector<Vector4f> _colors;
     Vector2f _valuesRange;
+    ModifiedFlag _flag;
 };
 } // namespace brayns

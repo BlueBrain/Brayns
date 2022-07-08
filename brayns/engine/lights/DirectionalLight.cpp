@@ -46,7 +46,7 @@ void DirectionalLight::setDirection(const Vector3f &newDirection)
         throw std::invalid_argument("DirectionalLight direction must be a non-zero vector");
     }
 
-    _updateValue(_direction, glm::normalize(newDirection));
+    getModifiedFlag().update(_direction, glm::normalize(newDirection));
 }
 
 const Vector3f &DirectionalLight::getDirection() const noexcept

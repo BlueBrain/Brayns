@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
 #include <brayns/common/Bounds.h>
 #include <brayns/common/MathTypes.h>
+#include <brayns/common/ModifiedFlag.h>
 
 #include <ospray/ospray_cpp/Light.h>
 
@@ -34,7 +34,7 @@ namespace brayns
 /**
  * @brief The Light class defines the common base class for all lights
  */
-class Light : public BaseObject
+class Light
 {
 public:
     Light(const std::string &handleID);
@@ -98,6 +98,11 @@ protected:
     bool commit();
 
     /**
+     * @brief Returns the modified flag status object
+     */
+    ModifiedFlag &getModifiedFlag() noexcept;
+
+    /**
      * @brief Subclasses must implement this method to set their light-speicfic parameters onto the Ospray object.
      * The Light base class will make sure to call ospCommit(handle) on the light handle.
      */
@@ -108,5 +113,6 @@ private:
     float _intensity{1.};
     bool _visible{true};
     ospray::cpp::Light _osprayLight;
+    ModifiedFlag _flag;
 };
 } // namespace brayns

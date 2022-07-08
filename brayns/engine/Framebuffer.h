@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
+#include <brayns/common/ModifiedFlag.h>
 #include <brayns/common/PixelFormat.h>
 #include <brayns/engine/imageoperations/ImageOperationManager.h>
 #include <brayns/utils/image/Image.h>
@@ -34,7 +34,7 @@ namespace brayns
 /**
  * @brief The Framebuffer class is the object that handles the frames rendered by a given renderer
  */
-class Framebuffer : public BaseObject
+class Framebuffer
 {
 public:
     Framebuffer() = default;
@@ -154,5 +154,6 @@ private:
     ospray::cpp::FrameBuffer _osprayFramebuffer;
     uint8_t *_colorBuffer = nullptr;
     ImageOperationManager _operationManager;
+    ModifiedFlag _flag;
 };
 } // namespace brayns

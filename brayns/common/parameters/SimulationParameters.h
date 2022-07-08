@@ -23,6 +23,8 @@
 
 #include "AbstractParameters.h"
 
+#include <brayns/common/ModifiedFlag.h>
+
 namespace brayns
 {
 class SimulationParameters : public AbstractParameters
@@ -112,11 +114,23 @@ public:
      */
     virtual void build(ArgvBuilder &builder) override;
 
+    /**
+     * @brief Resets the modified status of the simulation parameters
+     */
+    void resetModified() override;
+
+    /**
+     * @brief Returns the modified flag status object
+     */
+    ModifiedFlag &getModifiedFlag() noexcept;
+    const ModifiedFlag &getModifiedFlag() const noexcept;
+
 private:
     uint32_t _startFrame{0};
     uint32_t _endFrame{0};
     uint32_t _current{0};
     double _dt{0.0};
     const std::string _unit = "ms";
+    ModifiedFlag _flag;
 };
 } // namespace brayns

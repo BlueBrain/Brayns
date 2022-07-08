@@ -47,7 +47,7 @@ std::string MatteMaterial::getName() const noexcept
 
 void MatteMaterial::setOpacity(const float opacity) noexcept
 {
-    _updateValue(_opacity, glm::clamp(opacity, 0.f, 1.f));
+    getModifiedFlag().update(_opacity, glm::clamp(opacity, 0.f, 1.f));
 }
 
 float MatteMaterial::getOpacity() const noexcept

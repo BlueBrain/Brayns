@@ -50,7 +50,7 @@ std::string PlasticMaterial::getName() const noexcept
 
 void PlasticMaterial::setOpacity(const float opacity) noexcept
 {
-    _updateValue(_opacity, glm::clamp(opacity, 0.f, 1.f));
+    getModifiedFlag().update(_opacity, glm::clamp(opacity, 0.f, 1.f));
 }
 
 float PlasticMaterial::getOpacity() const noexcept

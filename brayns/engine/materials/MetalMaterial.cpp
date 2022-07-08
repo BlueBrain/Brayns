@@ -46,7 +46,7 @@ std::string MetalMaterial::getName() const noexcept
 
 void MetalMaterial::setRoughness(const float roughness) noexcept
 {
-    _updateValue(_roughness, glm::clamp(roughness, 0.f, 1.f));
+    getModifiedFlag().update(_roughness, glm::clamp(roughness, 0.f, 1.f));
 }
 
 float MetalMaterial::getRoughness() const noexcept

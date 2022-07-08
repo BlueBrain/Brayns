@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
+#include <brayns/common/ModifiedFlag.h>
 #include <brayns/json/JsonAdapterMacro.h>
 
 #include <ospray/ospray_cpp/Camera.h>
@@ -49,7 +49,7 @@ BRAYNS_JSON_ADAPTER_END()
 bool operator==(const LookAt &a, const LookAt &b) noexcept;
 bool operator!=(const LookAt &a, const LookAt &b) noexcept;
 
-class Camera : public BaseObject
+class Camera
 {
 public:
     Camera(const std::string &handleID);
@@ -112,6 +112,11 @@ public:
 
 protected:
     /**
+     * @brief Returns the modified flag status object
+     */
+    ModifiedFlag &getModifiedFlag() noexcept;
+
+    /**
      * @brief Subclasses of the Camera must implement this method to set camera type specific parameters.
      */
     virtual void commitCameraSpecificParams() = 0;
@@ -120,5 +125,6 @@ private:
     LookAt _lookAtParams;
     float _aspectRatio{1.f};
     ospray::cpp::Camera _osprayCamera;
+    ModifiedFlag _flag;
 };
 } // namespace brayns

@@ -121,7 +121,7 @@ void VasculatureRadiiReportComponent::onPreRender(const brayns::ParametersManage
     _lastEnabledValue = true;
 
     const auto &simulation = parameters.getSimulationParameters();
-    forceUpdate = forceUpdate || simulation.isModified();
+    forceUpdate = forceUpdate || simulation.getModifiedFlag();
 
     if (forceUpdate)
     {
