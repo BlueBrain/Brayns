@@ -25,16 +25,19 @@
 #include <array>
 #include <bitset>
 #include <limits>
-#include <optional>
 #include <stdexcept>
-#include <variant>
 
 #include <brayns/common/Log.h>
 
-#include "helpers/BinaryHelper.h"
-#include "helpers/EndianHelper.h"
-#include "helpers/StreamHelper.h"
-#include "helpers/StringHelper.h"
+#include <brayns/utils/binary/Endian.h>
+#include <brayns/utils/string/FileStream.h>
+#include <brayns/utils/string/ParsingException.h>
+#include <brayns/utils/string/StringCounter.h>
+#include <brayns/utils/string/StringStream.h>
+#include <brayns/utils/string/StringTrimmer.h>
+
+#include <brayns/common/BinaryParser.h>
+#include <brayns/common/TokenParser.h>
 
 namespace
 {
@@ -290,164 +293,240 @@ struct MeshBuffer
     std::vector<std::array<Vector2f, 3>> textures;
 };
 
-struct Context
+struct HeaderLine
 {
-    std::string_view data;
-    size_t lineNumber = 0;
-    std::string_view line;
     std::string_view key;
     std::string_view value;
-    Header header;
-    const Element *element = nullptr;
-    const Property *property = nullptr;
-    MeshBuffer mesh;
 
-    Context(std::string_view source)
-        : data(source)
+    bool isComment() const
     {
+        return key == "comment";
+    }
+
+    bool isEmpty() const
+    {
+        return key.empty();
+    }
+
+    bool isEmptyOrComment() const
+    {
+        return isEmpty() || isComment();
+    }
+};
+
+class HeaderLineParser
+{
+public:
+    static HeaderLine parse(std::string_view data)
+    {
+        auto stream = StringStream(data);
+        HeaderLine line;
+        line.key = stream.extractToken();
+        stream.extractSpaces();
+        line.value = stream.extractAll();
+        return line;
+    }
+};
+
+class HeaderLineExtractor
+{
+public:
+    static HeaderLine nextLine(FileStream &stream)
+    {
+        while (true)
+        {
+            if (!stream.nextLine())
+            {
+                throw std::runtime_error("Unterminated header");
+            }
+            auto data = stream.getLine();
+            auto line = HeaderLineParser::parse(data);
+            if (!line.isEmptyOrComment())
+            {
+                return line;
+            }
+        }
+    }
+};
+
+class MagicNumberParser
+{
+public:
+    static void skip(FileStream &stream)
+    {
+        auto line = HeaderLineExtractor::nextLine(stream);
+        if (line.key != "ply")
+        {
+            throw std::runtime_error("Expected 'ply' magic number");
+        }
     }
 };
 
 class FormatParser
 {
 public:
-    static bool canParse(const Context &context)
+    static void parse(FileStream &stream, Header &header)
     {
-        return context.key == "format";
-    }
-
-    static void parse(Context &context)
-    {
-        auto &header = context.header;
-        auto value = context.value;
-        _parseFormat(value, header);
-        _parseVersion(value, header);
+        auto line = HeaderLineExtractor::nextLine(stream);
+        if (line.key != "format")
+        {
+            throw std::runtime_error("Expected format definition after magic number");
+        }
+        auto format = StringStream(line.value);
+        _parseFormat(format, header);
+        _parseVersion(format, header);
     }
 
 private:
-    static void _parseFormat(std::string_view &value, Header &header)
+    static void _parseFormat(StringStream &stream, Header &header)
     {
-        if (header.format != Format::Unknown)
-        {
-            throw std::runtime_error("Format defined twice");
-        }
-        auto format = StringHelper::extractToken(value);
-        header.format = GetFormat::fromName(format);
+        auto token = stream.extractToken();
+        header.format = GetFormat::fromName(token);
     }
 
-    static void _parseVersion(std::string_view &value, Header &header)
+    static void _parseVersion(StringStream &stream, Header &header)
     {
-        auto version = StringHelper::extractToken(value);
-        if (version != "1.0")
+        auto token = stream.extractToken();
+        if (token != "1.0")
         {
-            throw std::runtime_error("Unsupported version");
+            throw std::runtime_error("Unsupported version '" + std::string(token) + "'");
         }
-        header.version = version;
+        header.version = token;
     }
 };
 
 class ElementParser
 {
 public:
-    static bool canParse(const Context &context)
+    static Element parse(std::string_view value)
     {
-        return context.key == "element";
-    }
-
-    static void parse(Context &context)
-    {
-        if (StringHelper::countTokens(context.value) != 2)
+        auto count = StringCounter::countTokens(value);
+        if (count != 2)
         {
             throw std::runtime_error("Expected name and count for an element");
         }
-        _addElement(context);
-    }
-
-private:
-    static void _addElement(Context &context)
-    {
-        auto value = context.value;
-        auto &header = context.header;
-        auto &elements = header.elements;
-        auto &element = elements.emplace_back();
-        auto name = StringHelper::extractToken(value);
+        auto stream = StringStream(value);
+        Element element;
+        auto name = stream.extractToken();
         element.name = name;
-        element.count = StringHelper::extract<size_t>(value);
         element.semantic = GetElementSemantic::fromName(name);
+        element.count = TokenParser::parse<size_t>(stream);
+        return element;
     }
 };
 
 class PropertyParser
 {
 public:
-    static bool canParse(const Context &context)
+    static Property parse(std::string_view value)
     {
-        return context.key == "property";
-    }
-
-    static void parse(Context &context)
-    {
-        auto count = StringHelper::countTokens(context.value);
+        auto count = StringCounter::countTokens(value);
+        auto stream = StringStream(value);
         if (count == 2)
         {
-            _parseScalar(context);
-            return;
+            return _parseScalar(stream);
         }
         if (count == 4)
         {
-            _parseList(context);
-            return;
+            return _parseList(stream);
         }
-        throw std::runtime_error("Invalid token count for property " + std::to_string(count));
+        throw std::runtime_error("Expected 2 or 4 tokens for a property");
     }
 
 private:
-    static void _parseScalar(Context &context)
+    static Property _parseScalar(StringStream &stream)
     {
-        auto data = context.value;
-        auto &property = _createProperty(context);
-        _parseProperty(data, property);
+        Property property;
+        _parse(stream, property);
+        return property;
     }
 
-    static void _parseList(Context &context)
+    static Property _parseList(StringStream &stream)
     {
-        auto data = context.value;
-        auto &property = _createProperty(context);
-        auto key = StringHelper::extractToken(data);
-        if (key != "list")
+        Property property;
+        auto list = stream.extractToken();
+        if (list != "list")
         {
             throw std::runtime_error("Expected 'list' key before property with 4 tokens");
         }
-        auto countType = StringHelper::extractToken(data);
+        auto countType = stream.extractToken();
         property.countType = GetType::fromName(countType);
-        _parseProperty(data, property);
+        _parse(stream, property);
+        return property;
     }
 
-    static Element &_getCurrentElement(Context &context)
+    static void _parse(StringStream &stream, Property &property)
     {
-        auto &header = context.header;
+        auto type = stream.extractToken();
+        property.type = GetType::fromName(type);
+        auto name = stream.extractToken();
+        property.name = name;
+        property.semantic = GetSemantic::fromName(name);
+    }
+};
+
+class HeaderParser
+{
+public:
+    static Header parse(FileStream &stream)
+    {
+        try
+        {
+            return _parse(stream);
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error(std::string("Failed to parse header: ") + e.what());
+        }
+    }
+
+private:
+    static Header _parse(FileStream &stream)
+    {
+        MagicNumberParser::skip(stream);
+        Header header;
+        FormatParser::parse(stream, header);
+        while (true)
+        {
+            auto line = HeaderLineExtractor::nextLine(stream);
+            if (!_parseLine(line, header))
+            {
+                return header;
+            }
+        }
+    }
+
+    static bool _parseLine(const HeaderLine &line, Header &header)
+    {
+        auto &[key, value] = line;
+        if (key == "end_header")
+        {
+            return false;
+        }
+        if (key == "element")
+        {
+            auto element = ElementParser::parse(value);
+            header.elements.push_back(element);
+            return true;
+        }
+        if (key == "property")
+        {
+            auto &element = _getCurrentElement(header);
+            auto property = PropertyParser::parse(value);
+            element.properties.push_back(property);
+            return true;
+        }
+        throw std::runtime_error("Unknown key: '" + std::string(key) + "'");
+    }
+
+    static Element &_getCurrentElement(Header &header)
+    {
         auto &elements = header.elements;
         if (elements.empty())
         {
             throw std::runtime_error("Property without element");
         }
         return elements.back();
-    }
-
-    static Property &_createProperty(Context &context)
-    {
-        auto &element = _getCurrentElement(context);
-        auto &properties = element.properties;
-        return properties.emplace_back();
-    }
-
-    static void _parseProperty(std::string_view &data, Property &property)
-    {
-        auto type = StringHelper::extractToken(data);
-        property.type = GetType::fromName(type);
-        auto name = StringHelper::extractToken(data);
-        property.name = name;
-        property.semantic = GetSemantic::fromName(name);
     }
 };
 
@@ -456,22 +535,13 @@ class HeaderValidator
 public:
     static void validate(const Header &header)
     {
-        _checkFormat(header);
         _checkDuplication(header);
     }
 
 private:
-    static void _checkFormat(const Header &header)
-    {
-        if (header.format == Format::Unknown)
-        {
-            throw std::runtime_error("Header format not specified");
-        }
-    }
-
     static void _checkDuplication(const Header &header)
     {
-        std::bitset<size_t(ElementSemantic::Count)> semantics;
+        std::bitset<static_cast<size_t>(ElementSemantic::Count)> semantics;
         for (const auto &element : header.elements)
         {
             auto semantic = element.semantic;
@@ -480,21 +550,20 @@ private:
                 Log::debug("Unknow semantic for element {}.", element.name);
                 continue;
             }
-            auto index = size_t(semantic);
+            auto index = static_cast<size_t>(semantic);
             if (!semantics[index])
             {
                 semantics[index] = true;
                 continue;
             }
-            auto name = std::string(element.name);
-            throw std::runtime_error("Semantic duplication '" + name + "'");
+            throw std::runtime_error("Element semantic duplication '" + std::string(element.name) + "'");
             _checkDuplication(element);
         }
     }
 
     static void _checkDuplication(const Element &element)
     {
-        std::bitset<size_t(Semantic::Count)> semantics;
+        std::bitset<static_cast<size_t>(Semantic::Count)> semantics;
         for (const auto &property : element.properties)
         {
             auto semantic = property.semantic;
@@ -503,394 +572,172 @@ private:
                 Log::debug("Unknow semantic for property {}.", property.name);
                 continue;
             }
-            auto index = size_t(semantic);
+            auto index = static_cast<size_t>(semantic);
             if (!semantics[index])
             {
                 semantics[index] = true;
                 continue;
             }
-            auto name = std::string(property.name);
-            throw std::runtime_error("Semantic duplication '" + name + "'");
+            throw std::runtime_error("Property semantic duplication '" + std::string(property.name) + "'");
         }
     }
-};
-
-class HeaderParser
-{
-public:
-    static void parse(Context &context)
-    {
-        _parseMagicNumber(context);
-        while (_extractLine(context))
-        {
-            _parseLine(context);
-        }
-        _prepareBodyExtraction(context);
-    }
-
-private:
-    static void _parseMagicNumber(Context &context)
-    {
-        _extractLine(context);
-        if (context.line != "ply")
-        {
-            throw std::runtime_error("Not a PLY file");
-        }
-    }
-
-    static bool _extractLine(Context &context)
-    {
-        if (!StreamHelper::getLine(context.data, context.line))
-        {
-            throw std::runtime_error("Incomplete header");
-        }
-        ++context.lineNumber;
-        auto line = context.line;
-        context.key = StringHelper::extractToken(line);
-        context.value = line;
-        return context.key != "end_header";
-    }
-
-    static void _parseLine(Context &context)
-    {
-        if (StringHelper::isSpace(context.line))
-        {
-            return;
-        }
-        if (!_tryParseLine(context))
-        {
-            Log::debug("Skip header line {}: '{}'.", context.lineNumber, context.line);
-        }
-    }
-
-    static bool _tryParseLine(Context &context)
-    {
-        return _tryParseWith<FormatParser>(context) || _tryParseWith<ElementParser>(context)
-            || _tryParseWith<PropertyParser>(context);
-    }
-
-    static void _prepareBodyExtraction(Context &context)
-    {
-        auto &header = context.header;
-        HeaderValidator::validate(header);
-        context.key = {};
-        context.value = {};
-        if (header.isBinary())
-        {
-            context.line = "<binary>";
-            context.value = context.data;
-        }
-    }
-
-    template<typename T>
-    static bool _tryParseWith(Context &context)
-    {
-        if (!T::canParse(context))
-        {
-            return false;
-        }
-        T::parse(context);
-        return true;
-    }
-};
-
-class Value
-{
-public:
-    Value() = default;
-
-    Value(int8_t value)
-        : _value(int32_t(value))
-    {
-    }
-
-    Value(uint8_t value)
-        : _value(uint32_t(value))
-    {
-    }
-
-    Value(int16_t value)
-        : _value(int32_t(value))
-    {
-    }
-
-    Value(uint16_t value)
-        : _value(uint32_t(value))
-    {
-    }
-
-    Value(int32_t value)
-        : _value(value)
-    {
-    }
-
-    Value(uint32_t value)
-        : _value(value)
-    {
-    }
-
-    Value(float value)
-        : _value(value)
-    {
-    }
-
-    Value(double value)
-        : _value(value)
-    {
-    }
-
-    template<typename T>
-    bool is() const
-    {
-        return std::holds_alternative<T>(_value);
-    }
-
-    template<typename T>
-    T as() const
-    {
-        return std::get<T>(_value);
-    }
-
-private:
-    std::variant<int32_t, uint32_t, float, double> _value;
 };
 
 class ConvertValue
 {
 public:
-    static float toFloat(Value value)
+    static float toFloat(double value)
     {
-        if (value.is<int32_t>())
+        if (value < std::numeric_limits<float>::min())
         {
-            return float(value.as<int32_t>());
+            throw std::runtime_error("Values must fit inside a float");
         }
-        if (value.is<uint32_t>())
+        if (value > std::numeric_limits<float>::max())
         {
-            return float(value.as<uint32_t>());
+            throw std::runtime_error("Values must fit inside a float");
         }
-        if (value.is<float>())
-        {
-            return value.as<float>();
-        }
-        if (value.is<double>())
-        {
-            auto asDouble = value.as<double>();
-            if (asDouble > std::numeric_limits<float>::max())
-            {
-                throw std::runtime_error("Values must fit inside a float");
-            }
-            return float(asDouble);
-        }
-        throw std::runtime_error("Internal error");
+        return static_cast<float>(value);
     }
 
-    static int32_t toSignedInteger(Value value)
+    static int32_t toInteger(double value)
     {
-        if (value.is<int32_t>())
+        if (value != std::floor(value))
         {
-            return value.as<int32_t>();
+            throw std::runtime_error("Value must be integer");
         }
-        if (value.is<uint32_t>())
+        if (value > static_cast<double>(std::numeric_limits<int32_t>::max()))
         {
-            auto asUnsigned = value.as<uint32_t>();
-            if (asUnsigned > uint32_t(std::numeric_limits<int32_t>::max()))
-            {
-                throw std::runtime_error("Value should fit in int32");
-            }
-            return int32_t(asUnsigned);
+            throw std::runtime_error("Value should fit in int32");
         }
-        throw std::runtime_error("Value cannot be float");
+        return static_cast<int32_t>(value);
     }
 
-    static uint32_t toUnsignedInteger(Value value)
+    static uint32_t toUnsigned(double value)
     {
-        if (value.is<uint32_t>())
+        if (value < 0.0)
         {
-            return value.as<uint32_t>();
+            throw std::runtime_error("Value must be positive");
         }
-        if (value.is<int32_t>())
+        if (value != std::floor(value))
         {
-            auto asSigned = value.as<int32_t>();
-            if (asSigned < 0)
-            {
-                throw std::runtime_error("Value should be positive");
-            }
-            return asSigned;
+            throw std::runtime_error("Value must be integer");
         }
-        throw std::runtime_error("Value cannot be float");
+        if (value > static_cast<double>(std::numeric_limits<uint32_t>::max()))
+        {
+            throw std::runtime_error("Value should fit in uint32");
+        }
+        return static_cast<int32_t>(value);
     }
 };
 
-class ValueExtractor
+class ValueParser
 {
 public:
-    static Value extractValue(Context &context)
-    {
-        auto &property = *context.property;
-        return _extract(context, property.type);
-    }
-
-    static size_t extractSize(Context &context)
-    {
-        auto &property = *context.property;
-        if (!property.isList())
-        {
-            throw std::runtime_error("Property is not a list");
-        }
-        auto value = _extract(context, property.countType);
-        auto size = ConvertValue::toUnsignedInteger(value);
-        return size_t(size);
-    }
-
-private:
-    static Value _extract(Context &context, Type type)
+    static double parse(StringStream &stream, Format format, Type type)
     {
         switch (type)
         {
         case Type::Int8:
-            return _extract<int8_t>(context);
+            return parse<int8_t>(stream, format);
         case Type::UInt8:
-            return _extract<uint8_t>(context);
+            return parse<uint8_t>(stream, format);
         case Type::Int16:
-            return _extract<int16_t>(context);
+            return parse<int16_t>(stream, format);
         case Type::UInt16:
-            return _extract<uint16_t>(context);
+            return parse<uint16_t>(stream, format);
         case Type::Int32:
-            return _extract<int32_t>(context);
+            return parse<int32_t>(stream, format);
         case Type::UInt32:
-            return _extract<uint32_t>(context);
+            return parse<uint32_t>(stream, format);
         case Type::Float32:
-            return _extract<float>(context);
+            return parse<float>(stream, format);
         case Type::Float64:
-            return _extract<double>(context);
+            return parse<double>(stream, format);
         default:
             throw std::runtime_error("Internal error");
         }
     }
 
     template<typename T>
-    static T _extract(Context &context)
+    static T parse(StringStream &stream, Format format)
     {
-        auto &header = context.header;
-        auto &value = context.value;
-        switch (header.format)
+        switch (format)
         {
         case Format::Ascii:
-            return StringHelper::extract<T>(value);
+            return TokenParser::parse<T>(stream);
         case Format::BinaryLittleEndian:
-            return BinaryHelper::extractLittleEndian<T>(value);
+            return BinaryParser::parse<T>(stream, Endian::Little);
         case Format::BinaryBigEndian:
-            return BinaryHelper::extractBigEndian<T>(value);
+            return BinaryParser::parse<T>(stream, Endian::Big);
         default:
             throw std::runtime_error("Invalid format");
         }
     }
 };
 
-class PropertyExtractor
+class ValueExtractor
 {
 public:
-    static void extractAndDiscard(Context &context)
+    static float extractFloat(StringStream &stream, Format format, Type type)
     {
-        auto &property = *context.property;
-        if (!property.isList())
-        {
-            ValueExtractor::extractValue(context);
-            return;
-        }
-        auto size = ValueExtractor::extractSize(context);
-        for (size_t i = 0; i < size; ++i)
-        {
-            ValueExtractor::extractValue(context);
-        }
-    }
-
-    static float extractFloat(Context &context)
-    {
-        auto value = ValueExtractor::extractValue(context);
+        auto value = ValueParser::parse(stream, format, type);
         return ConvertValue::toFloat(value);
     }
 
-    static int32_t extractInteger(Context &context)
+    static int32_t extractInteger(StringStream &stream, Format format, Type type)
     {
-        auto value = ValueExtractor::extractValue(context);
-        return ConvertValue::toSignedInteger(value);
+        auto value = ValueParser::parse(stream, format, type);
+        return ConvertValue::toInteger(value);
     }
 
-    static uint32_t extractIndex(Context &context)
+    static uint32_t extractUnsigned(StringStream &stream, Format format, Type type)
     {
-        auto value = ValueExtractor::extractValue(context);
-        return ConvertValue::toUnsignedInteger(value);
-    }
-
-    static Vector3ui extractFaceIndices(Context &context)
-    {
-        auto size = ValueExtractor::extractSize(context);
-        if (size != 3)
-        {
-            throw std::runtime_error("Non triangular face with " + std::to_string(size) + " indices");
-        }
-        auto first = extractIndex(context);
-        auto second = extractIndex(context);
-        auto third = extractIndex(context);
-        return {first, second, third};
-    }
-
-    static void extractTristrips(Context &context, std::vector<int32_t> &tristrips)
-    {
-        auto size = ValueExtractor::extractSize(context);
-        if (size == 0)
-        {
-            return;
-        }
-        if (!tristrips.empty() && tristrips.back() != -1)
-        {
-            tristrips.push_back(-1);
-        }
-        tristrips.reserve(tristrips.size() + size);
-        for (size_t i = 0; i < size; ++i)
-        {
-            auto index = extractInteger(context);
-            tristrips.push_back(index);
-        }
-    }
-
-    static std::array<Vector2f, 3> extractTextureCoordinates(Context &context)
-    {
-        std::array<Vector2f, 3> coordinates;
-        auto size = ValueExtractor::extractSize(context);
-        if (size != 6)
-        {
-            throw std::runtime_error("Expected 6 coordinates for face texture, got " + std::to_string(size));
-        }
-        for (size_t i = 0; i < 3; ++i)
-        {
-            coordinates[i].x = extractFloat(context);
-            coordinates[i].y = extractFloat(context);
-        }
-        return coordinates;
+        auto value = ValueParser::parse(stream, format, type);
+        return ConvertValue::toUnsigned(value);
     }
 };
 
-class ColorExtractor
+class PropertyExtractor
 {
 public:
-    static float extractAndNormalize(Context &context)
+    static void extractAndDiscard(StringStream &stream, Format format, const Property &property)
     {
-        auto value = PropertyExtractor::extractFloat(context);
-        auto &property = *context.property;
         auto type = property.type;
-        return _normalize(value, type);
+        if (!property.isList())
+        {
+            ValueParser::parse(stream, format, type);
+            return;
+        }
+        auto size = extractSize(stream, format, property);
+        for (size_t i = 0; i < size; ++i)
+        {
+            ValueParser::parse(stream, format, type);
+        }
     }
 
-private:
-    static float _normalize(float value, Type type)
+    static size_t extractSize(StringStream &stream, Format format, const Property &property)
+    {
+        if (!property.isList())
+        {
+            throw std::runtime_error("Expected a list property");
+        }
+        auto type = property.countType;
+        auto size = ValueExtractor::extractUnsigned(stream, format, type);
+        return static_cast<size_t>(size);
+    }
+};
+
+class ColorNormalizer
+{
+public:
+    static float normalize(float value, Type type)
     {
         auto baseValue = _getBaseValue(type);
         auto range = _getRange(type);
         return baseValue + value / range;
     }
 
+private:
     static float _getBaseValue(Type type)
     {
         switch (type)
@@ -911,210 +758,254 @@ private:
         case Type::Int8:
         case Type::UInt8:
         case Type::Int32:
-            return float(std::numeric_limits<uint8_t>::max());
+            return static_cast<float>(std::numeric_limits<uint8_t>::max());
         case Type::Int16:
         case Type::UInt16:
         case Type::UInt32:
-            return float(std::numeric_limits<uint16_t>::max());
+            return static_cast<float>(std::numeric_limits<uint16_t>::max());
         default:
             return 1.0f;
         }
     }
 };
 
-class MeshExtractor
+class VertexExtractor
 {
 public:
-    static void extract(Context &context)
+    static void extract(StringStream &stream, Format format, const Property &property, MeshBuffer &mesh)
     {
-        auto &element = *context.element;
-        switch (element.semantic)
-        {
-        case ElementSemantic::Vertex:
-            return _extractVertex(context);
-        case ElementSemantic::Tristrips:
-            return _extractTristrips(context);
-        case ElementSemantic::Face:
-            return _extractFace(context);
-        default:
-            PropertyExtractor::extractAndDiscard(context);
-        }
-    }
-
-private:
-    static void _extractVertex(Context &context)
-    {
-        auto &property = *context.property;
-        auto &mesh = context.mesh;
+        auto type = property.type;
         switch (property.semantic)
         {
         case Semantic::PositionX:
-            return _extractFloat(context, mesh.xs);
+            return _extractFloat(stream, format, type, mesh.xs);
         case Semantic::PositionY:
-            return _extractFloat(context, mesh.ys);
+            return _extractFloat(stream, format, type, mesh.ys);
         case Semantic::PositionZ:
-            return _extractFloat(context, mesh.zs);
+            return _extractFloat(stream, format, type, mesh.zs);
         case Semantic::NormalX:
-            return _extractFloat(context, mesh.nxs);
+            return _extractFloat(stream, format, type, mesh.nxs);
         case Semantic::NormalY:
-            return _extractFloat(context, mesh.nys);
+            return _extractFloat(stream, format, type, mesh.nys);
         case Semantic::NormalZ:
-            return _extractFloat(context, mesh.nzs);
+            return _extractFloat(stream, format, type, mesh.nzs);
         case Semantic::TextureX:
-            return _extractFloat(context, mesh.txs);
+            return _extractFloat(stream, format, type, mesh.txs);
         case Semantic::TextureY:
-            return _extractFloat(context, mesh.tys);
+            return _extractFloat(stream, format, type, mesh.tys);
         case Semantic::Red:
-            return _extractColor(context, mesh.rs);
+            return _extractColor(stream, format, type, mesh.rs);
         case Semantic::Green:
-            return _extractColor(context, mesh.gs);
+            return _extractColor(stream, format, type, mesh.gs);
         case Semantic::Blue:
-            return _extractColor(context, mesh.bs);
+            return _extractColor(stream, format, type, mesh.bs);
         case Semantic::Alpha:
-            return _extractColor(context, mesh.as);
+            return _extractColor(stream, format, type, mesh.as);
         default:
-            return PropertyExtractor::extractAndDiscard(context);
+            return PropertyExtractor::extractAndDiscard(stream, format, property);
         }
-    }
-
-    static void _extractFace(Context &context)
-    {
-        auto &property = *context.property;
-        switch (property.semantic)
-        {
-        case Semantic::VertexIndices:
-            return _extractFaceIndices(context);
-        case Semantic::TextureCoordinates:
-            return _extractTextureCoordinates(context);
-        default:
-            return PropertyExtractor::extractAndDiscard(context);
-        }
-    }
-
-    static void _extractTristrips(Context &context)
-    {
-        auto &property = *context.property;
-        switch (property.semantic)
-        {
-        case Semantic::VertexIndices:
-            return _extractTristripsIndices(context);
-        default:
-            return PropertyExtractor::extractAndDiscard(context);
-        }
-    }
-
-    static void _extractFloat(Context &context, std::vector<float> &to)
-    {
-        auto value = PropertyExtractor::extractFloat(context);
-        to.push_back(value);
-    }
-
-    static void _extractColor(Context &context, std::vector<float> &to)
-    {
-        auto value = ColorExtractor::extractAndNormalize(context);
-        to.push_back(value);
-    }
-
-    static void _extractFaceIndices(Context &context)
-    {
-        auto &mesh = context.mesh;
-        auto &faces = mesh.faces;
-        auto value = PropertyExtractor::extractFaceIndices(context);
-        faces.push_back(value);
-    }
-
-    static void _extractTristripsIndices(Context &context)
-    {
-        auto &mesh = context.mesh;
-        auto &tristrips = mesh.tristrips;
-        PropertyExtractor::extractTristrips(context, tristrips);
-    }
-
-    static void _extractTextureCoordinates(Context &context)
-    {
-        auto &mesh = context.mesh;
-        auto &textures = mesh.textures;
-        auto value = PropertyExtractor::extractTextureCoordinates(context);
-        textures.push_back(value);
-    }
-};
-
-class BodyLine
-{
-public:
-    static void next(Context &context)
-    {
-        if (context.header.isBinary())
-        {
-            return;
-        }
-        _nextNonEmptyLine(context);
     }
 
 private:
-    static void _nextNonEmptyLine(Context &context)
+    static void _extractFloat(StringStream &stream, Format format, Type type, std::vector<float> &values)
     {
-        while (true)
-        {
-            _nextLine(context);
-            if (!StringHelper::isSpace(context.value))
-            {
-                return;
-            }
-        }
+        auto value = ValueExtractor::extractFloat(stream, format, type);
+        values.push_back(value);
     }
 
-    static void _nextLine(Context &context)
+    static void _extractColor(StringStream &stream, Format format, Type type, std::vector<float> &colors)
     {
-        if (!StreamHelper::getLine(context.data, context.line))
-        {
-            throw std::runtime_error("Incomplete data");
-        }
-        context.value = context.line;
-        ++context.lineNumber;
+        auto value = ValueExtractor::extractFloat(stream, format, type);
+        auto color = ColorNormalizer::normalize(value, type);
+        colors.push_back(color);
     }
 };
 
-class BodyParser
+class FaceExtractor
 {
 public:
-    static void parse(Context &context)
+    static void extract(StringStream &stream, Format format, const Property &property, MeshBuffer &mesh)
     {
-        auto &header = context.header;
-        for (const auto &element : header.elements)
+        switch (property.semantic)
         {
-            context.element = &element;
+        case Semantic::VertexIndices:
+            return _extractIndices(stream, format, property, mesh);
+        case Semantic::TextureCoordinates:
+            return _extractTexture(stream, format, property, mesh);
+        default:
+            return PropertyExtractor::extractAndDiscard(stream, format, property);
+        }
+    }
+
+private:
+    static void _extractIndices(StringStream &stream, Format format, const Property &property, MeshBuffer &mesh)
+    {
+        auto size = PropertyExtractor::extractSize(stream, format, property);
+        if (size != 3)
+        {
+            throw std::runtime_error("Non triangular face with " + std::to_string(size) + " indices");
+        }
+        auto type = property.type;
+        auto &indices = mesh.faces.emplace_back();
+        indices.x = ValueExtractor::extractUnsigned(stream, format, type);
+        indices.y = ValueExtractor::extractUnsigned(stream, format, type);
+        indices.z = ValueExtractor::extractUnsigned(stream, format, type);
+    }
+
+    static void _extractTexture(StringStream &stream, Format format, const Property &property, MeshBuffer &mesh)
+    {
+        auto size = PropertyExtractor::extractSize(stream, format, property);
+        if (size != 6)
+        {
+            throw std::runtime_error("Expected 6 coordinates for face texture, got " + std::to_string(size));
+        }
+        auto type = property.type;
+        auto &texture = mesh.textures.emplace_back();
+        for (size_t i = 0; i < 3; ++i)
+        {
+            texture[i].x = ValueExtractor::extractFloat(stream, format, type);
+            texture[i].y = ValueExtractor::extractFloat(stream, format, type);
+        }
+    }
+};
+
+class TristripExtractor
+{
+public:
+    static void extract(StringStream &stream, Format format, const Property &property, std::vector<int32_t> &tristrips)
+    {
+        switch (property.semantic)
+        {
+        case Semantic::VertexIndices:
+            return _extract(stream, format, property, tristrips);
+        default:
+            return PropertyExtractor::extractAndDiscard(stream, format, property);
+        }
+    }
+
+private:
+    static void _extract(StringStream &stream, Format format, const Property &property, std::vector<int32_t> &tristrips)
+    {
+        auto size = PropertyExtractor::extractSize(stream, format, property);
+        if (size == 0)
+        {
+            return;
+        }
+        if (!tristrips.empty() && tristrips.back() != -1)
+        {
+            tristrips.push_back(-1);
+        }
+        tristrips.reserve(tristrips.size() + size);
+        for (size_t i = 0; i < size; ++i)
+        {
+            auto index = ValueExtractor::extractInteger(stream, format, property.type);
+            tristrips.push_back(index);
+        }
+    }
+};
+
+class ElementExtractor
+{
+public:
+    static void extract(StringStream &stream, Format format, const Element &element, size_t index, MeshBuffer &mesh)
+    {
+        for (const auto &property : element.properties)
+        {
+            _extract(stream, format, element, index, property, mesh);
+        }
+    }
+
+private:
+    static void _extract(
+        StringStream &stream,
+        Format format,
+        const Element &element,
+        size_t index,
+        const Property &property,
+        MeshBuffer &mesh)
+    {
+        try
+        {
+            auto semantic = element.semantic;
+            _extract(stream, format, semantic, property, mesh);
+        }
+        catch (const std::exception &e)
+        {
+            std::ostringstream stream;
+            stream << "Failed to extract data for element '" << element.name;
+            stream << "' (index = " << index;
+            stream << ") and property '" << property.name;
+            stream << "': '" << e.what() << "'";
+            throw std::runtime_error(stream.str());
+        }
+    }
+
+    static void _extract(
+        StringStream &stream,
+        Format format,
+        ElementSemantic semantic,
+        const Property &property,
+        MeshBuffer &mesh)
+    {
+        switch (semantic)
+        {
+        case ElementSemantic::Vertex:
+            return VertexExtractor::extract(stream, format, property, mesh);
+        case ElementSemantic::Face:
+            return FaceExtractor::extract(stream, format, property, mesh);
+        case ElementSemantic::Tristrips:
+            return TristripExtractor::extract(stream, format, property, mesh.tristrips);
+        default:
+            PropertyExtractor::extractAndDiscard(stream, format, property);
+        }
+    }
+};
+
+class AsciiMeshExtractor
+{
+public:
+    static MeshBuffer extract(FileStream &stream, const std::vector<Element> &elements)
+    {
+        MeshBuffer mesh;
+        for (const auto &element : elements)
+        {
             for (size_t i = 0; i < element.count; ++i)
             {
-                BodyLine::next(context);
-                for (const auto &property : element.properties)
-                {
-                    context.property = &property;
-                    MeshExtractor::extract(context);
-                }
+                auto line = _nextLine(stream);
+                auto format = Format::Ascii;
+                ElementExtractor::extract(line, format, element, i, mesh);
             }
         }
+        return mesh;
+    }
+
+private:
+    static StringStream _nextLine(FileStream &stream)
+    {
+        if (!stream.nextLine())
+        {
+            throw std::runtime_error("Incomplete ASCII data section");
+        }
+        return stream.getLine();
     }
 };
 
-class ErrorMessage
+class BinaryMeshExtractor
 {
 public:
-    static std::string format(const Context &context, const std::string &message)
+    static MeshBuffer extract(FileStream &file, Format format, const std::vector<Element> &elements)
     {
-        std::ostringstream stream;
-        stream << "Parsing error at line " << context.lineNumber;
-        stream << ": '" << message << "'";
-        stream << ". Line content: '" << context.line << "'";
-        if (context.element)
+        MeshBuffer mesh;
+        auto data = file.getData();
+        auto binary = StringStream(data);
+        for (const auto &element : elements)
         {
-            stream << ". Element: '" << context.element->name << "'";
+            for (size_t i = 0; i < element.count; ++i)
+            {
+                ElementExtractor::extract(binary, format, element, i, mesh);
+            }
         }
-        if (context.property)
-        {
-            stream << ". Property: '" << context.property->name << "'";
-        }
-        return stream.str();
+        return mesh;
     }
 };
 
@@ -1123,29 +1014,34 @@ class PlyParser
 public:
     static MeshBuffer parse(std::string_view data)
     {
-        Context context(data);
-        _tryParse(context);
-        return context.mesh;
-    }
-
-private:
-    static void _tryParse(Context &context)
-    {
+        auto stream = FileStream(data);
         try
         {
-            _parse(context);
+            return _parse(stream);
         }
         catch (const std::exception &e)
         {
-            auto message = ErrorMessage::format(context, e.what());
-            throw std::runtime_error(message);
+            throw ParsingException(e.what(), stream);
         }
     }
 
-    static void _parse(Context &context)
+private:
+    static MeshBuffer _parse(FileStream &stream)
     {
-        HeaderParser::parse(context);
-        BodyParser::parse(context);
+        auto header = HeaderParser::parse(stream);
+        HeaderValidator::validate(header);
+        auto format = header.format;
+        auto &elements = header.elements;
+        switch (format)
+        {
+        case Format::Ascii:
+            return AsciiMeshExtractor::extract(stream, elements);
+        case Format::BinaryLittleEndian:
+        case Format::BinaryBigEndian:
+            return BinaryMeshExtractor::extract(stream, format, elements);
+        default:
+            throw std::runtime_error("Invalid format");
+        }
     }
 };
 
@@ -1166,10 +1062,10 @@ public:
     }
 };
 
-class ConvertTristrips
+class TristripConverter
 {
 public:
-    static void toTriangles(const std::vector<int32_t> &tristrips, std::vector<Vector3ui> &indices)
+    static void convert(const std::vector<int32_t> &tristrips, std::vector<Vector3ui> &indices)
     {
         for (size_t i = 0; i < tristrips.size(); ++i)
         {
@@ -1218,132 +1114,173 @@ private:
     }
 };
 
+class IndexConverter
+{
+public:
+    static std::vector<Vector3ui> convert(const MeshBuffer &mesh)
+    {
+        auto indices = mesh.faces;
+        TristripConverter::convert(mesh.tristrips, indices);
+        return indices;
+    }
+
+    static std::vector<Vector3ui> recompute(const std::vector<Vector3f> &vertices)
+    {
+        std::vector<Vector3ui> indices;
+        auto size = vertices.size();
+        indices.reserve(size / 3);
+        for (size_t i = 0; i < size; i += 3)
+        {
+            indices.emplace_back(i, i + 1, i + 2);
+        }
+        return indices;
+    }
+};
+
+class VertexConverter
+{
+public:
+    static std::vector<Vector3f> convert(const MeshBuffer &mesh, const std::vector<Vector3ui> &indices)
+    {
+        if (mesh.xs.empty() && mesh.ys.empty() && mesh.zs.empty())
+        {
+            throw std::runtime_error("No positions in vertices");
+        }
+        std::vector<Vector3f> vertices;
+        vertices.reserve(3 * indices.size());
+        for (const auto &triangle : indices)
+        {
+            for (auto index : triangle)
+            {
+                auto x = VectorHelper::get(mesh.xs, index);
+                auto y = VectorHelper::get(mesh.ys, index);
+                auto z = VectorHelper::get(mesh.zs, index);
+                vertices.emplace_back(x, y, z);
+            }
+        }
+        return vertices;
+    }
+};
+
+class NormalConverter
+{
+public:
+    static std::vector<Vector3f> convert(const MeshBuffer &mesh, const std::vector<Vector3ui> &indices)
+    {
+        if (mesh.nxs.empty() && mesh.nys.empty() && mesh.nzs.empty())
+        {
+            return {};
+        }
+        std::vector<Vector3f> normals;
+        normals.reserve(3 * indices.size());
+        for (const auto &triangle : indices)
+        {
+            for (auto index : triangle)
+            {
+                auto x = VectorHelper::get(mesh.nxs, index);
+                auto y = VectorHelper::get(mesh.nys, index);
+                auto z = VectorHelper::get(mesh.nzs, index);
+                normals.emplace_back(x, y, z);
+            }
+        }
+        return normals;
+    }
+};
+
+class ColorConverter
+{
+public:
+    static std::vector<Vector4f> convert(const MeshBuffer &mesh, const std::vector<Vector3ui> &indices)
+    {
+        if (mesh.rs.empty() && mesh.gs.empty() && mesh.bs.empty() && mesh.as.empty())
+        {
+            return {};
+        }
+        std::vector<Vector4f> colors;
+        colors.reserve(3 * indices.size());
+        for (const auto &triangle : indices)
+        {
+            for (auto index : triangle)
+            {
+                auto r = VectorHelper::get(mesh.rs, index);
+                auto g = VectorHelper::get(mesh.gs, index);
+                auto b = VectorHelper::get(mesh.bs, index);
+                auto a = VectorHelper::get(mesh.as, index, 1.0f);
+                colors.emplace_back(r, g, b, a);
+            }
+        }
+        return colors;
+    }
+};
+
+class TextureConverter
+{
+public:
+    static std::vector<Vector2f> convert(const MeshBuffer &mesh, const std::vector<Vector3ui> &indices)
+    {
+        if (mesh.txs.empty() && mesh.tys.empty())
+        {
+            return _fromFaces(mesh, indices);
+        }
+        return _fromVertices(mesh, indices);
+    }
+
+private:
+    static std::vector<Vector2f> _fromFaces(const MeshBuffer &mesh, const std::vector<Vector3ui> &indices)
+    {
+        if (mesh.textures.empty())
+        {
+            return {};
+        }
+        if (mesh.textures.size() != indices.size())
+        {
+            throw std::runtime_error("Indices and texture coordinates mismatch");
+        }
+        std::vector<Vector2f> textures;
+        textures.reserve(3 * mesh.textures.size());
+        for (const auto &texture : mesh.textures)
+        {
+            textures.emplace_back(texture[0]);
+            textures.emplace_back(texture[1]);
+            textures.emplace_back(texture[2]);
+        }
+        return textures;
+    }
+
+    static std::vector<Vector2f> _fromVertices(const MeshBuffer &mesh, const std::vector<Vector3ui> &indices)
+    {
+        if (!mesh.textures.empty())
+        {
+            throw std::runtime_error("Texture coordinates defined in both face and vertices");
+        }
+        std::vector<Vector2f> textures;
+        textures.reserve(3 * indices.size());
+        for (const auto &triangle : indices)
+        {
+            for (auto index : triangle)
+            {
+                auto x = VectorHelper::get(mesh.txs, index);
+                auto y = VectorHelper::get(mesh.tys, index);
+                textures.emplace_back(x, y);
+            }
+        }
+        return textures;
+    }
+};
+
 class MeshConverter
 {
 public:
     static TriangleMesh convert(const MeshBuffer &buffer)
     {
         TriangleMesh mesh;
-        _getIndices(buffer, mesh);
-        _getPositions(buffer, mesh);
-        _getNormals(buffer, mesh);
-        _getColors(buffer, mesh);
-        _getTextures(buffer, mesh);
-        _recomputeIndices(mesh);
+        auto indices = IndexConverter::convert(buffer);
+        mesh.vertices = VertexConverter::convert(buffer, indices);
+        mesh.normals = NormalConverter::convert(buffer, indices);
+        mesh.colors = ColorConverter::convert(buffer, indices);
+        mesh.uvs = TextureConverter::convert(buffer, indices);
+        mesh.indices = IndexConverter::recompute(mesh.vertices);
         return mesh;
-    }
-
-private:
-    static void _getIndices(const MeshBuffer &buffer, TriangleMesh &mesh)
-    {
-        mesh.indices = buffer.faces;
-        ConvertTristrips::toTriangles(buffer.tristrips, mesh.indices);
-    }
-
-    static void _recomputeIndices(TriangleMesh &mesh)
-    {
-        mesh.indices.clear();
-        for (size_t i = 0; i < mesh.vertices.size(); i += 3)
-        {
-            mesh.indices.emplace_back(i, i + 1, i + 2);
-        }
-    }
-
-    static void _getPositions(const MeshBuffer &buffer, TriangleMesh &mesh)
-    {
-        if (buffer.xs.empty() && buffer.ys.empty() && buffer.zs.empty())
-        {
-            throw std::runtime_error("No positions in vertices");
-        }
-        mesh.vertices.reserve(3 * mesh.indices.size());
-        for (const auto &triangle : mesh.indices)
-        {
-            for (auto index : triangle)
-            {
-                mesh.vertices.emplace_back(
-                    VectorHelper::get(buffer.xs, index),
-                    VectorHelper::get(buffer.ys, index),
-                    VectorHelper::get(buffer.zs, index));
-            }
-        }
-    }
-
-    static void _getNormals(const MeshBuffer &buffer, TriangleMesh &mesh)
-    {
-        if (buffer.nxs.empty() && buffer.nys.empty() && buffer.nzs.empty())
-        {
-            return;
-        }
-        mesh.normals.reserve(3 * mesh.indices.size());
-        for (const auto &triangle : mesh.indices)
-        {
-            for (auto index : triangle)
-            {
-                mesh.normals.emplace_back(
-                    VectorHelper::get(buffer.nxs, index),
-                    VectorHelper::get(buffer.nys, index),
-                    VectorHelper::get(buffer.nzs, index));
-            }
-        }
-    }
-
-    static void _getColors(const MeshBuffer &buffer, TriangleMesh &mesh)
-    {
-        if (buffer.rs.empty() && buffer.gs.empty() && buffer.bs.empty() && buffer.as.empty())
-        {
-            return;
-        }
-        mesh.colors.reserve(3 * mesh.indices.size());
-        for (const auto &triangle : mesh.indices)
-        {
-            for (auto index : triangle)
-            {
-                mesh.colors.emplace_back(
-                    VectorHelper::get(buffer.rs, index),
-                    VectorHelper::get(buffer.gs, index),
-                    VectorHelper::get(buffer.bs, index),
-                    VectorHelper::get(buffer.as, index, 1.0f));
-            }
-        }
-    }
-
-    static void _getTextures(const MeshBuffer &buffer, TriangleMesh &mesh)
-    {
-        if (buffer.txs.empty() && buffer.tys.empty())
-        {
-            return _getTexturesFromFaces(buffer, mesh);
-        }
-        if (!buffer.textures.empty())
-        {
-            throw std::runtime_error("Texture coordinates defined in both face and vertices");
-        }
-        mesh.uvs.reserve(3 * mesh.indices.size());
-        for (const auto &triangle : mesh.indices)
-        {
-            for (auto index : triangle)
-            {
-                mesh.uvs.emplace_back(VectorHelper::get(buffer.txs, index), VectorHelper::get(buffer.tys, index));
-            }
-        }
-    }
-
-    static void _getTexturesFromFaces(const MeshBuffer &buffer, TriangleMesh &mesh)
-    {
-        if (buffer.textures.empty())
-        {
-            return;
-        }
-        if (buffer.textures.size() != mesh.indices.size())
-        {
-            throw std::runtime_error("Indices and texture coordinates mismatch");
-        }
-        mesh.uvs.reserve(3 * buffer.textures.size());
-        for (const auto &texture : buffer.textures)
-        {
-            mesh.uvs.emplace_back(texture[0]);
-            mesh.uvs.emplace_back(texture[1]);
-            mesh.uvs.emplace_back(texture[2]);
-        }
     }
 };
 } // namespace

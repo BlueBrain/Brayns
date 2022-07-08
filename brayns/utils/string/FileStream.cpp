@@ -28,6 +28,11 @@ FileStream::FileStream(std::string_view data)
 {
 }
 
+std::string_view FileStream::getData() const
+{
+    return _stream.getData();
+}
+
 size_t FileStream::getLineNumber() const
 {
     return _lineNumber;

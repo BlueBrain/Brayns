@@ -33,6 +33,7 @@ public:
     FileStream() = default;
     FileStream(std::string_view data);
 
+    std::string_view getData() const;
     size_t getLineNumber() const;
     std::string_view getLine() const;
     bool nextLine();

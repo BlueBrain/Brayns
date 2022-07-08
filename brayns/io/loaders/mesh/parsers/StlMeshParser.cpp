@@ -22,7 +22,6 @@
 #include "StlMeshParser.h"
 
 #include <array>
-#include <limits>
 
 #include <brayns/utils/binary/Endian.h>
 #include <brayns/utils/string/FileStream.h>

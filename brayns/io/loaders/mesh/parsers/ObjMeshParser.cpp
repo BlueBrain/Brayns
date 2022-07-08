@@ -25,7 +25,6 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/utils/Convert.h>
 #include <brayns/utils/string/FileStream.h>
 #include <brayns/utils/string/ParsingException.h>
 #include <brayns/utils/string/StringCounter.h>
@@ -119,7 +118,7 @@ private:
         {
             return;
         }
-        auto index = Convert::fromString<uint32_t>(data);
+        auto index = TokenParser::parse<uint32_t>(data);
         if (index < 1 || index > elementCount)
         {
             throw std::runtime_error("Invalid index " + std::to_string(index));
