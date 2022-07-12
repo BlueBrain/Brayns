@@ -35,7 +35,7 @@ uint32_t SceneClipManager::addClippingModel(std::unique_ptr<Model> clippingModel
     auto &instance = *clippingEntry.instance;
 
     model.commit();
-    instance.commit(true);
+    instance.commit();
     _dirty = true;
     return id;
 }

@@ -110,7 +110,7 @@ private:
     /**
      * @brief Commit implementation
      */
-    bool commit(const bool modelChanged);
+    bool commit();
 
 private:
     const uint32_t _modelInstanceID{};

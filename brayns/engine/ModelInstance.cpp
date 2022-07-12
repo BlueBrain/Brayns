@@ -137,15 +137,12 @@ const ospray::cpp::Instance &ModelInstance::getOsprayInstance() const noexcept
     return _osprayInstance;
 }
 
-bool ModelInstance::commit(const bool modelChanged)
+bool ModelInstance::commit()
 {
-    (void)modelChanged;
     if (!_flag)
     {
         return false;
     }
-
-    Log::critical("TESTING INSTANCE COMMIT");
 
     _osprayInstance.commit();
     _flag = false;

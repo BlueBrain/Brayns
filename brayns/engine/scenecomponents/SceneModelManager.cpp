@@ -205,20 +205,12 @@ bool SceneModelManager::commit()
     for (auto &entry : _models)
     {
         auto &model = *entry.model;
-        const bool modelChanged = model.commit();
-        needsRecommit = modelChanged || needsRecommit;
+        needsRecommit = model.commit() || needsRecommit;
+    }
 
-        auto &instances = entry.instances;
-        bool instancesChanged = false;
-        for (auto &instance : instances)
-        {
-            if (instance->commit(modelChanged))
-            {
-                instancesChanged = true;
-            }
-        }
-
-        needsRecommit = needsRecommit || instancesChanged;
+    for (auto instance : _instances)
+    {
+        needsRecommit = instance->commit() || needsRecommit;
     }
 
     return needsRecommit;
