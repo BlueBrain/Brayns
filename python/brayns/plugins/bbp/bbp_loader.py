@@ -24,6 +24,7 @@ from typing import Optional
 from brayns.core.model.model_loader import ModelLoader
 from brayns.plugins.bbp.bbp_cells import BbpCells
 from brayns.plugins.bbp.bbp_report import BbpReport
+from brayns.plugins.common.morphology_parameters import MorphologyParameters
 
 
 @dataclass
@@ -31,10 +32,7 @@ class BbpLoader(ModelLoader):
 
     cells: BbpCells = BbpCells.all()
     report: Optional[BbpReport] = None
-    radius_multiplier: float = 1.0
-    load_soma: bool = True
-    load_axon: bool = False
-    load_dendrites: bool = False
+    morphology: Optional[MorphologyParameters] = MorphologyParameters()
     load_afferent_synapses: bool = False
     load_efferent_synapses: bool = False
 
@@ -46,16 +44,12 @@ class BbpLoader(ModelLoader):
     @property
     def properties(self) -> dict:
         properties = {
-            'neuron_morphology_parameters': {
-                'radius_multiplier': self.radius_multiplier,
-                'load_soma': self.load_soma,
-                'load_axon': self.load_axon,
-                'load_dendrites': self.load_dendrites
-            },
             'load_afferent_synapses': self.load_afferent_synapses,
             'load_efferent_synapses': self.load_efferent_synapses
         }
         properties.update(self.cells.serialize())
+        if self.morphology is not None:
+            properties['neuron_morphology_parameters'] = self.morphology.serialize()
         if self.report is not None:
             properties.update(self.report.serialize())
         return properties

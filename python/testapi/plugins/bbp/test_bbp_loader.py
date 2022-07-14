@@ -37,10 +37,13 @@ class TestBbpLoader(SimpleTestCase):
         return folder / 'bbp.png'
 
     def test_load(self) -> None:
+        morphology = brayns.MorphologyParameters(
+            load_dendrites=True
+        )
         loader = brayns.BbpLoader(
             cells=brayns.BbpCells.from_density(0.5),
             report=brayns.BbpReport.compartment('somas'),
-            load_dendrites=True
+            morphology=morphology
         )
         models = loader.load(self.instance, self.circuit)
         self.assertEqual(len(models), 1)

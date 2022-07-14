@@ -25,10 +25,13 @@ from testapi.simple_test_case import SimpleTestCase
 class TestCircuitColorById(SimpleTestCase):
 
     def test_apply(self) -> None:
-        loader = brayns.BbpLoader(
-            cells=brayns.BbpCells.from_gids([1, 2]),
+        morphology = brayns.MorphologyParameters(
             radius_multiplier=10,
             load_dendrites=True
+        )
+        loader = brayns.BbpLoader(
+            cells=brayns.BbpCells.from_gids([1, 2]),
+            morphology = morphology
         )
         models = loader.load(self.instance, self.circuit)
         model = models[0]

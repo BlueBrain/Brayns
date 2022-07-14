@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,20 +17,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
-from testapi.simple_test_case import SimpleTestCase
+from dataclasses import dataclass
+from typing import Optional
 
 
-class TestCircuitColor(SimpleTestCase):
+@dataclass
+class MorphologyParameters:
 
-    def test_apply(self) -> None:
-        morphology = brayns.MorphologyParameters(
-            radius_multiplier=10
-        )
-        loader = brayns.BbpLoader(
-            morphology=morphology
-        )
-        models = loader.load(self.instance, self.circuit)
-        model = models[0]
-        color = brayns.CircuitColor(brayns.Color4.red)
-        color.apply(self.instance, model.id)
+    radius_multiplier: float = 1.0
+    load_soma: bool = True
+    load_axon: bool = False
+    load_dendrites: bool = False
+    geometry_type: str = "smooth"
+
+    def serialize(self) -> dict:
+        return {
+            'radius_multiplier': self.radius_multiplier,
+            'load_soma': self.load_soma,
+            'load_axon': self.load_axon,
+            'load_dendrites': self.load_dendrites,
+            'geometry_type': self.geometry_type
+        }

@@ -20,6 +20,7 @@
 
 import unittest
 
+from brayns.plugins.common.morphology_parameters import MorphologyParameters
 from brayns.plugins.sonata.sonata_edge_population import SonataEdgePopulation
 from brayns.plugins.sonata.sonata_node_population import SonataNodePopulation
 from brayns.plugins.sonata.sonata_nodes import SonataNodes
@@ -29,6 +30,13 @@ from brayns.plugins.sonata.sonata_report import SonataReport
 class TestSonataNodePopulation(unittest.TestCase):
 
     def test_serialize(self) -> None:
+        morphology = MorphologyParameters(
+            radius_multiplier=3,
+            load_soma=False,
+            load_axon=True,
+            load_dendrites=True,
+            geometry_type='original'
+        )
         test = SonataNodePopulation(
             name='test',
             nodes=SonataNodes.from_density(0.1),
@@ -37,11 +45,8 @@ class TestSonataNodePopulation(unittest.TestCase):
                 SonataEdgePopulation('test1', afferent=True),
                 SonataEdgePopulation('test2', afferent=False)
             ],
-            neuron_radius_multiplier=3,
-            vasculature_radius_multiplier=4,
-            load_soma=False,
-            load_axon=True,
-            load_dendrites=True
+            morphology=morphology,
+            vasculature_radius_multiplier=4
         )
         ref = {
             'node_population': 'test',
@@ -66,7 +71,8 @@ class TestSonataNodePopulation(unittest.TestCase):
                 'radius_multiplier': 3,
                 'load_soma': False,
                 'load_axon': True,
-                'load_dendrites': True
+                'load_dendrites': True,
+                'geometry_type': 'original'
             },
             'vasculature_geometry_parameters': {
                 'radius_multiplier': 4

@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,20 +17,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
-from testapi.simple_test_case import SimpleTestCase
+from brayns.plugins.morphology.morphology_loader import MorphologyLoader
 
-
-class TestCircuitColor(SimpleTestCase):
-
-    def test_apply(self) -> None:
-        morphology = brayns.MorphologyParameters(
-            radius_multiplier=10
-        )
-        loader = brayns.BbpLoader(
-            morphology=morphology
-        )
-        models = loader.load(self.instance, self.circuit)
-        model = models[0]
-        color = brayns.CircuitColor(brayns.Color4.red)
-        color.apply(self.instance, model.id)
+__all__ = [
+    'MorphologyLoader'
+]

@@ -47,9 +47,12 @@ class TestTransferFunction(SimpleTestCase):
         self.assertEqual(test, function)
 
     def _load_circuit(self) -> brayns.Model:
+        morphology = brayns.MorphologyParameters(
+            radius_multiplier=10
+        )
         loader = brayns.BbpLoader(
             report=brayns.BbpReport.compartment('somas'),
-            radius_multiplier=10
+            morphology=morphology
         )
         models = loader.load(self.instance, self.circuit)
         return models[0]

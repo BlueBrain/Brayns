@@ -23,11 +23,13 @@ from brayns.plugins.common.circuit_color import CircuitColor
 from brayns.plugins.common.circuit_color_by_id import CircuitColorById
 from brayns.plugins.common.circuit_color_by_method import CircuitColorByMethod
 from brayns.plugins.common.color_method import ColorMethod
+from brayns.plugins.common.morphology_parameters import MorphologyParameters
 
 __all__ = [
     'CellId',
     'CircuitColorById',
     'CircuitColorByMethod',
     'CircuitColor',
-    'ColorMethod'
+    'ColorMethod',
+    'MorphologyParameters'
 ]

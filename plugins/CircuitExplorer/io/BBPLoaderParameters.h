@@ -72,7 +72,8 @@ BRAYNS_JSON_OBJECT_ENTRY(
 BRAYNS_JSON_OBJECT_ENTRY(
     NeuronMorphologyLoaderParameters,
     neuron_morphology_parameters,
-    "Settings to configure neuron morphology load")
+    "Settings to configure neuron morphology load",
+    brayns::Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(
     bool,
     load_afferent_synapses,

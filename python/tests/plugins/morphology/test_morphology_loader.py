@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -20,16 +19,14 @@
 
 import unittest
 
-from brayns.plugins.bbp.bbp_cells import BbpCells
-from brayns.plugins.bbp.bbp_loader import BbpLoader
-from brayns.plugins.bbp.bbp_report import BbpReport
-from brayns.plugins.common.morphology_parameters import MorphologyParameters
+from brayns.plugins.common import MorphologyParameters
+from brayns.plugins.morphology import MorphologyLoader
 
 
-class TestBbpLoader(unittest.TestCase):
+class TestMorphologyLoader(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(BbpLoader.name, 'BBP loader')
+        self.assertEqual(MorphologyLoader.name, 'Neuron Morphology loader')
 
     def test_properties(self) -> None:
         morphology = MorphologyParameters(
@@ -39,27 +36,13 @@ class TestBbpLoader(unittest.TestCase):
             load_dendrites=True,
             geometry_type='original'
         )
-        loader = BbpLoader(
-            cells=BbpCells.from_targets(['tests'], 0.5),
-            report=BbpReport.compartment('test'),
-            morphology=morphology,
-            load_afferent_synapses=True,
-            load_efferent_synapses=True
-        )
+        loader = MorphologyLoader(morphology=morphology)
         properties = {
-            'percentage': 0.5,
-            'targets': ['tests'],
-            'report_type': 'compartment',
-            'report_name': 'test',
-            'load_afferent_synapses': True,
-            'load_efferent_synapses': True,
-            'neuron_morphology_parameters': {
-                'radius_multiplier': 3.0,
-                'load_soma': True,
-                'load_axon': True,
-                'load_dendrites': True,
-                'geometry_type': 'original'
-            }
+            'radius_multiplier': 3.0,
+            'load_soma': True,
+            'load_axon': True,
+            'load_dendrites': True,
+            'geometry_type': 'original'
         }
         self.assertEqual(loader.properties, properties)
 

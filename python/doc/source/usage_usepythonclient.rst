@@ -64,7 +64,7 @@ Now, we can start performing requests for example loading a circuit (with circui
     loader = brayns.BbpLoader(
         cells=brayns.BbpCells.from_density(0.1),
         report=brayns.BbpReport.spikes(),
-        radius_multiplier=20
+        morphology=brayns.MorphologyParameters(radius_multiplier=20)
     )
 
     # Load the model(s) into the instance (some files contain multiple models)
