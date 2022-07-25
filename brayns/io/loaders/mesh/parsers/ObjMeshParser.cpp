@@ -73,7 +73,7 @@ public:
         Line line;
         line.key = StringExtractor::extractToken(data);
         StringExtractor::extractSpaces(data);
-        line.value = StringExtractor::extractAll(data);
+        line.value = data;
         return line;
     }
 };
@@ -328,7 +328,7 @@ public:
         }
         catch (const std::exception &e)
         {
-            stream.raise(e.what());
+            throw stream.error(e.what());
         }
     }
 

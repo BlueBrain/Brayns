@@ -25,13 +25,13 @@
 
 #include <brayns/common/GlmParsers.h>
 
-#include <brayns/utils/parsing/Endian.h>
+#include <brayns/utils/binary/ByteOrder.h>
 #include <brayns/utils/parsing/FileStream.h>
-#include <brayns/utils/parsing/Parse.h>
+#include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/parsing/ParsingException.h>
-#include <brayns/utils/parsing/StringCounter.h>
-#include <brayns/utils/parsing/StringStream.h>
-#include <brayns/utils/parsing/StringTrimmer.h>
+#include <brayns/utils/string/StringCounter.h>
+#include <brayns/utils/string/StringExtractor.h>
+#include <brayns/utils/string/StringTrimmer.h>
 
 namespace
 {
@@ -91,9 +91,9 @@ public:
         }
     }
 
-    static void extractToken(StringStream &stream, std::string_view expected)
+    static void extractToken(std::string_view &data, std::string_view expected)
     {
-        auto token = stream.extractToken();
+        auto token = StringExtractor::extractToken(data);
         if (token != expected)
         {
             auto message = "Invalid token, expected '" + std::string(expected) + "', got '" + std::string(token) + "'";
@@ -112,10 +112,9 @@ public:
         {
             throw std::runtime_error("Invalid normal, expected 5 tokens, got " + std::to_string(count));
         }
-        auto stream = StringStream(line);
-        FixedStringExtractor::extractToken(stream, "facet");
-        FixedStringExtractor::extractToken(stream, "normal");
-        return Parse::fromTokens<Vector3f>(stream);
+        FixedStringExtractor::extractToken(line, "facet");
+        FixedStringExtractor::extractToken(line, "normal");
+        return Parser::extractToken<Vector3f>(line);
     }
 };
 
@@ -129,13 +128,12 @@ public:
         {
             throw std::runtime_error("Invalid vertex, expected 4 tokens, got " + std::to_string(count));
         }
-        auto stream = StringStream(line);
-        auto vertex = stream.extractToken();
+        auto vertex = StringExtractor::extractToken(line);
         if (vertex != "vertex")
         {
             throw std::runtime_error("Invalid vertex, expected 'vertex', got " + std::string(vertex));
         }
-        return Parse::fromTokens<Vector3f>(stream);
+        return Parser::extractToken<Vector3f>(line);
     }
 };
 
@@ -212,7 +210,7 @@ public:
         }
         catch (const std::exception &e)
         {
-            throw ParsingException(e.what(), stream);
+            throw stream.error(e.what());
         }
     }
 
@@ -243,11 +241,10 @@ private:
     static Solid _beginSolid(FileStream &stream)
     {
         auto line = _nextLine(stream);
-        auto header = StringStream(line);
-        FixedStringExtractor::extractToken(header, "solid");
-        header.extractSpaces();
+        FixedStringExtractor::extractToken(line, "solid");
+        StringExtractor::extractSpaces(line);
         Solid solid;
-        solid.name = header.extractAll();
+        solid.name = line;
         return solid;
     }
 };
@@ -255,53 +252,53 @@ private:
 class BinaryHeaderParser
 {
 public:
-    static size_t parse(StringStream &stream)
+    static size_t parse(std::string_view &data)
     {
-        _skipHeader(stream);
-        return _parseTriangleCount(stream);
+        _skipHeader(data);
+        return _parseTriangleCount(data);
     }
 
 private:
-    static void _skipHeader(StringStream &stream)
+    static void _skipHeader(std::string_view &data)
     {
-        if (!stream.canExtract(80))
+        if (!StringExtractor::canExtract(data, 80))
         {
             throw std::runtime_error("Expected 80 bytes header at the beginning of the file");
         }
-        stream.extract(80);
+        StringExtractor::extract(data, 80);
     }
 
-    static size_t _parseTriangleCount(StringStream &stream)
+    static size_t _parseTriangleCount(std::string_view &data)
     {
-        if (!stream.canExtract(4))
+        if (!StringExtractor::canExtract(data, 4))
         {
             throw std::runtime_error("Expected 4 bytes triangle count");
         }
-        return Parse::fromBytes<uint32_t>(stream, Endian::Little);
+        return Parser::extractChunk<uint32_t>(data, ByteOrder::LittleEndian);
     }
 };
 
 class BinaryFacetParser
 {
 public:
-    static std::vector<Facet> parseAll(StringStream &stream, size_t count)
+    static std::vector<Facet> parseAll(std::string_view &data, size_t count)
     {
         std::vector<Facet> facets;
         facets.reserve(count);
         for (size_t i = 0; i < count; ++i)
         {
-            auto facet = parse(stream);
+            auto facet = parse(data);
             facets.push_back(facet);
         }
         return facets;
     }
 
-    static Facet parse(StringStream &stream)
+    static Facet parse(std::string_view &data)
     {
         Facet facet;
-        Parse::fromBytes(stream, facet.normal, Endian::Little);
-        Parse::fromBytes(stream, facet.vertices, Endian::Little);
-        stream.extract(2);
+        Parser::extractChunk(data, facet.normal, ByteOrder::LittleEndian);
+        Parser::extractChunk(data, facet.vertices, ByteOrder::LittleEndian);
+        StringExtractor::extract(data, 2);
         return facet;
     }
 };
@@ -311,26 +308,25 @@ class BinarySolidParser
 public:
     static Solid parse(std::string_view data)
     {
-        auto stream = StringStream(data);
-        auto count = BinaryHeaderParser::parse(stream);
-        _checkDataSize(stream, count);
-        return _extractSolid(stream, count);
+        auto count = BinaryHeaderParser::parse(data);
+        _checkDataSize(data, count);
+        return _extractSolid(data, count);
     }
 
 private:
-    static void _checkDataSize(StringStream &stream, size_t count)
+    static void _checkDataSize(std::string_view &data, size_t count)
     {
         auto size = 50 * count;
-        if (!stream.canExtract(size))
+        if (!StringExtractor::canExtract(data, size))
         {
             throw std::runtime_error("Expected " + std::to_string(size) + " bytes of facet data after header");
         }
     }
 
-    static Solid _extractSolid(StringStream &stream, size_t count)
+    static Solid _extractSolid(std::string_view &data, size_t count)
     {
         Solid solid;
-        solid.facets = BinaryFacetParser::parseAll(stream, count);
+        solid.facets = BinaryFacetParser::parseAll(data, count);
         return solid;
     }
 };

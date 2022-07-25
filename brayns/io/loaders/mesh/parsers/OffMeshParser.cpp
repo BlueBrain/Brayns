@@ -24,11 +24,11 @@
 #include <brayns/common/GlmParsers.h>
 
 #include <brayns/utils/parsing/FileStream.h>
-#include <brayns/utils/parsing/Parse.h>
+#include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/parsing/ParsingException.h>
-#include <brayns/utils/parsing/StringCounter.h>
-#include <brayns/utils/parsing/StringStream.h>
-#include <brayns/utils/parsing/StringTrimmer.h>
+#include <brayns/utils/string/StringCounter.h>
+#include <brayns/utils/string/StringExtractor.h>
+#include <brayns/utils/string/StringTrimmer.h>
 
 namespace
 {
@@ -52,8 +52,7 @@ class LineFormatter
 public:
     static std::string_view removeCommentsAndTrim(std::string_view data)
     {
-        auto stream = StringStream(data);
-        auto result = stream.extractUntil('#');
+        auto result = StringExtractor::extractUntil(data, '#');
         return StringTrimmer::trim(result);
     }
 };
@@ -113,10 +112,9 @@ public:
             throw std::runtime_error("Invalid dimensions, expected 3 tokens, got " + std::to_string(count));
         }
         Dimensions dimensions;
-        auto stream = StringStream(line);
-        Parse::fromTokens(stream, dimensions.vertexCount);
-        Parse::fromTokens(stream, dimensions.faceCount);
-        Parse::fromTokens(stream, dimensions.edgeCount);
+        Parser::extractToken(line, dimensions.vertexCount);
+        Parser::extractToken(line, dimensions.faceCount);
+        Parser::extractToken(line, dimensions.edgeCount);
         return dimensions;
     }
 };
@@ -149,7 +147,7 @@ public:
         {
             throw std::runtime_error("Invalid vertex, expected 3 tokens, got " + std::to_string(count));
         }
-        return Parse::fromTokens<Vector3f>(line);
+        return Parser::extractToken<Vector3f>(line);
     }
 };
 
@@ -182,15 +180,14 @@ public:
         {
             throw std::runtime_error("Invalid face, expected at least one token, got " + std::to_string(count));
         }
-        auto stream = StringStream(line);
-        _extractSize(stream);
-        return _extractIndices(stream, vertexCount);
+        _extractSize(line);
+        return _extractIndices(line, vertexCount);
     }
 
 private:
-    static size_t _extractSize(StringStream &stream)
+    static size_t _extractSize(std::string_view &data)
     {
-        auto size = Parse::fromTokens<size_t>(stream);
+        auto size = Parser::extractToken<size_t>(data);
         if (size != 3)
         {
             throw std::runtime_error("Non triangular face with " + std::to_string(size) + " indices");
@@ -198,9 +195,9 @@ private:
         return size;
     }
 
-    static Vector3ui _extractIndices(StringStream &stream, size_t vertexCount)
+    static Vector3ui _extractIndices(std::string_view &data, size_t vertexCount)
     {
-        auto indices = Parse::fromTokens<Vector3ui>(stream);
+        auto indices = Parser::extractToken<Vector3ui>(data);
         for (auto index : indices)
         {
             if (index >= vertexCount)
@@ -225,7 +222,7 @@ public:
         }
         catch (const std::exception &e)
         {
-            throw ParsingException(e.what(), stream);
+            throw stream.error(e.what());
         }
     }
 

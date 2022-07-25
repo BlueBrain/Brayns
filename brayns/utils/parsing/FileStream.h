@@ -23,6 +23,8 @@
 
 #include <string_view>
 
+#include "ParsingException.h"
+
 namespace brayns
 {
 class FileStream
@@ -33,7 +35,7 @@ public:
     std::string_view getData() const;
     size_t getLineNumber() const;
     std::string_view getLine() const;
-    void raise(std::string_view message) const;
+    ParsingException error(std::string_view message) const;
     bool nextLine();
 
 private:

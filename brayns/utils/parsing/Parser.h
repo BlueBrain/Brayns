@@ -69,7 +69,7 @@ public:
     }
 
     template<typename T>
-    static T parseBytes(std::string_view data, T &value, ByteOrder order)
+    static void parseBytes(std::string_view data, T &value, ByteOrder order)
     {
         ByteParser<T>::parse(data, value, order);
     }
@@ -83,7 +83,7 @@ public:
     }
 
     template<typename T>
-    static T extractChunk(std::string_view &data, T &value, ByteOrder order)
+    static void extractChunk(std::string_view &data, T &value, ByteOrder order)
     {
         ChunkExtractor<T>::extract(data, value, order);
     }
