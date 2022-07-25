@@ -23,31 +23,31 @@
 
 #include "MathTypes.h"
 
-#include <brayns/utils/parsing/ByteParser.h>
-#include <brayns/utils/parsing/TokenParser.h>
+#include <brayns/utils/parsing/ChunkExtractor.h>
+#include <brayns/utils/parsing/TokenExtractor.h>
 
 namespace brayns
 {
 template<glm::length_t S, typename T>
-struct ByteParser<glm::vec<S, T>>
+struct ChunkExtractor<glm::vec<S, T>>
 {
-    static void parse(StringStream &stream, glm::vec<S, T> &value, Endian endian)
+    static void extract(std::string_view &data, glm::vec<S, T> &value, ByteOrder order)
     {
         for (glm::length_t i = 0; i < S; ++i)
         {
-            ByteParser<T>::parse(stream, value[i], endian);
+            ChunkExtractor<T>::extract(data, value[i], order);
         }
     }
 };
 
 template<glm::length_t S, typename T>
-struct TokenParser<glm::vec<S, T>>
+struct TokenExtractor<glm::vec<S, T>>
 {
-    static void parse(StringStream &stream, glm::vec<S, T> &value)
+    static void extract(std::string_view &data, glm::vec<S, T> &value)
     {
         for (glm::length_t i = 0; i < S; ++i)
         {
-            TokenParser<T>::parse(stream, value[i]);
+            TokenExtractor<T>::extract(data, value[i]);
         }
     }
 };

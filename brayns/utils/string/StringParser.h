@@ -41,6 +41,12 @@ struct StringParser<bool>
 };
 
 template<>
+struct StringParser<char>
+{
+    static void parse(std::string_view data, char &value);
+};
+
+template<>
 struct StringParser<int8_t>
 {
     static void parse(std::string_view data, int8_t &value);

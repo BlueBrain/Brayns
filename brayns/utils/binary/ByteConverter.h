@@ -21,29 +21,15 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cstdint>
+#include <cstddef>
 
 namespace brayns
 {
 class ByteConverter
 {
 public:
-    static void copyBytes(const char *from, char *to, size_t stride)
-    {
-        for (size_t i = 0; i < stride; ++i)
-        {
-            to[i] = from[i];
-        }
-    }
-
-    static void swapBytes(char *bytes, size_t stride)
-    {
-        for (size_t i = 0; i < stride / 2; ++i)
-        {
-            std::swap(bytes[i], bytes[stride - 1 - i]);
-        }
-    }
+    static void copyBytes(const char *from, char *to, size_t stride);
+    static void swapBytes(char *bytes, size_t stride);
 
     template<typename T>
     static const char *getBytes(const T &value)

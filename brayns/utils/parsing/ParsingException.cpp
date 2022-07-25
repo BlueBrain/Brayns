@@ -32,11 +32,6 @@ ParsingException::ParsingException(const std::string &message, size_t lineNumber
 {
 }
 
-ParsingException::ParsingException(const std::string &message, const FileStream &stream)
-    : ParsingException(std::move(message), stream.getLineNumber(), std::string(stream.getLine()))
-{
-}
-
 size_t ParsingException::getLineNumber() const
 {
     return _lineNumber;

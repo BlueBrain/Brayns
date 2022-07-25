@@ -22,52 +22,45 @@
 #pragma once
 
 #include <array>
+#include <string_view>
 #include <vector>
 
-#include "ByteConverter.h"
-#include "Endian.h"
-#include "StringStream.h"
+#include <brayns/utils/binary/ByteParser.h>
+#include <brayns/utils/string/StringExtractor.h>
 
 namespace brayns
 {
-class ByteParserHelper
-{
-public:
-    static void copyBytes(StringStream &stream, char *bytes, size_t stride);
-};
-
 template<typename T>
-struct ByteParser
+struct ChunkExtractor
 {
-    static void parse(StringStream &stream, T &value, Endian endian)
+    static void extract(std::string_view &data, T &value, ByteOrder order)
     {
-        auto bytes = ByteConverter::getBytes(value);
-        ByteParserHelper::copyBytes(stream, bytes, sizeof(T));
-        EndianConverter::convertToLocalEndian(value, endian);
+        auto chunk = StringExtractor::extract(data, sizeof(T));
+        ByteParser<T>::parse(chunk, value, order);
     }
 };
 
 template<typename T>
-struct ByteParser<std::vector<T>>
+struct ChunkExtractor<std::vector<T>>
 {
-    static void parse(StringStream &stream, std::vector<T> &values, Endian endian)
+    static void extract(std::string_view &data, std::vector<T> &values, ByteOrder order)
     {
-        while (!stream.isSpace())
+        while (!data.empty())
         {
             auto &value = values.emplace_back();
-            ByteParser<T>::parse(stream, value, endian);
+            ChunkExtractor<T>::extract(data, value, order);
         }
     }
 };
 
 template<typename T, size_t S>
-struct ByteParser<std::array<T, S>>
+struct ChunkExtractor<std::array<T, S>>
 {
-    static void parse(StringStream &stream, std::array<T, S> &values, Endian endian)
+    static void extract(std::string_view &data, std::array<T, S> &values, ByteOrder order)
     {
         for (auto &value : values)
         {
-            ByteParser<T>::parse(stream, value, endian);
+            ChunkExtractor<T>::extract(data, value, order);
         }
     }
 };

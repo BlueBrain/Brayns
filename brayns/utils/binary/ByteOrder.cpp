@@ -19,47 +19,41 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FileStream.h"
+#include "ByteOrder.h"
 
-#include <brayns/utils/string/StringExtractor.h>
-
-#include "ParsingException.h"
+#include <cstdint>
+#include <stdexcept>
 
 namespace brayns
 {
-FileStream::FileStream(std::string_view data)
-    : _data(data)
+ByteOrder ByteOrderHelper::getSystemByteOrder()
 {
-}
-
-std::string_view FileStream::getData() const
-{
-    return _data;
-}
-
-size_t FileStream::getLineNumber() const
-{
-    return _lineNumber;
-}
-
-std::string_view FileStream::getLine() const
-{
-    return _line;
-}
-
-void FileStream::raise(std::string_view message) const
-{
-    throw ParsingException(std::string(message), _lineNumber, std::string(_line));
-}
-
-bool FileStream::nextLine()
-{
-    if (_data.empty())
+    static constexpr uint32_t test = 0x01020304;
+    auto bytes = ByteConverter::getBytes(test);
+    if (bytes[0] == 1)
     {
-        return false;
+        return ByteOrder::BigEndian;
     }
-    _line = StringExtractor::extractLine(_data);
-    ++_lineNumber;
-    return true;
+    if (bytes[0] == 4)
+    {
+        return ByteOrder::LittleEndian;
+    }
+    throw std::runtime_error("Unsupported system byte order");
+}
+
+void ByteOrderHelper::convertToSystemByteOrder(char *bytes, size_t stride, ByteOrder order)
+{
+    if (order != getSystemByteOrder())
+    {
+        ByteConverter::swapBytes(bytes, stride);
+    }
+}
+
+void ByteOrderHelper::convertFromSystemByteOrder(char *bytes, size_t stride, ByteOrder order)
+{
+    if (order != getSystemByteOrder())
+    {
+        ByteConverter::swapBytes(bytes, stride);
+    }
 }
 } // namespace brayns

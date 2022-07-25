@@ -23,23 +23,21 @@
 
 #include <string_view>
 
-#include "StringStream.h"
-
 namespace brayns
 {
 class FileStream
 {
 public:
-    FileStream() = default;
     FileStream(std::string_view data);
 
     std::string_view getData() const;
     size_t getLineNumber() const;
     std::string_view getLine() const;
+    void raise(std::string_view message) const;
     bool nextLine();
 
 private:
-    StringStream _stream;
+    std::string_view _data;
     size_t _lineNumber = 0;
     std::string_view _line;
 };

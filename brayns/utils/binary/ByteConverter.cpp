@@ -19,58 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <cstdint>
-
 #include "ByteConverter.h"
+
+#include <algorithm>
 
 namespace brayns
 {
-class NativeEndian
+void ByteConverter::copyBytes(const char *from, char *to, size_t stride)
 {
-public:
-    static constexpr uint32_t test = 0x01020304;
-
-    static bool isBigEndian()
+    for (size_t i = 0; i < stride; ++i)
     {
+        to[i] = from[i];
     }
-};
+}
 
-enum class Endian
+void ByteConverter::swapBytes(char *bytes, size_t stride)
 {
-    Little = 0,
-    Big = 1,
-    Local = EndianHelper::isBigEndian() ? Big : Little
-};
-
-class EndianConverter
-{
-public:
-    static void convertToLocalEndian(char *bytes, size_t stride, Endian endian)
+    for (size_t i = 0; i < stride / 2; ++i)
     {
-        if (endian != Endian::Local)
-        {
-            ByteConverter::swapBytes(bytes, stride);
-        }
+        std::swap(bytes[i], bytes[stride - 1 - i]);
     }
-
-    static void convertFromLocalEndian(char *bytes, size_t stride, Endian endian)
-    {
-        convertToLocalEndian(bytes, stride, endian);
-    }
-
-    template<typename T>
-    static void convertToLocalEndian(T &value, Endian endian)
-    {
-        auto bytes = ByteConverter::getBytes(value);
-        convertToLocalEndian(bytes, sizeof(T), endian);
-    }
-
-    template<typename T>
-    static void convertFromLocalEndian(T &value, Endian endian)
-    {
-        convertToLocalEndian(value, endian);
-    }
-};
+}
 } // namespace brayns

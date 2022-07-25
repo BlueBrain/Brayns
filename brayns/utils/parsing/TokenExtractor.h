@@ -21,31 +21,48 @@
 
 #pragma once
 
+#include <array>
 #include <string_view>
+#include <vector>
+
+#include <brayns/utils/string/StringExtractor.h>
+#include <brayns/utils/string/StringInfo.h>
+#include <brayns/utils/string/StringParser.h>
 
 namespace brayns
 {
-class StringStream
+template<typename T>
+struct TokenExtractor
 {
-public:
-    StringStream() = default;
-    StringStream(std::string_view data);
+    static void extract(std::string_view &data, T &value)
+    {
+        auto token = StringExtractor::extractToken(data);
+        StringParser<T>::parse(token, value);
+    }
+};
 
-    bool isEmpty() const;
-    bool isSpace() const;
-    bool canExtract(size_t size) const;
-    size_t getSize() const;
-    std::string_view getData() const;
-    std::string_view extractAll();
-    std::string_view extract(size_t size);
-    std::string_view extractUntil(char separator);
-    std::string_view extractUntil(std::string_view separator);
-    std::string_view extractUntilOneOf(std::string_view separators);
-    std::string_view extractToken();
-    std::string_view extractLine();
-    void extractSpaces();
+template<typename T>
+struct TokenExtractor<std::vector<T>>
+{
+    static void extract(std::string_view &data, std::vector<T> &values)
+    {
+        while (!StringInfo::isSpace(data))
+        {
+            auto &value = values.emplace_back();
+            TokenExtractor<T>::extract(data, value);
+        }
+    }
+};
 
-private:
-    std::string_view _data;
+template<typename T, size_t S>
+struct TokenExtractor<std::array<T, S>>
+{
+    static void extract(std::string_view &data, std::array<T, S> &values)
+    {
+        for (auto &value : values)
+        {
+            TokenExtractor<T>::extract(data, value);
+        }
+    }
 };
 } // namespace brayns

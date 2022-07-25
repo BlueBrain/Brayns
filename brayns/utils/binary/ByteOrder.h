@@ -21,19 +21,35 @@
 
 #pragma once
 
-#include <string>
-#include <string_view>
+#include "ByteConverter.h"
 
 namespace brayns
 {
-class StringConverter
+enum class ByteOrder
+{
+    BigEndian,
+    LittleEndian
+};
+
+class ByteOrderHelper
 {
 public:
-    static char toLower(char c);
-    static char toUpper(char c);
-    static std::string toLower(std::string_view data);
-    static std::string toUpper(std::string_view data);
-    static void lower(std::string &data);
-    static void upper(std::string &data);
+    static ByteOrder getSystemByteOrder();
+    static void convertToSystemByteOrder(char *bytes, size_t stride, ByteOrder order);
+    static void convertFromSystemByteOrder(char *bytes, size_t stride, ByteOrder order);
+
+    template<typename T>
+    static void convertToSystemByteOrder(T &value, ByteOrder order)
+    {
+        auto bytes = ByteConverter::getBytes(value);
+        convertToSystemByteOrder(bytes, sizeof(T), order);
+    }
+
+    template<typename T>
+    static void convertFromSystemByteOrder(T &value, ByteOrder order)
+    {
+        auto bytes = ByteConverter::getBytes(value);
+        convertFromSystemByteOrder(bytes, sizeof(T), order);
+    }
 };
 } // namespace brayns

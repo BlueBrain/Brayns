@@ -21,83 +21,71 @@
 
 #pragma once
 
-#include "ByteParser.h"
-#include "StringParser.h"
-#include "TokenParser.h"
+#include <brayns/utils/binary/ByteParser.h>
+#include <brayns/utils/string/StringParser.h>
+
+#include "ChunkExtractor.h"
+#include "TokenExtractor.h"
 
 namespace brayns
 {
-class Parse
+class Parser
 {
 public:
     template<typename T>
-    static T fromString(std::string_view data)
+    static T parseString(std::string_view data)
     {
         T value{};
-        fromString(data, value);
+        parseString(data, value);
         return value;
     }
 
     template<typename T>
-    static void fromString(std::string_view data, T &value)
+    static void parseString(std::string_view data, T &value)
     {
         StringParser<T>::parse(data, value);
     }
 
     template<typename T>
-    static T fromTokens(std::string_view data)
-    {
-        auto stream = StringStream(data);
-        return fromTokens<T>(stream);
-    }
-
-    template<typename T>
-    static void fromTokens(std::string_view data, T &value)
-    {
-        auto stream = StringStream(data);
-        fromTokens(stream, value);
-    }
-
-    template<typename T>
-    static T fromTokens(StringStream &stream)
+    static T extractToken(std::string_view &data)
     {
         T value{};
-        fromTokens(stream, value);
+        extractToken(data, value);
         return value;
     }
 
     template<typename T>
-    static void fromTokens(StringStream &stream, T &value)
+    static void extractToken(std::string_view &data, T &value)
     {
-        return TokenParser<T>::parse(stream, value);
+        TokenExtractor<T>::extract(data, value);
     }
 
     template<typename T>
-    static T fromBytes(std::string_view data, Endian endian = Endian::Local)
-    {
-        auto stream = StringStream(data);
-        return fromBytes<T>(stream, endian);
-    }
-
-    template<typename T>
-    static void fromBytes(std::string_view data, T &value, Endian endian = Endian::Local)
-    {
-        auto stream = StringStream(data);
-        fromBytes(stream, value, endian);
-    }
-
-    template<typename T>
-    static T fromBytes(StringStream &stream, Endian endian = Endian::Local)
+    static T parseBytes(std::string_view data, ByteOrder order)
     {
         T value{};
-        fromBytes(stream, value, endian);
+        parseBytes(data, value, order);
         return value;
     }
 
     template<typename T>
-    static void fromBytes(StringStream &stream, T &value, Endian endian = Endian::Local)
+    static T parseBytes(std::string_view data, T &value, ByteOrder order)
     {
-        ByteParser<T>::parse(stream, value, endian);
+        ByteParser<T>::parse(data, value, order);
+    }
+
+    template<typename T>
+    static T extractChunk(std::string_view &data, ByteOrder order)
+    {
+        T value{};
+        extractChunk(data, value, order);
+        return value;
+    }
+
+    template<typename T>
+    static T extractChunk(std::string_view &data, T &value, ByteOrder order)
+    {
+        ChunkExtractor<T>::extract(data, value, order);
     }
 };
 } // namespace brayns

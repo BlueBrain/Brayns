@@ -24,15 +24,12 @@
 #include <stdexcept>
 #include <string>
 
-#include "FileStream.h"
-
 namespace brayns
 {
 class ParsingException : public std::runtime_error
 {
 public:
     ParsingException(const std::string &message, size_t lineNumber, std::string line);
-    ParsingException(const std::string &message, const FileStream &stream);
 
     size_t getLineNumber() const;
     const std::string &getLine() const;

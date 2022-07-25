@@ -19,47 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FileStream.h"
+#pragma once
 
-#include <brayns/utils/string/StringExtractor.h>
-
-#include "ParsingException.h"
+#include <string>
+#include <string_view>
 
 namespace brayns
 {
-FileStream::FileStream(std::string_view data)
-    : _data(data)
+class StringCase
 {
-}
-
-std::string_view FileStream::getData() const
-{
-    return _data;
-}
-
-size_t FileStream::getLineNumber() const
-{
-    return _lineNumber;
-}
-
-std::string_view FileStream::getLine() const
-{
-    return _line;
-}
-
-void FileStream::raise(std::string_view message) const
-{
-    throw ParsingException(std::string(message), _lineNumber, std::string(_line));
-}
-
-bool FileStream::nextLine()
-{
-    if (_data.empty())
-    {
-        return false;
-    }
-    _line = StringExtractor::extractLine(_data);
-    ++_lineNumber;
-    return true;
-}
+public:
+    static char toLower(char c);
+    static char toUpper(char c);
+    static std::string toLower(std::string_view data);
+    static std::string toUpper(std::string_view data);
+    static void lower(std::string &data);
+    static void upper(std::string &data);
+};
 } // namespace brayns

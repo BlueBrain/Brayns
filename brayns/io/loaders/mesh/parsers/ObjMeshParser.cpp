@@ -28,11 +28,11 @@
 #include <brayns/common/GlmParsers.h>
 
 #include <brayns/utils/parsing/FileStream.h>
-#include <brayns/utils/parsing/Parse.h>
+#include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/parsing/ParsingException.h>
-#include <brayns/utils/parsing/StringCounter.h>
-#include <brayns/utils/parsing/StringStream.h>
-#include <brayns/utils/parsing/StringTrimmer.h>
+#include <brayns/utils/string/StringCounter.h>
+#include <brayns/utils/string/StringExtractor.h>
+#include <brayns/utils/string/StringTrimmer.h>
 
 namespace
 {
@@ -60,8 +60,7 @@ class LineFormatter
 public:
     static std::string_view removeCommentsAndTrim(std::string_view line)
     {
-        auto stream = StringStream(line);
-        line = stream.extractUntil('#');
+        line = StringExtractor::extractUntil(line, '#');
         return StringTrimmer::trim(line);
     }
 };
@@ -71,11 +70,10 @@ class LineParser
 public:
     static Line parse(std::string_view data)
     {
-        auto stream = StringStream(data);
         Line line;
-        line.key = stream.extractToken();
-        stream.extractSpaces();
-        line.value = stream.extractAll();
+        line.key = StringExtractor::extractToken(data);
+        StringExtractor::extractSpaces(data);
+        line.value = StringExtractor::extractAll(data);
         return line;
     }
 };
@@ -90,10 +88,9 @@ public:
         {
             throw std::runtime_error("Non-triangular face with " + std::to_string(count) + " vertices");
         }
-        auto stream = StringStream(value);
         for (int i = 0; i < 3; ++i)
         {
-            auto token = stream.extractToken();
+            auto token = StringExtractor::extractToken(value);
             _parseToken(token, mesh);
         }
     }
@@ -106,20 +103,19 @@ private:
         {
             throw std::runtime_error("Invalid face element with " + std::to_string(count + 1) + "indices");
         }
-        auto stream = StringStream(token);
-        _parseIndex(stream, mesh.vertexIndices, mesh.vertices.size());
-        _parseIndex(stream, mesh.textureIndices, mesh.textures.size());
-        _parseIndex(stream, mesh.normalIndices, mesh.normals.size());
+        _parseIndex(token, mesh.vertexIndices, mesh.vertices.size());
+        _parseIndex(token, mesh.textureIndices, mesh.textures.size());
+        _parseIndex(token, mesh.normalIndices, mesh.normals.size());
     }
 
-    static void _parseIndex(StringStream &stream, std::vector<uint32_t> &indices, size_t elementCount)
+    static void _parseIndex(std::string_view &data, std::vector<uint32_t> &indices, size_t elementCount)
     {
-        auto data = stream.extractUntil('/');
+        data = StringExtractor::extractUntil(data, '/');
         if (data.empty())
         {
             return;
         }
-        auto index = Parse::fromString<uint32_t>(data);
+        auto index = Parser::parseString<uint32_t>(data);
         if (index < 1 || index > elementCount)
         {
             throw std::runtime_error("Invalid index " + std::to_string(index));
@@ -182,7 +178,7 @@ public:
         {
             throw std::runtime_error("Invalid vertex, expected 3 or 4 tokens, got " + std::to_string(count));
         }
-        return Parse::fromTokens<Vector3f>(value);
+        return Parser::extractToken<Vector3f>(value);
     }
 };
 
@@ -196,7 +192,7 @@ public:
         {
             throw std::runtime_error("Invalid texture, expected 2 tokens, got " + std::to_string(count));
         }
-        return Parse::fromTokens<Vector2f>(value);
+        return Parser::extractToken<Vector2f>(value);
     }
 };
 
@@ -210,7 +206,7 @@ public:
         {
             throw std::runtime_error("Invalid normal, expected 3 tokens, got " + std::to_string(count));
         }
-        return Parse::fromTokens<Vector3f>(value);
+        return Parser::extractToken<Vector3f>(value);
     }
 };
 
@@ -332,7 +328,7 @@ public:
         }
         catch (const std::exception &e)
         {
-            throw ParsingException(e.what(), stream);
+            stream.raise(e.what());
         }
     }
 
@@ -342,21 +338,26 @@ private:
         std::vector<MeshBuffer> meshes;
         while (stream.nextLine())
         {
-            auto data = stream.getLine();
-            data = LineFormatter::removeCommentsAndTrim(data);
-            if (data.empty())
-            {
-                Log::debug("Skip empty line {} '{}'.", stream.getLineNumber(), stream.getLine());
-                continue;
-            }
-            auto line = LineParser::parse(data);
-            if (!MeshLineParser::parse(line, meshes))
-            {
-                Log::debug("Skip unknown line {} '{}'", stream.getLineNumber(), stream.getLine());
-            }
+            _parseLine(stream, meshes);
         }
         MeshValidator::validate(meshes);
         return meshes;
+    }
+
+    static void _parseLine(const FileStream &stream, std::vector<MeshBuffer> &meshes)
+    {
+        auto data = stream.getLine();
+        data = LineFormatter::removeCommentsAndTrim(data);
+        if (data.empty())
+        {
+            Log::debug("Skip empty line {} '{}'.", stream.getLineNumber(), stream.getLine());
+            return;
+        }
+        auto line = LineParser::parse(data);
+        if (!MeshLineParser::parse(line, meshes))
+        {
+            Log::debug("Skip unknown line {} '{}'", stream.getLineNumber(), stream.getLine());
+        }
     }
 };
 

@@ -19,49 +19,49 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "StringCase.h"
 
-#include <array>
-#include <string_view>
-#include <vector>
-
-#include "StringParser.h"
-#include "StringStream.h"
+#include <cctype>
 
 namespace brayns
 {
-template<typename T>
-struct TokenParser
+char StringCase::toLower(char c)
 {
-    static void parse(StringStream &stream, T &value)
-    {
-        auto token = stream.extractToken();
-        StringParser<T>::parse(token, value);
-    }
-};
+    return std::tolower(static_cast<unsigned char>(c));
+}
 
-template<typename T>
-struct TokenParser<std::vector<T>>
+char StringCase::toUpper(char c)
 {
-    static void parse(StringStream &stream, std::vector<T> &values)
-    {
-        while (!stream.isSpace())
-        {
-            auto &value = values.emplace_back();
-            TokenParser<T>::parse(stream, value);
-        }
-    }
-};
+    return std::toupper(static_cast<unsigned char>(c));
+}
 
-template<typename T, size_t S>
-struct TokenParser<std::array<T, S>>
+std::string StringCase::toLower(std::string_view data)
 {
-    static void parse(StringStream &stream, std::array<T, S> &values)
+    auto result = std::string(data);
+    lower(result);
+    return result;
+}
+
+std::string StringCase::toUpper(std::string_view data)
+{
+    auto result = std::string(data);
+    upper(result);
+    return result;
+}
+
+void StringCase::lower(std::string &data)
+{
+    for (auto &c : data)
     {
-        for (auto &value : values)
-        {
-            TokenParser<T>::parse(stream, value);
-        }
+        c = toLower(c);
     }
-};
+}
+
+void StringCase::upper(std::string &data)
+{
+    for (auto &c : data)
+    {
+        c = toUpper(c);
+    }
+}
 } // namespace brayns

@@ -19,49 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "StringConverter.h"
+#pragma once
 
-#include <cctype>
+#include <string_view>
+
+#include "ByteConverter.h"
+#include "ByteOrder.h"
 
 namespace brayns
 {
-char StringConverter::toLower(char c)
+class ByteParserHelper
 {
-    return std::tolower(static_cast<unsigned char>(c));
-}
+public:
+    static void parse(std::string_view data, char *to, size_t stride);
+};
 
-char StringConverter::toUpper(char c)
+template<typename T>
+struct ByteParser
 {
-    return std::toupper(static_cast<unsigned char>(c));
-}
-
-std::string StringConverter::toLower(std::string_view data)
-{
-    auto result = std::string(data);
-    lower(result);
-    return result;
-}
-
-std::string StringConverter::toUpper(std::string_view data)
-{
-    auto result = std::string(data);
-    upper(result);
-    return result;
-}
-
-void StringConverter::lower(std::string &data)
-{
-    for (auto &c : data)
+    static void parse(std::string_view data, T &value, ByteOrder order)
     {
-        c = toLower(c);
+        auto bytes = ByteConverter::getBytes(value);
+        ByteParserHelper::parse(data, bytes, sizeof(T));
+        ByteOrderHelper::convertToSystemByteOrder(value, order);
     }
-}
-
-void StringConverter::upper(std::string &data)
-{
-    for (auto &c : data)
-    {
-        c = toUpper(c);
-    }
-}
+};
 } // namespace brayns

@@ -23,7 +23,7 @@
 #include <brayns/utils/parsing/Endian.h>
 #include <brayns/utils/parsing/FileStream.h>
 #include <brayns/utils/parsing/Parse.h>
-#include <brayns/utils/parsing/StringConverter.h>
+#include <brayns/utils/parsing/StringCase.h>
 #include <brayns/utils/parsing/StringCounter.h>
 #include <brayns/utils/parsing/StringInfo.h>
 #include <brayns/utils/parsing/StringJoiner.h>
@@ -112,26 +112,26 @@ TEST_CASE("parse")
 
 TEST_CASE("string_converter")
 {
-    auto toLowerChar = brayns::StringConverter::toLower('A');
+    auto toLowerChar = brayns::StringCase::toLower('A');
     CHECK_EQ(toLowerChar, 'a');
 
-    auto toUpperChar = brayns::StringConverter::toUpper('a');
+    auto toUpperChar = brayns::StringCase::toUpper('a');
     CHECK_EQ(toUpperChar, 'A');
 
     std::string test;
 
-    auto toLowerString = brayns::StringConverter::toLower("aBcDef");
+    auto toLowerString = brayns::StringCase::toLower("aBcDef");
     CHECK_EQ(toLowerString, "abcdef");
 
-    auto toUpperString = brayns::StringConverter::toUpper("aBcDef");
+    auto toUpperString = brayns::StringCase::toUpper("aBcDef");
     CHECK_EQ(toUpperString, "ABCDEF");
 
     std::string lower = "aBcDef";
-    brayns::StringConverter::lower(lower);
+    brayns::StringCase::lower(lower);
     CHECK_EQ(lower, "abcdef");
 
     std::string upper = "aBcDef";
-    brayns::StringConverter::upper(upper);
+    brayns::StringCase::upper(upper);
     CHECK_EQ(upper, "ABCDEF");
 }
 
