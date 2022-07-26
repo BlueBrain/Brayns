@@ -145,7 +145,7 @@ public:
     static void checkLimits(const std::string &data, U value)
     {
         static_assert(sizeof(U) >= sizeof(T));
-        auto min = static_cast<U>(std::numeric_limits<T>::min());
+        auto min = static_cast<U>(std::numeric_limits<T>::lowest());
         if (value < min)
         {
             throw std::out_of_range("Out of range: " + data + " < " + std::to_string(min));

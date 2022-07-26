@@ -503,14 +503,14 @@ private:
         if (key == "element")
         {
             auto element = ElementParser::parse(value);
-            header.elements.push_back(element);
+            header.elements.push_back(std::move(element));
             return true;
         }
         if (key == "property")
         {
             auto &element = _getCurrentElement(header);
             auto property = PropertyParser::parse(value);
-            element.properties.push_back(property);
+            element.properties.push_back(std::move(property));
             return true;
         }
         throw std::runtime_error("Unknown key: '" + std::string(key) + "'");
@@ -544,7 +544,7 @@ private:
             auto semantic = element.semantic;
             if (semantic == ElementSemantic::Unknown)
             {
-                Log::debug("Unknow semantic for element {}.", element.name);
+                Log::debug("Unknown semantic for element {}.", element.name);
                 continue;
             }
             auto index = static_cast<size_t>(semantic);
@@ -566,7 +566,7 @@ private:
             auto semantic = property.semantic;
             if (semantic == Semantic::Unknown)
             {
-                Log::debug("Unknow semantic for property {}.", property.name);
+                Log::debug("Unknown semantic for property {}.", property.name);
                 continue;
             }
             auto index = static_cast<size_t>(semantic);
@@ -585,7 +585,7 @@ class ConvertValue
 public:
     static float toFloat(double value)
     {
-        if (value < std::numeric_limits<float>::min())
+        if (value < std::numeric_limits<float>::lowest())
         {
             throw std::runtime_error("Values must fit inside a float");
         }
@@ -910,12 +910,12 @@ public:
     {
         for (const auto &property : element.properties)
         {
-            _extract(data, format, element, index, property, mesh);
+            _tryExtract(data, format, element, index, property, mesh);
         }
     }
 
 private:
-    static void _extract(
+    static void _tryExtract(
         std::string_view &data,
         Format format,
         const Element &element,
