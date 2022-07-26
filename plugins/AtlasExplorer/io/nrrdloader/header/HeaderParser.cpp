@@ -20,8 +20,6 @@
 
 #include "HeaderParser.h"
 
-#include <brayns/utils/StringUtils.h>
-
 #include <io/nrrdloader/header/HeaderEntryParser.h>
 
 #include <filesystem>

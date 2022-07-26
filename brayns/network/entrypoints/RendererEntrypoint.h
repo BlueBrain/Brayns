@@ -26,7 +26,6 @@
 #include <brayns/engine/renderers/ProductionRenderer.h>
 #include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/utils/StringUtils.h>
 
 namespace brayns
 {

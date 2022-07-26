@@ -27,7 +27,7 @@
 
 #include <brayns/common/parameters/ParametersManager.h>
 
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringJoiner.h>
 
 namespace
 {
@@ -132,7 +132,7 @@ private:
             return;
         }
         stream << "\n    Enumeration: this option must be one of the following values: [";
-        stream << brayns::string_utils::join(enums, ", ") << "].";
+        stream << brayns::StringJoiner::join(enums, ", ") << "].";
     }
 
     static void _formatItemCount(std::ostream &stream, const brayns::ArgvProperty &property)

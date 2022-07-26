@@ -20,7 +20,7 @@
 
 #include "ColorIDParser.h"
 
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringSplitter.h>
 
 namespace
 {
@@ -64,7 +64,7 @@ std::map<uint64_t, brayns::Vector4f> ColorIDParser::parse(const std::vector<Colo
         const auto &rawIds = entry.variable;
         const auto &color = entry.color;
 
-        const auto tokens = brayns::string_utils::split(rawIds, ',');
+        const auto tokens = brayns::StringSplitter::split(rawIds, ',');
         for (const auto &token : tokens)
         {
             auto dashPos = token.find("-");

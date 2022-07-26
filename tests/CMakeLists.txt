@@ -1,7 +1,7 @@
 # Copyright (c) 2015-2022, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Authors: Daniel.Nachbaur@epfl.ch
-#                      Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+# Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
@@ -11,10 +11,13 @@ enable_testing()
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 
 set(TEST_LIST
+    binary.cpp
     brayns.cpp
     clipping.cpp
     lights.cpp
     images.cpp
+    parsing.cpp
+    string.cpp
 )
 
 set(TEST_TARGET_LIST)
@@ -24,8 +27,9 @@ foreach(TEST ${TEST_LIST})
     set(TEST_NAME "braynstest_${TEST_NAME}")
 
     add_executable(${TEST_NAME} ${TEST})
-    
+
     target_compile_options(${TEST_NAME} PRIVATE ${BRAYNS_COMPILE_OPTIONS})
+
     # no trivial copy error from doctest.h
     target_compile_options(${TEST_NAME} PRIVATE -Wno-class-memaccess)
 
@@ -38,10 +42,9 @@ foreach(TEST ${TEST_LIST})
     target_link_libraries(${TEST_NAME} PRIVATE brayns)
 
     add_test(NAME ${TEST_NAME}
-        COMMAND $<TARGET_FILE:${TEST_NAME}>  -l test_suite
+        COMMAND $<TARGET_FILE:${TEST_NAME}> -l test_suite
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
     set_tests_properties(${TEST_NAME} PROPERTIES LABELS "Brayns-unit")
-
 endforeach()
 
 add_custom_target(Brayns-cpptests USES_TERMINAL
@@ -50,7 +53,7 @@ add_custom_target(Brayns-cpptests USES_TERMINAL
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/tests
     COMMENT "Running Brayns unit tests")
 set_target_properties(Brayns-cpptests PROPERTIES
-  EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER "tests")
+    EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER "tests")
 
 if(NOT TARGET tests)
     add_custom_target(tests)
@@ -66,7 +69,7 @@ endif()
 
 add_custom_target(Brayns-tests)
 set_target_properties(Brayns-tests PROPERTIES
-  EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER ${PROJECT_BINARY_DIR}/tests)
+    EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER ${PROJECT_BINARY_DIR}/tests)
 
 add_dependencies(test tests)
 add_dependencies(tests Brayns-tests)

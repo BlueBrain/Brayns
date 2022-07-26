@@ -18,7 +18,7 @@
 
 #include "ColorDataExtractor.h"
 
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringCase.h>
 
 #include <api/neuron/NeuronColorMethod.h>
 
@@ -257,7 +257,7 @@ struct CircuitFactory
 {
     static std::unique_ptr<CircuitAccessor> instantiate(const std::string &path, const std::string &pop)
     {
-        const auto lowerCasePath = brayns::string_utils::toLowercase(path);
+        const auto lowerCasePath = brayns::StringCase::toLower(path);
 
         if (lowerCasePath.find(".mvd2") != std::string::npos)
         {

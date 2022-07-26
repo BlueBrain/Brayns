@@ -25,7 +25,7 @@
 #include <brayns/engine/components/GeometryRendererComponent.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringTrimmer.h>
 
 #include <filesystem>
 #include <fstream>
@@ -57,7 +57,7 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob,
     while (std::getline(stream, line))
     {
         // Handle comments
-        string_utils::trim(line);
+        line = StringTrimmer::trim(line);
         if (line[0] == '#')
         {
             continue;

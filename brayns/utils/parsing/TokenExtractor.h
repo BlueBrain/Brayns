@@ -19,31 +19,50 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "StreamHelper.h"
+#pragma once
 
-#include <stdexcept>
+#include <array>
+#include <string_view>
+#include <vector>
+
+#include <brayns/utils/string/StringExtractor.h>
+#include <brayns/utils/string/StringInfo.h>
+#include <brayns/utils/string/StringParser.h>
 
 namespace brayns
 {
-bool StreamHelper::getLine(std::string_view &data, std::string_view &line)
+template<typename T>
+struct TokenExtractor
 {
-    line = {};
-    if (data.empty())
+    static void extract(std::string_view &data, T &value)
     {
-        return false;
+        auto token = StringExtractor::extractToken(data);
+        StringParser<T>::parse(token, value);
     }
-    for (size_t i = 0; i < data.size(); ++i)
+};
+
+template<typename T>
+struct TokenExtractor<std::vector<T>>
+{
+    static void extract(std::string_view &data, std::vector<T> &values)
     {
-        auto c = data[i];
-        if (c == '\n')
+        while (!StringInfo::isSpace(data))
         {
-            line = data.substr(0, i);
-            data = data.substr(i + 1);
-            return true;
+            auto &value = values.emplace_back();
+            TokenExtractor<T>::extract(data, value);
         }
     }
-    line = data;
-    data = {};
-    return true;
-}
+};
+
+template<typename T, size_t S>
+struct TokenExtractor<std::array<T, S>>
+{
+    static void extract(std::string_view &data, std::array<T, S> &values)
+    {
+        for (auto &value : values)
+        {
+            TokenExtractor<T>::extract(data, value);
+        }
+    }
+};
 } // namespace brayns
