@@ -50,7 +50,7 @@ struct Dimensions
 class LineFormatter
 {
 public:
-    static std::string_view removeCommentsAndTrim(std::string_view data)
+    static std::string_view format(std::string_view data)
     {
         auto result = StringExtractor::extractUntil(data, '#');
         return StringTrimmer::trim(result);
@@ -69,7 +69,7 @@ public:
                 return {};
             }
             auto line = stream.getLine();
-            line = LineFormatter::removeCommentsAndTrim(line);
+            line = LineFormatter::format(line);
             if (!line.empty())
             {
                 return line;

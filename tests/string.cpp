@@ -77,36 +77,48 @@ TEST_CASE("string_extractor")
     data = " test1 test2 ";
     extracted = brayns::StringExtractor::extractUntil(data, ' ');
     CHECK_EQ(extracted, "");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractUntil(data, ' ');
     CHECK_EQ(extracted, "test1");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractUntil(data, ' ');
     CHECK_EQ(extracted, "test2");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractUntil(data, ' ');
     CHECK_EQ(extracted, "");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractUntil(data, ' ');
     CHECK_EQ(extracted, "");
 
     data = "septest1septest2sep";
     extracted = brayns::StringExtractor::extractUntil(data, "sep");
     CHECK_EQ(extracted, "");
+    brayns::StringExtractor::extract(data, 3);
     extracted = brayns::StringExtractor::extractUntil(data, "sep");
     CHECK_EQ(extracted, "test1");
+    brayns::StringExtractor::extract(data, 3);
     extracted = brayns::StringExtractor::extractUntil(data, "sep");
     CHECK_EQ(extracted, "test2");
+    brayns::StringExtractor::extract(data, 3);
     extracted = brayns::StringExtractor::extractUntil(data, "sep");
     CHECK_EQ(extracted, "");
+    brayns::StringExtractor::extract(data, 3);
     extracted = brayns::StringExtractor::extractUntil(data, "sep");
     CHECK_EQ(extracted, "");
 
     data = "atest1btest2c";
     extracted = brayns::StringExtractor::extractUntilOneOf(data, "abc");
     CHECK_EQ(extracted, "");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractUntilOneOf(data, "abc");
     CHECK_EQ(extracted, "test1");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractUntilOneOf(data, "abc");
     CHECK_EQ(extracted, "test2");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractUntilOneOf(data, "abc");
     CHECK_EQ(extracted, "");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractUntilOneOf(data, "abc");
     CHECK_EQ(extracted, "");
 
@@ -123,12 +135,16 @@ TEST_CASE("string_extractor")
     data = "\n test1  \n\r\vtest2\t \n";
     extracted = brayns::StringExtractor::extractLine(data);
     CHECK_EQ(extracted, "");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractLine(data);
     CHECK_EQ(extracted, " test1  ");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractLine(data);
     CHECK_EQ(extracted, "\r\vtest2\t ");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractLine(data);
     CHECK_EQ(extracted, "");
+    brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractLine(data);
     CHECK_EQ(extracted, "");
 }
@@ -164,6 +180,18 @@ TEST_CASE("string_info")
 
     CHECK_FALSE((brayns::StringInfo::endsWith("test", "ext")));
     CHECK((brayns::StringInfo::endsWith("test", "est")));
+
+    CHECK_FALSE((brayns::StringInfo::contains("test", 'd')));
+    CHECK((brayns::StringInfo::contains("test", 'e')));
+
+    CHECK_FALSE((brayns::StringInfo::contains("test", "ext")));
+    CHECK((brayns::StringInfo::contains("test", "es")));
+
+    CHECK_FALSE((brayns::StringInfo::containsOneOf("test", "abc")));
+    CHECK((brayns::StringInfo::containsOneOf("test", "aec")));
+
+    CHECK_FALSE((brayns::StringInfo::containsToken(" test1  test23 ", "test2")));
+    CHECK((brayns::StringInfo::containsOneOf(" test1  test2 fyxdg", "test2")));
 }
 
 TEST_CASE("string_joiner")

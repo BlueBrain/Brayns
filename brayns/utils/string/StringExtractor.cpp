@@ -51,24 +51,20 @@ std::string_view StringExtractor::extract(std::string_view &data, size_t size)
 
 std::string_view StringExtractor::extractUntil(std::string_view &data, char separator)
 {
-    return extractUntil(data, {&separator, 1});
+    auto index = data.find(separator);
+    return extract(data, index);
 }
 
 std::string_view StringExtractor::extractUntil(std::string_view &data, std::string_view separator)
 {
     auto index = data.find(separator);
-    auto result = extract(data, index);
-    auto size = separator.size();
-    extract(data, size);
-    return result;
+    return extract(data, index);
 }
 
 std::string_view StringExtractor::extractUntilOneOf(std::string_view &data, std::string_view separators)
 {
     auto index = data.find_first_of(separators);
-    auto result = extract(data, index);
-    extract(data, 1);
-    return result;
+    return extract(data, index);
 }
 
 std::string_view StringExtractor::extractToken(std::string_view &data)

@@ -101,7 +101,7 @@ private:
         auto count = StringCounter::count(token, '/');
         if (count > 2)
         {
-            throw std::runtime_error("Invalid face element with " + std::to_string(count + 1) + "indices");
+            throw std::runtime_error("Invalid face element with " + std::to_string(count + 1) + " indices (max = 3)");
         }
         _parseIndex(token, mesh.vertexIndices, mesh.vertices.size());
         _parseIndex(token, mesh.textureIndices, mesh.textures.size());
@@ -110,12 +110,13 @@ private:
 
     static void _parseIndex(std::string_view &data, std::vector<uint32_t> &indices, size_t elementCount)
     {
-        data = StringExtractor::extractUntil(data, '/');
+        auto token = StringExtractor::extractUntil(data, '/');
         if (data.empty())
         {
             return;
         }
-        auto index = Parser::parseString<uint32_t>(data);
+        StringExtractor::extract(data, 1);
+        auto index = Parser::parseString<uint32_t>(token);
         if (index < 1 || index > elementCount)
         {
             throw std::runtime_error("Invalid index " + std::to_string(index));

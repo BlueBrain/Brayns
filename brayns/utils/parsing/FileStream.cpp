@@ -54,11 +54,16 @@ ParsingException FileStream::error(const std::string &message) const
 
 bool FileStream::nextLine()
 {
-    if (_data.empty())
+    if (_end)
     {
         return false;
     }
     _line = StringExtractor::extractLine(_data);
+    if (_data.empty())
+    {
+        _end = true;
+    }
+    StringExtractor::extract(_data, 1);
     ++_lineNumber;
     return true;
 }

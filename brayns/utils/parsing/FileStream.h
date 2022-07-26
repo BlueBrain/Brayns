@@ -42,5 +42,6 @@ private:
     std::string_view _data;
     size_t _lineNumber = 0;
     std::string_view _line;
+    bool _end = false;
 };
 } // namespace brayns

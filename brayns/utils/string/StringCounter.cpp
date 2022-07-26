@@ -21,7 +21,7 @@
 
 #include "StringCounter.h"
 
-#include "StringInfo.h"
+#include "StringExtractor.h"
 
 namespace brayns
 {
@@ -35,14 +35,13 @@ size_t StringCounter::count(std::string_view data, std::string_view item)
     size_t result = 0;
     while (true)
     {
-        auto index = data.find(item);
-        if (index == std::string_view::npos)
+        StringExtractor::extractUntil(data, item);
+        if (data.empty())
         {
             return result;
         }
+        StringExtractor::extract(data, item.size());
         ++result;
-        auto start = index + item.size();
-        data = data.substr(start);
     }
 }
 
@@ -51,36 +50,28 @@ size_t StringCounter::countOneOf(std::string_view data, std::string_view items)
     size_t result = 0;
     while (true)
     {
-        auto index = data.find_first_of(items);
-        if (index == std::string_view::npos)
+        StringExtractor::extractUntilOneOf(data, items);
+        if (data.empty())
         {
             return result;
         }
+        StringExtractor::extract(data, 1);
         ++result;
-        data = data.substr(index + 1);
     }
-    return result;
 }
 
 size_t StringCounter::countTokens(std::string_view data)
 {
     size_t result = 0;
-    bool token = false;
-    for (auto c : data)
+    while (true)
     {
-        if (StringInfo::isSpace(c))
+        auto token = StringExtractor::extractToken(data);
+        if (token.empty())
         {
-            token = false;
-            continue;
+            return result;
         }
-        if (token)
-        {
-            continue;
-        }
-        token = true;
         ++result;
     }
-    return result;
 }
 
 size_t StringCounter::countLines(std::string_view data)
