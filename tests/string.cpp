@@ -23,6 +23,7 @@
 #include <brayns/utils/string/StringInfo.h>
 #include <brayns/utils/string/StringJoiner.h>
 #include <brayns/utils/string/StringParser.h>
+#include <brayns/utils/string/StringSplitter.h>
 #include <brayns/utils/string/StringTrimmer.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
@@ -236,6 +237,19 @@ TEST_CASE("string_parser")
     data = "1234";
     uint8_t ui8 = 0;
     CHECK_THROWS_AS((brayns::StringParser<uint8_t>::parse(data, ui8)), std::out_of_range);
+}
+
+TEST_CASE("string_splitter")
+{
+    std::vector<std::string> ref = {"", "test1", "", "test2", ""};
+
+    CHECK_EQ(brayns::StringSplitter::split(" test1  test2 ", ' '), ref);
+    CHECK_EQ(brayns::StringSplitter::split("septest1sepseptest2sep", "sep"), ref);
+    CHECK_EQ(brayns::StringSplitter::splitOneOf("atest1bctest2d", "abcd"), ref);
+    CHECK_EQ(brayns::StringSplitter::splitLines("\ntest1\n\ntest2\n"), ref);
+
+    ref = {"test1", "test2"};
+    CHECK_EQ(brayns::StringSplitter::splitTokens(" test1 \n test2   "), ref);
 }
 
 TEST_CASE("string_trimmer")
