@@ -26,7 +26,7 @@
 #include <brayns/network/adapters/CameraAdapter.h>
 #include <brayns/network/adapters/RendererAdapter.h>
 
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringJoiner.h>
 
 namespace brayns
 {
@@ -66,7 +66,7 @@ public:
 
             if (!validationResult.empty())
             {
-                const auto errorMessage = string_utils::join(validationResult, "\n");
+                const auto errorMessage = StringJoiner::join(validationResult, "\n");
                 throw std::invalid_argument("Cannot deserialize type " + _name + ":" + errorMessage);
             }
 

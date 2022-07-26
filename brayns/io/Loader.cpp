@@ -20,6 +20,8 @@
 
 #include "Loader.h"
 
+#include <brayns/utils/string/StringCase.h>
+
 namespace brayns
 {
 LoaderProgress::LoaderProgress(CallbackFn callback)
@@ -38,12 +40,12 @@ bool AbstractLoader::isSupported(const std::string &fileName, const std::string 
     (void)fileName;
 
     const auto extensions = getSupportedExtensions();
-    const auto lcExtension = string_utils::toLowercase(extension[0] == '.' ? extension.substr(1) : extension);
+    const auto lcExtension = StringCase::toLower(extension[0] == '.' ? extension.substr(1) : extension);
     auto it = std::find_if(
         extensions.begin(),
         extensions.end(),
         [&](const std::string &ext)
-        { return string_utils::toLowercase(ext[0] == '.' ? ext.substr(1) : ext) == lcExtension; });
+        { return StringCase::toLower(ext[0] == '.' ? ext.substr(1) : ext) == lcExtension; });
     return it != extensions.end();
 }
 

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringSplitter.h>
 
 #include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
@@ -65,7 +65,7 @@ public:
                 }
                 else
                 {
-                    params.targets = brayns::string_utils::split(target, ',');
+                    params.targets = brayns::StringSplitter::split(target, ',');
                 }
             }
         }

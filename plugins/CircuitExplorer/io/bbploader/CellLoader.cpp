@@ -18,7 +18,7 @@
 
 #include "CellLoader.h"
 
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringJoiner.h>
 
 #include <api/circuit/MorphologyCircuitBuilder.h>
 #include <api/circuit/SomaCircuitBuilder.h>
@@ -120,7 +120,7 @@ struct MetadataFactory
         const auto &gids = ctxt.gids;
         const auto &params = ctxt.loadParameters;
         const auto &targets = params.targets;
-        const auto targetList = brayns::string_utils::join(targets, ",");
+        const auto targetList = brayns::StringJoiner::join(targets, ",");
         metadata["Targets"] = targetList;
         metadata["Neurons loaded count"] = std::to_string(gids.size());
 

@@ -23,7 +23,7 @@
 
 #include <sstream>
 
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringJoiner.h>
 
 namespace
 {
@@ -59,7 +59,7 @@ public:
 
     std::string toString() const
     {
-        return string_utils::join(_path, {});
+        return StringJoiner::join(_path, {});
     }
 
 private:

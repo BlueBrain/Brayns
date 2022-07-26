@@ -22,7 +22,6 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 #include <brayns/json/JsonObjectMacro.h>
-#include <brayns/utils/StringUtils.h>
 
 #include <io/NeuronMorphologyLoaderParameters.h>
 #include <io/sonataloader/reports/ReportType.h>

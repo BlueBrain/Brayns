@@ -23,6 +23,7 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/utils/Timer.h>
+#include <brayns/utils/string/StringCase.h>
 
 #include <io/bbploader/CellLoader.h>
 #include <io/bbploader/GIDLoader.h>
@@ -74,7 +75,7 @@ bool BBPLoader::isSupported(const std::string &filename, const std::string &exte
 {
     const auto containsKeyword = [](const std::string &matcher)
     {
-        const auto lcm = brayns::string_utils::toLowercase(matcher);
+        const auto lcm = brayns::StringCase::toLower(matcher);
         if (lcm.find("blueconfig") != std::string::npos || lcm.find("circuitconfig") != std::string::npos)
         {
             return true;
