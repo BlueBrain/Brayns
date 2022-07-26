@@ -111,7 +111,7 @@ private:
     static void _parseIndex(std::string_view &data, std::vector<uint32_t> &indices, size_t elementCount)
     {
         auto token = StringExtractor::extractUntil(data, '/');
-        if (data.empty())
+        if (token.empty())
         {
             return;
         }
@@ -175,7 +175,7 @@ public:
     static Vector3f parse(std::string_view value)
     {
         auto count = StringCounter::countTokens(value);
-        if (count != 3 || count != 4)
+        if (count != 3 && count != 4)
         {
             throw std::runtime_error("Invalid vertex, expected 3 or 4 tokens, got " + std::to_string(count));
         }
@@ -246,27 +246,30 @@ public:
             meshes.push_back(std::move(object));
             return true;
         }
-        auto &mesh = CurrentMesh::get(meshes);
         if (key == "v")
         {
             auto vertex = VertexParser::parse(value);
+            auto &mesh = CurrentMesh::get(meshes);
             mesh.vertices.push_back(vertex);
             return true;
         }
         if (key == "vt")
         {
             auto texture = TextureParser::parse(value);
+            auto &mesh = CurrentMesh::get(meshes);
             mesh.textures.push_back(texture);
             return true;
         }
         if (key == "vn")
         {
             auto normal = NormalParser::parse(value);
+            auto &mesh = CurrentMesh::get(meshes);
             mesh.normals.push_back(normal);
             return true;
         }
         if (key == "f")
         {
+            auto &mesh = CurrentMesh::get(meshes);
             FaceParser::parse(value, mesh);
             return true;
         }
@@ -284,7 +287,7 @@ public:
             throw std::runtime_error("No meshes found");
         }
         auto &first = meshes.front();
-        for (size_t i = 0; i < meshes.size(); ++i)
+        for (size_t i = 1; i < meshes.size(); ++i)
         {
             _checkCompatibility(first, meshes[i], i);
         }
