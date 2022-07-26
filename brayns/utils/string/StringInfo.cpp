@@ -24,6 +24,8 @@
 #include <algorithm>
 #include <cctype>
 
+#include "StringExtractor.h"
+
 namespace brayns
 {
 bool StringInfo::isSpace(char data)
@@ -77,5 +79,33 @@ bool StringInfo::endsWith(std::string_view data, std::string_view suffix)
     auto size = data.size();
     auto step = suffix.size();
     return size >= step && data.substr(size - step) == suffix;
+}
+
+bool StringInfo::contains(std::string_view data, char item)
+{
+    return data.find(item) != std::string_view::npos;
+}
+
+bool StringInfo::contains(std::string_view data, std::string_view item)
+{
+    return data.find(item) != std::string_view::npos;
+}
+
+bool StringInfo::containsOneOf(std::string_view data, std::string_view items)
+{
+    return data.find_first_of(items) != std::string_view::npos;
+}
+
+bool StringInfo::containsToken(std::string_view data, std::string_view token)
+{
+    while (!isSpace(data))
+    {
+        auto slice = StringExtractor::extractToken(data);
+        if (slice == token)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace brayns

@@ -47,9 +47,9 @@ std::string_view FileStream::getLine() const
     return _line;
 }
 
-ParsingException FileStream::error(std::string_view message) const
+ParsingException FileStream::error(const std::string &message) const
 {
-    return ParsingException(std::string(message), _lineNumber, std::string(_line));
+    return ParsingException(message, _lineNumber, std::string(_line));
 }
 
 bool FileStream::nextLine()

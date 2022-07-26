@@ -35,7 +35,7 @@ public:
     std::string_view getData() const;
     size_t getLineNumber() const;
     std::string_view getLine() const;
-    ParsingException error(std::string_view message) const;
+    ParsingException error(const std::string &message) const;
     bool nextLine();
 
 private:

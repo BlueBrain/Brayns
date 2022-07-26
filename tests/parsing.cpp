@@ -19,44 +19,41 @@
 
 #include <brayns/common/GlmParsers.h>
 
-#include <brayns/utils/parsing/ByteConverter.h>
-#include <brayns/utils/parsing/Endian.h>
+#include <brayns/utils/parsing/ChunkExtractor.h>
 #include <brayns/utils/parsing/FileStream.h>
-#include <brayns/utils/parsing/Parse.h>
-#include <brayns/utils/parsing/StringCase.h>
-#include <brayns/utils/parsing/StringCounter.h>
-#include <brayns/utils/parsing/StringInfo.h>
-#include <brayns/utils/parsing/StringJoiner.h>
-#include <brayns/utils/parsing/StringStream.h>
-#include <brayns/utils/parsing/StringTrimmer.h>
+#include <brayns/utils/parsing/Parser.h>
+#include <brayns/utils/parsing/TokenExtractor.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-TEST_CASE("byte_converter")
+TEST_CASE("chunk_extractor")
 {
-    int32_t test = 1;
-    int32_t copy = ~0;
+    std::string_view data;
+    auto order = brayns::ByteOrderHelper::getSystemByteOrder();
 
-    brayns::ByteConverter::copyBytes(test, copy);
-    CHECK_EQ(test, copy);
+    data = "\1\2\3\4";
+    uint32_t ui = 0;
+    brayns::ChunkExtractor<uint32_t>::extract(data, ui, brayns::ByteOrder::BigEndian);
+    CHECK_EQ(ui, 0x01020304);
 
-    brayns::ByteConverter::swapBytes(test);
-    CHECK_EQ(test, 0x01000000);
-}
+    const float ref = 1.23f;
+    data = {brayns::ByteConverter::getBytes(ref), sizeof(ref)};
+    float f = 0.0f;
+    brayns::ChunkExtractor<float>::extract(data, f, order);
+    CHECK_EQ(f, ref);
 
-TEST_CASE("endian")
-{
-    int32_t test = 1;
+    std::vector<int> refs = {1, 2, 3};
+    data = {brayns::ByteConverter::getBytes(refs[0]), 3 * sizeof(int)};
+    std::vector<int> is;
+    brayns::ChunkExtractor<std::vector<int>>::extract(data, is, order);
+    CHECK_EQ(is, refs);
 
-    brayns::EndianConverter::convertToLocalEndian(test, brayns::Endian::Local);
-    CHECK_EQ(test, 1);
-
-    brayns::EndianConverter::convertFromLocalEndian(test, brayns::Endian::Local);
-    CHECK_EQ(test, 1);
-
-    brayns::EndianConverter::convertFromLocalEndian(test, ~brayns::Endian::Local);
-    CHECK_EQ(test, 0x01000000);
+    brayns::Vector2f refv = {1.2, 2.3};
+    data = {brayns::ByteConverter::getBytes(refv[0]), 2 * sizeof(float)};
+    brayns::Vector2f v;
+    brayns::ChunkExtractor<brayns::Vector2f>::extract(data, v, order);
+    CHECK_EQ(v, refv);
 }
 
 TEST_CASE("file_stream")
@@ -79,192 +76,63 @@ TEST_CASE("file_stream")
     CHECK_EQ(stream.getLine(), "");
 }
 
-TEST_CASE("parse")
+TEST_CASE("parser")
 {
     std::string_view data;
 
     data = "123";
-    CHECK_EQ(brayns::Parse::fromString<int64_t>(data), 123);
+    CHECK_EQ(brayns::Parser::parseString<int64_t>(data), 123);
 
     data = "agss";
-    CHECK_THROWS_AS(brayns::Parse::fromString<int64_t>(data), std::invalid_argument);
+    CHECK_THROWS_AS(brayns::Parser::parseString<int64_t>(data), std::invalid_argument);
 
     data = "1.22";
-    CHECK_EQ(brayns::Parse::fromString<double>(data), 1.22);
-    CHECK_THROWS_AS(brayns::Parse::fromString<int32_t>(data), std::invalid_argument);
+    CHECK_EQ(brayns::Parser::parseString<double>(data), 1.22);
+    CHECK_THROWS_AS(brayns::Parser::parseString<int32_t>(data), std::invalid_argument);
 
     data = "1234";
-    CHECK_THROWS_AS(brayns::Parse::fromString<int8_t>(data), std::out_of_range);
+    CHECK_THROWS_AS(brayns::Parser::parseString<int8_t>(data), std::out_of_range);
 
     int32_t test = 123;
     auto bytes = brayns::ByteConverter::getBytes(test);
+    auto order = brayns::ByteOrderHelper::getSystemByteOrder();
     data = {bytes, sizeof(test)};
-    CHECK_EQ(brayns::Parse::fromBytes<int32_t>(data), test);
+    CHECK_EQ(brayns::Parser::parseBytes<int32_t>(data, order), test);
 
     data = "1 2 3";
     auto ref = brayns::Vector3f(1, 2, 3);
-    CHECK_EQ(brayns::Parse::fromTokens<brayns::Vector3f>(data), ref);
+    CHECK_EQ(brayns::Parser::extractToken<brayns::Vector3f>(data), ref);
 
     bytes = brayns::ByteConverter::getBytes(ref);
     data = {bytes, sizeof(ref)};
-    CHECK_EQ(brayns::Parse::fromBytes<brayns::Vector3f>(data), ref);
+    CHECK_EQ(brayns::Parser::extractChunk<brayns::Vector3f>(data, order), ref);
 }
 
-TEST_CASE("string_converter")
+TEST_CASE("token_extractor")
 {
-    auto toLowerChar = brayns::StringCase::toLower('A');
-    CHECK_EQ(toLowerChar, 'a');
+    std::string_view data;
 
-    auto toUpperChar = brayns::StringCase::toUpper('a');
-    CHECK_EQ(toUpperChar, 'A');
+    data = " 1234 test";
+    uint32_t ui = 0;
+    brayns::TokenExtractor<uint32_t>::extract(data, ui);
+    CHECK_EQ(ui, 1234);
+    CHECK_EQ(data, " test");
 
-    std::string test;
+    data = "\n12.34  \n test";
+    float f = 0.0f;
+    brayns::TokenExtractor<float>::extract(data, f);
+    CHECK_EQ(f, 12.34f);
+    CHECK_EQ(data, "  \n test");
 
-    auto toLowerString = brayns::StringCase::toLower("aBcDef");
-    CHECK_EQ(toLowerString, "abcdef");
+    data = "1 2 3";
+    std::vector<int> is;
+    brayns::TokenExtractor<std::vector<int>>::extract(data, is);
+    CHECK_EQ(is, std::vector<int>({1, 2, 3}));
+    CHECK_EQ(data, "");
 
-    auto toUpperString = brayns::StringCase::toUpper("aBcDef");
-    CHECK_EQ(toUpperString, "ABCDEF");
-
-    std::string lower = "aBcDef";
-    brayns::StringCase::lower(lower);
-    CHECK_EQ(lower, "abcdef");
-
-    std::string upper = "aBcDef";
-    brayns::StringCase::upper(upper);
-    CHECK_EQ(upper, "ABCDEF");
-}
-
-TEST_CASE("string_counter")
-{
-    auto countChar = brayns::StringCounter::count("test this please", 'e');
-    CHECK_EQ(countChar, 3);
-
-    auto countString = brayns::StringCounter::count("this this something this", "this");
-    CHECK_EQ(countString, 3);
-
-    auto countOneOf = brayns::StringCounter::countOneOf("ethis this something thisi", "aeiouy");
-    CHECK_EQ(countOneOf, 8);
-
-    auto countTokens = brayns::StringCounter::countTokens("   one\n\ttwo three \rfour\n\n");
-    CHECK_EQ(countTokens, 4);
-
-    auto countLines = brayns::StringCounter::countLines("   one\n\ttwo three \rfour\n\n");
-    CHECK_EQ(countLines, 4);
-}
-
-TEST_CASE("string_info")
-{
-    CHECK_FALSE(brayns::StringInfo::isSpace('c'));
-    CHECK(brayns::StringInfo::isSpace(' '));
-
-    CHECK_FALSE(brayns::StringInfo::isSpace("  1  "));
-    CHECK(brayns::StringInfo::isSpace("\n  \r  \t"));
-
-    CHECK_FALSE(brayns::StringInfo::isLower('C'));
-    CHECK(brayns::StringInfo::isLower('c'));
-
-    CHECK_FALSE(brayns::StringInfo::isLower("teSt"));
-    CHECK(brayns::StringInfo::isLower("test"));
-
-    CHECK_FALSE(brayns::StringInfo::isUpper('c'));
-    CHECK(brayns::StringInfo::isUpper('C'));
-
-    CHECK_FALSE(brayns::StringInfo::isUpper("TEsT"));
-    CHECK(brayns::StringInfo::isUpper("TEST"));
-
-    CHECK_FALSE((brayns::StringInfo::startsWith("test", 'c')));
-    CHECK((brayns::StringInfo::startsWith("test", 't')));
-
-    CHECK_FALSE((brayns::StringInfo::startsWith("test", "tex")));
-    CHECK((brayns::StringInfo::startsWith("test", "tes")));
-
-    CHECK_FALSE((brayns::StringInfo::endsWith("test", 'c')));
-    CHECK((brayns::StringInfo::endsWith("test", 't')));
-
-    CHECK_FALSE((brayns::StringInfo::endsWith("test", "ext")));
-    CHECK((brayns::StringInfo::endsWith("test", "est")));
-}
-
-TEST_CASE("string_joiner")
-{
-    auto joinEmpty = brayns::StringJoiner::join({}, '.');
-    CHECK_EQ(joinEmpty, "");
-
-    auto joinChar = brayns::StringJoiner::join({"1", "2", "3"}, '.');
-    CHECK_EQ(joinChar, "1.2.3");
-
-    auto joinString = brayns::StringJoiner::join({"1", "2", "3"}, "--");
-    CHECK_EQ(joinString, "1--2--3");
-}
-
-TEST_CASE("string_stream")
-{
-    auto stream = brayns::StringStream();
-    auto extracted = std::string_view();
-
-    stream = {" test1 test2 "};
-    extracted = stream.extractUntil(' ');
-    CHECK_EQ(extracted, "");
-    extracted = stream.extractUntil(' ');
-    CHECK_EQ(extracted, "test1");
-    extracted = stream.extractUntil(' ');
-    CHECK_EQ(extracted, "test2");
-    extracted = stream.extractUntil(' ');
-    CHECK_EQ(extracted, "");
-    extracted = stream.extractUntil(' ');
-    CHECK_EQ(extracted, "");
-
-    stream = {"septest1septest2sep"};
-    extracted = stream.extractUntil("sep");
-    CHECK_EQ(extracted, "");
-    extracted = stream.extractUntil("sep");
-    CHECK_EQ(extracted, "test1");
-    extracted = stream.extractUntil("sep");
-    CHECK_EQ(extracted, "test2");
-    extracted = stream.extractUntil("sep");
-    CHECK_EQ(extracted, "");
-    extracted = stream.extractUntil("sep");
-    CHECK_EQ(extracted, "");
-
-    stream = {"atest1btest2c"};
-    extracted = stream.extractUntilOneOf("abc");
-    CHECK_EQ(extracted, "");
-    extracted = stream.extractUntilOneOf("abc");
-    CHECK_EQ(extracted, "test1");
-    extracted = stream.extractUntilOneOf("abc");
-    CHECK_EQ(extracted, "test2");
-    extracted = stream.extractUntilOneOf("abc");
-    CHECK_EQ(extracted, "");
-    extracted = stream.extractUntilOneOf("abc");
-    CHECK_EQ(extracted, "");
-
-    stream = {"\n test1  \r\vtest2\t "};
-    extracted = stream.extractToken();
-    CHECK_EQ(extracted, "test1");
-    extracted = stream.extractToken();
-    CHECK_EQ(extracted, "test2");
-    extracted = stream.extractToken();
-    CHECK_EQ(extracted, "");
-    extracted = stream.extractToken();
-    CHECK_EQ(extracted, "");
-
-    stream = {"\n test1  \n\r\vtest2\t \n"};
-    extracted = stream.extractLine();
-    CHECK_EQ(extracted, "");
-    extracted = stream.extractLine();
-    CHECK_EQ(extracted, " test1  ");
-    extracted = stream.extractLine();
-    CHECK_EQ(extracted, "\r\vtest2\t ");
-    extracted = stream.extractLine();
-    CHECK_EQ(extracted, "");
-    extracted = stream.extractLine();
-    CHECK_EQ(extracted, "");
-}
-
-TEST_CASE("string_trimmer")
-{
-    CHECK_EQ(brayns::StringTrimmer::trimLeft("  \ttest\n "), "test\n ");
-    CHECK_EQ(brayns::StringTrimmer::trimRight("  \ttest\n "), "  \ttest");
-    CHECK_EQ(brayns::StringTrimmer::trim("  \ttest\n "), "test");
+    data = "1.2 3.4";
+    brayns::Vector2f v;
+    brayns::TokenExtractor<brayns::Vector2f>::extract(data, v);
+    CHECK_EQ(v, brayns::Vector2f(1.2f, 3.4f));
+    CHECK_EQ(data, "");
 }

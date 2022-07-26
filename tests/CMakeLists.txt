@@ -11,11 +11,13 @@ enable_testing()
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 
 set(TEST_LIST
+    binary.cpp
     brayns.cpp
     clipping.cpp
     lights.cpp
     images.cpp
     parsing.cpp
+    string.cpp
 )
 
 set(TEST_TARGET_LIST)

@@ -38,5 +38,9 @@ public:
     static bool startsWith(std::string_view data, std::string_view prefix);
     static bool endsWith(std::string_view data, char suffix);
     static bool endsWith(std::string_view data, std::string_view suffix);
+    static bool contains(std::string_view data, char item);
+    static bool contains(std::string_view data, std::string_view item);
+    static bool containsOneOf(std::string_view data, std::string_view items);
+    static bool containsToken(std::string_view data, std::string_view token);
 };
 } // namespace brayns

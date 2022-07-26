@@ -53,10 +53,10 @@ public:
     {
         auto &format = blob.type;
         auto &blobData = blob.data;
-        auto ptr = reinterpret_cast<const char *>(blobData.data());
+        auto address = static_cast<const void *>(blobData.data());
+        auto data = static_cast<const char *>(address);
         auto size = blobData.size();
-        std::string_view data = {ptr, size};
-        return parse(parsers, format, data);
+        return parse(parsers, format, {data, size});
     }
 
     static brayns::TriangleMesh
