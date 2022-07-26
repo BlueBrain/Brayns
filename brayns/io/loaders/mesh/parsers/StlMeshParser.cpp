@@ -164,7 +164,7 @@ private:
 
     static Vector3f _parseNormal(FileStream &stream)
     {
-        auto line = _nextLine(stream);
+        auto line = stream.getLine();
         return AsciiNormalParser::parse(line);
     }
 
@@ -235,6 +235,8 @@ private:
             {
                 return solid;
             }
+            auto facet = AsciiFacetParser::parse(stream);
+            solid.facets.push_back(std::move(facet));
         }
     }
 
