@@ -233,8 +233,8 @@ private:
         HeaderParser::skipHeaderIfPresent(stream);
         auto line = stream.getLine();
         auto dimensions = DimensionsParser::parse(line);
-        VertexParser::parseAll(stream, dimensions.vertexCount);
-        FaceParser::parseAll(stream, dimensions);
+        mesh.vertices = VertexParser::parseAll(stream, dimensions.vertexCount);
+        mesh.indices = FaceParser::parseAll(stream, dimensions);
         return mesh;
     }
 };
