@@ -71,3 +71,17 @@ class TestMeshLoader(SimpleTestCase):
         self.assertEqual(model.metadata['faces'], '12')
         self.assertEqual(model.metadata['meshes'], '1')
         self.assertEqual(model.metadata['vertices'], '36')
+
+    def test_load_stl_binary(self) -> None:
+        path = self.asset_folder / 'cube_binary.stl'
+        loader = brayns.MeshLoader()
+        models = loader.load(self.instance, str(path))
+        self.assertEqual(len(models), 1)
+        model = models[0]
+        min = brayns.Vector3(-0.5, -0.5, 0)
+        max = brayns.Vector3(0.5, 0.5, 1)
+        ref = brayns.Bounds(min, max)
+        self.assertEqual(model.bounds, ref)
+        self.assertEqual(model.metadata['faces'], '12')
+        self.assertEqual(model.metadata['meshes'], '1')
+        self.assertEqual(model.metadata['vertices'], '36')
