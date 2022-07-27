@@ -38,7 +38,7 @@ const Vector2ui &ApplicationParameters::getWindowSize() const noexcept
 
 void ApplicationParameters::setWindowSize(const Vector2ui &size) noexcept
 {
-    _updateValue(_windowSize, size);
+    _windowSize = size;
 }
 
 int ApplicationParameters::getJpegQuality() const noexcept
@@ -48,7 +48,7 @@ int ApplicationParameters::getJpegQuality() const noexcept
 
 void ApplicationParameters::setJpegQuality(int quality) noexcept
 {
-    _updateValue(_jpegQuality, quality);
+    _jpegQuality = quality;
 }
 
 void ApplicationParameters::build(ArgvBuilder &builder)

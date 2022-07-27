@@ -44,8 +44,8 @@ class TestQuadLight(unittest.TestCase):
             'intensity': 1,
             'visible': True,
             'position': [0, 0, 0],
-            'edge1': [0, 1, 0],
-            'edge2': [1, 0, 0]
+            'edge1': [1, 0, 0],
+            'edge2': [0, 1, 0]
         }
         test = light.serialize()
         self.assertEqual(test, ref)

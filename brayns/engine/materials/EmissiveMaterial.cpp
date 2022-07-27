@@ -46,7 +46,7 @@ std::string EmissiveMaterial::getName() const noexcept
 
 void EmissiveMaterial::setIntensity(const float intensity) noexcept
 {
-    _updateValue(_intensity, glm::max(intensity, 0.f));
+    getModifiedFlag().update(_intensity, glm::max(intensity, 0.f));
 }
 
 float EmissiveMaterial::getIntensity() const noexcept

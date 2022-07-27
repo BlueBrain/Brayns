@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
+#include <brayns/common/ModifiedFlag.h>
 
 #include <ospray/ospray_cpp/Renderer.h>
 
@@ -33,7 +33,7 @@ namespace brayns
 /**
  * @brief The Renderer class is the base class for all renderer to be available on Brayns
  */
-class Renderer : public BaseObject
+class Renderer
 {
 public:
     Renderer(const std::string &handleID);
@@ -103,6 +103,11 @@ public:
 
 protected:
     /**
+     * @brief Returns the modified flag status object
+     */
+    ModifiedFlag &getModifiedFlag() noexcept;
+
+    /**
      * @brief Subclasses must implement this method to commit their renderer-specific data to the Ospray counterpart.
      * The base class will make sure to call ospCommit(handle) on the renderer handle, so subclasses should avoid it.
      */
@@ -113,5 +118,6 @@ private:
     int32_t _maxRayBounces{3};
     Vector4f _backgroundColor{0.004f, 0.016f, 0.102f, 0.f}; // Default background color is BBP dark blue
     ospray::cpp::Renderer _osprayRenderer;
+    ModifiedFlag _flag;
 };
 } // namespace brayns

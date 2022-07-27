@@ -46,6 +46,11 @@ public:
         return result;
     }
 };
+
+struct InstanceParameters
+{
+    inline static const std::string transform = "transform";
+};
 }
 
 namespace brayns
@@ -102,8 +107,7 @@ const std::map<std::string, std::string> &ModelInstance::getModelMetadata() cons
 
 void ModelInstance::setVisible(const bool val) noexcept
 {
-    _visibilityChanged = _visible != val;
-    _visible = val;
+    _flag.update(_visible, val);
 }
 
 bool ModelInstance::isVisible() const noexcept
@@ -113,11 +117,13 @@ bool ModelInstance::isVisible() const noexcept
 
 void ModelInstance::setTransform(const Transform &transform) noexcept
 {
-    _transform = transform;
-    // Recompute bounds as soon as the transform changes
-    if (_transform.isModified())
+    if (_transform != transform)
     {
+        _transform = transform;
+        auto affine = MatrixConverter::glmToOspray(_transform.toMatrix());
+        _osprayInstance.setParam(InstanceParameters::transform, affine);
         computeBounds();
+        _flag = true;
     }
 }
 
@@ -131,27 +137,15 @@ const ospray::cpp::Instance &ModelInstance::getOsprayInstance() const noexcept
     return _osprayInstance;
 }
 
-bool ModelInstance::commit(const bool modelChanged)
+bool ModelInstance::commit()
 {
-    bool needsCommit = modelChanged;
-
-    // Re-commit transform if needed
-    if (_transform.isModified())
+    if (!_flag)
     {
-        auto affine = MatrixConverter::glmToOspray(_transform.toMatrix());
-        _osprayInstance.setParam("transform", affine);
-        _transform.resetModified();
-        needsCommit = true;
+        return false;
     }
 
-    if (needsCommit)
-    {
-        _osprayInstance.commit();
-    }
-
-    needsCommit = needsCommit || _visibilityChanged;
-    _visibilityChanged = false;
-
-    return needsCommit;
+    _osprayInstance.commit();
+    _flag = false;
+    return true;
 }
 }

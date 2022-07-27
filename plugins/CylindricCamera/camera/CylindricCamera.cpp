@@ -49,7 +49,7 @@ std::unique_ptr<brayns::Camera> CylindricCamera::clone() const noexcept
 
 void CylindricCamera::setFovy(float fovy) noexcept
 {
-    _updateValue(_fovy, fovy);
+    getModifiedFlag().update(_fovy, fovy);
 }
 
 float CylindricCamera::getFovy() const noexcept

@@ -55,7 +55,7 @@ std::unique_ptr<Renderer> InteractiveRenderer::clone() const noexcept
 
 void InteractiveRenderer::setShadowsEnabled(const bool enabled) noexcept
 {
-    _updateValue(_shadowsEnabled, enabled);
+    getModifiedFlag().update(_shadowsEnabled, enabled);
 }
 
 bool InteractiveRenderer::getShadowsEnabled() const noexcept
@@ -65,7 +65,7 @@ bool InteractiveRenderer::getShadowsEnabled() const noexcept
 
 void InteractiveRenderer::setAmbientOcclusionSamples(const int32_t numSamples) noexcept
 {
-    _updateValue(_aoSamples, numSamples);
+    getModifiedFlag().update(_aoSamples, numSamples);
 }
 
 int32_t InteractiveRenderer::getAmbientOcclusionSamples() const noexcept

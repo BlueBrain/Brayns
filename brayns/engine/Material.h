@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
+#include <brayns/common/ModifiedFlag.h>
 
 #include <ospray/ospray_cpp/Material.h>
 
@@ -37,7 +37,7 @@ namespace brayns
  * managed by the GeometricModels implementation, because this allows for a more optimal representation
  * of the geometry color for Brayns needs.
  */
-class Material : public BaseObject
+class Material
 {
 public:
     Material(const std::string &handleID);
@@ -82,6 +82,11 @@ public:
 
 protected:
     /**
+     * @brief Returns the modified flag status object
+     */
+    ModifiedFlag &getModifiedFlag() noexcept;
+
+    /**
      * @brief Subclasses must implement this method to commit material specific parameters to the Ospray material
      * counterpart. The base class will make sure to call ospCommit(handle) on the material handle, so subclasses
      * should avoid it.
@@ -90,7 +95,7 @@ protected:
 
 private:
     ospray::cpp::Material _osprayMaterial;
-
     Vector3f _color{1.f};
+    ModifiedFlag _flag;
 };
 } // namespace brayns

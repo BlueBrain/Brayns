@@ -25,6 +25,7 @@
 
 #include <ospray/ospray_cpp/Group.h>
 
+#include <algorithm>
 #include <vector>
 
 namespace brayns

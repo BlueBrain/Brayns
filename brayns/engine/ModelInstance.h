@@ -22,6 +22,7 @@
 #pragma once
 
 #include <brayns/common/Bounds.h>
+#include <brayns/common/ModifiedFlag.h>
 #include <brayns/common/Transform.h>
 #include <brayns/engine/Model.h>
 
@@ -109,17 +110,18 @@ private:
     /**
      * @brief Commit implementation
      */
-    bool commit(const bool modelChanged);
+    bool commit();
 
 private:
     const uint32_t _modelInstanceID{};
     Model &_model;
 
     bool _visible{true};
-    bool _visibilityChanged{true};
     Transform _transform;
     Bounds _bounds;
 
     ospray::cpp::Instance _osprayInstance;
+
+    ModifiedFlag _flag;
 };
 }

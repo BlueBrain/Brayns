@@ -59,14 +59,16 @@ void ReportComponent::onPreRender(const brayns::ParametersManager &parameters)
     }
 
     auto &tf = brayns::ExtractModelObject::extractTransferFunction(model);
-    const auto &simulation = parameters.getSimulationParameters();
-    auto forceUpdate = !_lastEnabledValue || simulation.isModified() || tf.isModified();
+    auto &tfModified = tf.getModifiedFlag();
+    auto &simulation = parameters.getSimulationParameters();
+    auto simulationModified = simulation.isModified();
+    auto forceUpdate = !_lastEnabledValue || simulationModified || tfModified;
     _lastEnabledValue = true;
 
     if (forceUpdate)
     {
         auto colors = TransferFunctionUtils::createSampleBuffer(tf);
-        tf.resetModified();
+        tfModified = false;
 
         const auto frameIndex = simulation.getFrame();
         const auto frameData = _report->getFrame(frameIndex);

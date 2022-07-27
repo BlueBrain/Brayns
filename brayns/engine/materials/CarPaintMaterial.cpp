@@ -46,7 +46,7 @@ std::string CarPaintMaterial::getName() const noexcept
 
 void CarPaintMaterial::setFlakesDesnity(const float flakeDensity) noexcept
 {
-    _updateValue(_flakeDensity, glm::clamp(flakeDensity, 0.f, 1.f));
+    getModifiedFlag().update(_flakeDensity, glm::clamp(flakeDensity, 0.f, 1.f));
 }
 
 float CarPaintMaterial::getFlakesDensity() const noexcept

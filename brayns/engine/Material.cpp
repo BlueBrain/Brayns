@@ -30,7 +30,7 @@ Material::Material(const std::string &handleID)
 
 bool Material::commit()
 {
-    if (!isModified())
+    if (!_flag)
     {
         return false;
     }
@@ -39,7 +39,7 @@ bool Material::commit()
 
     _osprayMaterial.commit();
 
-    resetModified();
+    _flag = false;
 
     return true;
 }
@@ -51,12 +51,17 @@ const ospray::cpp::Material &Material::getOsprayMaterial() const noexcept
 
 void Material::setColor(const Vector3f &color) noexcept
 {
-    _updateValue(_color, glm::clamp(color, Vector3f(0.f), Vector3f(1.f)));
+    _flag.update(_color, color);
 }
 
 const Vector3f &Material::getColor() const noexcept
 {
     return _color;
+}
+
+ModifiedFlag &Material::getModifiedFlag() noexcept
+{
+    return _flag;
 }
 
 } // namespace brayns

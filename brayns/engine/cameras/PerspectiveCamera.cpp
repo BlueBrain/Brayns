@@ -64,17 +64,17 @@ void PerspectiveCamera::commitCameraSpecificParams()
 
 void PerspectiveCamera::setFOVY(const float fovy) noexcept
 {
-    _updateValue(_fovy, fovy);
+    getModifiedFlag().update(_fovy, fovy);
 }
 
 void PerspectiveCamera::setApertureRadius(const float aperture) noexcept
 {
-    _updateValue(_apertureRadius, aperture);
+    getModifiedFlag().update(_apertureRadius, aperture);
 }
 
 void PerspectiveCamera::setFocusDistance(const float distance) noexcept
 {
-    _updateValue(_focusDistance, distance);
+    getModifiedFlag().update(_focusDistance, distance);
 }
 
 float PerspectiveCamera::getFOVY() const noexcept

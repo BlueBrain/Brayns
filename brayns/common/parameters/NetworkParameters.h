@@ -97,7 +97,7 @@ public:
      *
      * @param uri URI.
      */
-    void setUri(const std::string &uri) noexcept;
+    void setUri(std::string uri) noexcept;
 
     /**
      * @brief Get the delay between two connections attempts in client mode.
@@ -127,7 +127,7 @@ public:
      *
      * @param privateKeyFile File path.
      */
-    void setPrivateKeyFile(const std::string &privateKeyFile) noexcept;
+    void setPrivateKeyFile(std::string privateKeyFile) noexcept;
 
     /**
      * @brief Get the private key passphrase if any.
@@ -141,7 +141,7 @@ public:
      *
      * @param privateKeyPassphrase Passphrase.
      */
-    void setPrivateKeyPassphrase(const std::string &privateKeyPassphrase) noexcept;
+    void setPrivateKeyPassphrase(std::string privateKeyPassphrase) noexcept;
 
     /**
      * @brief Get the certificate of the server if any.
@@ -155,7 +155,7 @@ public:
      *
      * @param certificateFile Certificate file.
      */
-    void setCertificateFile(const std::string &certificateFile) noexcept;
+    void setCertificateFile(std::string certificateFile) noexcept;
 
     /**
      * @brief Get CA location, if empty, default SLL ones will be used.
@@ -171,7 +171,7 @@ public:
      *
      * @param caLocation CA file or directory.
      */
-    void setCALocation(const std::string &caLocation) noexcept;
+    void setCALocation(std::string caLocation) noexcept;
 
     /**
      * @brief Register argv properties of the parameter set.

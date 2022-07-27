@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
-
 #include "argv/ArgvBuilder.h"
 
 namespace brayns
@@ -29,7 +27,7 @@ namespace brayns
  * @brief Base class for brayns parameter sets.
  *
  */
-class AbstractParameters : public BaseObject
+class AbstractParameters
 {
 public:
     virtual ~AbstractParameters() = default;
@@ -40,5 +38,12 @@ public:
      * @param builder Helper class to register argv properties.
      */
     virtual void build(ArgvBuilder &builder) = 0;
+
+    /**
+     * @brief Sets the state of the parameters to not modified
+     */
+    virtual void resetModified()
+    {
+    }
 };
 } // namespace brayns

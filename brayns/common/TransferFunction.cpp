@@ -21,8 +21,6 @@
 
 #include "TransferFunction.h"
 
-#include <brayns/common/Log.h>
-
 #include <algorithm>
 
 namespace brayns
@@ -38,9 +36,9 @@ const std::vector<brayns::Vector4f> &TransferFunction::getColors() const
     return _colors;
 }
 
-void TransferFunction::setColors(const std::vector<Vector4f> &colors)
+void TransferFunction::setColors(std::vector<Vector4f> colors)
 {
-    _updateValue(_colors, colors);
+    _flag.update(_colors, std::move(colors));
 }
 
 const Vector2f &TransferFunction::getValuesRange() const
@@ -55,7 +53,7 @@ void TransferFunction::setValuesRange(const Vector2f &valuesRange)
         throw std::invalid_argument("Transfer function range must define a non zero positive interval");
     }
 
-    _updateValue(_valuesRange, valuesRange);
+    _flag.update(_valuesRange, valuesRange);
 }
 
 Vector4f TransferFunction::getColorForValue(const float v) const
@@ -82,5 +80,15 @@ Vector4f TransferFunction::getColorForValue(const float v) const
     const auto &color2 = _colors[nextColorIndex];
 
     return glm::mix(color1, color2, remainder);
+}
+
+ModifiedFlag &TransferFunction::getModifiedFlag() noexcept
+{
+    return _flag;
+}
+
+const ModifiedFlag &TransferFunction::getModifiedFlag() const noexcept
+{
+    return _flag;
 }
 } // namespace brayns

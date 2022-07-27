@@ -55,7 +55,8 @@ bool TransferFunctionRendererComponent::manualCommit()
 {
     Model &model = getModel();
     auto &transferFunction = ExtractModelObject::extractTransferFunction(model);
-    if (!transferFunction.isModified())
+    auto &transferFunctionModified = transferFunction.getModifiedFlag();
+    if (!transferFunctionModified)
     {
         return false;
     }
@@ -74,7 +75,7 @@ bool TransferFunctionRendererComponent::manualCommit()
     _osprayTransferFunction.setParam(TransferFunctionParameters::valueRange, ospRange);
 
     _osprayTransferFunction.commit();
-    transferFunction.resetModified();
+    transferFunctionModified = false;
 
     return true;
 }

@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/common/BaseObject.h>
 #include <brayns/common/MathTypes.h>
 
 namespace brayns
@@ -29,7 +28,7 @@ namespace brayns
  * @brief Defines the translation, rotation and scale parameters to be applied
  * to a scene asset.
  */
-class Transform : public BaseObject
+class Transform
 {
 public:
     Transform() = default;
@@ -52,4 +51,7 @@ private:
     Quaternion _rotation{1, 0, 0, 0};
     Vector3f _scale{1.f};
 };
+
+bool operator==(const Transform &lhs, const Transform &rhs);
+bool operator!=(const Transform &lhs, const Transform &rhs);
 } // namespace brayns

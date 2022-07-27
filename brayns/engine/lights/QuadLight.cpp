@@ -42,17 +42,17 @@ QuadLight::QuadLight()
 
 void QuadLight::setPosition(const Vector3f &position) noexcept
 {
-    _updateValue(_position, position);
+    getModifiedFlag().update(_position, position);
 }
 
 void QuadLight::setEdge1(const Vector3f &edge1) noexcept
 {
-    _updateValue(_edge1, edge1);
+    getModifiedFlag().update(_edge1, edge1);
 }
 
 void QuadLight::setEdge2(const Vector3f &edge2) noexcept
 {
-    _updateValue(_edge2, edge2);
+    getModifiedFlag().update(_edge2, edge2);
 }
 
 const Vector3f &QuadLight::getPosition() const noexcept

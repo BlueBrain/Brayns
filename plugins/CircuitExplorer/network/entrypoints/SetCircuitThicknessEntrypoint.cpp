@@ -59,6 +59,7 @@ public:
         circuit->changeThickness(radiusMultiplier);
 
         // We have modified the thickness, lets recompute the bounds
+        instance.computeBounds();
         scene.computeBounds();
     }
 };

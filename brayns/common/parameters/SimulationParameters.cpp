@@ -29,17 +29,17 @@ void SimulationParameters::reset()
     _dt = 0.;
     _startFrame = 0u;
     _endFrame = 0u;
-    markModified();
+    resetModified();
 }
 
 void SimulationParameters::setStartFrame(const uint32_t startFrame) noexcept
 {
-    _updateValue(_startFrame, startFrame);
+    _flag.update(_startFrame, startFrame);
 }
 
 void SimulationParameters::setEndFrame(const uint32_t endFrame) noexcept
 {
-    _updateValue(_endFrame, endFrame);
+    _flag.update(_endFrame, endFrame);
 }
 
 uint32_t SimulationParameters::getStartFrame() const noexcept
@@ -54,7 +54,7 @@ uint32_t SimulationParameters::getEndFrame() const noexcept
 
 void SimulationParameters::setFrame(const uint32_t value) noexcept
 {
-    _updateValue(_current, value);
+    _flag.update(_current, value);
 }
 
 uint32_t SimulationParameters::getFrame() const noexcept
@@ -64,7 +64,7 @@ uint32_t SimulationParameters::getFrame() const noexcept
 
 void SimulationParameters::setDt(const double dt) noexcept
 {
-    _updateValue(_dt, dt);
+    _flag.update(_dt, dt);
 }
 
 double SimulationParameters::getDt() const noexcept
@@ -80,5 +80,15 @@ const std::string &SimulationParameters::getTimeUnit() const noexcept
 void SimulationParameters::build(ArgvBuilder &builder)
 {
     (void)builder;
+}
+
+void SimulationParameters::resetModified()
+{
+    _flag = false;
+}
+
+bool SimulationParameters::isModified() const noexcept
+{
+    return static_cast<bool>(_flag);
 }
 } // namespace brayns

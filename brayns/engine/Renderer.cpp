@@ -56,22 +56,22 @@ const Vector4f &Renderer::getBackgroundColor() const noexcept
 
 void Renderer::setSamplesPerPixel(const int32_t spp) noexcept
 {
-    _updateValue(_samplesPerPixel, spp);
+    _flag.update(_samplesPerPixel, spp);
 }
 
 void Renderer::setMaxRayBounces(const int32_t maxBounces) noexcept
 {
-    _updateValue(_maxRayBounces, maxBounces);
+    _flag.update(_maxRayBounces, maxBounces);
 }
 
 void Renderer::setBackgroundColor(const Vector4f &background) noexcept
 {
-    _updateValue(_backgroundColor, background);
+    _flag.update(_backgroundColor, background);
 }
 
 bool Renderer::commit()
 {
-    if (!isModified())
+    if (!_flag)
     {
         return false;
     }
@@ -84,7 +84,7 @@ bool Renderer::commit()
 
     _osprayRenderer.commit();
 
-    resetModified();
+    _flag = false;
 
     return true;
 }
@@ -92,5 +92,10 @@ bool Renderer::commit()
 const ospray::cpp::Renderer &Renderer::getOsprayRenderer() const noexcept
 {
     return _osprayRenderer;
+}
+
+ModifiedFlag &Renderer::getModifiedFlag() noexcept
+{
+    return _flag;
 }
 } // namespace brayns

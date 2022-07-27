@@ -41,17 +41,17 @@ Light::Light(const std::string &handleID)
 
 void Light::setColor(const Vector3f &color) noexcept
 {
-    _updateValue(_color, color);
+    _flag.update(_color, color);
 }
 
 void Light::setIntensity(const float intensity) noexcept
 {
-    _updateValue(_intensity, intensity);
+    _flag.update(_intensity, intensity);
 }
 
 void Light::setVisible(const bool visible) noexcept
 {
-    _updateValue(_visible, visible);
+    _flag.update(_visible, visible);
 }
 
 const Vector3f &Light::getColor() const noexcept
@@ -76,7 +76,7 @@ Bounds Light::computeBounds() const noexcept
 
 bool Light::commit()
 {
-    if (!isModified())
+    if (!_flag)
     {
         return false;
     }
@@ -89,7 +89,7 @@ bool Light::commit()
 
     _osprayLight.commit();
 
-    resetModified();
+    _flag = false;
 
     return true;
 }
@@ -97,5 +97,10 @@ bool Light::commit()
 const ospray::cpp::Light &Light::getOsprayLight() const noexcept
 {
     return _osprayLight;
+}
+
+ModifiedFlag &Light::getModifiedFlag() noexcept
+{
+    return _flag;
 }
 } // namespace brayns
