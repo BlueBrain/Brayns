@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from dataclasses import field
 from typing import Optional
 
 from brayns.plugins.common.morphology_parameters import MorphologyParameters
@@ -34,7 +35,9 @@ class SonataNodePopulation:
     nodes: SonataNodes = SonataNodes.from_density(0.01)
     report: Optional[SonataReport] = None
     edges: Optional[list[SonataEdgePopulation]] = None
-    morphology: Optional[MorphologyParameters] = None
+    morphology: MorphologyParameters = field(
+        default_factory=MorphologyParameters
+    )
     vasculature_radius_multiplier: float = 1.0
 
     def serialize(self) -> dict:
@@ -52,6 +55,5 @@ class SonataNodePopulation:
                 edge.serialize()
                 for edge in self.edges
             ]
-        if self.morphology is not None:
-            message['neuron_morphology_parameters'] = self.morphology.serialize()
+        message['neuron_morphology_parameters'] = self.morphology.serialize()
         return message

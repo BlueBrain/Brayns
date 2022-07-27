@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from dataclasses import field
 from typing import Optional
 
 from brayns.core.model.model_loader import ModelLoader
@@ -32,7 +33,9 @@ class BbpLoader(ModelLoader):
 
     cells: BbpCells = BbpCells.all()
     report: Optional[BbpReport] = None
-    morphology: Optional[MorphologyParameters] = None
+    morphology: MorphologyParameters = field(
+        default_factory=MorphologyParameters
+    )
     load_afferent_synapses: bool = False
     load_efferent_synapses: bool = False
 
@@ -48,8 +51,7 @@ class BbpLoader(ModelLoader):
             'load_efferent_synapses': self.load_efferent_synapses
         }
         properties.update(self.cells.serialize())
-        if self.morphology is not None:
-            properties['neuron_morphology_parameters'] = self.morphology.serialize()
+        properties['neuron_morphology_parameters'] = self.morphology.serialize()
         if self.report is not None:
             properties.update(self.report.serialize())
         return properties

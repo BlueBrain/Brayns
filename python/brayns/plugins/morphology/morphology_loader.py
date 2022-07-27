@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Optional
+from dataclasses import field
 
 from brayns.core.model.model_loader import ModelLoader
 from brayns.plugins.common.morphology_parameters import MorphologyParameters
@@ -27,7 +27,9 @@ from brayns.plugins.common.morphology_parameters import MorphologyParameters
 @dataclass
 class MorphologyLoader(ModelLoader):
 
-    morphology: Optional[MorphologyParameters] = None
+    morphology: MorphologyParameters = field(
+        default_factory=MorphologyParameters
+    )
 
     @classmethod
     @property
@@ -36,6 +38,4 @@ class MorphologyLoader(ModelLoader):
 
     @property
     def properties(self) -> dict:
-        if self.morphology is None:
-            return {}
         return self.morphology.serialize()
