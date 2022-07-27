@@ -69,7 +69,7 @@ model = models[0]
 
 camera = brayns.PerspectiveCamera()
 
-view = camera.get_full_screen_view(model.bounds)
+view = camera.fovy.get_full_screen_view(model.bounds)
 
 renderer = brayns.InteractiveRenderer()
 

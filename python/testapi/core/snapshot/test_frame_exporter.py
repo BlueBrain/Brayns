@@ -57,7 +57,7 @@ class TestFrameExporter(SimpleTestCase):
 
     def _create_exporter(self, bounds: brayns.Bounds) -> brayns.FrameExporter:
         camera = brayns.PerspectiveCamera()
-        view = camera.get_full_screen_view(bounds)
+        view = camera.fovy.get_full_screen_view(bounds)
         self._adjust_lights(view)
         renderer = brayns.InteractiveRenderer()
         frames = self._get_frames(view)
