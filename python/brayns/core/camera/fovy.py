@@ -31,9 +31,9 @@ class Fovy:
         self._angle = math.radians(angle) if degrees else angle
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, Fovy):
-            return self._angle == other._angle
-        return False
+        if not isinstance(other, Fovy):
+            return False
+        return self._angle == other._angle
 
     @property
     def radians(self) -> float:
