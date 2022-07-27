@@ -46,7 +46,7 @@ public:
         context->useCertificate(certificate);
         auto privateKeyFile = parameters.getPrivateKeyFile();
         auto privateKeyPassphrase = parameters.getPrivateKeyPassphrase();
-        auto privateKey = Poco::Crypto::RSAKey("", privateKeyFile, privateKeyPassphrase);
+        auto privateKey = Poco::Crypto::EVPPKey("", privateKeyFile, privateKeyPassphrase);
         context->usePrivateKey(privateKey);
         return context;
     }
