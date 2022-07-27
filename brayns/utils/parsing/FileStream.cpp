@@ -19,45 +19,52 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "FileStream.h"
 
-#include <cstdint>
+#include <brayns/utils/string/StringExtractor.h>
+
+#include "ParsingException.h"
 
 namespace brayns
 {
-class EndianHelper
+FileStream::FileStream(std::string_view data)
+    : _data(data)
 {
-public:
-    static bool isBigEndian()
-    {
-        int32_t test = 1;
-        return *reinterpret_cast<char *>(&test) == 0;
-    }
+}
 
-    template<typename T>
-    static T convertLittleEndianToLocalEndian(T value)
-    {
-        return isBigEndian() ? swapBytes(value) : value;
-    }
+std::string_view FileStream::getData() const
+{
+    return _data;
+}
 
-    template<typename T>
-    static T convertBigEndianToLocalEndian(T value)
-    {
-        return isBigEndian() ? value : swapBytes(value);
-    }
+size_t FileStream::getLineNumber() const
+{
+    return _lineNumber;
+}
 
-    template<typename T>
-    static T swapBytes(T value)
+std::string_view FileStream::getLine() const
+{
+    return _line;
+}
+
+ParsingException FileStream::error(const std::string &message) const
+{
+    return ParsingException(message, _lineNumber, std::string(_line));
+}
+
+bool FileStream::nextLine()
+{
+    if (_end)
     {
-        T copy;
-        auto from = reinterpret_cast<const char *>(&value);
-        auto to = reinterpret_cast<char *>(&copy);
-        auto stride = sizeof(T);
-        for (size_t i = 0; i < stride; ++i)
-        {
-            to[i] = from[stride - i - 1];
-        }
-        return copy;
+        return false;
     }
-};
+    _line = StringExtractor::extractLine(_data);
+    if (_data.empty())
+    {
+        _end = true;
+    }
+    StringExtractor::extract(_data, 1);
+    ++_lineNumber;
+    return true;
+}
 } // namespace brayns

@@ -21,7 +21,6 @@
 #include <brayns/json/Json.h>
 #include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
-#include <brayns/utils/StringUtils.h>
 
 class ParamsParser
 {

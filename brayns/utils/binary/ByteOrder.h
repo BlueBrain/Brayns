@@ -21,13 +21,35 @@
 
 #pragma once
 
-#include <istream>
+#include "ByteConverter.h"
 
 namespace brayns
 {
-class StreamHelper
+enum class ByteOrder
+{
+    BigEndian,
+    LittleEndian
+};
+
+class ByteOrderHelper
 {
 public:
-    static bool getLine(std::string_view &data, std::string_view &line);
+    static ByteOrder getSystemByteOrder();
+    static void convertToSystemByteOrder(char *bytes, size_t stride, ByteOrder order);
+    static void convertFromSystemByteOrder(char *bytes, size_t stride, ByteOrder order);
+
+    template<typename T>
+    static void convertToSystemByteOrder(T &value, ByteOrder order)
+    {
+        auto bytes = ByteConverter::getBytes(value);
+        convertToSystemByteOrder(bytes, sizeof(T), order);
+    }
+
+    template<typename T>
+    static void convertFromSystemByteOrder(T &value, ByteOrder order)
+    {
+        auto bytes = ByteConverter::getBytes(value);
+        convertFromSystemByteOrder(bytes, sizeof(T), order);
+    }
 };
 } // namespace brayns

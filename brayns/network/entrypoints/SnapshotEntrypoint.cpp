@@ -26,9 +26,9 @@
 
 #include <brayns/network/common/ProgressHandler.h>
 
-#include <brayns/utils/StringUtils.h>
 #include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
+#include <brayns/utils/string/StringCase.h>
 
 #include <chrono>
 #include <thread>
@@ -56,7 +56,7 @@ struct SnapshotResultHandler
     static std::string encodeToBase64(const brayns::ImageSettings &imageSettings, brayns::Framebuffer &fb)
     {
         const auto &formatName = imageSettings.getFormat();
-        const auto fixedFormat = brayns::string_utils::toLowercase(formatName);
+        const auto fixedFormat = brayns::StringCase::toLower(formatName);
         const auto format = brayns::ImageFormat::fromExtension(fixedFormat);
         const auto quality = imageSettings.getQuality();
         auto image = fb.getImage();

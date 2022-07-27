@@ -22,11 +22,16 @@
 #include "StlMeshParser.h"
 
 #include <array>
-#include <limits>
 
-#include "helpers/BinaryHelper.h"
-#include "helpers/StreamHelper.h"
-#include "helpers/StringHelper.h"
+#include <brayns/common/GlmParsers.h>
+
+#include <brayns/utils/binary/ByteOrder.h>
+#include <brayns/utils/parsing/FileStream.h>
+#include <brayns/utils/parsing/Parser.h>
+#include <brayns/utils/parsing/ParsingException.h>
+#include <brayns/utils/string/StringCounter.h>
+#include <brayns/utils/string/StringExtractor.h>
+#include <brayns/utils/string/StringTrimmer.h>
 
 namespace
 {
@@ -34,7 +39,7 @@ using namespace brayns;
 
 struct Facet
 {
-    Vector3f normal{0.0f};
+    Vector3f normal;
     std::array<Vector3f, 3> vertices;
 };
 
@@ -44,423 +49,287 @@ struct Solid
     std::vector<Facet> facets;
 };
 
-struct Context
-{
-    std::string_view data;
-    size_t lineNumber = 0;
-    std::string_view line;
-    std::string_view key;
-    std::string_view value;
-    bool facet = false;
-    bool loop = false;
-    bool end = false;
-    size_t vertex = 0;
-    Solid solid;
-
-    Context(std::string_view source)
-        : data(source)
-    {
-    }
-};
-
 class Format
 {
 public:
     static bool isAscii(std::string_view data)
     {
-        std::string_view line;
-        StreamHelper::getLine(data, line);
-        auto solid = StringHelper::extractToken(line);
-        if (solid != "solid")
+        return data.substr(0, 5) == "solid";
+    }
+};
+
+class LineExtractor
+{
+public:
+    static std::string_view nextLine(FileStream &stream)
+    {
+        while (true)
         {
-            return false;
-        }
-        while (StreamHelper::getLine(data, line))
-        {
-            if (StringHelper::isSpace(line))
+            if (!stream.nextLine())
             {
-                continue;
+                return {};
             }
-            auto facet = StringHelper::extractToken(line);
-            auto normal = StringHelper::extractToken(line);
-            return facet == "facet" && normal == "normal";
+            auto line = stream.getLine();
+            line = StringTrimmer::trim(line);
+            if (!line.empty())
+            {
+                return line;
+            }
         }
-        throw std::runtime_error("Empty file");
     }
 };
 
-class CurrentFacet
+class FixedStringExtractor
 {
 public:
-    static Facet &get(Context &context)
+    static void checkLine(std::string_view line, std::string_view expected)
     {
-        auto &solid = context.solid;
-        auto &facets = solid.facets;
-        if (facets.empty())
+        if (line != expected)
         {
-            throw std::runtime_error("No current facet");
-        }
-        return facets.back();
-    }
-
-    static Facet &next(Context &context)
-    {
-        auto &solid = context.solid;
-        auto &facets = solid.facets;
-        return facets.emplace_back();
-    }
-};
-
-class BeginSolid
-{
-public:
-    static bool canParse(const Context &context)
-    {
-        return context.key == "solid";
-    }
-
-    static void parse(Context &context)
-    {
-        if (context.facet)
-        {
-            throw std::runtime_error("Opening facet before solid");
-        }
-        if (context.loop)
-        {
-            throw std::runtime_error("Opening loop before solid");
-        }
-        context.solid.name = context.value;
-    }
-};
-
-class EndSolid
-{
-public:
-    static bool canParse(const Context &context)
-    {
-        return context.key == "endsolid";
-    }
-
-    static void parse(Context &context)
-    {
-        if (context.facet)
-        {
-            throw std::runtime_error("Closing solid before facet");
-        }
-        if (context.loop)
-        {
-            throw std::runtime_error("Closing loop before solid");
-        }
-        context.end = true;
-    }
-};
-
-class BeginFacet
-{
-public:
-    static bool canParse(const Context &context)
-    {
-        return context.key == "facet";
-    }
-
-    static void parse(Context &context)
-    {
-        if (context.facet)
-        {
-            throw std::runtime_error("Opening facet twice");
-        }
-        if (context.loop)
-        {
-            throw std::runtime_error("Opening facet after loop");
-        }
-        context.facet = true;
-        _parseNormal(context);
-    }
-
-private:
-    static void _parseNormal(Context &context)
-    {
-        auto &value = context.value;
-        auto key = StringHelper::extractToken(value);
-        if (key != "normal")
-        {
-            throw std::runtime_error("Facet without 'normal' keyword");
-        }
-        auto &facet = CurrentFacet::next(context);
-        auto &normal = facet.normal;
-        normal.x = StringHelper::extract<float>(value);
-        normal.y = StringHelper::extract<float>(value);
-        normal.z = StringHelper::extract<float>(value);
-    }
-};
-
-class EndFacet
-{
-public:
-    static bool canParse(const Context &context)
-    {
-        return context.key == "endfacet";
-    }
-
-    static void parse(Context &context)
-    {
-        if (!context.facet)
-        {
-            throw std::runtime_error("No facet to end");
-        }
-        if (context.loop)
-        {
-            throw std::runtime_error("Ending facet before loop");
-        }
-        context.facet = false;
-    }
-};
-
-class BeginLoop
-{
-public:
-    static bool canParse(const Context &context)
-    {
-        return context.key == "outer";
-    }
-
-    static void parse(Context &context)
-    {
-        auto &value = context.value;
-        auto token = StringHelper::extractToken(value);
-        if (token != "loop")
-        {
-            throw std::runtime_error("Expected 'loop' after 'outer'");
-        }
-        if (context.loop)
-        {
-            throw std::runtime_error("Opening loop twice");
-        }
-        if (!context.facet)
-        {
-            throw std::runtime_error("Opening loop before facet");
-        }
-        context.loop = true;
-    }
-};
-
-class EndLoop
-{
-public:
-    static bool canParse(const Context &context)
-    {
-        return context.key == "endloop";
-    }
-
-    static void parse(Context &context)
-    {
-        if (!context.loop)
-        {
-            throw std::runtime_error("No loop to end");
-        }
-        if (!context.facet)
-        {
-            throw std::runtime_error("End loop outside facet");
-        }
-        if (context.vertex != 3)
-        {
-            throw std::runtime_error("Expected 3 vertices per facet");
-        }
-        context.loop = false;
-        context.vertex = 0;
-    }
-};
-
-class Vertex
-{
-public:
-    static bool canParse(const Context &context)
-    {
-        return context.key == "vertex";
-    }
-
-    static void parse(Context &context)
-    {
-        if (!context.facet || !context.loop)
-        {
-            throw std::runtime_error("Vertex definition outside facet");
-        }
-        if (context.vertex >= 3)
-        {
-            throw std::runtime_error("More that 3 vertices in facet");
-        }
-        _extract(context);
-        ++context.vertex;
-    }
-
-private:
-    static void _extract(Context &context)
-    {
-        auto &value = context.value;
-        auto &facet = CurrentFacet::get(context);
-        auto &vertex = facet.vertices[context.vertex];
-        vertex.x = StringHelper::extract<float>(value);
-        vertex.y = StringHelper::extract<float>(value);
-        vertex.z = StringHelper::extract<float>(value);
-    }
-};
-
-class AsciiLineParser
-{
-public:
-    static void parse(Context &context)
-    {
-        auto line = context.line;
-        if (StringHelper::isSpace(line))
-        {
-            return;
-        }
-        context.key = StringHelper::extractToken(line);
-        context.value = line;
-        if (!_tryParse(context))
-        {
-            throw std::runtime_error("Invalid line");
-        }
-    }
-
-private:
-    static bool _tryParse(Context &context)
-    {
-        return _tryParseWith<BeginSolid>(context) || _tryParseWith<EndSolid>(context)
-            || _tryParseWith<BeginFacet>(context) || _tryParseWith<EndFacet>(context)
-            || _tryParseWith<BeginLoop>(context) || _tryParseWith<EndLoop>(context) || _tryParseWith<Vertex>(context);
-    }
-
-    template<typename T>
-    static bool _tryParseWith(Context &context)
-    {
-        if (!T::canParse(context))
-        {
-            return false;
-        }
-        T::parse(context);
-        return true;
-    }
-};
-
-class ErrorMessage
-{
-public:
-    static std::string format(const Context &context, const char *message)
-    {
-        std::ostringstream stream;
-        stream << "Parsing error at line " << context.lineNumber;
-        stream << ": '" << message << "'";
-        stream << ". Line content: '" << context.line << "'";
-        return stream.str();
-    }
-};
-
-class AsciiParser
-{
-public:
-    static Solid parse(std::string_view data)
-    {
-        Context context(data);
-        try
-        {
-            _parse(context);
-            return context.solid;
-        }
-        catch (const std::exception &e)
-        {
-            auto message = ErrorMessage::format(context, e.what());
+            auto message = "Invalid line, expected '" + std::string(expected) + "', got '" + std::string(line) + "'";
             throw std::runtime_error(message);
         }
     }
 
-private:
-    static void _parse(Context &context)
+    static void extractToken(std::string_view &data, std::string_view expected)
     {
-        while (StreamHelper::getLine(context.data, context.line))
+        auto token = StringExtractor::extractToken(data);
+        if (token != expected)
         {
-            ++context.lineNumber;
-            AsciiLineParser::parse(context);
-            if (context.end)
-            {
-                return;
-            }
+            auto message = "Invalid token, expected '" + std::string(expected) + "', got '" + std::string(token) + "'";
+            throw std::runtime_error(message);
         }
-        throw std::runtime_error("Unterminated solid");
     }
 };
 
-class BinaryHeader
+class AsciiNormalParser
 {
 public:
-    static size_t getTriangleCount(std::string_view &data)
+    static Vector3f parse(std::string_view line)
     {
-        if (data.size() < 84)
+        auto count = StringCounter::countTokens(line);
+        if (count != 5)
         {
-            throw std::runtime_error("Expected 80 bytes header");
+            throw std::runtime_error("Invalid normal, expected 5 tokens, got " + std::to_string(count));
         }
-        data = data.substr(80);
-        auto size = BinaryHelper::extractLittleEndian<uint32_t>(data);
-        return size_t(size);
+        FixedStringExtractor::extractToken(line, "facet");
+        FixedStringExtractor::extractToken(line, "normal");
+        return Parser::extractToken<Vector3f>(line);
     }
 };
 
-class BinaryParser
+class AsciiVertexParser
+{
+public:
+    static Vector3f parse(std::string_view line)
+    {
+        auto count = StringCounter::countTokens(line);
+        if (count != 4)
+        {
+            throw std::runtime_error("Invalid vertex, expected 4 tokens, got " + std::to_string(count));
+        }
+        auto vertex = StringExtractor::extractToken(line);
+        if (vertex != "vertex")
+        {
+            throw std::runtime_error("Invalid vertex, expected 'vertex', got " + std::string(vertex));
+        }
+        return Parser::extractToken<Vector3f>(line);
+    }
+};
+
+class AsciiFacetParser
+{
+public:
+    static Facet parse(FileStream &stream)
+    {
+        Facet facet;
+        facet.normal = _parseNormal(stream);
+        _skipOuterLoop(stream);
+        facet.vertices = _parseVertices(stream);
+        _skipEndLoop(stream);
+        _skipEndFacet(stream);
+        return facet;
+    }
+
+private:
+    static std::string_view _nextLine(FileStream &stream)
+    {
+        auto line = LineExtractor::nextLine(stream);
+        if (line.empty())
+        {
+            throw std::runtime_error("Unterminated facet");
+        }
+        return line;
+    }
+
+    static Vector3f _parseNormal(FileStream &stream)
+    {
+        auto line = stream.getLine();
+        return AsciiNormalParser::parse(line);
+    }
+
+    static void _skipOuterLoop(FileStream &stream)
+    {
+        auto line = _nextLine(stream);
+        FixedStringExtractor::checkLine(line, "outer loop");
+    }
+
+    static std::array<Vector3f, 3> _parseVertices(FileStream &stream)
+    {
+        std::array<Vector3f, 3> vertices;
+        for (auto &vertex : vertices)
+        {
+            auto line = _nextLine(stream);
+            vertex = AsciiVertexParser::parse(line);
+        }
+        return vertices;
+    }
+
+    static void _skipEndLoop(FileStream &stream)
+    {
+        auto line = _nextLine(stream);
+        FixedStringExtractor::checkLine(line, "endloop");
+    }
+
+    static void _skipEndFacet(FileStream &stream)
+    {
+        auto line = _nextLine(stream);
+        FixedStringExtractor::checkLine(line, "endfacet");
+    }
+};
+
+class AsciiSolidParser
 {
 public:
     static Solid parse(std::string_view data)
     {
-        auto count = BinaryHeader::getTriangleCount(data);
+        FileStream stream(data);
+        try
+        {
+            return _parse(stream);
+        }
+        catch (const std::exception &e)
+        {
+            throw stream.error(e.what());
+        }
+    }
+
+private:
+    static std::string_view _nextLine(FileStream &stream)
+    {
+        auto line = LineExtractor::nextLine(stream);
+        if (line.empty())
+        {
+            throw std::runtime_error("Unterminated solid");
+        }
+        return line;
+    }
+
+    static Solid _parse(FileStream &stream)
+    {
+        auto solid = _beginSolid(stream);
+        while (true)
+        {
+            auto line = _nextLine(stream);
+            if (line == "endsolid")
+            {
+                return solid;
+            }
+            auto facet = AsciiFacetParser::parse(stream);
+            solid.facets.push_back(std::move(facet));
+        }
+    }
+
+    static Solid _beginSolid(FileStream &stream)
+    {
+        auto line = _nextLine(stream);
+        FixedStringExtractor::extractToken(line, "solid");
+        StringExtractor::extractSpaces(line);
+        Solid solid;
+        solid.name = line;
+        return solid;
+    }
+};
+
+class BinaryHeaderParser
+{
+public:
+    static size_t parse(std::string_view &data)
+    {
+        _skipHeader(data);
+        return _parseTriangleCount(data);
+    }
+
+private:
+    static void _skipHeader(std::string_view &data)
+    {
+        if (!StringExtractor::canExtract(data, 80))
+        {
+            throw std::runtime_error("Expected 80 bytes header at the beginning of the file");
+        }
+        StringExtractor::extract(data, 80);
+    }
+
+    static size_t _parseTriangleCount(std::string_view &data)
+    {
+        if (!StringExtractor::canExtract(data, 4))
+        {
+            throw std::runtime_error("Expected 4 bytes triangle count");
+        }
+        return Parser::extractChunk<uint32_t>(data, ByteOrder::LittleEndian);
+    }
+};
+
+class BinaryFacetParser
+{
+public:
+    static std::vector<Facet> parseAll(std::string_view &data, size_t count)
+    {
+        std::vector<Facet> facets;
+        facets.reserve(count);
+        for (size_t i = 0; i < count; ++i)
+        {
+            auto facet = parse(data);
+            facets.push_back(facet);
+        }
+        return facets;
+    }
+
+    static Facet parse(std::string_view &data)
+    {
+        Facet facet;
+        Parser::extractChunk(data, facet.normal, ByteOrder::LittleEndian);
+        Parser::extractChunk(data, facet.vertices, ByteOrder::LittleEndian);
+        StringExtractor::extract(data, 2);
+        return facet;
+    }
+};
+
+class BinarySolidParser
+{
+public:
+    static Solid parse(std::string_view data)
+    {
+        auto count = BinaryHeaderParser::parse(data);
         _checkDataSize(data, count);
         return _extractSolid(data, count);
     }
 
 private:
-    static void _checkDataSize(std::string_view data, size_t count)
+    static void _checkDataSize(std::string_view &data, size_t count)
     {
         auto size = 50 * count;
-        if (data.size() < size)
+        if (!StringExtractor::canExtract(data, size))
         {
-            throw std::runtime_error("Expected " + std::to_string(size) + " bytes of data after header");
+            throw std::runtime_error("Expected " + std::to_string(size) + " bytes of facet data after header");
         }
     }
 
     static Solid _extractSolid(std::string_view &data, size_t count)
     {
         Solid solid;
-        solid.facets = _extractFacets(data, count);
+        solid.facets = BinaryFacetParser::parseAll(data, count);
         return solid;
-    }
-
-    static std::vector<Facet> _extractFacets(std::string_view &data, size_t count)
-    {
-        std::vector<Facet> facets;
-        facets.reserve(count);
-        for (size_t i = 0; i < count; ++i)
-        {
-            auto facet = _extractFacet(data);
-            facets.push_back(facet);
-        }
-        return facets;
-    }
-
-    static Facet _extractFacet(std::string_view &data)
-    {
-        Facet facet;
-        facet.normal.x = BinaryHelper::extractLittleEndian<float>(data);
-        facet.normal.y = BinaryHelper::extractLittleEndian<float>(data);
-        facet.normal.z = BinaryHelper::extractLittleEndian<float>(data);
-        facet.vertices[0].x = BinaryHelper::extractLittleEndian<float>(data);
-        facet.vertices[0].y = BinaryHelper::extractLittleEndian<float>(data);
-        facet.vertices[0].z = BinaryHelper::extractLittleEndian<float>(data);
-        facet.vertices[1].x = BinaryHelper::extractLittleEndian<float>(data);
-        facet.vertices[1].y = BinaryHelper::extractLittleEndian<float>(data);
-        facet.vertices[1].z = BinaryHelper::extractLittleEndian<float>(data);
-        facet.vertices[2].x = BinaryHelper::extractLittleEndian<float>(data);
-        facet.vertices[2].y = BinaryHelper::extractLittleEndian<float>(data);
-        facet.vertices[2].z = BinaryHelper::extractLittleEndian<float>(data);
-        BinaryHelper::extractLittleEndian<uint16_t>(data);
-        return facet;
     }
 };
 
@@ -523,7 +392,7 @@ std::vector<std::string> StlMeshParser::getSupportedExtensions() const
 
 TriangleMesh StlMeshParser::parse(std::string_view data) const
 {
-    auto solid = Format::isAscii(data) ? AsciiParser::parse(data) : BinaryParser::parse(data);
+    auto solid = Format::isAscii(data) ? AsciiSolidParser::parse(data) : BinarySolidParser::parse(data);
     return MeshConverter::convert(solid);
 }
 } // namespace brayns

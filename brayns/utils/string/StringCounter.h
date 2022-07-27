@@ -21,42 +21,17 @@
 
 #pragma once
 
-#include <stdexcept>
 #include <string_view>
-
-#include "EndianHelper.h"
 
 namespace brayns
 {
-class BinaryHelper
+class StringCounter
 {
 public:
-    template<typename T>
-    static T extractBigEndian(std::string_view &line)
-    {
-        auto value = extract<T>(line);
-        return EndianHelper::convertBigEndianToLocalEndian(value);
-    }
-
-    template<typename T>
-    static T extractLittleEndian(std::string_view &line)
-    {
-        auto value = extract<T>(line);
-        return EndianHelper::convertLittleEndianToLocalEndian(value);
-    }
-
-    template<typename T>
-    static T extract(std::string_view &line)
-    {
-        auto stride = sizeof(T);
-        if (line.size() < stride)
-        {
-            throw std::runtime_error("Line too short");
-        }
-        T value;
-        std::memcpy(&value, line.data(), stride);
-        line = line.substr(stride);
-        return value;
-    }
+    static size_t count(std::string_view data, char item);
+    static size_t count(std::string_view data, std::string_view item);
+    static size_t countOneOf(std::string_view data, std::string_view items);
+    static size_t countTokens(std::string_view data);
+    static size_t countLines(std::string_view data);
 };
 } // namespace brayns

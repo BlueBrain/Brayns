@@ -21,7 +21,9 @@
 #include "HeaderEntryParser.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringCase.h>
+#include <brayns/utils/string/StringSplitter.h>
+#include <brayns/utils/string/StringTrimmer.h>
 
 #include <spdlog/fmt/bundled/printf.h>
 
@@ -152,16 +154,14 @@ class HeaderEntryParseUtils
 public:
     static std::string sanitizeValue(std::string_view value)
     {
-        std::string valueStr(value);
-        brayns::string_utils::trim(valueStr);
-        return brayns::string_utils::toLowercase(std::move(valueStr));
+        value = brayns::StringTrimmer::trim(value);
+        return brayns::StringCase::toLower(value);
     }
 
     static std::vector<std::string> parseStringArray(std::string_view value, char delimiter = ' ')
     {
-        auto valueStr = std::string(value);
-        brayns::string_utils::trim(valueStr);
-        return brayns::string_utils::split(valueStr, delimiter);
+        value = brayns::StringTrimmer::trim(value);
+        return brayns::StringSplitter::split(value, delimiter);
     }
 
     static std::vector<int32_t> parseIntArray(std::string_view value)
@@ -300,9 +300,7 @@ class ContentParser
 public:
     static void parse(std::string_view value, NRRDHeader &header)
     {
-        auto valueStr = std::string(value);
-        brayns::string_utils::trim(valueStr);
-        header.content = std::move(valueStr);
+        header.content = brayns::StringTrimmer::trim(value);
     }
 };
 
@@ -329,15 +327,14 @@ class DatafileParser
 public:
     static void parse(std::string_view value, NRRDHeader &header)
     {
-        auto valueStr = std::string(value);
-        brayns::string_utils::trim(valueStr);
+        value = brayns::StringTrimmer::trim(value);
 
-        auto tokens = brayns::string_utils::split(valueStr, ' ');
+        auto tokens = brayns::StringSplitter::split(value, ' ');
 
         // 1st form: a filename
         if (tokens.size() == 1)
         {
-            header.dataFiles = {valueStr};
+            header.dataFiles = {std::string(value)};
             return;
         }
 
@@ -421,9 +418,7 @@ class SampleUnitsParser
 public:
     static void parse(std::string_view value, NRRDHeader &header)
     {
-        auto valueStr = std::string(value);
-        brayns::string_utils::trim(valueStr);
-        header.sampleUnits = std::move(valueStr);
+        header.sampleUnits = brayns::StringTrimmer::trim(value);
     }
 };
 
@@ -486,7 +481,7 @@ public:
         for (size_t i = 0; i < kindTokens.size(); ++i)
         {
             auto token = kindTokens[i];
-            brayns::string_utils::trim(token);
+            token = brayns::StringTrimmer::trim(token);
             auto kindIterator = kindTable.find(token);
             if (kindIterator == kindTable.end())
             {
@@ -506,7 +501,7 @@ public:
     static void parse(std::string_view value, NRRDHeader &header)
     {
         auto valueStr = std::string(value);
-        brayns::string_utils::trim(valueStr);
+        valueStr = brayns::StringTrimmer::trim(valueStr);
 
         const auto spaceTable = SpaceTableBuilder::build();
         auto spaceIterator = spaceTable.find(valueStr);
@@ -734,7 +729,8 @@ HeaderEntryParser::HeaderEntryParser()
 
 void HeaderEntryParser::parseEntry(std::string_view key, std::string_view value, NRRDHeader &header)
 {
-    auto keyStr = brayns::string_utils::toLowercase(std::string(key));
+    auto keyStr = std::string(key);
+    keyStr = brayns::StringCase::toLower(key);
     auto parserIterator = _table.find(keyStr);
     if (parserIterator == _table.end())
     {

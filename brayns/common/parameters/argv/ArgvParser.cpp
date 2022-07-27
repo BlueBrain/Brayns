@@ -28,7 +28,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringSplitter.h>
 
 namespace
 {
@@ -432,7 +432,7 @@ private:
         {
             return {token};
         }
-        return brayns::string_utils::split(token, ' ');
+        return brayns::StringSplitter::split(token, ' ');
     }
 
     bool _parse(const std::vector<std::string> &tokens, std::vector<brayns::ArgvValue> &values)

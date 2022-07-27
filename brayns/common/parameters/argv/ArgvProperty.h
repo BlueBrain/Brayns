@@ -57,7 +57,7 @@ struct GetArgvProperty
         property.type = ArgvTypeInfo::getType<T>();
         if constexpr (ArgvTypeInfo::isNumeric<T>())
         {
-            property.minimum = std::numeric_limits<T>::min();
+            property.minimum = std::numeric_limits<T>::lowest();
             property.maximum = std::numeric_limits<T>::max();
         }
         if constexpr (std::is_enum_v<T>)

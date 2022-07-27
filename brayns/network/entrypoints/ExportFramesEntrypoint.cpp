@@ -25,9 +25,9 @@
 #include <brayns/common/Log.h>
 #include <brayns/engine/FrameRenderer.h>
 #include <brayns/network/common/ProgressHandler.h>
-#include <brayns/utils/StringUtils.h>
 #include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
+#include <brayns/utils/string/StringCase.h>
 
 #include <spdlog/fmt/fmt.h>
 
@@ -75,7 +75,7 @@ struct FrameWritter
 
         const auto &imageSettings = params.image_settings;
         const auto &inputFormat = imageSettings.getFormat();
-        const auto format = brayns::string_utils::toLowercase(inputFormat);
+        const auto format = brayns::StringCase::toLower(inputFormat);
         const auto quality = imageSettings.getQuality();
         auto image = fb.getImage();
 

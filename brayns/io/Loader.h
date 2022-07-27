@@ -25,7 +25,7 @@
 #include <brayns/json/Json.h>
 #include <brayns/json/JsonSchema.h>
 #include <brayns/json/JsonSchemaValidator.h>
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringJoiner.h>
 
 #include <functional>
 
@@ -189,7 +189,7 @@ private:
             const auto errors = JsonSchemaValidator::validate(input, _parameterSchema);
             if (!errors.empty())
                 throw std::invalid_argument(
-                    "Could not parse " + getName() + " parameters: " + string_utils::join(errors, ", "));
+                    "Could not parse " + getName() + " parameters: " + StringJoiner::join(errors, ", "));
 
             Json::deserialize<T>(input, inputParams);
         }
