@@ -25,7 +25,7 @@
 #include <brayns/json/JsonObjectMacro.h>
 #include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/utils/FileReader.h>
-#include <brayns/utils/StringUtils.h>
+#include <brayns/utils/string/StringJoiner.h>
 
 #include "builder/DTIBuilder.h"
 #include "builder/SimulatedDTIBuilder.h"
@@ -54,7 +54,7 @@ public:
 
         if (!jsonErrors.empty())
         {
-            auto errorString = brayns::string_utils::join(jsonErrors, "\n");
+            auto errorString = brayns::StringJoiner::join(jsonErrors, "\n");
             throw std::invalid_argument("Ill-formed dti config file: " + errorString);
         }
 
