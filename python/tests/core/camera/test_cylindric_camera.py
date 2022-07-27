@@ -24,7 +24,7 @@ from brayns.core.camera.cylindric_camera import CylindricCamera
 from brayns.core.camera.fovy import Fovy
 
 
-class TestPerspectiveCamera(unittest.TestCase):
+class TestCylindricCamera(unittest.TestCase):
 
     def test_get_name(self) -> None:
         test = CylindricCamera.name
