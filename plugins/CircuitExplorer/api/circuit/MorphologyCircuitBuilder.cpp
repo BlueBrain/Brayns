@@ -22,7 +22,7 @@
 #include "colorhandlers/MorphologyColorHandler.h"
 
 #include <api/neuron/NeuronGeometryBuilder.h>
-#include <api/neuron/NeuronMorphologyProcessor.h>
+#include <api/neuron/NeuronMorphologyPipeline.h>
 #include <api/neuron/NeuronMorphologyReader.h>
 #include <components/CircuitColorComponent.h>
 #include <components/MorphologyCircuitComponent.h>
@@ -75,11 +75,13 @@ public:
         const auto axon = morphologyParameters.load_axon;
         const auto dendrites = morphologyParameters.load_dendrites;
         const auto radiusMultiplier = morphologyParameters.radius_multiplier;
+        const auto geometryType = morphologyParameters.geometry_type;
+        const auto pipeline = NeuronMorphologyPipeline::fromParameters(geometryType, radiusMultiplier);
 
         const auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
         {
             auto morphology = NeuronMorphologyReader::read(path, soma, axon, dendrites);
-            NeuronMorphologyProcessor::processMorphology(morphology, true, radiusMultiplier);
+            pipeline.process(morphology);
             const NeuronGeometryBuilder builder(morphology);
             for (const auto idx : indices)
             {

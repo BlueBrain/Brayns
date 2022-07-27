@@ -129,7 +129,7 @@ struct NeuriteReader
                 sectionSamples.emplace_back();
                 auto &sample = sectionSamples.back();
                 sample.position = brayns::Vector3f(p[0], p[1], p[2]);
-                sample.radius = secDiameters[i];
+                sample.radius = std::max(secDiameters[i] * 0.5f, 0.f);
             }
         }
 

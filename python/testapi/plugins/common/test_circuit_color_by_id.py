@@ -27,8 +27,10 @@ class TestCircuitColorById(SimpleTestCase):
     def test_apply(self) -> None:
         loader = brayns.BbpLoader(
             cells=brayns.BbpCells.from_gids([1, 2]),
-            radius_multiplier=10,
-            load_dendrites=True
+            morphology=brayns.MorphologyParameters(
+                radius_multiplier=10,
+                load_dendrites=True
+            )
         )
         models = loader.load(self.instance, self.circuit)
         model = models[0]

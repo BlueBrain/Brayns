@@ -22,6 +22,17 @@
 
 #include <brayns/json/JsonObjectMacro.h>
 
+#include <api/neuron/NeuronGeometryType.h>
+
+namespace brayns
+{
+BRAYNS_JSON_ADAPTER_ENUM(
+    NeuronGeometryType,
+    {"original", NeuronGeometryType::Original},
+    {"smooth", NeuronGeometryType::Smooth},
+    {"constant_radii", NeuronGeometryType::ConstantRadii})
+}
+
 BRAYNS_JSON_OBJECT_BEGIN(NeuronMorphologyLoaderParameters)
 BRAYNS_JSON_OBJECT_ENTRY(
     float,
@@ -31,5 +42,10 @@ BRAYNS_JSON_OBJECT_ENTRY(
     brayns::Minimum(0.1f))
 BRAYNS_JSON_OBJECT_ENTRY(bool, load_soma, "Load the soma section of the neuron", brayns::Default(true))
 BRAYNS_JSON_OBJECT_ENTRY(bool, load_axon, "Load the axon section of the neuron", brayns::Default(false))
-BRAYNS_JSON_OBJECT_ENTRY(bool, load_dendrites, "Load the dendrite secitons of the neuron", brayns::Default(true))
+BRAYNS_JSON_OBJECT_ENTRY(bool, load_dendrites, "Load the dendrite secitons of the neuron", brayns::Default(false))
+BRAYNS_JSON_OBJECT_ENTRY(
+    NeuronGeometryType,
+    geometry_type,
+    "Geometry generation configuration",
+    brayns::Default("smooth"))
 BRAYNS_JSON_OBJECT_END()

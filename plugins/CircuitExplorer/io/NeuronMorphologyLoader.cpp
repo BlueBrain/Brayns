@@ -25,7 +25,7 @@
 #include <brayns/engine/geometry/types/Primitive.h>
 
 #include <api/neuron/NeuronGeometryBuilder.h>
-#include <api/neuron/NeuronMorphologyProcessor.h>
+#include <api/neuron/NeuronMorphologyPipeline.h>
 #include <api/neuron/NeuronMorphologyReader.h>
 #include <io/NeuronMorphologyLoaderParameters.h>
 
@@ -78,13 +78,17 @@ std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
 
     SectionLoadChecker::check(input);
 
-    const auto radMultiplier = input.radius_multiplier;
-    const auto soma = input.load_soma;
-    const auto axon = input.load_axon;
-    const auto dend = input.load_dendrites;
+    auto radMultiplier = input.radius_multiplier;
+    auto soma = input.load_soma;
+    auto axon = input.load_axon;
+    auto dend = input.load_dendrites;
+    auto geometryType = input.geometry_type;
 
     NeuronMorphology morphology = NeuronMorphologyReader::read(path, soma, axon, dend);
-    NeuronMorphologyProcessor::processMorphology(morphology, true, radMultiplier);
+
+    const auto pipeline = NeuronMorphologyPipeline::fromParameters(geometryType, radMultiplier);
+    pipeline.process(morphology);
+
     const NeuronGeometryBuilder builder(morphology);
     auto neuronGeometry = builder.instantiate({}, {});
     auto &primitives = neuronGeometry.geometry;

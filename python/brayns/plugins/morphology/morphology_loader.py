@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,20 +17,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.plugins.common.cell_id import CellId
-from brayns.plugins.common.circuit_color import CircuitColor
-from brayns.plugins.common.circuit_color_by_id import CircuitColorById
-from brayns.plugins.common.circuit_color_by_method import CircuitColorByMethod
-from brayns.plugins.common.color_method import ColorMethod
-from brayns.plugins.common.morphology_geometry_type import MorphologyGeometryType
+from dataclasses import dataclass
+from dataclasses import field
+
+from brayns.core.model.model_loader import ModelLoader
 from brayns.plugins.common.morphology_parameters import MorphologyParameters
 
-__all__ = [
-    'CellId',
-    'CircuitColorById',
-    'CircuitColorByMethod',
-    'CircuitColor',
-    'ColorMethod',
-    'MorphologyGeometryType',
-    'MorphologyParameters'
-]
+
+@dataclass
+class MorphologyLoader(ModelLoader):
+
+    morphology: MorphologyParameters = field(
+        default_factory=MorphologyParameters
+    )
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        return 'Neuron Morphology loader'
+
+    @property
+    def properties(self) -> dict:
+        return self.morphology.serialize()
