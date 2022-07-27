@@ -134,7 +134,7 @@ void SpikeReportComponent::onPreRender(const brayns::ParametersManager &paramete
     _lastEnabledValue = true;
 
     const auto &simulation = parameters.getSimulationParameters();
-    forceUpdate = forceUpdate || simulation.getModifiedFlag();
+    forceUpdate = forceUpdate || simulation.isModified();
 
     if (!forceUpdate)
     {

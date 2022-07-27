@@ -120,10 +120,12 @@ public:
     void resetModified() override;
 
     /**
-     * @brief Returns the modified flag status object
+     * @brief Returns wether the parameters were modified since the last call to resetModified()
+     *
+     * @return true if no changes have happened since the last call to resetModified()
+     * @return false if anything changed since the last call to resetModified()
      */
-    ModifiedFlag &getModifiedFlag() noexcept;
-    const ModifiedFlag &getModifiedFlag() const noexcept;
+    bool isModified() const noexcept;
 
 private:
     uint32_t _startFrame{0};

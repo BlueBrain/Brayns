@@ -87,13 +87,8 @@ void SimulationParameters::resetModified()
     _flag = false;
 }
 
-ModifiedFlag &SimulationParameters::getModifiedFlag() noexcept
+bool SimulationParameters::isModified() const noexcept
 {
-    return _flag;
-}
-
-const ModifiedFlag &SimulationParameters::getModifiedFlag() const noexcept
-{
-    return _flag;
+    return static_cast<bool>(_flag);
 }
 } // namespace brayns

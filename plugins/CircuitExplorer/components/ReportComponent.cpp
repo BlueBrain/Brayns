@@ -61,7 +61,7 @@ void ReportComponent::onPreRender(const brayns::ParametersManager &parameters)
     auto &tf = brayns::ExtractModelObject::extractTransferFunction(model);
     auto &tfModified = tf.getModifiedFlag();
     auto &simulation = parameters.getSimulationParameters();
-    auto &simulationModified = simulation.getModifiedFlag();
+    auto simulationModified = simulation.isModified();
     auto forceUpdate = !_lastEnabledValue || simulationModified || tfModified;
     _lastEnabledValue = true;
 

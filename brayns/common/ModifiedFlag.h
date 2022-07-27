@@ -39,6 +39,7 @@ public:
     ModifiedFlag &operator=(const ModifiedFlag &other)
     {
         (void)other;
+        _modified = true;
         return *this;
     }
 
