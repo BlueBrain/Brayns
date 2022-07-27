@@ -18,18 +18,34 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_view import CameraView
-from brayns.core.camera.cylindric_camera import CylindricCamera
-from brayns.core.camera.fovy import Fovy
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
+import math
 
-__all__ = [
-    'Camera',
-    'CameraView',
-    'CylindricCamera',
-    'Fovy',
-    'OrthographicCamera',
-    'PerspectiveCamera'
-]
+from brayns.core.camera.camera_view import CameraView
+from brayns.core.common.bounds import Bounds
+from brayns.core.common.vector3 import Vector3
+
+
+class Fovy:
+
+    def __init__(self, angle: float = math.radians(45), degrees: bool = False) -> None:
+        self._angle = math.radians(angle) if degrees else angle
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Fovy):
+            return False
+        return self._angle == other._angle
+
+    @property
+    def radians(self) -> float:
+        return self._angle
+
+    @property
+    def degrees(self) -> float:
+        return math.degrees(self._angle)
+
+    def get_full_screen_view(self, target: Bounds) -> CameraView:
+        center = target.center
+        distance = target.height / 2 / math.tan(self.radians / 2)
+        distance += target.depth / 2
+        position = center + distance * Vector3.forward
+        return CameraView(position, center)

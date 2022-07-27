@@ -18,18 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_view import CameraView
-from brayns.core.camera.cylindric_camera import CylindricCamera
-from brayns.core.camera.fovy import Fovy
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
+import brayns
+from testapi.core.camera.camera_test_case import CameraTestCase
 
-__all__ = [
-    'Camera',
-    'CameraView',
-    'CylindricCamera',
-    'Fovy',
-    'OrthographicCamera',
-    'PerspectiveCamera'
-]
+
+class TestOrthographicCamera(CameraTestCase):
+
+    def test_all(self) -> None:
+        camera = brayns.CylindricCamera(
+            fovy=brayns.Fovy(45, degrees=True)
+        )
+        self.run_tests(camera)

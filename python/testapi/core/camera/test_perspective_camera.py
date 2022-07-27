@@ -26,9 +26,8 @@ class TestPerspectiveCamera(CameraTestCase):
 
     def test_all(self) -> None:
         camera = brayns.PerspectiveCamera(
-            fovy=30,
+            fovy=brayns.Fovy(30, degrees=True),
             aperture_radius=1,
-            focus_distance=2,
-            degrees=True
+            focus_distance=2
         )
         self.run_tests(camera)

@@ -18,18 +18,31 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_view import CameraView
-from brayns.core.camera.cylindric_camera import CylindricCamera
-from brayns.core.camera.fovy import Fovy
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
+from dataclasses import dataclass
+from typing import Optional
 
-__all__ = [
-    'Camera',
-    'CameraView',
-    'CylindricCamera',
-    'Fovy',
-    'OrthographicCamera',
-    'PerspectiveCamera'
-]
+from brayns.core.camera.camera import Camera
+from brayns.core.camera.fovy import Fovy
+
+
+@dataclass
+class CylindricCamera(Camera):
+
+    fovy: Optional[Fovy] = None
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        return 'cylindric'
+
+    @classmethod
+    def deserialize(cls, message: dict) -> 'CylindricCamera':
+        return cls(
+            fovy=Fovy(message['fovy'], degrees=True)
+        )
+
+    def serialize(self) -> dict:
+        message = {}
+        if self.fovy is not None:
+            message['fovy'] = self.fovy.degrees
+        return message

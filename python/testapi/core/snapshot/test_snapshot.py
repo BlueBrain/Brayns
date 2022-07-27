@@ -75,7 +75,7 @@ class TestSnapshot(SimpleTestCase):
 
     def _create_snapshot(self, bounds: brayns.Bounds) -> brayns.Snapshot:
         camera = brayns.PerspectiveCamera()
-        view = camera.get_full_screen_view(bounds)
+        view = camera.fovy.get_full_screen_view(bounds)
         view.position += brayns.Vector3.forward
         renderer = brayns.InteractiveRenderer()
         return brayns.Snapshot(

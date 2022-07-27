@@ -18,22 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import math
-from dataclasses import InitVar, dataclass
+from dataclasses import dataclass
 
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_view import CameraView
-from brayns.core.common.bounds import Bounds
-from brayns.core.common.vector3 import Vector3
+from brayns.core.camera.fovy import Fovy
 
 
 @dataclass
 class PerspectiveCamera(Camera):
 
-    fovy: InitVar[float] = math.radians(45)
+    fovy: Fovy = Fovy()
     aperture_radius: float = 0.0
     focus_distance: float = 1.0
-    degrees: InitVar[bool] = False
 
     @classmethod
     @property
@@ -42,42 +38,15 @@ class PerspectiveCamera(Camera):
 
     @classmethod
     def deserialize(cls, message: dict) -> 'PerspectiveCamera':
-        return PerspectiveCamera(
-            fovy=message['fovy'],
+        return cls(
+            fovy=Fovy(message['fovy'], degrees=True),
             aperture_radius=message['aperture_radius'],
-            focus_distance=message['focus_distance'],
-            degrees=True
+            focus_distance=message['focus_distance']
         )
-
-    def __post_init__(self, fovy: float, degrees: bool) -> None:
-        self._fovy = math.radians(fovy) if degrees else fovy
-
-    @property
-    def fovy_radians(self) -> float:
-        return self._fovy
-
-    @fovy_radians.setter
-    def fovy_radians(self, value: float) -> None:
-        self._fovy = value
-
-    @property
-    def fovy_degrees(self) -> float:
-        return math.degrees(self._fovy)
-
-    @fovy_degrees.setter
-    def fovy_degrees(self, value: float) -> None:
-        self._fovy = math.radians(value)
 
     def serialize(self) -> dict:
         return {
-            'fovy': self.fovy_degrees,
+            'fovy': self.fovy.degrees,
             'aperture_radius': self.aperture_radius,
             'focus_distance': self.focus_distance
         }
-
-    def get_full_screen_view(self, target: Bounds) -> CameraView:
-        center = target.center
-        distance = target.height / 2 / math.tan(self.fovy_radians / 2)
-        distance += target.depth / 2
-        position = center + distance * Vector3.forward
-        return CameraView(position, center)

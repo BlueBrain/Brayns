@@ -18,18 +18,38 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_view import CameraView
+import unittest
+
 from brayns.core.camera.cylindric_camera import CylindricCamera
 from brayns.core.camera.fovy import Fovy
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
 
-__all__ = [
-    'Camera',
-    'CameraView',
-    'CylindricCamera',
-    'Fovy',
-    'OrthographicCamera',
-    'PerspectiveCamera'
-]
+
+class TestCylindricCamera(unittest.TestCase):
+
+    def test_get_name(self) -> None:
+        test = CylindricCamera.name
+        ref = 'cylindric'
+        self.assertEqual(test, ref)
+
+    def test_deserialize(self) -> None:
+        message = {
+            'fovy': 30
+        }
+        test = CylindricCamera.deserialize(message)
+        self.assertAlmostEqual(test.fovy.degrees, 30)
+
+    def test_serialize(self) -> None:
+        camera = CylindricCamera(
+            fovy=Fovy(30, degrees=True)
+        )
+        test = camera.serialize()
+        self.assertAlmostEqual(test['fovy'], 30)
+
+    def test_serialize_default_fovy(self) -> None:
+        camera = CylindricCamera()
+        test = camera.serialize()
+        self.assertNotIn('fovy', test)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -42,7 +42,7 @@ class OrthographicCamera(Camera):
 
     @classmethod
     def deserialize(cls, message: dict) -> 'OrthographicCamera':
-        return OrthographicCamera(
+        return cls(
             height=message['height'],
         )
 

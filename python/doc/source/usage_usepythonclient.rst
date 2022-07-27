@@ -94,7 +94,7 @@ However, it is not necessary to change the state of the global camera as we can 
     camera = brayns.PerspectiveCamera()
 
     # Use it to get the position and target to see the model entirely.
-    view = camera.get_full_screen_view(model.bounds)    
+    view = camera.fovy.get_full_screen_view(model.bounds)    
 
 
 Rendering a snapshot
