@@ -32,7 +32,7 @@ class BbpLoader(ModelLoader):
 
     cells: BbpCells = BbpCells.all()
     report: Optional[BbpReport] = None
-    morphology: Optional[MorphologyParameters] = MorphologyParameters()
+    morphology: Optional[MorphologyParameters] = None
     load_afferent_synapses: bool = False
     load_efferent_synapses: bool = False
 

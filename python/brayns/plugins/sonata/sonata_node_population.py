@@ -34,7 +34,7 @@ class SonataNodePopulation:
     nodes: SonataNodes = SonataNodes.from_density(0.01)
     report: Optional[SonataReport] = None
     edges: Optional[list[SonataEdgePopulation]] = None
-    morphology: Optional[MorphologyParameters] = MorphologyParameters()
+    morphology: Optional[MorphologyParameters] = None
     vasculature_radius_multiplier: float = 1.0
 
     def serialize(self) -> dict:

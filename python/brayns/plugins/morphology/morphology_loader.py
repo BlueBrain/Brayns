@@ -27,7 +27,7 @@ from brayns.plugins.common.morphology_parameters import MorphologyParameters
 @dataclass
 class MorphologyLoader(ModelLoader):
 
-    morphology: Optional[MorphologyParameters] = MorphologyParameters()
+    morphology: Optional[MorphologyParameters] = None
 
     @classmethod
     @property
@@ -36,4 +36,6 @@ class MorphologyLoader(ModelLoader):
 
     @property
     def properties(self) -> dict:
+        if self.morphology is None:
+            return {}
         return self.morphology.serialize()

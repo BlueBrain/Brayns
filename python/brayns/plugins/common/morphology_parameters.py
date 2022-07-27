@@ -18,7 +18,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Optional
+
+from brayns.plugins.common.morphology_geometry_type import MorphologyGeometryType
 
 
 @dataclass
@@ -28,7 +29,7 @@ class MorphologyParameters:
     load_soma: bool = True
     load_axon: bool = False
     load_dendrites: bool = False
-    geometry_type: str = "smooth"
+    geometry_type: MorphologyGeometryType = MorphologyGeometryType.SMOOTH
 
     def serialize(self) -> dict:
         return {
@@ -36,5 +37,5 @@ class MorphologyParameters:
             'load_soma': self.load_soma,
             'load_axon': self.load_axon,
             'load_dendrites': self.load_dendrites,
-            'geometry_type': self.geometry_type
+            'geometry_type': self.geometry_type.value
         }

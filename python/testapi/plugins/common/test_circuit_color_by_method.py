@@ -58,11 +58,10 @@ class TestCircuitColorByMethod(SimpleTestCase):
         color.apply(self.instance, id)
 
     def _load_circuit(self) -> int:
-        morphology = brayns.MorphologyParameters(
-            radius_multiplier=10
-        )
         loader = brayns.BbpLoader(
-            morphology=morphology
+            morphology=brayns.MorphologyParameters(
+                radius_multiplier=10
+            )
         )
         models = loader.load(self.instance, self.circuit)
         return models[0].id
