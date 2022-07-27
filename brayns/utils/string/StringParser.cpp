@@ -125,7 +125,7 @@ public:
         }
         catch (const std::out_of_range &)
         {
-            throw std::out_of_range("Value '" + data + "' outside 64 bits range");
+            throw std::out_of_range("Value '" + data + "' out of range");
         }
     }
 };
