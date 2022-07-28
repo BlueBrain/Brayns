@@ -35,11 +35,15 @@ class TestGeometries(unittest.TestCase):
         ])
         self._message = [
             {
-                'geometry': 1,
+                'geometry': {
+                    'value': 1
+                },
                 'color': [1, 1, 1, 1]
             },
             {
-                'geometry': 2,
+                'geometry': {
+                    'value': 1
+                },
                 'color': [1, 0, 0, 1]
             }
         ]

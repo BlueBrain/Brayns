@@ -63,7 +63,7 @@ class TestJsonRpcTask(unittest.TestCase):
         task.set_result(result)
         self.assertEqual(task.get_result(), result)
         task = JsonRpcTask()
-        error = RequestError('test', 0, 123)
+        error = RequestError(0, 'test', 123)
         task.set_error(error)
         with self.assertRaises(RequestError) as context:
             task.get_result()
@@ -79,7 +79,7 @@ class TestJsonRpcTask(unittest.TestCase):
 
     def test_set_error(self) -> None:
         task = JsonRpcTask()
-        error = RequestError('test', 1, 123)
+        error = RequestError(1, 'test', 123)
         task.set_error(error)
         with self.assertRaises(RequestError) as context:
             task.get_result()

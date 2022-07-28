@@ -57,6 +57,7 @@ class TestSnapshot(SimpleTestCase):
     def _prepare_snapshot(self) -> brayns.Snapshot:
         model = self._load_model()
         snapshot = self._create_snapshot(model.bounds)
+        assert snapshot.view is not None
         self._add_light(snapshot.view.direction)
         return snapshot
 

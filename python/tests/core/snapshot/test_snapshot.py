@@ -22,6 +22,7 @@ import base64
 import unittest
 
 from brayns.core.camera.camera_view import CameraView
+from brayns.core.common.resolution import Resolution
 from brayns.core.snapshot.image_format import ImageFormat
 from brayns.core.snapshot.snapshot import Snapshot
 from tests.core.camera.mock_camera import MockCamera
@@ -54,7 +55,7 @@ class TestSnapshot(unittest.TestCase):
     def test_serialize_with_format(self) -> None:
         snapshot = Snapshot(
             jpeg_quality=50,
-            resolution=(1920, 1080),
+            resolution=Resolution(1920, 1080),
             frame=12,
             view=CameraView(),
             camera=MockCamera(),

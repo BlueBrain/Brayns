@@ -48,8 +48,8 @@ class TestJsonRpcHandler(unittest.TestCase):
         self.assertEqual(task.get_result(), reply.result)
 
     def test_on_error(self) -> None:
-        error = JsonRpcError(0, RequestError('test', 0, 123))
-        task = self._tasks.create_task(error.id)
+        error = JsonRpcError(0, RequestError(0, 'test', 123))
+        task = self._tasks.create_task(0)
         with self.assertLogs(self._logger, logging.INFO) as context:
             self._handler.on_error(error)
         self.assertEqual(len(context.output), 1)

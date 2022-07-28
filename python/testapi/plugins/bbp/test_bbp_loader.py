@@ -51,8 +51,9 @@ class TestBbpLoader(SimpleTestCase):
 
     def _snapshot(self, bounds: brayns.Bounds) -> None:
         snapshot = self._create_snapshot(bounds)
+        assert snapshot.view is not None
         self._adjust_lights(snapshot.view)
-        snapshot.save(self.instance, self.output)
+        snapshot.save(self.instance, str(self.output))
 
     def _create_snapshot(self, bounds: brayns.Bounds) -> brayns.Snapshot:
         camera = brayns.PerspectiveCamera()

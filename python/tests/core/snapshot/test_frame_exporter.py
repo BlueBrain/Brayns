@@ -21,6 +21,7 @@
 import unittest
 
 from brayns.core.camera.camera_view import CameraView
+from brayns.core.common.resolution import Resolution
 from brayns.core.snapshot.frame_exporter import FrameExporter
 from brayns.core.snapshot.image_format import ImageFormat
 from brayns.core.snapshot.key_frame import KeyFrame
@@ -46,7 +47,7 @@ class TestFrameExporter(unittest.TestCase):
             frames=KeyFrame.from_indices([0, 1], CameraView()),
             format=ImageFormat.JPEG,
             jpeg_quality=50,
-            resolution=(600, 900),
+            resolution=Resolution(600, 900),
             camera=MockCamera(),
             renderer=MockRenderer()
         )

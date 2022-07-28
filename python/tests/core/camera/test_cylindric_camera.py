@@ -36,6 +36,8 @@ class TestCylindricCamera(unittest.TestCase):
             'fovy': 30
         }
         test = CylindricCamera.deserialize(message)
+        self.assertIsNotNone(test.fovy)
+        assert test.fovy is not None
         self.assertAlmostEqual(test.fovy.degrees, 30)
 
     def test_serialize(self) -> None:

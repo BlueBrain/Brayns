@@ -53,8 +53,6 @@ class TestJsonRpcManager(unittest.TestCase):
     def test_create_task(self) -> None:
         self._manager.create_task(0)
         self.assertEqual(len(self._tasks), 1)
-        self._manager.create_task(None)
-        self.assertEqual(len(self._tasks), 1)
 
     def test_process_message(self) -> None:
         task = self._manager.create_task(0)
