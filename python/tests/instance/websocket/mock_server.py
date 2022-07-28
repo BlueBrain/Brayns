@@ -22,8 +22,8 @@ import ssl
 import threading
 from typing import Optional, Union
 
-import websockets
 from brayns.instance.websocket.event_loop import EventLoop
+from websockets.server import WebSocketServer, WebSocketServerProtocol, serve
 
 
 class MockServer:
@@ -78,13 +78,13 @@ class MockServer:
         certfile: Optional[str] = None,
         keyfile: Optional[str] = None,
         password: Optional[str] = None
-    ) -> websockets.WebSocketServer:
+    ) -> WebSocketServer:
         host, port = uri.split(':')
         context = None
         if certfile is not None:
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             context.load_cert_chain(certfile, keyfile, password)
-        return await websockets.serve(
+        return await serve(
             ws_handler=self._handle_connection,
             host=host,
             port=int(port),
@@ -93,7 +93,7 @@ class MockServer:
             close_timeout=0
         )
 
-    async def _handle_connection(self, websocket: websockets.WebSocketServerProtocol, _) -> None:
+    async def _handle_connection(self, websocket: WebSocketServerProtocol, _) -> None:
         try:
             if self._receive:
                 self._request = await websocket.recv()

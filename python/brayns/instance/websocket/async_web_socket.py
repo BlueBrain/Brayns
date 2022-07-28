@@ -23,8 +23,8 @@ import threading
 from collections import deque
 from typing import Optional, Union
 
-import websockets
 from brayns.instance.websocket.web_socket_error import WebSocketError
+from websockets.client import WebSocketClientProtocol, connect
 
 
 class AsyncWebSocket:
@@ -32,7 +32,7 @@ class AsyncWebSocket:
     @staticmethod
     async def connect(uri: str, ssl: Optional[ssl.SSLContext]) -> 'AsyncWebSocket':
         try:
-            websocket = await websockets.connect(
+            websocket = await connect(
                 uri=uri,
                 ssl=ssl,
                 ping_interval=None,
@@ -43,7 +43,7 @@ class AsyncWebSocket:
         except Exception as e:
             raise WebSocketError(str(e))
 
-    def __init__(self,  websocket: websockets.WebSocketClientProtocol) -> None:
+    def __init__(self,  websocket: WebSocketClientProtocol) -> None:
         self._websocket = websocket
         self._error: Optional[WebSocketError] = None
         self._queue = deque[Union[bytes, str]]()

@@ -42,7 +42,7 @@ class TestGeometries(unittest.TestCase):
             },
             {
                 'geometry': {
-                    'value': 1
+                    'value': 2
                 },
                 'color': [1, 0, 0, 1]
             }

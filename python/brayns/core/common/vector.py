@@ -28,8 +28,7 @@ T = TypeVar('T', bound='Vector')
 
 class Vector(ABC):
 
-    @abstractmethod
-    def __init__(self, *args: float) -> None:
+    def __init__(self, *_: float) -> None:
         pass
 
     @abstractmethod
