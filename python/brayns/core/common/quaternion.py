@@ -55,11 +55,11 @@ class Quaternion(Vector):
             angle = math.radians(angle)
         half_angle = angle / 2
         axis = axis.normalized * math.sin(half_angle)
-        return Quaternion(*axis, math.cos(half_angle))
+        return Quaternion(axis.x, axis.y, axis.z, math.cos(half_angle))
 
     @staticmethod
     def from_vector(value: Vector3) -> 'Quaternion':
-        return Quaternion(*value, 0.0)
+        return Quaternion(value.x, value.y, value.z, 0.0)
 
     @classmethod
     @property

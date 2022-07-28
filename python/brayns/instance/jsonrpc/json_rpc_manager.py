@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
-from typing import Optional
 
 from brayns.instance.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
 from brayns.instance.jsonrpc.json_rpc_handler import JsonRpcHandler
@@ -51,7 +50,7 @@ class JsonRpcManager:
         error = RequestError(0, 'Disconnection from client side')
         self._tasks.add_global_error(error)
 
-    def create_task(self, id: Optional[JsonRpcId]) -> JsonRpcTask:
+    def create_task(self, id: JsonRpcId) -> JsonRpcTask:
         self._logger.debug('Create JSON-RPC task with ID %s.', id)
         return self._tasks.create_task(id)
 

@@ -33,7 +33,7 @@ class JsonRpcRequest:
     params: Any = None
 
     def to_dict(self) -> dict:
-        message = {
+        message: dict[str, Any] = {
             'jsonrpc': '2.0',
             'method': self.method
         }

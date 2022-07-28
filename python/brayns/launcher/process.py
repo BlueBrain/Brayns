@@ -57,6 +57,8 @@ class Process:
             return ''.join(self._logs)
 
     def terminate(self) -> None:
+        assert self._process.stdin is not None
+        assert self._process.stdout is not None
         self._process.terminate()
         self._process.wait()
         self._process.stdin.close()
@@ -64,6 +66,7 @@ class Process:
         self._thread.join()
 
     def _poll(self) -> None:
+        assert self._process.stdout is not None
         for line in self._process.stdout:
             with self._lock:
                 self._logs.append(line)

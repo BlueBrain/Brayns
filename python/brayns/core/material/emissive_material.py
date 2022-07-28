@@ -30,7 +30,7 @@ class EmissiveMaterial(Material):
 
     @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return 'emissive'
 
     @classmethod

@@ -36,7 +36,7 @@ class Material(ABC):
     @classmethod
     @property
     @abstractmethod
-    def name(self) -> str:
+    def name(cls) -> str:
         pass
 
     @classmethod

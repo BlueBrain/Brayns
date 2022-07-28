@@ -29,6 +29,10 @@ T = TypeVar('T', bound='Vector')
 class Vector(ABC):
 
     @abstractmethod
+    def __init__(self, *args: float) -> None:
+        pass
+
+    @abstractmethod
     def __iter__(self) -> Iterator[float]:
         pass
 

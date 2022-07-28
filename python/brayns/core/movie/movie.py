@@ -58,6 +58,7 @@ class Movie:
 
 def _run_process(args: list[str]) -> str:
     with _create_process(args) as process:
+        assert process.stdout is not None
         lines = deque[str](process.stdout, maxlen=1000)
         code = process.wait()
     logs = ''.join(lines)
@@ -66,7 +67,7 @@ def _run_process(args: list[str]) -> str:
     return logs
 
 
-def _create_process(args: list[str]) -> subprocess.Popen:
+def _create_process(args: list[str]) -> subprocess.Popen[str]:
     try:
         return subprocess.Popen(
             args=args,
@@ -101,9 +102,9 @@ def _get_input(folder: str, format: ImageFormat) -> list[str]:
 
 
 def _get_pattern(folder: str, format: ImageFormat) -> str:
-    folder = pathlib.Path(folder)
+    path = pathlib.Path(folder)
     pattern = f'%05d.{format.value}'
-    return str(folder / pattern)
+    return str(path / pattern)
 
 
 def _get_output_options(movie: Movie) -> list[str]:
