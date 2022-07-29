@@ -34,8 +34,10 @@ class Listener(WebSocketListener):
 
     def on_binary(self, data: bytes) -> None:
         self._logger.info('Binary frame received of %d bytes.', len(data))
+        self._logger.debug('Frame data: "%s".', data)
         self._binary_handler(data)
 
     def on_text(self, data: str) -> None:
-        self._logger.info('Text frame received: "%s".', data)
+        self._logger.info('Text frame received of %d chars.', len(data))
+        self._logger.debug('Frame data: "%s".', data)
         self._manager.process_message(data)

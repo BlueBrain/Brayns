@@ -36,6 +36,7 @@ class JsonRpcHandler(JsonRpcListener):
 
     def on_reply(self, reply: JsonRpcReply) -> None:
         self._logger.info('JSON-RPC reply received: %s.', reply)
+        self._logger.debug('Reply result: %s.', reply.result)
         self._tasks.add_result(reply.id, reply.result)
 
     def on_error(self, error: JsonRpcError) -> None:

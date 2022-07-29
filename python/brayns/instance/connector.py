@@ -43,6 +43,7 @@ class Connector:
     logger: logging.Logger = field(default_factory=Logger)
 
     def connect(self, max_attempts: Optional[int] = 1, attempt_period: float = 0.1) -> Instance:
+        self.logger.info('Connection to "%s".', self.uri)
         count = 0
         while True:
             self.logger.debug('Connection attempt %s.', count)

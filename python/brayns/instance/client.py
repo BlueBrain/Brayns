@@ -48,7 +48,8 @@ class Client(Instance):
         return self._manager.is_running(id)
 
     def send(self, request: JsonRpcRequest) -> RequestFuture:
-        self._logger.info('Sending request %s.', request)
+        self._logger.info('Send JSON-RPC request: %s.', request)
+        self._logger.debug('Request params: %s.', request.params)
         data = request.to_json()
         self._websocket.send_text(data)
         id = request.id
@@ -61,7 +62,7 @@ class Client(Instance):
         )
 
     def poll(self, block: bool = True) -> None:
-        self._logger.debug('Polling messages from Brayns instance.')
+        self._logger.info('Poll messages from Brayns instance.')
         self._websocket.poll(block)
 
     def cancel(self, id: JsonRpcId) -> None:

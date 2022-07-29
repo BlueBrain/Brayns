@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Optional
 
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
@@ -30,7 +30,7 @@ class JsonRpcRequest:
 
     id: Optional[JsonRpcId]
     method: str
-    params: Any = None
+    params: Any = field(default=None, repr=False)
 
     def to_dict(self) -> dict:
         message: dict[str, Any] = {
