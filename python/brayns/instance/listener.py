@@ -27,14 +27,14 @@ from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 class Listener(WebSocketListener):
 
-    def __init__(self, logger: logging.Logger, on_binary: Callable[[bytes], None], manager: JsonRpcManager) -> None:
+    def __init__(self, logger: logging.Logger, binary_handler: Callable[[bytes], None], manager: JsonRpcManager) -> None:
         self._logger = logger
         self._manager = manager
-        self._on_binary = on_binary
+        self._binary_handler = binary_handler
 
     def on_binary(self, data: bytes) -> None:
         self._logger.info('Binary frame received of %d bytes.', len(data))
-        self._on_binary(data)
+        self._binary_handler(data)
 
     def on_text(self, data: str) -> None:
         self._logger.info('Text frame received: "%s".', data)

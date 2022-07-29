@@ -32,6 +32,10 @@ class ApiTestCase(unittest.TestCase):
         return os.environ['BRAYNS_TEST_EXECUTABLE']
 
     @property
+    def uri(self) -> str:
+        return os.environ.get('BRAYNS_TEST_URI', 'localhost:5000')
+
+    @property
     def env(self) -> dict[str, str]:
         result = dict[str, str]()
         ospray = os.environ.get('BRAYNS_TEST_OSPRAY_DIR')
@@ -55,5 +59,11 @@ class ApiTestCase(unittest.TestCase):
     def create_launcher(self) -> brayns.Launcher:
         return brayns.Launcher(
             executable=self.executable,
+            uri=self.uri,
             env=self.env
+        )
+
+    def create_connector(self) -> brayns.Connector:
+        return brayns.Connector(
+            self.uri
         )

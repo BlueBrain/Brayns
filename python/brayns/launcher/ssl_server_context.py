@@ -23,7 +23,7 @@ from typing import Optional
 
 
 @dataclass
-class SslContext:
+class SslServerContext:
 
     private_key_file: Optional[str] = None
     private_key_passphrase: Optional[str] = None

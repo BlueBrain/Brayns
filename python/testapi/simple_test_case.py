@@ -32,7 +32,8 @@ class SimpleTestCase(ApiTestCase):
     def setUp(self) -> None:
         launcher = self.create_launcher()
         self.__process = launcher.start()
-        self.__instance = brayns.connect(launcher.uri)
+        connector = self.create_connector()
+        self.__instance = connector.connect(max_attempts=None)
 
     def tearDown(self) -> None:
         self.__instance.disconnect()

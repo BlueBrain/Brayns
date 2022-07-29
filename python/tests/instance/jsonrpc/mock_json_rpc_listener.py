@@ -32,7 +32,8 @@ class MockJsonRpcListener:
         self._data = None
 
     def get_data(self) -> Any:
-        assert self._called
+        if not self._called:
+            raise RuntimeError('Data not received')
         return self._data
 
     def on_reply(self, reply: JsonRpcReply) -> None:
@@ -48,6 +49,7 @@ class MockJsonRpcListener:
         self._set_data((data, e))
 
     def _set_data(self, data: Any) -> None:
-        assert not self._called
+        if self._called:
+            raise RuntimeError('Data received twice')
         self._called = True
         self._data = data

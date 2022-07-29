@@ -24,7 +24,7 @@ from brayns.core.common.resolution import Resolution
 from brayns.launcher.launcher import Launcher
 from brayns.launcher.log_level import LogLevel
 from brayns.launcher.plugin import Plugin
-from brayns.launcher.ssl_context import SslContext
+from brayns.launcher.ssl_server_context import SslServerContext
 
 
 class TestLauncher(unittest.TestCase):
@@ -40,7 +40,7 @@ class TestLauncher(unittest.TestCase):
                 Plugin.ATLAS_EXPLORER,
                 Plugin.CIRCUIT_EXPLORER
             ],
-            ssl=SslContext()
+            ssl=SslServerContext()
         )
         test = launcher.get_command_line()
         ref = [

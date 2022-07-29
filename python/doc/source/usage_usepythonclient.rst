@@ -40,7 +40,9 @@ So for a renderer running on the node r1i1n1 started with URI 0.0.0.0:5000, the 
 
     import brayns
 
-    with brayns.connect('r1i1n1.bbp.epfl.ch:5000') as instance:
+    connector = brayns.Connector('r1i1n1.bbp.epfl.ch:5000')
+
+    with connector.connect() as instance:
         print(instance.request('registry'))
 
 It will send a request to get all the existing entrypoint methods of this instance.

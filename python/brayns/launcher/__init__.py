@@ -22,12 +22,12 @@ from brayns.launcher.launcher import Launcher
 from brayns.launcher.log_level import LogLevel
 from brayns.launcher.plugin import Plugin
 from brayns.launcher.process import Process
-from brayns.launcher.ssl_context import SslContext
+from brayns.launcher.ssl_server_context import SslServerContext
 
 __all__ = [
     'Launcher',
     'LogLevel',
     'Plugin',
     'Process',
-    'SslContext'
+    'SslServerContext'
 ]

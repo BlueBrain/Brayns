@@ -22,9 +22,10 @@ import pathlib
 import unittest
 from typing import Optional, Union
 
+from brayns.instance.websocket.connection_failed_error import ConnectionFailedError
+from brayns.instance.websocket.ssl_client_context import SslClientContext
 from brayns.instance.websocket.web_socket_client import WebSocketClient
 from brayns.instance.websocket.web_socket_connector import WebSocketConnector
-from brayns.instance.websocket.web_socket_error import WebSocketError
 from tests.instance.websocket.mock_listener import MockListener
 from tests.instance.websocket.mock_server import MockServer
 
@@ -40,7 +41,7 @@ class TestWebSocketClient(unittest.TestCase):
         self._listener = MockListener()
 
     def test_connect_error(self) -> None:
-        with self.assertRaises(WebSocketError):
+        with self.assertRaises(ConnectionFailedError):
             self._connect()
 
     def test_connect(self) -> None:
@@ -110,10 +111,9 @@ class TestWebSocketClient(unittest.TestCase):
 
     def _connect(self, secure: bool = False) -> WebSocketClient:
         connector = WebSocketConnector(
-            self._uri,
-            self._listener,
-            secure=secure,
-            cafile=self._certificate if secure else None
+            uri=self._uri,
+            ssl=SslClientContext(self._certificate) if secure else None,
+            listener=self._listener
         )
         return connector.connect()
 

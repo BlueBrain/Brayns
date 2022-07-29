@@ -21,6 +21,7 @@
 from dataclasses import dataclass
 
 from brayns.instance.instance import Instance
+from brayns.version import DEV_VERSION, __version__
 
 
 @dataclass
@@ -52,3 +53,9 @@ class Version:
     @property
     def tag(self) -> str:
         return '.'.join(str(i) for i in self.release)
+
+    def check(self) -> None:
+        local = __version__
+        remote = self.tag
+        if local != DEV_VERSION and remote != local:
+            raise RuntimeError(f'Version mismatch {remote=} {local=}')

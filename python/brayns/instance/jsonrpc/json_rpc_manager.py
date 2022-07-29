@@ -30,17 +30,12 @@ from brayns.instance.request_error import RequestError
 
 class JsonRpcManager:
 
-    @staticmethod
-    def create(logger: logging.Logger) -> 'JsonRpcManager':
-        tasks = JsonRpcTasks()
-        handler = JsonRpcHandler(tasks, logger)
-        dispatcher = JsonRpcDispatcher(handler)
-        return JsonRpcManager(logger, tasks, dispatcher)
-
-    def __init__(self, logger: logging.Logger, tasks: JsonRpcTasks, dispatcher: JsonRpcDispatcher) -> None:
+    def __init__(self, logger: logging.Logger) -> None:
         self._logger = logger
-        self._tasks = tasks
-        self._dispatcher = dispatcher
+        self._tasks = JsonRpcTasks()
+        self._dispatcher = JsonRpcDispatcher(
+            listener=JsonRpcHandler(self._tasks, self._logger)
+        )
 
     def is_running(self, id: JsonRpcId) -> bool:
         return id in self._tasks

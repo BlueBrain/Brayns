@@ -25,19 +25,19 @@ from brayns.core.common.resolution import Resolution
 from brayns.launcher.log_level import LogLevel
 from brayns.launcher.plugin import Plugin
 from brayns.launcher.process import Process
-from brayns.launcher.ssl_context import SslContext
+from brayns.launcher.ssl_server_context import SslServerContext
 
 
 @dataclass
 class Launcher:
 
     executable: str
-    uri: str = 'localhost:5000'
+    uri: str
     log_level: LogLevel = LogLevel.WARN
     resolution: Resolution = Resolution.full_hd
     jpeg_quality: int = 100
     plugins: list[Plugin] = field(default_factory=lambda: list(Plugin))
-    ssl: Optional[SslContext] = None
+    ssl: Optional[SslServerContext] = None
     env: dict[str, str] = field(default_factory=dict)
 
     def get_command_line(self) -> list[str]:

@@ -22,7 +22,7 @@ import pathlib
 import subprocess
 from collections import deque
 from dataclasses import dataclass
-from typing import Optional
+from typing import IO, Optional, cast
 
 from brayns.core.common.resolution import Resolution
 from brayns.core.movie.movie_error import MovieError
@@ -58,8 +58,8 @@ class Movie:
 
 def _run_process(args: list[str]) -> str:
     with _create_process(args) as process:
-        assert process.stdout is not None
-        lines = deque[str](process.stdout, maxlen=1000)
+        stream = cast(IO[str], process.stdout)
+        lines = deque[str](stream, maxlen=1000)
         code = process.wait()
     logs = ''.join(lines)
     if code != 0:

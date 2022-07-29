@@ -18,15 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import ssl
 from dataclasses import dataclass
-
-from brayns.error import Error
+from typing import Optional
 
 
 @dataclass
-class WebSocketError(Error):
+class SslClientContext:
 
-    reason: str
+    cafile: Optional[str] = None
+    capath: Optional[str] = None
+    cadata: Optional[str] = None
 
-    def __str__(self) -> str:
-        return self.reason
+    def get_context(self) -> ssl.SSLContext:
+        return ssl.create_default_context(
+            cafile=self.cafile,
+            capath=self.capath,
+            cadata=self.cadata
+        )

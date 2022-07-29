@@ -18,32 +18,37 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.connector import Connector
-from brayns.instance.instance import Instance
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
-from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
-from brayns.instance.request_error import RequestError
-from brayns.instance.request_future import RequestFuture
-from brayns.instance.request_progress import RequestProgress
-from brayns.instance.websocket.connection_closed_error import ConnectionClosedError
+import ssl
+from typing import Optional
+
+from brayns.instance.websocket.async_web_socket import AsyncWebSocket
 from brayns.instance.websocket.connection_failed_error import ConnectionFailedError
 from brayns.instance.websocket.invalid_server_certificate_error import InvalidServerCertificateError
 from brayns.instance.websocket.protocol_error import ProtocolError
 from brayns.instance.websocket.ssl_client_context import SslClientContext
-from brayns.instance.websocket.web_socket_error import WebSocketError
+from websockets.client import connect
+from websockets.exceptions import WebSocketException
 
-__all__ = [
-    'Connector',
-    'Instance',
-    'JsonRpcId',
-    'JsonRpcRequest',
-    'RequestError',
-    'RequestFuture',
-    'RequestProgress',
-    'SslClientContext',
-    'ConnectionClosedError',
-    'ConnectionFailedError',
-    'InvalidServerCertificateError',
-    'ProtocolError',
-    'WebSocketError'
-]
+
+class AsyncWebSocketConnector:
+
+    def __init__(self, uri: str, ssl: Optional[SslClientContext]) -> None:
+        self._uri = ('ws://' if ssl is None else 'wss://') + uri
+        self._ssl = None if ssl is None else ssl.get_context()
+
+    async def connect(self) -> AsyncWebSocket:
+        try:
+            websocket = await connect(
+                uri=self._uri,
+                ssl=self._ssl,
+                ping_interval=None,
+                close_timeout=0,
+                max_size=int(2e9)
+            )
+            return AsyncWebSocket(websocket)
+        except ConnectionRefusedError as e:
+            raise ConnectionFailedError(str(e))
+        except ssl.SSLCertVerificationError as e:
+            raise InvalidServerCertificateError(str(e))
+        except WebSocketException as e:
+            raise ProtocolError(str(e))
