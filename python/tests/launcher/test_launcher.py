@@ -33,14 +33,14 @@ class TestLauncher(unittest.TestCase):
         launcher = Launcher(
             executable='service',
             uri='uri',
+            ssl_context=SslServerContext(),
             log_level=LogLevel.CRITICAL,
             resolution=Resolution(12, 23),
             jpeg_quality=25,
             plugins=[
                 Plugin.ATLAS_EXPLORER,
                 Plugin.CIRCUIT_EXPLORER
-            ],
-            ssl=SslServerContext()
+            ]
         )
         test = launcher.get_command_line()
         ref = [

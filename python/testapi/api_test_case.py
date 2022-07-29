@@ -22,8 +22,6 @@ import os
 import pathlib
 import unittest
 
-import brayns
-
 
 class ApiTestCase(unittest.TestCase):
 
@@ -55,15 +53,3 @@ class ApiTestCase(unittest.TestCase):
     def asset_folder(self) -> pathlib.Path:
         testapi = pathlib.Path(__file__).parent
         return testapi / 'assets'
-
-    def create_launcher(self) -> brayns.Launcher:
-        return brayns.Launcher(
-            executable=self.executable,
-            uri=self.uri,
-            env=self.env
-        )
-
-    def create_connector(self) -> brayns.Connector:
-        return brayns.Connector(
-            self.uri
-        )

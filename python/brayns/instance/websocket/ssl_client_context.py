@@ -30,7 +30,7 @@ class SslClientContext:
     capath: Optional[str] = None
     cadata: Optional[str] = None
 
-    def get_context(self) -> ssl.SSLContext:
+    def create(self) -> ssl.SSLContext:
         return ssl.create_default_context(
             cafile=self.cafile,
             capath=self.capath,

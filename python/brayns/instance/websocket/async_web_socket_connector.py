@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import ssl
+from dataclasses import dataclass
 from typing import Optional
 
 from brayns.instance.websocket.async_web_socket import AsyncWebSocket
@@ -30,17 +31,17 @@ from websockets.client import connect
 from websockets.exceptions import WebSocketException
 
 
+@dataclass
 class AsyncWebSocketConnector:
 
-    def __init__(self, uri: str, ssl: Optional[SslClientContext]) -> None:
-        self._uri = ('ws://' if ssl is None else 'wss://') + uri
-        self._ssl = None if ssl is None else ssl.get_context()
+    uri: str
+    ssl_context: Optional[SslClientContext] = None
 
     async def connect(self) -> AsyncWebSocket:
         try:
             websocket = await connect(
-                uri=self._uri,
-                ssl=self._ssl,
+                uri=self._format_uri(),
+                ssl=self._create_ssl_context(),
                 ping_interval=None,
                 close_timeout=0,
                 max_size=int(2e9)
@@ -48,7 +49,16 @@ class AsyncWebSocketConnector:
             return AsyncWebSocket(websocket)
         except ConnectionRefusedError as e:
             raise ConnectionFailedError(str(e))
-        except ssl.SSLCertVerificationError as e:
+        except ssl.SSLError as e:
             raise InvalidServerCertificateError(str(e))
         except WebSocketException as e:
             raise ProtocolError(str(e))
+
+    def _format_uri(self) -> str:
+        protocol = 'ws://' if self.ssl_context is None else 'wss://'
+        return protocol + self.uri
+
+    def _create_ssl_context(self) -> Optional[ssl.SSLContext]:
+        if self.ssl_context is None:
+            return None
+        return self.ssl_context.create()

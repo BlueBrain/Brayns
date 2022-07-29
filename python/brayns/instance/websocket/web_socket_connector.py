@@ -18,6 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from dataclasses import dataclass
 from typing import Optional
 
 from brayns.instance.websocket.async_web_socket_connector import AsyncWebSocketConnector
@@ -27,24 +28,17 @@ from brayns.instance.websocket.web_socket_client import WebSocketClient
 from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
+@dataclass
 class WebSocketConnector:
 
-    def __init__(
-        self,
-        uri: str,
-        listener: WebSocketListener,
-        ssl: Optional[SslClientContext] = None
-    ) -> None:
-        self._connector = AsyncWebSocketConnector(uri, ssl)
-        self._listener = listener
-        self._loop = EventLoop()
+    uri: str
+    listener: WebSocketListener
+    ssl_context: Optional[SslClientContext] = None
 
     def connect(self) -> WebSocketClient:
-        websocket = self._loop.run(
-            self._connector.connect()
+        loop = EventLoop()
+        connector = AsyncWebSocketConnector(self.uri, self.ssl_context)
+        websocket = loop.run(
+            connector.connect()
         ).result()
-        return WebSocketClient(
-            websocket=websocket,
-            loop=self._loop,
-            listener=self._listener
-        )
+        return WebSocketClient(websocket, loop, self.listener)

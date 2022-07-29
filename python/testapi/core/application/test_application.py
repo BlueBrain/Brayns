@@ -26,13 +26,11 @@ class TestApplication(SimpleTestCase):
 
     def test_from_instance(self) -> None:
         application = brayns.Application.from_instance(self.instance)
-        launcher = self.create_launcher()
-        self.assertEqual(application.plugins, [
-            plugin.value
-            for plugin in launcher.plugins
-        ])
-        self.assertEqual(application.resolution, launcher.resolution)
-        self.assertEqual(application.jpeg_quality, launcher.jpeg_quality)
+        self.assertEqual(set(application.plugins), set(
+            plugin.value for plugin in brayns.Plugin
+        ))
+        self.assertEqual(application.resolution, brayns.Resolution.full_hd)
+        self.assertEqual(application.jpeg_quality, 100)
 
     def test_update(self) -> None:
         brayns.Application.update(

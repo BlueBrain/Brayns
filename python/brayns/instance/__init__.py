@@ -22,6 +22,7 @@ from brayns.instance.connector import Connector
 from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
+from brayns.instance.logger import Logger
 from brayns.instance.request_error import RequestError
 from brayns.instance.request_future import RequestFuture
 from brayns.instance.request_progress import RequestProgress
@@ -37,6 +38,7 @@ __all__ = [
     'Instance',
     'JsonRpcId',
     'JsonRpcRequest',
+    'Logger',
     'RequestError',
     'RequestFuture',
     'RequestProgress',

@@ -18,17 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.websocket.web_socket_listener import WebSocketListener
+import logging
+import sys
 
 
-class MockListener(WebSocketListener):
+class Logger(logging.Logger):
 
-    def __init__(self) -> None:
-        self.binary = b''
-        self.text = ''
-
-    def on_binary(self, data: bytes) -> None:
-        self.binary = data
-
-    def on_text(self, data: str) -> None:
-        self.text = data
+    def __init__(self, level: int = logging.WARN) -> None:
+        super().__init__('Brayns', level)
+        handler = logging.StreamHandler(sys.stdout)
+        format = '[%(name)s][%(levelname)s] %(message)s'
+        formatter = logging.Formatter(format)
+        handler.setFormatter(formatter)
+        self.addHandler(handler)

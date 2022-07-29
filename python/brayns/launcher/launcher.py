@@ -33,11 +33,11 @@ class Launcher:
 
     executable: str
     uri: str
+    ssl_context: Optional[SslServerContext] = None
     log_level: LogLevel = LogLevel.WARN
     resolution: Resolution = Resolution.full_hd
     jpeg_quality: int = 100
     plugins: list[Plugin] = field(default_factory=lambda: list(Plugin))
-    ssl: Optional[SslServerContext] = None
     env: dict[str, str] = field(default_factory=dict)
 
     def get_command_line(self) -> list[str]:
@@ -57,10 +57,10 @@ class Launcher:
             for plugin in self.plugins
             for item in ('--plugin', plugin.value)
         )
-        if self.ssl is not None:
+        if self.ssl_context is not None:
             args.append('--secure')
             args.append('true')
-            ssl_args = self.ssl.get_command_line()
+            ssl_args = self.ssl_context.get_command_line()
             args.extend(ssl_args)
         return args
 
