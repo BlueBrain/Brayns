@@ -18,20 +18,34 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from brayns.instance.connector import Connector
 from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
+from brayns.instance.logger import Logger
 from brayns.instance.request_error import RequestError
 from brayns.instance.request_future import RequestFuture
 from brayns.instance.request_progress import RequestProgress
+from brayns.instance.websocket.connection_closed_error import ConnectionClosedError
+from brayns.instance.websocket.connection_failed_error import ConnectionFailedError
+from brayns.instance.websocket.invalid_server_certificate_error import InvalidServerCertificateError
+from brayns.instance.websocket.protocol_error import ProtocolError
+from brayns.instance.websocket.ssl_client_context import SslClientContext
 from brayns.instance.websocket.web_socket_error import WebSocketError
 
 __all__ = [
+    'Connector',
     'Instance',
     'JsonRpcId',
     'JsonRpcRequest',
+    'Logger',
+    'RequestError',
     'RequestFuture',
     'RequestProgress',
-    'RequestError',
+    'SslClientContext',
+    'ConnectionClosedError',
+    'ConnectionFailedError',
+    'InvalidServerCertificateError',
+    'ProtocolError',
     'WebSocketError'
 ]

@@ -106,7 +106,7 @@ def _deserialize_type(message: dict) -> JsonType:
     return JsonType(message.get('type', JsonType.UNDEFINED))
 
 
-def _deserialize_items(message: dict) -> JsonSchema:
+def _deserialize_items(message: dict) -> Optional[JsonSchema]:
     value = message.get('items')
     if value is None:
         return None
@@ -136,10 +136,10 @@ def _deserialize_additional(message: dict) -> Optional[Union[bool, JsonSchema]]:
     return JsonSchema.deserialize(value)
 
 
-def _serialize_additional(schema: JsonSchema) -> Union[bool, dict]:
-    if schema.additional_properties is False:
-        return False
-    return schema.additional_properties.serialize()
+def _serialize_additional(schema: JsonSchema) -> Optional[Union[bool, dict]]:
+    if isinstance(schema.additional_properties, JsonSchema):
+        return schema.additional_properties.serialize()
+    return schema.additional_properties
 
 
 def _deserialize_one_of(message: dict) -> list[JsonSchema]:

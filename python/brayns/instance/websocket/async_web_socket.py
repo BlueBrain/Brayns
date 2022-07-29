@@ -18,36 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import ssl
 import threading
 from collections import deque
 from typing import Optional, Union
 
-import websockets
-from brayns.instance.websocket.web_socket_error import WebSocketError
+from brayns.instance.websocket.connection_closed_error import ConnectionClosedError
+from brayns.instance.websocket.protocol_error import ProtocolError
+from websockets.client import WebSocketClientProtocol
+from websockets.exceptions import ConnectionClosed
 
 
 class AsyncWebSocket:
 
-    @staticmethod
-    async def connect(uri: str, ssl: Optional[ssl.SSLContext]) -> 'AsyncWebSocket':
-        try:
-            websocket = await websockets.connect(
-                uri=uri,
-                ssl=ssl,
-                ping_interval=None,
-                close_timeout=0,
-                max_size=int(2e9)
-            )
-            return AsyncWebSocket(websocket)
-        except Exception as e:
-            raise WebSocketError(str(e))
-
-    def __init__(self,  websocket: websockets.WebSocketClientProtocol) -> None:
+    def __init__(self, websocket: WebSocketClientProtocol) -> None:
         self._websocket = websocket
-        self._error: Optional[WebSocketError] = None
         self._queue = deque[Union[bytes, str]]()
         self._condition = threading.Condition()
+        self._error: Optional[Exception] = None
 
     @property
     def closed(self) -> bool:
@@ -64,29 +51,25 @@ class AsyncWebSocket:
             return self._get_data()
 
     async def close(self) -> None:
-        try:
-            await self._websocket.close()
-        except Exception as e:
-            raise WebSocketError(str(e))
+        await self._websocket.close()
 
     async def send(self, data: Union[bytes, str]) -> None:
         try:
             await self._websocket.send(data)
-        except Exception as e:
-            raise WebSocketError(str(e))
+        except ConnectionClosed as e:
+            raise ConnectionClosedError(str(e))
 
     async def run(self) -> None:
-        while True:
+        while self._error is None:
             try:
                 data = await self._websocket.recv()
-            except Exception as e:
-                with self._condition:
-                    self._error = WebSocketError(str(e))
-                    self._condition.notify_all()
+            except ConnectionClosed as e:
+                self._set_error(ConnectionClosedError(str(e)))
                 return
-            with self._condition:
-                self._queue.append(data)
-                self._condition.notify_all()
+            except Exception as e:
+                self._set_error(ProtocolError(str(e)))
+                return
+            self._set_data(data)
 
     def _get_data(self) -> Optional[Union[bytes, str]]:
         if self._error is not None:
@@ -94,3 +77,13 @@ class AsyncWebSocket:
         if not self._queue:
             return None
         return self._queue.popleft()
+
+    def _set_data(self, data: Union[bytes, str]) -> None:
+        with self._condition:
+            self._queue.append(data)
+            self._condition.notify_all()
+
+    def _set_error(self, e: Exception) -> None:
+        with self._condition:
+            self._error = e
+            self._condition.notify_all()

@@ -21,9 +21,11 @@
 from dataclasses import dataclass
 from typing import Any
 
+from brayns.error import Error
+
 
 @dataclass
-class RequestError(Exception):
+class RequestError(Error):
 
     code: int
     message: str

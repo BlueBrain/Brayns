@@ -33,7 +33,7 @@ class TestClient(unittest.TestCase):
 
     def setUp(self) -> None:
         self._logger = logging.root
-        self._manager = JsonRpcManager.create(self._logger)
+        self._manager = JsonRpcManager(self._logger)
         self._listener = Listener(self._logger, self._on_binary, self._manager)
         self._websocket = MockWebSocket(self._listener)
         self._data = b''

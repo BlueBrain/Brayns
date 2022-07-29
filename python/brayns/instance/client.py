@@ -51,9 +51,12 @@ class Client(Instance):
         self._logger.info('Sending request %s.', request)
         data = request.to_json()
         self._websocket.send_text(data)
+        id = request.id
+        if id is None:
+            return RequestFuture.from_result(None)
         return RequestFuture(
-            task=self._manager.create_task(request.id),
-            cancel=lambda: self.cancel(request.id),
+            task=self._manager.create_task(id),
+            cancel=lambda: self.cancel(id),
             poll=lambda: self.poll()
         )
 

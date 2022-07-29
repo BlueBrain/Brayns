@@ -19,8 +19,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
+from typing import cast
 
 import brayns
+from brayns.core.camera.camera_view import CameraView
 from testapi.image_validator import ImageValidator
 from testapi.simple_test_case import SimpleTestCase
 
@@ -57,7 +59,8 @@ class TestSnapshot(SimpleTestCase):
     def _prepare_snapshot(self) -> brayns.Snapshot:
         model = self._load_model()
         snapshot = self._create_snapshot(model.bounds)
-        self._add_light(snapshot.view.direction)
+        view = cast(CameraView, snapshot.view)
+        self._add_light(view.direction)
         return snapshot
 
     def _add_light(self, direction: brayns.Vector3) -> None:

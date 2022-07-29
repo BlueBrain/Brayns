@@ -18,33 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
-from brayns.launcher.ssl_context import SslContext
+from brayns.instance.websocket.web_socket_error import WebSocketError
 
 
-class TestSslContext(unittest.TestCase):
+class ProtocolError(WebSocketError):
 
-    def test_get_command_line(self) -> None:
-        context = SslContext(
-            private_key_file='private',
-            private_key_passphrase='passphrase',
-            certificate_file='certificate',
-            ca_location='ca'
-        )
-        test = context.get_command_line()
-        ref = [
-            '--private-key-file',
-            'private',
-            '--private-key-passphrase',
-            'passphrase',
-            '--certificate-file',
-            'certificate',
-            '--ca-location',
-            'ca'
-        ]
-        self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    pass

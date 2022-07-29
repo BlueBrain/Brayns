@@ -18,38 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os
-import pathlib
-import unittest
+from brayns.instance.websocket.web_socket_error import WebSocketError
 
 
-class ApiTestCase(unittest.TestCase):
+class ConnectionClosedError(WebSocketError):
 
-    @property
-    def executable(self) -> str:
-        return os.environ['BRAYNS_TEST_EXECUTABLE']
-
-    @property
-    def uri(self) -> str:
-        return os.environ.get('BRAYNS_TEST_URI', 'localhost:5000')
-
-    @property
-    def env(self) -> dict[str, str]:
-        result = dict[str, str]()
-        ospray = os.environ.get('BRAYNS_TEST_OSPRAY_DIR')
-        if ospray is not None:
-            result['LD_LIBRARY_PATH'] = ospray
-        return result
-
-    @property
-    def circuit(self) -> str:
-        return os.environ['BRAYNS_TEST_CIRCUIT']
-
-    @property
-    def ffmpeg(self) -> str:
-        return os.environ.get('BRAYNS_TEST_FFMPEG', 'ffmpeg')
-
-    @property
-    def asset_folder(self) -> pathlib.Path:
-        testapi = pathlib.Path(__file__).parent
-        return testapi / 'assets'
+    pass

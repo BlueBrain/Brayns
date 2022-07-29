@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
+from typing import cast
 
 from brayns.core.camera.cylindric_camera import CylindricCamera
 from brayns.core.camera.fovy import Fovy
@@ -36,7 +37,9 @@ class TestCylindricCamera(unittest.TestCase):
             'fovy': 30
         }
         test = CylindricCamera.deserialize(message)
-        self.assertAlmostEqual(test.fovy.degrees, 30)
+        self.assertIsNotNone(test.fovy)
+        fovy = cast(Fovy, test.fovy)
+        self.assertAlmostEqual(fovy.degrees, 30)
 
     def test_serialize(self) -> None:
         camera = CylindricCamera(

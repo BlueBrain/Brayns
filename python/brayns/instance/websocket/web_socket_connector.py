@@ -18,41 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import ssl
+from dataclasses import dataclass
 from typing import Optional
 
-from brayns.instance.websocket.async_web_socket import AsyncWebSocket
+from brayns.instance.websocket.async_web_socket_connector import AsyncWebSocketConnector
 from brayns.instance.websocket.event_loop import EventLoop
+from brayns.instance.websocket.ssl_client_context import SslClientContext
 from brayns.instance.websocket.web_socket_client import WebSocketClient
 from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
+@dataclass
 class WebSocketConnector:
 
-    def __init__(
-        self,
-        uri: str,
-        listener: WebSocketListener,
-        secure: bool = False,
-        cafile: Optional[str] = None
-    ) -> None:
-        self._uri = ('wss://' if secure else 'ws://') + uri
-        self._listener = listener
-        self._ssl = None
-        if secure:
-            self._ssl = ssl.create_default_context(cafile=cafile)
-        self._loop = EventLoop()
+    uri: str
+    listener: WebSocketListener
+    ssl_context: Optional[SslClientContext] = None
 
     def connect(self) -> WebSocketClient:
-        websocket = self._loop.run(
-            AsyncWebSocket.connect(self._uri, self._ssl)
+        loop = EventLoop()
+        connector = AsyncWebSocketConnector(self.uri, self.ssl_context)
+        websocket = loop.run(
+            connector.connect()
         ).result()
-        task = self._loop.run(
-            websocket.run()
-        )
-        return WebSocketClient(
-            websocket=websocket,
-            loop=self._loop,
-            task=task,
-            listener=self._listener
-        )
+        return WebSocketClient(websocket, loop, self.listener)

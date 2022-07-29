@@ -31,7 +31,7 @@ class DirectionalLight(Light):
 
     @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return 'directional'
 
     def serialize(self) -> dict:

@@ -18,38 +18,33 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os
-import pathlib
 import unittest
 
+from brayns.launcher.ssl_server_context import SslServerContext
 
-class ApiTestCase(unittest.TestCase):
 
-    @property
-    def executable(self) -> str:
-        return os.environ['BRAYNS_TEST_EXECUTABLE']
+class TestServerSsl(unittest.TestCase):
 
-    @property
-    def uri(self) -> str:
-        return os.environ.get('BRAYNS_TEST_URI', 'localhost:5000')
+    def test_get_command_line(self) -> None:
+        ssl = SslServerContext(
+            private_key_file='private',
+            private_key_passphrase='passphrase',
+            certificate_file='certificate',
+            ca_location='ca'
+        )
+        test = ssl.get_command_line()
+        ref = [
+            '--private-key-file',
+            'private',
+            '--private-key-passphrase',
+            'passphrase',
+            '--certificate-file',
+            'certificate',
+            '--ca-location',
+            'ca'
+        ]
+        self.assertEqual(test, ref)
 
-    @property
-    def env(self) -> dict[str, str]:
-        result = dict[str, str]()
-        ospray = os.environ.get('BRAYNS_TEST_OSPRAY_DIR')
-        if ospray is not None:
-            result['LD_LIBRARY_PATH'] = ospray
-        return result
 
-    @property
-    def circuit(self) -> str:
-        return os.environ['BRAYNS_TEST_CIRCUIT']
-
-    @property
-    def ffmpeg(self) -> str:
-        return os.environ.get('BRAYNS_TEST_FFMPEG', 'ffmpeg')
-
-    @property
-    def asset_folder(self) -> pathlib.Path:
-        testapi = pathlib.Path(__file__).parent
-        return testapi / 'assets'
+if __name__ == '__main__':
+    unittest.main()

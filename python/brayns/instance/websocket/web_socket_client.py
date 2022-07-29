@@ -18,13 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from concurrent.futures import Future
 from typing import Union
 
 from brayns.instance.websocket.async_web_socket import AsyncWebSocket
+from brayns.instance.websocket.connection_closed_error import ConnectionClosedError
 from brayns.instance.websocket.event_loop import EventLoop
 from brayns.instance.websocket.web_socket import WebSocket
-from brayns.instance.websocket.web_socket_error import WebSocketError
 from brayns.instance.websocket.web_socket_listener import WebSocketListener
 
 
@@ -34,13 +33,14 @@ class WebSocketClient(WebSocket):
         self,
         websocket: AsyncWebSocket,
         loop: EventLoop,
-        task: Future[None],
         listener: WebSocketListener
     ) -> None:
         self._websocket = websocket
         self._loop = loop
-        self._task = task
         self._listener = listener
+        self._task = self._loop.run(
+            self._websocket.run()
+        )
 
     @property
     def closed(self) -> bool:
@@ -66,7 +66,7 @@ class WebSocketClient(WebSocket):
         if isinstance(data, str):
             self._listener.on_text(data)
             return
-        raise WebSocketError(f'Invalid packet type {type(data)}')
+        raise TypeError(f'Invalid packet type {type(data)}')
 
     def send_binary(self, data: bytes) -> None:
         self._send(data)
@@ -82,4 +82,4 @@ class WebSocketClient(WebSocket):
 
     def _check_closed(self) -> None:
         if self.closed:
-            raise WebSocketError('Connection closed')
+            raise ConnectionClosedError('Connection closed')

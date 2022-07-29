@@ -20,9 +20,11 @@
 
 from dataclasses import dataclass
 
+from brayns.error import Error
+
 
 @dataclass
-class WebSocketError(Exception):
+class WebSocketError(Error):
 
     reason: str
 

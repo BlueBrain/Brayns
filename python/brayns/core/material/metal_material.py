@@ -30,7 +30,7 @@ class MetalMaterial(Material):
 
     @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return 'metal'
 
     @classmethod

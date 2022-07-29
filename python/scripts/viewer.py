@@ -22,6 +22,7 @@ import io
 import json
 import logging
 import sys
+from typing import Optional
 
 import brayns
 import PySimpleGUI as sg
@@ -87,7 +88,7 @@ def on_binary(window: sg.Window, data: bytes) -> None:
     image.update(data=data)
 
 
-def get_params(values: dict) -> str:
+def get_params(values: dict) -> Optional[str]:
     data: str = values[PARAMS]
     if not data or data.isspace():
         return None
@@ -124,11 +125,12 @@ def process_events(instance: brayns.Instance, window: sg.Window) -> None:
 
 def run(uri: str) -> None:
     window = create_window()
-    with brayns.connect(
+    connector = brayns.Connector(
         uri=uri,
-        on_binary=lambda data: on_binary(window, data),
-        log_level=logging.DEBUG
-    ) as instance:
+        binary_handler=lambda data: on_binary(window, data),
+        logger=brayns.Connector.get_default_logger(logging.DEBUG)
+    )
+    with connector.connect() as instance:
         process_events(instance, window)
     window.close()
 

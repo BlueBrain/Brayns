@@ -18,38 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os
-import pathlib
-import unittest
+import logging
+import sys
 
 
-class ApiTestCase(unittest.TestCase):
+class Logger(logging.Logger):
 
-    @property
-    def executable(self) -> str:
-        return os.environ['BRAYNS_TEST_EXECUTABLE']
-
-    @property
-    def uri(self) -> str:
-        return os.environ.get('BRAYNS_TEST_URI', 'localhost:5000')
-
-    @property
-    def env(self) -> dict[str, str]:
-        result = dict[str, str]()
-        ospray = os.environ.get('BRAYNS_TEST_OSPRAY_DIR')
-        if ospray is not None:
-            result['LD_LIBRARY_PATH'] = ospray
-        return result
-
-    @property
-    def circuit(self) -> str:
-        return os.environ['BRAYNS_TEST_CIRCUIT']
-
-    @property
-    def ffmpeg(self) -> str:
-        return os.environ.get('BRAYNS_TEST_FFMPEG', 'ffmpeg')
-
-    @property
-    def asset_folder(self) -> pathlib.Path:
-        testapi = pathlib.Path(__file__).parent
-        return testapi / 'assets'
+    def __init__(self, level: int = logging.WARN) -> None:
+        super().__init__('Brayns', level)
+        handler = logging.StreamHandler(sys.stdout)
+        format = '[%(name)s][%(levelname)s] %(message)s'
+        formatter = logging.Formatter(format)
+        handler.setFormatter(formatter)
+        self.addHandler(handler)

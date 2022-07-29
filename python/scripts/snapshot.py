@@ -33,6 +33,8 @@ if len(argv) > 1:
 if len(argv) > 2:
     path = argv[2]
 
-with brayns.connect(uri) as instance:
+connector = brayns.Connector(uri)
+
+with connector.connect() as instance:
     snapshot = brayns.Snapshot()
     snapshot.save(instance, path)
