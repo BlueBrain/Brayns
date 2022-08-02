@@ -28,7 +28,7 @@ class AmbientLight(Light):
 
     @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return 'ambient'
 
     def serialize(self) -> dict:

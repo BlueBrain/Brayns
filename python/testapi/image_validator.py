@@ -45,7 +45,7 @@ class ImageValidator:
         if mse > self.threshold:
             raise RuntimeError(f'Image difference {mse} > {self.threshold}')
 
-    def _get_mse(self, data1: bytes, data2: bytes) -> int:
+    def _get_mse(self, data1: bytes, data2: bytes) -> float:
         return sum(
             (i - j) ** 2
             for i, j in zip(data1, data2)

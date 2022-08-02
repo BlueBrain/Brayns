@@ -18,9 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from dataclasses import field
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Any, Optional
 
 from brayns.core.model.model_loader import ModelLoader
 from brayns.plugins.bbp.bbp_cells import BbpCells
@@ -46,7 +45,7 @@ class BbpLoader(ModelLoader):
 
     @property
     def properties(self) -> dict:
-        properties = {
+        properties: dict[str, Any] = {
             'load_afferent_synapses': self.load_afferent_synapses,
             'load_efferent_synapses': self.load_efferent_synapses
         }

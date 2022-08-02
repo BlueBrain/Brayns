@@ -213,7 +213,8 @@ def build_from_argv() -> None:
 
 
 def build_from_uri(uri: str, directory: str) -> None:
-    with brayns.connect(uri) as instance:
+    connector = brayns.Connector(uri)
+    with connector.connect() as instance:
         build_from_instance(instance, directory)
 
 

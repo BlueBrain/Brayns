@@ -26,7 +26,7 @@ class Capsules(Geometries[Capsule]):
 
     @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return 'capsules'
 
     @classmethod

@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 
 @dataclass(frozen=True)
@@ -65,7 +65,7 @@ class SonataReport:
         return SonataReport(type='bloodflow_radii', name=name)
 
     def serialize(self) -> dict:
-        message = {
+        message: dict[str, Any] = {
             'report_type': self.type
         }
         if self.name is not None:

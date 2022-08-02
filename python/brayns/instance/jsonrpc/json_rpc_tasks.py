@@ -44,9 +44,7 @@ class JsonRpcTasks:
     def find(self, id: JsonRpcId) -> Optional[JsonRpcTask]:
         return self._tasks.get(id)
 
-    def create_task(self, id: Optional[JsonRpcId]) -> JsonRpcTask:
-        if id is None:
-            return JsonRpcTask.from_result(None)
+    def create_task(self, id: JsonRpcId) -> JsonRpcTask:
         if id in self._tasks:
             raise RuntimeError('Request with same ID already running')
         task = JsonRpcTask()

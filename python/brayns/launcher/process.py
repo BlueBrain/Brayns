@@ -21,6 +21,7 @@
 import subprocess
 import threading
 from collections import deque
+from typing import IO, cast
 
 
 class Process:
@@ -59,11 +60,14 @@ class Process:
     def terminate(self) -> None:
         self._process.terminate()
         self._process.wait()
-        self._process.stdin.close()
-        self._process.stdout.close()
+        stdin = cast(IO[str], self._process.stdin)
+        stdin.close()
+        stdout = cast(IO[str], self._process.stdout)
+        stdout.close()
         self._thread.join()
 
     def _poll(self) -> None:
-        for line in self._process.stdout:
+        stdout = cast(IO[str], self._process.stdout)
+        for line in stdout:
             with self._lock:
                 self._logs.append(line)

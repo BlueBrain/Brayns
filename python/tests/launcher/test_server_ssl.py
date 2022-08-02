@@ -17,3 +17,34 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import unittest
+
+from brayns.launcher.ssl_server_context import SslServerContext
+
+
+class TestSslServerContext(unittest.TestCase):
+
+    def test_get_command_line(self) -> None:
+        ssl = SslServerContext(
+            private_key_file='private',
+            private_key_passphrase='passphrase',
+            certificate_file='certificate',
+            ca_location='ca'
+        )
+        test = ssl.get_command_line()
+        ref = [
+            '--private-key-file',
+            'private',
+            '--private-key-passphrase',
+            'passphrase',
+            '--certificate-file',
+            'certificate',
+            '--ca-location',
+            'ca'
+        ]
+        self.assertEqual(test, ref)
+
+
+if __name__ == '__main__':
+    unittest.main()

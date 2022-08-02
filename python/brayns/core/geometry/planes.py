@@ -26,7 +26,7 @@ class Planes(Geometries[Plane]):
 
     @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return 'planes'
 
     @classmethod

@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 from brayns.core.model.model_loader import ModelLoader
 from brayns.plugins.sonata.sonata_node_population import SonataNodePopulation
@@ -38,7 +38,7 @@ class SonataLoader(ModelLoader):
 
     @property
     def properties(self) -> dict:
-        properties = {
+        properties: dict[str, Any] = {
             'node_population_settings': [
                 node_population.serialize()
                 for node_population in self.node_populations

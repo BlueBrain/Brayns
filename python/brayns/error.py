@@ -18,17 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.websocket.web_socket_listener import WebSocketListener
+class Error(Exception):
 
-
-class MockListener(WebSocketListener):
-
-    def __init__(self) -> None:
-        self.binary = b''
-        self.text = ''
-
-    def on_binary(self, data: bytes) -> None:
-        self.binary = data
-
-    def on_text(self, data: str) -> None:
-        self.text = data
+    pass

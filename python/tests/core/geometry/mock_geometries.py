@@ -30,4 +30,6 @@ class MockGeometries(Geometries[int]):
 
     @classmethod
     def serialize_geometry(cls, geometry: int) -> dict:
-        return geometry
+        return {
+            'value': geometry
+        }

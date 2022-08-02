@@ -21,28 +21,27 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from brayns.instance.websocket.async_web_socket_connector import AsyncWebSocketConnector
-from brayns.instance.websocket.event_loop import EventLoop
-from brayns.instance.websocket.ssl_client_context import SslClientContext
-from brayns.instance.websocket.web_socket_client import WebSocketClient
-from brayns.instance.websocket.web_socket_listener import WebSocketListener
-
 
 @dataclass
-class WebSocketConnector:
+class SslServerContext:
 
-    uri: str
-    listener: WebSocketListener
-    ssl_context: Optional[SslClientContext] = None
+    private_key_file: Optional[str] = None
+    private_key_passphrase: Optional[str] = None
+    certificate_file: Optional[str] = None
+    ca_location: Optional[str] = None
 
-    def connect(self) -> WebSocketClient:
-        loop = EventLoop()
-        connector = AsyncWebSocketConnector(self.uri, self.ssl_context)
-        try:
-            websocket = loop.run(
-                connector.connect()
-            ).result()
-        except:
-            loop.close()
-            raise
-        return WebSocketClient(websocket, loop, self.listener)
+    def get_command_line(self) -> list[str]:
+        args = []
+        if self.private_key_file is not None:
+            args.append('--private-key-file')
+            args.append(self.private_key_file)
+        if self.private_key_passphrase is not None:
+            args.append('--private-key-passphrase')
+            args.append(self.private_key_passphrase)
+        if self.certificate_file is not None:
+            args.append('--certificate-file')
+            args.append(self.certificate_file)
+        if self.ca_location is not None:
+            args.append('--ca-location')
+            args.append(self.ca_location)
+        return args

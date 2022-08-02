@@ -64,7 +64,7 @@ class Entrypoint:
         ]
 
 
-def _parse_schema(message: dict, key: str) -> JsonSchema:
+def _parse_schema(message: dict, key: str) -> Optional[JsonSchema]:
     value = message.get(key)
     if value is None:
         return None

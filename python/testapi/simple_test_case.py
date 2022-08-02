@@ -30,10 +30,22 @@ class SimpleTestCase(ApiTestCase):
         return self.__instance
 
     def setUp(self) -> None:
-        launcher = self.create_launcher()
+        launcher = brayns.Launcher(
+            executable=self.executable,
+            uri=self.uri,
+            env=self.env
+        )
         self.__process = launcher.start()
-        self.__instance = brayns.connect(launcher.uri)
+        connector = brayns.Connector(
+            uri=self.uri,
+            binary_handler=self.on_binary,
+            max_attempts=None
+        )
+        self.__instance = connector.connect()
 
     def tearDown(self) -> None:
         self.__instance.disconnect()
         self.__process.terminate()
+
+    def on_binary(self, _: bytes) -> None:
+        pass

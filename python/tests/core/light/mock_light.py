@@ -30,7 +30,7 @@ class MockLight(Light):
 
     @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return 'test'
 
     def serialize(self) -> dict:

@@ -26,7 +26,7 @@ class Boxes(Geometries[Box]):
 
     @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return 'boxes'
 
     @classmethod

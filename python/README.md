@@ -39,8 +39,10 @@ Connect to a renderer backend instance:
 ```py
 import brayns
 
-with brayns.connect('localhost:5000') as instance: # Renderer host and port
-    instance.request('registry') # Some requests
+connector = brayns.Connector('localhost:5000')
+
+with connector.connect() as instance:
+    instance.request('registry')
 ```
 
 #### Raw requests

@@ -26,14 +26,14 @@ from brayns.instance.client import Client
 from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
 from brayns.instance.listener import Listener
-from tests.instance.websocket.mock_web_socket import MockWebSocket
+from tests.instance.mock_web_socket import MockWebSocket
 
 
 class TestClient(unittest.TestCase):
 
     def setUp(self) -> None:
         self._logger = logging.root
-        self._manager = JsonRpcManager.create(self._logger)
+        self._manager = JsonRpcManager(self._logger)
         self._listener = Listener(self._logger, self._on_binary, self._manager)
         self._websocket = MockWebSocket(self._listener)
         self._data = b''
