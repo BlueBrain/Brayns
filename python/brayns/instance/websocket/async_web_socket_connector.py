@@ -23,9 +23,9 @@ from dataclasses import dataclass
 from typing import Optional
 
 from brayns.instance.websocket.async_web_socket import AsyncWebSocket
-from brayns.instance.websocket.connection_failed_error import ConnectionFailedError
 from brayns.instance.websocket.invalid_server_certificate_error import InvalidServerCertificateError
 from brayns.instance.websocket.protocol_error import ProtocolError
+from brayns.instance.websocket.service_unavailable_error import ServiceUnavailableError
 from brayns.instance.websocket.ssl_client_context import SslClientContext
 from websockets.client import connect
 from websockets.exceptions import WebSocketException
@@ -48,7 +48,7 @@ class AsyncWebSocketConnector:
             )
             return AsyncWebSocket(websocket)
         except ConnectionRefusedError as e:
-            raise ConnectionFailedError(str(e))
+            raise ServiceUnavailableError(str(e))
         except ssl.SSLError as e:
             raise InvalidServerCertificateError(str(e))
         except WebSocketException as e:

@@ -21,6 +21,6 @@
 from brayns.instance.websocket.web_socket_error import WebSocketError
 
 
-class ConnectionFailedError(WebSocketError):
+class ServiceUnavailableError(WebSocketError):
 
     pass

@@ -27,9 +27,9 @@ from brayns.instance.request_error import RequestError
 from brayns.instance.request_future import RequestFuture
 from brayns.instance.request_progress import RequestProgress
 from brayns.instance.websocket.connection_closed_error import ConnectionClosedError
-from brayns.instance.websocket.connection_failed_error import ConnectionFailedError
 from brayns.instance.websocket.invalid_server_certificate_error import InvalidServerCertificateError
 from brayns.instance.websocket.protocol_error import ProtocolError
+from brayns.instance.websocket.service_unavailable_error import ServiceUnavailableError
 from brayns.instance.websocket.ssl_client_context import SslClientContext
 from brayns.instance.websocket.web_socket_error import WebSocketError
 
@@ -44,8 +44,8 @@ __all__ = [
     'RequestProgress',
     'SslClientContext',
     'ConnectionClosedError',
-    'ConnectionFailedError',
     'InvalidServerCertificateError',
     'ProtocolError',
+    'ServiceUnavailableError',
     'WebSocketError'
 ]

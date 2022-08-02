@@ -43,24 +43,24 @@ class TestConnector(ApiTestCase):
                 pass
 
     def test_connect_no_instance(self) -> None:
-        with self.assertRaises(brayns.ConnectionFailedError):
+        with self.assertRaises(brayns.ServiceUnavailableError):
             self._connect(max_attempts=5)
 
     def test_connect_invalid_server_certificate(self) -> None:
-        with self.assertRaises(brayns.InvalidServerCertificateError):
-            with self._start_instance(secure=True):
+        with self._start_instance(secure=True):
+            with self.assertRaises(brayns.InvalidServerCertificateError):
                 with self._connect(secure=True):
                     pass
 
     def test_connect_unsecure_server(self) -> None:
-        with self.assertRaises(brayns.InvalidServerCertificateError):
-            with self._start_instance(secure=False):
+        with self._start_instance(secure=False):
+            with self.assertRaises(brayns.InvalidServerCertificateError):
                 with self._connect(secure=True):
                     pass
 
     def test_connect_unsecure_client(self) -> None:
-        with self.assertRaises(brayns.ProtocolError):
-            with self._start_instance(secure=True):
+        with self._start_instance(secure=True):
+            with self.assertRaises(brayns.ProtocolError):
                 with self._connect(secure=False):
                     pass
 
@@ -89,6 +89,7 @@ class TestConnector(ApiTestCase):
             ssl_context=brayns.SslClientContext(
                 cafile=cafile
             ) if secure else None,
-            logger=brayns.Logger(logging.CRITICAL)
+            logger=brayns.Logger(logging.CRITICAL),
+            max_attempts=max_attempts
         )
-        return connector.connect(max_attempts)
+        return connector.connect()

@@ -38,7 +38,11 @@ class WebSocketConnector:
     def connect(self) -> WebSocketClient:
         loop = EventLoop()
         connector = AsyncWebSocketConnector(self.uri, self.ssl_context)
-        websocket = loop.run(
-            connector.connect()
-        ).result()
+        try:
+            websocket = loop.run(
+                connector.connect()
+            ).result()
+        except:
+            loop.close()
+            raise
         return WebSocketClient(websocket, loop, self.listener)

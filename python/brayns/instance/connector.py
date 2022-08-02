@@ -22,15 +22,16 @@ import logging
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, cast
 
 from brayns.instance.client import Client
 from brayns.instance.instance import Instance
 from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.listener import Listener
 from brayns.instance.logger import Logger
-from brayns.instance.websocket.connection_failed_error import ConnectionFailedError
+from brayns.instance.websocket.service_unavailable_error import ServiceUnavailableError
 from brayns.instance.websocket.ssl_client_context import SslClientContext
+from brayns.instance.websocket.web_socket_client import WebSocketClient
 from brayns.instance.websocket.web_socket_connector import WebSocketConnector
 
 
@@ -41,30 +42,49 @@ class Connector:
     ssl_context: Optional[SslClientContext] = None
     binary_handler: Callable[[bytes], None] = lambda _: None
     logger: logging.Logger = field(default_factory=Logger)
+    max_attempts: Optional[int] = 1
+    attempt_period: float = 0.1
 
-    def connect(self, max_attempts: Optional[int] = 1, attempt_period: float = 0.1) -> Instance:
-        self.logger.info('Connection to "%s".', self.uri)
-        count = 0
-        while True:
-            self.logger.debug('Connection attempt %s.', count)
-            try:
-                return self._connect()
-            except ConnectionFailedError as e:
-                count += 1
-                self.logger.debug('Connection failed: "%s".', e)
-                if max_attempts is not None and count >= max_attempts:
-                    self.logger.error('Max connection attempts reached.')
-                    raise e
-                time.sleep(attempt_period)
-            except Exception as e:
-                self.logger.error('Connection refused: "%s".', e)
-                raise e
-
-    def _connect(self) -> Instance:
+    def connect(self) -> Instance:
         manager = JsonRpcManager(self.logger)
         listener = Listener(self.logger, self.binary_handler, manager)
         connector = WebSocketConnector(self.uri, listener, self.ssl_context)
-        websocket = connector.connect()
-        self.logger.info('Successfully connected to "%s".', self.uri)
-        client = Client(websocket, self.logger, manager)
-        return client
+        websocket = self._open_websocket(connector)
+        return Client(websocket, self.logger, manager)
+
+    def _open_websocket(self, connector: WebSocketConnector) -> WebSocketClient:
+        self.logger.info('Connection to renderer at "%s".', self.uri)
+        try:
+            websocket = self._try_connect(connector)
+        except Exception as e:
+            self.logger.info('Connection failed: %s.', e)
+            raise
+        self.logger.info('Successfully connected".')
+        return websocket
+
+    def _try_connect(self, connector: WebSocketConnector) -> WebSocketClient:
+        if self.max_attempts is None:
+            return self._try_connect_forever(connector)
+        return self._try_connect_with_max_attempts(connector)
+
+    def _try_connect_forever(self, connector: WebSocketConnector) -> WebSocketClient:
+        while True:
+            self.logger.debug('Connection attempt.')
+            try:
+                return connector.connect()
+            except ServiceUnavailableError:
+                time.sleep(self.attempt_period)
+
+    def _try_connect_with_max_attempts(self, connector: WebSocketConnector) -> WebSocketClient:
+        max_attempts = cast(int, self.max_attempts)
+        count = 1
+        while True:
+            self.logger.debug('Connection attempt %s/%s.', count, max_attempts)
+            try:
+                return connector.connect()
+            except ServiceUnavailableError:
+                if count == max_attempts:
+                    self.logger.info('Max attempts reached.')
+                    raise
+                time.sleep(self.attempt_period)
+            count += 1
