@@ -23,7 +23,7 @@ import unittest
 from brayns.launcher.ssl_server_context import SslServerContext
 
 
-class TestServerSsl(unittest.TestCase):
+class TestSslServerContext(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
         ssl = SslServerContext(
