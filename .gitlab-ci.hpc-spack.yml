@@ -52,7 +52,6 @@ brayns-python-venv:
     - python setup.py sdist
     - pip install dist/$(ls dist)
     - pip install pyright
-    - deactivate
 
 
 brayns-python-test:
@@ -63,7 +62,6 @@ brayns-python-test:
     - cd ${SPACK_SOURCE_DIR}/python
     - source pythonvenv/bin/activate
     - python -m unittest discover -v --locals -s tests -p test_*.py
-    - deactivate
 
 
 brayns-python-type-check:
@@ -77,4 +75,3 @@ brayns-python-type-check:
     - pyright --warnings tests
     - pyright --warnings testapi
     - pyright --warnings scripts
-    - deactivate
