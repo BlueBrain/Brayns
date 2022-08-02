@@ -53,13 +53,13 @@ class Connector:
         return Client(websocket, self.logger, manager)
 
     def _open_websocket(self, connector: WebSocketConnector) -> WebSocketClient:
-        self.logger.info('Connection to renderer at "%s".', self.uri)
+        self.logger.info('Connection to instance at "%s".', self.uri)
         try:
             websocket = self._try_connect(connector)
         except Exception as e:
-            self.logger.info('Connection failed: %s.', e)
+            self.logger.info('Connection failed: "%s".', e)
             raise
-        self.logger.info('Successfully connected".')
+        self.logger.info('Successfully connected.')
         return websocket
 
     def _try_connect(self, connector: WebSocketConnector) -> WebSocketClient:
@@ -79,7 +79,7 @@ class Connector:
         max_attempts = cast(int, self.max_attempts)
         count = 1
         while True:
-            self.logger.debug('Connection attempt %s/%s.', count, max_attempts)
+            self.logger.debug('Connection attempt %d/%d.', count, max_attempts)
             try:
                 return connector.connect()
             except ServiceUnavailableError:

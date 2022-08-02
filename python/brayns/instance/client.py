@@ -62,7 +62,7 @@ class Client(Instance):
         )
 
     def poll(self, block: bool = True) -> None:
-        self._logger.info('Poll messages from Brayns instance.')
+        self._logger.debug('Waiting for messages from Brayns instance.')
         self._websocket.poll(block)
 
     def cancel(self, id: JsonRpcId) -> None:
