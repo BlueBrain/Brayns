@@ -128,7 +128,7 @@ def run(uri: str) -> None:
     connector = brayns.Connector(
         uri=uri,
         binary_handler=lambda data: on_binary(window, data),
-        logger=brayns.Connector.get_default_logger(logging.DEBUG)
+        logger=brayns.Logger(logging.DEBUG)
     )
     with connector.connect() as instance:
         process_events(instance, window)
