@@ -39,7 +39,7 @@ brayns-spack-test:
     - spack build-env ${SPACK_FULL_SPEC} -- ninja tests
 
 
-brayns-python-test:
+brayns-python-venv:
   extends: .spack_test
   needs: ["brayns-spack-build"]
   timeout: 10 minutes
@@ -51,5 +51,32 @@ brayns-python-test:
     - source pythonvenv/bin/activate
     - python setup.py sdist
     - pip install dist/$(ls dist)
+    - pip install pyright
+    - pip install PySimpleGUI
+    - pip install Pillow
+    - deactivate
+
+
+brayns-python-test:
+  extends: .spack_test
+  needs: ["brayns-spack-build", "brayns-python-venv"]
+  timeout: 10 minutes
+  script:
+    - cd ${SPACK_SOURCE_DIR}/python
+    - source pythonvenv/bin/activate
     - python -m unittest discover -v --locals -s tests -p test_*.py
+    - deactivate
+
+
+brayns-python-type-check:
+  extends: .spack_test
+  needs: ["brayns-spack-build", "brayns-python-venv"]
+  timeout: 10 minutes
+  script:
+    - cd ${SPACK_SOURCE_DIR}/python
+    - source pythonvenv/bin/activate
+    - pyright --warnings brayns
+    - pyright --warnings tests
+    - pyright --warnings testapi
+    - pyright --warnings scripts
     - deactivate
