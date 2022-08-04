@@ -18,18 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.api import *
-from brayns.core.application import *
-from brayns.core.camera import *
-from brayns.core.clipping import *
-from brayns.core.vector import *
-from brayns.core.geometry import *
-from brayns.core.light import *
-from brayns.core.material import *
-from brayns.core.model import *
-from brayns.core.movie import *
-from brayns.core.renderer import *
-from brayns.core.simulation import *
-from brayns.core.snapshot import *
-from brayns.core.transfer_function import *
-from brayns.core.version import *
+from dataclasses import dataclass
+
+from brayns.core.vector.vector3 import Vector3
+
+
+@dataclass
+class Capsule:
+
+    start_point: Vector3
+    start_radius: float
+    end_point: Vector3
+    end_radius: float
+
+    def serialize(self) -> dict:
+        return {
+            'p0': list(self.start_point),
+            'r0': self.start_radius,
+            'p1': list(self.end_point),
+            'r1': self.end_radius
+        }

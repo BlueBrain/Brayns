@@ -20,15 +20,15 @@
 
 import unittest
 
-from brayns.core.camera.camera_view import CameraView
-from brayns.core.common.vector3 import Vector3
+from brayns.core.camera.view import View
+from brayns.core.vector.vector3 import Vector3
 from tests.instance.mock_instance import MockInstance
 
 
 class TestCameraView(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._view = CameraView(
+        self._view = View(
             position=Vector3(1, 2, 3),
             target=Vector3(4, 5, 6),
             up=Vector3(7, 8, 9)
@@ -41,17 +41,17 @@ class TestCameraView(unittest.TestCase):
 
     def test_from_instance(self) -> None:
         instance = MockInstance(self._message)
-        test = CameraView.from_instance(instance)
+        test = View.from_instance(instance)
         self.assertEqual(test, self._view)
         self.assertEqual(instance.method, 'get-camera-look-at')
         self.assertEqual(instance.params, None)
 
     def test_deserialize(self) -> None:
-        test = CameraView.deserialize(self._message)
+        test = View.deserialize(self._message)
         self.assertEqual(test, self._view)
 
     def test_direction(self) -> None:
-        test = CameraView(
+        test = View(
             position=Vector3.zero,
             target=Vector3.one
         )

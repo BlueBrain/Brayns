@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.common.bounds import Bounds
-from brayns.core.common.vector3 import Vector3
+from brayns.core.vector.vector3 import Vector3
 
 
 class MockBounds:

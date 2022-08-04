@@ -21,8 +21,8 @@
 import unittest
 from typing import cast
 
-from brayns.core.camera.cylindric_camera import CylindricCamera
-from brayns.core.camera.fovy import Fovy
+from brayns.core.view.fovy import Fovy
+from brayns.plugins.cylindric_camera.cylindric_camera import CylindricCamera
 
 
 class TestCylindricCamera(unittest.TestCase):

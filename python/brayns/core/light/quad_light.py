@@ -20,7 +20,7 @@
 
 from dataclasses import dataclass
 
-from brayns.core.common.vector3 import Vector3
+from brayns.core.vector.vector3 import Vector3
 from brayns.core.light.light import Light
 
 

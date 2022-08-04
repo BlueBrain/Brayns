@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.camera.fovy import Fovy
+from brayns.core.view.fovy import Fovy
 from brayns.core.camera.perspective_camera import PerspectiveCamera
 
 

@@ -18,18 +18,34 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.api import *
-from brayns.core.application import *
-from brayns.core.camera import *
-from brayns.core.clipping import *
-from brayns.core.vector import *
-from brayns.core.geometry import *
-from brayns.core.light import *
-from brayns.core.material import *
-from brayns.core.model import *
-from brayns.core.movie import *
-from brayns.core.renderer import *
-from brayns.core.simulation import *
-from brayns.core.snapshot import *
-from brayns.core.transfer_function import *
-from brayns.core.version import *
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+
+from brayns.core.vector.vector3 import Vector3
+from brayns.core.rotation.quaternion import Quaternion
+
+
+@dataclass
+class AxisAngle:
+
+    axis: Vector3
+    angle: float = 0.0
+
+    @staticmethod
+    def from_quaternion(quaternion: Quaternion, degrees: bool = False) -> AxisAngle:
+        axis = quaternion.vector
+        angle = 2 * math.acos(quaternion.w)
+        if degrees:
+            angle = math.degrees(angle)
+        return AxisAngle(axis, angle)
+
+    def to_quaternion(self, degrees: bool = False) -> Quaternion:
+        axis, angle = self.axis, self.angle
+        if degrees:
+            angle = math.radians(angle)
+        half_angle = angle / 2
+        vector = axis.normalized * math.sin(half_angle)
+        real = math.cos(half_angle)
+        return Quaternion(vector.x, vector.y, vector.z, real)

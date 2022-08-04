@@ -18,29 +18,34 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+import math
 
+from brayns.core.common.bounds import Bounds
 from brayns.core.vector.vector3 import Vector3
-from brayns.core.geometry.capsule import Capsule
-from brayns.core.geometry.capsules import Capsules
+from brayns.core.view.view import View
 
 
-class TestCapsules(unittest.TestCase):
+class Fovy:
 
-    def test_name(self) -> None:
-        self.assertEqual(Capsules.name, 'capsules')
+    def __init__(self, angle: float = math.radians(45), degrees: bool = False) -> None:
+        self._angle = math.radians(angle) if degrees else angle
 
-    def test_serialize_geometry(self) -> None:
-        capsule = Capsule(
-            Vector3.zero,
-            0,
-            Vector3.one,
-            1
-        )
-        test = Capsules.serialize_geometry(capsule)
-        ref = capsule.serialize()
-        self.assertEqual(test, ref)
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Fovy):
+            return False
+        return self._angle == other._angle
 
+    @property
+    def radians(self) -> float:
+        return self._angle
 
-if __name__ == '__main__':
-    unittest.main()
+    @property
+    def degrees(self) -> float:
+        return math.degrees(self._angle)
+
+    def get_full_screen_view(self, target: Bounds) -> View:
+        center = target.center
+        distance = target.height / 2 / math.tan(self.radians / 2)
+        distance += target.depth / 2
+        position = center + distance * Vector3.forward
+        return View(position, center)

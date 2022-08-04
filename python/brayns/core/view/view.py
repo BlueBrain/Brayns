@@ -18,18 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.api import *
-from brayns.core.application import *
-from brayns.core.camera import *
-from brayns.core.clipping import *
-from brayns.core.vector import *
-from brayns.core.geometry import *
-from brayns.core.light import *
-from brayns.core.material import *
-from brayns.core.model import *
-from brayns.core.movie import *
-from brayns.core.renderer import *
-from brayns.core.simulation import *
-from brayns.core.snapshot import *
-from brayns.core.transfer_function import *
-from brayns.core.version import *
+from dataclasses import dataclass
+
+from brayns.core.vector.vector3 import Vector3
+
+
+@dataclass
+class View:
+
+    position: Vector3 = Vector3.zero
+    target: Vector3 = Vector3.forward
+    up: Vector3 = Vector3.up
+
+    @property
+    def direction(self) -> Vector3:
+        return self.target - self.position

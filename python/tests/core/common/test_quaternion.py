@@ -21,7 +21,7 @@
 import unittest
 
 from brayns.core.common.quaternion import Quaternion
-from brayns.core.common.vector3 import Vector3
+from brayns.core.vector.vector3 import Vector3
 
 
 class TestQuaternion(unittest.TestCase):

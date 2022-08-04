@@ -21,7 +21,7 @@
 import unittest
 
 from brayns.core.common.bounds import Bounds
-from brayns.core.common.vector3 import Vector3
+from brayns.core.vector.vector3 import Vector3
 from tests.core.common.mock_bounds import MockBounds
 
 

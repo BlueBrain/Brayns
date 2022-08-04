@@ -18,18 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.api import *
-from brayns.core.application import *
-from brayns.core.camera import *
-from brayns.core.clipping import *
-from brayns.core.vector import *
-from brayns.core.geometry import *
-from brayns.core.light import *
-from brayns.core.material import *
-from brayns.core.model import *
-from brayns.core.movie import *
-from brayns.core.renderer import *
-from brayns.core.simulation import *
-from brayns.core.snapshot import *
-from brayns.core.transfer_function import *
-from brayns.core.version import *
+from brayns.core.common.bounds import Bounds
+from brayns.core.vector.vector3 import Vector3
+from brayns.core.view.view import View
+
+
+def get_front_view(target: Bounds) -> View:
+    center = target.center
+    distance = target.depth
+    position = center + distance * Vector3.forward
+    return View(position, center)
