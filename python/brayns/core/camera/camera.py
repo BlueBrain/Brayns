@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class Camera(ABC):
@@ -27,4 +28,9 @@ class Camera(ABC):
     @property
     @abstractmethod
     def name(cls) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def properties(self) -> dict[str, Any]:
         pass

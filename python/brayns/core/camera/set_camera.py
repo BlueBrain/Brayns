@@ -18,16 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import TypeVar
-
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_registry import camera_registry
 from brayns.instance.instance import Instance
-
-T = TypeVar('T', bound=Camera)
 
 
 def set_camera(instance: Instance, camera: Camera) -> None:
     name = camera.name
-    params = camera_registry.serialize(camera)
+    params = camera.properties
     instance.request(f'set-camera-{name}', params)

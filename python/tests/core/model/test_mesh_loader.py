@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.model.mesh_loader import MeshLoader
+from brayns.core.loader.mesh_loader import MeshLoader
 
 
 class TestMeshLoader(unittest.TestCase):

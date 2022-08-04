@@ -25,11 +25,11 @@ from brayns.instance.instance import Instance
 
 
 def add_clip_plane(instance: Instance, plane: ClipPlane) -> int:
-    params = _serialize(plane)
+    params = _serialize_clip_plane(plane)
     return instance.request('add-clip-plane', params)
 
 
-def _serialize(plane: ClipPlane) -> dict[str, Any]:
+def _serialize_clip_plane(plane: ClipPlane) -> dict[str, Any]:
     return {
         'coefficients': [plane.a, plane.b, plane.c, plane.d]
     }

@@ -18,20 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.get_camera_name import get_camera_name
-from brayns.core.camera.get_orthographic_camera import get_orthographic_camera
-from brayns.core.camera.get_perspective_camera import get_perspective_camera
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.camera.set_camera import set_camera
+from typing import Any
 
-__all__ = [
-    'Camera',
-    'get_camera_name',
-    'get_orthographic_camera',
-    'get_perspective_camera',
-    'OrthographicCamera',
-    'PerspectiveCamera',
-    'set_camera',
-]
+from brayns.core.camera.orthographic_camera import OrthographicCamera
+from brayns.instance.instance import Instance
+
+
+def get_orthographic_camera(instance: Instance) -> OrthographicCamera:
+    name = OrthographicCamera.name
+    result = instance.request(f'get-camera-{name}')
+    return _deserialize_orthographic_camera(result)
+
+
+def _deserialize_orthographic_camera(message: dict[str, Any]) -> OrthographicCamera:
+    return OrthographicCamera(
+        height=message['height']
+    )

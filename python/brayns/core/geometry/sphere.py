@@ -20,17 +20,12 @@
 
 from dataclasses import dataclass
 
+from brayns.core.geometry.geometry import Geometry
 from brayns.core.vector.vector3 import Vector3
 
 
 @dataclass
-class Sphere:
+class Sphere(Geometry):
 
     radius: float
     center: Vector3 = Vector3.zero
-
-    def serialize(self) -> dict:
-        return {
-            'center': list(self.center),
-            'radius': self.radius
-        }

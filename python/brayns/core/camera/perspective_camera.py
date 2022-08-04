@@ -22,8 +22,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_handler import CameraHandler
-from brayns.core.camera.camera_registry import camera_registry
 from brayns.core.view.fovy import Fovy
 
 
@@ -39,22 +37,10 @@ class PerspectiveCamera(Camera):
     def name(cls) -> str:
         return 'perspective'
 
-
-class _Handler(CameraHandler):
-
-    def deserialize(self, message: dict[str, Any]) -> PerspectiveCamera:
-        return PerspectiveCamera(
-            fovy=Fovy(message['fovy'], degrees=True),
-            aperture_radius=message['aperture_radius'],
-            focus_distance=message['focus_distance'],
-        )
-
-    def serialize(self, camera: PerspectiveCamera) -> dict[str, Any]:
+    @property
+    def properties(self) -> dict[str, Any]:
         return {
-            'fovy': camera.fovy.degrees,
-            'aperture_radius': camera.aperture_radius,
-            'focus_distance': camera.focus_distance,
+            'fovy': self.fovy.degrees,
+            'aperture_radius': self.aperture_radius,
+            'focus_distance': self.focus_distance,
         }
-
-
-camera_registry.register(PerspectiveCamera, _Handler())

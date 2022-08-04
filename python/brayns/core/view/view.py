@@ -32,4 +32,4 @@ class View:
 
     @property
     def direction(self) -> Vector3:
-        return self.target - self.position
+        return (self.target - self.position).normalized

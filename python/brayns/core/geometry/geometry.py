@@ -18,16 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from abc import ABC
+from dataclasses import dataclass, field
 from typing import TypeVar
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_registry import camera_registry
-from brayns.instance.instance import Instance
+from brayns.core.color.color4 import Color4
 
-T = TypeVar('T', bound=Camera)
+T = TypeVar('T', bound='Geometry')
 
 
-def get_camera(instance: Instance, camera_type: type[T]) -> T:
-    name = camera_type.name
-    result = instance.request(f'get-camera-{name}')
-    return camera_registry.deserialize(camera_type, result)
+@dataclass
+class Geometry(ABC):
+
+    color: Color4 = field(default=Color4.white, init=False)
+
+    def with_color(self: T, color: Color4) -> T:
+        self.color = color
+        return self

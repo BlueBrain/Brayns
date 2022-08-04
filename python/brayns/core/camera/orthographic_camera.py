@@ -22,8 +22,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_handler import CameraHandler
-from brayns.core.camera.camera_registry import camera_registry
 
 
 @dataclass
@@ -36,18 +34,8 @@ class OrthographicCamera(Camera):
     def name(cls) -> str:
         return 'orthographic'
 
-
-class _Handler(CameraHandler):
-
-    def deserialize(self, message: dict[str, Any]) -> OrthographicCamera:
-        return OrthographicCamera(
-            height=message['height']
-        )
-
-    def serialize(self, camera: OrthographicCamera) -> dict[str, Any]:
+    @property
+    def properties(self) -> dict[str, Any]:
         return {
-            'height': camera.height
+            'height': self.height
         }
-
-
-camera_registry.register(OrthographicCamera, _Handler())

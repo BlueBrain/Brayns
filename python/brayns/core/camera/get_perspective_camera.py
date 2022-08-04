@@ -18,17 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.geometry.geometries import Geometries
-from brayns.core.geometry.plane import Plane
+from typing import Any
+
+from brayns.core.camera.perspective_camera import PerspectiveCamera
+from brayns.core.view.fovy import Fovy
+from brayns.instance.instance import Instance
 
 
-class Planes(Geometries[Plane]):
+def get_perspective_camera(instance: Instance) -> PerspectiveCamera:
+    name = PerspectiveCamera.name
+    result = instance.request(f'get-camera-{name}')
+    return _deserialize_perspective_camera(result)
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'planes'
 
-    @classmethod
-    def serialize_geometry(cls, plane: Plane) -> dict:
-        return plane.serialize()
+def _deserialize_perspective_camera(message: dict[str, Any]) -> PerspectiveCamera:
+    return PerspectiveCamera(
+        fovy=Fovy(message['fovy'], degrees=True),
+        aperture_radius=message['aperture_radius'],
+        focus_distance=message['focus_distance'],
+    )

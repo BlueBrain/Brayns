@@ -18,36 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import ABC, abstractmethod
+from typing import Any
 
+from brayns.core.geometry.add_geometries import add_geometries
+from brayns.core.geometry.capsule import Capsule
 from brayns.core.model.model import Model
 from brayns.instance.instance import Instance
 
 
-class ModelLoader(ABC):
+def add_capsules(instance: Instance, capsules: list[Capsule]) -> Model:
+    return add_geometries(instance, 'add-capsules', capsules, _serialize_capsule)
 
-    @classmethod
-    @property
-    @abstractmethod
-    def name(cls) -> str:
-        pass
 
-    @property
-    @abstractmethod
-    def properties(self) -> dict:
-        pass
-
-    def load(self, instance: Instance, path: str) -> list[Model]:
-        params = self.serialize(path)
-        result = instance.request('add-model', params)
-        return [
-            Model.deserialize(model)
-            for model in result
-        ]
-
-    def serialize(self, path: str) -> dict:
-        return {
-            'path': path,
-            'loader_name': self.name,
-            'loader_properties': self.properties
-        }
+def _serialize_capsule(capsule: Capsule) -> dict[str, Any]:
+    return {
+        'p0': list(capsule.start_point),
+        'r0': capsule.start_radius,
+        'p1': list(capsule.end_point),
+        'r1': capsule.end_radius,
+    }

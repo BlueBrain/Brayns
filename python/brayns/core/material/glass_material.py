@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.material.material import Material
 
@@ -33,14 +34,8 @@ class GlassMaterial(Material):
     def name(cls) -> str:
         return 'glass'
 
-    @classmethod
-    def deserialize(cls, message: dict) -> 'GlassMaterial':
-        return cls._from_dict(
-            message,
-            refraction_index=message['index_of_refraction']
-        )
-
-    def serialize(self) -> dict:
-        return self._to_dict({
+    @property
+    def properties(self) -> dict[str, Any]:
+        return {
             'index_of_refraction': self.refraction_index
-        })
+        }

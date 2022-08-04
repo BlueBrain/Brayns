@@ -18,16 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.model.model_loader import ModelLoader
+from brayns.instance.instance import Instance
 
 
-class MeshLoader(ModelLoader):
-
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'mesh'
-
-    @property
-    def properties(self) -> dict:
-        return {}
+def remove_models(instance: Instance, ids: list[int]) -> None:
+    params = {'ids': ids}
+    instance.request('remove-model', params)

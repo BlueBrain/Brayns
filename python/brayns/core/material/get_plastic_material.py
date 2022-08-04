@@ -18,17 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.geometry.capsule import Capsule
-from brayns.core.geometry.geometries import Geometries
+from typing import Any
+
+from brayns.core.material.get_material import get_material
+from brayns.core.material.plastic_material import PlasticMaterial
+from brayns.instance.instance import Instance
 
 
-class Capsules(Geometries[Capsule]):
+def get_plastic_material(instance: Instance, model_id: int) -> PlasticMaterial:
+    return get_material(
+        instance=instance,
+        model_id=model_id,
+        material=PlasticMaterial,
+        deserializer=_deserialize_plastic_material
+    )
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'capsules'
 
-    @classmethod
-    def serialize_geometry(cls, capsule: Capsule) -> dict:
-        return capsule.serialize()
+def _deserialize_plastic_material(message: dict[str, Any]) -> PlasticMaterial:
+    return PlasticMaterial(
+        opacity=message['opacity']
+    )

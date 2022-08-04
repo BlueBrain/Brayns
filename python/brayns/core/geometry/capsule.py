@@ -20,21 +20,14 @@
 
 from dataclasses import dataclass
 
+from brayns.core.geometry.geometry import Geometry
 from brayns.core.vector.vector3 import Vector3
 
 
 @dataclass
-class Capsule:
+class Capsule(Geometry):
 
     start_point: Vector3
     start_radius: float
     end_point: Vector3
     end_radius: float
-
-    def serialize(self) -> dict:
-        return {
-            'p0': list(self.start_point),
-            'r0': self.start_radius,
-            'p1': list(self.end_point),
-            'r1': self.end_radius
-        }

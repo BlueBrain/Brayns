@@ -18,17 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.geometry.geometries import Geometries
-from brayns.core.geometry.sphere import Sphere
+from typing import Any
+
+from brayns.core.material.get_material import get_material
+from brayns.core.material.glass_material import GlassMaterial
+from brayns.instance.instance import Instance
 
 
-class Spheres(Geometries[Sphere]):
+def get_glass_material(instance: Instance, model_id: int) -> GlassMaterial:
+    return get_material(
+        instance=instance,
+        model_id=model_id,
+        material=GlassMaterial,
+        deserializer=_deserialize_glass_material
+    )
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'spheres'
 
-    @classmethod
-    def serialize_geometry(cls, sphere: Sphere) -> dict:
-        return sphere.serialize()
+def _deserialize_glass_material(message: dict[str, Any]) -> GlassMaterial:
+    return GlassMaterial(
+        refraction_index=message['index_of_refraction']
+    )

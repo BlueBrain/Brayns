@@ -18,17 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, Protocol, TypeVar
+from brayns.core.loader.load_model import load_model
+from brayns.core.loader.loader import Loader
+from brayns.core.loader.mesh_loader import MeshLoader
 
-from brayns.core.camera.camera import Camera
-
-T = TypeVar('T', bound=Camera)
-
-
-class CameraHandler(Protocol):
-
-    def deserialize(self, message: dict[str, Any]) -> Camera:
-        raise NotImplementedError()
-
-    def serialize(self, camera: Camera) -> dict[str, Any]:
-        raise NotImplementedError()
+__all__ = [
+    'load_model',
+    'Loader',
+    'MeshLoader',
+]

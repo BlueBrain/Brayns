@@ -19,9 +19,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
-from brayns.core.vector.vector3 import Vector3
 from brayns.core.light.light import Light
+from brayns.core.vector.vector3 import Vector3
 
 
 @dataclass
@@ -37,12 +38,13 @@ class QuadLight(Light):
         return 'quad'
 
     @property
-    def emission_direction(self) -> Vector3:
-        return self.edge1.cross(self.edge2)
-
-    def serialize(self) -> dict:
-        return self._to_dict({
+    def additional_properties(self) -> dict[str, Any]:
+        return {
             'position': list(self.bottom_left),
             'edge1': list(self.edge1),
             'edge2': list(self.edge2)
-        })
+        }
+
+    @property
+    def emission_direction(self) -> Vector3:
+        return self.edge1.cross(self.edge2).normalized

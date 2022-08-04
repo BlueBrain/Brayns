@@ -18,12 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.model.mesh_loader import MeshLoader
+from brayns.core.model.clear_models import clear_models
+from brayns.core.model.get_model import get_model
+from brayns.core.model.get_models import get_models
 from brayns.core.model.model import Model
-from brayns.core.model.model_loader import ModelLoader
+from brayns.core.model.remove_models import remove_models
+from brayns.core.model.update_model import update_model
 
 __all__ = [
-    'MeshLoader',
+    'clear_models',
+    'get_model',
+    'get_models',
     'Model',
-    'ModelLoader'
+    'remove_models',
+    'update_model',
 ]

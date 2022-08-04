@@ -20,16 +20,13 @@
 
 from dataclasses import dataclass
 
+from brayns.core.geometry.geometry import Geometry
+
 
 @dataclass
-class Plane:
+class Plane(Geometry):
 
     a: float
     b: float
     c: float
     d: float = 0.0
-
-    def serialize(self) -> dict:
-        return {
-            'coefficients': [self.a, self.b, self.c, self.d]
-        }

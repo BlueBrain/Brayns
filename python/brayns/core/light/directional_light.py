@@ -19,9 +19,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
-from brayns.core.vector.vector3 import Vector3
 from brayns.core.light.light import Light
+from brayns.core.vector.vector3 import Vector3
 
 
 @dataclass
@@ -34,7 +35,8 @@ class DirectionalLight(Light):
     def name(cls) -> str:
         return 'directional'
 
-    def serialize(self) -> dict:
-        return self._to_dict({
+    @property
+    def additional_properties(self) -> dict[str, Any]:
+        return {
             'direction': list(self.direction)
-        })
+        }

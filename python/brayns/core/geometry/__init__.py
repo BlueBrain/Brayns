@@ -18,16 +18,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.geometry.boxes import Boxes
-from brayns.core.geometry.capsules import Capsules
-from brayns.core.geometry.geometries import Geometries
-from brayns.core.geometry.planes import Planes
-from brayns.core.geometry.spheres import Spheres
+from brayns.core.geometry.add_boxes import add_boxes
+from brayns.core.geometry.add_capsules import add_capsules
+from brayns.core.geometry.add_planes import add_planes
+from brayns.core.geometry.add_spheres import add_spheres
+from brayns.core.geometry.box import Box
+from brayns.core.geometry.capsule import Capsule
+from brayns.core.geometry.geometry import Geometry
+from brayns.core.geometry.plane import Plane
+from brayns.core.geometry.sphere import Sphere
 
 __all__ = [
-    'Boxes',
-    'Capsules',
-    'Geometries',
-    'Planes',
-    'Spheres'
+    'add_boxes',
+    'add_capsules',
+    'add_planes',
+    'add_spheres',
+    'Box',
+    'Capsule',
+    'Geometry',
+    'Plane',
+    'Sphere',
 ]

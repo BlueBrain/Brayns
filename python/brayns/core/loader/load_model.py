@@ -18,17 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.geometry.box import Box
-from brayns.core.geometry.geometries import Geometries
+from typing import Any
+
+from brayns.core.loader.loader import Loader
+from brayns.core.model.deserialize_model import deserialize_model
+from brayns.core.model.model import Model
+from brayns.instance.instance import Instance
 
 
-class Boxes(Geometries[Box]):
+def load_model(instance: Instance, loader: Loader, path: str) -> list[Model]:
+    params = _serialize_loader(loader, path)
+    result = instance.request('add-model', params)
+    return [
+        deserialize_model(model)
+        for model in result
+    ]
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'boxes'
 
-    @classmethod
-    def serialize_geometry(cls, box: Box) -> dict:
-        return box.serialize()
+def _serialize_loader(loader: Loader, path: str) -> dict[str, Any]:
+    return {
+        'path': path,
+        'loader_name': loader.name,
+        'loader_properties': loader.properties
+    }

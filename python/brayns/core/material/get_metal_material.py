@@ -18,20 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.get_camera_name import get_camera_name
-from brayns.core.camera.get_orthographic_camera import get_orthographic_camera
-from brayns.core.camera.get_perspective_camera import get_perspective_camera
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.camera.set_camera import set_camera
+from typing import Any
 
-__all__ = [
-    'Camera',
-    'get_camera_name',
-    'get_orthographic_camera',
-    'get_perspective_camera',
-    'OrthographicCamera',
-    'PerspectiveCamera',
-    'set_camera',
-]
+from brayns.core.material.get_material import get_material
+from brayns.core.material.metal_material import MetalMaterial
+from brayns.instance.instance import Instance
+
+
+def get_metal_material(instance: Instance, model_id: int) -> MetalMaterial:
+    return get_material(
+        instance=instance,
+        model_id=model_id,
+        material=MetalMaterial,
+        deserializer=_deserialize_metal_material
+    )
+
+
+def _deserialize_metal_material(message: dict[str, Any]) -> MetalMaterial:
+    return MetalMaterial(
+        roughness=message['roughness']
+    )

@@ -18,31 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, TypeVar, cast
-
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_handler import CameraHandler
-
-T = TypeVar('T', bound=Camera)
+from brayns.core.material.material import Material
+from brayns.instance.instance import Instance
 
 
-class CameraRegistry:
-
-    def __init__(self) -> None:
-        self._handlers = dict[type[T], CameraHandler]()
-
-    def register(self, camera: type[T], handler: CameraHandler) -> None:
-        assert camera not in self._handlers
-        self._handlers[camera] = handler
-
-    def deserialize(self, camera: type[T], message: dict[str, Any]) -> T:
-        handler = self._handlers[type(camera)]
-        result = handler.deserialize(message)
-        return cast(T, result)
-
-    def serialize(self, camera: Camera) -> dict[str, Any]:
-        handler = self._handlers[type(Camera)]
-        return handler.serialize(camera)
-
-
-camera_registry = CameraRegistry()
+def set_material(instance: Instance, model_id: int, material: Material) -> None:
+    name = material.name
+    properties = material.properties
+    params = {
+        'model_id': model_id,
+        'material': properties
+    }
+    instance.request(f'set-material-{name}', params)

@@ -18,20 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.get_camera_name import get_camera_name
-from brayns.core.camera.get_orthographic_camera import get_orthographic_camera
-from brayns.core.camera.get_perspective_camera import get_perspective_camera
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.camera.set_camera import set_camera
+from typing import Any
 
-__all__ = [
-    'Camera',
-    'get_camera_name',
-    'get_orthographic_camera',
-    'get_perspective_camera',
-    'OrthographicCamera',
-    'PerspectiveCamera',
-    'set_camera',
-]
+from brayns.core.material.get_material import get_material
+from brayns.core.material.matte_material import MatteMaterial
+from brayns.instance.instance import Instance
+
+
+def get_matte_material(instance: Instance, model_id: int) -> MatteMaterial:
+    return get_material(
+        instance=instance,
+        model_id=model_id,
+        material=MatteMaterial,
+        deserializer=_deserialize_matte_material
+    )
+
+
+def _deserialize_matte_material(message: dict[str, Any]) -> MatteMaterial:
+    return MatteMaterial(
+        opacity=message['opacity']
+    )

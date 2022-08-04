@@ -21,6 +21,13 @@
 from brayns.core.material.car_paint_material import CarPaintMaterial
 from brayns.core.material.default_material import DefaultMaterial
 from brayns.core.material.emissive_material import EmissiveMaterial
+from brayns.core.material.get_car_paint_material import get_car_paint_material
+from brayns.core.material.get_default_material import get_default_material
+from brayns.core.material.get_emissive_material import get_emissive_material
+from brayns.core.material.get_glass_material import get_glass_material
+from brayns.core.material.get_matte_material import get_matte_material
+from brayns.core.material.get_metal_material import get_metal_material
+from brayns.core.material.get_plastic_material import get_plastic_material
 from brayns.core.material.glass_material import GlassMaterial
 from brayns.core.material.material import Material
 from brayns.core.material.matte_material import MatteMaterial
@@ -31,9 +38,16 @@ __all__ = [
     'CarPaintMaterial',
     'DefaultMaterial',
     'EmissiveMaterial',
+    'get_car_paint_material',
+    'get_default_material',
+    'get_emissive_material',
+    'get_glass_material',
+    'get_matte_material',
+    'get_metal_material',
+    'get_plastic_material',
     'GlassMaterial',
     'Material',
     'MatteMaterial',
     'MetalMaterial',
-    'PlasticMaterial'
+    'PlasticMaterial',
 ]

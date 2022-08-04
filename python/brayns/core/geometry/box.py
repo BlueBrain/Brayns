@@ -20,14 +20,12 @@
 
 from dataclasses import dataclass
 
-from brayns.core.common.bounds import Bounds
+from brayns.core.geometry.geometry import Geometry
+from brayns.core.vector.vector3 import Vector3
 
 
 @dataclass
-class Box(Bounds):
+class Box(Geometry):
 
-    def serialize(self) -> dict:
-        return {
-            'min': list(self.min),
-            'max': list(self.max)
-        }
+    min: Vector3
+    max: Vector3

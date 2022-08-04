@@ -18,43 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import Any
 
-from brayns.core.common.color4 import Color4
+from brayns.core.geometry.add_geometries import add_geometries
+from brayns.core.geometry.box import Box
 from brayns.core.model.model import Model
 from brayns.instance.instance import Instance
 
-T = TypeVar('T')
+
+def add_boxes(instance: Instance, boxes: list[Box]) -> Model:
+    return add_geometries(instance, 'add-boxes', boxes, _serialize_box)
 
 
-@dataclass
-class Geometries(ABC, Generic[T]):
-
-    items: list[tuple[T, Color4]]
-
-    @classmethod
-    @property
-    @abstractmethod
-    def name(cls) -> str:
-        pass
-
-    @classmethod
-    @abstractmethod
-    def serialize_geometry(cls, geometry: T) -> dict:
-        pass
-
-    def add(self, instance: Instance) -> Model:
-        params = self.serialize()
-        result = instance.request(f'add-{self.name}', params)
-        return Model.deserialize(result)
-
-    def serialize(self) -> list[dict]:
-        return [
-            {
-                'geometry': self.serialize_geometry(item[0]),
-                'color': list(item[1])
-            }
-            for item in self.items
-        ]
+def _serialize_box(box: Box) -> dict[str, Any]:
+    return {
+        'min': list(box.min),
+        'max': list(box.max),
+    }

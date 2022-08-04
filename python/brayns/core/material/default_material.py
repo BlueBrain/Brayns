@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.material.material import Material
 
@@ -33,14 +34,8 @@ class DefaultMaterial(Material):
     def name(cls) -> str:
         return 'default'
 
-    @classmethod
-    def deserialize(cls, message: dict) -> 'DefaultMaterial':
-        return cls._from_dict(
-            message,
-            opacity=message['opacity']
-        )
-
-    def serialize(self) -> dict:
-        return self._to_dict({
+    @property
+    def properties(self) -> dict[str, Any]:
+        return {
             'opacity': self.opacity
-        })
+        }

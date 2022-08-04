@@ -27,7 +27,7 @@ from brayns.instance.instance import Instance
 def update_application(
     instance: Instance,
     resolution: Resolution | None = None,
-    jpeg_quality: int | None = None
+    jpeg_quality: int | None = None,
 ) -> None:
     params = {}
     if resolution is not None:
