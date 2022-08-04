@@ -18,18 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.get_camera import get_camera
-from brayns.core.camera.get_camera_name import get_camera_name
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.camera.set_camera import set_camera
+from typing import TypeVar
 
-__all__ = [
-    'Camera',
-    'get_camera',
-    'get_camera_name',
-    'OrthographicCamera',
-    'PerspectiveCamera',
-    'set_camera',
-]
+from brayns.core.camera.camera import Camera
+from brayns.core.camera.camera_registry import camera_registry
+from brayns.instance.instance import Instance
+
+T = TypeVar('T', bound=Camera)
+
+
+def set_camera(instance: Instance, camera: Camera) -> None:
+    name = camera.name
+    params = camera_registry.serialize(camera)
+    instance.request(f'set-camera-{name}', params)

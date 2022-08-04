@@ -18,18 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.get_camera import get_camera
-from brayns.core.camera.get_camera_name import get_camera_name
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.camera.set_camera import set_camera
+from __future__ import annotations
 
-__all__ = [
-    'Camera',
-    'get_camera',
-    'get_camera_name',
-    'OrthographicCamera',
-    'PerspectiveCamera',
-    'set_camera',
-]
+from brayns.core.image.resolution import Resolution
+from brayns.instance.instance import Instance
+
+
+def update_application(
+    instance: Instance,
+    resolution: Resolution | None = None,
+    jpeg_quality: int | None = None
+) -> None:
+    params = {}
+    if resolution is not None:
+        params['viewport'] = list(resolution)
+    if jpeg_quality is not None:
+        params['jpeg_quality'] = jpeg_quality
+    instance.request('set-application-parameters', params)

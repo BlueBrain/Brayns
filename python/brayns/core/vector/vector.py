@@ -18,25 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import math
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable, Iterator
-from typing import TypeVar, Union
+from typing import Generic, TypeVar
 
 T = TypeVar('T', bound='Vector')
+U = TypeVar('U', int, float)
 
 
-class Vector(ABC):
+class Vector(ABC, Generic[U]):
 
-    def __init__(self, *_: float) -> None:
+    def __init__(self, *_: U) -> None:
         pass
 
     @abstractmethod
-    def __iter__(self) -> Iterator[float]:
+    def __iter__(self) -> Iterator[U]:
         pass
 
     @classmethod
-    def unpack(cls: type[T], values: Iterable[float]) -> T:
+    def unpack(cls: type[T], values: Iterable[U]) -> T:
         return cls(*values)
 
     def __neg__(self: T) -> T:
@@ -51,34 +54,34 @@ class Vector(ABC):
     def __sub__(self: T, other: T) -> T:
         return self.unpack(i - j for i, j in zip(self, other))
 
-    def __mul__(self: T, value: Union[int, float, T]) -> T:
+    def __mul__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: x * y)
 
-    def __rmul__(self: T, value: Union[int, float, T]) -> T:
+    def __rmul__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: y * x)
 
-    def __truediv__(self: T, value: Union[int, float, T]) -> T:
+    def __truediv__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: x / y)
 
-    def __rtruediv__(self: T, value: Union[int, float, T]) -> T:
+    def __rtruediv__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: y / x)
 
-    def __floordiv__(self: T, value: Union[int, float, T]) -> T:
+    def __floordiv__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: x // y)
 
-    def __rfloordiv__(self: T, value: Union[int, float, T]) -> T:
+    def __rfloordiv__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: y // x)
 
-    def __mod__(self: T, value: Union[int, float, T]) -> T:
+    def __mod__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: x % y)
 
-    def __rmod__(self: T, value: Union[int, float, T]) -> T:
+    def __rmod__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: y % x)
 
-    def __pow__(self: T, value: Union[int, float, T]) -> T:
+    def __pow__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: x ** y)
 
-    def __rpow__(self: T, value: Union[int, float, T]) -> T:
+    def __rpow__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: y ** x)
 
     @property
@@ -93,7 +96,7 @@ class Vector(ABC):
     def normalized(self: T) -> T:
         return self / self.norm
 
-    def __unpack(self: T, value: Union[int, float, T], operation: Callable[[float, float], float]) -> T:
+    def __unpack(self: T, value: int | float | T, operation: Callable[[float, float], float]) -> T:
         if isinstance(value, (int, float)):
             return self.unpack(operation(i, value) for i in self)
         return self.unpack(operation(i, j) for i, j in zip(self, value))

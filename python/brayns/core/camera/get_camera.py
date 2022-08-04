@@ -18,31 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Optional
+from typing import TypeVar
 
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.fovy import Fovy
+from brayns.core.camera.camera_registry import camera_registry
+from brayns.instance.instance import Instance
+
+T = TypeVar('T', bound=Camera)
 
 
-@dataclass
-class CylindricCamera(Camera):
-
-    fovy: Optional[Fovy] = None
-
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'cylindric'
-
-    @classmethod
-    def deserialize(cls, message: dict) -> 'CylindricCamera':
-        return cls(
-            fovy=Fovy(message['fovy'], degrees=True)
-        )
-
-    def serialize(self) -> dict:
-        message = {}
-        if self.fovy is not None:
-            message['fovy'] = self.fovy.degrees
-        return message
+def get_camera(instance: Instance, camera_type: type[T]) -> T:
+    name = camera_type.name
+    result = instance.request(f'get-camera-{name}')
+    return camera_registry.deserialize(camera_type, result)

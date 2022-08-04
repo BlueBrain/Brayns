@@ -70,14 +70,14 @@ class TestFrameExporter(SimpleTestCase):
             renderer=renderer
         )
 
-    def _adjust_lights(self, view: brayns.CameraView) -> None:
+    def _adjust_lights(self, view: brayns.View) -> None:
         light = brayns.DirectionalLight(
             intensity=5,
             direction=view.direction
         )
         light.add(self.instance)
 
-    def _get_frames(self, view: brayns.CameraView) -> list[brayns.KeyFrame]:
+    def _get_frames(self, view: brayns.View) -> list[brayns.KeyFrame]:
         frames = brayns.MovieFrames(
             fps=5,
             slowing_factor=100

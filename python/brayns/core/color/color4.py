@@ -18,34 +18,35 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import math
+from __future__ import annotations
 
-from brayns.core.camera.camera_view import CameraView
-from brayns.core.common.bounds import Bounds
-from brayns.core.common.vector3 import Vector3
+from collections.abc import Iterator
+from dataclasses import dataclass, replace
+
+from brayns.core.common.color3 import Color3
 
 
-class Fovy:
+@dataclass(frozen=True, order=True)
+class Color4(Color3):
 
-    def __init__(self, angle: float = math.radians(45), degrees: bool = False) -> None:
-        self._angle = math.radians(angle) if degrees else angle
+    a: float = 1.0
 
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Fovy):
-            return False
-        return self._angle == other._angle
+    @staticmethod
+    def from_color3(color: Color3, alpha: float = 1.0) -> Color4:
+        return Color4(color.r, color.g, color.b, alpha)
+
+    def __iter__(self) -> Iterator[float]:
+        yield from super().__iter__()
+        yield self.a
 
     @property
-    def radians(self) -> float:
-        return self._angle
+    def transparent(self) -> Color4:
+        return replace(self, a=0.0)
 
     @property
-    def degrees(self) -> float:
-        return math.degrees(self._angle)
+    def opaque(self) -> Color4:
+        return replace(self, a=1.0)
 
-    def get_full_screen_view(self, target: Bounds) -> CameraView:
-        center = target.center
-        distance = target.height / 2 / math.tan(self.radians / 2)
-        distance += target.depth / 2
-        position = center + distance * Vector3.forward
-        return CameraView(position, center)
+    @property
+    def without_alpha(self) -> Color3:
+        return Color3(self.r, self.g, self.b)

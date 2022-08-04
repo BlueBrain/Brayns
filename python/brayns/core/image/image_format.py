@@ -18,35 +18,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from __future__ import annotations
 
-from brayns.core.common.quaternion import Quaternion
-from brayns.core.common.vector3 import Vector3
+import pathlib
+from enum import Enum
 
 
-@dataclass
-class Transform:
+class ImageFormat(Enum):
 
-    translation: Vector3 = Vector3.zero
-    rotation: Quaternion = Quaternion.identity
-    scale: Vector3 = Vector3.one
+    PNG = 'png'
+    JPEG = 'jpg'
 
     @staticmethod
-    def deserialize(message: dict) -> 'Transform':
-        return Transform(
-            translation=Vector3(*message['translation']),
-            rotation=Quaternion(*message['rotation']),
-            scale=Vector3(*message['scale'])
-        )
+    def from_filename(filename: str) -> ImageFormat:
+        path = pathlib.Path(filename)
+        return ImageFormat.from_path(path)
 
-    @classmethod
-    @property
-    def identity(cls) -> 'Transform':
-        return Transform()
-
-    def serialize(self) -> dict:
-        return {
-            'translation': list(self.translation),
-            'rotation': list(self.rotation),
-            'scale': list(self.scale)
-        }
+    @staticmethod
+    def from_path(path: pathlib.Path) -> ImageFormat:
+        extension = path.suffix[1:]
+        extension = extension.lower()
+        extension = extension.strip()
+        return ImageFormat(extension)

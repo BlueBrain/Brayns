@@ -19,10 +19,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Optional
 
-from brayns.core.common.resolution import Resolution
-from brayns.instance.instance import Instance
+from brayns.core.image.resolution import Resolution
 
 
 @dataclass
@@ -31,29 +29,3 @@ class Application:
     plugins: list[str]
     resolution: Resolution
     jpeg_quality: int
-
-    @staticmethod
-    def from_instance(instance: Instance) -> 'Application':
-        result = instance.request('get-application-parameters')
-        return Application.deserialize(result)
-
-    @staticmethod
-    def deserialize(message: dict) -> 'Application':
-        return Application(
-            plugins=message['plugins'],
-            resolution=Resolution(*message['viewport']),
-            jpeg_quality=message['jpeg_quality']
-        )
-
-    @staticmethod
-    def update(
-        instance: Instance,
-        resolution: Optional[Resolution] = None,
-        jpeg_quality: Optional[int] = None
-    ) -> None:
-        params = {}
-        if resolution is not None:
-            params['viewport'] = list(resolution)
-        if jpeg_quality is not None:
-            params['jpeg_quality'] = jpeg_quality
-        instance.request('set-application-parameters', params)

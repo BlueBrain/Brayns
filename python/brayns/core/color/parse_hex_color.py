@@ -18,18 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.get_camera import get_camera
-from brayns.core.camera.get_camera_name import get_camera_name
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.camera.set_camera import set_camera
+from brayns.core.color.color3 import Color3
 
-__all__ = [
-    'Camera',
-    'get_camera',
-    'get_camera_name',
-    'OrthographicCamera',
-    'PerspectiveCamera',
-    'set_camera',
-]
+
+def parse_hex_color(value: str) -> Color3:
+    value = _sanitize(value)
+    return Color3(
+        _normalize(value[0:2]),
+        _normalize(value[2:4]),
+        _normalize(value[4:6])
+    )
+
+
+def _sanitize(value: str) -> str:
+    size = len(value)
+    if size == 6:
+        return value
+    if size == 7 and value[0] == '#':
+        return value[1:]
+    if size == 8 and value[:2].lower() == '0x':
+        return value[2:]
+    raise ValueError(f'Not an hex color {value}')
+
+
+def _normalize(value: str) -> float:
+    return int(value, base=16) / 255

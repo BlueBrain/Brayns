@@ -44,7 +44,7 @@ class Client(Instance):
         self._manager.clear()
         self._websocket.close()
 
-    def is_running(self, id: JsonRpcId) -> int:
+    def is_running(self, id: JsonRpcId) -> bool:
         return self._manager.is_running(id)
 
     def send(self, request: JsonRpcRequest) -> RequestFuture:

@@ -18,33 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from collections.abc import Iterator
-from dataclasses import dataclass, replace
+from typing import Any, Protocol, TypeVar
 
-from brayns.core.common.color3 import Color3
+from brayns.core.camera.camera import Camera
+
+T = TypeVar('T', bound=Camera)
 
 
-@dataclass(frozen=True, order=True)
-class Color4(Color3):
+class CameraHandler(Protocol):
 
-    a: float = 1.0
+    def deserialize(self, message: dict[str, Any]) -> Camera:
+        raise NotImplementedError()
 
-    @staticmethod
-    def from_color3(color: Color3, alpha: float = 1.0) -> 'Color4':
-        return Color4(color.r, color.g, color.b, alpha)
-
-    def __iter__(self) -> Iterator[float]:
-        yield from super().__iter__()
-        yield self.a
-
-    @property
-    def transparent(self) -> 'Color4':
-        return replace(self, a=0.0)
-
-    @property
-    def opaque(self) -> 'Color4':
-        return replace(self, a=1.0)
-
-    @property
-    def without_alpha(self) -> Color3:
-        return Color3(self.r, self.g, self.b)
+    def serialize(self, camera: Camera) -> dict[str, Any]:
+        raise NotImplementedError()

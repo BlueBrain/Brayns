@@ -18,33 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from collections.abc import Iterator
-from dataclasses import dataclass
-
-from brayns.core.common.vector import Vector
+from brayns.instance.instance import Instance
 
 
-@dataclass(frozen=True, order=True)
-class Resolution(Vector):
-
-    width: int
-    height: int
-
-    @classmethod
-    @property
-    def full_hd(cls) -> 'Resolution':
-        return Resolution(1920, 1080)
-
-    @classmethod
-    @property
-    def ultra_hd(cls) -> 'Resolution':
-        return 2 * cls.full_hd
-
-    @classmethod
-    @property
-    def production(cls) -> 'Resolution':
-        return 8 * cls.full_hd
-
-    def __iter__(self) -> Iterator[float]:
-        yield self.width
-        yield self.height
+def get_methods(instance: Instance) -> list[str]:
+    return instance.request('registry')

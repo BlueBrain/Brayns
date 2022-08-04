@@ -18,28 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.common.bounds import Bounds
-from brayns.core.common.box import Box
-from brayns.core.common.capsule import Capsule
-from brayns.core.common.color3 import Color3
-from brayns.core.common.color4 import Color4
-from brayns.core.common.plane import Plane
-from brayns.core.common.quaternion import Quaternion
-from brayns.core.common.resolution import Resolution
-from brayns.core.common.sphere import Sphere
-from brayns.core.common.transform import Transform
-from brayns.core.common.vector3 import Vector3
+from brayns.core.view.serialize_view import serialize_view
+from brayns.core.view.view import View
+from brayns.instance.instance import Instance
 
-__all__ = [
-    'Bounds',
-    'Box',
-    'Capsule',
-    'Color3',
-    'Color4',
-    'Plane',
-    'Quaternion',
-    'Resolution',
-    'Sphere',
-    'Transform',
-    'Vector3'
-]
+
+def set_view(instance: Instance, view: View) -> None:
+    params = serialize_view(view)
+    instance.request('set-camera-look-at', params)

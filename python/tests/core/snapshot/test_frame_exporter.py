@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.camera.camera_view import CameraView
+from brayns.core.camera.view import View
 from brayns.core.common.resolution import Resolution
 from brayns.core.snapshot.frame_exporter import FrameExporter
 from brayns.core.snapshot.image_format import ImageFormat
@@ -44,7 +44,7 @@ class TestFrameExporter(unittest.TestCase):
 
     def test_serialize(self) -> None:
         exporter = FrameExporter(
-            frames=KeyFrame.from_indices([0, 1], CameraView()),
+            frames=KeyFrame.from_indices([0, 1], View()),
             format=ImageFormat.JPEG,
             jpeg_quality=50,
             resolution=Resolution(600, 900),
@@ -57,11 +57,11 @@ class TestFrameExporter(unittest.TestCase):
             'key_frames': [
                 {
                     'frame_index': 0,
-                    'camera_view': CameraView().serialize()
+                    'camera_view': View().serialize()
                 },
                 {
                     'frame_index': 1,
-                    'camera_view': CameraView().serialize()
+                    'camera_view': View().serialize()
                 }
             ],
             'image_settings': {

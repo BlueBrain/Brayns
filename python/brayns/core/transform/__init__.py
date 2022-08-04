@@ -18,15 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pathlib
-from enum import Enum
+from brayns.core.transform.transform import Transform
 
-
-class ImageFormat(Enum):
-
-    PNG = 'png'
-    JPEG = 'jpg'
-
-    @staticmethod
-    def from_path(path: str) -> 'ImageFormat':
-        return ImageFormat(pathlib.Path(path).suffix[1:].lower().strip())
+__all__ = [
+    'Transform',
+]

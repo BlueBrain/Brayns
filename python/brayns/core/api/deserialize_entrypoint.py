@@ -18,23 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from __future__ import annotations
 
-from brayns.core.common.vector3 import Vector3
+from typing import Any
+
+from brayns.core.api.deserialize_json_schema import deserialize_json_schema
+from brayns.core.api.entrypoint import Entrypoint
+from brayns.core.api.json_schema import JsonSchema
 
 
-@dataclass
-class Capsule:
+def deserialize_entrypoint(message: dict[str, Any]) -> Entrypoint:
+    return Entrypoint(
+        method=message['title'],
+        description=message['description'],
+        plugin=message['plugin'],
+        asynchronous=message['async'],
+        params=_deserialize_schema(message, 'params'),
+        result=_deserialize_schema(message, 'returns'),
+    )
 
-    start_point: Vector3
-    start_radius: float
-    end_point: Vector3
-    end_radius: float
 
-    def serialize(self) -> dict:
-        return {
-            'p0': list(self.start_point),
-            'r0': self.start_radius,
-            'p1': list(self.end_point),
-            'r1': self.end_radius
-        }
+def _deserialize_schema(message: dict[str, Any], key: str) -> JsonSchema | None:
+    value = message.get(key)
+    if value is None:
+        return None
+    return deserialize_json_schema(value)

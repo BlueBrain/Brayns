@@ -19,11 +19,19 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.api.entrypoint import Entrypoint
+from brayns.core.api.get_entrypoint import get_entrypoint
+from brayns.core.api.get_entrypoints import get_entrypoints
+from brayns.core.api.get_methods import get_methods
+from brayns.core.api.get_raw_entrypoint import get_raw_entrypoint
 from brayns.core.api.json_schema import JsonSchema
 from brayns.core.api.json_type import JsonType
 
 __all__ = [
     'Entrypoint',
+    'get_entrypoint',
+    'get_entrypoints',
+    'get_methods',
+    'get_raw_entrypoint',
     'JsonSchema',
-    'JsonType'
+    'JsonType',
 ]

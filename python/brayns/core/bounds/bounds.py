@@ -18,18 +18,43 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.get_camera import get_camera
-from brayns.core.camera.get_camera_name import get_camera_name
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.camera.set_camera import set_camera
+from __future__ import annotations
 
-__all__ = [
-    'Camera',
-    'get_camera',
-    'get_camera_name',
-    'OrthographicCamera',
-    'PerspectiveCamera',
-    'set_camera',
-]
+from dataclasses import dataclass
+
+from brayns.core.vector.vector3 import Vector3
+
+
+@dataclass
+class Bounds:
+
+    min: Vector3
+    max: Vector3
+
+    @classmethod
+    @property
+    def empty(cls) -> Bounds:
+        return Bounds(
+            min=Vector3.zero,
+            max=Vector3.zero
+        )
+
+    @property
+    def center(self) -> Vector3:
+        return (self.min + self.max) / 2
+
+    @property
+    def size(self) -> Vector3:
+        return self.max - self.min
+
+    @property
+    def width(self) -> float:
+        return self.size.x
+
+    @property
+    def height(self) -> float:
+        return self.size.y
+
+    @property
+    def depth(self) -> float:
+        return self.size.z

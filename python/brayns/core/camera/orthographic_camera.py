@@ -19,11 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_view import CameraView
-from brayns.core.common.bounds import Bounds
-from brayns.core.common.vector3 import Vector3
+from brayns.core.camera.camera_handler import CameraHandler
+from brayns.core.camera.camera_registry import camera_registry
 
 
 @dataclass
@@ -31,28 +31,23 @@ class OrthographicCamera(Camera):
 
     height: float = 0.0
 
-    @staticmethod
-    def from_target(target: Bounds) -> 'OrthographicCamera':
-        return OrthographicCamera(target.height)
-
     @classmethod
     @property
     def name(cls) -> str:
         return 'orthographic'
 
-    @classmethod
-    def deserialize(cls, message: dict) -> 'OrthographicCamera':
-        return cls(
-            height=message['height'],
+
+class _Handler(CameraHandler):
+
+    def deserialize(self, message: dict[str, Any]) -> OrthographicCamera:
+        return OrthographicCamera(
+            height=message['height']
         )
 
-    def serialize(self) -> dict:
+    def serialize(self, camera: OrthographicCamera) -> dict[str, Any]:
         return {
-            'height': self.height
+            'height': camera.height
         }
 
-    def get_full_screen_view(self, target: Bounds) -> CameraView:
-        center = target.center
-        distance = target.depth
-        position = center + distance * Vector3.forward
-        return CameraView(position, center)
+
+camera_registry.register(OrthographicCamera, _Handler())

@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.common.plane import Plane
 from brayns.core.geometry.geometries import Geometries
+from brayns.core.geometry.plane import Plane
 
 
 class Planes(Geometries[Plane]):

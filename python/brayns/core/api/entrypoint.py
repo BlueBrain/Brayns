@@ -18,11 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
 
 from brayns.core.api.json_schema import JsonSchema
-from brayns.instance.instance import Instance
 
 
 @dataclass
@@ -32,40 +32,5 @@ class Entrypoint:
     description: str
     plugin: str
     asynchronous: bool
-    params: Optional[JsonSchema] = None
-    result: Optional[JsonSchema] = None
-
-    @staticmethod
-    def from_method(instance: Instance, method: str) -> 'Entrypoint':
-        params = {'endpoint': method}
-        result = instance.request('schema', params)
-        return Entrypoint.deserialize(result)
-
-    @staticmethod
-    def deserialize(message: dict) -> 'Entrypoint':
-        return Entrypoint(
-            method=message['title'],
-            description=message['description'],
-            plugin=message['plugin'],
-            asynchronous=message['async'],
-            params=_parse_schema(message, 'params'),
-            result=_parse_schema(message, 'returns')
-        )
-
-    @staticmethod
-    def get_all_methods(instance: Instance) -> list[str]:
-        return instance.request('registry')
-
-    @staticmethod
-    def get_all(instance: Instance) -> list['Entrypoint']:
-        return [
-            Entrypoint.from_method(instance, method)
-            for method in Entrypoint.get_all_methods(instance)
-        ]
-
-
-def _parse_schema(message: dict, key: str) -> Optional[JsonSchema]:
-    value = message.get(key)
-    if value is None:
-        return None
-    return JsonSchema.deserialize(value)
+    params: JsonSchema | None = None
+    result: JsonSchema | None = None

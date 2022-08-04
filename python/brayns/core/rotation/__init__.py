@@ -18,48 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from brayns.core.rotation.axis_angle import AxisAngle
+from brayns.core.rotation.euler import Euler
+from brayns.core.rotation.quaternion import Quaternion
 
-from brayns.core.common.vector3 import Vector3
-
-
-@dataclass
-class Bounds:
-
-    min: Vector3
-    max: Vector3
-
-    @staticmethod
-    def deserialize(message: dict) -> 'Bounds':
-        return Bounds(
-            min=Vector3(*message['min']),
-            max=Vector3(*message['max'])
-        )
-
-    @classmethod
-    @property
-    def empty(cls) -> 'Bounds':
-        return cls(
-            min=Vector3.zero,
-            max=Vector3.zero
-        )
-
-    @property
-    def center(self) -> Vector3:
-        return (self.min + self.max) / 2
-
-    @property
-    def size(self) -> Vector3:
-        return self.max - self.min
-
-    @property
-    def width(self) -> float:
-        return self.size.x
-
-    @property
-    def height(self) -> float:
-        return self.size.y
-
-    @property
-    def depth(self) -> float:
-        return self.size.z
+__all__ = [
+    'AxisAngle',
+    'Euler',
+    'Quaternion',
+]

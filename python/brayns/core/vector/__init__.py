@@ -18,19 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from brayns.core.vector.vector3 import Vector3
 
-from brayns.core.common.vector3 import Vector3
-
-
-@dataclass
-class Sphere:
-
-    radius: float
-    center: Vector3 = Vector3.zero
-
-    def serialize(self) -> dict:
-        return {
-            'center': list(self.center),
-            'radius': self.radius
-        }
+__all__ = [
+    'Vector3'
+]

@@ -18,18 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.core.camera.get_camera import get_camera
-from brayns.core.camera.get_camera_name import get_camera_name
-from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.camera.set_camera import set_camera
+from brayns.core.view.deserialize_view import deserialize_view
+from brayns.core.view.view import View
+from brayns.instance.instance import Instance
 
-__all__ = [
-    'Camera',
-    'get_camera',
-    'get_camera_name',
-    'OrthographicCamera',
-    'PerspectiveCamera',
-    'set_camera',
-]
+
+def get_view(instance: Instance) -> View:
+    result = instance.request('get-camera-look-at')
+    return deserialize_view(result)

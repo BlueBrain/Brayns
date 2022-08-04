@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_view import CameraView
+from brayns.core.camera.view import View
 from brayns.core.common.resolution import Resolution
 from brayns.core.renderer.renderer import Renderer
 from brayns.core.snapshot.image_format import ImageFormat
@@ -35,7 +35,7 @@ class Snapshot:
 
     resolution: Optional[Resolution] = None
     frame: Optional[int] = None
-    view: Optional[CameraView] = None
+    view: Optional[View] = None
     camera: Optional[Camera] = None
     renderer: Optional[Renderer] = None
     jpeg_quality: int = 100
