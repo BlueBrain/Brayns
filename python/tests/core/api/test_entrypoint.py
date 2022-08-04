@@ -50,6 +50,14 @@ class TestEntrypoint(unittest.TestCase):
             result=JsonSchema(type=JsonType.ARRAY)
         )
 
+    def test_get_all_methods(self) -> None:
+        methods = ['test1', 'test2']
+        instance = MockInstance(methods)
+        tests = Entrypoint.get_all_methods(instance)
+        self.assertEqual(instance.method, 'registry')
+        self.assertEqual(instance.params, None)
+        self.assertEqual(tests, methods)
+
     def test_from_method(self) -> None:
         instance = MockInstance(self._message)
         test = Entrypoint.from_method(instance, 'test')
@@ -61,14 +69,6 @@ class TestEntrypoint(unittest.TestCase):
         test = Entrypoint.deserialize(self._message)
         ref = self._entrypoint
         self.assertEqual(test, ref)
-
-    def test_get_all_methods(self) -> None:
-        methods = ['test1', 'test2']
-        instance = MockInstance(methods)
-        tests = Entrypoint.get_all_methods(instance)
-        self.assertEqual(instance.method, 'registry')
-        self.assertEqual(instance.params, None)
-        self.assertEqual(tests, methods)
 
 
 if __name__ == '__main__':

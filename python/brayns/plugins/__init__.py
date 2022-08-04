@@ -20,4 +20,5 @@
 
 from brayns.plugins.bbp import *
 from brayns.plugins.common import *
+from brayns.plugins.cylindric_camera import *
 from brayns.plugins.sonata import *

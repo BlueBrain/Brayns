@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.plane import Plane
+from brayns.core.geometry.plane import Plane
 from brayns.core.geometry.planes import Planes
 
 

@@ -21,17 +21,17 @@
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from brayns.core.camera.camera_view import CameraView
+from brayns.core.camera.view import View
 
 
 @dataclass
 class KeyFrame:
 
     index: int
-    view: Optional[CameraView] = None
+    view: Optional[View] = None
 
     @staticmethod
-    def from_indices(indices: list[int], view: Optional[CameraView] = None) -> list['KeyFrame']:
+    def from_indices(indices: list[int], view: Optional[View] = None) -> list['KeyFrame']:
         return [
             KeyFrame(index, view)
             for index in indices

@@ -22,7 +22,7 @@ import pathlib
 from typing import cast
 
 import brayns
-from brayns.core.camera.camera_view import CameraView
+from brayns.core.camera.view import View
 from testapi.image_validator import ImageValidator
 from testapi.simple_test_case import SimpleTestCase
 
@@ -59,7 +59,7 @@ class TestSnapshot(SimpleTestCase):
     def _prepare_snapshot(self) -> brayns.Snapshot:
         model = self._load_model()
         snapshot = self._create_snapshot(model.bounds)
-        view = cast(CameraView, snapshot.view)
+        view = cast(View, snapshot.view)
         self._add_light(view.direction)
         return snapshot
 

@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.material.material import Material
 
@@ -33,14 +34,8 @@ class CarPaintMaterial(Material):
     def name(cls) -> str:
         return 'carpaint'
 
-    @classmethod
-    def deserialize(cls, message: dict) -> 'CarPaintMaterial':
-        return cls._from_dict(
-            message,
-            flake_density=message['flake_density']
-        )
-
-    def serialize(self) -> dict:
-        return self._to_dict({
+    @property
+    def properties(self) -> dict[str, Any]:
+        return {
             'flake_density': self.flake_density
-        })
+        }

@@ -22,7 +22,7 @@ from brayns.core.api import *
 from brayns.core.application import *
 from brayns.core.camera import *
 from brayns.core.clipping import *
-from brayns.core.common import *
+from brayns.core.vector import *
 from brayns.core.geometry import *
 from brayns.core.light import *
 from brayns.core.material import *

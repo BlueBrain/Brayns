@@ -19,9 +19,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.fovy import Fovy
+from brayns.core.view.fovy import Fovy
 
 
 @dataclass
@@ -36,17 +37,10 @@ class PerspectiveCamera(Camera):
     def name(cls) -> str:
         return 'perspective'
 
-    @classmethod
-    def deserialize(cls, message: dict) -> 'PerspectiveCamera':
-        return cls(
-            fovy=Fovy(message['fovy'], degrees=True),
-            aperture_radius=message['aperture_radius'],
-            focus_distance=message['focus_distance']
-        )
-
-    def serialize(self) -> dict:
+    @property
+    def properties(self) -> dict[str, Any]:
         return {
             'fovy': self.fovy.degrees,
             'aperture_radius': self.aperture_radius,
-            'focus_distance': self.focus_distance
+            'focus_distance': self.focus_distance,
         }

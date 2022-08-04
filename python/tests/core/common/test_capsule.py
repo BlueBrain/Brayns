@@ -20,8 +20,8 @@
 
 import unittest
 
-from brayns.core.common.capsule import Capsule
-from brayns.core.common.vector3 import Vector3
+from brayns.core.vector.vector3 import Vector3
+from brayns.core.geometry.capsule import Capsule
 
 
 class TestCapsule(unittest.TestCase):

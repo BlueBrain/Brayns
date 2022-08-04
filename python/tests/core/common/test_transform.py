@@ -22,7 +22,7 @@ import unittest
 
 from brayns.core.common.quaternion import Quaternion
 from brayns.core.common.transform import Transform
-from brayns.core.common.vector3 import Vector3
+from brayns.core.vector.vector3 import Vector3
 from tests.core.common.mock_transform import MockTransform
 
 

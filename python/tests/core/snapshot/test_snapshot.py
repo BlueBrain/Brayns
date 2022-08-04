@@ -21,7 +21,7 @@
 import base64
 import unittest
 
-from brayns.core.camera.camera_view import CameraView
+from brayns.core.camera.view import View
 from brayns.core.common.resolution import Resolution
 from brayns.core.snapshot.image_format import ImageFormat
 from brayns.core.snapshot.snapshot import Snapshot
@@ -57,7 +57,7 @@ class TestSnapshot(unittest.TestCase):
             jpeg_quality=50,
             resolution=Resolution(1920, 1080),
             frame=12,
-            view=CameraView(),
+            view=View(),
             camera=MockCamera(),
             renderer=MockRenderer()
         )
@@ -68,7 +68,7 @@ class TestSnapshot(unittest.TestCase):
                 'size': [1920, 1080]
             },
             'simulation_frame': 12,
-            'camera_view': CameraView().serialize(),
+            'camera_view': View().serialize(),
             'camera': MockCamera().serialize_with_name(),
             'renderer': MockRenderer().serialize_with_name()
         }

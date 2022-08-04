@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.material.material import Material
 
@@ -33,14 +34,8 @@ class MetalMaterial(Material):
     def name(cls) -> str:
         return 'metal'
 
-    @classmethod
-    def deserialize(cls, message: dict) -> 'MetalMaterial':
-        return cls._from_dict(
-            message,
-            roughness=message['roughness']
-        )
-
-    def serialize(self) -> dict:
-        return self._to_dict({
+    @property
+    def properties(self) -> dict[str, Any]:
+        return {
             'roughness': self.roughness
-        })
+        }

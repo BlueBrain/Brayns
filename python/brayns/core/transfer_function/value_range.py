@@ -21,7 +21,7 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from brayns.core.common.vector import Vector
+from brayns.core.vector.vector import Vector
 
 
 @dataclass(frozen=True, order=True)

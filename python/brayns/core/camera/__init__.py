@@ -19,17 +19,19 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_view import CameraView
-from brayns.core.camera.cylindric_camera import CylindricCamera
-from brayns.core.camera.fovy import Fovy
+from brayns.core.camera.get_camera_name import get_camera_name
+from brayns.core.camera.get_orthographic_camera import get_orthographic_camera
+from brayns.core.camera.get_perspective_camera import get_perspective_camera
 from brayns.core.camera.orthographic_camera import OrthographicCamera
 from brayns.core.camera.perspective_camera import PerspectiveCamera
+from brayns.core.camera.set_camera import set_camera
 
 __all__ = [
     'Camera',
-    'CameraView',
-    'CylindricCamera',
-    'Fovy',
+    'get_camera_name',
+    'get_orthographic_camera',
+    'get_perspective_camera',
     'OrthographicCamera',
-    'PerspectiveCamera'
+    'PerspectiveCamera',
+    'set_camera',
 ]
