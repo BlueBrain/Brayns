@@ -18,11 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import logging
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Optional, cast
+from typing import cast
 
 from brayns.instance.client import Client
 from brayns.instance.instance import Instance
@@ -39,10 +41,10 @@ from brayns.instance.websocket.web_socket_connector import WebSocketConnector
 class Connector:
 
     uri: str
-    ssl_context: Optional[SslClientContext] = None
+    ssl_context: SslClientContext | None = None
     binary_handler: Callable[[bytes], None] = lambda _: None
     logger: logging.Logger = field(default_factory=Logger)
-    max_attempts: Optional[int] = 1
+    max_attempts: int | None = 1
     attempt_period: float = 0.1
 
     def connect(self) -> Instance:

@@ -18,8 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.request_error import RequestError
@@ -28,12 +30,12 @@ from brayns.instance.request_error import RequestError
 @dataclass
 class JsonRpcError:
 
-    id: Optional[JsonRpcId]
+    id: JsonRpcId | None
     error: RequestError
 
     @staticmethod
-    def deserialize(message: dict) -> 'JsonRpcError':
-        error: dict = message['error']
+    def deserialize(message: dict[str, Any]) -> JsonRpcError:
+        error: dict[str, Any] = message['error']
         return JsonRpcError(
             id=message.get('id'),
             error=RequestError(

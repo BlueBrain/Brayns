@@ -18,8 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from collections.abc import Iterator
-from typing import Any, Optional
+from typing import Any
 
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
@@ -41,7 +43,7 @@ class JsonRpcTasks:
     def __contains__(self, id: JsonRpcId) -> bool:
         return id in self._tasks
 
-    def find(self, id: JsonRpcId) -> Optional[JsonRpcTask]:
+    def find(self, id: JsonRpcId) -> JsonRpcTask | None:
         return self._tasks.get(id)
 
     def create_task(self, id: JsonRpcId) -> JsonRpcTask:
@@ -58,7 +60,7 @@ class JsonRpcTasks:
         task.set_result(result)
         del self._tasks[id]
 
-    def add_error(self, id: Optional[JsonRpcId], error: RequestError) -> None:
+    def add_error(self, id: JsonRpcId | None, error: RequestError) -> None:
         if id is None:
             self.add_global_error(error)
             return

@@ -18,7 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.request_progress import RequestProgress
@@ -31,7 +34,7 @@ class JsonRpcProgress:
     params: RequestProgress
 
     @staticmethod
-    def deserialize(message: dict) -> 'JsonRpcProgress':
+    def deserialize(message: dict[str, Any]) -> JsonRpcProgress:
         params = message['params']
         return JsonRpcProgress(
             id=params['id'],

@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -31,7 +33,7 @@ class JsonRpcReply:
     result: Any = field(default=None, repr=False)
 
     @staticmethod
-    def deserialize(message: dict) -> 'JsonRpcReply':
+    def deserialize(message: dict[str, Any]) -> JsonRpcReply:
         return JsonRpcReply(
             id=message['id'],
             result=message['result']
