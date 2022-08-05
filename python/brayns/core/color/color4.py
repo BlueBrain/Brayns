@@ -28,6 +28,7 @@ from brayns.core.common.color3 import Color3
 
 T = TypeVar('T', bound='Color4')
 
+
 @dataclass(frozen=True, order=True)
 class Color4(Color3):
 

@@ -18,18 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+import math
 
-from brayns.core.bounds.deserialize_bounds import deserialize_bounds
-from brayns.core.model.model import Model
-from brayns.core.transform.deserialize_transform import deserialize_transform
+from brayns.core.transform.quaternion import Quaternion
+from brayns.core.vector.vector3 import Vector3
 
 
-def deserialize_model(message: dict[str, Any]) -> Model:
-    return Model(
-        id=message['model_id'],
-        bounds=deserialize_bounds(message['bounds']),
-        metadata=message['metadata'],
-        visible=message['is_visible'],
-        transform=deserialize_transform(message['transform'])
-    )
+def axis_angle_to_quaternion(axis: Vector3, angle: float, degrees: bool = False) -> Quaternion:
+    if degrees:
+        angle = math.radians(angle)
+    half_angle = angle / 2
+    vector = axis.normalized * math.sin(half_angle)
+    w = math.cos(half_angle)
+    return Quaternion(vector.x, vector.y, vector.z, w)

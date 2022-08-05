@@ -18,15 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+from typing import TypeVar
 
-from brayns.core.application.application import Application
-from brayns.core.image.resolution import Resolution
+from brayns.core.renderer.renderer import Renderer
+from brayns.instance.instance import Instance
+
+T = TypeVar('T', bound=Renderer)
 
 
-def deserialize_application(message: dict[str, Any]) -> Application:
-    return Application(
-        plugins=message['plugins'],
-        resolution=Resolution(*message['viewport']),
-        jpeg_quality=message['jpeg_quality'],
-    )
+def get_renderer(instance: Instance, renderer_type: type[T]) -> T:
+    name = renderer_type.name
+    result = instance.request(f'get-renderer-{name}')
+    return renderer_type.deserialize(result)

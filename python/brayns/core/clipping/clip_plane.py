@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -28,3 +29,12 @@ class ClipPlane:
     b: float
     c: float
     d: float = 0.0
+
+    def serialize(self) -> dict[str, Any]:
+        return _serialize_clip_plane(self)
+
+
+def _serialize_clip_plane(plane: ClipPlane) -> dict[str, Any]:
+    return {
+        'coefficients': [plane.a, plane.b, plane.c, plane.d]
+    }

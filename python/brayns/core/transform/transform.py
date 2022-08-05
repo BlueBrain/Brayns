@@ -21,19 +21,35 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
+from brayns.core.transform.rotation import Rotation
 from brayns.core.vector.vector3 import Vector3
-from brayns.core.rotation.quaternion import Quaternion
 
 
 @dataclass
 class Transform:
 
     translation: Vector3 = Vector3.zero
-    rotation: Quaternion = Quaternion.identity
+    rotation: Rotation = Rotation.identity
     scale: Vector3 = Vector3.one
+
+    @staticmethod
+    def deserialize(message: dict[str, Any]) -> Transform:
+        return Transform(
+            translation=Vector3(*message['translation']),
+            rotation=Rotation.deserialize(message['rotation']),
+            scale=Vector3(*message['scale']),
+        )
 
     @classmethod
     @property
     def identity(cls) -> Transform:
         return Transform()
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            'translation': list(self.translation),
+            'rotation': self.rotation.serialize(),
+            'scale': list(self.scale),
+        }

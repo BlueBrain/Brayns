@@ -18,11 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.view.deserialize_view import deserialize_view
 from brayns.core.view.view import View
 from brayns.instance.instance import Instance
 
 
 def get_view(instance: Instance) -> View:
     result = instance.request('get-camera-look-at')
-    return deserialize_view(result)
+    return View.deserialize(result)

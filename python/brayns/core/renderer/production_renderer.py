@@ -19,19 +19,18 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any, TypeVar
 
 from brayns.core.renderer.renderer import Renderer
+
+T = TypeVar('T', bound='ProductionRenderer')
 
 
 @dataclass
 class ProductionRenderer(Renderer):
 
-    @staticmethod
-    def default() -> 'ProductionRenderer':
-        return ProductionRenderer(
-            samples_per_pixel=128,
-            max_ray_bounces=7
-        )
+    samples_per_pixel: int = 128
+    max_ray_bounces: int = 7
 
     @classmethod
     @property
@@ -39,8 +38,9 @@ class ProductionRenderer(Renderer):
         return 'production'
 
     @classmethod
-    def deserialize(cls, message: dict) -> 'ProductionRenderer':
-        return cls._from_dict(message)
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        return cls.deserialize_with(message)
 
-    def serialize(self) -> dict:
-        return self._to_dict({})
+    @property
+    def additional_properties(self) -> dict[str, Any]:
+        return {}

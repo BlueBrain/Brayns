@@ -21,7 +21,6 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from brayns.core.model.deserialize_model import deserialize_model
 from brayns.core.model.model import Model
 from brayns.instance.instance import Instance
 
@@ -50,6 +49,6 @@ class Loader(ABC):
         params = self.serialize(path)
         result = instance.request('add-model', params)
         return [
-            deserialize_model(model)
+            Model.deserialize(model)
             for model in result
         ]

@@ -20,10 +20,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from brayns.core.common.color4 import Color4
-from brayns.instance.instance import Instance
 
 T = TypeVar('T', bound='Renderer')
 
@@ -43,38 +42,16 @@ class Renderer(ABC):
 
     @classmethod
     @abstractmethod
-    def deserialize(cls: type[T], message: dict) -> T:
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
         pass
 
+    @property
     @abstractmethod
-    def serialize(self) -> dict:
+    def additional_properties(self) -> dict[str, Any]:
         pass
 
-    @staticmethod
-    def get_main_renderer_name(instance: Instance) -> str:
-        return instance.request('get-renderer-type')
-
     @classmethod
-    def from_instance(cls: type[T], instance: Instance) -> T:
-        result = instance.request(f'get-renderer-{cls.name}')
-        return cls.deserialize(result)
-
-    @classmethod
-    def is_main_renderer(cls, instance: Instance) -> bool:
-        return cls.name == Renderer.get_main_renderer_name(instance)
-
-    def use_as_main_renderer(self, instance: Instance) -> None:
-        params = self.serialize()
-        instance.request(f'set-renderer-{self.name}', params)
-
-    def serialize_with_name(self) -> dict:
-        return {
-            'name': self.name,
-            'params': self.serialize()
-        }
-
-    @classmethod
-    def _from_dict(cls: type[T], message: dict, **kwargs) -> T:
+    def deserialize_with(cls: type[T], message: dict[str, Any], **kwargs) -> T:
         return cls(
             samples_per_pixel=message['samples_per_pixel'],
             max_ray_bounces=message['max_ray_bounces'],
@@ -82,9 +59,19 @@ class Renderer(ABC):
             **kwargs
         )
 
-    def _to_dict(self, properties: dict) -> dict:
+    @property
+    def base_properties(self) -> dict[str, Any]:
         return {
             'samples_per_pixel': self.samples_per_pixel,
             'max_ray_bounces': self.max_ray_bounces,
             'background_color': list(self.background_color)
-        } | properties
+        }
+
+    def serialize(self) -> dict[str, Any]:
+        return self.base_properties | self.additional_properties
+
+    def serialize_with_name(self) -> dict[str, Any]:
+        return {
+            'name': self.name,
+            'params': self.serialize()
+        }

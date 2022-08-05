@@ -18,26 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import base64
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.view import View
 from brayns.core.common.resolution import Resolution
 from brayns.core.renderer.renderer import Renderer
 from brayns.core.snapshot.image_format import ImageFormat
+from brayns.core.view.view import View
 from brayns.instance.instance import Instance
 
 
 @dataclass
 class Snapshot:
 
-    resolution: Optional[Resolution] = None
-    frame: Optional[int] = None
-    view: Optional[View] = None
-    camera: Optional[Camera] = None
-    renderer: Optional[Renderer] = None
+    resolution: Resolution | None = None
+    frame: int | None = None
+    view: View | None = None
+    camera: Camera | None = None
+    renderer: Renderer | None = None
     jpeg_quality: int = 100
 
     def save(self, instance: Instance, path: str) -> None:
@@ -55,13 +57,13 @@ class Snapshot:
         result = self._request(instance, params)
         return base64.b64decode(result['data'])
 
-    def serialize_with_format(self, format: ImageFormat) -> dict:
+    def serialize_with_format(self, format: ImageFormat) -> dict[str, Any]:
         return self._serialize(format=format)
 
-    def serialize_with_path(self, path: str) -> dict:
+    def serialize_with_path(self, path: str) -> dict[str, Any]:
         return self._serialize(path=path)
 
-    def _serialize(self, format: Optional[ImageFormat] = None, path: Optional[str] = None) -> dict:
+    def _serialize(self, format: ImageFormat | None = None, path: str | None = None) -> dict[str, Any]:
         message = {}
         if path is not None:
             message['file_path'] = path
@@ -84,5 +86,5 @@ class Snapshot:
             message['renderer'] = self.renderer.serialize_with_name()
         return message
 
-    def _request(self, instance: Instance, params: dict) -> dict:
+    def _request(self, instance: Instance, params: dict[str, Any]) -> dict[str, Any]:
         return instance.request('snapshot', params)

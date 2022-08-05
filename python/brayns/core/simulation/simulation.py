@@ -18,10 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.simulation.time_unit import TimeUnit
-from brayns.instance.instance import Instance
 
 
 @dataclass
@@ -34,12 +36,7 @@ class Simulation:
     time_unit: TimeUnit
 
     @staticmethod
-    def from_instance(instance: Instance) -> 'Simulation':
-        result = instance.request('get-simulation-parameters')
-        return Simulation.deserialize(result)
-
-    @staticmethod
-    def deserialize(message: dict) -> 'Simulation':
+    def deserialize(message: dict[str, Any]) -> Simulation:
         return Simulation(
             start_frame=message['start_frame'],
             end_frame=message['end_frame'],
@@ -47,19 +44,6 @@ class Simulation:
             delta_time=message['dt'],
             time_unit=TimeUnit(message['unit'])
         )
-
-    @staticmethod
-    def set_current_frame(instance: Instance, index: int) -> None:
-        params = {'current': index}
-        instance.request('set-simulation-parameters', params)
-
-    @staticmethod
-    def enable(instance: Instance, model_id: int, enabled: bool) -> None:
-        params = {
-            'model_id': model_id,
-            'enabled': enabled
-        }
-        instance.request('enable-simulation', params)
 
     @property
     def frame_count(self) -> int:

@@ -18,26 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any, Optional
+from __future__ import annotations
 
-from brayns.core.camera.view import View
+from dataclasses import dataclass
+from typing import Any
+
+from brayns.core.view.view import View
 
 
 @dataclass
 class KeyFrame:
 
     index: int
-    view: Optional[View] = None
+    view: View | None = None
 
     @staticmethod
-    def from_indices(indices: list[int], view: Optional[View] = None) -> list['KeyFrame']:
+    def from_indices(indices: list[int], view: View | None = None) -> list[KeyFrame]:
         return [
             KeyFrame(index, view)
             for index in indices
         ]
 
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         message: dict[str, Any] = {
             'frame_index': self.index,
         }

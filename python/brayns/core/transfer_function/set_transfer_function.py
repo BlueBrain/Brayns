@@ -18,16 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
-from brayns.core.vector.vector3 import Vector3
-from brayns.core.rotation.quaternion import Quaternion
-from brayns.core.transform.transform import Transform
+from brayns.core.transfer_function.transfer_function import TransferFunction
+from brayns.instance.instance import Instance
 
 
-def deserialize_transform(message: dict[str, Any]) -> Transform:
-    return Transform(
-        translation=Vector3(*message['translation']),
-        rotation=Quaternion(*message['rotation']),
-        scale=Vector3(*message['scale']),
-    )
+def set_transfer_function(instance: Instance, model_id: int, transfer_function: TransferFunction) -> None:
+    params = {
+        'id': model_id,
+        'transfer_function': transfer_function.serialize(),
+    }
+    instance.request('set-model-transfer-function', params)

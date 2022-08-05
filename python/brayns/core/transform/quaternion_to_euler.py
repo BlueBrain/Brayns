@@ -18,52 +18,37 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
+import math
 
-from dataclasses import dataclass
-from typing import Any
-
+from brayns.core.transform.quaternion import Quaternion
 from brayns.core.vector.vector3 import Vector3
 
 
-@dataclass
-class Bounds:
-
-    min: Vector3
-    max: Vector3
-
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> Bounds:
-        return _deserialize_bounds(message)
-
-    @classmethod
-    @property
-    def empty(cls) -> Bounds:
-        return Bounds(Vector3.zero, Vector3.zero)
-
-    @property
-    def center(self) -> Vector3:
-        return (self.min + self.max) / 2
-
-    @property
-    def size(self) -> Vector3:
-        return self.max - self.min
-
-    @property
-    def width(self) -> float:
-        return self.size.x
-
-    @property
-    def height(self) -> float:
-        return self.size.y
-
-    @property
-    def depth(self) -> float:
-        return self.size.z
+def quaternion_to_euler(quaternion: Quaternion, degrees: bool = False) -> Vector3:
+    q = quaternion.normalized
+    euler = Vector3(_get_x(q), _get_y(q), _get_z(q))
+    if degrees:
+        return Vector3.unpack(math.degrees(i) for i in euler)
+    return euler
 
 
-def _deserialize_bounds(message: dict[str, Any]) -> Bounds:
-    return Bounds(
-        min=Vector3(*message['min']),
-        max=Vector3(*message['max'])
-    )
+def _get_x(quaternion: Quaternion) -> float:
+    q = quaternion
+    sx_cy = 2 * (q.w * q.x + q.y * q.z)
+    cx_cy = 1 - 2 * (q.x * q.x + q.y * q.y)
+    return math.atan2(sx_cy, cx_cy)
+
+
+def _get_y(quaternion: Quaternion) -> float:
+    q = quaternion
+    sy = 2 * (q.w * q.y - q.z * q.x)
+    if abs(sy) >= 1:
+        return math.copysign(math.pi / 2, sy)
+    return math.asin(sy)
+
+
+def _get_z(quaternion: Quaternion) -> float:
+    q = quaternion
+    sz_cy = 2 * (q.w * q.z + q.x * q.y)
+    cz_cy = 1 - 2 * (q.y * q.y + q.z * q.z)
+    return math.atan2(sz_cy, cz_cy)

@@ -28,6 +28,7 @@ from brayns.core.material.material import Material
 from brayns.core.material.matte_material import MatteMaterial
 from brayns.core.material.metal_material import MetalMaterial
 from brayns.core.material.plastic_material import PlasticMaterial
+from brayns.core.material.set_material import set_material
 
 __all__ = [
     'CarPaintMaterial',
@@ -40,4 +41,5 @@ __all__ = [
     'MatteMaterial',
     'MetalMaterial',
     'PlasticMaterial',
+    'set_material',
 ]

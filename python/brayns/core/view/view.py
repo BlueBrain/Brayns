@@ -18,7 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.vector.vector3 import Vector3
 
@@ -30,6 +33,21 @@ class View:
     target: Vector3 = Vector3.forward
     up: Vector3 = Vector3.up
 
+    @staticmethod
+    def deserialize(message: dict[str, Any]) -> View:
+        return View(
+            position=Vector3(*message['position']),
+            target=Vector3(*message['target']),
+            up=Vector3(*message['up'])
+        )
+
     @property
     def direction(self) -> Vector3:
         return (self.target - self.position).normalized
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            'position': list(self.position),
+            'target': list(self.target),
+            'up': list(self.up)
+        }

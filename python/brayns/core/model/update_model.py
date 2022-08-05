@@ -20,27 +20,25 @@
 
 from __future__ import annotations
 
-from brayns.core.model.deserialize_model import deserialize_model
 from brayns.core.model.model import Model
-from brayns.core.transform.serialize_transform import serialize_transform
 from brayns.core.transform.transform import Transform
 from brayns.instance.instance import Instance
 
 
 def update_model(
     instance: Instance,
-    id: int,
+    model_id: int,
     visible: bool | None = None,
     transform: Transform | None = None,
 ) -> Model:
-    model = {}
+    properties = {}
     if visible is not None:
-        model['is_visible'] = visible
+        properties['is_visible'] = visible
     if transform is not None:
-        model['transform'] = serialize_transform(transform)
+        properties['transform'] = transform.serialize()
     params = {
-        'model_id': id,
-        'model': model,
+        'model_id': model_id,
+        'model': properties,
     }
     result = instance.request('update-model', params)
-    return deserialize_model(result)
+    return Model.deserialize(result)

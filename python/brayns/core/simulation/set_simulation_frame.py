@@ -18,15 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
-from brayns.core.vector.vector3 import Vector3
-from brayns.core.view.view import View
+from brayns.instance.instance import Instance
 
 
-def deserialize_view(message: dict[str, Any]) -> View:
-    return View(
-        position=Vector3(*message['position']),
-        target=Vector3(*message['target']),
-        up=Vector3(*message['up'])
-    )
+def set_simulation_frame(instance: Instance, index: int) -> None:
+    params = {'current': index}
+    instance.request('set-simulation-parameters', params)

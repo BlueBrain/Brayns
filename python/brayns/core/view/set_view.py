@@ -18,11 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.view.serialize_view import serialize_view
 from brayns.core.view.view import View
 from brayns.instance.instance import Instance
 
 
 def set_view(instance: Instance, view: View) -> None:
-    params = serialize_view(view)
+    params = view.serialize()
     instance.request('set-camera-look-at', params)

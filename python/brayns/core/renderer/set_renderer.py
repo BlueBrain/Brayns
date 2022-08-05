@@ -18,14 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
-from brayns.core.bounds.bounds import Bounds
-from brayns.core.vector.vector3 import Vector3
+from brayns.core.renderer.renderer import Renderer
+from brayns.instance.instance import Instance
 
 
-def deserialize_bounds(message: dict[str, Any]) -> Bounds:
-    return Bounds(
-        min=Vector3(*message['min']),
-        max=Vector3(*message['max'])
-    )
+def set_renderer(instance: Instance, renderer: Renderer) -> None:
+    name = renderer.name
+    params = renderer.serialize()
+    instance.request(f'set-renderer-{name}', params)

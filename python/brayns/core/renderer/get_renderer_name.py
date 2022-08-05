@@ -18,14 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
-from brayns.core.transform.transform import Transform
+from brayns.instance.instance import Instance
 
 
-def serialize_transform(transform: Transform) -> dict[str, Any]:
-    return {
-        'translation': list(transform.translation),
-        'rotation': list(transform.rotation),
-        'scale': list(transform.scale)
-    }
+def get_renderer_name(instance: Instance) -> str:
+    return instance.request('get-renderer-type')

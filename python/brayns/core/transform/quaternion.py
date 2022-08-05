@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Iterator
 from dataclasses import dataclass
 
@@ -34,10 +35,6 @@ class Quaternion(Vector[float]):
     y: float = 0.0
     z: float = 0.0
     w: float = 1.0
-
-    @staticmethod
-    def from_vector(value: Vector3) -> Quaternion:
-        return Quaternion(value.x, value.y, value.z, 0.0)
 
     @classmethod
     @property
@@ -78,8 +75,17 @@ class Quaternion(Vector[float]):
         return value * self.inverse
 
     @property
-    def vector(self) -> Vector3:
+    def axis(self) -> Vector3:
         return Vector3(self.x, self.y, self.z)
+
+    @property
+    def angle_radians(self) -> float:
+        q = self.normalized
+        return 2 * math.acos(q.w)
+
+    @property
+    def angle_degrees(self) -> float:
+        return math.degrees(self.angle_radians)
 
     @property
     def conjugate(self) -> Quaternion:
@@ -88,9 +94,3 @@ class Quaternion(Vector[float]):
     @property
     def inverse(self) -> Quaternion:
         return self.conjugate / self.square_norm
-
-    def rotate(self, value: Vector3, center: Vector3 = Vector3.zero) -> Vector3:
-        rotation = self.normalized
-        quaternion = Quaternion.from_vector(value - center)
-        quaternion = rotation * quaternion * rotation.conjugate
-        return center + quaternion.vector

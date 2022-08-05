@@ -18,24 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.api.deserialize_entrypoint import deserialize_entrypoint
-from brayns.core.api.deserialize_json_schema import deserialize_json_schema
 from brayns.core.api.entrypoint import Entrypoint
 from brayns.core.api.get_entrypoint import get_entrypoint
 from brayns.core.api.get_entrypoints import get_entrypoints
 from brayns.core.api.get_methods import get_methods
 from brayns.core.api.json_schema import JsonSchema
 from brayns.core.api.json_type import JsonType
-from brayns.core.api.serialize_json_schema import serialize_json_schema
 
 __all__ = [
-    'deserialize_entrypoint',
-    'deserialize_json_schema',
     'Entrypoint',
     'get_entrypoint',
     'get_entrypoints',
     'get_methods',
     'JsonSchema',
     'JsonType',
-    'serialize_json_schema',
 ]

@@ -18,7 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.common.bounds import Bounds
+from brayns.core.bounds.bounds import Bounds
 from brayns.core.vector.vector3 import Vector3
 from brayns.core.view.view import View
 

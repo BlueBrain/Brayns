@@ -18,34 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
-import math
-from dataclasses import dataclass
-
-from brayns.core.vector.vector3 import Vector3
-from brayns.core.rotation.quaternion import Quaternion
+from brayns.instance.instance import Instance
 
 
-@dataclass
-class AxisAngle:
-
-    axis: Vector3
-    angle: float = 0.0
-
-    @staticmethod
-    def from_quaternion(quaternion: Quaternion, degrees: bool = False) -> AxisAngle:
-        axis = quaternion.vector
-        angle = 2 * math.acos(quaternion.w)
-        if degrees:
-            angle = math.degrees(angle)
-        return AxisAngle(axis, angle)
-
-    def to_quaternion(self, degrees: bool = False) -> Quaternion:
-        axis, angle = self.axis, self.angle
-        if degrees:
-            angle = math.radians(angle)
-        half_angle = angle / 2
-        vector = axis.normalized * math.sin(half_angle)
-        real = math.cos(half_angle)
-        return Quaternion(vector.x, vector.y, vector.z, real)
+def enable_simulation(instance: Instance, model_id: int, enabled: bool) -> None:
+    params = {
+        'model_id': model_id,
+        'enabled': enabled
+    }
+    instance.request('enable-simulation', params)

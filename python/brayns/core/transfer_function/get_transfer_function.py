@@ -18,20 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
-from typing import Any
-
-from brayns.core.image.resolution import Resolution
+from brayns.core.transfer_function.transfer_function import TransferFunction
+from brayns.instance.instance import Instance
 
 
-def serialize_application_update(
-    resolution: Resolution | None = None,
-    jpeg_quality: int | None = None,
-) -> dict[str, Any]:
-    message = {}
-    if resolution is not None:
-        message['viewport'] = list(resolution)
-    if jpeg_quality is not None:
-        message['jpeg_quality'] = jpeg_quality
-    return message
+def get_transfer_function(instance: Instance, model_id: int) -> TransferFunction:
+    params = {'id': model_id}
+    result = instance.request('get-model-transfer-function', params)
+    return TransferFunction.deserialize(result)

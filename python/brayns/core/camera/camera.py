@@ -40,3 +40,9 @@ class Camera(ABC):
     @abstractmethod
     def serialize(self) -> dict[str, Any]:
         pass
+
+    def serialize_with_name(self) -> dict[str, Any]:
+        return {
+            'name': self.name,
+            'params': self.serialize()
+        }

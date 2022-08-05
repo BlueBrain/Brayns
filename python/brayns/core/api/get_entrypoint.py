@@ -18,7 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.api.deserialize_entrypoint import deserialize_entrypoint
 from brayns.core.api.entrypoint import Entrypoint
 from brayns.instance.instance import Instance
 
@@ -26,4 +25,4 @@ from brayns.instance.instance import Instance
 def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
     params = {'endpoint': method}
     result = instance.request('schema', params)
-    return deserialize_entrypoint(result)
+    return Entrypoint.deserialize(result)

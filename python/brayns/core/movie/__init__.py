@@ -25,5 +25,5 @@ from brayns.core.movie.movie_frames import MovieFrames
 __all__ = [
     'Movie',
     'MovieError',
-    'MovieFrames'
+    'MovieFrames',
 ]

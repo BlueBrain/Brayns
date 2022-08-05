@@ -18,8 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from brayns.core.version.check_version import check_version
+from brayns.core.version.get_version import get_version
 from brayns.core.version.version import Version
+from brayns.core.version.version_error import VersionError
 
 __all__ = [
-    'Version'
+    'check_version',
+    'get_version',
+    'Version',
+    'VersionError',
 ]

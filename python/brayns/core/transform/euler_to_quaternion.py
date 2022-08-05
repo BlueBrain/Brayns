@@ -18,16 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
+import math
 
-import pathlib
+from brayns.core.transform.quaternion import Quaternion
+from brayns.core.vector.vector3 import Vector3
 
-from brayns.core.image.image_format import ImageFormat
 
-
-def parse_image_format(filename: str) -> ImageFormat:
-    path = pathlib.Path(filename)
-    extension = path.suffix[1:]
-    extension = extension.lower()
-    extension = extension.strip()
-    return ImageFormat(extension)
+def euler_to_quaternion(euler: Vector3, degrees: bool = False) -> Quaternion:
+    if degrees:
+        euler = Vector3.unpack(math.radians(i) for i in euler)
+    euler /= 2
+    cx, cy, cz = Vector3.unpack(math.cos(i) for i in euler)
+    sx, sy, sz = Vector3.unpack(math.sin(i) for i in euler)
+    return Quaternion(
+        sx * cy * cz - cx * sy * sz,
+        cx * sy * cz + sx * cy * sz,
+        cx * cy * sz - sx * sy * cz,
+        cx * cy * cz + sx * sy * sz
+    )

@@ -19,11 +19,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.image.image_format import ImageFormat
-from brayns.core.image.parse_image_format import parse_image_format
 from brayns.core.image.resolution import Resolution
 
 __all__ = [
     'ImageFormat',
-    'parse_image_format',
     'Resolution',
 ]

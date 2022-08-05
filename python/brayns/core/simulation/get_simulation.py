@@ -18,18 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, TypeVar
-
-from brayns.core.geometry.geometry import Geometry
-
-T = TypeVar('T', bound=Geometry)
+from brayns.core.simulation.simulation import Simulation
+from brayns.instance.instance import Instance
 
 
-def serialize_geometries(geometries: list[T]) -> list[dict[str, Any]]:
-    return [
-        {
-            'geometry': geometry.serialize(),
-            'color': list(geometry.color),
-        }
-        for geometry in geometries
-    ]
+def get_simulation(instance: Instance) -> Simulation:
+    result = instance.request('get-simulation-parameters')
+    return Simulation.deserialize(result)

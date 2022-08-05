@@ -18,11 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from brayns.core.geometry.geometry import Geometry
-from brayns.core.geometry.serialize_geometries import serialize_geometries
-from brayns.core.model.deserialize_model import deserialize_model
 from brayns.core.model.model import Model
 from brayns.instance.instance import Instance
 
@@ -31,8 +29,18 @@ T = TypeVar('T', bound=Geometry)
 
 def add_geometries(instance: Instance, geometries: list[T]) -> Model:
     if not geometries:
-        raise ValueError('Creation of empty models is not supported')
+        raise ValueError('Creation of an empty model is not supported')
     method = geometries[0].method
-    params = serialize_geometries(geometries)
+    params = _serialize_geometries(geometries)
     result = instance.request(method, params)
-    return deserialize_model(result)
+    return Model.deserialize(result)
+
+
+def _serialize_geometries(geometries: list[T]) -> list[dict[str, Any]]:
+    return [
+        {
+            'geometry': geometry.serialize(),
+            'color': list(geometry.color),
+        }
+        for geometry in geometries
+    ]

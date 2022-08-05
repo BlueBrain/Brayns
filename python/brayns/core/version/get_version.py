@@ -18,14 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+from brayns.core.version.version import Version
+from brayns.instance.instance import Instance
 
-from brayns.core.view.view import View
 
-
-def serialize_view(view: View) -> dict[str, Any]:
-    return {
-        'position': list(view.position),
-        'target': list(view.target),
-        'up': list(view.up)
-    }
+def get_version(instance: Instance) -> Version:
+    result = instance.request('get-version')
+    return Version.deserialize(result)

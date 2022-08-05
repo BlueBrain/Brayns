@@ -18,12 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.rotation.axis_angle import AxisAngle
-from brayns.core.rotation.euler import Euler
-from brayns.core.rotation.quaternion import Quaternion
+from brayns.core.version.get_version import get_version
+from brayns.instance.instance import Instance
 
-__all__ = [
-    'AxisAngle',
-    'Euler',
-    'Quaternion',
-]
+
+def check_version(instance: Instance) -> None:
+    version = get_version(instance)
+    version.check()

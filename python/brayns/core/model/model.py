@@ -18,7 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.bounds.bounds import Bounds
 from brayns.core.transform.transform import Transform
@@ -32,3 +35,13 @@ class Model:
     metadata: dict
     visible: bool
     transform: Transform
+
+    @staticmethod
+    def deserialize(message: dict[str, Any]) -> Model:
+        return Model(
+            id=message['model_id'],
+            bounds=Bounds.deserialize(message['bounds']),
+            metadata=message['metadata'],
+            visible=message['is_visible'],
+            transform=Transform.deserialize(message['transform']),
+        )

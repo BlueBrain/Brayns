@@ -18,9 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from __future__ import annotations
 
-from brayns.instance.instance import Instance
+from dataclasses import dataclass
+from typing import Any
+
+from brayns.core.version.version_error import VersionError
 from brayns.version import DEV_VERSION, __version__
 
 
@@ -33,12 +36,7 @@ class Version:
     revision: str
 
     @staticmethod
-    def from_instance(instance: Instance) -> 'Version':
-        result = instance.request('get-version')
-        return Version.deserialize(result)
-
-    @staticmethod
-    def deserialize(message: dict) -> 'Version':
+    def deserialize(message: dict[str, Any]) -> Version:
         return Version(
             major=message['major'],
             minor=message['minor'],
@@ -57,5 +55,7 @@ class Version:
     def check(self) -> None:
         local = __version__
         remote = self.tag
-        if local != DEV_VERSION and remote != local:
-            raise RuntimeError(f'Version mismatch {remote=} {local=}')
+        if local == DEV_VERSION:
+            return
+        if remote != local:
+            raise VersionError(local, remote)

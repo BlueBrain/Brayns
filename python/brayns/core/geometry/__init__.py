@@ -23,7 +23,6 @@ from brayns.core.geometry.box import Box
 from brayns.core.geometry.capsule import Capsule
 from brayns.core.geometry.geometry import Geometry
 from brayns.core.geometry.plane import Plane
-from brayns.core.geometry.serialize_geometries import serialize_geometries
 from brayns.core.geometry.sphere import Sphere
 
 __all__ = [
@@ -32,6 +31,5 @@ __all__ = [
     'Capsule',
     'Geometry',
     'Plane',
-    'serialize_geometries',
     'Sphere',
 ]

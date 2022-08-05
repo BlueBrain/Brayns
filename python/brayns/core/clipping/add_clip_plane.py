@@ -19,10 +19,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.clipping.clip_plane import ClipPlane
-from brayns.core.clipping.serialize_clip_plane import serialize_clip_plane
 from brayns.instance.instance import Instance
 
 
 def add_clip_plane(instance: Instance, plane: ClipPlane) -> int:
-    params = serialize_clip_plane(plane)
+    params = plane.serialize()
     return instance.request('add-clip-plane', params)

@@ -18,11 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.common.color4 import Color4
 from brayns.core.transfer_function.value_range import ValueRange
-from brayns.instance.instance import Instance
 
 
 @dataclass
@@ -32,13 +34,7 @@ class TransferFunction:
     colors: list[Color4]
 
     @staticmethod
-    def from_model(instance: Instance, model_id: int) -> 'TransferFunction':
-        params = {'id': model_id}
-        result = instance.request('get-model-transfer-function', params)
-        return TransferFunction.deserialize(result)
-
-    @staticmethod
-    def deserialize(message: dict) -> 'TransferFunction':
+    def deserialize(message: dict[str, Any]) -> TransferFunction:
         return TransferFunction(
             value_range=ValueRange(*message['range']),
             colors=[
@@ -47,14 +43,7 @@ class TransferFunction:
             ]
         )
 
-    def apply(self, instance: Instance, model_id: int) -> None:
-        params = {
-            'id': model_id,
-            'transfer_function': self.serialize()
-        }
-        instance.request('set-model-transfer-function', params)
-
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         return {
             'range': list(self.value_range),
             'colors': [
