@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.geometry.geometry import Geometry
 from brayns.core.vector.vector3 import Vector3
@@ -29,3 +30,14 @@ class Sphere(Geometry):
 
     radius: float
     center: Vector3 = Vector3.zero
+
+    @classmethod
+    @property
+    def method(cls) -> str:
+        return 'add-spheres'
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            'center': list(self.center),
+            'radius': self.radius,
+        }

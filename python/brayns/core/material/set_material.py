@@ -24,7 +24,7 @@ from brayns.instance.instance import Instance
 
 def set_material(instance: Instance, model_id: int, material: Material) -> None:
     name = material.name
-    properties = material.properties
+    properties = material.serialize()
     params = {
         'model_id': model_id,
         'material': properties

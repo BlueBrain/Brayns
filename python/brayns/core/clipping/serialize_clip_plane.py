@@ -20,21 +20,10 @@
 
 from typing import Any
 
-from brayns.core.material.car_paint_material import CarPaintMaterial
-from brayns.core.material.get_material import get_material
-from brayns.instance.instance import Instance
+from brayns.core.clipping.clip_plane import ClipPlane
 
 
-def get_car_paint_material(instance: Instance, model_id: int) -> CarPaintMaterial:
-    return get_material(
-        instance=instance,
-        model_id=model_id,
-        material=CarPaintMaterial,
-        deserializer=_deserialize_car_paint_material
-    )
-
-
-def _deserialize_car_paint_material(message: dict[str, Any]) -> CarPaintMaterial:
-    return CarPaintMaterial(
-        flake_density=message['flake_density']
-    )
+def serialize_clip_plane(plane: ClipPlane) -> dict[str, Any]:
+    return {
+        'coefficients': [plane.a, plane.b, plane.c, plane.d]
+    }

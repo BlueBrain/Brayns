@@ -20,10 +20,10 @@
 
 from brayns.core.api.deserialize_entrypoint import deserialize_entrypoint
 from brayns.core.api.entrypoint import Entrypoint
-from brayns.core.api.get_raw_entrypoint import get_raw_entrypoint
 from brayns.instance.instance import Instance
 
 
 def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
-    result = get_raw_entrypoint(instance, method)
+    params = {'endpoint': method}
+    result = instance.request('schema', params)
     return deserialize_entrypoint(result)

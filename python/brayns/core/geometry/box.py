@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.geometry.geometry import Geometry
 from brayns.core.vector.vector3 import Vector3
@@ -29,3 +30,14 @@ class Box(Geometry):
 
     min: Vector3
     max: Vector3
+
+    @classmethod
+    @property
+    def method(cls) -> str:
+        return 'add-boxes'
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            'min': list(self.min),
+            'max': list(self.max),
+        }

@@ -19,9 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 from brayns.core.camera.camera import Camera
+
+T = TypeVar('T', bound='OrthographicCamera')
 
 
 @dataclass
@@ -34,8 +36,13 @@ class OrthographicCamera(Camera):
     def name(cls) -> str:
         return 'orthographic'
 
-    @property
-    def properties(self) -> dict[str, Any]:
+    @classmethod
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        return cls(
+            height=message['height']
+        )
+
+    def serialize(self) -> dict[str, Any]:
         return {
             'height': self.height
         }

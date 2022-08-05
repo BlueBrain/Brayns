@@ -19,11 +19,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.application.application import Application
+from brayns.core.application.deserialize_application import deserialize_application
 from brayns.core.application.get_application import get_application
+from brayns.core.application.serialize_application_update import serialize_application_update
 from brayns.core.application.update_application import update_application
 
 __all__ = [
     'Application',
+    'deserialize_application',
     'get_application',
+    'serialize_application_update',
     'update_application',
 ]

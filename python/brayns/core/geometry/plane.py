@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.geometry.geometry import Geometry
 
@@ -30,3 +31,13 @@ class Plane(Geometry):
     b: float
     c: float
     d: float = 0.0
+
+    @classmethod
+    @property
+    def method(cls) -> str:
+        return 'add-planes'
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            'coefficients': [self.a, self.b, self.c, self.d]
+        }

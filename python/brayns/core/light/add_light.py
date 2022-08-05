@@ -24,5 +24,5 @@ from brayns.instance.instance import Instance
 
 def add_light(instance: Instance, light: Light) -> int:
     name = light.name
-    params = light.properties
+    params = light.serialize()
     return instance.request(f'add-light-{name}', params)

@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+from brayns.core.application.serialize_application_update import serialize_application_update
 from brayns.core.image.resolution import Resolution
 from brayns.instance.instance import Instance
 
@@ -29,9 +30,5 @@ def update_application(
     resolution: Resolution | None = None,
     jpeg_quality: int | None = None,
 ) -> None:
-    params = {}
-    if resolution is not None:
-        params['viewport'] = list(resolution)
-    if jpeg_quality is not None:
-        params['jpeg_quality'] = jpeg_quality
+    params = serialize_application_update(resolution, jpeg_quality)
     instance.request('set-application-parameters', params)

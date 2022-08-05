@@ -51,6 +51,5 @@ class Light(ABC):
             'visible': self.visible,
         }
 
-    @property
-    def properties(self) -> dict[str, Any]:
+    def serialize(self) -> dict[str, Any]:
         return self.base_properties | self.additional_properties

@@ -21,6 +21,10 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+from brayns.core.model.deserialize_model import deserialize_model
+from brayns.core.model.model import Model
+from brayns.instance.instance import Instance
+
 
 class Loader(ABC):
 
@@ -34,3 +38,18 @@ class Loader(ABC):
     @abstractmethod
     def properties(self) -> dict[str, Any]:
         pass
+
+    def serialize(self, path: str) -> dict[str, Any]:
+        return {
+            'path': path,
+            'loader_name': self.name,
+            'loader_properties': self.properties
+        }
+
+    def load(self, instance: Instance, path: str) -> list[Model]:
+        params = self.serialize(path)
+        result = instance.request('add-model', params)
+        return [
+            deserialize_model(model)
+            for model in result
+        ]

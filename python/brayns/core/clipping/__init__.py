@@ -22,10 +22,12 @@ from brayns.core.clipping.add_clip_plane import add_clip_plane
 from brayns.core.clipping.clear_clip_planes import clear_clip_planes
 from brayns.core.clipping.clip_plane import ClipPlane
 from brayns.core.clipping.remove_clip_planes import remove_clip_planes
+from brayns.core.clipping.serialize_clip_plane import serialize_clip_plane
 
 __all__ = [
     'add_clip_plane',
     'clear_clip_planes',
     'ClipPlane',
     'remove_clip_planes',
+    'serialize_clip_plane',
 ]

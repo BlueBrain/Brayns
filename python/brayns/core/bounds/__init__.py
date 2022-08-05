@@ -19,9 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.bounds.bounds import Bounds
+from brayns.core.bounds.deserialize_bounds import deserialize_bounds
 from brayns.core.bounds.get_bounds import get_bounds
 
 __all__ = [
     'Bounds',
+    'deserialize_bounds',
     'get_bounds',
 ]

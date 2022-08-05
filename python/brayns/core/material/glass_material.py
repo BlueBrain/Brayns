@@ -19,9 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 from brayns.core.material.material import Material
+
+T = TypeVar('T', bound='GlassMaterial')
 
 
 @dataclass
@@ -34,8 +36,13 @@ class GlassMaterial(Material):
     def name(cls) -> str:
         return 'glass'
 
-    @property
-    def properties(self) -> dict[str, Any]:
+    @classmethod
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        return cls(
+            refraction_index=message['index_of_refraction']
+        )
+
+    def serialize(self) -> dict[str, Any]:
         return {
             'index_of_refraction': self.refraction_index
         }

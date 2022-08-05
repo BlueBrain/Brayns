@@ -18,23 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+from typing import TypeVar
 
-from brayns.core.material.get_material import get_material
-from brayns.core.material.glass_material import GlassMaterial
+from brayns.core.camera.camera import Camera
 from brayns.instance.instance import Instance
 
-
-def get_glass_material(instance: Instance, model_id: int) -> GlassMaterial:
-    return get_material(
-        instance=instance,
-        model_id=model_id,
-        material=GlassMaterial,
-        deserializer=_deserialize_glass_material
-    )
+T = TypeVar('T', bound=Camera)
 
 
-def _deserialize_glass_material(message: dict[str, Any]) -> GlassMaterial:
-    return GlassMaterial(
-        refraction_index=message['index_of_refraction']
-    )
+def get_camera(instance: Instance, camera_type: type[T]) -> T:
+    name = camera_type.name
+    result = instance.request(f'get-camera-{name}')
+    return camera_type.deserialize(result)

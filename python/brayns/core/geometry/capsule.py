@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.core.geometry.geometry import Geometry
 from brayns.core.vector.vector3 import Vector3
@@ -31,3 +32,16 @@ class Capsule(Geometry):
     start_radius: float
     end_point: Vector3
     end_radius: float
+
+    @classmethod
+    @property
+    def method(cls) -> str:
+        return 'add-capsules'
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            'p0': list(self.start_point),
+            'r0': self.start_radius,
+            'p1': list(self.end_point),
+            'r1': self.end_radius,
+        }

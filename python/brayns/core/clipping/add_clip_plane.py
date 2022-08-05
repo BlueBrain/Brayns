@@ -18,18 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
 from brayns.core.clipping.clip_plane import ClipPlane
+from brayns.core.clipping.serialize_clip_plane import serialize_clip_plane
 from brayns.instance.instance import Instance
 
 
 def add_clip_plane(instance: Instance, plane: ClipPlane) -> int:
-    params = _serialize_clip_plane(plane)
+    params = serialize_clip_plane(plane)
     return instance.request('add-clip-plane', params)
-
-
-def _serialize_clip_plane(plane: ClipPlane) -> dict[str, Any]:
-    return {
-        'coefficients': [plane.a, plane.b, plane.c, plane.d]
-    }

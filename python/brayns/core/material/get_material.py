@@ -18,8 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import TypeVar
 
 from brayns.core.material.material import Material
 from brayns.instance.instance import Instance
@@ -27,13 +26,8 @@ from brayns.instance.instance import Instance
 T = TypeVar('T', bound=Material)
 
 
-def get_material(
-    instance: Instance,
-    model_id: int,
-    material: type[T],
-    deserializer: Callable[[dict[str, Any]], T]
-) -> T:
-    name = material.name
+def get_material(instance: Instance, model_id: int, material_type: type[T]) -> T:
+    name = material_type.name
     params = {'id': model_id}
     result = instance.request(f'get-material-{name}', params)
-    return deserializer(result)
+    return material_type.deserialize(result)

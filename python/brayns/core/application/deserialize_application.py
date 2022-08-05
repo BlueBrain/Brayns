@@ -20,24 +20,13 @@
 
 from typing import Any
 
-from brayns.core.loader.loader import Loader
-from brayns.core.model.deserialize_model import deserialize_model
-from brayns.core.model.model import Model
-from brayns.instance.instance import Instance
+from brayns.core.application.application import Application
+from brayns.core.image.resolution import Resolution
 
 
-def load_model(instance: Instance, loader: Loader, path: str) -> list[Model]:
-    params = _serialize_loader(loader, path)
-    result = instance.request('add-model', params)
-    return [
-        deserialize_model(model)
-        for model in result
-    ]
-
-
-def _serialize_loader(loader: Loader, path: str) -> dict[str, Any]:
-    return {
-        'path': path,
-        'loader_name': loader.name,
-        'loader_properties': loader.properties
-    }
+def deserialize_application(message: dict[str, Any]) -> Application:
+    return Application(
+        plugins=message['plugins'],
+        resolution=Resolution(*message['viewport']),
+        jpeg_quality=message['jpeg_quality'],
+    )

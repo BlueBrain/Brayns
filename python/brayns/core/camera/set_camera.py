@@ -24,5 +24,5 @@ from brayns.instance.instance import Instance
 
 def set_camera(instance: Instance, camera: Camera) -> None:
     name = camera.name
-    params = camera.properties
+    params = camera.serialize()
     instance.request(f'set-camera-{name}', params)

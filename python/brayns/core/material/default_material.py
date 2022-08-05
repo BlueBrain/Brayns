@@ -19,9 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 from brayns.core.material.material import Material
+
+T = TypeVar('T', bound='DefaultMaterial')
 
 
 @dataclass
@@ -34,8 +36,13 @@ class DefaultMaterial(Material):
     def name(cls) -> str:
         return 'default'
 
-    @property
-    def properties(self) -> dict[str, Any]:
+    @classmethod
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        return cls(
+            opacity=message['opacity']
+        )
+
+    def serialize(self) -> dict[str, Any]:
         return {
             'opacity': self.opacity
         }

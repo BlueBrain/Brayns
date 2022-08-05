@@ -22,18 +22,20 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from dataclasses import dataclass, replace
+from typing import TypeVar
 
 from brayns.core.common.color3 import Color3
 
+T = TypeVar('T', bound='Color4')
 
 @dataclass(frozen=True, order=True)
 class Color4(Color3):
 
     a: float = 1.0
 
-    @staticmethod
-    def from_color3(color: Color3, alpha: float = 1.0) -> Color4:
-        return Color4(color.r, color.g, color.b, alpha)
+    @classmethod
+    def from_color3(cls: type[T], color: Color3, alpha: float = 1.0) -> T:
+        return cls(color.r, color.g, color.b, alpha)
 
     def __iter__(self) -> Iterator[float]:
         yield from super().__iter__()

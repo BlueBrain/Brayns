@@ -20,7 +20,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
+
+T = TypeVar('T', bound='Material')
 
 
 @dataclass
@@ -32,7 +34,11 @@ class Material(ABC):
     def name(cls) -> str:
         pass
 
-    @property
+    @classmethod
     @abstractmethod
-    def properties(self) -> dict[str, Any]:
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        pass
+
+    @abstractmethod
+    def serialize(self) -> dict[str, Any]:
         pass

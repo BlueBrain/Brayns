@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from brayns.core.color.color4 import Color4
 
@@ -31,6 +31,16 @@ T = TypeVar('T', bound='Geometry')
 class Geometry(ABC):
 
     color: Color4 = field(default=Color4.white, init=False)
+
+    @classmethod
+    @property
+    @abstractmethod
+    def method(cls) -> str:
+        pass
+
+    @abstractmethod
+    def serialize(self) -> dict[str, Any]:
+        pass
 
     def with_color(self: T, color: Color4) -> T:
         self.color = color

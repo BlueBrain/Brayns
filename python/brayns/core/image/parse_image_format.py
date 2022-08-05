@@ -18,23 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+from __future__ import annotations
 
-from brayns.core.material.get_material import get_material
-from brayns.core.material.plastic_material import PlasticMaterial
-from brayns.instance.instance import Instance
+import pathlib
 
-
-def get_plastic_material(instance: Instance, model_id: int) -> PlasticMaterial:
-    return get_material(
-        instance=instance,
-        model_id=model_id,
-        material=PlasticMaterial,
-        deserializer=_deserialize_plastic_material
-    )
+from brayns.core.image.image_format import ImageFormat
 
 
-def _deserialize_plastic_material(message: dict[str, Any]) -> PlasticMaterial:
-    return PlasticMaterial(
-        opacity=message['opacity']
-    )
+def parse_image_format(filename: str) -> ImageFormat:
+    path = pathlib.Path(filename)
+    extension = path.suffix[1:]
+    extension = extension.lower()
+    extension = extension.strip()
+    return ImageFormat(extension)

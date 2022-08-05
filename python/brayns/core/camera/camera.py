@@ -19,7 +19,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, TypeVar
+
+T = TypeVar('T', bound='Camera')
 
 
 class Camera(ABC):
@@ -30,7 +32,11 @@ class Camera(ABC):
     def name(cls) -> str:
         pass
 
-    @property
+    @classmethod
     @abstractmethod
-    def properties(self) -> dict[str, Any]:
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        pass
+
+    @abstractmethod
+    def serialize(self) -> dict[str, Any]:
         pass

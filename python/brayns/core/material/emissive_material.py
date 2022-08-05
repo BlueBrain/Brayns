@@ -19,9 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 from brayns.core.material.material import Material
+
+T = TypeVar('T', bound='EmissiveMaterial')
 
 
 @dataclass
@@ -34,8 +36,13 @@ class EmissiveMaterial(Material):
     def name(cls) -> str:
         return 'emissive'
 
-    @property
-    def properties(self) -> dict[str, Any]:
+    @classmethod
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        return cls(
+            intensity=message['intensity']
+        )
+
+    def serialize(self) -> dict[str, Any]:
         return {
             'intensity': self.intensity
         }
