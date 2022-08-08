@@ -23,14 +23,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from brayns.core.model.model_loader import ModelLoader
+from brayns.core.loader.loader import Loader
 from brayns.plugins.bbp.bbp_cells import BbpCells
 from brayns.plugins.bbp.bbp_report import BbpReport
 from brayns.plugins.common.morphology_parameters import MorphologyParameters
 
 
 @dataclass
-class BbpLoader(ModelLoader):
+class BbpLoader(Loader):
 
     cells: BbpCells = BbpCells.all()
     report: BbpReport | None = None

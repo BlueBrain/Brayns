@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from brayns.core.common.resolution import Resolution
+from brayns.core.image.resolution import Resolution
 from brayns.launcher.log_level import LogLevel
 from brayns.launcher.plugin import Plugin
 from brayns.launcher.process import Process

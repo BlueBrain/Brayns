@@ -18,18 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any, Optional
+from __future__ import annotations
 
-from brayns.core.model.model_loader import ModelLoader
+from dataclasses import dataclass
+from typing import Any
+
+from brayns.core.loader.loader import Loader
 from brayns.plugins.sonata.sonata_node_population import SonataNodePopulation
 
 
 @dataclass
-class SonataLoader(ModelLoader):
+class SonataLoader(Loader):
 
     node_populations: list[SonataNodePopulation]
-    simulation_config: Optional[str] = None
+    simulation_config: str | None = None
 
     @classmethod
     @property
@@ -37,7 +39,7 @@ class SonataLoader(ModelLoader):
         return 'SONATA loader'
 
     @property
-    def properties(self) -> dict:
+    def properties(self) -> dict[str, Any]:
         properties: dict[str, Any] = {
             'node_population_settings': [
                 node_population.serialize()

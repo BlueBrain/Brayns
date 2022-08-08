@@ -18,8 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 
 @dataclass
@@ -29,9 +31,9 @@ class SonataEdgePopulation:
     afferent: bool
     density: float = 1.0
     radius: float = 2.0
-    report: Optional[str] = None
+    report: str | None = None
 
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         message = {
             'edge_population': self.name,
             'load_afferent': self.afferent,

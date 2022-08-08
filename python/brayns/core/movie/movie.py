@@ -24,9 +24,9 @@ from collections import deque
 from dataclasses import dataclass
 from typing import IO, Optional, cast
 
-from brayns.core.common.resolution import Resolution
+from brayns.core.image.resolution import Resolution
 from brayns.core.movie.movie_error import MovieError
-from brayns.core.snapshot.image_format import ImageFormat
+from brayns.core.image.image_format import ImageFormat
 
 
 @dataclass

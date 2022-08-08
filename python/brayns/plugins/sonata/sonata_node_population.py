@@ -18,9 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from dataclasses import field
-from typing import Optional
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any
 
 from brayns.plugins.common.morphology_parameters import MorphologyParameters
 from brayns.plugins.sonata.sonata_edge_population import SonataEdgePopulation
@@ -33,14 +34,14 @@ class SonataNodePopulation:
 
     name: str
     nodes: SonataNodes = SonataNodes.from_density(0.01)
-    report: Optional[SonataReport] = None
-    edges: Optional[list[SonataEdgePopulation]] = None
+    report: SonataReport | None = None
+    edges: list[SonataEdgePopulation] | None = None
     morphology: MorphologyParameters = field(
         default_factory=MorphologyParameters
     )
     vasculature_radius_multiplier: float = 1.0
 
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         message = {
             'node_population': self.name,
             'vasculature_geometry_parameters': {

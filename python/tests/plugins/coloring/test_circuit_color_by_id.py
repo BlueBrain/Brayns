@@ -21,9 +21,9 @@
 import unittest
 
 from brayns.core.color.color4 import Color4
-from brayns.plugins.common.cell_id import CellId
-from brayns.plugins.common.circuit_color_by_id import CircuitColorById
-from tests.plugins.common.mock_circuit_instance import MockCircuitInstance
+from brayns.plugins.coloring.cell_id import CellId
+from brayns.plugins.coloring.circuit_color_by_id import CircuitColorById
+from tests.plugins.coloring.mock_circuit_instance import MockCircuitInstance
 
 
 class TestCircuitColorById(unittest.TestCase):

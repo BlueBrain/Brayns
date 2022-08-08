@@ -18,34 +18,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 
 @dataclass
 class SonataNodes:
 
-    density: Optional[float] = None
-    names: Optional[list[str]] = None
-    ids: Optional[list[int]] = None
+    density: float | None = None
+    names: list[str] | None = None
+    ids: list[int] | None = None
 
     @staticmethod
-    def all() -> 'SonataNodes':
+    def all() -> SonataNodes:
         return SonataNodes.from_density(1.0)
 
     @staticmethod
-    def from_density(density: float) -> 'SonataNodes':
+    def from_density(density: float) -> SonataNodes:
         return SonataNodes(density=density)
 
     @staticmethod
-    def from_names(names: list[str], density: float = 1.0) -> 'SonataNodes':
+    def from_names(names: list[str], density: float = 1.0) -> SonataNodes:
         return SonataNodes(density=density, names=names)
 
     @staticmethod
-    def from_ids(ids: list[int]) -> 'SonataNodes':
+    def from_ids(ids: list[int]) -> SonataNodes:
         return SonataNodes(ids=ids)
 
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         message = {}
         if self.density is not None:
             message['node_percentage'] = self.density

@@ -25,9 +25,10 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.core.camera.camera import Camera
-from brayns.core.common.resolution import Resolution
+from brayns.core.image.image_format import ImageFormat
+from brayns.core.image.parse_image_format import parse_image_format
+from brayns.core.image.resolution import Resolution
 from brayns.core.renderer.renderer import Renderer
-from brayns.core.snapshot.image_format import ImageFormat
 from brayns.core.view.view import View
 from brayns.instance.instance import Instance
 
@@ -43,7 +44,7 @@ class Snapshot:
     jpeg_quality: int = 100
 
     def save(self, instance: Instance, path: str) -> None:
-        format = ImageFormat.from_path(path)
+        format = parse_image_format(path)
         data = self.download(instance, format)
         with open(path, 'wb') as file:
             file.write(data)

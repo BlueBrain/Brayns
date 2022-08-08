@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.instance.instance import Instance
-from brayns.plugins.color.color_method import ColorMethod
+from brayns.plugins.coloring.color_method import ColorMethod
 
 
 def get_color_methods(

@@ -20,9 +20,9 @@
 
 import unittest
 
-from brayns.core.common.resolution import Resolution
+from brayns.core.image.resolution import Resolution
 from brayns.core.movie.movie import Movie
-from brayns.core.snapshot.image_format import ImageFormat
+from brayns.core.image.image_format import ImageFormat
 
 
 class TestMovie(unittest.TestCase):

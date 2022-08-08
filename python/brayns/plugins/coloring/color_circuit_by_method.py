@@ -20,7 +20,7 @@
 
 from brayns.core.color.color4 import Color4
 from brayns.instance.instance import Instance
-from brayns.plugins.color.color_method import ColorMethod
+from brayns.plugins.coloring.color_method import ColorMethod
 
 
 def color_circuit_by_method(

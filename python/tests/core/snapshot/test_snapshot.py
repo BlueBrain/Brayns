@@ -22,9 +22,9 @@ import base64
 import unittest
 
 from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.common.resolution import Resolution
+from brayns.core.image.resolution import Resolution
 from brayns.core.renderer.production_renderer import ProductionRenderer
-from brayns.core.snapshot.image_format import ImageFormat
+from brayns.core.image.image_format import ImageFormat
 from brayns.core.snapshot.snapshot import Snapshot
 from brayns.core.view.view import View
 from tests.instance.mock_instance import MockInstance

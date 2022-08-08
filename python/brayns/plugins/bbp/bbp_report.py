@@ -51,7 +51,7 @@ class BbpReport:
             name=name,
         )
 
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         message: dict[str, Any] = {
             'report_type': self.type
         }

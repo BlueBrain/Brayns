@@ -26,7 +26,7 @@ from typing import Any
 from brayns.core.camera.camera import Camera
 from brayns.core.image.resolution import Resolution
 from brayns.core.renderer.renderer import Renderer
-from brayns.core.snapshot.image_format import ImageFormat
+from brayns.core.image.image_format import ImageFormat
 from brayns.core.snapshot.key_frame import KeyFrame
 from brayns.instance.instance import Instance
 
