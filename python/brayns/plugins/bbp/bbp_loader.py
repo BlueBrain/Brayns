@@ -18,8 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from brayns.core.model.model_loader import ModelLoader
 from brayns.plugins.bbp.bbp_cells import BbpCells
@@ -31,7 +33,7 @@ from brayns.plugins.common.morphology_parameters import MorphologyParameters
 class BbpLoader(ModelLoader):
 
     cells: BbpCells = BbpCells.all()
-    report: Optional[BbpReport] = None
+    report: BbpReport | None = None
     morphology: MorphologyParameters = field(
         default_factory=MorphologyParameters
     )
@@ -44,7 +46,7 @@ class BbpLoader(ModelLoader):
         return 'BBP loader'
 
     @property
-    def properties(self) -> dict:
+    def properties(self) -> dict[str, Any]:
         properties: dict[str, Any] = {
             'load_afferent_synapses': self.load_afferent_synapses,
             'load_efferent_synapses': self.load_efferent_synapses

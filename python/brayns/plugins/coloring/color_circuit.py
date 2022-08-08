@@ -1,6 +1,7 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+#
+# Responsible Author: adrien.fleury@epfl.ch
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -17,12 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pathlib
-from enum import Enum
+from brayns.core.common.color4 import Color4
+from brayns.instance.instance import Instance
 
 
-class MorphologyGeometryType(Enum):
-
-    ORIGINAL = 'original'
-    SMOOTH = 'smooth'
-    CONSTANT_RADII = 'constant_radii'
+def color_circuit(instance: Instance, model_id: int, color: Color4) -> None:
+    params = {
+        'model_id': model_id,
+        'color': list(color)
+    }
+    instance.request('color-circuit-by-single-color', params)

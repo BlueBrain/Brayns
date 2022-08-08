@@ -20,39 +20,30 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass(frozen=True)
-class BbpCells:
+class CellId:
 
-    density: float | None = None
-    targets: list[str] | None = None
-    gids: list[int] | None = None
+    value: str
 
     @staticmethod
-    def all() -> BbpCells:
-        return BbpCells.from_density(1.0)
+    def from_integer(value: int) -> CellId:
+        return CellId(str(value))
 
     @staticmethod
-    def from_density(density: float) -> BbpCells:
-        return BbpCells(density=density)
+    def from_integers(values: Iterable[int]) -> CellId:
+        return CellId.from_strings(str(value) for value in values)
 
     @staticmethod
-    def from_targets(targets: list[str], density: float = 1.0) -> BbpCells:
-        return BbpCells(density=density, targets=targets)
+    def from_strings(values: Iterable[str]) -> CellId:
+        return CellId(','.join(values))
 
     @staticmethod
-    def from_gids(gids: list[int]) -> BbpCells:
-        return BbpCells(gids=gids)
+    def from_range(start: int, end: int) -> CellId:
+        return CellId(f'{start}-{end}')
 
-    def serialize(self) -> dict[str, Any]:
-        message = {}
-        if self.density is not None:
-            message['percentage'] = self.density
-        if self.targets is not None:
-            message['targets'] = self.targets
-        if self.gids is not None:
-            message['gids'] = self.gids
-        return message
+    def __or__(self, other: CellId) -> CellId:
+        return CellId.from_strings([self.value, other.value])

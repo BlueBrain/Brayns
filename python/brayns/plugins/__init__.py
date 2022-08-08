@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.plugins.bbp import *
-from brayns.plugins.common import *
+from brayns.plugins.coloring import *
 from brayns.plugins.cylindric_camera import *
+from brayns.plugins.morphology import *
 from brayns.plugins.sonata import *

@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,20 +17,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-
-from brayns.core.common.color4 import Color4
-from brayns.instance.instance import Instance
+from enum import Enum
 
 
-@dataclass
-class CircuitColor:
+class MorphologyGeometryType(Enum):
 
-    color: Color4 = Color4.white
-
-    def apply(self, instance: Instance, model_id: int) -> None:
-        params = {
-            'model_id': model_id,
-            'color': list(self.color)
-        }
-        instance.request('color-circuit-by-single-color', params)
+    ORIGINAL = 'original'
+    SMOOTH = 'smooth'
+    CONSTANT_RADII = 'constant_radii'

@@ -18,31 +18,38 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass(frozen=True)
 class BbpReport:
 
     type: str
-    name: Optional[str] = None
-    spike_transition_time: Optional[float] = None
+    name: str | None = None
+    spike_transition_time: float | None = None
 
     @staticmethod
-    def none() -> 'BbpReport':
-        return BbpReport(type='none')
-
-    @staticmethod
-    def spikes(spike_transition_time: float = 1.0) -> 'BbpReport':
+    def none() -> BbpReport:
         return BbpReport(
-            type='spikes',
-            spike_transition_time=spike_transition_time
+            type='none'
         )
 
     @staticmethod
-    def compartment(name: str) -> 'BbpReport':
-        return BbpReport(type='compartment', name=name)
+    def spikes(spike_transition_time: float = 1.0) -> BbpReport:
+        return BbpReport(
+            type='spikes',
+            spike_transition_time=spike_transition_time,
+        )
+
+    @staticmethod
+    def compartment(name: str) -> BbpReport:
+        return BbpReport(
+            type='compartment',
+            name=name,
+        )
 
     def serialize(self) -> dict:
         message: dict[str, Any] = {

@@ -21,12 +21,13 @@
 import unittest
 
 from brayns.core.api.entrypoint import Entrypoint
+from brayns.core.api.get_entrypoint import get_entrypoint
 from brayns.core.api.json_schema import JsonSchema
 from brayns.core.api.json_type import JsonType
 from tests.instance.mock_instance import MockInstance
 
 
-class TestEntrypoint(unittest.TestCase):
+class TestGetEntrypoint(unittest.TestCase):
 
     def setUp(self) -> None:
         self._message = {
@@ -50,25 +51,12 @@ class TestEntrypoint(unittest.TestCase):
             result=JsonSchema(type=JsonType.ARRAY)
         )
 
-    def test_get_all_methods(self) -> None:
-        methods = ['test1', 'test2']
-        instance = MockInstance(methods)
-        tests = Entrypoint.get_all_methods(instance)
-        self.assertEqual(instance.method, 'registry')
-        self.assertEqual(instance.params, None)
-        self.assertEqual(tests, methods)
-
-    def test_from_method(self) -> None:
+    def test_get_entrypoint(self) -> None:
         instance = MockInstance(self._message)
-        test = Entrypoint.from_method(instance, 'test')
+        test = get_entrypoint(instance, 'test')
         self.assertEqual(instance.method, 'schema')
         self.assertEqual(instance.params, {'endpoint': 'test'})
         self.assertEqual(test, self._entrypoint)
-
-    def test_deserialize(self) -> None:
-        test = Entrypoint.deserialize(self._message)
-        ref = self._entrypoint
-        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

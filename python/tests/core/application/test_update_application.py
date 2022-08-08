@@ -18,20 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.plugins.common.cell_id import CellId
-from brayns.plugins.common.circuit_color import CircuitColor
-from brayns.plugins.common.circuit_color_by_id import CircuitColorById
-from brayns.plugins.common.circuit_color_by_method import CircuitColorByMethod
-from brayns.plugins.common.color_method import ColorMethod
-from brayns.plugins.common.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.common.morphology_parameters import MorphologyParameters
+import unittest
 
-__all__ = [
-    'CellId',
-    'CircuitColorById',
-    'CircuitColorByMethod',
-    'CircuitColor',
-    'ColorMethod',
-    'MorphologyGeometryType',
-    'MorphologyParameters'
-]
+from brayns.core.application.update_application import update_application
+from brayns.core.image.resolution import Resolution
+from tests.instance.mock_instance import MockInstance
+
+
+class TestUpdateApplication(unittest.TestCase):
+
+    def test_update_application(self) -> None:
+        instance = MockInstance()
+        update_application(
+            instance,
+            resolution=Resolution(100, 200),
+            jpeg_quality=50
+        )
+        self.assertEqual(instance.method, 'set-application-parameters')
+        self.assertEqual(instance.params, {
+            'viewport': [100, 200],
+            'jpeg_quality': 50
+        })
+
+
+if __name__ == '__main__':
+    unittest.main()

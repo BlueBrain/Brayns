@@ -18,35 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any, ClassVar, TypeVar
+import unittest
 
-from brayns.core.camera.camera import Camera
-from brayns.core.view.fovy import Fovy
-
-T = TypeVar('T', bound='CylindricCamera')
+from brayns.core.api.get_methods import get_methods
+from tests.instance.mock_instance import MockInstance
 
 
-@dataclass
-class CylindricCamera(Camera):
+class TestGetMethods(unittest.TestCase):
 
-    OPENDECK_FOVY: ClassVar[Fovy] = Fovy(48.549, degrees=True)
+    def test_get_methods(self) -> None:
+        methods = ['test1', 'test2']
+        instance = MockInstance(methods)
+        tests = get_methods(instance)
+        self.assertEqual(instance.method, 'registry')
+        self.assertEqual(instance.params, None)
+        self.assertEqual(tests, methods)
 
-    fovy: Fovy = OPENDECK_FOVY
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'cylindric'
-
-    @classmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        return cls(
-            fovy=Fovy(message['fovy'], degrees=True)
-        )
-
-    def serialize(self) -> dict[str, Any]:
-        message = {}
-        if self.fovy is not None:
-            message['fovy'] = self.fovy.degrees
-        return message
+if __name__ == '__main__':
+    unittest.main()

@@ -25,5 +25,5 @@ from brayns.plugins.bbp.bbp_report import BbpReport
 __all__ = [
     'BbpCells',
     'BbpLoader',
-    'BbpReport'
+    'BbpReport',
 ]

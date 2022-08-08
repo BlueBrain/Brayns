@@ -18,35 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any, ClassVar, TypeVar
 
-from brayns.core.camera.camera import Camera
-from brayns.core.view.fovy import Fovy
-
-T = TypeVar('T', bound='CylindricCamera')
+from brayns.instance.instance import Instance
+from brayns.plugins.common.color_method import ColorMethod
 
 
-@dataclass
-class CylindricCamera(Camera):
-
-    OPENDECK_FOVY: ClassVar[Fovy] = Fovy(48.549, degrees=True)
-
-    fovy: Fovy = OPENDECK_FOVY
-
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'cylindric'
-
-    @classmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        return cls(
-            fovy=Fovy(message['fovy'], degrees=True)
-        )
-
-    def serialize(self) -> dict[str, Any]:
-        message = {}
-        if self.fovy is not None:
-            message['fovy'] = self.fovy.degrees
-        return message
+def get_color_method_values(
+    instance: Instance,
+    model_id: int,
+    method: ColorMethod,
+) -> list[str]:
+    params = {
+        'model_id': model_id,
+        'method': method.value
+    }
+    result = instance.request('get-circuit-color-method-variables', params)
+    return result['variables']

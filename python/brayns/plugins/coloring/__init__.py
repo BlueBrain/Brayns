@@ -18,35 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any, ClassVar, TypeVar
+from brayns.plugins.coloring.cell_id import CellId
+from brayns.plugins.coloring.color_circuit import color_circuit
+from brayns.plugins.coloring.color_circuit_by_id import color_circuit_by_id
+from brayns.plugins.coloring.color_circuit_by_method import color_circuit_by_method
+from brayns.plugins.coloring.color_method import ColorMethod
+from brayns.plugins.coloring.get_color_method_values import get_color_method_values
+from brayns.plugins.coloring.get_color_methods import get_color_methods
 
-from brayns.core.camera.camera import Camera
-from brayns.core.view.fovy import Fovy
-
-T = TypeVar('T', bound='CylindricCamera')
-
-
-@dataclass
-class CylindricCamera(Camera):
-
-    OPENDECK_FOVY: ClassVar[Fovy] = Fovy(48.549, degrees=True)
-
-    fovy: Fovy = OPENDECK_FOVY
-
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'cylindric'
-
-    @classmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        return cls(
-            fovy=Fovy(message['fovy'], degrees=True)
-        )
-
-    def serialize(self) -> dict[str, Any]:
-        message = {}
-        if self.fovy is not None:
-            message['fovy'] = self.fovy.degrees
-        return message
+__all__ = [
+    'CellId',
+    'color_circuit',
+    'color_circuit_by_id',
+    'color_circuit_by_method',
+    'ColorMethod',
+    'get_color_method_values',
+    'get_color_methods',
+]

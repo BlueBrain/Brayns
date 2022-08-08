@@ -18,30 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from collections.abc import Iterable
-from dataclasses import dataclass
+from brayns.core.common.color4 import Color4
+from brayns.instance.instance import Instance
+from brayns.plugins.common.color_method import ColorMethod
 
 
-@dataclass(frozen=True)
-class CellId:
-
-    value: str
-
-    @staticmethod
-    def from_integer(value: int) -> 'CellId':
-        return CellId(str(value))
-
-    @staticmethod
-    def from_integers(values: Iterable[int]) -> 'CellId':
-        return CellId.from_strings(str(value) for value in values)
-
-    @staticmethod
-    def from_strings(values: Iterable[str]) -> 'CellId':
-        return CellId(','.join(values))
-
-    @staticmethod
-    def from_range(start: int, end: int) -> 'CellId':
-        return CellId(f'{start}-{end}')
-
-    def __or__(self, other: 'CellId') -> 'CellId':
-        return CellId.from_strings([self.value, other.value])
+def color_circuit_by_method(
+    instance: Instance,
+    model_id: int,
+    method: ColorMethod,
+    colors: dict[str, Color4],
+) -> None:
+    params = {
+        'model_id': model_id,
+        'method': method.value,
+        'color_info': [
+            {
+                'variable': value,
+                'color': list(color)
+            }
+            for value, color in colors.items()
+        ]
+    }
+    instance.request('color-circuit-by-method', params)
