@@ -23,14 +23,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.request_progress import RequestProgress
 
 
 @dataclass
 class JsonRpcProgress:
 
-    id: JsonRpcId
+    id: int | str
     params: RequestProgress
 
     @staticmethod

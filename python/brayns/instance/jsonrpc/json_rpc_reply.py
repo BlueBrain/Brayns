@@ -23,13 +23,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
-
 
 @dataclass
 class JsonRpcReply:
 
-    id: JsonRpcId
+    id: int | str
     result: Any = field(default=None, repr=False)
 
     @staticmethod

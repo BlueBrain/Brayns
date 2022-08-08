@@ -18,6 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from brayns.core.loader.loader import Loader
 from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
@@ -36,5 +37,5 @@ class MorphologyLoader(Loader):
         return 'Neuron Morphology loader'
 
     @property
-    def properties(self) -> dict:
+    def properties(self) -> dict[str, Any]:
         return self.morphology.serialize()

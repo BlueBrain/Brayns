@@ -18,9 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from typing import Any, Protocol, TypeVar
 
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
 from brayns.instance.request_future import RequestFuture
 
@@ -53,7 +54,7 @@ class Instance(Protocol):
         request = JsonRpcRequest(id, method, params)
         return self.send(request)
 
-    def is_running(self, id: JsonRpcId) -> bool:
+    def is_running(self, id: int | str) -> bool:
         return False
 
     def send(self, request: JsonRpcRequest) -> RequestFuture:
@@ -62,5 +63,5 @@ class Instance(Protocol):
     def poll(self, block: bool = True) -> None:
         pass
 
-    def cancel(self, id: JsonRpcId) -> None:
+    def cancel(self, id: int | str) -> None:
         pass

@@ -18,11 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import io
 import json
 import logging
 import sys
-from typing import Optional
+from typing import Any
 
 import brayns
 import PySimpleGUI as sg
@@ -88,14 +90,14 @@ def on_binary(window: sg.Window, data: bytes) -> None:
     image.update(data=data)
 
 
-def get_params(values: dict) -> Optional[str]:
+def get_params(values: dict[str, Any]) -> str | None:
     data: str = values[PARAMS]
     if not data or data.isspace():
         return None
     return json.loads(data)
 
 
-def send_request(instance: brayns.Instance, window: sg.Window, values: dict) -> None:
+def send_request(instance: brayns.Instance, window: sg.Window, values: dict[str, Any]) -> None:
     method: str = values[METHOD]
     params = get_params(values)
     result = instance.request(method, params)
@@ -104,7 +106,7 @@ def send_request(instance: brayns.Instance, window: sg.Window, values: dict) -> 
     element.update(value=text)
 
 
-def try_send_request(instance: brayns.Instance, window: sg.Window, values: dict) -> None:
+def try_send_request(instance: brayns.Instance, window: sg.Window, values: dict[str, Any]) -> None:
     try:
         send_request(instance, window, values)
     except Exception as e:

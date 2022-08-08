@@ -23,14 +23,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.request_error import RequestError
 
 
 @dataclass
 class JsonRpcError:
 
-    id: JsonRpcId | None
+    id: int | str | None
     error: RequestError
 
     @staticmethod

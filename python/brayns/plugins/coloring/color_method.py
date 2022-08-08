@@ -23,12 +23,12 @@ from enum import Enum
 
 class ColorMethod(Enum):
 
-    ETYPE = "etype"
-    MTYPE = "mtype"
-    LAYER = "layer"
-    REGION = "region"
-    HEMISPHERE = "hemisphere"
-    MORPHOLOGY = "morphology"
-    MORPHOLOGY_CLASS = "morphology class"
-    MORPHOLOGY_SECTION = "morphology section"
-    SYNAPSE_CLASS = "synapse class"
+    ETYPE = 'etype'
+    MTYPE = 'mtype'
+    LAYER = 'layer'
+    REGION = 'region'
+    HEMISPHERE = 'hemisphere'
+    MORPHOLOGY = 'morphology'
+    MORPHOLOGY_CLASS = 'morphology class'
+    MORPHOLOGY_SECTION = 'morphology section'
+    SYNAPSE_CLASS = 'synapse class'

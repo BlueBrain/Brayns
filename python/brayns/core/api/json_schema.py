@@ -147,7 +147,7 @@ def _deserialize_one_of(message: dict[str, Any]) -> list[JsonSchema]:
     ]
 
 
-def _serialize_properties(schema: JsonSchema) -> dict[str, dict]:
+def _serialize_properties(schema: JsonSchema) -> dict[str, Any]:
     return {
         key: value.serialize()
         for key, value in schema.properties.items()
@@ -163,7 +163,7 @@ def _serialize_additional(schema: JsonSchema) -> bool | dict[str, Any] | None:
     return properties.serialize()
 
 
-def _serialize_one_of(schema: JsonSchema) -> list[dict]:
+def _serialize_one_of(schema: JsonSchema) -> list[dict[str, Any]]:
     return [
         one_of.serialize()
         for one_of in schema.one_of

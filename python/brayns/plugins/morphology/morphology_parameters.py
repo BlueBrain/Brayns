@@ -18,6 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
 
@@ -31,7 +32,7 @@ class MorphologyParameters:
     load_dendrites: bool = False
     geometry_type: MorphologyGeometryType = MorphologyGeometryType.SMOOTH
 
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         return {
             'radius_multiplier': self.radius_multiplier,
             'load_soma': self.load_soma,

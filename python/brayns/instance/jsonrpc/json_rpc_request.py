@@ -24,13 +24,11 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
-
 
 @dataclass
 class JsonRpcRequest:
 
-    id: JsonRpcId | None
+    id: int | str | None
     method: str
     params: Any = field(default=None, repr=False)
 
