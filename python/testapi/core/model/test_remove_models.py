@@ -22,18 +22,15 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class MaterialTestCase(SimpleTestCase):
+class TestRemoveModels(SimpleTestCase):
 
-    def run_tests(self, material: brayns.Material) -> None:
-        boxes = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3.one,
-            ).with_color(brayns.Color4.red),
-        ]
-        model = brayns.add_geometries(self.instance, boxes)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)
+    def test_remove_models(self) -> None:
+        model1 = brayns.add_geometries(self.instance, [brayns.Sphere(1)])
+        model2 = brayns.add_geometries(self.instance, [brayns.Sphere(2)])
+        model3 = brayns.add_geometries(self.instance, [brayns.Sphere(2)])
+        brayns.remove_models(self.instance, [1, 2])
+        brayns.get_model(self.instance, 0)
+        with self.assertRaises(brayns.RequestError):
+            brayns.get_model(self.instance, 1)
+        with self.assertRaises(brayns.RequestError):
+            brayns.get_model(self.instance, 2)

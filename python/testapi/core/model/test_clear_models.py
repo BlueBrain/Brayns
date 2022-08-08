@@ -22,18 +22,14 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class MaterialTestCase(SimpleTestCase):
+class TestClearModels(SimpleTestCase):
 
-    def run_tests(self, material: brayns.Material) -> None:
-        boxes = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3.one,
-            ).with_color(brayns.Color4.red),
+    def test_clear_models(self) -> None:
+        models = [
+            brayns.add_geometries(self.instance, [brayns.Sphere(i)])
+            for i in range(1, 4)
         ]
-        model = brayns.add_geometries(self.instance, boxes)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)
+        brayns.clear_models(self.instance)
+        for model in models:
+            with self.assertRaises(brayns.RequestError):
+                brayns.get_model(self.instance, model.id)

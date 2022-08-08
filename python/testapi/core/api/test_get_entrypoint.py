@@ -22,25 +22,9 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestBoxes(SimpleTestCase):
+class TestGetEntrypoint(SimpleTestCase):
 
-    def test_add(self) -> None:
-        geometries = brayns.Boxes([
-            (
-                brayns.Box(-brayns.Vector3.one, brayns.Vector3.one),
-                brayns.Color4.red
-            ),
-            (
-                brayns.Box(-2 * brayns.Vector3.one, brayns.Vector3.one),
-                brayns.Color4.blue
-            )
-        ])
-        model = geometries.add(self.instance)
-        self.assertEqual(model.id, 0)
-        self.assertEqual(model.bounds, brayns.Bounds(
-            -2 * brayns.Vector3.one,
-            brayns.Vector3.one
-        ))
-        self.assertEqual(model.metadata, {})
-        self.assertEqual(model.visible, True)
-        self.assertEqual(model.transform, brayns.Transform.identity)
+    def test_get_entrypoint(self) -> None:
+        method = 'get-camera-perspective'
+        entrypoint = brayns.get_entrypoint(self.instance, method)
+        self.assertEqual(entrypoint.method, method)

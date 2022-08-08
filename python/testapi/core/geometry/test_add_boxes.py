@@ -22,21 +22,25 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestCameraView(SimpleTestCase):
+class TestAddBoxes(SimpleTestCase):
 
-    def test_from_instance(self) -> None:
-        test = brayns.View.from_instance(self.instance)
-        ref = brayns.View(
-            target=brayns.Vector3.forward
-        )
-        self.assertEqual(test, ref)
-
-    def test_use_for_main_camera(self) -> None:
-        view = brayns.View(
-            position=brayns.Vector3(1, 2, 3),
-            target=brayns.Vector3(4, 5, 6),
-            up=brayns.Vector3(7, 8, 9)
-        )
-        view.use_for_main_camera(self.instance)
-        ref = brayns.View.from_instance(self.instance)
-        self.assertEqual(view, ref)
+    def test_add_boxes(self) -> None:
+        boxes = [
+            brayns.Box(
+                min=-brayns.Vector3.one,
+                max=brayns.Vector3.one
+            ).with_color(brayns.Color4.red),
+            brayns.Box(
+                min=-2 * brayns.Vector3.one,
+                max=brayns.Vector3.one
+            ).with_color(brayns.Color4.blue),
+        ]
+        model = brayns.add_geometries(self.instance, boxes)
+        self.assertEqual(model.id, 0)
+        self.assertEqual(model.bounds, brayns.Bounds(
+            -2 * brayns.Vector3.one,
+            brayns.Vector3.one
+        ))
+        self.assertEqual(model.metadata, {})
+        self.assertEqual(model.visible, True)
+        self.assertEqual(model.transform, brayns.Transform.identity)

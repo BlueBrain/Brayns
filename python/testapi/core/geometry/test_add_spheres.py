@@ -22,18 +22,19 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class MaterialTestCase(SimpleTestCase):
+class TestAddSpheres(SimpleTestCase):
 
-    def run_tests(self, material: brayns.Material) -> None:
-        boxes = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3.one,
-            ).with_color(brayns.Color4.red),
+    def test_add_spheres(self) -> None:
+        spheres = [
+            brayns.Sphere(2).with_color(brayns.Color4.blue),
+            brayns.Sphere(1, brayns.Vector3.one),
         ]
-        model = brayns.add_geometries(self.instance, boxes)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)
+        model = brayns.add_geometries(self.instance, spheres)
+        self.assertEqual(model.id, 0)
+        self.assertEqual(model.bounds, brayns.Bounds(
+            -2 * brayns.Vector3.one,
+            2 * brayns.Vector3.one
+        ))
+        self.assertEqual(model.metadata, {})
+        self.assertEqual(model.visible, True)
+        self.assertEqual(model.transform, brayns.Transform.identity)

@@ -17,23 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-import brayns
-from testapi.simple_test_case import SimpleTestCase
-
-
-class MaterialTestCase(SimpleTestCase):
-
-    def run_tests(self, material: brayns.Material) -> None:
-        boxes = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3.one,
-            ).with_color(brayns.Color4.red),
-        ]
-        model = brayns.add_geometries(self.instance, boxes)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)

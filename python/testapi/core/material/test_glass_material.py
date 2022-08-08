@@ -26,7 +26,6 @@ class TestGlassMaterial(MaterialTestCase):
 
     def test_all(self) -> None:
         material = brayns.GlassMaterial(
-            color=brayns.Color3.red,
             refraction_index=2
         )
         self.run_tests(material)

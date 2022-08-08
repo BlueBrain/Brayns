@@ -25,10 +25,8 @@ from testapi.simple_test_case import SimpleTestCase
 class RendererTestCase(SimpleTestCase):
 
     def run_tests(self, renderer: brayns.Renderer) -> None:
-        renderer.use_as_main_renderer(self.instance)
-        name = renderer.get_main_renderer_name(self.instance)
+        brayns.set_renderer(self.instance, renderer)
+        name = brayns.get_renderer_name(self.instance)
         self.assertEqual(name, renderer.name)
-        current = renderer.is_main_renderer(self.instance)
-        self.assertTrue(current)
-        test = renderer.from_instance(self.instance)
+        test = brayns.get_renderer(self.instance, type(renderer))
         self.assertEqual(test, renderer)

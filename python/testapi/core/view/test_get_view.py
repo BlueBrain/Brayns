@@ -22,17 +22,11 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestEntrypoint(SimpleTestCase):
+class TestGetView(SimpleTestCase):
 
-    def test_from_method(self) -> None:
-        method = 'get-camera-perspective'
-        entrypoint = brayns.Entrypoint.from_method(self.instance, method)
-        self.assertEqual(entrypoint.method, method)
-
-    def test_get_all_methods(self) -> None:
-        methods = brayns.Entrypoint.get_all_methods(self.instance)
-        self.assertTrue(methods)
-
-    def test_get_all(self) -> None:
-        entrypoints = brayns.Entrypoint.get_all(self.instance)
-        self.assertTrue(entrypoints)
+    def test_get_view(self) -> None:
+        test = brayns.get_view(self.instance)
+        ref = brayns.View(
+            target=brayns.Vector3.forward
+        )
+        self.assertEqual(test, ref)

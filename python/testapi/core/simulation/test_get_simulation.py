@@ -22,25 +22,7 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestSpheres(SimpleTestCase):
+class TestGetSimulation(SimpleTestCase):
 
-    def test_add(self) -> None:
-        geometries = brayns.Spheres([
-            (
-                brayns.Sphere(2),
-                brayns.Color4.red
-            ),
-            (
-                brayns.Sphere(1, brayns.Vector3.one),
-                brayns.Color4.blue
-            )
-        ])
-        model = geometries.add(self.instance)
-        self.assertEqual(model.id, 0)
-        self.assertEqual(model.bounds, brayns.Bounds(
-            -2 * brayns.Vector3.one,
-            2 * brayns.Vector3.one
-        ))
-        self.assertEqual(model.metadata, {})
-        self.assertEqual(model.visible, True)
-        self.assertEqual(model.transform, brayns.Transform.identity)
+    def test_get_simulation(self) -> None:
+        brayns.get_simulation(self.instance)

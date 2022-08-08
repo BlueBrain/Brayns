@@ -22,22 +22,17 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestApplication(SimpleTestCase):
+class LightTestCase(SimpleTestCase):
 
-    def test_from_instance(self) -> None:
-        application = brayns.Application.from_instance(self.instance)
-        self.assertEqual(set(application.plugins), set(
-            plugin.value for plugin in brayns.Plugin
-        ))
-        self.assertEqual(application.resolution, brayns.Resolution.full_hd)
-        self.assertEqual(application.jpeg_quality, 100)
-
-    def test_update(self) -> None:
-        brayns.Application.update(
-            self.instance,
-            resolution=brayns.Resolution.ultra_hd,
-            jpeg_quality=60
-        )
-        test = brayns.Application.from_instance(self.instance)
-        self.assertEqual(test.resolution, brayns.Resolution.ultra_hd)
-        self.assertEqual(test.jpeg_quality, 60)
+    def run_tests(self, light: brayns.Light) -> None:
+        ids = [
+            brayns.add_light(self.instance, light)
+            for _ in range(3)
+        ]
+        self.assertEqual(ids, [0, 1, 2])
+        brayns.remove_lights(self.instance, [1, 2])
+        id = brayns.add_light(self.instance, light)
+        self.assertEqual(id, 1)
+        brayns.clear_lights(self.instance)
+        id = brayns.add_light(self.instance, light)
+        self.assertEqual(id, 0)

@@ -22,10 +22,11 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestVersion(SimpleTestCase):
+class TestGetBounds(SimpleTestCase):
 
-    def test_from_instance(self) -> None:
-        version = brayns.Version.from_instance(self.instance)
-        test = version.tag
-        ref = brayns.__version__
-        self.assertEqual(test, ref)
+    def test_get_bounds(self) -> None:
+        model = brayns.add_geometries(self.instance, [
+            brayns.Sphere(1)
+        ])
+        test = brayns.get_bounds(self.instance)
+        self.assertEqual(test, model.bounds)

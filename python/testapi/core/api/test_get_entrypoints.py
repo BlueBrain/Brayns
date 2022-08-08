@@ -22,18 +22,8 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class MaterialTestCase(SimpleTestCase):
+class TestGetEntrypoints(SimpleTestCase):
 
-    def run_tests(self, material: brayns.Material) -> None:
-        boxes = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3.one,
-            ).with_color(brayns.Color4.red),
-        ]
-        model = brayns.add_geometries(self.instance, boxes)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)
+    def test_get_entrypoints(self) -> None:
+        entrypoints = brayns.get_entrypoints(self.instance)
+        self.assertTrue(entrypoints)

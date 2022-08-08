@@ -22,18 +22,21 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class MaterialTestCase(SimpleTestCase):
+class TestClearClipPlanes(SimpleTestCase):
 
-    def run_tests(self, material: brayns.Material) -> None:
-        boxes = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3.one,
-            ).with_color(brayns.Color4.red),
+    def test_clear_clip_planes(self) -> None:
+        planes = [
+            brayns.ClipPlane(1, 2, 3, 4),
+            brayns.ClipPlane(1, 1, 1, 1),
         ]
-        model = brayns.add_geometries(self.instance, boxes)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)
+        ids = [
+            brayns.add_clip_plane(self.instance, plane)
+            for plane in planes
+        ]
+        self.assertEqual(ids, [0, 1, 2])
+        brayns.clear_clip_planes(self.instance)
+        ids = [
+            brayns.add_clip_plane(self.instance, plane)
+            for plane in planes
+        ]
+        self.assertEqual(ids, [0, 1, 2])

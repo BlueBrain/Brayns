@@ -22,18 +22,19 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class MaterialTestCase(SimpleTestCase):
+class TestGetTransferFunction(SimpleTestCase):
 
-    def run_tests(self, material: brayns.Material) -> None:
-        boxes = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3.one,
-            ).with_color(brayns.Color4.red),
-        ]
-        model = brayns.add_geometries(self.instance, boxes)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)
+    def test_get_transfer_function(self) -> None:
+        model = self._load_circuit()
+        function = brayns.get_transfer_function(self.instance, model.id)
+        self.assertEqual(function.value_range, brayns.ValueRange(-80, -10))
+        self.assertEqual(len(function.colors), 128)
+        self.assertEqual(function.colors[0], brayns.Color4.black)
+        self.assertEqual(function.colors[-1], brayns.Color4.white)
+
+    def _load_circuit(self) -> brayns.Model:
+        loader = brayns.BbpLoader(
+            report=brayns.BbpReport.compartment('somas')
+        )
+        models = loader.load(self.instance, self.circuit)
+        return models[0]

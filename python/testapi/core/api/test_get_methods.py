@@ -19,13 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.core.camera.camera_test_case import CameraTestCase
+from testapi.simple_test_case import SimpleTestCase
 
 
-class TestOrthographicCamera(CameraTestCase):
+class TestGetMethods(SimpleTestCase):
 
-    def test_all(self) -> None:
-        camera = brayns.CylindricCamera(
-            fovy=brayns.Fovy(45, degrees=True)
-        )
-        self.run_tests(camera)
+    def test_get_methods(self) -> None:
+        methods = brayns.get_methods(self.instance)
+        self.assertTrue(methods)

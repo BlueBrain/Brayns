@@ -22,25 +22,9 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestCapsules(SimpleTestCase):
+class TestGetModel(SimpleTestCase):
 
-    def test_add(self) -> None:
-        geometries = brayns.Capsules([
-            (
-                brayns.Capsule(brayns.Vector3.zero, 0, brayns.Vector3.one, 1),
-                brayns.Color4.red
-            ),
-            (
-                brayns.Capsule(-brayns.Vector3.one, 1, brayns.Vector3.one, 0),
-                brayns.Color4.blue
-            )
-        ])
-        model = geometries.add(self.instance)
-        self.assertEqual(model.id, 0)
-        self.assertEqual(model.bounds, brayns.Bounds(
-            -2 * brayns.Vector3.one,
-            2 * brayns.Vector3.one
-        ))
-        self.assertEqual(model.metadata, {})
-        self.assertEqual(model.visible, True)
-        self.assertEqual(model.transform, brayns.Transform.identity)
+    def test_get_model(self) -> None:
+        model = brayns.add_geometries(self.instance, [brayns.Sphere(1)])
+        test = brayns.get_model(self.instance, model.id)
+        self.assertEqual(test, model)

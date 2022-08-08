@@ -22,25 +22,9 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestLight(SimpleTestCase):
+class TestAddClipPlane(SimpleTestCase):
 
-    def test_remove(self) -> None:
-        ids = self._add_lights()
-        self.assertEqual(ids, [0, 1, 2])
-        brayns.Light.remove(self.instance, [1, 2])
-        id = brayns.AmbientLight().add(self.instance)
-        self.assertIn(id, [1, 2])
-
-    def test_clear(self) -> None:
-        ids = self._add_lights()
-        self.assertEqual(ids, [0, 1, 2])
-        brayns.Light.clear(self.instance)
-        id = brayns.AmbientLight().add(self.instance)
+    def test_add_clip_plane(self) -> None:
+        plane = brayns.ClipPlane(1, 2, 3, 4)
+        id = brayns.add_clip_plane(self.instance, plane)
         self.assertEqual(id, 0)
-
-    def _add_lights(self) -> list[int]:
-        light = brayns.AmbientLight()
-        return [
-            light.add(self.instance)
-            for _ in range(3)
-        ]

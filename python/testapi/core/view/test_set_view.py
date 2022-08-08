@@ -22,18 +22,14 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class MaterialTestCase(SimpleTestCase):
+class TestSetView(SimpleTestCase):
 
-    def run_tests(self, material: brayns.Material) -> None:
-        boxes = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3.one,
-            ).with_color(brayns.Color4.red),
-        ]
-        model = brayns.add_geometries(self.instance, boxes)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)
+    def test_set_view(self) -> None:
+        view = brayns.View(
+            position=brayns.Vector3(1, 2, 3),
+            target=brayns.Vector3(4, 5, 6),
+            up=brayns.Vector3(7, 8, 9)
+        )
+        brayns.set_view(self.instance, view)
+        ref = brayns.get_view(self.instance)
+        self.assertEqual(view, ref)

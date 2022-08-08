@@ -22,18 +22,29 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class MaterialTestCase(SimpleTestCase):
+class TestAddCapsules(SimpleTestCase):
 
-    def run_tests(self, material: brayns.Material) -> None:
-        boxes = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3.one,
+    def test_add_capsules(self) -> None:
+        capsules = [
+            brayns.Capsule(
+                start_point=brayns.Vector3.zero,
+                start_radius=0,
+                end_point=brayns.Vector3.one,
+                end_radius=1,
             ).with_color(brayns.Color4.red),
+            brayns.Capsule(
+                start_point=-brayns.Vector3.one,
+                start_radius=1,
+                end_point=brayns.Vector3.one,
+                end_radius=0,
+            ).with_color(brayns.Color4.blue),
         ]
-        model = brayns.add_geometries(self.instance, boxes)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)
+        model = brayns.add_geometries(self.instance, capsules)
+        self.assertEqual(model.id, 0)
+        self.assertEqual(model.bounds, brayns.Bounds(
+            -2 * brayns.Vector3.one,
+            2 * brayns.Vector3.one
+        ))
+        self.assertEqual(model.metadata, {})
+        self.assertEqual(model.visible, True)
+        self.assertEqual(model.transform, brayns.Transform.identity)

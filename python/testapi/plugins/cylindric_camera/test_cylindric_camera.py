@@ -19,21 +19,13 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+from testapi.core.camera.camera_test_case import CameraTestCase
 
 
-class MaterialTestCase(SimpleTestCase):
+class TestCylindricCamera(CameraTestCase):
 
-    def run_tests(self, material: brayns.Material) -> None:
-        boxes = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3.one,
-            ).with_color(brayns.Color4.red),
-        ]
-        model = brayns.add_geometries(self.instance, boxes)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)
+    def test_all(self) -> None:
+        camera = brayns.CylindricCamera(
+            fovy=brayns.Fovy(45, degrees=True)
+        )
+        self.run_tests(camera)

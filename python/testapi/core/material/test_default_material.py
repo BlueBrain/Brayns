@@ -26,7 +26,6 @@ class TestDefaultMaterial(MaterialTestCase):
 
     def test_all(self) -> None:
         material = brayns.DefaultMaterial(
-            color=brayns.Color3.red,
             opacity=0.5
         )
         self.run_tests(material)
