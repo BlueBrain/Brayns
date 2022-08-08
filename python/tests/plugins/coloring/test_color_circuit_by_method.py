@@ -21,48 +21,25 @@
 import unittest
 
 from brayns.core.color.color4 import Color4
-from brayns.plugins.color.color_method import ColorMethod
-from brayns.plugins.common.circuit_color_by_method import CircuitColorByMethod
-from tests.plugins.coloring.mock_circuit_instance import MockCircuitInstance
+from brayns.plugins.coloring.color_circuit_by_method import color_circuit_by_method
+from brayns.plugins.coloring.color_method import ColorMethod
+from tests.instance.mock_instance import MockInstance
 
 
-class TestCircuitColorByMethod(unittest.TestCase):
+class TestColorCircuitByMethod(unittest.TestCase):
 
-    def test_get_available_methods(self) -> None:
-        instance = MockCircuitInstance()
-        test = CircuitColorByMethod.get_available_methods(instance, 0)
-        ref = [ColorMethod(method) for method in instance.methods]
-        self.assertEqual(test, ref)
-        self.assertEqual(instance.method, 'get-circuit-color-methods')
-        self.assertEqual(instance.params, {
-            'model_id': 0
-        })
-
-    def test_get_available_values(self) -> None:
-        instance = MockCircuitInstance()
-        values = CircuitColorByMethod.get_available_values(
-            instance=instance,
-            model_id=0,
-            method=ColorMethod.ETYPE
-        )
-        self.assertEqual(instance.method, 'get-circuit-color-method-variables')
-        self.assertEqual(instance.params, {
-            'model_id': 0,
-            'method': ColorMethod.ETYPE.value
-        })
-        self.assertEqual(values, instance.values)
-
-    def test_apply(self) -> None:
-        instance = MockCircuitInstance()
-        color = CircuitColorByMethod(ColorMethod.ETYPE, {
+    def test_color_circuit_by_method(self) -> None:
+        instance = MockInstance()
+        method = ColorMethod.HEMISPHERE
+        colors = {
             'test1': Color4.white,
             'test2': Color4.red
-        })
-        color.apply(instance, 0)
+        }
+        color_circuit_by_method(instance, 0, method, colors)
         self.assertEqual(instance.method, 'color-circuit-by-method')
         self.assertEqual(instance.params, {
             'model_id': 0,
-            'method': ColorMethod.ETYPE.value,
+            'method': method.value,
             'color_info': [
                 {
                     'variable': 'test1',

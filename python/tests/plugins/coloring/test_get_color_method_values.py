@@ -20,30 +20,24 @@
 
 import unittest
 
-from brayns.core.view.fovy import Fovy
-from brayns.plugins.cylindric_camera.cylindric_camera import CylindricCamera
+from brayns.plugins.coloring.color_method import ColorMethod
+from brayns.plugins.coloring.get_color_method_values import get_color_method_values
+from tests.instance.mock_instance import MockInstance
 
 
-class TestCylindricCamera(unittest.TestCase):
+class TestGetColorMethodValues(unittest.TestCase):
 
-    def test_get_name(self) -> None:
-        test = CylindricCamera.name
-        ref = 'cylindric'
+    def test_get_color_method_values(self) -> None:
+        ref = ['test1', 'test2']
+        instance = MockInstance({'variables': ref})
+        method = ColorMethod.ETYPE
+        test = get_color_method_values(instance, 0, method)
+        self.assertEqual(instance.method, 'get-circuit-color-method-variables')
+        self.assertEqual(instance.params, {
+            'model_id': 0,
+            'method': method.value
+        })
         self.assertEqual(test, ref)
-
-    def test_deserialize(self) -> None:
-        message = {
-            'fovy': 30
-        }
-        test = CylindricCamera.deserialize(message)
-        self.assertAlmostEqual(test.fovy.degrees, 30)
-
-    def test_serialize(self) -> None:
-        camera = CylindricCamera(
-            fovy=Fovy(30, degrees=True)
-        )
-        test = camera.serialize()
-        self.assertAlmostEqual(test['fovy'], 30)
 
 
 if __name__ == '__main__':

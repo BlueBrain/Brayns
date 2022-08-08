@@ -20,7 +20,7 @@
 
 from brayns.core.color.color4 import Color4
 from brayns.instance.instance import Instance
-from brayns.plugins.common.cell_id import CellId
+from brayns.plugins.coloring.cell_id import CellId
 
 
 def color_circuit_by_id(

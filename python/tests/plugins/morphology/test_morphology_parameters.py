@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -20,22 +19,28 @@
 
 import unittest
 
-from brayns.core.color.color4 import Color4
-from brayns.plugins.common.circuit_color import CircuitColor
-from tests.plugins.coloring.mock_circuit_instance import MockCircuitInstance
+from brayns.plugins.common.morphology_geometry_type import MorphologyGeometryType
+from brayns.plugins.common.morphology_parameters import MorphologyParameters
 
 
-class TestCircuitColor(unittest.TestCase):
+class TestMorphologyParameters(unittest.TestCase):
 
-    def test_apply(self) -> None:
-        instance = MockCircuitInstance()
-        color = CircuitColor(Color4.red)
-        color.apply(instance, 0)
-        self.assertEqual(instance.method, 'color-circuit-by-single-color')
-        self.assertEqual(instance.params, {
-            'model_id': 0,
-            'color': [1, 0, 0, 1]
-        })
+    def test_serialize(self) -> None:
+        test = MorphologyParameters(
+            radius_multiplier=3,
+            load_soma=False,
+            load_axon=True,
+            load_dendrites=True,
+            geometry_type=MorphologyGeometryType.CONSTANT_RADII,
+        )
+        ref = {
+            'radius_multiplier': 3,
+            'load_soma': False,
+            'load_axon': True,
+            'load_dendrites': True,
+            'geometry_type': MorphologyGeometryType.CONSTANT_RADII.value
+        }
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':
