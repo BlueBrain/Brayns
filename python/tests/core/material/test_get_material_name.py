@@ -20,44 +20,19 @@
 
 import unittest
 
-from brayns.core.color.color3 import Color3
-from brayns.core.material.material import Material
-from tests.core.material.mock_material import MockMaterial
+from brayns.core.material.get_material_name import get_material_name
 from tests.instance.mock_instance import MockInstance
 
 
-class TestMaterial(unittest.TestCase):
+class TestGetMaterialName(unittest.TestCase):
 
     def test_get_material_name(self) -> None:
         name = 'test'
         instance = MockInstance(name)
-        test = Material.get_material_name(instance, 0)
+        test = get_material_name(instance, 0)
         self.assertEqual(test, name)
         self.assertEqual(instance.method, 'get-material-type')
         self.assertEqual(instance.params, {'id': 0})
-
-    def test_from_model(self) -> None:
-        material = MockMaterial()
-        reply = material.serialize()
-        instance = MockInstance(reply)
-        test = MockMaterial.from_model(instance, 0)
-        self.assertEqual(test, material)
-        self.assertEqual(instance.method, 'get-material-test')
-        self.assertEqual(instance.params, {'id': 0})
-
-    def test_is_applied(self) -> None:
-        instance = MockInstance(MockMaterial.name)
-        self.assertTrue(MockMaterial.is_applied(instance, 0))
-
-    def test_apply(self) -> None:
-        instance = MockInstance()
-        material = MockMaterial(Color3.blue, test1='test', test2=3)
-        material.apply(instance, 0)
-        self.assertEqual(instance.method, 'set-material-test')
-        self.assertEqual(instance.params, {
-            'model_id': 0,
-            'material': material.serialize()
-        })
 
 
 if __name__ == '__main__':

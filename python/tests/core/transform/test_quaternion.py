@@ -18,48 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import math
 import unittest
 
-from brayns.core.common.quaternion import Quaternion
+from brayns.core.transform.quaternion import Quaternion
 from brayns.core.vector.vector3 import Vector3
 
 
 class TestQuaternion(unittest.TestCase):
 
-    def test_from_euler(self) -> None:
-        test = Quaternion.from_euler(Vector3(34, -22, -80), degrees=True)
-        self.assertAlmostEqual(test.norm, 1)
-        self.assertAlmostEqual(test.x, 0.10256431)
-        self.assertAlmostEqual(test.y, -0.32426137)
-        self.assertAlmostEqual(test.z, -0.56067163)
-        self.assertAlmostEqual(test.w, 0.75497182)
-
-    def test_from_axis_angle(self) -> None:
-        axis = Vector3(1, 2, 3)
-        angle = 30
-        test = Quaternion.from_axis_angle(axis, angle, degrees=True)
-        self.assertAlmostEqual(test.norm, 1)
-        self.assertAlmostEqual(test.x, 0.0691723)
-        self.assertAlmostEqual(test.y, 0.1383446)
-        self.assertAlmostEqual(test.z, 0.2075169)
-        self.assertAlmostEqual(test.w, 0.96592583)
-
-    def test_from_vector(self) -> None:
-        vector = Vector3(1, 2, 3)
-        test = Quaternion.from_vector(vector)
-        self.assertEqual(test, Quaternion(1, 2, 3, 0))
-
-    def test_unpack(self) -> None:
-        values = [1, 2, 3, 4]
-        self.assertEqual(Quaternion.unpack(values), Quaternion(*values))
-
     def test_identity(self) -> None:
         self.assertEqual(Quaternion.identity, Quaternion(0, 0, 0, 1))
-
-    def test_iter(self) -> None:
-        values = [1, 2, 3, 4]
-        test = Quaternion(*values)
-        self.assertEqual(list(test), values)
 
     def test_mul_scalar(self) -> None:
         values = [1, 2, 3, 4]
@@ -89,9 +58,17 @@ class TestQuaternion(unittest.TestCase):
         self.assertAlmostEqual(test.z, 0)
         self.assertAlmostEqual(test.w, 1)
 
-    def test_vector(self) -> None:
+    def test_axis(self) -> None:
         test = Quaternion(1, 2, 3, 4)
-        self.assertEqual(test.vector, Vector3(1, 2, 3))
+        self.assertEqual(test.axis, Vector3(1, 2, 3))
+
+    def test_angle_radians(self) -> None:
+        test = Quaternion(0, 0, 0, 0)
+        self.assertAlmostEqual(test.angle_radians, math.radians(90))
+
+    def test_angle_degrees(self) -> None:
+        test = Quaternion(0, 0, 0, 0)
+        self.assertAlmostEqual(test.angle_degrees, 90)
 
     def test_conjugate(self) -> None:
         test = Quaternion(1, 2, 3, 4)
@@ -105,23 +82,6 @@ class TestQuaternion(unittest.TestCase):
         self.assertAlmostEqual(test.y, 0)
         self.assertAlmostEqual(test.z, 0)
         self.assertAlmostEqual(test.w, 1)
-
-    def test_rotate(self) -> None:
-        rotation = Quaternion.from_euler(Vector3(22, 35, 68), degrees=True)
-        value = Vector3(1, 2, 3)
-        test = rotation.rotate(value)
-        self.assertAlmostEqual(test.x, 0.3881471)
-        self.assertAlmostEqual(test.y, 2.91087149)
-        self.assertAlmostEqual(test.z, 2.31865673)
-
-    def test_rotate_center(self) -> None:
-        rotation = Quaternion.from_euler(Vector3(22, 35, 68), degrees=True)
-        value = Vector3(1, 2, 3)
-        center = Vector3(4, 5, 6)
-        test = rotation.rotate(value, center)
-        self.assertAlmostEqual(test.x, 3.77731325)
-        self.assertAlmostEqual(test.y, 0.02357039)
-        self.assertAlmostEqual(test.z, 4.52163639)
 
 
 if __name__ == '__main__':

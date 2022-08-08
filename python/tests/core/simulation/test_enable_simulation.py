@@ -20,17 +20,20 @@
 
 import unittest
 
-from brayns.core.loader.mesh_loader import MeshLoader
+from brayns.core.simulation.enable_simulation import enable_simulation
+from tests.instance.mock_instance import MockInstance
 
 
-class TestMeshLoader(unittest.TestCase):
+class TestEnableSimulation(unittest.TestCase):
 
-    def test_name(self) -> None:
-        self.assertEqual(MeshLoader.name, 'mesh')
-
-    def test_properties(self) -> None:
-        test = MeshLoader()
-        self.assertEqual(test.properties, {})
+    def test_enable_simulation(self) -> None:
+        instance = MockInstance()
+        enable_simulation(instance, 0, True)
+        self.assertEqual(instance.method, 'enable-simulation')
+        self.assertEqual(instance.params, {
+            'model_id': 0,
+            'enabled': True
+        })
 
 
 if __name__ == '__main__':

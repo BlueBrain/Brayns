@@ -28,56 +28,24 @@ from brayns.core.transfer_function.opacity_curve import OpacityCurve
 
 class TestOpacityCurve(unittest.TestCase):
 
-    def test_normalize_index(self) -> None:
-        self.assertAlmostEqual(OpacityCurve.normalize_index(0, 1), 0)
-        self.assertAlmostEqual(OpacityCurve.normalize_index(0, 2), 0)
-        self.assertAlmostEqual(OpacityCurve.normalize_index(1, 2), 1)
-
     def test_apply(self) -> None:
         curve = OpacityCurve([
             ControlPoint(0, 0.1),
             ControlPoint(0.5, 0.2),
-            ControlPoint(1, 0.3)
+            ControlPoint(1, 0.3),
         ])
         colors = [
             Color3(1, 0, 0),
             Color3(0, 1, 0),
-            Color3(0, 0, 1)
+            Color3(0, 0, 1),
         ]
         ref = [
             Color4(1, 0, 0, 0.1),
             Color4(0, 1, 0, 0.2),
-            Color4(0, 0, 1, 0.3)
+            Color4(0, 0, 1, 0.3),
         ]
         test = curve.apply(colors)
         self.assertEqual(test, ref)
-
-    def test_get_opacity(self) -> None:
-        curve = OpacityCurve([
-            ControlPoint(0.5, 0.0)
-        ])
-        self.assertAlmostEqual(curve.get_opacity(0), 0)
-        self.assertAlmostEqual(curve.get_opacity(0.2), 0)
-        self.assertAlmostEqual(curve.get_opacity(0.5), 0)
-        self.assertAlmostEqual(curve.get_opacity(0.75), 0.5)
-        self.assertAlmostEqual(curve.get_opacity(1), 1)
-
-    def test_get_control_point(self) -> None:
-        curve = OpacityCurve([
-            ControlPoint(0.6, 0.2)
-        ])
-        self.assertEqual(curve.get_control_point(-1), ControlPoint.start)
-        self.assertEqual(curve.get_control_point(0), curve.control_points[0])
-        self.assertEqual(curve.get_control_point(1), ControlPoint.end)
-
-    def test_find_lower(self) -> None:
-        curve = OpacityCurve([
-            ControlPoint(0.5, 0.1)
-        ])
-        self.assertEqual(curve.find_lower(0.2), -1)
-        self.assertEqual(curve.find_lower(0.5), -1)
-        self.assertEqual(curve.find_lower(0.6), 0)
-        self.assertEqual(curve.find_lower(1.0), 0)
 
 
 if __name__ == '__main__':

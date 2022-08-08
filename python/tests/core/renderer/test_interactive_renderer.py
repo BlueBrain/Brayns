@@ -32,22 +32,15 @@ class TestInteractiveRenderer(unittest.TestCase):
             max_ray_bounces=12,
             background_color=Color4(0, 0, 1, 1),
             enable_shadows=False,
-            ambient_occlusion_samples=15
+            ambient_occlusion_samples=15,
         )
         self._message = {
             'samples_per_pixel': 2,
             'max_ray_bounces': 12,
             'background_color': [0, 0, 1, 1],
             'enable_shadows': False,
-            'ao_samples': 15
+            'ao_samples': 15,
         }
-
-    def test_default(self) -> None:
-        test = InteractiveRenderer.default()
-        self.assertEqual(test.samples_per_pixel, 1)
-        self.assertEqual(test.max_ray_bounces, 3)
-        self.assertEqual(test.enable_shadows, True)
-        self.assertEqual(test.ambient_occlusion_samples, 0)
 
     def test_name(self) -> None:
         test = InteractiveRenderer.name

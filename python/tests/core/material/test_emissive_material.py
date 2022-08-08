@@ -20,7 +20,6 @@
 
 import unittest
 
-from brayns.core.color.color3 import Color3
 from brayns.core.material.emissive_material import EmissiveMaterial
 
 
@@ -28,11 +27,9 @@ class TestEmissiveMaterial(unittest.TestCase):
 
     def setUp(self) -> None:
         self._material = EmissiveMaterial(
-            color=Color3.red,
             intensity=2
         )
         self._message = {
-            'color': [1, 0, 0],
             'intensity': 2
         }
 

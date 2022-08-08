@@ -52,8 +52,7 @@ class Version:
     def tag(self) -> str:
         return '.'.join(str(i) for i in self.release)
 
-    def check(self) -> None:
-        local = __version__
+    def check(self, local: str = __version__) -> None:
         remote = self.tag
         if local == DEV_VERSION:
             return

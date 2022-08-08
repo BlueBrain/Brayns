@@ -18,32 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from typing import Any
 
-from brayns.core.material.material import Material
+from brayns.core.version import Version
 
 
-@dataclass
-class MockMaterial(Material):
-
-    test1: str = ''
-    test2: int = 0
+class MockVersion:
 
     @classmethod
     @property
-    def name(cls) -> str:
-        return 'test'
-
-    @classmethod
-    def deserialize(cls, message: dict) -> 'MockMaterial':
-        return cls._from_dict(
-            message,
-            test1=message['test1'],
-            test2=message['test2']
+    def version(cls) -> Version:
+        return Version(
+            major=0,
+            minor=1,
+            patch=2,
+            revision='3'
         )
 
-    def serialize(self) -> dict:
-        return self._to_dict({
-            'test1': self.test1,
-            'test2': self.test2
-        })
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'major': 0,
+            'minor': 1,
+            'patch': 2,
+            'revision': '3'
+        }

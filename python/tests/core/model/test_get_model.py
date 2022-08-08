@@ -20,25 +20,19 @@
 
 import unittest
 
-from brayns.core.vector.vector3 import Vector3
-from brayns.core.geometry.capsule import Capsule
+from brayns.core.model.get_model import get_model
+from tests.core.model.mock_model import MockModel
+from tests.instance.mock_instance import MockInstance
 
 
-class TestCapsule(unittest.TestCase):
+class TestGetModel(unittest.TestCase):
 
-    def test_serialize(self) -> None:
-        test = Capsule(
-            start_point=Vector3.zero,
-            start_radius=0,
-            end_point=Vector3.one,
-            end_radius=1
-        )
-        self.assertEqual(test.serialize(), {
-            'p0': [0, 0, 0],
-            'r0': 0,
-            'p1': [1, 1, 1],
-            'r1': 1
-        })
+    def test_get_model(self) -> None:
+        instance = MockInstance(MockModel.message)
+        test = get_model(instance, 0)
+        self.assertEqual(test, MockModel.model)
+        self.assertEqual(instance.method, 'get-model')
+        self.assertEqual(instance.params, {'id': 0})
 
 
 if __name__ == '__main__':

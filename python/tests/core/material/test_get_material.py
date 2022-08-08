@@ -18,32 +18,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+import unittest
 
-from brayns.core.renderer.renderer import Renderer
+from brayns.core.material.default_material import DefaultMaterial
+from brayns.core.material.get_material import get_material
+from tests.instance.mock_instance import MockInstance
 
 
-@dataclass
-class MockRenderer(Renderer):
+class TestGetMaterial(unittest.TestCase):
 
-    test1: str = ''
-    test2: int = 0
+    def test_get_material(self) -> None:
+        material = DefaultMaterial()
+        reply = material.serialize()
+        instance = MockInstance(reply)
+        test = get_material(instance, 0, DefaultMaterial)
+        self.assertEqual(test, material)
+        self.assertEqual(instance.method, 'get-material-default')
+        self.assertEqual(instance.params, {'id': 0})
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'test'
 
-    @classmethod
-    def deserialize(cls, message: dict) -> 'MockRenderer':
-        return cls._from_dict(
-            message,
-            test1=message['test1'],
-            test2=message['test2']
-        )
-
-    def serialize(self) -> dict:
-        return self._to_dict({
-            'test1': self.test1,
-            'test2': self.test2
-        })
+if __name__ == '__main__':
+    unittest.main()

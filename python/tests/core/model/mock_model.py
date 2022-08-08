@@ -22,7 +22,7 @@ from typing import Any
 
 from brayns.core.model.model import Model
 from tests.core.bounds.mock_bounds import MockBounds
-from tests.core.common.mock_transform import MockTransform
+from tests.core.transform.mock_transform import MockTransform
 
 
 class MockModel:
@@ -46,5 +46,5 @@ class MockModel:
             'bounds': MockBounds.message,
             'metadata': {'test': 1},
             'is_visible': True,
-            'transform': MockTransform.serialized_transform
+            'transform': MockTransform.message
         }

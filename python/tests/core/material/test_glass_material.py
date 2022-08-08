@@ -20,7 +20,6 @@
 
 import unittest
 
-from brayns.core.color.color3 import Color3
 from brayns.core.material.glass_material import GlassMaterial
 
 
@@ -28,11 +27,9 @@ class TestGlassMaterial(unittest.TestCase):
 
     def setUp(self) -> None:
         self._material = GlassMaterial(
-            color=Color3.red,
             refraction_index=2.5
         )
         self._message = {
-            'color': [1, 0, 0],
             'index_of_refraction': 2.5
         }
 

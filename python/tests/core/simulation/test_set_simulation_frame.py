@@ -18,16 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import math
+import unittest
 
-from brayns.core.transform.quaternion import Quaternion
-from brayns.core.vector.vector3 import Vector3
+from brayns.core.simulation.set_simulation_frame import set_simulation_frame
+from tests.instance.mock_instance import MockInstance
 
 
-def axis_angle_to_quaternion(axis: Vector3, angle: float, degrees: bool = False) -> Quaternion:
-    if degrees:
-        angle = math.radians(angle)
-    half_angle = angle / 2
-    vector = axis.normalized * math.sin(half_angle)
-    w = math.cos(half_angle)
-    return Quaternion(vector.x, vector.y, vector.z, w)
+class TestSetSimulationFrame(unittest.TestCase):
+
+    def test_set_simulation_frame(self) -> None:
+        instance = MockInstance()
+        set_simulation_frame(instance, 5)
+        self.assertEqual(instance.method, 'set-simulation-parameters')
+        self.assertEqual(instance.params, {'current': 5})
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -18,25 +18,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+import unittest
 
-from brayns.core.model.model_loader import ModelLoader
+from brayns.core.renderer.get_renderer import get_renderer
+from brayns.core.renderer.production_renderer import ProductionRenderer
+from tests.instance.mock_instance import MockInstance
 
 
-@dataclass
-class MockModelLoader(ModelLoader):
+class TestGetRenderer(unittest.TestCase):
 
-    test1: int = 0
-    test2: str = ''
+    def test_get_renderer(self) -> None:
+        ref = ProductionRenderer()
+        reply = ref.serialize()
+        instance = MockInstance(reply)
+        test = get_renderer(instance, ProductionRenderer)
+        self.assertEqual(test, ref)
+        self.assertEqual(instance.method, 'get-renderer-production')
+        self.assertEqual(instance.params, None)
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'test'
 
-    @property
-    def properties(self) -> dict:
-        return {
-            'test1': self.test1,
-            'test2': self.test2
-        }
+if __name__ == '__main__':
+    unittest.main()

@@ -20,7 +20,6 @@
 
 import unittest
 
-from brayns.core.color.color3 import Color3
 from brayns.core.material.metal_material import MetalMaterial
 
 
@@ -28,11 +27,9 @@ class TestMetalMaterial(unittest.TestCase):
 
     def setUp(self) -> None:
         self._material = MetalMaterial(
-            color=Color3.red,
             roughness=0.5
         )
         self._message = {
-            'color': [1, 0, 0],
             'roughness': 0.5
         }
 

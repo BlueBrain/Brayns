@@ -36,7 +36,7 @@ class TestMovie(unittest.TestCase):
             bitrate=64000,
             encoder='encoder',
             pixel_format='pixel',
-            ffmpeg_executable='test'
+            ffmpeg_executable='test',
         )
         args = movie.get_command_line('path')
         ref = [
@@ -54,7 +54,7 @@ class TestMovie(unittest.TestCase):
             '64000',
             '-c',
             'encoder',
-            'path'
+            'path',
         ]
         self.assertEqual(args, ref)
 

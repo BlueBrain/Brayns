@@ -20,38 +20,31 @@
 
 import unittest
 
-from brayns.core.color.color3 import Color3
-from brayns.core.color.color4 import Color4
+from brayns.core.model.get_models import get_models
+from tests.core.model.mock_model import MockModel
+from tests.instance.mock_instance import MockInstance
 
 
-class TestColor4(unittest.TestCase):
+class TestGetModels(unittest.TestCase):
 
-    def test_from_color3(self) -> None:
-        ref = Color4(1, 2, 3, 4)
-        color = Color3(1, 2, 3)
-        test = Color4.from_color3(color, 4)
-        self.assertEqual(test, ref)
+    def setUp(self) -> None:
+        self._scene = {
+            'models': [
+                MockModel.message,
+                MockModel.message,
+            ]
+        }
+        self._models = [
+            MockModel.model,
+            MockModel.model,
+        ]
 
-    def test_iter(self) -> None:
-        test = list(Color4(1, 2, 3, 4))
-        ref = [1, 2, 3, 4]
-        self.assertEqual(test, ref)
-
-    def test_transparent(self) -> None:
-        test = Color4(1, 2, 3, 4).transparent
-        ref = Color4(1, 2, 3, 0)
-        self.assertEqual(test, ref)
-
-    def test_opaque(self) -> None:
-        test = Color4(1, 2, 3, 0).opaque
-        ref = Color4(1, 2, 3, 1)
-        self.assertEqual(test, ref)
-
-    def test_without_alpha(self) -> None:
-        color = Color4(1, 2, 3, 4)
-        ref = Color3(1, 2, 3)
-        test = color.without_alpha
-        self.assertEqual(test, ref)
+    def test_get_models(self) -> None:
+        instance = MockInstance(self._scene)
+        test = get_models(instance)
+        self.assertEqual(test, self._models)
+        self.assertEqual(instance.method, 'get-scene')
+        self.assertEqual(instance.params, None)
 
 
 if __name__ == '__main__':

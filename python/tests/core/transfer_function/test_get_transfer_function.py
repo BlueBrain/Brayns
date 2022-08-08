@@ -20,29 +20,19 @@
 
 import unittest
 
-from brayns.core.material.matte_material import MatteMaterial
+from brayns.core.transfer_function.get_transfer_function import get_transfer_function
+from tests.core.transfer_function.mock_transfer_function import MockTransferFunction
+from tests.instance.mock_instance import MockInstance
 
 
-class TestMatteMaterial(unittest.TestCase):
+class TestGetTransferFunction(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._material = MatteMaterial(
-            opacity=0.5
-        )
-        self._message = {
-            'opacity': 0.5
-        }
-
-    def test_name(self) -> None:
-        self.assertEqual(MatteMaterial.name, 'matte')
-
-    def test_deserialize(self) -> None:
-        test = MatteMaterial.deserialize(self._message)
-        self.assertEqual(test, self._material)
-
-    def test_serialize(self) -> None:
-        test = self._material.serialize()
-        self.assertEqual(test, self._message)
+    def test_get_transfer_function(self) -> None:
+        instance = MockInstance(MockTransferFunction.message)
+        test = get_transfer_function(instance, 0)
+        self.assertEqual(test, MockTransferFunction.transfer_function)
+        self.assertEqual(instance.method, 'get-model-transfer-function')
+        self.assertEqual(instance.params, {'id': 0})
 
 
 if __name__ == '__main__':

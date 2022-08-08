@@ -20,34 +20,19 @@
 
 import unittest
 
-from tests.core.model.mock_model import MockModel
-from tests.core.model.mock_model_loader import MockModelLoader
+from brayns.core.simulation.get_simulation import get_simulation
+from tests.core.simulation.mock_simulation import MockSimulation
 from tests.instance.mock_instance import MockInstance
 
 
-class TestModelLoader(unittest.TestCase):
+class TestGetSimulation(unittest.TestCase):
 
-    def test_load(self) -> None:
-        reply = [MockModel.serialized_model]
-        ref = [MockModel.model]
-        instance = MockInstance(reply)
-        loader = MockModelLoader()
-        path = 'path'
-        test = loader.load(instance, path)
-        self.assertEqual(test, ref)
-        self.assertEqual(instance.method, 'add-model')
-        self.assertEqual(instance.params, loader.serialize(path))
-
-    def test_serialize(self) -> None:
-        path = 'test'
-        loader = MockModelLoader()
-        test = loader.serialize(path)
-        ref = {
-            'path': 'test',
-            'loader_name': loader.name,
-            'loader_properties': loader.properties
-        }
-        self.assertEqual(test, ref)
+    def test_get_simulation(self) -> None:
+        instance = MockInstance(MockSimulation.message)
+        test = get_simulation(instance)
+        self.assertEqual(test, MockSimulation.simulation)
+        self.assertEqual(instance.method, 'get-simulation-parameters')
+        self.assertEqual(instance.params, None)
 
 
 if __name__ == '__main__':

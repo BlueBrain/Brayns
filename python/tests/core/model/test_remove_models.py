@@ -20,33 +20,18 @@
 
 import unittest
 
-from brayns.core.common.quaternion import Quaternion
-from brayns.core.common.transform import Transform
-from brayns.core.vector.vector3 import Vector3
-from tests.core.common.mock_transform import MockTransform
+from brayns.core.model.remove_models import remove_models
+from tests.instance.mock_instance import MockInstance
 
 
-class TestTransform(unittest.TestCase):
+class TestRemoveModels(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._transform = MockTransform.transform
-        self._message = MockTransform.serialized_transform
-
-    def test_deserialize(self) -> None:
-        test = Transform.deserialize(self._message)
-        ref = self._transform
-        self.assertEqual(test, ref)
-
-    def test_identity(self) -> None:
-        test = Transform.identity
-        self.assertEqual(test.translation, Vector3.zero)
-        self.assertEqual(test.rotation, Quaternion.identity)
-        self.assertEqual(test.scale, Vector3.one)
-
-    def test_serialize(self) -> None:
-        test = self._transform.serialize()
-        ref = self._message
-        self.assertEqual(test, ref)
+    def test_remove_models(self) -> None:
+        instance = MockInstance()
+        ids = [1, 2, 3]
+        remove_models(instance, ids)
+        self.assertEqual(instance.method, 'remove-model')
+        self.assertEqual(instance.params, {'ids': ids})
 
 
 if __name__ == '__main__':

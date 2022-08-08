@@ -18,32 +18,33 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from typing import Any
 
-from brayns.core.material.matte_material import MatteMaterial
+from brayns.core.color.color4 import Color4
+from brayns.core.transfer_function.transfer_function import TransferFunction
+from brayns.core.transfer_function.value_range import ValueRange
 
 
-class TestMatteMaterial(unittest.TestCase):
+class MockTransferFunction:
 
-    def setUp(self) -> None:
-        self._material = MatteMaterial(
-            opacity=0.5
+    @classmethod
+    @property
+    def transfer_function(cls) -> TransferFunction:
+        return TransferFunction(
+            value_range=ValueRange(0, 1),
+            colors=[
+                Color4.red,
+                Color4.blue,
+            ]
         )
-        self._message = {
-            'opacity': 0.5
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'range': [0, 1],
+            'colors': [
+                [1, 0, 0, 1],
+                [0, 0, 1, 1],
+            ]
         }
-
-    def test_name(self) -> None:
-        self.assertEqual(MatteMaterial.name, 'matte')
-
-    def test_deserialize(self) -> None:
-        test = MatteMaterial.deserialize(self._message)
-        self.assertEqual(test, self._material)
-
-    def test_serialize(self) -> None:
-        test = self._material.serialize()
-        self.assertEqual(test, self._message)
-
-
-if __name__ == '__main__':
-    unittest.main()

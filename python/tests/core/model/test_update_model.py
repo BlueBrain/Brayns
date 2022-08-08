@@ -20,29 +20,31 @@
 
 import unittest
 
-from brayns.core.material.matte_material import MatteMaterial
+from brayns.core.model.update_model import update_model
+from brayns.core.transform.transform import Transform
+from tests.core.model.mock_model import MockModel
+from tests.instance.mock_instance import MockInstance
 
 
-class TestMatteMaterial(unittest.TestCase):
+class TestUpdateModel(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._material = MatteMaterial(
-            opacity=0.5
+    def test_update_model(self) -> None:
+        instance = MockInstance(MockModel.message)
+        model = update_model(
+            instance,
+            model_id=0,
+            visible=True,
+            transform=Transform.identity,
         )
-        self._message = {
-            'opacity': 0.5
-        }
-
-    def test_name(self) -> None:
-        self.assertEqual(MatteMaterial.name, 'matte')
-
-    def test_deserialize(self) -> None:
-        test = MatteMaterial.deserialize(self._message)
-        self.assertEqual(test, self._material)
-
-    def test_serialize(self) -> None:
-        test = self._material.serialize()
-        self.assertEqual(test, self._message)
+        self.assertEqual(model, MockModel.model)
+        self.assertEqual(instance.method, 'update-model')
+        self.assertEqual(instance.params, {
+            'model_id': 0,
+            'model': {
+                'is_visible': True,
+                'transform': Transform.identity.serialize()
+            }
+        })
 
 
 if __name__ == '__main__':

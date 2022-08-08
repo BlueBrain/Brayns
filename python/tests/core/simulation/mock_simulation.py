@@ -18,21 +18,32 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from typing import Any
 
-from brayns.core.vector.vector3 import Vector3
-from brayns.core.geometry.box import Box
-
-
-class TestBox(unittest.TestCase):
-
-    def test_serialize(self) -> None:
-        test = Box(Vector3(1, 2, 3), Vector3(4, 5, 6))
-        self.assertEqual(test.serialize(), {
-            'min': [1, 2, 3],
-            'max': [4, 5, 6]
-        })
+from brayns.core.simulation.simulation import Simulation
+from brayns.core.simulation.time_unit import TimeUnit
 
 
-if __name__ == '__main__':
-    unittest.main()
+class MockSimulation:
+
+    @classmethod
+    @property
+    def simulation(cls) -> Simulation:
+        return Simulation(
+            start_frame=0,
+            end_frame=10,
+            current_frame=5,
+            delta_time=0.1,
+            time_unit=TimeUnit.MILLISECOND,
+        )
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'start_frame': 0,
+            'end_frame': 10,
+            'current': 5,
+            'dt': 0.1,
+            'unit': 'ms',
+        }

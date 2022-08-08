@@ -25,7 +25,7 @@ from brayns.core.view.view import View
 from tests.core.view.mock_view import MockView
 
 
-class TestCameraView(unittest.TestCase):
+class TestView(unittest.TestCase):
 
     def test_deserialize(self) -> None:
         test = View.deserialize(MockView.message)

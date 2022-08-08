@@ -18,37 +18,32 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import math
+import unittest
 
-from brayns.core.transform.quaternion import Quaternion
+from brayns.core.common.quaternion import Quaternion
+from brayns.core.transform.transform import Transform
 from brayns.core.vector.vector3 import Vector3
+from tests.core.transform.mock_transform import MockTransform
 
 
-def quaternion_to_euler(quaternion: Quaternion, degrees: bool = False) -> Vector3:
-    q = quaternion.normalized
-    euler = Vector3(_get_x(q), _get_y(q), _get_z(q))
-    if degrees:
-        return Vector3.unpack(math.degrees(i) for i in euler)
-    return euler
+class TestTransform(unittest.TestCase):
+
+    def test_deserialize(self) -> None:
+        test = Transform.deserialize(MockTransform.message)
+        ref = MockTransform.transform
+        self.assertEqual(test, ref)
+
+    def test_identity(self) -> None:
+        test = Transform.identity
+        self.assertEqual(test.translation, Vector3.zero)
+        self.assertEqual(test.rotation, Quaternion.identity)
+        self.assertEqual(test.scale, Vector3.one)
+
+    def test_serialize(self) -> None:
+        test = MockTransform.transform.serialize()
+        ref = MockTransform.message
+        self.assertEqual(test, ref)
 
 
-def _get_x(quaternion: Quaternion) -> float:
-    q = quaternion
-    sx_cy = 2 * (q.w * q.x + q.y * q.z)
-    cx_cy = 1 - 2 * (q.x * q.x + q.y * q.y)
-    return math.atan2(sx_cy, cx_cy)
-
-
-def _get_y(quaternion: Quaternion) -> float:
-    q = quaternion
-    sy = 2 * (q.w * q.y - q.z * q.x)
-    if abs(sy) >= 1:
-        return math.copysign(math.pi / 2, sy)
-    return math.asin(sy)
-
-
-def _get_z(quaternion: Quaternion) -> float:
-    q = quaternion
-    sz_cy = 2 * (q.w * q.z + q.x * q.y)
-    cz_cy = 1 - 2 * (q.y * q.y + q.z * q.z)
-    return math.atan2(sz_cy, cz_cy)
+if __name__ == '__main__':
+    unittest.main()

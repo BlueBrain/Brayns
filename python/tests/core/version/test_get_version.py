@@ -20,30 +20,17 @@
 
 import unittest
 
-from brayns.core.color.color3 import Color3
+from brayns.core.version.get_version import get_version
+from tests.core.version.mock_version import MockVersion
+from tests.instance.mock_instance import MockInstance
 
 
-class TestColor3(unittest.TestCase):
+class TestGetVersion(unittest.TestCase):
 
-    def test_normalize_hex(self) -> None:
-        test = Color3.normalize_hex('FF')
-        self.assertEqual(test, 1.0)
-
-    def test_from_hex(self) -> None:
-        test = Color3.from_hex('2ca02c')
-        ref = Color3(44, 160, 44) / 255
-        self.assertEqual(test, ref)
-        test = Color3.from_hex('0x2ca02c')
-        ref = Color3(44, 160, 44) / 255
-        self.assertEqual(test, ref)
-        test = Color3.from_hex('#2ca02c')
-        ref = Color3(44, 160, 44) / 255
-        self.assertEqual(test, ref)
-
-    def test_iter(self) -> None:
-        test = list(Color3(1, 2, 3))
-        ref = [1, 2, 3]
-        self.assertEqual(test, ref)
+    def test_get_version(self) -> None:
+        instance = MockInstance(MockVersion.message)
+        test = get_version(instance)
+        self.assertEqual(test, MockVersion.version)
 
 
 if __name__ == '__main__':

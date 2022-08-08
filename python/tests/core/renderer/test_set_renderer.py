@@ -20,29 +20,19 @@
 
 import unittest
 
-from brayns.core.material.matte_material import MatteMaterial
+from brayns.core.renderer.production_renderer import ProductionRenderer
+from brayns.core.renderer.set_renderer import set_renderer
+from tests.instance.mock_instance import MockInstance
 
 
-class TestMatteMaterial(unittest.TestCase):
+class TestSetRenderer(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._material = MatteMaterial(
-            opacity=0.5
-        )
-        self._message = {
-            'opacity': 0.5
-        }
-
-    def test_name(self) -> None:
-        self.assertEqual(MatteMaterial.name, 'matte')
-
-    def test_deserialize(self) -> None:
-        test = MatteMaterial.deserialize(self._message)
-        self.assertEqual(test, self._material)
-
-    def test_serialize(self) -> None:
-        test = self._material.serialize()
-        self.assertEqual(test, self._message)
+    def test_set_renderer(self) -> None:
+        instance = MockInstance()
+        renderer = ProductionRenderer()
+        set_renderer(instance, renderer)
+        self.assertEqual(instance.method, 'set-renderer-production')
+        self.assertEqual(instance.params, renderer.serialize())
 
 
 if __name__ == '__main__':
