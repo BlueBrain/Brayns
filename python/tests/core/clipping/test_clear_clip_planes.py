@@ -26,7 +26,7 @@ from tests.instance.mock_instance import MockInstance
 
 class TestClearClipPlane(unittest.TestCase):
 
-    def test_add_clip_plane(self) -> None:
+    def test_clear_clip_plane(self) -> None:
         instance = MockInstance()
         clear_clip_planes(instance)
         self.assertEqual(instance.method, 'clear-clip-planes')

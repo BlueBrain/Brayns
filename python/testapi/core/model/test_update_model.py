@@ -27,9 +27,10 @@ class TestUpdateModel(SimpleTestCase):
     def test_update_model(self) -> None:
         model = brayns.add_geometries(self.instance, [brayns.Sphere(1)])
         model.visible = False
-        model.transform = brayns.Transform(
-            translation=brayns.Vector3.one
-        )
+        translation = brayns.Vector3.one
+        model.transform = brayns.Transform(translation)
+        model.bounds.min += translation
+        model.bounds.max += translation
         test = brayns.update_model(
             self.instance,
             model.id,

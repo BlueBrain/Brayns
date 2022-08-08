@@ -24,9 +24,9 @@ from brayns.core.clipping.remove_clip_planes import remove_clip_planes
 from tests.instance.mock_instance import MockInstance
 
 
-class TestRemoveClipPlane(unittest.TestCase):
+class TestRemoveClipPlanes(unittest.TestCase):
 
-    def test_add_clip_plane(self) -> None:
+    def test_remove_clip_planes(self) -> None:
         instance = MockInstance()
         ids = [1, 2, 3]
         remove_clip_planes(instance, ids)

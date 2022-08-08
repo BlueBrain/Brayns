@@ -33,10 +33,10 @@ class TestClearClipPlanes(SimpleTestCase):
             brayns.add_clip_plane(self.instance, plane)
             for plane in planes
         ]
-        self.assertEqual(ids, [0, 1, 2])
+        self.assertEqual(ids, [0, 1])
         brayns.clear_clip_planes(self.instance)
         ids = [
             brayns.add_clip_plane(self.instance, plane)
             for plane in planes
         ]
-        self.assertEqual(ids, [0, 1, 2])
+        self.assertEqual(ids, [0, 1])

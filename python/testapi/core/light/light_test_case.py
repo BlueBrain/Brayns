@@ -32,7 +32,7 @@ class LightTestCase(SimpleTestCase):
         self.assertEqual(ids, [0, 1, 2])
         brayns.remove_lights(self.instance, [1, 2])
         id = brayns.add_light(self.instance, light)
-        self.assertEqual(id, 1)
+        self.assertIn(id, [1, 2])
         brayns.clear_lights(self.instance)
         id = brayns.add_light(self.instance, light)
         self.assertEqual(id, 0)
