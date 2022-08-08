@@ -31,10 +31,9 @@ class MockTransform:
     @classmethod
     @property
     def transform(cls) -> Transform:
-        quaternion = Quaternion(1, 2, 3, 4)
         return Transform(
             translation=Vector3(1, 2, 3),
-            rotation=Rotation.from_quaternion(quaternion),
+            rotation=Rotation.identity,
             scale=Vector3(4, 5, 6)
         )
 
@@ -43,6 +42,6 @@ class MockTransform:
     def message(cls) -> dict[str, Any]:
         return {
             'translation': [1, 2, 3],
-            'rotation': [1, 2, 3, 4],
+            'rotation': [0, 0, 0, 1],
             'scale': [4, 5, 6]
         }

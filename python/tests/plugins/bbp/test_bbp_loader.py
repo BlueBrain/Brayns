@@ -23,8 +23,8 @@ import unittest
 from brayns.plugins.bbp.bbp_cells import BbpCells
 from brayns.plugins.bbp.bbp_loader import BbpLoader
 from brayns.plugins.bbp.bbp_report import BbpReport
-from brayns.plugins.common.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.common.morphology_parameters import MorphologyParameters
+from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
+from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
 
 
 class TestBbpLoader(unittest.TestCase):

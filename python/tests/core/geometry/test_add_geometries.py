@@ -37,13 +37,13 @@ class TestAddGeometries(unittest.TestCase):
         self._message = [
             {
                 'geometry': {
-                    'value': [1, 2, 3, 4]
+                    'coefficients': [1, 2, 3, 4]
                 },
                 'color': [1, 1, 1, 1]
             },
             {
                 'geometry': {
-                    'value': [5, 6, 7, 8]
+                    'coefficients': [5, 6, 7, 8]
                 },
                 'color': [1, 0, 0, 1]
             }

@@ -55,6 +55,11 @@ class Rotation:
     def __init__(self, quaternion: Quaternion) -> None:
         self._quaternion = quaternion.normalized
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Rotation):
+            return False
+        return self._quaternion == other.quaternion
+
     @property
     def quaternion(self) -> Quaternion:
         return self._quaternion

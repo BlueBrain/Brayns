@@ -36,7 +36,7 @@ class TestView(unittest.TestCase):
             position=Vector3.zero,
             target=Vector3.one
         )
-        self.assertEqual(test.direction, Vector3.one)
+        self.assertEqual(test.direction, Vector3.one.normalized)
 
     def test_serialize(self) -> None:
         test = MockView.view.serialize()

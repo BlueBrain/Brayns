@@ -20,7 +20,7 @@
 from dataclasses import dataclass, field
 
 from brayns.core.loader.loader import Loader
-from brayns.plugins.common.morphology_parameters import MorphologyParameters
+from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
 
 
 @dataclass

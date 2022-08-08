@@ -19,8 +19,8 @@
 
 import unittest
 
-from brayns.plugins.common.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.common.morphology_parameters import MorphologyParameters
+from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
+from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
 
 
 class TestMorphologyParameters(unittest.TestCase):
@@ -40,7 +40,7 @@ class TestMorphologyParameters(unittest.TestCase):
             'load_dendrites': True,
             'geometry_type': MorphologyGeometryType.CONSTANT_RADII.value
         }
-        self.assertEqual(test, ref)
+        self.assertEqual(test.serialize(), ref)
 
 
 if __name__ == '__main__':

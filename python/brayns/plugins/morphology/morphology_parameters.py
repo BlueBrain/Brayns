@@ -19,7 +19,7 @@
 
 from dataclasses import dataclass
 
-from brayns.plugins.common.morphology_geometry_type import MorphologyGeometryType
+from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
 
 
 @dataclass

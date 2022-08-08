@@ -86,8 +86,12 @@ class TestRotation(unittest.TestCase):
         self.assertAlmostEqual(test.z, ref.z)
 
     def test_axis(self) -> None:
+        ref = Vector3.up
         rotation = Rotation.from_axis_angle(Vector3.up, 30, degrees=True)
-        self.assertEqual(rotation.axis, Vector3.up)
+        test = rotation.axis.normalized
+        self.assertAlmostEqual(test.x, ref.x)
+        self.assertAlmostEqual(test.y, ref.y)
+        self.assertAlmostEqual(test.z, ref.z)
 
     def test_angle_radians(self) -> None:
         rotation = Rotation.from_axis_angle(Vector3.up, 30, degrees=True)

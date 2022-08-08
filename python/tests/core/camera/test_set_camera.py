@@ -31,7 +31,7 @@ class TestSetCamera(unittest.TestCase):
         instance = MockInstance()
         camera = PerspectiveCamera()
         set_camera(instance, camera)
-        self.assertEqual(instance.method, 'set-camera-test')
+        self.assertEqual(instance.method, 'set-camera-perspective')
         self.assertEqual(instance.params, camera.serialize())
 
 

@@ -29,18 +29,18 @@ class TestParseImageFormat(unittest.TestCase):
     def test_jpeg(self) -> None:
         path = 'test/stuff/image.jpg'
         test = parse_image_format(path)
-        self.assertIs(path, ImageFormat.JPEG)
+        self.assertIs(test, ImageFormat.JPEG)
         path = path.upper()
         test = parse_image_format(path)
-        self.assertIs(path, ImageFormat.JPEG)
+        self.assertIs(test, ImageFormat.JPEG)
 
     def test_png(self) -> None:
         path = 'test/stuff/image.png'
         test = parse_image_format(path)
-        self.assertIs(path, ImageFormat.PNG)
+        self.assertIs(test, ImageFormat.PNG)
         path = path.upper()
         test = parse_image_format(path)
-        self.assertIs(path, ImageFormat.PNG)
+        self.assertIs(test, ImageFormat.PNG)
 
 
 if __name__ == '__main__':

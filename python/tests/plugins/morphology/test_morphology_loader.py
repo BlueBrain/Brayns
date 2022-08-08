@@ -19,9 +19,9 @@
 
 import unittest
 
-from brayns.plugins.common import MorphologyGeometryType
-from brayns.plugins.common import MorphologyParameters
 from brayns.plugins.morphology import MorphologyLoader
+from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
+from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
 
 
 class TestMorphologyLoader(unittest.TestCase):

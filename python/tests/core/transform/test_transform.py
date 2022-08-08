@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.quaternion import Quaternion
+from brayns.core.transform.rotation import Rotation
 from brayns.core.transform.transform import Transform
 from brayns.core.vector.vector3 import Vector3
 from tests.core.transform.mock_transform import MockTransform
@@ -36,7 +36,7 @@ class TestTransform(unittest.TestCase):
     def test_identity(self) -> None:
         test = Transform.identity
         self.assertEqual(test.translation, Vector3.zero)
-        self.assertEqual(test.rotation, Quaternion.identity)
+        self.assertEqual(test.rotation, Rotation.identity)
         self.assertEqual(test.scale, Vector3.one)
 
     def test_serialize(self) -> None:

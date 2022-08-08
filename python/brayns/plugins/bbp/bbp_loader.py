@@ -26,7 +26,7 @@ from typing import Any
 from brayns.core.loader.loader import Loader
 from brayns.plugins.bbp.bbp_cells import BbpCells
 from brayns.plugins.bbp.bbp_report import BbpReport
-from brayns.plugins.common.morphology_parameters import MorphologyParameters
+from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
 
 
 @dataclass

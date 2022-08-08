@@ -33,7 +33,7 @@ class TestAddLight(unittest.TestCase):
         light = AmbientLight(Color3.red, 3, False)
         id = add_light(instance, light)
         self.assertEqual(id, 0)
-        self.assertEqual(instance.method, 'add-light-test')
+        self.assertEqual(instance.method, 'add-light-ambient')
         self.assertEqual(instance.params, light.serialize())
 
 

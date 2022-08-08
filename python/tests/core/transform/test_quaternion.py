@@ -63,12 +63,12 @@ class TestQuaternion(unittest.TestCase):
         self.assertEqual(test.axis, Vector3(1, 2, 3))
 
     def test_angle_radians(self) -> None:
-        test = Quaternion(0, 0, 0, 0)
-        self.assertAlmostEqual(test.angle_radians, math.radians(90))
+        test = Quaternion(1, 0, 0, 0)
+        self.assertAlmostEqual(test.angle_radians, math.radians(180))
 
     def test_angle_degrees(self) -> None:
-        test = Quaternion(0, 0, 0, 0)
-        self.assertAlmostEqual(test.angle_degrees, 90)
+        test = Quaternion(1, 0, 0, 0)
+        self.assertAlmostEqual(test.angle_degrees, 180)
 
     def test_conjugate(self) -> None:
         test = Quaternion(1, 2, 3, 4)
