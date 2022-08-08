@@ -22,7 +22,7 @@ import unittest
 
 from brayns.core.common.transform import Transform
 from brayns.core.model.model import Model
-from tests.core.common.mock_bounds import MockBounds
+from tests.core.bounds.mock_bounds import MockBounds
 from tests.core.model.mock_model import MockModel
 from tests.instance.mock_instance import MockInstance
 
@@ -58,13 +58,6 @@ class TestModel(unittest.TestCase):
         instance = MockInstance(self._scene)
         test = Model.get_all(instance)
         self.assertEqual(test, self._models)
-        self.assertEqual(instance.method, 'get-scene')
-        self.assertEqual(instance.params, None)
-
-    def test_get_bounds(self) -> None:
-        instance = MockInstance(self._scene)
-        test = Model.get_bounds(instance)
-        self.assertEqual(test, self._bounds)
         self.assertEqual(instance.method, 'get-scene')
         self.assertEqual(instance.params, None)
 

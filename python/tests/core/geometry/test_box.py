@@ -20,39 +20,23 @@
 
 import unittest
 
-from brayns.core.common.bounds import Bounds
+from brayns.core.geometry.box import Box
 from brayns.core.vector.vector3 import Vector3
-from tests.core.common.mock_bounds import MockBounds
 
 
-class TestBounds(unittest.TestCase):
+class TestBox(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._box = Bounds(Vector3(1, 2, 3), Vector3(4, 5, 6))
+    def test_method(self) -> None:
+        self.assertEqual(Box.method, 'add-boxes')
 
-    def test_empty(self) -> None:
-        test = Bounds.empty
-        self.assertEqual(test.min, Vector3.zero)
-        self.assertEqual(test.max, Vector3.zero)
-
-    def test_deserialize(self) -> None:
-        test = Bounds.deserialize(MockBounds.serialized_bounds)
-        self.assertEqual(test, MockBounds.bounds)
-
-    def test_center(self) -> None:
-        self.assertEqual(self._box.center, Vector3(2.5, 3.5, 4.5))
-
-    def test_size(self) -> None:
-        self.assertEqual(self._box.size, Vector3(3, 3, 3))
-
-    def test_width(self) -> None:
-        self.assertEqual(self._box.width, 3)
-
-    def test_height(self) -> None:
-        self.assertEqual(self._box.height, 3)
-
-    def test_depth(self) -> None:
-        self.assertEqual(self._box.depth, 3)
+    def test_serialize(self) -> None:
+        box = Box(Vector3.zero, Vector3.one)
+        test = box.serialize()
+        ref = {
+            'min': [0, 0, 0],
+            'max': [1, 1, 1],
+        }
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.color3 import Color3
+from brayns.core.color.color3 import Color3
 from brayns.core.material.material import Material
 from tests.core.material.mock_material import MockMaterial
 from tests.instance.mock_instance import MockInstance

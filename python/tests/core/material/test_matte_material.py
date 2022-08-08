@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.color3 import Color3
+from brayns.core.color.color3 import Color3
 from brayns.core.material.matte_material import MatteMaterial
 
 

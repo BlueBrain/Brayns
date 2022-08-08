@@ -34,7 +34,10 @@ class Bounds:
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> Bounds:
-        return _deserialize_bounds(message)
+        return Bounds(
+            min=Vector3(*message['min']),
+            max=Vector3(*message['max'])
+        )
 
     @classmethod
     @property
@@ -60,10 +63,3 @@ class Bounds:
     @property
     def depth(self) -> float:
         return self.size.z
-
-
-def _deserialize_bounds(message: dict[str, Any]) -> Bounds:
-    return Bounds(
-        min=Vector3(*message['min']),
-        max=Vector3(*message['max'])
-    )

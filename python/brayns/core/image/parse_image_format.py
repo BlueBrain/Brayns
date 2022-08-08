@@ -18,31 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from __future__ import annotations
 
-from brayns.core.camera.camera import Camera
+import pathlib
+
+from brayns.core.image.image_format import ImageFormat
 
 
-@dataclass
-class MockCamera(Camera):
-
-    test1: str = ''
-    test2: int = 0
-
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'test'
-
-    @classmethod
-    def deserialize(cls, message: dict) -> 'MockCamera':
-        return MockCamera(
-            message['test1'],
-            message['test2']
-        )
-
-    def serialize(self) -> dict:
-        return {
-            'test1': self.test1,
-            'test2': self.test2
-        }
+def parse_image_format(filename: str) -> ImageFormat:
+    path = pathlib.Path(filename)
+    extension = path.suffix[1:]
+    extension = extension.lower()
+    extension = extension.strip()
+    return ImageFormat(extension)

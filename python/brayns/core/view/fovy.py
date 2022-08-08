@@ -27,7 +27,7 @@ from brayns.core.view.view import View
 
 class Fovy:
 
-    def __init__(self, angle: float = math.radians(45), degrees: bool = False) -> None:
+    def __init__(self, angle: float, degrees: bool = False) -> None:
         self._angle = math.radians(angle) if degrees else angle
 
     def __eq__(self, other: object) -> bool:

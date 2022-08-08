@@ -20,20 +20,18 @@
 
 import unittest
 
-from brayns.core.geometry.plane import Plane
-from brayns.core.geometry.planes import Planes
+from brayns.core.clipping.remove_clip_planes import remove_clip_planes
+from tests.instance.mock_instance import MockInstance
 
 
-class TestPlanes(unittest.TestCase):
+class TestRemoveClipPlane(unittest.TestCase):
 
-    def test_name(self) -> None:
-        self.assertEqual(Planes.name, 'planes')
-
-    def test_serialize_geometry(self) -> None:
-        plane = Plane(1, 2, 3, 4)
-        test = Planes.serialize_geometry(plane)
-        ref = plane.serialize()
-        self.assertEqual(test, ref)
+    def test_add_clip_plane(self) -> None:
+        instance = MockInstance()
+        ids = [1, 2, 3]
+        remove_clip_planes(instance, ids)
+        self.assertEqual(instance.method, 'remove-clip-planes')
+        self.assertEqual(instance.params, {'ids': ids})
 
 
 if __name__ == '__main__':

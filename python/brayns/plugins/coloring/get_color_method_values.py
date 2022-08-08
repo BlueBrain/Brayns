@@ -20,7 +20,7 @@
 
 
 from brayns.instance.instance import Instance
-from brayns.plugins.common.color_method import ColorMethod
+from brayns.plugins.color.color_method import ColorMethod
 
 
 def get_color_method_values(

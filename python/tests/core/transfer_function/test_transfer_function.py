@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.color4 import Color4
+from brayns.core.color.color4 import Color4
 from brayns.core.transfer_function.transfer_function import TransferFunction
 from brayns.core.transfer_function.value_range import ValueRange
 from tests.instance.mock_instance import MockInstance

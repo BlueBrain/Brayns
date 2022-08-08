@@ -30,7 +30,7 @@ T = TypeVar('T', bound='PerspectiveCamera')
 @dataclass
 class PerspectiveCamera(Camera):
 
-    fovy: Fovy = Fovy()
+    fovy: Fovy = Fovy(45, degrees=True)
     aperture_radius: float = 0.0
     focus_distance: float = 1.0
 

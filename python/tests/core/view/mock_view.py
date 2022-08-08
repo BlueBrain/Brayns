@@ -18,24 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.common.bounds import Bounds
+from typing import Any
+
 from brayns.core.vector.vector3 import Vector3
+from brayns.core.view.view import View
 
 
-class MockBounds:
+class MockView:
 
     @classmethod
     @property
-    def bounds(cls) -> Bounds:
-        return Bounds(
-            min=Vector3.zero,
-            max=Vector3.one
+    def view(cls) -> View:
+        return View(
+            position=Vector3(1, 2, 3),
+            target=Vector3(4, 5, 6),
+            up=Vector3(7, 8, 9)
         )
 
     @classmethod
     @property
-    def serialized_bounds(cls) -> dict:
+    def message(cls) -> dict[str, Any]:
         return {
-            'min': [0, 0, 0],
-            'max': [1, 1, 1]
+            'position': [1, 2, 3],
+            'target': [4, 5, 6],
+            'up': [7, 8, 9]
         }

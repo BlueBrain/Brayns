@@ -21,7 +21,7 @@
 from typing import Any
 
 from brayns.instance.instance import Instance
-from brayns.plugins.common.color_method import ColorMethod
+from brayns.plugins.color.color_method import ColorMethod
 
 
 class MockCircuitInstance(Instance):

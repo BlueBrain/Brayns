@@ -21,7 +21,10 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
+from brayns.core.bounds.bounds import Bounds
 from brayns.core.camera.camera import Camera
+from brayns.core.vector.vector3 import Vector3
+from brayns.core.view.view import View
 
 T = TypeVar('T', bound='OrthographicCamera')
 
@@ -30,6 +33,13 @@ T = TypeVar('T', bound='OrthographicCamera')
 class OrthographicCamera(Camera):
 
     height: float = 0.0
+
+    @staticmethod
+    def get_front_view(target: Bounds) -> View:
+        center = target.center
+        distance = target.depth
+        position = center + distance * Vector3.forward
+        return View(position, center)
 
     @classmethod
     @property

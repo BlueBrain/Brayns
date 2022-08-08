@@ -20,21 +20,20 @@
 
 import unittest
 
-from brayns.core.vector.vector3 import Vector3
-from brayns.core.geometry.box import Box
-from brayns.core.geometry.boxes import Boxes
+from brayns.core.camera.get_camera import get_camera
+from brayns.core.camera.perspective_camera import PerspectiveCamera
+from tests.instance.mock_instance import MockInstance
 
 
-class TestBoxes(unittest.TestCase):
+class TestGetCamera(unittest.TestCase):
 
-    def test_name(self) -> None:
-        self.assertEqual(Boxes.name, 'boxes')
-
-    def test_serialize_geometry(self) -> None:
-        box = Box(Vector3.zero, Vector3.one)
-        test = Boxes.serialize_geometry(box)
-        ref = box.serialize()
-        self.assertEqual(test, ref)
+    def test_get_camera(self) -> None:
+        camera = PerspectiveCamera()
+        instance = MockInstance(camera.serialize())
+        test = get_camera(instance, PerspectiveCamera)
+        self.assertEqual(test, camera)
+        self.assertEqual(instance.method, 'get-camera-perspective')
+        self.assertEqual(instance.params, None)
 
 
 if __name__ == '__main__':

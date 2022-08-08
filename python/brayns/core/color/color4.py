@@ -24,7 +24,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, replace
 from typing import TypeVar
 
-from brayns.core.common.color3 import Color3
+from brayns.core.color.color3 import Color3
 
 T = TypeVar('T', bound='Color4')
 

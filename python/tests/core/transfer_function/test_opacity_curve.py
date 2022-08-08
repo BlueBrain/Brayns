@@ -20,8 +20,8 @@
 
 import unittest
 
-from brayns.core.common.color3 import Color3
-from brayns.core.common.color4 import Color4
+from brayns.core.color.color3 import Color3
+from brayns.core.color.color4 import Color4
 from brayns.core.transfer_function.control_point import ControlPoint
 from brayns.core.transfer_function.opacity_curve import OpacityCurve
 

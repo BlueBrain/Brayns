@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.common.color4 import Color4
+from brayns.core.color.color4 import Color4
 from brayns.core.transfer_function.value_range import ValueRange
 
 

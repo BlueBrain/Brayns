@@ -20,26 +20,42 @@
 
 import unittest
 
+from brayns.core.bounds.bounds import Bounds
 from brayns.core.vector.vector3 import Vector3
-from brayns.core.geometry.capsule import Capsule
-from brayns.core.geometry.capsules import Capsules
+from tests.core.bounds.mock_bounds import MockBounds
 
 
-class TestCapsules(unittest.TestCase):
+class TestBounds(unittest.TestCase):
 
-    def test_name(self) -> None:
-        self.assertEqual(Capsules.name, 'capsules')
-
-    def test_serialize_geometry(self) -> None:
-        capsule = Capsule(
-            Vector3.zero,
-            0,
-            Vector3.one,
-            1
+    def setUp(self) -> None:
+        self._box = Bounds(
+            min=Vector3(1, 2, 3),
+            max=Vector3(4, 5, 6),
         )
-        test = Capsules.serialize_geometry(capsule)
-        ref = capsule.serialize()
-        self.assertEqual(test, ref)
+
+    def test_empty(self) -> None:
+        test = Bounds.empty
+        self.assertEqual(test.min, Vector3.zero)
+        self.assertEqual(test.max, Vector3.zero)
+
+    def test_deserialize(self) -> None:
+        test = Bounds.deserialize(MockBounds.message)
+        self.assertEqual(test, MockBounds.bounds)
+
+    def test_center(self) -> None:
+        self.assertEqual(self._box.center, Vector3(2.5, 3.5, 4.5))
+
+    def test_size(self) -> None:
+        self.assertEqual(self._box.size, Vector3(3, 3, 3))
+
+    def test_width(self) -> None:
+        self.assertEqual(self._box.width, 3)
+
+    def test_height(self) -> None:
+        self.assertEqual(self._box.height, 3)
+
+    def test_depth(self) -> None:
+        self.assertEqual(self._box.depth, 3)
 
 
 if __name__ == '__main__':

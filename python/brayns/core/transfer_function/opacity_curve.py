@@ -20,8 +20,8 @@
 
 from dataclasses import dataclass
 
-from brayns.core.common.color3 import Color3
-from brayns.core.common.color4 import Color4
+from brayns.core.color.color3 import Color3
+from brayns.core.color.color4 import Color4
 from brayns.core.transfer_function.control_point import ControlPoint
 
 
@@ -35,23 +35,24 @@ class OpacityCurve:
         color_count = len(colors)
         for i in range(color_count):
             normalized_value = _normalize_index(i, color_count)
-            opacity = self.get_opacity(normalized_value)
+            opacity = _get_opacity(self.control_points, normalized_value)
             color = Color4.from_color3(colors[i], opacity)
             result.append(color)
         return result
 
-    def get_opacity(self, normalized_value: float) -> float:
-        lower_index = _find_lower_index(self.control_points, normalized_value)
-        upper_index = lower_index + 1
-        lower_control_point = _find(self.control_points, lower_index)
-        upper_control_point = _find(self.control_points, upper_index)
-        lower = lower_control_point.normalized_value
-        upper = upper_control_point.normalized_value
-        lower_factor = _get_lower_factor(normalized_value, lower, upper)
-        upper_factor = 1 - lower_factor
-        lower_opacity = lower_control_point.opacity
-        upper_opacity = upper_control_point.opacity
-        return lower_opacity * lower_factor + upper_opacity * upper_factor
+
+def _get_opacity(control_points: list[ControlPoint], normalized_value: float) -> float:
+    lower_index = _find_lower_index(control_points, normalized_value)
+    upper_index = lower_index + 1
+    lower_control_point = _find(control_points, lower_index)
+    upper_control_point = _find(control_points, upper_index)
+    lower = lower_control_point.normalized_value
+    upper = upper_control_point.normalized_value
+    lower_factor = _get_lower_factor(normalized_value, lower, upper)
+    upper_factor = 1 - lower_factor
+    lower_opacity = lower_control_point.opacity
+    upper_opacity = upper_control_point.opacity
+    return lower_opacity * lower_factor + upper_opacity * upper_factor
 
 
 def _find_lower_index(control_points: list[ControlPoint], normalized_value: float) -> int:

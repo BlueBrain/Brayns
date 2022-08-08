@@ -35,12 +35,8 @@ class Application:
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> Application:
-        return _deserialize_application(message)
-
-
-def _deserialize_application(message: dict[str, Any]) -> Application:
-    return Application(
-        plugins=message['plugins'],
-        resolution=Resolution(*message['viewport']),
-        jpeg_quality=message['jpeg_quality'],
-    )
+        return Application(
+            plugins=message['plugins'],
+            resolution=Resolution(*message['viewport']),
+            jpeg_quality=message['jpeg_quality'],
+        )

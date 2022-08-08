@@ -18,8 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.common.quaternion import Quaternion
-from brayns.core.common.transform import Transform
+from typing import Any
+
+from brayns.core.transform.quaternion import Quaternion
+from brayns.core.transform.rotation import Rotation
+from brayns.core.transform.transform import Transform
 from brayns.core.vector.vector3 import Vector3
 
 
@@ -28,15 +31,16 @@ class MockTransform:
     @classmethod
     @property
     def transform(cls) -> Transform:
+        quaternion = Quaternion(1, 2, 3, 4)
         return Transform(
             translation=Vector3(1, 2, 3),
-            rotation=Quaternion(1, 2, 3, 4),
+            rotation=Rotation.from_quaternion(quaternion),
             scale=Vector3(4, 5, 6)
         )
 
     @classmethod
     @property
-    def serialized_transform(cls) -> dict:
+    def message(cls) -> dict[str, Any]:
         return {
             'translation': [1, 2, 3],
             'rotation': [1, 2, 3, 4],

@@ -20,9 +20,9 @@
 
 import unittest
 
-from brayns.core.common.color4 import Color4
+from brayns.core.color.color4 import Color4
 from brayns.plugins.common.circuit_color_by_method import CircuitColorByMethod
-from brayns.plugins.common.color_method import ColorMethod
+from brayns.plugins.color.color_method import ColorMethod
 from tests.plugins.common.mock_circuit_instance import MockCircuitInstance
 
 

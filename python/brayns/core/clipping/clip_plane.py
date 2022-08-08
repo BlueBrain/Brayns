@@ -31,10 +31,6 @@ class ClipPlane:
     d: float = 0.0
 
     def serialize(self) -> dict[str, Any]:
-        return _serialize_clip_plane(self)
-
-
-def _serialize_clip_plane(plane: ClipPlane) -> dict[str, Any]:
-    return {
-        'coefficients': [plane.a, plane.b, plane.c, plane.d]
-    }
+        return {
+            'coefficients': [self.a, self.b, self.c, self.d]
+        }

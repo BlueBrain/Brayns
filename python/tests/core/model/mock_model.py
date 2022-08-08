@@ -18,8 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from typing import Any
+
 from brayns.core.model.model import Model
-from tests.core.common.mock_bounds import MockBounds
+from tests.core.bounds.mock_bounds import MockBounds
 from tests.core.common.mock_transform import MockTransform
 
 
@@ -38,10 +40,10 @@ class MockModel:
 
     @classmethod
     @property
-    def serialized_model(cls) -> dict:
+    def message(cls) -> dict[str, Any]:
         return {
             'model_id': 0,
-            'bounds': MockBounds.serialized_bounds,
+            'bounds': MockBounds.message,
             'metadata': {'test': 1},
             'is_visible': True,
             'transform': MockTransform.serialized_transform

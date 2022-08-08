@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.core.common.color4 import Color4
+from brayns.core.color.color4 import Color4
 
 T = TypeVar('T', bound='Renderer')
 

@@ -18,20 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+import unittest
 
-from brayns.core.light.light import Light
+from brayns.core.light.clear_lights import clear_lights
+from tests.instance.mock_instance import MockInstance
 
 
-@dataclass
-class MockLight(Light):
+class TestClearLight(unittest.TestCase):
 
-    test: str = ''
+    def test_clear_lights(self) -> None:
+        instance = MockInstance()
+        clear_lights(instance)
+        self.assertEqual(instance.method, 'clear-lights')
+        self.assertEqual(instance.params, None)
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'test'
 
-    def serialize(self) -> dict:
-        return self._to_dict({'test': self.test})
+if __name__ == '__main__':
+    unittest.main()

@@ -18,18 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.geometry.geometries import Geometries
+import unittest
+
+from brayns.core.color.color3 import Color3
 
 
-class MockGeometries(Geometries[int]):
+class TestColor3(unittest.TestCase):
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return 'tests'
+    def test_iter(self) -> None:
+        test = list(Color3(1, 2, 3))
+        ref = [1, 2, 3]
+        self.assertEqual(test, ref)
 
-    @classmethod
-    def serialize_geometry(cls, geometry: int) -> dict:
-        return {
-            'value': geometry
-        }
+
+if __name__ == '__main__':
+    unittest.main()

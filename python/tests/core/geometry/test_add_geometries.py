@@ -20,46 +20,43 @@
 
 import unittest
 
-from brayns.core.common.color4 import Color4
-from tests.core.geometry.mock_geometries import MockGeometries
+from brayns.core.color.color4 import Color4
+from brayns.core.geometry.add_geometries import add_geometries
+from brayns.core.geometry.plane import Plane
 from tests.core.model.mock_model import MockModel
 from tests.instance.mock_instance import MockInstance
 
 
-class TestGeometries(unittest.TestCase):
+class TestAddGeometries(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._geometries = MockGeometries([
-            (1, Color4.white),
-            (2, Color4.red)
-        ])
+        self._geometries = [
+            Plane(1, 2, 3, 4),
+            Plane(5, 6, 7, 8).with_color(Color4.red),
+        ]
         self._message = [
             {
                 'geometry': {
-                    'value': 1
+                    'value': [1, 2, 3, 4]
                 },
                 'color': [1, 1, 1, 1]
             },
             {
                 'geometry': {
-                    'value': 2
+                    'value': [5, 6, 7, 8]
                 },
                 'color': [1, 0, 0, 1]
             }
         ]
 
-    def test_add(self) -> None:
+    def test_add_geometries(self) -> None:
         ref = MockModel.model
-        reply = MockModel.serialized_model
+        reply = MockModel.message
         instance = MockInstance(reply)
-        model = self._geometries.add(instance)
+        model = add_geometries(instance, self._geometries)
         self.assertEqual(model, ref)
-        self.assertEqual(instance.method, 'add-tests')
+        self.assertEqual(instance.method, 'add-planes')
         self.assertEqual(instance.params, self._message)
-
-    def test_serialize(self) -> None:
-        test = self._geometries.serialize()
-        self.assertEqual(test, self._message)
 
 
 if __name__ == '__main__':

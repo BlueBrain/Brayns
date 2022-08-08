@@ -20,33 +20,19 @@
 
 import unittest
 
-from brayns.core.common.color3 import Color3
-from brayns.core.light.light import Light
-from tests.core.light.mock_light import MockLight
+from brayns.core.view.get_view import get_view
+from tests.core.view.mock_view import MockView
 from tests.instance.mock_instance import MockInstance
 
 
-class TestLight(unittest.TestCase):
+class TestGetView(unittest.TestCase):
 
-    def test_remove(self) -> None:
-        instance = MockInstance()
-        Light.remove(instance, [0, 1, 2])
-        self.assertEqual(instance.method, 'remove-lights')
-        self.assertEqual(instance.params, {'ids': [0, 1, 2]})
-
-    def test_clear(self) -> None:
-        instance = MockInstance()
-        Light.clear(instance)
-        self.assertEqual(instance.method, 'clear-lights')
+    def test_get_view(self) -> None:
+        instance = MockInstance(MockView.message)
+        view = get_view(instance)
+        self.assertEqual(instance.method, 'get-camera-look-at')
         self.assertEqual(instance.params, None)
-
-    def test_add(self) -> None:
-        instance = MockInstance(0)
-        light = MockLight(Color3.red, 3, False, 'test')
-        id = light.add(instance)
-        self.assertEqual(id, 0)
-        self.assertEqual(instance.method, 'add-light-test')
-        self.assertEqual(instance.params, light.serialize())
+        self.assertEqual(view, MockView.view)
 
 
 if __name__ == '__main__':

@@ -18,25 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
-import pathlib
 from enum import Enum
 
 
 class ImageFormat(Enum):
 
-    PNG = 'png'
     JPEG = 'jpg'
-
-    @staticmethod
-    def from_filename(filename: str) -> ImageFormat:
-        path = pathlib.Path(filename)
-        return ImageFormat.from_path(path)
-
-    @staticmethod
-    def from_path(path: pathlib.Path) -> ImageFormat:
-        extension = path.suffix[1:]
-        extension = extension.lower()
-        extension = extension.strip()
-        return ImageFormat(extension)
+    PNG = 'png'

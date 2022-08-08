@@ -20,35 +20,16 @@
 
 import unittest
 
-from brayns.core.camera.view import View
 from brayns.core.vector.vector3 import Vector3
-from tests.instance.mock_instance import MockInstance
+from brayns.core.view.view import View
+from tests.core.view.mock_view import MockView
 
 
 class TestCameraView(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._view = View(
-            position=Vector3(1, 2, 3),
-            target=Vector3(4, 5, 6),
-            up=Vector3(7, 8, 9)
-        )
-        self._message = {
-            'position': [1, 2, 3],
-            'target': [4, 5, 6],
-            'up': [7, 8, 9]
-        }
-
-    def test_from_instance(self) -> None:
-        instance = MockInstance(self._message)
-        test = View.from_instance(instance)
-        self.assertEqual(test, self._view)
-        self.assertEqual(instance.method, 'get-camera-look-at')
-        self.assertEqual(instance.params, None)
-
     def test_deserialize(self) -> None:
-        test = View.deserialize(self._message)
-        self.assertEqual(test, self._view)
+        test = View.deserialize(MockView.message)
+        self.assertEqual(test, MockView.view)
 
     def test_direction(self) -> None:
         test = View(
@@ -57,15 +38,9 @@ class TestCameraView(unittest.TestCase):
         )
         self.assertEqual(test.direction, Vector3.one)
 
-    def test_use_for_main_camera(self) -> None:
-        instance = MockInstance()
-        self._view.use_for_main_camera(instance)
-        self.assertEqual(instance.method, 'set-camera-look-at')
-        self.assertEqual(instance.params, self._message)
-
     def test_serialize(self) -> None:
-        test = self._view.serialize()
-        self.assertEqual(test, self._message)
+        test = MockView.view.serialize()
+        self.assertEqual(test, MockView.message)
 
 
 if __name__ == '__main__':

@@ -20,20 +20,22 @@
 
 import unittest
 
-from brayns.core.vector.vector3 import Vector3
 from brayns.core.geometry.sphere import Sphere
-from brayns.core.geometry.spheres import Spheres
+from brayns.core.vector.vector3 import Vector3
 
 
-class TestSpheres(unittest.TestCase):
+class TestSphere(unittest.TestCase):
 
-    def test_name(self) -> None:
-        self.assertEqual(Spheres.name, 'spheres')
+    def test_method(self) -> None:
+        self.assertEqual(Sphere.method, 'add-spheres')
 
-    def test_serialize_geometry(self) -> None:
+    def test_serialize(self) -> None:
         sphere = Sphere(1, Vector3.one)
-        test = Spheres.serialize_geometry(sphere)
-        ref = sphere.serialize()
+        test = sphere.serialize()
+        ref = {
+            'center': [1, 1, 1],
+            'radius': 1,
+        }
         self.assertEqual(test, ref)
 
 

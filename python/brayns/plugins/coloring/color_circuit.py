@@ -18,7 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.common.color4 import Color4
+from brayns.core.color.color4 import Color4
 from brayns.instance.instance import Instance
 
 

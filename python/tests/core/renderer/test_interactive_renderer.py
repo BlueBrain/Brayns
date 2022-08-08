@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.common.color4 import Color4
+from brayns.core.color.color4 import Color4
 from brayns.core.renderer.interactive_renderer import InteractiveRenderer
 
 

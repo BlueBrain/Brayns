@@ -21,9 +21,9 @@
 import math
 import unittest
 
-from brayns.core.view.fovy import Fovy
-from brayns.core.common.bounds import Bounds
+from brayns.core.bounds.bounds import Bounds
 from brayns.core.vector.vector3 import Vector3
+from brayns.core.view.fovy import Fovy
 
 
 class TestFovy(unittest.TestCase):
