@@ -33,7 +33,7 @@ class MockModel:
         return Model(
             id=0,
             bounds=MockBounds.bounds,
-            metadata={'test': 1},
+            metadata={'test': '1'},
             visible=True,
             transform=MockTransform.transform
         )
@@ -44,7 +44,7 @@ class MockModel:
         return {
             'model_id': 0,
             'bounds': MockBounds.message,
-            'metadata': {'test': 1},
+            'metadata': {'test': '1'},
             'is_visible': True,
             'transform': MockTransform.message
         }
