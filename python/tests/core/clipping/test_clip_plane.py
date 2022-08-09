@@ -21,31 +21,15 @@
 import unittest
 
 from brayns.core.clipping.clip_plane import ClipPlane
-from tests.instance.mock_instance import MockInstance
 
 
 class TestClipPlane(unittest.TestCase):
 
-    def test_remove(self) -> None:
-        instance = MockInstance()
-        ids = [1, 2, 3]
-        ClipPlane.remove(instance, ids)
-        self.assertEqual(instance.method, 'remove-clip-planes')
-        self.assertEqual(instance.params, {'ids': ids})
-
-    def test_clear(self) -> None:
-        instance = MockInstance()
-        ClipPlane.clear(instance)
-        self.assertEqual(instance.method, 'clear-clip-planes')
-        self.assertEqual(instance.params, None)
-
-    def test_add(self) -> None:
-        instance = MockInstance(0)
+    def test_serialize(self) -> None:
         plane = ClipPlane(1, 2, 3, 4)
-        test = plane.add(instance)
-        self.assertEqual(test, 0)
-        self.assertEqual(instance.method, 'add-clip-plane')
-        self.assertEqual(instance.params, {'coefficients': [1, 2, 3, 4]})
+        test = plane.serialize()
+        ref = {'coefficients': [1, 2, 3, 4]}
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

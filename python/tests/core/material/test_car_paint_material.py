@@ -20,7 +20,6 @@
 
 import unittest
 
-from brayns.core.common.color3 import Color3
 from brayns.core.material.car_paint_material import CarPaintMaterial
 
 
@@ -28,11 +27,9 @@ class TestCarPaintMaterial(unittest.TestCase):
 
     def setUp(self) -> None:
         self._material = CarPaintMaterial(
-            color=Color3.red,
             flake_density=3
         )
         self._message = {
-            'color': [1, 0, 0],
             'flake_density': 3
         }
 

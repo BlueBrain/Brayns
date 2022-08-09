@@ -18,8 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
 
 from brayns.instance.websocket.async_web_socket_connector import AsyncWebSocketConnector
 from brayns.instance.websocket.event_loop import EventLoop
@@ -33,7 +34,7 @@ class WebSocketConnector:
 
     uri: str
     listener: WebSocketListener
-    ssl_context: Optional[SslClientContext] = None
+    ssl_context: SslClientContext | None = None
 
     def connect(self) -> WebSocketClient:
         loop = EventLoop()

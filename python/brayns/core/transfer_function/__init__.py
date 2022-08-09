@@ -19,13 +19,17 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.transfer_function.control_point import ControlPoint
+from brayns.core.transfer_function.get_transfer_function import get_transfer_function
 from brayns.core.transfer_function.opacity_curve import OpacityCurve
+from brayns.core.transfer_function.set_transfer_function import set_transfer_function
 from brayns.core.transfer_function.transfer_function import TransferFunction
 from brayns.core.transfer_function.value_range import ValueRange
 
 __all__ = [
     'ControlPoint',
+    'get_transfer_function',
     'OpacityCurve',
+    'set_transfer_function',
     'TransferFunction',
-    'ValueRange'
+    'ValueRange',
 ]

@@ -18,8 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import logging
-from typing import Optional
 
 import brayns
 from testapi.api_test_case import ApiTestCase
@@ -81,8 +82,8 @@ class TestConnector(ApiTestCase):
     def _connect(
         self,
         secure: bool = False,
-        max_attempts: Optional[int] = None,
-        cafile: Optional[str] = None
+        max_attempts: int | None = None,
+        cafile: str | None = None
     ) -> brayns.Instance:
         connector = brayns.Connector(
             uri=self.uri,

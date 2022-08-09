@@ -25,10 +25,8 @@ from testapi.simple_test_case import SimpleTestCase
 class CameraTestCase(SimpleTestCase):
 
     def run_tests(self, camera: brayns.Camera) -> None:
-        camera.use_as_main_camera(self.instance)
-        name = camera.get_main_camera_name(self.instance)
+        brayns.set_camera(self.instance, camera)
+        name = brayns.get_camera_name(self.instance)
         self.assertEqual(name, camera.name)
-        current = camera.is_main_camera(self.instance)
-        self.assertTrue(current)
-        test = camera.from_instance(self.instance)
+        test = brayns.get_camera(self.instance, type(camera))
         self.assertEqual(test, camera)

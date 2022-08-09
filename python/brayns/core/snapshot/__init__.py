@@ -19,13 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.snapshot.frame_exporter import FrameExporter
-from brayns.core.snapshot.image_format import ImageFormat
 from brayns.core.snapshot.key_frame import KeyFrame
 from brayns.core.snapshot.snapshot import Snapshot
 
 __all__ = [
     'FrameExporter',
-    'ImageFormat',
     'KeyFrame',
-    'Snapshot'
+    'Snapshot',
 ]

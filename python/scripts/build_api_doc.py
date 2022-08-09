@@ -18,11 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import json
 import pathlib
 import sys
 from collections import defaultdict
-from typing import Optional
 
 import brayns
 
@@ -219,7 +220,7 @@ def build_from_uri(uri: str, directory: str) -> None:
 
 
 def build_from_instance(instance: brayns.Instance, directory: str) -> None:
-    entrypoints = brayns.Entrypoint.get_all(instance)
+    entrypoints = brayns.get_entrypoints(instance)
     return build_from_entrypoints(entrypoints, directory)
 
 
@@ -304,13 +305,13 @@ def format_entrypoint(entrypoint: brayns.Entrypoint, separator: bool = True) -> 
     )
 
 
-def format_params(schema: Optional[brayns.JsonSchema]) -> str:
+def format_params(schema: brayns.JsonSchema | None) -> str:
     if schema is None:
         return NO_PARAMS
     return format_schema(schema)
 
 
-def format_result(schema: Optional[brayns.JsonSchema]) -> str:
+def format_result(schema: brayns.JsonSchema | None) -> str:
     if schema is None:
         return NO_RESULT
     return format_schema(schema)

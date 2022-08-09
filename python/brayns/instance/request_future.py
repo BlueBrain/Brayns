@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from collections.abc import Callable, Iterator
 from typing import Any
 
@@ -28,7 +30,7 @@ from brayns.instance.request_progress import RequestProgress
 class RequestFuture:
 
     @staticmethod
-    def from_result(result: Any) -> 'RequestFuture':
+    def from_result(result: Any) -> RequestFuture:
         return RequestFuture(
             task=JsonRpcTask.from_result(result),
             cancel=lambda: None,

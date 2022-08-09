@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import json
+from typing import Any
 
 from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
 from brayns.instance.jsonrpc.json_rpc_listener import JsonRpcListener
@@ -47,27 +48,27 @@ class JsonRpcDispatcher:
             return
         raise ValueError('Unsupported JSON-RPC message')
 
-    def _parse(self, data: str) -> dict:
+    def _parse(self, data: str) -> dict[str, Any]:
         message = json.loads(data)
         if not isinstance(message, dict):
             raise ValueError('Message is not a JSON object')
         return message
 
-    def _dispatch_error(self, message: dict) -> bool:
+    def _dispatch_error(self, message: dict[str, Any]) -> bool:
         if 'error' not in message:
             return False
         error = JsonRpcError.deserialize(message)
         self._listener.on_error(error)
         return True
 
-    def _dispatch_reply(self, message: dict) -> bool:
+    def _dispatch_reply(self, message: dict[str, Any]) -> bool:
         if 'result' not in message:
             return False
         reply = JsonRpcReply.deserialize(message)
         self._listener.on_reply(reply)
         return True
 
-    def _dispatch_progress(self, message: dict) -> bool:
+    def _dispatch_progress(self, message: dict[str, Any]) -> bool:
         if 'id' in message:
             return False
         progress = JsonRpcProgress.deserialize(message)

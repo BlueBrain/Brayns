@@ -25,18 +25,9 @@ from testapi.simple_test_case import SimpleTestCase
 class MaterialTestCase(SimpleTestCase):
 
     def run_tests(self, material: brayns.Material) -> None:
-        boxes = brayns.Boxes([
-            (
-                brayns.Box(-brayns.Vector3.one, brayns.Vector3.one),
-                brayns.Color4.red
-            )
-        ])
-        model = boxes.add(self.instance)
-        id = model.id
-        material.apply(self.instance, id)
-        name = brayns.Material.get_material_name(self.instance, id)
+        model = brayns.add_geometries(self.instance, [brayns.Sphere(1)])
+        brayns.set_material(self.instance, model.id, material)
+        name = brayns.get_material_name(self.instance, model.id)
         self.assertEqual(name, material.name)
-        applied = material.is_applied(self.instance, id)
-        self.assertTrue(applied)
-        test = material.from_model(self.instance, id)
+        test = brayns.get_material(self.instance, model.id, type(material))
         self.assertEqual(test, material)

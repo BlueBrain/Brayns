@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 
@@ -29,10 +31,10 @@ class ControlPoint:
 
     @classmethod
     @property
-    def start(cls) -> 'ControlPoint':
+    def start(cls) -> ControlPoint:
         return ControlPoint(0.0, 0.0)
 
     @classmethod
     @property
-    def end(cls) -> 'ControlPoint':
+    def end(cls) -> ControlPoint:
         return ControlPoint(1.0, 1.0)

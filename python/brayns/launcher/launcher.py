@@ -18,10 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass, field
-from typing import Optional
+from __future__ import annotations
 
-from brayns.core.common.resolution import Resolution
+from dataclasses import dataclass, field
+
+from brayns.core.image.resolution import Resolution
 from brayns.launcher.log_level import LogLevel
 from brayns.launcher.plugin import Plugin
 from brayns.launcher.process import Process
@@ -33,7 +34,7 @@ class Launcher:
 
     executable: str
     uri: str
-    ssl_context: Optional[SslServerContext] = None
+    ssl_context: SslServerContext | None = None
     log_level: LogLevel = LogLevel.WARN
     resolution: Resolution = Resolution.full_hd
     jpeg_quality: int = 100

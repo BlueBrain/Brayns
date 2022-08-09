@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import subprocess
 import threading
 from collections import deque
@@ -42,7 +44,7 @@ class Process:
         self._lock = threading.RLock()
         self._thread.start()
 
-    def __enter__(self) -> 'Process':
+    def __enter__(self) -> Process:
         return self
 
     def __exit__(self, *_) -> None:

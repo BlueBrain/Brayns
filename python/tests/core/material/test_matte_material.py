@@ -20,7 +20,6 @@
 
 import unittest
 
-from brayns.core.common.color3 import Color3
 from brayns.core.material.matte_material import MatteMaterial
 
 
@@ -28,11 +27,9 @@ class TestMatteMaterial(unittest.TestCase):
 
     def setUp(self) -> None:
         self._material = MatteMaterial(
-            color=Color3.red,
             opacity=0.5
         )
         self._message = {
-            'color': [1, 0, 0],
             'opacity': 0.5
         }
 

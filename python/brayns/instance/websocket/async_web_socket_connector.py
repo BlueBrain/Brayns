@@ -18,9 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import ssl
 from dataclasses import dataclass
-from typing import Optional
 
 from brayns.instance.websocket.async_web_socket import AsyncWebSocket
 from brayns.instance.websocket.invalid_server_certificate_error import InvalidServerCertificateError
@@ -35,7 +36,7 @@ from websockets.exceptions import WebSocketException
 class AsyncWebSocketConnector:
 
     uri: str
-    ssl_context: Optional[SslClientContext] = None
+    ssl_context: SslClientContext | None = None
 
     async def connect(self) -> AsyncWebSocket:
         try:
@@ -58,7 +59,7 @@ class AsyncWebSocketConnector:
         protocol = 'ws://' if self.ssl_context is None else 'wss://'
         return protocol + self.uri
 
-    def _create_ssl_context(self) -> Optional[ssl.SSLContext]:
+    def _create_ssl_context(self) -> ssl.SSLContext | None:
         if self.ssl_context is None:
             return None
         return self.ssl_context.create()

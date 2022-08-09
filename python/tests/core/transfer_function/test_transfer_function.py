@@ -20,53 +20,19 @@
 
 import unittest
 
-from brayns.core.common.color4 import Color4
 from brayns.core.transfer_function.transfer_function import TransferFunction
-from brayns.core.transfer_function.value_range import ValueRange
-from tests.instance.mock_instance import MockInstance
+from tests.core.transfer_function.mock_transfer_function import MockTransferFunction
 
 
 class TestTransferFunction(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._function = TransferFunction(
-            value_range=ValueRange(0, 1),
-            colors=[
-                Color4.red,
-                Color4.blue
-            ]
-        )
-        self._message = {
-            'range': [0, 1],
-            'colors': [
-                [1, 0, 0, 1],
-                [0, 0, 1, 1]
-            ]
-        }
-
-    def test_from_model(self) -> None:
-        instance = MockInstance(self._message)
-        test = TransferFunction.from_model(instance, 0)
-        self.assertEqual(test, self._function)
-        self.assertEqual(instance.method, 'get-model-transfer-function')
-        self.assertEqual(instance.params, {'id': 0})
-
     def test_deserialize(self) -> None:
-        test = TransferFunction.deserialize(self._message)
-        self.assertEqual(test, self._function)
-
-    def test_apply(self) -> None:
-        instance = MockInstance()
-        self._function.apply(instance, 0)
-        self.assertEqual(instance.method, 'set-model-transfer-function')
-        self.assertEqual(instance.params, {
-            'id': 0,
-            'transfer_function': self._message
-        })
+        test = TransferFunction.deserialize(MockTransferFunction.message)
+        self.assertEqual(test, MockTransferFunction.transfer_function)
 
     def test_serialize(self) -> None:
-        test = self._function.serialize()
-        self.assertEqual(test, self._message)
+        test = MockTransferFunction.transfer_function.serialize()
+        self.assertEqual(test, MockTransferFunction.message)
 
 
 if __name__ == '__main__':

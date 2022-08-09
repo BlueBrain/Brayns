@@ -17,15 +17,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from dataclasses import field
+from dataclasses import dataclass, field
+from typing import Any
 
-from brayns.core.model.model_loader import ModelLoader
-from brayns.plugins.common.morphology_parameters import MorphologyParameters
+from brayns.core.loader.loader import Loader
+from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
 
 
 @dataclass
-class MorphologyLoader(ModelLoader):
+class MorphologyLoader(Loader):
 
     morphology: MorphologyParameters = field(
         default_factory=MorphologyParameters
@@ -37,5 +37,5 @@ class MorphologyLoader(ModelLoader):
         return 'Neuron Morphology loader'
 
     @property
-    def properties(self) -> dict:
+    def properties(self) -> dict[str, Any]:
         return self.morphology.serialize()

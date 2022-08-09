@@ -20,8 +20,8 @@
 
 import unittest
 
-from brayns.plugins.common.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.common.morphology_parameters import MorphologyParameters
+from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
+from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
 from brayns.plugins.sonata.sonata_edge_population import SonataEdgePopulation
 from brayns.plugins.sonata.sonata_node_population import SonataNodePopulation
 from brayns.plugins.sonata.sonata_nodes import SonataNodes

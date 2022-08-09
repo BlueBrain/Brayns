@@ -18,15 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import pathlib
 import subprocess
 from collections import deque
 from dataclasses import dataclass
-from typing import IO, Optional, cast
+from typing import IO, cast
 
-from brayns.core.common.resolution import Resolution
+from brayns.core.image.image_format import ImageFormat
+from brayns.core.image.resolution import Resolution
 from brayns.core.movie.movie_error import MovieError
-from brayns.core.snapshot.image_format import ImageFormat
 
 
 @dataclass
@@ -35,10 +37,10 @@ class Movie:
     frames_folder: str
     frames_format: ImageFormat = ImageFormat.PNG
     fps: float = 25.0
-    resolution: Optional[Resolution] = None
-    bitrate: Optional[int] = None
-    encoder: Optional[str] = None
-    pixel_format: Optional[str] = 'yuv420p'
+    resolution: Resolution | None = None
+    bitrate: int | None = None
+    encoder: str | None = None
+    pixel_format: str | None = 'yuv420p'
     ffmpeg_executable: str = 'ffmpeg'
 
     def save(self, path: str) -> str:

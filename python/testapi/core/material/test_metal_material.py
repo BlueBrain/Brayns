@@ -26,7 +26,6 @@ class TestMetalMaterial(MaterialTestCase):
 
     def test_all(self) -> None:
         material = brayns.MetalMaterial(
-            color=brayns.Color3.red,
             roughness=0.5
         )
         self.run_tests(material)

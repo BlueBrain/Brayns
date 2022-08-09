@@ -19,17 +19,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+from testapi.core.light.light_test_case import LightTestCase
 
 
-class TestDirectionalLight(SimpleTestCase):
+class TestDirectionalLight(LightTestCase):
 
-    def test_add(self) -> None:
+    def test_all(self) -> None:
         light = brayns.DirectionalLight(
             color=brayns.Color3.red,
             intensity=5,
             visible=True,
             direction=brayns.Vector3.up
         )
-        id = light.add(self.instance)
-        self.assertEqual(id, 0)
+        self.run_tests(light)

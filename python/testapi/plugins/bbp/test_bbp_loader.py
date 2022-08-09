@@ -22,7 +22,6 @@ import pathlib
 from typing import cast
 
 import brayns
-from brayns.core.camera.camera_view import CameraView
 from testapi.image_validator import ImageValidator
 from testapi.simple_test_case import SimpleTestCase
 
@@ -55,7 +54,7 @@ class TestBbpLoader(SimpleTestCase):
 
     def _snapshot(self, bounds: brayns.Bounds) -> None:
         snapshot = self._create_snapshot(bounds)
-        view = cast(CameraView, snapshot.view)
+        view = cast(brayns.View, snapshot.view)
         self._adjust_lights(view)
         snapshot.save(self.instance, str(self.output))
 
@@ -71,9 +70,9 @@ class TestBbpLoader(SimpleTestCase):
             renderer=renderer
         )
 
-    def _adjust_lights(self, view: brayns.CameraView) -> None:
+    def _adjust_lights(self, view: brayns.View) -> None:
         light = brayns.DirectionalLight(
             intensity=5,
             direction=view.direction
         )
-        light.add(self.instance)
+        brayns.add_light(self.instance, light)

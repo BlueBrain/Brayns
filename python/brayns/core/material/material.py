@@ -20,18 +20,13 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TypeVar
-
-from brayns.instance.instance import Instance
-from brayns.core.common.color3 import Color3
+from typing import Any, TypeVar
 
 T = TypeVar('T', bound='Material')
 
 
 @dataclass
 class Material(ABC):
-
-    color: Color3 = Color3.white
 
     @classmethod
     @property
@@ -41,43 +36,9 @@ class Material(ABC):
 
     @classmethod
     @abstractmethod
-    def deserialize(cls: type[T], message: dict) -> T:
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
         pass
 
     @abstractmethod
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         pass
-
-    @staticmethod
-    def get_material_name(instance: Instance, model_id: int) -> str:
-        params = {'id': model_id}
-        return instance.request('get-material-type', params)
-
-    @classmethod
-    def from_model(cls: type[T], instance: Instance, model_id: int) -> T:
-        params = {'id': model_id}
-        result = instance.request(f'get-material-{cls.name}', params)
-        return cls.deserialize(result)
-
-    @classmethod
-    def is_applied(cls, instance: Instance, model_id: int) -> bool:
-        return cls.name == Material.get_material_name(instance, model_id)
-
-    def apply(self, instance: Instance, model_id: int) -> None:
-        params = {
-            'model_id': model_id,
-            'material': self.serialize()
-        }
-        instance.request(f'set-material-{self.name}', params)
-
-    @classmethod
-    def _from_dict(cls: type[T], message: dict, **kwargs) -> T:
-        return cls(
-            color=Color3(*message['color']),
-            **kwargs
-        )
-
-    def _to_dict(self, properties: dict) -> dict:
-        return {
-            'color': list(self.color),
-        } | properties

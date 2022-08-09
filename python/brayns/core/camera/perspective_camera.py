@@ -19,15 +19,18 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any, TypeVar
 
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.fovy import Fovy
+from brayns.core.view.fovy import Fovy
+
+T = TypeVar('T', bound='PerspectiveCamera')
 
 
 @dataclass
 class PerspectiveCamera(Camera):
 
-    fovy: Fovy = Fovy()
+    fovy: Fovy = Fovy(45, degrees=True)
     aperture_radius: float = 0.0
     focus_distance: float = 1.0
 
@@ -37,16 +40,16 @@ class PerspectiveCamera(Camera):
         return 'perspective'
 
     @classmethod
-    def deserialize(cls, message: dict) -> 'PerspectiveCamera':
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
         return cls(
             fovy=Fovy(message['fovy'], degrees=True),
             aperture_radius=message['aperture_radius'],
-            focus_distance=message['focus_distance']
+            focus_distance=message['focus_distance'],
         )
 
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         return {
             'fovy': self.fovy.degrees,
             'aperture_radius': self.aperture_radius,
-            'focus_distance': self.focus_distance
+            'focus_distance': self.focus_distance,
         }

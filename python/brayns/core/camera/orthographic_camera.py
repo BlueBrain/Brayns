@@ -19,11 +19,14 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any, TypeVar
 
+from brayns.core.bounds.bounds import Bounds
 from brayns.core.camera.camera import Camera
-from brayns.core.camera.camera_view import CameraView
-from brayns.core.common.bounds import Bounds
-from brayns.core.common.vector3 import Vector3
+from brayns.core.vector.vector3 import Vector3
+from brayns.core.view.view import View
+
+T = TypeVar('T', bound='OrthographicCamera')
 
 
 @dataclass
@@ -32,8 +35,11 @@ class OrthographicCamera(Camera):
     height: float = 0.0
 
     @staticmethod
-    def from_target(target: Bounds) -> 'OrthographicCamera':
-        return OrthographicCamera(target.height)
+    def get_front_view(target: Bounds) -> View:
+        center = target.center
+        distance = target.depth
+        position = center + distance * Vector3.forward
+        return View(position, center)
 
     @classmethod
     @property
@@ -41,18 +47,12 @@ class OrthographicCamera(Camera):
         return 'orthographic'
 
     @classmethod
-    def deserialize(cls, message: dict) -> 'OrthographicCamera':
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
         return cls(
-            height=message['height'],
+            height=message['height']
         )
 
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         return {
             'height': self.height
         }
-
-    def get_full_screen_view(self, target: Bounds) -> CameraView:
-        center = target.center
-        distance = target.depth
-        position = center + distance * Vector3.forward
-        return CameraView(position, center)

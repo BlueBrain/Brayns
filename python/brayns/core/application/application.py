@@ -18,11 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Optional
+from __future__ import annotations
 
-from brayns.core.common.resolution import Resolution
-from brayns.instance.instance import Instance
+from dataclasses import dataclass
+from typing import Any
+
+from brayns.core.image.resolution import Resolution
 
 
 @dataclass
@@ -33,27 +34,9 @@ class Application:
     jpeg_quality: int
 
     @staticmethod
-    def from_instance(instance: Instance) -> 'Application':
-        result = instance.request('get-application-parameters')
-        return Application.deserialize(result)
-
-    @staticmethod
-    def deserialize(message: dict) -> 'Application':
+    def deserialize(message: dict[str, Any]) -> Application:
         return Application(
             plugins=message['plugins'],
             resolution=Resolution(*message['viewport']),
-            jpeg_quality=message['jpeg_quality']
+            jpeg_quality=message['jpeg_quality'],
         )
-
-    @staticmethod
-    def update(
-        instance: Instance,
-        resolution: Optional[Resolution] = None,
-        jpeg_quality: Optional[int] = None
-    ) -> None:
-        params = {}
-        if resolution is not None:
-            params['viewport'] = list(resolution)
-        if jpeg_quality is not None:
-            params['jpeg_quality'] = jpeg_quality
-        instance.request('set-application-parameters', params)

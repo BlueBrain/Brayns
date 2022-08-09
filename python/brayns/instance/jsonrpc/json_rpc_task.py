@@ -18,8 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from collections import deque
-from typing import Any, Optional
+from typing import Any
 
 from brayns.instance.request_error import RequestError
 from brayns.instance.request_progress import RequestProgress
@@ -28,7 +30,7 @@ from brayns.instance.request_progress import RequestProgress
 class JsonRpcTask:
 
     @staticmethod
-    def from_result(result: Any) -> 'JsonRpcTask':
+    def from_result(result: Any) -> JsonRpcTask:
         task = JsonRpcTask()
         task.set_result(result)
         return task
@@ -36,7 +38,7 @@ class JsonRpcTask:
     def __init__(self) -> None:
         self._ready = False
         self._result: Any = None
-        self._error: Optional[RequestError] = None
+        self._error: RequestError | None = None
         self._progresses = deque[RequestProgress]()
 
     def is_ready(self) -> bool:

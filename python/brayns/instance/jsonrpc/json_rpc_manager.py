@@ -18,11 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import logging
 
 from brayns.instance.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
 from brayns.instance.jsonrpc.json_rpc_handler import JsonRpcHandler
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
 from brayns.instance.jsonrpc.json_rpc_tasks import JsonRpcTasks
 from brayns.instance.request_error import RequestError
@@ -37,7 +38,7 @@ class JsonRpcManager:
             listener=JsonRpcHandler(self._tasks, self._logger)
         )
 
-    def is_running(self, id: JsonRpcId) -> bool:
+    def is_running(self, id: int | str) -> bool:
         return id in self._tasks
 
     def clear(self) -> None:
@@ -45,7 +46,7 @@ class JsonRpcManager:
         error = RequestError(0, 'Disconnection from client side')
         self._tasks.add_global_error(error)
 
-    def create_task(self, id: JsonRpcId) -> JsonRpcTask:
+    def create_task(self, id: int | str) -> JsonRpcTask:
         self._logger.debug('Create JSON-RPC task with ID %s.', id)
         return self._tasks.create_task(id)
 

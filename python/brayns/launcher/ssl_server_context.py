@@ -18,17 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
 class SslServerContext:
 
-    private_key_file: Optional[str] = None
-    private_key_passphrase: Optional[str] = None
-    certificate_file: Optional[str] = None
-    ca_location: Optional[str] = None
+    private_key_file: str | None = None
+    private_key_passphrase: str | None = None
+    certificate_file: str | None = None
+    ca_location: str | None = None
 
     def get_command_line(self) -> list[str]:
         args = []

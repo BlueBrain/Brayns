@@ -19,12 +19,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+from testapi.core.light.light_test_case import LightTestCase
 
 
-class TestQuadLight(SimpleTestCase):
+class TestQuadLight(LightTestCase):
 
-    def test_add(self) -> None:
+    def test_all(self) -> None:
         light = brayns.QuadLight(
             color=brayns.Color3.red,
             intensity=5,
@@ -33,5 +33,4 @@ class TestQuadLight(SimpleTestCase):
             edge1=brayns.Vector3.up,
             edge2=brayns.Vector3.right
         )
-        id = light.add(self.instance)
-        self.assertEqual(id, 0)
+        self.run_tests(light)

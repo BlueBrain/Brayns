@@ -18,9 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import threading
 from collections import deque
-from typing import Optional, Union
 
 from brayns.instance.websocket.connection_closed_error import ConnectionClosedError
 from brayns.instance.websocket.protocol_error import ProtocolError
@@ -32,15 +33,15 @@ class AsyncWebSocket:
 
     def __init__(self, websocket: WebSocketClientProtocol) -> None:
         self._websocket = websocket
-        self._queue = deque[Union[bytes, str]]()
+        self._queue: deque[bytes | str] = deque()
         self._condition = threading.Condition()
-        self._error: Optional[Exception] = None
+        self._error: Exception | None = None
 
     @property
     def closed(self) -> bool:
         return self._websocket.closed
 
-    def poll(self, block: bool) -> Optional[Union[bytes, str]]:
+    def poll(self, block: bool) -> bytes | str | None:
         with self._condition:
             data = self._get_data()
             if data is not None:
@@ -53,7 +54,7 @@ class AsyncWebSocket:
     async def close(self) -> None:
         await self._websocket.close()
 
-    async def send(self, data: Union[bytes, str]) -> None:
+    async def send(self, data: bytes | str) -> None:
         try:
             await self._websocket.send(data)
         except ConnectionClosed as e:
@@ -71,14 +72,14 @@ class AsyncWebSocket:
                 return
             self._set_data(data)
 
-    def _get_data(self) -> Optional[Union[bytes, str]]:
+    def _get_data(self) -> bytes | str | None:
         if self._error is not None:
             raise self._error
         if not self._queue:
             return None
         return self._queue.popleft()
 
-    def _set_data(self, data: Union[bytes, str]) -> None:
+    def _set_data(self, data: bytes | str) -> None:
         with self._condition:
             self._queue.append(data)
             self._condition.notify_all()

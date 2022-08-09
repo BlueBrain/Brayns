@@ -18,21 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import json
 from dataclasses import dataclass, field
-from typing import Any, Optional
-
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
+from typing import Any
 
 
 @dataclass
 class JsonRpcRequest:
 
-    id: Optional[JsonRpcId]
+    id: int | str | None
     method: str
     params: Any = field(default=None, repr=False)
 
-    def to_dict(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         message: dict[str, Any] = {
             'jsonrpc': '2.0',
             'method': self.method
@@ -44,4 +44,4 @@ class JsonRpcRequest:
         return message
 
     def to_json(self) -> str:
-        return json.dumps(self.to_dict())
+        return json.dumps(self.serialize())

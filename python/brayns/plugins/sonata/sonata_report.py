@@ -18,53 +18,55 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass(frozen=True)
 class SonataReport:
 
     type: str
-    name: Optional[str] = None
-    spike_transition_time: Optional[float] = None
+    name: str | None = None
+    spike_transition_time: float | None = None
 
     @staticmethod
-    def none() -> 'SonataReport':
+    def none() -> SonataReport:
         return SonataReport(type='none')
 
     @staticmethod
-    def spikes(spike_transition_time: float = 1.0) -> 'SonataReport':
+    def spikes(spike_transition_time: float = 1.0) -> SonataReport:
         return SonataReport(
             type='spikes',
             spike_transition_time=spike_transition_time
         )
 
     @staticmethod
-    def compartment(name: str) -> 'SonataReport':
+    def compartment(name: str) -> SonataReport:
         return SonataReport(type='compartment', name=name)
 
     @staticmethod
-    def summation(name: str) -> 'SonataReport':
+    def summation(name: str) -> SonataReport:
         return SonataReport(type='summation', name=name)
 
     @staticmethod
-    def synapse(name: str) -> 'SonataReport':
+    def synapse(name: str) -> SonataReport:
         return SonataReport(type='synapse', name=name)
 
     @staticmethod
-    def bloodflow_pressure(name: str) -> 'SonataReport':
+    def bloodflow_pressure(name: str) -> SonataReport:
         return SonataReport(type='bloodflow_pressure', name=name)
 
     @staticmethod
-    def bloodflow_speed(name: str) -> 'SonataReport':
+    def bloodflow_speed(name: str) -> SonataReport:
         return SonataReport(type='bloodflow_speed', name=name)
 
     @staticmethod
-    def bloodflow_radii(name: str) -> 'SonataReport':
+    def bloodflow_radii(name: str) -> SonataReport:
         return SonataReport(type='bloodflow_radii', name=name)
 
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         message: dict[str, Any] = {
             'report_type': self.type
         }

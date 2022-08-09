@@ -21,47 +21,14 @@
 import unittest
 
 from brayns.core.application.application import Application
-from brayns.core.common.resolution import Resolution
-from tests.instance.mock_instance import MockInstance
+from tests.core.application.mock_application import MockApplication
 
 
 class TestApplication(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._application = Application(
-            plugins=['test1', 'test2'],
-            resolution=Resolution(100, 200),
-            jpeg_quality=50
-        )
-        self._message = {
-            'plugins': ['test1', 'test2'],
-            'viewport': [100, 200],
-            'jpeg_quality': 50
-        }
-
-    def test_from_instance(self) -> None:
-        instance = MockInstance(self._message)
-        test = Application.from_instance(instance)
-        self.assertEqual(test, self._application)
-        self.assertEqual(instance.method, 'get-application-parameters')
-        self.assertEqual(instance.params, None)
-
     def test_deserialize(self) -> None:
-        test = Application.deserialize(self._message)
-        self.assertEqual(test, self._application)
-
-    def test_update(self) -> None:
-        instance = MockInstance()
-        Application.update(
-            instance,
-            resolution=Resolution(100, 200),
-            jpeg_quality=50
-        )
-        self.assertEqual(instance.method, 'set-application-parameters')
-        self.assertEqual(instance.params, {
-            'viewport': [100, 200],
-            'jpeg_quality': 50
-        })
+        test = Application.deserialize(MockApplication.message)
+        self.assertEqual(test, MockApplication.application)
 
 
 if __name__ == '__main__':

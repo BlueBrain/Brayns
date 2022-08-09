@@ -21,12 +21,12 @@
 import base64
 import unittest
 
-from brayns.core.camera.camera_view import CameraView
-from brayns.core.common.resolution import Resolution
-from brayns.core.snapshot.image_format import ImageFormat
+from brayns.core.camera.perspective_camera import PerspectiveCamera
+from brayns.core.image.resolution import Resolution
+from brayns.core.renderer.production_renderer import ProductionRenderer
+from brayns.core.image.image_format import ImageFormat
 from brayns.core.snapshot.snapshot import Snapshot
-from tests.core.camera.mock_camera import MockCamera
-from tests.core.renderer.mock_renderer import MockRenderer
+from brayns.core.view.view import View
 from tests.instance.mock_instance import MockInstance
 
 
@@ -57,9 +57,9 @@ class TestSnapshot(unittest.TestCase):
             jpeg_quality=50,
             resolution=Resolution(1920, 1080),
             frame=12,
-            view=CameraView(),
-            camera=MockCamera(),
-            renderer=MockRenderer()
+            view=View(),
+            camera=PerspectiveCamera(),
+            renderer=ProductionRenderer()
         )
         ref = {
             'image_settings': {
@@ -68,9 +68,9 @@ class TestSnapshot(unittest.TestCase):
                 'size': [1920, 1080]
             },
             'simulation_frame': 12,
-            'camera_view': CameraView().serialize(),
-            'camera': MockCamera().serialize_with_name(),
-            'renderer': MockRenderer().serialize_with_name()
+            'camera_view': View().serialize(),
+            'camera': PerspectiveCamera().serialize_with_name(),
+            'renderer': ProductionRenderer().serialize_with_name()
         }
         test = snapshot.serialize_with_format(ImageFormat.JPEG)
         self.assertEqual(test, ref)

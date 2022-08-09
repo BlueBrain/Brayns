@@ -18,10 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import logging
 
 from brayns.instance.instance import Instance
-from brayns.instance.jsonrpc.json_rpc_id import JsonRpcId
 from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
 from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
 from brayns.instance.request_future import RequestFuture
@@ -44,7 +45,7 @@ class Client(Instance):
         self._manager.clear()
         self._websocket.close()
 
-    def is_running(self, id: JsonRpcId) -> int:
+    def is_running(self, id: int | str) -> bool:
         return self._manager.is_running(id)
 
     def send(self, request: JsonRpcRequest) -> RequestFuture:
@@ -65,6 +66,6 @@ class Client(Instance):
         self._logger.debug('Waiting for messages from Brayns instance.')
         self._websocket.poll(block)
 
-    def cancel(self, id: JsonRpcId) -> None:
+    def cancel(self, id: int | str) -> None:
         self._logger.info('Cancel request with ID %s.', id)
         self.request('cancel', {'id': id})

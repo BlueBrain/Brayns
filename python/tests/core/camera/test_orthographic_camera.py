@@ -20,17 +20,19 @@
 
 import unittest
 
+from brayns.core.bounds.bounds import Bounds
 from brayns.core.camera.orthographic_camera import OrthographicCamera
-from brayns.core.common.bounds import Bounds
-from brayns.core.common.vector3 import Vector3
+from brayns.core.vector.vector3 import Vector3
 
 
-class TestPerspectiveCamera(unittest.TestCase):
+class TestOrthographicCamera(unittest.TestCase):
 
-    def test_from_target(self) -> None:
+    def test_get_front_view(self) -> None:
         target = Bounds(-Vector3.one, Vector3.one)
-        test = OrthographicCamera.from_target(target)
-        self.assertEqual(test.height, 2)
+        test = OrthographicCamera.get_front_view(target)
+        self.assertEqual(test.position, 2 * Vector3.forward)
+        self.assertEqual(test.target, Vector3.zero)
+        self.assertEqual(test.up, Vector3.up)
 
     def test_name(self) -> None:
         test = OrthographicCamera.name
@@ -47,15 +49,16 @@ class TestPerspectiveCamera(unittest.TestCase):
     def test_serialize(self) -> None:
         camera = OrthographicCamera(3)
         test = camera.serialize()
-        self.assertAlmostEqual(test['height'], 3)
+        self.assertEqual(test['height'], 3)
 
-    def test_get_full_screen_view(self) -> None:
-        target = Bounds(-Vector3.one, Vector3.one)
-        camera = OrthographicCamera.from_target(target)
-        test = camera.get_full_screen_view(target)
-        self.assertEqual(test.position, 2 * Vector3.forward)
-        self.assertEqual(test.target, Vector3.zero)
-        self.assertEqual(test.up, Vector3.up)
+    def test_serialize_with_name(self) -> None:
+        camera = OrthographicCamera()
+        test = camera.serialize_with_name()
+        ref = {
+            'name': OrthographicCamera.name,
+            'params': camera.serialize(),
+        }
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

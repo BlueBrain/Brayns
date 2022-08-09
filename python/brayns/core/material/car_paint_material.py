@@ -19,8 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any, TypeVar
 
 from brayns.core.material.material import Material
+
+T = TypeVar('T', bound='CarPaintMaterial')
 
 
 @dataclass
@@ -34,13 +37,12 @@ class CarPaintMaterial(Material):
         return 'carpaint'
 
     @classmethod
-    def deserialize(cls, message: dict) -> 'CarPaintMaterial':
-        return cls._from_dict(
-            message,
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        return cls(
             flake_density=message['flake_density']
         )
 
-    def serialize(self) -> dict:
-        return self._to_dict({
+    def serialize(self) -> dict[str, Any]:
+        return {
             'flake_density': self.flake_density
-        })
+        }

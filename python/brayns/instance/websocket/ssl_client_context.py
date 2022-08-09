@@ -18,17 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import ssl
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
 class SslClientContext:
 
-    cafile: Optional[str] = None
-    capath: Optional[str] = None
-    cadata: Optional[str] = None
+    cafile: str | None = None
+    capath: str | None = None
+    cadata: str | None = None
 
     def create(self) -> ssl.SSLContext:
         return ssl.create_default_context(

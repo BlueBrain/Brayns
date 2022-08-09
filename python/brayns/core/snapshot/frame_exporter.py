@@ -18,13 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 from brayns.core.camera.camera import Camera
-from brayns.core.common.resolution import Resolution
+from brayns.core.image.resolution import Resolution
 from brayns.core.renderer.renderer import Renderer
-from brayns.core.snapshot.image_format import ImageFormat
+from brayns.core.image.image_format import ImageFormat
 from brayns.core.snapshot.key_frame import KeyFrame
 from brayns.instance.instance import Instance
 
@@ -34,16 +36,16 @@ class FrameExporter:
 
     frames: list[KeyFrame]
     format: ImageFormat = ImageFormat.PNG
-    resolution: Optional[Resolution] = None
-    camera: Optional[Camera] = None
-    renderer: Optional[Renderer] = None
+    resolution: Resolution | None = None
+    camera: Camera | None = None
+    renderer: Renderer | None = None
     jpeg_quality: int = 100
 
     def export_frames(self, instance: Instance, folder: str) -> None:
         params = self.serialize(folder)
         instance.request('export-frames', params)
 
-    def serialize(self, folder: str) -> dict:
+    def serialize(self, folder: str) -> dict[str, Any]:
         message = {
             'path': folder,
             'key_frames': [

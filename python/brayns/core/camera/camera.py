@@ -19,9 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from abc import ABC, abstractmethod
-from typing import TypeVar
-
-from brayns.instance.instance import Instance
+from typing import Any, TypeVar
 
 T = TypeVar('T', bound='Camera')
 
@@ -36,31 +34,14 @@ class Camera(ABC):
 
     @classmethod
     @abstractmethod
-    def deserialize(cls: type[T], message: dict) -> T:
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
         pass
 
     @abstractmethod
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         pass
 
-    @staticmethod
-    def get_main_camera_name(instance: Instance) -> str:
-        return instance.request('get-camera-type')
-
-    @classmethod
-    def from_instance(cls: type[T], instance: Instance) -> T:
-        result = instance.request(f'get-camera-{cls.name}')
-        return cls.deserialize(result)
-
-    @classmethod
-    def is_main_camera(cls, instance: Instance) -> bool:
-        return cls.name == Camera.get_main_camera_name(instance)
-
-    def use_as_main_camera(self, instance: Instance) -> None:
-        params = self.serialize()
-        instance.request(f'set-camera-{self.name}', params)
-
-    def serialize_with_name(self) -> dict:
+    def serialize_with_name(self) -> dict[str, Any]:
         return {
             'name': self.name,
             'params': self.serialize()

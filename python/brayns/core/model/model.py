@@ -18,12 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Optional
+from __future__ import annotations
 
-from brayns.core.common.bounds import Bounds
-from brayns.core.common.transform import Transform
-from brayns.instance.instance import Instance
+from dataclasses import dataclass
+from typing import Any
+
+from brayns.core.bounds.bounds import Bounds
+from brayns.core.transform.transform import Transform
 
 
 @dataclass
@@ -31,65 +32,16 @@ class Model:
 
     id: int
     bounds: Bounds
-    metadata: dict
+    metadata: dict[str, str]
     visible: bool
     transform: Transform
 
     @staticmethod
-    def from_instance(instance: Instance, id: int) -> 'Model':
-        result = instance.request('get-model', {'id': id})
-        return Model.deserialize(result)
-
-    @staticmethod
-    def deserialize(message: dict) -> 'Model':
+    def deserialize(message: dict[str, Any]) -> Model:
         return Model(
             id=message['model_id'],
             bounds=Bounds.deserialize(message['bounds']),
             metadata=message['metadata'],
             visible=message['is_visible'],
-            transform=Transform.deserialize(message['transform'])
+            transform=Transform.deserialize(message['transform']),
         )
-
-    @staticmethod
-    def get_all(instance: Instance) -> list['Model']:
-        scene = Model._get_scene(instance)
-        return [
-            Model.deserialize(model)
-            for model in scene['models']
-        ]
-
-    @staticmethod
-    def get_bounds(instance: Instance) -> Bounds:
-        scene = Model._get_scene(instance)
-        return Bounds.deserialize(scene['bounds'])
-
-    @staticmethod
-    def remove(instance: Instance, ids: list[int]) -> None:
-        instance.request('remove-model', {'ids': ids})
-
-    @staticmethod
-    def clear(instance: Instance) -> None:
-        instance.request('clear-models')
-
-    @staticmethod
-    def update(
-        instance: Instance,
-        id: int,
-        visible: Optional[bool] = None,
-        transform: Optional[Transform] = None
-    ) -> 'Model':
-        model = {}
-        params = {
-            'model_id': id,
-            'model': model
-        }
-        if visible is not None:
-            model['is_visible'] = visible
-        if transform is not None:
-            model['transform'] = transform.serialize()
-        result = instance.request('update-model', params)
-        return Model.deserialize(result)
-
-    @staticmethod
-    def _get_scene(instance: Instance) -> dict:
-        return instance.request('get-scene')

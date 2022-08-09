@@ -20,12 +20,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import Any
 
-from brayns.core.common.color3 import Color3
-from brayns.instance.instance import Instance
-
-T = TypeVar('T', bound='Light')
+from brayns.core.color.color3 import Color3
 
 
 @dataclass
@@ -41,26 +38,18 @@ class Light(ABC):
     def name(cls) -> str:
         pass
 
+    @property
     @abstractmethod
-    def serialize(self) -> dict:
+    def additional_properties(self) -> dict[str, Any]:
         pass
 
-    @staticmethod
-    def remove(instance: Instance, ids: list[int]) -> None:
-        params = {'ids': ids}
-        instance.request('remove-lights', params)
-
-    @staticmethod
-    def clear(instance: Instance) -> None:
-        instance.request('clear-lights')
-
-    def add(self, instance: Instance) -> int:
-        params = self.serialize()
-        return instance.request(f'add-light-{self.name}', params)
-
-    def _to_dict(self, properties: dict) -> dict:
+    @property
+    def base_properties(self) -> dict[str, Any]:
         return {
             'color': list(self.color),
             'intensity': self.intensity,
             'visible': self.visible,
-        } | properties
+        }
+
+    def serialize(self) -> dict[str, Any]:
+        return self.base_properties | self.additional_properties

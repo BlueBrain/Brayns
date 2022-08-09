@@ -19,8 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any, TypeVar
 
 from brayns.core.renderer.renderer import Renderer
+
+T = TypeVar('T', bound='InteractiveRenderer')
 
 
 @dataclass
@@ -29,25 +32,22 @@ class InteractiveRenderer(Renderer):
     enable_shadows: bool = True
     ambient_occlusion_samples: int = 0
 
-    @staticmethod
-    def default() -> 'InteractiveRenderer':
-        return InteractiveRenderer()
-
     @classmethod
     @property
     def name(cls) -> str:
         return 'interactive'
 
     @classmethod
-    def deserialize(cls, message: dict) -> 'InteractiveRenderer':
-        return cls._from_dict(
+    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        return cls.deserialize_with(
             message,
             enable_shadows=message['enable_shadows'],
             ambient_occlusion_samples=message['ao_samples']
         )
 
-    def serialize(self) -> dict:
-        return self._to_dict({
+    @property
+    def additional_properties(self) -> dict[str, Any]:
+        return {
             'enable_shadows': self.enable_shadows,
             'ao_samples': self.ambient_occlusion_samples
-        })
+        }

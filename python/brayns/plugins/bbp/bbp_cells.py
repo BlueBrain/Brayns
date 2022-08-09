@@ -18,34 +18,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 
 @dataclass(frozen=True)
 class BbpCells:
 
-    density: Optional[float] = None
-    targets: Optional[list[str]] = None
-    gids: Optional[list[int]] = None
+    density: float | None = None
+    targets: list[str] | None = None
+    gids: list[int] | None = None
 
     @staticmethod
-    def all() -> 'BbpCells':
+    def all() -> BbpCells:
         return BbpCells.from_density(1.0)
 
     @staticmethod
-    def from_density(density: float) -> 'BbpCells':
+    def from_density(density: float) -> BbpCells:
         return BbpCells(density=density)
 
     @staticmethod
-    def from_targets(targets: list[str], density: float = 1.0) -> 'BbpCells':
+    def from_targets(targets: list[str], density: float = 1.0) -> BbpCells:
         return BbpCells(density=density, targets=targets)
 
     @staticmethod
-    def from_gids(gids: list[int]) -> 'BbpCells':
+    def from_gids(gids: list[int]) -> BbpCells:
         return BbpCells(gids=gids)
 
-    def serialize(self) -> dict:
+    def serialize(self) -> dict[str, Any]:
         message = {}
         if self.density is not None:
             message['percentage'] = self.density
