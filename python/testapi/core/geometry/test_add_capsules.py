@@ -25,7 +25,7 @@ from testapi.simple_test_case import SimpleTestCase
 class TestAddCapsules(SimpleTestCase):
 
     def test_add_capsules(self) -> None:
-        capsules = [
+        model = brayns.add_geometries(self.instance, [
             brayns.Capsule(
                 start_point=brayns.Vector3.zero,
                 start_radius=0,
@@ -38,8 +38,7 @@ class TestAddCapsules(SimpleTestCase):
                 end_point=brayns.Vector3.one,
                 end_radius=0,
             ).with_color(brayns.Color4.blue),
-        ]
-        model = brayns.add_geometries(self.instance, capsules)
+        ])
         self.assertEqual(model.id, 0)
         self.assertEqual(model.bounds, brayns.Bounds(
             -2 * brayns.Vector3.one,

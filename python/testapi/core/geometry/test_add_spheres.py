@@ -25,11 +25,10 @@ from testapi.simple_test_case import SimpleTestCase
 class TestAddSpheres(SimpleTestCase):
 
     def test_add_spheres(self) -> None:
-        spheres = [
+        model = brayns.add_geometries(self.instance, [
             brayns.Sphere(2).with_color(brayns.Color4.blue),
             brayns.Sphere(1, brayns.Vector3.one),
-        ]
-        model = brayns.add_geometries(self.instance, spheres)
+        ])
         self.assertEqual(model.id, 0)
         self.assertEqual(model.bounds, brayns.Bounds(
             -2 * brayns.Vector3.one,

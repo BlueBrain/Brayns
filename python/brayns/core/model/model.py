@@ -32,7 +32,7 @@ class Model:
 
     id: int
     bounds: Bounds
-    metadata: dict
+    metadata: dict[str, str]
     visible: bool
     transform: Transform
 

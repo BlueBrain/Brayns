@@ -19,15 +19,13 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.core.view.fovy import Fovy
-from brayns.core.view.get_front_view import get_front_view
-from brayns.core.view.get_view import get_view
-from brayns.core.view.set_view import set_view
+from brayns.core.view.get_camera_view import get_camera_view
+from brayns.core.view.set_camera_view import set_camera_view
 from brayns.core.view.view import View
 
 __all__ = [
     'Fovy',
-    'get_front_view',
-    'get_view',
-    'set_view',
+    'get_camera_view',
+    'set_camera_view',
     'View',
 ]

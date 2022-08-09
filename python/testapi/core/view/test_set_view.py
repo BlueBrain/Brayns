@@ -30,6 +30,6 @@ class TestSetView(SimpleTestCase):
             target=brayns.Vector3(4, 5, 6),
             up=brayns.Vector3(7, 8, 9)
         )
-        brayns.set_view(self.instance, view)
-        ref = brayns.get_view(self.instance)
+        brayns.set_camera_view(self.instance, view)
+        ref = brayns.get_camera_view(self.instance)
         self.assertEqual(view, ref)

@@ -18,21 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
-from brayns.core.view.set_view import set_view
-from tests.core.view.mock_view import MockView
-from tests.instance.mock_instance import MockInstance
+from brayns.core.view.view import View
+from brayns.instance.instance import Instance
 
 
-class TestSetView(unittest.TestCase):
-
-    def test_set_view(self) -> None:
-        instance = MockInstance()
-        set_view(instance, MockView.view)
-        self.assertEqual(instance.method, 'set-camera-look-at')
-        self.assertEqual(instance.params, MockView.message)
-
-
-if __name__ == '__main__':
-    unittest.main()
+def get_camera_view(instance: Instance) -> View:
+    result = instance.request('get-camera-look-at')
+    return View.deserialize(result)

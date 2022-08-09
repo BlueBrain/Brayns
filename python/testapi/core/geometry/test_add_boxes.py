@@ -25,7 +25,7 @@ from testapi.simple_test_case import SimpleTestCase
 class TestAddBoxes(SimpleTestCase):
 
     def test_add_boxes(self) -> None:
-        boxes = [
+        model = brayns.add_geometries(self.instance, [
             brayns.Box(
                 min=-brayns.Vector3.one,
                 max=brayns.Vector3.one
@@ -34,8 +34,7 @@ class TestAddBoxes(SimpleTestCase):
                 min=-2 * brayns.Vector3.one,
                 max=brayns.Vector3.one
             ).with_color(brayns.Color4.blue),
-        ]
-        model = brayns.add_geometries(self.instance, boxes)
+        ])
         self.assertEqual(model.id, 0)
         self.assertEqual(model.bounds, brayns.Bounds(
             -2 * brayns.Vector3.one,

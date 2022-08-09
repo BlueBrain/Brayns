@@ -48,11 +48,11 @@ def _get_opacity(control_points: list[ControlPoint], normalized_value: float) ->
     upper_control_point = _find(control_points, upper_index)
     lower = lower_control_point.normalized_value
     upper = upper_control_point.normalized_value
-    lower_factor = _get_lower_factor(normalized_value, lower, upper)
-    upper_factor = 1 - lower_factor
+    lower_ratio = _get_lower_ratio(normalized_value, lower, upper)
+    upper_ratio = 1 - lower_ratio
     lower_opacity = lower_control_point.opacity
     upper_opacity = upper_control_point.opacity
-    return lower_opacity * lower_factor + upper_opacity * upper_factor
+    return lower_opacity * lower_ratio + upper_opacity * upper_ratio
 
 
 def _find_lower_index(control_points: list[ControlPoint], normalized_value: float) -> int:
@@ -74,9 +74,9 @@ def _normalize_index(index: int, size: int) -> float:
     return index / max(size - 1, 1)
 
 
-def _get_lower_factor(value: float, lower: float, upper: float) -> float:
+def _get_lower_ratio(value: float, lower: float, upper: float) -> float:
     if lower == upper:
         return 0.0
-    size = upper - lower
     gap = upper - value
+    size = upper - lower
     return gap / size

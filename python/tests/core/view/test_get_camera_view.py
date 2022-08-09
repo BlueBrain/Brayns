@@ -18,13 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.bounds.bounds import Bounds
-from brayns.core.vector.vector3 import Vector3
-from brayns.core.view.view import View
+import unittest
+
+from brayns.core.view.get_camera_view import get_camera_view
+from tests.core.view.mock_view import MockView
+from tests.instance.mock_instance import MockInstance
 
 
-def get_front_view(target: Bounds) -> View:
-    center = target.center
-    distance = target.depth
-    position = center + distance * Vector3.forward
-    return View(position, center)
+class TestGetCameraView(unittest.TestCase):
+
+    def test_get_camera_view(self) -> None:
+        instance = MockInstance(MockView.message)
+        view = get_camera_view(instance)
+        self.assertEqual(instance.method, 'get-camera-look-at')
+        self.assertEqual(instance.params, None)
+        self.assertEqual(view, MockView.view)
+
+
+if __name__ == '__main__':
+    unittest.main()

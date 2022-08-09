@@ -24,9 +24,9 @@ from brayns.core.clipping.clear_clip_planes import clear_clip_planes
 from tests.instance.mock_instance import MockInstance
 
 
-class TestClearClipPlane(unittest.TestCase):
+class TestClearClipPlanes(unittest.TestCase):
 
-    def test_clear_clip_plane(self) -> None:
+    def test_clear_clip_planes(self) -> None:
         instance = MockInstance()
         clear_clip_planes(instance)
         self.assertEqual(instance.method, 'clear-clip-planes')
