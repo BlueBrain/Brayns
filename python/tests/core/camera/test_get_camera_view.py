@@ -17,3 +17,23 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import unittest
+
+from brayns.core.camera.get_camera_view import get_camera_view
+from tests.core.view.mock_view import MockView
+from tests.instance.mock_instance import MockInstance
+
+
+class TestGetCameraView(unittest.TestCase):
+
+    def test_get_camera_view(self) -> None:
+        instance = MockInstance(MockView.message)
+        view = get_camera_view(instance)
+        self.assertEqual(instance.method, 'get-camera-look-at')
+        self.assertEqual(instance.params, None)
+        self.assertEqual(view, MockView.view)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -18,14 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.view.fovy import Fovy
-from brayns.core.view.get_camera_view import get_camera_view
-from brayns.core.view.set_camera_view import set_camera_view
-from brayns.core.view.view import View
+from .fovy import Fovy
+from .view import View
 
 __all__ = [
     'Fovy',
-    'get_camera_view',
-    'set_camera_view',
     'View',
 ]

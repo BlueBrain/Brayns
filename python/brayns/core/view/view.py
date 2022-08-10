@@ -23,11 +23,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.vector.vector3 import Vector3
+from brayns.core.vector import Vector3
 
 
 @dataclass
 class View:
+    """Represent a viewpoint with position and target.
+
+    :param position: Observation position.
+    :type position: Vector3
+    :param target: Target position.
+    :type target: Vector3
+    :param up: Up vector, defaults to +Y (global up).
+    :type up: Vector3, optional
+    """
 
     position: Vector3 = Vector3.zero
     target: Vector3 = Vector3.forward
@@ -35,6 +44,8 @@ class View:
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> View:
+        """Low level API to deserialize from JSON."""
+        """Low level API to deserialize from JSON."""
         return View(
             position=Vector3(*message['position']),
             target=Vector3(*message['target']),
@@ -43,9 +54,15 @@ class View:
 
     @property
     def direction(self) -> Vector3:
+        """Get normalized direction of the view (position -> target).
+
+        :return: View direction normalized.
+        :rtype: Vector3
+        """
         return (self.target - self.position).normalized
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'position': list(self.position),
             'target': list(self.target),

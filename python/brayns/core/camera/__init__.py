@@ -21,15 +21,19 @@
 from .camera import Camera
 from .get_camera import get_camera
 from .get_camera_name import get_camera_name
+from .get_camera_view import get_camera_view
 from .orthographic_camera import OrthographicCamera
 from .perspective_camera import PerspectiveCamera
 from .set_camera import set_camera
+from .set_camera_view import set_camera_view
 
 __all__ = [
     'Camera',
     'get_camera',
     'get_camera_name',
+    'get_camera_view',
     'OrthographicCamera',
     'PerspectiveCamera',
     'set_camera',
+    'set_camera_view',
 ]
