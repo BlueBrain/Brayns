@@ -22,13 +22,24 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import TypeVar
 
-from brayns.core.vector.vector import Vector
+from brayns.core.vector import Vector
 
 T = TypeVar('T', bound='Color3')
 
 
 @dataclass(frozen=True, order=True)
 class Color3(Vector[float]):
+    """Color with RGB normalized components.
+
+    Color3 are vectors and can be manipulated as such.
+
+    :param r: Red component 0-1.
+    :type r: float
+    :param g: Green component 0-1.
+    :type g: float
+    :param b: Blue component 0-1.
+    :type b: float
+    """
 
     r: float = 0.0
     g: float = 0.0
@@ -37,34 +48,69 @@ class Color3(Vector[float]):
     @classmethod
     @property
     def black(cls: type[T]) -> T:
+        """Create a black color.
+
+        :return: Black color [0, 0, 0].
+        :rtype: Color3
+        """
         return cls()
 
     @classmethod
     @property
     def white(cls: type[T]) -> T:
+        """Create a white color.
+
+        :return: White color [1, 1, 1].
+        :rtype: Color3
+        """
         return cls(1.0, 1.0, 1.0)
 
     @classmethod
     @property
     def red(cls: type[T]) -> T:
+        """Create a red color.
+
+        :return: red color [1, 0, 0].
+        :rtype: Color3
+        """
         return cls(1.0, 0.0, 0.0)
 
     @classmethod
     @property
     def green(cls: type[T]) -> T:
+        """Create a green color.
+
+        :return: green color [0, 1, 0].
+        :rtype: Color3
+        """
         return cls(0.0, 1.0, 0.0)
 
     @classmethod
     @property
     def blue(cls: type[T]) -> T:
+        """Create a blue color.
+
+        :return: blue color [0, 0, 1].
+        :rtype: Color3
+        """
         return cls(0.0, 0.0, 1.0)
 
     @classmethod
     @property
     def bbp_background(cls: type[T]) -> T:
+        """Create a color of the BBP standard background (~blue).
+
+        :return: BBP background color [0.004, 0.016, 0.102].
+        :rtype: Color3
+        """
         return cls(0.004, 0.016, 0.102)
 
     def __iter__(self) -> Iterator[float]:
+        """Iterate over components.
+
+        :yield: Color components.
+        :rtype: Iterator[float]
+        """
         yield self.r
         yield self.g
         yield self.b

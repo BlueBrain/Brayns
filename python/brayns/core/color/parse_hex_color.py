@@ -18,10 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.color.color3 import Color3
+from color3 import Color3
 
 
 def parse_hex_color(value: str) -> Color3:
+    """Parse an hexadecimal color string to Color3.
+
+    The string can be just digits (0a12f5), prefixed with a hash (#0a12f5) or
+    with 0x (0x0a12f5).
+
+    :param value: Color code.
+    :type value: str
+    :return: Color parsed.
+    :rtype: Color3
+    """
     value = _sanitize(value)
     return Color3(
         _normalize(value[0:2]),
