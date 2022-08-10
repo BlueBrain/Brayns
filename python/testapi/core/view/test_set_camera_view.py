@@ -22,9 +22,9 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestSetView(SimpleTestCase):
+class TestSetCameraView(SimpleTestCase):
 
-    def test_set_view(self) -> None:
+    def test_set_camera_view(self) -> None:
         view = brayns.View(
             position=brayns.Vector3(1, 2, 3),
             target=brayns.Vector3(4, 5, 6),

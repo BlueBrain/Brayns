@@ -23,11 +23,31 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.api.json_schema import JsonSchema
+from json_schema import JsonSchema
 
 
 @dataclass
 class Entrypoint:
+    """Entrypoint (endpoint) of the JSON-RPC API.
+
+    Describes how a given entrypoint of the JSON-RPC API can be used.
+
+    Available entrypoints can be queried from an instance to inspect the
+    Web API of a renderer backend.
+
+    :param method: JSON-RPC method (ex: 'get-camera-name').
+    :type method: str
+    :param description: Human readable description.
+    :type description: str
+    :param plugin: Name of the plugin which loads the entrypoint.
+    :type plugin: str
+    :param asynchronous: Check wether progress and cancellation are supported.
+    :type asynchronous: bool
+    :param params: Input JSON schema if needed, otherwise None.
+    :type params: JsonSchema | None
+    :param result: Output JSON schema if needed, otherwise None.
+    :type result: JsonSchema | None
+    """
 
     method: str
     description: str
@@ -38,6 +58,7 @@ class Entrypoint:
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> Entrypoint:
+        """Low level API to deserialize from JSON."""
         return Entrypoint(
             method=message['title'],
             description=message['description'],

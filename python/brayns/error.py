@@ -19,5 +19,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 class Error(Exception):
+    """Base class of all Brayns specific errors.
+
+    Can be used to catch only these kind of errors like this:
+
+    .. code-block: python
+        try:
+            brayns.get_version(instance)
+        except brayns.Error as e:
+            print(e)
+    """
 
     pass

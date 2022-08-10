@@ -18,13 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.api.entrypoint import Entrypoint
-from brayns.core.api.get_entrypoint import get_entrypoint
-from brayns.core.api.get_methods import get_methods
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from entrypoint import Entrypoint
+from get_entrypoint import get_entrypoint
+from get_methods import get_methods
 
 
 def get_entrypoints(instance: Instance) -> list[Entrypoint]:
+    """Retreive all available entrypoints from a renderer instance.
+
+    :param instance: Renderer instance to query the entrypoints.
+    :type instance: Instance
+    :return: List of available entrypoints (depends on plugins loaded).
+    :rtype: list[Entrypoint]
+    """
     return [
         get_entrypoint(instance, method)
         for method in get_methods(instance)

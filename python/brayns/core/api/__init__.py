@@ -18,12 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.api.entrypoint import Entrypoint
-from brayns.core.api.get_entrypoint import get_entrypoint
-from brayns.core.api.get_entrypoints import get_entrypoints
-from brayns.core.api.get_methods import get_methods
-from brayns.core.api.json_schema import JsonSchema
-from brayns.core.api.json_type import JsonType
+from entrypoint import Entrypoint
+from get_entrypoint import get_entrypoint
+from get_entrypoints import get_entrypoints
+from get_methods import get_methods
+from json_schema import JsonSchema
+from json_type import JsonType
 
 __all__ = [
     'Entrypoint',

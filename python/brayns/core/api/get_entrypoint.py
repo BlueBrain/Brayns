@@ -18,11 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.api.entrypoint import Entrypoint
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from entrypoint import Entrypoint
 
 
 def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
+    """Retreive an entrypoint using its name (JSON-RPC method).
+
+    :param instance: Renderer instance to query the entrypoint.
+    :type instance: Instance
+    :param method: JSON-RPC method name.
+    :type method: str
+    :return: Deserialized entrypoint.
+    :rtype: Entrypoint
+    """
     params = {'endpoint': method}
     result = instance.request('schema', params)
     return Entrypoint.deserialize(result)

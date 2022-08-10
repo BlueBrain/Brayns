@@ -22,9 +22,9 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestGetView(SimpleTestCase):
+class TestGetCameraView(SimpleTestCase):
 
-    def test_get_view(self) -> None:
+    def test_get_camera_view(self) -> None:
         test = brayns.get_camera_view(self.instance)
         ref = brayns.View(
             target=brayns.Vector3.forward

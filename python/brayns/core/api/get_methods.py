@@ -18,8 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
 
 
 def get_methods(instance: Instance) -> list[str]:
+    """Retreive all JSON-RPC methods from a renderer instance.
+
+    :param instance: Renderer instance to query the methods.
+    :type instance: Instance
+    :return: List of available methods (depends on plugins loaded).
+    :rtype: list[str]
+    """
     return instance.request('registry')

@@ -23,11 +23,48 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from brayns.core.api.json_type import JsonType
+from json_type import JsonType
 
 
 @dataclass
 class JsonSchema:
+    """JSON schema object to describe JSON data.
+
+    :param title: Title (class name).
+    :type title: str
+    :param description: Human readable description.
+    :type description: str
+    :param type: JSON type (null, boolean, number, string, object, ...).
+    :type type: JsonType
+    :param read_only: If true, this field cannot be assigned.
+    :type read_only: bool
+    :param write_only: If true, this field cannot get retreived.
+    :type write_only: bool
+    :param default: Optional default value if not specified in message.
+    :type default: Any
+    :param minimum: Optional minimum value for numbers.
+    :type minimum: float | None
+    :param maximum: Optional maximum value for numbers.
+    :type maximum: float | None
+    :param items: Optional item schema value for arrays.
+    :type items: JsonSchema | None
+    :param min_items: Optional minimum item count for arrays.
+    :type min_items: int | None
+    :param max_items: Optional maximum item count for arrays.
+    :type max_items: int | None
+    :param properties: Optional fixed properties schema for objects.
+    :type properties: dict[str, JsonSchema]
+    :param required: Optional list of required properties for objects.
+    :type required: list[str]
+    :param additional_properties: Schema of additional properties for objects.
+        If False then no additional properties are allowed (only fixed).
+        If None then any additional properties are allowed (usually ignored).
+    :type additional_properties: bool | JsonSchema | None
+    :param one_of: If not empty, the schema is a union of several schemas.
+    :type one_of: list[JsonSchema]
+    :param enum: If not empty, the message must be in these values.
+    :type enum: list[Any]
+    """
 
     title: str = ''
     description: str = ''
@@ -48,6 +85,7 @@ class JsonSchema:
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> JsonSchema:
+        """Low level API to deserialize from JSON."""
         return JsonSchema(
             title=message.get('title', ''),
             description=message.get('description', ''),
@@ -68,6 +106,7 @@ class JsonSchema:
         )
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         message = {}
         if self.title:
             message['title'] = self.title

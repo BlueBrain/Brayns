@@ -21,9 +21,10 @@
 import pkg_resources
 
 DEV_VERSION = 'dev'
+"""Dev version tag compatible with all instance versions."""
 
 
-def _get_version():
+def _get_version() -> str:
     try:
         distribution = pkg_resources.get_distribution('brayns')
     except pkg_resources.DistributionNotFound:
@@ -32,3 +33,4 @@ def _get_version():
 
 
 __version__ = _get_version()
+"""Version tag of brayns Python package (major.minor.patch)."""
