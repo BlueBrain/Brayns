@@ -30,6 +30,6 @@ namespace brayns
 BRAYNS_JSON_ADAPTER_BEGIN(LoaderInfo)
 BRAYNS_JSON_ADAPTER_ENTRY(name, "Loader name")
 BRAYNS_JSON_ADAPTER_ENTRY(extensions, "Supported file extensions")
-BRAYNS_JSON_ADAPTER_ENTRY(inputParametersSchema, "Loader properties")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("input_parameters_schema", inputParametersSchema, "Loader properties")
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns
