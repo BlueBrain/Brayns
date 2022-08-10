@@ -22,11 +22,20 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.color.color3 import Color3
+from brayns.core.color import Color3
 
 
 @dataclass
 class Light(ABC):
+    """Base class for all light types.
+
+    :param color: Light color, defaults to white.
+    :type color: Color3, optional
+    :param intensity: Light intensity, defaults to 1.
+    :type intensity: float, optional
+    :param visible: Make the light visible or not, defaults to True.
+    :type visible: bool, optional
+    """
 
     color: Color3 = Color3.white
     intensity: float = 1.0
@@ -36,15 +45,22 @@ class Light(ABC):
     @property
     @abstractmethod
     def name(cls) -> str:
+        """Get the light name.
+
+        :return: Light name.
+        :rtype: str
+        """
         pass
 
     @property
     @abstractmethod
     def additional_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         pass
 
     @property
     def base_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'color': list(self.color),
             'intensity': self.intensity,
@@ -52,4 +68,5 @@ class Light(ABC):
         }
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return self.base_properties | self.additional_properties

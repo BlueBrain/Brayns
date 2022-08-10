@@ -18,9 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
 
 
 def remove_lights(instance: Instance, ids: list[int]) -> None:
+    """Remove lights from a renderer instance using their IDs.
+
+    :param instance: Renderer instance.
+    :type instance: Instance
+    :param ids: Light ID(s).
+    :type ids: list[int]
+    """
     params = {'ids': ids}
     instance.request('remove-lights', params)

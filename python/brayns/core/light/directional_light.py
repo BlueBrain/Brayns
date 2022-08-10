@@ -21,22 +21,34 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.light.light import Light
-from brayns.core.vector.vector3 import Vector3
+from brayns.core.vector import Vector3
+
+from .light import Light
 
 
 @dataclass
 class DirectionalLight(Light):
+    """Light shining in a given direction.
+
+    :param direction: Light emission direction, defaults to -Z.
+    :type direction: Vector3, optional
+    """
 
     direction: Vector3 = Vector3.back
 
     @classmethod
     @property
     def name(cls) -> str:
+        """Get the light name.
+
+        :return: Light name.
+        :rtype: str
+        """
         return 'directional'
 
     @property
     def additional_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'direction': list(self.direction)
         }

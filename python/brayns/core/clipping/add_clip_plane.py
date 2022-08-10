@@ -24,7 +24,7 @@ from .clip_plane import ClipPlane
 
 
 def add_clip_plane(instance: Instance, plane: ClipPlane) -> int:
-    """Add a clip plane to the given renderer instance.
+    """Add a clip plane to the given renderer instance and return its ID.
 
     :param instance: Renderer instance.
     :type instance: Instance
