@@ -23,23 +23,40 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.view.view import View
+from brayns.core.view import View
 
 
 @dataclass
 class KeyFrame:
+    """Key frame to hold a simulation frame and a camera view.
+
+    :param index: Simulation frame index.
+    :type index: int
+    :param view: Camera view, defaults to None.
+    :type view: View | None, optional
+    """
 
     index: int
     view: View | None = None
 
     @staticmethod
     def from_indices(indices: list[int], view: View | None = None) -> list[KeyFrame]:
+        """Generate key frames with a fixed camera view.
+
+        :param indices: Frame indices.
+        :type indices: list[int]
+        :param view: Camera view, defaults to None
+        :type view: View | None, optional
+        :return: Key frames.
+        :rtype: list[KeyFrame]
+        """
         return [
             KeyFrame(index, view)
             for index in indices
         ]
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         message: dict[str, Any] = {
             'frame_index': self.index,
         }

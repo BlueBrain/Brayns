@@ -41,12 +41,19 @@ class TestMeshLoader(unittest.TestCase):
         test = loader.load(instance, path)
         ref = [MockModel.model]
         self.assertEqual(test, ref)
-        params = {
+        params = loader.serialize(path)
+        self.assertEqual(instance.params, params)
+
+    def test_serialize(self) -> None:
+        loader = MeshLoader()
+        path = 'path'
+        ref = {
             'path': path,
             'loader_name': MeshLoader.name,
             'loader_properties': loader.properties
         }
-        self.assertEqual(instance.params, params)
+        test = loader.serialize(path)
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':
