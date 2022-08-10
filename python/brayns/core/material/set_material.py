@@ -18,11 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.material.material import Material
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .material import Material
 
 
 def set_material(instance: Instance, model_id: int, material: Material) -> None:
+    """Apply the given material to the given model.
+
+    :param instance: Renderer instance.
+    :type instance: Instance
+    :param model_id: Model ID.
+    :type model_id: int
+    :param material: Material to apply.
+    :type material: Material
+    """
     name = material.name
     properties = material.serialize()
     params = {

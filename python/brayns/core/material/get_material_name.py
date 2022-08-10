@@ -18,9 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
 
 
 def get_material_name(instance: Instance, model_id: int) -> str:
+    """Get the name of the material applied on the given model.
+
+    Can be used to check that a given material is applied on a model:
+
+    .. code-block: python
+        current = brayns.get_material_name(instance, model_id)
+        if current != brayns.MetalMaterial.name:
+            # Error
+        material = brayns.get_material(instance, model_id, brayns.MetalMaterial)
+
+    :param instance: Renderer instance.
+    :type instance: Instance
+    :param model_id: ID of the model to check.
+    :type model_id: int
+    :return: Material name.
+    :rtype: str
+    """
     params = {'id': model_id}
     return instance.request('get-material-type', params)

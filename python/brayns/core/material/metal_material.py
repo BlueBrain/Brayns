@@ -21,28 +21,40 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.core.material.material import Material
+from .material import Material
 
 T = TypeVar('T', bound='MetalMaterial')
 
 
 @dataclass
 class MetalMaterial(Material):
+    """Metal material.
+
+    :param roughness: Roughness of the metal, defaults to 1.
+    :type roughness: float, optional
+    """
 
     roughness: float = 1.0
 
     @classmethod
     @property
     def name(cls) -> str:
+        """Get the material name.
+
+        :return: Material name
+        :rtype: str
+        """
         return 'metal'
 
     @classmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
         return cls(
             roughness=message['roughness']
         )
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'roughness': self.roughness
         }
