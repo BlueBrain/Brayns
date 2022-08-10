@@ -21,13 +21,20 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.core.renderer.renderer import Renderer
+from .renderer import Renderer
 
 T = TypeVar('T', bound='InteractiveRenderer')
 
 
 @dataclass
 class InteractiveRenderer(Renderer):
+    """Default renderer used for fast rendering (streaming, tests).
+
+    :param enable_shadows: Enable shadows, defaults to True.
+    :type enable_shadows: bool, optional.
+    :param ambient_occlusion_samples: AO samples, defaults to 0.
+    :type ambient_occlusion_samples: int, optional.
+    """
 
     enable_shadows: bool = True
     ambient_occlusion_samples: int = 0
@@ -35,10 +42,16 @@ class InteractiveRenderer(Renderer):
     @classmethod
     @property
     def name(cls) -> str:
+        """Get renderer name.
+
+        :return: Renderer name.
+        :rtype: str
+        """
         return 'interactive'
 
     @classmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
         return cls.deserialize_with(
             message,
             enable_shadows=message['enable_shadows'],
@@ -47,6 +60,7 @@ class InteractiveRenderer(Renderer):
 
     @property
     def additional_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'enable_shadows': self.enable_shadows,
             'ao_samples': self.ambient_occlusion_samples

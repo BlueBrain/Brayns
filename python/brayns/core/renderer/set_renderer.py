@@ -18,11 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.renderer.renderer import Renderer
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .renderer import Renderer
 
 
 def set_renderer(instance: Instance, renderer: Renderer) -> None:
+    """Set the current renderer of an instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param renderer: New renderer.
+    :type renderer: Renderer
+    """
     name = renderer.name
     params = renderer.serialize()
     instance.request(f'set-renderer-{name}', params)
