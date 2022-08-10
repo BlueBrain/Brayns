@@ -18,9 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
 
 
 def set_simulation_frame(instance: Instance, index: int) -> None:
+    """Set the current simulation frame of an instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param index: Index of the current frame.
+    :type index: int
+    """
     params = {'current': index}
     instance.request('set-simulation-parameters', params)
