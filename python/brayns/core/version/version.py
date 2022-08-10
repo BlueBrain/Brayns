@@ -23,12 +23,24 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.version.version_error import VersionError
 from brayns.version import DEV_VERSION, __version__
+
+from .version_error import VersionError
 
 
 @dataclass
 class Version:
+    """Instance version info.
+
+    :param major: Major part.
+    :type major: int
+    :param minor: Minor part.
+    :type minor: int
+    :param patch: Patch part.
+    :type patch: int
+    :param revision: Commit hash.
+    :type revision: str
+    """
 
     major: int
     minor: int
@@ -37,6 +49,7 @@ class Version:
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> Version:
+        """Low level API to deserialize from JSON."""
         return Version(
             major=message['major'],
             minor=message['minor'],
@@ -46,13 +59,31 @@ class Version:
 
     @property
     def release(self) -> tuple[int, int, int]:
+        """Return a tuple with major, minor and patch.
+
+        :return: Release tuple.
+        :rtype: tuple[int, int, int]
+        """
         return (self.major, self.minor, self.patch)
 
     @property
     def tag(self) -> str:
+        """Format version tag 'major.minor.patch'.
+
+        Can be compared to package __version__.
+
+        :return: Version tag.
+        :rtype: str
+        """
         return '.'.join(str(i) for i in self.release)
 
     def check(self, local: str = __version__) -> None:
+        """Check that self is compatible with local version.
+
+        :param local: API version, defaults to __version__
+        :type local: str, optional
+        :raises VersionError: Version mismatch.
+        """
         remote = self.tag
         if local == DEV_VERSION:
             return

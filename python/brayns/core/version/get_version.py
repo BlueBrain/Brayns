@@ -18,10 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.version.version import Version
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .version import Version
 
 
 def get_version(instance: Instance) -> Version:
+    """Retreive the version of an instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :return: Version info.
+    :rtype: Version
+    """
     result = instance.request('get-version')
     return Version.deserialize(result)
