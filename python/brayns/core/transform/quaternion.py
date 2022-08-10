@@ -24,12 +24,25 @@ import math
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from brayns.core.vector.vector import Vector
-from brayns.core.vector.vector3 import Vector3
+from brayns.core.vector import Vector, Vector3
 
 
 @dataclass(frozen=True, order=True)
 class Quaternion(Vector[float]):
+    """Quaternion with XYZW components.
+
+    Provides vector operations (componentwise) and quaternion special operators
+    (multiplication, conjugate, etc).
+
+    :param x: X component.
+    :type x: float
+    :param y: Y component.
+    :type y: float
+    :param z: Z component.
+    :type z: float
+    :param w: W component.
+    :type w: float
+    """
 
     x: float = 0.0
     y: float = 0.0

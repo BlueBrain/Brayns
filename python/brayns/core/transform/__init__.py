@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.transform.quaternion import Quaternion
-from brayns.core.transform.rotation import Rotation
-from brayns.core.transform.transform import Transform
+from .quaternion import Quaternion
+from .rotation import Rotation
+from .transform import Transform
 
 __all__ = [
     'Quaternion',

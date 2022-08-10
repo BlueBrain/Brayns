@@ -22,11 +22,30 @@ from __future__ import annotations
 
 import math
 
-from brayns.core.transform.quaternion import Quaternion
-from brayns.core.vector.vector3 import Vector3
+from brayns.core.vector import Vector3
+
+from .quaternion import Quaternion
 
 
 class Rotation:
+    """Arbitrary 3D rotation.
+
+    Can be constructed from euler angles, quaternion or axis and angle.
+
+    Can also be converted to such types.
+
+    Quaternions are automatically normalized (otherwise it is not a rotation).
+
+    Use normalized quaternion internally.
+
+    Euler angles only support XYZ order.
+
+    Serialize / deserialize methods are low level JSON API.
+
+    Can be combined (a.combine(b) is rotation a and then b).
+
+    Can be applied on a given point around a given center (origin by default).
+    """
 
     @staticmethod
     def from_quaternion(quaternion: Quaternion) -> Rotation:

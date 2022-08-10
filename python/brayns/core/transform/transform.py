@@ -23,12 +23,29 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.transform.rotation import Rotation
-from brayns.core.vector.vector3 import Vector3
+from brayns.core.vector import Vector3
+
+from .rotation import Rotation
 
 
 @dataclass
 class Transform:
+    """3D transformation.
+
+    Used to move models in 3D space.
+
+    It is equivalent to a TRS matrix multiplication.
+
+    It means we first scale the point at the origin, then rotate around the same
+    origin and finally we translate it to its position.
+
+    :param translation: Translation, defaults to zero.
+    :type translation: Vector3, optional
+    :param rotation: Rotation, defaults to identity.
+    :type rotation: Rotation, optional
+    :param scale: Scaling, defaults to one.
+    :type scale: Vector3, optional
+    """
 
     translation: Vector3 = Vector3.zero
     rotation: Rotation = Rotation.identity
@@ -36,6 +53,7 @@ class Transform:
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> Transform:
+        """Low level API to deserialize from JSON."""
         return Transform(
             translation=Vector3(*message['translation']),
             rotation=Rotation.deserialize(message['rotation']),
@@ -45,9 +63,15 @@ class Transform:
     @classmethod
     @property
     def identity(cls) -> Transform:
+        """Create an identity transform (doesn't do anything).
+
+        :return: Identity transform.
+        :rtype: Transform
+        """
         return Transform()
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'translation': list(self.translation),
             'rotation': self.rotation.serialize(),
