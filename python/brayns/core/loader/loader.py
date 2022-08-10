@@ -21,32 +21,44 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from brayns.core.model.model import Model
-from brayns.instance.instance import Instance
+from brayns.core.model import Model
+from brayns.instance import Instance
 
 
 class Loader(ABC):
+    """Base class for all loaders.
+
+    Loader are used to load models from files into a renderer instance.
+    """
 
     @classmethod
     @property
     @abstractmethod
     def name(cls) -> str:
+        """Low level API to serialize to JSON."""
         pass
 
     @property
     @abstractmethod
     def properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         pass
 
-    def serialize(self, path: str) -> dict[str, Any]:
-        return {
+    def load(self, instance: Instance, path: str) -> list[Model]:
+        """Load the given file into a renderer instance and return the models.
+
+        :param instance: Renderer instance.
+        :type instance: Instance
+        :param path: Model(s) file path.
+        :type path: str
+        :return: List of created models.
+        :rtype: list[Model]
+        """
+        params = {
             'path': path,
             'loader_name': self.name,
             'loader_properties': self.properties
         }
-
-    def load(self, instance: Instance, path: str) -> list[Model]:
-        params = self.serialize(path)
         result = instance.request('add-model', params)
         return [
             Model.deserialize(model)

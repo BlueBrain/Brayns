@@ -20,16 +20,22 @@
 
 from typing import Any
 
-from brayns.core.loader.loader import Loader
+from .loader import Loader
 
 
 class MeshLoader(Loader):
+    """Mesh loader.
+
+    Supported formats are OBJ, PLY, STL and OFF.
+    """
 
     @classmethod
     @property
     def name(cls) -> str:
+        """Low level API to serialize to JSON."""
         return 'mesh'
 
     @property
     def properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {}
