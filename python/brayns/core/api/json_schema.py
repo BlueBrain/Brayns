@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from json_type import JsonType
+from .json_type import JsonType
 
 
 @dataclass

@@ -20,7 +20,7 @@
 
 from brayns.instance import Instance
 
-from application import Application
+from .application import Application
 
 
 def get_application(instance: Instance) -> Application:

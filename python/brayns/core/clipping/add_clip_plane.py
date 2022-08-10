@@ -20,7 +20,7 @@
 
 from brayns.instance import Instance
 
-from clip_plane import ClipPlane
+from .clip_plane import ClipPlane
 
 
 def add_clip_plane(instance: Instance, plane: ClipPlane) -> int:

@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from application import Application
-from get_application import get_application
-from update_application import update_application
+from .application import Application
+from .get_application import get_application
+from .update_application import update_application
 
 __all__ = [
     'Application',

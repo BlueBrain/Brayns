@@ -25,7 +25,7 @@ from brayns.core.bounds import Bounds
 from brayns.core.vector import Vector3
 from brayns.core.view import View
 
-from camera import Camera
+from .camera import Camera
 
 T = TypeVar('T', bound='OrthographicCamera')
 

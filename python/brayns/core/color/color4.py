@@ -24,7 +24,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, replace
 from typing import TypeVar
 
-from color3 import Color3
+from .color3 import Color3
 
 T = TypeVar('T', bound='Color4')
 

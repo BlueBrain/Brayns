@@ -20,7 +20,7 @@
 
 from brayns.instance import Instance
 
-from bounds import Bounds
+from .bounds import Bounds
 
 
 def get_bounds(instance: Instance) -> Bounds:

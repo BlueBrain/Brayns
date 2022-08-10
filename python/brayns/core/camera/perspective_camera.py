@@ -23,7 +23,7 @@ from typing import Any, TypeVar
 
 from brayns.core.view import Fovy
 
-from camera import Camera
+from .camera import Camera
 
 T = TypeVar('T', bound='PerspectiveCamera')
 

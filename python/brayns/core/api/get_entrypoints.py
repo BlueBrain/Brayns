@@ -20,9 +20,9 @@
 
 from brayns.instance import Instance
 
-from entrypoint import Entrypoint
-from get_entrypoint import get_entrypoint
-from get_methods import get_methods
+from .entrypoint import Entrypoint
+from .get_entrypoint import get_entrypoint
+from .get_methods import get_methods
 
 
 def get_entrypoints(instance: Instance) -> list[Entrypoint]:

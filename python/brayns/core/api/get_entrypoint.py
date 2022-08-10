@@ -20,7 +20,7 @@
 
 from brayns.instance import Instance
 
-from entrypoint import Entrypoint
+from .entrypoint import Entrypoint
 
 
 def get_entrypoint(instance: Instance, method: str) -> Entrypoint:

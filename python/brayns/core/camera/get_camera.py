@@ -22,7 +22,7 @@ from typing import TypeVar
 
 from brayns.instance import Instance
 
-from camera import Camera
+from .camera import Camera
 
 T = TypeVar('T', bound=Camera)
 

@@ -20,7 +20,7 @@
 
 from brayns.instance.instance import Instance
 
-from camera import Camera
+from .camera import Camera
 
 
 def set_camera(instance: Instance, camera: Camera) -> None:

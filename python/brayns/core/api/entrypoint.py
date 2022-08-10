@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from json_schema import JsonSchema
+from .json_schema import JsonSchema
 
 
 @dataclass

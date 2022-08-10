@@ -18,10 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from add_clip_plane import add_clip_plane
-from clear_clip_planes import clear_clip_planes
-from clip_plane import ClipPlane
-from remove_clip_planes import remove_clip_planes
+from .add_clip_plane import add_clip_plane
+from .clear_clip_planes import clear_clip_planes
+from .clip_plane import ClipPlane
+from .remove_clip_planes import remove_clip_planes
 
 __all__ = [
     'add_clip_plane',
