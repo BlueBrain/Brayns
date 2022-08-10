@@ -30,6 +30,31 @@ U = TypeVar('U', int, float)
 
 
 class Vector(ABC, Generic[U]):
+    """Generic vector base class.
+
+    Child has to implement __iter__ special methods to yield components.
+
+    Provide either componentwise (with another vector) and scalar operators (
+    apply the scalar to all components).
+
+    Provides also normalization and unpack operations.
+
+    Example:
+    .. code-block: python
+        vector = brayns.Vector3(1, 1, 1)
+        vector += vector # 2 2 2
+        vector *= 3 # 6 6 6
+        vector /= 3 # 1 1 1
+        2 / vector # 2 2 2
+        vector = Vector3.unpack(i*i for i in range(3)) # 1 4 9
+        vector = vector.normalized.
+
+    See below for supported operators.
+    """
+
+    @classmethod
+    def unpack(cls: type[T], values: Iterable[U]) -> T:
+        return cls(*values)
 
     def __init__(self, *_: U) -> None:
         pass
@@ -37,10 +62,6 @@ class Vector(ABC, Generic[U]):
     @abstractmethod
     def __iter__(self) -> Iterator[U]:
         pass
-
-    @classmethod
-    def unpack(cls: type[T], values: Iterable[U]) -> T:
-        return cls(*values)
 
     def __neg__(self: T) -> T:
         return self.unpack(-i for i in self)

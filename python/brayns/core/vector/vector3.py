@@ -23,11 +23,24 @@ from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from brayns.core.vector.vector import Vector
+from .vector import Vector
 
 
 @dataclass(frozen=True, order=True)
 class Vector3(Vector[float]):
+    """3D vector with XYZ components.
+
+    Provides scalar and dot product in addition to Vector operators.
+
+    Also gives the basic space directions (up, down, front, etc...).
+
+    :param x: X component.
+    :type x: float
+    :param y: Y component.
+    :type y: float
+    :param z: Z component.
+    :type z: float
+    """
 
     x: float = 0.0
     y: float = 0.0
