@@ -20,28 +20,30 @@
 
 from typing import Any
 
-from .loader import Loader
+from brayns.core.api.json_schema import JsonSchema
+from brayns.core.api.json_type import JsonType
+from brayns.core.image.resolution import Resolution
+from brayns.core.loader.loader_info import LoaderInfo
 
 
-class MeshLoader(Loader):
-    """Mesh loader.
-
-    Main supported formats are OBJ, PLY, STL and OFF.
-
-    Format support can be queried using `get_loaders`.
-    """
+class MockLoaderInfo:
 
     @classmethod
     @property
-    def name(cls) -> str:
-        """Get the loader name.
+    def loader_info(cls) -> LoaderInfo:
+        return LoaderInfo(
+            name='test',
+            extensions=['test1', 'test2'],
+            schema=JsonSchema(type=JsonType.INTEGER)
+        )
 
-        :return: Loader name.
-        :rtype: str
-        """
-        return 'mesh'
-
+    @classmethod
     @property
-    def properties(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {}
+    def message(cls) -> dict[str, Any]:
+        return {
+            'name': 'test',
+            'extensions': ['test1', 'test2'],
+            'input_parameters_schema': {
+                'type': 'integer'
+            }
+        }

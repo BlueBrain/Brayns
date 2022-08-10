@@ -18,35 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import dataclasses
 import unittest
 
-from brayns.core.loader.mesh_loader import MeshLoader
-from tests.core.model.mock_model import MockModel
+from brayns.core.loader.get_loaders import get_loaders
+from brayns.core.loader.loader_info import LoaderInfo
+from tests.core.loader.mock_loader_info import MockLoaderInfo
 from tests.instance.mock_instance import MockInstance
 
 
-class TestMeshLoader(unittest.TestCase):
+class TestGetLoaders(unittest.TestCase):
 
-    def test_name(self) -> None:
-        self.assertEqual(MeshLoader.name, 'mesh')
-
-    def test_properties(self) -> None:
-        loader = MeshLoader()
-        self.assertEqual(loader.properties, {})
-
-    def test_load(self) -> None:
-        instance = MockInstance([MockModel.message])
-        loader = MeshLoader()
-        path = 'path'
-        test = loader.load(instance, path)
-        ref = [MockModel.model]
+    def test_get_loaders(self) -> None:
+        instance = MockInstance([
+            MockLoaderInfo.message,
+            MockLoaderInfo.message | {'name': 'test2'},
+        ])
+        ref = [
+            MockLoaderInfo.loader_info,
+            dataclasses.replace(MockLoaderInfo.loader_info, name='test2'),
+        ]
+        test = get_loaders(instance)
         self.assertEqual(test, ref)
-        params = {
-            'path': path,
-            'loader_name': MeshLoader.name,
-            'loader_properties': loader.properties
-        }
-        self.assertEqual(instance.params, params)
+        self.assertIsNone(instance.params)
 
 
 if __name__ == '__main__':

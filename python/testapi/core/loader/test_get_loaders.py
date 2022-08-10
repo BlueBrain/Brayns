@@ -18,30 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-from .loader import Loader
 
+class TestGetLoaders(SimpleTestCase):
 
-class MeshLoader(Loader):
-    """Mesh loader.
-
-    Main supported formats are OBJ, PLY, STL and OFF.
-
-    Format support can be queried using `get_loaders`.
-    """
-
-    @classmethod
-    @property
-    def name(cls) -> str:
-        """Get the loader name.
-
-        :return: Loader name.
-        :rtype: str
-        """
-        return 'mesh'
-
-    @property
-    def properties(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {}
+    def test_get_loaders(self) -> None:
+        test = brayns.get_loaders(self.instance)
+        self.assertTrue(test)

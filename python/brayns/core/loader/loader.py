@@ -29,13 +29,24 @@ class Loader(ABC):
     """Base class for all loaders.
 
     Loader are used to load models from files into a renderer instance.
+
+    Available loaders for a given instance depends on the loaded plugins.
+
+    The list of available loaders and supported extensions for a given instance
+    can be queried using `get_loaders(instance)`.
     """
 
     @classmethod
     @property
     @abstractmethod
     def name(cls) -> str:
-        """Low level API to serialize to JSON."""
+        """Get the loader name.
+
+        Can be compared with `LoaderInfo.name`.
+
+        :return: Loader name.
+        :rtype: str
+        """
         pass
 
     @property

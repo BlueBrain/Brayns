@@ -18,30 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+from brayns.instance import Instance
 
-from .loader import Loader
+from .loader_info import LoaderInfo
 
 
-class MeshLoader(Loader):
-    """Mesh loader.
+def get_loaders(instance: Instance) -> list[LoaderInfo]:
+    """Retreive all available loaders from a renderer instance.
 
-    Main supported formats are OBJ, PLY, STL and OFF.
-
-    Format support can be queried using `get_loaders`.
+    :param instance: Renderer instance.
+    :type instance: Instance
+    :return: List of loader descriptions.
+    :rtype: list[LoaderInfo]
     """
-
-    @classmethod
-    @property
-    def name(cls) -> str:
-        """Get the loader name.
-
-        :return: Loader name.
-        :rtype: str
-        """
-        return 'mesh'
-
-    @property
-    def properties(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {}
+    result = instance.request('get-loaders')
+    return [
+        LoaderInfo.deserialize(item)
+        for item in result
+    ]

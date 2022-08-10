@@ -18,30 +18,34 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
+from dataclasses import dataclass
 from typing import Any
 
-from .loader import Loader
+from brayns.core.api import JsonSchema
 
 
-class MeshLoader(Loader):
-    """Mesh loader.
+@dataclass
+class LoaderInfo:
+    """Loader description.
 
-    Main supported formats are OBJ, PLY, STL and OFF.
-
-    Format support can be queried using `get_loaders`.
+    :param name: Loader name.
+    :type name: str
+    :param extensions: Supported extensions without the dot.
+    :type extensions: list[str]
+    :param schema: Parameters JSON schema (low level).
+    :type schema: JsonSchema
     """
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        """Get the loader name.
+    name: str
+    extensions: list[str]
+    schema: JsonSchema
 
-        :return: Loader name.
-        :rtype: str
-        """
-        return 'mesh'
-
-    @property
-    def properties(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {}
+    @staticmethod
+    def deserialize(message: dict[str, Any]) -> LoaderInfo:
+        return LoaderInfo(
+            name=message['name'],
+            extensions=message['extensions'],
+            schema=JsonSchema.deserialize(message['input_parameters_schema']),
+        )
