@@ -25,23 +25,37 @@ T = TypeVar('T', bound='Camera')
 
 
 class Camera(ABC):
+    """Base class of all supported cameras (plugin dependent).
+
+    All cameras defined in the package inherit from this class.
+
+    Cameras can be identified using a unique name (ex: 'perspective').
+    """
 
     @classmethod
     @property
     @abstractmethod
     def name(cls) -> str:
+        """Name of the camera to identify it.
+
+        :return: Camera name.
+        :rtype: str
+        """
         pass
 
     @classmethod
     @abstractmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
         pass
 
     @abstractmethod
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         pass
 
     def serialize_with_name(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'name': self.name,
             'params': self.serialize()

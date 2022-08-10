@@ -21,21 +21,45 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.core.bounds.bounds import Bounds
-from brayns.core.camera.camera import Camera
-from brayns.core.vector.vector3 import Vector3
-from brayns.core.view.view import View
+from brayns.core.bounds import Bounds
+from brayns.core.vector import Vector3
+from brayns.core.view import View
+
+from camera import Camera
 
 T = TypeVar('T', bound='OrthographicCamera')
 
 
 @dataclass
 class OrthographicCamera(Camera):
+    """Orthographic camera.
+
+    Orthographic camera makes all objects having the same size regardless their
+    distance from the camera.
+
+    The viewport width is computed using the aspect ratio of the current
+    resolution of the renderer (framebuffer size).
+
+    :param height: Viewport height in world coordinates.
+    :type height: float
+    """
 
     height: float = 0.0
 
     @staticmethod
     def get_front_view(target: Bounds) -> View:
+        """Helper method to get the front view of a target object.
+
+        Distance from the object doesn't matter as long as no other objects are
+        between the camera and the target.
+
+        By default the camera-target distance is half of the target depth.
+
+        :param target: _description_
+        :type target: Bounds
+        :return: _description_
+        :rtype: View
+        """
         center = target.center
         distance = target.depth
         position = center + distance * Vector3.forward
@@ -44,15 +68,22 @@ class OrthographicCamera(Camera):
     @classmethod
     @property
     def name(cls) -> str:
+        """Camera name.
+
+        :return: Camera name.
+        :rtype: str
+        """
         return 'orthographic'
 
     @classmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
         return cls(
             height=message['height']
         )
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'height': self.height
         }

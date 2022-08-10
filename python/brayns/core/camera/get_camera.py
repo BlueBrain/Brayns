@@ -20,13 +20,27 @@
 
 from typing import TypeVar
 
-from brayns.core.camera.camera import Camera
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from camera import Camera
 
 T = TypeVar('T', bound=Camera)
 
 
 def get_camera(instance: Instance, camera_type: type[T]) -> T:
+    """Retreive the current camera from a renderer instance.
+
+    The provided camera type must be the same as the current one.
+
+    Returned camera is of type :param:`camera_type`.
+
+    :param instance: Renderer instance.
+    :type instance: Instance
+    :param camera_type: Camera type (ex: brayns.PerspectiveCamera).
+    :type camera_type: type[T]
+    :return: Current camera of :params:`instance`.
+    :rtype: T
+    """
     name = camera_type.name
     result = instance.request(f'get-camera-{name}')
     return camera_type.deserialize(result)

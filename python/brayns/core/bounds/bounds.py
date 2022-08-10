@@ -28,7 +28,7 @@ from brayns.core.vector import Vector3
 
 @dataclass
 class Bounds:
-    """3D boundary object
+    """3D boundary in world coordinates.
 
     :param min: Minimum 3D point.
     :type min: Vector3
