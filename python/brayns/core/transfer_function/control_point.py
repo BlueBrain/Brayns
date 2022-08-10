@@ -25,6 +25,19 @@ from dataclasses import dataclass
 
 @dataclass
 class ControlPoint:
+    """Control point used for opacity curves.
+
+    Normalized values are simulation values (usually voltages) normalized
+    between the max and min values of the simulation.
+
+    Implicit start and end control points can be overriden if a control point
+    exists at 0 or 1. 
+
+    :param normalized_value: Simulation value, normalized.
+    :type normalized_value: float
+    :param opacity: Color opacity at simulation value.
+    :type opacity: float
+    """
 
     normalized_value: float
     opacity: float
@@ -32,9 +45,19 @@ class ControlPoint:
     @classmethod
     @property
     def start(cls) -> ControlPoint:
+        """Implicit first control point of the opacity curve.
+
+        :return: Control point.
+        :rtype: ControlPoint
+        """
         return ControlPoint(0.0, 0.0)
 
     @classmethod
     @property
     def end(cls) -> ControlPoint:
+        """Implicit last control point of the opacity curve.
+
+        :return: Control point.
+        :rtype: ControlPoint
+        """
         return ControlPoint(1.0, 1.0)

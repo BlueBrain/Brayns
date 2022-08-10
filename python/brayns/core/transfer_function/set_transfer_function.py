@@ -18,11 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.transfer_function.transfer_function import TransferFunction
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .transfer_function import TransferFunction
 
 
 def set_transfer_function(instance: Instance, model_id: int, transfer_function: TransferFunction) -> None:
+    """Set the current transfer function of the given model.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Model ID.
+    :type model_id: int
+    :param transfer_function: Transfer function.
+    :type transfer_function: TransferFunction
+    """
     params = {
         'id': model_id,
         'transfer_function': transfer_function.serialize(),

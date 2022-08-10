@@ -23,18 +23,33 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.color.color4 import Color4
-from brayns.core.transfer_function.value_range import ValueRange
+from brayns.core.color import Color4
+
+from .value_range import ValueRange
 
 
 @dataclass
 class TransferFunction:
+    """Transfer function to map simulation values to colors.
+
+    Simulation values below value_range.min have colors[0].
+
+    Simulation values above value_range.max have colors[-1].
+
+    Otherwise, the two closest colors in the list are interpolated linearly.
+
+    :param value_range: Simulation value range (usually voltages).
+    :type value_range: ValueRange
+    :param colors: Color mapping.
+    :type colors: list[Color4]
+    """
 
     value_range: ValueRange
     colors: list[Color4]
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> TransferFunction:
+        """Low level API to deserialize from JSON."""
         return TransferFunction(
             value_range=ValueRange(*message['range']),
             colors=[
@@ -44,6 +59,7 @@ class TransferFunction:
         )
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'range': list(self.value_range),
             'colors': [
