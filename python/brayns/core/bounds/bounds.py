@@ -23,17 +23,25 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.vector.vector3 import Vector3
+from brayns.core.vector import Vector3
 
 
 @dataclass
 class Bounds:
+    """3D boundary object
+
+    :param min: Minimum 3D point.
+    :type min: Vector3
+    :param max: Maximum 3D point.
+    :type max: Vector3
+    """
 
     min: Vector3
     max: Vector3
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> Bounds:
+        """Low level API to deserialize from JSON."""
         return Bounds(
             min=Vector3(*message['min']),
             max=Vector3(*message['max'])
@@ -42,24 +50,54 @@ class Bounds:
     @classmethod
     @property
     def empty(cls) -> Bounds:
+        """Create empty bounds.
+
+        :return: Empty bounds in [0, 0, 0].
+        :rtype: Bounds
+        """
         return Bounds(Vector3.zero, Vector3.zero)
 
     @property
     def center(self) -> Vector3:
+        """Compute the center point of the bounds.
+
+        :return: 3D point of the center.
+        :rtype: Vector3
+        """
         return (self.min + self.max) / 2
 
     @property
     def size(self) -> Vector3:
+        """Compute the size of the bounds.
+
+        :return: Size XYZ (width, height, depth).
+        :rtype: Vector3
+        """
         return self.max - self.min
 
     @property
     def width(self) -> float:
+        """Compute the width of the bounds.
+
+        :return: size.x.
+        :rtype: float
+        """
         return self.size.x
 
     @property
     def height(self) -> float:
+        """Compute the height of the bounds.
+
+        :return: size.y.
+        :rtype: float
+        """
         return self.size.y
 
     @property
     def depth(self) -> float:
+        """Compute the depth of the bounds.
+
+        :return: size.z.
+        :rtype: float
+        """
         return self.size.z

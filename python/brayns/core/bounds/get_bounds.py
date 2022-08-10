@@ -18,10 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.bounds.bounds import Bounds
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from bounds import Bounds
 
 
 def get_bounds(instance: Instance) -> Bounds:
+    """Retreive the scene boundary of a renderer instance.
+
+    The scene boundaries are computed from all existing lights and models
+    in the given instance.
+
+    :param instance: Renderer instance.
+    :type instance: Instance
+    :return: Bounds of the current scene.
+    :rtype: Bounds
+    """
     result = instance.request('get-scene')
     return Bounds.deserialize(result['bounds'])
