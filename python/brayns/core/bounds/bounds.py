@@ -30,9 +30,9 @@ from brayns.core.vector import Vector3
 class Bounds:
     """3D boundary in world coordinates.
 
-    :param min: Minimum 3D point.
+    :param min: Minimum XYZ.
     :type min: Vector3
-    :param max: Maximum 3D point.
+    :param max: Maximum XYZ.
     :type max: Vector3
     """
 

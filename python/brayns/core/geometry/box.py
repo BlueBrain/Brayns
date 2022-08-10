@@ -21,12 +21,20 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.geometry.geometry import Geometry
-from brayns.core.vector.vector3 import Vector3
+from brayns.core.vector import Vector3
+
+from .geometry import Geometry
 
 
 @dataclass
 class Box(Geometry):
+    """3D box.
+
+    :param min: Minimum XYZ.
+    :type min: Vector3
+    :param max: Maximum XYZ.
+    :type max: Vector3
+    """
 
     min: Vector3
     max: Vector3
@@ -34,9 +42,15 @@ class Box(Geometry):
     @classmethod
     @property
     def method(cls) -> str:
+        """JSON-RPC method to add boxes.
+
+        :return: JSON-RPC method.
+        :rtype: str
+        """
         return 'add-boxes'
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'min': list(self.min),
             'max': list(self.max),

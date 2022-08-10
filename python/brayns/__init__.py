@@ -62,9 +62,9 @@ Basic example (take a snapshot):
         snapshot.save(instance, 'snapshot.png')
 """
 
-from core import *
-from error import Error
-from instance import *
-from launcher import *
-from plugins import *
-from version import __version__
+from .core import *
+from .error import Error
+from .instance import *
+from .launcher import *
+from .plugins import *
+from .version import __version__
