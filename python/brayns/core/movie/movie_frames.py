@@ -20,11 +20,33 @@
 
 from dataclasses import dataclass
 
-from brayns.core.simulation.simulation import Simulation
+from brayns.core.simulation import Simulation
 
 
 @dataclass
 class MovieFrames:
+    """Helper class to generate frame indices.
+
+    Use the movie specification (FPS, slow motion, frame range) to generate
+    the indices of the simulation frames which needs to be rendered.
+
+    Slowing factor is compared to real time (2 = twice slower).
+
+    Start and end frames are clamped to the simulation limits and are threated
+    like Python indices (ie -N is len - N).
+
+    The time step generated is constant so if the FPS ratio between the movie
+    and the simulation is not an integer, it will be truncated.
+
+    :param fps: Movie FPS.
+    :type fps: float
+    :param slowing_factor: Slowing factor.
+    :type slowing_factor: float
+    :param start_frame: First frame of the movie.
+    :type start_frame: int
+    :param end_frame: Last frame of the movie.
+    :type end_frame: int
+    """
 
     fps: float = 25.0
     slowing_factor: float = 1.0

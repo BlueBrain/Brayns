@@ -26,13 +26,44 @@ from collections import deque
 from dataclasses import dataclass
 from typing import IO, cast
 
-from brayns.core.image.image_format import ImageFormat
-from brayns.core.image.resolution import Resolution
-from brayns.core.movie.movie_error import MovieError
+from brayns.core.image import ImageFormat, Resolution
+
+from .movie_error import MovieError
 
 
 @dataclass
 class Movie:
+    """Holds all the necessary information to generate a movie.
+
+    Movies are generated using FFMPEG executable, this class only generates the
+    command line. Customm FFMPEG executable can be specified if not in PATH.
+
+    Encoder settings are chosen by FFMPEG if not specified except for pixel
+    format which is chosen for maximum compatibility with players.
+
+    The movie frames must be rendered separately and be in the same folder with
+    the same extension (other are ignored).
+
+    All the frames selected are used to generate the movie so its duration will
+    be frame_count / FPS.
+
+    :param frames_folder: Path of the folder with frames to render.
+    :type frames_folder: str
+    :param frames_format: Frames format.
+    :type frames_format: ImageFormat
+    :param fps: Movie FPS.
+    :type fps: float
+    :param resolution: Movie resolution, defaults to frames resolution.
+    :type resolution: Resolution | None, optional
+    :param bitrate: Encoding bitrate, defaults to FFMPEG choice.
+    :type bitrate: int | None, optional
+    :param encoder: Encoder name, defaults to deduced from output file.
+    :type encoder: str | None, optional
+    :param pixel_format: Pixel format name, defaults to 'yuv420p'.
+    :type pixel_format: str | None, optional
+    :param ffmpeg_executable: FFMPEG executable path, defaults to 'ffmpeg'.
+    :type ffmpeg_executable: str, optional
+    """
 
     frames_folder: str
     frames_format: ImageFormat = ImageFormat.PNG
@@ -44,10 +75,26 @@ class Movie:
     ffmpeg_executable: str = 'ffmpeg'
 
     def save(self, path: str) -> str:
+        """Save the movie under the given path.
+
+        Simply run get_command_line(path).
+
+        :param path: Movie output path.
+        :type path: str
+        :return: FFMPEG logs for debugging.
+        :rtype: str
+        """
         args = self.get_command_line(path)
         return _run_process(args)
 
     def get_command_line(self, path: str) -> list[str]:
+        """Generate FFMPEG command line from members and given path.
+
+        :param path: Path to save the movie.
+        :type path: str
+        :return: FFMPEG command line.
+        :rtype: list[str]
+        """
         return [
             self.ffmpeg_executable,
             *_get_global_options(),

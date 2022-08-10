@@ -20,9 +20,20 @@
 
 from dataclasses import dataclass
 
+from brayns.error import Error
+
 
 @dataclass
-class MovieError(Exception):
+class MovieError(Error):
+    """Exception raised if an error occurs when making a movie.
+
+    :param reason: Description of what happened.
+    :type reason: str
+    :param code: Error code (FFMPEG output code).
+    :type code: int
+    :param logs: FFMPEG logs if any.
+    :type logs: str
+    """
 
     reason: str
     code: int = 0

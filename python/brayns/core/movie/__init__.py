@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.movie.movie import Movie
-from brayns.core.movie.movie_error import MovieError
-from brayns.core.movie.movie_frames import MovieFrames
+from .movie import Movie
+from .movie_error import MovieError
+from .movie_frames import MovieFrames
 
 __all__ = [
     'Movie',
