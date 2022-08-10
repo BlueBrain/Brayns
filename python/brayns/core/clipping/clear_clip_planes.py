@@ -18,8 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
 
 
 def clear_clip_planes(instance: Instance) -> None:
+    """Clear all clip planes from the given renderer instance.
+
+    :param instance: Renderer instance.
+    :type instance: Instance
+    """
     instance.request('clear-clip-planes')

@@ -18,10 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.clipping.clip_plane import ClipPlane
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from clip_plane import ClipPlane
 
 
 def add_clip_plane(instance: Instance, plane: ClipPlane) -> int:
+    """Add a clip plane to the given renderer instance.
+
+    :param instance: Renderer instance.
+    :type instance: Instance
+    :param plane: Clip plane to add.
+    :type plane: ClipPlane
+    :return: Clip plane ID.
+    :rtype: int
+    """
     params = plane.serialize()
     return instance.request('add-clip-plane', params)
