@@ -38,7 +38,7 @@ class OrthographicCamera(Camera):
     distance from the camera.
 
     The viewport width is computed using the aspect ratio of the current
-    resolution of the renderer (framebuffer size).
+    resolution of the instance (framebuffer size).
 
     :param height: Viewport height in world coordinates.
     :type height: float

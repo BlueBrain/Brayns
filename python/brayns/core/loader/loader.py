@@ -28,7 +28,7 @@ from brayns.instance import Instance
 class Loader(ABC):
     """Base class for all loaders.
 
-    Loader are used to load models from files into a renderer instance.
+    Loader are used to load models from files into an instance.
 
     Available loaders for a given instance depends on the loaded plugins.
 
@@ -56,9 +56,9 @@ class Loader(ABC):
         pass
 
     def load(self, instance: Instance, path: str) -> list[Model]:
-        """Load the given file into a renderer instance and return the models.
+        """Load the given file into an instance and return the models.
 
-        :param instance: Renderer instance.
+        :param instance: Instance.
         :type instance: Instance
         :param path: Model(s) file path.
         :type path: str

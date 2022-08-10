@@ -28,9 +28,9 @@ from brayns.core.image import Resolution
 
 @dataclass
 class Application:
-    """Store the application parameters of a renderer instance.
+    """Store the application parameters of an instance.
 
-    :param plugins: List of plugins loaded in the renderer.
+    :param plugins: List of plugins loaded in the instance.
     :type plugins: list[str]
     :param resolution: Streaming resolution (main framebuffer).
     :type resolution: Resolution

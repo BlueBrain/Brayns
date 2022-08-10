@@ -29,11 +29,11 @@ def update_application(
     resolution: Resolution | None = None,
     jpeg_quality: int | None = None,
 ) -> None:
-    """Change some application parameters of the given renderer instance.
+    """Change some application parameters of the given instance.
 
     Parameters not specified are left to their current value.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param resolution: Streaming resolution, defaults to None
     :type resolution: Resolution | None, optional

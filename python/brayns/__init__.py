@@ -22,7 +22,7 @@
 Brayns Python package.
 
 This package provides a high level API to interact with an instance of Brayns
-renderer through websockets.
+instance through websockets.
 
 Basic example (take a snapshot):
 

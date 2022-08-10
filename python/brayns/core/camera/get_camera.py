@@ -28,13 +28,13 @@ T = TypeVar('T', bound=Camera)
 
 
 def get_camera(instance: Instance, camera_type: type[T]) -> T:
-    """Retreive the current camera from a renderer instance.
+    """Retreive the current camera from an instance.
 
     The provided camera type must be the same as the current one.
 
     Returned camera is of type :param:`camera_type`.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param camera_type: Camera type (ex: brayns.PerspectiveCamera).
     :type camera_type: type[T]

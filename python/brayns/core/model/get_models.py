@@ -24,9 +24,9 @@ from .model import Model
 
 
 def get_models(instance: Instance) -> list[Model]:
-    """Retreive all models from a renderer instance.
+    """Retreive all models from an instance.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :return: List of models.
     :rtype: list[Model]

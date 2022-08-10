@@ -31,4 +31,4 @@ class VersionError(Error):
 
     def __str__(self) -> str:
         local, remote = self.local, self.remote
-        return f'Version mismatch with renderer {local=}, {remote=}'
+        return f'Version mismatch with server {local=}, {remote=}'

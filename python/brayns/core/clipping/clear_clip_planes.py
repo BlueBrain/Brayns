@@ -22,9 +22,9 @@ from brayns.instance import Instance
 
 
 def clear_clip_planes(instance: Instance) -> None:
-    """Clear all clip planes from the given renderer instance.
+    """Clear all clip planes from the given instance.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     """
     instance.request('clear-clip-planes')

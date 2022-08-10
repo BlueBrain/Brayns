@@ -24,9 +24,9 @@ from .loader_info import LoaderInfo
 
 
 def get_loaders(instance: Instance) -> list[LoaderInfo]:
-    """Retreive all available loaders from a renderer instance.
+    """Retreive all available loaders from an instance.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :return: List of loader descriptions.
     :rtype: list[LoaderInfo]

@@ -24,9 +24,9 @@ from .model import Model
 
 
 def get_model(instance: Instance, id: int) -> Model:
-    """Retreive the model with given ID from a renderer instance.
+    """Retreive the model with given ID from an instance.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param id: Model ID.
     :type id: int

@@ -26,7 +26,7 @@ from .entrypoint import Entrypoint
 def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
     """Retreive an entrypoint using its name (JSON-RPC method).
 
-    :param instance: Renderer instance to query the entrypoint.
+    :param instance: Instance to query the entrypoint.
     :type instance: Instance
     :param method: JSON-RPC method name.
     :type method: str

@@ -22,9 +22,9 @@ from brayns.instance import Instance
 
 
 def remove_models(instance: Instance, ids: list[int]) -> None:
-    """Remove the given models from a renderer instance.
+    """Remove the given models from an instance.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param ids: ID(s) of the models to remove.
     :type ids: list[int]

@@ -26,9 +26,9 @@ from .get_methods import get_methods
 
 
 def get_entrypoints(instance: Instance) -> list[Entrypoint]:
-    """Retreive all available entrypoints from a renderer instance.
+    """Retreive all available entrypoints from an instance.
 
-    :param instance: Renderer instance to query the entrypoints.
+    :param instance: Instance to query the entrypoints.
     :type instance: Instance
     :return: List of available entrypoints (depends on plugins loaded).
     :rtype: list[Entrypoint]

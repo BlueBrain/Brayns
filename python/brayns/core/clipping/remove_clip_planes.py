@@ -22,9 +22,9 @@ from brayns.instance import Instance
 
 
 def remove_clip_planes(instance: Instance, ids: list[int]) -> None:
-    """Remove clip planes from a renderer instance using their IDs.
+    """Remove clip planes from an instance using their IDs.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param ids: Clip planes ID(s).
     :type ids: list[int]

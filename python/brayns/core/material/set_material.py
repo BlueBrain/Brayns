@@ -26,7 +26,7 @@ from .material import Material
 def set_material(instance: Instance, model_id: int, material: Material) -> None:
     """Apply the given material to the given model.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param model_id: Model ID.
     :type model_id: int

@@ -36,7 +36,7 @@ def update_model(
 
     All unspecified values will be remain to their current state.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param model_id: ID of the model to update.
     :type model_id: int

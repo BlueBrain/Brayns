@@ -24,12 +24,12 @@ from .bounds import Bounds
 
 
 def get_bounds(instance: Instance) -> Bounds:
-    """Retreive the scene boundary of a renderer instance.
+    """Retreive the scene boundary of an instance.
 
     The scene boundaries are computed from all existing lights and models
     in the given instance.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :return: Bounds of the current scene.
     :rtype: Bounds

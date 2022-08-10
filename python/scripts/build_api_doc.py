@@ -37,9 +37,9 @@ JSON-RPC API
 
 This page references the entrypoints of Brayns JSON-RPC API.
 
-The available entrypoints depend on the plugins loaded in the renderer instance and are hence grouped by plugin.
+The available entrypoints depend on the plugins loaded in the instance and are hence grouped by plugin.
 
-The Core plugin is always loaded as long as the renderer instance is running a websocket server (--uri provided).
+The Core plugin is always loaded as long as the instance is running a websocket server (--uri provided).
 
 All entrypoints use a JSON-RPC protocol (see specifications `here <https://www.jsonrpc.org/specification>`_).
 

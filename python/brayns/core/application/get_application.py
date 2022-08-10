@@ -24,9 +24,9 @@ from .application import Application
 
 
 def get_application(instance: Instance) -> Application:
-    """Retreive the application parameters from a renderer instance.
+    """Retreive the application parameters from an instance.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :return: Current application parameters.
     :rtype: Application

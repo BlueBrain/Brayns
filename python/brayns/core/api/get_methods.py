@@ -22,9 +22,9 @@ from brayns.instance import Instance
 
 
 def get_methods(instance: Instance) -> list[str]:
-    """Retreive all JSON-RPC methods from a renderer instance.
+    """Retreive all JSON-RPC methods from an instance.
 
-    :param instance: Renderer instance to query the methods.
+    :param instance: Instance to query the methods.
     :type instance: Instance
     :return: List of available methods (depends on plugins loaded).
     :rtype: list[str]

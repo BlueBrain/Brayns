@@ -24,9 +24,9 @@ from .light import Light
 
 
 def add_light(instance: Instance, light: Light) -> int:
-    """Add a given light to a renderer instance and return its ID.
+    """Add a given light to an instance and return its ID.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param light: Light to add.
     :type light: Light

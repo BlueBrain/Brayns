@@ -22,9 +22,9 @@ from brayns.instance import Instance
 
 
 def remove_lights(instance: Instance, ids: list[int]) -> None:
-    """Remove lights from a renderer instance using their IDs.
+    """Remove lights from an instance using their IDs.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param ids: Light ID(s).
     :type ids: list[int]

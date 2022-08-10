@@ -33,7 +33,7 @@ class Entrypoint:
     Describes how a given entrypoint of the JSON-RPC API can be used.
 
     Available entrypoints can be queried from an instance to inspect the
-    Web API of a renderer backend.
+    Web API of a given instance.
 
     :param method: JSON-RPC method (ex: 'get-camera-name').
     :type method: str

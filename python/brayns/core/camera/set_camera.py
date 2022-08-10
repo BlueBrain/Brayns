@@ -24,9 +24,9 @@ from .camera import Camera
 
 
 def set_camera(instance: Instance, camera: Camera) -> None:
-    """Set the current camera of the given renderer instance.
+    """Set the current camera of the given instance.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param camera: Current camera.
     :type camera: Camera

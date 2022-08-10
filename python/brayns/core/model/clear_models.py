@@ -22,9 +22,9 @@ from brayns.instance import Instance
 
 
 def clear_models(instance: Instance) -> None:
-    """Clear all models from the given renderer instance.
+    """Clear all models from the given instance.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     """
     instance.request('clear-models')

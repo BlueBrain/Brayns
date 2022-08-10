@@ -32,7 +32,7 @@ def get_material_name(instance: Instance, model_id: int) -> str:
             # Error
         material = brayns.get_material(instance, model_id, brayns.MetalMaterial)
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param model_id: ID of the model to check.
     :type model_id: int

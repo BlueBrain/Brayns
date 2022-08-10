@@ -32,7 +32,7 @@ def get_material(instance: Instance, model_id: int, material_type: type[T]) -> T
 
     `material_type` must be the same as the current one.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param model_id: ID of the model.
     :type model_id: int

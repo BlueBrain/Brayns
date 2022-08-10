@@ -22,9 +22,9 @@ from brayns.instance import Instance
 
 
 def clear_lights(instance: Instance) -> None:
-    """Remove all lights from a renderer instance.
+    """Remove all lights from an instance.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     """
     instance.request('clear-lights')

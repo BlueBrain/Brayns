@@ -29,13 +29,13 @@ T = TypeVar('T', bound=Geometry)
 
 
 def add_geometries(instance: Instance, geometries: list[T]) -> Model:
-    """Add a list of geometries to a renderer instance as a single model.
+    """Add a list of geometries to an instance as a single model.
 
     All geometries must have the same type.
 
     Empty models (no geometries) are not supported.
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :param geometries: Geometries to add (boxes, capsules, etc...).
     :type geometries: list[T]

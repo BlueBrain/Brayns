@@ -22,7 +22,7 @@ from brayns.instance import Instance
 
 
 def get_camera_name(instance: Instance) -> str:
-    """Retreive the name of the current camera of a renderer instance.
+    """Retreive the name of the current camera of an instance.
 
     The returned name is the same as Camera.name and can be used to check
     if a given camera is the current one like this:
@@ -32,7 +32,7 @@ def get_camera_name(instance: Instance) -> str:
             camera = brayns.get_camera(instance, brayns.PerspectiveCamera)
             print(camera.fovy.degrees) # camera is a PerspectiveCamera
 
-    :param instance: Renderer instance.
+    :param instance: Instance.
     :type instance: Instance
     :return: Current camera name.
     :rtype: str
