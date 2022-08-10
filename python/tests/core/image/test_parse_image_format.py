@@ -18,6 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import pathlib
 import unittest
 
 from brayns.core.image.image_format import ImageFormat
@@ -30,15 +31,19 @@ class TestParseImageFormat(unittest.TestCase):
         path = 'test/stuff/image.jpg'
         test = parse_image_format(path)
         self.assertIs(test, ImageFormat.JPEG)
-        path = path.upper()
-        test = parse_image_format(path)
-        self.assertIs(test, ImageFormat.JPEG)
 
     def test_png(self) -> None:
         path = 'test/stuff/image.png'
         test = parse_image_format(path)
         self.assertIs(test, ImageFormat.PNG)
-        path = path.upper()
+
+    def test_upper(self) -> None:
+        path = 'test/stuff/image.PNG'
+        test = parse_image_format(path)
+        self.assertIs(test, ImageFormat.PNG)
+
+    def test_path(self) -> None:
+        path = pathlib.Path('test/stuff/image.png')
         test = parse_image_format(path)
         self.assertIs(test, ImageFormat.PNG)
 

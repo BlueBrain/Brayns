@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from color3 import Color3
-from color4 import Color4
-from parse_hex_color import parse_hex_color
+from .color3 import Color3
+from .color4 import Color4
+from .parse_hex_color import parse_hex_color
 
 __all__ = [
     'Color3',

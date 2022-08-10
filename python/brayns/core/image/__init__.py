@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.image.image_format import ImageFormat
-from brayns.core.image.parse_image_format import parse_image_format
-from brayns.core.image.resolution import Resolution
+from .image_format import ImageFormat
+from .parse_image_format import parse_image_format
+from .resolution import Resolution
 
 __all__ = [
     'ImageFormat',

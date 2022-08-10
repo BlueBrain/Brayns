@@ -22,11 +22,20 @@ from __future__ import annotations
 
 import pathlib
 
-from brayns.core.image.image_format import ImageFormat
+from .image_format import ImageFormat
 
 
-def parse_image_format(filename: str) -> ImageFormat:
-    path = pathlib.Path(filename)
+def parse_image_format(filename: str | pathlib.Path) -> ImageFormat:
+    """Parse the image format from a file path using its extension.
+
+    Supports both string and pathlib.Path input.
+
+    :param filename: Image file path.
+    :type filename: str | pathlib.Path
+    :return: Image format.
+    :rtype: ImageFormat
+    """
+    path = pathlib.Path(filename) if isinstance(filename, str) else filename
     extension = path.suffix[1:]
     extension = extension.lower()
     extension = extension.strip()

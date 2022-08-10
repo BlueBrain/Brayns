@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from vector.vector import Vector
-from vector.vector3 import Vector3
+from .vector import Vector
+from .vector3 import Vector3
 
 __all__ = [
     'Vector',

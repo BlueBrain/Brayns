@@ -23,11 +23,20 @@ from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from brayns.core.vector.vector import Vector
+from brayns.core.vector import Vector
 
 
 @dataclass(frozen=True, order=True)
 class Resolution(Vector[int]):
+    """Image resolution.
+
+    Resolution is a Vector of integers and can be handled as such.
+
+    :param width: Image width in pixels.
+    :type width: int
+    :param height: Image height in pixels.
+    :type height: int
+    """
 
     width: int
     height: int
@@ -35,18 +44,38 @@ class Resolution(Vector[int]):
     @classmethod
     @property
     def full_hd(cls) -> Resolution:
+        """Create a full HD (1920x1080) resolution.
+
+        :return: Full HD resolution.
+        :rtype: Resolution
+        """
         return cls(1920, 1080)
 
     @classmethod
     @property
     def ultra_hd(cls) -> Resolution:
+        """Create a 4K (3840x2160) resolution.
+
+        :return: Ultra HD resolution.
+        :rtype: Resolution
+        """
         return 2 * cls.full_hd
 
     @classmethod
     @property
     def production(cls) -> Resolution:
+        """Create a production (15360x8640) resolution.
+
+        :return: Production resolution.
+        :rtype: Resolution
+        """
         return 8 * cls.full_hd
 
     def __iter__(self) -> Iterator[int]:
+        """Iterate over width and height.
+
+        :yield: Width and height components.
+        :rtype: Iterator[int]
+        """
         yield self.width
         yield self.height

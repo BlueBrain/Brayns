@@ -22,6 +22,13 @@ from enum import Enum
 
 
 class ImageFormat(Enum):
+    """Enumeration of all supported image format.
+
+    Values are the image format file extension without the dot.
+
+    :param JPEG: JPEG format, smaller but lose quality.
+    :param PNG: PNG format, bigger but lossless.
+    """
 
     JPEG = 'jpg'
     PNG = 'png'
