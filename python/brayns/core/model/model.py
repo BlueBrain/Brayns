@@ -23,12 +23,30 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.bounds.bounds import Bounds
-from brayns.core.transform.transform import Transform
+from brayns.core.bounds import Bounds
+from brayns.core.transform import Transform
 
 
 @dataclass
 class Model:
+    """Loaded model.
+
+    All models are loaded without transform (identity) but it doesn't mean that
+    their center of mass is at the origin (depends on the source file).
+
+    Model metadata are a str -> str map and depends on the model type.
+
+    :param id: Model ID.
+    :type id: int
+    :param bounds: Model bounding box.
+    :type bounds: Bounds
+    :param metadata: Model metadata.
+    :type metadata: dict[str, str]
+    :param visible: Check wether the model is rendered or not.
+    :type visible: bool
+    :param transform: Model transform relative to the origin.
+    :type transform: Transform
+    """
 
     id: int
     bounds: Bounds
@@ -38,6 +56,7 @@ class Model:
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> Model:
+        """Low level API to deserialize from JSON."""
         return Model(
             id=message['model_id'],
             bounds=Bounds.deserialize(message['bounds']),

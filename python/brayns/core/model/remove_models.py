@@ -18,9 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
 
 
 def remove_models(instance: Instance, ids: list[int]) -> None:
+    """Remove the given models from a renderer instance.
+
+    :param instance: Renderer instance.
+    :type instance: Instance
+    :param ids: ID(s) of the models to remove.
+    :type ids: list[int]
+    """
     params = {'ids': ids}
     instance.request('remove-model', params)

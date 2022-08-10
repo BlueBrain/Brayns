@@ -18,11 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.model.model import Model
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .model import Model
 
 
 def get_models(instance: Instance) -> list[Model]:
+    """Retreive all models from a renderer instance.
+
+    :param instance: Renderer instance.
+    :type instance: Instance
+    :return: List of models.
+    :rtype: list[Model]
+    """
     result = instance.request('get-scene')
     return [
         Model.deserialize(model)
