@@ -47,12 +47,18 @@ class Launcher:
     to override the PATH and load specific libraries.
 
     Example to start an instance and connect to it:
-    .. code-block: python
+
+    .. code-block:: python
+
         launcher = brayns.Launcher('braynsService', 'localhost:5000')
+
         connector = brayns.Connector('localhost:5000', max_attempts=None)
+
         with launcher.start() as process:
+
             with connector.connect() as instance:
-                # Use instance.
+
+                # Use instance or process.
 
     :param executable: Path of the braynsService executable.
     :type executable: str

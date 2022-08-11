@@ -204,12 +204,14 @@ SEPARATOR = '\n\n----'
 
 def build_from_argv() -> None:
     uri = 'localhost:5000'
-    directory = pathlib.Path(__file__).parent.parent / 'doc' / 'source'
+    python = pathlib.Path(__file__).parent.parent
+    directory = python / 'doc' / 'source' / 'jsonrpcapi'
     argv = sys.argv
     if len(argv) > 1:
         uri = argv[1]
     if len(argv) > 2:
         directory = pathlib.Path(argv[2])
+    directory.mkdir(exist_ok=True)
     build_from_uri(uri, str(directory))
 
 

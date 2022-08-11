@@ -35,10 +35,12 @@ class OpacityCurve:
 
     Example:
 
-    .. code-block: python
+    .. code-block:: python
+
         curve = brayns.OpacityCurve([
             brayns.ControlPoint(0.5, 0.0),
         ])
+
         new_colors = curve.apply(colors)
 
     Here it will give an opacity of 0 from 0% to 50% of the transfer function

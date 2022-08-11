@@ -11,3 +11,5 @@ dist/
 venv/
 doc/source/.ipynb_checkpoints/
 doc/html
+doc/source/jsonrpcapi
+doc/source/pythonapi

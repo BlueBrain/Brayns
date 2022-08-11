@@ -25,7 +25,8 @@ Through the API (websocket or Python) use can:
    install
    usage
    plugins
-   api
+   jsonrpcapi/api
+   pythonapi/brayns
 
 Acknowledgments
 ---------------

@@ -5,4 +5,4 @@ Usage
    :hidden:
 
    usage_launchbraynsbackend
-   usage_usepythonclient
+   usage_usepythonapi

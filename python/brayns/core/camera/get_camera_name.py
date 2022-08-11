@@ -27,9 +27,12 @@ def get_camera_name(instance: Instance) -> str:
     The returned name is the same as Camera.name and can be used to check
     if a given camera is the current one like this:
 
-    .. code-block: python
+    .. code-block:: python
+
         if brayns.get_camera_name(instance) == brayns.PerspectiveCamera.name:
+
             camera = brayns.get_camera(instance, brayns.PerspectiveCamera)
+
             print(camera.fovy.degrees) # camera is a PerspectiveCamera
 
     :param instance: Instance.

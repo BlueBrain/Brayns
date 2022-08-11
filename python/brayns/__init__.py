@@ -26,7 +26,8 @@ instance through websockets.
 
 Basic example (take a snapshot):
 
-.. code-block: python
+.. code-block:: python
+
     import brayns
 
     # Connection settings (at least server URI)

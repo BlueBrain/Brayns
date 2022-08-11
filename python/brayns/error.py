@@ -23,7 +23,8 @@ class Error(Exception):
 
     Can be used to catch only these kind of errors like this:
 
-    .. code-block: python
+    .. code-block:: python
+
         try:
             brayns.get_version(instance)
         except brayns.Error as e:

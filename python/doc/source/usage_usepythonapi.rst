@@ -1,10 +1,14 @@
-.. _usepythonclient-label:
+.. _usepythonapi-label:
 
-Using Brayns python client
-==========================
+Installation
+============
 
-After launching the Brayns backend service, we will have a server to which we can connect
-and manipulate using the python client.
+Make sure you followed the installation procedure :ref:`install-label`.
+
+Using Brayns Python API
+=======================
+
+After launching the Brayns backend service, we will have a server to interact with using the python API.
 
 We will assume the backend has been started with the command:
 
@@ -21,10 +25,13 @@ The IP mentioned here is from the **SERVER** point of view and specifies which h
 
 Use localhost if you want to allow only local connections.
 
-Initializing the client object
-------------------------------
+Connection to an instance
+--------------------------
 
-The first step will be always to create a connection to the backend.
+The Python API is basically a websocket client with a JSON-RPC layer. It means
+that is needs to connect to a backend to be able to render something.
+
+The first step is hence always to create a connection to the backend.
 
 To do so, we need the URI of the backend service we want to connect to (ip:port).
 
@@ -43,9 +50,9 @@ So for a renderer running on the node r1i1n1 started with URI 0.0.0.0:5000, the 
     connector = brayns.Connector('r1i1n1.bbp.epfl.ch:5000')
 
     with connector.connect() as instance:
-        print(instance.request('registry'))
+        print(brayns.get_version(instance))
 
-It will send a request to get all the existing entrypoint methods of this instance.
+It will send a request to get the version of the instance we are connected to.
 
 .. attention::
 
@@ -66,7 +73,7 @@ Now, we can start performing requests for example loading a circuit (with circui
     loader = brayns.BbpLoader(
         cells=brayns.BbpCells.from_density(0.1),
         report=brayns.BbpReport.spikes(),
-        morphology=brayns.MorphologyParameters(radius_multiplier=20)
+        morphology=brayns.Morphology(radius_multiplier=20)
     )
 
     # Load the model(s) into the instance (some files contain multiple models)
@@ -126,4 +133,4 @@ After we have loaded the model and chose the camera type and view, we can get an
 Further information
 -------------------
 
-For further information about the API, refer to the different API pages.
+For further information about the API, please refer to the API reference :ref:`brayns-label`.

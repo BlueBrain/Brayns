@@ -60,9 +60,13 @@ class Connector:
     until it works (or with a maximum count and a delay to have a timeout).
 
     Example:
-    ..code-block: python
+
+    .. code-block:: python
+
         connector = brayns.Connector('localhost:5000')
+
         with connector.connect() as instance:
+
             # use instance
 
     :param uri: Instance URI with format 'host:port'.
