@@ -21,10 +21,10 @@
 import json
 from typing import Any
 
-from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
-from brayns.instance.jsonrpc.json_rpc_listener import JsonRpcListener
-from brayns.instance.jsonrpc.json_rpc_progress import JsonRpcProgress
-from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
+from .json_rpc_error import JsonRpcError
+from .json_rpc_listener import JsonRpcListener
+from .json_rpc_progress import JsonRpcProgress
+from .json_rpc_reply import JsonRpcReply
 
 
 class JsonRpcDispatcher:

@@ -26,15 +26,15 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import cast
 
-from brayns.instance.client import Client
-from brayns.instance.instance import Instance
-from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
-from brayns.instance.listener import Listener
-from brayns.instance.logger import Logger
-from brayns.instance.websocket.service_unavailable_error import ServiceUnavailableError
-from brayns.instance.websocket.ssl_client_context import SslClientContext
-from brayns.instance.websocket.web_socket_client import WebSocketClient
-from brayns.instance.websocket.web_socket_connector import WebSocketConnector
+from.client import Client
+from.instance import Instance
+from.jsonrpc.json_rpc_manager import JsonRpcManager
+from.listener import Listener
+from.logger import Logger
+from.websocket.service_unavailable_error import ServiceUnavailableError
+from.websocket.ssl_client_context import SslClientContext
+from.websocket.web_socket_client import WebSocketClient
+from.websocket.web_socket_connector import WebSocketConnector
 
 
 @dataclass

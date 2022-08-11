@@ -20,11 +20,11 @@
 
 from __future__ import annotations
 
-from brayns.instance.websocket.async_web_socket import AsyncWebSocket
-from brayns.instance.websocket.connection_closed_error import ConnectionClosedError
-from brayns.instance.websocket.event_loop import EventLoop
-from brayns.instance.websocket.web_socket import WebSocket
-from brayns.instance.websocket.web_socket_listener import WebSocketListener
+from .async_web_socket import AsyncWebSocket
+from .connection_closed_error import ConnectionClosedError
+from .event_loop import EventLoop
+from .web_socket import WebSocket
+from .web_socket_listener import WebSocketListener
 
 
 class WebSocketClient(WebSocket):

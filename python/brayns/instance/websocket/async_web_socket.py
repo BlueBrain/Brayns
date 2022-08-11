@@ -23,10 +23,11 @@ from __future__ import annotations
 import threading
 from collections import deque
 
-from brayns.instance.websocket.connection_closed_error import ConnectionClosedError
-from brayns.instance.websocket.protocol_error import ProtocolError
 from websockets.client import WebSocketClientProtocol
 from websockets.exceptions import ConnectionClosed
+
+from .connection_closed_error import ConnectionClosedError
+from .protocol_error import ProtocolError
 
 
 class AsyncWebSocket:

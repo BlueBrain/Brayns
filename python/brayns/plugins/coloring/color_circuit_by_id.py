@@ -18,9 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.color.color4 import Color4
-from brayns.instance.instance import Instance
-from brayns.plugins.coloring.cell_id import CellId
+from brayns.core import Color4
+from brayns.instance import Instance
+
+from .cell_id import CellId
 
 
 def color_circuit_by_id(

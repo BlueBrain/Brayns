@@ -23,8 +23,8 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 from typing import Any
 
-from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
-from brayns.instance.request_progress import RequestProgress
+from .json_rpc_task import JsonRpcTask
+from .request_progress import RequestProgress
 
 
 class RequestFuture:

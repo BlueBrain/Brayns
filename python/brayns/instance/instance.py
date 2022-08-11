@@ -22,8 +22,8 @@ from __future__ import annotations
 
 from typing import Any, Protocol, TypeVar
 
-from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
-from brayns.instance.request_future import RequestFuture
+from .jsonrpc.json_rpc_request import JsonRpcRequest
+from .jsonrpc.request_future import RequestFuture
 
 T = TypeVar('T', bound='Instance')
 

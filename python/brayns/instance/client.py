@@ -22,11 +22,11 @@ from __future__ import annotations
 
 import logging
 
-from brayns.instance.instance import Instance
-from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
-from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
-from brayns.instance.request_future import RequestFuture
-from brayns.instance.websocket.web_socket import WebSocket
+from .instance import Instance
+from .jsonrpc.json_rpc_manager import JsonRpcManager
+from .jsonrpc.json_rpc_request import JsonRpcRequest
+from .jsonrpc.request_future import RequestFuture
+from .websocket.web_socket import WebSocket
 
 
 class Client(Instance):
