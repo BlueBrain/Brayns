@@ -20,14 +20,13 @@
 
 import unittest
 
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.view.fovy import Fovy
+import brayns
 
 
 class TestPerspectiveCamera(unittest.TestCase):
 
     def test_get_name(self) -> None:
-        test = PerspectiveCamera.name
+        test = brayns.PerspectiveCamera.name
         ref = 'perspective'
         self.assertEqual(test, ref)
 
@@ -37,14 +36,14 @@ class TestPerspectiveCamera(unittest.TestCase):
             'aperture_radius': 1,
             'focus_distance': 2
         }
-        test = PerspectiveCamera.deserialize(message)
+        test = brayns.PerspectiveCamera.deserialize(message)
         self.assertAlmostEqual(test.fovy.degrees, 30)
         self.assertEqual(test.aperture_radius, 1)
         self.assertEqual(test.focus_distance, 2)
 
     def test_serialize(self) -> None:
-        camera = PerspectiveCamera(
-            fovy=Fovy(30, degrees=True),
+        camera = brayns.PerspectiveCamera(
+            fovy=brayns.Fovy(30, degrees=True),
             aperture_radius=1,
             focus_distance=2
         )

@@ -20,16 +20,16 @@
 
 import unittest
 
-from brayns.core.geometry.plane import Plane
+import brayns
 
 
 class TestPlane(unittest.TestCase):
 
     def test_method(self) -> None:
-        self.assertEqual(Plane.method, 'add-planes')
+        self.assertEqual(brayns.Plane.method, 'add-planes')
 
     def test_serialize(self) -> None:
-        plane = Plane(1, 2, 3, 4)
+        plane = brayns.Plane(1, 2, 3, 4)
         test = plane.serialize()
         ref = {
             'coefficients': [1, 2, 3, 4]

@@ -20,13 +20,13 @@
 
 import unittest
 
-from brayns.plugins.sonata.sonata_edge_population import SonataEdgePopulation
+import brayns
 
 
 class TestSonataEdgePopulation(unittest.TestCase):
 
     def test_serialize(self) -> None:
-        test = SonataEdgePopulation(
+        test = brayns.SonataEdgePopulation(
             name='test',
             afferent=True,
             density=0.5,

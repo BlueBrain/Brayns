@@ -20,15 +20,15 @@
 
 from typing import Any
 
-from brayns.core.version import Version
+import brayns
 
 
 class MockVersion:
 
     @classmethod
     @property
-    def version(cls) -> Version:
-        return Version(
+    def version(cls) -> brayns.Version:
+        return brayns.Version(
             major=0,
             minor=1,
             patch=2,

@@ -20,14 +20,17 @@
 
 import unittest
 
-from brayns.core.transfer_function.transfer_function import TransferFunction
-from tests.core.transfer_function.mock_transfer_function import MockTransferFunction
+import brayns
+
+from .mock_transfer_function import MockTransferFunction
 
 
 class TestTransferFunction(unittest.TestCase):
 
     def test_deserialize(self) -> None:
-        test = TransferFunction.deserialize(MockTransferFunction.message)
+        test = brayns.TransferFunction.deserialize(
+            MockTransferFunction.message
+        )
         self.assertEqual(test, MockTransferFunction.transfer_function)
 
     def test_serialize(self) -> None:

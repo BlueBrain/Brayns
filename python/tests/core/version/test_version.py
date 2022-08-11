@@ -20,16 +20,16 @@
 
 import unittest
 
-from brayns.core.version.version import Version
-from brayns.core.version.version_error import VersionError
+import brayns
 from brayns.version import DEV_VERSION
-from tests.core.version.mock_version import MockVersion
+
+from .mock_version import MockVersion
 
 
 class TestVersion(unittest.TestCase):
 
     def test_deserialize(self) -> None:
-        test = Version.deserialize(MockVersion.message)
+        test = brayns.Version.deserialize(MockVersion.message)
         self.assertEqual(test, MockVersion.version)
 
     def test_release(self) -> None:
@@ -46,7 +46,7 @@ class TestVersion(unittest.TestCase):
         test = MockVersion.version
         test.check(test.tag)
         test.check(DEV_VERSION)
-        with self.assertRaises(VersionError):
+        with self.assertRaises(brayns.VersionError):
             test.check('5.6.7')
 
 

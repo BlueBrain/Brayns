@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.simulation.enable_simulation import enable_simulation
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -28,7 +28,7 @@ class TestEnableSimulation(unittest.TestCase):
 
     def test_enable_simulation(self) -> None:
         instance = MockInstance()
-        enable_simulation(instance, 0, True)
+        brayns.enable_simulation(instance, 0, True)
         self.assertEqual(instance.method, 'enable-simulation')
         self.assertEqual(instance.params, {
             'model_id': 0,

@@ -20,9 +20,7 @@
 
 import unittest
 
-from brayns.core.color.color4 import Color4
-from brayns.core.geometry.add_geometries import add_geometries
-from brayns.core.geometry.plane import Plane
+import brayns
 from tests.core.model.mock_model import MockModel
 from tests.instance.mock_instance import MockInstance
 
@@ -31,8 +29,8 @@ class TestAddGeometries(unittest.TestCase):
 
     def setUp(self) -> None:
         self._geometries = [
-            Plane(1, 2, 3, 4),
-            Plane(5, 6, 7, 8).with_color(Color4.red),
+            brayns.Plane(1, 2, 3, 4),
+            brayns.Plane(5, 6, 7, 8).with_color(brayns.Color4.red),
         ]
         self._message = [
             {
@@ -53,7 +51,7 @@ class TestAddGeometries(unittest.TestCase):
         ref = MockModel.model
         reply = MockModel.message
         instance = MockInstance(reply)
-        model = add_geometries(instance, self._geometries)
+        model = brayns.add_geometries(instance, self._geometries)
         self.assertEqual(model, ref)
         self.assertEqual(instance.method, 'add-planes')
         self.assertEqual(instance.params, self._message)

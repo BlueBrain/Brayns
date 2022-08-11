@@ -25,7 +25,8 @@ from brayns.instance.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
 from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
 from brayns.instance.jsonrpc.json_rpc_progress import JsonRpcProgress
 from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
-from tests.instance.jsonrpc.mock_json_rpc_listener import MockJsonRpcListener
+
+from .mock_json_rpc_listener import MockJsonRpcListener
 
 
 class TestJsonRpcDispatcher(unittest.TestCase):

@@ -20,26 +20,24 @@
 
 import unittest
 
-from brayns.core.movie.movie_frames import MovieFrames
-from brayns.core.simulation.simulation import Simulation
-from brayns.core.simulation.time_unit import TimeUnit
+import brayns
 
 
 class TestMovieFrames(unittest.TestCase):
 
     def test_get_indices(self) -> None:
-        frames = MovieFrames(
+        frames = brayns.MovieFrames(
             fps=10,
             slowing_factor=10,
             start_frame=5000,
             end_frame=-4000,
         )
-        simulation = Simulation(
+        simulation = brayns.Simulation(
             start_frame=0,
             end_frame=10000,
             current_frame=2,
             delta_time=0.1,
-            time_unit=TimeUnit.MILLISECOND,
+            time_unit=brayns.TimeUnit.MILLISECOND,
         )
         ref = list(range(5000, 6100, 100))
         indices = frames.get_indices(simulation)

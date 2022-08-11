@@ -20,9 +20,10 @@
 
 import unittest
 
-from brayns.core.model.get_models import get_models
-from tests.core.model.mock_model import MockModel
+import brayns
 from tests.instance.mock_instance import MockInstance
+
+from .mock_model import MockModel
 
 
 class TestGetModels(unittest.TestCase):
@@ -41,7 +42,7 @@ class TestGetModels(unittest.TestCase):
 
     def test_get_models(self) -> None:
         instance = MockInstance(self._scene)
-        test = get_models(instance)
+        test = brayns.get_models(instance)
         self.assertEqual(test, self._models)
         self.assertEqual(instance.method, 'get-scene')
         self.assertEqual(instance.params, None)

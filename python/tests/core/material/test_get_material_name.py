@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.material.get_material_name import get_material_name
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -29,7 +29,7 @@ class TestGetMaterialName(unittest.TestCase):
     def test_get_material_name(self) -> None:
         name = 'test'
         instance = MockInstance(name)
-        test = get_material_name(instance, 0)
+        test = brayns.get_material_name(instance, 0)
         self.assertEqual(test, name)
         self.assertEqual(instance.method, 'get-material-type')
         self.assertEqual(instance.params, {'id': 0})

@@ -21,39 +21,37 @@
 import math
 import unittest
 
-from brayns.core.bounds.bounds import Bounds
-from brayns.core.vector.vector3 import Vector3
-from brayns.core.view.fovy import Fovy
+import brayns
 
 
 class TestFovy(unittest.TestCase):
 
     def test_eq(self) -> None:
-        self.assertEqual(Fovy(30), Fovy(30.0))
-        self.assertNotEqual(Fovy(31), Fovy(30.0))
-        self.assertNotEqual(Fovy(31), None)
+        self.assertEqual(brayns.Fovy(30), brayns.Fovy(30.0))
+        self.assertNotEqual(brayns.Fovy(31), brayns.Fovy(30.0))
+        self.assertNotEqual(brayns.Fovy(31), None)
 
     def test_radians(self) -> None:
         angle = math.radians(30)
-        fovy = Fovy(angle)
+        fovy = brayns.Fovy(angle)
         self.assertAlmostEqual(fovy.radians, angle)
         self.assertAlmostEqual(fovy.degrees, math.degrees(angle))
 
     def test_degrees(self) -> None:
         angle = 30
-        fovy = Fovy(angle, degrees=True)
+        fovy = brayns.Fovy(angle, degrees=True)
         self.assertAlmostEqual(fovy.radians, math.radians(angle))
         self.assertAlmostEqual(fovy.degrees, angle)
 
     def test_get_full_screen_view(self) -> None:
-        fovy = Fovy(90, degrees=True)
-        target = Bounds(-Vector3.one, Vector3.one)
+        fovy = brayns.Fovy(90, degrees=True)
+        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         test = fovy.get_full_screen_view(target)
         self.assertAlmostEqual(test.position.x, 0)
         self.assertAlmostEqual(test.position.y, 0)
         self.assertAlmostEqual(test.position.z, 2.0)
-        self.assertEqual(test.target, Vector3.zero)
-        self.assertEqual(test.up, Vector3.up)
+        self.assertEqual(test.target, brayns.Vector3.zero)
+        self.assertEqual(test.up, brayns.Vector3.up)
 
 
 if __name__ == '__main__':

@@ -21,10 +21,10 @@
 import dataclasses
 import unittest
 
-from brayns.core.loader.get_loaders import get_loaders
-from brayns.core.loader.loader_info import LoaderInfo
-from tests.core.loader.mock_loader_info import MockLoaderInfo
+import brayns
 from tests.instance.mock_instance import MockInstance
+
+from .mock_loader_info import MockLoaderInfo
 
 
 class TestGetLoaders(unittest.TestCase):
@@ -38,7 +38,7 @@ class TestGetLoaders(unittest.TestCase):
             MockLoaderInfo.loader_info,
             dataclasses.replace(MockLoaderInfo.loader_info, name='test2'),
         ]
-        test = get_loaders(instance)
+        test = brayns.get_loaders(instance)
         self.assertEqual(test, ref)
         self.assertIsNone(instance.params)
 

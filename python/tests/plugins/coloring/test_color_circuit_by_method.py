@@ -20,9 +20,7 @@
 
 import unittest
 
-from brayns.core.color.color4 import Color4
-from brayns.plugins.coloring.color_circuit_by_method import color_circuit_by_method
-from brayns.plugins.coloring.color_method import ColorMethod
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -30,12 +28,12 @@ class TestColorCircuitByMethod(unittest.TestCase):
 
     def test_color_circuit_by_method(self) -> None:
         instance = MockInstance()
-        method = ColorMethod.HEMISPHERE
+        method = brayns.ColorMethod.HEMISPHERE
         colors = {
-            'test1': Color4.white,
-            'test2': Color4.red
+            'test1': brayns.Color4.white,
+            'test2': brayns.Color4.red
         }
-        color_circuit_by_method(instance, 0, method, colors)
+        brayns.color_circuit_by_method(instance, 0, method, colors)
         self.assertEqual(instance.method, 'color-circuit-by-method')
         self.assertEqual(instance.params, {
             'model_id': 0,

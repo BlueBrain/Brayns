@@ -21,20 +21,20 @@
 import json
 import unittest
 
-from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
+import brayns
 
 
 class TestJsonRpcRequest(unittest.TestCase):
 
     def test_to_json_with_id(self) -> None:
-        request = JsonRpcRequest(1, 'test', [1, 2, 3])
+        request = brayns.JsonRpcRequest(1, 'test', [1, 2, 3])
         message = json.loads(request.to_json())
         self.assertEqual(request.id, message['id'])
         self.assertEqual(request.method, message['method'])
         self.assertEqual(request.params, message['params'])
 
     def test_to_json_notification(self) -> None:
-        notification = JsonRpcRequest(None, 'test', None)
+        notification = brayns.JsonRpcRequest(None, 'test', None)
         message = json.loads(notification.to_json())
         self.assertNotIn('id', message)
         self.assertEqual(notification.method, message['method'])

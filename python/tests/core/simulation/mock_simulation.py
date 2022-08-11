@@ -20,21 +20,20 @@
 
 from typing import Any
 
-from brayns.core.simulation.simulation import Simulation
-from brayns.core.simulation.time_unit import TimeUnit
+import brayns
 
 
 class MockSimulation:
 
     @classmethod
     @property
-    def simulation(cls) -> Simulation:
-        return Simulation(
+    def simulation(cls) -> brayns.Simulation:
+        return brayns.Simulation(
             start_frame=0,
             end_frame=10,
             current_frame=5,
             delta_time=0.1,
-            time_unit=TimeUnit.MILLISECOND,
+            time_unit=brayns.TimeUnit.MILLISECOND,
         )
 
     @classmethod

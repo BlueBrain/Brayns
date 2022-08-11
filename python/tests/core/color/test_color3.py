@@ -20,13 +20,13 @@
 
 import unittest
 
-from brayns.core.color.color3 import Color3
+import brayns
 
 
 class TestColor3(unittest.TestCase):
 
     def test_iter(self) -> None:
-        test = list(Color3(1, 2, 3))
+        test = list(brayns.Color3(1, 2, 3))
         ref = [1, 2, 3]
         self.assertEqual(test, ref)
 

@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.camera.get_camera_name import get_camera_name
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -29,7 +29,7 @@ class TestGetCameraName(unittest.TestCase):
     def test_get_camera_name(self) -> None:
         name = 'test'
         instance = MockInstance(name)
-        test = get_camera_name(instance)
+        test = brayns.get_camera_name(instance)
         self.assertEqual(test, name)
         self.assertEqual(instance.method, 'get-camera-type')
         self.assertEqual(instance.params, None)

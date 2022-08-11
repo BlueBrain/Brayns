@@ -20,16 +20,17 @@
 
 import unittest
 
-from brayns.core.transfer_function.get_transfer_function import get_transfer_function
-from tests.core.transfer_function.mock_transfer_function import MockTransferFunction
+import brayns
 from tests.instance.mock_instance import MockInstance
+
+from .mock_transfer_function import MockTransferFunction
 
 
 class TestGetTransferFunction(unittest.TestCase):
 
     def test_get_transfer_function(self) -> None:
         instance = MockInstance(MockTransferFunction.message)
-        test = get_transfer_function(instance, 0)
+        test = brayns.get_transfer_function(instance, 0)
         self.assertEqual(test, MockTransferFunction.transfer_function)
         self.assertEqual(instance.method, 'get-model-transfer-function')
         self.assertEqual(instance.params, {'id': 0})

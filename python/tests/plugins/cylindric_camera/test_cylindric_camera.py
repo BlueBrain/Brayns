@@ -20,14 +20,13 @@
 
 import unittest
 
-from brayns.core.view.fovy import Fovy
-from brayns.plugins.cylindric_camera.cylindric_camera import CylindricCamera
+import brayns
 
 
 class TestCylindricCamera(unittest.TestCase):
 
     def test_get_name(self) -> None:
-        test = CylindricCamera.name
+        test = brayns.CylindricCamera.name
         ref = 'cylindric'
         self.assertEqual(test, ref)
 
@@ -35,12 +34,12 @@ class TestCylindricCamera(unittest.TestCase):
         message = {
             'fovy': 30
         }
-        test = CylindricCamera.deserialize(message)
+        test = brayns.CylindricCamera.deserialize(message)
         self.assertAlmostEqual(test.fovy.degrees, 30)
 
     def test_serialize(self) -> None:
-        camera = CylindricCamera(
-            fovy=Fovy(30, degrees=True)
+        camera = brayns.CylindricCamera(
+            fovy=brayns.Fovy(30, degrees=True)
         )
         test = camera.serialize()
         self.assertAlmostEqual(test['fovy'], 30)

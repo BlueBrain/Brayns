@@ -20,16 +20,17 @@
 
 import unittest
 
-from brayns.core.version.get_version import get_version
-from tests.core.version.mock_version import MockVersion
+import brayns
 from tests.instance.mock_instance import MockInstance
+
+from .mock_version import MockVersion
 
 
 class TestGetVersion(unittest.TestCase):
 
     def test_get_version(self) -> None:
         instance = MockInstance(MockVersion.message)
-        test = get_version(instance)
+        test = brayns.get_version(instance)
         self.assertEqual(test, MockVersion.version)
 
 

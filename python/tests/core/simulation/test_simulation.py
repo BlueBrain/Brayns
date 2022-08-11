@@ -20,14 +20,15 @@
 
 import unittest
 
-from brayns.core.simulation.simulation import Simulation
-from tests.core.simulation.mock_simulation import MockSimulation
+import brayns
+
+from .mock_simulation import MockSimulation
 
 
 class TestSimulation(unittest.TestCase):
 
     def test_deserialize(self) -> None:
-        test = Simulation.deserialize(MockSimulation.message)
+        test = brayns.Simulation.deserialize(MockSimulation.message)
         self.assertEqual(test, MockSimulation.simulation)
 
     def test_frame_count(self) -> None:

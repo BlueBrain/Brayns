@@ -20,17 +20,16 @@
 
 import unittest
 
-from brayns.core.camera.get_camera import get_camera
-from brayns.core.camera.perspective_camera import PerspectiveCamera
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
 class TestGetCamera(unittest.TestCase):
 
     def test_get_camera(self) -> None:
-        camera = PerspectiveCamera()
+        camera = brayns.PerspectiveCamera()
         instance = MockInstance(camera.serialize())
-        test = get_camera(instance, PerspectiveCamera)
+        test = brayns.get_camera(instance, brayns.PerspectiveCamera)
         self.assertEqual(test, camera)
         self.assertEqual(instance.method, 'get-camera-perspective')
         self.assertEqual(instance.params, None)

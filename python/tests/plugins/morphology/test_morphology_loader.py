@@ -19,24 +19,25 @@
 
 import unittest
 
-from brayns.plugins.morphology import MorphologyLoader
-from brayns.plugins.morphology.geometry_type import GeometryType
-from brayns.plugins.morphology.morphology import Morphology
+import brayns
 
 
 class TestMorphologyLoader(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(MorphologyLoader.name, 'Neuron Morphology loader')
+        self.assertEqual(
+            brayns.MorphologyLoader.name,
+            'Neuron Morphology loader'
+        )
 
     def test_properties(self) -> None:
-        loader = MorphologyLoader(
-            morphology=Morphology(
+        loader = brayns.MorphologyLoader(
+            morphology=brayns.Morphology(
                 radius_multiplier=3,
                 load_soma=True,
                 load_axon=True,
                 load_dendrites=True,
-                geometry_type=GeometryType.ORIGINAL
+                geometry_type=brayns.GeometryType.ORIGINAL
             ))
         properties = {
             'radius_multiplier': 3.0,

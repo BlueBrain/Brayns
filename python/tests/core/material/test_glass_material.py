@@ -20,13 +20,13 @@
 
 import unittest
 
-from brayns.core.material.glass_material import GlassMaterial
+import brayns
 
 
 class TestGlassMaterial(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._material = GlassMaterial(
+        self._material = brayns.GlassMaterial(
             refraction_index=2.5
         )
         self._message = {
@@ -34,10 +34,10 @@ class TestGlassMaterial(unittest.TestCase):
         }
 
     def test_name(self) -> None:
-        self.assertEqual(GlassMaterial.name, 'glass')
+        self.assertEqual(brayns.GlassMaterial.name, 'glass')
 
     def test_deserialize(self) -> None:
-        test = GlassMaterial.deserialize(self._message)
+        test = brayns.GlassMaterial.deserialize(self._message)
         self.assertEqual(test, self._material)
 
     def test_serialize(self) -> None:

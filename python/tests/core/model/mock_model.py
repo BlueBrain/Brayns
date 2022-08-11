@@ -20,7 +20,7 @@
 
 from typing import Any
 
-from brayns.core.model.model import Model
+import brayns
 from tests.core.bounds.mock_bounds import MockBounds
 from tests.core.transform.mock_transform import MockTransform
 
@@ -29,8 +29,8 @@ class MockModel:
 
     @classmethod
     @property
-    def model(cls) -> Model:
-        return Model(
+    def model(cls) -> brayns.Model:
+        return brayns.Model(
             id=0,
             bounds=MockBounds.bounds,
             metadata={'test': '1'},

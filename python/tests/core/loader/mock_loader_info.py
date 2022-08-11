@@ -20,21 +20,18 @@
 
 from typing import Any
 
-from brayns.core.api.json_schema import JsonSchema
-from brayns.core.api.json_type import JsonType
-from brayns.core.image.resolution import Resolution
-from brayns.core.loader.loader_info import LoaderInfo
+import brayns
 
 
 class MockLoaderInfo:
 
     @classmethod
     @property
-    def loader_info(cls) -> LoaderInfo:
-        return LoaderInfo(
+    def loader_info(cls) -> brayns.LoaderInfo:
+        return brayns.LoaderInfo(
             name='test',
             extensions=['test1', 'test2'],
-            schema=JsonSchema(type=JsonType.INTEGER)
+            schema=brayns.JsonSchema(type=brayns.JsonType.INTEGER)
         )
 
     @classmethod

@@ -20,17 +20,16 @@
 
 import unittest
 
-from brayns.core.light.directional_light import DirectionalLight
-from brayns.core.vector.vector3 import Vector3
+import brayns
 
 
 class TestDirectionalLight(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(DirectionalLight.name, 'directional')
+        self.assertEqual(brayns.DirectionalLight.name, 'directional')
 
     def test_serialize(self) -> None:
-        light = DirectionalLight(direction=Vector3.up)
+        light = brayns.DirectionalLight(direction=brayns.Vector3.up)
         ref = {
             'color': [1, 1, 1],
             'intensity': 1,

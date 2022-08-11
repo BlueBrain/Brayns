@@ -20,33 +20,33 @@
 
 import unittest
 
-from brayns.core.bounds.bounds import Bounds
-from brayns.core.vector.vector3 import Vector3
-from tests.core.bounds.mock_bounds import MockBounds
+import brayns
+
+from .mock_bounds import MockBounds
 
 
 class TestBounds(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._box = Bounds(
-            min=Vector3(1, 2, 3),
-            max=Vector3(4, 5, 6),
+        self._box = brayns.Bounds(
+            min=brayns.Vector3(1, 2, 3),
+            max=brayns.Vector3(4, 5, 6),
         )
 
     def test_empty(self) -> None:
-        test = Bounds.empty
-        self.assertEqual(test.min, Vector3.zero)
-        self.assertEqual(test.max, Vector3.zero)
+        test = brayns.Bounds.empty
+        self.assertEqual(test.min, brayns.Vector3.zero)
+        self.assertEqual(test.max, brayns.Vector3.zero)
 
     def test_deserialize(self) -> None:
-        test = Bounds.deserialize(MockBounds.message)
+        test = brayns.Bounds.deserialize(MockBounds.message)
         self.assertEqual(test, MockBounds.bounds)
 
     def test_center(self) -> None:
-        self.assertEqual(self._box.center, Vector3(2.5, 3.5, 4.5))
+        self.assertEqual(self._box.center, brayns.Vector3(2.5, 3.5, 4.5))
 
     def test_size(self) -> None:
-        self.assertEqual(self._box.size, Vector3(3, 3, 3))
+        self.assertEqual(self._box.size, brayns.Vector3(3, 3, 3))
 
     def test_width(self) -> None:
         self.assertEqual(self._box.width, 3)

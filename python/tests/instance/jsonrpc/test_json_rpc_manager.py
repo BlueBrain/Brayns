@@ -22,8 +22,8 @@ import json
 import logging
 import unittest
 
+import brayns
 from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
-from brayns.instance.request_error import RequestError
 
 
 class TestJsonRpcManager(unittest.TestCase):
@@ -40,7 +40,7 @@ class TestJsonRpcManager(unittest.TestCase):
     def test_clear(self) -> None:
         task = self._manager.create_task(0)
         self._manager.clear()
-        with self.assertRaises(RequestError):
+        with self.assertRaises(brayns.RequestError):
             task.get_result()
         self.assertFalse(self._manager.is_running(0))
 

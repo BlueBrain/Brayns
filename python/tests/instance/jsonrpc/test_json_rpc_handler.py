@@ -22,13 +22,12 @@ import logging
 import sys
 import unittest
 
+import brayns
 from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
 from brayns.instance.jsonrpc.json_rpc_handler import JsonRpcHandler
 from brayns.instance.jsonrpc.json_rpc_progress import JsonRpcProgress
 from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
 from brayns.instance.jsonrpc.json_rpc_tasks import JsonRpcTasks
-from brayns.instance.request_error import RequestError
-from brayns.instance.request_progress import RequestProgress
 
 
 class TestJsonRpcHandler(unittest.TestCase):
@@ -48,24 +47,24 @@ class TestJsonRpcHandler(unittest.TestCase):
         self.assertEqual(task.get_result(), reply.result)
 
     def test_on_error(self) -> None:
-        error = JsonRpcError(0, RequestError(0, 'test', 123))
+        error = JsonRpcError(0, brayns.RequestError(0, 'test', 123))
         task = self._tasks.create_task(0)
         with self.assertLogs(self._logger, logging.INFO) as context:
             self._handler.on_error(error)
         self.assertEqual(len(context.output), 1)
-        with self.assertRaises(RequestError) as context:
+        with self.assertRaises(brayns.RequestError) as context:
             task.get_result()
 
     def test_on_error_global(self) -> None:
-        error = JsonRpcError(None, RequestError(0, 'test'))
+        error = JsonRpcError(None, brayns.RequestError(0, 'test'))
         tasks = [self._tasks.create_task(i) for i in range(3)]
         self._handler.on_error(error)
         for task in tasks:
-            with self.assertRaises(RequestError):
+            with self.assertRaises(brayns.RequestError):
                 task.get_result()
 
     def test_on_progress(self) -> None:
-        progress = JsonRpcProgress(0, RequestProgress('test', 0.5))
+        progress = JsonRpcProgress(0, brayns.RequestProgress('test', 0.5))
         task = self._tasks.create_task(progress.id)
         with self.assertLogs(self._logger, logging.INFO) as context:
             self._handler.on_progress(progress)

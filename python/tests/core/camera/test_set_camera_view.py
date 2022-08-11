@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.camera.set_camera_view import set_camera_view
+import brayns
 from tests.core.view.mock_view import MockView
 from tests.instance.mock_instance import MockInstance
 
@@ -29,7 +29,7 @@ class TestSetCameraView(unittest.TestCase):
 
     def test_set_camera_view(self) -> None:
         instance = MockInstance()
-        set_camera_view(instance, MockView.view)
+        brayns.set_camera_view(instance, MockView.view)
         self.assertEqual(instance.method, 'set-camera-look-at')
         self.assertEqual(instance.params, MockView.message)
 

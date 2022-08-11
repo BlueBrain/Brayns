@@ -20,17 +20,16 @@
 
 import unittest
 
-from brayns.core.color.color4 import Color4
-from brayns.core.renderer.interactive_renderer import InteractiveRenderer
+import brayns
 
 
 class TestInteractiveRenderer(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._renderer = InteractiveRenderer(
+        self._renderer = brayns.InteractiveRenderer(
             samples_per_pixel=2,
             max_ray_bounces=12,
-            background_color=Color4(0, 0, 1, 1),
+            background_color=brayns.Color4(0, 0, 1, 1),
             enable_shadows=False,
             ambient_occlusion_samples=15,
         )
@@ -43,12 +42,12 @@ class TestInteractiveRenderer(unittest.TestCase):
         }
 
     def test_name(self) -> None:
-        test = InteractiveRenderer.name
+        test = brayns.InteractiveRenderer.name
         ref = 'interactive'
         self.assertEqual(test, ref)
 
     def test_deserialize(self) -> None:
-        test = InteractiveRenderer.deserialize(self._message)
+        test = brayns.InteractiveRenderer.deserialize(self._message)
         self.assertEqual(test, self._renderer)
 
     def test_serialize(self) -> None:

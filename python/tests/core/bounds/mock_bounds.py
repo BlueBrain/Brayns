@@ -20,18 +20,17 @@
 
 from typing import Any
 
-from brayns.core.bounds.bounds import Bounds
-from brayns.core.vector.vector3 import Vector3
+import brayns
 
 
 class MockBounds:
 
     @classmethod
     @property
-    def bounds(cls) -> Bounds:
-        return Bounds(
-            min=Vector3.zero,
-            max=Vector3.one
+    def bounds(cls) -> brayns.Bounds:
+        return brayns.Bounds(
+            min=brayns.Vector3.zero,
+            max=brayns.Vector3.one
         )
 
     @classmethod

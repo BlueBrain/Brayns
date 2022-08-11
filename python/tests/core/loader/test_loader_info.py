@@ -20,14 +20,15 @@
 
 import unittest
 
-from brayns.core.loader.loader_info import LoaderInfo
-from tests.core.loader.mock_loader_info import MockLoaderInfo
+import brayns
+
+from .mock_loader_info import MockLoaderInfo
 
 
 class TestLoaderInfo(unittest.TestCase):
 
     def test_deserialize(self) -> None:
-        test = LoaderInfo.deserialize(MockLoaderInfo.message)
+        test = brayns.LoaderInfo.deserialize(MockLoaderInfo.message)
         self.assertEqual(test, MockLoaderInfo.loader_info)
 
 

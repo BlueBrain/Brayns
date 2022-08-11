@@ -21,23 +21,31 @@
 import math
 import unittest
 
-from brayns.core.transform.quaternion import Quaternion
-from brayns.core.vector.vector3 import Vector3
+import brayns
 
 
 class TestQuaternion(unittest.TestCase):
 
     def test_identity(self) -> None:
-        self.assertEqual(Quaternion.identity, Quaternion(0, 0, 0, 1))
+        self.assertEqual(
+            brayns.Quaternion.identity,
+            brayns.Quaternion(0, 0, 0, 1)
+        )
 
     def test_mul_scalar(self) -> None:
         values = [1, 2, 3, 4]
         ref = [2 * i for i in values]
-        self.assertEqual(Quaternion(*values) * 2, Quaternion(*ref))
-        self.assertEqual(2 * Quaternion(*values), Quaternion(*ref))
+        self.assertEqual(
+            brayns.Quaternion(*values)
+            * 2, brayns.Quaternion(*ref)
+        )
+        self.assertEqual(
+            2 * brayns.Quaternion(*values),
+            brayns.Quaternion(*ref)
+        )
 
     def test_mul_other(self) -> None:
-        test = Quaternion(1, 2, 3, 4) * Quaternion(5, 6, 7, 8)
+        test = brayns.Quaternion(1, 2, 3, 4) * brayns.Quaternion(5, 6, 7, 8)
         self.assertAlmostEqual(test.x, 24)
         self.assertAlmostEqual(test.y, 48)
         self.assertAlmostEqual(test.z, 48)
@@ -46,12 +54,18 @@ class TestQuaternion(unittest.TestCase):
     def test_div_scalar(self) -> None:
         values = [1, 2, 3, 4]
         ref = [i / 2 for i in values]
-        self.assertEqual(Quaternion(*values) / 2, Quaternion(*ref))
+        self.assertEqual(
+            brayns.Quaternion(*values) / 2,
+            brayns.Quaternion(*ref)
+        )
         ref = [2 / i for i in values]
-        self.assertEqual(2 / Quaternion(*values), Quaternion(*ref))
+        self.assertEqual(
+            2 / brayns.Quaternion(*values),
+            brayns.Quaternion(*ref)
+        )
 
     def test_div_other(self) -> None:
-        value = Quaternion(1, 2, 3, 4)
+        value = brayns.Quaternion(1, 2, 3, 4)
         test = value / value
         self.assertAlmostEqual(test.x, 0)
         self.assertAlmostEqual(test.y, 0)
@@ -59,24 +73,24 @@ class TestQuaternion(unittest.TestCase):
         self.assertAlmostEqual(test.w, 1)
 
     def test_axis(self) -> None:
-        test = Quaternion(1, 2, 3, 4)
-        self.assertEqual(test.axis, Vector3(1, 2, 3))
+        test = brayns.Quaternion(1, 2, 3, 4)
+        self.assertEqual(test.axis, brayns.Vector3(1, 2, 3))
 
     def test_angle_radians(self) -> None:
-        test = Quaternion(1, 0, 0, 0)
+        test = brayns.Quaternion(1, 0, 0, 0)
         self.assertAlmostEqual(test.angle_radians, math.radians(180))
 
     def test_angle_degrees(self) -> None:
-        test = Quaternion(1, 0, 0, 0)
+        test = brayns.Quaternion(1, 0, 0, 0)
         self.assertAlmostEqual(test.angle_degrees, 180)
 
     def test_conjugate(self) -> None:
-        test = Quaternion(1, 2, 3, 4)
-        ref = Quaternion(-1, -2, -3, 4)
+        test = brayns.Quaternion(1, 2, 3, 4)
+        ref = brayns.Quaternion(-1, -2, -3, 4)
         self.assertEqual(test.conjugate, ref)
 
     def test_inverse(self) -> None:
-        value = Quaternion(1, 2, 3, 4)
+        value = brayns.Quaternion(1, 2, 3, 4)
         test = value * value.inverse
         self.assertAlmostEqual(test.x, 0)
         self.assertAlmostEqual(test.y, 0)

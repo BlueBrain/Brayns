@@ -20,13 +20,13 @@
 
 import unittest
 
-from brayns.core.material.default_material import DefaultMaterial
+import brayns
 
 
 class TestDefaultMaterial(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._material = DefaultMaterial(
+        self._material = brayns.DefaultMaterial(
             opacity=0.5
         )
         self._message = {
@@ -34,10 +34,10 @@ class TestDefaultMaterial(unittest.TestCase):
         }
 
     def test_name(self) -> None:
-        self.assertEqual(DefaultMaterial.name, 'default')
+        self.assertEqual(brayns.DefaultMaterial.name, 'default')
 
     def test_deserialize(self) -> None:
-        test = DefaultMaterial.deserialize(self._message)
+        test = brayns.DefaultMaterial.deserialize(self._message)
         self.assertEqual(test, self._material)
 
     def test_serialize(self) -> None:

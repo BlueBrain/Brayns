@@ -21,31 +21,30 @@
 import pathlib
 import unittest
 
-from brayns.core.image.image_format import ImageFormat
-from brayns.core.image.parse_image_format import parse_image_format
+import brayns
 
 
 class TestParseImageFormat(unittest.TestCase):
 
     def test_jpeg(self) -> None:
         path = 'test/stuff/image.jpg'
-        test = parse_image_format(path)
-        self.assertIs(test, ImageFormat.JPEG)
+        test = brayns.parse_image_format(path)
+        self.assertIs(test, brayns.ImageFormat.JPEG)
 
     def test_png(self) -> None:
         path = 'test/stuff/image.png'
-        test = parse_image_format(path)
-        self.assertIs(test, ImageFormat.PNG)
+        test = brayns.parse_image_format(path)
+        self.assertIs(test, brayns.ImageFormat.PNG)
 
     def test_upper(self) -> None:
         path = 'test/stuff/image.PNG'
-        test = parse_image_format(path)
-        self.assertIs(test, ImageFormat.PNG)
+        test = brayns.parse_image_format(path)
+        self.assertIs(test, brayns.ImageFormat.PNG)
 
     def test_path(self) -> None:
         path = pathlib.Path('test/stuff/image.png')
-        test = parse_image_format(path)
-        self.assertIs(test, ImageFormat.PNG)
+        test = brayns.parse_image_format(path)
+        self.assertIs(test, brayns.ImageFormat.PNG)
 
 
 if __name__ == '__main__':

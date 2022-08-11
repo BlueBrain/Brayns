@@ -20,35 +20,37 @@
 
 import unittest
 
-from brayns.plugins.coloring.cell_id import CellId
+import brayns
 
 
 class TestCellId(unittest.TestCase):
 
     def test_from_integer(self) -> None:
-        test = CellId.from_integer(3)
+        test = brayns.CellId.from_integer(3)
         ref = '3'
         self.assertEqual(test.value, ref)
 
     def test_from_integers(self) -> None:
         values = [1, 3, 6]
-        test = CellId.from_integers(values)
+        test = brayns.CellId.from_integers(values)
         ref = '1,3,6'
         self.assertEqual(test.value, ref)
 
     def test_from_strings(self) -> None:
         values = ['1', '3', '6']
-        test = CellId.from_strings(values)
+        test = brayns.CellId.from_strings(values)
         ref = '1,3,6'
         self.assertEqual(test.value, ref)
 
     def test_from_range(self) -> None:
-        test = CellId.from_range(0, 3)
+        test = brayns.CellId.from_range(0, 3)
         ref = '0-3'
         self.assertEqual(test.value, ref)
 
     def test_or(self) -> None:
-        test = CellId.from_integer(3) | CellId.from_range(10, 13) | CellId('5')
+        test = brayns.CellId.from_integer(3)
+        test |= brayns.CellId.from_range(10, 13)
+        test |= brayns.CellId('5')
         ref = '3,10-13,5'
         self.assertEqual(test.value, ref)
 

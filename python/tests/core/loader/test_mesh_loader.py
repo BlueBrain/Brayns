@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.loader.mesh_loader import MeshLoader
+import brayns
 from tests.core.model.mock_model import MockModel
 from tests.instance.mock_instance import MockInstance
 
@@ -28,15 +28,15 @@ from tests.instance.mock_instance import MockInstance
 class TestMeshLoader(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(MeshLoader.name, 'mesh')
+        self.assertEqual(brayns.MeshLoader.name, 'mesh')
 
     def test_properties(self) -> None:
-        loader = MeshLoader()
+        loader = brayns.MeshLoader()
         self.assertEqual(loader.properties, {})
 
     def test_load(self) -> None:
         instance = MockInstance([MockModel.message])
-        loader = MeshLoader()
+        loader = brayns.MeshLoader()
         path = 'path'
         test = loader.load(instance, path)
         ref = [MockModel.model]
@@ -45,11 +45,11 @@ class TestMeshLoader(unittest.TestCase):
         self.assertEqual(instance.params, params)
 
     def test_serialize(self) -> None:
-        loader = MeshLoader()
+        loader = brayns.MeshLoader()
         path = 'path'
         ref = {
             'path': path,
-            'loader_name': MeshLoader.name,
+            'loader_name': brayns.MeshLoader.name,
             'loader_properties': loader.properties
         }
         test = loader.serialize(path)

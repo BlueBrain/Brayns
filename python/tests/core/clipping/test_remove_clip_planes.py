@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.clipping.remove_clip_planes import remove_clip_planes
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -29,7 +29,7 @@ class TestRemoveClipPlanes(unittest.TestCase):
     def test_remove_clip_planes(self) -> None:
         instance = MockInstance()
         ids = [1, 2, 3]
-        remove_clip_planes(instance, ids)
+        brayns.remove_clip_planes(instance, ids)
         self.assertEqual(instance.method, 'remove-clip-planes')
         self.assertEqual(instance.params, {'ids': ids})
 

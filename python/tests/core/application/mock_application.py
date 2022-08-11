@@ -20,18 +20,17 @@
 
 from typing import Any
 
-from brayns.core.application.application import Application
-from brayns.core.image.resolution import Resolution
+import brayns
 
 
 class MockApplication:
 
     @classmethod
     @property
-    def application(cls) -> Application:
-        return Application(
+    def application(cls) -> brayns.Application:
+        return brayns.Application(
             plugins=['test1', 'test2'],
-            resolution=Resolution(100, 200),
+            resolution=brayns.Resolution(100, 200),
             jpeg_quality=50
         )
 

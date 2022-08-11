@@ -20,24 +20,23 @@
 
 import unittest
 
-from brayns.core.transform.rotation import Rotation
-from brayns.core.transform.transform import Transform
-from brayns.core.vector.vector3 import Vector3
-from tests.core.transform.mock_transform import MockTransform
+import brayns
+
+from .mock_transform import MockTransform
 
 
 class TestTransform(unittest.TestCase):
 
     def test_deserialize(self) -> None:
-        test = Transform.deserialize(MockTransform.message)
+        test = brayns.Transform.deserialize(MockTransform.message)
         ref = MockTransform.transform
         self.assertEqual(test, ref)
 
     def test_identity(self) -> None:
-        test = Transform.identity
-        self.assertEqual(test.translation, Vector3.zero)
-        self.assertEqual(test.rotation, Rotation.identity)
-        self.assertEqual(test.scale, Vector3.one)
+        test = brayns.Transform.identity
+        self.assertEqual(test.translation, brayns.Vector3.zero)
+        self.assertEqual(test.rotation, brayns.Rotation.identity)
+        self.assertEqual(test.scale, brayns.Vector3.one)
 
     def test_serialize(self) -> None:
         test = MockTransform.transform.serialize()

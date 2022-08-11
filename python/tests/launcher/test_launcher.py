@@ -20,26 +20,22 @@
 
 import unittest
 
-from brayns.core.image.resolution import Resolution
-from brayns.launcher.launcher import Launcher
-from brayns.launcher.log_level import LogLevel
-from brayns.launcher.plugin import Plugin
-from brayns.launcher.ssl_server_context import SslServerContext
+import brayns
 
 
 class TestLauncher(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
-        launcher = Launcher(
+        launcher = brayns.Launcher(
             executable='service',
             uri='uri',
-            ssl_context=SslServerContext(),
-            log_level=LogLevel.CRITICAL,
-            resolution=Resolution(12, 23),
+            ssl_context=brayns.SslServerContext(),
+            log_level=brayns.LogLevel.CRITICAL,
+            resolution=brayns.Resolution(12, 23),
             jpeg_quality=25,
             plugins=[
-                Plugin.ATLAS_EXPLORER,
-                Plugin.CIRCUIT_EXPLORER
+                brayns.Plugin.ATLAS_EXPLORER,
+                brayns.Plugin.CIRCUIT_EXPLORER
             ]
         )
         test = launcher.get_command_line()
@@ -54,9 +50,9 @@ class TestLauncher(unittest.TestCase):
             '--jpeg-quality',
             '25',
             '--plugin',
-            Plugin.ATLAS_EXPLORER.value,
+            brayns.Plugin.ATLAS_EXPLORER.value,
             '--plugin',
-            Plugin.CIRCUIT_EXPLORER.value,
+            brayns.Plugin.CIRCUIT_EXPLORER.value,
             '--secure',
             'true'
         ]

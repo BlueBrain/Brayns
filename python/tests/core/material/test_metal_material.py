@@ -20,13 +20,13 @@
 
 import unittest
 
-from brayns.core.material.metal_material import MetalMaterial
+import brayns
 
 
 class TestMetalMaterial(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._material = MetalMaterial(
+        self._material = brayns.MetalMaterial(
             roughness=0.5
         )
         self._message = {
@@ -34,10 +34,10 @@ class TestMetalMaterial(unittest.TestCase):
         }
 
     def test_name(self) -> None:
-        self.assertEqual(MetalMaterial.name, 'metal')
+        self.assertEqual(brayns.MetalMaterial.name, 'metal')
 
     def test_deserialize(self) -> None:
-        test = MetalMaterial.deserialize(self._message)
+        test = brayns.MetalMaterial.deserialize(self._message)
         self.assertEqual(test, self._material)
 
     def test_serialize(self) -> None:

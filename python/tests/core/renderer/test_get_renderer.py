@@ -20,18 +20,17 @@
 
 import unittest
 
-from brayns.core.renderer.get_renderer import get_renderer
-from brayns.core.renderer.production_renderer import ProductionRenderer
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
 class TestGetRenderer(unittest.TestCase):
 
     def test_get_renderer(self) -> None:
-        ref = ProductionRenderer()
+        ref = brayns.ProductionRenderer()
         reply = ref.serialize()
         instance = MockInstance(reply)
-        test = get_renderer(instance, ProductionRenderer)
+        test = brayns.get_renderer(instance, brayns.ProductionRenderer)
         self.assertEqual(test, ref)
         self.assertEqual(instance.method, 'get-renderer-production')
         self.assertEqual(instance.params, None)

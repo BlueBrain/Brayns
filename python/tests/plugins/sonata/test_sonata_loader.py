@@ -20,20 +20,19 @@
 
 import unittest
 
-from brayns.plugins.sonata.sonata_loader import SonataLoader
-from brayns.plugins.sonata.sonata_node_population import SonataNodePopulation
+import brayns
 
 
 class TestSonataLoader(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(SonataLoader.name, 'SONATA loader')
+        self.assertEqual(brayns.SonataLoader.name, 'SONATA loader')
 
     def test_properties(self) -> None:
-        loader = SonataLoader(
+        loader = brayns.SonataLoader(
             node_populations=[
-                SonataNodePopulation('test1'),
-                SonataNodePopulation('test2')
+                brayns.SonataNodePopulation('test1'),
+                brayns.SonataNodePopulation('test2')
             ],
             simulation_config='test'
         )

@@ -20,25 +20,24 @@
 
 import unittest
 
-from brayns.core.light.quad_light import QuadLight
-from brayns.core.vector.vector3 import Vector3
+import brayns
 
 
 class TestQuadLight(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(QuadLight.name, 'quad')
+        self.assertEqual(brayns.QuadLight.name, 'quad')
 
     def test_emission_direction(self) -> None:
-        light = QuadLight(
-            bottom_left=Vector3.one,
-            edge1=Vector3.up,
-            edge2=Vector3.left
+        light = brayns.QuadLight(
+            bottom_left=brayns.Vector3.one,
+            edge1=brayns.Vector3.up,
+            edge2=brayns.Vector3.left
         )
-        self.assertEqual(light.emission_direction, Vector3.forward)
+        self.assertEqual(light.emission_direction, brayns.Vector3.forward)
 
     def test_serialize(self) -> None:
-        light = QuadLight()
+        light = brayns.QuadLight()
         ref = {
             'color': [1, 1, 1],
             'intensity': 1,

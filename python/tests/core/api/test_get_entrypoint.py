@@ -20,10 +20,7 @@
 
 import unittest
 
-from brayns.core.api.entrypoint import Entrypoint
-from brayns.core.api.get_entrypoint import get_entrypoint
-from brayns.core.api.json_schema import JsonSchema
-from brayns.core.api.json_type import JsonType
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -42,18 +39,18 @@ class TestGetEntrypoint(unittest.TestCase):
                 'type': 'array'
             }
         }
-        self._entrypoint = Entrypoint(
+        self._entrypoint = brayns.Entrypoint(
             method='test',
             description='test2',
             plugin='stuff',
             asynchronous=True,
-            params=JsonSchema(type=JsonType.OBJECT),
-            result=JsonSchema(type=JsonType.ARRAY)
+            params=brayns.JsonSchema(type=brayns.JsonType.OBJECT),
+            result=brayns.JsonSchema(type=brayns.JsonType.ARRAY)
         )
 
     def test_get_entrypoint(self) -> None:
         instance = MockInstance(self._message)
-        test = get_entrypoint(instance, 'test')
+        test = brayns.get_entrypoint(instance, 'test')
         self.assertEqual(instance.method, 'schema')
         self.assertEqual(instance.params, {'endpoint': 'test'})
         self.assertEqual(test, self._entrypoint)

@@ -20,19 +20,18 @@
 
 from typing import Any
 
-from brayns.core.vector.vector3 import Vector3
-from brayns.core.view.view import View
+import brayns
 
 
 class MockView:
 
     @classmethod
     @property
-    def view(cls) -> View:
-        return View(
-            position=Vector3(1, 2, 3),
-            target=Vector3(4, 5, 6),
-            up=Vector3(7, 8, 9)
+    def view(cls) -> brayns.View:
+        return brayns.View(
+            position=brayns.Vector3(1, 2, 3),
+            target=brayns.Vector3(4, 5, 6),
+            up=brayns.Vector3(7, 8, 9)
         )
 
     @classmethod

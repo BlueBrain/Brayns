@@ -20,17 +20,16 @@
 
 import unittest
 
-from brayns.core.color.color3 import Color3
-from brayns.core.light.ambient_light import AmbientLight
+import brayns
 
 
 class TestAmbientLight(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(AmbientLight.name, 'ambient')
+        self.assertEqual(brayns.AmbientLight.name, 'ambient')
 
     def test_serialize(self) -> None:
-        light = AmbientLight(Color3.red, 12, False)
+        light = brayns.AmbientLight(brayns.Color3.red, 12, False)
         ref = {
             'color': [1, 0, 0],
             'intensity': 12,

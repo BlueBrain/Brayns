@@ -20,21 +20,18 @@
 
 from typing import Any
 
-from brayns.core.transform.quaternion import Quaternion
-from brayns.core.transform.rotation import Rotation
-from brayns.core.transform.transform import Transform
-from brayns.core.vector.vector3 import Vector3
+import brayns
 
 
 class MockTransform:
 
     @classmethod
     @property
-    def transform(cls) -> Transform:
-        return Transform(
-            translation=Vector3(1, 2, 3),
-            rotation=Rotation.identity,
-            scale=Vector3(4, 5, 6)
+    def transform(cls) -> brayns.Transform:
+        return brayns.Transform(
+            translation=brayns.Vector3(1, 2, 3),
+            rotation=brayns.Rotation.identity,
+            scale=brayns.Vector3(4, 5, 6)
         )
 
     @classmethod

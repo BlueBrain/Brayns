@@ -20,19 +20,17 @@
 
 import unittest
 
-from brayns.core.image.resolution import Resolution
-from brayns.core.movie.movie import Movie
-from brayns.core.image.image_format import ImageFormat
+import brayns
 
 
 class TestMovie(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
-        movie = Movie(
+        movie = brayns.Movie(
             frames_folder='folder',
-            frames_format=ImageFormat.PNG,
+            frames_format=brayns.ImageFormat.PNG,
             fps=30,
-            resolution=Resolution.full_hd,
+            resolution=brayns.Resolution.full_hd,
             bitrate=64000,
             encoder='encoder',
             pixel_format='pixel',

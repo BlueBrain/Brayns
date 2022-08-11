@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.light.clear_lights import clear_lights
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -28,7 +28,7 @@ class TestClearLight(unittest.TestCase):
 
     def test_clear_lights(self) -> None:
         instance = MockInstance()
-        clear_lights(instance)
+        brayns.clear_lights(instance)
         self.assertEqual(instance.method, 'clear-lights')
         self.assertEqual(instance.params, None)
 
