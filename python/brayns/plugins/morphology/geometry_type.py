@@ -20,7 +20,13 @@
 from enum import Enum
 
 
-class MorphologyGeometryType(Enum):
+class GeometryType(Enum):
+    """Type of geometry to use when loading a morphology.
+
+    :param ORIGINAL: Use raw geometries dimensions.
+    :param SMOOTH: Smooth radius changes between geometries for better visual.
+    :param CONSTANT_RADII: Apply the same radius to all geometries.
+    """
 
     ORIGINAL = 'original'
     SMOOTH = 'smooth'

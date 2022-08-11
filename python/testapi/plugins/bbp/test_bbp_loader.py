@@ -41,7 +41,7 @@ class TestBbpLoader(SimpleTestCase):
         loader = brayns.BbpLoader(
             cells=brayns.BbpCells.from_density(0.5),
             report=brayns.BbpReport.compartment('somas'),
-            morphology=brayns.MorphologyParameters(
+            morphology=brayns.Morphology(
                 load_dendrites=True
             )
         )

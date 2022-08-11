@@ -26,6 +26,10 @@ from typing import Any
 
 @dataclass(frozen=True)
 class BbpReport:
+    """BlueConfig report selection.
+
+    Use one of the factory methods to create this object.
+    """
 
     type: str
     name: str | None = None
@@ -33,12 +37,18 @@ class BbpReport:
 
     @staticmethod
     def none() -> BbpReport:
+        """No reports to load."""
         return BbpReport(
             type='none'
         )
 
     @staticmethod
     def spikes(spike_transition_time: float = 1.0) -> BbpReport:
+        """Spike report with optional transition time.
+
+        time unit of transition depends on the report but it can be used to make
+        this transition faster or slower (ie 2 = twice slower).
+        """
         return BbpReport(
             type='spikes',
             spike_transition_time=spike_transition_time,
@@ -46,12 +56,14 @@ class BbpReport:
 
     @staticmethod
     def compartment(name: str) -> BbpReport:
+        """Compartment report with given name."""
         return BbpReport(
             type='compartment',
             name=name,
         )
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         message: dict[str, Any] = {
             'report_type': self.type
         }

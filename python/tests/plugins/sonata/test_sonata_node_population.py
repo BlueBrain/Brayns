@@ -20,8 +20,8 @@
 
 import unittest
 
-from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
+from brayns.plugins.morphology.geometry_type import GeometryType
+from brayns.plugins.morphology.morphology import Morphology
 from brayns.plugins.sonata.sonata_edge_population import SonataEdgePopulation
 from brayns.plugins.sonata.sonata_node_population import SonataNodePopulation
 from brayns.plugins.sonata.sonata_nodes import SonataNodes
@@ -39,12 +39,12 @@ class TestSonataNodePopulation(unittest.TestCase):
                 SonataEdgePopulation('test1', afferent=True),
                 SonataEdgePopulation('test2', afferent=False)
             ],
-            morphology=MorphologyParameters(
+            morphology=Morphology(
                 radius_multiplier=3,
                 load_soma=False,
                 load_axon=True,
                 load_dendrites=True,
-                geometry_type=MorphologyGeometryType.ORIGINAL
+                geometry_type=GeometryType.ORIGINAL
             ),
             vasculature_radius_multiplier=4
         )

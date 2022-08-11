@@ -19,8 +19,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from brayns.instance.instance import Instance
-from brayns.plugins.coloring.color_method import ColorMethod
+from brayns.instance import Instance
+
+from .color_method import ColorMethod
 
 
 def get_color_method_values(
@@ -28,6 +29,20 @@ def get_color_method_values(
     model_id: int,
     method: ColorMethod,
 ) -> list[str]:
+    """Get available values for a coloring method on the given circuit.
+
+    For example get_color_method_values(ColorMethod.BY_LAYER) would give
+    ['1', '2', '3'] if the circuit has 3 layers.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Model ID.
+    :type model_id: int
+    :param method: Coloring method.
+    :type method: ColorMethod
+    :return: List of values available for given method.
+    :rtype: list[str]
+    """
     params = {
         'model_id': model_id,
         'method': method.value

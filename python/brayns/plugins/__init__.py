@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.plugins.bbp import *
-from brayns.plugins.coloring import *
-from brayns.plugins.cylindric_camera import *
-from brayns.plugins.morphology import *
-from brayns.plugins.sonata import *
+from .bbp import *
+from .coloring import *
+from .cylindric_camera import *
+from .morphology import *
+from .sonata import *

@@ -29,6 +29,17 @@ def color_circuit_by_id(
     model_id: int,
     colors: dict[CellId, Color4],
 ) -> list[int]:
+    """Color a circuit from a mapping cell ID -> Color.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Circuit model ID.
+    :type model_id: int
+    :param colors: Color mappings Cells -> Color.
+    :type colors: dict[CellId, Color4]
+    :return: List of GIDs that were not colored.
+    :rtype: list[int]
+    """
     params = {
         'model_id': model_id,
         'color_info': [

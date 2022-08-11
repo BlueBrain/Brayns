@@ -23,25 +23,40 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
-from brayns.plugins.sonata.sonata_edge_population import SonataEdgePopulation
-from brayns.plugins.sonata.sonata_nodes import SonataNodes
-from brayns.plugins.sonata.sonata_report import SonataReport
+from brayns.plugins.morphology import Morphology
+
+from .sonata_edge_population import SonataEdgePopulation
+from .sonata_nodes import SonataNodes
+from .sonata_report import SonataReport
 
 
 @dataclass
 class SonataNodePopulation:
+    """SONATA node population parameters.
+
+    :param name: Population name.
+    :type name: str
+    :param nodes: Nodes to load, defaults to 0.01% of all nodes.
+    :type nodes: SonataNodes, optional
+    :param report: Report to load, defaults to None.
+    :type report: SonataReport | None, optional
+    :param edges: Edges to load, defaults to None.
+    :type edges: list[SonataEdgePopulation] | None, optional
+    :param morphology: How to load the morphologies, default constructed.
+    :type morphology: Morphology, optional
+    :param vasculature_radius_multiplier: Vasculature scale, defaults to 1.
+    :type vasculature_radius_multiplier: float, optional
+    """
 
     name: str
     nodes: SonataNodes = SonataNodes.from_density(0.01)
     report: SonataReport | None = None
     edges: list[SonataEdgePopulation] | None = None
-    morphology: MorphologyParameters = field(
-        default_factory=MorphologyParameters
-    )
+    morphology: Morphology = field(default_factory=Morphology)
     vasculature_radius_multiplier: float = 1.0
 
     def serialize(self) -> dict[str, Any]:
+        """Low level JSON API to serialize to JSON."""
         message = {
             'node_population': self.name,
             'vasculature_geometry_parameters': {

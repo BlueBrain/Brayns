@@ -20,8 +20,8 @@
 import unittest
 
 from brayns.plugins.morphology import MorphologyLoader
-from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
+from brayns.plugins.morphology.geometry_type import GeometryType
+from brayns.plugins.morphology.morphology import Morphology
 
 
 class TestMorphologyLoader(unittest.TestCase):
@@ -31,12 +31,12 @@ class TestMorphologyLoader(unittest.TestCase):
 
     def test_properties(self) -> None:
         loader = MorphologyLoader(
-            morphology=MorphologyParameters(
+            morphology=Morphology(
                 radius_multiplier=3,
                 load_soma=True,
                 load_axon=True,
                 load_dendrites=True,
-                geometry_type=MorphologyGeometryType.ORIGINAL
+                geometry_type=GeometryType.ORIGINAL
             ))
         properties = {
             'radius_multiplier': 3.0,

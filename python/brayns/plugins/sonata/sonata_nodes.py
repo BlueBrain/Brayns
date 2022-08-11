@@ -26,6 +26,10 @@ from typing import Any
 
 @dataclass
 class SonataNodes:
+    """Specify how to load SONATA nodes.
+
+    Use one of the factory methods to create this object.
+    """
 
     density: float | None = None
     names: list[str] | None = None
@@ -33,21 +37,26 @@ class SonataNodes:
 
     @staticmethod
     def all() -> SonataNodes:
+        """Load all nodes."""
         return SonataNodes.from_density(1.0)
 
     @staticmethod
     def from_density(density: float) -> SonataNodes:
+        """Load a proportion of all nodes (0 = none, 1 = all)."""
         return SonataNodes(density=density)
 
     @staticmethod
     def from_names(names: list[str], density: float = 1.0) -> SonataNodes:
+        """Load from node group names with optional density."""
         return SonataNodes(density=density, names=names)
 
     @staticmethod
     def from_ids(ids: list[int]) -> SonataNodes:
+        """Load nodes with given IDs."""
         return SonataNodes(ids=ids)
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         message = {}
         if self.density is not None:
             message['node_percentage'] = self.density

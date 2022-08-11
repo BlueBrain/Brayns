@@ -23,8 +23,8 @@ import unittest
 from brayns.plugins.bbp.bbp_cells import BbpCells
 from brayns.plugins.bbp.bbp_loader import BbpLoader
 from brayns.plugins.bbp.bbp_report import BbpReport
-from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
+from brayns.plugins.morphology.geometry_type import GeometryType
+from brayns.plugins.morphology.morphology import Morphology
 
 
 class TestBbpLoader(unittest.TestCase):
@@ -36,12 +36,12 @@ class TestBbpLoader(unittest.TestCase):
         loader = BbpLoader(
             cells=BbpCells.from_targets(['tests'], 0.5),
             report=BbpReport.compartment('test'),
-            morphology=MorphologyParameters(
+            morphology=Morphology(
                 radius_multiplier=3,
                 load_soma=True,
                 load_axon=True,
                 load_dendrites=True,
-                geometry_type=MorphologyGeometryType.ORIGINAL
+                geometry_type=GeometryType.ORIGINAL
             ),
             load_afferent_synapses=True,
             load_efferent_synapses=True

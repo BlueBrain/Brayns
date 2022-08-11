@@ -26,24 +26,33 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CellId:
+    """Compressed cell ID list into a string.
+
+    Use one of the factory methods to create this object.
+    """
 
     value: str
 
     @staticmethod
     def from_integer(value: int) -> CellId:
+        """Create from a GID integer value."""
         return CellId(str(value))
 
     @staticmethod
     def from_integers(values: Iterable[int]) -> CellId:
+        """Create from a list of GIDs value."""
         return CellId.from_strings(str(value) for value in values)
 
     @staticmethod
     def from_strings(values: Iterable[str]) -> CellId:
+        """Create from a list of formatted strings."""
         return CellId(','.join(values))
 
     @staticmethod
     def from_range(start: int, end: int) -> CellId:
+        """Create from a range of GIDs."""
         return CellId(f'{start}-{end}')
 
     def __or__(self, other: CellId) -> CellId:
+        """Combine two set of GIDs."""
         return CellId.from_strings([self.value, other.value])

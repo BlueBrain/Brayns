@@ -18,16 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.plugins.sonata.sonata_edge_population import SonataEdgePopulation
-from brayns.plugins.sonata.sonata_loader import SonataLoader
-from brayns.plugins.sonata.sonata_node_population import SonataNodePopulation
-from brayns.plugins.sonata.sonata_nodes import SonataNodes
-from brayns.plugins.sonata.sonata_report import SonataReport
+from .sonata_edge_population import SonataEdgePopulation
+from .sonata_loader import SonataLoader
+from .sonata_node_population import SonataNodePopulation
+from .sonata_nodes import SonataNodes
+from .sonata_report import SonataReport
 
 __all__ = [
     'SonataEdgePopulation',
     'SonataLoader',
     'SonataNodePopulation',
     'SonataNodes',
-    'SonataReport'
+    'SonataReport',
 ]

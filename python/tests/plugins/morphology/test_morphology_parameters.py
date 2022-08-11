@@ -19,26 +19,26 @@
 
 import unittest
 
-from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
+from brayns.plugins.morphology.geometry_type import GeometryType
+from brayns.plugins.morphology.morphology import Morphology
 
 
 class TestMorphologyParameters(unittest.TestCase):
 
     def test_serialize(self) -> None:
-        test = MorphologyParameters(
+        test = Morphology(
             radius_multiplier=3,
             load_soma=False,
             load_axon=True,
             load_dendrites=True,
-            geometry_type=MorphologyGeometryType.CONSTANT_RADII,
+            geometry_type=GeometryType.CONSTANT_RADII,
         )
         ref = {
             'radius_multiplier': 3,
             'load_soma': False,
             'load_axon': True,
             'load_dendrites': True,
-            'geometry_type': MorphologyGeometryType.CONSTANT_RADII.value
+            'geometry_type': GeometryType.CONSTANT_RADII.value
         }
         self.assertEqual(test.serialize(), ref)
 

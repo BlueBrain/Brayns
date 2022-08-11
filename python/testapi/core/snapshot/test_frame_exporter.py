@@ -44,7 +44,7 @@ class TestFrameExporter(SimpleTestCase):
     def _load_circuit(self) -> brayns.Model:
         loader = brayns.BbpLoader(
             report=brayns.BbpReport.compartment('somas'),
-            morphology=brayns.MorphologyParameters(
+            morphology=brayns.Morphology(
                 radius_multiplier=10
             )
         )

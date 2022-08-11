@@ -21,14 +21,18 @@
 from dataclasses import dataclass
 from typing import Any, ClassVar, TypeVar
 
-from brayns.core.camera.camera import Camera
-from brayns.core.view.fovy import Fovy
+from brayns.core import Camera, Fovy
 
 T = TypeVar('T', bound='CylindricCamera')
 
 
 @dataclass
 class CylindricCamera(Camera):
+    """Cylindric camera used to correct curved screen distorsion.
+
+    :param fovy: Field of view, defaults to OpenDeck's.
+    :type fovy: Fovy, optional
+    """
 
     OPENDECK_FOVY: ClassVar[Fovy] = Fovy(48.549, degrees=True)
 
@@ -37,15 +41,22 @@ class CylindricCamera(Camera):
     @classmethod
     @property
     def name(cls) -> str:
+        """Get camera name.
+
+        :return: Camera name.
+        :rtype: str
+        """
         return 'cylindric'
 
     @classmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
         return cls(
             fovy=Fovy(message['fovy'], degrees=True)
         )
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         message = {}
         if self.fovy is not None:
             message['fovy'] = self.fovy.degrees

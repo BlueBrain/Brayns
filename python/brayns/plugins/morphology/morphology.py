@@ -20,19 +20,33 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
+from .geometry_type import GeometryType
 
 
 @dataclass
-class MorphologyParameters:
+class Morphology:
+    """Describe how to load a morphology.
+
+    :param radius_multiplier: Radius scaling, defaults to 1.
+    :type radius_multiplier: float, optional
+    :param load_soma: Wether to load somas, defaults to True.
+    :type load_soma: bool, optional
+    :param load_axon: Wether to load axons, defaults to False.
+    :type load_axon: bool, optional
+    :param load_dendrites: Wether to load dendrites, defaults to False.
+    :type load_dendrites: bool, optional
+    :param geometry_type: How to load geometries, defaults to smooth.
+    :type geometry_type: GeometryType, optional
+    """
 
     radius_multiplier: float = 1.0
     load_soma: bool = True
     load_axon: bool = False
     load_dendrites: bool = False
-    geometry_type: MorphologyGeometryType = MorphologyGeometryType.SMOOTH
+    geometry_type: GeometryType = GeometryType.SMOOTH
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'radius_multiplier': self.radius_multiplier,
             'load_soma': self.load_soma,

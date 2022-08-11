@@ -17,12 +17,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.morphology.morphology_loader import MorphologyLoader
-from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
+from .geometry_type import GeometryType
+from .morphology import Morphology
+from .morphology_loader import MorphologyLoader
 
 __all__ = [
-    'MorphologyGeometryType',
+    'GeometryType',
+    'Morphology',
     'MorphologyLoader',
-    'MorphologyParameters',
 ]

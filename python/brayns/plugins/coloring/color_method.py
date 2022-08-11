@@ -22,6 +22,10 @@ from enum import Enum
 
 
 class ColorMethod(Enum):
+    """Methods to color a circuit.
+
+    Not all methods are available for all circuits, see `get_color_methods`.
+    """
 
     ETYPE = 'etype'
     MTYPE = 'mtype'

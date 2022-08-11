@@ -18,13 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.plugins.coloring.cell_id import CellId
-from brayns.plugins.coloring.color_circuit import color_circuit
-from brayns.plugins.coloring.color_circuit_by_id import color_circuit_by_id
-from brayns.plugins.coloring.color_circuit_by_method import color_circuit_by_method
-from brayns.plugins.coloring.color_method import ColorMethod
-from brayns.plugins.coloring.get_color_method_values import get_color_method_values
-from brayns.plugins.coloring.get_color_methods import get_color_methods
+from .cell_id import CellId
+from .color_circuit import color_circuit
+from .color_circuit_by_id import color_circuit_by_id
+from .color_circuit_by_method import color_circuit_by_method
+from .color_method import ColorMethod
+from .get_color_method_values import get_color_method_values
+from .get_color_methods import get_color_methods
 
 __all__ = [
     'CellId',
