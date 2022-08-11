@@ -22,15 +22,55 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from brayns.core.image.resolution import Resolution
-from brayns.launcher.log_level import LogLevel
-from brayns.launcher.plugin import Plugin
-from brayns.launcher.process import Process
-from brayns.launcher.ssl_server_context import SslServerContext
+from brayns.core import Resolution
+
+from .log_level import LogLevel
+from .plugin import Plugin
+from .process import Process
+from .ssl_server_context import SslServerContext
 
 
 @dataclass
 class Launcher:
+    """Used to start a braynsService instance from Python.
+
+    Use a braynsService executable to start a subprocess.
+
+    URI is the same as for the `Connector` object.
+
+    SSL server settings can be specified using optional certificate, key, CA and
+    password.
+
+    Log level and default streaming parameters can also be specified.
+
+    Custom environment variables can also be set for the subprocess, for example
+    to override the PATH and load specific libraries.
+
+    Example to start an instance and connect to it:
+    .. code-block: python
+        launcher = brayns.Launcher('braynsService', 'localhost:5000')
+        connector = brayns.Connector('localhost:5000', max_attempts=None)
+        with launcher.start() as process:
+            with connector.connect() as instance:
+                # Use instance.
+
+    :param executable: Path of the braynsService executable.
+    :type executable: str
+    :param uri: Service URI with format 'host:port'.
+    :type uri: str
+    :param ssl_context: SSL context if secure, defaults to None.
+    :type ssl_context: SslServerContext | None, optional
+    :param log_level: Process log level, defaults to LogLevel.WARN.
+    :type log_level: LogLevel, optional
+    :param resolution: Streaming resolution, defaults to full HD.
+    :type resolution: Resolution, optional
+    :param jpeg_quality: Streaming JPEG quality, defaults to 100.
+    :type jpeg_quality: int, optional
+    :param plugins: Plugins to load, defaults to all built-in plugins.
+    :type plugins: list[Plugin], optional
+    :param env: Subprocess environment variables, default to empty.
+    :type env: dict[str, str], optional
+    """
 
     executable: str
     uri: str
@@ -42,6 +82,11 @@ class Launcher:
     env: dict[str, str] = field(default_factory=dict)
 
     def get_command_line(self) -> list[str]:
+        """Build the command line to start braynsService.
+
+        :return: Command line arguments.
+        :rtype: list[str]
+        """
         args = [
             self.executable,
             '--uri',
@@ -66,5 +111,12 @@ class Launcher:
         return args
 
     def start(self) -> Process:
+        """Start a new process for a braynsService instance.
+
+        Return the process which runs the instance.
+
+        :return: Instance process.
+        :rtype: Process
+        """
         args = self.get_command_line()
         return Process(args, self.env)
