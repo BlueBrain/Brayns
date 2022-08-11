@@ -23,7 +23,7 @@ from brayns.plugins.morphology.geometry_type import GeometryType
 from brayns.plugins.morphology.morphology import Morphology
 
 
-class TestMorphologyParameters(unittest.TestCase):
+class TestMorphology(unittest.TestCase):
 
     def test_serialize(self) -> None:
         test = Morphology(
