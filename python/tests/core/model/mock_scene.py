@@ -18,23 +18,35 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+import dataclasses
+from typing import Any
 
 import brayns
-from tests.instance.mock_instance import MockInstance
+from tests.utils.bounds.mock_bounds import MockBounds
 
-from .mock_scene import MockScene
-
-
-class TestGetModels(unittest.TestCase):
-
-    def test_get_models(self) -> None:
-        instance = MockInstance(MockScene.message)
-        test = brayns.get_models(instance)
-        self.assertEqual(test, MockScene.scene.models)
-        self.assertEqual(instance.method, 'get-scene')
-        self.assertEqual(instance.params, None)
+from .mock_model import MockModel
 
 
-if __name__ == '__main__':
-    unittest.main()
+class MockScene:
+
+    @classmethod
+    @property
+    def scene(cls) -> brayns.Scene:
+        return brayns.Scene(
+            bounds=MockBounds.bounds,
+            models=[
+                MockModel.model,
+                dataclasses.replace(MockModel.model, id=1)
+            ],
+        )
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'bounds': MockBounds.message,
+            'models': [
+                MockModel.message,
+                MockModel.message | {'id': 1},
+            ]
+        }

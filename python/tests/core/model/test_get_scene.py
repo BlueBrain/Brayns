@@ -23,18 +23,15 @@ import unittest
 import brayns
 from tests.instance.mock_instance import MockInstance
 
-from .mock_bounds import MockBounds
+from .mock_scene import MockScene
 
 
-class TestGetBounds(unittest.TestCase):
+class TestGetScene(unittest.TestCase):
 
-    def test_get_bounds(self) -> None:
-        scene = {
-            'bounds': MockBounds.message
-        }
-        instance = MockInstance(scene)
-        test = brayns.get_bounds(instance)
-        self.assertEqual(test, MockBounds.bounds)
+    def test_get_scene(self) -> None:
+        instance = MockInstance(MockScene.message)
+        test = brayns.get_scene(instance)
+        self.assertEqual(test, MockScene.scene)
         self.assertEqual(instance.method, 'get-scene')
         self.assertEqual(instance.params, None)
 

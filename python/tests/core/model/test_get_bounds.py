@@ -26,12 +26,12 @@ from tests.instance.mock_instance import MockInstance
 from .mock_scene import MockScene
 
 
-class TestGetModels(unittest.TestCase):
+class TestGetBounds(unittest.TestCase):
 
-    def test_get_models(self) -> None:
+    def test_get_bounds(self) -> None:
         instance = MockInstance(MockScene.message)
-        test = brayns.get_models(instance)
-        self.assertEqual(test, MockScene.scene.models)
+        test = brayns.get_bounds(instance)
+        self.assertEqual(test, MockScene.scene.bounds)
         self.assertEqual(instance.method, 'get-scene')
         self.assertEqual(instance.params, None)
 

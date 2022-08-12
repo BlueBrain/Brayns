@@ -21,19 +21,15 @@
 import unittest
 
 import brayns
-from tests.instance.mock_instance import MockInstance
 
 from .mock_scene import MockScene
 
 
-class TestGetModels(unittest.TestCase):
+class TestScene(unittest.TestCase):
 
-    def test_get_models(self) -> None:
-        instance = MockInstance(MockScene.message)
-        test = brayns.get_models(instance)
-        self.assertEqual(test, MockScene.scene.models)
-        self.assertEqual(instance.method, 'get-scene')
-        self.assertEqual(instance.params, None)
+    def test_deserialize(self) -> None:
+        test = brayns.Scene.deserialize(MockScene.message)
+        self.assertEqual(test, MockScene.scene)
 
 
 if __name__ == '__main__':
