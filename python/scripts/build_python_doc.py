@@ -58,6 +58,9 @@ Functions
 
 
 AUTOMODULE = '''
+{name}
+{underline}
+
 .. automodule:: {module}
     :members: {member}
     :undoc-members:
@@ -144,6 +147,8 @@ def format_item(item: str) -> str:
     obj = getattr(brayns, item)
     module = obj.__module__
     return AUTOMODULE.format(
+        name=item,
+        underline=len(item) * '~',
         module=module,
         member=item,
     )
