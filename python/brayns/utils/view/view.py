@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.vector import Vector3
+from ..vector import Vector3
 
 
 @dataclass

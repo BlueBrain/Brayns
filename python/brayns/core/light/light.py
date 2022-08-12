@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.color import Color3
+from brayns.utils import Color3
 
 
 @dataclass

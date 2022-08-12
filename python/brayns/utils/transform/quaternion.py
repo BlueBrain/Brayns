@@ -24,7 +24,7 @@ import math
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from brayns.core.vector import Vector, Vector3
+from ..vector import Vector, Vector3
 
 
 @dataclass(frozen=True, order=True)

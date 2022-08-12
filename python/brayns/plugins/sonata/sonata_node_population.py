@@ -23,8 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from brayns.plugins.morphology import Morphology
-
+from ..morphology import Morphology
 from .sonata_edge_population import SonataEdgePopulation
 from .sonata_nodes import SonataNodes
 from .sonata_report import SonataReport

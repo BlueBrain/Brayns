@@ -18,22 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .camera import Camera
-from .get_camera import get_camera
-from .get_camera_name import get_camera_name
-from .get_camera_view import get_camera_view
-from .orthographic_camera import OrthographicCamera
-from .perspective_camera import PerspectiveCamera
-from .set_camera import set_camera
-from .set_camera_view import set_camera_view
+from .bounds import Bounds
 
 __all__ = [
-    'Camera',
-    'get_camera_name',
-    'get_camera_view',
-    'get_camera',
-    'OrthographicCamera',
-    'PerspectiveCamera',
-    'set_camera_view',
-    'set_camera',
+    'Bounds',
 ]

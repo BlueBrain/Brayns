@@ -20,9 +20,9 @@
 
 from typing import TypeVar
 
-from brayns.core.model import Model
 from brayns.instance import Instance
 
+from ..model import Model
 from .geometry import Geometry
 
 T = TypeVar('T', bound=Geometry)

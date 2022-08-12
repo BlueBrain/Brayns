@@ -18,21 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance import Instance
+from .bounds import *
+from .color import *
+from .exceptions import *
+from .image import *
+from .transform import *
+from .vector import *
+from .view import *
 
-from .bounds import Bounds
-
-
-def get_bounds(instance: Instance) -> Bounds:
-    """Retreive the scene boundary of an instance.
-
-    The scene boundaries are computed from all existing lights and models
-    in the given instance.
-
-    :param instance: Instance.
-    :type instance: Instance
-    :return: Bounds of the current scene.
-    :rtype: Bounds
-    """
-    result = instance.request('get-scene')
-    return Bounds.deserialize(result['bounds'])
+__all__ = [
+    'Bounds',
+    'Color3',
+    'Color4',
+    'Error',
+    'Fovy',
+    'ImageFormat',
+    'parse_hex_color',
+    'parse_image_format',
+    'Quaternion',
+    'Resolution',
+    'Rotation',
+    'Transform',
+    'Vector',
+    'Vector3',
+    'View',
+]

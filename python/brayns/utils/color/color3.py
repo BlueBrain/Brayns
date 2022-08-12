@@ -22,7 +22,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import TypeVar
 
-from brayns.core.vector import Vector
+from ..vector import Vector
 
 T = TypeVar('T', bound='Color3')
 

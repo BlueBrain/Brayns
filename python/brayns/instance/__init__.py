@@ -33,17 +33,17 @@ from .websocket.ssl_client_context import SslClientContext
 from .websocket.web_socket_error import WebSocketError
 
 __all__ = [
+    'ConnectionClosedError',
     'Connector',
     'Instance',
+    'InvalidServerCertificateError',
     'JsonRpcRequest',
     'Logger',
+    'ProtocolError',
     'RequestError',
     'RequestFuture',
     'RequestProgress',
-    'SslClientContext',
-    'ConnectionClosedError',
-    'InvalidServerCertificateError',
-    'ProtocolError',
     'ServiceUnavailableError',
+    'SslClientContext',
     'WebSocketError',
 ]

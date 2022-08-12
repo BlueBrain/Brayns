@@ -23,43 +23,33 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.utils import Bounds, Transform
+from brayns.utils import Bounds
+
+from .model import Model
 
 
 @dataclass
-class Model:
-    """Loaded model.
+class Scene:
+    """Contains all existing models and scene boundaries.
 
-    All models are loaded without transform (identity) but it doesn't mean that
-    their center of mass is at the origin (depends on the source file).
+    Scene bounds take models and lights into account.
 
-    Model metadata are a str -> str map and depends on the model type.
-
-    :param id: Model ID.
-    :type id: int
-    :param bounds: Model bounding box.
+    :param bounds: Global bounds.
     :type bounds: Bounds
-    :param metadata: Model metadata.
-    :type metadata: dict[str, str]
-    :param visible: Check wether the model is rendered or not.
-    :type visible: bool
-    :param transform: Model transform relative to the origin.
-    :type transform: Transform
+    :param models: List of all existing models.
+    :type models: list[Model]
     """
 
-    id: int
     bounds: Bounds
-    metadata: dict[str, str]
-    visible: bool
-    transform: Transform
+    models: list[Model]
 
     @staticmethod
-    def deserialize(message: dict[str, Any]) -> Model:
+    def deserialize(message: dict[str, Any]) -> Scene:
         """Low level API to deserialize from JSON."""
-        return Model(
-            id=message['model_id'],
+        return Scene(
             bounds=Bounds.deserialize(message['bounds']),
-            metadata=message['metadata'],
-            visible=message['is_visible'],
-            transform=Transform.deserialize(message['transform']),
+            models=[
+                Model.deserialize(model)
+                for model in message['models']
+            ],
         )

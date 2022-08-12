@@ -21,9 +21,7 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.core.bounds import Bounds
-from brayns.core.vector import Vector3
-from brayns.core.view import View
+from brayns.utils import Bounds, Vector3, View
 
 from .camera import Camera
 

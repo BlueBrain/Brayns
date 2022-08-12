@@ -21,7 +21,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.vector import Vector3
+from brayns.utils import Vector3
 
 from .light import Light
 

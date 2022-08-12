@@ -28,9 +28,9 @@ from .get_color_methods import get_color_methods
 
 __all__ = [
     'CellId',
-    'color_circuit',
     'color_circuit_by_id',
     'color_circuit_by_method',
+    'color_circuit',
     'ColorMethod',
     'get_color_method_values',
     'get_color_methods',

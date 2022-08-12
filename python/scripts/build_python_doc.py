@@ -21,7 +21,9 @@
 import pathlib
 import sys
 
-ROOT = '''
+import brayns
+
+API = '''
 Python API reference
 ====================
 
@@ -42,8 +44,13 @@ def build_from_argv() -> None:
 
 
 def build(directory: pathlib.Path) -> None:
-    pass
+    directory.mkdir(exist_ok=True)
 
+def get_subpackages() -> list[str]:
+    python = pathlib.Path(__file__).parent.parent
+    directory = python / 'brayns'
+    return []
+    
 
 if __name__ == '__main__':
     build_from_argv()

@@ -20,6 +20,7 @@
 
 from brayns.instance import Instance
 
+from .get_scene import get_scene
 from .model import Model
 
 
@@ -31,8 +32,4 @@ def get_models(instance: Instance) -> list[Model]:
     :return: List of models.
     :rtype: list[Model]
     """
-    result = instance.request('get-scene')
-    return [
-        Model.deserialize(model)
-        for model in result['models']
-    ]
+    return get_scene(instance).models

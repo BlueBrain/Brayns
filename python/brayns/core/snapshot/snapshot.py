@@ -24,11 +24,11 @@ import base64
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.camera import Camera
-from brayns.core.image import ImageFormat, Resolution, parse_image_format
-from brayns.core.renderer import Renderer
-from brayns.core.view import View
 from brayns.instance import Instance
+from brayns.utils import ImageFormat, Resolution, View, parse_image_format
+
+from ..camera import Camera
+from ..renderer import Renderer
 
 
 @dataclass

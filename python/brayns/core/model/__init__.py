@@ -19,17 +19,23 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .clear_models import clear_models
+from .get_bounds import get_bounds
 from .get_model import get_model
 from .get_models import get_models
+from .get_scene import get_scene
 from .model import Model
 from .remove_models import remove_models
+from .scene import Scene
 from .update_model import update_model
 
 __all__ = [
     'clear_models',
+    'get_bounds',
     'get_model',
     'get_models',
+    'get_scene',
     'Model',
     'remove_models',
+    'Scene',
     'update_model',
 ]

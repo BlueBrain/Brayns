@@ -22,8 +22,7 @@ from __future__ import annotations
 
 import math
 
-from brayns.core.vector import Vector3
-
+from ..vector import Vector3
 from .quaternion import Quaternion
 
 

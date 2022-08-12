@@ -21,7 +21,7 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.core.view import Fovy
+from brayns.utils import Fovy
 
 from .camera import Camera
 

@@ -21,8 +21,9 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from brayns.core.model import Model
 from brayns.instance import Instance
+
+from ..model import Model
 
 
 class Loader(ABC):

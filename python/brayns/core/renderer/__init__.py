@@ -26,8 +26,8 @@ from .renderer import Renderer
 from .set_renderer import set_renderer
 
 __all__ = [
-    'get_renderer',
     'get_renderer_name',
+    'get_renderer',
     'InteractiveRenderer',
     'ProductionRenderer',
     'Renderer',

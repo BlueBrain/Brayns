@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core import Color4
 from brayns.instance import Instance
+from brayns.utils import Color4
 
 
 def color_circuit(instance: Instance, model_id: int, color: Color4) -> None:

@@ -20,8 +20,8 @@
 
 from __future__ import annotations
 
-from brayns.core.image import Resolution
 from brayns.instance import Instance
+from brayns.utils import Resolution
 
 
 def update_application(

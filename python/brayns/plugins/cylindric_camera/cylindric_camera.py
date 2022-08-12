@@ -21,7 +21,8 @@
 from dataclasses import dataclass
 from typing import Any, ClassVar, TypeVar
 
-from brayns.core import Camera, Fovy
+from brayns.core import Camera
+from brayns.utils import Fovy
 
 T = TypeVar('T', bound='CylindricCamera')
 

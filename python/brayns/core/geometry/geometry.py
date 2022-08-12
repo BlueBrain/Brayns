@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, TypeVar
 
-from brayns.core.color import Color4
+from brayns.utils import Color4
 
 T = TypeVar('T', bound='Geometry')
 

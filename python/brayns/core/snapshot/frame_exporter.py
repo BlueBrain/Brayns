@@ -23,11 +23,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.camera import Camera
-from brayns.core.image import ImageFormat, Resolution
-from brayns.core.renderer import Renderer
 from brayns.instance import Instance
+from brayns.utils import ImageFormat, Resolution
 
+from ..camera import Camera
+from ..renderer import Renderer
 from .key_frame import KeyFrame
 
 

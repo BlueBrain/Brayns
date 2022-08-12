@@ -20,9 +20,8 @@
 
 import math
 
-from brayns.core.bounds import Bounds
-from brayns.core.vector import Vector3
-
+from ..bounds import Bounds
+from ..vector import Vector3
 from .view import View
 
 

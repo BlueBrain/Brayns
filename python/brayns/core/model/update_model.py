@@ -20,8 +20,8 @@
 
 from __future__ import annotations
 
-from brayns.core.transform import Transform
 from brayns.instance import Instance
+from brayns.utils import Transform
 
 from .model import Model
 

@@ -23,7 +23,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from brayns.core.vector import Vector
+from ..vector import Vector
 
 
 @dataclass(frozen=True, order=True)
