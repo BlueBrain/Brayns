@@ -18,6 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""
+Plugins subpackage.
+
+It includes all science related features and optional components.
+
+Main objects are BBP circuit loading support, circuit coloring, raw
+morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
+"""
+
 from .bbp import *
 from .coloring import *
 from .cylindric_camera import *

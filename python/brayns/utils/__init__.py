@@ -18,6 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""
+Brayns utilities.
+
+This subpackage contains all functionalities that are commonly used inside and
+outside the main package and are not directly related to the Web API.
+
+It includes helpers for algebra, imaging or coloring and the base exception.
+"""
+
 from .bounds import *
 from .color import *
 from .exceptions import *

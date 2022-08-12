@@ -18,6 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""
+Movie generation subpackage.
+
+Important: requires an FFMPEG executable to work.
+
+It provides a wrapper around FFPMEG command line tool to generate movies from
+a list of images.
+
+To make a movie, frames must be rendered separately. This subpackage includes
+helpers to select the frames to renderer based on movie specifications.
+"""
+
 from .movie import Movie
 from .movie_error import MovieError
 from .movie_frames import MovieFrames

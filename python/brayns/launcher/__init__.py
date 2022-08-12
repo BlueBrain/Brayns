@@ -18,6 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""
+Subpackage to launch Brayns backend from Python.
+
+It provides a helper class to generate command line options to start Brayns
+service and launch it in a subprocess.
+"""
+
 from .launcher import Launcher
 from .log_level import LogLevel
 from .plugin import Plugin

@@ -18,6 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""
+Subpackage to connect to a Brayns service instance (backend).
+
+This package is a wrapper around a websocket connection and a JSON-RPC context.
+
+It provides functionalities to send JSON-RPC requests and receive replies with a
+Brayns instance.
+"""
+
 from .connector import Connector
 from .instance import Instance
 from .jsonrpc.json_rpc_request import JsonRpcRequest

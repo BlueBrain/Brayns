@@ -18,6 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""
+Brayns core functionalities.
+
+Provides high-level objects to wrap the raw JSON-RPC messages sent and received
+with an instance of Brayns service.
+
+Include access to camera, renderer, models, materials, snapshots, etc...
+"""
+
 from .api import *
 from .application import *
 from .camera import *
