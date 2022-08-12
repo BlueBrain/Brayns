@@ -47,6 +47,6 @@ class MockScene:
             'bounds': MockBounds.message,
             'models': [
                 MockModel.message,
-                MockModel.message | {'id': 1},
+                MockModel.message | {'model_id': 1},
             ]
         }

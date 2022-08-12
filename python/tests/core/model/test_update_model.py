@@ -21,8 +21,9 @@
 import unittest
 
 import brayns
-from tests.core.model.mock_model import MockModel
 from tests.instance.mock_instance import MockInstance
+
+from .mock_model import MockModel
 
 
 class TestUpdateModel(unittest.TestCase):
