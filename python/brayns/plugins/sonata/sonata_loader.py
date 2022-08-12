@@ -23,12 +23,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.loader.loader import Loader
-from brayns.plugins.sonata.sonata_node_population import SonataNodePopulation
+from brayns.core import Loader
+
+from .sonata_node_population import SonataNodePopulation
 
 
 @dataclass
 class SonataLoader(Loader):
+    """Loader for SONATA circuit files.
+
+    :param node_populations: Nodes to load.
+    :type node_populations: list[SonataNodePopulation]
+    :param simulation_config: Override configuration file, defaults to None.
+    :type simulation_config: str | None
+    """
 
     node_populations: list[SonataNodePopulation]
     simulation_config: str | None = None

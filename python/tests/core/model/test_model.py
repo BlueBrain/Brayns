@@ -20,14 +20,15 @@
 
 import unittest
 
-from brayns.core.model.model import Model
-from tests.core.model.mock_model import MockModel
+import brayns
+
+from .mock_model import MockModel
 
 
 class TestModel(unittest.TestCase):
 
     def test_deserialize(self) -> None:
-        test = Model.deserialize(MockModel.message)
+        test = brayns.Model.deserialize(MockModel.message)
         self.assertEqual(test, MockModel.model)
 
 

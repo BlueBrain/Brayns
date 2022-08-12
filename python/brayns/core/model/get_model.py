@@ -18,10 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.model.model import Model
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .model import Model
 
 
 def get_model(instance: Instance, id: int) -> Model:
+    """Retreive the model with given ID from an instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param id: Model ID.
+    :type id: int
+    :return: Model object.
+    :rtype: Model
+    """
     result = instance.request('get-model', {'id': id})
     return Model.deserialize(result)

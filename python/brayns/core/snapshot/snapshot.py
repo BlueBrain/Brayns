@@ -24,17 +24,32 @@ import base64
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.camera.camera import Camera
-from brayns.core.image.image_format import ImageFormat
-from brayns.core.image.parse_image_format import parse_image_format
-from brayns.core.image.resolution import Resolution
-from brayns.core.renderer.renderer import Renderer
-from brayns.core.view.view import View
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+from brayns.utils import ImageFormat, Resolution, View, parse_image_format
+
+from ..camera import Camera
+from ..renderer import Renderer
 
 
 @dataclass
 class Snapshot:
+    """Snapshot to render a given frame.
+
+    For None parameters, the current values of the instance are used.
+
+    :param resolution: Image resolution, defaults to None.
+    :type resolution: Resolution | None, optional
+    :param frame: Simulation index, defaults to None.
+    :type frame: int | None, optional
+    :param view: Camera view, defaults to None.
+    :type view: View | None, optional
+    :param camera: Camera used to render, defaults to None.
+    :type camera: Camera | None, optional
+    :param renderer: Renderer used to render, defaults to None.
+    :type renderer: Renderer | None, optional
+    :param jpeg_quality: JPEG quality if format is JPEG, defaults to 100.
+    :type jpeg_quality: int, optional
+    """
 
     resolution: Resolution | None = None
     frame: int | None = None
@@ -44,24 +59,51 @@ class Snapshot:
     jpeg_quality: int = 100
 
     def save(self, instance: Instance, path: str) -> None:
+        """Download and save the snapshot locally under given file.
+
+        Path is on the local machine (running current script).
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param path: Output file.
+        :type path: str
+        """
         format = parse_image_format(path)
         data = self.download(instance, format)
         with open(path, 'wb') as file:
             file.write(data)
 
     def save_remotely(self, instance: Instance, path: str) -> None:
+        """Save the snapshot remotely under given file.
+
+        Path is on the remote machine (running instance backend).
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param path: Output file.
+        :type path: str
+        """
         params = self.serialize_with_path(path)
         self._request(instance, params)
 
     def download(self, instance: Instance, format: ImageFormat = ImageFormat.PNG) -> bytes:
+        """Download the rendered image as bytes at given format.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param path: Output file.
+        :type path: str
+        """
         params = self.serialize_with_format(format)
         result = self._request(instance, params)
         return base64.b64decode(result['data'])
 
     def serialize_with_format(self, format: ImageFormat) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return self._serialize(format=format)
 
     def serialize_with_path(self, path: str) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return self._serialize(path=path)
 
     def _serialize(self, format: ImageFormat | None = None, path: str | None = None) -> dict[str, Any]:

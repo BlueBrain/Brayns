@@ -20,17 +20,16 @@
 
 import unittest
 
-from brayns.core.geometry.box import Box
-from brayns.core.vector.vector3 import Vector3
+import brayns
 
 
 class TestBox(unittest.TestCase):
 
     def test_method(self) -> None:
-        self.assertEqual(Box.method, 'add-boxes')
+        self.assertEqual(brayns.Box.method, 'add-boxes')
 
     def test_serialize(self) -> None:
-        box = Box(Vector3.zero, Vector3.one)
+        box = brayns.Box(brayns.Vector3.zero, brayns.Vector3.one)
         test = box.serialize()
         ref = {
             'min': [0, 0, 0],

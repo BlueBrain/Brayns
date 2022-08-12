@@ -18,12 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.geometry.add_geometries import add_geometries
-from brayns.core.geometry.box import Box
-from brayns.core.geometry.capsule import Capsule
-from brayns.core.geometry.geometry import Geometry
-from brayns.core.geometry.plane import Plane
-from brayns.core.geometry.sphere import Sphere
+from .add_geometries import add_geometries
+from .box import Box
+from .capsule import Capsule
+from .geometry import Geometry
+from .plane import Plane
+from .sphere import Sphere
 
 __all__ = [
     'add_geometries',

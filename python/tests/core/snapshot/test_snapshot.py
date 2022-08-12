@@ -21,12 +21,7 @@
 import base64
 import unittest
 
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.image.resolution import Resolution
-from brayns.core.renderer.production_renderer import ProductionRenderer
-from brayns.core.image.image_format import ImageFormat
-from brayns.core.snapshot.snapshot import Snapshot
-from brayns.core.view.view import View
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -34,7 +29,7 @@ class TestSnapshot(unittest.TestCase):
 
     def test_save_remotely(self) -> None:
         instance = MockInstance()
-        snapshot = Snapshot()
+        snapshot = brayns.Snapshot()
         path = 'test.jpg'
         ref = snapshot.serialize_with_path(path)
         snapshot.save_remotely(instance, path)
@@ -45,21 +40,21 @@ class TestSnapshot(unittest.TestCase):
         data = b'test'
         reply = {'data': base64.b64encode(data)}
         instance = MockInstance(reply)
-        snapshot = Snapshot()
-        test = snapshot.download(instance, ImageFormat.JPEG)
-        ref = snapshot.serialize_with_format(ImageFormat.JPEG)
+        snapshot = brayns.Snapshot()
+        test = snapshot.download(instance, brayns.ImageFormat.JPEG)
+        ref = snapshot.serialize_with_format(brayns.ImageFormat.JPEG)
         self.assertEqual(test, data)
         self.assertEqual(instance.method, 'snapshot')
         self.assertEqual(instance.params, ref)
 
     def test_serialize_with_format(self) -> None:
-        snapshot = Snapshot(
+        snapshot = brayns.Snapshot(
             jpeg_quality=50,
-            resolution=Resolution(1920, 1080),
+            resolution=brayns.Resolution(1920, 1080),
             frame=12,
-            view=View(),
-            camera=PerspectiveCamera(),
-            renderer=ProductionRenderer()
+            view=brayns.View(),
+            camera=brayns.PerspectiveCamera(),
+            renderer=brayns.ProductionRenderer()
         )
         ref = {
             'image_settings': {
@@ -68,15 +63,15 @@ class TestSnapshot(unittest.TestCase):
                 'size': [1920, 1080]
             },
             'simulation_frame': 12,
-            'camera_view': View().serialize(),
-            'camera': PerspectiveCamera().serialize_with_name(),
-            'renderer': ProductionRenderer().serialize_with_name()
+            'camera_view': brayns.View().serialize(),
+            'camera': brayns.PerspectiveCamera().serialize_with_name(),
+            'renderer': brayns.ProductionRenderer().serialize_with_name()
         }
-        test = snapshot.serialize_with_format(ImageFormat.JPEG)
+        test = snapshot.serialize_with_format(brayns.ImageFormat.JPEG)
         self.assertEqual(test, ref)
 
     def test_serialize_with_path(self) -> None:
-        snapshot = Snapshot()
+        snapshot = brayns.Snapshot()
         path = 'test.png'
         ref = {
             'file_path': path

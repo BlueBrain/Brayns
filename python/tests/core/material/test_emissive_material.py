@@ -20,13 +20,13 @@
 
 import unittest
 
-from brayns.core.material.emissive_material import EmissiveMaterial
+import brayns
 
 
 class TestEmissiveMaterial(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._material = EmissiveMaterial(
+        self._material = brayns.EmissiveMaterial(
             intensity=2
         )
         self._message = {
@@ -34,10 +34,10 @@ class TestEmissiveMaterial(unittest.TestCase):
         }
 
     def test_name(self) -> None:
-        self.assertEqual(EmissiveMaterial.name, 'emissive')
+        self.assertEqual(brayns.EmissiveMaterial.name, 'emissive')
 
     def test_deserialize(self) -> None:
-        test = EmissiveMaterial.deserialize(self._message)
+        test = brayns.EmissiveMaterial.deserialize(self._message)
         self.assertEqual(test, self._material)
 
     def test_serialize(self) -> None:

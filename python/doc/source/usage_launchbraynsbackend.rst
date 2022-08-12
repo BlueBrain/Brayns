@@ -77,3 +77,5 @@ Now we know the host (r2i2n11) and port (5000 in this case) where our Brayns bac
 connect to it through the Python client (here using uri='r2i2n11:5000').
 
 Note: if the websocket client (e.g. Python) is running outside BB5, r2i2n11 should be replaced by r2i2n11.bbp.epfl.ch.
+
+Now you can interact with the backend instance by using the Python API :ref:`usepythonapi-label`.

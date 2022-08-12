@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.light.remove_lights import remove_lights
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -28,7 +28,7 @@ class TestRemoveLight(unittest.TestCase):
 
     def test_remove_lights(self) -> None:
         instance = MockInstance()
-        remove_lights(instance, [0, 1, 2])
+        brayns.remove_lights(instance, [0, 1, 2])
         self.assertEqual(instance.method, 'remove-lights')
         self.assertEqual(instance.params, {'ids': [0, 1, 2]})
 

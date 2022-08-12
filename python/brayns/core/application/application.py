@@ -23,11 +23,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.image.resolution import Resolution
+from brayns.utils import Resolution
 
 
 @dataclass
 class Application:
+    """Store the application parameters of an instance.
+
+    :param plugins: List of plugins loaded in the instance.
+    :type plugins: list[str]
+    :param resolution: Streaming resolution (main framebuffer).
+    :type resolution: Resolution
+    :param jpeg_quality: JPEG stream quality (0=lowest, 100=highest).
+    :type jpeg_quality: int
+    """
 
     plugins: list[str]
     resolution: Resolution
@@ -35,6 +44,7 @@ class Application:
 
     @staticmethod
     def deserialize(message: dict[str, Any]) -> Application:
+        """Low level API to deserialize from JSON."""
         return Application(
             plugins=message['plugins'],
             resolution=Resolution(*message['viewport']),

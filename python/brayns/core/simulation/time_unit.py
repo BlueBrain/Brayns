@@ -22,13 +22,30 @@ from enum import Enum
 
 
 class TimeUnit(Enum):
+    """Simulation time unit.
+
+    Simulation time is always in milliseconds but this class is here to avoid
+    making this assumption.
+
+    :param MILLISECOND: milliseconds ('ms').
+    """
 
     MILLISECOND = 'ms'
 
     @property
     def seconds(self) -> float:
+        """Convert the time unit to seconds.
+
+        :return: Time unit in seconds.
+        :rtype: float
+        """
         return 1 / self.per_second
 
     @property
     def per_second(self) -> float:
+        """Get the number of time unit per second.
+
+        :return: Time unit count in one second.
+        :rtype: float
+        """
         return 1000.0

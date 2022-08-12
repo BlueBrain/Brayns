@@ -18,11 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.camera.camera import Camera
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .camera import Camera
 
 
 def set_camera(instance: Instance, camera: Camera) -> None:
+    """Set the current camera of the given instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param camera: Current camera.
+    :type camera: Camera
+    """
     name = camera.name
     params = camera.serialize()
     instance.request(f'set-camera-{name}', params)

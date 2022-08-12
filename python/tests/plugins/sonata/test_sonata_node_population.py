@@ -20,31 +20,26 @@
 
 import unittest
 
-from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
-from brayns.plugins.sonata.sonata_edge_population import SonataEdgePopulation
-from brayns.plugins.sonata.sonata_node_population import SonataNodePopulation
-from brayns.plugins.sonata.sonata_nodes import SonataNodes
-from brayns.plugins.sonata.sonata_report import SonataReport
+import brayns
 
 
 class TestSonataNodePopulation(unittest.TestCase):
 
     def test_serialize(self) -> None:
-        test = SonataNodePopulation(
+        test = brayns.SonataNodePopulation(
             name='test',
-            nodes=SonataNodes.from_density(0.1),
-            report=SonataReport.bloodflow_pressure('report'),
+            nodes=brayns.SonataNodes.from_density(0.1),
+            report=brayns.SonataReport.bloodflow_pressure('report'),
             edges=[
-                SonataEdgePopulation('test1', afferent=True),
-                SonataEdgePopulation('test2', afferent=False)
+                brayns.SonataEdgePopulation('test1', afferent=True),
+                brayns.SonataEdgePopulation('test2', afferent=False)
             ],
-            morphology=MorphologyParameters(
+            morphology=brayns.Morphology(
                 radius_multiplier=3,
                 load_soma=False,
                 load_axon=True,
                 load_dendrites=True,
-                geometry_type=MorphologyGeometryType.ORIGINAL
+                geometry_type=brayns.GeometryType.ORIGINAL
             ),
             vasculature_radius_multiplier=4
         )

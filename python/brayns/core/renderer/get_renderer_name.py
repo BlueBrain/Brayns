@@ -18,8 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
 
 
 def get_renderer_name(instance: Instance) -> str:
+    """Retreive the name of the current renderer of an instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :return: Renderer name.
+    :rtype: str
+    """
     return instance.request('get-renderer-type')

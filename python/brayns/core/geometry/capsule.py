@@ -21,12 +21,24 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.geometry.geometry import Geometry
-from brayns.core.vector.vector3 import Vector3
+from brayns.utils import Vector3
+
+from .geometry import Geometry
 
 
 @dataclass
 class Capsule(Geometry):
+    """Capsule (cylinder with slope and half spheres at extremities).
+
+    :param start_point: Cylinder base XYZ.
+    :type start_point: Vector3
+    :param start_radius: Cylinder and sphere base radius.
+    :type start_radius: float
+    :param end_point: Cylinder end XYZ.
+    :type end_point: Vector3
+    :param end_radius: Cylinder and sphere end radius.
+    :type end_radius: float
+    """
 
     start_point: Vector3
     start_radius: float
@@ -36,9 +48,15 @@ class Capsule(Geometry):
     @classmethod
     @property
     def method(cls) -> str:
+        """JSON-RPC method to add capsules.
+
+        :return: JSON-RPC method.
+        :rtype: str
+        """
         return 'add-capsules'
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'p0': list(self.start_point),
             'r0': self.start_radius,

@@ -20,8 +20,7 @@
 
 import unittest
 
-from brayns.core.renderer.production_renderer import ProductionRenderer
-from brayns.core.renderer.set_renderer import set_renderer
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -29,8 +28,8 @@ class TestSetRenderer(unittest.TestCase):
 
     def test_set_renderer(self) -> None:
         instance = MockInstance()
-        renderer = ProductionRenderer()
-        set_renderer(instance, renderer)
+        renderer = brayns.ProductionRenderer()
+        brayns.set_renderer(instance, renderer)
         self.assertEqual(instance.method, 'set-renderer-production')
         self.assertEqual(instance.params, renderer.serialize())
 

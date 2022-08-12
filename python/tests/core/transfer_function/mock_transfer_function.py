@@ -20,21 +20,19 @@
 
 from typing import Any
 
-from brayns.core.color.color4 import Color4
-from brayns.core.transfer_function.transfer_function import TransferFunction
-from brayns.core.transfer_function.value_range import ValueRange
+import brayns
 
 
 class MockTransferFunction:
 
     @classmethod
     @property
-    def transfer_function(cls) -> TransferFunction:
-        return TransferFunction(
-            value_range=ValueRange(0, 1),
+    def transfer_function(cls) -> brayns.TransferFunction:
+        return brayns.TransferFunction(
+            value_range=brayns.ValueRange(0, 1),
             colors=[
-                Color4.red,
-                Color4.blue,
+                brayns.Color4.red,
+                brayns.Color4.blue,
             ]
         )
 

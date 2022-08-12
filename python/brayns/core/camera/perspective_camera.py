@@ -21,14 +21,30 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.core.camera.camera import Camera
-from brayns.core.view.fovy import Fovy
+from brayns.utils import Fovy
+
+from .camera import Camera
 
 T = TypeVar('T', bound='PerspectiveCamera')
 
 
 @dataclass
 class PerspectiveCamera(Camera):
+    """Perspective camera.
+
+    Perspective camera use a field of view angle to compute the size of the
+    objects depending on their distance from the camera.
+
+    The field of view (fovy) can be used to compute full screen view of a given
+    target object.
+
+    :param fovy: Field of view angle (45 degrees by default).
+    :type fovy: Fovy
+    :param aperture_radius: Optional aperture radius.
+    :type aperture_radius: float
+    :param focus_distance: Optional focus distance.
+    :type focus_distance: float
+    """
 
     fovy: Fovy = Fovy(45, degrees=True)
     aperture_radius: float = 0.0
@@ -37,10 +53,16 @@ class PerspectiveCamera(Camera):
     @classmethod
     @property
     def name(cls) -> str:
+        """Camera name.
+
+        :return: Camera name.
+        :rtype: str
+        """
         return 'perspective'
 
     @classmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
         return cls(
             fovy=Fovy(message['fovy'], degrees=True),
             aperture_radius=message['aperture_radius'],
@@ -48,6 +70,7 @@ class PerspectiveCamera(Camera):
         )
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'fovy': self.fovy.degrees,
             'aperture_radius': self.aperture_radius,

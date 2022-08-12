@@ -18,11 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.light.light import Light
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .light import Light
 
 
 def add_light(instance: Instance, light: Light) -> int:
+    """Add a given light to an instance and return its ID.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param light: Light to add.
+    :type light: Light
+    :return: Light ID.
+    :rtype: int
+    """
     name = light.name
     params = light.serialize()
     return instance.request(f'add-light-{name}', params)

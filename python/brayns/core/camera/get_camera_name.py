@@ -18,8 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
 
 
 def get_camera_name(instance: Instance) -> str:
+    """Retreive the name of the current camera of an instance.
+
+    The returned name is the same as Camera.name and can be used to check
+    if a given camera is the current one like this:
+
+    .. code-block:: python
+
+        if brayns.get_camera_name(instance) == brayns.PerspectiveCamera.name:
+
+            camera = brayns.get_camera(instance, brayns.PerspectiveCamera)
+
+            print(camera.fovy.degrees) # camera is a PerspectiveCamera
+
+    :param instance: Instance.
+    :type instance: Instance
+    :return: Current camera name.
+    :rtype: str
+    """
     return instance.request('get-camera-type')

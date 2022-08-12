@@ -18,11 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.color.color4 import Color4
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+from brayns.utils import Color4
 
 
 def color_circuit(instance: Instance, model_id: int, color: Color4) -> None:
+    """Color a circuit by the given color.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Circuit model ID.
+    :type model_id: int
+    :param color: Circuit color.
+    :type color: Color4
+    """
     params = {
         'model_id': model_id,
         'color': list(color)

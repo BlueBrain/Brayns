@@ -21,12 +21,24 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.light.light import Light
-from brayns.core.vector.vector3 import Vector3
+from brayns.utils import Vector3
+
+from .light import Light
 
 
 @dataclass
 class QuadLight(Light):
+    """Rectangular light.
+
+    Emission direction is the positive side (see emission_direction).
+
+    :param bottom_left: Bottom left corner, defaults to origin.
+    :type bottom_left: Vector3
+    :param edge1: First edge, defaults to +X.
+    :type edge1: Vector3, optional
+    :param edge2: Second edge, defaults to +Y.
+    :type edge2: Vector3, optional
+    """
 
     bottom_left: Vector3 = Vector3.zero
     edge1: Vector3 = Vector3.right
@@ -35,10 +47,16 @@ class QuadLight(Light):
     @classmethod
     @property
     def name(cls) -> str:
+        """Return light name.
+
+        :return: Light name.
+        :rtype: str
+        """
         return 'quad'
 
     @property
     def additional_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'position': list(self.bottom_left),
             'edge1': list(self.edge1),
@@ -47,4 +65,11 @@ class QuadLight(Light):
 
     @property
     def emission_direction(self) -> Vector3:
+        """Get the emission direction of the light.
+
+        Equal to edge1 x edge2 normalized.
+
+        :return: Emission direction.
+        :rtype: Vector3
+        """
         return self.edge1.cross(self.edge2).normalized

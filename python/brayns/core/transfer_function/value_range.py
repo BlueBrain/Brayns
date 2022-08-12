@@ -21,22 +21,50 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from brayns.core.vector.vector import Vector
+from brayns.utils import Vector
 
 
 @dataclass(frozen=True, order=True)
 class ValueRange(Vector):
+    """Specify transfer function value range.
+
+    :param min: Minimal simulation value.
+    :type min: float
+    :param max: Maximal simulation value.
+    :type max: float
+    """
 
     min: float
     max: float
 
     def __iter__(self) -> Iterator[float]:
+        """Iterate over min and max.
+
+        :yield: Value range.
+        :rtype: Iterator[float]
+        """
         yield self.min
         yield self.max
 
     @property
     def size(self) -> float:
+        """Get the difference between min and max.
+
+        :return: Value range.
+        :rtype: float
+        """
         return self.max - self.min
 
     def normalize(self, value: float) -> float:
-        return value - self.min / self.size
+        """Normalize given value between min and max.
+
+        Result is not clamped between min and max.
+
+        For example a value of 5 with min = 0 and max = 10 gives 0.5.
+
+        :param value: Simulation value.
+        :type value: float
+        :return: Normalized simulation value.
+        :rtype: float
+        """
+        return (value - self.min) / self.size

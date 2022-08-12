@@ -22,13 +22,21 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, TypeVar
 
-from brayns.core.color.color4 import Color4
+from brayns.utils import Color4
 
 T = TypeVar('T', bound='Geometry')
 
 
 @dataclass
 class Geometry(ABC):
+    """Base class of all geometry types.
+
+    The color attribute is white by default and is not in the constructor, use
+    with_color to chain the color settings with the construction.
+
+    :param color: Geometry color, defaults to white.
+    :type color: Color4
+    """
 
     color: Color4 = field(default=Color4.white, init=False)
 
@@ -36,12 +44,27 @@ class Geometry(ABC):
     @property
     @abstractmethod
     def method(cls) -> str:
+        """JSON-RPC method to add geometries of the derived type.
+
+        :return: JSON-RPC method.
+        :rtype: str
+        """
         pass
 
     @abstractmethod
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         pass
 
     def with_color(self: T, color: Color4) -> T:
+        """Helper method to quickly change the color of the geometry.
+
+        Example: `sphere = brayns.Sphere(1).with_color(my_color)`.
+
+        :param color: Geometry color.
+        :type color: Color4
+        :return: self
+        :rtype: type(self)
+        """
         self.color = color
         return self

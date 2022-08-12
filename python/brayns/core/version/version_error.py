@@ -20,15 +20,27 @@
 
 from dataclasses import dataclass
 
-from brayns.error import Error
+from brayns.utils import Error
 
 
 @dataclass
 class VersionError(Error):
+    """Error raised when a version mismatch occurs.
+
+    :param local: Local (Python API) version.
+    :type local: str
+    :param local: Remote (Binary) version.
+    :type local: str
+    """
 
     local: str
     remote: str
 
     def __str__(self) -> str:
+        """Format exception.
+
+        :return: Exception description.
+        :rtype: str
+        """
         local, remote = self.local, self.remote
-        return f'Version mismatch with renderer {local=}, {remote=}'
+        return f'Version mismatch with server {local=}, {remote=}'

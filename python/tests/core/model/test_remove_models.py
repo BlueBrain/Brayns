@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.core.model.remove_models import remove_models
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -29,7 +29,7 @@ class TestRemoveModels(unittest.TestCase):
     def test_remove_models(self) -> None:
         instance = MockInstance()
         ids = [1, 2, 3]
-        remove_models(instance, ids)
+        brayns.remove_models(instance, ids)
         self.assertEqual(instance.method, 'remove-model')
         self.assertEqual(instance.params, {'ids': ids})
 

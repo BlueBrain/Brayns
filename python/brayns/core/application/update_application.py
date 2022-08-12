@@ -20,8 +20,8 @@
 
 from __future__ import annotations
 
-from brayns.core.image.resolution import Resolution
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+from brayns.utils import Resolution
 
 
 def update_application(
@@ -29,6 +29,17 @@ def update_application(
     resolution: Resolution | None = None,
     jpeg_quality: int | None = None,
 ) -> None:
+    """Change some application parameters of the given instance.
+
+    Parameters not specified are left to their current value.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param resolution: Streaming resolution, defaults to None
+    :type resolution: Resolution | None, optional
+    :param jpeg_quality: JPEG stream quality (0-100), defaults to None
+    :type jpeg_quality: int | None, optional
+    """
     params = {}
     if resolution is not None:
         params['viewport'] = list(resolution)

@@ -20,9 +20,8 @@
 
 import unittest
 
+import brayns
 from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
-from brayns.instance.request_error import RequestError
-from brayns.instance.request_progress import RequestProgress
 
 
 class TestJsonRpcTask(unittest.TestCase):
@@ -45,13 +44,13 @@ class TestJsonRpcTask(unittest.TestCase):
         task.set_result(123)
         self.assertTrue(task.is_ready())
         task = JsonRpcTask()
-        task.set_error(RequestError(0, 'test'))
+        task.set_error(brayns.RequestError(0, 'test'))
         self.assertTrue(task.is_ready())
 
     def test_has_progress(self) -> None:
         task = JsonRpcTask()
         self.assertFalse(task.has_progress())
-        progress = RequestProgress('test', 0.5)
+        progress = brayns.RequestProgress('test', 0.5)
         task.add_progress(progress)
         self.assertTrue(task.has_progress())
 
@@ -63,9 +62,9 @@ class TestJsonRpcTask(unittest.TestCase):
         task.set_result(result)
         self.assertEqual(task.get_result(), result)
         task = JsonRpcTask()
-        error = RequestError(0, 'test', 123)
+        error = brayns.RequestError(0, 'test', 123)
         task.set_error(error)
-        with self.assertRaises(RequestError) as context:
+        with self.assertRaises(brayns.RequestError) as context:
             task.get_result()
         self.assertEqual(context.exception, error)
 
@@ -79,9 +78,9 @@ class TestJsonRpcTask(unittest.TestCase):
 
     def test_set_error(self) -> None:
         task = JsonRpcTask()
-        error = RequestError(1, 'test', 123)
+        error = brayns.RequestError(1, 'test', 123)
         task.set_error(error)
-        with self.assertRaises(RequestError) as context:
+        with self.assertRaises(brayns.RequestError) as context:
             task.get_result()
         self.assertEqual(context.exception, error)
         with self.assertRaises(RuntimeError):
@@ -91,13 +90,13 @@ class TestJsonRpcTask(unittest.TestCase):
         task = JsonRpcTask()
         with self.assertRaises(RuntimeError):
             task.get_progress()
-        progress = RequestProgress('test', 0.5)
+        progress = brayns.RequestProgress('test', 0.5)
         task.add_progress(progress)
         self.assertEqual(task.get_progress(), progress)
 
     def test_add_progress(self) -> None:
         task = JsonRpcTask()
-        progress = RequestProgress('test', 0.5)
+        progress = brayns.RequestProgress('test', 0.5)
         for _ in range(3):
             task.add_progress(progress)
         for _ in range(3):

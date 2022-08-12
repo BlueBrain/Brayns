@@ -23,16 +23,39 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.camera.camera import Camera
-from brayns.core.image.resolution import Resolution
-from brayns.core.renderer.renderer import Renderer
-from brayns.core.image.image_format import ImageFormat
-from brayns.core.snapshot.key_frame import KeyFrame
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+from brayns.utils import ImageFormat, Resolution
+
+from ..camera import Camera
+from ..renderer import Renderer
+from .key_frame import KeyFrame
 
 
 @dataclass
 class FrameExporter:
+    """Frame exporter to take multiple snapshots in an optimized way.
+
+    Camera position can be different for each frame using KeyFrame objects.
+
+    For parameters with None value, the current ones of the instance are used.
+
+    Exported frames are names using 5 digits filenames.
+
+    For example 00000.png, 00001.png, 00003.png.
+
+    :param frames: Like of key frames to export.
+    :type frames: list[KeyFrame]
+    :param format: Format of the exported frames, defaults to PNG.
+    :type format: ImageFormat, optional
+    :param resolution: Resolution of the exported frames, defaults to None.
+    :type resolution: Resolution | None, optional
+    :param camera: Camera to use for render, defaults to None.
+    :type camera: Camera | None, optional
+    :param renderer: Renderer to use for render, defaults to None.
+    :type renderer: Renderer | None, optional
+    :param jpeg_quality: JPEG quality if format is JPEG, defaults to 100.
+    :type jpeg_quality: int, optional
+    """
 
     frames: list[KeyFrame]
     format: ImageFormat = ImageFormat.PNG
@@ -42,10 +65,18 @@ class FrameExporter:
     jpeg_quality: int = 100
 
     def export_frames(self, instance: Instance, folder: str) -> None:
+        """Export frames to given folder.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param folder: Output folder.
+        :type folder: str
+        """
         params = self.serialize(folder)
         instance.request('export-frames', params)
 
     def serialize(self, folder: str) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         message = {
             'path': folder,
             'key_frames': [

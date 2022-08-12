@@ -22,11 +22,11 @@ from __future__ import annotations
 
 import logging
 
-from brayns.instance.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
-from brayns.instance.jsonrpc.json_rpc_handler import JsonRpcHandler
-from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
-from brayns.instance.jsonrpc.json_rpc_tasks import JsonRpcTasks
-from brayns.instance.request_error import RequestError
+from .json_rpc_dispatcher import JsonRpcDispatcher
+from .json_rpc_handler import JsonRpcHandler
+from .json_rpc_task import JsonRpcTask
+from .json_rpc_tasks import JsonRpcTasks
+from .request_error import RequestError
 
 
 class JsonRpcManager:

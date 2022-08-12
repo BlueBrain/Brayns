@@ -23,9 +23,9 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import Any
 
-from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
-from brayns.instance.request_error import RequestError
-from brayns.instance.request_progress import RequestProgress
+from .json_rpc_task import JsonRpcTask
+from .request_error import RequestError
+from .request_progress import RequestProgress
 
 
 class JsonRpcTasks:

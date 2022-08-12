@@ -18,14 +18,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.instance import Instance
-from brayns.plugins.coloring.color_method import ColorMethod
+from brayns.instance import Instance
+
+from .color_method import ColorMethod
 
 
 def get_color_methods(
     instance: Instance,
     model_id: int,
 ) -> list[ColorMethod]:
+    """Get the available coloring methods for the given circuit.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Circuit model ID.
+    :type model_id: int
+    :return: List of available coloring methods.
+    :rtype: list[ColorMethod]
+    """
     params = {'model_id': model_id}
     result = instance.request('get-circuit-color-methods', params)
     return [

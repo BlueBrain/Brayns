@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.instance.request_error import RequestError
+from .request_error import RequestError
 
 
 @dataclass

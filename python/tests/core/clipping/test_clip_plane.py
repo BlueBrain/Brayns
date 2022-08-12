@@ -20,13 +20,13 @@
 
 import unittest
 
-from brayns.core.clipping.clip_plane import ClipPlane
+import brayns
 
 
 class TestClipPlane(unittest.TestCase):
 
     def test_serialize(self) -> None:
-        plane = ClipPlane(1, 2, 3, 4)
+        plane = brayns.ClipPlane(1, 2, 3, 4)
         test = plane.serialize()
         ref = {'coefficients': [1, 2, 3, 4]}
         self.assertEqual(test, ref)

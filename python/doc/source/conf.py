@@ -18,7 +18,7 @@ from os import path
 sys.path.insert(0, os.path.abspath('../../brayns'))
 sys.path.insert(0, path.dirname(path.dirname(path.abspath('../python'))))
 
-from version import __version__
+import brayns
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -59,7 +59,7 @@ project = u'Brayns'
 # built documents.
 #
 # The short X.Y version.
-version = __version__
+version = brayns.__version__
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -85,7 +85,7 @@ exclude_patterns = []
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-#add_module_names = True
+add_module_names = False
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
@@ -259,7 +259,7 @@ texinfo_documents = [
         u'Brayns Documentation',
         u'BBP',
         'Brayns',
-        'One line description of project.',
+        'Ray tracing based renderer.',
         'Miscellaneous'
     ),
 ]

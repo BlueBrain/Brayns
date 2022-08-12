@@ -20,13 +20,27 @@
 
 from typing import TypeVar
 
-from brayns.core.renderer.renderer import Renderer
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .renderer import Renderer
 
 T = TypeVar('T', bound=Renderer)
 
 
 def get_renderer(instance: Instance, renderer_type: type[T]) -> T:
+    """Retreive the current renderer from an instance.
+
+    Current renderer and given renderer type must be the same.
+
+    Current renderer can be queried using `get_rendere_name`.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param renderer_type: Type of the current renderer.
+    :type renderer_type: type[T]
+    :return: Current renderer.
+    :rtype: T
+    """
     name = renderer_type.name
     result = instance.request(f'get-renderer-{name}')
     return renderer_type.deserialize(result)

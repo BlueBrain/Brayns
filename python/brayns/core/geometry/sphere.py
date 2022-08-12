@@ -21,12 +21,20 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.geometry.geometry import Geometry
-from brayns.core.vector.vector3 import Vector3
+from brayns.utils import Vector3
+
+from .geometry import Geometry
 
 
 @dataclass
 class Sphere(Geometry):
+    """Sphere with radius and position.
+
+    :param radius: Radius.
+    :type radius: float
+    :param center: Center XYZ, defaults to origin.
+    :type center: Vector3
+    """
 
     radius: float
     center: Vector3 = Vector3.zero
@@ -34,9 +42,15 @@ class Sphere(Geometry):
     @classmethod
     @property
     def method(cls) -> str:
+        """JSON-RPC method to add spheres.
+
+        :return: JSON-RPC method.
+        :rtype: str
+        """
         return 'add-spheres'
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'center': list(self.center),
             'radius': self.radius,

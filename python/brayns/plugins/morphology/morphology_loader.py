@@ -20,16 +20,20 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from brayns.core.loader.loader import Loader
-from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
+from brayns.core import Loader
+
+from .morphology import Morphology
 
 
 @dataclass
 class MorphologyLoader(Loader):
+    """Loader for morphology files.
 
-    morphology: MorphologyParameters = field(
-        default_factory=MorphologyParameters
-    )
+    :param morphology: How to load the morphologies, default constructed.
+    :type morphology: Morphology, optional
+    """
+
+    morphology: Morphology = field(default_factory=Morphology)
 
     @classmethod
     @property

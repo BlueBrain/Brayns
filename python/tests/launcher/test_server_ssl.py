@@ -20,13 +20,13 @@
 
 import unittest
 
-from brayns.launcher.ssl_server_context import SslServerContext
+import brayns
 
 
 class TestSslServerContext(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
-        ssl = SslServerContext(
+        ssl = brayns.SslServerContext(
             private_key_file='private',
             private_key_passphrase='passphrase',
             certificate_file='certificate',

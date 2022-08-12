@@ -20,27 +20,40 @@
 
 import unittest
 
-from brayns.core.loader.mesh_loader import MeshLoader
+import brayns
+from tests.instance.mock_instance import MockInstance
+
+from ..model.mock_model import MockModel
 
 
 class TestMeshLoader(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(MeshLoader.name, 'mesh')
+        self.assertEqual(brayns.MeshLoader.name, 'mesh')
 
     def test_properties(self) -> None:
-        loader = MeshLoader()
+        loader = brayns.MeshLoader()
         self.assertEqual(loader.properties, {})
 
-    def test_serialize(self) -> None:
-        loader = MeshLoader()
+    def test_load(self) -> None:
+        instance = MockInstance([MockModel.message])
+        loader = brayns.MeshLoader()
         path = 'path'
-        test = loader.serialize(path)
+        test = loader.load(instance, path)
+        ref = [MockModel.model]
+        self.assertEqual(test, ref)
+        params = loader.serialize(path)
+        self.assertEqual(instance.params, params)
+
+    def test_serialize(self) -> None:
+        loader = brayns.MeshLoader()
+        path = 'path'
         ref = {
             'path': path,
-            'loader_name': MeshLoader.name,
+            'loader_name': brayns.MeshLoader.name,
             'loader_properties': loader.properties
         }
+        test = loader.serialize(path)
         self.assertEqual(test, ref)
 
 

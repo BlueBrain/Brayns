@@ -26,6 +26,10 @@ from typing import Any
 
 @dataclass(frozen=True)
 class SonataReport:
+    """Describe a SONATA report to load.
+
+    Use one of the factory methods to create this object.
+    """
 
     type: str
     name: str | None = None
@@ -33,10 +37,12 @@ class SonataReport:
 
     @staticmethod
     def none() -> SonataReport:
+        """No report to load."""
         return SonataReport(type='none')
 
     @staticmethod
     def spikes(spike_transition_time: float = 1.0) -> SonataReport:
+        """Spike report with transition time (units from report)."""
         return SonataReport(
             type='spikes',
             spike_transition_time=spike_transition_time
@@ -44,29 +50,36 @@ class SonataReport:
 
     @staticmethod
     def compartment(name: str) -> SonataReport:
+        """Compartment report with name."""
         return SonataReport(type='compartment', name=name)
 
     @staticmethod
     def summation(name: str) -> SonataReport:
+        """Simulation report with name."""
         return SonataReport(type='summation', name=name)
 
     @staticmethod
     def synapse(name: str) -> SonataReport:
+        """Synapse report with name."""
         return SonataReport(type='synapse', name=name)
 
     @staticmethod
     def bloodflow_pressure(name: str) -> SonataReport:
+        """Bloodflow pressure report with name."""
         return SonataReport(type='bloodflow_pressure', name=name)
 
     @staticmethod
     def bloodflow_speed(name: str) -> SonataReport:
+        """Bloodflow speed report with name."""
         return SonataReport(type='bloodflow_speed', name=name)
 
     @staticmethod
     def bloodflow_radii(name: str) -> SonataReport:
+        """Bloodflow radii report with name."""
         return SonataReport(type='bloodflow_radii', name=name)
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         message: dict[str, Any] = {
             'report_type': self.type
         }

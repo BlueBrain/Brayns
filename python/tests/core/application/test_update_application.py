@@ -20,8 +20,7 @@
 
 import unittest
 
-from brayns.core.application.update_application import update_application
-from brayns.core.image.resolution import Resolution
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -29,9 +28,9 @@ class TestUpdateApplication(unittest.TestCase):
 
     def test_update_application(self) -> None:
         instance = MockInstance()
-        update_application(
+        brayns.update_application(
             instance,
-            resolution=Resolution(100, 200),
+            resolution=brayns.Resolution(100, 200),
             jpeg_quality=50
         )
         self.assertEqual(instance.method, 'set-application-parameters')

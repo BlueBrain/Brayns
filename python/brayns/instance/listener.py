@@ -21,8 +21,8 @@
 import logging
 from collections.abc import Callable
 
-from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
-from brayns.instance.websocket.web_socket_listener import WebSocketListener
+from .jsonrpc.json_rpc_manager import JsonRpcManager
+from .websocket.web_socket_listener import WebSocketListener
 
 
 class Listener(WebSocketListener):

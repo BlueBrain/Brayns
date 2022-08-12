@@ -22,11 +22,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from brayns.instance.websocket.async_web_socket_connector import AsyncWebSocketConnector
-from brayns.instance.websocket.event_loop import EventLoop
-from brayns.instance.websocket.ssl_client_context import SslClientContext
-from brayns.instance.websocket.web_socket_client import WebSocketClient
-from brayns.instance.websocket.web_socket_listener import WebSocketListener
+from .async_web_socket_connector import AsyncWebSocketConnector
+from .event_loop import EventLoop
+from .ssl_client_context import SslClientContext
+from .web_socket_client import WebSocketClient
+from .web_socket_listener import WebSocketListener
 
 
 @dataclass

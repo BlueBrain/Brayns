@@ -20,16 +20,17 @@
 
 import unittest
 
-from brayns.core.application.get_application import get_application
-from tests.core.application.mock_application import MockApplication
+import brayns
 from tests.instance.mock_instance import MockInstance
+
+from .mock_application import MockApplication
 
 
 class TestGetApplication(unittest.TestCase):
 
     def test_get_application(self) -> None:
         instance = MockInstance(MockApplication.message)
-        test = get_application(instance)
+        test = brayns.get_application(instance)
         self.assertEqual(test, MockApplication.application)
         self.assertEqual(instance.method, 'get-application-parameters')
         self.assertEqual(instance.params, None)

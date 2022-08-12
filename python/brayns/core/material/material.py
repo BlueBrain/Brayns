@@ -27,18 +27,29 @@ T = TypeVar('T', bound='Material')
 
 @dataclass
 class Material(ABC):
+    """Base class for all material types.
+
+    Material are applied on model to change their aspect (but not their color).
+    """
 
     @classmethod
     @property
     @abstractmethod
     def name(cls) -> str:
+        """Get the material name.
+
+        :return: Material name
+        :rtype: str
+        """
         pass
 
     @classmethod
     @abstractmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
         pass
 
     @abstractmethod
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         pass

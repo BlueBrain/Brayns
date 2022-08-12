@@ -18,7 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.instance.websocket.web_socket_error import WebSocketError
+from .web_socket_error import WebSocketError
 
 
 class ConnectionClosedError(WebSocketError):

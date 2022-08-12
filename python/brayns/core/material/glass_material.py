@@ -21,28 +21,40 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.core.material.material import Material
+from .material import Material
 
 T = TypeVar('T', bound='GlassMaterial')
 
 
 @dataclass
 class GlassMaterial(Material):
+    """Glass material.
+
+    :param refraction_index: Refraction index, defaults to 1.5.
+    :type refraction_index: float, optional
+    """
 
     refraction_index: float = 1.5
 
     @classmethod
     @property
     def name(cls) -> str:
+        """Get the material name.
+
+        :return: Material name
+        :rtype: str
+        """
         return 'glass'
 
     @classmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
         return cls(
             refraction_index=message['index_of_refraction']
         )
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'index_of_refraction': self.refraction_index
         }

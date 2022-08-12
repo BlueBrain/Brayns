@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.plugins.bbp.bbp_cells import BbpCells
-from brayns.plugins.bbp.bbp_loader import BbpLoader
-from brayns.plugins.bbp.bbp_report import BbpReport
+from .bbp_cells import BbpCells
+from .bbp_loader import BbpLoader
+from .bbp_report import BbpReport
 
 __all__ = [
     'BbpCells',

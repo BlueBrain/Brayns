@@ -20,9 +20,10 @@
 
 from __future__ import annotations
 
-from brayns.core.model.model import Model
-from brayns.core.transform.transform import Transform
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+from brayns.utils import Transform
+
+from .model import Model
 
 
 def update_model(
@@ -31,6 +32,21 @@ def update_model(
     visible: bool | None = None,
     transform: Transform | None = None,
 ) -> Model:
+    """Modify the properties of a given model and return its updated version.
+
+    All unspecified values will be remain to their current state.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: ID of the model to update.
+    :type model_id: int
+    :param visible: Model visibility, defaults to None
+    :type visible: bool | None, optional
+    :param transform: Model transformation, defaults to None
+    :type transform: Transform | None, optional
+    :return: Updated model.
+    :rtype: Model
+    """
     properties = {}
     if visible is not None:
         properties['is_visible'] = visible

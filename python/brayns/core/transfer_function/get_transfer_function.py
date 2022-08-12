@@ -18,11 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.transfer_function.transfer_function import TransferFunction
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .transfer_function import TransferFunction
 
 
 def get_transfer_function(instance: Instance, model_id: int) -> TransferFunction:
+    """Retreive the transfer function of the given model.
+
+    Model must have a transfer function.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Model ID.
+    :type model_id: int
+    :return: Transfer function.
+    :rtype: TransferFunction
+    """
     params = {'id': model_id}
     result = instance.request('get-model-transfer-function', params)
     return TransferFunction.deserialize(result)

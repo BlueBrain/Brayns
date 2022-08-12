@@ -21,17 +21,24 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.core.light.light import Light
+from .light import Light
 
 
 @dataclass
 class AmbientLight(Light):
+    """Ambient light with no particular properties."""
 
     @classmethod
     @property
     def name(cls) -> str:
+        """Get the light name.
+
+        :return: Light name.
+        :rtype: str
+        """
         return 'ambient'
 
     @property
     def additional_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {}

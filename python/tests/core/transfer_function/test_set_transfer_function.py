@@ -20,9 +20,10 @@
 
 import unittest
 
-from brayns.core.transfer_function.set_transfer_function import set_transfer_function
-from tests.core.transfer_function.mock_transfer_function import MockTransferFunction
+import brayns
 from tests.instance.mock_instance import MockInstance
+
+from .mock_transfer_function import MockTransferFunction
 
 
 class TestSetTransferFunction(unittest.TestCase):
@@ -30,7 +31,7 @@ class TestSetTransferFunction(unittest.TestCase):
     def test_set_transfer_function(self) -> None:
         instance = MockInstance()
         function = MockTransferFunction.transfer_function
-        set_transfer_function(instance, 0, function)
+        brayns.set_transfer_function(instance, 0, function)
         self.assertEqual(instance.method, 'set-model-transfer-function')
         self.assertEqual(instance.params, {
             'id': 0,

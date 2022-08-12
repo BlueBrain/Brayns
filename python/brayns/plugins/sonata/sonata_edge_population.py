@@ -26,6 +26,21 @@ from typing import Any
 
 @dataclass
 class SonataEdgePopulation:
+    """SONATA edge population parameters.
+
+    :param name: Population name.
+    :type name: str
+    :param afferent: If these edges are afferent or efferent ones.
+    :type afferent: bool
+    :param afferent: If these edges are afferent ones.
+    :type afferent: bool
+    :param density: Proportion of edges to load, defaults to 1.
+    :type density: float, optional
+    :param radius: Edge radii, defaults to 2.
+    :type radius: float, optional
+    :param report: Report name, defaults to None.
+    :type report: str | None, optional
+    """
 
     name: str
     afferent: bool
@@ -34,6 +49,7 @@ class SonataEdgePopulation:
     report: str | None = None
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         message = {
             'edge_population': self.name,
             'load_afferent': self.afferent,

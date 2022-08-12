@@ -20,9 +20,7 @@
 
 import unittest
 
-from brayns.core.color.color3 import Color3
-from brayns.core.light.add_light import add_light
-from brayns.core.light.ambient_light import AmbientLight
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -30,8 +28,8 @@ class TestAddLight(unittest.TestCase):
 
     def test_add_light(self) -> None:
         instance = MockInstance(0)
-        light = AmbientLight(Color3.red, 3, False)
-        id = add_light(instance, light)
+        light = brayns.AmbientLight(brayns.Color3.red, 3, False)
+        id = brayns.add_light(instance, light)
         self.assertEqual(id, 0)
         self.assertEqual(instance.method, 'add-light-ambient')
         self.assertEqual(instance.params, light.serialize())

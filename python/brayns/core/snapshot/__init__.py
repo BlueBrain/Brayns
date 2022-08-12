@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.snapshot.frame_exporter import FrameExporter
-from brayns.core.snapshot.key_frame import KeyFrame
-from brayns.core.snapshot.snapshot import Snapshot
+from .frame_exporter import FrameExporter
+from .key_frame import KeyFrame
+from .snapshot import Snapshot
 
 __all__ = [
     'FrameExporter',

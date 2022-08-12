@@ -18,10 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.simulation.simulation import Simulation
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .simulation import Simulation
 
 
 def get_simulation(instance: Instance) -> Simulation:
+    """Retreive the current simulation state of an instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :return: Current simulation state.
+    :rtype: Simulation
+    """
     result = instance.request('get-simulation-parameters')
     return Simulation.deserialize(result)

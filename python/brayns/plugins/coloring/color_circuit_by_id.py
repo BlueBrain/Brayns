@@ -18,9 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.color.color4 import Color4
-from brayns.instance.instance import Instance
-from brayns.plugins.coloring.cell_id import CellId
+from brayns.instance import Instance
+from brayns.utils import Color4
+
+from .cell_id import CellId
 
 
 def color_circuit_by_id(
@@ -28,6 +29,17 @@ def color_circuit_by_id(
     model_id: int,
     colors: dict[CellId, Color4],
 ) -> list[int]:
+    """Color a circuit from a mapping cell ID -> Color.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Circuit model ID.
+    :type model_id: int
+    :param colors: Color mappings Cells -> Color.
+    :type colors: dict[CellId, Color4]
+    :return: List of GIDs that were not colored.
+    :rtype: list[int]
+    """
     params = {
         'model_id': model_id,
         'color_info': [

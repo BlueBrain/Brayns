@@ -20,8 +20,7 @@
 
 import unittest
 
-from brayns.core.api.json_schema import JsonSchema
-from brayns.core.api.json_type import JsonType
+import brayns
 
 
 class TestJsonSchema(unittest.TestCase):
@@ -58,36 +57,36 @@ class TestJsonSchema(unittest.TestCase):
             ],
             'enum': ['test', 12]
         }
-        self._schema = JsonSchema(
+        self._schema = brayns.JsonSchema(
             title='test1',
             description='test2',
-            type=JsonType.INTEGER,
+            type=brayns.JsonType.INTEGER,
             read_only=True,
             write_only=True,
             default=123,
             minimum=0,
             maximum=10,
-            items=JsonSchema(
-                type=JsonType.OBJECT,
+            items=brayns.JsonSchema(
+                type=brayns.JsonType.OBJECT,
                 additional_properties=False
             ),
             min_items=1,
             max_items=3,
             properties={
-                '1': JsonSchema(type=JsonType.STRING),
-                '2': JsonSchema(type=JsonType.NUMBER)
+                '1': brayns.JsonSchema(type=brayns.JsonType.STRING),
+                '2': brayns.JsonSchema(type=brayns.JsonType.NUMBER)
             },
             required=['1', '2'],
             additional_properties=False,
             one_of=[
-                JsonSchema(type=JsonType.INTEGER),
-                JsonSchema(type=JsonType.STRING)
+                brayns.JsonSchema(type=brayns.JsonType.INTEGER),
+                brayns.JsonSchema(type=brayns.JsonType.STRING)
             ],
             enum=['test', 12]
         )
 
     def test_deserialize(self) -> None:
-        test = JsonSchema.deserialize(self._message)
+        test = brayns.JsonSchema.deserialize(self._message)
         self.assertEqual(test, self._schema)
 
     def test_serialize(self) -> None:

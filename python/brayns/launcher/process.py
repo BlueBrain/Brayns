@@ -27,6 +27,14 @@ from typing import IO, cast
 
 
 class Process:
+    """Process which runs a braynsService instance.
+
+    The process must be stopped using terminate() once done with it, otherwise
+    it will run forever. Use context manager (ie with process: ...) to avoid
+    mistakes.
+
+    The last lines of the process logs can be retreived using `logs`.
+    """
 
     def __init__(self, args: list[str], env: dict[str, str]) -> None:
         self._process = subprocess.Popen(

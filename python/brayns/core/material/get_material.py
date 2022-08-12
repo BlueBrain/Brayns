@@ -20,13 +20,27 @@
 
 from typing import TypeVar
 
-from brayns.core.material.material import Material
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .material import Material
 
 T = TypeVar('T', bound=Material)
 
 
 def get_material(instance: Instance, model_id: int, material_type: type[T]) -> T:
+    """Get the material applied on the given model.
+
+    `material_type` must be the same as the current one.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: ID of the model.
+    :type model_id: int
+    :param material_type: Material type.
+    :type material_type: type[T]
+    :return: Material applied on `model`.
+    :rtype: T
+    """
     name = material_type.name
     params = {'id': model_id}
     result = instance.request(f'get-material-{name}', params)

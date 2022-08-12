@@ -18,13 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.model.model import Model
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .get_scene import get_scene
+from .model import Model
 
 
 def get_models(instance: Instance) -> list[Model]:
-    result = instance.request('get-scene')
-    return [
-        Model.deserialize(model)
-        for model in result['models']
-    ]
+    """Retreive all models from an instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :return: List of models.
+    :rtype: list[Model]
+    """
+    return get_scene(instance).models

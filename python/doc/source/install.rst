@@ -1,3 +1,5 @@
+.. _install-label:
+
 Installation
 ============
 
@@ -52,7 +54,7 @@ It can also be installed from the github repository sources using:
     $ git clone https://github.com/BlueBrain/Brayns.git
     $ cd Brayns/python
     $ python setup.py sdist
-    $ pip install dist/brayns-2.0.0.tar.gz
+    $ pip install dist/$(ls dist) # The output tar.gz will be in dist folder
 
 On BB5
 ~~~~~~

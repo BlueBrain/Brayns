@@ -18,11 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.simulation.enable_simulation import enable_simulation
-from brayns.core.simulation.get_simulation import get_simulation
-from brayns.core.simulation.set_simulation_frame import set_simulation_frame
-from brayns.core.simulation.simulation import Simulation
-from brayns.core.simulation.time_unit import TimeUnit
+from .enable_simulation import enable_simulation
+from .get_simulation import get_simulation
+from .set_simulation_frame import set_simulation_frame
+from .simulation import Simulation
+from .time_unit import TimeUnit
 
 __all__ = [
     'enable_simulation',

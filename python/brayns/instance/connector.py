@@ -26,19 +26,62 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import cast
 
-from brayns.instance.client import Client
-from brayns.instance.instance import Instance
-from brayns.instance.jsonrpc.json_rpc_manager import JsonRpcManager
-from brayns.instance.listener import Listener
-from brayns.instance.logger import Logger
-from brayns.instance.websocket.service_unavailable_error import ServiceUnavailableError
-from brayns.instance.websocket.ssl_client_context import SslClientContext
-from brayns.instance.websocket.web_socket_client import WebSocketClient
-from brayns.instance.websocket.web_socket_connector import WebSocketConnector
+from.client import Client
+from.instance import Instance
+from.jsonrpc.json_rpc_manager import JsonRpcManager
+from.listener import Listener
+from.logger import Logger
+from.websocket.service_unavailable_error import ServiceUnavailableError
+from.websocket.ssl_client_context import SslClientContext
+from.websocket.web_socket_client import WebSocketClient
+from.websocket.web_socket_connector import WebSocketConnector
 
 
 @dataclass
 class Connector:
+    """Used to connect to a braynsService instance.
+
+    A connector must at least have the URI the braynsService instance was
+    started with.
+
+    URI is always in format host:port, wss:// or ws:// will be added depending
+    if an SSL context is provided (SSL is disabled if context is None).
+
+    SSL context can be provided for a secure connection. If the instance uses a
+    certificate signed by a CA installed on the local machine, the default value
+    of brayns.SslClientContext() can be used. Otherwise, the CA file or path
+    must be provided in the SSL context constructor.
+
+    Binary messages received from the instance are not JSON-RPC requests but can
+    be handled using an optional callback (see `binary_handler`).
+
+    If you don't know when your instance of braynsService will be ready when you
+    call connect(), you can set `max_attempts` to None to try to connect in loop
+    until it works (or with a maximum count and a delay to have a timeout).
+
+    Example:
+
+    .. code-block:: python
+
+        connector = brayns.Connector('localhost:5000')
+
+        with connector.connect() as instance:
+
+            # use instance
+
+    :param uri: Instance URI with format 'host:port'.
+    :type uri: str
+    :param ssl_context: SSL context if secure, defaults to None.
+    :type ssl_context: SslClientContext | None, optional
+    :param binary_handler: Callback for binary, defaults to (bytes) -> None.
+    :type binary_handler: Callable[[bytes], None], optional
+    :param logger: Instance logger, defaults to brayns.Logger().
+    :type logger: logging.Logger, optional
+    :param max_attempts: Max connection attempts, defaults to 1.
+    :type max_attempts: int | None, optional
+    :param attempt_period: Delay in seconds between attempts, defaults to 0.1.
+    :type attempt_period: float, optional
+    """
 
     uri: str
     ssl_context: SslClientContext | None = None
@@ -48,6 +91,15 @@ class Connector:
     attempt_period: float = 0.1
 
     def connect(self) -> Instance:
+        """Connect to instance and return it.
+
+        Try to connect `max_attempts` times waiting `attempt_period` between two
+        tries. If it fails, ServiceUnavailableError will be raised.
+
+        :raises WebSocketError
+        :return: Connected braynsService instance.
+        :rtype: Instance
+        """
         manager = JsonRpcManager(self.logger)
         listener = Listener(self.logger, self.binary_handler, manager)
         connector = WebSocketConnector(self.uri, listener, self.ssl_context)

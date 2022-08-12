@@ -24,6 +24,28 @@ from typing import Any
 
 @dataclass
 class ClipPlane:
+    """Clip plane.
+
+    Described by the equation `ax + by + cz + d = 0`.
+
+    Where [a, b, c] is the normal of the plane and d the orthogonal distance
+    from the origin.
+
+    The normal vector indicates the upper side of the plane.
+
+    Everything below the given plane is clipped:
+
+    Multiple clip planes can be combined to slice a model in complex ways.
+
+    :param a: X term of the plane equation.
+    :type a: float
+    :param b: Y term of the plane equation.
+    :type b: float
+    :param c: Y term of the plane equation.
+    :type c: float
+    :param d: Scalar term of the plane equation.
+    :type d: float
+    """
 
     a: float
     b: float

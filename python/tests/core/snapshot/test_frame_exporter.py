@@ -20,13 +20,7 @@
 
 import unittest
 
-from brayns.core.camera.perspective_camera import PerspectiveCamera
-from brayns.core.image.resolution import Resolution
-from brayns.core.renderer.production_renderer import ProductionRenderer
-from brayns.core.snapshot.frame_exporter import FrameExporter
-from brayns.core.image.image_format import ImageFormat
-from brayns.core.snapshot.key_frame import KeyFrame
-from brayns.core.view.view import View
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -35,21 +29,21 @@ class TestFrameExporter(unittest.TestCase):
     def test_export_frames(self) -> None:
         instance = MockInstance()
         path = 'test'
-        frames = KeyFrame.from_indices([0, 1])
-        exporter = FrameExporter(frames)
+        frames = brayns.KeyFrame.from_indices([0, 1])
+        exporter = brayns.FrameExporter(frames)
         ref = exporter.serialize(path)
         exporter.export_frames(instance, path)
         self.assertEqual(instance.method, 'export-frames')
         self.assertEqual(instance.params, ref)
 
     def test_serialize(self) -> None:
-        exporter = FrameExporter(
-            frames=KeyFrame.from_indices([0, 1], View()),
-            format=ImageFormat.JPEG,
+        exporter = brayns.FrameExporter(
+            frames=brayns.KeyFrame.from_indices([0, 1], brayns.View()),
+            format=brayns.ImageFormat.JPEG,
             jpeg_quality=50,
-            resolution=Resolution(600, 900),
-            camera=PerspectiveCamera(),
-            renderer=ProductionRenderer()
+            resolution=brayns.Resolution(600, 900),
+            camera=brayns.PerspectiveCamera(),
+            renderer=brayns.ProductionRenderer()
         )
         path = 'test'
         ref = {
@@ -57,11 +51,11 @@ class TestFrameExporter(unittest.TestCase):
             'key_frames': [
                 {
                     'frame_index': 0,
-                    'camera_view': View().serialize()
+                    'camera_view': brayns.View().serialize()
                 },
                 {
                     'frame_index': 1,
-                    'camera_view': View().serialize()
+                    'camera_view': brayns.View().serialize()
                 }
             ],
             'image_settings': {
@@ -69,8 +63,8 @@ class TestFrameExporter(unittest.TestCase):
                 'quality': 50,
                 'size': [600, 900]
             },
-            'camera': PerspectiveCamera().serialize_with_name(),
-            'renderer': ProductionRenderer().serialize_with_name()
+            'camera': brayns.PerspectiveCamera().serialize_with_name(),
+            'renderer': brayns.ProductionRenderer().serialize_with_name()
         }
         test = exporter.serialize(path)
         self.assertEqual(test, ref)

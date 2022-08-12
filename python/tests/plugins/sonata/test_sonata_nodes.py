@@ -20,20 +20,20 @@
 
 import unittest
 
-from brayns.plugins.sonata.sonata_nodes import SonataNodes
+import brayns
 
 
 class TestSonataNodes(unittest.TestCase):
 
     def test_all(self) -> None:
-        test = SonataNodes.all()
+        test = brayns.SonataNodes.all()
         self.assertEqual(test.density, 1)
         self.assertIsNone(test.names)
         self.assertIsNone(test.ids)
 
     def test_from_density(self) -> None:
         density = 0.3
-        test = SonataNodes.from_density(density)
+        test = brayns.SonataNodes.from_density(density)
         self.assertEqual(test.density, density)
         self.assertIsNone(test.names)
         self.assertIsNone(test.ids)
@@ -41,20 +41,20 @@ class TestSonataNodes(unittest.TestCase):
     def test_from_names(self) -> None:
         names = ['test1', 'test2']
         density = 0.3
-        test = SonataNodes.from_names(names, density)
+        test = brayns.SonataNodes.from_names(names, density)
         self.assertEqual(test.density, density)
         self.assertEqual(test.names, names)
         self.assertIsNone(test.ids)
 
     def test_from_ids(self) -> None:
         ids = [1, 2, 3]
-        test = SonataNodes.from_ids(ids)
+        test = brayns.SonataNodes.from_ids(ids)
         self.assertIsNone(test.density)
         self.assertIsNone(test.names)
         self.assertEqual(test.ids, ids)
 
     def test_serialize(self) -> None:
-        test = SonataNodes.from_ids([1, 2, 3])
+        test = brayns.SonataNodes.from_ids([1, 2, 3])
         ref = {
             'node_ids': [1, 2, 3]
         }

@@ -23,20 +23,34 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from brayns.core.loader.loader import Loader
-from brayns.plugins.bbp.bbp_cells import BbpCells
-from brayns.plugins.bbp.bbp_report import BbpReport
-from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
+from brayns.core import Loader
+
+from ..morphology import Morphology
+from .bbp_cells import BbpCells
+from .bbp_report import BbpReport
 
 
 @dataclass
 class BbpLoader(Loader):
+    """BlueConfig / CircuitConfig loader.
+
+    Use this loader to load circuit files with BBP internal format.
+
+    :param cells: Cells to load, defaults to all.
+    :type cells: BbpCells, optional
+    :param report: Report to load, defaults to None.
+    :type report: BbpReport | None, optional
+    :param morphology: Specifies how to load the circuit morphologies.
+    :type morphology: Morphology, optional
+    :param load_afferent_synapses: Wether to load afferent, defaults to False.
+    :type load_afferent_synapses: bool, optional
+    :param load_efferent_synapses: Wether to load efferent, defaults to False.
+    :type load_efferent_synapses: bool, optional
+    """
 
     cells: BbpCells = BbpCells.all()
     report: BbpReport | None = None
-    morphology: MorphologyParameters = field(
-        default_factory=MorphologyParameters
-    )
+    morphology: Morphology = field(default_factory=Morphology)
     load_afferent_synapses: bool = False
     load_efferent_synapses: bool = False
 

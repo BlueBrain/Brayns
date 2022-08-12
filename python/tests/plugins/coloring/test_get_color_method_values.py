@@ -20,8 +20,7 @@
 
 import unittest
 
-from brayns.plugins.coloring.color_method import ColorMethod
-from brayns.plugins.coloring.get_color_method_values import get_color_method_values
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -30,8 +29,8 @@ class TestGetColorMethodValues(unittest.TestCase):
     def test_get_color_method_values(self) -> None:
         ref = ['test1', 'test2']
         instance = MockInstance({'variables': ref})
-        method = ColorMethod.ETYPE
-        test = get_color_method_values(instance, 0, method)
+        method = brayns.ColorMethod.ETYPE
+        test = brayns.get_color_method_values(instance, 0, method)
         self.assertEqual(instance.method, 'get-circuit-color-method-variables')
         self.assertEqual(instance.params, {
             'model_id': 0,

@@ -20,13 +20,13 @@
 
 import unittest
 
-from brayns.core.material.plastic_material import PlasticMaterial
+import brayns
 
 
 class TestPlasticMaterial(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._material = PlasticMaterial(
+        self._material = brayns.PlasticMaterial(
             opacity=0.5
         )
         self._message = {
@@ -34,10 +34,10 @@ class TestPlasticMaterial(unittest.TestCase):
         }
 
     def test_name(self) -> None:
-        self.assertEqual(PlasticMaterial.name, 'plastic')
+        self.assertEqual(brayns.PlasticMaterial.name, 'plastic')
 
     def test_deserialize(self) -> None:
-        test = PlasticMaterial.deserialize(self._message)
+        test = brayns.PlasticMaterial.deserialize(self._message)
         self.assertEqual(test, self._material)
 
     def test_serialize(self) -> None:

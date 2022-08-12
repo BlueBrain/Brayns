@@ -20,14 +20,29 @@
 
 from typing import TypeVar
 
-from brayns.core.geometry.geometry import Geometry
-from brayns.core.model.model import Model
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from ..model import Model
+from .geometry import Geometry
 
 T = TypeVar('T', bound=Geometry)
 
 
 def add_geometries(instance: Instance, geometries: list[T]) -> Model:
+    """Add a list of geometries to an instance as a single model.
+
+    All geometries must have the same type.
+
+    Empty models (no geometries) are not supported.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param geometries: Geometries to add (boxes, capsules, etc...).
+    :type geometries: list[T]
+    :raises ValueError: List is empty.
+    :return: Model created from the geometries.
+    :rtype: Model
+    """
     if not geometries:
         raise ValueError('Creation of an empty model is not supported')
     method = geometries[0].method

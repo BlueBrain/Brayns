@@ -20,17 +20,16 @@
 
 import unittest
 
-from brayns.core.color.color4 import Color4
-from brayns.core.renderer.production_renderer import ProductionRenderer
+import brayns
 
 
 class TestProductionRenderer(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._renderer = ProductionRenderer(
+        self._renderer = brayns.ProductionRenderer(
             samples_per_pixel=2,
             max_ray_bounces=12,
-            background_color=Color4(0, 0, 1, 1)
+            background_color=brayns.Color4(0, 0, 1, 1)
         )
         self._message = {
             'samples_per_pixel': 2,
@@ -39,12 +38,12 @@ class TestProductionRenderer(unittest.TestCase):
         }
 
     def test_name(self) -> None:
-        test = ProductionRenderer.name
+        test = brayns.ProductionRenderer.name
         ref = 'production'
         self.assertEqual(test, ref)
 
     def test_deserialize(self) -> None:
-        test = ProductionRenderer.deserialize(self._message)
+        test = brayns.ProductionRenderer.deserialize(self._message)
         self.assertEqual(test, self._renderer)
 
     def test_serialize(self) -> None:
@@ -52,7 +51,7 @@ class TestProductionRenderer(unittest.TestCase):
         self.assertEqual(test, self._message)
 
     def test_serialize_with_name(self) -> None:
-        renderer = ProductionRenderer()
+        renderer = brayns.ProductionRenderer()
         test = renderer.serialize_with_name()
         ref = {
             'name': renderer.name,

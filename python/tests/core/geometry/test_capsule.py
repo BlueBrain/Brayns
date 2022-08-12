@@ -20,17 +20,16 @@
 
 import unittest
 
-from brayns.core.geometry.capsule import Capsule
-from brayns.core.vector.vector3 import Vector3
+import brayns
 
 
 class TestCapsule(unittest.TestCase):
 
     def test_method(self) -> None:
-        self.assertEqual(Capsule.method, 'add-capsules')
+        self.assertEqual(brayns.Capsule.method, 'add-capsules')
 
     def test_serialize(self) -> None:
-        capsule = Capsule(Vector3.zero, 0, Vector3.one, 1)
+        capsule = brayns.Capsule(brayns.Vector3.zero, 0, brayns.Vector3.one, 1)
         test = capsule.serialize()
         ref = {
             'p0': [0, 0, 0],

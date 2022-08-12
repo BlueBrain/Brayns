@@ -20,28 +20,24 @@
 
 import unittest
 
-from brayns.plugins.bbp.bbp_cells import BbpCells
-from brayns.plugins.bbp.bbp_loader import BbpLoader
-from brayns.plugins.bbp.bbp_report import BbpReport
-from brayns.plugins.morphology.morphology_geometry_type import MorphologyGeometryType
-from brayns.plugins.morphology.morphology_parameters import MorphologyParameters
+import brayns
 
 
 class TestBbpLoader(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(BbpLoader.name, 'BBP loader')
+        self.assertEqual(brayns.BbpLoader.name, 'BBP loader')
 
     def test_properties(self) -> None:
-        loader = BbpLoader(
-            cells=BbpCells.from_targets(['tests'], 0.5),
-            report=BbpReport.compartment('test'),
-            morphology=MorphologyParameters(
+        loader = brayns.BbpLoader(
+            cells=brayns.BbpCells.from_targets(['tests'], 0.5),
+            report=brayns.BbpReport.compartment('test'),
+            morphology=brayns.Morphology(
                 radius_multiplier=3,
                 load_soma=True,
                 load_axon=True,
                 load_dendrites=True,
-                geometry_type=MorphologyGeometryType.ORIGINAL
+                geometry_type=brayns.GeometryType.ORIGINAL
             ),
             load_afferent_synapses=True,
             load_efferent_synapses=True

@@ -23,8 +23,8 @@ from __future__ import annotations
 from collections import deque
 from typing import Any
 
-from brayns.instance.request_error import RequestError
-from brayns.instance.request_progress import RequestProgress
+from .request_error import RequestError
+from .request_progress import RequestProgress
 
 
 class JsonRpcTask:

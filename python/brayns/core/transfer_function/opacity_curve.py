@@ -20,17 +20,51 @@
 
 from dataclasses import dataclass
 
-from brayns.core.color.color3 import Color3
-from brayns.core.color.color4 import Color4
-from brayns.core.transfer_function.control_point import ControlPoint
+from brayns.utils import Color3, Color4
+
+from .control_point import ControlPoint
 
 
 @dataclass
 class OpacityCurve:
+    """Opacity curve to apply to a transfer function.
+
+    Use control points to map simulation value (usually voltage) to opacity.
+
+    The simulation values are normalized so it is not necessary to know them.
+
+    Example:
+
+    .. code-block:: python
+
+        curve = brayns.OpacityCurve([
+            brayns.ControlPoint(0.5, 0.0),
+        ])
+
+        new_colors = curve.apply(colors)
+
+    Here it will give an opacity of 0 from 0% to 50% of the transfer function
+    value range and then a staight line from 0 to 1 between 50% and 100% of the
+    value range.
+
+    :param control_points: Control points of the curve.
+    :type control_points: list[ControlPoint]
+    """
 
     control_points: list[ControlPoint]
 
     def apply(self, colors: list[Color3]) -> list[Color4]:
+        """Create a from colors with opacities computed from the curve.
+
+        Works also with a list of Color4 as lists are covariant in Python.
+
+        Simulation normalized value range is inferred from len(colors).
+
+        :param colors: Input colors.
+        :type colors: list[Color3]
+        :return: Output colors.
+        :rtype: list[Color4]
+        """
         result = []
         color_count = len(colors)
         for i in range(color_count):

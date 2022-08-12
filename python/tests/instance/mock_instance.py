@@ -20,19 +20,17 @@
 
 from typing import Any
 
-from brayns.instance.instance import Instance
-from brayns.instance.jsonrpc.json_rpc_request import JsonRpcRequest
-from brayns.instance.request_future import RequestFuture
+import brayns
 
 
-class MockInstance(Instance):
+class MockInstance(brayns.Instance):
 
     def __init__(self, reply: Any = None) -> None:
         self.reply = reply
         self.method = ''
         self.params = None
 
-    def send(self, request: JsonRpcRequest) -> RequestFuture:
+    def send(self, request: brayns.JsonRpcRequest) -> brayns.RequestFuture:
         self.method = request.method
         self.params = request.params
-        return RequestFuture.from_result(self.reply)
+        return brayns.RequestFuture.from_result(self.reply)

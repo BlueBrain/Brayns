@@ -22,6 +22,19 @@ from enum import Enum
 
 
 class JsonType(Enum):
+    """Enumeration of available JSON types.
+
+    The value is the string from the JSON schema standard.
+
+    :param UNDEFINED: Any type is allowed.
+    :param NULL: No types are allowed.
+    :param BOOLEAN: Boolean.
+    :param INTEGER: Integral number.
+    :param NUMBER: Any number.
+    :param STRING: String.
+    :param ARRAY: Array.
+    :param OBJECT: Object.
+    """
 
     UNDEFINED = 'undefined'
     NULL = 'null'

@@ -21,13 +21,22 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.core.renderer.renderer import Renderer
+from .renderer import Renderer
 
 T = TypeVar('T', bound='ProductionRenderer')
 
 
 @dataclass
 class ProductionRenderer(Renderer):
+    """Production renderer for expensive quality rendering.
+
+    Overrides default parameters for higher quality.
+
+    :param samples_per_pixel: Accumulation, defaults to 128.
+    :type samples_per_pixel: int, optional. 
+    :param max_ray_bounces: Ray bounces, defaults to 7.
+    :type max_ray_bounces: int, optional. 
+    """
 
     samples_per_pixel: int = 128
     max_ray_bounces: int = 7
@@ -35,12 +44,19 @@ class ProductionRenderer(Renderer):
     @classmethod
     @property
     def name(cls) -> str:
+        """Get renderer name.
+
+        :return: Renderer name.
+        :rtype: str
+        """
         return 'production'
 
     @classmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
         return cls.deserialize_with(message)
 
     @property
     def additional_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {}

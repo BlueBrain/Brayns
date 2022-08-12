@@ -20,29 +20,26 @@
 
 import unittest
 
-from brayns.core.color.color3 import Color3
-from brayns.core.color.color4 import Color4
-from brayns.core.transfer_function.control_point import ControlPoint
-from brayns.core.transfer_function.opacity_curve import OpacityCurve
+import brayns
 
 
 class TestOpacityCurve(unittest.TestCase):
 
     def test_apply(self) -> None:
-        curve = OpacityCurve([
-            ControlPoint(0, 0.1),
-            ControlPoint(0.5, 0.2),
-            ControlPoint(1, 0.3),
+        curve = brayns.OpacityCurve([
+            brayns.ControlPoint(0, 0.1),
+            brayns.ControlPoint(0.5, 0.2),
+            brayns.ControlPoint(1, 0.3),
         ])
         colors = [
-            Color3(1, 0, 0),
-            Color3(0, 1, 0),
-            Color3(0, 0, 1),
+            brayns.Color3(1, 0, 0),
+            brayns.Color3(0, 1, 0),
+            brayns.Color3(0, 0, 1),
         ]
         ref = [
-            Color4(1, 0, 0, 0.1),
-            Color4(0, 1, 0, 0.2),
-            Color4(0, 0, 1, 0.3),
+            brayns.Color4(1, 0, 0, 0.1),
+            brayns.Color4(0, 1, 0, 0.2),
+            brayns.Color4(0, 0, 1, 0.3),
         ]
         test = curve.apply(colors)
         self.assertEqual(test, ref)

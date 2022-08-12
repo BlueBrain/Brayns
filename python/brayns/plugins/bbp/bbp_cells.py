@@ -26,6 +26,10 @@ from typing import Any
 
 @dataclass(frozen=True)
 class BbpCells:
+    """BlueConfig cells selection.
+
+    Use one of the factory methods to create this object.
+    """
 
     density: float | None = None
     targets: list[str] | None = None
@@ -33,21 +37,29 @@ class BbpCells:
 
     @staticmethod
     def all() -> BbpCells:
+        """Select all cells from a circuit."""
         return BbpCells.from_density(1.0)
 
     @staticmethod
     def from_density(density: float) -> BbpCells:
+        """Select only a proportion of cells (0 = None, 1 = all)."""
         return BbpCells(density=density)
 
     @staticmethod
     def from_targets(targets: list[str], density: float = 1.0) -> BbpCells:
+        """Select only the cells from a given target.
+
+        The density of cells to load per target can also be specified.
+        """
         return BbpCells(density=density, targets=targets)
 
     @staticmethod
     def from_gids(gids: list[int]) -> BbpCells:
+        """Select cells using their GIDs."""
         return BbpCells(gids=gids)
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         message = {}
         if self.density is not None:
             message['percentage'] = self.density

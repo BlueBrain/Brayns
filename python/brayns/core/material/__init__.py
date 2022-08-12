@@ -18,24 +18,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.material.car_paint_material import CarPaintMaterial
-from brayns.core.material.default_material import DefaultMaterial
-from brayns.core.material.emissive_material import EmissiveMaterial
-from brayns.core.material.get_material import get_material
-from brayns.core.material.get_material_name import get_material_name
-from brayns.core.material.glass_material import GlassMaterial
-from brayns.core.material.material import Material
-from brayns.core.material.matte_material import MatteMaterial
-from brayns.core.material.metal_material import MetalMaterial
-from brayns.core.material.plastic_material import PlasticMaterial
-from brayns.core.material.set_material import set_material
+from .car_paint_material import CarPaintMaterial
+from .default_material import DefaultMaterial
+from .emissive_material import EmissiveMaterial
+from .get_material import get_material
+from .get_material_name import get_material_name
+from .glass_material import GlassMaterial
+from .material import Material
+from .matte_material import MatteMaterial
+from .metal_material import MetalMaterial
+from .plastic_material import PlasticMaterial
+from .set_material import set_material
 
 __all__ = [
     'CarPaintMaterial',
     'DefaultMaterial',
     'EmissiveMaterial',
-    'get_material',
     'get_material_name',
+    'get_material',
     'GlassMaterial',
     'Material',
     'MatteMaterial',

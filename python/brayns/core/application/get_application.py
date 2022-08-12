@@ -18,10 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core.application.application import Application
-from brayns.instance.instance import Instance
+from brayns.instance import Instance
+
+from .application import Application
 
 
 def get_application(instance: Instance) -> Application:
+    """Retreive the application parameters from an instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :return: Current application parameters.
+    :rtype: Application
+    """
     result = instance.request('get-application-parameters')
     return Application.deserialize(result)

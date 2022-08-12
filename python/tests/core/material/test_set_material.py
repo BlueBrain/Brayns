@@ -20,8 +20,7 @@
 
 import unittest
 
-from brayns.core.material.default_material import DefaultMaterial
-from brayns.core.material.set_material import set_material
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
@@ -29,8 +28,8 @@ class TestSetMaterial(unittest.TestCase):
 
     def test_get_material(self) -> None:
         instance = MockInstance()
-        material = DefaultMaterial()
-        set_material(instance, 0, material)
+        material = brayns.DefaultMaterial()
+        brayns.set_material(instance, 0, material)
         self.assertEqual(instance.method, 'set-material-default')
         self.assertEqual(instance.params, {
             'model_id': 0,

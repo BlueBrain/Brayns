@@ -21,28 +21,40 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.core.material.material import Material
+from .material import Material
 
 T = TypeVar('T', bound='EmissiveMaterial')
 
 
 @dataclass
 class EmissiveMaterial(Material):
+    """Emissive material.
+
+    :param intensity: Light emission intensity, defaults to 1.
+    :type intensity: float, optional
+    """
 
     intensity: float = 1.0
 
     @classmethod
     @property
     def name(cls) -> str:
+        """Get the material name.
+
+        :return: Material name
+        :rtype: str
+        """
         return 'emissive'
 
     @classmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
         return cls(
             intensity=message['intensity']
         )
 
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'intensity': self.intensity
         }

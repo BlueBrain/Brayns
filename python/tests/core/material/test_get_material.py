@@ -20,18 +20,17 @@
 
 import unittest
 
-from brayns.core.material.default_material import DefaultMaterial
-from brayns.core.material.get_material import get_material
+import brayns
 from tests.instance.mock_instance import MockInstance
 
 
 class TestGetMaterial(unittest.TestCase):
 
     def test_get_material(self) -> None:
-        material = DefaultMaterial()
+        material = brayns.DefaultMaterial()
         reply = material.serialize()
         instance = MockInstance(reply)
-        test = get_material(instance, 0, DefaultMaterial)
+        test = brayns.get_material(instance, 0, brayns.DefaultMaterial)
         self.assertEqual(test, material)
         self.assertEqual(instance.method, 'get-material-default')
         self.assertEqual(instance.params, {'id': 0})
