@@ -133,4 +133,4 @@ After we have loaded the model and chose the camera type and view, we can get an
 Further information
 -------------------
 
-For further information about the API, please refer to the API reference :ref:`brayns-label`.
+For further information about the API, please refer to the API reference.

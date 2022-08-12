@@ -32,8 +32,8 @@ SUMMARY_FILENAME = 'api.rst'
 SUMMARY = '''
 .. _api-label:
 
-JSON-RPC API
-============
+JSON-RPC API reference
+======================
 
 This page references the entrypoints of Brayns JSON-RPC API.
 

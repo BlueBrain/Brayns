@@ -96,9 +96,9 @@ class Connector:
         Try to connect `max_attempts` times waiting `attempt_period` between two
         tries. If it fails, ServiceUnavailableError will be raised.
 
+        :raises WebSocketError
         :return: Connected braynsService instance.
         :rtype: Instance
-        :raises WebSocketError
         """
         manager = JsonRpcManager(self.logger)
         listener = Listener(self.logger, self.binary_handler, manager)
