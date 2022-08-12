@@ -26,7 +26,7 @@ Through the API (websocket or Python) use can:
    usage
    plugins
    jsonrpcapi/api
-   pythonapi/modules
+   pythonapi/api
 
 Acknowledgments
 ---------------
