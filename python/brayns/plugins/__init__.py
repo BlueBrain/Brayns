@@ -23,3 +23,25 @@ from .coloring import *
 from .cylindric_camera import *
 from .morphology import *
 from .sonata import *
+
+__all__ = [
+    'BbpCells',
+    'BbpLoader',
+    'BbpReport',
+    'CellId',
+    'ColorMethod',
+    'CylindricCamera',
+    'GeometryType',
+    'Morphology',
+    'MorphologyLoader',
+    'SonataEdgePopulation',
+    'SonataLoader',
+    'SonataNodePopulation',
+    'SonataNodes',
+    'SonataReport',
+    'color_circuit',
+    'color_circuit_by_id',
+    'color_circuit_by_method',
+    'get_color_method_values',
+    'get_color_methods',
+]
