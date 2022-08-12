@@ -56,13 +56,12 @@ Functions
 {functions}
 '''.strip()
 
+
 AUTOMODULE = '''
 .. automodule:: {module}
     :members: {member}
     :undoc-members:
     :show-inheritance:
-    :special-members:
-    :no-special-members:
 '''.strip()
 
 
@@ -117,7 +116,7 @@ def build_subpackage(directory: pathlib.Path, subpackage: str) -> None:
 
 
 def format_subpackage(subpackage: str) -> str:
-    underline = len(subpackage) * '-'
+    underline = len(subpackage) * '='
     module = f'brayns.{subpackage}'
     obj = getattr(brayns, subpackage)
     items = get_subpackage_items(obj)

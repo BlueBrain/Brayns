@@ -1,12 +1,14 @@
-JSONRPCAPI=source/jsonrpcapi
-PYTHONAPI=source/pythonapi
-HTML=html
+DOC=$(dirname $0)
+SOURCE=${DOC}/source
+JSONRPCAPI=${SOURCE}/jsonrpcapi
+PYTHONAPI=${SOURCE}/pythonapi
+HTML=${DOC}/html
 
 rm -rf ${JSONRPCAPI}
-python ../scripts/build_json_rpc_doc.py ${JSONRPCAPI}
+python ${DOC}/../scripts/build_json_rpc_doc.py ${JSONRPCAPI}
 
 rm -rf ${PYTHONAPI}
-sphinx-apidoc -o ${PYTHONAPI} ../brayns
+python ${DOC}/../scripts/build_python_doc.py ${PYTHONAPI}
 
 rm -rf ${HTML}
-sphinx-build -b html source ${HTML}
+sphinx-build -b html ${SOURCE} ${HTML}
