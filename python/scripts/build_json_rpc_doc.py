@@ -203,30 +203,29 @@ SEPARATOR = '\n\n----'
 
 
 def build_from_argv() -> None:
-    uri = 'localhost:5000'
     python = pathlib.Path(__file__).parent.parent
     directory = python / 'doc' / 'source' / 'jsonrpcapi'
+    uri = 'localhost:5000'
     argv = sys.argv
     if len(argv) > 1:
-        uri = argv[1]
+        directory = pathlib.Path(argv[1])
     if len(argv) > 2:
-        directory = pathlib.Path(argv[2])
-    directory.mkdir(exist_ok=True)
-    build_from_uri(uri, str(directory))
+        uri = argv[2]
+    build_from_uri(uri, directory)
 
 
-def build_from_uri(uri: str, directory: str) -> None:
+def build_from_uri(uri: str, directory: pathlib.Path) -> None:
     connector = brayns.Connector(uri)
     with connector.connect() as instance:
         build_from_instance(instance, directory)
 
 
-def build_from_instance(instance: brayns.Instance, directory: str) -> None:
+def build_from_instance(instance: brayns.Instance, directory: pathlib.Path) -> None:
     entrypoints = brayns.get_entrypoints(instance)
     return build_from_entrypoints(entrypoints, directory)
 
 
-def build_from_entrypoints(entrypoints: list[brayns.Entrypoint], directory: str) -> None:
+def build_from_entrypoints(entrypoints: list[brayns.Entrypoint], directory: pathlib.Path) -> None:
     plugins = defaultdict[str, list[brayns.Entrypoint]](list)
     for entrypoint in entrypoints:
         plugins[entrypoint.plugin].append(entrypoint)
@@ -235,7 +234,8 @@ def build_from_entrypoints(entrypoints: list[brayns.Entrypoint], directory: str)
     build_from_plugins(plugins, directory)
 
 
-def build_from_plugins(plugins: dict[str, list[brayns.Entrypoint]], directory: str) -> None:
+def build_from_plugins(plugins: dict[str, list[brayns.Entrypoint]], directory: pathlib.Path) -> None:
+    directory.mkdir(exist_ok=True)
     filenames = list[str]()
     for plugin, entrypoints in plugins.items():
         filename = FILENAME.format(plugin=plugin.lower().replace(' ', ''))
@@ -244,9 +244,9 @@ def build_from_plugins(plugins: dict[str, list[brayns.Entrypoint]], directory: s
     build_summary(directory, filenames)
 
 
-def build_summary(directory: str, filenames: list[str]) -> None:
+def build_summary(directory: pathlib.Path, filenames: list[str]) -> None:
     summary = format_summary(filenames) + '\n'
-    path = pathlib.Path(directory) / SUMMARY_FILENAME
+    path = directory / SUMMARY_FILENAME
     with path.open('w') as file:
         file.write(summary)
 
@@ -266,9 +266,9 @@ def format_summary_items(filenames: list[str]) -> str:
     )
 
 
-def build_plugin(plugin: str, entrypoints: list[brayns.Entrypoint], directory: str, filename: str) -> None:
+def build_plugin(plugin: str, entrypoints: list[brayns.Entrypoint], directory: pathlib.Path, filename: str) -> None:
     data = format_plugin(plugin, entrypoints) + '\n'
-    path = pathlib.Path(directory) / filename
+    path = directory / filename
     with path.open('w') as file:
         file.write(data)
 
@@ -279,7 +279,7 @@ def format_plugin(plugin: str, entrypoints: list[brayns.Entrypoint]) -> str:
         label=plugin.lower().replace(' ', ''),
         title=title,
         underline=len(title) * '-',
-        plugin=plugin
+        plugin=plugin,
     )
     api = format_entrypoints(entrypoints)
     return f'{header}\n\n{api}'
@@ -303,7 +303,7 @@ def format_entrypoint(entrypoint: brayns.Entrypoint, separator: bool = True) -> 
         asynchronous=f'\n\n{ASYNCHRONOUS}' if entrypoint.asynchronous else '',
         params=format_params(entrypoint.params),
         result=format_result(entrypoint.result),
-        separator=SEPARATOR if separator else ''
+        separator=SEPARATOR if separator else '',
     )
 
 
