@@ -49,12 +49,12 @@ class AsyncWebSocketConnector:
                 max_size=int(2e9)
             )
             return AsyncWebSocket(websocket)
-        except ConnectionRefusedError as e:
-            raise ServiceUnavailableError(str(e))
-        except ssl.SSLError as e:
-            raise InvalidServerCertificateError(str(e))
         except WebSocketException as e:
             raise ProtocolError(str(e))
+        except ssl.SSLError as e:
+            raise InvalidServerCertificateError(str(e))
+        except OSError as e:
+            raise ServiceUnavailableError(str(e))
 
     def _format_uri(self) -> str:
         protocol = 'ws://' if self.ssl_context is None else 'wss://'
