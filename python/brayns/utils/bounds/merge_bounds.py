@@ -18,37 +18,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
-import brayns
-
-from .mock_view import MockView
+from .bounds import Bounds
+from .lower_bound import lower_bound
+from .upper_bound import upper_bound
 
 
-class TestView(unittest.TestCase):
+def merge_bounds(values: list[Bounds]) -> Bounds:
+    """Compute the union of all given bounds.
 
-    def test_deserialize(self) -> None:
-        test = brayns.View.deserialize(MockView.message)
-        self.assertEqual(test, MockView.view)
+    Returns Bounds.empty if values are empty.
 
-    def test_axis(self) -> None:
-        test = brayns.View(
-            position=brayns.Vector3.zero,
-            target=brayns.Vector3.one
-        )
-        self.assertEqual(test.axis, brayns.Vector3.one)
+    Assume that all bounds are valid (ie min <= max for each component).
 
-    def test_direction(self) -> None:
-        test = brayns.View(
-            position=brayns.Vector3.zero,
-            target=brayns.Vector3.one
-        )
-        self.assertEqual(test.direction, brayns.Vector3.one.normalized)
-
-    def test_serialize(self) -> None:
-        test = MockView.view.serialize()
-        self.assertEqual(test, MockView.message)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    :param values: Bounds to merge.
+    :type values: list[Bounds]
+    :return: Union of all bounds in values.
+    :rtype: Bounds
+    """
+    return Bounds(
+        min=lower_bound([value.min for value in values]),
+        max=upper_bound([value.max for value in values]),
+    )
