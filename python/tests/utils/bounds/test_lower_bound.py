@@ -22,32 +22,22 @@ import unittest
 
 import brayns
 
-from .mock_view import MockView
 
+class TestLowerBound(unittest.TestCase):
 
-class TestView(unittest.TestCase):
+    def test_lower_bound(self) -> None:
+        test = brayns.lower_bound([
+            brayns.Vector3(-3, 2, 1),
+            brayns.Vector3(-1, -4, 2),
+            brayns.Vector3(-2, 1, 3),
+        ])
+        ref = brayns.Vector3(-3, -4, 1)
+        self.assertEqual(test, ref)
 
-    def test_deserialize(self) -> None:
-        test = brayns.View.deserialize(MockView.message)
-        self.assertEqual(test, MockView.view)
-
-    def test_axis(self) -> None:
-        test = brayns.View(
-            position=brayns.Vector3.zero,
-            target=brayns.Vector3.one
-        )
-        self.assertEqual(test.axis, brayns.Vector3.one)
-
-    def test_direction(self) -> None:
-        test = brayns.View(
-            position=brayns.Vector3.zero,
-            target=brayns.Vector3.one
-        )
-        self.assertEqual(test.direction, brayns.Vector3.one.normalized)
-
-    def test_serialize(self) -> None:
-        test = MockView.view.serialize()
-        self.assertEqual(test, MockView.message)
+    def test_empty(self) -> None:
+        test = brayns.lower_bound([])
+        ref = brayns.Vector3.zero
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

@@ -19,7 +19,13 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .bounds import Bounds
+from .lower_bound import lower_bound
+from .merge_bounds import merge_bounds
+from .upper_bound import upper_bound
 
 __all__ = [
     'Bounds',
+    'lower_bound',
+    'merge_bounds',
+    'upper_bound',
 ]

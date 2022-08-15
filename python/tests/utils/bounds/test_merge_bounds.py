@@ -22,32 +22,25 @@ import unittest
 
 import brayns
 
-from .mock_view import MockView
 
+class TestMergeBounds(unittest.TestCase):
 
-class TestView(unittest.TestCase):
-
-    def test_deserialize(self) -> None:
-        test = brayns.View.deserialize(MockView.message)
-        self.assertEqual(test, MockView.view)
-
-    def test_axis(self) -> None:
-        test = brayns.View(
-            position=brayns.Vector3.zero,
-            target=brayns.Vector3.one
+    def test_merge_bounds(self) -> None:
+        test = brayns.merge_bounds([
+            brayns.Bounds(brayns.Vector3(-1, 2, 3), brayns.Vector3(6, 5, 4)),
+            brayns.Bounds(brayns.Vector3(1, -2, 3), brayns.Vector3(5, 4, 6)),
+            brayns.Bounds(brayns.Vector3(1, 2, -3), brayns.Vector3(4, 6, 5)),
+        ])
+        ref = brayns.Bounds(
+            brayns.Vector3(-1, -2, -3),
+            brayns.Vector3(6, 6, 6),
         )
-        self.assertEqual(test.axis, brayns.Vector3.one)
+        self.assertEqual(test, ref)
 
-    def test_direction(self) -> None:
-        test = brayns.View(
-            position=brayns.Vector3.zero,
-            target=brayns.Vector3.one
-        )
-        self.assertEqual(test.direction, brayns.Vector3.one.normalized)
-
-    def test_serialize(self) -> None:
-        test = MockView.view.serialize()
-        self.assertEqual(test, MockView.message)
+    def test_empty(self) -> None:
+        test = brayns.merge_bounds([])
+        ref = brayns.Bounds.empty
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':
