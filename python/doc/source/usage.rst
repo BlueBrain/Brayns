@@ -6,3 +6,4 @@ Usage
 
    usage_launchbraynsbackend
    usage_usepythonapi
+   usage_usejsonrpcapi

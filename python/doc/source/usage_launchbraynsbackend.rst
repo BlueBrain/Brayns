@@ -7,47 +7,68 @@
 Running a Brayns backend service
 ================================
 
-For any kind of vizualization, a running instance of Brayns renderer backend is required.
+For any kind of vizualization, a running instance of Brayns renderer backend
+with a websocket server (braynsService) is required. This component will
+perform the computationally expensive tasks and is monitored using a JSON-RPC
+API on websockets (e.g. from the Python client).
 
-This one has to run a websocket server on an URI chosen by use (ie ip:port) to be able to interact with the user.
+The URI of the websocket server of the backend instance is specified when it is
+started with the format "host:port" (ex: localhost:5000). The host specfies the
+IP addresses that can connect to it, use 0.0.0.0 (wildcard) to bypass this
+restriction.
 
-An instance can be started using its executable (braynsService) with the following command line:
+The Python API will need the IP address of the machine on which the backed
+instance has been started and the port specified in the server URI (i.e. 5000).
+
+An instance can be started using its executable (braynsService binary) with the
+following command line:
 
 .. code-block:: console
 
     $ braynsService --uri 0.0.0.0:5000
 
-To be able to load circuits, additional plugins must be loaded using keyword arguments (see :ref:`plugins-label`).
+To be able to load circuits, additional plugins must be loaded using keyword
+arguments (see :ref:`plugins-label`).
 
-The log level can also be configured using --log-level followed by either trace, debug, info, warn, error, critical or off.
+The log level can also be configured using --log-level followed by either trace,
+debug, info, warn, error, critical or off. This is useful for debugging and see
+the requests sent from and received by the instance.
+
+.. code-block:: console
+
+    $ braynsService --uri 0.0.0.0:5000 --log-level debug
 
 Example of commonly used instance:
 
 .. code-block:: console
 
-    $ braynsService --uri 0.0.0.0:5000 -log-level debug --plugin braynsCircuitExplorer --plugin braynsDTI
+    $ braynsService --uri 0.0.0.0:5000 --log-level debug --plugin braynsCircuitExplorer
+
+The command line usage of an instance can be retreived with:
+
+.. code-block:: console
+
+    $ braynsService --help
 
 Running an instance on BB5
 --------------------------
 
-On BB5 the binary executable of Brayns is provided through spack and can be started like follows:
+On BB5 the binary executable of braynsService is provided through spack.
 
 * 1 - Allocate a node on BB5:
 
 .. code-block:: console
 
-    $ salloc --account=proj3 -p interactive -t 8:00:00 --exclusive --constraint=cpu -c 72 --mem 0
+    $ salloc --account=<your_project_account> -p interactive -t 8:00:00 --exclusive --constraint=cpu -c 72 --mem 0
 
-Where ``your_project_account`` should be the project account you have access to on BB5.
+Where ``your_project_account`` should be the project account you have access to.
 
-After a successful allocation, you will be shown with the node ID or host of your allocation. It is composed of alpha-numeric
-characters, for example: ``r2i2n11``.
+After a successful allocation, an SSH connection with the node is opened
+automatically. The node ID is composed of alpha-numeric characters, for example:
+``r2i2n11``.
 
-You will need it to connect to the ``braynsService`` (here URI from client side will be r2i2n11:5000).
-
-Note: 0.0.0.0 is a wildcard IP address, meaning that clients from any IP address will be able to connect to the instance.
-
-Use localhost to restrict it to the local node / machine.
+To connect to a ``braynsService`` instance running on this node, the URI from a
+BB5 client will be r2i2n11:5000.
 
 * 2 - Launch the ``braynsService`` server:
 
@@ -64,18 +85,24 @@ And then start Brayns instance as before:
     
     $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer 
 
-The last command will launch a Brayns backend service with remote access needed for the client (``--uri``)
-on port 5000, and enabling the Circuit Explorer plugin.
+The last command will launch a Brayns backend service on port 5000 and any
+client from any host can connect to it.
 
 .. hint::
 
-   Brayns, by default, does not understand science-specific models. The specific functionality is loaded using plugins.
-   The ``CircuitExplorer`` plugin is the main plugin for neuroscientific visualization that you will want to load.
-   For further information on plugins, check :ref:`plugins-label`.
+   Brayns, by default, does not understand science-specific models. These
+   specific functionalities are loaded using plugins. The ``CircuitExplorer``
+   plugin is the main plugin for neuroscientific visualization that you will
+   want to load. For further information on plugins, check :ref:`plugins-label`.
 
-Now we know the host (r2i2n11) and port (5000 in this case) where our Brayns backend is running. We will need both to
-connect to it through the Python client (here using uri='r2i2n11:5000').
+Now we know the host (r2i2n11) and port (5000 in this case) where our Brayns
+backend is running. We can connect to it through the Python client (here using
+uri='r2i2n11:5000').
 
-Note: if the websocket client (e.g. Python) is running outside BB5, r2i2n11 should be replaced by r2i2n11.bbp.epfl.ch.
+.. hint::
 
-Now you can interact with the backend instance by using the Python API :ref:`usepythonapi-label`.
+    If the websocket client (e.g. Python) is running outside BB5, r2i2n11 should
+    be replaced by r2i2n11.bbp.epfl.ch.
+
+Now you can interact with the backend instance by using the Python API
+:ref:`usepythonapi-label`.

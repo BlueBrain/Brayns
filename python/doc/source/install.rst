@@ -3,37 +3,51 @@
 Installation
 ============
 
-To be able to interact with a running instance of Brayns renderer backend, user can use websockets directly or use the Python client.
+This section describes how to install brayns Python package. Note that a running
+renderer backend instance (braynsService) is required to be able to perform some
+rendering, the Python package is basically just a websocket client.
 
-If you choose to use raw websocket and JSON-RPC to interact with a Brayns renderer backend, see the API section :ref:`api-label`
-for the documentation of the entrypoints.
+To be able to interact with a running instance of braynsService, websockets can
+be used directly but the easiest way is to use the Python API.
 
-In that case, no installation is required and you can skip this section.
+To use raw websocket and JSON-RPC to interact with the backend, the API
+reference can be found under :ref:`jsonrpcapi-label` with endpoints
+documentation. In this case, no installation is required and this section can be
+skipped but a custom websocket client has to be written.
 
-Otherwise the Brayns Python client is distributed as a Python package named "brayns" and must be installed.
+Otherwise the Brayns Python client is distributed as a Python package named
+"brayns" and must be installed.
 
-Be careful though, only Python 3.9+ is supported so if your system version is older, you can install it using:
+Currently only Python 3.9+ is supported so for platforms with older system
+version, it can be installed using:
 
 .. code-block:: console
 
     $ sudo apt install python3.9
 
-And don't forget to replace all python commands with python3.9.
-
-As for all Python projects, it is recommended (but not required) to use a virtual environment created like this:
+As for all Python projects, it is recommended (but not required) to use a
+virtual environment. It can be created with the following commands (update the
+paths with the one your environment folder):
 
 .. code-block:: console
 
+    # Use python3.9 (or python3.10, ...) if system version is older
     $ python -m venv mypythonvenv
+
+Now it can be activated with:
+
+.. code-block:: console
+
     $ source mypythonvenv/bin/activate
 
-Note: it can be deactivated with:
+And deactivated with:
 
 .. code-block:: console
 
     $ deactivate
 
-With the Python environment activated (optional) one of the following methods can be used to install brayns Python package.
+With the Python environment activated (optional) one of the following methods
+can be used to install brayns Python package.
 
 From Python Pacakge Index (PyPI)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,37 +58,49 @@ The easiest way is to access the latest release is the following:
 
     $ pip install brayns
 
-From source
-~~~~~~~~~~~
+And that's it, no other steps are required.
 
-It can also be installed from the github repository sources using:
+Alternative from source
+~~~~~~~~~~~~~~~~~~~~~~~
+
+For development or to get a more recent version than the one released on PyPI,
+the package can also be installed from the github repository sources using:
 
 .. code-block:: console
 
+    # Clone Brayns repo
     $ git clone https://github.com/BlueBrain/Brayns.git
+
+    # Go inside the Python package source folder
     $ cd Brayns/python
+
+    # Build a source distribution (tar.gz)
     $ python setup.py sdist
-    $ pip install dist/$(ls dist) # The output tar.gz will be in dist folder
+
+    # Install the distribution with pip (output in dist folder)
+    $ pip install dist/$(ls dist)
+
+Now brayns installation is complete.
 
 On BB5
 ~~~~~~
 
-On BB5, the virual environment is mandatory.
-
-It can be done as follows:
+On BB5 the Python package can be installed like on a local machine with a
+virtual environment but it is also available on spack without any installation.
+It can be activated as follows:
 
 .. code-block:: console
 
+    # Allocate a node, can also be done with sbatch
     $ salloc --account=proj3 -p interactive -t 8:00:00 --exclusive --constraint=cpu -c 72 --mem 0
+
+    # Load brayns module with Python
     $ module load unstable
     $ module load python
-    $ python -m venv mypythonvenv
-    $ source mypythonvenv/bin/activate
+    $ module load brayns/latest
 
-This provides you with a virtual env with the latest supported version of python on BB5.
+Now brayns should be available in the Python system version.
 
-Then you need to install the brayns Python package on that environment with one of the methods above.
-
-.. code-block:: console
-
-    $ pip install brayns
+The renderer backend (braynsService) should also be available in the current
+path once brayns module is loaded. Otherwise on a local machine, it must be
+compiled from source.

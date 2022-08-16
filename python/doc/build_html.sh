@@ -1,3 +1,8 @@
+#!/bin/bash
+
+# Requires python venv activated with brayns latest version installed and
+# a running instance of braynsService on localhost:5000.
+
 DOC=$(dirname $0)
 SOURCE=${DOC}/source
 JSONRPCAPI=${SOURCE}/jsonrpcapi

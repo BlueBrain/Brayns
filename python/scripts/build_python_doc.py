@@ -28,6 +28,8 @@ import brayns
 API_FILENAME = 'api.rst'
 
 API = '''
+.. _pythonapi-label:
+
 Python API reference
 ====================
 

@@ -3,15 +3,32 @@
     "description": "Brayns python API",
     "version": "2.0.0",
     "repository": {
-      "type": "git",
-      "url": "https://github.com/BlueBrain/Brayns.git"
+        "type": "git",
+        "url": "https://github.com/BlueBrain/Brayns.git"
     },
-    "keywords": ["brayns", "raytracing", "bbp", "BlueBrain"],
+    "keywords": [
+        "brayns",
+        "raytracing",
+        "bbp",
+        "BlueBrain"
+    ],
     "author": "Blue Brain Project",
     "license": "LGPLv3",
     "bugs": {
-      "url": "https://github.com/BlueBrain/Brayns/issues"
+        "url": "https://github.com/BlueBrain/Brayns/issues"
     },
     "homepage": "https://github.com/BlueBrain/Brayns",
-    "contributors":["Daniel Nachbaur", "Cyrille Favreau", "Jonas Karlsson", "Roland Groza", "Nadir Roman", "Grigori Chevtchenko", "Pawel Podhajski", "Adrien Devresse", "Sebastien Speierer", "Fabien Petitjean", "Adrien Fleury"]
-  }
+    "contributors": [
+        "Daniel Nachbaur",
+        "Cyrille Favreau",
+        "Jonas Karlsson",
+        "Roland Groza",
+        "Nadir Roman",
+        "Grigori Chevtchenko",
+        "Pawel Podhajski",
+        "Adrien Devresse",
+        "Sebastien Speierer",
+        "Fabien Petitjean",
+        "Adrien Fleury"
+    ]
+}
