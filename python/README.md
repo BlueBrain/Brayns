@@ -1,6 +1,7 @@
-# Brayns Python Client
+# Brayns Python API
 
-> A client for [Brayns](../README.md) based on a websocket client to provide remote control of a running Brayns instance.
+> A client for [Brayns](../README.md) based on a websocket client to provide
+remote control on a running braynsService instance.
 
 # Table of Contents
 
@@ -26,7 +27,7 @@ Or from source:
 git clone https://github.com/BlueBrain/Brayns.git
 cd Brayns/python
 python setup.py sdist
-pip install dist/brayns-<version>.tar.gz # Replace with current version
+pip install dist/$(ls dist) # Output in dist folder
 ```
 
 ### Usage
@@ -42,7 +43,7 @@ import brayns
 connector = brayns.Connector('localhost:5000')
 
 with connector.connect() as instance:
-    instance.request('registry')
+    print(brayns.get_version(instance))
 ```
 
 #### Raw requests
@@ -60,32 +61,11 @@ It will throw a brayns.RequestError if an error occurs.
 As raw requests can be tedious, a higher level API is also provided.
 
 ```py
-loader = brayns.BbpLoader(
-    cells=brayns.BbpCells.all(),
-    radius_multiplier=10
-)
-
-models = loader.load(instance, 'path/to/BlueConfig')
-
-model = models[0]
-
-camera = brayns.PerspectiveCamera()
-
-view = camera.fovy.get_full_screen_view(model.bounds)
-
-renderer = brayns.InteractiveRenderer()
-
-snapshot = brayns.Snapshot(
-    resolution=brayns.Resolution.full_hd,
-    camera=camera,
-    view=view,
-    renderer=renderer
-)
-
-snapshot.save(instance, 'path/to/snapshot.png')
+models = brayns.get_models(instance)
 ```
 
 ### Documentation
 -----------------
 
-The JSON-RPC and Python APIs are documented [here](https://brayns.readthedocs.io/en/latest/).
+A more complete documentation is available
+[here](https://brayns.readthedocs.io/en/latest/).
