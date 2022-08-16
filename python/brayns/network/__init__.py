@@ -21,7 +21,7 @@
 """
 Subpackage to connect to a Brayns service instance (backend).
 
-This package is a wrapper around a websocket connection and a JSON-RPC context.
+An instance is a wrapper around a websocket connection and a JSON-RPC context.
 
 It provides functionalities to send JSON-RPC requests and receive replies with a
 Brayns instance.

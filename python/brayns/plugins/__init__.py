@@ -23,7 +23,7 @@ Plugins subpackage.
 
 It includes all science related features and optional components.
 
-Main objects are BBP circuit loading support, circuit coloring, raw
+Main functionalities are BBP circuit loading support, circuit coloring, raw
 morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
 """
 

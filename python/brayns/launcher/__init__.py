@@ -22,7 +22,7 @@
 Subpackage to launch Brayns backend from Python.
 
 It provides a helper class to generate command line options to start Brayns
-service and launch it in a subprocess.
+service and launch it in a subprocess programatically.
 """
 
 from .launcher import Launcher
