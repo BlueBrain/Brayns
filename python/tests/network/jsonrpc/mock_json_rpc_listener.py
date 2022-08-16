@@ -20,9 +20,9 @@
 
 from typing import Any
 
-from brayns.instance.jsonrpc.json_rpc_error import JsonRpcError
-from brayns.instance.jsonrpc.json_rpc_progress import JsonRpcProgress
-from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
+from brayns.network.jsonrpc.json_rpc_error import JsonRpcError
+from brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress
+from brayns.network.jsonrpc.json_rpc_reply import JsonRpcReply
 
 
 class MockJsonRpcListener:

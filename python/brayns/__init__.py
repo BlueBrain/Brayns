@@ -64,9 +64,9 @@ Basic example (take a snapshot):
 """
 
 from .core import *
-from .instance import *
 from .launcher import *
 from .movie import *
+from .network import *
 from .plugins import *
 from .utils import *
 from .version import __version__

@@ -22,7 +22,7 @@ import base64
 import unittest
 
 import brayns
-from tests.instance.mock_instance import MockInstance
+from tests.network.mock_instance import MockInstance
 
 
 class TestSnapshot(unittest.TestCase):

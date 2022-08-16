@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from brayns.instance import Instance
+from brayns.network import Instance
 from brayns.utils import Resolution
 
 

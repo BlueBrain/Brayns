@@ -21,8 +21,8 @@
 import unittest
 
 import brayns
-from brayns.instance.jsonrpc.json_rpc_task import JsonRpcTask
-from brayns.instance.jsonrpc.json_rpc_tasks import JsonRpcTasks
+from brayns.network.jsonrpc.json_rpc_task import JsonRpcTask
+from brayns.network.jsonrpc.json_rpc_tasks import JsonRpcTasks
 
 
 class TestJsonRpcTasks(unittest.TestCase):

@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.utils import View
-from brayns.instance import Instance
+from brayns.network import Instance
 
 
 def get_camera_view(instance: Instance) -> View:

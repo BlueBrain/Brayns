@@ -20,18 +20,22 @@
 
 import unittest
 
-from brayns.instance.jsonrpc.json_rpc_reply import JsonRpcReply
+from brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress
 
 
-class TestJsonRpcReply(unittest.TestCase):
+class TestJsonRpcProgress(unittest.TestCase):
 
     def test_deserialize(self) -> None:
-        reply = JsonRpcReply.deserialize({
-            'id': 1,
-            'result': 12
+        progress = JsonRpcProgress.deserialize({
+            'params': {
+                'id': 1,
+                'operation': 'test',
+                'amount': 0.5
+            }
         })
-        self.assertEqual(reply.id, 1)
-        self.assertEqual(reply.result, 12)
+        self.assertEqual(progress.id, 1)
+        self.assertEqual(progress.params.operation, 'test')
+        self.assertEqual(progress.params.amount, 0.5)
 
 
 if __name__ == '__main__':
