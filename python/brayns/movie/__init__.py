@@ -24,10 +24,10 @@ Movie generation subpackage.
 Important: requires an FFMPEG executable to work.
 
 It provides a wrapper around FFPMEG command line tool to generate movies from
-a list of images.
+a list of already rendered images.
 
 To make a movie, frames must be rendered separately. This subpackage includes
-helpers to select the frames to renderer based on movie specifications.
+helpers to select the frames to render based on movie specifications.
 """
 
 from .movie import Movie

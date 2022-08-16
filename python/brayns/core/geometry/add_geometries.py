@@ -20,7 +20,7 @@
 
 from typing import TypeVar
 
-from brayns.instance import Instance
+from brayns.network import Instance
 
 from ..model import Model
 from .geometry import Geometry

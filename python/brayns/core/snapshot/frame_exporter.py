@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.instance import Instance
+from brayns.network import Instance
 from brayns.utils import ImageFormat, Resolution
 
 from ..camera import Camera

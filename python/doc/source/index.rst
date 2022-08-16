@@ -4,11 +4,13 @@ Brayns API
 Introduction
 ------------
 
-Brayns provides a JSON-RPC API accessible through a websocket to interact with a running instance (renderer backend).
+Brayns provides a JSON-RPC API accessible through a websocket to interact with a
+running instance of braynsService (renderer backend).
 
-For convenience, it also provides a Python package to wrap the websocket communication with classes to hide low level JSON-RPC messages.
+For convenience, it also provides a Python package to wrap the websocket
+communication with classes and functions to hide low level JSON-RPC messages.
 
-Through the API (websocket or Python) use can:
+This API (websocket or Python) has the following features:
 
 - Load models into brayns (circuits, DTIs, meshes, volumes, ...).
 - Load and/or attach simulations (compartment and spike reports).
@@ -52,4 +54,6 @@ Reporting issues
 
 Brayns is currently maintained by the BlueBrain Visualization team.
 
-Should you face any issue with using it, please submit a ticket to the `issue tracker <https://bbpteam.epfl.ch/project/issues/browse/BRAYNS>`_; or drop us an `email <mailto: bbp-ou-visualization@groupes.epfl.ch>`_.
+Should you face any issue with using it, please submit a ticket to the
+`issue tracker <https://bbpteam.epfl.ch/project/issues/browse/BRAYNS>`_; or drop
+us an `email <mailto: bbp-ou-visualization@groupes.epfl.ch>`_.

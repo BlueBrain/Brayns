@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.instance.mock_instance import MockInstance
+from tests.network.mock_instance import MockInstance
 
 from ..model.mock_model import MockModel
 

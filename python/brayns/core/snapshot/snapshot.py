@@ -24,7 +24,7 @@ import base64
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.instance import Instance
+from brayns.network import Instance
 from brayns.utils import ImageFormat, Resolution, View, parse_image_format
 
 from ..camera import Camera

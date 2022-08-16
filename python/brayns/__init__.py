@@ -24,49 +24,13 @@ Brayns Python package.
 This package provides a high level API to interact with an instance of Brayns
 instance through websockets.
 
-Basic example (take a snapshot):
-
-.. code-block:: python
-
-    import brayns
-
-    # Connection settings (at least server URI)
-    connector = brayns.Connector('localhost:5000')
-
-    # Connect and use context manager to close it once it is done
-    with connector.connect() as instance:
-
-        # Check that the package is compatible with the instance
-        brayns.check_version(instance)
-
-        # load some mesh and get models (here there will be only one)
-        loader = brayns.MeshLoader()
-        models = loader.load(instance, 'cube.ply')
-        model = models[0]
-
-        # Choose a camera
-        camera = brayns.PerspectiveCamera()
-
-        # Use it to compute a camera position to see the whole model
-        view = camera.get_full_screen_view(model.bounds)
-
-        # Put some light to see the model (in camera direction)
-        light = brayns.DirectionalLight(direction=view.direction)
-        brayns.add_light(instance, light)
-
-        # Take a snapshot and save it locally (download it)
-        snapshot = brayns.Snapshot(
-            resolution=brayns.Resolution.full_hd,
-            camera=camera,
-            view=view,
-        )
-        snapshot.save(instance, 'snapshot.png')
+The low level JSON-RPC API is also available using the instance directly.
 """
 
 from .core import *
-from .instance import *
 from .launcher import *
 from .movie import *
+from .network import *
 from .plugins import *
 from .utils import *
 from .version import __version__

@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from brayns.instance import Instance
+from brayns.network import Instance
 
 from .color_method import ColorMethod
 

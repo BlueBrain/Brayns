@@ -22,7 +22,7 @@ import dataclasses
 import unittest
 
 import brayns
-from tests.instance.mock_instance import MockInstance
+from tests.network.mock_instance import MockInstance
 
 from .mock_loader_info import MockLoaderInfo
 
