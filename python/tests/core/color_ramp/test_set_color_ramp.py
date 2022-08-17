@@ -18,23 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import unittest
+
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+from tests.network.mock_instance import MockInstance
+
+from .mock_color_ramp import MockColorRamp
 
 
-class TestGetTransferFunction(SimpleTestCase):
+class TestSetColorRamp(unittest.TestCase):
 
-    def test_get_transfer_function(self) -> None:
-        model = self._load_circuit()
-        function = brayns.get_transfer_function(self.instance, model.id)
-        self.assertEqual(function.value_range, brayns.ValueRange(-80, -10))
-        self.assertEqual(len(function.colors), 128)
-        self.assertEqual(function.colors[0], brayns.Color4.black)
-        self.assertEqual(function.colors[-1], brayns.Color4.white)
+    def test_set_color_ramp(self) -> None:
+        instance = MockInstance()
+        function = MockColorRamp.color_ramp
+        brayns.set_color_ramp(instance, 0, function)
+        self.assertEqual(instance.method, 'set-model-transfer-function')
+        self.assertEqual(instance.params, {
+            'id': 0,
+            'transfer_function': MockColorRamp.message
+        })
 
-    def _load_circuit(self) -> brayns.Model:
-        loader = brayns.BbpLoader(
-            report=brayns.BbpReport.compartment('somas')
-        )
-        models = loader.load(self.instance, self.circuit)
-        return models[0]
+
+if __name__ == '__main__':
+    unittest.main()

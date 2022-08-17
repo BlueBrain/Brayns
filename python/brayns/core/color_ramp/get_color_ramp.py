@@ -20,21 +20,21 @@
 
 from brayns.network import Instance
 
-from .transfer_function import TransferFunction
+from .color_ramp import ColorRamp
 
 
-def set_transfer_function(instance: Instance, model_id: int, transfer_function: TransferFunction) -> None:
-    """Set the current transfer function of the given model.
+def get_color_ramp(instance: Instance, model_id: int) -> ColorRamp:
+    """Retreive the color ramp of the given model.
+
+    Model must have a color ramp attached (usually report loaded).
 
     :param instance: Instance.
     :type instance: Instance
     :param model_id: Model ID.
     :type model_id: int
-    :param transfer_function: Transfer function.
-    :type transfer_function: TransferFunction
+    :return: Color ramp.
+    :rtype: ColorRamp
     """
-    params = {
-        'id': model_id,
-        'transfer_function': transfer_function.serialize(),
-    }
-    instance.request('set-model-transfer-function', params)
+    params = {'id': model_id}
+    result = instance.request('get-model-transfer-function', params)
+    return ColorRamp.deserialize(result)

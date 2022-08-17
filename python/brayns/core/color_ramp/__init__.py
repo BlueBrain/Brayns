@@ -18,23 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
+from .control_point import ControlPoint
+from .get_color_ramp import get_color_ramp
+from .opacity_curve import OpacityCurve
+from .set_color_ramp import set_color_ramp
+from .color_ramp import ColorRamp
+from .value_range import ValueRange
 
-from .transfer_function import TransferFunction
-
-
-def get_transfer_function(instance: Instance, model_id: int) -> TransferFunction:
-    """Retreive the transfer function of the given model.
-
-    Model must have a transfer function.
-
-    :param instance: Instance.
-    :type instance: Instance
-    :param model_id: Model ID.
-    :type model_id: int
-    :return: Transfer function.
-    :rtype: TransferFunction
-    """
-    params = {'id': model_id}
-    result = instance.request('get-model-transfer-function', params)
-    return TransferFunction.deserialize(result)
+__all__ = [
+    'ControlPoint',
+    'get_color_ramp',
+    'OpacityCurve',
+    'set_color_ramp',
+    'ColorRamp',
+    'ValueRange',
+]

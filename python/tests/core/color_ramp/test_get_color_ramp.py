@@ -23,20 +23,17 @@ import unittest
 import brayns
 from tests.network.mock_instance import MockInstance
 
-from .mock_transfer_function import MockTransferFunction
+from .mock_color_ramp import MockColorRamp
 
 
-class TestSetTransferFunction(unittest.TestCase):
+class TestGetColorRamp(unittest.TestCase):
 
-    def test_set_transfer_function(self) -> None:
-        instance = MockInstance()
-        function = MockTransferFunction.transfer_function
-        brayns.set_transfer_function(instance, 0, function)
-        self.assertEqual(instance.method, 'set-model-transfer-function')
-        self.assertEqual(instance.params, {
-            'id': 0,
-            'transfer_function': MockTransferFunction.message
-        })
+    def test_get_color_ramp(self) -> None:
+        instance = MockInstance(MockColorRamp.message)
+        test = brayns.get_color_ramp(instance, 0)
+        self.assertEqual(test, MockColorRamp.color_ramp)
+        self.assertEqual(instance.method, 'get-model-transfer-function')
+        self.assertEqual(instance.params, {'id': 0})
 
 
 if __name__ == '__main__':

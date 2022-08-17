@@ -27,7 +27,7 @@ from .control_point import ControlPoint
 
 @dataclass
 class OpacityCurve:
-    """Opacity curve to apply to a transfer function.
+    """Opacity curve to generate opacity from a list of color3.
 
     Use control points to map simulation value (usually voltage) to opacity.
 
@@ -43,7 +43,7 @@ class OpacityCurve:
 
         new_colors = curve.apply(colors)
 
-    Here it will give an opacity of 0 from 0% to 50% of the transfer function
+    Here it will give an opacity of 0 from 0% to 50% of the color ramp
     value range and then a staight line from 0 to 1 between 50% and 100% of the
     value range.
 

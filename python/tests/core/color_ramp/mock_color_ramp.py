@@ -18,25 +18,31 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from typing import Any
 
 import brayns
 
-from .mock_transfer_function import MockTransferFunction
 
+class MockColorRamp:
 
-class TestTransferFunction(unittest.TestCase):
-
-    def test_deserialize(self) -> None:
-        test = brayns.TransferFunction.deserialize(
-            MockTransferFunction.message
+    @classmethod
+    @property
+    def color_ramp(cls) -> brayns.ColorRamp:
+        return brayns.ColorRamp(
+            value_range=brayns.ValueRange(0, 1),
+            colors=[
+                brayns.Color4.red,
+                brayns.Color4.blue,
+            ]
         )
-        self.assertEqual(test, MockTransferFunction.transfer_function)
 
-    def test_serialize(self) -> None:
-        test = MockTransferFunction.transfer_function.serialize()
-        self.assertEqual(test, MockTransferFunction.message)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'range': [0, 1],
+            'colors': [
+                [1, 0, 0, 1],
+                [0, 0, 1, 1],
+            ]
+        }

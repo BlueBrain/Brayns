@@ -18,18 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .control_point import ControlPoint
-from .get_transfer_function import get_transfer_function
-from .opacity_curve import OpacityCurve
-from .set_transfer_function import set_transfer_function
-from .transfer_function import TransferFunction
-from .value_range import ValueRange
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-__all__ = [
-    'ControlPoint',
-    'get_transfer_function',
-    'OpacityCurve',
-    'set_transfer_function',
-    'TransferFunction',
-    'ValueRange',
-]
+
+class TestSetColorRamp(SimpleTestCase):
+
+    def test_set_color_ramp(self) -> None:
+        model = self._load_circuit()
+        function = brayns.ColorRamp(
+            brayns.ValueRange(20, 30),
+            colors=[
+                brayns.Color4.red,
+                brayns.Color4.green,
+                brayns.Color4.blue
+            ]
+        )
+        brayns.set_color_ramp(self.instance, model.id, function)
+        test = brayns.get_color_ramp(self.instance, model.id)
+        self.assertEqual(test, function)
+
+    def _load_circuit(self) -> brayns.Model:
+        loader = brayns.BbpLoader(
+            report=brayns.BbpReport.compartment('somas')
+        )
+        models = loader.load(self.instance, self.circuit)
+        return models[0]

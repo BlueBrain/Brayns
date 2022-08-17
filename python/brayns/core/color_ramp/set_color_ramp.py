@@ -18,23 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from brayns.network import Instance
 
-import brayns
-from tests.network.mock_instance import MockInstance
-
-from .mock_transfer_function import MockTransferFunction
+from .color_ramp import ColorRamp
 
 
-class TestGetTransferFunction(unittest.TestCase):
+def set_color_ramp(instance: Instance, model_id: int, color_ramp: ColorRamp) -> None:
+    """Set the current color ramp of the given model.
 
-    def test_get_transfer_function(self) -> None:
-        instance = MockInstance(MockTransferFunction.message)
-        test = brayns.get_transfer_function(instance, 0)
-        self.assertEqual(test, MockTransferFunction.transfer_function)
-        self.assertEqual(instance.method, 'get-model-transfer-function')
-        self.assertEqual(instance.params, {'id': 0})
-
-
-if __name__ == '__main__':
-    unittest.main()
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Model ID.
+    :type model_id: int
+    :param color_ramp: Color ramp.
+    :type color_ramp: ColorRamp
+    """
+    params = {
+        'id': model_id,
+        'transfer_function': color_ramp.serialize(),
+    }
+    instance.request('set-model-transfer-function', params)
