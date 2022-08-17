@@ -1,5 +1,5 @@
-Connection
-==========
+Connection to a running backend instance
+========================================
 
 Now that the Python package is installed and that we saw how to basically
 connect to a braynsService instance (backend), we can see more advanced

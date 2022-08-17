@@ -1,5 +1,8 @@
+Launch Brayns backend from Python
+=================================
+
 Launcher
-========
+--------
 
 The `Launcher` class of the Python API can be used to start a braynsService
 backend instance programmatically. It is basically a wrapper around the command

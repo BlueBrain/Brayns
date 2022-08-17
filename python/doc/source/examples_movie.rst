@@ -1,5 +1,5 @@
-Movie
-=====
+Make a movie from exported frames
+=================================
 
 Now that we have exported some simulation frames, we can make a movie from it.
 

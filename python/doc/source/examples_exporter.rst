@@ -118,8 +118,8 @@ This part is optional as Brayns build a default color ramp for circuits.
     # Update the color ramp.
     brayns.set_color_ramp(instance, model.id, ramp)
 
-Exporter
---------
+Frame exporter
+--------------
 
 The exporter class can render frames into a given folder. All export parameters
 (resolution, camera, renderer, format, key frames) can be specified in its

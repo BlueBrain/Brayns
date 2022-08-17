@@ -14,21 +14,6 @@ different files (SONATA, BlueConfig, DTI, ...) is added by plugins
 :ref:`plugins-label`. By default, Brayns only supports mesh loading without
 plugins.
 
-Connection
-----------
-
-As describe in the previous sections, we first need to connect to an instance.
-
-.. code-block:: python
-
-    import brayns
-
-    connector = brayns.Connector('localhost:5000')
-
-    with connector.connect() as instance:
-
-        ...
-
 Loader
 ------
 
@@ -157,7 +142,7 @@ retreived using `get_color_methods` and `get_color_method_values`.
 Some alternatives exist with `color_circuit_by_id` and `color_circuit`
 
 Switch between original color and simulation color
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a model has a simulation attached, its original color can be overriden by
 the simulation color. To avoid this `enable_simulation` can be used to enable/
