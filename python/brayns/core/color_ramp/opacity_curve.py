@@ -33,16 +33,6 @@ class OpacityCurve:
 
     The simulation values are normalized so it is not necessary to know them.
 
-    Example:
-
-    .. code-block:: python
-
-        curve = brayns.OpacityCurve([
-            brayns.ControlPoint(0.5, 0.0),
-        ])
-
-        new_colors = curve.apply(colors)
-
     Here it will give an opacity of 0 from 0% to 50% of the color ramp
     value range and then a staight line from 0 to 1 between 50% and 100% of the
     value range.
