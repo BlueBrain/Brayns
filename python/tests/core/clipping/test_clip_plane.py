@@ -25,6 +25,9 @@ import brayns
 
 class TestClipPlane(unittest.TestCase):
 
+    def test_method(self) -> None:
+        self.assertEqual(brayns.ClipPlane.method, 'add-clip-plane')
+
     def test_serialize(self) -> None:
         plane = brayns.ClipPlane(1, 2, 3, 4)
         test = plane.serialize()

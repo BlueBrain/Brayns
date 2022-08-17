@@ -18,16 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .add_clipping_geometry import add_clipping_geometry
-from .clear_clipping_geometries import clear_clipping_geometries
-from .clip_plane import ClipPlane
-from .clipping_geometry import ClippingGeometry
-from .remove_clipping_geometries import remove_clipping_geometries
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-__all__ = [
-    'add_clipping_geometry',
-    'clear_clipping_geometries',
-    'ClipPlane',
-    'ClippingGeometry',
-    'remove_clipping_geometries',
-]
+
+class TestRemoveClippingGeometries(SimpleTestCase):
+
+    def test_remove_clipping_geometries(self) -> None:
+        planes = [
+            brayns.ClipPlane(1, 2, 3, 4),
+            brayns.ClipPlane(2, 2, 2, 2),
+            brayns.ClipPlane(1, 2, 1, 2),
+        ]
+        ids = [
+            brayns.add_clipping_geometry(self.instance, plane)
+            for plane in planes
+        ]
+        self.assertEqual(ids, [0, 1, 2])
+        brayns.remove_clipping_geometries(self.instance, [1, 2])
+        id = brayns.add_clipping_geometry(self.instance, planes[0])
+        self.assertIn(id, [1, 2])

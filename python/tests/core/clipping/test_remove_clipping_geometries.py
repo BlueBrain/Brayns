@@ -18,23 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import unittest
+
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+from tests.network.mock_instance import MockInstance
 
 
-class TestRemoveClipPlanes(SimpleTestCase):
+class TestRemoveClippingGeometries(unittest.TestCase):
 
-    def test_remove_clip_planes(self) -> None:
-        planes = [
-            brayns.ClipPlane(1, 2, 3, 4),
-            brayns.ClipPlane(2, 2, 2, 2),
-            brayns.ClipPlane(1, 2, 1, 2),
-        ]
-        ids = [
-            brayns.add_clip_plane(self.instance, plane)
-            for plane in planes
-        ]
-        self.assertEqual(ids, [0, 1, 2])
-        brayns.remove_clip_planes(self.instance, [1, 2])
-        id = brayns.add_clip_plane(self.instance, planes[0])
-        self.assertIn(id, [1, 2])
+    def test_remove_clipping_geometries(self) -> None:
+        instance = MockInstance()
+        ids = [1, 2, 3]
+        brayns.remove_clipping_geometries(instance, ids)
+        self.assertEqual(instance.method, 'remove-clip-planes')
+        self.assertEqual(instance.params, {'ids': ids})
+
+
+if __name__ == '__main__':
+    unittest.main()

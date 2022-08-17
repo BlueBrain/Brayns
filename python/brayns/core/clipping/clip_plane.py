@@ -21,9 +21,11 @@
 from dataclasses import dataclass
 from typing import Any
 
+from .clipping_geometry import ClippingGeometry
+
 
 @dataclass
-class ClipPlane:
+class ClipPlane(ClippingGeometry):
     """Clip plane.
 
     Described by the equation `ax + by + cz + d = 0`.
@@ -52,7 +54,18 @@ class ClipPlane:
     c: float
     d: float = 0.0
 
+    @classmethod
+    @property
+    def method(cls) -> str:
+        """Get the JSON-RCP method to add the clipping geometry.
+
+        :return: JSON-RPC method.
+        :rtype: str
+        """
+        return 'add-clip-plane'
+
     def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'coefficients': [self.a, self.b, self.c, self.d]
         }

@@ -36,7 +36,7 @@ from .utils import *
 from .version import __version__
 
 __all__ = [
-    'add_clip_plane',
+    'add_clipping_geometry',
     'add_geometries',
     'add_light',
     'AmbientLight',
@@ -51,10 +51,11 @@ __all__ = [
     'CarPaintMaterial',
     'CellId',
     'check_version',
-    'clear_clip_planes',
+    'clear_clipping_geometries',
     'clear_lights',
     'clear_models',
     'ClipPlane',
+    'ClippingGeometry',
     'color_circuit_by_id',
     'color_circuit_by_method',
     'color_circuit',
@@ -136,7 +137,7 @@ __all__ = [
     'ProtocolError',
     'QuadLight',
     'Quaternion',
-    'remove_clip_planes',
+    'remove_clipping_geometries',
     'remove_lights',
     'remove_models',
     'Renderer',

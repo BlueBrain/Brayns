@@ -18,20 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
-import brayns
-from tests.network.mock_instance import MockInstance
-
-
-class TestClearClipPlanes(unittest.TestCase):
-
-    def test_clear_clip_planes(self) -> None:
-        instance = MockInstance()
-        brayns.clear_clip_planes(instance)
-        self.assertEqual(instance.method, 'clear-clip-planes')
-        self.assertEqual(instance.params, None)
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Any
 
 
-if __name__ == '__main__':
-    unittest.main()
+@dataclass
+class ClippingGeometry(ABC):
+    """Base class used for clipping geometries."""
+
+    @classmethod
+    @property
+    @abstractmethod
+    def method(cls) -> str:
+        """Get the JSON-RCP method to add the clipping geometry.
+
+        :return: JSON-RPC method.
+        :rtype: str
+        """
+        pass
+
+    @abstractmethod
+    def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        pass

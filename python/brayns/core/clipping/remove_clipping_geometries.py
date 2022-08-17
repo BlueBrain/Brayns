@@ -18,13 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
-from testapi.simple_test_case import SimpleTestCase
+from brayns.network import Instance
 
 
-class TestAddClipPlane(SimpleTestCase):
+def remove_clipping_geometries(instance: Instance, ids: list[int]) -> None:
+    """Remove clipping geometries from an instance using their IDs.
 
-    def test_add_clip_plane(self) -> None:
-        plane = brayns.ClipPlane(1, 2, 3, 4)
-        id = brayns.add_clip_plane(self.instance, plane)
-        self.assertEqual(id, 0)
+    :param instance: Instance.
+    :type instance: Instance
+    :param ids: Clipping geometry ID(s).
+    :type ids: list[int]
+    """
+    params = {'ids': ids}
+    instance.request('remove-clip-planes', params)

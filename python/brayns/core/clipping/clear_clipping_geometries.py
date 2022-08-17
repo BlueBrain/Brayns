@@ -21,8 +21,8 @@
 from brayns.network import Instance
 
 
-def clear_clip_planes(instance: Instance) -> None:
-    """Clear all clip planes from the given instance.
+def clear_clipping_geometries(instance: Instance) -> None:
+    """Clear all clipping geometries from the given instance.
 
     :param instance: Instance.
     :type instance: Instance

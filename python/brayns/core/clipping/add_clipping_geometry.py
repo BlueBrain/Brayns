@@ -18,25 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
-from testapi.simple_test_case import SimpleTestCase
+from brayns.network import Instance
+
+from .clipping_geometry import ClippingGeometry
 
 
-class TestClearClipPlanes(SimpleTestCase):
+def add_clipping_geometry(instance: Instance, geometry: ClippingGeometry) -> int:
+    """Add a clipping geometry to the given instance and return its ID.
 
-    def test_clear_clip_planes(self) -> None:
-        planes = [
-            brayns.ClipPlane(1, 2, 3, 4),
-            brayns.ClipPlane(1, 1, 1, 1),
-        ]
-        ids = [
-            brayns.add_clip_plane(self.instance, plane)
-            for plane in planes
-        ]
-        self.assertEqual(ids, [0, 1])
-        brayns.clear_clip_planes(self.instance)
-        ids = [
-            brayns.add_clip_plane(self.instance, plane)
-            for plane in planes
-        ]
-        self.assertEqual(ids, [0, 1])
+    :param instance: Instance.
+    :type instance: Instance
+    :param geometry: Clipping geometry to add.
+    :type geometry: ClippingGeometry
+    :return: Clipping geometry ID.
+    :rtype: int
+    """
+    method = geometry.method
+    params = geometry.serialize()
+    return instance.request(method, params)

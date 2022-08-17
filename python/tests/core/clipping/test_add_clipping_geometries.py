@@ -18,16 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
+import unittest
+
+import brayns
+from tests.network.mock_instance import MockInstance
 
 
-def remove_clip_planes(instance: Instance, ids: list[int]) -> None:
-    """Remove clip planes from an instance using their IDs.
+class TestAddClippingGeometries(unittest.TestCase):
 
-    :param instance: Instance.
-    :type instance: Instance
-    :param ids: Clip planes ID(s).
-    :type ids: list[int]
-    """
-    params = {'ids': ids}
-    instance.request('remove-clip-planes', params)
+    def test_add_clipping_geometry(self) -> None:
+        instance = MockInstance(0)
+        plane = brayns.ClipPlane(1, 2, 3, 4)
+        test = brayns.add_clipping_geometry(instance, plane)
+        self.assertEqual(test, 0)
+        self.assertEqual(instance.method, brayns.ClipPlane.method)
+        self.assertEqual(instance.params, plane.serialize())
+
+
+if __name__ == '__main__':
+    unittest.main()

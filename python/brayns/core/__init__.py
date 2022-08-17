@@ -43,7 +43,7 @@ from .transfer_function import *
 from .version import *
 
 __all__ = [
-    'add_clip_plane',
+    'add_clipping_geometry',
     'add_geometries',
     'add_light',
     'AmbientLight',
@@ -53,10 +53,11 @@ __all__ = [
     'Capsule',
     'CarPaintMaterial',
     'check_version',
-    'clear_clip_planes',
+    'clear_clipping_geometries',
     'clear_lights',
     'clear_models',
     'ClipPlane',
+    'ClippingGeometry',
     'ControlPoint',
     'DefaultMaterial',
     'DirectionalLight',
@@ -104,7 +105,7 @@ __all__ = [
     'PlasticMaterial',
     'ProductionRenderer',
     'QuadLight',
-    'remove_clip_planes',
+    'remove_clipping_geometries',
     'remove_lights',
     'remove_models',
     'Renderer',
