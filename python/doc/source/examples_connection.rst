@@ -100,7 +100,7 @@ taken into account).
     regardless of `max_attempts` and `attempt_period`.
 
 Instance
-~~~~~~~~
+--------
 
 Once `connector.connect()` succeeds, a backend instance `brayns.Instance` is
 returned. It can be used to send raw JSON-RPC requests to braynsService.
