@@ -27,7 +27,7 @@ Or from source:
 git clone https://github.com/BlueBrain/Brayns.git
 cd Brayns/python
 python setup.py sdist
-pip install dist/$(ls dist) # Output in dist folder
+pip install dist/* # Output in dist folder
 ```
 
 ### Usage
