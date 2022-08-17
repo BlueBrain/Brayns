@@ -33,8 +33,8 @@ class TestLauncher(unittest.TestCase):
             resolution=brayns.Resolution(12, 23),
             jpeg_quality=25,
             plugins=[
-                brayns.Plugin.ATLAS_EXPLORER,
-                brayns.Plugin.CIRCUIT_EXPLORER
+                brayns.Plugin.ATLAS_EXPLORER.value,
+                brayns.Plugin.CIRCUIT_EXPLORER.value,
             ],
             executable='service',
         )

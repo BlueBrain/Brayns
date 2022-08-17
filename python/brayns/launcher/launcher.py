@@ -37,7 +37,8 @@ class Launcher:
     Use a braynsService executable to start a subprocess. By default it looks
     for a 'braynsService' binary in the PATH but it can be overriden.
 
-    URI is the same as for the `Connector` object.
+    URI is the websocket server URI (ip:port) use 0.0.0.0 as wildcard to allow
+    connections from any machine.
 
     SSL server settings can be specified using optional certificate, key, CA and
     password.
@@ -58,7 +59,7 @@ class Launcher:
     :param jpeg_quality: Streaming JPEG quality, defaults to 100.
     :type jpeg_quality: int, optional
     :param plugins: Plugins to load, defaults to all built-in plugins.
-    :type plugins: list[Plugin], optional
+    :type plugins: list[str], optional
     :param executable: Path of the braynsService executable.
     :type executable: str
     :param env: Subprocess environment variables, default to empty.
@@ -70,7 +71,7 @@ class Launcher:
     log_level: LogLevel = LogLevel.WARN
     resolution: Resolution = Resolution.full_hd
     jpeg_quality: int = 100
-    plugins: list[Plugin] = field(default_factory=lambda: list(Plugin))
+    plugins: list[str] = field(default_factory=Plugin.all_values)
     executable: str = 'braynsService'
     env: dict[str, str] = field(default_factory=dict)
 
@@ -94,7 +95,7 @@ class Launcher:
         args.extend(
             item
             for plugin in self.plugins
-            for item in ('--plugin', plugin.value)
+            for item in ('--plugin', plugin)
         )
         if self.ssl_context is not None:
             args.append('--secure')

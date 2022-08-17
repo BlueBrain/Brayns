@@ -25,6 +25,12 @@ from dataclasses import dataclass
 
 @dataclass
 class SslServerContext:
+    """Server SSL context.
+
+    Can be used to start a braynsService instance with SSL enabled. Optional
+    parameters such as the server private key, certificate and trusted CAs can
+    be specified here.
+    """
 
     private_key_file: str | None = None
     private_key_passphrase: str | None = None
@@ -32,6 +38,7 @@ class SslServerContext:
     ca_location: str | None = None
 
     def get_command_line(self) -> list[str]:
+        """Low level command line building."""
         args = []
         if self.private_key_file is not None:
             args.append('--private-key-file')

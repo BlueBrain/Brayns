@@ -22,6 +22,7 @@ from enum import Enum
 
 
 class LogLevel(Enum):
+    """Server (braynsService backend) log level."""
 
     TRACE = 'trace'
     DEBUG = 'debug'

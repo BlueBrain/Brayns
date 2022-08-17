@@ -22,5 +22,9 @@ from .web_socket_error import WebSocketError
 
 
 class ConnectionClosedError(WebSocketError):
+    """Raised when doing operation on a disconnected instance.
+
+    Happens after the connection to an instance.
+    """
 
     pass

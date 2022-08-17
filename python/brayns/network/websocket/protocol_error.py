@@ -22,5 +22,9 @@ from .web_socket_error import WebSocketError
 
 
 class ProtocolError(WebSocketError):
+    """Raised when a websocket protocol error occurs.
+
+    Usually happens during the connection to an instance.
+    """
 
     pass

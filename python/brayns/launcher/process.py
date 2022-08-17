@@ -60,14 +60,21 @@ class Process:
 
     @property
     def alive(self) -> bool:
+        """Check if the process is still running."""
         return self._process.poll() is None
 
     @property
     def logs(self) -> str:
+        """Get the last logs (stdout + stderr) from the process."""
         with self._lock:
             return ''.join(self._logs)
 
     def terminate(self) -> None:
+        """Terminate the process.
+
+        Must be called through the context manager (i.e. 'with') or manually to
+        avoid having the process running forever once the Python exits.
+        """
         self._process.terminate()
         self._process.wait()
         stdin = cast(IO[str], self._process.stdin)
