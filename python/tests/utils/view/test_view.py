@@ -31,13 +31,6 @@ class TestView(unittest.TestCase):
         test = brayns.View.deserialize(MockView.message)
         self.assertEqual(test, MockView.view)
 
-    def test_axis(self) -> None:
-        test = brayns.View(
-            position=brayns.Vector3.zero,
-            target=brayns.Vector3.one
-        )
-        self.assertEqual(test.axis, brayns.Vector3.one)
-
     def test_direction(self) -> None:
         test = brayns.View(
             position=brayns.Vector3.zero,

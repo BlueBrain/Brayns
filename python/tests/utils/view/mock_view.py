@@ -31,7 +31,7 @@ class MockView:
         return brayns.View(
             position=brayns.Vector3(1, 2, 3),
             target=brayns.Vector3(4, 5, 6),
-            up=brayns.Vector3(7, 8, 9)
+            up=brayns.Vector3(7, 8, 9),
         )
 
     @classmethod
@@ -40,5 +40,5 @@ class MockView:
         return {
             'position': [1, 2, 3],
             'target': [4, 5, 6],
-            'up': [7, 8, 9]
+            'up': [7, 8, 9],
         }
