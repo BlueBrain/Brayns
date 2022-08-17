@@ -74,6 +74,11 @@ User can specify a custom logger to redirect the logs or change the level as
 long as the logger is a subclass of logging.Logger. Brayns default logger can
 be constructed with brayns.Logger(<level>).
 
+Usually for production it is better not to log anything but warnings (default)
+but logging.INFO will trace JSON-RPC messages (useful for debugging). For more
+advanced debug, logging.DEBUG can be used but it prints the requests / replies
+content (not only the method and ID) so it can be slow the program a lot.
+
 Attempts
 ~~~~~~~~
 
