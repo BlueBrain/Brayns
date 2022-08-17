@@ -31,15 +31,15 @@ class SimpleTestCase(ApiTestCase):
 
     def setUp(self) -> None:
         launcher = brayns.Launcher(
-            executable=self.executable,
             uri=self.uri,
-            env=self.env
+            executable=self.executable,
+            env=self.env,
         )
         self.__process = launcher.start()
         connector = brayns.Connector(
             uri=self.uri,
             binary_handler=self.on_binary,
-            max_attempts=None
+            max_attempts=None,
         )
         self.__instance = connector.connect()
 

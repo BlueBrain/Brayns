@@ -27,7 +27,6 @@ class TestLauncher(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
         launcher = brayns.Launcher(
-            executable='service',
             uri='uri',
             ssl_context=brayns.SslServerContext(),
             log_level=brayns.LogLevel.CRITICAL,
@@ -36,7 +35,8 @@ class TestLauncher(unittest.TestCase):
             plugins=[
                 brayns.Plugin.ATLAS_EXPLORER,
                 brayns.Plugin.CIRCUIT_EXPLORER
-            ]
+            ],
+            executable='service',
         )
         test = launcher.get_command_line()
         ref = [
@@ -54,7 +54,7 @@ class TestLauncher(unittest.TestCase):
             '--plugin',
             brayns.Plugin.CIRCUIT_EXPLORER.value,
             '--secure',
-            'true'
+            'true',
         ]
         self.assertEqual(test, ref)
 
