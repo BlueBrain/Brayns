@@ -60,6 +60,11 @@ helper class `MovieFrames` to generate the indices from these data.
 
     step = int(simulation_fps / movie_fps / slowing_factor)
 
+.. attention::
+
+    You need to remember the movie FPS you set if you want to make a movie from
+    the exported frames.
+
 View
 ----
 
@@ -70,6 +75,48 @@ Here we will suppose it is the same for all (static camera).
 .. code-block:: python
 
     key_frames = brayns.KeyFrame.from_indices(indices, view)
+
+Color ramp
+----------
+
+The color ramp is an object attached to models with a simulation. It allows to
+map a value range (usually voltage) to a color range (list of color).
+
+This part is optional as Brayns build a default color ramp for circuits.
+
+.. code-block:: python
+
+    # Get the color ramp.
+    ramp = brayns.get_color_ramp(instance, model.id)
+
+    # Set the simulation values.
+    ramp.value_range = brayns.ValueRange(-80, 10)
+
+    # Choose colors (could be Color4 for simple cases) as follows:
+    # Simulation values of -80 and below will be red.
+    # Simulation values around -35 (middle of value range) will be green.
+    # Simulation values of +10 and above will be blue.
+    # Between these values, the color is linearly interpolated (mixed).
+    colors = [
+        brayns.Color3.red,
+        brayns.Color3.green,
+        brayns.Color3.blue,
+    ]
+
+    # Optional opacity curve for complex alpha channel as follows:
+    # Colors from 0% to 50% of the value range will be transparent.
+    # Other colors will be interpolated from alpha = 0 to alpha = 1.
+    curve = brayns.OpacityCurve([
+        brayns.ControlPoint(0.0, 0.0),
+        brayns.ControlPoint(0.5, 0.0),
+        brayns.ControlPoint(1.0, 1.0),
+    ])
+
+    # Generate the colors with opacity.
+    ramp.colors = curve.apply(colors)
+
+    # Update the color ramp.
+    brayns.set_color_ramp(instance, model.id, ramp)
 
 Exporter
 --------
@@ -91,8 +138,3 @@ constructor.
 
     # Export to given folder.
     exporter.export_frames(instance, 'path/to/frames')
-
-.. attention::
-
-    You need to remember the movie FPS you set if you want to make a movie from
-    the exported frames.
