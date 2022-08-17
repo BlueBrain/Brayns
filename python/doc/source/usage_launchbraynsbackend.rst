@@ -1,9 +1,5 @@
 .. _launchbraynsbackend-label:
 
-.. |location_link| raw:: html
-
-   <a href="http://webbrayns.ocp.bbp.epfl.ch" target="_blank">WebBrayns</a>
-
 Running a Brayns backend service
 ================================
 

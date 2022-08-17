@@ -27,6 +27,7 @@ This API (websocket or Python) has the following features:
    install
    usage
    plugins
+   examples
    jsonrpcapi/api
    pythonapi/api
 
