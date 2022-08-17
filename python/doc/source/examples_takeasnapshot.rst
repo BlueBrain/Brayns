@@ -89,6 +89,26 @@ The renderer can also be used to configure the number of samples per pixel (
 antialiasing) and the ray bounces (reflection of light from a non emissive
 surface to another).
 
+Light
+-----
+
+By default, Brayns scene is empty, that is why we need to add a light to be able
+to see the models we want to render.
+
+.. code-block:: python
+
+    light = brayns.DirectionalLight(
+        intensity=4,
+        direction=view.direction,
+    )
+
+    light_id = brayns.add_light(instance, light)
+
+Here we add a directional light oriented from the camera to the target. The ID
+returned can be used to remove it but in this example we don't use it.
+
+Lights can be removed / cleared using `remove_lights` and `clear_lights`.
+
 Snapshot
 --------
 
