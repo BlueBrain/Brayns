@@ -38,7 +38,7 @@ class ColorRamp:
 
     Otherwise, the two closest colors in the list are interpolated linearly.
 
-    :param value_range: Simulation value range (usually a voltage).
+    :param value_range: Simulation value range (usually voltages).
     :type value_range: ValueRange
     :param colors: List of colors mapped to value range.
     :type colors: list[Color4]

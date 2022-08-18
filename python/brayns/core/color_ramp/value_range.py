@@ -28,6 +28,8 @@ from brayns.utils import Vector
 class ValueRange(Vector):
     """Specify color ramp value range.
 
+    Usually the simulation values are voltages but it can be anything.
+
     :param min: Minimal simulation value.
     :type min: float
     :param max: Maximal simulation value.
