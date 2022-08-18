@@ -41,9 +41,9 @@ class Vector(ABC, Generic[U]):
 
     Examples of arithmetic operations with vector = [1, 1, 1]:
 
-        vector += vector # 2 2 2
-        vector *= 3 # 6 6 6
-        vector /= 3 # 1 1 1
+        vector + vector # 2 2 2
+        vector * 3 # 3 3 3
+        vector / 2 # 0.5 0.5 0.5
         2 / vector # 2 2 2
         vector = Vector3.unpack(i*i for i in range(3)) # 1 4 9
         vector = vector.normalized # vector.norm ~ 1
