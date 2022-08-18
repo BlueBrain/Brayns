@@ -50,7 +50,7 @@ brayns-python-venv:
     - python -m venv pythonvenv
     - source pythonvenv/bin/activate
     - python setup.py sdist
-    - pip install dist/$(ls dist)
+    - pip install dist/*
     - pip install pyright
     - pip install PySimpleGUI
     - pip install Pillow
@@ -79,4 +79,5 @@ brayns-python-type-check:
     - pyright --warnings tests
     - pyright --warnings testapi
     - pyright --warnings scripts
+    - pyright --warnings samples
     - deactivate
