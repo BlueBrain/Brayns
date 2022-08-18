@@ -60,8 +60,8 @@ class Launcher:
     :type jpeg_quality: int, optional
     :param plugins: Plugins to load, defaults to all built-in plugins.
     :type plugins: list[str], optional
-    :param executable: Path of the braynsService executable.
-    :type executable: str
+    :param executable: braynsService executable, defaults to 'braynService'.
+    :type executable: str, optional
     :param env: Subprocess environment variables, default to empty.
     :type env: dict[str, str], optional
     """
@@ -71,7 +71,7 @@ class Launcher:
     log_level: LogLevel = LogLevel.WARN
     resolution: Resolution = Resolution.full_hd
     jpeg_quality: int = 100
-    plugins: list[str] = field(default_factory=Plugin.all_values)
+    plugins: list[str] = field(default_factory=Plugin.get_all_values)
     executable: str = 'braynsService'
     env: dict[str, str] = field(default_factory=dict)
 

@@ -73,7 +73,7 @@ class Process:
         """Terminate the process.
 
         Must be called through the context manager (i.e. 'with') or manually to
-        avoid having the process running forever once the Python exits.
+        avoid the process to run forever.
         """
         self._process.terminate()
         self._process.wait()

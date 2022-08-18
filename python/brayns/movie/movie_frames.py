@@ -34,10 +34,11 @@ class MovieFrames:
     Slowing factor is compared to real time (2 = twice slower).
 
     Start and end frames are clamped to the simulation limits and are threated
-    like Python indices (i.e. -N is len - N).
+    like Python indices (i.e. -1 is simulation.end_frame).
 
     The index step is computed as simulation_fps / fps / slowing_factor. If it
-    is smaller than 1, then some frames will be duplicated.
+    is smaller than 1, then some frames will be duplicated to match the target
+    FPS.
 
     :param fps: Movie FPS.
     :type fps: float

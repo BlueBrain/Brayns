@@ -37,7 +37,7 @@ class Plugin(Enum):
     DTI = 'braynsDTI'
 
     @staticmethod
-    def all_values() -> list[str]:
+    def get_all_values() -> list[str]:
         """Shortcut to get all the plugin names."""
         return [
             plugin.value
