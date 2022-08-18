@@ -28,10 +28,7 @@ class ControlPoint:
     """Control point used for opacity curves.
 
     Normalized values are simulation values (usually voltages) normalized
-    between the max and min values of the simulation.
-
-    Implicit start and end control points can be overriden if a control point
-    exists at 0 or 1. 
+    between the min and max of the color ramp value range.
 
     :param normalized_value: Simulation value, normalized.
     :type normalized_value: float
@@ -45,7 +42,7 @@ class ControlPoint:
     @classmethod
     @property
     def start(cls) -> ControlPoint:
-        """Implicit first control point of the opacity curve.
+        """Implicit first control point of the opacity curve [0, 0].
 
         :return: Control point.
         :rtype: ControlPoint
@@ -55,7 +52,7 @@ class ControlPoint:
     @classmethod
     @property
     def end(cls) -> ControlPoint:
-        """Implicit last control point of the opacity curve.
+        """Implicit last control point of the opacity curve [1, 1].
 
         :return: Control point.
         :rtype: ControlPoint

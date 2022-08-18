@@ -18,23 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-from .transfer_function import TransferFunction
 
+class TestSetColorRamp(SimpleTestCase):
 
-def set_transfer_function(instance: Instance, model_id: int, transfer_function: TransferFunction) -> None:
-    """Set the current transfer function of the given model.
+    def test_set_color_ramp(self) -> None:
+        model = self._load_circuit()
+        function = brayns.ColorRamp(
+            brayns.ValueRange(20, 30),
+            colors=[
+                brayns.Color4.red,
+                brayns.Color4.green,
+                brayns.Color4.blue
+            ]
+        )
+        brayns.set_color_ramp(self.instance, model.id, function)
+        test = brayns.get_color_ramp(self.instance, model.id)
+        self.assertEqual(test, function)
 
-    :param instance: Instance.
-    :type instance: Instance
-    :param model_id: Model ID.
-    :type model_id: int
-    :param transfer_function: Transfer function.
-    :type transfer_function: TransferFunction
-    """
-    params = {
-        'id': model_id,
-        'transfer_function': transfer_function.serialize(),
-    }
-    instance.request('set-model-transfer-function', params)
+    def _load_circuit(self) -> brayns.Model:
+        loader = brayns.BbpLoader(
+            report=brayns.BbpReport.compartment('somas')
+        )
+        models = loader.load(self.instance, self.circuit)
+        return models[0]

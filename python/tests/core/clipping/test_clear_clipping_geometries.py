@@ -24,15 +24,13 @@ import brayns
 from tests.network.mock_instance import MockInstance
 
 
-class TestAddClipPlane(unittest.TestCase):
+class TestClearClippingGeometries(unittest.TestCase):
 
-    def test_add_clip_plane(self) -> None:
-        instance = MockInstance(0)
-        plane = brayns.ClipPlane(1, 2, 3, 4)
-        test = brayns.add_clip_plane(instance, plane)
-        self.assertEqual(test, 0)
-        self.assertEqual(instance.method, 'add-clip-plane')
-        self.assertEqual(instance.params, plane.serialize())
+    def test_clear_clipping_geometries(self) -> None:
+        instance = MockInstance()
+        brayns.clear_clipping_geometries(instance)
+        self.assertEqual(instance.method, 'clear-clip-planes')
+        self.assertEqual(instance.params, None)
 
 
 if __name__ == '__main__':

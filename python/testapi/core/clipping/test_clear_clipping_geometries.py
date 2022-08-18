@@ -18,23 +18,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
 import brayns
-from tests.network.mock_instance import MockInstance
-
-from .mock_transfer_function import MockTransferFunction
+from testapi.simple_test_case import SimpleTestCase
 
 
-class TestGetTransferFunction(unittest.TestCase):
+class TestClearClippingGeometries(SimpleTestCase):
 
-    def test_get_transfer_function(self) -> None:
-        instance = MockInstance(MockTransferFunction.message)
-        test = brayns.get_transfer_function(instance, 0)
-        self.assertEqual(test, MockTransferFunction.transfer_function)
-        self.assertEqual(instance.method, 'get-model-transfer-function')
-        self.assertEqual(instance.params, {'id': 0})
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_clear_clipping_geometries(self) -> None:
+        planes = [
+            brayns.ClipPlane(1, 2, 3, 4),
+            brayns.ClipPlane(1, 1, 1, 1),
+        ]
+        ids = [
+            brayns.add_clipping_geometry(self.instance, plane)
+            for plane in planes
+        ]
+        self.assertEqual(ids, [0, 1])
+        brayns.clear_clipping_geometries(self.instance)
+        ids = [
+            brayns.add_clipping_geometry(self.instance, plane)
+            for plane in planes
+        ]
+        self.assertEqual(ids, [0, 1])

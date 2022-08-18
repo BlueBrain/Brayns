@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Iterator
 
 from brayns.core.simulation import Simulation
 
@@ -33,10 +34,11 @@ class MovieFrames:
     Slowing factor is compared to real time (2 = twice slower).
 
     Start and end frames are clamped to the simulation limits and are threated
-    like Python indices (ie -N is len - N).
+    like Python indices (i.e. -1 is simulation.end_frame).
 
-    The time step generated is constant so if the FPS ratio between the movie
-    and the simulation is not an integer, it will be truncated.
+    The index step is computed as simulation_fps / fps / slowing_factor. If it
+    is smaller than 1, then some frames will be duplicated to match the target
+    FPS.
 
     :param fps: Movie FPS.
     :type fps: float
@@ -54,15 +56,23 @@ class MovieFrames:
     end_frame: int = -1
 
     def get_indices(self, simulation: Simulation) -> list[int]:
-        start_frame = self._get_frame(simulation, self.start_frame)
-        end_frame = self._get_frame(simulation, self.end_frame)
+        start = self._get_frame(simulation, self.start_frame)
+        end = self._get_frame(simulation, self.end_frame)
         step = self._get_step(simulation)
-        return list(range(start_frame, end_frame + 1, step))
+        return list(self._yield_indices(start, end, step))
 
     def _get_frame(self, simulation: Simulation, frame: int) -> int:
         if frame < 0:
-            frame += simulation.end_frame
+            frame += simulation.end_frame + 1
         return simulation.clamp(frame)
 
-    def _get_step(self, simulation: Simulation) -> int:
-        return int(simulation.fps / self.fps / self.slowing_factor)
+    def _get_step(self, simulation: Simulation) -> float:
+        return simulation.fps / self.fps / self.slowing_factor
+
+    def _yield_indices(self, start: int, end: int, step: float) -> Iterator[int]:
+        current = float(start)
+        while True:
+            if current > end:
+                return
+            yield round(current)
+            current += step

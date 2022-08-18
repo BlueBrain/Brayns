@@ -22,5 +22,9 @@ from .web_socket_error import WebSocketError
 
 
 class InvalidServerCertificateError(WebSocketError):
+    """Raised when the server certificate is rejected by the client.
+
+    SSL specific error happening during the connection to an instance.
+    """
 
     pass

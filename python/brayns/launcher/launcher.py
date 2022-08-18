@@ -34,9 +34,11 @@ from .ssl_server_context import SslServerContext
 class Launcher:
     """Used to start a braynsService instance from Python.
 
-    Use a braynsService executable to start a subprocess.
+    Use a braynsService executable to start a subprocess. By default it looks
+    for a 'braynsService' binary in the PATH but it can be overriden.
 
-    URI is the same as for the `Connector` object.
+    URI is the websocket server URI (ip:port) use 0.0.0.0 as wildcard to allow
+    connections from any machine.
 
     SSL server settings can be specified using optional certificate, key, CA and
     password.
@@ -46,22 +48,6 @@ class Launcher:
     Custom environment variables can also be set for the subprocess, for example
     to override the PATH and load specific libraries.
 
-    Example to start an instance and connect to it:
-
-    .. code-block:: python
-
-        launcher = brayns.Launcher('braynsService', 'localhost:5000')
-
-        connector = brayns.Connector('localhost:5000', max_attempts=None)
-
-        with launcher.start() as process:
-
-            with connector.connect() as instance:
-
-                # Use instance or process.
-
-    :param executable: Path of the braynsService executable.
-    :type executable: str
     :param uri: Service URI with format 'host:port'.
     :type uri: str
     :param ssl_context: SSL context if secure, defaults to None.
@@ -73,18 +59,20 @@ class Launcher:
     :param jpeg_quality: Streaming JPEG quality, defaults to 100.
     :type jpeg_quality: int, optional
     :param plugins: Plugins to load, defaults to all built-in plugins.
-    :type plugins: list[Plugin], optional
+    :type plugins: list[str], optional
+    :param executable: braynsService executable, defaults to 'braynService'.
+    :type executable: str, optional
     :param env: Subprocess environment variables, default to empty.
     :type env: dict[str, str], optional
     """
 
-    executable: str
     uri: str
     ssl_context: SslServerContext | None = None
     log_level: LogLevel = LogLevel.WARN
     resolution: Resolution = Resolution.full_hd
     jpeg_quality: int = 100
-    plugins: list[Plugin] = field(default_factory=lambda: list(Plugin))
+    plugins: list[str] = field(default_factory=Plugin.get_all_values)
+    executable: str = 'braynsService'
     env: dict[str, str] = field(default_factory=dict)
 
     def get_command_line(self) -> list[str]:
@@ -107,7 +95,7 @@ class Launcher:
         args.extend(
             item
             for plugin in self.plugins
-            for item in ('--plugin', plugin.value)
+            for item in ('--plugin', plugin)
         )
         if self.ssl_context is not None:
             args.append('--secure')

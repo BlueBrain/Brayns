@@ -14,7 +14,7 @@ This API (websocket or Python) has the following features:
 
 - Load models into brayns (circuits, DTIs, meshes, volumes, ...).
 - Load and/or attach simulations (compartment and spike reports).
-- Modify their visual appearance (color, simulation transfer function, ...).
+- Modify their visual appearance (color, simulation color ramp, ...).
 - Tune the renderers to achieve different visual results.
 - Render images and simulation videos and save it to disk.
 
@@ -27,6 +27,7 @@ This API (websocket or Python) has the following features:
    install
    usage
    plugins
+   examples
    jsonrpcapi/api
    pythonapi/api
 

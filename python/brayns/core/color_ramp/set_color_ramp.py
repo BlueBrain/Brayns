@@ -20,14 +20,21 @@
 
 from brayns.network import Instance
 
+from .color_ramp import ColorRamp
 
-def remove_clip_planes(instance: Instance, ids: list[int]) -> None:
-    """Remove clip planes from an instance using their IDs.
+
+def set_color_ramp(instance: Instance, model_id: int, color_ramp: ColorRamp) -> None:
+    """Set the current color ramp of the given model.
 
     :param instance: Instance.
     :type instance: Instance
-    :param ids: Clip planes ID(s).
-    :type ids: list[int]
+    :param model_id: Model ID.
+    :type model_id: int
+    :param color_ramp: Color ramp.
+    :type color_ramp: ColorRamp
     """
-    params = {'ids': ids}
-    instance.request('remove-clip-planes', params)
+    params = {
+        'id': model_id,
+        'transfer_function': color_ramp.serialize(),
+    }
+    instance.request('set-model-transfer-function', params)

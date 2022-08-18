@@ -28,8 +28,7 @@ Connection to an instance
 
 To create a connection to the backend from the Python API, we need the URI of
 the braynsService instance we want to connect to (ip:port). The IP is always the
-one of the machine the instance is running on, seen from the machine of the
-Python client.
+machine the instance is running on seen from the Python client.
 
 .. hint::
 
@@ -70,107 +69,8 @@ connection is made as follows from a remote machine:
     If you are connecting to a backend running on BB5, it will be necessary to
     be working within EPFL's network, either on-site or through the VPN.
 
-Loading a model into Brayns
----------------------------
-
-Now, we can start performing requests, for example loading a circuit (requires
-circuit explorer plugin loaded during the renderer startup).
-
-.. code-block:: python
-
-    # Path to the file to load.
-    path = 'path/to/BlueConfig'
-
-    # Loader we want to use (each loader has specific params).
-    loader = brayns.BbpLoader(
-        cells=brayns.BbpCells.from_density(0.1),
-        report=brayns.BbpReport.spikes(),
-        morphology=brayns.Morphology(radius_multiplier=20)
-    )
-
-    # Load the model(s) into the instance (some files contain multiple models).
-    models = loader.load(instance, path)
-
-    # Use the list of brayns.Model returned.
-    for model in models:
-        print(model)
-
-.. hint::
-
-    When loading files from disk, by specifying a path, the backend will be able
-    to load only the files it can find on its filesystem. This means that, if we
-    are running the backend on BB5, we cannot specify a local path.
-
-Adjusting the camera
---------------------
-
-By default, the camera is not placed to look at a given model, that's why we
-have to move it manually. The camera view is specified using its position and
-its target with an optional up vector. However, it is not necessary to change
-the state of the renderer camera as we can provide our own view when rendering
-snapshots.
-
-.. code-block:: python
-
-    # Choose the camera type we want (perspective or orthographic).
-    camera = brayns.PerspectiveCamera()
-
-    # Get the scene boundary (take all visible models into account).
-    # If you want to focus on a single model, use model.bounds.
-    bounds = brayns.get_bounds(instance)
-
-    # Use it to get the position and target to see the model entirely.
-    view = camera.fovy.get_full_screen_view(bounds)    
-
-    # Camera view can optionally be rotated like this.
-    euler = brayns.Vector3(0, 90, 0)
-    rotation = brayns.Rotation.from_euler(euler, degrees=True)
-    view.position = rotation.apply(view.position, center=view.target)
-
-Adding a light source
----------------------
-
-By default an instance doesn't have any light so we need to add one to see
-something.
-
-.. code-block:: python
-
-    # Choose light type. Here directional light with same direction as the
-    # camera view.
-    light = brayns.DirectionalLight(
-        direction=view.direction,
-    )
-
-    # Upload the light.
-    brayns.add_light(instance, light)
-
-Rendering a snapshot
---------------------
-
-ONce we have loaded out models and chosen the camera type and view, we can get
-render and save an image of the current scene.
-
-.. code-block:: python
-
-    # Path to save the image.
-    path = 'snapshot.png'
-
-    # We can choose a custom renderer (fast or slow).
-    renderer = brayns.InteractiveRenderer()
-
-    # Then we can setup our snapshot settings using the previous results.
-    snapshot = brayns.Snapshot(
-        resolution=brayns.Resolution.full_hd,
-        view=view,
-        camera=camera,
-        renderer=renderer
-    )
-
-    # And then render, download and save our image.
-    snapshot.save(instance, path)
-
 Further information
 -------------------
 
 For further information about, please refer to the API reference
-:ref:`pythonapi-label`.
+:ref:`pythonapi-label` and typical use cases examples :ref:`examples-label`.

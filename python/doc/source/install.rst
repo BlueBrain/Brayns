@@ -78,7 +78,7 @@ the package can also be installed from the github repository sources using:
     $ python setup.py sdist
 
     # Install the distribution with pip (output in dist folder)
-    $ pip install dist/$(ls dist)
+    $ pip install dist/*
 
 Now brayns installation is complete.
 

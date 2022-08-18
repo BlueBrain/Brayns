@@ -18,23 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import sys
+from brayns.network import Instance
 
-import brayns
 
-uri = 'localhost:5000'
-path = 'snapshot.png'
+def remove_clipping_geometries(instance: Instance, ids: list[int]) -> None:
+    """Remove clipping geometries from an instance using their IDs.
 
-argv = sys.argv
-
-if len(argv) > 1:
-    uri = argv[1]
-
-if len(argv) > 2:
-    path = argv[2]
-
-connector = brayns.Connector(uri)
-
-with connector.connect() as instance:
-    snapshot = brayns.Snapshot()
-    snapshot.save(instance, path)
+    :param instance: Instance.
+    :type instance: Instance
+    :param ids: Clipping geometry ID(s).
+    :type ids: list[int]
+    """
+    params = {'ids': ids}
+    instance.request('remove-clip-planes', params)

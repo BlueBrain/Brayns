@@ -24,5 +24,12 @@ from .scene import Scene
 
 
 def get_scene(instance: Instance) -> Scene:
+    """Retreive all models and the world boundaries from an instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :return: Models and global bounds.
+    :rtype: Scene
+    """
     result = instance.request('get-scene')
     return Scene.deserialize(result)

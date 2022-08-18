@@ -18,20 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
+import unittest
 
-from .clip_plane import ClipPlane
+import brayns
+from tests.network.mock_instance import MockInstance
+
+from .mock_color_ramp import MockColorRamp
 
 
-def add_clip_plane(instance: Instance, plane: ClipPlane) -> int:
-    """Add a clip plane to the given instance and return its ID.
+class TestSetColorRamp(unittest.TestCase):
 
-    :param instance: Instance.
-    :type instance: Instance
-    :param plane: Clip plane to add.
-    :type plane: ClipPlane
-    :return: Clip plane ID.
-    :rtype: int
-    """
-    params = plane.serialize()
-    return instance.request('add-clip-plane', params)
+    def test_set_color_ramp(self) -> None:
+        instance = MockInstance()
+        function = MockColorRamp.color_ramp
+        brayns.set_color_ramp(instance, 0, function)
+        self.assertEqual(instance.method, 'set-model-transfer-function')
+        self.assertEqual(instance.params, {
+            'id': 0,
+            'transfer_function': MockColorRamp.message
+        })
+
+
+if __name__ == '__main__':
+    unittest.main()

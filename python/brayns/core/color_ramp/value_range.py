@@ -26,7 +26,9 @@ from brayns.utils import Vector
 
 @dataclass(frozen=True, order=True)
 class ValueRange(Vector):
-    """Specify transfer function value range.
+    """Specify color ramp value range.
+
+    Usually the simulation values are voltages but it can be anything.
 
     :param min: Minimal simulation value.
     :type min: float

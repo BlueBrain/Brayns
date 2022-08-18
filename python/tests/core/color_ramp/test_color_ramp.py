@@ -22,20 +22,18 @@ import unittest
 
 import brayns
 
-from .mock_transfer_function import MockTransferFunction
+from .mock_color_ramp import MockColorRamp
 
 
-class TestTransferFunction(unittest.TestCase):
+class TestColorRamp(unittest.TestCase):
 
     def test_deserialize(self) -> None:
-        test = brayns.TransferFunction.deserialize(
-            MockTransferFunction.message
-        )
-        self.assertEqual(test, MockTransferFunction.transfer_function)
+        test = brayns.ColorRamp.deserialize(MockColorRamp.message)
+        self.assertEqual(test, MockColorRamp.color_ramp)
 
     def test_serialize(self) -> None:
-        test = MockTransferFunction.transfer_function.serialize()
-        self.assertEqual(test, MockTransferFunction.message)
+        test = MockColorRamp.color_ramp.serialize()
+        self.assertEqual(test, MockColorRamp.message)
 
 
 if __name__ == '__main__':

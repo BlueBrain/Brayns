@@ -25,8 +25,14 @@ from brayns.utils import Error
 
 @dataclass
 class WebSocketError(Error):
+    """Base class of all network exceptions.
+
+    :param reason: Short description of what happened.
+    :type reason: str
+    """
 
     reason: str
 
     def __str__(self) -> str:
+        """Display the reason when printed."""
         return self.reason

@@ -18,31 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+import unittest
 
 import brayns
+from tests.network.mock_instance import MockInstance
 
 
-class MockTransferFunction:
+class TestRemoveClippingGeometries(unittest.TestCase):
 
-    @classmethod
-    @property
-    def transfer_function(cls) -> brayns.TransferFunction:
-        return brayns.TransferFunction(
-            value_range=brayns.ValueRange(0, 1),
-            colors=[
-                brayns.Color4.red,
-                brayns.Color4.blue,
-            ]
-        )
+    def test_remove_clipping_geometries(self) -> None:
+        instance = MockInstance()
+        ids = [1, 2, 3]
+        brayns.remove_clipping_geometries(instance, ids)
+        self.assertEqual(instance.method, 'remove-clip-planes')
+        self.assertEqual(instance.params, {'ids': ids})
 
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
-            'range': [0, 1],
-            'colors': [
-                [1, 0, 0, 1],
-                [0, 0, 1, 1],
-            ]
-        }
+
+if __name__ == '__main__':
+    unittest.main()

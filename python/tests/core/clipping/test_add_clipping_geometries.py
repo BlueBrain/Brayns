@@ -18,23 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
+import unittest
 
-from .transfer_function import TransferFunction
+import brayns
+from tests.network.mock_instance import MockInstance
 
 
-def get_transfer_function(instance: Instance, model_id: int) -> TransferFunction:
-    """Retreive the transfer function of the given model.
+class TestAddClippingGeometries(unittest.TestCase):
 
-    Model must have a transfer function.
+    def test_add_clipping_geometry(self) -> None:
+        instance = MockInstance(0)
+        plane = brayns.ClipPlane(1, 2, 3, 4)
+        test = brayns.add_clipping_geometry(instance, plane)
+        self.assertEqual(test, 0)
+        self.assertEqual(instance.method, brayns.ClipPlane.method)
+        self.assertEqual(instance.params, plane.serialize())
 
-    :param instance: Instance.
-    :type instance: Instance
-    :param model_id: Model ID.
-    :type model_id: int
-    :return: Transfer function.
-    :rtype: TransferFunction
-    """
-    params = {'id': model_id}
-    result = instance.request('get-model-transfer-function', params)
-    return TransferFunction.deserialize(result)
+
+if __name__ == '__main__':
+    unittest.main()

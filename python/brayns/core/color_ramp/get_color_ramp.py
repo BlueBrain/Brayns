@@ -18,23 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
-from testapi.simple_test_case import SimpleTestCase
+from brayns.network import Instance
+
+from .color_ramp import ColorRamp
 
 
-class TestRemoveClipPlanes(SimpleTestCase):
+def get_color_ramp(instance: Instance, model_id: int) -> ColorRamp:
+    """Retreive the color ramp of the given model.
 
-    def test_remove_clip_planes(self) -> None:
-        planes = [
-            brayns.ClipPlane(1, 2, 3, 4),
-            brayns.ClipPlane(2, 2, 2, 2),
-            brayns.ClipPlane(1, 2, 1, 2),
-        ]
-        ids = [
-            brayns.add_clip_plane(self.instance, plane)
-            for plane in planes
-        ]
-        self.assertEqual(ids, [0, 1, 2])
-        brayns.remove_clip_planes(self.instance, [1, 2])
-        id = brayns.add_clip_plane(self.instance, planes[0])
-        self.assertIn(id, [1, 2])
+    Model must have a color ramp attached (usually report loaded).
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Model ID.
+    :type model_id: int
+    :return: Color ramp.
+    :rtype: ColorRamp
+    """
+    params = {'id': model_id}
+    result = instance.request('get-model-transfer-function', params)
+    return ColorRamp.deserialize(result)

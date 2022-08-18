@@ -26,15 +26,6 @@ def get_material_name(instance: Instance, model_id: int) -> str:
 
     Can be used to check that a given material is applied on a model:
 
-    .. code-block:: python
-
-        current = brayns.get_material_name(instance, model_id)
-
-        if current != brayns.MetalMaterial.name:
-            # Error
-
-        material = brayns.get_material(instance, model_id, brayns.MetalMaterial)
-
     :param instance: Instance.
     :type instance: Instance
     :param model_id: ID of the model to check.

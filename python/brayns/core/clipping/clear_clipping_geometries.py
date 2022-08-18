@@ -18,26 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
-import brayns
-from tests.network.mock_instance import MockInstance
-
-from .mock_transfer_function import MockTransferFunction
+from brayns.network import Instance
 
 
-class TestSetTransferFunction(unittest.TestCase):
+def clear_clipping_geometries(instance: Instance) -> None:
+    """Clear all clipping geometries from the given instance.
 
-    def test_set_transfer_function(self) -> None:
-        instance = MockInstance()
-        function = MockTransferFunction.transfer_function
-        brayns.set_transfer_function(instance, 0, function)
-        self.assertEqual(instance.method, 'set-model-transfer-function')
-        self.assertEqual(instance.params, {
-            'id': 0,
-            'transfer_function': MockTransferFunction.message
-        })
-
-
-if __name__ == '__main__':
-    unittest.main()
+    :param instance: Instance.
+    :type instance: Instance
+    """
+    instance.request('clear-clip-planes')

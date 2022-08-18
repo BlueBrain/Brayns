@@ -31,6 +31,7 @@ from .api import *
 from .application import *
 from .camera import *
 from .clipping import *
+from .color_ramp import *
 from .geometry import *
 from .light import *
 from .loader import *
@@ -39,11 +40,10 @@ from .model import *
 from .renderer import *
 from .simulation import *
 from .snapshot import *
-from .transfer_function import *
 from .version import *
 
 __all__ = [
-    'add_clip_plane',
+    'add_clipping_geometry',
     'add_geometries',
     'add_light',
     'AmbientLight',
@@ -53,10 +53,12 @@ __all__ = [
     'Capsule',
     'CarPaintMaterial',
     'check_version',
-    'clear_clip_planes',
+    'clear_clipping_geometries',
     'clear_lights',
     'clear_models',
+    'ClippingGeometry',
     'ClipPlane',
+    'ColorRamp',
     'ControlPoint',
     'DefaultMaterial',
     'DirectionalLight',
@@ -70,6 +72,7 @@ __all__ = [
     'get_camera_name',
     'get_camera_view',
     'get_camera',
+    'get_color_ramp',
     'get_entrypoint',
     'get_entrypoints',
     'get_loaders',
@@ -82,7 +85,6 @@ __all__ = [
     'get_renderer',
     'get_scene',
     'get_simulation',
-    'get_transfer_function',
     'get_version',
     'GlassMaterial',
     'InteractiveRenderer',
@@ -104,22 +106,21 @@ __all__ = [
     'PlasticMaterial',
     'ProductionRenderer',
     'QuadLight',
-    'remove_clip_planes',
+    'remove_clipping_geometries',
     'remove_lights',
     'remove_models',
     'Renderer',
     'Scene',
     'set_camera_view',
     'set_camera',
+    'set_color_ramp',
     'set_material',
     'set_renderer',
     'set_simulation_frame',
-    'set_transfer_function',
     'Simulation',
     'Snapshot',
     'Sphere',
     'TimeUnit',
-    'TransferFunction',
     'update_application',
     'update_model',
     'ValueRange',

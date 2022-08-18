@@ -26,7 +26,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CellId:
-    """Compressed cell ID list into a string.
+    """Compressed list of cell IDs into a string.
 
     Use one of the factory methods to create this object.
     """

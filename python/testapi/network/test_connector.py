@@ -67,15 +67,15 @@ class TestConnector(ApiTestCase):
 
     def _start_instance(self, secure: bool = False) -> brayns.Process:
         launcher = brayns.Launcher(
-            executable=self.executable,
             uri=self.uri,
             ssl_context=brayns.SslServerContext(
                 private_key_file=self._key,
                 private_key_passphrase='test',
                 certificate_file=self._certificate,
-                ca_location=self._certificate
+                ca_location=self._certificate,
             ) if secure else None,
-            env=self.env
+            executable=self.executable,
+            env=self.env,
         )
         return launcher.start()
 
@@ -91,6 +91,6 @@ class TestConnector(ApiTestCase):
                 cafile=cafile
             ) if secure else None,
             logger=brayns.Logger(logging.CRITICAL),
-            max_attempts=max_attempts
+            max_attempts=max_attempts,
         )
         return connector.connect()

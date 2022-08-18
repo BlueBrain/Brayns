@@ -23,6 +23,15 @@ import sys
 
 
 class Logger(logging.Logger):
+    """Brayns default logger.
+
+    Log to stdout with simple formatting (name, level, message).
+
+    Can be used to change only the log level without creating a new logger.
+
+    :param level: Log level from logging module, defaults to WARN.
+    :type level: int, optional
+    """
 
     def __init__(self, level: int = logging.WARN) -> None:
         super().__init__('Brayns', level)

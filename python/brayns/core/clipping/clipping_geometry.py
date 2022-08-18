@@ -18,13 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Any
 
 
-def clear_clip_planes(instance: Instance) -> None:
-    """Clear all clip planes from the given instance.
+@dataclass
+class ClippingGeometry(ABC):
+    """Base class used for clipping geometries."""
 
-    :param instance: Instance.
-    :type instance: Instance
-    """
-    instance.request('clear-clip-planes')
+    @classmethod
+    @property
+    @abstractmethod
+    def method(cls) -> str:
+        """Get the JSON-RCP method to add the clipping geometry.
+
+        :return: JSON-RPC method.
+        :rtype: str
+        """
+        pass
+
+    @abstractmethod
+    def serialize(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        pass

@@ -22,9 +22,24 @@ from enum import Enum
 
 
 class Plugin(Enum):
+    """All built-in plugins for braynsService.
+
+    Plugins are loaded when the backend instance is started and cannot be
+    changed afterward.
+
+    The value is the name of the plugin dynamic library (.so).
+    """
 
     CIRCUIT_EXPLORER = 'braynsCircuitExplorer'
     ATLAS_EXPLORER = 'braynsAtlasExplorer'
     CYLINDRIC_CAMERA = 'braynsCylindricCamera'
     CIRCUIT_INFO = 'braynsCircuitInfo'
     DTI = 'braynsDTI'
+
+    @staticmethod
+    def get_all_values() -> list[str]:
+        """Shortcut to get all the plugin names."""
+        return [
+            plugin.value
+            for plugin in Plugin
+        ]

@@ -22,5 +22,11 @@ from .web_socket_error import WebSocketError
 
 
 class ServiceUnavailableError(WebSocketError):
+    """Raised when braynsService instance is not available at given URI.
+
+    Occurs when the backend instance is not ready or started.
+
+    Can be used to try multiple connections to wait for an instance to be ready.
+    """
 
     pass

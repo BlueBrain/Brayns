@@ -18,18 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .control_point import ControlPoint
-from .get_transfer_function import get_transfer_function
-from .opacity_curve import OpacityCurve
-from .set_transfer_function import set_transfer_function
-from .transfer_function import TransferFunction
-from .value_range import ValueRange
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-__all__ = [
-    'ControlPoint',
-    'get_transfer_function',
-    'OpacityCurve',
-    'set_transfer_function',
-    'TransferFunction',
-    'ValueRange',
-]
+
+class TestRemoveClippingGeometries(SimpleTestCase):
+
+    def test_remove_clipping_geometries(self) -> None:
+        planes = [
+            brayns.ClipPlane(1, 2, 3, 4),
+            brayns.ClipPlane(2, 2, 2, 2),
+            brayns.ClipPlane(1, 2, 1, 2),
+        ]
+        ids = [
+            brayns.add_clipping_geometry(self.instance, plane)
+            for plane in planes
+        ]
+        self.assertEqual(ids, [0, 1, 2])
+        brayns.remove_clipping_geometries(self.instance, [1, 2])
+        id = brayns.add_clipping_geometry(self.instance, planes[0])
+        self.assertIn(id, [1, 2])

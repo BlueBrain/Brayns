@@ -27,25 +27,15 @@ from .control_point import ControlPoint
 
 @dataclass
 class OpacityCurve:
-    """Opacity curve to apply to a transfer function.
+    """Opacity curve to generate opacity from a list of color3.
 
     Use control points to map simulation value (usually voltage) to opacity.
 
     The simulation values are normalized so it is not necessary to know them.
 
-    Example:
-
-    .. code-block:: python
-
-        curve = brayns.OpacityCurve([
-            brayns.ControlPoint(0.5, 0.0),
-        ])
-
-        new_colors = curve.apply(colors)
-
-    Here it will give an opacity of 0 from 0% to 50% of the transfer function
-    value range and then a staight line from 0 to 1 between 50% and 100% of the
-    value range.
+    If no control points are set at 0 or 1, implicit control points [0, 0] and
+    [1, 1] will be used for the computations. Otherwise the user-defined ones
+    are used.
 
     :param control_points: Control points of the curve.
     :type control_points: list[ControlPoint]

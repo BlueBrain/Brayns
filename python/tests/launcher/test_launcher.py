@@ -27,16 +27,16 @@ class TestLauncher(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
         launcher = brayns.Launcher(
-            executable='service',
             uri='uri',
             ssl_context=brayns.SslServerContext(),
             log_level=brayns.LogLevel.CRITICAL,
             resolution=brayns.Resolution(12, 23),
             jpeg_quality=25,
             plugins=[
-                brayns.Plugin.ATLAS_EXPLORER,
-                brayns.Plugin.CIRCUIT_EXPLORER
-            ]
+                brayns.Plugin.ATLAS_EXPLORER.value,
+                brayns.Plugin.CIRCUIT_EXPLORER.value,
+            ],
+            executable='service',
         )
         test = launcher.get_command_line()
         ref = [
@@ -54,7 +54,7 @@ class TestLauncher(unittest.TestCase):
             '--plugin',
             brayns.Plugin.CIRCUIT_EXPLORER.value,
             '--secure',
-            'true'
+            'true',
         ]
         self.assertEqual(test, ref)
 

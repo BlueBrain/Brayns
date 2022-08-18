@@ -53,22 +53,13 @@ class View:
         )
 
     @property
-    def axis(self) -> Vector3:
-        """Get view axis (target - position).
-
-        :return: View axis.
-        :rtype: Vector3
-        """
-        return self.target - self.position
-
-    @property
     def direction(self) -> Vector3:
-        """Get normalized direction (self.axis.normalized).
+        """Get normalized view direction (target - position).
 
         :return: View direction normalized.
         :rtype: Vector3
         """
-        return self.axis.normalized
+        return (self.target - self.position).normalized
 
     def serialize(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

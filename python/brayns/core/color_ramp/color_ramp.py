@@ -29,8 +29,8 @@ from .value_range import ValueRange
 
 
 @dataclass
-class TransferFunction:
-    """Transfer function to map simulation values to colors.
+class ColorRamp:
+    """Color ramp to map simulation values to colors.
 
     Simulation values below value_range.min have colors[0].
 
@@ -40,7 +40,7 @@ class TransferFunction:
 
     :param value_range: Simulation value range (usually voltages).
     :type value_range: ValueRange
-    :param colors: Color mapping.
+    :param colors: List of colors mapped to value range.
     :type colors: list[Color4]
     """
 
@@ -48,9 +48,9 @@ class TransferFunction:
     colors: list[Color4]
 
     @staticmethod
-    def deserialize(message: dict[str, Any]) -> TransferFunction:
+    def deserialize(message: dict[str, Any]) -> ColorRamp:
         """Low level API to deserialize from JSON."""
-        return TransferFunction(
+        return ColorRamp(
             value_range=ValueRange(*message['range']),
             colors=[
                 Color4(*color)

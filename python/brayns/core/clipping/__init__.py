@@ -18,14 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .add_clip_plane import add_clip_plane
-from .clear_clip_planes import clear_clip_planes
+from .add_clipping_geometry import add_clipping_geometry
+from .clear_clipping_geometries import clear_clipping_geometries
 from .clip_plane import ClipPlane
-from .remove_clip_planes import remove_clip_planes
+from .clipping_geometry import ClippingGeometry
+from .remove_clipping_geometries import remove_clipping_geometries
 
 __all__ = [
-    'add_clip_plane',
-    'clear_clip_planes',
+    'add_clipping_geometry',
+    'clear_clipping_geometries',
     'ClipPlane',
-    'remove_clip_planes',
+    'ClippingGeometry',
+    'remove_clipping_geometries',
 ]
