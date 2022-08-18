@@ -54,11 +54,13 @@ helper class `MovieFrames` to generate the indices from these data.
 
 .. attention::
 
-    This class takes a regular time step between frames so if the movie FPS are
-    not a multiple of simulation FPS, the movie time might not be accurate. The
-    formula is the following:
+    The formula used to compute the frame indices is using the following formula
+    to compute the index step between two frames to render:
 
-    step = int(simulation_fps / movie_fps / slowing_factor)
+    step = simulation_fps / movie_fps / slowing_factor
+    
+    If the step is smaller than 1, some frames will be duplicated to match the
+    target FPS.
 
 .. attention::
 

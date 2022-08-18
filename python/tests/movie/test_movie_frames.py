@@ -40,8 +40,27 @@ class TestMovieFrames(unittest.TestCase):
             time_unit=brayns.TimeUnit.MILLISECOND,
         )
         ref = list(range(5000, 6100, 100))
-        indices = frames.get_indices(simulation)
-        self.assertEqual(indices, ref)
+        test = frames.get_indices(simulation)
+        self.assertEqual(test, ref)
+
+    def test_get_indices_small_step(self) -> None:
+        frames = brayns.MovieFrames(
+            fps=10,
+            slowing_factor=1000,
+            start_frame=0,
+            end_frame=-1,
+        )
+        simulation = brayns.Simulation(
+            start_frame=0,
+            end_frame=100,
+            current_frame=2,
+            delta_time=0.1,
+            time_unit=brayns.TimeUnit.MILLISECOND,
+        )
+        test = frames.get_indices(simulation)
+        self.assertEqual(test[0], 0)
+        self.assertEqual(test[-1], 100)
+        self.assertEqual(len(test), 101)
 
 
 if __name__ == '__main__':
