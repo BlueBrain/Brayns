@@ -28,6 +28,10 @@ from testapi.api_test_case import ApiTestCase
 
 class TestConnector(ApiTestCase):
 
+    @property
+    def uri(self) -> str:
+        return f'localhost:{self.port}'
+
     def setUp(self) -> None:
         ssl_folder = self.asset_folder / 'ssl'
         self._key = str(ssl_folder / 'key.pem')

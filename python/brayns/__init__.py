@@ -148,6 +148,8 @@ __all__ = [
     'Resolution',
     'Rotation',
     'Scene',
+    'Service',
+    'ServiceLauncher',
     'ServiceUnavailableError',
     'set_camera_view',
     'set_camera',

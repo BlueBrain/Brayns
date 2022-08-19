@@ -56,7 +56,7 @@ class Process:
         return self
 
     def __exit__(self, *_) -> None:
-        self.terminate()
+        self.stop()
 
     @property
     def alive(self) -> bool:
@@ -69,8 +69,8 @@ class Process:
         with self._lock:
             return ''.join(self._logs)
 
-    def terminate(self) -> None:
-        """Terminate the process.
+    def stop(self) -> None:
+        """Stop the backend instance by terminating the process.
 
         Must be called through the context manager (i.e. 'with') or manually to
         avoid the process to run forever.

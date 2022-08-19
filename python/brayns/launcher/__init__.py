@@ -29,6 +29,8 @@ from .launcher import Launcher
 from .log_level import LogLevel
 from .plugin import Plugin
 from .process import Process
+from .service import Service
+from .service_launcher import ServiceLauncher
 from .ssl_server_context import SslServerContext
 
 __all__ = [
@@ -36,5 +38,7 @@ __all__ = [
     'LogLevel',
     'Plugin',
     'Process',
+    'Service',
+    'ServiceLauncher',
     'SslServerContext',
 ]
