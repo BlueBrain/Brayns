@@ -35,7 +35,7 @@ def color_circuit_by_method(
     Use a mapping from method value (str) to color.
 
     Available methods and method values can be queried for a given model using
-    `get_color_methods` and `get_color_method_values`.
+    ``get_color_methods`` and ``get_color_method_values``.
 
     :param instance: Instance.
     :type instance: Instance

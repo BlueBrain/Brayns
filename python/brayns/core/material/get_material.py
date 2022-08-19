@@ -30,7 +30,7 @@ T = TypeVar('T', bound=Material)
 def get_material(instance: Instance, model_id: int, material_type: type[T]) -> T:
     """Get the material applied on the given model.
 
-    `material_type` must be the same as the current one.
+    ``material_type`` must be the same as the current one.
 
     :param instance: Instance.
     :type instance: Instance
@@ -38,7 +38,7 @@ def get_material(instance: Instance, model_id: int, material_type: type[T]) -> T
     :type model_id: int
     :param material_type: Material type.
     :type material_type: type[T]
-    :return: Material applied on `model`.
+    :return: Material applied on ``model``.
     :rtype: T
     """
     name = material_type.name

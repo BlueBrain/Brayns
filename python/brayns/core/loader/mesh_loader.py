@@ -28,7 +28,7 @@ class MeshLoader(Loader):
 
     Main supported formats are OBJ, PLY, STL and OFF.
 
-    Format support can be queried using `get_loaders`.
+    Format support can be queried using ``get_loaders(instance)``.
     """
 
     @classmethod
