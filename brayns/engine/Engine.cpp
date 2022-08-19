@@ -22,10 +22,10 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/engine/FrameRenderer.h>
-#include <brayns/engine/cameras/OrthographicCamera.h>
-#include <brayns/engine/cameras/PerspectiveCamera.h>
-#include <brayns/engine/renderers/InteractiveRenderer.h>
-#include <brayns/engine/renderers/ProductionRenderer.h>
+#include <brayns/engine/camera/projections/Orthographic.h>
+#include <brayns/engine/camera/projections/Perspective.h>
+#include <brayns/engine/renderer/types/Interactive.h>
+#include <brayns/engine/renderer/types/Production.h>
 
 #include <thread>
 
@@ -120,8 +120,8 @@ Engine::OsprayModuleHandler::~OsprayModuleHandler()
 Engine::Engine(ParametersManager &parameters)
     : _params(parameters)
     , _osprayDevice(OsprayDeviceInitializer::init(parameters))
-    , _camera(std::make_unique<PerspectiveCamera>())
-    , _renderer(std::make_unique<InteractiveRenderer>())
+    , _camera(Perspective())
+    , _renderer(Interactive())
 {
     FactoryInitializer::addRenderers(_rendererFactory);
     FactoryInitializer::addCameras(_cameraFactory);

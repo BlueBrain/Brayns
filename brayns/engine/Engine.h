@@ -22,11 +22,11 @@
 #pragma once
 
 #include <brayns/common/parameters/ParametersManager.h>
-#include <brayns/engine/Camera.h>
 #include <brayns/engine/EngineObjectFactory.h>
-#include <brayns/engine/Framebuffer.h>
-#include <brayns/engine/Renderer.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/camera/Camera.h>
+#include <brayns/engine/framebuffer/Framebuffer.h>
+#include <brayns/engine/renderer/Renderer.h>
+#include <brayns/engine/scene/Scene.h>
 
 #include <ospray/ospray_cpp/Device.h>
 
@@ -81,7 +81,7 @@ public:
     /**
      * @brief Sets a new system Camera to use
      */
-    void setCamera(std::unique_ptr<Camera> camera) noexcept;
+    void setCamera(Camera camera) noexcept;
 
     /**
      * @brief Returns the system's current Camera object
@@ -91,7 +91,7 @@ public:
     /**
      * @brief Sets a new system Renderer to use
      */
-    void setRenderer(std::unique_ptr<Renderer> renderer) noexcept;
+    void setRenderer(Renderer renderer) noexcept;
 
     /**
      * @brief Returns the system's current Renderer object
@@ -140,15 +140,14 @@ private:
     // Global system parameters used to read when updating the backend during commit() and render()
     ParametersManager &_params;
 
-    OsprayModuleHandler _moduleHandle;
-
+    OsprayModuleHandler _moduleHandler;
     ospray::cpp::Device _osprayDevice;
 
     // System objects
     Framebuffer _frameBuffer;
     Scene _scene;
-    std::unique_ptr<Camera> _camera;
-    std::unique_ptr<Renderer> _renderer;
+    Camera _camera;
+    Renderer _renderer;
 
     EngineObjectFactory<Camera> _cameraFactory;
     EngineObjectFactory<Renderer> _rendererFactory;
