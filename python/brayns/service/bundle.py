@@ -54,7 +54,7 @@ class Bundle:
     connector_ssl: SslClientContext | None = None
     connector_binary_handler: Callable[[bytes], None] = lambda _: None
     connector_logger: logging.Logger = field(default_factory=Logger)
-    connector_max_attempts: int | None = 100
+    connector_max_attempts: int | None = None
     connector_attempt_period: float = 0.1
 
     @property

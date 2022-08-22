@@ -60,7 +60,27 @@ using the `logs` property of the object.
 
 .. attention::
 
-    Use the context manager to automatically call `terminate` on the process
-    started by the service (or call it manually) otherwise it will never get
-    terminated and will keep running after your script is finished (locking the
-    server port).
+    Use the context manager to automatically call `stop` on the process started
+    by the service (or call it manually) otherwise it will never get terminated
+    and keep running after your script is finished (locking the server port).
+
+Bundle
+------
+
+Brayns also provides a helper class to manage both the service and its connector
+named ``Bundle``. It automatically starts a service process on the given port
+and connects to it.
+
+.. code-block:: python
+
+    bundle = brayns.Bundle(5000)
+
+    with bundle.start() as manager:
+
+        print(brayns.get_version(manager.instance))
+        print(manager.process.logs)
+
+.. attention::
+
+    As for the process, use the context manager to automatically call `stop` on
+    the manager or do it manually.
