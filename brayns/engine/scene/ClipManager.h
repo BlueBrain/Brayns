@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include <brayns/engine/light/Light.h>
+#include <brayns/engine/model/Model.h>
+#include <brayns/engine/model/ModelInstance.h>
 #include <brayns/utils/IDFactory.h>
 
 #include <memory>
@@ -29,57 +30,56 @@
 namespace brayns
 {
 /**
- * @brief Handles the lights of the scene
+ * @brief Manages all the models used to clip renderable objects in the scene
  */
-class SceneLightManager
+class ClipManager
 {
 public:
     /**
-     * @brief Adds a new light and returns its ID
+     * @brief Adds a new clipping model
      *
-     * @param light
+     * @param clippingModel
      * @return uint32_t
      */
-    uint32_t addLight(std::unique_ptr<Light> light) noexcept;
+    uint32_t addClippingModel(std::unique_ptr<Model> clippingModel) noexcept;
 
     /**
-     * @brief Removes a list of lights identifid by their ID
-     * @param lightIds
-     * @throws std::invalid_argument if any of the light id does not belong to any existing light
+     * @brief Removes a list of clipping models from a list of IDs
+     * @param ids List of model ids to remove
+     * @throws std::invalid_argument if any of the id does not belong to any existing clipping model
      */
-    void removeLights(const std::vector<uint32_t> &lightId);
+    void removeClippingModels(const std::vector<uint32_t> &ids);
 
     /**
-     * @brief Removes all lights from the scene
+     * @brief Removes all clipping models from this manager
      */
-    void removeAllLights() noexcept;
-
-    /**
-     * @brief Return the bounds of all the lights in the manager
-     * @return Bounds
-     */
-    Bounds getBounds() const noexcept;
+    void removeAllClippingModels() noexcept;
 
 private:
     friend class Scene;
 
+    struct ClippingEntry
+    {
+        std::unique_ptr<Model> model;
+        std::unique_ptr<ModelInstance> instance;
+    };
+
     /**
-     * @brief Will commit any not synced data with Ospray.
+     * @brief Will commit any not synced data with Ospray
      *
      * @return true if there was anything to commit, false otherwise
      */
     bool commit();
 
     /**
-     * @brief Get the Ospray handles of all lights
-     *
-     * @return std::vector<ospray::cpp::Light>
+     * @brief Return the handles of the instances of the clipping geometry
+     * @return std::vector<ospray::cpp::Instance>
      */
-    std::vector<ospray::cpp::Light> getOsprayLights() const noexcept;
+    std::vector<ospray::cpp::Instance> getHandles() noexcept;
 
 private:
     bool _dirty{false};
     IDFactory<uint32_t> _idFactory;
-    std::unordered_map<uint32_t, std::unique_ptr<Light>> _lights;
+    std::unordered_map<uint32_t, ClippingEntry> _clippingModels;
 };
 }

@@ -33,7 +33,7 @@ struct AmbientLightParameters
 
 namespace brayns
 {
-void LightData<AmbientLight>::update(ospray::cpp::Light &handle, AmbientLight &data)
+void LightTraits<AmbientLight>::updateData(ospray::cpp::Light &handle, AmbientLight &data)
 {
     handle.setParam(AmbientLightParameters::color, data.color);
     handle.setParam(AmbientLightParameters::intensity, data.intensity);

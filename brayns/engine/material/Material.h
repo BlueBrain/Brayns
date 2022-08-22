@@ -35,14 +35,14 @@ class Material
 {
 private:
     template<typename MaterialType>
-    using Data = DataWrapper<MaterialType, ospray::cpp::Material, MaterialData>;
+    using Data = DataWrapper<MaterialType, ospray::cpp::Material, MaterialTraits>;
 
 public:
     template<typename MaterialType>
     Material(MaterialType &&data)
-        : _osprayHandleName(MaterialName<MaterialType>::osprayValue)
-        , _materialName(MaterialName<MaterialType>::value)
-        , _handle("", _osprayHandleName)
+        : _handleName(MaterialTraits<MaterialType>::handleName)
+        , _materialName(MaterialTraits<MaterialType>::materialName)
+        , _handle("", _handleName)
         , _data(std::make_unique<Data<MaterialType>>(std::forward<MaterialType>(data)))
     {
         _data->pushTo(_handle);
@@ -83,7 +83,7 @@ public:
     const ospray::cpp::Material &getHandle() const noexcept;
 
 private:
-    std::string _osprayHandleName;
+    std::string _handleName;
     std::string _materialName;
     ospray::cpp::Material _handle;
     std::unique_ptr<IDataWrapper<ospray::cpp::Material>> _data;

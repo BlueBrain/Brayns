@@ -33,16 +33,12 @@ struct Production
 };
 
 template<>
-struct RendererName<Production>
-{
-    inline static const std::string osprayValue = "pathtracer";
-    inline static const std::string value = "production";
-};
-
-template<>
-class RendererData<Production>
+class RendererTraits<Production>
 {
 public:
+    inline static const std::string handleName = "pathtracer";
+    inline static const std::string rendererName = "production";
+
     static void update(ospray::cpp::Renderer &handle, Production &data);
 };
 }

@@ -34,7 +34,7 @@ struct DirectionalLightParameters
 
 namespace brayns
 {
-void LightData<DirectionalLight>::update(ospray::cpp::Light &handle, DirectionalLight &data)
+void LightTraits<DirectionalLight>::updateData(ospray::cpp::Light &handle, DirectionalLight &data)
 {
     data.direction = glm::normalize(data.direction);
     handle.setParam(DirectionalLightParameters::color, data.color);

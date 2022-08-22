@@ -86,34 +86,27 @@ struct RegularVolumeParameters
 
 namespace brayns
 {
-const std::string &OsprayVolumeName<RegularVolume>::get()
+Bounds VolumeTraits<RegularVolume>::computeBounds(const Matrix4f &matrix, const RegularVolume &data)
 {
-    return RegularVolumeParameters::osprayName;
+    auto size = brayns::Vector3f(data.size) * data.spacing;
+    Bounds bounds;
+    bounds.expand(matrix * Vector4f(0.f, 0.f, 0.f, 1.f));
+    bounds.expand(matrix * Vector4f(size, 1.f));
 }
 
-void VolumeBoundsUpdater<RegularVolume>::update(const RegularVolume &s, const Matrix4f &t, Bounds &b)
+void VolumeTraits<RegularVolume>::updateData(ospray::cpp::Volume &handle, RegularVolume &data)
 {
-    const auto size = brayns::Vector3f(s.size) * s.spacing;
-    const Vector3f minBound(t * Vector4f(0.f, 0.f, 0.f, 1.f));
-    const Vector3f maxBound(t * Vector4f(size, 1.f));
+    const auto cellCentered = !data.perVertexData;
+    const auto dataType = static_cast<OSPDataType>(data.dataType);
+    const auto &voxels = data.voxels;
+    const auto &size = data.size;
+    const auto &spacing = data.spacing;
 
-    b.expand(minBound);
-    b.expand(maxBound);
-}
-
-void VolumeCommitter<RegularVolume>::commit(const ospray::cpp::Volume &osprayVolume, const RegularVolume &volumeData)
-{
-    const auto cellCentered = !volumeData.perVertexData;
-    const auto dataType = static_cast<OSPDataType>(volumeData.dataType);
-    const auto &data = volumeData.data;
-    const auto &size = volumeData.size;
-    const auto &spacing = volumeData.spacing;
-
-    OSPData sharedData = ospNewSharedData(data.data(), dataType, size.x, 0, size.y, 0, size.z);
-    osprayVolume.setParam(RegularVolumeParameters::data, sharedData);
+    OSPData sharedData = ospNewSharedData(voxels.data(), dataType, size.x, 0, size.y, 0, size.z);
+    handle.setParam(RegularVolumeParameters::data, sharedData);
     ospRelease(sharedData);
 
-    osprayVolume.setParam(RegularVolumeParameters::cellCentered, cellCentered);
-    osprayVolume.setParam(RegularVolumeParameters::gridSpacing, spacing);
+    handle.setParam(RegularVolumeParameters::cellCentered, cellCentered);
+    handle.setParam(RegularVolumeParameters::gridSpacing, spacing);
 }
 }

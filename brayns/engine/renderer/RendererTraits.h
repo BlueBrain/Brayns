@@ -28,17 +28,13 @@
 namespace brayns
 {
 template<typename T>
-struct RendererName
-{
-    inline static const std::string osprayValue;
-    inline static const std::string value;
-};
-
-template<typename T>
-class RendererData
+class RendererTraits
 {
 public:
-    static void update(ospray::cpp::Renderer &handle, T &data)
+    inline static const std::string handleName;
+    inline static const std::string rendererName;
+
+    static void updateData(ospray::cpp::Renderer &handle, T &data)
     {
         (void)handle;
         (void)data;

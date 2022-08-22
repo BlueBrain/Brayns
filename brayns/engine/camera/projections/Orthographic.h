@@ -30,15 +30,11 @@ struct Orthographic
 };
 
 template<>
-struct ProjectionName<Orthographic>
-{
-    inline static const std::string value = "orthographic";
-};
-
-template<>
-class ProjectionData<Orthographic>
+class ProjectionTraits<Orthographic>
 {
 public:
-    static void update(ospray::cpp::Camera &handle, Orthographic &data);
+    inline static const std::string value = "orthographic";
+
+    static void updateData(ospray::cpp::Camera &handle, Orthographic &data);
 };
 }

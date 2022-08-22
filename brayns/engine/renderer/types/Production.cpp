@@ -34,7 +34,7 @@ struct ProductionParameters
 
 namespace brayns
 {
-void RendererData<Interactive>::update(ospray::cpp::Renderer &handle, Production &data)
+void RendererTraits<Interactive>::updateData(ospray::cpp::Renderer &handle, Production &data)
 {
     handle.setParam(ProductionParameters::spp, data.samplesPerPixel);
     handle.setParam(ProductionParameters::pathLength, data.maxRayBounces);

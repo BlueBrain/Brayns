@@ -26,12 +26,9 @@
 #include <brayns/json/JsonType.h>
 
 #include "ModelComponents.h"
-#include "ModelGroup.h"
-
-#include <ospray/ospray.h>
+#include "RenderableGroup.h"
 
 #include <map>
-#include <memory>
 
 namespace brayns
 {
@@ -108,7 +105,7 @@ public:
     /**
      * @brief Returns the Ospray group handler object
      */
-    ModelGroup &getGroup() noexcept;
+    RenderableGroup &getGroup() noexcept;
 
     /**
      * @brief returns the model ID
@@ -140,14 +137,14 @@ private:
     bool commit();
 
 private:
-    friend class SceneClipManager;
-    friend class SceneModelManager;
+    friend class ClipManager;
+    friend class ModelManager;
     friend class ModelInstance;
 
 private:
     uint32_t _modelId{};
     std::map<std::string, std::string> _metadata;
     ModelComponentContainer _components;
-    ModelGroup _group;
+    RenderableGroup _group;
 };
 } // namespace brayns

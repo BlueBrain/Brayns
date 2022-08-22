@@ -51,7 +51,7 @@ struct ModelLoadParameters
 /**
  * @brief The SceneModelManager class manages models within a scene
  */
-class SceneModelManager
+class ModelManager
 {
 public:
     /**
@@ -158,7 +158,7 @@ private:
      *
      * @return std::vector<ospray::cpp::Instance>
      */
-    std::vector<ospray::cpp::Instance> getOsprayInstances() noexcept;
+    std::vector<ospray::cpp::Instance> getHandles() noexcept;
 
 private:
     /**

@@ -36,14 +36,13 @@ class Camera
 {
 private:
     template<typename ProjectionType>
-    using Data = DataWrapper<ProjectionType, ospray::cpp::Camera, ProjectionData>;
+    using Data = DataWrapper<ProjectionType, ospray::cpp::Camera, ProjectionTraits>;
 
 public:
     template<typename ProjectionType>
     Camera(ProjectionType &&data)
-        : _osprayHandleName(ProjectionName<ProjectionType>::osprayValue)
-        , _projectionName(ProjectionName<ProjectionType>::value)
-        , _handle(_osprayHandleName)
+        : _projectionName(ProjectionTraits<ProjectionType>::name)
+        , _handle(_projectionName)
         , _data(std::make_unique<Data<ProjectionType>>(std::forward<ProjectionType>(data)))
     {
         _data->pushTo(_handle);
@@ -113,7 +112,6 @@ private:
     void _updateAspectRatio();
 
 private:
-    std::string _osprayHandleName;
     std::string _projectionName;
     ospray::cpp::Camera _handle;
     std::unique_ptr<IDataWrapper<ospray::cpp::Camera>> _data;

@@ -27,21 +27,18 @@ namespace brayns
 {
 struct Default
 {
+    Vector3f color = Vector3f(1.f);
     Vector3f specularColor = Vector3f(0.f);
     float shininess = 2.f;
 };
 
 template<>
-struct MaterialName<Default>
-{
-    inline static const std::string osprayValue = "obj";
-    inline static const std::string value = "default";
-};
-
-template<>
-class MaterialData<Default>
+class MaterialTraits<Default>
 {
 public:
-    static void update(ospray::cpp::Material &handle, Default &data);
+    inline static const std::string handleName = "obj";
+    inline static const std::string materialName = "default";
+
+    static void updateData(ospray::cpp::Material &handle, Default &data);
 };
 }

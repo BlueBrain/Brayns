@@ -27,20 +27,17 @@ namespace brayns
 {
 struct CarPaint
 {
+    Vector3f color = Vector3f(1.f);
     float flakeDensity = 0.f;
 };
 
 template<>
-struct MaterialName<CarPaint>
-{
-    inline static const std::string osprayValue = "carPaint";
-    inline static const std::string value = "carpaint";
-};
-
-template<>
-class MaterialData<CarPaint>
+class MaterialTraits<CarPaint>
 {
 public:
-    static void update(ospray::cpp::Material &material, CarPaint &data);
+    inline static const std::string handleName = "carPaint";
+    inline static const std::string materialName = "carpaint";
+
+    static void updateData(ospray::cpp::Material &material, CarPaint &data);
 };
 }

@@ -32,16 +32,19 @@ struct DirectionalLight
 };
 
 template<>
-struct LightName<DirectionalLight>
-{
-    inline static const std::string osprayValue = "distant";
-    inline static const std::string value = "directional";
-};
-
-template<>
-class LightData<DirectionalLight>
+class LightTraits<DirectionalLight>
 {
 public:
-    static void update(ospray::cpp::Light &handle, DirectionalLight &lightData);
+    inline static const std::string handleName = "distant";
+    inline static const std::string lightName = "directional";
+
+    static Bounds computeBounds(const Matrix4f &matrix, const DirectionalLight &data)
+    {
+        (void)matrix;
+        (void)data;
+        return {};
+    }
+
+    static void updateData(ospray::cpp::Light &handle, DirectionalLight &lightData);
 };
 }

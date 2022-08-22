@@ -30,7 +30,7 @@ struct OrhtographicParameters
 
 namespace brayns
 {
-void ProjectionData<Orthographic>::update(ospray::cpp::Camera &handle, Orthographic &data)
+void ProjectionTraits<Orthographic>::updateData(ospray::cpp::Camera &handle, Orthographic &data)
 {
     handle.setParam(OrhtographicParameters::height, data.height);
 }

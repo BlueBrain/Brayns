@@ -34,33 +34,22 @@ namespace brayns
  */
 struct RegularVolume
 {
-    // Specifies how to interpret the bytes stored as data
     VolumeDataType dataType;
-    std::vector<uint8_t> data;
-    Vector3ui size{0u};
+    std::vector<uint8_t> voxels;
+    Vector3ui size;
     Vector3f spacing;
-    // Specifies wether the data is scpeified as per grid vertex. If false, is specified as per grid cell center.
-    bool perVertexData{false};
+    bool perVertexData;
 };
 
 template<>
-class OsprayVolumeName<RegularVolume>
+class VolumeTraits<RegularVolume>
 {
 public:
-    static const std::string &get();
-};
+    inline static const std::string handleName = "structuredRegular";
+    inline static const std::string volumeName = "gridvolume";
 
-template<>
-class VolumeBoundsUpdater<RegularVolume>
-{
-public:
-    static void update(const RegularVolume &s, const Matrix4f &t, Bounds &b);
-};
+    static Bounds computeBounds(const Matrix4f &matrix, const RegularVolume &data);
 
-template<>
-class VolumeCommitter<RegularVolume>
-{
-public:
-    static void commit(const ospray::cpp::Volume &osprayVolumeconst, const RegularVolume &volumeData);
+    static void updateData(ospray::cpp::Volume &handle, RegularVolume &volumeData);
 };
 }

@@ -32,13 +32,13 @@ namespace brayns
  * @brief The TransferFunction class is an utility object which transform maps a value within a range, and from that
  * range, maps it into a color map scale.
  */
-class TransferFunction
+class ColorMap
 {
 public:
     /**
      * @brief Initializes the tranfer function by default to a grayscale from 0 to 1
      */
-    TransferFunction();
+    ColorMap();
 
     /**
      * @brief Return the list of colors that make up this transfer function color map
@@ -70,8 +70,12 @@ public:
     /**
      * @brief Returns the modified flag status object
      */
-    ModifiedFlag &getModifiedFlag() noexcept;
-    const ModifiedFlag &getModifiedFlag() const noexcept;
+    bool isModified() const noexcept;
+
+    /**
+     * @brief Sets the modified flag to false
+     */
+    void resetModified() noexcept;
 
 private:
     std::vector<Vector4f> _colors;

@@ -26,6 +26,7 @@
 
 #include <cassert>
 #include <string>
+#include <vector>
 
 namespace brayns
 {
@@ -33,8 +34,8 @@ template<typename T>
 class GeometryTraits
 {
 public:
-    inline static const std::string osprayValue;
-    inline static const std::string value;
+    inline static const std::string handleName;
+    inline static const std::string geometryName;
 
     static Bounds computeBounds(const Matrix4f &matrix, const T &data)
     {
@@ -43,7 +44,7 @@ public:
         assert(false);
     }
 
-    static void update(ospray::cpp::Geometry &handle, T &data)
+    static void update(ospray::cpp::Geometry &handle, std::vector<T> &data)
     {
         (void)handle;
         (void)data;

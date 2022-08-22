@@ -35,14 +35,14 @@ class Renderer
 {
 private:
     template<typename RendererType>
-    using Data = DataWrapper<RendererType, ospray::cpp::Renderer, RendererData>;
+    using Data = DataWrapper<RendererType, ospray::cpp::Renderer, RendererTraits>;
 
 public:
     template<typename RendererType>
     Renderer(RendererType &&data)
-        : _osprayHandleName(RendererName<RendererType>::osprayValue)
-        , _rendererName(RendererName<RendererType>::value)
-        , _handle(_osprayHandleName)
+        : _handleName(RendererTraits<RendererType>::handleName)
+        , _rendererName(RendererTraits<RendererType>::rendererName)
+        , _handle(_handleName)
         , _data(std::make_unique<Data<RendererType>>(std::forward<RendererType>(data)))
     {
         _data->pushTo(_handle);
@@ -90,7 +90,7 @@ public:
     const ospray::cpp::Renderer &getHandle() const noexcept;
 
 private:
-    std::string _osprayHandleName;
+    std::string _handleName;
     std::string _rendererName;
     ospray::cpp::Renderer _handle;
     std::unique_ptr<IDataWrapper<ospray::cpp::Renderer>> _data;

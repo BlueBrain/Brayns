@@ -19,34 +19,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TransferFunction.h"
+#include "ColorMap.h"
 
 #include <algorithm>
 
 namespace brayns
 {
-TransferFunction::TransferFunction()
+ColorMap::ColorMap()
     : _colors({{0, 0, 0, 0}, {1, 1, 1, 1}})
     , _valuesRange({0, 255})
 {
 }
 
-const std::vector<brayns::Vector4f> &TransferFunction::getColors() const
+const std::vector<brayns::Vector4f> &ColorMap::getColors() const
 {
     return _colors;
 }
 
-void TransferFunction::setColors(std::vector<Vector4f> colors)
+void ColorMap::setColors(std::vector<Vector4f> colors)
 {
     _flag.update(_colors, std::move(colors));
 }
 
-const Vector2f &TransferFunction::getValuesRange() const
+const Vector2f &ColorMap::getValuesRange() const
 {
     return _valuesRange;
 }
 
-void TransferFunction::setValuesRange(const Vector2f &valuesRange)
+void ColorMap::setValuesRange(const Vector2f &valuesRange)
 {
     if (valuesRange.x >= valuesRange.y)
     {
@@ -56,7 +56,7 @@ void TransferFunction::setValuesRange(const Vector2f &valuesRange)
     _flag.update(_valuesRange, valuesRange);
 }
 
-Vector4f TransferFunction::getColorForValue(const float v) const
+Vector4f ColorMap::getColorForValue(const float v) const
 {
     if (v <= _valuesRange.x)
     {
@@ -82,13 +82,13 @@ Vector4f TransferFunction::getColorForValue(const float v) const
     return glm::mix(color1, color2, remainder);
 }
 
-ModifiedFlag &TransferFunction::getModifiedFlag() noexcept
+bool ColorMap::isModified() const noexcept
 {
     return _flag;
 }
 
-const ModifiedFlag &TransferFunction::getModifiedFlag() const noexcept
+void ColorMap::resetModified() noexcept
 {
-    return _flag;
+    _flag = false;
 }
 } // namespace brayns

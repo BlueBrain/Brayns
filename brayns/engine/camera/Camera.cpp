@@ -42,9 +42,8 @@ Camera::Camera(const Camera &other)
 
 Camera &Camera::operator=(const Camera &other)
 {
-    _osprayHandleName = other._osprayHandleName;
     _projectionName = other._projectionName;
-    _handle = ospray::cpp::Camera(_osprayHandleName);
+    _handle = ospray::cpp::Camera(_projectionName);
     _data = other._data->clone();
     _data->pushTo(_handle);
     setView(other._view);

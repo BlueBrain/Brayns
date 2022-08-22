@@ -35,13 +35,13 @@ class Light
 {
 private:
     template<typename LightType>
-    using Data = DataWrapper<LightType, ospray::cpp::Light, LightData, LightBounds>;
+    using Data = SpataialDataWrapper<LightType, ospray::cpp::Light, LightTraits>;
 
 public:
     template<typename Type>
     Light(Type data)
-        : _osprayHandleName(LightName<Type>::osprayValue)
-        , _lightName(LightName<Type>::value)
+        : _handleName(LightTraits<Type>::handleName)
+        , _lightName(LightTraits<Type>::lightName)
         : _handle(_osprayHandleName)
         , _data(std::make_unique<Data<Type>>(std::move(data)))
     {
@@ -69,9 +69,9 @@ public:
     Bounds computeBounds(const Matrix4f &matrix) const noexcept;
 
 private:
-    std::string _osprayHandleName;
+    std::string _handleName;
     std::string _lightName;
     ospray::cpp::Light _handle;
-    std::unique_ptr<IDataWrapper<ospray::cpp::Light>> _data;
+    std::unique_ptr<ISpatialDataWrapper<ospray::cpp::Light>> _data;
 };
 } // namespace brayns

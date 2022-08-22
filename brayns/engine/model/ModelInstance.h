@@ -105,8 +105,8 @@ public:
     const ospray::cpp::Instance &getOsprayInstance() const noexcept;
 
 private:
-    friend class SceneClipManager;
-    friend class SceneModelManager;
+    friend class ClipManager;
+    friend class ModelManager;
 
     /**
      * @brief Commit implementation

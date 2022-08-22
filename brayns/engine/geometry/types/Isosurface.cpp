@@ -18,45 +18,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Isosurface.h"
 
-#include <brayns/common/MathTypes.h>
-#include <brayns/engine/geometry/Geometry.h>
+#include <ospray/ospray_cpp/Data.h>
+
+namespace
+{
+struct IsosurfaceParameters
+{
+    inline static const std::string volume = "volume";
+    inline static const std::string isovalue = "isovalue";
+};
+}
 
 namespace brayns
 {
-struct Primitive
+Bounds GeometryTraits<Isosurface>::computeBounds(const Matrix4f &matrix, const Isosurface &data)
 {
-    Vector3f p0;
-    float r0;
-    Vector3f p1;
-    float r1;
+    auto &volume = data.volume;
+    return volume.computeBounds(matrix);
+}
 
-    static Primitive cylinder(const Vector3f &p0, const Vector3f &p1, const float radius) noexcept;
-
-    static Primitive cone(const Vector3f &p0, const float r0, const Vector3f &p1, const float r1) noexcept;
-
-    static Primitive sphere(const Vector3f &center, const float radius) noexcept;
-};
-
-template<>
-class OsprayGeometryName<Primitive>
+void GeometryTraits<Isosurface>::updateData(ospray::cpp::Geometry &handle, std::vector<Isosurface> &primitives)
 {
-public:
-    static const std::string &get();
-};
+    assert(primitives.size() == 1);
+    auto &primitive = primitives.front();
+    auto &isoValues = primitive.isovalues;
+    auto &volume = primitive.volume;
 
-template<>
-class GeometryBoundsUpdater<Primitive>
-{
-public:
-    static void update(const Primitive &s, const Matrix4f &t, Bounds &b);
-};
-
-template<>
-class GeometryCommitter<Primitive>
-{
-public:
-    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Primitive> &primitives);
-};
+    volume.commit();
+    handle.setParam(IsosurfaceParameters::volume, volume.getHandle());
+    handle.setParam(IsosurfaceParameters::isovalue, ospray::cpp::SharedData(isoValues));
+}
 }

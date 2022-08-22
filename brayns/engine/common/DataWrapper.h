@@ -22,7 +22,6 @@
 
 #include <brayns/common/Bounds.h>
 
-#include <cassert>
 #include <memory>
 
 namespace brayns
@@ -34,10 +33,9 @@ public:
     virtual ~IDataWrapper() = default;
     virtual void pushTo(OsprayHandle &handle) = 0;
     virtual std::unique_ptr<IDataWrapper> clone() const noexcept = 0;
-    virtual Bounds computeBounds(const Matrix4f &matrix) const noexcept = 0;
 };
 
-template<typename DataType, typename OsprayHandle, typename UpdateTraits, typename BoundsTraits = void>
+template<typename DataType, typename OsprayHandle, typename Traits>
 class DataWrapper final : public IDataWrapper<OsprayHandle>
 {
 public:
@@ -48,7 +46,7 @@ public:
 
     void pushTo(OsprayHandle &handle) override
     {
-        UpdateTraits<DataType>::update(handle, data);
+        Traits<DataType>::updateData(handle, data);
     }
 
     std::unique_ptr<IDataWrapper> clone() const noexcept override
@@ -56,19 +54,42 @@ public:
         return std::make_unique<DataWrapper<DataType>>(data);
     }
 
+    DataType data;
+};
+
+template<typename OsprayHandle>
+class ISpatialDataWrapper
+{
+public:
+    virtual ~ISpatialDataWrapper() = default;
+    virtual void pushTo(OsprayHandle &handle) = 0;
+    virtual std::unique_ptr<ISpatialDataWrapper> clone() const noexcept = 0;
+    virtual Bounds computeBounds(const Matrix4f &matrix) const noexcept = 0;
+};
+
+template<typename DataType, typename OsprayHandle, typename Traits>
+class SpatialDataWrapper final : public ISpatialDataWrapper<OsprayHandle>
+{
+public:
+    SpatialDataWrapper(DataType value)
+        : data(std::move(value))
+    {
+    }
+
+    void pushTo(OsprayHandle &handle) override
+    {
+        Traits<DataType>::updateData(handle, data);
+    }
+
+    std::unique_ptr<ISpatialDataWrapper> clone() const noexcept override
+    {
+        return std::make_unique<SpatialDataWrapper<DataType>>(data);
+    }
+
     Bounds computeBounds(const Matrix4f &matrix) const noexcept override
     {
-        if constexpr (std::is_same_v<BoundsTraits, void>)
-        {
-            (void)matrix;
-            assert(false);
-            return {};
-        }
-        else
-        {
-            return BoundsTraits<DataType>::compute(matrix, data);
-        }
-    }
+        return Traits<DataType>::computeBounds(matrix, data);
+    };
 
     DataType data;
 };

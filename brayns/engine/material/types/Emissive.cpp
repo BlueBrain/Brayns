@@ -33,7 +33,7 @@ struct EmissiveParameters
 
 namespace brayns
 {
-void MaterialData<Emissive>::update(ospray::cpp::Material &handle, Emissive &data)
+void MaterialTraits<Emissive>::updateData(ospray::cpp::Material &handle, Emissive &data)
 {
     handle.setParam(EmissiveParameters::color, data.color);
     handle.setParam(EmissiveParameters::intensity, data.intensity);

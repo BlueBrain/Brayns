@@ -74,7 +74,6 @@ public:
 
 struct TriangleMeshParameters
 {
-    inline static const std::string osprayName = "mesh";
     inline static const std::string position = "vertex.position";
     inline static const std::string index = "index";
     inline static const std::string normal = "vertex.normal";
@@ -85,7 +84,7 @@ struct TriangleMeshParameters
 
 namespace brayns
 {
-void TriangleMeshMerger::merge(const TriangleMesh &src, TriangleMesh &dst)
+void TriangleMeshUtils::merge(const TriangleMesh &src, TriangleMesh &dst)
 {
     auto &indices = dst.indices;
     auto &positions = dst.vertices;
@@ -116,7 +115,7 @@ void TriangleMeshMerger::merge(const TriangleMesh &src, TriangleMesh &dst)
     }
 }
 
-void TriangleMeshNormalGenerator::generate(TriangleMesh &mesh)
+void TriangleMeshUtils::generateNormals(TriangleMesh &mesh)
 {
     auto &indices = mesh.indices;
     auto &positions = mesh.vertices;
@@ -152,57 +151,40 @@ void TriangleMeshNormalGenerator::generate(TriangleMesh &mesh)
     }
 }
 
-const std::string &OsprayGeometryName<TriangleMesh>::get()
+Bounds GeometryTraits<TriangleMesh>::computeBounds(const Matrix4f &matrix, const TriangleMesh &data)
 {
-    return TriangleMeshParameters::osprayName;
-}
-
-void GeometryBoundsUpdater<TriangleMesh>::update(const TriangleMesh &mesh, const Matrix4f &matrix, Bounds &bounds)
-{
-    const auto &vertices = mesh.vertices;
-
-    for (const auto &vertex : vertices)
+    Bounds bounds;
+    for (auto &vertex : data.vertices)
     {
-        auto point = Vector3f(matrix * Vector4f(vertex, 1.f));
-        bounds.expand(point);
+        bounds.expand(matrix * Vector4f(vertex, 1.f));
     }
+    return bounds;
 }
 
-void InputGeometryChecker<TriangleMesh>::check(const std::vector<TriangleMesh> &primitives)
+void GeometryTraits<TriangleMesh>::updateData(ospray::cpp::Geometry &handle, std::vector<TriangleMesh> &data)
 {
-    if (primitives.size() > 1)
-    {
-        throw std::invalid_argument("Geometry<TriangleMesh> can hold only 1 mesh");
-    }
+    assert(data.size() == 1);
 
-    TriangleMeshAttributeChecker::check(primitives.front());
-}
-
-void GeometryCommitter<TriangleMesh>::commit(
-    const ospray::cpp::Geometry &osprayGeometry,
-    const std::vector<TriangleMesh> &primitives)
-{
-    auto &mesh = primitives.front();
-
+    auto &mesh = data.front();
     auto &vertices = mesh.vertices;
     auto &indices = mesh.indices;
     auto &normals = mesh.normals;
     auto &uvs = mesh.uvs;
     auto &colors = mesh.colors;
 
-    osprayGeometry.setParam(TriangleMeshParameters::position, ospray::cpp::SharedData(vertices));
-    osprayGeometry.setParam(TriangleMeshParameters::index, ospray::cpp::SharedData(indices));
+    handle.setParam(TriangleMeshParameters::position, ospray::cpp::SharedData(vertices));
+    handle.setParam(TriangleMeshParameters::index, ospray::cpp::SharedData(indices));
     if (!normals.empty())
     {
-        osprayGeometry.setParam(TriangleMeshParameters::normal, ospray::cpp::SharedData(normals));
+        handle.setParam(TriangleMeshParameters::normal, ospray::cpp::SharedData(normals));
     }
     if (!uvs.empty())
     {
-        osprayGeometry.setParam(TriangleMeshParameters::uv, ospray::cpp::SharedData(uvs));
+        handle.setParam(TriangleMeshParameters::uv, ospray::cpp::SharedData(uvs));
     }
     if (!colors.empty())
     {
-        osprayGeometry.setParam(TriangleMeshParameters::uv, ospray::cpp::SharedData(colors));
+        handle.setParam(TriangleMeshParameters::uv, ospray::cpp::SharedData(colors));
     }
 }
 }

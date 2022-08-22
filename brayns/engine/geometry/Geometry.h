@@ -20,13 +20,15 @@
 
 #pragma once
 
-#include <brayns/engine/common/DataWrapper.h>
+#include <brayns/common/ModifiedFlag.h>
+#include <brayns/engine/common/ArgumentInferer.h>
 
 #include "GeometryData.h"
 #include "GeometryTraits.h"
 
 #include <ospray/ospray_cpp/Geometry.h>
 
+#include <cassert>
 #include <memory>
 #include <vector>
 
@@ -34,7 +36,6 @@ namespace brayns
 {
 class Geometry
 {
-private:
 public:
     template<typename Type>
     Geometry(std::vector<Type> primitives)
@@ -45,41 +46,71 @@ public:
     {
     }
 
-    Geometry(std::vector<T> primitives)
-        : _osprayGeometry(OsprayGeometryName<T>::get())
-        , _primitives(std::move(primitives))
-    {
-        assert(!_primitives.empty());
-        InputGeometryChecker<T>::check(_primitives);
-    }
+    Geometry(Geometry &&) noexcept = default;
+    Geometry &operator=(Geometry &&) noexcept = default;
+
+    Geometry(const Geometry &other);
+    Geometry &operator=(const Geometry &other);
 
     /**
-     * @brief Retrieves all geometry primitives in this Geometry object
+     * @brief Allows to pass a callback of the underlying primitive type to iterate over all the primitives.
+     * @tparam Callable callback signature whose argument must be a single reference to the underlying geometry type.
+     * @param callback the Callable object.
      */
-    const std::vector<T> &getPrimitives() const noexcept
+    template<typename Callable>
+    void forEach(Callable &&callback) const noexcept
     {
-        return _primitives;
-    }
-
-    /**
-     * @brief Allows to pass a callback to mainipulate all the geometries on thie Geometry buffer.
-     * The callback must have the signature void(const uint32_t index, GeometryType&).
-     */
-    template<typename Type, typename Callable>
-    void forEach(const Callable &callback)
-    {
-        _dirty = true;
-        const auto end = static_cast<uint32_t>(_primitives.size());
-        for (uint32_t i = 0; i < end; ++i)
+        using ArgType = typename ArgumentInferer<Callable>::argType;
+        auto cast = dynamic_cast<const GeometryData<ArgType> *>(data.get());
+        assert(cast);
+        for (auto &element : cast->elements)
         {
-            callback(i, _primitives[i]);
+            callable(element);
         }
     }
 
-    Bounds computeBounds(const Matrix4f &transform) const noexcept;
+    /**
+     * @copydoc Geometry::forEach<Callable>(Callable&&) const
+     */
+    template<typename Callable>
+    void forEach(Callable &&callback) noexcept
+    {
+        using ArgType = typename ArgumentInferer<Callable>::argType;
+        auto cast = dynamic_cast<GeometryData<ArgType> *>(data.get());
+        assert(cast);
+        for (auto &element : cast->elements)
+        {
+            callable(element);
+        }
+        data->pushTo(_handle);
+        _flag = true;
+    }
 
+    /**
+     * @brief Return the number of primitives that make up this geometry.
+     * @return size_t number of primitives.
+     */
+    size_t numPrimitives() const noexcept;
+
+    /**
+     * @brief Compute the spatial bounds of the transformed primitives.
+     * @param matrix transformation to apply to the geometry spatial data.
+     * @return Bounds axis-aligned bounding box of the geometry
+     */
+    Bounds computeBounds(const Matrix4f &matrix) const noexcept;
+
+    /**
+     * @brief Calls the underlying OSPRay commit function, if any parameter has been modified, and resets the modified
+     * state.
+     * @return true If any parameter was modified and thus the commit function was called.
+     * @return false If no parameter was modified.
+     */
     bool commit();
 
+    /**
+     * @brief Returns the OSPRay geometry handle.
+     * @return const ospray::cpp::Geometry&.
+     */
     const ospray::cpp::Geometry &getHandle() const noexcept;
 
 private:
@@ -87,5 +118,6 @@ private:
     std::string _geometryName;
     ospray::cpp::Geometry _handle;
     std::unique_ptr<IGeometryData> _data;
+    ModifiedFlag _flag;
 };
 }

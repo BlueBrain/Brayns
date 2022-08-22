@@ -28,17 +28,13 @@
 namespace brayns
 {
 template<typename T>
-struct MaterialName
-{
-    inline static const std::string osprayValue;
-    inline static const std::string value;
-};
-
-template<typename T>
-class MaterialData
+class MaterialTraits
 {
 public:
-    static void update(ospray::cpp::Material &handle, T &data)
+    inline static const std::string handleNam;
+    inline static const std::string materialName;
+
+    static void updateData(ospray::cpp::Material &handle, T &data)
     {
         (void)handle;
         (void)data;

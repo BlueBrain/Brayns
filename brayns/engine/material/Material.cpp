@@ -30,9 +30,9 @@ Material::Material(const Material &other)
 
 Material &Material::operator=(const Material &other)
 {
-    _osprayHandleName = other._osprayHandleName;
+    _handleName = other._handleName;
     _materialName = other._materialName;
-    _handle = ospray::cpp::Material("", _osprayHandleName);
+    _handle = ospray::cpp::Material("", _handleName);
     _data = other._data->clone();
     _data->pushTo(_handle);
     _handle.commit();

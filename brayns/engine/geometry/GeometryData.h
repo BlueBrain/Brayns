@@ -24,7 +24,7 @@
 
 #include "GeometryTraits.h"
 
-#include <ospray/cpp/Geometry.h>
+#include <ospray/ospray_cpp/Geometry.h>
 
 #include <cassert>
 #include <memory>
@@ -34,9 +34,10 @@ namespace brayns
 class IGeometryData
 {
 public:
-    virtual ~IDataWrapper() = default;
+    virtual ~IGeometryData() = default;
     virtual void pushTo(ospray::cpp::Geometry &handle) = 0;
     virtual std::unique_ptr<IGeometryData> clone() const noexcept = 0;
+    virtual size_t numPrimitives() const noexcept = 0;
     virtual Bounds computeBounds(const Matrix4f &matrix) const noexcept = 0;
 };
 
@@ -57,6 +58,11 @@ public:
     std::unique_ptr<IGeometryData> clone() const noexcept override
     {
         return std::make_unique<GeometryData<Type>>(primitives);
+    }
+
+    size_t numPrimitives() const noexcept override
+    {
+        return primitives.size();
     }
 
     Bounds computeBounds(const Matrix4f &matrix) const noexcept override

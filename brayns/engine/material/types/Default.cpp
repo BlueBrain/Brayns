@@ -34,9 +34,9 @@ struct DefaultParameters
 
 namespace brayns
 {
-void MaterialData<Default>::update(ospray::cpp::Material &handle, Default &data)
+void MaterialTraits<Default>::updateData(ospray::cpp::Material &handle, Default &data)
 {
-    handle.setParam(DefaultParameters::diffuseColor, Vector3f(1.f));
+    handle.setParam(DefaultParameters::diffuseColor, data.color);
     handle.setParam(DefaultParameters::specularColor, data.specularColor);
     handle.setParam(DefaultParameters::shininess, data.shininess);
 }

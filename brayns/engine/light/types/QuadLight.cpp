@@ -36,7 +36,7 @@ struct QuadLightParameters
 
 namespace brayns
 {
-Bounds LightBounds<QuadLight>::compute(const Matrix4f &matrix, const QuadLight &light)
+Bounds LightTraits<QuadLight>::computeBounds(const Matrix4f &matrix, const QuadLight &light)
 {
     Bounds bounds;
     bounds.expand(matrix * Vector4f(light.position, 1.f));
@@ -46,7 +46,7 @@ Bounds LightBounds<QuadLight>::compute(const Matrix4f &matrix, const QuadLight &
     return bounds;
 }
 
-void LightData<QuadLight>::update(ospray::cpp::Light &handle, QuadLight &data)
+void LightTraits<QuadLight>::updateData(ospray::cpp::Light &handle, QuadLight &data)
 {
     handle.setParam(QuadLightParameters::color, data.color);
     handle.setParam(QuadLightParameters::intensity, data.intensity);

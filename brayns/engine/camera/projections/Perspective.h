@@ -18,24 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Perspective.h"
-
-namespace
-{
-struct PerspectiveParameters
-{
-    inline static const std::string fovy = "fovy";
-    inline static const std::string aperture = "apertureRadius";
-    inline static const std::string focus = "focusDistance";
-};
-}
+#include <brayns/engine/camera/ProjectionTraits.h>
 
 namespace brayns
 {
-void ProjectionData<Perspective>::update(ospray::cpp::Camera &handle, Perspective &data)
+struct Perspective
 {
-    handle.setParam(PerspectiveParameters::fovy, data.fovy);
-    handle.setParam(PerspectiveParameters::aperture, data.apertureRadius);
-    handle.setParam(PerspectiveParameters::focus, data.focusDistance);
-}
+    float fovy = 45.f;
+    float apertureRadius = 0.f;
+    float focusDistance = 1.f;
+};
+
+template<>
+class ProjectionTraits<Perspective>
+{
+public:
+    static inline const std::string name = "perspective";
+
+    static void updateData(ospray::cpp::Camera &handle, Perspective &data);
+};
 }

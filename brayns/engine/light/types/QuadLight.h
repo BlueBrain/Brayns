@@ -34,23 +34,14 @@ struct QuadLight
 };
 
 template<>
-struct LightName<QuadLight>
-{
-    inline static const std::string osprayValue = "quad";
-    inline static const std::string value = "quad";
-};
-
-template<>
-class LightBounds<QuadLight>
+class LightTraits<QuadLight>
 {
 public:
-    static Bounds compute(const Matrix4f &matrix, const QuadLight &light);
-};
+    inline static const std::string handleName = "quad";
+    inline static const std::string lightName = "quad";
 
-template<>
-class LightData<QuadLight>
-{
-public:
-    static void update(ospray::cpp::Light &handle, QuadLight &data);
+    static Bounds computeBounds(const Matrix4f &matrix, const QuadLight &light);
+
+    static void updateData(ospray::cpp::Light &handle, QuadLight &data);
 };
 }

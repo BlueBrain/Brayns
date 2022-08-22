@@ -18,13 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PerspectiveCamera.h"
+#include "Perspective.h"
 
 namespace
 {
 struct PerspectiveParameters
 {
-    inline static const std::string osprayName = "perspective";
     inline static const std::string fovy = "fovy";
     inline static const std::string aperture = "apertureRadius";
     inline static const std::string focus = "focusDistance";
@@ -33,62 +32,10 @@ struct PerspectiveParameters
 
 namespace brayns
 {
-PerspectiveCamera::PerspectiveCamera()
-    : Camera(PerspectiveParameters::osprayName)
+void ProjectionTraits<Perspective>::updateData(ospray::cpp::Camera &handle, Perspective &data)
 {
-}
-
-std::string PerspectiveCamera::getName() const noexcept
-{
-    return typeName;
-}
-
-std::unique_ptr<Camera> PerspectiveCamera::clone() const noexcept
-{
-    auto result = std::make_unique<PerspectiveCamera>();
-    result->setApertureRadius(getApertureRadius());
-    result->setAspectRatio(getAspectRatio());
-    result->setFocusDistance(getFocusDistance());
-    result->setFOVY(getFOVY());
-    result->setLookAt(getLookAt());
-    return result;
-}
-
-void PerspectiveCamera::commitCameraSpecificParams()
-{
-    const auto &osprayCamera = getOsprayCamera();
-    osprayCamera.setParam(PerspectiveParameters::fovy, _fovy);
-    osprayCamera.setParam(PerspectiveParameters::aperture, _apertureRadius);
-    osprayCamera.setParam(PerspectiveParameters::focus, _focusDistance);
-}
-
-void PerspectiveCamera::setFOVY(const float fovy) noexcept
-{
-    getModifiedFlag().update(_fovy, fovy);
-}
-
-void PerspectiveCamera::setApertureRadius(const float aperture) noexcept
-{
-    getModifiedFlag().update(_apertureRadius, aperture);
-}
-
-void PerspectiveCamera::setFocusDistance(const float distance) noexcept
-{
-    getModifiedFlag().update(_focusDistance, distance);
-}
-
-float PerspectiveCamera::getFOVY() const noexcept
-{
-    return _fovy;
-}
-
-float PerspectiveCamera::getApertureRadius() const noexcept
-{
-    return _apertureRadius;
-}
-
-float PerspectiveCamera::getFocusDistance() const noexcept
-{
-    return _focusDistance;
+    handle.setParam(PerspectiveParameters::fovy, data.fovy);
+    handle.setParam(PerspectiveParameters::aperture, data.apertureRadius);
+    handle.setParam(PerspectiveParameters::focus, data.focusDistance);
 }
 }

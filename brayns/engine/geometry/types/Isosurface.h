@@ -20,79 +20,26 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-#include <brayns/engine/geometry/Geometry.h>
+#include <brayns/engine/geometry/GeometryTraits.h>
 #include <brayns/engine/volume/Volume.h>
-
-#include <ospray/ospray_cpp/Data.h>
 
 namespace brayns
 {
-struct IsosurfaceParameters
-{
-    inline static const std::string osprayName = "isosurface";
-    inline static const std::string volume = "volume";
-    inline static const std::string isovalue = "isovalue";
-};
-
-template<typename T>
 struct Isosurface
 {
-    // As owner of the volume, the isosurface needs to commit it during its own commit(), where
-    // the data is const, thus volume must be mutable. Temporary until commit is changed
-    mutable Volume<T> volume;
+    Volume volume;
     std::vector<float> isovalues;
 };
 
-template<typename T>
-class OsprayGeometryName<Isosurface<T>>
+template<>
+class GeometryTraits<Isosurface>
 {
 public:
-    static const std::string &get()
-    {
-        return IsosurfaceParameters::osprayName;
-    }
-};
+    inline static const std::string handleName = "isosurface";
+    inline static const std::string geometryName = "isosurface";
 
-template<typename T>
-class GeometryBoundsUpdater<Isosurface<T>>
-{
-public:
-    static void update(const Isosurface<T> &geometry, const Matrix4f &transform, Bounds &bounds)
-    {
-        const auto &volume = geometry.volume;
-        auto volumeBounds = volume.computeBounds(transform);
-        bounds.expand(volumeBounds);
-    }
-};
-
-template<typename T>
-class InputGeometryChecker<Isosurface<T>>
-{
-public:
-    static void check(const std::vector<Isosurface<T>> &primitives)
-    {
-        if (primitives.size() > 1)
-        {
-            throw std::runtime_error("Geometry<Isosurface<T>> only accepts 1 geometry");
-        }
-    }
-};
-
-template<typename T>
-class GeometryCommitter<Isosurface<T>>
-{
-public:
-    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Isosurface<T>> &primitives)
-    {
-        const auto &primitive = primitives.front();
-        auto &isoValues = primitive.isovalues;
-        auto &volume = primitive.volume;
-
-        volume.commit();
-        osprayGeometry.setParam(IsosurfaceParameters::volume, volume.getOsprayVolume());
-        osprayGeometry.setParam(IsosurfaceParameters::isovalue, ospray::cpp::SharedData(isoValues));
-    }
+    static Bounds computeBounds(const Matrix4f &matrix, const Isosurface &data);
+    static void updateData(ospray::cpp::Geometry &handle, std::vector<Isosurface> &primitives);
 };
 
 }

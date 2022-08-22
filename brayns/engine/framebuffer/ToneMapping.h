@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <ospray/ospray_cpp/ImageOperation.cpp>
+#include <ospray/ospray_cpp/ImageOperation.h>
 
 namespace brayns
 {

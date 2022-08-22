@@ -26,19 +26,16 @@ namespace brayns
 {
 struct Matte
 {
+    Vector3f color = Vector3f(1.f);
 };
 
 template<>
-struct MaterialName<Matte>
-{
-    inline static const std::string osprayValue = "principled";
-    inline static const std::string value = "matte";
-};
-
-template<>
-class MaterialData<Matte>
+class MaterialTraits<Matte>
 {
 public:
-    static void update(ospray::cpp::Material &handle, Matte &data);
+    inline static const std::string handleName = "principled";
+    inline static const std::string materialName = "matte";
+
+    static void updateData(ospray::cpp::Material &handle, Matte &data);
 };
 }

@@ -31,16 +31,19 @@ struct AmbientLight
 };
 
 template<>
-struct LightName<AmbientLight>
-{
-    inline static const std::string osprayValue = "ambient";
-    inline static const std::string value = "ambient";
-};
-
-template<>
-class LightData<AmbientLight>
+class LightTraits<AmbientLight>
 {
 public:
-    static void update(ospray::cpp::Light &handle, AmbientLight &lightData);
+    inline static const std::string handleName = "ambient";
+    inline static const std::string lightName = "ambient";
+
+    static Bounds computeBounds(const Matrix4f &matrix, const AmbientLight &light)
+    {
+        (void)matrix;
+        (void)light;
+        return {};
+    }
+
+    static void updateData(ospray::cpp::Light &handle, AmbientLight &lightData);
 };
 }

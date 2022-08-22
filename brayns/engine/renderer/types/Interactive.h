@@ -35,16 +35,12 @@ struct Interactive
 };
 
 template<>
-struct RendererName<Interactive>
-{
-    inline static const std::string osprayValue = "scivis";
-    inline static const std::string value = "interactive";
-};
-
-template<>
-class RendererData<Interactive>
+class RendererTraits<Interactive>
 {
 public:
-    static void update(ospray::cpp::Renderer &handle, Interactive &data);
+    inline static const std::string osprayValue = "scivis";
+    inline static const std::string value = "interactive";
+
+    static void updateData(ospray::cpp::Renderer &handle, Interactive &data);
 };
 }

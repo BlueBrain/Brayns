@@ -32,16 +32,12 @@ struct Emissive
 };
 
 template<>
-struct MaterialName<Emissive>
-{
-    inline static const std::string osprayValue = "luminous";
-    inline static const std::string value = "emissive";
-};
-
-template<>
-class MaterialData<Emissive>
+class MaterialTraits<Emissive>
 {
 public:
-    static void update(ospray::cpp::Material &handle, Emissive &data);
+    inline static const std::string handleName = "luminous";
+    inline static const std::string materialName = "emissive";
+
+    static void updateData(ospray::cpp::Material &handle, Emissive &data);
 };
 }

@@ -24,9 +24,9 @@
 #include <brayns/common/Bounds.h>
 #include <brayns/common/parameters/ParametersManager.h>
 
-#include "SceneClipManager.h"
-#include "SceneLightManager.h"
-#include "SceneModelManager.h"
+#include "ClipManager.h"
+#include "LightManager.h"
+#include "ModelManager.h"
 
 #include <ospray/ospray_cpp/World.h>
 
@@ -164,25 +164,16 @@ public:
     /**
      * @brief Returns the Ospray handle of the scene
      */
-    const ospray::cpp::World &getOsprayScene() const noexcept;
+    const ospray::cpp::World &getHandle() const noexcept;
 
 private:
     friend class Engine;
 
-    // Scene bounds
     Bounds _bounds;
-
-    // Model data
-    SceneModelManager _modelManager;
-
-    // Clipping model data
-    SceneClipManager _clippingManager;
-
-    // Lights data
-    SceneLightManager _lightManager;
-
-    // OSPRRay "scene" handle
-    ospray::cpp::World _osprayWorld;
+    ModelManager _modelManager;
+    ClipManager _clippingManager;
+    LightManager _lightManager;
+    ospray::cpp::World _handle;
 };
 
 } // namespace brayns

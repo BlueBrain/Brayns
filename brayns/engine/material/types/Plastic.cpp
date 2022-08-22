@@ -36,9 +36,9 @@ struct PlasticParameters
 
 namespace brayns
 {
-void MaterialData<Plastic>::update(ospray::cpp::Material &handle, Plastic &data)
+void MaterialTraits<Plastic>::updateData(ospray::cpp::Material &handle, Plastic &data)
 {
-    handle.setParam(PlasticParameters::color, Vector3f(1.f));
+    handle.setParam(PlasticParameters::color, data.color);
     handle.setParam(PlasticParameters::roughness, 0.01f);
     handle.setParam(PlasticParameters::coat, 1.f);
     handle.setParam(PlasticParameters::coatThickness, 3.f);

@@ -18,11 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SceneClipManager.h"
+#include "ClipManager.h"
 
 namespace brayns
 {
-uint32_t SceneClipManager::addClippingModel(std::unique_ptr<Model> clippingModel) noexcept
+uint32_t ClipManager::addClippingModel(std::unique_ptr<Model> clippingModel) noexcept
 {
     const auto id = _idFactory.generateID();
 
@@ -40,7 +40,7 @@ uint32_t SceneClipManager::addClippingModel(std::unique_ptr<Model> clippingModel
     return id;
 }
 
-void SceneClipManager::removeClippingModels(const std::vector<uint32_t> &ids)
+void ClipManager::removeClippingModels(const std::vector<uint32_t> &ids)
 {
     for (auto id : ids)
     {
@@ -57,21 +57,21 @@ void SceneClipManager::removeClippingModels(const std::vector<uint32_t> &ids)
     _dirty = true;
 }
 
-void SceneClipManager::removeAllClippingModels() noexcept
+void ClipManager::removeAllClippingModels() noexcept
 {
     _idFactory.clear();
     _clippingModels.clear();
     _dirty = true;
 }
 
-bool SceneClipManager::commit()
+bool ClipManager::commit()
 {
     auto result = _dirty;
     _dirty = false;
     return result;
 }
 
-std::vector<ospray::cpp::Instance> SceneClipManager::getOsprayInstances() noexcept
+std::vector<ospray::cpp::Instance> ClipManager::getHandles() noexcept
 {
     std::vector<ospray::cpp::Instance> result;
     result.reserve(_clippingModels.size());

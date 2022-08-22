@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SceneModelManager.h"
+#include "ModelManager.h"
 
 namespace
 {
@@ -79,7 +79,7 @@ public:
 
 namespace brayns
 {
-ModelInstance &SceneModelManager::addModel(ModelLoadParameters params, std::unique_ptr<Model> model)
+ModelInstance &ModelManager::addModel(ModelLoadParameters params, std::unique_ptr<Model> model)
 {
     std::vector<std::unique_ptr<Model>> models;
     models.push_back(std::move(model));
@@ -87,7 +87,7 @@ ModelInstance &SceneModelManager::addModel(ModelLoadParameters params, std::uniq
     return *(instances.front());
 }
 
-std::vector<ModelInstance *> SceneModelManager::addModels(
+std::vector<ModelInstance *> ModelManager::addModels(
     ModelLoadParameters params,
     std::vector<std::unique_ptr<Model>> models)
 {
@@ -104,7 +104,7 @@ std::vector<ModelInstance *> SceneModelManager::addModels(
     return result;
 }
 
-ModelInstance &SceneModelManager::createInstance(const uint32_t instanceID)
+ModelInstance &ModelManager::createInstance(const uint32_t instanceID)
 {
     auto &sourceInstance = ModelFinder::findInstance(_instances, instanceID);
     auto &model = sourceInstance.getModel();
@@ -113,22 +113,22 @@ ModelInstance &SceneModelManager::createInstance(const uint32_t instanceID)
     return _createModelInstance(modelEntry);
 }
 
-ModelInstance &SceneModelManager::getModelInstance(const uint32_t modelID)
+ModelInstance &ModelManager::getModelInstance(const uint32_t modelID)
 {
     return ModelFinder::findInstance(_instances, modelID);
 }
 
-std::vector<ModelInstance *> &SceneModelManager::getAllModelInstances() noexcept
+std::vector<ModelInstance *> &ModelManager::getAllModelInstances() noexcept
 {
     return _instances;
 }
 
-const std::vector<ModelInstance *> &SceneModelManager::getAllModelInstances() const noexcept
+const std::vector<ModelInstance *> &ModelManager::getAllModelInstances() const noexcept
 {
     return _instances;
 }
 
-void SceneModelManager::removeModels(const std::vector<uint32_t> &instanceIDs)
+void ModelManager::removeModels(const std::vector<uint32_t> &instanceIDs)
 {
     if (instanceIDs.empty())
     {
@@ -168,7 +168,7 @@ void SceneModelManager::removeModels(const std::vector<uint32_t> &instanceIDs)
     _dirty = true;
 }
 
-void SceneModelManager::removeAllModelInstances()
+void ModelManager::removeAllModelInstances()
 {
     _instanceIdFactory.clear();
     _modelIdFactory.clear();
@@ -177,7 +177,7 @@ void SceneModelManager::removeAllModelInstances()
     _dirty = true;
 }
 
-const ModelLoadParameters &SceneModelManager::getModelLoadParameters(const uint32_t instanceID) const
+const ModelLoadParameters &ModelManager::getModelLoadParameters(const uint32_t instanceID) const
 {
     auto &modelInstance = ModelFinder::findInstance(_instances, instanceID);
     auto &model = modelInstance.getModel();
@@ -188,7 +188,7 @@ const ModelLoadParameters &SceneModelManager::getModelLoadParameters(const uint3
     return loadParams;
 }
 
-void SceneModelManager::preRender(const ParametersManager &parameters)
+void ModelManager::preRender(const ParametersManager &parameters)
 {
     for (auto &entry : _models)
     {
@@ -197,7 +197,7 @@ void SceneModelManager::preRender(const ParametersManager &parameters)
     }
 }
 
-bool SceneModelManager::commit()
+bool ModelManager::commit()
 {
     bool needsRecommit = _dirty;
     _dirty = false;
@@ -216,7 +216,7 @@ bool SceneModelManager::commit()
     return needsRecommit;
 }
 
-void SceneModelManager::postRender(const ParametersManager &parameters)
+void ModelManager::postRender(const ParametersManager &parameters)
 {
     for (auto &entry : _models)
     {
@@ -225,7 +225,7 @@ void SceneModelManager::postRender(const ParametersManager &parameters)
     }
 }
 
-Bounds SceneModelManager::getBounds() const noexcept
+Bounds ModelManager::getBounds() const noexcept
 {
     Bounds result;
     for (const auto instance : _instances)
@@ -237,9 +237,7 @@ Bounds SceneModelManager::getBounds() const noexcept
     return result;
 }
 
-SceneModelManager::ModelEntry &SceneModelManager::_createModelEntry(
-    ModelLoadParameters params,
-    std::unique_ptr<Model> model)
+ModelManager::ModelEntry &ModelManager::_createModelEntry(ModelLoadParameters params, std::unique_ptr<Model> model)
 {
     auto &modelEntry = _models.emplace_back();
     modelEntry.params = std::move(params);
@@ -248,7 +246,7 @@ SceneModelManager::ModelEntry &SceneModelManager::_createModelEntry(
     return modelEntry;
 }
 
-ModelInstance &SceneModelManager::_createModelInstance(ModelEntry &modelEntry)
+ModelInstance &ModelManager::_createModelInstance(ModelEntry &modelEntry)
 {
     const auto instanceID = _instanceIdFactory.generateID();
     auto &model = *modelEntry.model;
@@ -261,7 +259,7 @@ ModelInstance &SceneModelManager::_createModelInstance(ModelEntry &modelEntry)
     return *(_instances.back());
 }
 
-std::vector<ospray::cpp::Instance> SceneModelManager::getOsprayInstances() noexcept
+std::vector<ospray::cpp::Instance> ModelManager::getHandles() noexcept
 {
     std::vector<ospray::cpp::Instance> handles;
     handles.reserve(_instances.size());

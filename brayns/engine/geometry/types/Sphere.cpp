@@ -28,7 +28,6 @@ namespace
 {
 struct SphereParameters
 {
-    inline static const std::string osprayName = "sphere";
     inline static const std::string position = "sphere.position";
     inline static const std::string radius = "sphere.radius";
 };
@@ -36,37 +35,29 @@ struct SphereParameters
 
 namespace brayns
 {
-const std::string &OsprayGeometryName<Sphere>::get()
+Bounds GeometryTraits<Sphere>::computeBounds(const Matrix4f &matrix, const Sphere &data)
 {
-    return SphereParameters::osprayName;
+    Vector3f radiusDelta(data.radius);
+    auto sphereMin = data.center - radiusDelta;
+    auto sphereMax = data.center + radiusDelta;
+
+    Bounds bounds;
+    bounds.expand(matrix * Vector4f(sphereMin, 1.f));
+    bounds.expand(matrix * Vector4f(sphereMax, 1.f));
+    return bounds;
 }
 
-void GeometryBoundsUpdater<Sphere>::update(const Sphere &s, const Matrix4f &t, Bounds &b)
-{
-    const Vector3f radiusDelta(s.radius);
-    auto sphereMin = s.center - radiusDelta;
-    auto sphereMax = s.center + radiusDelta;
-
-    sphereMin = Vector3f(t * Vector4f(sphereMin, 1.f));
-    sphereMax = Vector3f(t * Vector4f(sphereMax, 1.f));
-
-    b.expand(sphereMin);
-    b.expand(sphereMax);
-}
-
-void GeometryCommitter<Sphere>::commit(
-    const ospray::cpp::Geometry &osprayGeometry,
-    const std::vector<Sphere> &primitives)
+void GeometryTraits<Sphere>::updateData(ospray::cpp::Geometry &handle, std::vector<Sphere> &data)
 {
     constexpr auto stride = 4 * sizeof(float);
-    auto basePtr = &(primitives.front().center.x);
+    auto basePtr = &(data.front().center.x);
     auto positionPtr = basePtr;
     auto radiiPtr = basePtr + 3;
-    auto size = primitives.size();
+    auto size = data.size();
 
     ospray::cpp::SharedData positionData(positionPtr, OSP_VEC3F, size, stride);
     ospray::cpp::SharedData radiiData(radiiPtr, OSP_FLOAT, size, stride);
-    osprayGeometry.setParam(SphereParameters::position, positionData);
-    osprayGeometry.setParam(SphereParameters::radius, radiiData);
+    handle.setParam(SphereParameters::position, positionData);
+    handle.setParam(SphereParameters::radius, radiiData);
 }
 }

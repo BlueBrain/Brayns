@@ -28,16 +28,16 @@
 namespace brayns
 {
 template<typename T>
-struct ProjectionName
-{
-    inline static const std::string osprayValue;
-    inline static const std::string value;
-};
-
-template<typename T>
-class ProjectionData
+class ProjectionTraits
 {
 public:
-    static void update(ospray::cpp::Camera &handle, T &data);
+    inline static const std::string name;
+
+    static void updateData(ospray::cpp::Camera &handle, T &data)
+    {
+        (void)handle;
+        (void)data;
+        assert(false);
+    }
 };
 };

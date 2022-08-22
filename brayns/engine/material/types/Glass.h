@@ -26,20 +26,17 @@ namespace brayns
 {
 struct Glass
 {
+    Vector3f color = Vector3f(1.f);
     float indexOfRefraction = 1.5f;
 };
 
 template<>
-struct MaterialName<Glass>
-{
-    inline static const std::string osprayValue = "thinGlass";
-    inline static const std::string value = "glass";
-};
-
-template<>
-class MaterialData<Glass>
+class MaterialTraits<Glass>
 {
 public:
-    static void update(ospray::cpp::Material &handle, Glass &data);
+    inline static const std::string handleName = "thinGlass";
+    inline static const std::string materialName = "glass";
+
+    static void updateData(ospray::cpp::Material &handle, Glass &data);
 };
 }

@@ -30,29 +30,21 @@
 namespace brayns
 {
 template<typename T>
-struct LightName
-{
-    inline static const std::string osprayValue;
-    inline static const std::string value;
-};
-
-template<typename T>
-class LightBounds
+class LightTraits
 {
 public:
-    static Bounds compute(const Matrix4f &matrix, const T &data)
+    inline static const std::string handleName;
+    inline static const std::string lightName;
+
+    static Bounds computeBounds(const Matrix4f &matrix, const T &data)
     {
         (void)matrix;
         (void)data;
         (void)bounds;
+        assert(false);
     }
-};
 
-template<typename T>
-class LightData
-{
-public:
-    static void update(ospray::cpp::Light &handle, T &lightData)
+    static void updateData(ospray::cpp::Light &handle, T &lightData)
     {
         (void)handle;
         (void)lightData;

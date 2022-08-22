@@ -26,14 +26,16 @@ namespace
 {
 struct GlassParameters
 {
+    inline static const std::string attenuationColor = "attenuationColor";
     inline static const std::string indexOfRefraction = "eta";
 };
 }
 
 namespace brayns
 {
-void MaterialData<Glass>::update(ospray::cpp::Material &handle, Glass &data)
+void MaterialTraits<Glass>::updateData(ospray::cpp::Material &handle, Glass &data)
 {
+    handle.setParam(GlassParameters::attenuationColor, data.color);
     handle.setParam(GlassParameters::indexOfRefraction, data.indexOfRefraction);
 }
 }

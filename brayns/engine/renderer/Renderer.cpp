@@ -29,9 +29,9 @@ Renderer::Renderer(const Renderer &other)
 
 Renderer &Renderer::operator=(const Renderer &other)
 {
-    _osprayHandleName = other._osprayHandleName;
+    _handleName = other._handleName;
     _rendererName = other._rendererName;
-    _handle = ospray::cpp::Renderer(_osprayHandleName);
+    _handle = ospray::cpp::Renderer(_handleName);
     _data = other._data->clone();
     _data->pushTo(_handle);
 }

@@ -29,9 +29,9 @@ Light::Light(const Light &other)
 
 Light &Light::operator=(const Light &other)
 {
-    _osprayHandleName = other._osprayHandleName;
+    _handleName = other._handleName;
     _lightName = other._lightName;
-    _handle = ospray::cpp::Light(_osprayHandleName);
+    _handle = ospray::cpp::Light(_handleName);
     _data = other._data->clone();
     _data->pushTo(_handle);
     _handle.commit();

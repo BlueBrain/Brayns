@@ -79,25 +79,25 @@ bool Scene::commit()
     if (_modelManager.commit() || _clippingManager.commit())
     {
         std::vector<ospray::cpp::Instance> instances;
-        auto modelInstances = _modelManager.getOsprayInstances();
+        auto modelInstances = _modelManager.getHandles();
         instances.insert(instances.end(), modelInstances.begin(), modelInstances.end());
-        auto clipInstances = _clippingManager.getOsprayInstances();
+        auto clipInstances = _clippingManager.getHandles();
         instances.insert(instances.end(), clipInstances.begin(), clipInstances.end());
-        WorldParameterUpdater::update(_osprayWorld, WorldParameters::instanceParameter, instances);
+        WorldParameterUpdater::update(_handle, WorldParameters::instanceParameter, instances);
         needsCommit = true;
     }
 
     if (_lightManager.commit())
     {
-        auto lights = _lightManager.getOsprayLights();
-        WorldParameterUpdater::update(_osprayWorld, WorldParameters::lightParameter, lights);
+        auto lights = _lightManager.getHandles();
+        WorldParameterUpdater::update(_handle, WorldParameters::lightParameter, lights);
         needsCommit = true;
     }
 
     // Commit handle
     if (needsCommit)
     {
-        _osprayWorld.commit();
+        _handle.commit();
     }
 
     return needsCommit;
@@ -178,8 +178,8 @@ void Scene::removeAllClippingModels() noexcept
     _clippingManager.removeAllClippingModels();
 }
 
-const ospray::cpp::World &Scene::getOsprayScene() const noexcept
+const ospray::cpp::World &Scene::getHandle() const noexcept
 {
-    return _osprayWorld;
+    return _handle;
 }
 } // namespace brayns

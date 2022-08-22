@@ -18,20 +18,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SceneLightManager.h"
+#include "LightManager.h"
 
 namespace brayns
 {
-uint32_t SceneLightManager::addLight(std::unique_ptr<Light> light) noexcept
+uint32_t LightManager::addLight(Light light) noexcept
 {
     const auto id = _idFactory.generateID();
-    light->commit();
     _lights[id] = std::move(light);
     _dirty = true;
     return id;
 }
 
-void SceneLightManager::removeLights(const std::vector<uint32_t> &lightIds)
+void LightManager::removeLights(const std::vector<uint32_t> &lightIds)
 {
     for (auto lightId : lightIds)
     {
@@ -48,37 +47,37 @@ void SceneLightManager::removeLights(const std::vector<uint32_t> &lightIds)
     _dirty = true;
 }
 
-void SceneLightManager::removeAllLights() noexcept
+void LightManager::removeAllLights() noexcept
 {
     _idFactory.clear();
     _lights.clear();
     _dirty = true;
 }
 
-Bounds SceneLightManager::getBounds() const noexcept
+Bounds LightManager::getBounds() const noexcept
 {
     Bounds bounds;
     for (const auto &[lightId, light] : _lights)
     {
-        bounds.expand(light->computeBounds());
+        bounds.expand(light.computeBounds(Matrix4f(1.f)));
     }
     return bounds;
 }
 
-bool SceneLightManager::commit()
+bool LightManager::commit()
 {
     auto result = _dirty;
     _dirty = false;
     return result;
 }
 
-std::vector<ospray::cpp::Light> SceneLightManager::getOsprayLights() const noexcept
+std::vector<ospray::cpp::Light> LightManager::getHandles() const noexcept
 {
     std::vector<ospray::cpp::Light> handles;
     handles.reserve(_lights.size());
-    for (const auto &[lightId, light] : _lights)
+    for (auto &[lightId, light] : _lights)
     {
-        const auto &osprayLight = light->getOsprayLight();
+        auto &osprayLight = light.getHandle();
         handles.push_back(osprayLight);
     }
 

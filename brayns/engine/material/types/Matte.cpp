@@ -33,10 +33,10 @@ struct MatteParameters
 
 namespace brayns
 {
-void MaterialData<Matte>::update(ospray::cpp::Material &handle, Matte &data)
+void MaterialTraits<Matte>::updateData(ospray::cpp::Material &handle, Matte &data)
 {
     (void)data;
-    handle.setParam(MatteParameters::color, Vector3f(1.f));
+    handle.setParam(MatteParameters::color, data.color);
     handle.setParam(MatteParameters::roughness, 1.f);
 }
 }

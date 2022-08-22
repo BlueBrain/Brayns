@@ -36,7 +36,7 @@ struct InteractiveParameters
 
 namespace brayns
 {
-void RendererData<Interactive>::update(ospray::cpp::Renderer &handle, Interactive &data)
+void RendererTraits<Interactive>::updateData(ospray::cpp::Renderer &handle, Interactive &data)
 {
     handle.setParam(InteractiveParameters::spp, data.samplesPerPixel);
     handle.setParam(InteractiveParameters::pathLength, data.maxRayBounces);
