@@ -49,10 +49,10 @@ Brayns uses further dependencies, but if they are not present on the system, it 
 * Poco libraries 1.11.1 (https://github.com/pocoproject/poco/tree/poco-1.11.1-release)
 * spdlog 1.9.2 (https://github.com/gabime/spdlog/tree/v1.9.2)
 * stb (https://github.com/nothings/stb)
-* libsonata 0.1.13 (https://github.com/BlueBrain/libsonata/tree/v0.1.11)
+* libsonata 0.1.13 (https://github.com/BlueBrain/libsonata/tree/v0.1.13)
 * MVDTool 2.4.4 (https://github.com/BlueBrain/MVDTool/tree/v2.4.4)
 * MorphIO 3.3.3 (https://github.com/BlueBrain/MorphIO/tree/v3.3.3)
-* Brion 3.3.9 (https://github.com/BlueBrain/Brion/tree/3.3.8)
+* Brion 3.3.9 (https://github.com/BlueBrain/Brion/tree/3.3.9)
 
 ### Build command
 
@@ -73,7 +73,8 @@ The following cmake options (shown with their default value) can be used during 
 * **BRAYNS_CIRCUITEXPLORER_ENABLED** (Default ON) - Activate CircuitExplorer plugin
 * **BRAYNS_CIRCUITINFO_ENABLED** (Default OFF) - Activate CircuitInfo plugin
 * **BRAYNS_DTI_ENABLED** (Default OFF) - Activate Diffusion-Tensor Imaging plugin
-* **BRAYNS_ATLASEXPLORER_ENABLED** - Activate AtlasExplorer plugin
+* **BRAYNS_ATLASEXPLORER_ENABLED** - (Default OFF) Activate AtlasExplorer plugin
+* **BRAYNS_CYLINDIRCCAMERA_ENABLED** - (Default OFF) Activate Cylindric Camera projection plugin
 
 
 ## Running
