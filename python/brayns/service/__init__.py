@@ -19,26 +19,25 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 """
-Subpackage to launch Brayns backend from Python.
+Subpackage start braynsService as a subprocess from Python.
 
-It provides a helper class to generate command line options to start Brayns
-service and launch it in a subprocess programatically.
+Provides mainly helpers to generate the command line.
 """
 
-from .launcher import Launcher
+from .bundle import Bundle
 from .log_level import LogLevel
+from .manager import Manager
 from .plugin import Plugin
 from .process import Process
 from .service import Service
-from .service_launcher import ServiceLauncher
 from .ssl_server_context import SslServerContext
 
 __all__ = [
-    'Launcher',
+    'Bundle',
     'LogLevel',
+    'Manager',
     'Plugin',
     'Process',
     'Service',
-    'ServiceLauncher',
     'SslServerContext',
 ]

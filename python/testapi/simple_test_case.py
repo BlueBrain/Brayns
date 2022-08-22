@@ -27,19 +27,19 @@ class SimpleTestCase(ApiTestCase):
 
     @property
     def instance(self) -> brayns.Instance:
-        return self.__service.instance
+        return self.__manager.instance
 
     def setUp(self) -> None:
-        launcher = brayns.ServiceLauncher(
+        bundle = brayns.Bundle(
             port=self.port,
-            client_binary_handler=self.on_binary,
-            server_executable=self.executable,
-            server_env=self.env,
+            service_executable=self.executable,
+            service_env=self.env,
+            connector_binary_handler=self.on_binary,
         )
-        self.__service = launcher.start()
+        self.__manager = bundle.start()
 
     def tearDown(self) -> None:
-        self.__service.stop()
+        self.__manager.stop()
 
     def on_binary(self, _: bytes) -> None:
         pass

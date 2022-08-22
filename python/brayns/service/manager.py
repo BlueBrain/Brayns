@@ -20,32 +20,29 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 from brayns.network import Instance
 
 from .process import Process
 
 
-@dataclass
-class Service:
-    """Wrapper around a ``Process`` connected to an ``Instance``.
+class Manager:
+    """Wrapper to manage a ``Process`` connected to an ``Instance``.
 
-    Contains a running process and an instance connected to it.
+    Contains a process running braynService and an instance connected to it.
 
     Once done with this object, ``stop()`` must be called to disconnect the
-    instance and kill the process using the context manager (with service) or
-    manually (service.stop()).
+    instance and kill the process, using the context manager or by hand.
     """
 
-    process: Process
-    instance: Instance
+    def __init__(self, process: Process, instance: Instance) -> None:
+        self._process = process
+        self._instance = instance
 
-    def __enter__(self) -> Service:
+    def __enter__(self) -> Manager:
         """Context manager enter.
 
         :return: Self.
-        :rtype: Service
+        :rtype: Manager
         """
         return self
 
@@ -53,7 +50,25 @@ class Service:
         """Call stop when exiting the context manager."""
         self.stop()
 
+    @property
+    def process(self) -> Process:
+        """Process running braynsService.
+
+        :return: braynsService Process.
+        :rtype: Process
+        """
+        return self._process
+
+    @property
+    def instance(self) -> Instance:
+        """Client instance connected to ``process``.
+
+        :return: Connected instance.
+        :rtype: Instance
+        """
+        return self._instance
+
     def stop(self) -> None:
         """Disconnect the instance and kill the process."""
-        self.instance.disconnect()
-        self.process.stop()
+        self._instance.disconnect()
+        self._process.stop()

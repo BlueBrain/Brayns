@@ -18,28 +18,33 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from enum import Enum
+import unittest
+
+import brayns
 
 
-class Plugin(Enum):
-    """All built-in plugins for braynsService.
+class TestSslServerContext(unittest.TestCase):
 
-    Plugins are loaded when the backend instance is started and cannot be
-    changed afterward.
-
-    The value is the name of the plugin dynamic library (.so).
-    """
-
-    CIRCUIT_EXPLORER = 'braynsCircuitExplorer'
-    ATLAS_EXPLORER = 'braynsAtlasExplorer'
-    CYLINDRIC_CAMERA = 'braynsCylindricCamera'
-    CIRCUIT_INFO = 'braynsCircuitInfo'
-    DTI = 'braynsDTI'
-
-    @staticmethod
-    def get_all_values() -> list[str]:
-        """Shortcut to get all the plugin names."""
-        return [
-            plugin.value
-            for plugin in Plugin
+    def test_get_command_line(self) -> None:
+        ssl = brayns.SslServerContext(
+            private_key_file='private',
+            private_key_passphrase='passphrase',
+            certificate_file='certificate',
+            ca_location='ca',
+        )
+        test = ssl.get_command_line()
+        ref = [
+            '--private-key-file',
+            'private',
+            '--private-key-passphrase',
+            'passphrase',
+            '--certificate-file',
+            'certificate',
+            '--ca-location',
+            'ca',
         ]
+        self.assertEqual(test, ref)
+
+
+if __name__ == '__main__':
+    unittest.main()

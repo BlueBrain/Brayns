@@ -23,25 +23,32 @@ import unittest
 import brayns
 
 
-class TestSslServerContext(unittest.TestCase):
+class TestService(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
-        ssl = brayns.SslServerContext(
-            private_key_file='private',
-            private_key_passphrase='passphrase',
-            certificate_file='certificate',
-            ca_location='ca'
+        service = brayns.Service(
+            uri='uri',
+            ssl_context=brayns.SslServerContext(),
+            log_level=brayns.LogLevel.CRITICAL,
+            plugins=[
+                brayns.Plugin.ATLAS_EXPLORER.value,
+                brayns.Plugin.CIRCUIT_EXPLORER.value,
+            ],
+            executable='service',
         )
-        test = ssl.get_command_line()
+        test = service.get_command_line()
         ref = [
-            '--private-key-file',
-            'private',
-            '--private-key-passphrase',
-            'passphrase',
-            '--certificate-file',
-            'certificate',
-            '--ca-location',
-            'ca'
+            'service',
+            '--uri',
+            'uri',
+            '--log-level',
+            'critical',
+            '--plugin',
+            brayns.Plugin.ATLAS_EXPLORER.value,
+            '--plugin',
+            brayns.Plugin.CIRCUIT_EXPLORER.value,
+            '--secure',
+            'true',
         ]
         self.assertEqual(test, ref)
 

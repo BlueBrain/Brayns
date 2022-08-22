@@ -1,14 +1,14 @@
 Launch Brayns backend from Python
 =================================
 
-Launcher
+Service
 --------
 
-The `Launcher` class of the Python API can be used to start a braynsService
+The `Service` class of the Python API can be used to start a braynsService
 backend instance programmatically. It is basically a wrapper around the command
 line, that is why an executable of braynsService is required to use it.
 
-By default the executable taken by the launcher is `braynsService` so it must
+By default the executable taken by the service is `braynsService` so it must
 be in the system PATH.
 
 On BB5 running the following command line will add `braynsService` to the PATH.
@@ -19,14 +19,14 @@ On BB5 running the following command line will add `braynsService` to the PATH.
     $ module load brayns
 
 On a local machine or without loading brayns module, the executable can still
-be specified manually using the `executable` parameter of the launcher.
+be specified manually using the `executable` parameter of the service.
 
 User can specify the server URI, the log level and some SSL and stream settings
-of the braynsService started by the launcher.
+of the braynsService started by the service.
 
 .. code-block:: python
 
-    launcher = brayns.Launcher(
+    service = brayns.Service(
         uri='0.0.0.0:5000',
         log_level=brayns.LogLevel.DEBUG,
     )
@@ -34,13 +34,15 @@ of the braynsService started by the launcher.
 Process
 -------
 
-Use `launch` to start a new braynsService process. Its behavior is the same
+Use `start()` to start a new braynsService process. Its behavior is the same
 as a backend instance started manually except that it can be monitored from
 Python.
 
-A value of None for `max_attempts` should be chosen as you have no way to know
-when the server will be ready. It will make the connector try in loop to connect
-to the instance until it is available.
+Here a value of 100 for `max_attempts` is chosen to let some time to the process
+to start propertly.
+
+The timeout is deduced as ``max_attempts`` * ``attempt_period`` (in seconds) but
+it can be disabled with ``max_attempts=None``.
 
 The current logs (stdout and stderr) of a `Process` can be retreived at any time
 using the `logs` property of the object.
@@ -49,9 +51,9 @@ using the `logs` property of the object.
 
     connector = brayns.Connector('localhost:5000')
 
-    with launcher.start() as process:
+    with service.start() as process:
 
-        with connector.connect(max_attempts=None) as instance:
+        with connector.connect(max_attempts=100) as instance:
 
             print(brayns.get_version(instance))
             print(process.logs)
@@ -59,6 +61,6 @@ using the `logs` property of the object.
 .. attention::
 
     Use the context manager to automatically call `terminate` on the process
-    started by the launcher (or call it manually) otherwise it will never get
+    started by the service (or call it manually) otherwise it will never get
     terminated and will keep running after your script is finished (locking the
     server port).

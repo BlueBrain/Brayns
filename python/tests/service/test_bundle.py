@@ -24,49 +24,49 @@ import unittest
 import brayns
 
 
-class TestServiceLauncher(unittest.TestCase):
+class TestBundle(unittest.TestCase):
 
     def test_uri(self) -> None:
-        launcher = brayns.ServiceLauncher(5000)
-        self.assertEqual(launcher.uri, 'localhost:5000')
+        bundle = brayns.Bundle(5000)
+        self.assertEqual(bundle.uri, 'localhost:5000')
 
-    def test_create_launcher(self) -> None:
-        launcher = brayns.ServiceLauncher(
+    def test_create_service(self) -> None:
+        bundle = brayns.Bundle(
             port=5000,
-            server_ssl=brayns.SslServerContext(),
-            server_log_level=brayns.LogLevel.INFO,
-            server_plugins=['1', '2'],
-            server_executable='exec',
-            server_env={'test1': '1'},
+            service_ssl=brayns.SslServerContext(),
+            service_log_level=brayns.LogLevel.INFO,
+            service_plugins=['1', '2'],
+            service_executable='exec',
+            service_env={'test1': '1'},
         )
-        ref = brayns.Launcher(
-            uri=launcher.uri,
-            ssl_context=launcher.server_ssl,
-            log_level=launcher.server_log_level,
-            plugins=launcher.server_plugins,
-            executable=launcher.server_executable,
-            env=launcher.server_env,
+        ref = brayns.Service(
+            uri=bundle.uri,
+            ssl_context=bundle.service_ssl,
+            log_level=bundle.service_log_level,
+            plugins=bundle.service_plugins,
+            executable=bundle.service_executable,
+            env=bundle.service_env,
         )
-        test = launcher.create_launcher()
+        test = bundle.create_service()
         self.assertEqual(test, ref)
 
     def test_create_connector(self) -> None:
         def binary_handler(_): return None
         logger = logging.Logger('test')
-        launcher = brayns.ServiceLauncher(
+        bundle = brayns.Bundle(
             port=5000,
-            client_ssl=brayns.SslClientContext(),
-            client_binary_handler=binary_handler,
-            client_logger=logger,
+            connector_ssl=brayns.SslClientContext(),
+            connector_binary_handler=binary_handler,
+            connector_logger=logger,
         )
         ref = brayns.Connector(
-            uri=launcher.uri,
-            ssl_context=launcher.client_ssl,
-            binary_handler=launcher.client_binary_handler,
-            logger=launcher.client_logger,
-            max_attempts=None,
+            uri=bundle.uri,
+            ssl_context=bundle.connector_ssl,
+            binary_handler=bundle.connector_binary_handler,
+            logger=bundle.connector_logger,
+            max_attempts=100,
         )
-        test = launcher.create_connector()
+        test = bundle.create_connector()
         self.assertEqual(test, ref)
 
 

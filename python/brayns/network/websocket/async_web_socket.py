@@ -34,7 +34,7 @@ class AsyncWebSocket:
 
     def __init__(self, websocket: WebSocketClientProtocol) -> None:
         self._websocket = websocket
-        self._queue: deque[bytes | str] = deque()
+        self._queue: deque[bytes | str] = deque(maxlen=100)
         self._condition = threading.Condition()
         self._error: Exception | None = None
 

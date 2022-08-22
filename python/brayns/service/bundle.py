@@ -26,46 +26,47 @@ from dataclasses import dataclass, field
 
 from brayns.network import Connector, Logger, SslClientContext
 
-from .launcher import Launcher
 from .log_level import LogLevel
+from .manager import Manager
 from .plugin import Plugin
 from .service import Service
 from .ssl_server_context import SslServerContext
 
 
 @dataclass
-class ServiceLauncher:
-    """Helper class to combine ``Launcher`` and ``Connector``.
+class Bundle:
+    """Bundle with parameters of both ``Service`` and ``Connector``.
 
-    Used to start both braynsService subprocess (server) and connect to it as an
-    instance (client).
+    Used to start a backend process and connect to it.
 
     As both client and server run on the same host, the client automatically
     connects to localhost and only the port can be configured.
 
-    See ``Connector`` and ``Launcher`` for details about other parameters.
+    See ``Connector`` and ``Service`` for details about other parameters.
     """
 
     port: int
-    client_ssl: SslClientContext | None = None
-    client_binary_handler: Callable[[bytes], None] = lambda _: None
-    client_logger: logging.Logger = field(default_factory=Logger)
-    server_ssl: SslServerContext | None = None
-    server_log_level: LogLevel = LogLevel.WARN
-    server_plugins: list[str] = field(default_factory=Plugin.get_all_values)
-    server_executable: str = 'braynsService'
-    server_env: dict[str, str] = field(default_factory=dict)
+    service_ssl: SslServerContext | None = None
+    service_log_level: LogLevel = LogLevel.WARN
+    service_plugins: list[str] = field(default_factory=lambda: Plugin.all)
+    service_executable: str = 'braynsService'
+    service_env: dict[str, str] = field(default_factory=dict)
+    connector_ssl: SslClientContext | None = None
+    connector_binary_handler: Callable[[bytes], None] = lambda _: None
+    connector_logger: logging.Logger = field(default_factory=Logger)
+    connector_max_attempts: int | None = 100
+    connector_attempt_period: float = 0.1
 
     @property
     def uri(self) -> str:
-        """Return the common URI between the client and server.
+        """Return the common URI between the service and the connector.
 
         :return: Common URI (localhost:<port>).
         :rtype: str
         """
         return f'localhost:{5000}'
 
-    def start(self) -> Service:
+    def start(self) -> Manager:
         """Start an instance backend and connect to it.
 
         The service returned must be stopped by the user (see Service class).
@@ -73,33 +74,34 @@ class ServiceLauncher:
         :return: Service with both client and server inside.
         :rtype: Service
         """
-        launcher = self.create_launcher()
-        server = launcher.start()
+        service = self.create_service()
+        process = service.start()
         try:
             connector = self.create_connector()
-            client = connector.connect()
+            instance = connector.connect()
         except:
-            server.stop()
+            process.stop()
             raise
-        return Service(server, client)
+        return Manager(process, instance)
 
-    def create_launcher(self) -> Launcher:
-        """Low level API to create the launcher from the settings."""
-        return Launcher(
+    def create_service(self) -> Service:
+        """Low level API to create the service from the settings."""
+        return Service(
             uri=self.uri,
-            ssl_context=self.server_ssl,
-            log_level=self.server_log_level,
-            plugins=self.server_plugins,
-            executable=self.server_executable,
-            env=self.server_env,
+            ssl_context=self.service_ssl,
+            log_level=self.service_log_level,
+            plugins=self.service_plugins,
+            executable=self.service_executable,
+            env=self.service_env,
         )
 
     def create_connector(self) -> Connector:
         """Low level API to create the connector from the settings."""
         return Connector(
             uri=self.uri,
-            ssl_context=self.client_ssl,
-            binary_handler=self.client_binary_handler,
-            logger=self.client_logger,
-            max_attempts=None,
+            ssl_context=self.connector_ssl,
+            binary_handler=self.connector_binary_handler,
+            logger=self.connector_logger,
+            max_attempts=self.connector_max_attempts,
+            attempt_period=self.connector_attempt_period,
         )

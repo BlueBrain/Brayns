@@ -18,16 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
-from testapi.simple_test_case import SimpleTestCase
+from enum import Enum
 
 
-class TestGetApplication(SimpleTestCase):
+class Plugin(Enum):
+    """All built-in plugins for braynsService.
 
-    def test_get_application(self) -> None:
-        application = brayns.get_application(self.instance)
-        self.assertSetEqual(set(application.plugins), set(
-            plugin.value for plugin in brayns.Plugin
-        ))
-        self.assertIsInstance(application.resolution, brayns.Resolution)
-        self.assertIsInstance(application.jpeg_quality, int)
+    Plugins are loaded when the backend instance is started and cannot be
+    changed afterward.
+
+    The value is the name of the plugin dynamic library (.so).
+    """
+
+    CIRCUIT_EXPLORER = 'braynsCircuitExplorer'
+    ATLAS_EXPLORER = 'braynsAtlasExplorer'
+    CYLINDRIC_CAMERA = 'braynsCylindricCamera'
+    CIRCUIT_INFO = 'braynsCircuitInfo'
+    DTI = 'braynsDTI'
+
+    @classmethod
+    @property
+    def all(cls) -> list[str]:
+        """Shortcut to get all the plugin names."""
+        return [
+            plugin.value
+            for plugin in Plugin
+        ]

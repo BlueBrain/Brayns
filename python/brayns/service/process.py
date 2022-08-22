@@ -27,7 +27,7 @@ from typing import IO, cast
 
 
 class Process:
-    """Process which runs a braynsService instance.
+    """Process running a braynsService backend.
 
     The process must be stopped using terminate() once done with it, otherwise
     it will run forever. Use context manager (ie with process: ...) to avoid
@@ -53,9 +53,11 @@ class Process:
         self._thread.start()
 
     def __enter__(self) -> Process:
+        """Context manager, just return self."""
         return self
 
     def __exit__(self, *_) -> None:
+        """Context manager, call ``stop()``."""
         self.stop()
 
     @property
@@ -70,7 +72,7 @@ class Process:
             return ''.join(self._logs)
 
     def stop(self) -> None:
-        """Stop the backend instance by terminating the process.
+        """Stop the backend service by terminating the process.
 
         Must be called through the context manager (i.e. 'with') or manually to
         avoid the process to run forever.

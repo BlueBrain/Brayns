@@ -28,10 +28,10 @@ The low level JSON-RPC API is also available using the instance directly.
 """
 
 from .core import *
-from .launcher import *
 from .movie import *
 from .network import *
 from .plugins import *
+from .service import *
 from .utils import *
 from .version import __version__
 
@@ -46,6 +46,7 @@ __all__ = [
     'BbpReport',
     'Bounds',
     'Box',
+    'Bundle',
     'Camera',
     'Capsule',
     'CarPaintMaterial',
@@ -107,13 +108,13 @@ __all__ = [
     'JsonSchema',
     'JsonType',
     'KeyFrame',
-    'Launcher',
     'Light',
     'Loader',
     'LoaderInfo',
     'Logger',
     'LogLevel',
     'lower_bound',
+    'Manager',
     'Material',
     'MatteMaterial',
     'merge_bounds',
@@ -149,7 +150,6 @@ __all__ = [
     'Rotation',
     'Scene',
     'Service',
-    'ServiceLauncher',
     'ServiceUnavailableError',
     'set_camera_view',
     'set_camera',

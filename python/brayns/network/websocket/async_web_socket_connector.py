@@ -46,7 +46,7 @@ class AsyncWebSocketConnector:
                 ssl=self._create_ssl_context(),
                 ping_interval=None,
                 close_timeout=0,
-                max_size=int(2e9)
+                max_size=int(2e9),
             )
             return AsyncWebSocket(websocket)
         except WebSocketException as e:

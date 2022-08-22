@@ -70,7 +70,7 @@ class TestConnector(ApiTestCase):
                     pass
 
     def _start_instance(self, secure: bool = False) -> brayns.Process:
-        launcher = brayns.Launcher(
+        service = brayns.Service(
             uri=self.uri,
             ssl_context=brayns.SslServerContext(
                 private_key_file=self._key,
@@ -81,7 +81,7 @@ class TestConnector(ApiTestCase):
             executable=self.executable,
             env=self.env,
         )
-        return launcher.start()
+        return service.start()
 
     def _connect(
         self,
