@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.utils import Resolution
+from ...utils import Resolution
 
 
 @dataclass

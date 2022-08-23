@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress
+from ....brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress
 
 
 class TestJsonRpcProgress(unittest.TestCase):

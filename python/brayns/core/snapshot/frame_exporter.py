@@ -23,9 +23,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.network import Instance
-from brayns.utils import ImageFormat, Resolution
-
+from ...network import Instance
+from ...utils import ImageFormat, Resolution
 from ..camera import Camera
 from ..renderer import Renderer
 from .key_frame import KeyFrame

@@ -22,6 +22,7 @@ import pathlib
 from typing import cast
 
 import brayns
+
 from ...image_validator import ImageValidator
 from ...simple_test_case import SimpleTestCase
 

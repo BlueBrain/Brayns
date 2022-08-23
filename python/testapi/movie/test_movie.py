@@ -21,8 +21,9 @@
 import pathlib
 
 import brayns
-from testapi.image_validator import ImageValidator
-from testapi.simple_test_case import SimpleTestCase
+
+from ..image_validator import ImageValidator
+from ..simple_test_case import SimpleTestCase
 
 
 class TestMovie(SimpleTestCase):

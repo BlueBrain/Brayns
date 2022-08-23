@@ -19,8 +19,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from brayns.network.websocket.web_socket import WebSocket
-from brayns.network.websocket.web_socket_listener import WebSocketListener
+from ...brayns.network.websocket.web_socket import WebSocket
+from ...brayns.network.websocket.web_socket_listener import WebSocketListener
 
 
 class MockWebSocket(WebSocket):

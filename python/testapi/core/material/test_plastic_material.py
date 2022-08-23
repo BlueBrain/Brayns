@@ -19,7 +19,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.core.material.material_test_case import MaterialTestCase
+
+from .material_test_case import MaterialTestCase
 
 
 class TestPlasticMaterial(MaterialTestCase):

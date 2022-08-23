@@ -20,7 +20,7 @@
 
 import brayns
 
-from testapi.api_test_case import ApiTestCase
+from .api_test_case import ApiTestCase
 
 
 class SimpleTestCase(ApiTestCase):

@@ -20,8 +20,8 @@
 
 from __future__ import annotations
 
-from brayns.network import Instance
-from brayns.utils import Resolution
+from ...network import Instance
+from ...utils import Resolution
 
 
 def update_application(

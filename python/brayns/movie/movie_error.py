@@ -20,7 +20,7 @@
 
 from dataclasses import dataclass
 
-from brayns.utils import Error
+from ..utils import Error
 
 
 @dataclass

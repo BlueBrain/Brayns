@@ -21,8 +21,8 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
 
+from ...network.mock_instance import MockInstance
 from .mock_color_ramp import MockColorRamp
 
 

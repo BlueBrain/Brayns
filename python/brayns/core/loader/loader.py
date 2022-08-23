@@ -21,8 +21,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from brayns.network import Instance
-
+from ...network import Instance
 from ..model import Model
 
 

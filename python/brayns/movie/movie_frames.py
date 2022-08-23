@@ -21,7 +21,7 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from brayns.core.simulation import Simulation
+from ..core.simulation import Simulation
 
 
 @dataclass

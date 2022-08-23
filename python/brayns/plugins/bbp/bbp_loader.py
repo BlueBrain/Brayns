@@ -23,8 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from brayns.core import Loader
-
+from ...core import Loader
 from ..morphology import Morphology
 from .bbp_cells import BbpCells
 from .bbp_report import BbpReport

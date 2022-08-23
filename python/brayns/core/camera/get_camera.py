@@ -20,8 +20,7 @@
 
 from typing import TypeVar
 
-from brayns.network import Instance
-
+from ...network import Instance
 from .camera import Camera
 
 T = TypeVar('T', bound=Camera)
