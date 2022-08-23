@@ -28,6 +28,9 @@
 namespace brayns
 {
 template<typename T>
+constexpr bool alwaysFalse = false;
+
+template<typename T>
 class ProjectionTraits
 {
 public:
@@ -37,7 +40,7 @@ public:
     {
         (void)handle;
         (void)data;
-        assert(false);
+        static_assert(alwaysFalse<T>, "Please specialize");
     }
 };
-};
+}

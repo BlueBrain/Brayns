@@ -33,7 +33,7 @@ template<>
 class ProjectionTraits<Orthographic>
 {
 public:
-    inline static const std::string value = "orthographic";
+    inline static const std::string name = "orthographic";
 
     static void updateData(ospray::cpp::Camera &handle, Orthographic &data);
 };

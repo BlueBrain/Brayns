@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/ModifiedFlag.h>
-#include <brayns/engine/common/DataWrapper.h>
+#include <brayns/engine/renderer/RendererData.h>
 
 #include "RendererTraits.h"
 
@@ -35,9 +35,12 @@ class Renderer
 {
 private:
     template<typename RendererType>
-    using Data = DataWrapper<RendererType, ospray::cpp::Renderer, RendererTraits>;
+    using Data = RendererData<RendererType>;
 
 public:
+    template<typename T>
+    using Traits = RendererTraits<T>;
+
     template<typename RendererType>
     Renderer(RendererType &&data)
         : _handleName(RendererTraits<RendererType>::handleName)
@@ -78,6 +81,12 @@ public:
     bool commit();
 
     /**
+     * @brief Returns the number of pixels to be sent by this renderer.
+     * @return int32_t
+     */
+    int32_t getSamplesPerPixel() const noexcept;
+
+    /**
      * @brief Returns the renderer name.
      * @return const std::string&.
      */
@@ -93,7 +102,7 @@ private:
     std::string _handleName;
     std::string _rendererName;
     ospray::cpp::Renderer _handle;
-    std::unique_ptr<IDataWrapper<ospray::cpp::Renderer>> _data;
+    std::unique_ptr<IRendererData> _data;
     ModifiedFlag _flag;
 };
 }

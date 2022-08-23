@@ -39,6 +39,9 @@ private:
     using Data = DataWrapper<ProjectionType, ospray::cpp::Camera, ProjectionTraits>;
 
 public:
+    template<typename T>
+    using Traits = ProjectionTraits<T>;
+
     template<typename ProjectionType>
     Camera(ProjectionType &&data)
         : _projectionName(ProjectionTraits<ProjectionType>::name)

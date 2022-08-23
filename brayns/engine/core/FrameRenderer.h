@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include <brayns/engine/Camera.h>
-#include <brayns/engine/Framebuffer.h>
-#include <brayns/engine/Renderer.h>
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/camera/Camera.h>
+#include <brayns/engine/framebuffer/Framebuffer.h>
+#include <brayns/engine/renderer/Renderer.h>
+#include <brayns/engine/scene/Scene.h>
 
 namespace brayns
 {

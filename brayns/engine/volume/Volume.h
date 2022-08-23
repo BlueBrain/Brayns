@@ -43,6 +43,9 @@ private:
 
 public:
     template<typename T>
+    using Traits = VolumeTraits<T>;
+
+    template<typename T>
     Volume(T data)
         : _handleName(VolumeTraits<T>::handleName)
         , _volumeName(VolumeTraits<T>::volumeName)

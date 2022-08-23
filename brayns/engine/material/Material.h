@@ -38,6 +38,9 @@ private:
     using Data = DataWrapper<MaterialType, ospray::cpp::Material, MaterialTraits>;
 
 public:
+    template<typename T>
+    using Traits = MaterialTraits<T>;
+
     template<typename MaterialType>
     Material(MaterialType &&data)
         : _handleName(MaterialTraits<MaterialType>::handleName)

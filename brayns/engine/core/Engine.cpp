@@ -87,22 +87,6 @@ struct OsprayDeviceInitializer
         return device;
     }
 };
-
-class FactoryInitializer
-{
-public:
-    static void addRenderers(brayns::EngineObjectFactory<brayns::Renderer> &factory)
-    {
-        factory.registerType<brayns::InteractiveRenderer>();
-        factory.registerType<brayns::ProductionRenderer>();
-    }
-
-    static void addCameras(brayns::EngineObjectFactory<brayns::Camera> &factory)
-    {
-        factory.registerType<brayns::OrthographicCamera>();
-        factory.registerType<brayns::PerspectiveCamera>();
-    }
-};
 }
 
 namespace brayns
@@ -123,8 +107,7 @@ Engine::Engine(ParametersManager &parameters)
     , _camera(Perspective())
     , _renderer(Interactive())
 {
-    FactoryInitializer::addRenderers(_rendererFactory);
-    FactoryInitializer::addCameras(_cameraFactory);
+    EngineFactoriesInitializer::init(_factories);
 }
 
 void Engine::preRender()
@@ -145,7 +128,7 @@ void Engine::commit()
     const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
 
     _frameBuffer.setFrameSize(frameSize);
-    _camera->setAspectRatio(aspectRatio);
+    _camera.setAspectRatio(aspectRatio);
 
     bool needResetFramebuffer = false;
     if (_frameBuffer.commit())
@@ -154,13 +137,13 @@ void Engine::commit()
         needResetFramebuffer = true;
     }
 
-    if (_camera->commit())
+    if (_camera.commit())
     {
         Log::debug("[Engine] Camera committed");
         needResetFramebuffer = true;
     }
 
-    if (_renderer->commit())
+    if (_renderer.commit())
     {
         Log::debug("[Engine] Renderer committed");
         needResetFramebuffer = true;
@@ -186,14 +169,14 @@ void Engine::render()
     }
 
     // Check wether we should keep rendering or not
-    const auto maxSpp = _renderer->getSamplesPerPixel();
-    const auto currentSpp = _frameBuffer.numAccumFrames();
+    auto maxSpp = _renderer.getSamplesPerPixel();
+    auto currentSpp = _frameBuffer.numAccumFrames();
     if (currentSpp >= maxSpp)
     {
         return;
     }
 
-    FrameRenderer::synchronous(*_camera, _frameBuffer, *_renderer, _scene);
+    FrameRenderer::synchronous(_camera, _frameBuffer, _renderer, _scene);
 
     _frameBuffer.incrementAccumFrames();
 }
@@ -218,34 +201,29 @@ Framebuffer &Engine::getFramebuffer() noexcept
     return _frameBuffer;
 }
 
-void Engine::setCamera(std::unique_ptr<Camera> camera) noexcept
+void Engine::setCamera(Camera camera) noexcept
 {
     _camera = std::move(camera);
 }
 
 Camera &Engine::getCamera() noexcept
 {
-    return *_camera;
+    return _camera;
 }
 
-void Engine::setRenderer(std::unique_ptr<Renderer> renderer) noexcept
+void Engine::setRenderer(Renderer renderer) noexcept
 {
     _renderer = std::move(renderer);
 }
 
 Renderer &Engine::getRenderer() noexcept
 {
-    return *_renderer;
+    return _renderer;
 }
 
-EngineObjectFactory<Camera> &Engine::getCameraFactory() noexcept
+EngineFactories &Engine::getFactories() noexcept
 {
-    return _cameraFactory;
-}
-
-EngineObjectFactory<Renderer> &Engine::getRendererFactory() noexcept
-{
-    return _rendererFactory;
+    return _factories;
 }
 
 void Engine::setRunning(bool keepRunning) noexcept

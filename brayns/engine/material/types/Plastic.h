@@ -27,6 +27,7 @@ namespace brayns
 struct Plastic
 {
     Vector3f color = Vector3f(1.f);
+    float opacity = 1.f;
 };
 
 template<>

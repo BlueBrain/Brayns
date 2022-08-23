@@ -28,6 +28,7 @@ struct MatteParameters
 {
     inline static const std::string color = "baseColor";
     inline static const std::string roughness = "roughness";
+    inline static const std::string opacity = "opacity";
 };
 }
 
@@ -35,8 +36,8 @@ namespace brayns
 {
 void MaterialTraits<Matte>::updateData(ospray::cpp::Material &handle, Matte &data)
 {
-    (void)data;
     handle.setParam(MatteParameters::color, data.color);
     handle.setParam(MatteParameters::roughness, 1.f);
+    handle.setParam(MatteParameters::opacity, data.opacity);
 }
 }

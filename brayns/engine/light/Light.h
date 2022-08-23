@@ -38,6 +38,9 @@ private:
     using Data = SpataialDataWrapper<LightType, ospray::cpp::Light, LightTraits>;
 
 public:
+    template<typename T>
+    using Traits = LightTraits<T>;
+
     template<typename Type>
     Light(Type data)
         : _handleName(LightTraits<Type>::handleName)
@@ -54,6 +57,21 @@ public:
 
     Light(const Light &other);
     Light &operator=(const Light &other);
+
+    /**
+     * @brief Tries to cast the light data to the given type.
+     * @tparam Type light type to cast the data to
+     * @return const Type* if the cast is successful, null otherwise
+     */
+    template<typename Type>
+    const Type *as() const noexcept
+    {
+        if (auto cast = dynamic_cast<const Data<Type> *>(_data.get()))
+        {
+            return &cast->data;
+        }
+        return nullptr;
+    }
 
     /**
      * @brief Returns the OSPRay light handle.

@@ -18,26 +18,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Default.h"
+#pragma once
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
-
-namespace
-{
-struct DefaultParameters
-{
-    inline static const std::string diffuseColor = "kd";
-    inline static const std::string specularColor = "ks";
-    inline static const std::string shininess = "ns";
-};
-}
+#include <brayns/common/MathTypes.h>
+#include <brayns/engine/material/MaterialTraits.h>
 
 namespace brayns
 {
-void MaterialTraits<Default>::updateData(ospray::cpp::Material &handle, Default &data)
+struct Phong
 {
-    handle.setParam(DefaultParameters::diffuseColor, data.color);
-    handle.setParam(DefaultParameters::specularColor, data.specularColor);
-    handle.setParam(DefaultParameters::shininess, data.shininess);
-}
+    Vector3f color = Vector3f(1.f);
+    float opacity = 1.f;
+};
+
+template<>
+class MaterialTraits<Phong>
+{
+public:
+    inline static const std::string handleName = "obj";
+    inline static const std::string materialName = "default";
+
+    static void updateData(ospray::cpp::Material &handle, Phong &data);
+};
 }

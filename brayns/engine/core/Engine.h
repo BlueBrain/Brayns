@@ -22,9 +22,9 @@
 #pragma once
 
 #include <brayns/common/parameters/ParametersManager.h>
-#include <brayns/engine/EngineObjectFactory.h>
 #include <brayns/engine/camera/Camera.h>
 #include <brayns/engine/framebuffer/Framebuffer.h>
+#include <brayns/engine/json/EngineFactories.h>
 #include <brayns/engine/renderer/Renderer.h>
 #include <brayns/engine/scene/Scene.h>
 
@@ -99,16 +99,10 @@ public:
     Renderer &getRenderer() noexcept;
 
     /**
-     * @brief Returns the system's camera factory object
-     * @return EngineObjectFactory<Camera>&
+     * @brief Return the manager of engine object factories.
+     * @return EngineFactories&
      */
-    EngineObjectFactory<Camera> &getCameraFactory() noexcept;
-
-    /**
-     * @brief Returns the system's renderer factory object
-     * @return EngineObjectFactory<Renderer>&
-     */
-    EngineObjectFactory<Renderer> &getRendererFactory() noexcept;
+    EngineFactories &getFactories() noexcept;
 
     /**
      * @brief Sets wether the engine should keep running or not
@@ -149,8 +143,7 @@ private:
     Camera _camera;
     Renderer _renderer;
 
-    EngineObjectFactory<Camera> _cameraFactory;
-    EngineObjectFactory<Renderer> _rendererFactory;
+    EngineFactories _factories;
 
     // Run flag
     bool _keepRunning{true};

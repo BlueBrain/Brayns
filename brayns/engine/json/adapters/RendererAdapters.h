@@ -18,43 +18,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "EngineFactory.h"
-
-#include <brayns/engine/camera/projections/OrthographicCamera.h>
-#include <brayns/engine/camera/projections/PerspectiveCamera.h>
-
-#include <brayns/engine/light/types/AmbientLight.h>
-#include <brayns/engine/light/types/DirectionalLight.h>
-#include <brayns/engine/light/types/QuadLight.h>
-
-#include <brayns/engine/material/types/CarPaint.h>
-#include <brayns/engine/material/types/Default.h>
-#include <brayns/engine/material/types/Emissive.h>
-#include <brayns/engine/material/types/Glass.h>
-#include <brayns/engine/material/types/Matte.h>
-#include <brayns/engine/material/types/Metal.h>
-#include <brayns/engine/material/types/Plastic.h>
+#pragma once
 
 #include <brayns/engine/renderer/types/Interactive.h>
 #include <brayns/engine/renderer/types/Production.h>
 
+#include <brayns/json/JsonAdapterMacro.h>
+
 namespace brayns
 {
-EngineFactory<Camera> EngineFactories::createCameraFactory()
-{
-    EngineFactory<Camera> factory;
-    factory.registerType < Ortho
-}
+BRAYNS_JSON_ADAPTER_BEGIN(Interactive)
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("samples_per_pixel", samplesPerPixel, "Ray samples per pixel", Minimum(1))
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("max_ray_bounces", maxRayBounces, "Maximum ray bounces")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("background_color", backgroundColor, "Background color")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("enable_shadows", shadowsEnabled, "Enable casted shadows when rendering")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("ao_samples", aoSamples, "Ambient occlusion samples")
+BRAYNS_JSON_ADAPTER_END()
 
-EngineFactory<Light> EngineFactories::createLightFactory()
-{
-}
-
-EngineFactory<Material> EngineFactories::createMaterialFactory()
-{
-}
-
-EngineFactory<Renderer> EngineFactories::createRendererFactory()
-{
-}
+BRAYNS_JSON_ADAPTER_BEGIN(Production)
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("samples_per_pixel", samplesPerPixel, "Ray samples per pixel", Minimum(1))
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("max_ray_bounces", maxRayBounces, "Maximum ray bounces")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("background_color", backgroundColor, "Background color")
+BRAYNS_JSON_ADAPTER_END()
 }

@@ -37,6 +37,9 @@ namespace brayns
 class Geometry
 {
 public:
+    template<typename T>
+    using Traits = GeometryTraits<T>;
+
     template<typename Type>
     Geometry(std::vector<Type> primitives)
         : _osprayHandleName(GeometryTraits<Type>::osprayValue)
@@ -53,20 +56,18 @@ public:
     Geometry &operator=(const Geometry &other);
 
     /**
-     * @brief Allows to pass a callback of the underlying primitive type to iterate over all the primitives.
-     * @tparam Callable callback signature whose argument must be a single reference to the underlying geometry type.
-     * @param callback the Callable object.
+     * @brief Tries to cast the primitive data to the given type.
+     * @tparam Type primitive type to cast the data to
+     * @return const std::vector<Type>*, if the cast is successful, null otherwise
      */
-    template<typename Callable>
-    void forEach(Callable &&callback) const noexcept
+    template<typename Type>
+    const std::vector<Type> *as() const noexcept
     {
-        using ArgType = typename ArgumentInferer<Callable>::argType;
-        auto cast = dynamic_cast<const GeometryData<ArgType> *>(data.get());
-        assert(cast);
-        for (auto &element : cast->elements)
+        if (auto cast = dynamic_cast<const GeometryData<Type> *>(data.get()))
         {
-            callable(element);
+            return &cast->primitives;
         }
+        return nullptr;
     }
 
     /**

@@ -20,18 +20,27 @@
 
 #pragma once
 
+#include <brayns/engine/camera/Camera.h>
+#include <brayns/engine/light/Light.h>
+#include <brayns/engine/material/Material.h>
+#include <brayns/engine/renderer/Renderer.h>
+#include <brayns/json/Json.h>
+#include <brayns/json/JsonSchemaValidator.h>
+#include <brayns/utils/string/StringJoiner.h>
+
 #include <algorithm>
 #include <string>
 #include <string_view>
 #include <vector>
 
-#include <brayns/engine/camera/Camera.h>
-#include <brayns/engine/light/Light.h>
-#include <brayns/engine/material/Material.h>
-#include <brayns/engine/renderer/Renderer.h>
-
 namespace brayns
 {
+struct EngineObjectData
+{
+    std::string name;
+    JsonValue params;
+};
+
 template<typename T>
 class EngineFactory
 {
@@ -40,7 +49,8 @@ public:
     {
     public:
         virtual ~IFactoryEntry() = default;
-        virtual T create() const = 0;
+        virtual T deserialize() const = 0;
+        virtual JsonValue serialize(const T &object) const = 0;
         virtual std::string_view getName() const noexcept = 0;
     };
 
@@ -53,9 +63,28 @@ public:
         {
         }
 
-        T create() const override
+        T deserialize(const JsonValue &payload) const override
         {
-            return T(SubT());
+            auto schema = Json::getSchema<SubT>();
+            auto schemaErrors = JsonSchemaValidator::validate(payload, schema);
+            if (!schemaErrors.empty())
+            {
+                auto errors = StringJoiner::join(schemaErrors, "\n");
+                throw std::invalid_argument("Cannot parse json: " + errors);
+            }
+            auto data = Json::deserialize<SubT>(payload);
+            return T(data);
+        }
+
+        JsonValue serialize(const T &object)
+        {
+            auto casted = object.as<SubT>();
+            if (!casted)
+            {
+                throw std::invalid_argument("Cannot cast the object to the underlying requested type");
+            }
+
+            return Json::serialize(casted);
         }
 
         std::string_view getName() const noexcept override
@@ -68,8 +97,9 @@ public:
     };
 
 public:
-    T create(const std::string &name) const
+    T create(const EngineObjectData &data) const
     {
+        auto &name = data.name;
         auto begin = _items.begin();
         auto end = _items.end();
         auto it = std::find_if(begin, end, [&](auto &entry) { return entry->getName() == name; });
@@ -77,22 +107,23 @@ public:
         {
             throw std::invalid_argument("Unknown type name " + name);
         }
-        return (*it)->create();
+        return (*it)->deserialize(data.params);
     }
 
-    T createOr(const std::string &name, const T &defaultValue) const
+    T createOr(const EngineObjectData &data, const T &defaultValue) const
     {
-        if (name.empty())
+        if (data.name.empty())
         {
             return T(defaultValue);
         }
-        return create(name);
+        return create(data);
     }
 
     template<typename SubT>
-    void registerType(std::string name)
+    void addType()
     {
-        _items.push_back(std::make_unique<FactoryEntry<SubT>>(std::move(name)));
+        using Traits = T::Traits<SubT>;
+        _items.push_back(std::make_unique<FactoryEntry<SubT>>(Traits::name));
     }
 
 private:

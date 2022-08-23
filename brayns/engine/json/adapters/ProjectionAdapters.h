@@ -1,5 +1,4 @@
-
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -19,30 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Plastic.h"
+#pragma once
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <brayns/engine/camera/projections/Orthographic.h>
+#include <brayns/engine/camera/projections/Perspective.h>
 
-namespace
-{
-struct PlasticParameters
-{
-    inline static const std::string color = "baseColor";
-    inline static const std::string roughness = "roughness";
-    inline static const std::string coat = "coat";
-    inline static const std::string coatThickness = "coatThickness";
-    inline static const std::string opacity = "opacity";
-};
-}
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-void MaterialTraits<Plastic>::updateData(ospray::cpp::Material &handle, Plastic &data)
-{
-    handle.setParam(PlasticParameters::color, data.color);
-    handle.setParam(PlasticParameters::roughness, 0.01f);
-    handle.setParam(PlasticParameters::coat, 1.f);
-    handle.setParam(PlasticParameters::coatThickness, 3.f);
-    handle.setParam(PlasticParameters::opacity, data.opacity);
-}
+BRAYNS_JSON_ADAPTER_BEGIN(Orthographic)
+BRAYNS_JSON_ADAPTER_ENTRY(height, "Orthographic projection plane height")
+BRAYNS_JSON_ADAPTER_END()
+
+BRAYNS_JSON_ADAPTER_BEGIN(Perspective)
+BRAYNS_JSON_ADAPTER_ENTRY(fovy, "Vertical field of view")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("aperture_radius", apertureRadius, "Lens aperture radius")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("focus_distance", focusDistance, "Camera focus distance")
+BRAYNS_JSON_ADAPTER_END()
 }

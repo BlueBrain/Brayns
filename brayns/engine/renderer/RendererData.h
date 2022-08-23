@@ -18,48 +18,49 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Renderer.h"
+#pragma once
+
+#include "RendererTraits.h"
+
+#include <ospray/ospray_cpp/Renderer.h>
+
+#include <memory>
 
 namespace brayns
 {
-Renderer::Renderer(const Renderer &other)
+class IRendererData
 {
-    *this = other;
-}
+public:
+    virtual ~IRendererData() = default;
+    virtual void pushTo(ospray::cpp::Renderer &handle) = 0;
+    virtual int32_t getSamplesPerPixel() const noexcept = 0;
+    virtual std::unique_ptr<IRendererData> clone() const noexcept = 0;
+};
 
-Renderer &Renderer::operator=(const Renderer &other)
+template<typename DataType>
+class RendererData final : public IRendererData
 {
-    _handleName = other._handleName;
-    _rendererName = other._rendererName;
-    _handle = ospray::cpp::Renderer(_handleName);
-    _data = other._data->clone();
-    _data->pushTo(_handle);
-}
-
-bool Renderer::commit()
-{
-    if (!_flag)
+public:
+    DataWrapper(DataType value)
+        : data(std::move(value))
     {
-        return false;
     }
 
-    _flag = false;
-    _handle.commit();
-    return true;
-}
+    void pushTo(ospray::cpp::Renderer &handle) override
+    {
+        RendererTraits<DataType>::updateData(handle, data);
+    }
 
-int32_t Renderer::getSamplesPerPixel() const noexcept
-{
-    return _data->getSamplesPerPixel();
-}
+    int32_t getSamplesPerPixel() const noexcept override
+    {
+        return data.samplesPerPixel;
+    }
 
-const std::string &Renderer::getName() const noexcept
-{
-    return _rendererName;
-}
+    std::unique_ptr<IRendererData> clone() const noexcept override
+    {
+        return std::make_unique<RendererData<DataType>>(data);
+    }
 
-const ospray::cpp::Renderer &Renderer::getHandle() const noexcept
-{
-    return _handle;
-}
+    DataType data;
+};
 }

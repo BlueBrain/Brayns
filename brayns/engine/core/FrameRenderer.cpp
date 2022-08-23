@@ -1,4 +1,3 @@
-
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
@@ -19,30 +18,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Plastic.h"
+#include "FrameRenderer.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
-
-namespace
-{
-struct PlasticParameters
-{
-    inline static const std::string color = "baseColor";
-    inline static const std::string roughness = "roughness";
-    inline static const std::string coat = "coat";
-    inline static const std::string coatThickness = "coatThickness";
-    inline static const std::string opacity = "opacity";
-};
-}
+#include <ospray/ospray_util.h>
 
 namespace brayns
 {
-void MaterialTraits<Plastic>::updateData(ospray::cpp::Material &handle, Plastic &data)
+void FrameRenderer::synchronous(
+    const Camera &camera,
+    const Framebuffer &framebuffer,
+    const Renderer &renderer,
+    const Scene &scene)
 {
-    handle.setParam(PlasticParameters::color, data.color);
-    handle.setParam(PlasticParameters::roughness, 0.01f);
-    handle.setParam(PlasticParameters::coat, 1.f);
-    handle.setParam(PlasticParameters::coatThickness, 3.f);
-    handle.setParam(PlasticParameters::opacity, data.opacity);
+    auto future = asynchronous(camera, framebuffer, renderer, scene);
+    future.wait();
+}
+
+ospray::cpp::Future FrameRenderer::asynchronous(
+    const Camera &camera,
+    const Framebuffer &framebuffer,
+    const Renderer &renderer,
+    const Scene &scene)
+{
+    auto &osprayCamera = camera.getHandle();
+    auto &osprayFrameBuffer = framebuffer.getHandle();
+    auto &osprayRenderer = renderer.getHandle();
+    auto &osprayScene = scene.getHandle();
+
+    auto future = osprayFrameBuffer.renderFrame(osprayRenderer, osprayCamera, osprayScene);
+    return future;
 }
 }

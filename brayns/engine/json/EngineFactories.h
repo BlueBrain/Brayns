@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -18,34 +18,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FrameRenderer.h"
+#pragma once
 
-#include <ospray/ospray_util.h>
+#include "EngineFactory.h"
+
+#include <brayns/engine/camera/Camera.h>
+#include <brayns/engine/geometry/Geometry.h>
+#include <brayns/engine/light/Light.h>
+#include <brayns/engine/material/Material.h>
+#include <brayns/engine/renderer/Renderer.h>
+#include <brayns/engine/volume/Volume.h>
 
 namespace brayns
 {
-void FrameRenderer::synchronous(
-    const Camera &camera,
-    const Framebuffer &framebuffer,
-    const Renderer &renderer,
-    const Scene &scene)
+struct EngineFactories
 {
-    auto future = asynchronous(camera, framebuffer, renderer, scene);
-    future.wait();
-}
+    EngineFactory<Camera> cameras;
+    EngineFactory<Geometry> geometries;
+    EngineFactory<Light> lights;
+    EngineFactory<Material> materials;
+    EngineFactory<Renderer> renderer;
+    EngineFactory<Volume> volumes;
+};
 
-ospray::cpp::Future FrameRenderer::asynchronous(
-    const Camera &camera,
-    const Framebuffer &framebuffer,
-    const Renderer &renderer,
-    const Scene &scene)
+class EngineFactoriesInitializer
 {
-    auto &osprayCamera = camera.getOsprayCamera();
-    auto &osprayFrameBuffer = framebuffer.getOsprayFramebuffer();
-    auto &osprayRenderer = renderer.getOsprayRenderer();
-    auto &osprayScene = scene.getOsprayScene();
-
-    auto future = osprayFrameBuffer.renderFrame(osprayRenderer, osprayCamera, osprayScene);
-    return future;
-}
+public:
+    static void init(EngineFactories &factories);
+};
 }

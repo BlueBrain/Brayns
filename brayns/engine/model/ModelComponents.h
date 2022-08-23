@@ -22,7 +22,7 @@
 
 #include <brayns/common/Bounds.h>
 #include <brayns/common/parameters/ParametersManager.h>
-#include <brayns/engine/InspectContext.h>
+#include <brayns/engine/common/InspectContext.h>
 #include <brayns/json/JsonType.h>
 #include <brayns/utils/TypeNameDemangler.h>
 
