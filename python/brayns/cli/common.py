@@ -18,28 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Brayns command line interface built on top of ``argparse``.
+from ..utils import Rotation, Vector3
 
-Provides a CLI for simple use cases to parse sys.argv into brayns types.
-"""
+TRUE_FALSE = ['true', 'false']
+WIDTH_HEIGHT = ('WIDTH', 'HEIGHT')
+XYZ = ('X', 'Y', 'Z')
+RGB = ('R', 'G', 'B')
+RGBA = RGB + ('A',)
 
-from .camera_cli import CameraCli
-from .cells_cli import CellsCli
-from .circuit_cli import CircuitCli
-from .light_cli import LightCli
-from .morphology_cli import MorphologyCli
-from .renderer_cli import RendererCli
-from .report_cli import ReportCli
-from .service_cli import ServiceCli
 
-__all__ = [
-    'CameraCli',
-    'CellsCli',
-    'CircuitCli',
-    'LightCli',
-    'MorphologyCli',
-    'RendererCli',
-    'ReportCli',
-    'ServiceCli',
-]
+def boolean(value: str) -> bool:
+    if value == 'true':
+        return True
+    if value == 'false':
+        return False
+    raise ValueError(f'Invalid boolean value {value}')
+
+
+def rotation(values: list[float]) -> Rotation:
+    euler = Vector3(*values)
+    return Rotation.from_euler(euler, degrees=True)

@@ -21,8 +21,7 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from brayns.utils import Bounds, Vector3, View
-
+from ...utils import Bounds, Vector3, View
 from .camera import Camera
 
 T = TypeVar('T', bound='OrthographicCamera')
@@ -44,25 +43,6 @@ class OrthographicCamera(Camera):
 
     height: float = 0.0
 
-    @staticmethod
-    def get_front_view(target: Bounds) -> View:
-        """Helper method to get the front view of a target object.
-
-        Distance from the object doesn't matter as long as no other objects are
-        between the camera and the target.
-
-        By default the camera-target distance is half of the target depth.
-
-        :param target: _description_
-        :type target: Bounds
-        :return: _description_
-        :rtype: View
-        """
-        center = target.center
-        distance = target.depth
-        position = center + distance * Vector3.forward
-        return View(position, center)
-
     @classmethod
     @property
     def name(cls) -> str:
@@ -74,11 +54,40 @@ class OrthographicCamera(Camera):
         return 'orthographic'
 
     @classmethod
+    def from_target(cls: type[T], target: Bounds) -> T:
+        """Create a camera with target height.
+
+        :param target: Camera target.
+        :type target: Bounds
+        :return: Camera to see target entirely.
+        :rtype: T
+        """
+        return cls(target.height)
+
+    @classmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
         """Low level API to deserialize from JSON."""
         return cls(
             height=message['height']
         )
+
+    def get_front_view(self, target: Bounds) -> View:
+        """Helper method to get the front view of a target object.
+
+        Distance from the object doesn't matter as long as no other objects are
+        between the camera and the target.
+
+        By default, the margin is half of the target depth.
+
+        :param target: Camera target.
+        :type target: Bounds
+        :return: Front view to see the target entirely.
+        :rtype: View
+        """
+        center = target.center
+        distance = target.depth
+        position = center + distance * Vector3.forward
+        return View(position, center)
 
     def serialize(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

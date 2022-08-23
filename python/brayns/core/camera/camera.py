@@ -21,6 +21,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, TypeVar
 
+from ...utils import Bounds, View
+
 T = TypeVar('T', bound='Camera')
 
 
@@ -45,8 +47,33 @@ class Camera(ABC):
 
     @classmethod
     @abstractmethod
+    def from_target(cls: type[T], target: Bounds) -> T:
+        """Create a camera to see entirely the given target.
+
+        Default values are used for parameters independent from the target.
+
+        :param target: Camera target.
+        :type target: Bounds
+        :return: Camera instance.
+        :rtype: T
+        """
+        pass
+
+    @classmethod
+    @abstractmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
         """Low level API to deserialize from JSON."""
+        pass
+
+    @abstractmethod
+    def get_front_view(self, target: Bounds) -> View:
+        """Compute front view for the given target.
+
+        :param target: Camera target.
+        :type target: Bounds
+        :return: Front view to see the target entirely.
+        :rtype: View
+        """
         pass
 
     @abstractmethod

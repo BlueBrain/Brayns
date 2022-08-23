@@ -23,6 +23,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from .bbp_report_type import BbpReportType
+
 
 @dataclass(frozen=True)
 class BbpReport:
@@ -31,7 +33,7 @@ class BbpReport:
     Use one of the factory methods to create this object.
     """
 
-    type: str
+    type: BbpReportType
     name: str | None = None
     spike_transition_time: float | None = None
 
@@ -39,7 +41,7 @@ class BbpReport:
     def none() -> BbpReport:
         """No reports to load."""
         return BbpReport(
-            type='none'
+            type=BbpReportType.NONE,
         )
 
     @staticmethod
@@ -50,7 +52,7 @@ class BbpReport:
         this transition faster or slower (ie 2 = twice slower).
         """
         return BbpReport(
-            type='spikes',
+            type=BbpReportType.SPIKES,
             spike_transition_time=spike_transition_time,
         )
 
@@ -58,14 +60,14 @@ class BbpReport:
     def compartment(name: str) -> BbpReport:
         """Compartment report with given name."""
         return BbpReport(
-            type='compartment',
+            type=BbpReportType.COMPARTMENT,
             name=name,
         )
 
     def serialize(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         message: dict[str, Any] = {
-            'report_type': self.type
+            'report_type': self.type.value
         }
         if self.name is not None:
             message['report_name'] = self.name

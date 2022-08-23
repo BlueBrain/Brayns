@@ -22,8 +22,8 @@ import pathlib
 from typing import cast
 
 import brayns
-from testapi.image_validator import ImageValidator
-from testapi.simple_test_case import SimpleTestCase
+from ...image_validator import ImageValidator
+from ...simple_test_case import SimpleTestCase
 
 
 class TestBbpLoader(SimpleTestCase):
@@ -60,7 +60,7 @@ class TestBbpLoader(SimpleTestCase):
 
     def _create_snapshot(self, bounds: brayns.Bounds) -> brayns.Snapshot:
         camera = brayns.PerspectiveCamera()
-        view = camera.fovy.get_full_screen_view(bounds)
+        view = camera.fovy.get_front_view(bounds)
         renderer = brayns.InteractiveRenderer()
         return brayns.Snapshot(
             resolution=brayns.Resolution.full_hd,

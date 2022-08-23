@@ -27,6 +27,7 @@ instance through websockets.
 The low level JSON-RPC API is also available using the instance directly.
 """
 
+from .cli import *
 from .core import *
 from .movie import *
 from .network import *
@@ -44,14 +45,18 @@ __all__ = [
     'BbpCells',
     'BbpLoader',
     'BbpReport',
+    'BbpReportType',
     'Bounds',
     'Box',
     'Bundle',
     'Camera',
+    'CameraCli',
     'Capsule',
     'CarPaintMaterial',
     'CellId',
+    'CellsCli',
     'check_version',
+    'CircuitCli',
     'clear_clipping_geometries',
     'clear_lights',
     'clear_models',
@@ -109,6 +114,7 @@ __all__ = [
     'JsonType',
     'KeyFrame',
     'Light',
+    'LightCli',
     'Loader',
     'LoaderInfo',
     'Logger',
@@ -122,6 +128,7 @@ __all__ = [
     'MetalMaterial',
     'Model',
     'Morphology',
+    'MorphologyCli',
     'MorphologyLoader',
     'Movie',
     'MovieError',
@@ -143,6 +150,8 @@ __all__ = [
     'remove_lights',
     'remove_models',
     'Renderer',
+    'RendererCli',
+    'ReportCli',
     'RequestError',
     'RequestFuture',
     'RequestProgress',
@@ -150,6 +159,7 @@ __all__ = [
     'Rotation',
     'Scene',
     'Service',
+    'ServiceCli',
     'ServiceUnavailableError',
     'set_camera_view',
     'set_camera',
@@ -164,6 +174,7 @@ __all__ = [
     'SonataNodePopulation',
     'SonataNodes',
     'SonataReport',
+    'SonataReportType',
     'Sphere',
     'SslClientContext',
     'SslServerContext',

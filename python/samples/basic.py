@@ -58,7 +58,7 @@ with bundle.start() as manager:
 
     camera = brayns.PerspectiveCamera()
 
-    view = camera.fovy.get_full_screen_view(model.bounds)
+    view = camera.fovy.get_front_view(model.bounds)
 
     renderer = brayns.InteractiveRenderer()
 

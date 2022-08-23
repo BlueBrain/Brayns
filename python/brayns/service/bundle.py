@@ -24,8 +24,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from brayns.network import Connector, Logger, SslClientContext
-
+from ..network import Connector, Logger, SslClientContext
 from .log_level import LogLevel
 from .manager import Manager
 from .plugin import Plugin
@@ -42,10 +41,13 @@ class Bundle:
     As both client and server run on the same host, the client automatically
     connects to localhost and only the port can be configured.
 
+    The service host defines which host are authorized to connect to it.
+
     See ``Connector`` and ``Service`` for details about other parameters.
     """
 
     port: int
+    service_host: str = 'localhost'
     service_ssl: SslServerContext | None = None
     service_log_level: LogLevel = LogLevel.WARN
     service_plugins: list[str] = field(default_factory=lambda: Plugin.all)
@@ -58,13 +60,22 @@ class Bundle:
     connector_attempt_period: float = 0.1
 
     @property
-    def uri(self) -> str:
-        """Return the common URI between the service and the connector.
+    def service_uri(self) -> str:
+        """Return the service URI.
 
-        :return: Common URI (localhost:<port>).
+        :return: Service URI (host:port).
         :rtype: str
         """
-        return f'localhost:{5000}'
+        return f'{self.service_host}:{self.port}'
+
+    @property
+    def connector_uri(self) -> str:
+        """Return the connector URI.
+
+        :return: Connector URI (host:port).
+        :rtype: str
+        """
+        return f'localhost:{self.port}'
 
     def start(self) -> Manager:
         """Start an instance backend and connect to it.
@@ -87,7 +98,7 @@ class Bundle:
     def create_service(self) -> Service:
         """Low level API to create the service from the settings."""
         return Service(
-            uri=self.uri,
+            uri=self.service_uri,
             ssl_context=self.service_ssl,
             log_level=self.service_log_level,
             plugins=self.service_plugins,
@@ -98,7 +109,7 @@ class Bundle:
     def create_connector(self) -> Connector:
         """Low level API to create the connector from the settings."""
         return Connector(
-            uri=self.uri,
+            uri=self.connector_uri,
             ssl_context=self.connector_ssl,
             binary_handler=self.connector_binary_handler,
             logger=self.connector_logger,

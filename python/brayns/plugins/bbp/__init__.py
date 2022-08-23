@@ -21,9 +21,11 @@
 from .bbp_cells import BbpCells
 from .bbp_loader import BbpLoader
 from .bbp_report import BbpReport
+from .bbp_report_type import BbpReportType
 
 __all__ = [
     'BbpCells',
     'BbpLoader',
     'BbpReport',
+    'BbpReportType',
 ]

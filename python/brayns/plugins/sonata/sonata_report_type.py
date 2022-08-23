@@ -18,28 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Brayns command line interface built on top of ``argparse``.
 
-Provides a CLI for simple use cases to parse sys.argv into brayns types.
-"""
+from enum import Enum
 
-from .camera_cli import CameraCli
-from .cells_cli import CellsCli
-from .circuit_cli import CircuitCli
-from .light_cli import LightCli
-from .morphology_cli import MorphologyCli
-from .renderer_cli import RendererCli
-from .report_cli import ReportCli
-from .service_cli import ServiceCli
 
-__all__ = [
-    'CameraCli',
-    'CellsCli',
-    'CircuitCli',
-    'LightCli',
-    'MorphologyCli',
-    'RendererCli',
-    'ReportCli',
-    'ServiceCli',
-]
+class SonataReportType(Enum):
+    """All available SONATA report types."""
+
+    NONE = 'none'
+    SPIKES = 'spikes'
+    COMPARTMENT = 'compartment'
+    SUMMATION = 'summation'
+    SYNAPSE = 'synapse'
+    BLOODFLOW_PRESSURE = 'bloodflow_pressure'
+    BLOODFLOW_SPEED = 'bloodflow_speed'
+    BLOODFLOW_RADII = 'bloodflow_radii'

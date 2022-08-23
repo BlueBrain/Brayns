@@ -21,8 +21,8 @@
 from dataclasses import dataclass
 from typing import Any, ClassVar, TypeVar
 
-from brayns.core import Camera
-from brayns.utils import Fovy
+from ...core import Camera
+from ...utils import Bounds, Fovy, View
 
 T = TypeVar('T', bound='CylindricCamera')
 
@@ -50,11 +50,30 @@ class CylindricCamera(Camera):
         return 'cylindric'
 
     @classmethod
+    def from_target(cls: type[T], _: Bounds) -> T:
+        """Return default constructed camera.
+
+        :return: Perspective camera.
+        :rtype: T
+        """
+        return cls()
+
+    @classmethod
     def deserialize(cls: type[T], message: dict[str, Any]) -> T:
         """Low level API to deserialize from JSON."""
         return cls(
             fovy=Fovy(message['fovy'], degrees=True)
         )
+
+    def get_front_view(self, target: Bounds) -> View:
+        """Use fovy to compute the front view.
+
+        :param target: Camera target.
+        :type target: Bounds
+        :return: Front view based on self.fovy.
+        :rtype: View
+        """
+        return self.fovy.get_front_view(target)
 
     def serialize(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

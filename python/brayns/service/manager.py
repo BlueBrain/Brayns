@@ -20,8 +20,7 @@
 
 from __future__ import annotations
 
-from brayns.network import Instance
-
+from ..network import Instance
 from .process import Process
 
 

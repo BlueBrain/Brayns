@@ -26,13 +26,18 @@ import brayns
 
 class TestBundle(unittest.TestCase):
 
-    def test_uri(self) -> None:
+    def test_service_uri(self) -> None:
+        bundle = brayns.Bundle(5000, service_host='test')
+        self.assertEqual(bundle.service_uri, 'test:5000')
+
+    def test_connector_uri(self) -> None:
         bundle = brayns.Bundle(5000)
-        self.assertEqual(bundle.uri, 'localhost:5000')
+        self.assertEqual(bundle.connector_uri, 'localhost:5000')
 
     def test_create_service(self) -> None:
         bundle = brayns.Bundle(
             port=5000,
+            service_host='test',
             service_ssl=brayns.SslServerContext(),
             service_log_level=brayns.LogLevel.INFO,
             service_plugins=['1', '2'],
@@ -40,7 +45,7 @@ class TestBundle(unittest.TestCase):
             service_env={'test1': '1'},
         )
         ref = brayns.Service(
-            uri=bundle.uri,
+            uri=bundle.service_uri,
             ssl_context=bundle.service_ssl,
             log_level=bundle.service_log_level,
             plugins=bundle.service_plugins,
@@ -60,11 +65,11 @@ class TestBundle(unittest.TestCase):
             connector_logger=logger,
         )
         ref = brayns.Connector(
-            uri=bundle.uri,
+            uri=bundle.connector_uri,
             ssl_context=bundle.connector_ssl,
             binary_handler=bundle.connector_binary_handler,
             logger=bundle.connector_logger,
-            max_attempts=100,
+            max_attempts=None,
         )
         test = bundle.create_connector()
         self.assertEqual(test, ref)

@@ -21,8 +21,8 @@
 import pathlib
 
 import brayns
-from testapi.image_validator import ImageValidator
-from testapi.simple_test_case import SimpleTestCase
+from ...image_validator import ImageValidator
+from ...simple_test_case import SimpleTestCase
 
 
 class TestFrameExporter(SimpleTestCase):
@@ -59,7 +59,7 @@ class TestFrameExporter(SimpleTestCase):
 
     def _create_exporter(self, bounds: brayns.Bounds) -> brayns.FrameExporter:
         camera = brayns.PerspectiveCamera()
-        view = camera.fovy.get_full_screen_view(bounds)
+        view = camera.fovy.get_front_view(bounds)
         self._adjust_lights(view)
         renderer = brayns.InteractiveRenderer()
         frames = self._get_frames(view)
