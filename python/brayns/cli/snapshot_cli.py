@@ -23,8 +23,9 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass, field
 
-from ..core import Snapshot
-from ..utils import Resolution
+from brayns.core import Snapshot
+from brayns.utils import Resolution
+
 from .render_cli import RenderCli
 from .render_context import RenderContext
 from .utils import WIDTH_HEIGHT

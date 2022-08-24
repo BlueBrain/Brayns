@@ -21,8 +21,8 @@
 import argparse
 from dataclasses import dataclass, field
 
-from ...core import InteractiveRenderer, ProductionRenderer, Renderer
-from ...utils import Color4
+from brayns.core import InteractiveRenderer, ProductionRenderer, Renderer
+from brayns.utils import Color4
 from ..cli import Cli
 from ..utils import RGBA
 

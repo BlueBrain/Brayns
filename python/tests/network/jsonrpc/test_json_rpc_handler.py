@@ -24,11 +24,11 @@ import unittest
 
 import brayns
 
-from ....brayns.network.jsonrpc.json_rpc_error import JsonRpcError
-from ....brayns.network.jsonrpc.json_rpc_handler import JsonRpcHandler
-from ....brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress
-from ....brayns.network.jsonrpc.json_rpc_reply import JsonRpcReply
-from ....brayns.network.jsonrpc.json_rpc_tasks import JsonRpcTasks
+from brayns.network.jsonrpc.json_rpc_error import JsonRpcError
+from brayns.network.jsonrpc.json_rpc_handler import JsonRpcHandler
+from brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress
+from brayns.network.jsonrpc.json_rpc_reply import JsonRpcReply
+from brayns.network.jsonrpc.json_rpc_tasks import JsonRpcTasks
 
 
 class TestJsonRpcHandler(unittest.TestCase):

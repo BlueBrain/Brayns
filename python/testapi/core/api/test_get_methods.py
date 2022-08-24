@@ -20,7 +20,7 @@
 
 import brayns
 
-from ...simple_test_case import SimpleTestCase
+from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetMethods(SimpleTestCase):

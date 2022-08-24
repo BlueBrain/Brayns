@@ -20,7 +20,7 @@
 
 from typing import TypeVar
 
-from ...network import Instance
+from brayns.network import Instance
 from .renderer import Renderer
 
 T = TypeVar('T', bound=Renderer)

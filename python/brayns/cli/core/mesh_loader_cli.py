@@ -21,7 +21,7 @@
 import argparse
 from dataclasses import dataclass
 
-from ...core import Loader, MeshLoader
+from brayns.core import Loader, MeshLoader
 from .loader_cli import LoaderCli
 
 

@@ -20,7 +20,7 @@
 
 import brayns
 
-from ...core.camera.camera_test_case import CameraTestCase
+from testapi.core.camera.camera_test_case import CameraTestCase
 
 
 class TestCylindricCamera(CameraTestCase):

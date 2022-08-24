@@ -20,7 +20,7 @@
 
 from dataclasses import dataclass
 
-from ...utils import Color3, Color4
+from brayns.utils import Color3, Color4
 from .control_point import ControlPoint
 
 

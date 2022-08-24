@@ -22,7 +22,7 @@ import unittest
 
 import brayns
 
-from ....brayns.version import DEV_VERSION
+from brayns.version import DEV_VERSION
 from .mock_version import MockVersion
 
 

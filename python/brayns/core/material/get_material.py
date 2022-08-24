@@ -20,7 +20,7 @@
 
 from typing import TypeVar
 
-from ...network import Instance
+from brayns.network import Instance
 from .material import Material
 
 T = TypeVar('T', bound=Material)

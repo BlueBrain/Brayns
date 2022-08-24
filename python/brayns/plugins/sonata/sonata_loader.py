@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from ...core import Loader
+from brayns.core import Loader
 from .sonata_node_population import SonataNodePopulation
 
 

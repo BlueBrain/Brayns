@@ -21,7 +21,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, TypeVar
 
-from ...utils import Bounds, View
+from brayns.utils import Bounds, View
 
 T = TypeVar('T', bound='Camera')
 

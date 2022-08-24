@@ -23,7 +23,7 @@ from typing import Any
 
 import brayns
 
-from ...utils.bounds.mock_bounds import MockBounds
+from tests.utils.bounds.mock_bounds import MockBounds
 from .mock_model import MockModel
 
 

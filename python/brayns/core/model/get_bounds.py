@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from ...network import Instance
-from ...utils import Bounds
+from brayns.network import Instance
+from brayns.utils import Bounds
 from .get_scene import get_scene
 
 

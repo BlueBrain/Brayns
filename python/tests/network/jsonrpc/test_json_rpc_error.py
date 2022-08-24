@@ -20,7 +20,7 @@
 
 import unittest
 
-from ....brayns.network.jsonrpc.json_rpc_error import JsonRpcError
+from brayns.network.jsonrpc.json_rpc_error import JsonRpcError
 
 
 class TestJsonRpcError(unittest.TestCase):

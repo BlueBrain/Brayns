@@ -22,8 +22,8 @@ from typing import Any
 
 import brayns
 
-from ...utils.bounds.mock_bounds import MockBounds
-from ...utils.transform.mock_transform import MockTransform
+from tests.utils.bounds.mock_bounds import MockBounds
+from tests.utils.transform.mock_transform import MockTransform
 
 
 class MockModel:

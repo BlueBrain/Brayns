@@ -23,7 +23,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 
-from ...plugins import BbpCells
+from brayns.plugins import BbpCells
 from ..cli import Cli
 
 

@@ -24,9 +24,9 @@ import unittest
 
 import brayns
 
-from ...brayns.network.client import Client
-from ...brayns.network.jsonrpc.json_rpc_manager import JsonRpcManager
-from ...brayns.network.listener import Listener
+from brayns.network.client import Client
+from brayns.network.jsonrpc.json_rpc_manager import JsonRpcManager
+from brayns.network.listener import Listener
 from .mock_web_socket import MockWebSocket
 
 

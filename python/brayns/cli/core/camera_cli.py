@@ -21,8 +21,9 @@
 import argparse
 from dataclasses import dataclass, field
 
-from ...core import Camera, OrthographicCamera, PerspectiveCamera
-from ...utils import Bounds, Rotation, Vector3, View
+from brayns.core import Camera, OrthographicCamera, PerspectiveCamera
+from brayns.utils import Bounds, Rotation, Vector3, View
+
 from ..cli import Cli
 from ..utils import XYZ, rotation
 

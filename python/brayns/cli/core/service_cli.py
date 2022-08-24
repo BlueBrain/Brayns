@@ -21,7 +21,7 @@
 import argparse
 from dataclasses import dataclass
 
-from ...service import Bundle
+from brayns.service import Bundle
 from ..cli import Cli
 
 

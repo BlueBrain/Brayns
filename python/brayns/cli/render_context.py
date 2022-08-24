@@ -20,9 +20,9 @@
 
 from dataclasses import dataclass
 
-from ..core import Camera, Renderer
-from ..network import Instance
-from ..utils import View
+from brayns.core import Camera, Renderer
+from brayns.network import Instance
+from brayns.utils import View
 
 
 @dataclass

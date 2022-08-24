@@ -22,8 +22,8 @@ import unittest
 
 import brayns
 
-from ...network.mock_instance import MockInstance
-from ...utils.view.mock_view import MockView
+from tests.network.mock_instance import MockInstance
+from tests.utils.view.mock_view import MockView
 
 
 class TestGetCameraView(unittest.TestCase):

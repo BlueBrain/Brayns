@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from ...utils import Bounds
+from brayns.utils import Bounds
 from .model import Model
 
 

@@ -21,7 +21,7 @@
 import argparse
 from dataclasses import dataclass
 
-from ...plugins import GeometryType, Morphology
+from brayns.plugins import GeometryType, Morphology
 from ..cli import Cli
 from ..utils import TRUE_FALSE, boolean
 

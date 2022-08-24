@@ -23,7 +23,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass, field
 
-from ...plugins import BbpReport, BbpReportType
+from brayns.plugins import BbpReport, BbpReportType
 from ..cli import Cli
 
 

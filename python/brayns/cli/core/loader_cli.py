@@ -21,7 +21,8 @@
 from abc import abstractmethod
 from dataclasses import dataclass
 
-from ...core import Loader
+from brayns.core import Loader
+
 from ..cli import Cli
 
 

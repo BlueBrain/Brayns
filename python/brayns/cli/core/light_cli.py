@@ -21,8 +21,9 @@
 import argparse
 from dataclasses import dataclass
 
-from ...core import DirectionalLight
-from ...utils import Color3, Rotation, Vector3
+from brayns.core import DirectionalLight
+from brayns.utils import Color3, Rotation, Vector3
+
 from ..cli import Cli
 from ..utils import RGB, XYZ, rotation
 

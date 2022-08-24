@@ -23,8 +23,7 @@ from __future__ import annotations
 import logging
 
 import brayns
-
-from ..api_test_case import ApiTestCase
+from testapi.api_test_case import ApiTestCase
 
 
 class TestConnector(ApiTestCase):

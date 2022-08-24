@@ -22,9 +22,10 @@ import argparse
 from abc import abstractmethod
 from dataclasses import dataclass, field
 
-from ..core import add_light, get_bounds
-from ..network.instance import Instance
-from ..service import Manager
+from brayns.core import add_light, get_bounds
+from brayns.network import Instance
+from brayns.service import Manager
+
 from .cli import Cli
 from .core import CameraCli, LightCli, LoaderCli, RendererCli, ServiceCli
 from .render_context import RenderContext
