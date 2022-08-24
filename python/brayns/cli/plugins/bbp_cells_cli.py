@@ -24,6 +24,7 @@ import argparse
 from dataclasses import dataclass
 
 from brayns.plugins import BbpCells
+
 from ..cli import Cli
 
 

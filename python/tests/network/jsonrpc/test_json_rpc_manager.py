@@ -23,7 +23,6 @@ import logging
 import unittest
 
 import brayns
-
 from brayns.network.jsonrpc.json_rpc_manager import JsonRpcManager
 
 

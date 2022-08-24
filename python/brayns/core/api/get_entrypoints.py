@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.network import Instance
+
 from .entrypoint import Entrypoint
 from .get_entrypoint import get_entrypoint
 from .get_methods import get_methods

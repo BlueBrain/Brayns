@@ -23,7 +23,6 @@ import sys
 import unittest
 
 import brayns
-
 from brayns.network.jsonrpc.json_rpc_error import JsonRpcError
 from brayns.network.jsonrpc.json_rpc_handler import JsonRpcHandler
 from brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress

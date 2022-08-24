@@ -21,7 +21,6 @@
 import pathlib
 
 import brayns
-
 from testapi.image_validator import ImageValidator
 from testapi.simple_test_case import SimpleTestCase
 

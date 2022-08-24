@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-
 from testapi.core.camera.camera_test_case import CameraTestCase
 
 

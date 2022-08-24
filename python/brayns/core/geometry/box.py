@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.utils import Vector3
+
 from .geometry import Geometry
 
 

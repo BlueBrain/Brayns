@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from typing import Any, TypeVar
 
 from brayns.utils import Bounds, Vector3, View
+
 from .camera import Camera
 
 T = TypeVar('T', bound='OrthographicCamera')

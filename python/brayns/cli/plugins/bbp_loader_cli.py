@@ -22,6 +22,7 @@ import argparse
 from dataclasses import dataclass, field
 
 from brayns.plugins import BbpLoader
+
 from ..core import LoaderCli
 from .bbp_cells_cli import BbpCellsCli
 from .bbp_report_cli import BbpReportCli

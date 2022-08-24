@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.network import Instance
+
 from .get_scene import get_scene
 from .model import Model
 

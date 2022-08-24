@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.version import DEV_VERSION, __version__
+
 from .version_error import VersionError
 
 

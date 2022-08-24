@@ -24,6 +24,7 @@ import argparse
 from dataclasses import dataclass, field
 
 from brayns.plugins import BbpReport, BbpReportType
+
 from ..cli import Cli
 
 

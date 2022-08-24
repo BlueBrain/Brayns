@@ -21,6 +21,7 @@
 from typing import TypeVar
 
 from brayns.network import Instance
+
 from .camera import Camera
 
 T = TypeVar('T', bound=Camera)

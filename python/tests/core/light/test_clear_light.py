@@ -21,7 +21,6 @@
 import unittest
 
 import brayns
-
 from tests.network.mock_instance import MockInstance
 
 

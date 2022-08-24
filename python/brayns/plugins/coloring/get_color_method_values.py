@@ -20,6 +20,7 @@
 
 
 from brayns.network import Instance
+
 from .color_method import ColorMethod
 
 

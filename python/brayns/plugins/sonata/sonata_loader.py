@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.core import Loader
+
 from .sonata_node_population import SonataNodePopulation
 
 

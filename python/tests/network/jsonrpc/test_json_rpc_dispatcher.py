@@ -25,6 +25,7 @@ from brayns.network.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
 from brayns.network.jsonrpc.json_rpc_error import JsonRpcError
 from brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress
 from brayns.network.jsonrpc.json_rpc_reply import JsonRpcReply
+
 from .mock_json_rpc_listener import MockJsonRpcListener
 
 

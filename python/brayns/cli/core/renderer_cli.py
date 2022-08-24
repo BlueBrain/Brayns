@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 
 from brayns.core import InteractiveRenderer, ProductionRenderer, Renderer
 from brayns.utils import Color4
+
 from ..cli import Cli
 from ..utils import RGBA
 

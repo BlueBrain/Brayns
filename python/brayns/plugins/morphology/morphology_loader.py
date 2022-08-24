@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from brayns.core import Loader
+
 from .morphology import Morphology
 
 

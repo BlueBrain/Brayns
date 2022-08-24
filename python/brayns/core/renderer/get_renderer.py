@@ -21,6 +21,7 @@
 from typing import TypeVar
 
 from brayns.network import Instance
+
 from .renderer import Renderer
 
 T = TypeVar('T', bound=Renderer)

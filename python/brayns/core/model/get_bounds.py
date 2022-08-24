@@ -20,6 +20,7 @@
 
 from brayns.network import Instance
 from brayns.utils import Bounds
+
 from .get_scene import get_scene
 
 
