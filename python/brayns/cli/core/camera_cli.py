@@ -21,9 +21,9 @@
 import argparse
 from dataclasses import dataclass, field
 
-from ..core import Camera, OrthographicCamera, PerspectiveCamera
-from ..utils import Bounds, Rotation, Vector3, View
-from .common import XYZ, rotation
+from ...core import Camera, OrthographicCamera, PerspectiveCamera
+from ...utils import Bounds, Rotation, Vector3, View
+from ..utils import XYZ, rotation
 
 
 @dataclass
@@ -72,6 +72,8 @@ class CameraCli:
                 return camera.from_target(target)
         raise ValueError(f'Invalid camera type: "{self.name}"')
 
-    def adjust_view(self, view: View) -> None:
+    def create_view(self, camera: Camera, bounds: Bounds) -> View:
+        view = camera.get_front_view(bounds)
         view.position += self.translation
         view.position = self.rotation.apply(view.position, center=view.target)
+        return view

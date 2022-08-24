@@ -21,9 +21,8 @@
 import argparse
 from dataclasses import dataclass
 
-from ..plugins.morphology.geometry_type import GeometryType
-from ..plugins.morphology.morphology import Morphology
-from .common import TRUE_FALSE, boolean
+from ...plugins import GeometryType, Morphology
+from ..utils import TRUE_FALSE, boolean
 
 
 @dataclass

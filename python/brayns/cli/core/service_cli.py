@@ -21,51 +21,45 @@
 import argparse
 from dataclasses import dataclass
 
-from ..core import DirectionalLight
-from ..utils import Color3, Rotation, Vector3
-from .common import RGB, XYZ, rotation
+from ...service import Bundle
 
 
 @dataclass
-class LightCli:
+class ServiceCli:
 
-    color: Color3 = Color3.white
-    intensity: float = 1.0
-    rotation: Rotation = Rotation.identity
+    port: int = 5000
+    executable: str = 'braynsService'
+    ospray: str = ''
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            '--light_color',
-            type=float,
-            nargs=3,
-            default=list(self.color),
-            metavar=RGB,
-            help='Light color RGB normalized',
+            '--port',
+            type=int,
+            default=self.port,
+            metavar='NUMBER',
+            help='Brayns service websocket server port',
         )
         parser.add_argument(
-            '--light_intensity',
-            type=float,
-            default=self.intensity,
-            metavar='VALUE',
-            help='Light intensity',
+            '--executable',
+            default=self.executable,
+            metavar='PATH',
+            help='braynsService executable path',
         )
         parser.add_argument(
-            '--light_rotation',
-            type=float,
-            nargs=3,
-            default=list(self.rotation.euler_degrees),
-            metavar=XYZ,
-            help='Light rotation (relative to camera direction)',
+            '--ospray',
+            default=self.ospray,
+            metavar='PATH',
+            help='OSPRAY dev libs (for local dev builds)',
         )
 
     def parse(self, args: argparse.Namespace) -> None:
-        self.color = Color3(*args.light_color)
-        self.intensity = args.light_intensity
-        self.rotation = rotation(args.light_rotation)
+        self.port = args.port
+        self.executable = args.executable
+        self.ospray = args.ospray
 
-    def create_directional_light(self, camera_direction: Vector3) -> DirectionalLight:
-        return DirectionalLight(
-            color=self.color,
-            intensity=self.intensity,
-            direction=self.rotation.apply(camera_direction),
+    def create_bundle(self) -> Bundle:
+        return Bundle(
+            port=self.port,
+            service_executable=self.executable,
+            service_env={'LD_LIBRARY_PATH': self.ospray},
         )

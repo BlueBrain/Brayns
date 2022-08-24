@@ -18,48 +18,51 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import argparse
 from dataclasses import dataclass
 
-from ..service import Bundle
+from ...plugins import BbpCells
 
 
 @dataclass
-class ServiceCli:
+class BbpCellsCli:
 
-    port: int = 5000
-    executable: str = 'braynsService'
-    ospray: str = ''
+    density: float = 0.1
+    targets: list[str] | None = None
+    gids: list[int] | None = None
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            '--port',
+            '--density',
+            type=float,
+            default=self.density,
+            metavar='VALUE',
+            help='Density of target(s) cells to load (0-1)',
+        )
+        parser.add_argument(
+            '--targets',
+            nargs='*',
+            metavar='NAME',
+            help='Names of targets to load, all if unspecified',
+        )
+        parser.add_argument(
+            '--gids',
             type=int,
-            default=self.port,
-            metavar='NUMBER',
-            help='Brayns service websocket server port',
-        )
-        parser.add_argument(
-            '--executable',
-            default=self.executable,
-            metavar='PATH',
-            help='braynsService executable path',
-        )
-        parser.add_argument(
-            '--ospray',
-            default=self.ospray,
-            metavar='PATH',
-            help='OSPRAY dev libs (for local dev builds)',
+            nargs='*',
+            metavar='GID',
+            help='GIDs of cells to load (override density and targets)',
         )
 
     def parse(self, args: argparse.Namespace) -> None:
-        self.port = args.port
-        self.executable = args.executable
-        self.ospray = args.ospray
+        self.density = args.density
+        self.gids = args.gids
+        self.targets = args.targets
 
-    def create_bundle(self) -> Bundle:
-        return Bundle(
-            port=self.port,
-            service_executable=self.executable,
-            service_env={'LD_LIBRARY_PATH': self.ospray},
+    def create_cells(self) -> BbpCells:
+        return BbpCells(
+            density=self.density,
+            targets=self.targets,
+            gids=self.gids,
         )

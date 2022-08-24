@@ -21,9 +21,9 @@
 import argparse
 from dataclasses import dataclass, field
 
-from ..core import InteractiveRenderer, ProductionRenderer, Renderer
-from ..utils import Color4
-from .common import RGBA
+from ...core import InteractiveRenderer, ProductionRenderer, Renderer
+from ...utils import Color4
+from ..utils import RGBA
 
 
 @dataclass

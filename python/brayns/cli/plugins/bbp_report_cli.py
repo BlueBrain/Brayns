@@ -23,11 +23,11 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass, field
 
-from ..plugins import BbpReport, BbpReportType
+from ...plugins import BbpReport, BbpReportType
 
 
 @dataclass
-class ReportCli:
+class BbpReportCli:
 
     type: str | None = None
     available_types: list[str] = field(default_factory=lambda: [
@@ -53,7 +53,7 @@ class ReportCli:
         self.type = args.report_type
         self.name = args.report_name
 
-    def create_bbp_report(self) -> BbpReport:
+    def create_report(self) -> BbpReport:
         return BbpReport(
             type=BbpReportType(self.type),
             name=self.name,

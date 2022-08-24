@@ -18,51 +18,54 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 import argparse
 from dataclasses import dataclass
 
-from ..plugins import BbpCells
+from ...core import DirectionalLight
+from ...utils import Color3, Rotation, Vector3
+from ..utils import RGB, XYZ, rotation
 
 
 @dataclass
-class CellsCli:
+class LightCli:
 
-    density: float = 0.1
-    targets: list[str] | None = None
-    gids: list[int] | None = None
+    color: Color3 = Color3.white
+    intensity: float = 1.0
+    rotation: Rotation = Rotation.identity
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            '--density',
+            '--light_color',
             type=float,
-            default=self.density,
+            nargs=3,
+            default=list(self.color),
+            metavar=RGB,
+            help='Light color RGB normalized',
+        )
+        parser.add_argument(
+            '--light_intensity',
+            type=float,
+            default=self.intensity,
             metavar='VALUE',
-            help='Density of target(s) cells to load (0-1)',
+            help='Light intensity',
         )
         parser.add_argument(
-            '--targets',
-            nargs='*',
-            metavar='NAME',
-            help='Names of targets to load, all if unspecified',
-        )
-        parser.add_argument(
-            '--gids',
-            type=int,
-            nargs='*',
-            metavar='GID',
-            help='GIDs of cells to load (override density and targets)',
+            '--light_rotation',
+            type=float,
+            nargs=3,
+            default=list(self.rotation.euler_degrees),
+            metavar=XYZ,
+            help='Light rotation (relative to camera direction)',
         )
 
     def parse(self, args: argparse.Namespace) -> None:
-        self.density = args.density
-        self.gids = args.gids
-        self.targets = args.targets
+        self.color = Color3(*args.light_color)
+        self.intensity = args.light_intensity
+        self.rotation = rotation(args.light_rotation)
 
-    def create_bbp_cells(self) -> BbpCells:
-        return BbpCells(
-            density=self.density,
-            targets=self.targets,
-            gids=self.gids,
+    def create_directional_light(self, direction: Vector3) -> DirectionalLight:
+        return DirectionalLight(
+            color=self.color,
+            intensity=self.intensity,
+            direction=self.rotation.apply(direction),
         )

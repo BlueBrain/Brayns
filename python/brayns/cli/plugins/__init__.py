@@ -18,25 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Brayns command line interface built on top of ``argparse``.
-
-Provides a CLI for simple use cases to parse sys.argv into brayns types.
-"""
-
-from .core import *
-from .plugins import *
-from .snapshot_cli import SnapshotCli
+from .bbp_cells_cli import BbpCellsCli
+from .bbp_loader_cli import BbpLoaderCli
+from .bbp_report_cli import BbpReportCli
+from .morphology_cli import MorphologyCli
 
 __all__ = [
     'BbpCellsCli',
     'BbpLoaderCli',
     'BbpReportCli',
-    'CameraCli',
-    'LightCli',
-    'LoaderCli',
     'MorphologyCli',
-    'RendererCli',
-    'ServiceCli',
-    'SnapshotCli',
 ]

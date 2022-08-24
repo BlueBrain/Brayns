@@ -19,42 +19,38 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import argparse
-from dataclasses import dataclass, field
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
-from ..plugins import BbpLoader
-from .cells_cli import CellsCli
-from .morphology_cli import MorphologyCli
-from .report_cli import ReportCli
+from ...core import Loader
 
 
 @dataclass
-class CircuitCli:
+class LoaderCli(ABC):
 
     path: str = ''
-    cells: CellsCli = field(default_factory=CellsCli)
-    report: ReportCli = field(default_factory=ReportCli)
-    morphology: MorphologyCli = field(default_factory=MorphologyCli)
+
+    @abstractmethod
+    def register_additional_args(self, parser: argparse.ArgumentParser) -> None:
+        pass
+
+    @abstractmethod
+    def parse_additional_args(self, args: argparse.Namespace) -> None:
+        pass
+
+    @abstractmethod
+    def create_loader(self) -> Loader:
+        pass
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            '--model_path',
+            '--path',
             required=True,
             metavar='PATH',
-            help='Path of the model to load',
+            help='Path of the model file to render',
         )
-        self.cells.register(parser)
-        self.report.register(parser)
-        self.morphology.register(parser)
+        self.register_additional_args(parser)
 
     def parse(self, args: argparse.Namespace) -> None:
-        self.path = args.circuit_path
-        self.cells.parse(args)
-        self.report.parse(args)
-        self.morphology.parse(args)
-
-    def create_bbp_loader(self) -> BbpLoader:
-        return BbpLoader(
-            cells=self.cells.create_bbp_cells(),
-            report=self.report.create_bbp_report(),
-            morphology=self.morphology.create_morphology(),
-        )
+        self.path = args.path
+        self.parse_additional_args(args)
