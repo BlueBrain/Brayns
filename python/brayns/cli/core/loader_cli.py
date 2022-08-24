@@ -18,9 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import argparse
 from abc import abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from ...core import Loader
 from ..cli import Cli
@@ -29,29 +28,6 @@ from ..cli import Cli
 @dataclass
 class LoaderCli(Cli):
 
-    path: str = field(default='', init=False)
-
-    @abstractmethod
-    def register_additional_args(self, parser: argparse.ArgumentParser) -> None:
-        pass
-
-    @abstractmethod
-    def load_additional_args(self, args: argparse.Namespace) -> None:
-        pass
-
     @abstractmethod
     def create_loader(self) -> Loader:
         pass
-
-    def register(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument(
-            '--path',
-            required=True,
-            metavar='PATH',
-            help='Path of the model file to render',
-        )
-        self.register_additional_args(parser)
-
-    def load(self, args: argparse.Namespace) -> None:
-        self.path = args.path
-        self.load_additional_args(args)

@@ -17,22 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-import argparse
-from dataclasses import dataclass
-
-from ...core import Loader, MeshLoader
-from .loader_cli import LoaderCli
-
-
-@dataclass
-class MeshLoaderCli(LoaderCli):
-
-    def register(self, _: argparse.ArgumentParser) -> None:
-        pass
-
-    def load(self, _: argparse.Namespace) -> None:
-        pass
-
-    def create_loader(self) -> Loader:
-        return MeshLoader()

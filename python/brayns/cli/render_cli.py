@@ -33,6 +33,7 @@ from .render_context import RenderContext
 @dataclass
 class RenderCli(Cli):
 
+    path: str = field(default='', init=False)
     loader: LoaderCli
     service: ServiceCli = field(default_factory=ServiceCli)
     light: LightCli = field(default_factory=LightCli)
@@ -52,6 +53,12 @@ class RenderCli(Cli):
         pass
 
     def register(self, parser: argparse.ArgumentParser) -> None:
+        parser.add_argument(
+            '--path',
+            required=True,
+            metavar='PATH',
+            help='Path of the model to render',
+        )
         self.loader.register(parser)
         self.service.register(parser)
         self.light.register(parser)
@@ -60,6 +67,7 @@ class RenderCli(Cli):
         self.register_additional_args(parser)
 
     def load(self, args: argparse.Namespace) -> None:
+        self.path = args.path
         self.loader.load(args)
         self.service.load(args)
         self.light.load(args)
@@ -81,7 +89,7 @@ class RenderCli(Cli):
 
     def _load_models(self, instance: Instance) -> None:
         loader = self.loader.create_loader()
-        loader.load(instance, self.loader.path)
+        loader.load(instance, self.path)
 
     def _create_context(self, instance: Instance) -> RenderContext:
         bounds = get_bounds(instance)
