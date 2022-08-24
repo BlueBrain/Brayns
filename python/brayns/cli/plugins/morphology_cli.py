@@ -24,7 +24,7 @@ from dataclasses import dataclass
 from brayns.plugins import GeometryType, Morphology
 
 from ..cli import Cli
-from ..utils import TRUE_FALSE, boolean
+from ..utils import TRUE_FALSE, boolean_key, boolean_value
 
 
 @dataclass
@@ -46,39 +46,35 @@ class MorphologyCli(Cli):
         )
         parser.add_argument(
             '--constant_radius',
-            type=boolean,
             choices=TRUE_FALSE,
-            default=self.constant_radius,
+            default=boolean_key(self.constant_radius),
             help='Use constant radius of radius_multiplier for all geometries',
         )
         parser.add_argument(
             '--load_soma',
-            type=boolean,
             choices=TRUE_FALSE,
-            default=self.load_soma,
+            default=boolean_key(self.load_soma),
             help='Wether to load morphologies somas or not',
         )
         parser.add_argument(
             '--load_dendrites',
-            type=boolean,
             choices=TRUE_FALSE,
-            default=self.load_dendrites,
+            default=boolean_key(self.load_dendrites),
             help='Wether to load morphologies dendrites or not',
         )
         parser.add_argument(
             '--load_axon',
-            type=boolean,
             choices=TRUE_FALSE,
-            default=self.load_axon,
+            default=boolean_key(self.load_axon),
             help='Wether to load morphologies axons or not',
         )
 
     def load(self, args: argparse.Namespace) -> None:
         self.radius_multiplier = args.radius_multiplier
-        self.constant_radius = args.constant_radius
-        self.load_soma = args.load_soma
-        self.load_dendrites = args.load_dendrites
-        self.load_axon = args.load_axon
+        self.constant_radius = boolean_value(args.constant_radius)
+        self.load_soma = boolean_value(args.load_soma)
+        self.load_dendrites = boolean_value(args.load_dendrites)
+        self.load_axon = boolean_value(args.load_axon)
 
     def create_morphology(self) -> Morphology:
         geometry_type = GeometryType.SMOOTH

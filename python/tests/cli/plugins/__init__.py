@@ -17,30 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-"""
-Brayns command line interface built on top of ``argparse``.
-
-Provides a CLI for simple use cases to parse sys.argv into brayns types.
-"""
-
-from .cli import Cli
-from .core import *
-from .plugins import *
-from .render_cli import RenderCli
-from .snapshot_cli import SnapshotCli
-
-__all__ = [
-    'BbpCellsCli',
-    'BbpLoaderCli',
-    'BbpReportCli',
-    'CameraCli',
-    'Cli',
-    'LightCli',
-    'LoaderCli',
-    'MorphologyCli',
-    'RenderCli',
-    'RendererCli',
-    'ServiceCli',
-    'SnapshotCli',
-]

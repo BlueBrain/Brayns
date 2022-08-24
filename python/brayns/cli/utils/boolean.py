@@ -18,7 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-def boolean(value: str) -> bool:
+def boolean_key(value: bool) -> str:
+    return 'true' if value else 'false'
+
+
+def boolean_value(value: str) -> bool:
     if value == 'true':
         return True
     if value == 'false':

@@ -106,5 +106,5 @@ class RenderCli(Cli):
 
     def _add_light(self, instance: Instance, context: RenderContext) -> None:
         direction = context.view.direction
-        light = self.light.create_directional_light(direction)
+        light = self.light.create_light(direction)
         add_light(instance, light)

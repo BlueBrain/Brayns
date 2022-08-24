@@ -18,12 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .boolean import boolean
+from .boolean import boolean_key, boolean_value
 from .metavars import RGB, RGBA, TRUE_FALSE, WIDTH_HEIGHT, XYZ
 from .rotation import rotation
 
 __all__ = [
-    'boolean',
+    'boolean_key',
+    'boolean_value',
     'RGB',
     'RGBA',
     'rotation',

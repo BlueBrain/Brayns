@@ -36,12 +36,12 @@ class BbpLoaderCli(LoaderCli):
     report: BbpReportCli = field(default_factory=BbpReportCli)
     morphology: MorphologyCli = field(default_factory=MorphologyCli)
 
-    def register_additional_args(self, parser: argparse.ArgumentParser) -> None:
+    def register(self, parser: argparse.ArgumentParser) -> None:
         self.cells.register(parser)
         self.report.register(parser)
         self.morphology.register(parser)
 
-    def load_additional_args(self, args: argparse.Namespace) -> None:
+    def load(self, args: argparse.Namespace) -> None:
         self.cells.load(args)
         self.report.load(args)
         self.morphology.load(args)

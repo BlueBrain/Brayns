@@ -43,30 +43,41 @@ import unittest
 import brayns
 
 
-class TestSnapshotCli(unittest.TestCase):
+class TestServiceCli(unittest.TestCase):
 
     def test_parse(self) -> None:
-        test = brayns.SnapshotCli(
-            loader=brayns.BbpLoaderCli(),
-            resolution=brayns.Resolution.ultra_hd,
-            frame=0,
+        test = brayns.ServiceCli(
+            port=3,
+            executable='exe',
+            ospray='osp',
         )
         args = [
-            '--path',
-            'path',
-            '--save_as',
-            'save',
-            '--resolution',
-            '1920',
-            '1080',
-            '--frame',
-            '25',
+            '--port',
+            '4',
+            '--executable',
+            'exe2',
+            '--ospray',
+            'osp2',
         ]
         test.parse(args)
-        self.assertEqual(test.save_as, 'save')
-        self.assertEqual(test.path, 'path')
-        self.assertEqual(test.resolution, brayns.Resolution.full_hd)
-        self.assertEqual(test.frame, 25)
+        self.assertEqual(test.port, 4)
+        self.assertEqual(test.executable, 'exe2')
+        self.assertEqual(test.ospray, 'osp2')
+
+    def test_create_bundle(self) -> None:
+        cli = brayns.ServiceCli(
+            port=3,
+            executable='exe',
+            ospray='osp',
+        )
+        test = cli.create_bundle()
+        ref = brayns.Bundle(
+            port=cli.port,
+            service_executable=cli.executable,
+            service_env={'LD_LIBRARY_PATH': cli.ospray},
+            connector_logger=test.connector_logger,
+        )
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

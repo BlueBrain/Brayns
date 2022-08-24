@@ -21,7 +21,6 @@
 from .camera_cli import CameraCli
 from .light_cli import LightCli
 from .loader_cli import LoaderCli
-from .mesh_loader_cli import MeshLoaderCli
 from .renderer_cli import RendererCli
 from .service_cli import ServiceCli
 
@@ -29,7 +28,6 @@ __all__ = [
     'CameraCli',
     'LightCli',
     'LoaderCli',
-    'MeshLoaderCli',
     'RendererCli',
     'ServiceCli',
 ]

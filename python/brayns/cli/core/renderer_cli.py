@@ -69,7 +69,7 @@ class RendererCli(Cli):
 
     def create_renderer(self) -> Renderer:
         for renderer in self.available:
-            if renderer == self.name:
+            if renderer.name == self.name:
                 return renderer(
                     samples_per_pixel=self.samples,
                     background_color=self.background,

@@ -128,7 +128,6 @@ __all__ = [
     'MatteMaterial',
     'merge_bounds',
     'MeshLoader',
-    'MeshLoaderCli',
     'MetalMaterial',
     'Model',
     'Morphology',

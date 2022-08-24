@@ -43,30 +43,63 @@ import unittest
 import brayns
 
 
-class TestSnapshotCli(unittest.TestCase):
+class TestMorphologyCli(unittest.TestCase):
 
     def test_parse(self) -> None:
-        test = brayns.SnapshotCli(
-            loader=brayns.BbpLoaderCli(),
-            resolution=brayns.Resolution.ultra_hd,
-            frame=0,
+        test = brayns.MorphologyCli(
+            radius_multiplier=1,
+            constant_radius=False,
+            load_soma=True,
+            load_dendrites=True,
+            load_axon=True,
         )
         args = [
-            '--path',
-            'path',
-            '--save_as',
-            'save',
-            '--resolution',
-            '1920',
-            '1080',
-            '--frame',
-            '25',
+            '--radius_multiplier',
+            '2',
+            '--constant_radius',
+            'true',
+            '--load_soma',
+            'false',
+            '--load_dendrites',
+            'false',
+            '--load_axon',
+            'false',
         ]
         test.parse(args)
-        self.assertEqual(test.save_as, 'save')
-        self.assertEqual(test.path, 'path')
-        self.assertEqual(test.resolution, brayns.Resolution.full_hd)
-        self.assertEqual(test.frame, 25)
+        self.assertEqual(test.radius_multiplier, 2)
+        self.assertEqual(test.constant_radius, True)
+        self.assertEqual(test.load_soma, False)
+        self.assertEqual(test.load_dendrites, False)
+        self.assertEqual(test.load_axon, False)
+
+    def test_create_morphology(self) -> None:
+        cli = brayns.MorphologyCli(
+            radius_multiplier=1,
+            constant_radius=False,
+            load_soma=True,
+            load_dendrites=True,
+            load_axon=True,
+        )
+        test = cli.create_morphology()
+        ref = brayns.Morphology(
+            radius_multiplier=1,
+            load_soma=True,
+            load_dendrites=True,
+            load_axon=True,
+            geometry_type=brayns.GeometryType.SMOOTH,
+        )
+        self.assertEqual(test, ref)
+
+    def test_create_morphology_constant_radius(self) -> None:
+        cli = brayns.MorphologyCli(
+            constant_radius=True,
+        )
+        test = cli.create_morphology()
+        ref = brayns.Morphology(
+            radius_multiplier=10,
+            geometry_type=brayns.GeometryType.CONSTANT_RADII,
+        )
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

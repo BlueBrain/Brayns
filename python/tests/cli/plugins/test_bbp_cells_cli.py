@@ -43,30 +43,34 @@ import unittest
 import brayns
 
 
-class TestSnapshotCli(unittest.TestCase):
+class TestBbpCellsCli(unittest.TestCase):
 
     def test_parse(self) -> None:
-        test = brayns.SnapshotCli(
-            loader=brayns.BbpLoaderCli(),
-            resolution=brayns.Resolution.ultra_hd,
-            frame=0,
+        test = brayns.BbpCellsCli(
+            density=0.5,
+            targets=['1', '2'],
+            gids=[1, 2],
         )
         args = [
-            '--path',
-            'path',
-            '--save_as',
-            'save',
-            '--resolution',
-            '1920',
-            '1080',
-            '--frame',
-            '25',
+            '--density',
+            '0.6',
+            '--targets',
+            '3',
+            '4',
+            '--gids',
+            '3',
+            '4',
         ]
         test.parse(args)
-        self.assertEqual(test.save_as, 'save')
-        self.assertEqual(test.path, 'path')
-        self.assertEqual(test.resolution, brayns.Resolution.full_hd)
-        self.assertEqual(test.frame, 25)
+        self.assertEqual(test.density, 0.6)
+        self.assertEqual(test.targets, ['3', '4'])
+        self.assertEqual(test.gids, [3, 4])
+
+    def test_create_cells(self) -> None:
+        cli = brayns.BbpCellsCli(density=1)
+        test = cli.create_cells()
+        ref = brayns.BbpCells.from_density(1)
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

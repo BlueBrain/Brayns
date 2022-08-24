@@ -43,30 +43,31 @@ import unittest
 import brayns
 
 
-class TestSnapshotCli(unittest.TestCase):
+class TestBbpReportCli(unittest.TestCase):
 
     def test_parse(self) -> None:
-        test = brayns.SnapshotCli(
-            loader=brayns.BbpLoaderCli(),
-            resolution=brayns.Resolution.ultra_hd,
-            frame=0,
+        test = brayns.BbpReportCli(
+            type=brayns.BbpReportType.COMPARTMENT,
+            name='test',
         )
         args = [
-            '--path',
-            'path',
-            '--save_as',
-            'save',
-            '--resolution',
-            '1920',
-            '1080',
-            '--frame',
-            '25',
+            '--report_type',
+            'spikes',
+            '--report_name',
+            'test2',
         ]
         test.parse(args)
-        self.assertEqual(test.save_as, 'save')
-        self.assertEqual(test.path, 'path')
-        self.assertEqual(test.resolution, brayns.Resolution.full_hd)
-        self.assertEqual(test.frame, 25)
+        self.assertEqual(test.type, brayns.BbpReportType.SPIKES)
+        self.assertEqual(test.name, 'test2')
+
+    def test_create_report(self) -> None:
+        cli = brayns.BbpReportCli(
+            type=brayns.BbpReportType.COMPARTMENT,
+            name='test',
+        )
+        test = cli.create_report()
+        ref = brayns.BbpReport.compartment('test')
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

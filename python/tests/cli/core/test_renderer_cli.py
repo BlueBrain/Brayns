@@ -43,30 +43,43 @@ import unittest
 import brayns
 
 
-class TestSnapshotCli(unittest.TestCase):
+class TestRendererCli(unittest.TestCase):
 
     def test_parse(self) -> None:
-        test = brayns.SnapshotCli(
-            loader=brayns.BbpLoaderCli(),
-            resolution=brayns.Resolution.ultra_hd,
-            frame=0,
+        test = brayns.RendererCli(
+            name=brayns.ProductionRenderer.name,
+            available=[brayns.ProductionRenderer],
+            background=brayns.Color4.red,
+            samples=2,
         )
         args = [
-            '--path',
-            'path',
-            '--save_as',
-            'save',
-            '--resolution',
-            '1920',
-            '1080',
-            '--frame',
-            '25',
+            '--renderer_type',
+            'production',
+            '--background',
+            '0',
+            '1',
+            '0',
+            '0',
+            '--samples',
+            '3',
         ]
         test.parse(args)
-        self.assertEqual(test.save_as, 'save')
-        self.assertEqual(test.path, 'path')
-        self.assertEqual(test.resolution, brayns.Resolution.full_hd)
-        self.assertEqual(test.frame, 25)
+        self.assertEqual(test.name, 'production')
+        self.assertEqual(test.background, brayns.Color4.green.transparent)
+        self.assertEqual(test.samples, 3)
+
+    def test_create_renderer(self) -> None:
+        cli = brayns.RendererCli(
+            name=brayns.ProductionRenderer.name,
+            background=brayns.Color4.red,
+            samples=3,
+        )
+        test = cli.create_renderer()
+        ref = brayns.ProductionRenderer(
+            samples_per_pixel=cli.samples,
+            background_color=cli.background,
+        )
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

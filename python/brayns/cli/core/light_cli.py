@@ -65,7 +65,7 @@ class LightCli(Cli):
         self.intensity = args.light_intensity
         self.rotation = rotation(args.light_rotation)
 
-    def create_directional_light(self, direction: Vector3) -> DirectionalLight:
+    def create_light(self, direction: Vector3) -> DirectionalLight:
         return DirectionalLight(
             color=self.color,
             intensity=self.intensity,

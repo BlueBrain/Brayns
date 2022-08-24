@@ -43,30 +43,32 @@ import unittest
 import brayns
 
 
-class TestSnapshotCli(unittest.TestCase):
+class TestBbpLoaderCli(unittest.TestCase):
 
     def test_parse(self) -> None:
-        test = brayns.SnapshotCli(
-            loader=brayns.BbpLoaderCli(),
-            resolution=brayns.Resolution.ultra_hd,
-            frame=0,
-        )
+        test = brayns.BbpLoaderCli()
         args = [
-            '--path',
-            'path',
-            '--save_as',
-            'save',
-            '--resolution',
-            '1920',
-            '1080',
-            '--frame',
-            '25',
+            '--density',
+            '0.6',
+            '--report_type',
+            'spikes',
+            '--load_dendrites',
+            'true',
         ]
         test.parse(args)
-        self.assertEqual(test.save_as, 'save')
-        self.assertEqual(test.path, 'path')
-        self.assertEqual(test.resolution, brayns.Resolution.full_hd)
-        self.assertEqual(test.frame, 25)
+        self.assertEqual(test.cells.density, 0.6)
+        self.assertEqual(test.report.type, brayns.BbpReportType.SPIKES)
+        self.assertTrue(test.morphology.load_dendrites)
+
+    def test_create_loader(self) -> None:
+        cli = brayns.BbpLoaderCli()
+        test = cli.create_loader()
+        ref = brayns.BbpLoader(
+            cells=cli.cells.create_cells(),
+            report=cli.report.create_report(),
+            morphology=cli.morphology.create_morphology(),
+        )
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

@@ -31,32 +31,30 @@ from ..cli import Cli
 @dataclass
 class BbpReportCli(Cli):
 
-    type: str | None = None
-    available_types: list[str] = field(default_factory=lambda: [
-        report.value
-        for report in BbpReportType
-    ])
-    name: str | None = None
+    type: BbpReportType = BbpReportType.NONE
+    name: str = ''
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             '--report_type',
-            choices=self.available_types,
+            choices=[report.value for report in BbpReportType],
+            default=self.type.value,
             metavar='TYPE',
             help='Type of the report to load if any',
         )
         parser.add_argument(
             '--report_name',
+            default=self.name,
             metavar='NAME',
             help='Name of the report to load if necessary',
         )
 
     def load(self, args: argparse.Namespace) -> None:
-        self.type = args.report_type
+        self.type = BbpReportType(args.report_type)
         self.name = args.report_name
 
     def create_report(self) -> BbpReport:
         return BbpReport(
-            type=BbpReportType(self.type),
+            type=self.type,
             name=self.name,
         )
