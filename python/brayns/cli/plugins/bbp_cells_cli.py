@@ -24,10 +24,11 @@ import argparse
 from dataclasses import dataclass
 
 from ...plugins import BbpCells
+from ..cli import Cli
 
 
 @dataclass
-class BbpCellsCli:
+class BbpCellsCli(Cli):
 
     density: float = 0.1
     targets: list[str] | None = None
@@ -55,7 +56,7 @@ class BbpCellsCli:
             help='GIDs of cells to load (override density and targets)',
         )
 
-    def parse(self, args: argparse.Namespace) -> None:
+    def load(self, args: argparse.Namespace) -> None:
         self.density = args.density
         self.gids = args.gids
         self.targets = args.targets

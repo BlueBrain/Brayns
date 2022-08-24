@@ -19,18 +19,19 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import argparse
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass, field
 
 from ..core import add_light, get_bounds
 from ..network.instance import Instance
 from ..service import Manager
+from .cli import Cli
 from .core import CameraCli, LightCli, LoaderCli, RendererCli, ServiceCli
 from .render_context import RenderContext
 
 
 @dataclass
-class RenderCli(ABC):
+class RenderCli(Cli):
 
     loader: LoaderCli
     service: ServiceCli = field(default_factory=ServiceCli)
@@ -43,7 +44,7 @@ class RenderCli(ABC):
         pass
 
     @abstractmethod
-    def parse_additional_args(self, args: argparse.Namespace) -> None:
+    def load_additional_args(self, args: argparse.Namespace) -> None:
         pass
 
     @abstractmethod
@@ -58,13 +59,13 @@ class RenderCli(ABC):
         self.renderer.register(parser)
         self.register_additional_args(parser)
 
-    def parse(self, args: argparse.Namespace) -> None:
-        self.loader.parse(args)
-        self.service.parse(args)
-        self.light.parse(args)
-        self.camera.parse(args)
-        self.renderer.parse(args)
-        self.parse_additional_args(args)
+    def load(self, args: argparse.Namespace) -> None:
+        self.loader.load(args)
+        self.service.load(args)
+        self.light.load(args)
+        self.camera.load(args)
+        self.renderer.load(args)
+        self.load_additional_args(args)
 
     def run(self) -> None:
         with self._start_service() as manager:

@@ -22,11 +22,12 @@ import argparse
 from dataclasses import dataclass
 
 from ...plugins import GeometryType, Morphology
+from ..cli import Cli
 from ..utils import TRUE_FALSE, boolean
 
 
 @dataclass
-class MorphologyCli:
+class MorphologyCli(Cli):
 
     radius_multiplier: float = 10.0
     constant_radius: bool = False
@@ -71,7 +72,7 @@ class MorphologyCli:
             help='Wether to load morphologies axons or not',
         )
 
-    def parse(self, args: argparse.Namespace) -> None:
+    def load(self, args: argparse.Namespace) -> None:
         self.radius_multiplier = args.radius_multiplier
         self.constant_radius = args.constant_radius
         self.load_soma = args.load_soma

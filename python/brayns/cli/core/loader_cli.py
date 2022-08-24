@@ -19,23 +19,24 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import argparse
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from abc import abstractmethod
+from dataclasses import dataclass, field
 
 from ...core import Loader
+from ..cli import Cli
 
 
 @dataclass
-class LoaderCli(ABC):
+class LoaderCli(Cli):
 
-    path: str = ''
+    path: str = field(default='', init=False)
 
     @abstractmethod
     def register_additional_args(self, parser: argparse.ArgumentParser) -> None:
         pass
 
     @abstractmethod
-    def parse_additional_args(self, args: argparse.Namespace) -> None:
+    def load_additional_args(self, args: argparse.Namespace) -> None:
         pass
 
     @abstractmethod
@@ -51,6 +52,6 @@ class LoaderCli(ABC):
         )
         self.register_additional_args(parser)
 
-    def parse(self, args: argparse.Namespace) -> None:
+    def load(self, args: argparse.Namespace) -> None:
         self.path = args.path
-        self.parse_additional_args(args)
+        self.load_additional_args(args)

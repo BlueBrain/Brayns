@@ -40,10 +40,10 @@ class BbpLoaderCli(LoaderCli):
         self.report.register(parser)
         self.morphology.register(parser)
 
-    def parse_additional_args(self, args: argparse.Namespace) -> None:
-        self.cells.parse(args)
-        self.report.parse(args)
-        self.morphology.parse(args)
+    def load_additional_args(self, args: argparse.Namespace) -> None:
+        self.cells.load(args)
+        self.report.load(args)
+        self.morphology.load(args)
 
     def create_loader(self) -> BbpLoader:
         return BbpLoader(

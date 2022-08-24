@@ -22,10 +22,11 @@ import argparse
 from dataclasses import dataclass
 
 from ...service import Bundle
+from ..cli import Cli
 
 
 @dataclass
-class ServiceCli:
+class ServiceCli(Cli):
 
     port: int = 5000
     executable: str = 'braynsService'
@@ -52,7 +53,7 @@ class ServiceCli:
             help='OSPRAY dev libs (for local dev builds)',
         )
 
-    def parse(self, args: argparse.Namespace) -> None:
+    def load(self, args: argparse.Namespace) -> None:
         self.port = args.port
         self.executable = args.executable
         self.ospray = args.ospray

@@ -24,8 +24,10 @@ Brayns command line interface built on top of ``argparse``.
 Provides a CLI for simple use cases to parse sys.argv into brayns types.
 """
 
+from .cli import Cli
 from .core import *
 from .plugins import *
+from .render_cli import RenderCli
 from .snapshot_cli import SnapshotCli
 
 __all__ = [
@@ -33,9 +35,12 @@ __all__ = [
     'BbpLoaderCli',
     'BbpReportCli',
     'CameraCli',
+    'Cli',
     'LightCli',
     'LoaderCli',
+    'MeshLoaderCli',
     'MorphologyCli',
+    'RenderCli',
     'RendererCli',
     'ServiceCli',
     'SnapshotCli',

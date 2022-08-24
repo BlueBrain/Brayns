@@ -23,11 +23,12 @@ from dataclasses import dataclass
 
 from ...core import DirectionalLight
 from ...utils import Color3, Rotation, Vector3
+from ..cli import Cli
 from ..utils import RGB, XYZ, rotation
 
 
 @dataclass
-class LightCli:
+class LightCli(Cli):
 
     color: Color3 = Color3.white
     intensity: float = 1.0
@@ -58,7 +59,7 @@ class LightCli:
             help='Light rotation (relative to camera direction)',
         )
 
-    def parse(self, args: argparse.Namespace) -> None:
+    def load(self, args: argparse.Namespace) -> None:
         self.color = Color3(*args.light_color)
         self.intensity = args.light_intensity
         self.rotation = rotation(args.light_rotation)

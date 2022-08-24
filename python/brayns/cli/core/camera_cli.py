@@ -23,11 +23,12 @@ from dataclasses import dataclass, field
 
 from ...core import Camera, OrthographicCamera, PerspectiveCamera
 from ...utils import Bounds, Rotation, Vector3, View
+from ..cli import Cli
 from ..utils import XYZ, rotation
 
 
 @dataclass
-class CameraCli:
+class CameraCli(Cli):
 
     name: str = PerspectiveCamera.name
     available: list[type[Camera]] = field(default_factory=lambda: [
@@ -61,7 +62,7 @@ class CameraCli:
             help='Camera rotation using euler angles XYZ in degrees',
         )
 
-    def parse(self, args: argparse.Namespace) -> None:
+    def load(self, args: argparse.Namespace) -> None:
         self.name = args.camera_type
         self.translation = Vector3(*args.camera_translation)
         self.rotation = rotation(args.camera_rotation)

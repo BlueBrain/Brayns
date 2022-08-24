@@ -23,11 +23,12 @@ from dataclasses import dataclass, field
 
 from ...core import InteractiveRenderer, ProductionRenderer, Renderer
 from ...utils import Color4
+from ..cli import Cli
 from ..utils import RGBA
 
 
 @dataclass
-class RendererCli:
+class RendererCli(Cli):
 
     name: str = InteractiveRenderer.name
     available: list[type[Renderer]] = field(default_factory=lambda: [
@@ -60,7 +61,7 @@ class RendererCli:
             help='Samples per pixels (antialiasing)',
         )
 
-    def parse(self, args: argparse.Namespace) -> None:
+    def load(self, args: argparse.Namespace) -> None:
         self.name = args.renderer_type
         self.background = Color4(*args.background)
         self.samples = args.samples

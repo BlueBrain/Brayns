@@ -18,18 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .camera_cli import CameraCli
-from .light_cli import LightCli
-from .loader_cli import LoaderCli
-from .mesh_loader_cli import MeshLoaderCli
-from .renderer_cli import RendererCli
-from .service_cli import ServiceCli
+import argparse
+from dataclasses import dataclass
 
-__all__ = [
-    'CameraCli',
-    'LightCli',
-    'LoaderCli',
-    'MeshLoaderCli',
-    'RendererCli',
-    'ServiceCli',
-]
+from ...core import Loader, MeshLoader
+from .loader_cli import LoaderCli
+
+
+@dataclass
+class MeshLoaderCli(LoaderCli):
+
+    def register_additional_args(self, _: argparse.ArgumentParser) -> None:
+        pass
+
+    def load_additional_args(self, _: argparse.Namespace) -> None:
+        pass
+
+    def create_loader(self) -> Loader:
+        return MeshLoader()

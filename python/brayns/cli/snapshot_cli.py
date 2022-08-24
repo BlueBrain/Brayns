@@ -21,7 +21,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..core import Snapshot
 from ..utils import Resolution
@@ -33,7 +33,7 @@ from .utils import WIDTH_HEIGHT
 @dataclass
 class SnapshotCli(RenderCli):
 
-    save_as: str = ''
+    save_as: str = field(default='', init=False)
     resolution: Resolution = Resolution.full_hd
     frame: int | None = None
 
@@ -60,7 +60,7 @@ class SnapshotCli(RenderCli):
             help='Simulation frame to render if any',
         )
 
-    def parse_additional_args(self, args: argparse.Namespace) -> None:
+    def load_additional_args(self, args: argparse.Namespace) -> None:
         self.resolution = Resolution(*args.resolution)
         self.frame = args.frame
         self.save_as = args.save_as

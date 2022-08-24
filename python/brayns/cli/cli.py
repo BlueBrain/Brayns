@@ -18,44 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 import argparse
-from dataclasses import dataclass, field
-
-from ...plugins import BbpReport, BbpReportType
-from ..cli import Cli
+import sys
+from abc import ABC, abstractmethod
 
 
-@dataclass
-class BbpReportCli(Cli):
+class Cli(ABC):
 
-    type: str | None = None
-    available_types: list[str] = field(default_factory=lambda: [
-        report.value
-        for report in BbpReportType
-    ])
-    name: str | None = None
-
+    @abstractmethod
     def register(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument(
-            '--report_type',
-            choices=self.available_types,
-            metavar='TYPE',
-            help='Type of the report to load if any',
-        )
-        parser.add_argument(
-            '--report_name',
-            metavar='NAME',
-            help='Name of the report to load if necessary',
-        )
+        pass
 
+    @abstractmethod
     def load(self, args: argparse.Namespace) -> None:
-        self.type = args.report_type
-        self.name = args.report_name
+        pass
 
-    def create_report(self) -> BbpReport:
-        return BbpReport(
-            type=BbpReportType(self.type),
-            name=self.name,
-        )
+    def parse(self, argv: list[str] = sys.argv) -> None:
+        parser = argparse.ArgumentParser()
+        self.register(parser)
+        args = parser.parse_args(argv)
+        self.load(args)
