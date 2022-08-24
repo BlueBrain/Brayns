@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import argparse
-import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import TypeVar
@@ -44,7 +43,7 @@ class Cli(ABC):
         self.description = description
         return self
 
-    def parse(self, argv: list[str] = sys.argv) -> None:
+    def parse(self, argv: list[str]) -> None:
         parser = argparse.ArgumentParser(
             description=self.description,
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
