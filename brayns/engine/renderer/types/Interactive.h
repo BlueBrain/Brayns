@@ -27,9 +27,9 @@ namespace brayns
 {
 struct Interactive
 {
-    int32_t samplesPerPixel = 5;
+    int32_t samplesPerPixel = 1;
     int32_t maxRayBounces = 3;
-    Vector4f backgroundColor = Vector4f(0.f, 0.f, 0.f, 1.f);
+    Vector4f backgroundColor = Vector4f(.004f, .016f, .102f, 0.f);
     bool shadowsEnabled = true;
     int32_t aoSamples = 0;
 };
@@ -38,8 +38,8 @@ template<>
 class RendererTraits<Interactive>
 {
 public:
-    inline static const std::string osprayValue = "scivis";
-    inline static const std::string value = "interactive";
+    inline static const std::string handleName = "scivis";
+    inline static const std::string name = "interactive";
 
     static void updateData(ospray::cpp::Renderer &handle, Interactive &data);
 };

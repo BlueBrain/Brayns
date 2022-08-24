@@ -28,6 +28,8 @@
 #include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/utils/string/StringJoiner.h>
 
+#include "EngineObjectData.h"
+
 #include <algorithm>
 #include <string>
 #include <string_view>
@@ -35,12 +37,6 @@
 
 namespace brayns
 {
-struct EngineObjectData
-{
-    std::string name;
-    JsonValue params;
-};
-
 template<typename T>
 class EngineFactory
 {
@@ -49,7 +45,7 @@ public:
     {
     public:
         virtual ~IFactoryEntry() = default;
-        virtual T deserialize() const = 0;
+        virtual T deserialize(const JsonValue &payload) const = 0;
         virtual JsonValue serialize(const T &object) const = 0;
         virtual std::string_view getName() const noexcept = 0;
     };
@@ -76,9 +72,9 @@ public:
             return T(data);
         }
 
-        JsonValue serialize(const T &object)
+        JsonValue serialize(const T &object) const override
         {
-            auto casted = object.as<SubT>();
+            auto casted = object.template as<SubT>();
             if (!casted)
             {
                 throw std::invalid_argument("Cannot cast the object to the underlying requested type");
@@ -122,20 +118,11 @@ public:
     template<typename SubT>
     void addType()
     {
-        using Traits = T::Traits<SubT>;
+        using Traits = typename T::template Traits<SubT>;
         _items.push_back(std::make_unique<FactoryEntry<SubT>>(Traits::name));
     }
 
 private:
     std::vector<std::unique_ptr<IFactoryEntry>> _items;
-};
-
-class EngineFactories
-{
-public:
-    static EngineFactory<Camera> createCameraFactory();
-    static EngineFactory<Light> createLightFactory();
-    static EngineFactory<Material> createMaterialFactory();
-    static EngineFactory<Renderer> createRendererFactory();
 };
 }

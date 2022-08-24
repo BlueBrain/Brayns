@@ -44,7 +44,7 @@ void AddClipPlaneEntrypoint::onRequest(const Request &request)
 {
     auto plane = request.getParams();
     auto model = std::make_unique<Model>();
-    model->addComponent<ClippingComponent<Plane>>(plane);
+    model->addComponent<ClippingComponent>(plane);
     auto id = _scene.addClippingModel(std::move(model));
     request.reply(id);
 }

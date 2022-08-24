@@ -77,6 +77,12 @@ public:
     const Vector2ui &getFrameSize() const noexcept;
 
     /**
+     * @brief Returns the frame aspect ratio (width / height)
+     * @return float
+     */
+    float getAspectRatio() const noexcept;
+
+    /**
      * @brief Enables or disables accumulation. Accumulation is a proccess in which a frame is integrated
      * over multiple calls render calls, rendering 1 sample per pixel on each call (It allows for more
      * interactivity as it does not block the main thread).

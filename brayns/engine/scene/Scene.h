@@ -128,7 +128,7 @@ public:
      * @param light Light to add.
      * @return uint32_t ID of the light after adding it.
      */
-    uint32_t addLight(std::unique_ptr<Light> light);
+    uint32_t addLight(Light light);
 
     /**
      * @brief Removes a list of lights from the scene identified by their ID.

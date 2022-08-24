@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include <brayns/engine/json/adapters/MaterialAdapters.h>
 #include <brayns/json/JsonBuffer.h>
-#include <brayns/network/adapters/MaterialAdapter.h>
 
 namespace brayns
 {
@@ -38,11 +38,11 @@ struct SetMaterialMessage
     BRAYNS_JSON_ADAPTER_ENTRY(material, "Material parameters") \
     BRAYNS_JSON_ADAPTER_END()
 
-BRAYNS_SET_MATERIAL_ADAPTER(CarPaintMaterial)
-BRAYNS_SET_MATERIAL_ADAPTER(DefaultMaterial)
-BRAYNS_SET_MATERIAL_ADAPTER(EmissiveMaterial)
-BRAYNS_SET_MATERIAL_ADAPTER(GlassMaterial)
-BRAYNS_SET_MATERIAL_ADAPTER(MatteMaterial)
-BRAYNS_SET_MATERIAL_ADAPTER(MetalMaterial)
-BRAYNS_SET_MATERIAL_ADAPTER(PlasticMaterial)
+BRAYNS_SET_MATERIAL_ADAPTER(CarPaint)
+BRAYNS_SET_MATERIAL_ADAPTER(Emissive)
+BRAYNS_SET_MATERIAL_ADAPTER(Glass)
+BRAYNS_SET_MATERIAL_ADAPTER(Matte)
+BRAYNS_SET_MATERIAL_ADAPTER(Metal)
+BRAYNS_SET_MATERIAL_ADAPTER(Phong)
+BRAYNS_SET_MATERIAL_ADAPTER(Plastic)
 }

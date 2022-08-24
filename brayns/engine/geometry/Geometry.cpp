@@ -29,6 +29,11 @@ Geometry::Geometry(const Geometry &other)
 
 Geometry &Geometry::operator=(const Geometry &other)
 {
+    _handleName = other._handleName;
+    _geometryName = other._geometryName;
+    _handle = ospray::cpp::Geometry(_handleName);
+    _data = other._data->clone();
+    _data->pushTo(_handle);
     return *this;
 }
 

@@ -36,7 +36,7 @@ class MaterialTraits<Emissive>
 {
 public:
     inline static const std::string handleName = "luminous";
-    inline static const std::string materialName = "emissive";
+    inline static const std::string name = "emissive";
 
     static void updateData(ospray::cpp::Material &handle, Emissive &data);
 };

@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <utility>
+
 namespace brayns
 {
 class ModifiedFlag

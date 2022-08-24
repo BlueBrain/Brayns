@@ -32,13 +32,13 @@ namespace brayns
  * @brief The TransferFunction class is an utility object which transform maps a value within a range, and from that
  * range, maps it into a color map scale.
  */
-class ColorMap
+class ColorRamp
 {
 public:
     /**
      * @brief Initializes the tranfer function by default to a grayscale from 0 to 1
      */
-    ColorMap();
+    ColorRamp();
 
     /**
      * @brief Return the list of colors that make up this transfer function color map

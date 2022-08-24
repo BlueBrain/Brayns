@@ -28,17 +28,20 @@
 namespace brayns
 {
 template<typename T>
+constexpr bool materialSpecialized = false;
+
+template<typename T>
 class MaterialTraits
 {
 public:
-    inline static const std::string handleNam;
-    inline static const std::string materialName;
+    inline static const std::string handleName;
+    inline static const std::string name;
 
     static void updateData(ospray::cpp::Material &handle, T &data)
     {
+        static_assert(materialSpecialized<T>, "MaterialTraits not specialized");
         (void)handle;
         (void)data;
-        assert(false);
     }
 };
 }

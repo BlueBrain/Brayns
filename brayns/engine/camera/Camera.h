@@ -43,12 +43,9 @@ public:
     using Traits = ProjectionTraits<T>;
 
     template<typename ProjectionType>
-    Camera(ProjectionType &&data)
-        : _projectionName(ProjectionTraits<ProjectionType>::name)
-        , _handle(_projectionName)
-        , _data(std::make_unique<Data<ProjectionType>>(std::forward<ProjectionType>(data)))
+    Camera(ProjectionType data)
     {
-        _data->pushTo(_handle);
+        set(std::move(data));
     }
 
     Camera(Camera &&) noexcept = default;
@@ -70,6 +67,21 @@ public:
             return &cast->data;
         }
         return nullptr;
+    }
+
+    /**
+     * @brief Sets the camera projection and recreates the OSPRay handle to accomodate it.
+     * @tparam ProjectionType Type of projection to set
+     * @param projection Projection data
+     */
+    template<typename ProjectionType>
+    void set(ProjectionType data) noexcept
+    {
+        _projectionName = ProjectionTraits<ProjectionType>::name;
+        _handle = ospray::cpp::Camera(_projectionName);
+        _data = std::make_unique<Data<ProjectionType>>(std::move(data));
+        _data->pushTo(_handle);
+        _flag = true;
     }
 
     /**

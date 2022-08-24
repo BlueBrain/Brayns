@@ -22,8 +22,8 @@
 
 #include <brayns/engine/components/GeometryRendererComponent.h>
 #include <brayns/engine/geometry/types/Sphere.h>
-#include <brayns/engine/lights/AmbientLight.h>
-#include <brayns/engine/lights/DirectionalLight.h>
+#include <brayns/engine/light/types/AmbientLight.h>
+#include <brayns/engine/light/types/DirectionalLight.h>
 
 #include <tests/paths.h>
 
@@ -39,10 +39,8 @@ TEST_CASE("render_two_frames_and_compare_they_are_same")
 
     BraynsTestUtils::setRenderResolution(brayns, 300, 300);
     BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
-    BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
-    auto ambient = std::make_unique<brayns::AmbientLight>();
-    ambient->setIntensity(0.05f);
-    BraynsTestUtils::addLight(brayns, std::move(ambient));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight()));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{0.05f}));
     BraynsTestUtils::adjustPerspectiveView(brayns);
 
     auto &engine = brayns.getEngine();
@@ -65,10 +63,8 @@ TEST_CASE("render_xyz_and_compare")
 
     BraynsTestUtils::setRenderResolution(brayns, 300, 300);
     BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_XYZ_PATH);
-    BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
-    auto ambient = std::make_unique<brayns::AmbientLight>();
-    ambient->setIntensity(0.05f);
-    BraynsTestUtils::addLight(brayns, std::move(ambient));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight()));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{0.05f}));
     BraynsTestUtils::adjustPerspectiveView(brayns);
     brayns.commitAndRender();
 
@@ -78,14 +74,9 @@ TEST_CASE("render_xyz_and_compare")
     auto &scene = engine.getScene();
     auto &instance = scene.getModelInstance(0);
     auto &model = instance.getModel();
-    auto &component = model.getComponent<brayns::GeometryRendererComponent<brayns::Sphere>>();
+    auto &component = model.getComponent<brayns::GeometryRendererComponent>();
     auto &geometry = component.getGeometry();
-    geometry.forEach(
-        [](uint32_t index, brayns::Sphere &sphere)
-        {
-            (void)index;
-            sphere.radius *= 0.5f;
-        });
+    geometry.forEach([](brayns::Sphere &sphere) { sphere.radius *= 0.5f; });
     brayns.commitAndRender();
 
     CHECK(ImageValidator::validate(engine, "testImagesXYZSmaller.png"));
@@ -97,10 +88,8 @@ TEST_CASE("render_protein_and_compare")
 
     BraynsTestUtils::setRenderResolution(brayns, 300, 300);
     BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PDB_PATH);
-    BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
-    auto ambient = std::make_unique<brayns::AmbientLight>();
-    ambient->setIntensity(0.05f);
-    BraynsTestUtils::addLight(brayns, std::move(ambient));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight()));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{0.05f}));
     BraynsTestUtils::adjustPerspectiveView(brayns);
     brayns.commitAndRender();
 
@@ -114,10 +103,8 @@ TEST_CASE("render_ply_and_compare")
 
     BraynsTestUtils::setRenderResolution(brayns, 300, 300);
     BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
-    BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
-    auto ambient = std::make_unique<brayns::AmbientLight>();
-    ambient->setIntensity(0.05f);
-    BraynsTestUtils::addLight(brayns, std::move(ambient));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight()));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{0.05f}));
     BraynsTestUtils::adjustPerspectiveView(brayns);
     brayns.commitAndRender();
 

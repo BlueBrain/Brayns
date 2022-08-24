@@ -40,9 +40,9 @@ std::string SetCameraLookAtEntrypoint::getDescription() const
 void SetCameraLookAtEntrypoint::onRequest(const Request &request)
 {
     auto &camera = _engine.getCamera();
-    auto lookAt = camera.getLookAt();
-    request.getParams(lookAt);
-    camera.setLookAt(lookAt);
+    auto view = camera.getView();
+    request.getParams(view);
+    camera.setView(view);
     request.reply(EmptyMessage());
 }
 
@@ -64,7 +64,7 @@ std::string GetCameraLookAtEntrypoint::getDescription() const
 void GetCameraLookAtEntrypoint::onRequest(const Request &request)
 {
     auto &camera = _engine.getCamera();
-    const auto &lookAt = camera.getLookAt();
-    request.reply(lookAt);
+    auto &view = camera.getView();
+    request.reply(view);
 }
 }

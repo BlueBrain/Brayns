@@ -22,23 +22,25 @@
 
 #include <ospray/ospray_cpp/Renderer.h>
 
-#include <cassert>
 #include <string>
 
 namespace brayns
 {
 template<typename T>
+constexpr bool rendererSpecialized = false;
+
+template<typename T>
 class RendererTraits
 {
 public:
     inline static const std::string handleName;
-    inline static const std::string rendererName;
+    inline static const std::string name;
 
     static void updateData(ospray::cpp::Renderer &handle, T &data)
     {
+        static_assert(rendererSpecialized<T>, "RendererTraits not specialized");
         (void)handle;
         (void)data;
-        assert(false);
     }
 };
 }

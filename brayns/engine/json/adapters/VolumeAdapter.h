@@ -26,14 +26,10 @@
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_ENUM(
-    VolumeDataType,
-    {"unsinged_char", VolumeDataType::UnsignedChar},
-    {"short", VolumeDataType::Short},
-    {"unsigned_short", VolumeDataType::UnsignedShort},
-    {"half_float", VolumeDataType::HalfFloat},
-    {"float", VolumeDataType::Float},
-    {"double", VolumeDataType::Double})
+template<>
+struct JsonAdapter<VolumeDataType> : EnumAdapter<VolumeDataType>
+{
+};
 
 BRAYNS_JSON_ADAPTER_BEGIN(RegularVolume)
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("data_type", dataType, "Voxel data type")

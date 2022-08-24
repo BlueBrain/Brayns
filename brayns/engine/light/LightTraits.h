@@ -24,31 +24,33 @@
 
 #include <ospray/ospray_cpp/Light.h>
 
-#include <cassert>
 #include <string>
 
 namespace brayns
 {
 template<typename T>
+constexpr bool lightSpecialization = false;
+
+template<typename T>
 class LightTraits
 {
 public:
     inline static const std::string handleName;
-    inline static const std::string lightName;
+    inline static const std::string name;
 
     static Bounds computeBounds(const Matrix4f &matrix, const T &data)
     {
+        static_assert(lightSpecialization<T>, "LightTraits not specialized");
         (void)matrix;
         (void)data;
-        (void)bounds;
-        assert(false);
+        return {};
     }
 
     static void updateData(ospray::cpp::Light &handle, T &lightData)
     {
+        static_assert(lightSpecialization<T>, "LightTraits not specialized");
         (void)handle;
         (void)lightData;
-        assert(false);
     }
 };
 }

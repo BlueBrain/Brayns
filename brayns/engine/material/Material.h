@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <brayns/common/ModifiedFlag.h>
 #include <brayns/engine/common/DataWrapper.h>
 
 #include "MaterialTraits.h"
@@ -42,14 +43,13 @@ public:
     using Traits = MaterialTraits<T>;
 
     template<typename MaterialType>
-    Material(MaterialType &&data)
+    Material(MaterialType data)
         : _handleName(MaterialTraits<MaterialType>::handleName)
-        , _materialName(MaterialTraits<MaterialType>::materialName)
+        , _materialName(MaterialTraits<MaterialType>::name)
         , _handle("", _handleName)
-        , _data(std::make_unique<Data<MaterialType>>(std::forward<MaterialType>(data)))
+        , _data(std::make_unique<Data<MaterialType>>(std::move(data)))
     {
         _data->pushTo(_handle);
-        _handle->commit();
     }
 
     Material(Material &&) noexcept = default;
@@ -74,6 +74,14 @@ public:
     }
 
     /**
+     * @brief Calls the underlying OSPRay commit function, if any parameter has been modified, and resets the modified
+     * state.
+     * @return true If any parameter was modified and thus the commit function was called.
+     * @return false If no parameter was modified.
+     */
+    bool commit();
+
+    /**
      * @brief Returns the material name.
      * @return const std::string&.
      */
@@ -90,5 +98,6 @@ private:
     std::string _materialName;
     ospray::cpp::Material _handle;
     std::unique_ptr<IDataWrapper<ospray::cpp::Material>> _data;
+    ModifiedFlag _flag;
 };
 }

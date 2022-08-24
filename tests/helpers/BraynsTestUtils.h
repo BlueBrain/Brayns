@@ -22,8 +22,8 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/engine/cameras/OrthographicCamera.h>
-#include <brayns/engine/cameras/PerspectiveCamera.h>
+#include <brayns/engine/camera/projections/Orthographic.h>
+#include <brayns/engine/camera/projections/Perspective.h>
 
 /**
  * @brief Encapsulates some utilities used across all the tests
@@ -38,7 +38,7 @@ public:
         appParams.setWindowSize(brayns::Vector2ui(width, height));
     }
 
-    static void addLight(brayns::Brayns &brayns, std::unique_ptr<brayns::Light> light)
+    static void addLight(brayns::Brayns &brayns, brayns::Light light)
     {
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
@@ -57,28 +57,24 @@ public:
 
     static void adjustPerspectiveView(brayns::Brayns &brayns)
     {
-        auto camera = std::make_unique<brayns::PerspectiveCamera>();
+        brayns::Perspective projection{45.f};
+
         auto &engine = brayns.getEngine();
-
-        constexpr auto fovy = 45.f;
-        camera->setFOVY(fovy);
-
         auto &scene = engine.getScene();
         const auto &bounds = scene.getBounds();
         auto center = bounds.center();
         auto dimensions = bounds.dimensions();
-        auto distance = dimensions.y * 0.5 / glm::tan(glm::radians(fovy * 0.5));
+        auto distance = dimensions.y * 0.5 / glm::tan(glm::radians(projection.fovy * 0.5));
         const auto position = center + brayns::Vector3f(0.f, 0.f, distance + dimensions.z * 0.5f);
-        brayns::LookAt view{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
-        camera->setLookAt(view);
+        auto view = brayns::View{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
 
-        engine.setCamera(std::move(camera));
+        auto &camera = engine.getCamera();
+        camera.set(projection);
+        camera.setView(view);
     }
 
     static void adjustOrthographicView(brayns::Brayns &brayns)
     {
-        auto camera = std::make_unique<brayns::OrthographicCamera>();
-
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
         const auto &bounds = scene.getBounds();
@@ -87,12 +83,11 @@ public:
 
         const auto distance = dimensions.z * 0.6; // A bit more than just half to avoid any artifact
         const auto position = center + brayns::Vector3f(0.f, 0.f, distance);
-        brayns::LookAt view{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
-        camera->setLookAt(view);
+        auto view = brayns::View{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
+        auto projection = brayns::Orthographic{dimensions.y};
 
-        const auto height = dimensions.y;
-        camera->setHeight(height);
-
-        engine.setCamera(std::move(camera));
+        auto &camera = engine.getCamera();
+        camera.set(projection);
+        camera.setView(view);
     }
 };

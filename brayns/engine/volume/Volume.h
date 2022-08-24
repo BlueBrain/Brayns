@@ -48,9 +48,9 @@ public:
     template<typename T>
     Volume(T data)
         : _handleName(VolumeTraits<T>::handleName)
-        , _volumeName(VolumeTraits<T>::volumeName)
+        , _volumeName(VolumeTraits<T>::name)
         , _handle(_handleName)
-        , _data(std::move(data))
+        , _data(std::make_unique<Data<T>>(std::move(data)))
     {
     }
 
@@ -68,7 +68,7 @@ public:
     template<typename Type>
     const Type *as() const noexcept
     {
-        if (auto cast = dynamic_cast<SpatialDataWrapper<ArgType> *>(_data.get()))
+        if (auto cast = dynamic_cast<Data<Type> *>(_data.get()))
         {
             return &cast->data;
         }
@@ -85,7 +85,7 @@ public:
     void manipulate(Callable &&callback) const noexcept
     {
         using ArgType = typename ArgumentInferer<Callable>::argType;
-        auto cast = dynamic_cast<const SpatialDataWrapper<ArgType> *>(_data.get());
+        auto cast = dynamic_cast<const Data<ArgType> *>(_data.get());
         assert(cast);
         callback(cast->data);
         _flag = true;

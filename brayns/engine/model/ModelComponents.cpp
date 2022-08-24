@@ -48,10 +48,6 @@ bool Component::commit()
     return false;
 }
 
-void Component::onDestroy()
-{
-}
-
 Bounds Component::computeBounds(const Matrix4f &transform) const noexcept
 {
     (void)transform;
@@ -91,15 +87,6 @@ bool ModelComponentContainer::commit()
         committed = component.commit() || committed;
     }
     return committed;
-}
-
-void ModelComponentContainer::onDestroy()
-{
-    for (auto &entry : _components)
-    {
-        auto &component = *entry.component;
-        component.onDestroy();
-    }
 }
 
 Bounds ModelComponentContainer::computeBounds(const Matrix4f &transform) const noexcept

@@ -42,8 +42,6 @@ class Model
 public:
     Model() = default;
 
-    ~Model();
-
     Model(const Model &) = delete;
     Model &operator=(const Model &) = delete;
 
@@ -80,6 +78,12 @@ public:
     T &getComponent()
     {
         return _components.getComponent<T>();
+    }
+
+    template<typename T>
+    T *findComponent()
+    {
+        return _components.findComponent<T>();
     }
 
     template<typename T>

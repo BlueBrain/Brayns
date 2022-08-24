@@ -25,7 +25,7 @@ namespace brayns
 uint32_t LightManager::addLight(Light light) noexcept
 {
     const auto id = _idFactory.generateID();
-    _lights[id] = std::move(light);
+    _lights.emplace(id, std::move(light));
     _dirty = true;
     return id;
 }

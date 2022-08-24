@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/Framebuffer.h>
+#include <brayns/engine/framebuffer/Framebuffer.h>
 
 #include <brayns/json/JsonAdapterMacro.h>
 

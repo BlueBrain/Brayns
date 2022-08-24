@@ -21,7 +21,8 @@
 #pragma once
 
 #include <brayns/common/ModifiedFlag.h>
-#include <brayns/engine/colormap/ShadingColorMap.h>
+
+#include "ShadingColorRamp.h"
 #include "Volume.h"
 
 #include <ospray/ospray_cpp/VolumetricModel.h>
@@ -32,15 +33,13 @@ class VolumeView
 {
 public:
     VolumeView(const Volume &volume);
-
-    void setColorMap(const ShadingColorMap &colorMap);
-
+    void setColorRamp(const ColorRamp &colorRamp);
     bool commit();
-
     const ospray::cpp::VolumetricModel &getHandle() const noexcept;
 
 private:
     ospray::cpp::VolumetricModel _handle;
+    ShadingColorRamp _colorRamp;
     ModifiedFlag _flag;
 };
 }

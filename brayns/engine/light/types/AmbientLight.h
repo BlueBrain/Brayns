@@ -26,8 +26,8 @@ namespace brayns
 {
 struct AmbientLight
 {
-    Vector3f color = Vector3f(1.f);
     float intensity = 0.1;
+    Vector3f color = Vector3f(1.f);
 };
 
 template<>
@@ -35,7 +35,7 @@ class LightTraits<AmbientLight>
 {
 public:
     inline static const std::string handleName = "ambient";
-    inline static const std::string lightName = "ambient";
+    inline static const std::string name = "ambient";
 
     static Bounds computeBounds(const Matrix4f &matrix, const AmbientLight &light)
     {

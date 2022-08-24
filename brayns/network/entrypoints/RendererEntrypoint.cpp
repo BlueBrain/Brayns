@@ -46,7 +46,7 @@ void GetRendererTypeEntrypoint::onRequest(const Request &request)
 }
 
 SetRendererInteractiveEntrypoint::SetRendererInteractiveEntrypoint(Engine &engine)
-    : SetRendererEntrypoint<InteractiveRenderer>(engine)
+    : SetRendererEntrypoint<Interactive>(engine)
 {
 }
 
@@ -61,7 +61,7 @@ std::string SetRendererInteractiveEntrypoint::getDescription() const
 }
 
 SetRendererProductionEntrypoint::SetRendererProductionEntrypoint(Engine &engine)
-    : SetRendererEntrypoint<ProductionRenderer>(engine)
+    : SetRendererEntrypoint<Production>(engine)
 {
 }
 
@@ -76,7 +76,7 @@ std::string SetRendererProductionEntrypoint::getDescription() const
 }
 
 GetRendererInteractiveEntrypoint::GetRendererInteractiveEntrypoint(Engine &engine)
-    : GetRendererEntrypoint<InteractiveRenderer>(engine)
+    : GetRendererEntrypoint<Interactive>(engine)
 {
 }
 
@@ -91,7 +91,7 @@ std::string GetRendererInteractiveEntrypoint::getDescription() const
 }
 
 GetRendererProductionEntrypoint::GetRendererProductionEntrypoint(Engine &engine)
-    : GetRendererEntrypoint<ProductionRenderer>(engine)
+    : GetRendererEntrypoint<Production>(engine)
 {
 }
 

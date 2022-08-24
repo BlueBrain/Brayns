@@ -22,8 +22,10 @@
 
 #include <ospray/ospray_cpp/Volume.h>
 
-#include <cassert>
 #include <string>
+
+template<typename T>
+constexpr bool volumeSpecialized = false;
 
 namespace brayns
 {
@@ -32,20 +34,21 @@ class VolumeTraits
 {
 public:
     inline static const std::string handleName;
-    inline static const std::string volumeName;
+    inline static const std::string name;
 
     static Bounds computeBounds(const Matrix4f &matrix, const T &data)
     {
+        static_assert(volumeSpecialized<T>, "VolumeTraits not specialized");
         (void)matrix;
         (void)data;
-        assert(false);
+        return {};
     }
 
     static void updateData(ospray::cpp::Volume &handle, T &data)
     {
+        static_assert(volumeSpecialized<T>, "VolumeTraits not specialized");
         (void)handle;
         (void)data;
-        assert(false);
     };
 };
 }

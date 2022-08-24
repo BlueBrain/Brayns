@@ -18,22 +18,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TransferFunctionComponent.h"
+#include "VolumeRendererComponent.h"
+#include "ColorRampComponent.h"
 
 namespace brayns
 {
-TransferFunctionComponent::TransferFunctionComponent(TransferFunction transferFunction)
-    : _transferFunction(std::move(transferFunction))
+Bounds VolumeRendererComponent::computeBounds(const Matrix4f &transform) const noexcept
 {
+    return _volume.computeBounds(transform);
 }
 
-TransferFunction &TransferFunctionComponent::getTransferFunction() noexcept
+void VolumeRendererComponent::onCreate()
 {
-    return _transferFunction;
+    Model &model = getModel();
+    auto &group = model.getGroup();
+    group.setVolume(_volumeView);
+    model.addComponent<ColorRampComponent>();
 }
 
-void TransferFunctionComponent::setTransferFunction(TransferFunction transferFunction) noexcept
+bool VolumeRendererComponent::commit()
 {
-    _transferFunction = std::move(transferFunction);
+    auto &model = getModel();
+    auto &colorRampComponent = model.getComponent<ColorRampComponent>();
+    auto &colorRamp = colorRampComponent.getColorRamp();
+    if (colorRamp.isModified())
+    {
+        _volumeView.setColorRamp(colorRamp);
+        colorRamp.resetModified();
+    }
+
+    auto volumeCommitted = _volume.commit();
+    auto viewCommitted = _volumeView.commit();
+    return volumeCommitted || viewCommitted;
 }
 }

@@ -20,6 +20,8 @@
 
 #include "GeometryView.h"
 
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+
 namespace
 {
 struct GeometryViewParameters
@@ -80,8 +82,8 @@ void GeometryView::_setColorPerPrimitive(const OSPData handle)
 
 void GeometryView::_setColorMap(const OSPData indexHandle, const OSPData colorHandle)
 {
-    _handle.setParam(GeometryViewParameters::index, OSPDataType::OSP_DATA, indexHandle);
-    _handle.setParam(GeometryViewParameters::color, OSPDataType::OSP_DATA, colorHandle);
+    _handle.setParam(GeometryViewParameters::index, OSPDataType::OSP_DATA, &indexHandle);
+    _handle.setParam(GeometryViewParameters::color, OSPDataType::OSP_DATA, &colorHandle);
     _flag = true;
 }
 }

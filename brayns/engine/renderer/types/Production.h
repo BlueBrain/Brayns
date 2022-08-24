@@ -37,8 +37,8 @@ class RendererTraits<Production>
 {
 public:
     inline static const std::string handleName = "pathtracer";
-    inline static const std::string rendererName = "production";
+    inline static const std::string name = "production";
 
-    static void update(ospray::cpp::Renderer &handle, Production &data);
+    static void updateData(ospray::cpp::Renderer &handle, Production &data);
 };
 }

@@ -35,6 +35,7 @@ Light &Light::operator=(const Light &other)
     _data = other._data->clone();
     _data->pushTo(_handle);
     _handle.commit();
+    return *this;
 }
 
 const ospray::cpp::Light &Light::getHandle() const noexcept

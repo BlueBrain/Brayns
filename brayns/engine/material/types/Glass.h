@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/common/MathTypes.h>
 #include <brayns/engine/material/MaterialTraits.h>
 
 namespace brayns
@@ -35,7 +36,7 @@ class MaterialTraits<Glass>
 {
 public:
     inline static const std::string handleName = "thinGlass";
-    inline static const std::string materialName = "glass";
+    inline static const std::string name = "glass";
 
     static void updateData(ospray::cpp::Material &handle, Glass &data);
 };

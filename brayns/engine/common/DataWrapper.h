@@ -32,10 +32,10 @@ class IDataWrapper
 public:
     virtual ~IDataWrapper() = default;
     virtual void pushTo(OsprayHandle &handle) = 0;
-    virtual std::unique_ptr<IDataWrapper> clone() const noexcept = 0;
+    virtual std::unique_ptr<IDataWrapper<OsprayHandle>> clone() const noexcept = 0;
 };
 
-template<typename DataType, typename OsprayHandle, typename Traits>
+template<typename DataType, typename OsprayHandle, template<typename> typename Traits>
 class DataWrapper final : public IDataWrapper<OsprayHandle>
 {
 public:
@@ -49,9 +49,9 @@ public:
         Traits<DataType>::updateData(handle, data);
     }
 
-    std::unique_ptr<IDataWrapper> clone() const noexcept override
+    std::unique_ptr<IDataWrapper<OsprayHandle>> clone() const noexcept override
     {
-        return std::make_unique<DataWrapper<DataType>>(data);
+        return std::make_unique<DataWrapper<DataType, OsprayHandle, Traits>>(data);
     }
 
     DataType data;
@@ -67,30 +67,32 @@ public:
     virtual Bounds computeBounds(const Matrix4f &matrix) const noexcept = 0;
 };
 
-template<typename DataType, typename OsprayHandle, typename Traits>
+template<typename DataType, typename OsprayHandle, template<typename> typename Traits>
 class SpatialDataWrapper final : public ISpatialDataWrapper<OsprayHandle>
 {
 public:
-    SpatialDataWrapper(DataType value)
+    using Type = std::decay_t<DataType>;
+
+    SpatialDataWrapper(Type value)
         : data(std::move(value))
     {
     }
 
     void pushTo(OsprayHandle &handle) override
     {
-        Traits<DataType>::updateData(handle, data);
+        Traits<Type>::updateData(handle, data);
     }
 
-    std::unique_ptr<ISpatialDataWrapper> clone() const noexcept override
+    std::unique_ptr<ISpatialDataWrapper<OsprayHandle>> clone() const noexcept override
     {
-        return std::make_unique<SpatialDataWrapper<DataType>>(data);
+        return std::make_unique<SpatialDataWrapper<Type, OsprayHandle, Traits>>(data);
     }
 
     Bounds computeBounds(const Matrix4f &matrix) const noexcept override
     {
-        return Traits<DataType>::computeBounds(matrix, data);
+        return Traits<Type>::computeBounds(matrix, data);
     };
 
-    DataType data;
+    Type data;
 };
 }

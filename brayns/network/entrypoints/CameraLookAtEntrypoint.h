@@ -20,12 +20,13 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engine/core/Engine.h>
+#include <brayns/engine/json/adapters/ViewAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-class SetCameraLookAtEntrypoint final : public Entrypoint<LookAt, EmptyMessage>
+class SetCameraLookAtEntrypoint final : public Entrypoint<View, EmptyMessage>
 {
 public:
     SetCameraLookAtEntrypoint(Engine &engine);
@@ -38,7 +39,7 @@ private:
     Engine &_engine;
 };
 
-class GetCameraLookAtEntrypoint final : public Entrypoint<EmptyMessage, LookAt>
+class GetCameraLookAtEntrypoint final : public Entrypoint<EmptyMessage, View>
 {
 public:
     GetCameraLookAtEntrypoint(Engine &engine);

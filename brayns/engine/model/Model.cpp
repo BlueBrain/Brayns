@@ -22,11 +22,6 @@
 
 namespace brayns
 {
-Model::~Model()
-{
-    _components.onDestroy();
-}
-
 void Model::setMetaData(std::map<std::string, std::string> metadata) noexcept
 {
     _metadata = std::move(metadata);
@@ -42,7 +37,7 @@ void Model::onInspect(const InspectContext &context, JsonObject &writeResult) co
     _components.onInspect(context, writeResult);
 }
 
-ModelGroup &Model::getGroup() noexcept
+RenderableGroup &Model::getGroup() noexcept
 {
     return _group;
 }
@@ -69,8 +64,6 @@ void Model::onPostRender(const ParametersManager &params)
 
 bool Model::commit()
 {
-    bool update = _components.commit();
-    update = _group.commit() || update;
-    return update;
+    return _components.commit();
 }
 } // namespace brayns

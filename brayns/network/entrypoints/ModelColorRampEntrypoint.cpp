@@ -19,9 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ModelTransferFunctionEntrypoint.h"
+#include "ModelColorRampEntrypoint.h"
 
-#include <brayns/engine/components/TransferFunctionComponent.h>
+#include <brayns/engine/components/ColorRampComponent.h>
 #include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
@@ -48,16 +48,13 @@ void GetModelTransferFunctionEntrypoint::onRequest(const Request &request)
     auto &modelInstance = ExtractModel::fromId(_scene, modelId);
     auto &model = modelInstance.getModel();
 
-    try
+    if (auto component = model.findComponent<ColorRampComponent>())
     {
-        auto &tfComponent = model.getComponent<TransferFunctionComponent>();
-        auto &transferFunction = tfComponent.getTransferFunction();
-        request.reply(transferFunction);
+        auto &colorRamp = component->getColorRamp();
+        request.reply(colorRamp);
+        return;
     }
-    catch (...)
-    {
-        throw JsonRpcException("The requested model does not have a transfer function");
-    }
+    throw JsonRpcException("The requested model does not have a transfer function");
 }
 
 SetModelTransferFunctionEntrypoint::SetModelTransferFunctionEntrypoint(Scene &scene)
@@ -83,17 +80,14 @@ void SetModelTransferFunctionEntrypoint::onRequest(const Request &request)
     auto &modelInstance = _scene.getModelInstance(modelId);
     auto &model = modelInstance.getModel();
 
-    try
+    if (auto component = model.findComponent<ColorRampComponent>())
     {
-        auto &component = model.getComponent<TransferFunctionComponent>();
-        auto &transferFunction = component.getTransferFunction();
-        buffer.extract(transferFunction);
-    }
-    catch (...)
-    {
-        throw InvalidRequestException("The requested model does not have a transfer function");
+        auto &colorRamp = component->getColorRamp();
+        buffer.extract(colorRamp);
+        request.reply(EmptyMessage());
+        return;
     }
 
-    request.reply(EmptyMessage());
+    throw InvalidRequestException("The requested model does not have a transfer function");
 }
 } // namespace brayns

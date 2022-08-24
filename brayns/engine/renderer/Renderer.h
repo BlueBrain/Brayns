@@ -33,22 +33,14 @@ namespace brayns
 {
 class Renderer
 {
-private:
-    template<typename RendererType>
-    using Data = RendererData<RendererType>;
-
 public:
     template<typename T>
     using Traits = RendererTraits<T>;
 
     template<typename RendererType>
-    Renderer(RendererType &&data)
-        : _handleName(RendererTraits<RendererType>::handleName)
-        , _rendererName(RendererTraits<RendererType>::rendererName)
-        , _handle(_handleName)
-        , _data(std::make_unique<Data<RendererType>>(std::forward<RendererType>(data)))
+    Renderer(RendererType data)
     {
-        _data->pushTo(_handle);
+        set(std::move(data));
     }
 
     Renderer(Renderer &&) noexcept = default;
@@ -65,11 +57,27 @@ public:
     template<typename RendererType>
     const RendererType *as() const noexcept
     {
-        if (auto cast = dynamic_cast<const DataWrapper<RendererType> *>(_data.get()))
+        if (auto cast = dynamic_cast<const RendererData<RendererType> *>(_data.get()))
         {
             return &cast->data;
         }
         return nullptr;
+    }
+
+    /**
+     * @brief Sets the renderer type and recreates the OSPRay handle to accomodate it.
+     * @tparam RendererType Type of renderer to set
+     * @param data Renderer parameters
+     */
+    template<typename RendererType>
+    void set(RendererType data) noexcept
+    {
+        _handleName = RendererTraits<RendererType>::handleName;
+        _rendererName = RendererTraits<RendererType>::name;
+        _handle = ospray::cpp::Renderer(_handleName);
+        _data = std::make_unique<RendererData<RendererType>>(std::move(data));
+        _data->pushTo(_handle);
+        _flag = true;
     }
 
     /**

@@ -39,7 +39,9 @@ public:
     template<typename HandleType>
     static void update(ospray::cpp::Group &handle, const std::string &param, const std::vector<HandleType> &handles)
     {
-        handle.setParam(param, ospray::cpp::SharedData(handles));
+        (void)param;
+        (void)handles;
+        handle.setParam(param, ospray::cpp::CopiedData(handles));
         handle.commit();
     }
 };

@@ -21,19 +21,18 @@
 #include "Engine.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/FrameRenderer.h>
-#include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
+#include <brayns/engine/core/FrameRenderer.h>
 #include <brayns/engine/renderer/types/Interactive.h>
-#include <brayns/engine/renderer/types/Production.h>
 
 #include <thread>
 
 namespace
 {
-struct OsprayLogLevelGenerator
+class OsprayLogLevel
 {
-    static OSPLogLevel generate(const brayns::ApplicationParameters &params)
+public:
+    static OSPLogLevel fromParameters(const brayns::ApplicationParameters &params)
     {
         const auto systemLogLevel = params.getLogLevel();
         switch (systemLogLevel)
@@ -57,8 +56,9 @@ struct OsprayLogLevelGenerator
     }
 };
 
-struct OsprayDeviceInitializer
+class OsprayDeviceInitializer
 {
+public:
     static ospray::cpp::Device init(const brayns::ParametersManager &parameters)
     {
         auto device = ospray::cpp::Device("cpu");
@@ -79,7 +79,7 @@ struct OsprayDeviceInitializer
             });
 
         auto &appParams = parameters.getApplicationParameters();
-        const auto logLevel = OsprayLogLevelGenerator::generate(appParams);
+        const auto logLevel = OsprayLogLevel::fromParameters(appParams);
         device.setParam("logLevel", logLevel);
         device.commit();
         device.setCurrent();
@@ -124,11 +124,9 @@ void Engine::commit()
 
     // Update changes on the viewport
     auto &appParams = _params.getApplicationParameters();
-    const auto &frameSize = appParams.getWindowSize();
-    const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
-
+    auto &frameSize = appParams.getWindowSize();
     _frameBuffer.setFrameSize(frameSize);
-    _camera.setAspectRatio(aspectRatio);
+    _camera.setAspectRatio(_frameBuffer.getAspectRatio());
 
     bool needResetFramebuffer = false;
     if (_frameBuffer.commit())
@@ -177,7 +175,6 @@ void Engine::render()
     }
 
     FrameRenderer::synchronous(_camera, _frameBuffer, _renderer, _scene);
-
     _frameBuffer.incrementAccumFrames();
 }
 
@@ -187,7 +184,6 @@ void Engine::postRender()
     {
         return;
     }
-
     _scene.postRender(_params);
 }
 
@@ -201,19 +197,9 @@ Framebuffer &Engine::getFramebuffer() noexcept
     return _frameBuffer;
 }
 
-void Engine::setCamera(Camera camera) noexcept
-{
-    _camera = std::move(camera);
-}
-
 Camera &Engine::getCamera() noexcept
 {
     return _camera;
-}
-
-void Engine::setRenderer(Renderer renderer) noexcept
-{
-    _renderer = std::move(renderer);
 }
 
 Renderer &Engine::getRenderer() noexcept

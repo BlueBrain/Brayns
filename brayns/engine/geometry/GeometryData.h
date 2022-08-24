@@ -41,10 +41,12 @@ public:
     virtual Bounds computeBounds(const Matrix4f &matrix) const noexcept = 0;
 };
 
-template<typename Type>
+template<typename DataType>
 class GeometryData final : public IGeometryData
 {
 public:
+    using Type = std::decay_t<DataType>;
+
     GeometryData(std::vector<Type> primitives)
         : primitives(std::move(primitives))
     {
@@ -52,7 +54,7 @@ public:
 
     void pushTo(ospray::cpp::Geometry &handle) override
     {
-        GeometryTraits<Type>::update(handle, primitives);
+        GeometryTraits<Type>::updateData(handle, primitives);
     }
 
     std::unique_ptr<IGeometryData> clone() const noexcept override

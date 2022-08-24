@@ -35,7 +35,18 @@ Material &Material::operator=(const Material &other)
     _handle = ospray::cpp::Material("", _handleName);
     _data = other._data->clone();
     _data->pushTo(_handle);
+    return *this;
+}
+
+bool Material::commit()
+{
+    if (!_flag)
+    {
+        return false;
+    }
+    _flag = false;
     _handle.commit();
+    return true;
 }
 
 std::string Material::getName() const noexcept

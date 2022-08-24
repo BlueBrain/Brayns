@@ -18,46 +18,44 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ProteinComponent.h"
-
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
-#include <brayns/engine/components/MaterialComponent.h>
-#include <brayns/engine/model/Model.h>
-
-#include <ospray/ospray_cpp/Data.h>
+#include "GeometryRendererComponent.h"
 
 namespace brayns
 {
-ProteinComponent::ProteinComponent(
-    std::vector<Sphere> spheres,
-    std::vector<uint8_t> indices,
-    std::vector<Vector4f> colors)
-    : _geometry(std::move(spheres))
-    , _geometryView(_geometry)
-    , _indices(std::move(indices))
-    , _colors(std::move(colors))
+Geometry &GeometryRendererComponent::getGeometry() noexcept
 {
-    _geometryView.setColorMap(ospray::cpp::SharedData(_indices), ospray::cpp::SharedData(_colors));
+    return _geometry;
 }
 
-Bounds ProteinComponent::computeBounds(const Matrix4f &transform) const noexcept
+void GeometryRendererComponent::setColors(const std::vector<brayns::Vector4f> &colors)
+{
+    if (colors.size() < _geometry.numPrimitives())
+    {
+        throw std::invalid_argument("Not enough colors for all geometry");
+    }
+
+    _geometryView.setColorPerPrimitive(ospray::cpp::CopiedData(colors));
+    _useMaterialColor = false;
+}
+
+Bounds GeometryRendererComponent::computeBounds(const Matrix4f &transform) const noexcept
 {
     return _geometry.computeBounds(transform);
 }
 
-void ProteinComponent::onCreate()
+void GeometryRendererComponent::onCreate()
 {
-    auto &model = getModel();
+    Model &model = getModel();
     auto &group = model.getGroup();
     group.setGeometry(_geometryView);
     model.addComponent<MaterialComponent>();
 }
 
-bool ProteinComponent::commit()
+bool GeometryRendererComponent::commit()
 {
     auto &model = getModel();
-    auto &component = model.getComponent<MaterialComponent>();
-    auto &material = component.getMaterial();
+    auto &materialComponent = model.getComponent<MaterialComponent>();
+    auto &material = materialComponent.getMaterial();
     if (material.commit())
     {
         _geometryView.setMaterial(material);

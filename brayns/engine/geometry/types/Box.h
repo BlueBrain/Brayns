@@ -37,10 +37,10 @@ class GeometryTraits<Box>
 {
 public:
     inline static const std::string handleName = "box";
-    inline static const std::string geometryName = "box";
+    inline static const std::string name = "box";
 
     static Bounds computeBounds(const Matrix4f &matrix, const Box &data);
-    static void update(ospray::cpp::Geometry &handle, std::vector<Box> &data);
+    static void updateData(ospray::cpp::Geometry &handle, std::vector<Box> &data);
 };
 
 } // namespace brayns

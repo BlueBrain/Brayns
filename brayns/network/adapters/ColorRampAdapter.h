@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,26 +21,14 @@
 
 #pragma once
 
-#include <brayns/common/TransferFunction.h>
-#include <brayns/engine/ModelComponents.h>
+#include <brayns/common/ColorRamp.h>
+
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-/**
- * @brief Adds a transfer function to the model
- */
-class TransferFunctionComponent final : public Component
-{
-public:
-    TransferFunctionComponent() = default;
-
-    TransferFunctionComponent(TransferFunction transferFunction);
-
-    TransferFunction &getTransferFunction() noexcept;
-
-    void setTransferFunction(TransferFunction transferFunction) noexcept;
-
-private:
-    TransferFunction _transferFunction;
-};
-}
+BRAYNS_JSON_ADAPTER_BEGIN(ColorRamp)
+BRAYNS_JSON_ADAPTER_GETSET("range", getValuesRange, setValuesRange, "Values range")
+BRAYNS_JSON_ADAPTER_GETSET("colors", getColors, setColors, "List of colors (RGBA) to map")
+BRAYNS_JSON_ADAPTER_END()
+} // namespace brayns

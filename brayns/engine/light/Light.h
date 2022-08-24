@@ -35,7 +35,7 @@ class Light
 {
 private:
     template<typename LightType>
-    using Data = SpataialDataWrapper<LightType, ospray::cpp::Light, LightTraits>;
+    using Data = SpatialDataWrapper<LightType, ospray::cpp::Light, LightTraits>;
 
 public:
     template<typename T>
@@ -44,8 +44,8 @@ public:
     template<typename Type>
     Light(Type data)
         : _handleName(LightTraits<Type>::handleName)
-        , _lightName(LightTraits<Type>::lightName)
-        : _handle(_osprayHandleName)
+        , _lightName(LightTraits<Type>::name)
+        , _handle(_handleName)
         , _data(std::make_unique<Data<Type>>(std::move(data)))
     {
         _data->pushTo(_handle);

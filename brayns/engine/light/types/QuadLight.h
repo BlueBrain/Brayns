@@ -26,8 +26,8 @@ namespace brayns
 {
 struct QuadLight
 {
-    Vector3f color = Vector3f(1.f);
     float intensity = 1.f;
+    Vector3f color = Vector3f(1.f);
     Vector3f position = Vector3f(0.f);
     Vector3f edge1 = Vector3f(0.f, 0.f, 1.f);
     Vector3f edge2 = Vector3f(1.f, 0.f, 0.f);
@@ -38,7 +38,7 @@ class LightTraits<QuadLight>
 {
 public:
     inline static const std::string handleName = "quad";
-    inline static const std::string lightName = "quad";
+    inline static const std::string name = "quad";
 
     static Bounds computeBounds(const Matrix4f &matrix, const QuadLight &light);
 

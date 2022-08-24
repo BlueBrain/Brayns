@@ -19,34 +19,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ColorMap.h"
+#include "ColorRamp.h"
 
 #include <algorithm>
 
 namespace brayns
 {
-ColorMap::ColorMap()
+ColorRamp::ColorRamp()
     : _colors({{0, 0, 0, 0}, {1, 1, 1, 1}})
     , _valuesRange({0, 255})
 {
 }
 
-const std::vector<brayns::Vector4f> &ColorMap::getColors() const
+const std::vector<brayns::Vector4f> &ColorRamp::getColors() const
 {
     return _colors;
 }
 
-void ColorMap::setColors(std::vector<Vector4f> colors)
+void ColorRamp::setColors(std::vector<Vector4f> colors)
 {
     _flag.update(_colors, std::move(colors));
 }
 
-const Vector2f &ColorMap::getValuesRange() const
+const Vector2f &ColorRamp::getValuesRange() const
 {
     return _valuesRange;
 }
 
-void ColorMap::setValuesRange(const Vector2f &valuesRange)
+void ColorRamp::setValuesRange(const Vector2f &valuesRange)
 {
     if (valuesRange.x >= valuesRange.y)
     {
@@ -56,7 +56,7 @@ void ColorMap::setValuesRange(const Vector2f &valuesRange)
     _flag.update(_valuesRange, valuesRange);
 }
 
-Vector4f ColorMap::getColorForValue(const float v) const
+Vector4f ColorRamp::getColorForValue(const float v) const
 {
     if (v <= _valuesRange.x)
     {
@@ -82,12 +82,12 @@ Vector4f ColorMap::getColorForValue(const float v) const
     return glm::mix(color1, color2, remainder);
 }
 
-bool ColorMap::isModified() const noexcept
+bool ColorRamp::isModified() const noexcept
 {
-    return _flag;
+    return static_cast<bool>(_flag);
 }
 
-void ColorMap::resetModified() noexcept
+void ColorRamp::resetModified() noexcept
 {
     _flag = false;
 }

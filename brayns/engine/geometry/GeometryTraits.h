@@ -24,31 +24,34 @@
 
 #include <ospray/ospray_cpp/Geometry.h>
 
-#include <cassert>
 #include <string>
 #include <vector>
 
 namespace brayns
 {
 template<typename T>
+constexpr bool geometrySpecialized = false;
+
+template<typename T>
 class GeometryTraits
 {
 public:
     inline static const std::string handleName;
-    inline static const std::string geometryName;
+    inline static const std::string name;
 
     static Bounds computeBounds(const Matrix4f &matrix, const T &data)
     {
+        static_assert(geometrySpecialized<T>, "GeometryTraits not specialized");
         (void)matrix;
         (void)data;
-        assert(false);
+        return {};
     }
 
     static void update(ospray::cpp::Geometry &handle, std::vector<T> &data)
     {
+        static_assert(geometrySpecialized<T>, "GeometryTraits not specialized");
         (void)handle;
         (void)data;
-        assert(false);
     }
 };
 }

@@ -23,7 +23,8 @@
 
 #include <brayns/json/JsonObjectMacro.h>
 
-#include <brayns/network/adapters/EngineObjectDataAdapter.h>
+#include <brayns/engine/json/adapters/EngineObjectDataAdapter.h>
+#include <brayns/engine/json/adapters/ViewAdapter.h>
 #include <brayns/network/adapters/SimulationParametersAdapter.h>
 #include <brayns/network/messages/ImageSettingsMessage.h>
 
@@ -34,7 +35,7 @@ namespace brayns
 BRAYNS_JSON_OBJECT_BEGIN(SnapshotParams)
 BRAYNS_JSON_OBJECT_ENTRY(ImageSettings, image_settings, "Image settings", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(EngineObjectData, camera, "Camera definition", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(LookAt, camera_view, "Camera 'look at' view settings", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(View, camera_view, "Camera 'look at' view settings", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(EngineObjectData, renderer, "Renderer definition", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(uint32_t, simulation_frame, "Simulation frame to render", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(

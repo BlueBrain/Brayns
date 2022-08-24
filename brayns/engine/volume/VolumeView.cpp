@@ -24,7 +24,7 @@ namespace
 {
 struct VolumeViewParameters
 {
-    inline static const std::string colorMap = "transferFunction";
+    inline static const std::string colorRamp = "transferFunction";
 };
 }
 
@@ -35,9 +35,10 @@ VolumeView::VolumeView(const Volume &volume)
 {
 }
 
-void VolumeView::setColorMap(const ShadingColorMap &colorMap)
+void VolumeView::setColorRamp(const ColorRamp &colorRamp)
 {
-    _handle.setParam(VolumeViewParameters::colorMap, colorMap.getHandle());
+    _colorRamp.set(colorRamp);
+    _handle.setParam(VolumeViewParameters::colorRamp, _colorRamp.getHandle());
     _flag = true;
 }
 

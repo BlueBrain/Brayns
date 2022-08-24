@@ -46,7 +46,7 @@ class VolumeTraits<RegularVolume>
 {
 public:
     inline static const std::string handleName = "structuredRegular";
-    inline static const std::string volumeName = "gridvolume";
+    inline static const std::string name = "gridvolume";
 
     static Bounds computeBounds(const Matrix4f &matrix, const RegularVolume &data);
 

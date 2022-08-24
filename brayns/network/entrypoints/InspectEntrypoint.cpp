@@ -40,14 +40,8 @@ public:
         }
 
         auto instance = _findHittedInstance(pickResult.instance);
-        if (!instance)
-        {
-            throw brayns::InternalErrorException("Could not find hitted instance");
-        }
-
         const auto inspectContext = _buildInspectContext(pickResult);
         auto metadata = brayns::JsonObject();
-
         auto &model = instance->getModel();
         model.onInspect(inspectContext, metadata);
 
@@ -65,10 +59,10 @@ private:
         auto &camera = _engine.getCamera();
         auto &scene = _engine.getScene();
 
-        auto &osprayFrameBuffer = framebuffer.getOsprayFramebuffer();
-        auto &osprayRenderer = renderer.getOsprayRenderer();
-        auto &osprayCamera = camera.getOsprayCamera();
-        auto &osprayWorld = scene.getOsprayScene();
+        auto &osprayFrameBuffer = framebuffer.getHandle();
+        auto &osprayRenderer = renderer.getHandle();
+        auto &osprayCamera = camera.getHandle();
+        auto &osprayWorld = scene.getHandle();
         return osprayFrameBuffer.pick(osprayRenderer, osprayCamera, osprayWorld, x, y);
     }
 
@@ -92,11 +86,7 @@ private:
             });
 
         // Shouldn't happen, but..
-        if (instanceIterator == end)
-        {
-            return nullptr;
-        }
-
+        assert(instanceIterator != end);
         return *instanceIterator;
     }
 

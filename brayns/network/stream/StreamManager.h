@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Framebuffer.h>
+#include <brayns/engine/framebuffer/Framebuffer.h>
 
 #include <brayns/network/client/ClientManager.h>
 

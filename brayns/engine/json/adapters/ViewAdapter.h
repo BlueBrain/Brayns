@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -20,24 +20,14 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-#include <brayns/engine/material/MaterialTraits.h>
+#include <brayns/engine/camera/View.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-struct Metal
-{
-    Vector3f color = Vector3f(1.f);
-    float roughness = 0.1f;
-};
-
-template<>
-class MaterialTraits<Metal>
-{
-public:
-    inline static const std::string handleName = "alloy";
-    inline static const std::string name = "metal";
-
-    static void updateData(ospray::cpp::Material &handle, Metal &data);
-};
+BRAYNS_JSON_ADAPTER_BEGIN(View)
+BRAYNS_JSON_ADAPTER_ENTRY(position, "Camera position")
+BRAYNS_JSON_ADAPTER_ENTRY(target, "Camera target")
+BRAYNS_JSON_ADAPTER_ENTRY(up, "Camera up vector")
+BRAYNS_JSON_ADAPTER_END()
 }

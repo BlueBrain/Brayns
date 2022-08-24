@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,25 +21,15 @@
 
 #pragma once
 
-#include <brayns/common/ColorMap.h>
+#include <brayns/json/JsonBuffer.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-#include <ospray/ospray_cpp/TransferFunction.h>
+#include <brayns/network/adapters/ColorRampAdapter.h>
 
 namespace brayns
 {
-/**
- * @brief Wrapper to uset brayns/common/ColorMap as an ospray trasnfer function for rendering.
- */
-class ShadingColorMap
-{
-public:
-    ShadingColorMap(const ColorMap &colorMap);
-
-    void set(const ColorMap &colorMap);
-
-    const ospray::cpp::TransferFunction &getHandle() const noexcept;
-
-private:
-    ospray::cpp::TransferFunction _handle;
-};
-}
+BRAYNS_JSON_OBJECT_BEGIN(SetColorRampMessage)
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Model ID")
+BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<ColorRamp>, transfer_function, "Transfer function")
+BRAYNS_JSON_OBJECT_END()
+} // namespace brayns

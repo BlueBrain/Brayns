@@ -92,7 +92,7 @@ public:
     {
         auto model = std::make_unique<brayns::Model>();
 
-        model->addComponent<brayns::GeometryRendererComponent<brayns::TriangleMesh>>(mesh);
+        model->addComponent<brayns::GeometryRendererComponent>(mesh);
 
         return model;
     }

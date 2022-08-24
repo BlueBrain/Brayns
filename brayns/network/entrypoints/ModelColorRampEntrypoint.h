@@ -21,16 +21,16 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/scene/Scene.h>
 
-#include <brayns/network/adapters/TransferFunctionAdapter.h>
+#include <brayns/network/adapters/ColorRampAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetModelMessage.h>
-#include <brayns/network/messages/SetTransferFunctionMessage.h>
+#include <brayns/network/messages/SetColorRampMessage.h>
 
 namespace brayns
 {
-class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, TransferFunction>
+class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, ColorRamp>
 {
 public:
     GetModelTransferFunctionEntrypoint(Scene &scene);
@@ -43,7 +43,7 @@ private:
     Scene &_scene;
 };
 
-class SetModelTransferFunctionEntrypoint : public Entrypoint<SetTransferFunctionMessage, EmptyMessage>
+class SetModelTransferFunctionEntrypoint : public Entrypoint<SetColorRampMessage, EmptyMessage>
 {
 public:
     SetModelTransferFunctionEntrypoint(Scene &scene);

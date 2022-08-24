@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engine/core/Engine.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/InspectMessage.h>

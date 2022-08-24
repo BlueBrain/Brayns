@@ -23,7 +23,7 @@
 
 #include <optional>
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/scene/Scene.h>
 
 #include <brayns/io/LoaderRegistry.h>
 

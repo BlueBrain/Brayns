@@ -21,6 +21,8 @@
 
 #include <brayns/Brayns.h>
 
+#include <brayns/engine/renderer/types/Interactive.h>
+
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
@@ -37,11 +39,11 @@ TEST_CASE("defaults")
     auto &engine = brayns.getEngine();
 
     auto &camera = engine.getCamera();
-    const auto &lookAt = camera.getLookAt();
+    const auto &view = camera.getView();
     CHECK_EQ(camera.getName(), "perspective");
-    CHECK_EQ(lookAt.position, brayns::Vector3f(0.f));
-    CHECK_EQ(lookAt.target, brayns::Vector3f(0.f, 0.f, 1.f));
-    CHECK_EQ(lookAt.up, brayns::Vector3f(0.f, 1.f, 0.f));
+    CHECK_EQ(view.position, brayns::Vector3f(0.f));
+    CHECK_EQ(view.target, brayns::Vector3f(0.f, 0.f, 1.f));
+    CHECK_EQ(view.up, brayns::Vector3f(0.f, 1.f, 0.f));
 
     auto &fb = engine.getFramebuffer();
     CHECK(!fb.getColorBuffer());
@@ -51,7 +53,8 @@ TEST_CASE("defaults")
     auto &renderer = engine.getRenderer();
     CHECK_EQ(renderer.getName(), "interactive");
     CHECK_EQ(renderer.getSamplesPerPixel(), 1);
-    CHECK_EQ(renderer.getBackgroundColor(), brayns::Vector4f(0.004f, 0.016f, 0.102f, 0.f));
+    auto interactive = renderer.as<brayns::Interactive>();
+    CHECK_EQ(interactive->backgroundColor, brayns::Vector4f(0.004f, 0.016f, 0.102f, 0.f));
 
     const auto &pm = brayns.getParametersManager();
     const auto &appParams = pm.getApplicationParameters();

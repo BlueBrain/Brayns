@@ -41,14 +41,16 @@ template<typename DataType>
 class RendererData final : public IRendererData
 {
 public:
-    DataWrapper(DataType value)
+    using Type = std::decay_t<DataType>;
+
+    RendererData(Type value)
         : data(std::move(value))
     {
     }
 
     void pushTo(ospray::cpp::Renderer &handle) override
     {
-        RendererTraits<DataType>::updateData(handle, data);
+        RendererTraits<Type>::updateData(handle, data);
     }
 
     int32_t getSamplesPerPixel() const noexcept override
@@ -58,9 +60,9 @@ public:
 
     std::unique_ptr<IRendererData> clone() const noexcept override
     {
-        return std::make_unique<RendererData<DataType>>(data);
+        return std::make_unique<RendererData<Type>>(data);
     }
 
-    DataType data;
+    Type data;
 };
 }

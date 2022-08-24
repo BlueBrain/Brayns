@@ -26,9 +26,9 @@ namespace brayns
 {
 struct DirectionalLight
 {
-    Vector3f color = Vector3f(1.f);
     float intensity = 1.f;
-    Vector3f direction = Vector3f(0.f, -1.f, 0.f);
+    Vector3f color = Vector3f(1.f);
+    Vector3f direction = Vector3f(-0.707107f, -0.707107f, 0.f);
 };
 
 template<>
@@ -36,7 +36,7 @@ class LightTraits<DirectionalLight>
 {
 public:
     inline static const std::string handleName = "distant";
-    inline static const std::string lightName = "directional";
+    inline static const std::string name = "directional";
 
     static Bounds computeBounds(const Matrix4f &matrix, const DirectionalLight &data)
     {

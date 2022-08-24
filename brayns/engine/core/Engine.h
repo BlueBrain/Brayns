@@ -79,19 +79,9 @@ public:
     Framebuffer &getFramebuffer() noexcept;
 
     /**
-     * @brief Sets a new system Camera to use
-     */
-    void setCamera(Camera camera) noexcept;
-
-    /**
      * @brief Returns the system's current Camera object
      */
     Camera &getCamera() noexcept;
-
-    /**
-     * @brief Sets a new system Renderer to use
-     */
-    void setRenderer(Renderer renderer) noexcept;
 
     /**
      * @brief Returns the system's current Renderer object

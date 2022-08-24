@@ -26,9 +26,9 @@ namespace brayns
 {
 struct View
 {
-    Vector3f position;
-    Vector3f target;
-    Vector3f up;
+    Vector3f position = Vector3f(0.f);
+    Vector3f target = Vector3f(0.f, 0.f, 1.f);
+    Vector3f up = Vector3f(0.f, 1.f, 0.f);
 
     bool operator==(const View &other) const noexcept;
     bool operator!=(const View &other) const noexcept;

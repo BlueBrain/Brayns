@@ -26,6 +26,7 @@
 #include <brayns/json/JsonType.h>
 #include <brayns/utils/TypeNameDemangler.h>
 
+#include <cassert>
 #include <memory>
 #include <string_view>
 #include <typeindex>
@@ -83,11 +84,6 @@ protected:
     virtual bool commit();
 
     /**
-     * @brief called when the component is removed from the model. Does nothing by defualt.
-     */
-    virtual void onDestroy();
-
-    /**
      * @brief Compute the bounds of the content of the component, if it applies. Does nothing by default.
      */
     virtual Bounds computeBounds(const Matrix4f &transform) const noexcept;
@@ -132,10 +128,22 @@ private:
     template<typename T>
     T &getComponent()
     {
+        auto component = findComponent<T>();
+        assert(component);
+        return *component;
+    }
+
+    template<typename T>
+    T *findComponent()
+    {
         auto it = _findComponentIterator<T>();
+        if (it == _components.end())
+        {
+            return nullptr;
+        }
         auto &entry = *it;
         auto &component = *entry.component;
-        return static_cast<T &>(component);
+        return static_cast<T *>(&component);
     }
 
     /**
@@ -218,11 +226,6 @@ private:
      * from its commit implementation
      */
     bool commit();
-
-    /**
-     * @brief Calls all the components 'onDestroy' in this container
-     */
-    void onDestroy();
 
     /**
      * @brief compute the merged bounds of all contained components

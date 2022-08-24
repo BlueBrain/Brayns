@@ -452,7 +452,7 @@ std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
     }
 
     auto model = std::make_unique<Model>();
-    model->addComponent<ProteinComponent>(std::move(spheres), std::move(modelColors), std::move(colorMapIndices));
+    model->addComponent<ProteinComponent>(std::move(spheres), std::move(colorMapIndices), std::move(modelColors));
 
     std::vector<std::unique_ptr<Model>> result;
     result.push_back(std::move(model));

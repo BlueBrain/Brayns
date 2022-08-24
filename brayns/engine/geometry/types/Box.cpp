@@ -48,7 +48,7 @@ Bounds GeometryTraits<Box>::computeBounds(const Matrix4f &matrix, const Box &box
     return bounds;
 }
 
-void GeometryTraits<Box>::update(ospray::cpp::Geometry &handle, std::vector<Box> &data)
+void GeometryTraits<Box>::updateData(ospray::cpp::Geometry &handle, std::vector<Box> &data)
 {
     handle.setParam(BoxParameters::box, ospray::cpp::SharedData(data));
 }

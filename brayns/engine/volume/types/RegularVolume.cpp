@@ -32,7 +32,7 @@ public:
     static void check(const brayns::RegularVolume &volumeData)
     {
         const auto dataType = static_cast<OSPDataType>(volumeData.dataType);
-        const auto &data = volumeData.data;
+        const auto &voxels = volumeData.voxels;
         const auto &size = volumeData.size;
         const auto dimensionSize = glm::compMul(size);
         if (dimensionSize == 0)
@@ -40,7 +40,7 @@ public:
             throw std::runtime_error("Tried to commit volume with 0 size");
         }
 
-        const auto currentSize = data.size();
+        const auto currentSize = voxels.size();
         const auto expectedSize = _getTypeByteSize(dataType) * dimensionSize;
         if (currentSize != expectedSize)
         {
@@ -92,6 +92,7 @@ Bounds VolumeTraits<RegularVolume>::computeBounds(const Matrix4f &matrix, const 
     Bounds bounds;
     bounds.expand(matrix * Vector4f(0.f, 0.f, 0.f, 1.f));
     bounds.expand(matrix * Vector4f(size, 1.f));
+    return bounds;
 }
 
 void VolumeTraits<RegularVolume>::updateData(ospray::cpp::Volume &handle, RegularVolume &data)

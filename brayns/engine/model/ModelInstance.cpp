@@ -58,7 +58,7 @@ namespace brayns
 ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model &model)
     : _modelInstanceID(modelInstanceID)
     , _model(model)
-    , _osprayInstance(model.getGroup().getOsprayGroup())
+    , _osprayInstance(model.getGroup().getHandle().handle())
 {
     computeBounds();
 }

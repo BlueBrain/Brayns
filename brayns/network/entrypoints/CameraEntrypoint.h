@@ -21,9 +21,8 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/cameras/OrthographicCamera.h>
-#include <brayns/engine/cameras/PerspectiveCamera.h>
+#include <brayns/engine/core/Engine.h>
+#include <brayns/engine/json/adapters/ProjectionAdapters.h>
 #include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -55,20 +54,15 @@ public:
 
     virtual void onRequest(const Request &request) override
     {
-        auto &currentCamera = _engine.getCamera();
-        if (auto castedSystemCamera = dynamic_cast<T *>(&currentCamera))
-        {
-            request.getParams(*castedSystemCamera);
-        }
-        else
-        {
-            auto currentLookAt = currentCamera.getLookAt();
-            auto newCamera = std::make_unique<T>();
-            request.getParams(*newCamera);
-            newCamera->setLookAt(currentLookAt);
-            _engine.setCamera(std::move(newCamera));
-        }
+        auto &camera = _engine.getCamera();
 
+        T projection;
+        if (auto cast = camera.as<T>())
+        {
+            projection = *cast;
+        }
+        request.getParams(projection);
+        camera.set(projection);
         request.reply(EmptyMessage());
     }
 
@@ -76,7 +70,7 @@ private:
     Engine &_engine;
 };
 
-class SetCameraPerspectiveEntrypoint final : public SetCameraEntrypoint<PerspectiveCamera>
+class SetCameraPerspectiveEntrypoint final : public SetCameraEntrypoint<Perspective>
 {
 public:
     SetCameraPerspectiveEntrypoint(Engine &engine);
@@ -85,7 +79,7 @@ public:
     std::string getDescription() const override;
 };
 
-class SetCameraOrthographicEntrypoint final : public SetCameraEntrypoint<OrthographicCamera>
+class SetCameraOrthographicEntrypoint final : public SetCameraEntrypoint<Orthographic>
 {
 public:
     SetCameraOrthographicEntrypoint(Engine &engine);
@@ -108,9 +102,9 @@ public:
     virtual void onRequest(const Request &request) override
     {
         auto &currentCamera = _engine.getCamera();
-        if (auto castedSystemCamera = dynamic_cast<T *>(&currentCamera))
+        if (auto castedProjection = currentCamera.as<T>())
         {
-            request.reply(*castedSystemCamera);
+            request.reply(*castedProjection);
             return;
         }
 
@@ -121,7 +115,7 @@ private:
     Engine &_engine;
 };
 
-class GetCameraPerspectiveEntrypoint final : public GetCameraEntrypoint<PerspectiveCamera>
+class GetCameraPerspectiveEntrypoint final : public GetCameraEntrypoint<Perspective>
 {
 public:
     GetCameraPerspectiveEntrypoint(Engine &engine);
@@ -130,7 +124,7 @@ public:
     std::string getDescription() const override;
 };
 
-class GetCameraOrthographicEntrypoint final : public GetCameraEntrypoint<OrthographicCamera>
+class GetCameraOrthographicEntrypoint final : public GetCameraEntrypoint<Orthographic>
 {
 public:
     GetCameraOrthographicEntrypoint(Engine &engine);

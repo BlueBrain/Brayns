@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,15 +20,26 @@
 
 #pragma once
 
-#include <brayns/json/JsonBuffer.h>
-#include <brayns/json/JsonObjectMacro.h>
-
-#include <brayns/network/adapters/TransferFunctionAdapter.h>
+#include <brayns/common/ColorRamp.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(SetTransferFunctionMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Model ID")
-BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<TransferFunction>, transfer_function, "Transfer function")
-BRAYNS_JSON_OBJECT_END()
-} // namespace brayns
+/**
+ * @brief Adds a transfer function to the model
+ */
+class ColorRampComponent final : public Component
+{
+public:
+    ColorRampComponent() = default;
+
+    ColorRampComponent(ColorRamp colorRamp);
+
+    ColorRamp &getColorRamp() noexcept;
+
+    void setColorRamp(ColorRamp colorRamp) noexcept;
+
+private:
+    ColorRamp _colorRamp;
+};
+}

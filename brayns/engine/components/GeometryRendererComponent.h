@@ -20,12 +20,11 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/common/ExtractModelObject.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
-#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/GeometryView.h>
+#include <brayns/engine/model/Model.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 #include <ospray/ospray_cpp/Data.h>
 
@@ -34,25 +33,19 @@ namespace brayns
 /**
  * @brief Adds renderable geometry to the model
  */
-template<typename T>
 class GeometryRendererComponent final : public Component
 {
 public:
-    /**
-     * @brief Constructs the component with a single geometry
-     * @param geometry
-     */
+    template<typename T>
     GeometryRendererComponent(T primitive)
-        : _geometryObject(std::move(primitive))
+        : GeometryRendererComponent(std::vector<T>{std::move(primitive)})
     {
     }
 
-    /**
-     * @brief Constructs the component with a list of geometries
-     * @param geometries
-     */
+    template<typename T>
     GeometryRendererComponent(std::vector<T> primitives)
-        : _geometryObject(std::move(primitives))
+        : _geometry(std::move(primitives))
+        , _geometryView(_geometry)
     {
     }
 
@@ -60,67 +53,22 @@ public:
      * @brief Returns a modifiable geometry reference
      * @return Geometry<T> &
      */
-    Geometry<T> &getGeometry() noexcept
-    {
-        return _geometryObject.getGeometry();
-    }
+    Geometry &getGeometry() noexcept;
 
     /**
      * @brief Sets a color per geometry. Disables material color
      * @param colors
      * @throws std::invalid_argument if there are not enough colors for the contained geometry
      */
-    void setColors(const std::vector<brayns::Vector4f> &colors)
-    {
-        auto &geometry = _geometryObject.getGeometry();
-        if (colors.size() < geometry.getPrimitives().size())
-        {
-            throw std::invalid_argument("Not enough colors for all geometry");
-        }
+    void setColors(const std::vector<brayns::Vector4f> &colors);
 
-        _geometryObject.setColorPerPrimitive(ospray::cpp::CopiedData(colors));
-        _useMaterialColor = false;
-    }
-
-    virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
-    {
-        return _geometryObject.computeBounds(transform);
-    }
-
-    virtual void onCreate() override
-    {
-        Model &model = getModel();
-
-        auto &group = model.getGroup();
-        group.addGeometry(_geometryObject);
-
-        model.addComponent<MaterialComponent>();
-    }
-
-    virtual bool commit() override
-    {
-        auto &material = ExtractModelObject::extractMaterial(getModel());
-        if (material.commit())
-        {
-            _geometryObject.setMaterial(material);
-            if (_useMaterialColor)
-            {
-                _geometryObject.setColor(material.getColor());
-            }
-        }
-
-        return _geometryObject.commit();
-    }
-
-    virtual void onDestroy() override
-    {
-        Model &model = getModel();
-        auto &group = model.getGroup();
-        group.removeGeometry(_geometryObject);
-    }
+    virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override;
+    virtual void onCreate() override;
+    virtual bool commit() override;
 
 private:
-    GeometryObject<T> _geometryObject;
+    Geometry _geometry;
+    GeometryView _geometryView;
     bool _useMaterialColor = true;
 };
 }

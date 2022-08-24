@@ -35,7 +35,7 @@ class GeometryTraits<Sphere>
 {
 public:
     inline static const std::string handleName = "sphere";
-    inline static const std::string geometryName = "sphere";
+    inline static const std::string name = "sphere";
 
     static Bounds computeBounds(const Matrix4f &matrix, const Sphere &data);
     static void updateData(ospray::cpp::Geometry &handle, std::vector<Sphere> &data);

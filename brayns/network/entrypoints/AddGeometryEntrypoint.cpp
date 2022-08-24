@@ -53,7 +53,7 @@ std::string AddPlanesEntrypoint::getDescription() const
 }
 
 AddCapsulesEntrypoint::AddCapsulesEntrypoint(Scene &scene)
-    : AddGeometryEntrypoint<Primitive>(scene)
+    : AddGeometryEntrypoint<Capsule>(scene)
 {
 }
 

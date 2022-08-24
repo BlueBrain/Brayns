@@ -21,9 +21,8 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/renderers/InteractiveRenderer.h>
-#include <brayns/engine/renderers/ProductionRenderer.h>
+#include <brayns/engine/core/Engine.h>
+#include <brayns/engine/json/adapters/RendererAdapters.h>
 #include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -56,19 +55,14 @@ public:
 
     virtual void onRequest(const Request &request) override
     {
-        auto &systemRenderer = _engine.getRenderer();
-
-        if (auto castedRenderer = dynamic_cast<T *>(&systemRenderer))
+        auto &renderer = _engine.getRenderer();
+        T data;
+        if (auto cast = renderer.as<T>())
         {
-            request.getParams(*castedRenderer);
+            data = *cast;
         }
-        else
-        {
-            auto newRenderer = std::make_unique<T>();
-            request.getParams(*newRenderer);
-            _engine.setRenderer(std::move(newRenderer));
-        }
-
+        request.getParams(data);
+        renderer.set(data);
         request.reply(EmptyMessage());
     }
 
@@ -76,7 +70,7 @@ private:
     Engine &_engine;
 };
 
-class SetRendererInteractiveEntrypoint final : public SetRendererEntrypoint<InteractiveRenderer>
+class SetRendererInteractiveEntrypoint final : public SetRendererEntrypoint<Interactive>
 {
 public:
     SetRendererInteractiveEntrypoint(Engine &engine);
@@ -85,7 +79,7 @@ public:
     std::string getDescription() const override;
 };
 
-class SetRendererProductionEntrypoint final : public SetRendererEntrypoint<ProductionRenderer>
+class SetRendererProductionEntrypoint final : public SetRendererEntrypoint<Production>
 {
 public:
     SetRendererProductionEntrypoint(Engine &engine);
@@ -107,21 +101,21 @@ public:
 
     void onRequest(const Request &request) override
     {
-        auto &systemRenderer = _engine.getRenderer();
-        if (auto castedRenderer = dynamic_cast<T *>(&systemRenderer))
+        auto &renderer = _engine.getRenderer();
+        if (auto cast = renderer.as<T>())
         {
-            request.reply(*castedRenderer);
+            request.reply(*cast);
             return;
         }
 
-        throw InvalidRequestException("Invalid renderer type (should be '" + systemRenderer.getName() + "')");
+        throw InvalidRequestException("Invalid renderer type (should be '" + renderer.getName() + "')");
     }
 
 private:
     Engine &_engine;
 };
 
-class GetRendererInteractiveEntrypoint final : public GetRendererEntrypoint<InteractiveRenderer>
+class GetRendererInteractiveEntrypoint final : public GetRendererEntrypoint<Interactive>
 {
 public:
     GetRendererInteractiveEntrypoint(Engine &engine);
@@ -130,7 +124,7 @@ public:
     std::string getDescription() const override;
 };
 
-class GetRendererProductionEntrypoint final : public GetRendererEntrypoint<ProductionRenderer>
+class GetRendererProductionEntrypoint final : public GetRendererEntrypoint<Production>
 {
 public:
     GetRendererProductionEntrypoint(Engine &engine);

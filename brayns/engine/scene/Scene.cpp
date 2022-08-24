@@ -144,7 +144,7 @@ const ModelLoadParameters &Scene::getModelLoadParameters(uint32_t instanceId) co
     return _modelManager.getModelLoadParameters(instanceId);
 }
 
-uint32_t Scene::addLight(std::unique_ptr<Light> light)
+uint32_t Scene::addLight(Light light)
 {
     auto lightId = _lightManager.addLight(std::move(light));
     computeBounds();

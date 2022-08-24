@@ -42,10 +42,16 @@ public:
 
     template<typename Type>
     Geometry(std::vector<Type> primitives)
-        : _osprayHandleName(GeometryTraits<Type>::osprayValue)
-        , _geometryName(GeometryTraits<Type>::value)
-        , _handle(_osprayHandleName)
+        : _handleName(GeometryTraits<Type>::handleName)
+        , _geometryName(GeometryTraits<Type>::name)
+        , _handle(_handleName)
         , _data(std::make_unique<GeometryData<Type>>(std::move(primitives)))
+    {
+    }
+
+    template<typename Type>
+    Geometry(Type primitive)
+        : Geometry(std::vector<Type>{std::move(primitive)})
     {
     }
 
@@ -63,7 +69,7 @@ public:
     template<typename Type>
     const std::vector<Type> *as() const noexcept
     {
-        if (auto cast = dynamic_cast<const GeometryData<Type> *>(data.get()))
+        if (auto cast = dynamic_cast<const GeometryData<Type> *>(_data.get()))
         {
             return &cast->primitives;
         }
@@ -77,13 +83,13 @@ public:
     void forEach(Callable &&callback) noexcept
     {
         using ArgType = typename ArgumentInferer<Callable>::argType;
-        auto cast = dynamic_cast<GeometryData<ArgType> *>(data.get());
+        auto cast = dynamic_cast<GeometryData<ArgType> *>(_data.get());
         assert(cast);
-        for (auto &element : cast->elements)
+        for (auto &element : cast->primitives)
         {
-            callable(element);
+            callback(element);
         }
-        data->pushTo(_handle);
+        _data->pushTo(_handle);
         _flag = true;
     }
 
@@ -115,7 +121,7 @@ public:
     const ospray::cpp::Geometry &getHandle() const noexcept;
 
 private:
-    std::string _osprayHandleName;
+    std::string _handleName;
     std::string _geometryName;
     ospray::cpp::Geometry _handle;
     std::unique_ptr<IGeometryData> _data;

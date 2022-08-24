@@ -20,59 +20,30 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/components/TransferFunctionRendererComponent.h>
-#include <brayns/engine/volume/VolumeObject.h>
+#include <brayns/engine/model/Model.h>
+#include <brayns/engine/model/ModelComponents.h>
+#include <brayns/engine/volume/VolumeView.h>
 
 namespace brayns
 {
 /**
  * @brief Adds a renderable volume to the model
  */
-template<typename T>
 class VolumeRendererComponent final : public Component
 {
 public:
+    template<typename T>
     VolumeRendererComponent(T volumeData)
-        : _object(std::move(volumeData))
+        : _volume(std::move(volumeData))
     {
     }
 
-    virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override
-    {
-        return _object.computeBounds(transform);
-    }
-
-    virtual void onCreate() override
-    {
-        Model &model = getModel();
-        auto &group = model.getGroup();
-        group.addVolume(_object);
-
-        model.addComponent<TransferFunctionRendererComponent>();
-    }
-
-    bool commit() override
-    {
-        Model &model = getModel();
-        auto &tfComponent = model.getComponent<TransferFunctionRendererComponent>();
-        if (tfComponent.manualCommit())
-        {
-            _object.setTransferFunction(tfComponent.getOsprayObject());
-        }
-
-        return _object.commit();
-    }
-
-    virtual void onDestroy() override
-    {
-        auto &model = getModel();
-        auto &group = model.getGroup();
-        group.removeVolume(_object);
-    }
+    virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override;
+    virtual void onCreate() override;
+    bool commit() override;
 
 private:
-    VolumeObject<T> _object;
+    Volume _volume;
+    VolumeView _volumeView;
 };
 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -20,29 +20,13 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-
-#include <ospray/ospray_cpp/TransferFunction.h>
+#include <brayns/engine/json/EngineObjectData.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-/**
- * @brief Takes (or adds, if not present) the transfer function from the model and converts it
- * to an Ospray transfer function. Modified and committment is done manually to allow the components
- * that make use of this to control its life cylce
- */
-class TransferFunctionRendererComponent : public Component
-{
-public:
-    TransferFunctionRendererComponent();
-
-    void onCreate() override;
-
-    bool manualCommit();
-
-    const ospray::cpp::TransferFunction &getOsprayObject() const noexcept;
-
-private:
-    ospray::cpp::TransferFunction _osprayTransferFunction;
-};
+BRAYNS_JSON_ADAPTER_BEGIN(EngineObjectData)
+BRAYNS_JSON_ADAPTER_ENTRY(name, "Object type name", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(params, "Object parameters", Required(false))
+BRAYNS_JSON_ADAPTER_END()
 }

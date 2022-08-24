@@ -119,6 +119,11 @@ const Vector2ui &Framebuffer::getFrameSize() const noexcept
     return _frameSize;
 }
 
+float Framebuffer::getAspectRatio() const noexcept
+{
+    return static_cast<float>(_frameSize.x) / static_cast<float>(_frameSize.y);
+}
+
 void Framebuffer::setAccumulation(const bool accumulation) noexcept
 {
     _flag.update(_accumulation, accumulation);

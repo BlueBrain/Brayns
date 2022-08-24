@@ -22,13 +22,12 @@
 
 #include <ospray/ospray_cpp/Camera.h>
 
-#include <cassert>
 #include <string>
 
 namespace brayns
 {
 template<typename T>
-constexpr bool alwaysFalse = false;
+constexpr bool cameraSpecialized = false;
 
 template<typename T>
 class ProjectionTraits
@@ -38,9 +37,9 @@ public:
 
     static void updateData(ospray::cpp::Camera &handle, T &data)
     {
+        static_assert(cameraSpecialized<T>, "CameraTraits not specialized");
         (void)handle;
         (void)data;
-        static_assert(alwaysFalse<T>, "Please specialize");
     }
 };
 }

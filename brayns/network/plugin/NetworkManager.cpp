@@ -52,8 +52,8 @@
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
+#include <brayns/network/entrypoints/ModelColorRampEntrypoint.h>
 #include <brayns/network/entrypoints/ModelMaterialEntrypoint.h>
-#include <brayns/network/entrypoints/ModelTransferFunctionEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RegistryEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveClipPlanesEntrypoint.h>
@@ -119,7 +119,7 @@ public:
         builder.add<brayns::GetCameraTypeEntrypoint>(engine);
         builder.add<brayns::GetLoadersEntrypoint>(loaders);
         builder.add<brayns::GetMaterialCarPaint>(scene);
-        builder.add<brayns::GetMaterialDefault>(scene);
+        builder.add<brayns::GetMaterialPhong>(scene);
         builder.add<brayns::GetMaterialEmissive>(scene);
         builder.add<brayns::GetMaterialGlass>(scene);
         builder.add<brayns::GetMaterialMatte>(scene);
@@ -147,7 +147,7 @@ public:
         builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::SetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::SetMaterialCarPaint>(scene);
-        builder.add<brayns::SetMaterialDefault>(scene);
+        builder.add<brayns::SetMaterialPhong>(scene);
         builder.add<brayns::SetMaterialEmissive>(scene);
         builder.add<brayns::SetMaterialGlass>(scene);
         builder.add<brayns::SetMaterialMatte>(scene);

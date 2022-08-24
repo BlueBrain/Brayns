@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/common/MathTypes.h>
 #include <brayns/engine/material/MaterialTraits.h>
 
 namespace brayns
@@ -35,7 +36,7 @@ class MaterialTraits<Plastic>
 {
 public:
     inline static const std::string handleName = "principled";
-    inline static const std::string materialName = "plastic";
+    inline static const std::string name = "plastic";
 
     static void updateData(ospray::cpp::Material &handle, Plastic &data);
 };

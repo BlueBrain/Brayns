@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ShadingColorMap.h"
+#include "ShadingColorRamp.h"
 
 #include <string>
 
@@ -38,12 +38,12 @@ struct ColorMapParameters
 
 namespace brayns
 {
-ShadingColorMap::ShadingColorMap(const ColorMap &colorMap)
+ShadingColorRamp::ShadingColorRamp()
+    : _handle(ColorMapParameters::name)
 {
-    set(colorMap);
 }
 
-void ShadingColorMap::set(const ColorMap &colorMap)
+void ShadingColorRamp::set(const ColorRamp &colorMap)
 {
     constexpr auto stride = 4 * sizeof(float);
     auto &colors = colorMap.getColors();
@@ -61,7 +61,7 @@ void ShadingColorMap::set(const ColorMap &colorMap)
     _handle.commit();
 }
 
-const ospray::cpp::TransferFunction &ShadingColorMap::getHandle() const noexcept
+const ospray::cpp::TransferFunction &ShadingColorRamp::getHandle() const noexcept
 {
     return _handle;
 }

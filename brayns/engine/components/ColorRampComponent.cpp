@@ -18,26 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/common/MathTypes.h>
-#include <brayns/engine/material/MaterialTraits.h>
+#include "ColorRampComponent.h"
 
 namespace brayns
 {
-struct Metal
+ColorRampComponent::ColorRampComponent(ColorRamp colorRamp)
+    : _colorRamp(std::move(colorRamp))
 {
-    Vector3f color = Vector3f(1.f);
-    float roughness = 0.1f;
-};
+}
 
-template<>
-class MaterialTraits<Metal>
+ColorRamp &ColorRampComponent::getColorRamp() noexcept
 {
-public:
-    inline static const std::string handleName = "alloy";
-    inline static const std::string name = "metal";
+    return _colorRamp;
+}
 
-    static void updateData(ospray::cpp::Material &handle, Metal &data);
-};
+void ColorRampComponent::setColorRamp(ColorRamp colorRamp) noexcept
+{
+    _colorRamp = std::move(colorRamp);
+}
 }

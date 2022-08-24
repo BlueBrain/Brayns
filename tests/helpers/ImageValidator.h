@@ -29,7 +29,7 @@
 
 #include <tests/paths.h>
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engine/core/Engine.h>
 #include <brayns/utils/image/Image.h>
 #include <brayns/utils/image/ImageDecoder.h>
 #include <brayns/utils/image/ImageEncoder.h>

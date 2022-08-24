@@ -20,13 +20,15 @@
 
 #pragma once
 
-#include <brayns/engine/EngineObjectFactory.h>
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/JsonType.h>
+
+#include <string>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(EngineObjectData)
-BRAYNS_JSON_ADAPTER_ENTRY(name, "Engine object type name", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(params, "Object parameters", Required(false))
-BRAYNS_JSON_ADAPTER_END()
+struct EngineObjectData
+{
+    std::string name;
+    JsonValue params;
+};
 }

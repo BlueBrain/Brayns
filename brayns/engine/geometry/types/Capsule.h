@@ -47,7 +47,7 @@ class GeometryTraits<Capsule>
 {
 public:
     inline static const std::string handleName = "curve";
-    inline static const std::string geometryName = "capsule";
+    inline static const std::string name = "capsule";
 
     static Bounds computeBounds(const Matrix4f &matrix, const Capsule &data);
     static void updateData(ospray::cpp::Geometry &handle, std::vector<Capsule> &data);
