@@ -26,7 +26,8 @@ from collections import deque
 from dataclasses import dataclass
 from typing import IO, cast
 
-from ..utils import ImageFormat, Resolution
+from brayns.utils import ImageFormat, Resolution
+
 from .movie_error import MovieError
 
 
