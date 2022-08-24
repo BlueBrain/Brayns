@@ -21,9 +21,16 @@
 import argparse
 import sys
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from typing import TypeVar
+
+T = TypeVar('T', bound='Cli')
 
 
+@dataclass
 class Cli(ABC):
+
+    description: str = field(default='', init=False)
 
     @abstractmethod
     def register(self, parser: argparse.ArgumentParser) -> None:
@@ -33,8 +40,15 @@ class Cli(ABC):
     def load(self, args: argparse.Namespace) -> None:
         pass
 
+    def with_description(self: T, description: str) -> T:
+        self.description = description
+        return self
+
     def parse(self, argv: list[str] = sys.argv) -> None:
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(
+            description=self.description,
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        )
         self.register(parser)
         args = parser.parse_args(argv)
         self.load(args)
