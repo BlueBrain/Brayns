@@ -49,32 +49,32 @@ class TestServiceCli(unittest.TestCase):
         test = brayns.ServiceCli(
             port=3,
             executable='exe',
-            ospray='osp',
+            library_path='osp',
         )
         args = [
             '--port',
             '4',
             '--executable',
             'exe2',
-            '--ospray',
+            '--library_path',
             'osp2',
         ]
         test.parse(args)
         self.assertEqual(test.port, 4)
         self.assertEqual(test.executable, 'exe2')
-        self.assertEqual(test.ospray, 'osp2')
+        self.assertEqual(test.library_path, 'osp2')
 
     def test_create_bundle(self) -> None:
         cli = brayns.ServiceCli(
             port=3,
             executable='exe',
-            ospray='osp',
+            library_path='osp',
         )
         test = cli.create_bundle()
         ref = brayns.Bundle(
             port=cli.port,
             service_executable=cli.executable,
-            service_env={'LD_LIBRARY_PATH': cli.ospray},
+            service_env={'LD_LIBRARY_PATH': cli.library_path},
             connector_logger=test.connector_logger,
         )
         self.assertEqual(test, ref)

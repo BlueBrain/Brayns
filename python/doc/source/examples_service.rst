@@ -75,10 +75,10 @@ given port and connects to it.
 
     bundle = brayns.Bundle(5000)
 
-    with bundle.start() as process, instance:
+    with bundle.start() as manager:
 
-        print(brayns.get_version(instance))
-        print(process.logs)
+        print(brayns.get_version(manager.instance))
+        print(manager.process.logs)
 
 .. attention::
 

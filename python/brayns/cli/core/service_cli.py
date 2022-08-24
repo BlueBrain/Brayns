@@ -31,7 +31,7 @@ class ServiceCli(Cli):
 
     port: int = 5000
     executable: str = 'braynsService'
-    ospray: str = ''
+    library_path: str = ''
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
@@ -48,20 +48,20 @@ class ServiceCli(Cli):
             help='braynsService executable path',
         )
         parser.add_argument(
-            '--ospray',
-            default=self.ospray,
+            '--library_path',
+            default=self.library_path,
             metavar='PATH',
-            help='OSPRAY dev libs (for local dev builds)',
+            help='LD_LIBRARY_PATH override (for local dev builds)',
         )
 
     def load(self, args: argparse.Namespace) -> None:
         self.port = args.port
         self.executable = args.executable
-        self.ospray = args.ospray
+        self.library_path = args.library_path
 
     def create_bundle(self) -> Bundle:
         return Bundle(
             port=self.port,
             service_executable=self.executable,
-            service_env={'LD_LIBRARY_PATH': self.ospray},
+            service_env={'LD_LIBRARY_PATH': self.library_path},
         )

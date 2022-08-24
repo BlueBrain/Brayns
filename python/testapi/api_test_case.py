@@ -37,9 +37,9 @@ class ApiTestCase(unittest.TestCase):
     @property
     def env(self) -> dict[str, str]:
         result = dict[str, str]()
-        ospray = os.environ.get('BRAYNS_TEST_OSPRAY_DIR')
-        if ospray is not None:
-            result['LD_LIBRARY_PATH'] = ospray
+        path = os.environ.get('BRAYNS_TEST_LIBRARY_PATH')
+        if path is not None:
+            result['LD_LIBRARY_PATH'] = path
         return result
 
     @property
