@@ -20,6 +20,7 @@
 
 #include "ProteinComponent.h"
 
+#include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
 #include <brayns/engine/model/Model.h>
@@ -49,15 +50,13 @@ void ProteinComponent::onCreate()
 {
     auto &model = getModel();
     auto &group = model.getGroup();
-    group.fromGeometry(_geometryView);
+    group.setGeometry(_geometryView);
     model.addComponent<MaterialComponent>();
 }
 
 bool ProteinComponent::commit()
 {
-    auto &model = getModel();
-    auto &component = model.getComponent<MaterialComponent>();
-    auto &material = component.getMaterial();
+    auto &material = ExtractComponent::material(getModel());
     if (material.commit())
     {
         _geometryView.setMaterial(material);

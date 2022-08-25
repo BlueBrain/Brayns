@@ -18,36 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "VolumeRendererComponent.h"
+#include "Cylindric.h"
 
-#include <brayns/engine/common/ExtractComponent.h>
-
-namespace brayns
+namespace
 {
-Bounds VolumeRendererComponent::computeBounds(const Matrix4f &transform) const noexcept
+struct CylindricParameters
 {
-    return _volume.computeBounds(transform);
+    inline static const std::string fovy = "fovy";
+};
 }
 
-void VolumeRendererComponent::onCreate()
+void brayns::ProjectionTraits<Cylindric>::updateData(ospray::cpp::Camera &handle, Cylindric &data)
 {
-    Model &model = getModel();
-    auto &group = model.getGroup();
-    group.setVolume(_volumeView);
-    model.addComponent<ColorRampComponent>();
-}
-
-bool VolumeRendererComponent::commit()
-{
-    auto &colorRamp = ExtractComponent::colorRamp(getModel());
-    if (colorRamp.isModified())
-    {
-        _volumeView.setColorRamp(colorRamp);
-        colorRamp.resetModified();
-    }
-
-    auto volumeCommitted = _volume.commit();
-    auto viewCommitted = _volumeView.commit();
-    return volumeCommitted || viewCommitted;
-}
+    handle.setParam(CylindricParameters::fovy, data.fovy);
 }

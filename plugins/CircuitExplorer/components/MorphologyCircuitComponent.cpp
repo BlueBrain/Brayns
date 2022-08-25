@@ -20,7 +20,7 @@
 
 #include "MorphologyCircuitComponent.h"
 
-#include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
@@ -32,7 +32,7 @@ class MorphologyGeometryInitializer
 {
 public:
     static auto init(
-        std::vector<std::vector<brayns::Primitive>> primitives,
+        std::vector<std::vector<brayns::Capsule>> primitives,
         std::vector<std::vector<NeuronSectionMapping>> map)
     {
         std::vector<MorphologyGeometry> morphologies;
@@ -42,9 +42,7 @@ public:
         {
             auto &morphGeometry = primitives[i];
             auto &morphSections = map[i];
-
-            MorphologyGeometry morphology{{std::move(morphGeometry)}, std::move(morphSections)};
-            morphologies.push_back(std::move(morphology));
+            morphologies.emplace_back(std::move(morphGeometry), std::move(morphSections));
         }
 
         return morphologies;
@@ -54,7 +52,7 @@ public:
 
 MorphologyCircuitComponent::MorphologyCircuitComponent(
     std::vector<uint64_t> ids,
-    std::vector<std::vector<brayns::Primitive>> primitives,
+    std::vector<std::vector<brayns::Capsule>> primitives,
     std::vector<std::vector<NeuronSectionMapping>> map)
     : _ids(std::move(ids))
     , _morphologies(MorphologyGeometryInitializer::init(std::move(primitives), std::move(map)))
@@ -79,11 +77,14 @@ void MorphologyCircuitComponent::onCreate()
     auto &model = getModel();
     model.addComponent<brayns::MaterialComponent>();
 
+    std::vector<ospray::cpp::GeometricModel> handles;
+    handles.reserve(_morphologies.size());
     auto &group = model.getGroup();
     for (auto &morphology : _morphologies)
     {
-        group.addGeometry(morphology.geometry);
+        handles.push_back(morphology.view.getHandle());
     }
+    group.setGeometry(handles);
 }
 
 bool MorphologyCircuitComponent::commit()
@@ -91,13 +92,12 @@ bool MorphologyCircuitComponent::commit()
     bool needsCommit = _colorsDirty || _geometryDirty;
     _colorsDirty = _geometryDirty = false;
 
-    auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
+    auto &material = brayns::ExtractComponent::material(getModel());
     if (material.commit())
     {
         for (auto &morphology : _morphologies)
         {
-            auto &geometry = morphology.geometry;
-            geometry.setMaterial(material);
+            morphology.view.setMaterial(material);
         }
         needsCommit = true;
     }
@@ -106,22 +106,12 @@ bool MorphologyCircuitComponent::commit()
     {
         for (auto &morphology : _morphologies)
         {
-            auto &geometry = morphology.geometry;
-            geometry.commit();
+            morphology.geometry.commit();
+            morphology.view.commit();
         }
     }
 
     return needsCommit;
-}
-
-void MorphologyCircuitComponent::onDestroy()
-{
-    auto &model = getModel();
-    auto &group = model.getGroup();
-    for (auto &morphology : _morphologies)
-    {
-        group.removeGeometry(morphology.geometry);
-    }
 }
 
 void MorphologyCircuitComponent::onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult)
@@ -134,12 +124,7 @@ void MorphologyCircuitComponent::onInspect(const brayns::InspectContext &context
     auto it = std::find_if(
         morphBegin,
         morphEnd,
-        [=](const MorphologyGeometry &morphology)
-        {
-            auto &geometry = morphology.geometry;
-            auto &osprayObject = geometry.getOsprayObject();
-            return osprayObject.handle() == modelHandle;
-        });
+        [=](const MorphologyGeometry &morphology) { return morphology.view.getHandle().handle() == modelHandle; });
 
     if (it == morphEnd)
     {
@@ -147,7 +132,6 @@ void MorphologyCircuitComponent::onInspect(const brayns::InspectContext &context
     }
 
     auto index = std::distance(morphBegin, it);
-
     auto cellId = _ids[index];
     writeResult.set("neuron_id", cellId);
 }
@@ -161,8 +145,7 @@ void MorphologyCircuitComponent::setColor(const brayns::Vector4f &color) noexcep
 {
     for (auto &morphology : _morphologies)
     {
-        auto &geometry = morphology.geometry;
-        geometry.setColor(color);
+        morphology.view.setColor(color);
     }
     _colorsDirty = true;
 }
@@ -177,8 +160,7 @@ void MorphologyCircuitComponent::setColorById(const std::vector<brayns::Vector4f
     for (size_t i = 0; i < _morphologies.size(); ++i)
     {
         auto &morphology = _morphologies[i];
-        auto &geometry = morphology.geometry;
-        geometry.setColor(colors[i]);
+        morphology.view.setColor(colors[i]);
     }
     _colorsDirty = true;
 }
@@ -193,8 +175,7 @@ std::vector<uint64_t> MorphologyCircuitComponent::setColorById(
         {
             (void)id;
             auto &morphology = _morphologies[index];
-            auto &geometry = morphology.geometry;
-            geometry.setColor(color);
+            morphology.view.setColor(color);
             _colorsDirty = true;
         });
 
@@ -227,7 +208,7 @@ void MorphologyCircuitComponent::setColorBySection(
     for (auto &morphology : _morphologies)
     {
         auto &geometry = morphology.geometry;
-        std::vector<uint8_t> indices(geometry.getNumPrimitives(), 0u);
+        std::vector<uint8_t> indices(geometry.numPrimitives(), 0u);
         auto &sections = morphology.sections;
 
         for (const auto &entry : sectionIndices)
@@ -247,7 +228,7 @@ void MorphologyCircuitComponent::setColorBySection(
         }
         auto indexData = ospray::cpp::CopiedData(indices);
 
-        geometry.setColorMap(colorData, indexData);
+        morphology.view.setColorMap(colorData, indexData);
     }
 
     _colorsDirty = true;
@@ -257,10 +238,7 @@ void MorphologyCircuitComponent::setIndexedColor(
     const std::vector<brayns::Vector4f> &colors,
     const std::vector<uint8_t> &map)
 {
-    if (colors.size() > 256)
-    {
-        throw std::invalid_argument("Colormap has more than 256 values");
-    }
+    assert(colors.size() <= 256);
 
     auto colorData = ospray::cpp::CopiedData(colors);
 
@@ -268,7 +246,7 @@ void MorphologyCircuitComponent::setIndexedColor(
     for (auto &morphology : _morphologies)
     {
         auto &geometry = morphology.geometry;
-        auto geometrySize = geometry.getNumPrimitives();
+        auto geometrySize = geometry.numPrimitives();
 
         if (mappingOffset + geometrySize > map.size())
         {
@@ -277,22 +255,21 @@ void MorphologyCircuitComponent::setIndexedColor(
 
         auto morphologyMapping = &map[mappingOffset];
         auto mappingData = ospray::cpp::CopiedData(morphologyMapping, geometrySize);
-        geometry.setColorMap(colorData, mappingData);
+
+        morphology.view.setColorMap(colorData, mappingData);
         mappingOffset += geometrySize;
     }
     _colorsDirty = true;
 }
 
-void MorphologyCircuitComponent::changeThickness(const float multiplier) noexcept
+void MorphologyCircuitComponent::changeThickness(float multiplier) noexcept
 {
     for (auto &morphology : _morphologies)
     {
         auto &geometry = morphology.geometry;
-        auto &primitives = geometry.getGeometry();
-        primitives.forEach(
-            [=](uint32_t i, brayns::Primitive &primitive)
+        geometry.forEach(
+            [=](brayns::Capsule &primitive)
             {
-                (void)i;
                 primitive.r0 *= multiplier;
                 primitive.r1 *= multiplier;
             });

@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometry/GeometryObject.h>
-#include <brayns/engine/geometry/types/Primitive.h>
+#include <brayns/engine/geometry/GeometryView.h>
+#include <brayns/engine/geometry/types/Capsule.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 #include <api/vasculature/VasculatureSection.h>
 
@@ -31,7 +31,7 @@ class VasculatureComponent final : public brayns::Component
 public:
     VasculatureComponent(
         std::vector<uint64_t> ids,
-        std::vector<brayns::Primitive> geometry,
+        std::vector<brayns::Capsule> geometry,
         std::vector<VasculatureSection> sections);
 
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
@@ -39,8 +39,6 @@ public:
     void onCreate() override;
 
     bool commit() override;
-
-    void onDestroy() override;
 
     /**
      * @brief getIDs return the ids of the vessels in this vasculature
@@ -85,13 +83,14 @@ public:
     /**
      * @brief Get the Geometry object
      *
-     * @return brayns::Geometry<brayns::Primitive>
+     * @return brayns::Geometry
      */
-    brayns::Geometry<brayns::Primitive> &getGeometry() noexcept;
+    brayns::Geometry &getGeometry() noexcept;
 
 private:
     std::vector<uint64_t> _ids;
-    brayns::GeometryObject<brayns::Primitive> _geometry;
+    brayns::Geometry _geometry;
+    brayns::GeometryView _view;
     std::vector<VasculatureSection> _sections;
     std::vector<brayns::Vector4f> _colors;
 };

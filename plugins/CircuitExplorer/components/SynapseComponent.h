@@ -20,9 +20,8 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometry/GeometryObject.h>
-#include <brayns/engine/geometry/types/Sphere.h>
+#include <brayns/engine/geometry/GeometryView.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 /**
  * @brief The SynapseComponent class is a synapse geometry rendering component in which the synapse geometries are
@@ -36,7 +35,6 @@ public:
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
     bool commit() override;
     void onCreate() override;
-    void onDestroy() override;
 
     /**
      * @brief getCellIds Return the cell ids by which the synapses are grouped
@@ -73,9 +71,8 @@ public:
     void setIndexedColor(const std::vector<brayns::Vector4f> &color, const std::vector<uint8_t> &mapping);
 
 private:
-    using CellSynapses = brayns::GeometryObject<brayns::Sphere>;
-
     std::vector<uint64_t> _cellIds;
-    std::vector<CellSynapses> _synapses;
+    std::vector<brayns::Geometry> _geometries;
+    std::vector<brayns::GeometryView> _views;
     bool _colorsDirty{false};
 };

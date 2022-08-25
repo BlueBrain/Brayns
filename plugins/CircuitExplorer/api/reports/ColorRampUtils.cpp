@@ -18,13 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TransferFunctionUtils.h"
+#include "ColorRampUtils.h"
 
-brayns::TransferFunction TransferFunctionUtils::createUnipolarTransferFunction() noexcept
+brayns::ColorRamp ColorRampUtils::createUnipolarColorRamp() noexcept
 {
-    brayns::TransferFunction tf;
+    brayns::ColorRamp colorRamp;
 
-    tf.setColors(
+    colorRamp.setColors(
         {{0.0, 0.0, 0.0, 1.0},
          {0.00392156862745098, 0.00392156862745098, 0.12941176470588237, 1.0},
          {0.00784313725490196, 0.00784313725490196, 0.25882352941176473, 1.0},
@@ -153,23 +153,22 @@ brayns::TransferFunction TransferFunctionUtils::createUnipolarTransferFunction()
          {0.996078431372549, 1.0, 0.9686274509803922, 1.0},
          {0.996078431372549, 1.0, 0.9803921568627451, 1.0},
          {1.0, 1.0, 1.0, 1.0}});
-    tf.setValuesRange({-80, -10});
+    colorRamp.setValuesRange({-80, -10});
 
-    return tf;
+    return colorRamp;
 }
 
-std::vector<brayns::Vector4f> TransferFunctionUtils::createSampleBuffer(const brayns::TransferFunction &tf) noexcept
+std::vector<brayns::Vector4f> ColorRampUtils::createSampleBuffer(const brayns::ColorRamp &colorRamp) noexcept
 {
     std::vector<brayns::Vector4f> colors(256);
 
-    const auto &range = tf.getValuesRange();
-    const auto chunk = (range.y - range.x) / 256.f;
+    auto &range = colorRamp.getValuesRange();
+    auto chunk = (range.y - range.x) / 256.f;
 
     for (size_t i = 0; i < 256; ++i)
     {
-        const auto value = range.x + chunk * i;
-        auto color = tf.getColorForValue(value);
-        colors[i] = std::move(color);
+        auto value = range.x + chunk * i;
+        colors[i] = colorRamp.getColorForValue(value);
     }
 
     return colors;

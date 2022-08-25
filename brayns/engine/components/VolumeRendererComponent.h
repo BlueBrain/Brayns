@@ -35,6 +35,7 @@ public:
     template<typename T>
     VolumeRendererComponent(T volumeData)
         : _volume(std::move(volumeData))
+        , _volumeView(_volume)
     {
     }
 

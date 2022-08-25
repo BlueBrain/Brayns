@@ -18,47 +18,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CylindricCamera.h"
+#include "ExtractComponent.h"
 
-namespace
+#include <brayns/engine/components/ColorRampComponent.h>
+#include <brayns/engine/components/MaterialComponent.h>
+#include <brayns/engine/components/SimulationComponent.h>
+
+namespace brayns
 {
-struct CylindricParameters
+Material &ExtractComponent::material(Model &model)
 {
-    inline static const std::string fovy = "fovy";
-};
+    auto &component = model.getComponent<MaterialComponent>();
+    return component.getMaterial();
 }
 
-CylindricCamera::CylindricCamera()
-    : brayns::Camera(typeName)
+ColorRamp &ExtractComponent::colorRamp(Model &model)
 {
+    auto &component = model.getComponent<ColorRampComponent>();
+    return component.getColorRamp();
 }
 
-std::string CylindricCamera::getName() const noexcept
+bool ExtractComponent::simulationEnabled(Model &model)
 {
-    return typeName;
+    auto component = model.findComponent<SimulationComponent>();
+    if (!component || !component->enabled())
+    {
+        return false;
+    }
+    return true;
 }
-
-std::unique_ptr<brayns::Camera> CylindricCamera::clone() const noexcept
-{
-    auto result = std::make_unique<CylindricCamera>();
-    result->setLookAt(getLookAt());
-    result->setAspectRatio(getAspectRatio());
-    result->setFovy(_fovy);
-    return result;
-}
-
-void CylindricCamera::setFovy(float fovy) noexcept
-{
-    getModifiedFlag().update(_fovy, fovy);
-}
-
-float CylindricCamera::getFovy() const noexcept
-{
-    return _fovy;
-}
-
-void CylindricCamera::commitCameraSpecificParams()
-{
-    auto &osprayCamera = getOsprayCamera();
-    osprayCamera.setParam(CylindricParameters::fovy, _fovy);
 }

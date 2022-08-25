@@ -122,7 +122,7 @@ std::unique_ptr<brayns::Model> HighlightColumn::execute(const AtlasVolume &volum
 
     auto model = std::make_unique<brayns::Model>();
 
-    auto &component = model->addComponent<brayns::GeometryRendererComponent<brayns::Box>>(std::move(geometry));
+    auto &component = model->addComponent<brayns::GeometryRendererComponent>(std::move(geometry));
     component.setColors(colors);
 
     return model;

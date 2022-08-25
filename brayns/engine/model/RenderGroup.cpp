@@ -52,45 +52,57 @@ public:
 
 namespace brayns
 {
-void RenderGroup::fromGeometry(const GeometryView &geometry)
+void RenderGroup::setGeometry(const GeometryView &geometry)
 {
     auto handle = std::vector<ospray::cpp::GeometricModel>{geometry.getHandle()};
-    _handle.setParam(GroupParameters::geometry, ospray::cpp::CopiedData(handle));
-    _flag = true;
+    setGeometry(handle);
 }
 
-void RenderGroup::fromGeometry(const std::vector<GeometryView> &geometries)
+void RenderGroup::setGeometry(const std::vector<GeometryView> &geometries)
 {
     auto handles = HandleListCompiler::compile<ospray::cpp::GeometricModel>(geometries);
-    _handle.setParam(GroupParameters::geometry, ospray::cpp::CopiedData(handles));
+    setGeometry(handles);
+}
+
+void RenderGroup::setGeometry(const std::vector<ospray::cpp::GeometricModel> &geometries)
+{
+    _handle.setParam(GroupParameters::geometry, ospray::cpp::CopiedData(geometries));
     _flag = true;
 }
 
-void RenderGroup::fromVolume(const VolumeView &volume)
+void RenderGroup::setVolume(const VolumeView &volume)
 {
     auto handle = std::vector<ospray::cpp::VolumetricModel>{volume.getHandle()};
-    _handle.setParam(GroupParameters::volume, ospray::cpp::CopiedData(handle));
-    _flag = true;
+    setVolume(handle);
 }
 
-void RenderGroup::fromVolume(const std::vector<VolumeView> &volumes)
+void RenderGroup::setVolume(const std::vector<VolumeView> &volumes)
 {
     auto handles = HandleListCompiler::compile<ospray::cpp::VolumetricModel>(volumes);
-    _handle.setParam(GroupParameters::volume, ospray::cpp::CopiedData(handles));
+    setVolume(handles);
+}
+
+void RenderGroup::setVolume(const std::vector<ospray::cpp::VolumetricModel> &volumes)
+{
+    _handle.setParam(GroupParameters::volume, ospray::cpp::CopiedData(volumes));
     _flag = true;
 }
 
-void RenderGroup::fromClipper(const GeometryView &clipper)
+void RenderGroup::setClipper(const GeometryView &clipper)
 {
     auto handle = std::vector<ospray::cpp::GeometricModel>{clipper.getHandle()};
-    _handle.setParam(GroupParameters::clipping, ospray::cpp::CopiedData(handle));
-    _flag = true;
+    setClipper(handle);
 }
 
-void RenderGroup::fromClipper(const std::vector<GeometryView> &clippers)
+void RenderGroup::setClipper(const std::vector<GeometryView> &clippers)
 {
     auto handles = HandleListCompiler::compile<ospray::cpp::GeometricModel>(clippers);
-    _handle.setParam(GroupParameters::clipping, ospray::cpp::CopiedData(handles));
+    setClipper(handles);
+}
+
+void RenderGroup::setClipper(const std::vector<ospray::cpp::GeometricModel> &clippers)
+{
+    _handle.setParam(GroupParameters::clipping, ospray::cpp::CopiedData(clippers));
     _flag = true;
 }
 

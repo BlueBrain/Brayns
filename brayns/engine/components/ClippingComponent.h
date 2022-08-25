@@ -51,7 +51,7 @@ public:
     {
         auto &model = getModel();
         auto &group = model.getGroup();
-        group.fromClipper(_view);
+        group.setClipper(_view);
     }
 
 private:

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/geometry/types/Primitive.h>
+#include <brayns/engine/geometry/types/Capsule.h>
 
 #include "NeuronSection.h"
 
@@ -36,7 +36,7 @@ struct NeuronSectionMapping
 
 struct NeuronGeometry
 {
-    std::vector<brayns::Primitive> geometry;
+    std::vector<brayns::Capsule> geometry;
     std::vector<NeuronSectionMapping> sectionMapping;
     std::unordered_map<int32_t, std::vector<size_t>> sectionSegmentMapping;
 };

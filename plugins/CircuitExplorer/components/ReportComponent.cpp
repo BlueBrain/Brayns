@@ -20,12 +20,12 @@
 
 #include "ReportComponent.h"
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/ExtractComponent.h>
+#include <brayns/engine/components/ColorRampComponent.h>
 #include <brayns/engine/components/SimulationComponent.h>
-#include <brayns/engine/components/TransferFunctionComponent.h>
+#include <brayns/engine/model/Model.h>
 
-#include <api/reports/TransferFunctionUtils.h>
+#include <api/reports/ColorRampUtils.h>
 #include <components/CircuitColorComponent.h>
 
 ReportComponent::ReportComponent(std::unique_ptr<IReportData> data, std::unique_ptr<IColormapIndexer> indexer)
@@ -38,8 +38,8 @@ void ReportComponent::onCreate()
 {
     auto &model = getModel();
 
-    auto unipolarTf = TransferFunctionUtils::createUnipolarTransferFunction();
-    model.addComponent<brayns::TransferFunctionComponent>(std::move(unipolarTf));
+    auto colorRamp = ColorRampUtils::createUnipolarColorRamp();
+    model.addComponent<brayns::ColorRampComponent>(std::move(colorRamp));
 
     const auto startTime = _report->getStartTime();
     const auto endTime = _report->getEndTime();
@@ -52,27 +52,29 @@ void ReportComponent::onPreRender(const brayns::ParametersManager &parameters)
 {
     auto &model = getModel();
 
-    if (!brayns::ExtractModelObject::isSimulationEnabled(model))
+    if (!brayns::ExtractComponent::simulationEnabled(model))
     {
         _lastEnabledValue = false;
         return;
     }
 
-    auto &tf = brayns::ExtractModelObject::extractTransferFunction(model);
-    auto &tfModified = tf.getModifiedFlag();
+    auto &colorRamp = brayns::ExtractComponent::colorRamp(model);
+    auto colorRampDirty = colorRamp.isModified();
+    colorRamp.resetModified();
+
     auto &simulation = parameters.getSimulationParameters();
     auto simulationModified = simulation.isModified();
-    auto forceUpdate = !_lastEnabledValue || simulationModified || tfModified;
+
+    auto forceUpdate = !_lastEnabledValue || simulationModified || colorRampDirty;
     _lastEnabledValue = true;
 
     if (forceUpdate)
     {
-        auto colors = TransferFunctionUtils::createSampleBuffer(tf);
-        tfModified = false;
+        auto colors = ColorRampUtils::createSampleBuffer(colorRamp);
 
         const auto frameIndex = simulation.getFrame();
         const auto frameData = _report->getFrame(frameIndex);
-        const auto &range = tf.getValuesRange();
+        const auto &range = colorRamp.getValuesRange();
         auto indices = _indexer->generate(frameData, range);
 
         auto &colorComponent = model.getComponent<CircuitColorComponent>();

@@ -20,7 +20,7 @@
 
 #include "Density.h"
 
-#include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/components/VolumeRendererComponent.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
 
@@ -123,16 +123,16 @@ std::unique_ptr<brayns::Model> Density::execute(const AtlasVolume &volume, const
     auto densityData = DensityVolumeBuilder::build(volume);
 
     brayns::RegularVolume densityVolume;
-    densityVolume.data = std::move(densityData.data);
+    densityVolume.voxels = std::move(densityData.data);
     densityVolume.dataType = densityData.dataType;
     densityVolume.size = volume.getSize();
     densityVolume.spacing = volume.getSpacing();
 
     auto model = std::make_unique<brayns::Model>();
-    model->addComponent<brayns::VolumeRendererComponent<brayns::RegularVolume>>(std::move(densityVolume));
+    model->addComponent<brayns::VolumeRendererComponent>(brayns::Volume(std::move(densityVolume)));
 
-    auto &transferFunction = brayns::ExtractModelObject::extractTransferFunction(*model);
-    transferFunction.setValuesRange(densityData.minMax);
+    auto &colorRamp = brayns::ExtractComponent::colorRamp(*model);
+    colorRamp.setValuesRange(densityData.minMax);
 
     return model;
 }

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/Engine.h>
+#include <brayns/engine/core/Engine.h>
 #include <brayns/pluginapi/IPlugin.h>
 
 /**

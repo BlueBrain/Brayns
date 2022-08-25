@@ -33,12 +33,15 @@ namespace brayns
 class RenderGroup
 {
 public:
-    void fromGeometry(const GeometryView &geometry);
-    void fromGeometry(const std::vector<GeometryView> &geometries);
-    void fromVolume(const VolumeView &volume);
-    void fromVolume(const std::vector<VolumeView> &volumes);
-    void fromClipper(const GeometryView &clipper);
-    void fromClipper(const std::vector<GeometryView> &clippers);
+    void setGeometry(const GeometryView &geometry);
+    void setGeometry(const std::vector<GeometryView> &geometries);
+    void setGeometry(const std::vector<ospray::cpp::GeometricModel> &geometries);
+    void setVolume(const VolumeView &volume);
+    void setVolume(const std::vector<VolumeView> &volumes);
+    void setVolume(const std::vector<ospray::cpp::VolumetricModel> &volumes);
+    void setClipper(const GeometryView &clipper);
+    void setClipper(const std::vector<GeometryView> &clippers);
+    void setClipper(const std::vector<ospray::cpp::GeometricModel> &clippers);
 
     void commit();
     const ospray::cpp::Group &getHandle() const noexcept;

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 #include <api/AtlasVolume.h>
 

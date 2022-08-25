@@ -20,7 +20,7 @@
 
 #include "VasculatureComponent.h"
 
-#include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
@@ -28,13 +28,15 @@
 
 VasculatureComponent::VasculatureComponent(
     std::vector<uint64_t> ids,
-    std::vector<brayns::Primitive> geometry,
+    std::vector<brayns::Capsule> geometry,
     std::vector<VasculatureSection> sections)
     : _ids(std::move(ids))
     , _geometry(std::move(geometry))
+    , _view(_geometry)
     , _sections(std::move(sections))
-    , _colors(_geometry.getNumPrimitives(), brayns::Vector4f(1.f))
+    , _colors(_geometry.numPrimitives(), brayns::Vector4f(1.f))
 {
+    _geometry.commit();
 }
 
 brayns::Bounds VasculatureComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
@@ -48,25 +50,18 @@ void VasculatureComponent::onCreate()
     model.addComponent<brayns::MaterialComponent>();
 
     auto &group = model.getGroup();
-    group.addGeometry(_geometry);
+    group.setGeometry(_view);
 }
 
 bool VasculatureComponent::commit()
 {
-    auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
+    auto &material = brayns::ExtractComponent::material(getModel());
     if (material.commit())
     {
-        _geometry.setMaterial(material);
+        _view.setMaterial(material);
     }
 
-    return _geometry.commit();
-}
-
-void VasculatureComponent::onDestroy()
-{
-    auto &model = getModel();
-    auto &group = model.getGroup();
-    group.removeGeometry(_geometry);
+    return _view.commit();
 }
 
 const std::vector<uint64_t> &VasculatureComponent::getIDs() const noexcept
@@ -77,7 +72,7 @@ const std::vector<uint64_t> &VasculatureComponent::getIDs() const noexcept
 void VasculatureComponent::setColor(const brayns::Vector4f &color) noexcept
 {
     std::fill(_colors.begin(), _colors.end(), color);
-    _geometry.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
+    _view.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
 }
 
 void VasculatureComponent::setColorBySection(
@@ -101,14 +96,14 @@ void VasculatureComponent::setColorBySection(
 
     if (somethingColored)
     {
-        _geometry.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
+        _view.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
     }
 }
 
 void VasculatureComponent::setColorById(std::vector<brayns::Vector4f> colors) noexcept
 {
     _colors = std::move(colors);
-    _geometry.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
+    _view.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
 }
 
 std::vector<uint64_t> VasculatureComponent::setColorById(const std::map<uint64_t, brayns::Vector4f> &colors) noexcept
@@ -124,7 +119,7 @@ std::vector<uint64_t> VasculatureComponent::setColorById(const std::map<uint64_t
 
     if (skipped.size() < _ids.size())
     {
-        _geometry.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
+        _view.setColorPerPrimitive(ospray::cpp::SharedData(_colors));
     }
 
     return skipped;
@@ -134,10 +129,10 @@ void VasculatureComponent::setSimulationColor(
     const std::vector<brayns::Vector4f> &color,
     const std::vector<uint8_t> &mapping) noexcept
 {
-    _geometry.setColorMap(ospray::cpp::CopiedData(color), ospray::cpp::CopiedData(mapping));
+    _view.setColorMap(ospray::cpp::CopiedData(color), ospray::cpp::CopiedData(mapping));
 }
 
-brayns::Geometry<brayns::Primitive> &VasculatureComponent::getGeometry() noexcept
+brayns::Geometry &VasculatureComponent::getGeometry() noexcept
 {
-    return _geometry.getGeometry();
+    return _geometry;
 }

@@ -21,7 +21,7 @@
 #include "EndfeetComponent.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
@@ -30,7 +30,7 @@
 brayns::Bounds EndfeetComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds result;
-    for (const auto &endfoot : _endFeet)
+    for (const auto &endfoot : _geometries)
     {
         const auto endFootBounds = endfoot.computeBounds(transform);
         result.expand(endFootBounds);
@@ -43,10 +43,10 @@ bool EndfeetComponent::commit()
     bool needsCommit = _colorsDirty;
     _colorsDirty = false;
 
-    auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
+    auto &material = brayns::ExtractComponent::material(getModel());
     if (material.commit())
     {
-        for (auto &endfoot : _endFeet)
+        for (auto &endfoot : _views)
         {
             endfoot.setMaterial(material);
             needsCommit = true;
@@ -55,7 +55,7 @@ bool EndfeetComponent::commit()
 
     if (needsCommit)
     {
-        for (auto &endfoot : _endFeet)
+        for (auto &endfoot : _views)
         {
             endfoot.commit();
         }
@@ -64,14 +64,11 @@ bool EndfeetComponent::commit()
     return needsCommit;
 }
 
-void EndfeetComponent::onDestroy()
+void EndfeetComponent::onCreate()
 {
     auto &model = getModel();
     auto &group = model.getGroup();
-    for (auto &endfoot : _endFeet)
-    {
-        group.addGeometry(endfoot);
-    }
+    group.setGeometry(_views);
 }
 
 const std::vector<uint64_t> &EndfeetComponent::getAstroctyeIds() const noexcept
@@ -82,12 +79,11 @@ const std::vector<uint64_t> &EndfeetComponent::getAstroctyeIds() const noexcept
 void EndfeetComponent::addEndfeet(std::map<uint64_t, std::vector<brayns::TriangleMesh>> &endfeetGeometry)
 {
     _astrocyteIds.reserve(endfeetGeometry.size());
-    _endFeet.reserve(endfeetGeometry.size());
+    _geometries.reserve(endfeetGeometry.size());
+    _views.reserve(endfeetGeometry.size());
 
     auto &model = getModel();
     model.addComponent<brayns::MaterialComponent>();
-
-    auto &group = model.getGroup();
 
     for (auto &[astrocyteId, endfeets] : endfeetGeometry)
     {
@@ -99,7 +95,7 @@ void EndfeetComponent::addEndfeet(std::map<uint64_t, std::vector<brayns::Triangl
                 brayns::Log::warn("[CE] Skipping empty endfoot mesh connected to astrocyte id {}", astrocyteId);
                 continue;
             }
-            brayns::TriangleMeshMerger::merge(mesh, mergedMeshes);
+            brayns::TriangleMeshUtils::merge(mesh, mergedMeshes);
         }
 
         if (mergedMeshes.indices.empty() || mergedMeshes.vertices.empty())
@@ -109,15 +105,16 @@ void EndfeetComponent::addEndfeet(std::map<uint64_t, std::vector<brayns::Triangl
         }
 
         _astrocyteIds.push_back(astrocyteId);
-        auto &endfoot = _endFeet.emplace_back(std::move(mergedMeshes));
-        endfoot.setColor(brayns::Vector4f(1.f));
-        group.addGeometry(endfoot);
+        auto &geometry = _geometries.emplace_back(std::move(mergedMeshes));
+        geometry.commit();
+        auto &view = _views.emplace_back(geometry);
+        view.setColor(brayns::Vector4f(1.f));
     }
 }
 
 void EndfeetComponent::setColor(const brayns::Vector4f &color) noexcept
 {
-    for (auto &endfoot : _endFeet)
+    for (auto &endfoot : _views)
     {
         endfoot.setColor(color);
     }
@@ -126,10 +123,11 @@ void EndfeetComponent::setColor(const brayns::Vector4f &color) noexcept
 
 void EndfeetComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
 {
-    for (size_t i = 0; i < _endFeet.size(); ++i)
+    assert(colors.size() == _views.size());
+    for (size_t i = 0; i < _views.size(); ++i)
     {
         const auto &color = colors[i];
-        auto &endFoot = _endFeet[i];
+        auto &endFoot = _views[i];
         endFoot.setColor(color);
     }
     _colorsDirty = true;
@@ -143,7 +141,7 @@ std::vector<uint64_t> EndfeetComponent::setColorById(const std::map<uint64_t, br
         [&](uint64_t id, size_t index, const brayns::Vector4f &color)
         {
             (void)id;
-            auto &endFoot = _endFeet[index];
+            auto &endFoot = _views[index];
             endFoot.setColor(color);
             _colorsDirty = true;
         });

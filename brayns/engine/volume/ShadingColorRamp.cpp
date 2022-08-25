@@ -49,7 +49,7 @@ void ShadingColorRamp::set(const ColorRamp &colorMap)
     auto &colors = colorMap.getColors();
     auto &color = colors.front();
     auto colorSize = colors.size();
-    auto colorData = ospray::cpp::SharedData(&color.x, colorSize, stride);
+    auto colorData = ospray::cpp::SharedData(&color.x, OSPDataType::OSP_VEC3F, colorSize, stride);
     auto opacityData = ospray::cpp::SharedData(&color.w, colorSize, stride);
     _handle.setParam(ColorMapParameters::colors, colorData);
     _handle.setParam(ColorMapParameters::opacity, opacityData);

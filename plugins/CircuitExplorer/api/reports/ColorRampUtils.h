@@ -18,36 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "VolumeRendererComponent.h"
+#pragma once
 
-#include <brayns/engine/common/ExtractComponent.h>
+#include <brayns/common/ColorRamp.h>
 
-namespace brayns
+struct ColorRampUtils
 {
-Bounds VolumeRendererComponent::computeBounds(const Matrix4f &transform) const noexcept
-{
-    return _volume.computeBounds(transform);
-}
+    static brayns::ColorRamp createUnipolarColorRamp() noexcept;
 
-void VolumeRendererComponent::onCreate()
-{
-    Model &model = getModel();
-    auto &group = model.getGroup();
-    group.setVolume(_volumeView);
-    model.addComponent<ColorRampComponent>();
-}
-
-bool VolumeRendererComponent::commit()
-{
-    auto &colorRamp = ExtractComponent::colorRamp(getModel());
-    if (colorRamp.isModified())
-    {
-        _volumeView.setColorRamp(colorRamp);
-        colorRamp.resetModified();
-    }
-
-    auto volumeCommitted = _volume.commit();
-    auto viewCommitted = _volumeView.commit();
-    return volumeCommitted || viewCommitted;
-}
-}
+    static std::vector<brayns::Vector4f> createSampleBuffer(const brayns::ColorRamp &colorRamp) noexcept;
+};

@@ -21,7 +21,7 @@
 #include "CylindricCameraEntrypoint.h"
 
 SetCylindricCameraEntrypoint::SetCylindricCameraEntrypoint(brayns::Engine &engine)
-    : brayns::SetCameraEntrypoint<CylindricCamera>(engine)
+    : brayns::SetCameraEntrypoint<Cylindric>(engine)
 {
 }
 
@@ -36,7 +36,7 @@ std::string SetCylindricCameraEntrypoint::getDescription() const
 }
 
 GetCylindricCameraEntrypoint::GetCylindricCameraEntrypoint(brayns::Engine &engine)
-    : brayns::GetCameraEntrypoint<CylindricCamera>(engine)
+    : brayns::GetCameraEntrypoint<Cylindric>(engine)
 {
 }
 

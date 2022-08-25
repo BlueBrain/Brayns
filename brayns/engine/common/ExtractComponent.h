@@ -20,35 +20,17 @@
 
 #pragma once
 
-#include <brayns/engine/Camera.h>
-#include <brayns/json/JsonAdapterMacro.h>
-
-class CylindricCamera final : public brayns::Camera
-{
-public:
-    inline static const std::string typeName = "cylindric";
-
-public:
-    CylindricCamera();
-
-    std::string getName() const noexcept override;
-
-    std::unique_ptr<brayns::Camera> clone() const noexcept override;
-
-    void setFovy(float fovy) noexcept;
-
-    float getFovy() const noexcept;
-
-protected:
-    void commitCameraSpecificParams() override;
-
-private:
-    float _fovy = 48.549f; // Opendeck fovy
-};
+#include <brayns/common/ColorRamp.h>
+#include <brayns/engine/material/Material.h>
+#include <brayns/engine/model/Model.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(CylindricCamera)
-BRAYNS_JSON_ADAPTER_GETSET("fovy", getFovy, setFovy, "Vertical field of view (in degrees)")
-BRAYNS_JSON_ADAPTER_END()
+class ExtractComponent
+{
+public:
+    static Material &material(Model &model);
+    static ColorRamp &colorRamp(Model &model);
+    static bool simulationEnabled(Model &model);
+};
 }

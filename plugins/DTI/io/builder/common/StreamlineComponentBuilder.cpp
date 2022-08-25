@@ -20,7 +20,7 @@
 
 #include "StreamlineComponentBuilder.h"
 
-#include <brayns/engine/geometry/types/Primitive.h>
+#include <brayns/engine/geometry/types/Capsule.h>
 
 #include <components/DTIComponent.h>
 
@@ -31,7 +31,7 @@ void StreamlineComponentBuilder::build(
     float radius,
     brayns::Model &model)
 {
-    std::vector<std::vector<brayns::Primitive>> geometries;
+    std::vector<std::vector<brayns::Capsule>> geometries;
     geometries.reserve(streamlines.size());
 
     for (const auto &[row, streamline] : streamlines)
@@ -45,7 +45,7 @@ void StreamlineComponentBuilder::build(
         {
             const auto &start = points[i - 1];
             const auto &end = points[i];
-            geometry.push_back(brayns::Primitive::cylinder(start, end, radius));
+            geometry.push_back(brayns::CapsuleFactory::cylinder(start, end, radius));
         }
     }
     model.addComponent<dti::DTIComponent>(std::move(geometries));

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/scene/Scene.h>
 
 #include <api/AtlasVolume.h>
 #include <components/AtlasComponent.h>

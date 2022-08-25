@@ -20,11 +20,18 @@
 
 #pragma once
 
-#include <brayns/common/TransferFunction.h>
+#include <brayns/engine/camera/ProjectionTraits.h>
 
-struct TransferFunctionUtils
+struct Cylindric
 {
-    static brayns::TransferFunction createUnipolarTransferFunction() noexcept;
+    float fovy = 48.549f; // Opendeck fovy
+};
 
-    static std::vector<brayns::Vector4f> createSampleBuffer(const brayns::TransferFunction &tf) noexcept;
+template<>
+class brayns::ProjectionTraits<Cylindric>
+{
+public:
+    inline static const std::string name = "cylindric";
+
+    static void updateData(ospray::cpp::Camera &handle, Cylindric &data);
 };

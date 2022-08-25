@@ -20,6 +20,8 @@
 
 #include "GeometryRendererComponent.h"
 
+#include <brayns/engine/common/ExtractComponent.h>
+
 namespace brayns
 {
 Geometry &GeometryRendererComponent::getGeometry() noexcept
@@ -47,15 +49,13 @@ void GeometryRendererComponent::onCreate()
 {
     Model &model = getModel();
     auto &group = model.getGroup();
-    group.fromGeometry(_geometryView);
+    group.setGeometry(_geometryView);
     model.addComponent<MaterialComponent>();
 }
 
 bool GeometryRendererComponent::commit()
 {
-    auto &model = getModel();
-    auto &materialComponent = model.getComponent<MaterialComponent>();
-    auto &material = materialComponent.getMaterial();
+    auto &material = ExtractComponent::material(getModel());
     if (material.commit())
     {
         _geometryView.setMaterial(material);

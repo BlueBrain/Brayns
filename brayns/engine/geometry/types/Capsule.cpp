@@ -73,11 +73,12 @@ void GeometryTraits<Capsule>::updateData(ospray::cpp::Geometry &handle, std::vec
 {
     auto capsuleCount = data.size();
 
-    std::vector<uint32_t> indexData;
+    std::vector<uint32_t> indexData; //(capsuleCount);
     indexData.reserve(capsuleCount);
     for (uint32_t i = 0, index = 0; i < capsuleCount; ++i, index = index + 2)
     {
         indexData.push_back(index);
+        // indexData[i] = index;
     }
 
     const auto type = OSPCurveType::OSP_ROUND;

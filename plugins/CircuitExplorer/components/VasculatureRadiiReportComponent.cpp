@@ -20,19 +20,22 @@
 
 #include "VasculatureRadiiReportComponent.h"
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/components/SimulationComponent.h>
+#include <brayns/engine/model/Model.h>
 
 #include <components/VasculatureComponent.h>
 
 namespace
 {
-struct OriginalRadiiManager
+class OriginalRadiiManager
 {
-    static std::vector<float> save(brayns::Geometry<brayns::Primitive> &geometry)
+public:
+    static std::vector<float> save(brayns::Geometry &geometry)
     {
-        const auto &primitives = geometry.getPrimitives();
+        auto primitivesPtr = geometry.as<brayns::Capsule>();
+        assert(primitivesPtr);
+        auto &primitives = *primitivesPtr;
         std::vector<float> result(primitives.size() * 2);
 
         for (size_t i = 0; i < primitives.size(); ++i)
@@ -47,29 +50,29 @@ struct OriginalRadiiManager
         return result;
     }
 
-    static void restore(brayns::Geometry<brayns::Primitive> &geometry, const std::vector<float> &originalRadii)
+    static void restore(brayns::Geometry &geometry, const std::vector<float> &originalRadii)
     {
+        size_t i = 0;
         geometry.forEach(
-            [&](uint32_t i, brayns::Primitive &primitive)
+            [&](brayns::Capsule &primitive)
             {
-                const auto index = i * 2;
+                const auto index = i++ * 2;
                 primitive.r0 = originalRadii[index];
                 primitive.r1 = originalRadii[index + 1];
             });
     }
 };
 
-struct RadiiReportUpdater
+class RadiiReportUpdater
 {
-    static void update(
-        brayns::Geometry<brayns::Primitive> &geometry,
-        const std::vector<size_t> offsets,
-        const std::vector<float> frame)
+public:
+    static void update(brayns::Geometry &geometry, const std::vector<size_t> offsets, const std::vector<float> frame)
     {
+        size_t i = 0;
         geometry.forEach(
-            [&](uint32_t i, brayns::Primitive &primitive)
+            [&](brayns::Capsule &primitive)
             {
-                const auto offset = offsets[i];
+                const auto offset = offsets[i++];
                 primitive.r0 = frame[offset];
                 primitive.r1 = frame[offset];
             });
@@ -106,7 +109,7 @@ void VasculatureRadiiReportComponent::onPreRender(const brayns::ParametersManage
     auto &vasculature = model.getComponent<VasculatureComponent>();
     auto &geometry = vasculature.getGeometry();
 
-    if (!brayns::ExtractModelObject::isSimulationEnabled(model))
+    if (!brayns::ExtractComponent::simulationEnabled(model))
     {
         // If we just disabled simulation, restore original radii
         if (_lastEnabledValue)
