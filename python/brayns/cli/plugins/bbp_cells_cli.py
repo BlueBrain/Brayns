@@ -41,7 +41,7 @@ class BbpCellsCli(Cli):
             type=float,
             default=self.density,
             metavar='VALUE',
-            help='Density of target(s) cells to load (0-1)',
+            help='Density of cells to load (0-1)',
         )
         parser.add_argument(
             '--targets',

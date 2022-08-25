@@ -21,7 +21,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from brayns.plugins import BbpReport, BbpReportType
 

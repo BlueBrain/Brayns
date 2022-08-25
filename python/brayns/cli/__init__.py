@@ -27,8 +27,7 @@ Provides a CLI for simple use cases to parse sys.argv into brayns types.
 from .cli import Cli
 from .core import *
 from .plugins import *
-from .render_cli import RenderCli
-from .snapshot_cli import SnapshotCli
+from .tasks import *
 
 __all__ = [
     'BbpCellsCli',
@@ -38,8 +37,10 @@ __all__ = [
     'Cli',
     'LightCli',
     'LoaderCli',
+    'MeshLoaderCli',
     'MorphologyCli',
     'RenderCli',
+    'RenderCommand',
     'RendererCli',
     'ServiceCli',
     'SnapshotCli',

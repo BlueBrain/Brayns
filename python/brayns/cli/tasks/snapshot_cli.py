@@ -21,21 +21,18 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from brayns.core import Snapshot
-from brayns.utils import Resolution
 
 from .render_cli import RenderCli
-from .render_context import RenderContext
-from .utils import WIDTH_HEIGHT
+from .render_command import RenderCommand
 
 
 @dataclass
 class SnapshotCli(RenderCli):
 
-    save_as: str = field(default='', init=False)
-    resolution: Resolution = Resolution.full_hd
+    save_as: str = ''
     frame: int | None = None
 
     def register_additional_args(self, parser: argparse.ArgumentParser) -> None:
@@ -44,15 +41,7 @@ class SnapshotCli(RenderCli):
             type=str,
             required=True,
             metavar='PATH',
-            help='Output snapshot path',
-        )
-        parser.add_argument(
-            '--resolution',
-            type=int,
-            nargs=2,
-            default=list(self.resolution),
-            metavar=WIDTH_HEIGHT,
-            help='Snapshot resolution in pixels',
+            help='Path to save snapshot as image',
         )
         parser.add_argument(
             '--frame',
@@ -62,16 +51,15 @@ class SnapshotCli(RenderCli):
         )
 
     def load_additional_args(self, args: argparse.Namespace) -> None:
-        self.resolution = Resolution(*args.resolution)
         self.frame = args.frame
         self.save_as = args.save_as
 
-    def render(self, context: RenderContext) -> None:
+    def render(self, command: RenderCommand) -> None:
         snapshot = Snapshot(
             resolution=self.resolution,
             frame=self.frame,
-            view=context.view,
-            camera=context.camera,
-            renderer=context.renderer,
+            view=command.view,
+            camera=command.camera,
+            renderer=command.renderer,
         )
-        snapshot.save(context.instance, self.save_as)
+        snapshot.save(command.instance, self.save_as)

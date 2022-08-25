@@ -44,7 +44,7 @@ class CameraCli(Cli):
             '--camera_type',
             choices=[camera.name for camera in self.available],
             default=self.name,
-            help='Camera type',
+            help='Type of camera to use for render',
         )
         parser.add_argument(
             '--camera_translation',
@@ -52,7 +52,7 @@ class CameraCli(Cli):
             nargs=3,
             default=list(self.translation),
             metavar=XYZ,
-            help='Translate the camera XYZ (applied before rotation)',
+            help='Camera translation from default position (applied first)',
         )
         parser.add_argument(
             '--camera_rotation',
@@ -60,7 +60,7 @@ class CameraCli(Cli):
             nargs=3,
             default=list(self.rotation.euler_degrees),
             metavar=XYZ,
-            help='Camera rotation using euler angles XYZ in degrees',
+            help='Camera rotation from front view',
         )
 
     def load(self, args: argparse.Namespace) -> None:

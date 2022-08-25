@@ -21,7 +21,7 @@
 import argparse
 from dataclasses import dataclass
 
-from brayns.service import Bundle
+from brayns.service import Bundle, Manager
 
 from ..cli import Cli
 
@@ -65,3 +65,7 @@ class ServiceCli(Cli):
             service_executable=self.executable,
             service_env={'LD_LIBRARY_PATH': self.library_path},
         )
+
+    def start(self) -> Manager:
+        bundle = self.create_bundle()
+        return bundle.start()

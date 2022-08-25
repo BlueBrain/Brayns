@@ -18,17 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from .render_cli import RenderCli
+from .render_command import RenderCommand
+from .snapshot_cli import SnapshotCli
 
-from brayns.core import Camera, Renderer
-from brayns.network import Instance
-from brayns.utils import View
-
-
-@dataclass
-class RenderContext:
-
-    instance: Instance
-    view: View
-    camera: Camera
-    renderer: Renderer
+__all__ = [
+    'RenderCli',
+    'RenderCommand',
+    'SnapshotCli',
+]

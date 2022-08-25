@@ -24,19 +24,28 @@ from dataclasses import dataclass, field
 
 from brayns.core import add_light, get_bounds
 from brayns.network import Instance
-from brayns.service import Manager
+from brayns.utils import Resolution, Vector3
 
-from .cli import Cli
-from .core import CameraCli, LightCli, LoaderCli, RendererCli, ServiceCli
-from .render_context import RenderContext
+from ..cli import Cli
+from ..core import (
+    CameraCli,
+    LightCli,
+    LoaderCli,
+    MeshLoaderCli,
+    RendererCli,
+    ServiceCli,
+)
+from ..utils import WIDTH_HEIGHT
+from .render_command import RenderCommand
 
 
 @dataclass
 class RenderCli(Cli):
 
-    path: str = field(default='', init=False)
-    loader: LoaderCli
+    path: str = ''
+    resolution: Resolution = Resolution.full_hd
     service: ServiceCli = field(default_factory=ServiceCli)
+    loader: LoaderCli = field(default_factory=MeshLoaderCli)
     light: LightCli = field(default_factory=LightCli)
     camera: CameraCli = field(default_factory=CameraCli)
     renderer: RendererCli = field(default_factory=RendererCli)
@@ -50,7 +59,7 @@ class RenderCli(Cli):
         pass
 
     @abstractmethod
-    def render(self, context: RenderContext) -> None:
+    def render(self, command: RenderCommand) -> None:
         pass
 
     def register(self, parser: argparse.ArgumentParser) -> None:
@@ -60,8 +69,16 @@ class RenderCli(Cli):
             metavar='PATH',
             help='Path of the model to render',
         )
-        self.loader.register(parser)
+        parser.add_argument(
+            '--resolution',
+            type=int,
+            nargs=2,
+            default=list(self.resolution),
+            metavar=WIDTH_HEIGHT,
+            help='Snapshot resolution in pixels',
+        )
         self.service.register(parser)
+        self.loader.register(parser)
         self.light.register(parser)
         self.camera.register(parser)
         self.renderer.register(parser)
@@ -69,42 +86,38 @@ class RenderCli(Cli):
 
     def load(self, args: argparse.Namespace) -> None:
         self.path = args.path
-        self.loader.load(args)
+        self.resolution = Resolution(*args.resolution)
         self.service.load(args)
+        self.loader.load(args)
         self.light.load(args)
         self.camera.load(args)
         self.renderer.load(args)
         self.load_additional_args(args)
 
     def run(self) -> None:
-        with self._start_service() as manager:
-            instance = manager.instance
-            self._load_models(instance)
-            context = self._create_context(instance)
-            self._add_light(instance, context)
-            self.render(context)
+        with self.service.start() as (_, instance):
+            self._run(instance)
 
-    def _start_service(self) -> Manager:
-        bundle = self.service.create_bundle()
-        return bundle.start()
+    def _run(self, instance: Instance) -> None:
+        self._load_models(instance)
+        command = self._create_command(instance)
+        self._add_light(instance, command.view.direction)
+        self.render(command)
 
     def _load_models(self, instance: Instance) -> None:
         loader = self.loader.create_loader()
         loader.load(instance, self.path)
 
-    def _create_context(self, instance: Instance) -> RenderContext:
-        bounds = get_bounds(instance)
-        camera = self.camera.create_camera(bounds)
-        view = self.camera.create_view(camera, bounds)
-        renderer = self.renderer.create_renderer()
-        return RenderContext(
+    def _create_command(self, instance: Instance) -> RenderCommand:
+        target = get_bounds(instance)
+        camera = self.camera.create_camera(target)
+        return RenderCommand(
             instance=instance,
-            view=view,
+            view=self.camera.create_view(camera, target),
             camera=camera,
-            renderer=renderer,
+            renderer=self.renderer.create_renderer(),
         )
 
-    def _add_light(self, instance: Instance, context: RenderContext) -> None:
-        direction = context.view.direction
+    def _add_light(self, instance: Instance, direction: Vector3) -> None:
         light = self.light.create_light(direction)
         add_light(instance, light)
