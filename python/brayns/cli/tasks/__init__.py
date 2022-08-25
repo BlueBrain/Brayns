@@ -18,11 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from .frame_exporter_cli import FrameExporterCli
 from .render_cli import RenderCli
 from .render_command import RenderCommand
 from .snapshot_cli import SnapshotCli
 
 __all__ = [
+    'FrameExporterCli',
     'RenderCli',
     'RenderCommand',
     'SnapshotCli',

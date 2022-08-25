@@ -47,8 +47,16 @@ class TestSnapshotCli(unittest.TestCase):
 
     def test_parse(self) -> None:
         test = brayns.SnapshotCli(
-            loader=brayns.BbpLoaderCli(),
+            name='Test',
+            description='This is a test',
+            path='test',
             resolution=brayns.Resolution.ultra_hd,
+            service=brayns.ServiceCli(),
+            loader=brayns.MeshLoaderCli(),
+            light=brayns.LightCli(),
+            camera=brayns.CameraCli(),
+            renderer=brayns.RendererCli(),
+            save_as='test2',
             frame=0,
         )
         args = [
@@ -63,8 +71,8 @@ class TestSnapshotCli(unittest.TestCase):
             '25',
         ]
         test.parse(args)
-        self.assertEqual(test.save_as, 'save')
         self.assertEqual(test.path, 'path')
+        self.assertEqual(test.save_as, 'save')
         self.assertEqual(test.resolution, brayns.Resolution.full_hd)
         self.assertEqual(test.frame, 25)
 
