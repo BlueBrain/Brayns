@@ -18,23 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Subpackage to launch Brayns backend from Python.
 
-It provides a helper class to generate command line options to start Brayns
-service and launch it in a subprocess programatically.
-"""
+from enum import Enum
 
-from .launcher import Launcher
-from .log_level import LogLevel
-from .plugin import Plugin
-from .process import Process
-from .ssl_server_context import SslServerContext
 
-__all__ = [
-    'Launcher',
-    'LogLevel',
-    'Plugin',
-    'Process',
-    'SslServerContext',
-]
+class BbpReportType(Enum):
+    """All available BBP report types."""
+
+    NONE = 'none'
+    SPIKES = 'spikes'
+    COMPARTMENT = 'compartment'

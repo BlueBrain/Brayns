@@ -28,7 +28,7 @@ from .clipping_geometry import ClippingGeometry
 class ClipPlane(ClippingGeometry):
     """Clip plane.
 
-    Described by the equation `ax + by + cz + d = 0`.
+    Described by the equation ``ax + by + cz + d = 0``.
 
     Where [a, b, c] is the normal of the plane and d the orthogonal distance
     from the origin.

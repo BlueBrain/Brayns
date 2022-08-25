@@ -23,6 +23,7 @@ from .sonata_loader import SonataLoader
 from .sonata_node_population import SonataNodePopulation
 from .sonata_nodes import SonataNodes
 from .sonata_report import SonataReport
+from .sonata_report_type import SonataReportType
 
 __all__ = [
     'SonataEdgePopulation',
@@ -30,4 +31,5 @@ __all__ = [
     'SonataNodePopulation',
     'SonataNodes',
     'SonataReport',
+    'SonataReportType',
 ]

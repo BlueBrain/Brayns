@@ -36,7 +36,7 @@ class Simulation:
     :type end_frame: int
     :param current_frame: Index of the current frame of the simulation.
     :type current_frame: int
-    :param delta_time: Delta time in `time_unit` between two frames.
+    :param delta_time: Delta time in ``time_unit`` between two frames.
     :type delta_time: float
     :param time_unit: Time unit, always milliseconds.
     :type time_unit: TimeUnit
@@ -70,7 +70,7 @@ class Simulation:
 
     @property
     def duration(self) -> float:
-        """Simulation duration in `time_unit`.
+        """Simulation duration in ``time_unit``.
 
         :return: Duration.
         :rtype: float
@@ -97,11 +97,11 @@ class Simulation:
         return min(max(frame, self.start_frame), self.end_frame)
 
     def get_frame(self, time: float) -> int:
-        """Convert timestamp in `time_unit` to frame index.
+        """Convert timestamp in ``time_unit`` to frame index.
 
         Result is not clamped to simulation limits.
 
-        :param time: Timestep in `time_unit`.
+        :param time: Timestep in ``time_unit``.
         :type time: float
         :return: Frame index.
         :rtype: int
@@ -109,13 +109,13 @@ class Simulation:
         return round(time / self.delta_time)
 
     def get_time(self, frame: int) -> float:
-        """Convert frame index to a timestep in `time_unit`.
+        """Convert frame index to a timestep in ``time_unit``.
 
         Result is not clamped to simulation limits.
 
         :param frame: Frame index.
         :type frame: int
-        :return: Timestep in `time_unit`.
+        :return: Timestep in ``time_unit``.
         :rtype: float
         """
         return frame * self.delta_time

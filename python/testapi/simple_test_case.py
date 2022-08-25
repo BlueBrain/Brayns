@@ -20,32 +20,26 @@
 
 import brayns
 
-from testapi.api_test_case import ApiTestCase
+from .api_test_case import ApiTestCase
 
 
 class SimpleTestCase(ApiTestCase):
 
     @property
     def instance(self) -> brayns.Instance:
-        return self.__instance
+        return self.__manager.instance
 
     def setUp(self) -> None:
-        launcher = brayns.Launcher(
-            uri=self.uri,
-            executable=self.executable,
-            env=self.env,
+        bundle = brayns.Bundle(
+            port=self.port,
+            service_executable=self.executable,
+            service_env=self.env,
+            connector_binary_handler=self.on_binary,
         )
-        self.__process = launcher.start()
-        connector = brayns.Connector(
-            uri=self.uri,
-            binary_handler=self.on_binary,
-            max_attempts=None,
-        )
-        self.__instance = connector.connect()
+        self.__manager = bundle.start()
 
     def tearDown(self) -> None:
-        self.__instance.disconnect()
-        self.__process.terminate()
+        self.__manager.stop()
 
     def on_binary(self, _: bytes) -> None:
         pass

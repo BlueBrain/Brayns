@@ -27,13 +27,13 @@ from typing import IO, cast
 
 
 class Process:
-    """Process which runs a braynsService instance.
+    """Process running a braynsService backend.
 
     The process must be stopped using terminate() once done with it, otherwise
     it will run forever. Use context manager (ie with process: ...) to avoid
     mistakes.
 
-    The last lines of the process logs can be retreived using `logs`.
+    The last lines of the process logs can be retreived using ``logs``.
     """
 
     def __init__(self, args: list[str], env: dict[str, str]) -> None:
@@ -53,10 +53,12 @@ class Process:
         self._thread.start()
 
     def __enter__(self) -> Process:
+        """Context manager, just return self."""
         return self
 
     def __exit__(self, *_) -> None:
-        self.terminate()
+        """Context manager, call ``stop()``."""
+        self.stop()
 
     @property
     def alive(self) -> bool:
@@ -69,8 +71,8 @@ class Process:
         with self._lock:
             return ''.join(self._logs)
 
-    def terminate(self) -> None:
-        """Terminate the process.
+    def stop(self) -> None:
+        """Stop the backend service by terminating the process.
 
         Must be called through the context manager (i.e. 'with') or manually to
         avoid the process to run forever.

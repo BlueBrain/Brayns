@@ -29,5 +29,5 @@ class TestGetApplication(SimpleTestCase):
         self.assertSetEqual(set(application.plugins), set(
             plugin.value for plugin in brayns.Plugin
         ))
-        self.assertEqual(application.resolution, brayns.Resolution.full_hd)
-        self.assertEqual(application.jpeg_quality, 100)
+        self.assertIsInstance(application.resolution, brayns.Resolution)
+        self.assertIsInstance(application.jpeg_quality, int)

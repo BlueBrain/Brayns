@@ -59,7 +59,7 @@ class Geometry(ABC):
     def with_color(self: T, color: Color4) -> T:
         """Helper method to quickly change the color of the geometry.
 
-        Example: `sphere = brayns.Sphere(1).with_color(my_color)`.
+        Example: ``sphere = brayns.Sphere(1).with_color(my_color)``.
 
         :param color: Geometry color.
         :type color: Color4

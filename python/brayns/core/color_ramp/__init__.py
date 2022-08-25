@@ -18,11 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from .color_ramp import ColorRamp
 from .control_point import ControlPoint
 from .get_color_ramp import get_color_ramp
 from .opacity_curve import OpacityCurve
 from .set_color_ramp import set_color_ramp
-from .color_ramp import ColorRamp
 from .value_range import ValueRange
 
 __all__ = [

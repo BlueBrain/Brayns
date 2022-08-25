@@ -68,7 +68,7 @@ class Fovy:
         """
         return math.degrees(self._angle)
 
-    def get_full_screen_view(self, target: Bounds) -> View:
+    def get_front_view(self, target: Bounds) -> View:
         """Compute the view necessary to see the target in full screen.
 
         :param target: Bounds of the target to look.

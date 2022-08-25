@@ -60,7 +60,7 @@ class TestBbpLoader(SimpleTestCase):
 
     def _create_snapshot(self, bounds: brayns.Bounds) -> brayns.Snapshot:
         camera = brayns.PerspectiveCamera()
-        view = camera.fovy.get_full_screen_view(bounds)
+        view = camera.fovy.get_front_view(bounds)
         renderer = brayns.InteractiveRenderer()
         return brayns.Snapshot(
             resolution=brayns.Resolution.full_hd,

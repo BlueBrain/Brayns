@@ -34,7 +34,7 @@ class Loader(ABC):
     Available loaders for a given instance depends on the loaded plugins.
 
     The list of available loaders and supported extensions for a given instance
-    can be queried using `get_loaders(instance)`.
+    can be queried using ``get_loaders(instance)``.
     """
 
     @classmethod
@@ -43,7 +43,7 @@ class Loader(ABC):
     def name(cls) -> str:
         """Get the loader name.
 
-        Can be compared with `LoaderInfo.name`.
+        Can be compared with ``LoaderInfo.name``.
 
         :return: Loader name.
         :rtype: str

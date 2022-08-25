@@ -32,13 +32,13 @@ def get_camera(instance: Instance, camera_type: type[T]) -> T:
 
     The provided camera type must be the same as the current one.
 
-    Returned camera is of type `camera_type`.
+    Returned camera is of type ``camera_type``.
 
     :param instance: Instance.
     :type instance: Instance
     :param camera_type: Camera type (ex: brayns.PerspectiveCamera).
     :type camera_type: type[T]
-    :return: Current camera of `instance`.
+    :return: Current camera of ``instance``.
     :rtype: T
     """
     name = camera_type.name

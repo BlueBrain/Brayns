@@ -27,27 +27,27 @@ class TestBbpReport(unittest.TestCase):
 
     def test_none(self) -> None:
         report = brayns.BbpReport.none()
-        self.assertEqual(report.type, 'none')
+        self.assertEqual(report.type, brayns.BbpReportType.NONE)
         self.assertIsNone(report.name)
         self.assertIsNone(report.spike_transition_time)
 
     def test_spikes(self) -> None:
         report = brayns.BbpReport.spikes()
-        self.assertEqual(report.type, 'spikes')
+        self.assertEqual(report.type, brayns.BbpReportType.SPIKES)
         self.assertIsNone(report.name)
         self.assertEqual(report.spike_transition_time, 1.0)
 
     def test_spikes_with_time(self) -> None:
         spike_transition_time = 0.5
         report = brayns.BbpReport.spikes(spike_transition_time)
-        self.assertEqual(report.type, 'spikes')
+        self.assertEqual(report.type, brayns.BbpReportType.SPIKES)
         self.assertIsNone(report.name)
         self.assertEqual(report.spike_transition_time, spike_transition_time)
 
     def test_compartment(self) -> None:
         name = 'test'
         report = brayns.BbpReport.compartment(name)
-        self.assertEqual(report.type, 'compartment')
+        self.assertEqual(report.type, brayns.BbpReportType.COMPARTMENT)
         self.assertEqual(report.name, name)
         self.assertIsNone(report.spike_transition_time)
 

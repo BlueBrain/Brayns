@@ -30,15 +30,16 @@ class ApiTestCase(unittest.TestCase):
         return os.environ['BRAYNS_TEST_EXECUTABLE']
 
     @property
-    def uri(self) -> str:
-        return os.environ.get('BRAYNS_TEST_URI', 'localhost:5000')
+    def port(self) -> int:
+        value = os.environ.get('BRAYNS_TEST_PORT', '5000')
+        return int(value)
 
     @property
     def env(self) -> dict[str, str]:
         result = dict[str, str]()
-        ospray = os.environ.get('BRAYNS_TEST_OSPRAY_DIR')
-        if ospray is not None:
-            result['LD_LIBRARY_PATH'] = ospray
+        path = os.environ.get('BRAYNS_TEST_LIBRARY_PATH')
+        if path is not None:
+            result['LD_LIBRARY_PATH'] = path
         return result
 
     @property

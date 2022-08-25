@@ -18,33 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+"""
+Brayns command line interface built on top of ``argparse``.
 
-import brayns
+Provides a CLI for simple use cases to parse sys.argv into brayns types.
+"""
 
+from .cli import Cli
+from .core import *
+from .plugins import *
+from .render_cli import RenderCli
+from .snapshot_cli import SnapshotCli
 
-class TestSslServerContext(unittest.TestCase):
-
-    def test_get_command_line(self) -> None:
-        ssl = brayns.SslServerContext(
-            private_key_file='private',
-            private_key_passphrase='passphrase',
-            certificate_file='certificate',
-            ca_location='ca'
-        )
-        test = ssl.get_command_line()
-        ref = [
-            '--private-key-file',
-            'private',
-            '--private-key-passphrase',
-            'passphrase',
-            '--certificate-file',
-            'certificate',
-            '--ca-location',
-            'ca'
-        ]
-        self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()
+__all__ = [
+    'BbpCellsCli',
+    'BbpLoaderCli',
+    'BbpReportCli',
+    'CameraCli',
+    'Cli',
+    'LightCli',
+    'LoaderCli',
+    'MorphologyCli',
+    'RenderCli',
+    'RendererCli',
+    'ServiceCli',
+    'SnapshotCli',
+]

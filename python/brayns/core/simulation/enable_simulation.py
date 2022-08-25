@@ -25,7 +25,7 @@ def enable_simulation(instance: Instance, model_id: int, enabled: bool) -> None:
     """Enable the simulation coloring for the given model.
 
     If enabled, the colors of the model are the one of the simulation at the
-    current frame (see `get_simulation` and `set_simulation_frame`).
+    current frame (see ``get_simulation`` and ``set_simulation_frame``).
 
     If disabled, the colors of the model are set manually or by default.
 

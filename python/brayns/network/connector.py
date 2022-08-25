@@ -53,11 +53,11 @@ class Connector:
     must be provided in the SSL context constructor.
 
     Binary messages received from the instance are not JSON-RPC requests but can
-    be handled using an optional callback (see `binary_handler`).
+    be handled using an optional callback (see ``binary_handler``).
 
     If you don't know when your instance of braynsService will be ready when you
-    call connect(), you can set `max_attempts` to None to try to connect in loop
-    until it works (or with a maximum count and a delay to have a timeout).
+    call connect(), you can set ``max_attempts`` to None to try to connect in
+    loop until it works (or with a maximum count and a delay to have a timeout).
 
     :param uri: Instance URI with format 'host:port'.
     :type uri: str
@@ -83,7 +83,7 @@ class Connector:
     def connect(self) -> Instance:
         """Connect to instance and return it.
 
-        Try to connect `max_attempts` times waiting `attempt_period` between two
+        Try to connect ``max_attempts`` times waiting ``attempt_period`` between two
         tries. If it fails, ServiceUnavailableError will be raised.
 
         :raises WebSocketError

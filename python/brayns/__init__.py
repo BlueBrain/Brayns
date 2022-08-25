@@ -27,11 +27,12 @@ instance through websockets.
 The low level JSON-RPC API is also available using the instance directly.
 """
 
+from .cli import *
 from .core import *
-from .launcher import *
 from .movie import *
 from .network import *
 from .plugins import *
+from .service import *
 from .utils import *
 from .version import __version__
 
@@ -42,11 +43,17 @@ __all__ = [
     'AmbientLight',
     'Application',
     'BbpCells',
+    'BbpCellsCli',
     'BbpLoader',
+    'BbpLoaderCli',
     'BbpReport',
+    'BbpReportCli',
+    'BbpReportType',
     'Bounds',
     'Box',
+    'Bundle',
     'Camera',
+    'CameraCli',
     'Capsule',
     'CarPaintMaterial',
     'CellId',
@@ -54,6 +61,7 @@ __all__ = [
     'clear_clipping_geometries',
     'clear_lights',
     'clear_models',
+    'Cli',
     'ClippingGeometry',
     'ClipPlane',
     'color_circuit_by_id',
@@ -107,13 +115,15 @@ __all__ = [
     'JsonSchema',
     'JsonType',
     'KeyFrame',
-    'Launcher',
     'Light',
+    'LightCli',
     'Loader',
+    'LoaderCli',
     'LoaderInfo',
     'Logger',
     'LogLevel',
     'lower_bound',
+    'Manager',
     'Material',
     'MatteMaterial',
     'merge_bounds',
@@ -121,6 +131,7 @@ __all__ = [
     'MetalMaterial',
     'Model',
     'Morphology',
+    'MorphologyCli',
     'MorphologyLoader',
     'Movie',
     'MovieError',
@@ -141,13 +152,17 @@ __all__ = [
     'remove_clipping_geometries',
     'remove_lights',
     'remove_models',
+    'RenderCli',
     'Renderer',
+    'RendererCli',
     'RequestError',
     'RequestFuture',
     'RequestProgress',
     'Resolution',
     'Rotation',
     'Scene',
+    'Service',
+    'ServiceCli',
     'ServiceUnavailableError',
     'set_camera_view',
     'set_camera',
@@ -157,11 +172,13 @@ __all__ = [
     'set_simulation_frame',
     'Simulation',
     'Snapshot',
+    'SnapshotCli',
     'SonataEdgePopulation',
     'SonataLoader',
     'SonataNodePopulation',
     'SonataNodes',
     'SonataReport',
+    'SonataReportType',
     'Sphere',
     'SslClientContext',
     'SslServerContext',

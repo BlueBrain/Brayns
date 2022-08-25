@@ -23,32 +23,26 @@ import unittest
 import brayns
 
 
-class TestLauncher(unittest.TestCase):
+class TestService(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
-        launcher = brayns.Launcher(
+        service = brayns.Service(
             uri='uri',
             ssl_context=brayns.SslServerContext(),
             log_level=brayns.LogLevel.CRITICAL,
-            resolution=brayns.Resolution(12, 23),
-            jpeg_quality=25,
             plugins=[
                 brayns.Plugin.ATLAS_EXPLORER.value,
                 brayns.Plugin.CIRCUIT_EXPLORER.value,
             ],
             executable='service',
         )
-        test = launcher.get_command_line()
+        test = service.get_command_line()
         ref = [
             'service',
             '--uri',
             'uri',
             '--log-level',
             'critical',
-            '--window-size',
-            '12 23',
-            '--jpeg-quality',
-            '25',
             '--plugin',
             brayns.Plugin.ATLAS_EXPLORER.value,
             '--plugin',

@@ -55,7 +55,7 @@ from which we want to render our snapshot.
 .. code-block:: python
 
     # For a perspective camera, the FOVY gives the full-screen distance.
-    view = camera.fovy.get_full_screen_view(bounds)
+    view = camera.fovy.get_front_view(bounds)
 
     # For an orthographic camera, we just take some margin as the viewport is
     # already defined by the camera height.

@@ -11,4 +11,4 @@ Examples
    examples_snapshot
    examples_exporter
    examples_movie
-   examples_launcher
+   examples_service

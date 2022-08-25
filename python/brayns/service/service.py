@@ -22,8 +22,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from brayns.utils import Resolution
-
 from .log_level import LogLevel
 from .plugin import Plugin
 from .process import Process
@@ -31,19 +29,19 @@ from .ssl_server_context import SslServerContext
 
 
 @dataclass
-class Launcher:
-    """Used to start a braynsService instance from Python.
+class Service:
+    """Class used to start a braynsService subprocess.
 
     Use a braynsService executable to start a subprocess. By default it looks
-    for a 'braynsService' binary in the PATH but it can be overriden.
+    for a 'braynsService' binary in the PATH but it can be changed.
 
-    URI is the websocket server URI (ip:port) use 0.0.0.0 as wildcard to allow
+    URI is the websocket server URI (ip:port). Use 0.0.0.0 as wildcard to allow
     connections from any machine.
 
     SSL server settings can be specified using optional certificate, key, CA and
     password.
 
-    Log level and default streaming parameters can also be specified.
+    The backend log level can also be specified using ``log_level``.
 
     Custom environment variables can also be set for the subprocess, for example
     to override the PATH and load specific libraries.
@@ -54,10 +52,6 @@ class Launcher:
     :type ssl_context: SslServerContext | None, optional
     :param log_level: Process log level, defaults to LogLevel.WARN.
     :type log_level: LogLevel, optional
-    :param resolution: Streaming resolution, defaults to full HD.
-    :type resolution: Resolution, optional
-    :param jpeg_quality: Streaming JPEG quality, defaults to 100.
-    :type jpeg_quality: int, optional
     :param plugins: Plugins to load, defaults to all built-in plugins.
     :type plugins: list[str], optional
     :param executable: braynsService executable, defaults to 'braynService'.
@@ -69,9 +63,7 @@ class Launcher:
     uri: str
     ssl_context: SslServerContext | None = None
     log_level: LogLevel = LogLevel.WARN
-    resolution: Resolution = Resolution.full_hd
-    jpeg_quality: int = 100
-    plugins: list[str] = field(default_factory=Plugin.get_all_values)
+    plugins: list[str] = field(default_factory=lambda: Plugin.all)
     executable: str = 'braynsService'
     env: dict[str, str] = field(default_factory=dict)
 
@@ -87,10 +79,6 @@ class Launcher:
             self.uri,
             '--log-level',
             self.log_level.value,
-            '--window-size',
-            f'{self.resolution.width} {self.resolution.height}',
-            '--jpeg-quality',
-            str(self.jpeg_quality)
         ]
         args.extend(
             item
@@ -105,11 +93,11 @@ class Launcher:
         return args
 
     def start(self) -> Process:
-        """Start a new process for a braynsService instance.
+        """Start a new process for a braynsService backend.
 
-        Return the process which runs the instance.
+        Return the process which runs the service.
 
-        :return: Instance process.
+        :return: Service process.
         :rtype: Process
         """
         args = self.get_command_line()

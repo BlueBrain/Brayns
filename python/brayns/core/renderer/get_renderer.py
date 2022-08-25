@@ -32,7 +32,7 @@ def get_renderer(instance: Instance, renderer_type: type[T]) -> T:
 
     Current renderer and given renderer type must be the same.
 
-    Current renderer can be queried using `get_rendere_name`.
+    Current renderer can be queried using ``get_rendere_name``.
 
     :param instance: Instance.
     :type instance: Instance

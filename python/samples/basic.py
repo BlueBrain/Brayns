@@ -30,87 +30,82 @@ SNAPSHOT = 'path/to/snapshot.png'
 FRAMES = 'path/to/frames'
 MOVIE = 'path/to/movie.mp4'
 
-launcher = brayns.Launcher(
-    uri='0.0.0.0:5000',
-    log_level=brayns.LogLevel.INFO,
-    executable=EXECUTABLE,
-    env={'LD_LIBRARY_PATH': OSPRAY},
+bundle = brayns.Bundle(
+    port=5000,
+    service_log_level=brayns.LogLevel.INFO,
+    service_executable=EXECUTABLE,
+    service_env={'LD_LIBRARY_PATH': OSPRAY},
+    connector_logger=brayns.Logger(logging.INFO),
 )
 
-connector = brayns.Connector(
-    uri='localhost:5000',
-    logger=brayns.Logger(logging.INFO),
-    max_attempts=None,
-)
+with bundle.start() as manager:
 
-with launcher.start() as process:
+    instance = manager.instance
 
-    with connector.connect() as instance:
-
-        loader = brayns.BbpLoader(
-            cells=brayns.BbpCells.from_density(1),
-            report=brayns.BbpReport.compartment('somas'),
-            morphology=brayns.Morphology(
-                radius_multiplier=10,
-                load_soma=True,
-                load_dendrites=False,
-                geometry_type=brayns.GeometryType.SMOOTH,
-            )
+    loader = brayns.BbpLoader(
+        cells=brayns.BbpCells.from_density(1),
+        report=brayns.BbpReport.compartment('somas'),
+        morphology=brayns.Morphology(
+            radius_multiplier=10,
+            load_soma=True,
+            load_dendrites=False,
+            geometry_type=brayns.GeometryType.SMOOTH,
         )
+    )
 
-        models = loader.load(instance, CIRCUIT)
-        model = models[0]
+    models = loader.load(instance, CIRCUIT)
+    model = models[0]
 
-        camera = brayns.PerspectiveCamera()
+    camera = brayns.PerspectiveCamera()
 
-        view = camera.fovy.get_full_screen_view(model.bounds)
+    view = camera.fovy.get_front_view(model.bounds)
 
-        renderer = brayns.InteractiveRenderer()
+    renderer = brayns.InteractiveRenderer()
 
-        light = brayns.DirectionalLight(
-            intensity=4,
-            direction=view.direction,
-        )
+    light = brayns.DirectionalLight(
+        intensity=4,
+        direction=view.direction,
+    )
 
-        brayns.add_light(instance, light)
+    brayns.add_light(instance, light)
 
-        snapshot = brayns.Snapshot(
-            resolution=brayns.Resolution.full_hd,
-            view=view,
-            camera=camera,
-            renderer=renderer,
-        )
+    snapshot = brayns.Snapshot(
+        resolution=brayns.Resolution.full_hd,
+        view=view,
+        camera=camera,
+        renderer=renderer,
+    )
 
-        snapshot.save(instance, SNAPSHOT)
+    snapshot.save(instance, SNAPSHOT)
 
-        simulation = brayns.get_simulation(instance)
+    simulation = brayns.get_simulation(instance)
 
-        frames = brayns.MovieFrames(
-            fps=25,
-            slowing_factor=1000,
-            start_frame=0,
-            end_frame=-1,
-        )
+    frames = brayns.MovieFrames(
+        fps=1,
+        slowing_factor=1000,
+        start_frame=0,
+        end_frame=-1,
+    )
 
-        indices = frames.get_indices(simulation)
+    indices = frames.get_indices(simulation)
 
-        for frame in pathlib.Path(FRAMES).glob('*.*'):
-            frame.unlink()
+    for frame in pathlib.Path(FRAMES).glob('*.*'):
+        frame.unlink()
 
-        exporter = brayns.FrameExporter(
-            frames=brayns.KeyFrame.from_indices(indices, view),
-            format=brayns.ImageFormat.PNG,
-            resolution=brayns.Resolution.full_hd,
-            camera=camera,
-            renderer=renderer,
-        )
+    exporter = brayns.FrameExporter(
+        frames=brayns.KeyFrame.from_indices(indices, view),
+        format=brayns.ImageFormat.PNG,
+        resolution=brayns.Resolution.full_hd,
+        camera=camera,
+        renderer=renderer,
+    )
 
-        exporter.export_frames(instance, FRAMES)
+    exporter.export_frames(instance, FRAMES)
 
-        movie = brayns.Movie(
-            frames_folder=FRAMES,
-            frames_format=exporter.format,
-            fps=frames.fps,
-        )
+    movie = brayns.Movie(
+        frames_folder=FRAMES,
+        frames_format=exporter.format,
+        fps=frames.fps,
+    )
 
-        movie.save(MOVIE)
+    movie.save(MOVIE)
