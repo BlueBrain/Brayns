@@ -136,6 +136,7 @@ __all__ = [
     'MorphologyCli',
     'MorphologyLoader',
     'Movie',
+    'MovieCli',
     'MovieError',
     'MovieFrames',
     'MovieFramesCli',

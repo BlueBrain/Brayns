@@ -31,7 +31,7 @@ from ..cli import Cli
 @dataclass
 class MovieFramesCli(Cli):
 
-    fps: int = 25
+    fps: float = 25.0
     slowing_factor: float = 1.0
     start_frame: int = 0
     end_frame: int = -1
@@ -39,7 +39,7 @@ class MovieFramesCli(Cli):
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             '--fps',
-            type=int,
+            type=float,
             default=self.fps,
             metavar='RATE',
             help='Movie FPS',

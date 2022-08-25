@@ -19,12 +19,14 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .frame_exporter_cli import FrameExporterCli
+from .movie_cli import MovieCli
 from .render_cli import RenderCli
 from .render_command import RenderCommand
 from .snapshot_cli import SnapshotCli
 
 __all__ = [
     'FrameExporterCli',
+    'MovieCli',
     'RenderCli',
     'RenderCommand',
     'SnapshotCli',

@@ -40,6 +40,7 @@ __all__ = [
     'LoaderCli',
     'MeshLoaderCli',
     'MorphologyCli',
+    'MovieCli',
     'MovieFramesCli',
     'RenderCli',
     'RenderCommand',

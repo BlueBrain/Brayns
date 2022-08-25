@@ -43,6 +43,7 @@ class TestMovie(SimpleTestCase):
     def test_save(self) -> None:
         movie = brayns.Movie(
             frames_folder=str(self.input),
+            frames_format=brayns.ImageFormat.PNG,
             fps=1,
             ffmpeg_executable=self.ffmpeg
         )

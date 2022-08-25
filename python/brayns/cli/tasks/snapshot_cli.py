@@ -40,7 +40,7 @@ class SnapshotCli(RenderCli):
             '--save_as',
             required=True,
             metavar='PATH',
-            help='Path to save snapshot as image',
+            help='Path to save snapshot image',
         )
         parser.add_argument(
             '--frame',
