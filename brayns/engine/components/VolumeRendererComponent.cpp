@@ -32,7 +32,7 @@ void VolumeRendererComponent::onCreate()
 {
     Model &model = getModel();
     auto &group = model.getGroup();
-    group.setVolume(_volumeView);
+    group.fromVolume(_volumeView);
     model.addComponent<ColorRampComponent>();
 }
 

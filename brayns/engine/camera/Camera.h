@@ -131,7 +131,7 @@ private:
     ospray::cpp::Camera _handle;
     std::unique_ptr<IDataWrapper<ospray::cpp::Camera>> _data;
     View _view;
-    float _aspectRatio;
+    float _aspectRatio = 1.f;
     ModifiedFlag _flag;
 };
 }

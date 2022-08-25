@@ -37,7 +37,7 @@ void Model::onInspect(const InspectContext &context, JsonObject &writeResult) co
     _components.onInspect(context, writeResult);
 }
 
-RenderableGroup &Model::getGroup() noexcept
+RenderGroup &Model::getGroup() noexcept
 {
     return _group;
 }
@@ -64,6 +64,8 @@ void Model::onPostRender(const ParametersManager &params)
 
 bool Model::commit()
 {
-    return _components.commit();
+    auto componentsChanged = _components.commit();
+    _group.commit();
+    return componentsChanged;
 }
 } // namespace brayns

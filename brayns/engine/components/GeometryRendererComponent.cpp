@@ -47,7 +47,7 @@ void GeometryRendererComponent::onCreate()
 {
     Model &model = getModel();
     auto &group = model.getGroup();
-    group.setGeometry(_geometryView);
+    group.fromGeometry(_geometryView);
     model.addComponent<MaterialComponent>();
 }
 

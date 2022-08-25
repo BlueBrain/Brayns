@@ -37,6 +37,7 @@ namespace brayns
 GeometryView::GeometryView(const Geometry &geometry)
     : _handle(geometry.getHandle())
 {
+    (void)geometry;
 }
 
 void GeometryView::setMaterial(const Material &material)
@@ -75,7 +76,7 @@ const ospray::cpp::GeometricModel &GeometryView::getHandle() const noexcept
 
 void GeometryView::_setColorPerPrimitive(const OSPData handle)
 {
-    _handle.setParam(GeometryViewParameters::color, OSPDataType::OSP_DATA, handle);
+    _handle.setParam(GeometryViewParameters::color, OSPDataType::OSP_DATA, &handle);
     _handle.removeParam(GeometryViewParameters::index);
     _flag = true;
 }

@@ -34,7 +34,13 @@ class ClippingComponent : public Component
 public:
     template<typename T>
     ClippingComponent(T primitive)
-        : _geometry(std::vector<T>{std::move(primitive)})
+        : ClippingComponent(std::vector<T>{std::move(primitive)})
+    {
+    }
+
+    template<typename T>
+    ClippingComponent(std::vector<T> primitives)
+        : _geometry(std::move(primitives))
         , _view(_geometry)
     {
         _geometry.commit();
@@ -45,7 +51,7 @@ public:
     {
         auto &model = getModel();
         auto &group = model.getGroup();
-        group.setClipper(_view);
+        group.fromClipper(_view);
     }
 
 private:

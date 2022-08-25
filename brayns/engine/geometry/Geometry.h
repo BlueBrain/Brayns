@@ -42,11 +42,11 @@ public:
 
     template<typename Type>
     Geometry(std::vector<Type> primitives)
-        : _handleName(GeometryTraits<Type>::handleName)
-        , _geometryName(GeometryTraits<Type>::name)
-        , _handle(_handleName)
-        , _data(std::make_unique<GeometryData<Type>>(std::move(primitives)))
     {
+        _handleName = GeometryTraits<Type>::handleName;
+        _geometryName = GeometryTraits<Type>::name;
+        _handle = ospray::cpp::Geometry(_handleName);
+        _data = std::make_unique<GeometryData<Type>>(std::move(primitives));
     }
 
     template<typename Type>
@@ -89,7 +89,6 @@ public:
         {
             callback(element);
         }
-        _data->pushTo(_handle);
         _flag = true;
     }
 

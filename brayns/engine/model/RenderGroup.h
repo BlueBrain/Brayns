@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/common/ModifiedFlag.h>
 #include <brayns/engine/geometry/GeometryView.h>
 #include <brayns/engine/volume/VolumeView.h>
 
@@ -29,19 +30,21 @@
 
 namespace brayns
 {
-class RenderableGroup
+class RenderGroup
 {
 public:
-    void setGeometry(const GeometryView &geometry);
-    void setGeometry(const std::vector<GeometryView> &geometries);
-    void setVolume(const VolumeView &volume);
-    void setVolume(const std::vector<VolumeView> &volumes);
-    void setClipper(const GeometryView &clipper);
-    void setClipper(const std::vector<GeometryView> &clippers);
+    void fromGeometry(const GeometryView &geometry);
+    void fromGeometry(const std::vector<GeometryView> &geometries);
+    void fromVolume(const VolumeView &volume);
+    void fromVolume(const std::vector<VolumeView> &volumes);
+    void fromClipper(const GeometryView &clipper);
+    void fromClipper(const std::vector<GeometryView> &clippers);
 
+    void commit();
     const ospray::cpp::Group &getHandle() const noexcept;
 
 private:
     ospray::cpp::Group _handle;
+    ModifiedFlag _flag;
 };
 }

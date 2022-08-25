@@ -33,7 +33,6 @@ Geometry &Geometry::operator=(const Geometry &other)
     _geometryName = other._geometryName;
     _handle = ospray::cpp::Geometry(_handleName);
     _data = other._data->clone();
-    _data->pushTo(_handle);
     return *this;
 }
 
@@ -53,7 +52,7 @@ bool Geometry::commit()
     {
         return false;
     }
-
+    _data->pushTo(_handle);
     _flag = false;
     _handle.commit();
     return true;

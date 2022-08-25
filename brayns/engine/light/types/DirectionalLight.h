@@ -29,6 +29,7 @@ struct DirectionalLight
     float intensity = 1.f;
     Vector3f color = Vector3f(1.f);
     Vector3f direction = Vector3f(-0.707107f, -0.707107f, 0.f);
+    bool visible = true;
 };
 
 template<>

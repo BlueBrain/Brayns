@@ -57,12 +57,10 @@ struct ZParallelSliceManager
         const auto planeBDistance = -center.z - sliceThickness * 0.5f;
 
         auto model = std::make_unique<brayns::Model>();
-        const auto planes = std::vector<brayns::Vector4f>{{planeA, planeADistance}, {planeB, planeBDistance}};
-        for (const auto &plane : planes)
-        {
-            model->addComponent<brayns::ClippingComponent>(brayns::Plane{plane});
-        }
-
+        auto planes = std::vector<brayns::Plane>{
+            brayns::Plane{{planeA, planeADistance}},
+            brayns::Plane{{planeB, planeBDistance}}};
+        model->addComponent<brayns::ClippingComponent>(std::move(planes));
         scene.addClippingModel(std::move(model));
     }
 
