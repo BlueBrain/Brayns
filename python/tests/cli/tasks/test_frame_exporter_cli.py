@@ -47,32 +47,24 @@ class TestFrameExporterCli(unittest.TestCase):
 
     def test_parse(self) -> None:
         test = brayns.FrameExporterCli(
-            save_as='test',
             frames_folder='test2',
             frames_format=brayns.ImageFormat.PNG,
-            ffmpeg_executable='test3',
             frames=brayns.MovieFramesCli(),
         )
         args = [
             '--path',
             'path',
-            '--save_as',
-            'save',
             '--frames_folder',
             'folder',
             '--frames_format',
             'jpg',
-            '--ffmpeg_executable',
-            'exe',
             '--fps',
             '10',
         ]
         test.parse(args)
         self.assertEqual(test.path, 'path')
-        self.assertEqual(test.save_as, 'save')
         self.assertEqual(test.frames_folder, 'folder')
         self.assertEqual(test.frames_format, brayns.ImageFormat.JPEG)
-        self.assertEqual(test.ffmpeg_executable, 'exe')
         self.assertEqual(test.frames.fps, 10)
 
 

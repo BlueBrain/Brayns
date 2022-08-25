@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+import os
 import pathlib
 import subprocess
 from collections import deque
@@ -124,7 +125,7 @@ def _create_process(args: list[str]) -> subprocess.Popen[str]:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            env={'AV_LOG_FORCE_NOCOLOR': '1'}
+            env=os.environ | {'AV_LOG_FORCE_NOCOLOR': '1'},
         )
     except OSError as e:
         raise MovieError(f'Failed to start ffmpeg process {str(e)}')

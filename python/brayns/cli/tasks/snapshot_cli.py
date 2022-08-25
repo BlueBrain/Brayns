@@ -38,7 +38,6 @@ class SnapshotCli(RenderCli):
     def register_additional_args(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             '--save_as',
-            type=str,
             required=True,
             metavar='PATH',
             help='Path to save snapshot as image',

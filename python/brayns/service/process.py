@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import threading
 from collections import deque
@@ -39,7 +40,7 @@ class Process:
     def __init__(self, args: list[str], env: dict[str, str]) -> None:
         self._process = subprocess.Popen(
             args=args,
-            env=env,
+            env=os.environ | env,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
