@@ -22,8 +22,8 @@
 
 #include <brayns/common/Bounds.h>
 #include <brayns/common/ModifiedFlag.h>
-#include <brayns/engine/common/ArgumentInferer.h>
 #include <brayns/engine/common/DataWrapper.h>
+#include <brayns/utils/FunctorInfo.h>
 
 #include "VolumeTraits.h"
 
@@ -84,7 +84,7 @@ public:
     template<typename Callable>
     void manipulate(Callable &&callback) const noexcept
     {
-        using ArgType = typename ArgumentInferer<Callable>::argType;
+        using ArgType = DecayFirstArgType<Callable>;
         auto cast = dynamic_cast<const Data<ArgType> *>(_data.get());
         assert(cast);
         callback(cast->data);

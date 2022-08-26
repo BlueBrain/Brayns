@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/ModifiedFlag.h>
-#include <brayns/engine/common/ArgumentInferer.h>
+#include <brayns/utils/FunctorInfo.h>
 
 #include "GeometryData.h"
 #include "GeometryTraits.h"
@@ -82,7 +82,7 @@ public:
     template<typename Callable>
     void forEach(Callable &&callback) noexcept
     {
-        using ArgType = typename ArgumentInferer<Callable>::argType;
+        using ArgType = DecayFirstArgType<Callable>; // typename ArgumentInferer<Callable>::argType;
         auto cast = dynamic_cast<GeometryData<ArgType> *>(_data.get());
         assert(cast);
         for (auto &element : cast->primitives)

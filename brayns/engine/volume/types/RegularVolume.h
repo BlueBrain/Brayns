@@ -38,7 +38,7 @@ struct RegularVolume
     std::vector<uint8_t> voxels;
     Vector3ui size;
     Vector3f spacing;
-    bool perVertexData;
+    bool perVertexData = false;
 };
 
 template<>
