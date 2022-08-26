@@ -21,7 +21,7 @@
 import argparse
 from dataclasses import dataclass
 
-from brayns.service import Bundle
+from brayns.service import Bundle, Manager
 
 from ..cli import Cli
 
@@ -35,14 +35,14 @@ class ServiceCli(Cli):
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            '--port',
+            '--service_port',
             type=int,
             default=self.port,
             metavar='NUMBER',
-            help='Brayns service websocket server port',
+            help='braynsService websocket server port',
         )
         parser.add_argument(
-            '--executable',
+            '--service_executable',
             default=self.executable,
             metavar='PATH',
             help='braynsService executable path',
@@ -55,8 +55,8 @@ class ServiceCli(Cli):
         )
 
     def load(self, args: argparse.Namespace) -> None:
-        self.port = args.port
-        self.executable = args.executable
+        self.port = args.service_port
+        self.executable = args.service_executable
         self.library_path = args.library_path
 
     def create_bundle(self) -> Bundle:
@@ -65,3 +65,7 @@ class ServiceCli(Cli):
             service_executable=self.executable,
             service_env={'LD_LIBRARY_PATH': self.library_path},
         )
+
+    def start(self) -> Manager:
+        bundle = self.create_bundle()
+        return bundle.start()

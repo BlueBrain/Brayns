@@ -21,7 +21,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from brayns.plugins import BbpReport, BbpReportType
 
@@ -39,7 +39,6 @@ class BbpReportCli(Cli):
             '--report_type',
             choices=[report.value for report in BbpReportType],
             default=self.type.value,
-            metavar='TYPE',
             help='Type of the report to load if any',
         )
         parser.add_argument(

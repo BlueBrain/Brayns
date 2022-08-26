@@ -18,17 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import argparse
 from dataclasses import dataclass
 
-from brayns.core import Camera, Renderer
-from brayns.network import Instance
-from brayns.utils import View
+from brayns.core import MeshLoader
+
+from .loader_cli import LoaderCli
 
 
 @dataclass
-class RenderContext:
+class MeshLoaderCli(LoaderCli):
 
-    instance: Instance
-    view: View
-    camera: Camera
-    renderer: Renderer
+    def register(self, _: argparse.ArgumentParser) -> None:
+        pass
+
+    def load(self, _: argparse.Namespace) -> None:
+        pass
+
+    def create_loader(self) -> MeshLoader:
+        return MeshLoader()

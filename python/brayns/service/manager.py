@@ -20,54 +20,38 @@
 
 from __future__ import annotations
 
+from typing import NamedTuple
+
 from ..network import Instance
 from .process import Process
 
 
-class Manager:
+class Manager(NamedTuple):
     """Wrapper to manage a ``Process`` connected to an ``Instance``.
 
     Contains a process running braynService and an instance connected to it.
 
     Once done with this object, ``stop()`` must be called to disconnect the
     instance and kill the process, using the context manager or by hand.
+
+    :param process: Process running braynsService.
+    :type process: Process
+    :param instance: Instance connected to ``process``.
+    :type instance: Instance
     """
 
-    def __init__(self, process: Process, instance: Instance) -> None:
-        self._process = process
-        self._instance = instance
+    process: Process
+    instance: Instance
 
     def __enter__(self) -> Manager:
-        """Context manager enter.
-
-        :return: Self.
-        :rtype: Manager
-        """
+        """Context manager enter, just return self."""
         return self
 
     def __exit__(self, *_) -> None:
         """Call stop when exiting the context manager."""
         self.stop()
 
-    @property
-    def process(self) -> Process:
-        """Process running braynsService.
-
-        :return: braynsService Process.
-        :rtype: Process
-        """
-        return self._process
-
-    @property
-    def instance(self) -> Instance:
-        """Client instance connected to ``process``.
-
-        :return: Connected instance.
-        :rtype: Instance
-        """
-        return self._instance
-
     def stop(self) -> None:
         """Disconnect the instance and kill the process."""
-        self._instance.disconnect()
-        self._process.stop()
+        self.instance.disconnect()
+        self.process.stop()

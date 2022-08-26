@@ -43,39 +43,45 @@ import unittest
 import brayns
 
 
-class TestServiceCli(unittest.TestCase):
+class TestMovieCli(unittest.TestCase):
 
     def test_parse(self) -> None:
-        test = brayns.ServiceCli(
-            port=3,
-            executable='exe',
-            library_path='osp',
+        test = brayns.MovieCli(
+            save_as='test',
+            frames_folder='test1',
+            frames_format=brayns.ImageFormat.PNG,
+            fps=10,
+            ffmpeg_executable='test2',
         )
         args = [
-            '--service_port',
-            '4',
-            '--service_executable',
-            'exe2',
-            '--library_path',
-            'osp2',
+            '--save_as',
+            'save',
+            '--frames_folder',
+            'folder',
+            '--frames_format',
+            'jpg',
+            '--fps',
+            '5',
+            '--ffmpeg_executable',
+            'exe',
         ]
         test.parse(args)
-        self.assertEqual(test.port, 4)
-        self.assertEqual(test.executable, 'exe2')
-        self.assertEqual(test.library_path, 'osp2')
+        self.assertEqual(test.save_as, 'save')
+        self.assertEqual(test.frames_folder, 'folder')
+        self.assertEqual(test.frames_format, brayns.ImageFormat.JPEG)
+        self.assertEqual(test.fps, 5)
+        self.assertEqual(test.ffmpeg_executable, 'exe')
 
-    def test_create_bundle(self) -> None:
-        cli = brayns.ServiceCli(
-            port=3,
-            executable='exe',
-            library_path='osp',
+    def test_create_movie(self) -> None:
+        cli = brayns.MovieCli(
+            frames_folder='test',
         )
-        test = cli.create_bundle()
-        ref = brayns.Bundle(
-            port=cli.port,
-            service_executable=cli.executable,
-            service_env={'LD_LIBRARY_PATH': cli.library_path},
-            connector_logger=test.connector_logger,
+        test = cli.create_movie()
+        ref = brayns.Movie(
+            frames_folder=cli.frames_folder,
+            frames_format=cli.frames_format,
+            fps=cli.fps,
+            ffmpeg_executable=cli.ffmpeg_executable,
         )
         self.assertEqual(test, ref)
 

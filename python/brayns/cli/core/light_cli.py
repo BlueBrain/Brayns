@@ -57,7 +57,7 @@ class LightCli(Cli):
             nargs=3,
             default=list(self.rotation.euler_degrees),
             metavar=XYZ,
-            help='Light rotation (relative to camera direction)',
+            help='Light rotation relative to camera direction',
         )
 
     def load(self, args: argparse.Namespace) -> None:

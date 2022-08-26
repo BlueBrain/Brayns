@@ -23,48 +23,59 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 
-from brayns.plugins import BbpCells
+from brayns.movie import MovieFrames
 
 from ..cli import Cli
 
 
 @dataclass
-class BbpCellsCli(Cli):
+class MovieFramesCli(Cli):
 
-    density: float = 0.1
-    targets: list[str] | None = None
-    gids: list[int] | None = None
+    fps: float = 25.0
+    slowing_factor: float = 1.0
+    start_frame: int = 0
+    end_frame: int = -1
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            '--density',
+            '--fps',
             type=float,
-            default=self.density,
-            metavar='VALUE',
-            help='Density of cells to load (0-1)',
+            default=self.fps,
+            metavar='RATE',
+            help='Movie FPS',
         )
         parser.add_argument(
-            '--targets',
-            nargs='*',
-            metavar='NAME',
-            help='Names of targets to load, all if unspecified',
+            '--slowing_factor',
+            type=float,
+            default=self.slowing_factor,
+            metavar='FACTOR',
+            help='Slow motion factor (2 = twice slower)',
         )
         parser.add_argument(
-            '--gids',
+            '--start_frame',
             type=int,
-            nargs='*',
-            metavar='GID',
-            help='GIDs of cells to load (override density and targets)',
+            default=self.start_frame,
+            metavar='INDEX',
+            help='Index of the first frame of the movie',
+        )
+        parser.add_argument(
+            '--end_frame',
+            type=int,
+            default=self.end_frame,
+            metavar='INDEX',
+            help='Index of the last frame of the movie',
         )
 
     def load(self, args: argparse.Namespace) -> None:
-        self.density = args.density
-        self.gids = args.gids
-        self.targets = args.targets
+        self.fps = args.fps
+        self.slowing_factor = args.slowing_factor
+        self.start_frame = args.start_frame
+        self.end_frame = args.end_frame
 
-    def create_cells(self) -> BbpCells:
-        return BbpCells(
-            density=self.density,
-            targets=self.targets,
-            gids=self.gids,
+    def create_frames(self) -> MovieFrames:
+        return MovieFrames(
+            fps=self.fps,
+            slowing_factor=self.slowing_factor,
+            start_frame=self.start_frame,
+            end_frame=self.end_frame,
         )

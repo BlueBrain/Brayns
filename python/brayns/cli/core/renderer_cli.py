@@ -36,23 +36,15 @@ class RendererCli(Cli):
         InteractiveRenderer,
         ProductionRenderer,
     ])
-    background: Color4 = Color4.bbp_background
     samples: int = 1
+    background: Color4 = Color4.bbp_background.transparent
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             '--renderer_type',
             choices=[renderer.name for renderer in self.available],
             default=self.name,
-            help='Renderer type',
-        )
-        parser.add_argument(
-            '--background',
-            type=float,
-            nargs=4,
-            default=list(self.background),
-            metavar=RGBA,
-            help='Background color RGBA',
+            help='Type of renderer to use for render',
         )
         parser.add_argument(
             '--samples',
@@ -61,11 +53,19 @@ class RendererCli(Cli):
             metavar='COUNT',
             help='Samples per pixels (antialiasing)',
         )
+        parser.add_argument(
+            '--background',
+            type=float,
+            nargs=4,
+            default=list(self.background),
+            metavar=RGBA,
+            help='Background color RGBA normalized',
+        )
 
     def load(self, args: argparse.Namespace) -> None:
         self.name = args.renderer_type
-        self.background = Color4(*args.background)
         self.samples = args.samples
+        self.background = Color4(*args.background)
 
     def create_renderer(self) -> Renderer:
         for renderer in self.available:

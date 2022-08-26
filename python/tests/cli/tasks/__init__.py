@@ -17,37 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from __future__ import annotations
-
-import argparse
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import TypeVar
-
-T = TypeVar('T', bound='Cli')
-
-
-@dataclass
-class Cli(ABC):
-
-    name: str | None = None
-    description: str | None = None
-
-    @abstractmethod
-    def register(self, parser: argparse.ArgumentParser) -> None:
-        pass
-
-    @abstractmethod
-    def load(self, args: argparse.Namespace) -> None:
-        pass
-
-    def parse(self, argv: list[str]) -> None:
-        parser = argparse.ArgumentParser(
-            prog=self.name,
-            description=self.description,
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        )
-        self.register(parser)
-        args = parser.parse_args(argv)
-        self.load(args)

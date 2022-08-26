@@ -43,39 +43,39 @@ import unittest
 import brayns
 
 
-class TestServiceCli(unittest.TestCase):
+class TestMovieFramesCli(unittest.TestCase):
 
     def test_parse(self) -> None:
-        test = brayns.ServiceCli(
-            port=3,
-            executable='exe',
-            library_path='osp',
+        test = brayns.MovieFramesCli(
+            fps=20,
+            slowing_factor=2,
+            start_frame=1,
+            end_frame=2,
         )
         args = [
-            '--service_port',
+            '--fps',
+            '10',
+            '--slowing_factor',
+            '3',
+            '--start_frame',
             '4',
-            '--service_executable',
-            'exe2',
-            '--library_path',
-            'osp2',
+            '--end_frame',
+            '-4',
         ]
         test.parse(args)
-        self.assertEqual(test.port, 4)
-        self.assertEqual(test.executable, 'exe2')
-        self.assertEqual(test.library_path, 'osp2')
+        self.assertEqual(test.fps, 10)
+        self.assertEqual(test.slowing_factor, 3)
+        self.assertEqual(test.start_frame, 4)
+        self.assertEqual(test.end_frame, -4)
 
-    def test_create_bundle(self) -> None:
-        cli = brayns.ServiceCli(
-            port=3,
-            executable='exe',
-            library_path='osp',
-        )
-        test = cli.create_bundle()
-        ref = brayns.Bundle(
-            port=cli.port,
-            service_executable=cli.executable,
-            service_env={'LD_LIBRARY_PATH': cli.library_path},
-            connector_logger=test.connector_logger,
+    def test_create_frames(self) -> None:
+        cli = brayns.MovieFramesCli()
+        test = cli.create_frames()
+        ref = brayns.MovieFrames(
+            fps=cli.fps,
+            slowing_factor=cli.slowing_factor,
+            start_frame=cli.start_frame,
+            end_frame=cli.end_frame,
         )
         self.assertEqual(test, ref)
 

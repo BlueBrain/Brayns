@@ -12,3 +12,4 @@ Examples
    examples_exporter
    examples_movie
    examples_service
+   examples_cli

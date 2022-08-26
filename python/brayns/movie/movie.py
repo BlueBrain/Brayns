@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+import os
 import pathlib
 import subprocess
 from collections import deque
@@ -47,11 +48,11 @@ class Movie:
     All the frames selected are used to generate the movie so its duration will
     be frame_count / FPS.
 
-    :param frames_folder: Path of the folder with frames to render.
+    :param frames_folder: Path of the folder with movie frames.
     :type frames_folder: str
-    :param frames_format: Frames format.
+    :param frames_format: Format of the frames in folder.
     :type frames_format: ImageFormat
-    :param fps: Movie FPS.
+    :param fps: Movie FPS, should be the same as for export.
     :type fps: float
     :param resolution: Movie resolution, defaults to frames resolution.
     :type resolution: Resolution | None, optional
@@ -66,8 +67,8 @@ class Movie:
     """
 
     frames_folder: str
-    frames_format: ImageFormat = ImageFormat.PNG
-    fps: float = 25.0
+    frames_format: ImageFormat
+    fps: float
     resolution: Resolution | None = None
     bitrate: int | None = None
     encoder: str | None = None
@@ -124,7 +125,7 @@ def _create_process(args: list[str]) -> subprocess.Popen[str]:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            env={'AV_LOG_FORCE_NOCOLOR': '1'}
+            env=os.environ | {'AV_LOG_FORCE_NOCOLOR': '1'},
         )
     except OSError as e:
         raise MovieError(f'Failed to start ffmpeg process {str(e)}')

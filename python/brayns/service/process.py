@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import threading
 from collections import deque
@@ -39,15 +40,13 @@ class Process:
     def __init__(self, args: list[str], env: dict[str, str]) -> None:
         self._process = subprocess.Popen(
             args=args,
-            env=env,
+            env=os.environ | env,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True
         )
-        self._thread = threading.Thread(
-            target=self._poll
-        )
+        self._thread = threading.Thread(target=self._poll)
         self._logs = deque[str](maxlen=1000)
         self._lock = threading.RLock()
         self._thread.start()

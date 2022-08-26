@@ -38,9 +38,7 @@ bundle = brayns.Bundle(
     connector_logger=brayns.Logger(logging.INFO),
 )
 
-with bundle.start() as manager:
-
-    instance = manager.instance
+with bundle.start() as (process, instance):
 
     loader = brayns.BbpLoader(
         cells=brayns.BbpCells.from_density(1),

@@ -43,41 +43,29 @@ import unittest
 import brayns
 
 
-class TestServiceCli(unittest.TestCase):
+class TestFrameExporterCli(unittest.TestCase):
 
     def test_parse(self) -> None:
-        test = brayns.ServiceCli(
-            port=3,
-            executable='exe',
-            library_path='osp',
+        test = brayns.FrameExporterCli(
+            frames_folder='test2',
+            frames_format=brayns.ImageFormat.PNG,
+            frames=brayns.MovieFramesCli(),
         )
         args = [
-            '--service_port',
-            '4',
-            '--service_executable',
-            'exe2',
-            '--library_path',
-            'osp2',
+            '--model_path',
+            'path',
+            '--frames_folder',
+            'folder',
+            '--frames_format',
+            'jpg',
+            '--fps',
+            '10',
         ]
         test.parse(args)
-        self.assertEqual(test.port, 4)
-        self.assertEqual(test.executable, 'exe2')
-        self.assertEqual(test.library_path, 'osp2')
-
-    def test_create_bundle(self) -> None:
-        cli = brayns.ServiceCli(
-            port=3,
-            executable='exe',
-            library_path='osp',
-        )
-        test = cli.create_bundle()
-        ref = brayns.Bundle(
-            port=cli.port,
-            service_executable=cli.executable,
-            service_env={'LD_LIBRARY_PATH': cli.library_path},
-            connector_logger=test.connector_logger,
-        )
-        self.assertEqual(test, ref)
+        self.assertEqual(test.path, 'path')
+        self.assertEqual(test.frames_folder, 'folder')
+        self.assertEqual(test.frames_format, brayns.ImageFormat.JPEG)
+        self.assertEqual(test.frames.fps, 10)
 
 
 if __name__ == '__main__':
