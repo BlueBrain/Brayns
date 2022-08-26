@@ -39,7 +39,6 @@ class BbpReportCli(Cli):
             '--report_type',
             choices=[report.value for report in BbpReportType],
             default=self.type.value,
-            metavar='TYPE',
             help='Type of the report to load if any',
         )
         parser.add_argument(

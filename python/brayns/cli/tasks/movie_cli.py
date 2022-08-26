@@ -55,7 +55,6 @@ class MovieCli(Cli):
             '--frames_format',
             choices=[format.value for format in ImageFormat],
             required=True,
-            metavar='NAME',
             help='Encoding of the movie frames',
         )
         parser.add_argument(

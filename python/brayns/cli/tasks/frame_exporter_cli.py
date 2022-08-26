@@ -49,7 +49,6 @@ class FrameExporterCli(RenderCli):
             '--frames_format',
             choices=[format.value for format in ImageFormat],
             default=self.frames_format.value,
-            metavar='NAME',
             help='Encoding of the exported frames',
         )
         self.frames.register(parser)
