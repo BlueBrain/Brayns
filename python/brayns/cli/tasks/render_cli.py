@@ -64,7 +64,7 @@ class RenderCli(Cli):
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            '--path',
+            '--model_path',
             required=True,
             metavar='PATH',
             help='Path of the model to render',
@@ -85,7 +85,7 @@ class RenderCli(Cli):
         self.register_additional_args(parser)
 
     def load(self, args: argparse.Namespace) -> None:
-        self.path = args.path
+        self.path = args.model_path
         self.resolution = Resolution(*args.resolution)
         self.service.load(args)
         self.loader.load(args)

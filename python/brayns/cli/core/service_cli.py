@@ -35,14 +35,14 @@ class ServiceCli(Cli):
 
     def register(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            '--port',
+            '--service_port',
             type=int,
             default=self.port,
             metavar='NUMBER',
-            help='Brayns service websocket server port',
+            help='braynsService websocket server port',
         )
         parser.add_argument(
-            '--executable',
+            '--service_executable',
             default=self.executable,
             metavar='PATH',
             help='braynsService executable path',
@@ -55,8 +55,8 @@ class ServiceCli(Cli):
         )
 
     def load(self, args: argparse.Namespace) -> None:
-        self.port = args.port
-        self.executable = args.executable
+        self.port = args.service_port
+        self.executable = args.service_executable
         self.library_path = args.library_path
 
     def create_bundle(self) -> Bundle:

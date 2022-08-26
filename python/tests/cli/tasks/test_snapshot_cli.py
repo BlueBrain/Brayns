@@ -60,7 +60,7 @@ class TestSnapshotCli(unittest.TestCase):
             frame=0,
         )
         args = [
-            '--path',
+            '--model_path',
             'path',
             '--save_as',
             'save',

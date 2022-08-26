@@ -52,7 +52,7 @@ class TestFrameExporterCli(unittest.TestCase):
             frames=brayns.MovieFramesCli(),
         )
         args = [
-            '--path',
+            '--model_path',
             'path',
             '--frames_folder',
             'folder',

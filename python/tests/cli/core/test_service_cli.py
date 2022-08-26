@@ -52,9 +52,9 @@ class TestServiceCli(unittest.TestCase):
             library_path='osp',
         )
         args = [
-            '--port',
+            '--service_port',
             '4',
-            '--executable',
+            '--service_executable',
             'exe2',
             '--library_path',
             'osp2',
