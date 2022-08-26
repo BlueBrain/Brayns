@@ -228,7 +228,7 @@ void MorphologyCircuitComponent::setColorBySection(
         }
         auto indexData = ospray::cpp::CopiedData(indices);
 
-        morphology.view.setColorMap(colorData, indexData);
+        morphology.view.setColorMap(indexData, colorData);
     }
 
     _colorsDirty = true;
@@ -256,7 +256,7 @@ void MorphologyCircuitComponent::setIndexedColor(
         auto morphologyMapping = &map[mappingOffset];
         auto mappingData = ospray::cpp::CopiedData(morphologyMapping, geometrySize);
 
-        morphology.view.setColorMap(colorData, mappingData);
+        morphology.view.setColorMap(mappingData, colorData);
         mappingOffset += geometrySize;
     }
     _colorsDirty = true;

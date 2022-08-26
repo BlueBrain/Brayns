@@ -157,7 +157,7 @@ std::vector<brayns::TriangleMesh> SonataEndFeetReader::readEndFeet(
             meshIndices[i].z = triangles[faceOffset][2];
         }
 
-        brayns::TriangleMeshNormalGenerator::generate(mesh);
+        brayns::TriangleMeshUtils::generateNormals(mesh);
     }
 
     return result;

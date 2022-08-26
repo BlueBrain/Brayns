@@ -129,7 +129,7 @@ void VasculatureComponent::setSimulationColor(
     const std::vector<brayns::Vector4f> &color,
     const std::vector<uint8_t> &mapping) noexcept
 {
-    _view.setColorMap(ospray::cpp::CopiedData(color), ospray::cpp::CopiedData(mapping));
+    _view.setColorMap(ospray::cpp::CopiedData(mapping), ospray::cpp::CopiedData(color));
 }
 
 brayns::Geometry &VasculatureComponent::getGeometry() noexcept

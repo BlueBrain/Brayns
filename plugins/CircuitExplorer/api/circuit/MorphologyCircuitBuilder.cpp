@@ -148,7 +148,7 @@ std::vector<CellCompartments> MorphologyCircuitBuilder::load(
     auto morphologies = ParallelMorphologyLoader::load(morphologyPathMap, morphParams, positions, rotations, updater);
 
     std::vector<CellCompartments> compartments(ids.size());
-    std::vector<std::vector<brayns::Primitive>> geometries(ids.size());
+    std::vector<std::vector<brayns::Capsule>> geometries(ids.size());
     std::vector<std::vector<NeuronSectionMapping>> mappings(ids.size());
 
 #pragma omp parallel for

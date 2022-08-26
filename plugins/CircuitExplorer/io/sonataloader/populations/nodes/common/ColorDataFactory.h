@@ -23,8 +23,9 @@
 
 namespace sonataloader
 {
-struct NodeColorDataFactory
+class NodeColorDataFactory
 {
+public:
     template<typename T>
     static std::unique_ptr<IColorData> create(const NodeLoadContext &ctxt)
     {

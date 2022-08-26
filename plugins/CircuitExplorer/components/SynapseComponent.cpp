@@ -23,7 +23,6 @@
 #include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
-#include <brayns/engine/geometry/types/Sphere.h>
 
 #include <api/coloring/ColorByIDAlgorithm.h>
 
@@ -141,7 +140,7 @@ void SynapseComponent::setIndexedColor(const std::vector<brayns::Vector4f> &colo
 
         auto morphologyMapping = &mapping[mappingOffset];
         auto mappingData = ospray::cpp::CopiedData(morphologyMapping, geometrySize);
-        _views[i].setColorMap(colorData, mappingData);
+        _views[i].setColorMap(mappingData, colorData);
     }
     _colorsDirty = true;
 }

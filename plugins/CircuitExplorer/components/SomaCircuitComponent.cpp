@@ -119,5 +119,5 @@ void SomaCircuitComponent::setIndexedColor(
     const std::vector<uint8_t> &mapping)
 {
     assert(color.size() <= 256);
-    _view.setColorMap(ospray::cpp::CopiedData(color), ospray::cpp::CopiedData(mapping));
+    _view.setColorMap(ospray::cpp::CopiedData(mapping), ospray::cpp::CopiedData(color));
 }

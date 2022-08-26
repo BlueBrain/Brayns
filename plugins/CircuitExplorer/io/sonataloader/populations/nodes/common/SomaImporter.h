@@ -16,8 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/Model.h>
-
 #include <api/coloring/IColorData.h>
 #include <api/reports/ReportMapping.h>
 #include <io/sonataloader/LoadContext.h>

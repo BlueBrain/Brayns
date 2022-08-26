@@ -65,7 +65,7 @@ struct VasculatureImporter
         }
 
         auto ids = selection.flatten();
-        auto geometry = std::vector<brayns::Primitive>(ids.size());
+        auto geometry = std::vector<brayns::Capsule>(ids.size());
 
 #pragma omp parallel for
         for (size_t i = 0; i < ids.size(); ++i)
@@ -75,7 +75,7 @@ struct VasculatureImporter
             const auto &p1 = endPoints[i];
             const auto r1 = endRadii[i];
 
-            geometry[i] = brayns::Primitive::cone(p0, r0, p1, r1);
+            geometry[i] = brayns::CapsuleFactory::cone(p0, r0, p1, r1);
         }
 
         auto &model = context.model;

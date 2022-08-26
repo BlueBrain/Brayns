@@ -21,6 +21,7 @@
 #include "VolumeRendererComponent.h"
 
 #include <brayns/engine/common/ExtractComponent.h>
+#include "ColorRampComponent.h"
 
 namespace brayns
 {

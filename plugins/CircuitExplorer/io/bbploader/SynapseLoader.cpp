@@ -20,6 +20,8 @@
 
 #include "SynapseLoader.h"
 
+#include <brayns/engine/geometry/types/Sphere.h>
+
 #include <api/synapse/SynapseColorHandler.h>
 #include <components/CircuitColorComponent.h>
 #include <components/SynapseComponent.h>

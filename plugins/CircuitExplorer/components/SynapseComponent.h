@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/engine/geometry/GeometryView.h>
+#include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/model/ModelComponents.h>
 
 /**

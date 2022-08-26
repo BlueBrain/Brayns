@@ -72,7 +72,9 @@ public:
     }
 
     /**
-     * @brief Retrieves a component from the model
+     * @brief Retrieves an existing component from the model.
+     * @tparam T component type.
+     * @return reference to the component type.
      */
     template<typename T>
     T &getComponent()
@@ -80,25 +82,15 @@ public:
         return _components.getComponent<T>();
     }
 
+    /**
+     * @brief Retrieves a component from the model.
+     * @tparam T component type.
+     * @return pointer to the component type, or null if it was not found.
+     */
     template<typename T>
     T *findComponent()
     {
         return _components.findComponent<T>();
-    }
-
-    template<typename T>
-    std::vector<T *> getAllComponents()
-    {
-        return _components.getAllComponents<T>();
-    }
-
-    /**
-     * @brief Removes a component from the model
-     */
-    template<typename T>
-    void removeComponent()
-    {
-        _components.removeComponent<T>();
     }
 
     /**

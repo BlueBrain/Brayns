@@ -37,7 +37,7 @@ public:
 
     static void updateData(ospray::cpp::Camera &handle, T &data)
     {
-        static_assert(cameraSpecialized<T>, "CameraTraits not specialized");
+        static_assert(cameraSpecialized<T>, "ProjectionTraits not specialized");
         (void)handle;
         (void)data;
     }
