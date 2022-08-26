@@ -43,7 +43,7 @@ import unittest
 import brayns
 
 
-class TestLightCli(unittest.TestCase):
+class TestMovieFramesCli(unittest.TestCase):
 
     def test_parse(self) -> None:
         test = brayns.MovieFramesCli(
