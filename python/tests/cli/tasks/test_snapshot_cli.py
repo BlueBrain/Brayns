@@ -71,6 +71,8 @@ class TestSnapshotCli(unittest.TestCase):
             '25',
         ]
         test.parse(args)
+        self.assertEqual(test.name, 'Test')
+        self.assertEqual(test.description, 'This is a test')
         self.assertEqual(test.path, 'path')
         self.assertEqual(test.save_as, 'save')
         self.assertEqual(test.resolution, brayns.Resolution.full_hd)

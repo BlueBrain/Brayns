@@ -20,6 +20,10 @@ attributes from a list of string.
 The main CLI tasks also have a ``run`` method to call once parsed to perform the
 underlying task.
 
+All CLI classes also have ``name`` and ``description`` optional attributes which
+can be used to display the help message. By default, these parameters are
+delegated to ``argparse`` which uses argv[0] as name.
+
 Example
 -------
 
