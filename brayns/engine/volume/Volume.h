@@ -85,8 +85,8 @@ public:
     void manipulate(Callable &&callback) const noexcept
     {
         using ArgType = DecayFirstArgType<Callable>;
-        auto cast = dynamic_cast<const Data<ArgType> *>(_data.get());
-        assert(cast);
+        assert(dynamic_cast<const Data<ArgType> *>(_data.get()));
+        auto &cast = static_cast<const Data<ArgType> &>(*_data);
         callback(cast->data);
         _flag = true;
     }

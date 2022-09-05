@@ -83,9 +83,9 @@ public:
     void forEach(Callable &&callback) noexcept
     {
         using ArgType = DecayFirstArgType<Callable>; // typename ArgumentInferer<Callable>::argType;
-        auto cast = dynamic_cast<GeometryData<ArgType> *>(_data.get());
-        assert(cast);
-        for (auto &element : cast->primitives)
+        assert(dynamic_cast<GeometryData<ArgType> *>(_data.get()));
+        auto &cast = static_cast<GeometryData<ArgType> &>(*_data);
+        for (auto &element : cast.primitives)
         {
             callback(element);
         }
