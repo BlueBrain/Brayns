@@ -48,8 +48,8 @@ public:
         set(std::move(data));
     }
 
-    Camera(Camera &&) noexcept = default;
-    Camera &operator=(Camera &&) noexcept = default;
+    Camera(Camera &&) noexcept;
+    Camera &operator=(Camera &&) noexcept;
 
     Camera(const Camera &);
     Camera &operator=(const Camera &);

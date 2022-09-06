@@ -25,9 +25,11 @@ class GeometryType(Enum):
 
     :param ORIGINAL: Use raw geometries dimensions.
     :param SMOOTH: Smooth radius changes between geometries for better visual.
+    :param SECTION_SMOOTH: Smooth radius change between whole sections.
     :param CONSTANT_RADII: Apply the same radius to all geometries.
     """
 
     ORIGINAL = 'original'
     SMOOTH = 'smooth'
+    SECTION_SMOOTH = 'section_smooth'
     CONSTANT_RADII = 'constant_radii'

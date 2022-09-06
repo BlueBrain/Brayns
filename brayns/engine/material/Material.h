@@ -52,8 +52,8 @@ public:
         _data->pushTo(_handle);
     }
 
-    Material(Material &&) noexcept = default;
-    Material &operator=(Material &&) noexcept = default;
+    Material(Material &&) noexcept;
+    Material &operator=(Material &&) noexcept;
 
     Material(const Material &other);
     Material &operator=(const Material &other);

@@ -52,8 +52,8 @@ public:
         _handle.commit();
     }
 
-    Light(Light &&) noexcept = default;
-    Light &operator=(Light &&) noexcept = default;
+    Light(Light &&) noexcept;
+    Light &operator=(Light &&) noexcept;
 
     Light(const Light &other);
     Light &operator=(const Light &other);

@@ -1,8 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
- *
- * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,10 +18,14 @@
 
 #pragma once
 
-enum class NeuronGeometryType
+#include <api/neuron/INeuronMorphologyProcessor.h>
+
+/**
+ * @brief Applies a smoothing kernel that softens the radius changes from section to section,
+ * whilst section radii are constant
+ */
+class SectionSmoother final : public INeuronMorphologyProcessor
 {
-    Original,
-    Smooth,
-    SectionSmooth,
-    ConstantRadii
+public:
+    void process(NeuronMorphology &morphology) const override;
 };
