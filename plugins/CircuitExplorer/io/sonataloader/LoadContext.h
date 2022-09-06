@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
+#include <brayns/engine/model/Model.h>
 
 #include <io/SonataLoaderParameters.h>
 #include <io/sonataloader/data/SonataConfig.h>

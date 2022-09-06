@@ -20,28 +20,24 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/GeometryView.h>
 #include <brayns/engine/geometry/types/Sphere.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 namespace brayns
 {
 class ProteinComponent final : public Component
 {
 public:
-    ProteinComponent(std::vector<Sphere> spheres, std::vector<Vector4f> colors, std::vector<uint8_t> colorIndices);
-
+    ProteinComponent(std::vector<Sphere> spheres, std::vector<uint8_t> colorIndices, std::vector<Vector4f> colors);
     Bounds computeBounds(const Matrix4f &transform) const noexcept override;
-
     void onCreate() override;
-
     bool commit() override;
 
-    void onDestroy() override;
-
 private:
-    GeometryObject<Sphere> _object;
+    Geometry _geometry;
+    GeometryView _geometryView;
+    std::vector<uint8_t> _indices;
     std::vector<Vector4f> _colors;
-    std::vector<uint8_t> _colorIndices;
 };
 }

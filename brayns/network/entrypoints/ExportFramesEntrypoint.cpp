@@ -23,7 +23,8 @@
 #include <filesystem>
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/FrameRenderer.h>
+#include <brayns/engine/core/FrameRenderer.h>
+#include <brayns/engine/framebuffer/Framebuffer.h>
 #include <brayns/network/common/ProgressHandler.h>
 #include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
@@ -112,23 +113,13 @@ public:
         const auto &keyFrames = params.key_frames;
         const auto sequentialNaming = params.sequential_naming;
 
+        auto &factories = engine.getFactories();
+
         // Renderer
         auto &rendererData = params.renderer;
-        auto &rendererFactory = engine.getRendererFactory();
+        auto &rendererFactory = factories.renderer;
         auto renderer = rendererFactory.createOr(rendererData, engine.getRenderer());
-        renderer->commit();
-
-        // Camera (committed on the loop)
-        auto &cameraData = params.camera;
-        auto &cameraFactory = engine.getCameraFactory();
-        auto camera = cameraFactory.createOr(cameraData, engine.getCamera());
-
-        auto &systemCamera = engine.getCamera();
-        const auto &systemLookAt = systemCamera.getLookAt();
-
-        // Update aspect ratio to match the rendered images size
-        const auto aspectRatio = static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y);
-        camera->setAspectRatio(aspectRatio);
+        renderer.commit();
 
         // Framebuffer
         brayns::Framebuffer framebuffer;
@@ -136,6 +127,12 @@ public:
         framebuffer.setFormat(brayns::PixelFormat::StandardRgbaI8);
         framebuffer.setFrameSize(frameSize);
         framebuffer.commit();
+
+        // Camera (committed on the loop)
+        auto &cameraData = params.camera;
+        auto &cameraFactory = factories.cameras;
+        auto camera = cameraFactory.createOr(cameraData, engine.getCamera());
+        camera.setAspectRatio(framebuffer.getAspectRatio());
 
         // Parameters manager
         auto parametersManager = paramsManager;
@@ -147,8 +144,10 @@ public:
         const auto progressChunk = 1.f / static_cast<float>(keyFrames.size());
         float totalProgress = 0.f;
 
+        auto &systemView = engine.getCamera().getView();
+
         // Log export info
-        ExportInfoLogger::log(keyFrames.size(), path, frameSize, *renderer);
+        ExportInfoLogger::log(keyFrames.size(), path, frameSize, renderer);
 
         // Render frames
         for (size_t i = 0; i < keyFrames.size(); ++i)
@@ -161,12 +160,12 @@ public:
             scene.commit();
 
             // Update camera
-            const auto lookAt = keyFrame.camera_view.value_or(systemLookAt);
-            camera->setLookAt(lookAt);
-            camera->commit();
+            auto view = keyFrame.camera_view.value_or(systemView);
+            camera.setView(view);
+            camera.commit();
 
             // Render
-            brayns::FrameRenderer::synchronous(*camera, framebuffer, *renderer, scene);
+            brayns::FrameRenderer::synchronous(camera, framebuffer, renderer, scene);
 
             // Write frame to disk
             auto name = sequentialNaming ? i : keyFrame.frame_index;

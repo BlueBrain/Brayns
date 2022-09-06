@@ -22,7 +22,7 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/engine/FrameRenderer.h>
+#include <brayns/engine/core/FrameRenderer.h>
 
 #include <brayns/network/common/ProgressHandler.h>
 
@@ -81,8 +81,9 @@ public:
     static brayns::ImageBase64Message
         handle(brayns::SnapshotParams &params, SnapshotProgress &progress, brayns::Engine &engine)
     {
-        // Initialize parameters
+        auto &factories = engine.getFactories();
 
+        // Initialize parameters
         auto &imageSettings = params.image_settings;
         const auto &imageSize = imageSettings.getSize();
         auto &imagePath = params.file_path;
@@ -95,19 +96,9 @@ public:
 
         // Renderer
         auto &rendererData = params.renderer;
-        auto &rendererFactory = engine.getRendererFactory();
+        auto &rendererFactory = factories.renderer;
         auto renderer = rendererFactory.createOr(rendererData, engine.getRenderer());
-        renderer->commit();
-
-        // Camera
-        auto &cameraData = params.camera;
-        auto &cameraFactory = engine.getCameraFactory();
-        auto camera = cameraFactory.createOr(cameraData, engine.getCamera());
-        const auto aspectRatio = static_cast<float>(imageSize.x) / static_cast<float>(imageSize.y);
-        camera->setAspectRatio(aspectRatio);
-        const auto &cameraLookAt = params.camera_view;
-        camera->setLookAt(cameraLookAt);
-        camera->commit();
+        renderer.commit();
 
         // Framebuffer
         brayns::Framebuffer framebuffer;
@@ -116,13 +107,21 @@ public:
         framebuffer.setFrameSize(imageSize);
         framebuffer.commit();
 
+        // Camera
+        auto &cameraData = params.camera;
+        auto &cameraFactory = factories.cameras;
+        auto camera = cameraFactory.createOr(cameraData, engine.getCamera());
+        camera.setAspectRatio(framebuffer.getAspectRatio());
+        camera.setView(params.camera_view);
+        camera.commit();
+
         // Scene
         auto &scene = engine.getScene();
         scene.preRender(paramsManager);
         scene.commit();
 
         // Render
-        auto future = brayns::FrameRenderer::asynchronous(*camera, framebuffer, *renderer, scene);
+        auto future = brayns::FrameRenderer::asynchronous(camera, framebuffer, renderer, scene);
         const auto msg = "Rendering snapshot ...";
         while (!future.isReady())
         {
@@ -175,9 +174,9 @@ void SnapshotEntrypoint::onRequest(const Request &request)
 {
     SnapshotParams params;
 
-    auto &systemCamera = _engine.getCamera();
-    auto systemLookAt = systemCamera.getLookAt();
-    params.camera_view = systemLookAt;
+    auto &camera = _engine.getCamera();
+    auto view = camera.getView();
+    params.camera_view = view;
 
     auto &systemFramebuffer = _engine.getFramebuffer();
     auto systemSize = systemFramebuffer.getFrameSize();

@@ -20,7 +20,7 @@
 
 #include "SynapseComponent.h"
 
-#include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
 
@@ -29,22 +29,24 @@
 SynapseComponent::SynapseComponent(std::map<uint64_t, std::vector<brayns::Sphere>> &synapses)
 {
     _cellIds.reserve(synapses.size());
-    _synapses.reserve(synapses.size());
+    _geometries.reserve(synapses.size());
+    _views.reserve(synapses.size());
 
     for (auto &[id, synapseGeometry] : synapses)
     {
         _cellIds.push_back(id);
-        _synapses.emplace_back(std::move(synapseGeometry));
+        auto &geometry = _geometries.emplace_back(std::move(synapseGeometry));
+        geometry.commit();
+        _views.emplace_back(geometry);
     }
 }
 
 brayns::Bounds SynapseComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds result;
-    for (const auto &synapse : _synapses)
+    for (auto &synapse : _geometries)
     {
-        const auto synapseBounds = synapse.computeBounds(transform);
-        result.expand(synapseBounds);
+        result.expand(synapse.computeBounds(transform));
     }
     return result;
 }
@@ -54,10 +56,10 @@ bool SynapseComponent::commit()
     bool needsCommit = _colorsDirty;
     _colorsDirty = false;
 
-    auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
+    auto &material = brayns::ExtractComponent::material(getModel());
     if (material.commit())
     {
-        for (auto &synapse : _synapses)
+        for (auto &synapse : _views)
         {
             synapse.setMaterial(material);
             needsCommit = true;
@@ -66,7 +68,7 @@ bool SynapseComponent::commit()
 
     if (needsCommit)
     {
-        for (auto &synapse : _synapses)
+        for (auto &synapse : _views)
         {
             synapse.commit();
         }
@@ -81,20 +83,7 @@ void SynapseComponent::onCreate()
     model.addComponent<brayns::MaterialComponent>();
 
     auto &group = model.getGroup();
-    for (auto &synapse : _synapses)
-    {
-        group.addGeometry(synapse);
-    }
-}
-
-void SynapseComponent::onDestroy()
-{
-    auto &model = getModel();
-    auto &group = model.getGroup();
-    for (auto &synapse : _synapses)
-    {
-        group.removeGeometry(synapse);
-    }
+    group.setGeometry(_views);
 }
 
 const std::vector<uint64_t> &SynapseComponent::getCellIds() const noexcept
@@ -104,7 +93,7 @@ const std::vector<uint64_t> &SynapseComponent::getCellIds() const noexcept
 
 void SynapseComponent::setColor(const brayns::Vector4f &color) noexcept
 {
-    for (auto &synapse : _synapses)
+    for (auto &synapse : _views)
     {
         synapse.setColor(color);
     }
@@ -113,10 +102,9 @@ void SynapseComponent::setColor(const brayns::Vector4f &color) noexcept
 
 void SynapseComponent::setColorById(const std::vector<brayns::Vector4f> &colors)
 {
-    for (size_t i = 0; i < _synapses.size(); ++i)
+    for (size_t i = 0; i < _views.size(); ++i)
     {
-        auto &synapse = _synapses[i];
-        synapse.setColor(colors[i]);
+        _views[i].setColor(colors[i]);
     }
     _colorsDirty = true;
 }
@@ -129,27 +117,22 @@ std::vector<uint64_t> SynapseComponent::setColorById(const std::map<uint64_t, br
         [&](uint64_t id, size_t index, const brayns::Vector4f &color)
         {
             (void)id;
-            auto &synapse = _synapses[index];
-            synapse.setColor(color);
-            _colorsDirty = true;
+            _views[index].setColor(color);
         });
 
+    _colorsDirty = skipped.size() < _cellIds.size();
     return skipped;
 }
 
 void SynapseComponent::setIndexedColor(const std::vector<brayns::Vector4f> &color, const std::vector<uint8_t> &mapping)
 {
-    if (color.size() > 256)
-    {
-        throw std::invalid_argument("Colormap has more than 256 values");
-    }
+    assert(color.size() <= 256);
 
     auto colorData = ospray::cpp::CopiedData(color);
     size_t mappingOffset = 0;
-    for (auto &synapses : _synapses)
+    for (size_t i = 0; i < _cellIds.size(); ++i)
     {
-        auto geometrySize = synapses.getNumPrimitives();
-
+        auto geometrySize = _geometries[i].numPrimitives();
         if (mappingOffset + geometrySize < mapping.size())
         {
             throw std::invalid_argument("Not enough mapping data provided");
@@ -157,7 +140,7 @@ void SynapseComponent::setIndexedColor(const std::vector<brayns::Vector4f> &colo
 
         auto morphologyMapping = &mapping[mappingOffset];
         auto mappingData = ospray::cpp::CopiedData(morphologyMapping, geometrySize);
-        synapses.setColorMap(colorData, mappingData);
+        _views[i].setColorMap(mappingData, colorData);
     }
     _colorsDirty = true;
 }

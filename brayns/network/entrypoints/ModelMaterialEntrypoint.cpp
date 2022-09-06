@@ -50,7 +50,7 @@ void GetMaterialType::onRequest(const Request &request)
 }
 
 SetMaterialCarPaint::SetMaterialCarPaint(Scene &scene)
-    : SetMaterialEntrypoint<CarPaintMaterial>(scene)
+    : SetMaterialEntrypoint<CarPaint>(scene)
 {
 }
 
@@ -65,24 +65,24 @@ std::string SetMaterialCarPaint::getDescription() const
            "This material is only usable with the production renderer";
 }
 
-SetMaterialDefault::SetMaterialDefault(Scene &scene)
-    : SetMaterialEntrypoint<DefaultMaterial>(scene)
+SetMaterialPhong::SetMaterialPhong(Scene &scene)
+    : SetMaterialEntrypoint<Phong>(scene)
 {
 }
 
-std::string SetMaterialDefault::getMethod() const
+std::string SetMaterialPhong::getMethod() const
 {
     return "set-material-default";
 }
 
-std::string SetMaterialDefault::getDescription() const
+std::string SetMaterialPhong::getDescription() const
 {
     return "Updates the material of the given model to the Default material. This material works with all renderers. "
            "It has a matte appearance.";
 }
 
 SetMaterialEmissive::SetMaterialEmissive(Scene &scene)
-    : SetMaterialEntrypoint<EmissiveMaterial>(scene)
+    : SetMaterialEntrypoint<Emissive>(scene)
 {
 }
 
@@ -98,7 +98,7 @@ std::string SetMaterialEmissive::getDescription() const
 }
 
 SetMaterialGlass::SetMaterialGlass(Scene &scene)
-    : SetMaterialEntrypoint<GlassMaterial>(scene)
+    : SetMaterialEntrypoint<Glass>(scene)
 {
 }
 
@@ -114,7 +114,7 @@ std::string SetMaterialGlass::getDescription() const
 }
 
 SetMaterialMatte::SetMaterialMatte(Scene &scene)
-    : SetMaterialEntrypoint<MatteMaterial>(scene)
+    : SetMaterialEntrypoint<Matte>(scene)
 {
 }
 
@@ -130,7 +130,7 @@ std::string SetMaterialMatte::getDescription() const
 }
 
 SetMaterialMetal::SetMaterialMetal(Scene &scene)
-    : SetMaterialEntrypoint<MetalMaterial>(scene)
+    : SetMaterialEntrypoint<Metal>(scene)
 {
 }
 
@@ -146,7 +146,7 @@ std::string SetMaterialMetal::getDescription() const
 }
 
 SetMaterialPlastic::SetMaterialPlastic(Scene &scene)
-    : SetMaterialEntrypoint<PlasticMaterial>(scene)
+    : SetMaterialEntrypoint<Plastic>(scene)
 {
 }
 
@@ -162,7 +162,7 @@ std::string SetMaterialPlastic::getDescription() const
 }
 
 GetMaterialCarPaint::GetMaterialCarPaint(Scene &scene)
-    : GetMaterialEntrypoint<CarPaintMaterial>(scene)
+    : GetMaterialEntrypoint<CarPaint>(scene)
 {
 }
 
@@ -176,23 +176,23 @@ std::string GetMaterialCarPaint::getDescription() const
     return "Returns the material of the given model as a car paint material, if possible";
 }
 
-GetMaterialDefault::GetMaterialDefault(Scene &scene)
-    : GetMaterialEntrypoint<DefaultMaterial>(scene)
+GetMaterialPhong::GetMaterialPhong(Scene &scene)
+    : GetMaterialEntrypoint<Phong>(scene)
 {
 }
 
-std::string GetMaterialDefault::getMethod() const
+std::string GetMaterialPhong::getMethod() const
 {
     return "get-material-default";
 }
 
-std::string GetMaterialDefault::getDescription() const
+std::string GetMaterialPhong::getDescription() const
 {
-    return "Returns the material of the given model as a default material, if possible";
+    return "Returns the material of the given model as a phong material, if possible";
 }
 
 GetMaterialEmissive::GetMaterialEmissive(Scene &scene)
-    : GetMaterialEntrypoint<EmissiveMaterial>(scene)
+    : GetMaterialEntrypoint<Emissive>(scene)
 {
 }
 
@@ -207,7 +207,7 @@ std::string GetMaterialEmissive::getDescription() const
 }
 
 GetMaterialGlass::GetMaterialGlass(Scene &scene)
-    : GetMaterialEntrypoint<GlassMaterial>(scene)
+    : GetMaterialEntrypoint<Glass>(scene)
 {
 }
 
@@ -222,7 +222,7 @@ std::string GetMaterialGlass::getDescription() const
 }
 
 GetMaterialMatte::GetMaterialMatte(Scene &scene)
-    : GetMaterialEntrypoint<MatteMaterial>(scene)
+    : GetMaterialEntrypoint<Matte>(scene)
 {
 }
 
@@ -237,7 +237,7 @@ std::string GetMaterialMatte::getDescription() const
 }
 
 GetMaterialMetal::GetMaterialMetal(Scene &scene)
-    : GetMaterialEntrypoint<MetalMaterial>(scene)
+    : GetMaterialEntrypoint<Metal>(scene)
 {
 }
 
@@ -252,7 +252,7 @@ std::string GetMaterialMetal::getDescription() const
 }
 
 GetMaterialPlastic::GetMaterialPlastic(Scene &scene)
-    : GetMaterialEntrypoint<PlasticMaterial>(scene)
+    : GetMaterialEntrypoint<Plastic>(scene)
 {
 }
 

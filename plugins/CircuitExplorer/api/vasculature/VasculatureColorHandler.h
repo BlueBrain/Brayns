@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
+#include <brayns/engine/model/Model.h>
 
 #include <api/coloring/IColorHandler.h>
 #include <components/VasculatureComponent.h>

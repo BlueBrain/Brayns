@@ -46,7 +46,7 @@ void GetCameraTypeEntrypoint::onRequest(const Request &request)
 }
 
 SetCameraPerspectiveEntrypoint::SetCameraPerspectiveEntrypoint(Engine &engine)
-    : SetCameraEntrypoint<PerspectiveCamera>(engine)
+    : SetCameraEntrypoint<Perspective>(engine)
 {
 }
 
@@ -61,7 +61,7 @@ std::string SetCameraPerspectiveEntrypoint::getDescription() const
 }
 
 SetCameraOrthographicEntrypoint::SetCameraOrthographicEntrypoint(Engine &engine)
-    : SetCameraEntrypoint<OrthographicCamera>(engine)
+    : SetCameraEntrypoint<Orthographic>(engine)
 {
 }
 
@@ -76,7 +76,7 @@ std::string SetCameraOrthographicEntrypoint::getDescription() const
 }
 
 GetCameraPerspectiveEntrypoint::GetCameraPerspectiveEntrypoint(Engine &engine)
-    : GetCameraEntrypoint<PerspectiveCamera>(engine)
+    : GetCameraEntrypoint<Perspective>(engine)
 {
 }
 
@@ -91,7 +91,7 @@ std::string GetCameraPerspectiveEntrypoint::getDescription() const
 }
 
 GetCameraOrthographicEntrypoint::GetCameraOrthographicEntrypoint(Engine &engine)
-    : GetCameraEntrypoint<OrthographicCamera>(engine)
+    : GetCameraEntrypoint<Orthographic>(engine)
 {
 }
 

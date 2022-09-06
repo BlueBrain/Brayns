@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometry/GeometryObject.h>
-#include <brayns/engine/geometry/types/Primitive.h>
+#include <brayns/engine/geometry/GeometryView.h>
+#include <brayns/engine/geometry/types/Capsule.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 namespace dti
 {
@@ -31,20 +31,26 @@ class DTIComponent final : public brayns::Component
 public:
     struct Streamline
     {
-        brayns::GeometryObject<brayns::Primitive> geometry;
+        Streamline(std::vector<brayns::Capsule> primitives)
+            : geometry(std::move(primitives))
+            , view(geometry)
+        {
+            geometry.commit();
+        }
+        brayns::Geometry geometry;
+
+        brayns::GeometryView view;
         std::vector<brayns::Vector4f> colors;
     };
 
 public:
-    DTIComponent(std::vector<std::vector<brayns::Primitive>> streamlineGeometries);
+    DTIComponent(std::vector<std::vector<brayns::Capsule>> streamlineGeometries);
 
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
 
     void onCreate() override;
 
     bool commit() override;
-
-    void onDestroy() override;
 
     size_t getNumStreamlines() const noexcept;
 

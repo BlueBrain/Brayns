@@ -26,41 +26,30 @@ namespace
 {
 struct BoxParameters
 {
-    inline static const std::string osprayName = "box";
     inline static const std::string box = "box";
 };
 }
 
 namespace brayns
 {
-const std::string &OsprayGeometryName<Box>::get()
-{
-    return BoxParameters::osprayName;
-}
-
-void GeometryBoundsUpdater<Box>::update(const Box &box, const Matrix4f &t, Bounds &b)
+Bounds GeometryTraits<Box>::computeBounds(const Matrix4f &matrix, const Box &box)
 {
     const auto &min = box.min;
     const auto &max = box.max;
-
-    std::vector<Vector3f> corners = {
-        min,
-        Vector3f(max.x, min.y, min.z),
-        Vector3f(min.x, min.y, max.z),
-        Vector3f(max.x, min.y, max.z),
-        Vector3f(min.x, max.y, min.z),
-        Vector3f(max.x, max.y, min.z),
-        Vector3f(min.x, max.y, max.z),
-        max};
-
-    for (const auto &corner : corners)
-    {
-        b.expand(Vector3f(t * Vector4f(corner, 1.f)));
-    }
+    Bounds bounds;
+    bounds.expand(matrix * Vector4f(min, 1.f));
+    bounds.expand(matrix * Vector4f(max.x, min.y, min.z, 1.f));
+    bounds.expand(matrix * Vector4f(min.x, min.y, max.z, 1.f));
+    bounds.expand(matrix * Vector4f(max.x, min.y, max.z, 1.f));
+    bounds.expand(matrix * Vector4f(min.x, max.y, min.z, 1.f));
+    bounds.expand(matrix * Vector4f(max.x, max.y, min.z, 1.f));
+    bounds.expand(matrix * Vector4f(min.x, max.y, max.z, 1.f));
+    bounds.expand(matrix * Vector4f(max, 1.f));
+    return bounds;
 }
 
-void GeometryCommitter<Box>::commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Box> &primitives)
+void GeometryTraits<Box>::updateData(ospray::cpp::Geometry &handle, std::vector<Box> &data)
 {
-    osprayGeometry.setParam(BoxParameters::box, ospray::cpp::SharedData(primitives));
+    handle.setParam(BoxParameters::box, ospray::cpp::SharedData(data));
 }
 }

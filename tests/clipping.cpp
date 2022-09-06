@@ -19,13 +19,13 @@
  */
 
 #include <brayns/Brayns.h>
-#include <brayns/engine/Engine.h>
-#include <brayns/engine/cameras/OrthographicCamera.h>
-#include <brayns/engine/cameras/PerspectiveCamera.h>
+#include <brayns/engine/camera/projections/Orthographic.h>
+#include <brayns/engine/camera/projections/Perspective.h>
 #include <brayns/engine/components/ClippingComponent.h>
+#include <brayns/engine/core/Engine.h>
 #include <brayns/engine/geometry/types/Plane.h>
-#include <brayns/engine/lights/AmbientLight.h>
-#include <brayns/engine/lights/DirectionalLight.h>
+#include <brayns/engine/light/types/AmbientLight.h>
+#include <brayns/engine/light/types/DirectionalLight.h>
 
 #include <tests/paths.h>
 
@@ -57,13 +57,10 @@ struct ZParallelSliceManager
         const auto planeBDistance = -center.z - sliceThickness * 0.5f;
 
         auto model = std::make_unique<brayns::Model>();
-        const auto planes = std::vector<brayns::Vector4f>{{planeA, planeADistance}, {planeB, planeBDistance}};
-        for (const auto &plane : planes)
-        {
-            const auto planeGeometry = brayns::Plane{plane};
-            model->addComponent<brayns::ClippingComponent<brayns::Plane>>(planeGeometry);
-        }
-
+        auto planes = std::vector<brayns::Plane>{
+            brayns::Plane{{planeA, planeADistance}},
+            brayns::Plane{{planeB, planeBDistance}}};
+        model->addComponent<brayns::ClippingComponent>(std::move(planes));
         scene.addClippingModel(std::move(model));
     }
 
@@ -95,10 +92,8 @@ void testClipping(bool orthographic)
         BraynsTestUtils::adjustPerspectiveView(brayns);
     }
 
-    BraynsTestUtils::addLight(brayns, std::make_unique<brayns::DirectionalLight>());
-    auto ambientLight = std::make_unique<brayns::AmbientLight>();
-    ambientLight->setIntensity(0.05f);
-    BraynsTestUtils::addLight(brayns, std::move(ambientLight));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight()));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{0.05f}));
 
     auto &engine = brayns.getEngine();
     brayns.commitAndRender();

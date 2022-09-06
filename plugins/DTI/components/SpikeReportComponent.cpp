@@ -20,9 +20,9 @@
 
 #include "SpikeReportComponent.h"
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/components/SimulationComponent.h>
+#include <brayns/engine/model/Model.h>
 
 #include <components/DTIComponent.h>
 
@@ -118,7 +118,7 @@ void SpikeReportComponent::onPreRender(const brayns::ParametersManager &paramete
     auto &model = getModel();
     auto &dti = model.getComponent<DTIComponent>();
 
-    if (!brayns::ExtractModelObject::isSimulationEnabled(model))
+    if (!brayns::ExtractComponent::simulationEnabled(getModel()))
     {
         // First onPreRender after disabling simulation - restore default colors
         if (_lastEnabledValue)

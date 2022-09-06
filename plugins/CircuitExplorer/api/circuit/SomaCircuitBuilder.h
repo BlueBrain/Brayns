@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/MathTypes.h>
-#include <brayns/engine/Model.h>
+#include <brayns/engine/model/Model.h>
 
 #include <api/coloring/IColorData.h>
 #include <api/reports/ReportMapping.h>

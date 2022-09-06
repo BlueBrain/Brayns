@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
-
 #include <api/reports/ReportMapping.h>
 #include <io/sonataloader/LoadContext.h>
 #include <io/util/ProgressUpdater.h>

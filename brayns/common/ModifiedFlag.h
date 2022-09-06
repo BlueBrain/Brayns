@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <utility>
+
 namespace brayns
 {
 class ModifiedFlag
@@ -55,13 +57,16 @@ public:
     }
 
     template<typename T, typename U>
-    void update(T &value, U &&newValue)
+    bool update(T &value, U &&newValue)
     {
         if (newValue != value)
         {
             value = std::forward<U>(newValue);
             _modified = true;
+            return true;
         }
+
+        return false;
     }
 
 private:

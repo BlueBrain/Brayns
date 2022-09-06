@@ -20,9 +20,10 @@
 
 #include "ProteinComponent.h"
 
-#include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
+#include <brayns/engine/model/Model.h>
 
 #include <ospray/ospray_cpp/Data.h>
 
@@ -30,44 +31,39 @@ namespace brayns
 {
 ProteinComponent::ProteinComponent(
     std::vector<Sphere> spheres,
-    std::vector<Vector4f> colors,
-    std::vector<uint8_t> indices)
-    : _object(std::move(spheres))
+    std::vector<uint8_t> indices,
+    std::vector<Vector4f> colors)
+    : _geometry(std::move(spheres))
+    , _geometryView(_geometry)
+    , _indices(std::move(indices))
     , _colors(std::move(colors))
-    , _colorIndices(std::move(indices))
 {
-    _object.setColorMap(ospray::cpp::SharedData(_colors), ospray::cpp::SharedData(_colorIndices));
+    _geometryView.setColorMap(ospray::cpp::SharedData(_indices), ospray::cpp::SharedData(_colors));
 }
 
 Bounds ProteinComponent::computeBounds(const Matrix4f &transform) const noexcept
 {
-    return _object.computeBounds(transform);
+    return _geometry.computeBounds(transform);
 }
 
 void ProteinComponent::onCreate()
 {
     auto &model = getModel();
     auto &group = model.getGroup();
-    group.addGeometry(_object);
-
+    group.setGeometry(_geometryView);
     model.addComponent<MaterialComponent>();
 }
 
 bool ProteinComponent::commit()
 {
-    auto &material = ExtractModelObject::extractMaterial(getModel());
+    auto &material = ExtractComponent::material(getModel());
     if (material.commit())
     {
-        _object.setMaterial(material);
+        _geometryView.setMaterial(material);
     }
 
-    return _object.commit();
-}
-
-void ProteinComponent::onDestroy()
-{
-    auto &model = getModel();
-    auto &group = model.getGroup();
-    group.removeGeometry(_object);
+    auto commitGeometry = _geometry.commit();
+    auto commitView = _geometryView.commit();
+    return commitGeometry || commitView;
 }
 }

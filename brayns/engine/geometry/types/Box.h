@@ -20,8 +20,7 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-#include <brayns/engine/geometry/Geometry.h>
+#include <brayns/engine/geometry/GeometryTraits.h>
 
 #include <ospray/ospray_cpp/Traits.h>
 
@@ -34,24 +33,14 @@ struct Box
 };
 
 template<>
-class OsprayGeometryName<Box>
+class GeometryTraits<Box>
 {
 public:
-    static const std::string &get();
-};
+    inline static const std::string handleName = "box";
+    inline static const std::string name = "box";
 
-template<>
-class GeometryBoundsUpdater<Box>
-{
-public:
-    static void update(const Box &s, const Matrix4f &t, Bounds &b);
-};
-
-template<>
-class GeometryCommitter<Box>
-{
-public:
-    static void commit(const ospray::cpp::Geometry &osparyGeometry, const std::vector<Box> &primitives);
+    static Bounds computeBounds(const Matrix4f &matrix, const Box &data);
+    static void updateData(ospray::cpp::Geometry &handle, std::vector<Box> &data);
 };
 
 } // namespace brayns

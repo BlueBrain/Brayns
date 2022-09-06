@@ -20,7 +20,8 @@
 
 #include "OutlineShell.h"
 
-#include <brayns/engine/components/IsosurfaceRendererComponent.h>
+#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/geometry/types/Isosurface.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
 
 #include <api/usecases/common/DataUtils.h>
@@ -106,7 +107,7 @@ public:
 
         brayns::RegularVolume result;
         result.dataType = brayns::VolumeDataType::UnsignedChar;
-        result.data = ValidVoxelGridFilter::filter(voxelSize, doubles);
+        result.voxels = ValidVoxelGridFilter::filter(voxelSize, doubles);
         result.size = volume.getSize();
         result.spacing = volume.getSpacing();
         return result;
@@ -128,10 +129,12 @@ bool OutlineShell::isVolumeValid(const AtlasVolume &volume) const
 std::unique_ptr<brayns::Model> OutlineShell::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
 {
     (void)payload;
-    brayns::RegularVolume shellVolume = FeaturesExtractor::extract(volume);
 
     auto model = std::make_unique<brayns::Model>();
-    model->addComponent<brayns::IsosurfaceRendererComponent<brayns::RegularVolume>>(std::move(shellVolume), 1.f);
+
+    auto shellVolume = FeaturesExtractor::extract(volume);
+    auto isoSurface = brayns::Isosurface{brayns::Volume(std::move(shellVolume)), std::vector<float>{1.f}};
+    model->addComponent<brayns::GeometryRendererComponent>(std::move(isoSurface));
 
     return model;
 }

@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
 #include <brayns/engine/components/GeometryRendererComponent.h>
-#include <brayns/network/adapters/GeometryAdapter.h>
+#include <brayns/engine/json/adapters/GeometryAdapters.h>
+#include <brayns/engine/scene/Scene.h>
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -44,18 +44,20 @@ public:
         auto params = request.getParams();
         auto numGeometries = params.size();
 
-        std::vector<T> geometries(numGeometries);
-        std::vector<brayns::Vector4f> colors(numGeometries);
+        std::vector<T> geometries;
+        geometries.reserve(numGeometries);
+        std::vector<brayns::Vector4f> colors;
+        colors.reserve(numGeometries);
 
         for (size_t i = 0; i < numGeometries; ++i)
         {
             auto &param = params[i];
-            geometries[i] = std::move(param.geometry);
-            colors[i] = std::move(param.color);
+            geometries.push_back(std::move(param.geometry));
+            colors.push_back(param.color);
         }
 
         auto newModel = std::make_unique<Model>();
-        auto &renderComponent = newModel->addComponent<GeometryRendererComponent<T>>(std::move(geometries));
+        auto &renderComponent = newModel->addComponent<GeometryRendererComponent>(std::move(geometries));
         renderComponent.setColors(colors);
 
         auto &instance = _scene.addModel({}, std::move(newModel));
@@ -84,7 +86,7 @@ public:
     std::string getDescription() const override;
 };
 
-class AddCapsulesEntrypoint final : public AddGeometryEntrypoint<Primitive>
+class AddCapsulesEntrypoint final : public AddGeometryEntrypoint<Capsule>
 {
 public:
     AddCapsulesEntrypoint(Scene &scene);

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
+#include <brayns/engine/model/Model.h>
 #include <brayns/json/JsonType.h>
 
 #include <api/AtlasVolume.h>

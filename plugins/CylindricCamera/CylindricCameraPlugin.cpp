@@ -25,7 +25,7 @@
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include "camera/CylindricCamera.h"
+#include "camera/CylindricAdapter.h"
 #include "camera/ospray/OsprayCylindricCamera.h"
 #include "network/entrypoints/CylindricCameraEntrypoint.h"
 
@@ -36,10 +36,11 @@ CylindricCameraPlugin::CylindricCameraPlugin(brayns::Engine &engine)
 
 void CylindricCameraPlugin::onCreate()
 {
-    ospray::Camera::registerType<OsprayCylindricCamera>(CylindricCamera::typeName.c_str());
+    ospray::Camera::registerType<OsprayCylindricCamera>(brayns::ProjectionTraits<Cylindric>::name.c_str());
 
-    auto &cameraFactory = _engine.getCameraFactory();
-    cameraFactory.registerType<CylindricCamera>();
+    auto &factories = _engine.getFactories();
+    auto &cameras = factories.cameras;
+    cameras.addType<Cylindric>();
 }
 
 void CylindricCameraPlugin::registerEntrypoints(brayns::INetworkInterface &interface)

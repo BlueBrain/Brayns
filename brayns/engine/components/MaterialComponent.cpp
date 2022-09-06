@@ -20,27 +20,22 @@
 
 #include "MaterialComponent.h"
 
-#include <brayns/engine/materials/DefaultMaterial.h>
+#include <brayns/engine/material/types/Phong.h>
 
 namespace brayns
 {
 MaterialComponent::MaterialComponent()
-    : _material(std::make_unique<DefaultMaterial>())
+    : _material(Phong())
 {
 }
 
-void MaterialComponent::setMaterial(std::unique_ptr<Material> material)
+void MaterialComponent::setMaterial(Material material)
 {
-    if (!material)
-    {
-        throw std::invalid_argument("Cannot set a null material to a MaterialComponent");
-    }
-
     _material = std::move(material);
 }
 
 Material &MaterialComponent::getMaterial() noexcept
 {
-    return *_material;
+    return _material;
 }
 }

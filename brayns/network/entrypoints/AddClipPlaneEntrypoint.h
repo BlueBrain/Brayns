@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
-#include <brayns/network/adapters/GeometryAdapter.h>
+#include <brayns/engine/json/adapters/GeometryAdapters.h>
+#include <brayns/engine/scene/Scene.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns

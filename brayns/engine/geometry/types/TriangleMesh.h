@@ -20,8 +20,7 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-#include <brayns/engine/geometry/Geometry.h>
+#include <brayns/engine/geometry/GeometryTraits.h>
 
 namespace brayns
 {
@@ -34,43 +33,21 @@ struct TriangleMesh
     std::vector<Vector3ui> indices;
 };
 
-class TriangleMeshMerger
+class TriangleMeshUtils
 {
 public:
     static void merge(const TriangleMesh &src, TriangleMesh &dst);
-};
-
-class TriangleMeshNormalGenerator
-{
-public:
-    static void generate(TriangleMesh &mesh);
+    static void generateNormals(TriangleMesh &mesh);
 };
 
 template<>
-class OsprayGeometryName<TriangleMesh>
+class GeometryTraits<TriangleMesh>
 {
 public:
-    static const std::string &get();
-};
+    inline static const std::string handleName = "mesh";
+    inline static const std::string name = "mesh";
 
-template<>
-class GeometryBoundsUpdater<TriangleMesh>
-{
-public:
-    static void update(const TriangleMesh &mesh, const Matrix4f &matrix, Bounds &bounds);
-};
-
-template<>
-class InputGeometryChecker<TriangleMesh>
-{
-public:
-    static void check(const std::vector<TriangleMesh> &primitives);
-};
-
-template<>
-class GeometryCommitter<TriangleMesh>
-{
-public:
-    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<TriangleMesh> &primitives);
+    static Bounds computeBounds(const Matrix4f &matrix, const TriangleMesh &data);
+    static void updateData(ospray::cpp::Geometry &handle, std::vector<TriangleMesh> &data);
 };
 }

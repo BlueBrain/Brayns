@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
+#include <brayns/engine/scene/Scene.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/UpdateModelMessage.h>

@@ -22,7 +22,7 @@
 #include <brayns/utils/Timer.h>
 
 #include <brayns/engine/components/GeometryRendererComponent.h>
-#include <brayns/engine/geometry/types/Primitive.h>
+#include <brayns/engine/geometry/types/Capsule.h>
 
 #include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
@@ -94,7 +94,7 @@ std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
     auto &primitives = neuronGeometry.geometry;
 
     auto model = std::make_unique<brayns::Model>();
-    model->addComponent<brayns::GeometryRendererComponent<brayns::Primitive>>(std::move(primitives));
+    model->addComponent<brayns::GeometryRendererComponent>(std::move(primitives));
 
     brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.seconds());
 

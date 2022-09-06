@@ -26,30 +26,22 @@ namespace
 {
 struct PlaneParameters
 {
-    inline static const std::string osprayName = "plane";
     inline static const std::string coefficients = "plane.coefficients";
 };
 }
 
 namespace brayns
 {
-const std::string &OsprayGeometryName<Plane>::get()
+Bounds GeometryTraits<Plane>::computeBounds(const Matrix4f &matrix, const Plane &data)
 {
-    return PlaneParameters::osprayName;
+    // NOOP Planes are infinite.
+    (void)matrix;
+    (void)data;
+    return {};
 }
 
-void GeometryBoundsUpdater<Plane>::update(const Plane &p, const Matrix4f &t, Bounds &b)
+void GeometryTraits<Plane>::updateData(ospray::cpp::Geometry &handle, std::vector<Plane> &data)
 {
-    // NOOP
-    // Planes are infinite. They can be limited, but on Brayns we only use them for clipping
-    // https://github.com/ospray/ospray#planes
-    (void)p;
-    (void)t;
-    (void)b;
-}
-
-void GeometryCommitter<Plane>::commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<Plane> &primitives)
-{
-    osprayGeometry.setParam(PlaneParameters::coefficients, ospray::cpp::SharedData(primitives));
+    handle.setParam(PlaneParameters::coefficients, ospray::cpp::SharedData(data));
 }
 }

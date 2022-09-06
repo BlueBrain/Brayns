@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/engine/Scene.h>
-#include <brayns/network/adapters/LightAdapter.h>
+#include <brayns/engine/json/adapters/LightAdapters.h>
+#include <brayns/engine/scene/Scene.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
@@ -40,8 +40,8 @@ public:
 
     virtual void onRequest(const Request &request) override
     {
-        auto light = std::make_unique<T>();
-        request.getParams(*light);
+        T data = request.getParams();
+        auto light = Light(std::move(data));
         auto lightId = _scene.addLight(std::move(light));
         request.reply(Json::serialize(lightId));
     }

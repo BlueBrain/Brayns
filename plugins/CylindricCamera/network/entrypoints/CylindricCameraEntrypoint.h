@@ -21,9 +21,9 @@
 #pragma once
 
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
-#include <camera/CylindricCamera.h>
+#include <camera/CylindricAdapter.h>
 
-class SetCylindricCameraEntrypoint : public brayns::SetCameraEntrypoint<CylindricCamera>
+class SetCylindricCameraEntrypoint : public brayns::SetCameraEntrypoint<Cylindric>
 {
 public:
     SetCylindricCameraEntrypoint(brayns::Engine &engine);
@@ -32,7 +32,7 @@ public:
     std::string getDescription() const override;
 };
 
-class GetCylindricCameraEntrypoint : public brayns::GetCameraEntrypoint<CylindricCamera>
+class GetCylindricCameraEntrypoint : public brayns::GetCameraEntrypoint<Cylindric>
 {
 public:
     GetCylindricCameraEntrypoint(brayns::Engine &engine);

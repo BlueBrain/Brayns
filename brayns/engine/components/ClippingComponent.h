@@ -20,40 +20,42 @@
 
 #pragma once
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/GeometryView.h>
+#include <brayns/engine/model/Model.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 namespace brayns
 {
 /**
  * @brief Adds clipping geometry to the model (Affects the whole scene)
  */
-template<typename T>
 class ClippingComponent : public Component
 {
 public:
+    template<typename T>
     ClippingComponent(T primitive)
-        : _clipper(std::move(primitive))
+        : ClippingComponent(std::vector<T>{std::move(primitive)})
     {
-        _clipper.commit();
+    }
+
+    template<typename T>
+    ClippingComponent(std::vector<T> primitives)
+        : _geometry(std::move(primitives))
+        , _view(_geometry)
+    {
+        _geometry.commit();
+        _view.commit();
     }
 
     virtual void onCreate() override
     {
         auto &model = getModel();
         auto &group = model.getGroup();
-        group.addClipper(_clipper);
-    }
-
-    virtual void onDestroy() override
-    {
-        auto &model = getModel();
-        auto &group = model.getGroup();
-        group.removeClipper(_clipper);
+        group.setClipper(_view);
     }
 
 private:
-    GeometryObject<T> _clipper;
+    Geometry _geometry;
+    GeometryView _view;
 };
 }

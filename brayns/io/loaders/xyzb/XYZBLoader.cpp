@@ -89,7 +89,7 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob,
     }
 
     auto model = std::make_unique<Model>();
-    model->addComponent<GeometryRendererComponent<Sphere>>(std::move(spheres));
+    model->addComponent<GeometryRendererComponent>(std::move(spheres));
 
     std::vector<std::unique_ptr<Model>> result;
     result.push_back(std::move(model));

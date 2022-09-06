@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/GeometryView.h>
 #include <brayns/engine/geometry/types/TriangleMesh.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 /**
  * @brief The EndfeetComponent class is a endfeet connectivity geometry rendering component in which the endfeet
@@ -35,7 +35,7 @@ public:
 
     bool commit() override;
 
-    void onDestroy() override;
+    void onCreate() override;
 
     /**
      * @brief getAstroctyeIds Return the ID of the astroctyes that the endfeet are grouped by
@@ -72,9 +72,8 @@ public:
     std::vector<uint64_t> setColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap);
 
 private:
-    using Endfeet = brayns::GeometryObject<brayns::TriangleMesh>;
-
     std::vector<uint64_t> _astrocyteIds;
-    std::vector<Endfeet> _endFeet;
+    std::vector<brayns::Geometry> _geometries;
+    std::vector<brayns::GeometryView> _views;
     bool _colorsDirty{false};
 };

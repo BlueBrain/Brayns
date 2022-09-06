@@ -20,190 +20,110 @@
 
 #pragma once
 
-#include <brayns/common/Bounds.h>
+#include <brayns/common/ModifiedFlag.h>
+#include <brayns/utils/FunctorInfo.h>
+
+#include "GeometryData.h"
+#include "GeometryTraits.h"
 
 #include <ospray/ospray_cpp/Geometry.h>
 
 #include <cassert>
-#include <numeric>
-#include <string_view>
+#include <memory>
 #include <vector>
 
 namespace brayns
 {
-/**
- * @brief The RenderableBoundsUpdater is a templated class that can be specialized to update bounds
- * based on a trasnformation and a given specialized geometry
- */
-template<typename T>
-class GeometryBoundsUpdater
-{
-public:
-    /**
-     * @brief Updates a Bounds object with the given geometry trasnformed by the given matrix
-     * @param renderableType The source renderable used to update the bounds
-     * @param transform The matrix by which to trasnform the geometry
-     * @param bounds The bounds to update
-     */
-    static void update(const T &renderableType, const Matrix4f &transform, Bounds &bounds)
-    {
-        (void)renderableType;
-        (void)transform;
-        (void)bounds;
-    }
-};
-
-/**
- * @brief Utility class to deduce the Ospray geometry name for a given geometry type
- */
-template<typename T>
-class OsprayGeometryName
-{
-public:
-    /**
-     * @brief Returns the Ospray name of the type
-     */
-    static const std::string &get()
-    {
-        throw std::runtime_error("Unhandled geometry type");
-    }
-};
-
-template<typename T>
-class InputGeometryChecker
-{
-public:
-    static void check(const std::vector<T> &primitives)
-    {
-        if (primitives.size() >= std::numeric_limits<uint32_t>::max())
-        {
-            throw std::invalid_argument("Maximum number of primitives is 2^32 - 1");
-        }
-    }
-};
-
-/**
- * @brief Utility class to commit geometry-specific parameters
- */
-template<typename T>
-class GeometryCommitter
-{
-public:
-    /**
-     * @brief Commits the type specific parameters
-     */
-    static void commit(const ospray::cpp::Geometry &osprayGeometry, const std::vector<T> &primitives)
-    {
-        (void)osprayGeometry;
-        (void)primitives;
-        throw std::runtime_error("Unhandled geometry type");
-    }
-};
-
-/**
- * @brief The Geometry class is a templated class to easily manage Ospray geometry at a high level.
- * It allows to add, retrieve and manipulate Geometry.
- */
-template<typename T>
 class Geometry
 {
 public:
-    Geometry(T primitive)
-        : _osprayGeometry(OsprayGeometryName<T>::get())
+    template<typename T>
+    using Traits = GeometryTraits<T>;
+
+    template<typename Type>
+    Geometry(std::vector<Type> primitives)
     {
-        _primitives.push_back(std::move(primitive));
-        InputGeometryChecker<T>::check(_primitives);
+        _handleName = GeometryTraits<Type>::handleName;
+        _geometryName = GeometryTraits<Type>::name;
+        _handle = ospray::cpp::Geometry(_handleName);
+        _data = std::make_unique<GeometryData<Type>>(std::move(primitives));
     }
 
-    Geometry(std::vector<T> primitives)
-        : _osprayGeometry(OsprayGeometryName<T>::get())
-        , _primitives(std::move(primitives))
+    template<typename Type>
+    Geometry(Type primitive)
+        : Geometry(std::vector<Type>{std::move(primitive)})
     {
-        assert(!_primitives.empty());
-        InputGeometryChecker<T>::check(_primitives);
     }
+
+    Geometry(Geometry &&) noexcept = default;
+    Geometry &operator=(Geometry &&) noexcept = default;
+
+    Geometry(const Geometry &other);
+    Geometry &operator=(const Geometry &other);
 
     /**
-     * @brief Retrieves all geometry primitives in this Geometry object
+     * @brief Tries to cast the primitive data to the given type.
+     * @tparam Type primitive type to cast the data to
+     * @return const std::vector<Type>*, if the cast is successful, null otherwise
      */
-    const std::vector<T> &getPrimitives() const noexcept
+    template<typename Type>
+    const std::vector<Type> *as() const noexcept
     {
-        return _primitives;
+        if (auto cast = dynamic_cast<const GeometryData<Type> *>(_data.get()))
+        {
+            return &cast->primitives;
+        }
+        return nullptr;
     }
 
     /**
-     * @brief Allows to pass a callback to mainipulate all the geometries on thie Geometry buffer.
-     * The callback must have the signature void(const uint32_t index, GeometryType&).
+     * @copydoc Geometry::forEach<Callable>(Callable&&) const
      */
     template<typename Callable>
-    void forEach(const Callable &callback)
+    void forEach(Callable &&callback) noexcept
     {
-        _dirty = true;
-        const auto end = static_cast<uint32_t>(_primitives.size());
-        for (uint32_t i = 0; i < end; ++i)
+        using ArgType = DecayFirstArgType<Callable>; // typename ArgumentInferer<Callable>::argType;
+        assert(dynamic_cast<GeometryData<ArgType> *>(_data.get()));
+        auto &cast = static_cast<GeometryData<ArgType> &>(*_data);
+        for (auto &element : cast.primitives)
         {
-            callback(i, _primitives[i]);
+            callback(element);
         }
+        _flag = true;
     }
 
     /**
-     * @brief Compute the spatial bounds of the geometry on the buffer transformed by the given
-     * matrix.
-     * There must be a specialization of GeometryBoundsUpdater::updateBounds for the gometry type
-     * handled.
+     * @brief Return the number of primitives that make up this geometry.
+     * @return size_t number of primitives.
      */
-    Bounds computeBounds(const Matrix4f &transform) const noexcept
-    {
-        Bounds result;
-#pragma omp parallel
-        {
-            Bounds local;
-
-#pragma omp for
-            for (size_t i = 0; i < _primitives.size(); ++i)
-            {
-                const auto &geometry = _primitives[i];
-                GeometryBoundsUpdater<T>::update(geometry, transform, local);
-            }
-
-#pragma omp critical(local_bounds_merge_section)
-            result.expand(local);
-        }
-
-        return result;
-    }
+    size_t numPrimitives() const noexcept;
 
     /**
-     * @brief Will attempt to synchronize the geometry data with Ospray, if any changes since the previous
-     * synchronization has happen. It will call the commitGeometrySpecificParams(), which must have been
-     * specialized for the geometry type being handled.
+     * @brief Compute the spatial bounds of the transformed primitives.
+     * @param matrix transformation to apply to the geometry spatial data.
+     * @return Bounds axis-aligned bounding box of the geometry
      */
-    bool commit()
-    {
-        if (!_dirty || _primitives.empty())
-        {
-            return false;
-        }
-
-        GeometryCommitter<T>::commit(_osprayGeometry, _primitives);
-        _osprayGeometry.commit();
-
-        _dirty = false;
-
-        return true;
-    }
+    Bounds computeBounds(const Matrix4f &matrix) const noexcept;
 
     /**
-     * @brief Returns the Ospray geometry object handle
+     * @brief Calls the underlying OSPRay commit function, if any parameter has been modified, and resets the modified
+     * state.
+     * @return true If any parameter was modified and thus the commit function was called.
+     * @return false If no parameter was modified.
      */
-    const ospray::cpp::Geometry &getOsprayGeometry() const noexcept
-    {
-        return _osprayGeometry;
-    }
+    bool commit();
+
+    /**
+     * @brief Returns the OSPRay geometry handle.
+     * @return const ospray::cpp::Geometry&.
+     */
+    const ospray::cpp::Geometry &getHandle() const noexcept;
 
 private:
-    ospray::cpp::Geometry _osprayGeometry;
-    bool _dirty{true};
-    std::vector<T> _primitives;
+    std::string _handleName;
+    std::string _geometryName;
+    ospray::cpp::Geometry _handle;
+    std::unique_ptr<IGeometryData> _data;
+    ModifiedFlag _flag;
 };
 }

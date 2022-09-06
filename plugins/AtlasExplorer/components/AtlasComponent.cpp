@@ -20,8 +20,6 @@
 
 #include "AtlasComponent.h"
 
-#include <cassert>
-
 AtlasComponent::AtlasComponent(const std::shared_ptr<AtlasVolume> &volume)
     : _volume(volume)
 {

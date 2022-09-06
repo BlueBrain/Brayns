@@ -66,7 +66,7 @@ struct NeuronSectionMappingGenerator
 
 struct NeuronGeometryAppender
 {
-    static void append(NeuronGeometry &dst, int32_t section, brayns::Primitive geometry)
+    static void append(NeuronGeometry &dst, int32_t section, brayns::Capsule geometry)
     {
         auto &geometryBuffer = dst.geometry;
         auto &sectionMapping = dst.sectionSegmentMapping;
@@ -86,7 +86,7 @@ struct SomaBuilder
 
         const auto &somaCenter = soma.center;
         const auto somaRadius = soma.radius;
-        auto somaSphere = brayns::Primitive::sphere(somaCenter, somaRadius);
+        auto somaSphere = brayns::CapsuleFactory::sphere(somaCenter, somaRadius);
         NeuronGeometryAppender::append(dst, -1, std::move(somaSphere));
 
         const auto somaChildren = morphology.sectionChildrenIndices(-1);
@@ -101,7 +101,7 @@ struct SomaBuilder
             const auto &childFirstSample = child.samples[0];
             const auto &samplePos = childFirstSample.position;
             const auto sampleRadius = childFirstSample.radius;
-            auto somaCone = brayns::Primitive::cone(somaCenter, somaRadius, samplePos, sampleRadius);
+            auto somaCone = brayns::CapsuleFactory::cone(somaCenter, somaRadius, samplePos, sampleRadius);
             NeuronGeometryAppender::append(dst, -1, std::move(somaCone));
         }
 
@@ -154,7 +154,7 @@ struct NeuriteBuilder
                     const auto &p2 = s2.position;
                     const auto r2 = s2.radius;
 
-                    auto segmentGeometry = brayns::Primitive::cone(p1, r1, p2, r2);
+                    auto segmentGeometry = brayns::CapsuleFactory::cone(p1, r1, p2, r2);
                     NeuronGeometryAppender::append(dst, section.id, std::move(segmentGeometry));
                 }
             }

@@ -20,42 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometry/GeometryObject.h>
-#include <brayns/engine/geometry/types/Primitive.h>
-
-struct RenderableAxisList
-{
-    brayns::Vector3f vector;
-    brayns::GeometryObject<brayns::Primitive> geometry;
-};
-
-class RenderableAxes
-{
-public:
-    RenderableAxes(std::vector<RenderableAxisList> geometry);
-
-    template<typename Callable>
-    void forEach(const Callable &callback)
-    {
-        for (auto &axis : _geometry)
-        {
-            callback(axis);
-        }
-    }
-
-    template<typename Callable>
-    void forEach(const Callable &callback) const
-    {
-        for (auto &axis : _geometry)
-        {
-            callback(axis);
-        }
-    }
-
-private:
-    std::vector<RenderableAxisList> _geometry;
-};
+#include <brayns/engine/geometry/GeometryView.h>
+#include <brayns/engine/geometry/types/Capsule.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 class RotationVolumeComponent final : public brayns::Component
 {
@@ -71,8 +38,7 @@ public:
 
     bool commit() override;
 
-    void onDestroy() override;
-
 private:
-    RenderableAxes _axes;
+    std::vector<brayns::Geometry> _primitives;
+    std::vector<brayns::GeometryView> _views;
 };

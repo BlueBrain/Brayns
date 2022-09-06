@@ -23,7 +23,7 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/engine/ModelInstance.h>
+#include <brayns/engine/model/ModelInstance.h>
 
 #include <brayns/network/messages/GetModelMessage.h>
 

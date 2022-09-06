@@ -20,14 +20,22 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/GeometryView.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 #include <api/neuron/NeuronGeometry.h>
 
 struct MorphologyGeometry
 {
-    brayns::GeometryObject<brayns::Primitive> geometry;
+    MorphologyGeometry(std::vector<brayns::Capsule> primitives, std::vector<NeuronSectionMapping> sections)
+        : geometry(std::move(primitives))
+        , view(geometry)
+        , sections(std::move(sections))
+    {
+    }
+
+    brayns::Geometry geometry;
+    brayns::GeometryView view;
     std::vector<NeuronSectionMapping> sections;
 };
 
@@ -36,13 +44,12 @@ class MorphologyCircuitComponent final : public brayns::Component
 public:
     MorphologyCircuitComponent(
         std::vector<uint64_t> ids,
-        std::vector<std::vector<brayns::Primitive>> primitives,
+        std::vector<std::vector<brayns::Capsule>> primitives,
         std::vector<std::vector<NeuronSectionMapping>> map);
 
     brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
     void onCreate() override;
     bool commit() override;
-    void onDestroy() override;
     void onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult) const noexcept override;
 
     /**
@@ -90,7 +97,7 @@ public:
      *
      * @param multiplier
      */
-    void changeThickness(const float multiplier) noexcept;
+    void changeThickness(float multiplier) noexcept;
 
 private:
     std::vector<uint64_t> _ids;

@@ -20,9 +20,10 @@
 
 #include "RotationVolumeComponent.h"
 
-#include <brayns/engine/common/ExtractModelObject.h>
+#include <brayns/engine/common/ExtractComponent.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/MaterialComponent.h>
+#include <brayns/engine/model/Model.h>
 
 #include <cmath>
 
@@ -74,14 +75,14 @@ public:
 
 struct RenderableAxisGeometry
 {
-    brayns::Vector3f vector = brayns::Vector3f(0.f);
-    std::vector<brayns::Primitive> geometry;
+    brayns::Vector3f axis = brayns::Vector3f(0.f);
+    std::vector<brayns::Capsule> geometry;
 };
 
 class SparseRotationVolumeBuilder
 {
 public:
-    static std::vector<RenderableAxisList> build(
+    static std::array<RenderableAxisGeometry, 3> build(
         const brayns::Vector3ui &sizes,
         const brayns::Vector3f &dimensions,
         const std::vector<brayns::Quaternion> &rotations)
@@ -90,7 +91,7 @@ public:
         const float radius = minDimension * 0.05f;
 
         const auto validQuaternions = QuaternionVolumeVerifier::computeValidIndices(rotations);
-        auto result = _allocateTemporary(validQuaternions.size());
+        auto result = _allocateResult(validQuaternions.size());
 
         const auto width = sizes.x;
         const auto height = sizes.y;
@@ -112,24 +113,23 @@ public:
             for (auto &axis : result)
             {
                 // * 0.5f so that the axis length does not invade surronding voxels
-                const auto vector = (quaternion * axis.vector) * minDimension * 0.5f;
+                const auto vector = (quaternion * axis.axis) * minDimension * 0.5f;
                 auto &buffer = axis.geometry;
-                buffer[i] = brayns::Primitive::cylinder(voxelCenter, voxelCenter + vector, radius);
+                buffer[i] = brayns::CapsuleFactory::cylinder(voxelCenter, voxelCenter + vector, radius);
             }
         }
 
-        return _buildResult(std::move(result));
+        return result;
     }
 
 private:
-    static std::vector<RenderableAxisGeometry> _allocateTemporary(size_t elementCount)
+    static std::array<RenderableAxisGeometry, 3> _allocateResult(size_t elementCount)
     {
-        auto result = std::vector<RenderableAxisGeometry>(3);
+        auto result = std::array<RenderableAxisGeometry, 3>();
         for (size_t i = 0; i < 3; ++i)
         {
-            auto &axis = result[i];
-            axis.vector[i] = 1.f;
-            axis.geometry.resize(elementCount);
+            result[i].axis[i] = 1.f;
+            result[i].geometry.resize(elementCount);
         }
         return result;
     }
@@ -144,44 +144,33 @@ private:
         const auto maxCorner = brayns::Vector3f(worldX + dimensions.x, worldY + dimensions.y, worldZ);
         return (maxCorner + minCorner) * 0.5f;
     }
-
-    static std::vector<RenderableAxisList> _buildResult(std::vector<RenderableAxisGeometry> buildData)
-    {
-        std::vector<RenderableAxisList> axes;
-        axes.reserve(buildData.size());
-        for (auto &rawAxis : buildData)
-        {
-            RenderableAxisList renderableAxis{rawAxis.vector, {std::move(rawAxis.geometry)}};
-            axes.push_back(std::move(renderableAxis));
-        }
-        return axes;
-    }
 };
-}
-
-RenderableAxes::RenderableAxes(std::vector<RenderableAxisList> geometry)
-    : _geometry(std::move(geometry))
-{
 }
 
 RotationVolumeComponent::RotationVolumeComponent(
     const brayns::Vector3ui &sizes,
     const brayns::Vector3f &dimensions,
     const std::vector<brayns::Quaternion> &rotations)
-    : _axes(SparseRotationVolumeBuilder::build(sizes, dimensions, rotations))
 {
+    auto geometry = SparseRotationVolumeBuilder::build(sizes, dimensions, rotations);
+    _primitives.reserve(3);
+    _views.reserve(3);
+    for (size_t i = 0; i < 3; ++i)
+    {
+        auto &primitive = _primitives.emplace_back(std::move(geometry[i].geometry));
+        primitive.commit();
+        auto &view = _views.emplace_back(primitive);
+        view.setColor(geometry[i].axis);
+    }
 }
 
 brayns::Bounds RotationVolumeComponent::computeBounds(const brayns::Matrix4f &transform) const noexcept
 {
     brayns::Bounds bounds;
-    _axes.forEach(
-        [&bounds, &transform](const RenderableAxisList &axis)
-        {
-            const auto &axisGeometry = axis.geometry;
-            auto axisBounds = axisGeometry.computeBounds(transform);
-            bounds.expand(axisBounds);
-        });
+    for (auto &primitive : _primitives)
+    {
+        bounds.expand(primitive.computeBounds(transform));
+    }
     return bounds;
 }
 
@@ -191,37 +180,24 @@ void RotationVolumeComponent::onCreate()
     model.addComponent<brayns::MaterialComponent>();
 
     auto &group = model.getGroup();
-    _axes.forEach(
-        [&](RenderableAxisList &axis)
-        {
-            auto &geometry = axis.geometry;
-            geometry.setColor(axis.vector);
-            group.addGeometry(geometry);
-        });
+    group.setGeometry(_views);
 }
 
 bool RotationVolumeComponent::commit()
 {
-    auto &material = brayns::ExtractModelObject::extractMaterial(getModel());
-    if (!material.commit())
+    auto &material = brayns::ExtractComponent::material(getModel());
+    if (material.commit())
     {
-        return false;
+        for (auto &view : _views)
+        {
+            view.setMaterial(material);
+        }
     }
 
-    _axes.forEach(
-        [&](RenderableAxisList &axis)
-        {
-            auto &geometry = axis.geometry;
-            geometry.setMaterial(material);
-            geometry.commit();
-        });
-
-    return true;
-}
-
-void RotationVolumeComponent::onDestroy()
-{
-    auto &model = getModel();
-    auto &group = model.getGroup();
-    _axes.forEach([&](RenderableAxisList &axis) { group.removeGeometry(axis.geometry); });
+    bool trigger = false;
+    for (auto &view : _views)
+    {
+        trigger = view.commit() || trigger;
+    }
+    return trigger;
 }

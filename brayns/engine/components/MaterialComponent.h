@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/engine/Material.h>
-#include <brayns/engine/ModelComponents.h>
+#include <brayns/engine/material/Material.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 namespace brayns
 {
@@ -32,12 +32,10 @@ class MaterialComponent final : public Component
 {
 public:
     MaterialComponent();
-
-    void setMaterial(std::unique_ptr<Material> material);
-
+    void setMaterial(Material material);
     Material &getMaterial() noexcept;
 
 private:
-    std::unique_ptr<Material> _material;
+    Material _material;
 };
 }

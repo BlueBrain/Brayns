@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/engine/ModelComponents.h>
-#include <brayns/engine/geometry/GeometryObject.h>
+#include <brayns/engine/geometry/GeometryView.h>
 #include <brayns/engine/geometry/types/Sphere.h>
+#include <brayns/engine/model/ModelComponents.h>
 
 #include <api/neuron/NeuronSection.h>
 
@@ -36,8 +36,6 @@ public:
     bool commit() override;
 
     void onCreate() override;
-
-    void onDestroy() override;
 
     void onInspect(const brayns::InspectContext &context, brayns::JsonObject &writeResult) const noexcept override;
 
@@ -77,6 +75,7 @@ public:
 
 private:
     std::vector<uint64_t> _ids;
-    brayns::GeometryObject<brayns::Sphere> _geometry;
+    brayns::Geometry _geometry;
+    brayns::GeometryView _view;
     std::vector<brayns::Vector4f> _colors;
 };
