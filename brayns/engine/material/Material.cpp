@@ -23,21 +23,6 @@
 
 namespace brayns
 {
-Material::Material(Material &&other) noexcept
-{
-    *this = other;
-}
-
-Material &Material::operator=(Material &&other) noexcept
-{
-    _handleName = std::move(other._handleName);
-    _materialName = std::move(other._materialName);
-    _handle = std::move(other._handle);
-    _data = std::move(other._data);
-    _flag = std::move(other._flag);
-    return *this;
-}
-
 Material::Material(const Material &other)
 {
     *this = other;

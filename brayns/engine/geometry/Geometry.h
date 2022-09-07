@@ -55,8 +55,8 @@ public:
     {
     }
 
-    Geometry(Geometry &&) noexcept;
-    Geometry &operator=(Geometry &&) noexcept;
+    Geometry(Geometry &&) = default;
+    Geometry &operator=(Geometry &&) = default;
 
     Geometry(const Geometry &other);
     Geometry &operator=(const Geometry &other);

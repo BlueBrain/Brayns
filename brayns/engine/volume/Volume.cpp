@@ -22,21 +22,6 @@
 
 namespace brayns
 {
-Volume::Volume(Volume &&other) noexcept
-{
-    *this = other;
-}
-
-Volume &Volume::operator=(Volume &&other) noexcept
-{
-    _handleName = std::move(other._handleName);
-    _volumeName = std::move(other._volumeName);
-    _handle = std::move(other._handle);
-    _data = std::move(other._data);
-    _flag = std::move(other._flag);
-    return *this;
-}
-
 Volume::Volume(const Volume &other)
 {
     *this = other;

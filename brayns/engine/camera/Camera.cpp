@@ -35,22 +35,6 @@ struct CameraParameters
 
 namespace brayns
 {
-Camera::Camera(Camera &&other) noexcept
-{
-    *this = other;
-}
-
-Camera &Camera::operator=(Camera &&other) noexcept
-{
-    _projectionName = std::move(other._projectionName);
-    _handle = std::move(other._handle);
-    _data = std::move(other._data);
-    _view = other._view;
-    _aspectRatio = other._aspectRatio;
-    _flag = std::move(other._flag);
-    return *this;
-}
-
 Camera::Camera(const Camera &other)
 {
     *this = other;
