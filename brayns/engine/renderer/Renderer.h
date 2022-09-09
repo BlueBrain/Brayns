@@ -43,8 +43,8 @@ public:
         set(std::move(data));
     }
 
-    Renderer(Renderer &&) = default;
-    Renderer &operator=(Renderer &&) = default;
+    Renderer(Renderer &&) noexcept;
+    Renderer &operator=(Renderer &&) noexcept;
 
     Renderer(const Renderer &other);
     Renderer &operator=(const Renderer &other);

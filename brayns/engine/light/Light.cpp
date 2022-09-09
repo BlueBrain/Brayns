@@ -22,6 +22,20 @@
 
 namespace brayns
 {
+Light::Light(Light &&other) noexcept
+{
+    *this = other;
+}
+
+Light &Light::operator=(Light &&other) noexcept
+{
+    _handleName = std::move(other._handleName);
+    _lightName = std::move(other._lightName);
+    _handle = std::move(other._handle);
+    _data = std::move(other._data);
+    return *this;
+}
+
 Light::Light(const Light &other)
 {
     *this = other;

@@ -22,6 +22,21 @@
 
 namespace brayns
 {
+Geometry::Geometry(Geometry &&other) noexcept
+{
+    *this = other;
+}
+
+Geometry &Geometry::operator=(Geometry &&other) noexcept
+{
+    _handleName = std::move(other._handleName);
+    _geometryName = std::move(other._geometryName);
+    _handle = std::move(other._handle);
+    _data = std::move(other._data);
+    _flag = std::move(other._flag);
+    return *this;
+}
+
 Geometry::Geometry(const Geometry &other)
 {
     *this = other;

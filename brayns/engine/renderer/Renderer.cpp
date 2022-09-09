@@ -22,6 +22,21 @@
 
 namespace brayns
 {
+Renderer::Renderer(Renderer &&other) noexcept
+{
+    *this = other;
+}
+
+Renderer &Renderer::operator=(Renderer &&other) noexcept
+{
+    _handleName = std::move(other._handleName);
+    _rendererName = std::move(other._rendererName);
+    _handle = std::move(other._handle);
+    _data = std::move(other._data);
+    _flag = std::move(other._flag);
+    return *this;
+}
+
 Renderer::Renderer(const Renderer &other)
 {
     *this = other;

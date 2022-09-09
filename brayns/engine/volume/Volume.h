@@ -54,8 +54,8 @@ public:
     {
     }
 
-    Volume(Volume &&) = default;
-    Volume &operator=(Volume &&) = default;
+    Volume(Volume &&) noexcept;
+    Volume &operator=(Volume &&) noexcept;
 
     Volume(const Volume &other);
     Volume &operator=(const Volume &other);
