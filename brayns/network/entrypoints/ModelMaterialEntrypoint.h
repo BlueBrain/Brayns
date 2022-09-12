@@ -64,7 +64,7 @@ public:
         auto &component = model.getComponent<MaterialComponent>();
         MaterialType materialData;
         buffer.extract(materialData);
-        component.setMaterial(Material(materialData));
+        component.setMaterial(Material(std::move(materialData)));
         request.reply(EmptyMessage());
     }
 

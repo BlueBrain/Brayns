@@ -20,6 +20,7 @@
 
 #include "processors/ConstantRadius.h"
 #include "processors/RadiusMultiplier.h"
+#include "processors/SectionSmoother.h"
 #include "processors/Smoother.h"
 
 namespace
@@ -35,6 +36,9 @@ public:
         {
         case NeuronGeometryType::ConstantRadii:
             stages.push_back(std::make_unique<ConstantRadius>());
+            break;
+        case NeuronGeometryType::SectionSmooth:
+            stages.push_back(std::make_unique<SectionSmoother>());
             break;
         case NeuronGeometryType::Smooth:
             stages.push_back(std::make_unique<Smoother>());

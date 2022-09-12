@@ -30,6 +30,7 @@ BRAYNS_JSON_ADAPTER_ENUM(
     NeuronGeometryType,
     {"original", NeuronGeometryType::Original},
     {"smooth", NeuronGeometryType::Smooth},
+    {"section_smooth", NeuronGeometryType::SectionSmooth},
     {"constant_radii", NeuronGeometryType::ConstantRadii})
 }
 
