@@ -21,42 +21,13 @@
 #pragma once
 
 #include <brayns/common/ModifiedFlag.h>
-#include <brayns/engine/geometry/GeometryView.h>
 #include <brayns/engine/volume/VolumeView.h>
-
-#include <ospray/ospray_cpp/Group.h>
-
-#include <vector>
 
 namespace brayns
 {
-class RenderGroup
+struct VolumeViews
 {
-public:
-    RenderGroup() = default;
-
-    RenderGroup(const RenderGroup &other);
-    RenderGroup &operator=(const RenderGroup &other);
-
-    RenderGroup(RenderGroup &&other) noexcept;
-    RenderGroup &operator=(RenderGroup &&other) noexcept;
-
-    bool commit();
-    const ospray::cpp::Group &getHandle() const noexcept;
-
-private:
-    ospray::cpp::Group _handle;
-    ModifiedFlag _flag;
-};
-
-class RenderGroupFactory
-{
-public:
-    static RenderGroup fromGeometry(const GeometryView &geometry);
-    static RenderGroup fromGeometry(const std::vector<GeometryView> &geometries);
-    static RenderGroup fromVolume(const VolumeView &volume);
-    static RenderGroup fromVolume(const std::vector<VolumeView> &volumes);
-    static RenderGroup fromClipper(const GeometryView &clipper);
-    static RenderGroup fromClipper(const std::vector<GeometryView> &clippers);
+    ModifiedFlag modified;
+    std::vector<VolumeView> elements;
 };
 }

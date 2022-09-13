@@ -50,7 +50,7 @@ Material &Material::operator=(const Material &other)
     _handle = ospray::cpp::Material("", _handleName);
     _data = other._data->clone();
     _data->pushTo(_handle);
-    _flag = true;
+    _flag.setModified(true);
     return *this;
 }
 

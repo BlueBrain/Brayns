@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,440 +20,207 @@
  */
 
 #include "ProteinLoader.h"
+#include "ProteinData.h"
 
-#include <brayns/common/Log.h>
-#include <brayns/io/loaders/protein/ProteinComponent.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/GeometryViews.h>
+#include <brayns/engine/geometry/types/Sphere.h>
+#include <brayns/utils/FileReader.h>
+#include <brayns/utils/string/StringCounter.h>
+#include <brayns/utils/string/StringExtractor.h>
+#include <brayns/utils/string/StringSplitter.h>
 
-#include <assert.h>
-#include <fstream>
+#include <cassert>
 
-namespace brayns
-{
 namespace
 {
-constexpr char LOADER_NAME[] = "protein";
-} // namespace
-
-/** Structure containing the positions of the proteins in space
- */
-struct PDBCellPositions
-{
-    int32_t id;
-    Vector3f position;
-    Vector3f unknown;
-};
-
-/** Structure defining an atom as it is stored in a PDB file
+/**
+ * Structure defining an atom as it is stored in a PDB file
  */
 struct Atom
 {
-    int32_t processed;
     int32_t id;
-    int32_t index;
-    Vector3f position;
-    float radius;
-    int32_t materialId;
     int32_t chainId;
     int32_t residue;
+    brayns::Vector3f position;
+    std::string name;
 };
 
-/** Structure defining an atom radius in microns
- */
-struct AtomicRadius
+struct PdbFormatColumns
 {
-    std::string Symbol;
-    float radius;
-    int index;
-};
-constexpr float DEFAULT_RADIUS = 25.f;
-
-/** Structure defining the color of atoms according to the JMol Scheme
- */
-struct ProteinColorMap
-{
-    std::string symbol;
-    short R, G, B;
+    inline static constexpr size_t type = 0;
+    inline static constexpr size_t atomId = 1;
+    inline static constexpr size_t chainId = 4;
+    inline static constexpr size_t residue = 5;
+    inline static constexpr size_t x = 6;
+    inline static constexpr size_t y = 7;
+    inline static constexpr size_t z = 8;
+    inline static constexpr size_t name = 11;
 };
 
-const size_t colorMapSize = 113;
-static ProteinColorMap colorMap[colorMapSize] = {
-    {"H", 0xDF, 0xDF, 0xDF},
-    {"He", 0xD9, 0xFF, 0xFF},
-    {"Li", 0xCC, 0x80, 0xFF},
-    {"Be", 0xC2, 0xFF, 0x00},
-    {"B", 0xFF, 0xB5, 0xB5},
-    {"C", 0x90, 0x90, 0x90},
-    {"N", 0x30, 0x50, 0xF8},
-    {"O", 0xFF, 0x0D, 0x0D},
-    {"F", 0x9E, 0x05, 0x1},
-    {"Ne", 0xB3, 0xE3, 0xF5},
-    {"Na", 0xAB, 0x5C, 0xF2},
-    {"Mg", 0x8A, 0xFF, 0x00},
-    {"Al", 0xBF, 0xA6, 0xA6},
-    {"Si", 0xF0, 0xC8, 0xA0},
-    {"P", 0xFF, 0x80, 0x00},
-    {"S", 0xFF, 0xFF, 0x30},
-    {"Cl", 0x1F, 0xF0, 0x1F},
-    {"Ar", 0x80, 0xD1, 0xE3},
-    {"K", 0x8F, 0x40, 0xD4},
-    {"Ca", 0x3D, 0xFF, 0x00},
-    {"Sc", 0xE6, 0xE6, 0xE6},
-    {"Ti", 0xBF, 0xC2, 0xC7},
-    {"V", 0xA6, 0xA6, 0xAB},
-    {"Cr", 0x8A, 0x99, 0xC7},
-    {"Mn", 0x9C, 0x7A, 0xC7},
-    {"Fe", 0xE0, 0x66, 0x33},
-    {"Co", 0xF0, 0x90, 0xA0},
-    {"Ni", 0x50, 0xD0, 0x50},
-    {"Cu", 0xC8, 0x80, 0x33},
-    {"Zn", 0x7D, 0x80, 0xB0},
-    {"Ga", 0xC2, 0x8F, 0x8F},
-    {"Ge", 0x66, 0x8F, 0x8F},
-    {"As", 0xBD, 0x80, 0xE3},
-    {"Se", 0xFF, 0xA1, 0x00},
-    {"Br", 0xA6, 0x29, 0x29},
-    {"Kr", 0x5C, 0xB8, 0xD1},
-    {"Rb", 0x70, 0x2E, 0xB0},
-    {"Sr", 0x00, 0xFF, 0x00},
-    {"Y", 0x94, 0xFF, 0xFF},
-    {"Zr", 0x94, 0xE0, 0xE0},
-    {"Nb", 0x73, 0xC2, 0xC9},
-    {"Mo", 0x54, 0xB5, 0xB5},
-    {"Tc", 0x3B, 0x9E, 0x9E},
-    {"Ru", 0x24, 0x8F, 0x8F},
-    {"Rh", 0x0A, 0x7D, 0x8C},
-    {"Pd", 0x69, 0x85, 0x00},
-    {"Ag", 0xC0, 0xC0, 0xC0},
-    {"Cd", 0xFF, 0xD9, 0x8F},
-    {"In", 0xA6, 0x75, 0x73},
-    {"Sn", 0x66, 0x80, 0x80},
-    {"Sb", 0x9E, 0x63, 0xB5},
-    {"Te", 0xD4, 0x7A, 0x00},
-    {"I", 0x94, 0x00, 0x94},
-    {"Xe", 0x42, 0x9E, 0xB0},
-    {"Cs", 0x57, 0x17, 0x8F},
-    {"Ba", 0x00, 0xC9, 0x00},
-    {"La", 0x70, 0xD4, 0xFF},
-    {"Ce", 0xFF, 0xFF, 0xC7},
-    {"Pr", 0xD9, 0xFF, 0xC7},
-    {"Nd", 0xC7, 0xFF, 0xC7},
-    {"Pm", 0xA3, 0xFF, 0xC7},
-    {"Sm", 0x8F, 0xFF, 0xC7},
-    {"Eu", 0x61, 0xFF, 0xC7},
-    {"Gd", 0x45, 0xFF, 0xC7},
-    {"Tb", 0x30, 0xFF, 0xC7},
-    {"Dy", 0x1F, 0xFF, 0xC7},
-    {"Ho", 0x00, 0xFF, 0x9C},
-    {"Er", 0x00, 0xE6, 0x75},
-    {"Tm", 0x00, 0xD4, 0x52},
-    {"Yb", 0x00, 0xBF, 0x38},
-    {"Lu", 0x00, 0xAB, 0x24},
-    {"Hf", 0x4D, 0xC2, 0xFF},
-    {"Ta", 0x4D, 0xA6, 0xFF},
-    {"W", 0x21, 0x94, 0xD6},
-    {"Re", 0x26, 0x7D, 0xAB},
-    {"Os", 0x26, 0x66, 0x96},
-    {"Ir", 0x17, 0x54, 0x87},
-    {"Pt", 0xD0, 0xD0, 0xE0},
-    {"Au", 0xFF, 0xD1, 0x23},
-    {"Hg", 0xB8, 0xB8, 0xD0},
-    {"Tl", 0xA6, 0x54, 0x4D},
-    {"Pb", 0x57, 0x59, 0x61},
-    {"Bi", 0x9E, 0x4F, 0xB5},
-    {"Po", 0xAB, 0x5C, 0x00},
-    {"At", 0x75, 0x4F, 0x45},
-    {"Rn", 0x42, 0x82, 0x96},
-    {"Fr", 0x42, 0x00, 0x66},
-    {"Ra", 0x00, 0x7D, 0x00},
-    {"Ac", 0x70, 0xAB, 0xFA},
-    {"Th", 0x00, 0xBA, 0xFF},
-    {"Pa", 0x00, 0xA1, 0xFF},
-    {"U", 0x00, 0x8F, 0xFF},
-    {"Np", 0x00, 0x80, 0xFF},
-    {"Pu", 0x00, 0x6B, 0xFF},
-    {"Am", 0x54, 0x5C, 0xF2},
-    {"Cm", 0x78, 0x5C, 0xE3},
-    {"Bk", 0x8A, 0x4F, 0xE3},
-    {"Cf", 0xA1, 0x36, 0xD4},
-    {"Es", 0xB3, 0x1F, 0xD4},
-    {"Fm", 0xB3, 0x1F, 0xBA},
-    {"Md", 0xB3, 0x0D, 0xA6},
-    {"No", 0xBD, 0x0D, 0x87},
-    {"Lr", 0xC7, 0x00, 0x66},
-    {"Rf", 0xCC, 0x00, 0x59},
-    {"Db", 0xD1, 0x00, 0x4F},
-    {"Sg", 0xD9, 0x00, 0x45},
-    {"Bh", 0xE0, 0x00, 0x38},
-    {"Hs", 0xE6, 0x00, 0x2E},
-    {"Mt", 0xEB, 0x00, 0x26},
-
-    // TODO
-    {"", 0xFF, 0xFF, 0xFF},
-    {"", 0xFF, 0xFF, 0xFF},
-    {"", 0xFF, 0xFF, 0xFF},
-    {"", 0xFF, 0xFF, 0xFF}};
-
-static AtomicRadius atomic_radii[colorMapSize] = // atomic radii in microns
-    {{"C", 67.f, 1},
-     {"N", 56.f, 2},
-     {"O", 48.f, 3},
-     {"H", 53.f, 4},
-     {"B", 87.f, 5},
-     {"F", 42.f, 6},
-     {"P", 98.f, 7},
-     {"S", 88.f, 8},
-     {"V", 171.f, 9},
-     {"K", 243.f, 10},
-     {"HE", 31.f, 11},
-     {"LI", 167.f, 12},
-     {"BE", 112.f, 13},
-     {"NE", 38.f, 14},
-     {"NA", 190.f, 15},
-     {"MG", 145.f, 16},
-     {"AL", 118.f, 17},
-     {"SI", 111.f, 18},
-     {"CL", 79.f, 19},
-     {"AR", 71.f, 20},
-     {"CA", 194.f, 21},
-     {"SC", 184.f, 22},
-     {"TI", 176.f, 23},
-     {"CR", 166.f, 24},
-     {"MN", 161.f, 25},
-     {"FE", 156.f, 26},
-     {"CO", 152.f, 27},
-     {"NI", 149.f, 28},
-     {"CU", 145.f, 29},
-     {"ZN", 142.f, 30},
-     {"GA", 136.f, 31},
-     {"GE", 125.f, 32},
-     {"AS", 114.f, 33},
-     {"SE", 103.f, 34},
-     {"BR", 94.f, 35},
-     {"KR", 88.f, 36},
-
-     // TODO
-     {"OD1", 25.f, 37},
-     {"OD2", 25.f, 38},
-     {"CG1", 25.f, 39},
-     {"CG2", 25.f, 40},
-     {"CD1", 25.f, 41},
-     {"CB", 25.f, 42},
-     {"CG", 25.f, 43},
-     {"CD", 25.f, 44},
-     {"OE1", 25.f, 45},
-     {"NE2", 25.f, 46},
-     {"CZ", 25.f, 47},
-     {"NH1", 25.f, 48},
-     {"NH2", 25.f, 49},
-     {"CD2", 25.f, 50},
-     {"CE1", 25.f, 51},
-     {"CE2", 25.f, 52},
-     {"CE", 25.f, 53},
-     {"NZ", 25.f, 54},
-     {"OH", 25.f, 55},
-     {"CE", 25.f, 56},
-     {"ND1", 25.f, 57},
-     {"ND2", 25.f, 58},
-     {"OXT", 25.f, 59},
-     {"OG1", 25.f, 60},
-     {"NE1", 25.f, 61},
-     {"CE3", 25.f, 62},
-     {"CZ2", 25.f, 63},
-     {"CZ3", 25.f, 64},
-     {"CH2", 25.f, 65},
-     {"OE2", 25.f, 66},
-     {"OG", 25.f, 67},
-     {"OE2", 25.f, 68},
-     {"SD", 25.f, 69},
-     {"SG", 25.f, 70},
-     {"C1*", 25.f, 71},
-     {"C2", 25.f, 72},
-     {"C2*", 25.f, 73},
-     {"C3*", 25.f, 74},
-     {"C4", 25.f, 75},
-     {"C4*", 25.f, 76},
-     {"C5", 25.f, 77},
-     {"C5*", 25.f, 78},
-     {"C5M", 25.f, 79},
-     {"C6", 25.f, 80},
-     {"C8", 25.f, 81},
-     {"H1", 25.f, 82},
-     {"H1*", 25.f, 83},
-     {"H2", 25.f, 84},
-     {"H2*", 25.f, 85},
-     {"H3", 25.f, 86},
-     {"H3*", 25.f, 87},
-     {"H3P", 25.f, 88},
-     {"H4", 25.f, 89},
-     {"H4*", 25.f, 90},
-     {"H5", 25.f, 91},
-     {"H5*", 25.f, 92},
-     {"H5M", 25.f, 93},
-     {"H6", 25.f, 94},
-     {"H8", 25.f, 95},
-     {"N1", 25.f, 96},
-     {"N2", 25.f, 97},
-     {"N3", 25.f, 98},
-     {"N4", 25.f, 99},
-     {"N6", 25.f, 100},
-     {"N7", 25.f, 101},
-     {"N9", 25.f, 102},
-     {"O1P", 25.f, 103},
-     {"O2", 25.f, 104},
-     {"O2P", 25.f, 105},
-     {"O3*", 25.f, 106},
-     {"O3P", 25.f, 107},
-     {"O4", 25.f, 108},
-     {"O4*", 25.f, 109},
-     {"O5*", 25.f, 110},
-     {"O6", 25.f, 111},
-     {"OXT", 25.f, 112},
-     {"P", 25.f, 113}};
-
-std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
-    const std::string &fileName,
-    const LoaderProgress &cb,
-    const ProteinLoaderParameters &properties) const
+class PdbReader
 {
-    (void)cb;
-
-    std::ifstream file(fileName.c_str());
-    if (!file.is_open())
-        throw std::runtime_error("Could not open " + fileName);
-
-    size_t lineIndex{0};
-
-    std::vector<Sphere> spheres;
-    std::vector<uint8_t> colorMapIndices;
-
-    while (file.good())
+public:
+    static std::vector<Atom> readFile(const std::string &path)
     {
-        std::string line;
-        std::string value;
-        std::getline(file, line);
+        auto content = brayns::FileReader::read(path);
+        return _processLines(content);
+    }
+
+private:
+    static std::vector<Atom> _processLines(std::string_view content)
+    {
+        auto tempBuffer = _allocateBuffer(content);
+
+        auto line = brayns::StringExtractor::extractLine(content);
+        while (!line.empty())
+        {
+            if (_filterLine(line))
+            {
+                auto atom = _processLine(line);
+                tempBuffer.push_back(std::move(atom));
+            }
+            line = brayns::StringExtractor::extractLine(content);
+        }
+
+        return tempBuffer;
+    }
+
+    static bool _filterLine(std::string_view line)
+    {
         if (line.find("ATOM") == 0 || line.find("HETATM") == 0)
         {
-            // Atom
-            Atom atom;
-            atom.chainId = 0;
-            atom.residue = 0;
-            atom.processed = false;
-            atom.index = lineIndex;
-            lineIndex++;
-            std::string atomName;
-            std::string atomCode;
-            size_t i = 0;
-            while (i < line.length())
+            return true;
+        }
+        return false;
+    }
+
+    static std::vector<Atom> _allocateBuffer(std::string_view content)
+    {
+        auto lines = brayns::StringCounter::countLines(content);
+        auto buffer = std::vector<Atom>();
+        buffer.reserve(lines);
+        return buffer;
+    }
+
+    static Atom _processLine(std::string_view line)
+    {
+        auto tokens = brayns::StringSplitter::splitTokens(line);
+        assert(tokens.size() >= 12);
+
+        Atom result;
+        result.id = std::stoi(tokens[PdbFormatColumns::atomId]);
+        result.chainId = std::stoi(tokens[PdbFormatColumns::chainId]);
+        result.residue = std::stoi(tokens[PdbFormatColumns::residue]);
+        result.position.x = std::stof(tokens[PdbFormatColumns::x]);
+        result.position.y = std::stof(tokens[PdbFormatColumns::y]);
+        result.position.z = std::stof(tokens[PdbFormatColumns::z]);
+        result.name = std::move(tokens[PdbFormatColumns::name]);
+
+        return result;
+    }
+};
+
+class RadiusGenerator
+{
+public:
+    static std::vector<float> generateForAtoms(const brayns::ProteinLoaderParameters &params, std::vector<Atom> &atoms)
+    {
+        auto &atomRadiis = brayns::ProteinData::atomicRadii;
+        auto defaultRadius = brayns::ProteinData::defaultRadius;
+
+        std::vector<float> result;
+        result.reserve(atoms.size());
+
+        for (auto &atom : atoms)
+        {
+            auto it = std::find(atomRadiis.begin(), atomRadiis.end(), atom.name);
+            auto radius = it == atomRadiis.end() ? defaultRadius : it->radius;
+            radius *= params.radius_multiplier;
+            result.push_back(radius);
+        }
+
+        return result;
+    }
+};
+
+class SphereGenerator
+{
+public:
+    static std::vector<brayns::Sphere> generate(const std::vector<Atom> &atoms, const std::vector<float> &radii)
+    {
+        std::vector<brayns::Sphere> spheres;
+        spheres.reserve(atoms.size());
+
+        for (size_t i = 0; i < atoms.size(); ++i)
+        {
+            auto &atom = atoms[i];
+            auto radius = radii[i];
+            spheres.push_back({atom.position, radius});
+        }
+
+        return spheres;
+    }
+};
+
+class ColormapIndexer
+{
+public:
+    static std::vector<size_t> indexAtoms(const brayns::ProteinLoaderParameters &params, const std::vector<Atom> &atoms)
+    {
+        auto &colorMap = brayns::ProteinData::colorIndices;
+        auto &colors = brayns::ProteinData::colors;
+
+        auto result = std::vector<size_t>();
+        result.reserve(atoms.size());
+
+        for (auto &atom : atoms)
+        {
+            switch (params.color_scheme)
             {
-                switch (i)
-                {
-                case 6: // ID
-                case 12:
-                case 76: // Atom name
-                case 22: // ChainID
-                case 30: // x
-                case 38: // y
-                case 46: // z
-                    value = "";
-                    break;
-                case 21:
-                    atom.chainId = (int)line.at(i) - 64;
-                    break;
-                case 11:
-                    atom.id = static_cast<int>(atoi(value.c_str()));
-                    break;
-                case 17:
-                    atomCode = value;
-                    break;
-                case 79:
-                    atomName = value;
-                    break;
-                case 26:
-                    atom.residue = static_cast<int>(atoi(value.c_str()));
-                    break;
-                case 37:
-                    atom.position[0] = static_cast<float>(atof(value.c_str()));
-                    break;
-                case 45:
-                    atom.position[1] = static_cast<float>(atof(value.c_str()));
-                    break;
-                case 53:
-                    atom.position[2] = static_cast<float>(atof(value.c_str()));
-                    break;
-                default:
-                    if (line.at(i) != ' ')
-                        value += line.at(i);
-                    break;
-                }
-                i++;
+            case brayns::ProteinLoaderColorScheme::ProteinChains:
+                result.push_back(static_cast<size_t>(atom.chainId));
+                break;
+            case brayns::ProteinLoaderColorScheme::ProteinResidues:
+                result.push_back(static_cast<size_t>(atom.residue));
+                break;
+            case brayns::ProteinLoaderColorScheme::ById:
+                result.push_back(atom.id % colors.size());
+                break;
+            default:
+                auto it = std::find(colorMap.begin(), colorMap.end(), atom.name);
+                auto index = it == colorMap.end() ? 0 : it->colorIndex;
+                result.push_back(index);
             }
-
-            // Material
-            atom.materialId = 0;
-            i = 0;
-            bool found = false;
-            while (!found && i < colorMapSize)
-            {
-                if (atomName == colorMap[i].symbol)
-                {
-                    found = true;
-                    switch (properties.color_scheme)
-                    {
-                    case ProteinLoaderColorScheme::ProteinChains:
-                        atom.materialId = abs(atom.chainId);
-                        break;
-                    case ProteinLoaderColorScheme::ProteinResidues:
-                        atom.materialId = atom.residue;
-                        break;
-                    default:
-                        atom.materialId = static_cast<int>(i);
-                        break;
-                    }
-                }
-                ++i;
-            }
-
-            // Radius
-            atom.radius = DEFAULT_RADIUS;
-            i = 0;
-            found = false;
-            while (!found && i < colorMapSize)
-            {
-                if (atomName == atomic_radii[i].Symbol)
-                {
-                    atom.radius = atomic_radii[i].radius;
-                    found = true;
-                }
-                ++i;
-            }
-
-            // Convert position from nanometers
-            const auto center = 0.01f * atom.position;
-
-            // Convert radius from angstrom
-            const float radius = 0.0001f * atom.radius * properties.radius_multiplier;
-
-            spheres.push_back({center, radius});
-            colorMapIndices.push_back(static_cast<uint8_t>(atom.materialId));
         }
     }
-    file.close();
+};
+}
 
-    // Generate the color map for the model
-    std::vector<Vector4f> modelColors;
-    modelColors.reserve(colorMapSize);
+namespace brayns
+{
+std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
+    const std::string &path,
+    const LoaderProgress &callback,
+    const ProteinLoaderParameters &parameters) const
+{
+    (void)callback;
 
-    const auto normalizationFactor = 1.f / 255.f;
-    for (const auto &colorMapEntry : colorMap)
-    {
-        const auto r = colorMapEntry.R * normalizationFactor;
-        const auto g = colorMapEntry.G * normalizationFactor;
-        const auto b = colorMapEntry.B * normalizationFactor;
-        modelColors.emplace_back(r, g, b, 1.f);
-    }
+    auto atoms = PdbReader::readFile(path);
+    auto radii = RadiusGenerator::generateForAtoms(parameters, atoms);
+    auto spheres = SphereGenerator::generate(atoms, radii);
+    auto colorIndices = ColormapIndexer::indexAtoms(parameters, atoms);
+    auto &colors = ProteinData::colors;
 
     auto model = std::make_unique<Model>();
-    model->addComponent<ProteinComponent>(std::move(spheres), std::move(colorMapIndices), std::move(modelColors));
+    auto &components = model->getComponents();
+
+    auto &geometries = components.add<Geometries>();
+    geometries.elements.push_back(Geometry(std::move(spheres)));
+
+    auto &views = components.add<GeometryViews>();
+    auto &view = views.elements.emplace_back(geometries.elements.back());
+    view.setColorMap(ospray::cpp::CopiedData(colorIndices), ospray::cpp::CopiedData(colors));
 
     std::vector<std::unique_ptr<Model>> result;
     result.push_back(std::move(model));
@@ -461,7 +229,7 @@ std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
 
 std::string ProteinLoader::getName() const
 {
-    return LOADER_NAME;
+    return "protein";
 }
 
 std::vector<std::string> ProteinLoader::getSupportedExtensions() const
@@ -472,11 +240,11 @@ std::vector<std::string> ProteinLoader::getSupportedExtensions() const
 std::vector<std::unique_ptr<Model>> ProteinLoader::importFromBlob(
     const Blob &blob,
     const LoaderProgress &callback,
-    const ProteinLoaderParameters &properties) const
+    const ProteinLoaderParameters &parameters) const
 {
     (void)blob;
     (void)callback;
-    (void)properties;
+    (void)parameters;
 
     throw std::runtime_error("Loading from blob not supported");
 }

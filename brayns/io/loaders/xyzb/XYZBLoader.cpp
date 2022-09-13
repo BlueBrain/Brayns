@@ -22,7 +22,7 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 
 #include <brayns/utils/string/StringTrimmer.h>
@@ -89,7 +89,10 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob,
     }
 
     auto model = std::make_unique<Model>();
-    model->addComponent<GeometryRendererComponent>(std::move(spheres));
+
+    auto &components = model->getComponents();
+    auto &geometries = components.add<Geometries>();
+    geometries.elements.emplace_back(std::move(spheres));
 
     std::vector<std::unique_ptr<Model>> result;
     result.push_back(std::move(model));

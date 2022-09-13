@@ -64,7 +64,7 @@ Camera &Camera::operator=(const Camera &other)
     _data->pushTo(_handle);
     setView(other._view);
     setAspectRatio(other._aspectRatio);
-    _flag = true;
+    _flag.setModified(true);
     return *this;
 }
 

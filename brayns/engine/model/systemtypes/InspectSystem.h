@@ -18,24 +18,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "MaterialComponent.h"
+#pragma once
 
-#include <brayns/engine/material/types/Phong.h>
+#include <brayns/engine/common/InspectContext.h>
+#include <brayns/engine/common/InspectResult.h>
+#include <brayns/engine/model/Components.h>
 
 namespace brayns
 {
-MaterialComponent::MaterialComponent()
-    : _material(Phong())
+class InspectSystem
 {
-}
+public:
+    virtual ~InspectSystem() = default;
 
-void MaterialComponent::setMaterial(Material material)
-{
-    _material = std::move(material);
-}
-
-Material &MaterialComponent::getMaterial() noexcept
-{
-    return _material;
-}
+    virtual InspectResult execute(const InspectContext &context, Components &components) = 0;
+};
 }

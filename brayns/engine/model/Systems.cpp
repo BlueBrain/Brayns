@@ -18,61 +18,58 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Volume.h"
+#include "Systems.h"
 
 namespace brayns
 {
-Volume::Volume(Volume &&other) noexcept
+void Systems::init(Components &components)
 {
-    *this = other;
-}
-
-Volume &Volume::operator=(Volume &&other) noexcept
-{
-    _handleName = std::move(other._handleName);
-    _volumeName = std::move(other._volumeName);
-    _handle = std::move(other._handle);
-    _data = std::move(other._data);
-    _flag = std::move(other._flag);
-    return *this;
-}
-
-Volume::Volume(const Volume &other)
-{
-    *this = other;
-}
-
-Volume &Volume::operator=(const Volume &other)
-{
-    _handleName = other._handleName;
-    _volumeName = other._volumeName;
-    _handle = ospray::cpp::Volume(_handleName);
-    _data = other._data->clone();
-    _flag.setModified(true);
-    return *this;
-}
-
-bool Volume::commit()
-{
-    if (!_flag)
+    if (_init)
     {
-        return false;
+        _init->execute(components);
     }
-
-    _data->pushTo(_handle);
-    _handle.commit();
-    _flag = false;
-    return true;
 }
 
-Bounds Volume::computeBounds(const Matrix4f &matrix) const noexcept
+CommitResult Systems::commit(Components &components)
 {
-    return _data->computeBounds(matrix);
+    if (_commit)
+    {
+        return _commit->execute(components);
+    }
+    return {};
 }
 
-const ospray::cpp::Volume &Volume::getHandle() const noexcept
+void Systems::preRender(const ParametersManager &parameters, Components &components)
 {
-    return _handle;
+    if (_preRender)
+    {
+        _preRender->execute(parameters, components);
+    }
 }
 
+void Systems::postRender(const ParametersManager &parameters, Components &components)
+{
+    if (_postRender)
+    {
+        _postRender->execute(parameters, components);
+    }
+}
+
+InspectResult Systems::inspect(const InspectContext &context, Components &components)
+{
+    if (_inspect)
+    {
+        return _inspect->execute(context, components);
+    }
+    return {};
+}
+
+Bounds Systems::computeBounds(const Matrix4f &matrix, Components &components)
+{
+    if (_bounds)
+    {
+        return _bounds->compute(matrix, components);
+    }
+    return {};
+}
 }

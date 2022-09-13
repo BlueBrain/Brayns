@@ -20,7 +20,8 @@
 
 #include <brayns/io/loaders/mesh/MeshLoader.h>
 
-#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/Metadata.h>
 
 #include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
 #include <brayns/io/loaders/mesh/parsers/OffMeshParser.h>
@@ -91,8 +92,9 @@ public:
     static std::unique_ptr<brayns::Model> load(const brayns::TriangleMesh &mesh)
     {
         auto model = std::make_unique<brayns::Model>();
-
-        model->addComponent<brayns::GeometryRendererComponent>(mesh);
+        auto &components = model->getComponents();
+        auto &geometries = components.add<brayns::Geometries>();
+        geometries.elements.push_back(brayns::Geometry(mesh));
 
         return model;
     }
@@ -101,11 +103,14 @@ public:
 class MeshMetadataBuilder
 {
 public:
-    static std::map<std::string, std::string> build(const brayns::TriangleMesh &mesh)
+    static brayns::Metadata build(const brayns::TriangleMesh &mesh)
     {
         auto vertexCount = mesh.vertices.size();
         auto triangleCount = mesh.indices.size();
-        return {{"meshes", "1"}, {"vertices", std::to_string(vertexCount)}, {"faces", std::to_string(triangleCount)}};
+        return {std::vector<brayns::MetadataEntry>{
+            {"meshes", "1"},
+            {"vertices", std::to_string(vertexCount)},
+            {"faces", std::to_string(triangleCount)}}};
     }
 };
 
@@ -116,8 +121,8 @@ public:
     {
         auto model = MeshLoadingHelper::load(mesh);
 
-        auto metadata = MeshMetadataBuilder::build(mesh);
-        model->setMetaData(metadata);
+        auto &components = model->getComponents();
+        components.add<brayns::Metadata>(MeshMetadataBuilder::build(mesh));
 
         std::vector<std::unique_ptr<brayns::Model>> result;
         result.push_back(std::move(model));

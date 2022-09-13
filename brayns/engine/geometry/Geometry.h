@@ -89,7 +89,7 @@ public:
         {
             callback(element);
         }
-        _flag = true;
+        _flag.setModified(true);
     }
 
     /**

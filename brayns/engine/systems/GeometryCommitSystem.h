@@ -18,22 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ColorRampComponent.h"
+#pragma once
+
+#include <brayns/engine/model/systemtypes/CommitSystem.h>
 
 namespace brayns
 {
-ColorRampComponent::ColorRampComponent(ColorRamp colorRamp)
-    : _colorRamp(std::move(colorRamp))
+class GeometryCommitSystem final : public CommitSystem
 {
-}
-
-ColorRamp &ColorRampComponent::getColorRamp() noexcept
-{
-    return _colorRamp;
-}
-
-void ColorRampComponent::setColorRamp(ColorRamp colorRamp) noexcept
-{
-    _colorRamp = std::move(colorRamp);
-}
+public:
+    CommitResult execute(Components &components) override;
+};
 }

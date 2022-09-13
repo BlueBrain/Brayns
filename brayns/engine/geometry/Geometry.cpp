@@ -48,7 +48,7 @@ Geometry &Geometry::operator=(const Geometry &other)
     _geometryName = other._geometryName;
     _handle = ospray::cpp::Geometry(_handleName);
     _data = other._data->clone();
-    _flag = true;
+    _flag.setModified(true);
     return *this;
 }
 

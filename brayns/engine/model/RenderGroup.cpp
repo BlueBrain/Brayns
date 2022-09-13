@@ -26,7 +26,7 @@
 
 namespace
 {
-struct GroupParameters
+struct RenderGroupParameters
 {
     inline static const std::string geometry = "geometry";
     inline static const std::string volume = "volume";
@@ -48,76 +48,97 @@ public:
         return result;
     }
 };
+
+class RenderGroupBuilder
+{
+public:
+    template<typename T>
+    static brayns::RenderGroup build(const std::string &param, const std::vector<T> &handles)
+    {
+        brayns::RenderGroup group;
+        auto &handle = group.getHandle();
+        handle.setParam(param, ospray::cpp::CopiedData(handles));
+        return group;
+    }
+};
 }
 
 namespace brayns
 {
-void RenderGroup::setGeometry(const GeometryView &geometry)
+RenderGroup::RenderGroup(const RenderGroup &other)
 {
-    auto handle = std::vector<ospray::cpp::GeometricModel>{geometry.getHandle()};
-    setGeometry(handle);
+    *this = other;
 }
 
-void RenderGroup::setGeometry(const std::vector<GeometryView> &geometries)
+RenderGroup &RenderGroup::operator=(const RenderGroup &other)
 {
-    auto handles = HandleListCompiler::compile<ospray::cpp::GeometricModel>(geometries);
-    setGeometry(handles);
+    (void)other;
+    _handle = ospray::cpp::Group();
+    _flag.setModified(true);
+    return *this;
 }
 
-void RenderGroup::setGeometry(const std::vector<ospray::cpp::GeometricModel> &geometries)
+RenderGroup::RenderGroup(RenderGroup &&other) noexcept
 {
-    _handle.setParam(GroupParameters::geometry, ospray::cpp::CopiedData(geometries));
-    _flag = true;
+    *this = other;
 }
 
-void RenderGroup::setVolume(const VolumeView &volume)
+RenderGroup &RenderGroup::operator=(RenderGroup &&other) noexcept
 {
-    auto handle = std::vector<ospray::cpp::VolumetricModel>{volume.getHandle()};
-    setVolume(handle);
+    _handle = std::move(other._handle);
+    _flag = std::move(other._flag);
+    return *this;
 }
 
-void RenderGroup::setVolume(const std::vector<VolumeView> &volumes)
-{
-    auto handles = HandleListCompiler::compile<ospray::cpp::VolumetricModel>(volumes);
-    setVolume(handles);
-}
-
-void RenderGroup::setVolume(const std::vector<ospray::cpp::VolumetricModel> &volumes)
-{
-    _handle.setParam(GroupParameters::volume, ospray::cpp::CopiedData(volumes));
-    _flag = true;
-}
-
-void RenderGroup::setClipper(const GeometryView &clipper)
-{
-    auto handle = std::vector<ospray::cpp::GeometricModel>{clipper.getHandle()};
-    setClipper(handle);
-}
-
-void RenderGroup::setClipper(const std::vector<GeometryView> &clippers)
-{
-    auto handles = HandleListCompiler::compile<ospray::cpp::GeometricModel>(clippers);
-    setClipper(handles);
-}
-
-void RenderGroup::setClipper(const std::vector<ospray::cpp::GeometricModel> &clippers)
-{
-    _handle.setParam(GroupParameters::clipping, ospray::cpp::CopiedData(clippers));
-    _flag = true;
-}
-
-void RenderGroup::commit()
+bool RenderGroup::commit()
 {
     if (!_flag)
     {
-        return;
+        return false;
     }
     _flag = false;
     _handle.commit();
+    return true;
 }
 
 const ospray::cpp::Group &RenderGroup::getHandle() const noexcept
 {
     return _handle;
+}
+
+RenderGroup RenderGroupFactory::fromGeometry(const GeometryView &geometry)
+{
+    auto handle = std::vector<ospray::cpp::GeometricModel>{geometry.getHandle()};
+    return RenderGroupBuilder::build(RenderGroupParameters::geometry, handle);
+}
+
+RenderGroup RenderGroupFactory::fromGeometry(const std::vector<GeometryView> &geometries)
+{
+    auto handles = HandleListCompiler::compile<ospray::cpp::GeometricModel>(geometries);
+    return RenderGroupBuilder::build(RenderGroupParameters::geometry, handles);
+}
+
+RenderGroup RenderGroupFactory::fromVolume(const VolumeView &volume)
+{
+    auto handle = std::vector<ospray::cpp::VolumetricModel>{volume.getHandle()};
+    return RenderGroupBuilder::build(RenderGroupParameters::volume, handle);
+}
+
+RenderGroup RenderGroupFactory::fromVolume(const std::vector<VolumeView> &volumes)
+{
+    auto handles = HandleListCompiler::compile<ospray::cpp::VolumetricModel>(volumes);
+    return RenderGroupBuilder::build(RenderGroupParameters::volume, handles);
+}
+
+RenderGroup RenderGroupFactory::fromClipper(const GeometryView &clipper)
+{
+    auto handle = std::vector<ospray::cpp::GeometricModel>{clipper.getHandle()};
+    return RenderGroupBuilder::build(RenderGroupParameters::clipping, handle);
+}
+
+RenderGroup RenderGroupFactory::fromClipper(const std::vector<GeometryView> &clippers)
+{
+    auto handles = HandleListCompiler::compile<ospray::cpp::GeometricModel>(clippers);
+    return RenderGroupBuilder::build(RenderGroupParameters::clipping, handles);
 }
 }

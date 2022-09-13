@@ -20,31 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/model/Model.h>
-#include <brayns/engine/model/ModelComponents.h>
-#include <brayns/engine/volume/VolumeView.h>
+#include <brayns/common/ModifiedFlag.h>
+#include <brayns/engine/volume/Volume.h>
 
 namespace brayns
 {
-/**
- * @brief Adds a renderable volume to the model
- */
-class VolumeRendererComponent final : public Component
+struct Volumes
 {
-public:
-    template<typename T>
-    VolumeRendererComponent(T volumeData)
-        : _volume(std::move(volumeData))
-        , _volumeView(_volume)
-    {
-    }
-
-    virtual Bounds computeBounds(const Matrix4f &transform) const noexcept override;
-    virtual void onCreate() override;
-    bool commit() override;
-
-private:
-    Volume _volume;
-    VolumeView _volumeView;
+    ModifiedFlag modified;
+    std::vector<Volume> elements;
 };
 }

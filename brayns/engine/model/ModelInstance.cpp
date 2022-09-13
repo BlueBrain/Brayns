@@ -20,6 +20,7 @@
  */
 
 #include "ModelInstance.h"
+#include "RenderGroup.h"
 
 #include <brayns/common/Log.h>
 
@@ -47,6 +48,17 @@ public:
     }
 };
 
+class ExtractGroupHandle
+{
+public:
+    static OSPGroup extract(brayns::Model &model)
+    {
+        auto &components = model.getComponents();
+        auto &group = components.get<brayns::RenderGroup>();
+        return group.getHandle().handle();
+    }
+};
+
 struct InstanceParameters
 {
     inline static const std::string transform = "transform";
@@ -58,7 +70,7 @@ namespace brayns
 ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model &model)
     : _modelInstanceID(modelInstanceID)
     , _model(model)
-    , _osprayInstance(model.getGroup().getHandle().handle())
+    , _osprayInstance(ExtractGroupHandle::extract(model))
 {
     computeBounds();
 }
@@ -100,9 +112,9 @@ const Model &ModelInstance::getModel() const noexcept
     return _model;
 }
 
-const std::map<std::string, std::string> &ModelInstance::getModelMetadata() const noexcept
+const Metadata &ModelInstance::getModelMetadata() const noexcept
 {
-    return _model.getMetaData();
+    auto &components = _model.getComponents();
 }
 
 void ModelInstance::setVisible(const bool val) noexcept

@@ -24,6 +24,7 @@
 #include <brayns/common/Bounds.h>
 #include <brayns/common/ModifiedFlag.h>
 #include <brayns/common/Transform.h>
+#include <brayns/engine/components/Metadata.h>
 
 #include "Model.h"
 
@@ -77,7 +78,7 @@ public:
     /**
      * @brief Utility function to return this Model Instance underlying model metadata
      */
-    const std::map<std::string, std::string> &getModelMetadata() const noexcept;
+    const Metadata &getModelMetadata() const noexcept;
 
     /**
      * @brief Sets wether this instance is visible or not.

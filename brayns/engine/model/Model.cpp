@@ -22,50 +22,43 @@
 
 namespace brayns
 {
-void Model::setMetaData(std::map<std::string, std::string> metadata) noexcept
-{
-    _metadata = std::move(metadata);
-}
-
-const std::map<std::string, std::string> &Model::getMetaData() const noexcept
-{
-    return _metadata;
-}
-
-void Model::onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept
-{
-    _components.onInspect(context, writeResult);
-}
-
-RenderGroup &Model::getGroup() noexcept
-{
-    return _group;
-}
-
 uint32_t Model::getID() const noexcept
 {
     return _modelId;
 }
 
-Bounds Model::computeBounds(const Matrix4f &transform) const noexcept
+Components &Model::getComponents() noexcept
 {
-    return _components.computeBounds(transform);
+    return _components;
 }
 
-void Model::onPreRender(const ParametersManager &params)
+InspectResult Model::inspect(const InspectContext &context)
 {
-    _components.onPreRender(params);
+    return _systems.inspect(context, _components);
 }
 
-void Model::onPostRender(const ParametersManager &params)
+Bounds Model::computeBounds(const Matrix4f &matrix)
 {
-    _components.onPostRender(params);
+    return _systems.computeBounds(matrix, _components);
 }
 
-bool Model::commit()
+void Model::init()
 {
-    auto componentsChanged = _components.commit();
-    _group.commit();
-    return componentsChanged;
+    _systems.init(_components);
+}
+
+void Model::preRender(const ParametersManager &parameters)
+{
+    _systems.preRender(parameters, _components);
+}
+
+CommitResult Model::commit()
+{
+    return _systems.commit(_components);
+}
+
+void Model::postRender(const ParametersManager &parameters)
+{
+    return _systems.postRender(parameters, _components);
 }
 } // namespace brayns

@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,29 +20,16 @@
 
 #pragma once
 
-#include <brayns/io/Loader.h>
-#include <brayns/io/loaders/protein/ProteinLoaderParameters.h>
+#include <brayns/common/parameters/ParametersManager.h>
+#include <brayns/engine/model/Components.h>
 
 namespace brayns
 {
-/**
- * @brief The ProteinLoader class loads protein from PDB files: http://www.rcsb.org
- */
-class ProteinLoader : public Loader<ProteinLoaderParameters>
+class ParameterSystem
 {
 public:
-    std::vector<std::string> getSupportedExtensions() const final;
+    virtual ~ParameterSystem() = default;
 
-    std::string getName() const final;
-
-    std::vector<std::unique_ptr<Model>> importFromFile(
-        const std::string &path,
-        const LoaderProgress &callback,
-        const ProteinLoaderParameters &parameters) const final;
-
-    std::vector<std::unique_ptr<Model>> importFromBlob(
-        const Blob &blob,
-        const LoaderProgress &callback,
-        const ProteinLoaderParameters &parameters) const final;
+    virtual void execute(const ParametersManager &parameters, Components &components) = 0;
 };
-} // namespace brayns
+}

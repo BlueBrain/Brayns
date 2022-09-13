@@ -20,7 +20,7 @@
 
 #include "SimulationScanner.h"
 
-#include <brayns/engine/components/SimulationComponent.h>
+#include <brayns/engine/components/SimulationInfo.h>
 
 namespace
 {
@@ -56,22 +56,18 @@ void SimulationScanner::scanAndUpdate(Scene &scene, SimulationParameters &global
     for (auto instancePtr : instances)
     {
         auto &model = instancePtr->getModel();
-        SimulationComponent *simulation = nullptr;
+        auto &components = model.getComponents();
+        auto simulation = components.find<SimulationInfo>();
 
-        try
-        {
-            auto &component = model.getComponent<SimulationComponent>();
-            simulation = &component;
-            foundSimulation = true;
-        }
-        catch (...)
+        if (!simulation)
         {
             continue;
         }
+        foundSimulation = true;
 
-        auto startTime = simulation->getStartTime();
-        auto endTime = simulation->getEndTime();
-        auto dt = simulation->getDT();
+        auto startTime = simulation->startTime;
+        auto endTime = simulation->endTime;
+        auto dt = simulation->dt;
 
         earlierStart = startTime < earlierStart ? startTime : earlierStart;
         latestEnd = endTime > latestEnd ? endTime : latestEnd;

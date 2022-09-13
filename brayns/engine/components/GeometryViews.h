@@ -20,22 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/material/Material.h>
-#include <brayns/engine/model/ModelComponents.h>
+#include <brayns/common/ModifiedFlag.h>
+#include <brayns/engine/geometry/GeometryView.h>
 
 namespace brayns
 {
-/**
- * @brief Adds a material to the model
- */
-class MaterialComponent final : public Component
+struct GeometryViews
 {
-public:
-    MaterialComponent();
-    void setMaterial(Material material);
-    Material &getMaterial() noexcept;
-
-private:
-    Material _material;
+    ModifiedFlag modified;
+    std::vector<GeometryView> elements;
 };
 }

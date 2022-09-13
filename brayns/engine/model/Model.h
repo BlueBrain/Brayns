@@ -21,14 +21,8 @@
 
 #pragma once
 
-#include <brayns/common/Bounds.h>
-#include <brayns/common/parameters/ParametersManager.h>
-#include <brayns/json/JsonType.h>
-
-#include "ModelComponents.h"
-#include "RenderGroup.h"
-
-#include <map>
+#include "Components.h"
+#include "Systems.h"
 
 namespace brayns
 {
@@ -49,98 +43,60 @@ public:
     Model &operator=(Model &&) = delete;
 
     /**
-     * @brief Sets the metadata of this model (The metadata is model-specific information).
-     * @param metadata
-     */
-    void setMetaData(std::map<std::string, std::string> metadata) noexcept;
-
-    /**
-     * @brief Returns the metadata of this model
-     */
-    const std::map<std::string, std::string> &getMetaData() const noexcept;
-
-    /**
-     * @brief Adds a new component to the model
-     */
-    template<typename T, typename... Args>
-    T &addComponent(Args &&...args) noexcept
-    {
-        auto &component = _components.addComponent<T>(std::forward<Args>(args)...);
-        component._owner = this;
-        component.onCreate();
-        return component;
-    }
-
-    /**
-     * @brief Retrieves an existing component from the model.
-     * @tparam T component type.
-     * @return reference to the component type.
-     */
-    template<typename T>
-    T &getComponent()
-    {
-        return _components.getComponent<T>();
-    }
-
-    /**
-     * @brief Retrieves a component from the model.
-     * @tparam T component type.
-     * @return pointer to the component type, or null if it was not found.
-     */
-    template<typename T>
-    T *findComponent()
-    {
-        return _components.findComponent<T>();
-    }
-
-    /**
-     * @brief Called when a scene inspect event has hitted any geometry of this model
-     */
-    void onInspect(const InspectContext &context, JsonObject &writeResult) const noexcept;
-
-    /**
-     * @brief Returns the Ospray group handler object
-     */
-    RenderGroup &getGroup() noexcept;
-
-    /**
      * @brief returns the model ID
      * @return uint32_t
      */
     uint32_t getID() const noexcept;
 
-private:
     /**
-     * @brief Compute the model bounds, taking into account the given trasnformation
-     * @param transform Matrix with the trasnformation to apply to the model data
-     * @return Bounds of the model
+     * @brief Returns the model's component list
+     * @return Components&
      */
-    Bounds computeBounds(const Matrix4f &transform) const noexcept;
+    Components &getComponents() noexcept;
 
     /**
-     * @brief Called before the commit + rendering happens
+     * @brief Process the model if it is the target of the inspect context
+     * @param context Information about the hitted model on the inspection
+     * @return InspectResult the result of checking the inspection context for this model
      */
-    void onPreRender(const ParametersManager &params);
+    InspectResult inspect(const InspectContext &context);
 
     /**
-     * @brief Called after the commit + rendering happens
+     * @brief Compute the spatial bounds of the model
+     * @param matrix Transformation to apply to the volume or geometries of the model
+     * @return Bounds axis-aligned spatial bounds
      */
-    void onPostRender(const ParametersManager &params);
-
-    /**
-     * @brief commit implementation
-     */
-    bool commit();
+    Bounds computeBounds(const Matrix4f &matrix);
 
 private:
-    friend class ClipManager;
     friend class ModelManager;
-    friend class ModelInstance;
+
+    /**
+     * @brief Called when the model is added to the scene
+     */
+    void init();
+
+    /**
+     * @brief Called on the pre-render stage
+     * @param parameters ParametersManager object to access system config
+     */
+    void preRender(const ParametersManager &parameters);
+
+    /**
+     * @brief Called before rendering a new frame
+     * @return CommitResult Required actions given the commits made on the model
+     */
+    CommitResult commit();
+
+    /**
+     * @brief Called on the post-render stage
+     * @param parameters ParametersManager object to access system config
+     */
+    void postRender(const ParametersManager &parameters);
 
 private:
     uint32_t _modelId{};
-    std::map<std::string, std::string> _metadata;
-    ModelComponentContainer _components;
-    RenderGroup _group;
+    Components _components;
+    Systems _systems;
 };
 } // namespace brayns

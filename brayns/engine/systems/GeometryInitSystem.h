@@ -18,45 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SimulationComponent.h"
+#pragma once
+
+#include <brayns/engine/model/systemtypes/InitSystem.h>
 
 namespace brayns
 {
-SimulationComponent::SimulationComponent(float start, float end, float dt, std::string timeUnit)
-    : _startTime(start)
-    , _endTime(end)
-    , _dt(dt)
-    , _timeUnit(std::move(timeUnit))
+class GeometryInitSystem final : public InitSystem
 {
-}
-
-float SimulationComponent::getStartTime() const noexcept
-{
-    return _startTime;
-}
-
-float SimulationComponent::getEndTime() const noexcept
-{
-    return _endTime;
-}
-
-float SimulationComponent::getDT() const noexcept
-{
-    return _dt;
-}
-
-const std::string &SimulationComponent::getTimeUnit() const noexcept
-{
-    return _timeUnit;
-}
-
-bool SimulationComponent::enabled() const noexcept
-{
-    return _enabled;
-}
-
-void SimulationComponent::setEnabled(const bool val) noexcept
-{
-    _enabled = val;
-}
+public:
+    void execute(Components &components) override;
+};
 }

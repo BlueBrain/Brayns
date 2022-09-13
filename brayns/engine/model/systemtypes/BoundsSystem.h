@@ -18,37 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "VolumeRendererComponent.h"
+#pragma once
 
-#include <brayns/engine/common/ExtractComponent.h>
-#include "ColorRampComponent.h"
+#include <brayns/common/Bounds.h>
+#include <brayns/engine/model/Components.h>
 
 namespace brayns
 {
-Bounds VolumeRendererComponent::computeBounds(const Matrix4f &transform) const noexcept
+class BoundsSystem
 {
-    return _volume.computeBounds(transform);
-}
+public:
+    virtual ~BoundsSystem() = default;
 
-void VolumeRendererComponent::onCreate()
-{
-    Model &model = getModel();
-    auto &group = model.getGroup();
-    group.setVolume(_volumeView);
-    model.addComponent<ColorRampComponent>();
-}
-
-bool VolumeRendererComponent::commit()
-{
-    auto &colorRamp = ExtractComponent::colorRamp(getModel());
-    if (colorRamp.isModified())
-    {
-        _volumeView.setColorRamp(colorRamp);
-        colorRamp.resetModified();
-    }
-
-    auto volumeCommitted = _volume.commit();
-    auto viewCommitted = _volumeView.commit();
-    return volumeCommitted || viewCommitted;
-}
+    virtual Bounds compute(const Matrix4f &matrix, Components &components) = 0;
+};
 }

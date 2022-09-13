@@ -20,26 +20,36 @@
 
 #pragma once
 
-#include <brayns/common/ColorRamp.h>
-#include <brayns/engine/model/ModelComponents.h>
+#include <brayns/engine/model/systemtypes/BoundsSystem.h>
 
 namespace brayns
 {
-/**
- * @brief Adds a transfer function to the model
- */
-class ColorRampComponent final : public Component
+template<typename Type>
+class GenericBoundsSystem : public BoundsSystem
 {
 public:
-    ColorRampComponent() = default;
+    Bounds compute(const Matrix4f &matrix, Components &components) override
+    {
+        auto &component = components.get<Type>();
+        auto &elements = component.elements;
 
-    ColorRampComponent(ColorRamp colorRamp);
+        Bounds result;
+#pragma omp parallel
+        {
+            Bounds local;
 
-    ColorRamp &getColorRamp() noexcept;
+#pragma omp for
+            for (size_t i = 0; i < elements.size(); ++i)
+            {
+                auto &element = elements[i];
+                local.expand(element.computeBounds(matrix));
+            }
 
-    void setColorRamp(ColorRamp colorRamp) noexcept;
+#pragma omp critical(local_bounds_merge_section)
+            result.expand(local);
+        }
 
-private:
-    ColorRamp _colorRamp;
+        return result;
+    }
 };
 }
