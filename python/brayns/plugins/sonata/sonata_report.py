@@ -26,7 +26,7 @@ from typing import Any
 from .sonata_report_type import SonataReportType
 
 
-@dataclass(frozen=True)
+@dataclass
 class SonataReport:
     """Describe a SONATA report to load.
 

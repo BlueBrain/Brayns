@@ -26,7 +26,7 @@ from typing import Any
 from .bbp_report_type import BbpReportType
 
 
-@dataclass(frozen=True)
+@dataclass
 class BbpReport:
     """BlueConfig report selection.
 

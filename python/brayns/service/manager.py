@@ -22,7 +22,8 @@ from __future__ import annotations
 
 from typing import NamedTuple
 
-from ..network import Instance
+from brayns.network import Instance
+
 from .process import Process
 
 

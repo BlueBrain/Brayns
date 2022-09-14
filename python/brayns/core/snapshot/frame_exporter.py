@@ -39,7 +39,7 @@ class FrameExporter:
 
     For parameters with None value, the current ones of the instance are used.
 
-    Exported frames are names using 5 digits filenames.
+    Exported frames are named using 5 digits filenames.
 
     For example 00000.png, 00001.png, 00003.png.
 

@@ -23,6 +23,7 @@ import pathlib
 
 import brayns
 
+URI = 'localhost:5000'
 EXECUTABLE = 'path/to/braynsService'
 OSPRAY = 'path/to/OSPRAY_2_10/install_dir/lib'
 CIRCUIT = '/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/circuitBuilding_1000neurons/BlueConfig'
@@ -30,15 +31,20 @@ SNAPSHOT = 'path/to/snapshot.png'
 FRAMES = 'path/to/frames'
 MOVIE = 'path/to/movie.mp4'
 
-bundle = brayns.Bundle(
-    port=5000,
-    service_log_level=brayns.LogLevel.INFO,
-    service_executable=EXECUTABLE,
-    service_env={'LD_LIBRARY_PATH': OSPRAY},
-    connector_logger=brayns.Logger(logging.INFO),
+service = brayns.Service(
+    uri=URI,
+    log_level=brayns.LogLevel.INFO,
+    executable=EXECUTABLE,
+    env={'LD_LIBRARY_PATH': OSPRAY},
 )
 
-with bundle.start() as (process, instance):
+connector = brayns.Connector(
+    uri=URI,
+    logger=brayns.Logger(logging.INFO),
+    max_attempts=None,
+)
+
+with brayns.start(service, connector) as (process, instance):
 
     loader = brayns.BbpLoader(
         cells=brayns.BbpCells.from_density(1),

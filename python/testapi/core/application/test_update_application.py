@@ -28,7 +28,7 @@ class TestUpdateApplication(SimpleTestCase):
         brayns.update_application(
             self.instance,
             resolution=brayns.Resolution.ultra_hd,
-            jpeg_quality=60
+            jpeg_quality=60,
         )
         test = brayns.get_application(self.instance)
         self.assertEqual(test.resolution, brayns.Resolution.ultra_hd)

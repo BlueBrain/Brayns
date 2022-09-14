@@ -48,7 +48,7 @@ class SonataNodePopulation:
     """
 
     name: str
-    nodes: SonataNodes = SonataNodes.from_density(0.01)
+    nodes: SonataNodes = field(default_factory=SonataNodes.default)
     report: SonataReport | None = None
     edges: list[SonataEdgePopulation] | None = None
     morphology: Morphology = field(default_factory=Morphology)
