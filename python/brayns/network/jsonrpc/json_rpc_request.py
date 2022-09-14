@@ -20,28 +20,26 @@
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field
 from typing import Any
 
+from .json_rpc_message import JsonRpcMessage
+
 
 @dataclass
-class JsonRpcRequest:
+class JsonRpcRequest(JsonRpcMessage):
 
-    id: int | str | None
-    method: str
+    id: int | str | None = None
+    method: str = ''
     params: Any = field(default=None, repr=False)
 
-    def serialize(self) -> dict[str, Any]:
-        message: dict[str, Any] = {
+    def to_dict(self) -> dict[str, Any]:
+        obj: dict[str, Any] = {
             'jsonrpc': '2.0',
             'method': self.method
         }
         if self.id is not None:
-            message['id'] = self.id
+            obj['id'] = self.id
         if self.params is not None:
-            message['params'] = self.params
-        return message
-
-    def to_json(self) -> str:
-        return json.dumps(self.serialize())
+            obj['params'] = self.params
+        return obj

@@ -20,26 +20,22 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
+from .json_rpc_message import JsonRpcMessage
 from .request_error import RequestError
 
 
 @dataclass
-class JsonRpcError:
+class JsonRpcError(JsonRpcMessage):
 
-    id: int | str | None
-    error: RequestError
+    id: int | str | None = None
+    error: RequestError = field(default_factory=RequestError)
 
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> JsonRpcError:
-        error: dict[str, Any] = message['error']
-        return JsonRpcError(
-            id=message.get('id'),
-            error=RequestError(
-                code=error['code'],
-                message=error['message'],
-                data=error.get('data')
-            )
-        )
+    def update(self, obj: dict[str, Any]) -> None:
+        error: dict[str, Any] = obj['error']
+        self.id = obj.get('id')
+        self.error.code = error['code']
+        self.error.message = error['message']
+        self.error.data = error.get('data')

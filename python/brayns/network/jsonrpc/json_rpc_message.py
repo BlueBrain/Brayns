@@ -19,27 +19,30 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import json
-import unittest
+from typing import Any, Protocol, TypeVar
 
-import brayns
-
-
-class TestJsonRpcRequest(unittest.TestCase):
-
-    def test_to_json_with_id(self) -> None:
-        request = brayns.JsonRpcRequest(1, 'test', [1, 2, 3])
-        obj = json.loads(request.to_json())
-        self.assertEqual(request.id, obj['id'])
-        self.assertEqual(request.method, obj['method'])
-        self.assertEqual(request.params, obj['params'])
-
-    def test_to_json_notification(self) -> None:
-        notification = brayns.JsonRpcRequest(None, 'test', None)
-        obj = json.loads(notification.to_json())
-        self.assertNotIn('id', obj)
-        self.assertEqual(notification.method, obj['method'])
-        self.assertNotIn('params', obj)
+T = TypeVar('T', bound='JsonRpcMessage')
 
 
-if __name__ == '__main__':
-    unittest.main()
+class JsonRpcMessage(Protocol):
+
+    @classmethod
+    def from_json(cls: type[T], data: str) -> T:
+        obj = json.loads(data)
+        return cls.from_dict(obj)
+
+    @classmethod
+    def from_dict(cls: type[T], obj: dict[str, Any]) -> T:
+        message = cls()
+        message.update(obj)
+        return message
+
+    def to_json(self) -> str:
+        obj = self.to_dict()
+        return json.dumps(obj)
+
+    def to_dict(self) -> dict[str, Any]:
+        raise NotImplementedError()
+
+    def update(self, obj: dict[str, Any]) -> None:
+        raise NotImplementedError()

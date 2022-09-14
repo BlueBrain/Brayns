@@ -23,16 +23,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from .json_rpc_message import JsonRpcMessage
+
 
 @dataclass
-class JsonRpcReply:
+class JsonRpcReply(JsonRpcMessage):
 
-    id: int | str
+    id: int | str = 0
     result: Any = field(default=None, repr=False)
 
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> JsonRpcReply:
-        return JsonRpcReply(
-            id=message['id'],
-            result=message['result']
-        )
+    def update(self, obj: dict[str, Any]) -> None:
+        self.id = obj['id']
+        self.result = obj['result']

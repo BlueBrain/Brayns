@@ -20,25 +20,21 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
+from .json_rpc_message import JsonRpcMessage
 from .request_progress import RequestProgress
 
 
 @dataclass
-class JsonRpcProgress:
+class JsonRpcProgress(JsonRpcMessage):
 
-    id: int | str
-    params: RequestProgress
+    id: int | str = 0
+    params: RequestProgress = field(default_factory=RequestProgress)
 
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> JsonRpcProgress:
-        params = message['params']
-        return JsonRpcProgress(
-            id=params['id'],
-            params=RequestProgress(
-                operation=params['operation'],
-                amount=params['amount']
-            )
-        )
+    def update(self, obj: dict[str, Any]) -> None:
+        params = obj['params']
+        self.id = params['id']
+        self.params.operation = params['operation']
+        self.params.amount = params['amount']

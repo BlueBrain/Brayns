@@ -25,10 +25,10 @@ from brayns.network.jsonrpc.json_rpc_reply import JsonRpcReply
 
 class TestJsonRpcReply(unittest.TestCase):
 
-    def test_deserialize(self) -> None:
-        reply = JsonRpcReply.deserialize({
+    def test_from_dict(self) -> None:
+        reply = JsonRpcReply.from_dict({
             'id': 1,
-            'result': 12
+            'result': 12,
         })
         self.assertEqual(reply.id, 1)
         self.assertEqual(reply.result, 12)

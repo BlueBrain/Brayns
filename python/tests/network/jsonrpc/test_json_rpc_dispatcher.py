@@ -42,7 +42,7 @@ class TestJsonRpcDispatcher(unittest.TestCase):
         }
         self._dispatcher.dispatch(json.dumps(reply))
         test = self._listener.get_data()
-        ref = JsonRpcReply.deserialize(reply)
+        ref = JsonRpcReply.from_dict(reply)
         self.assertEqual(test, ref)
 
     def test_dispatch_error(self) -> None:
@@ -55,7 +55,7 @@ class TestJsonRpcDispatcher(unittest.TestCase):
         }
         self._dispatcher.dispatch(json.dumps(error))
         test = self._listener.get_data()
-        ref = JsonRpcError.deserialize(error)
+        ref = JsonRpcError.from_dict(error)
         self.assertEqual(test, ref)
 
     def test_dispatch_progress(self) -> None:
@@ -68,7 +68,7 @@ class TestJsonRpcDispatcher(unittest.TestCase):
         }
         self._dispatcher.dispatch(json.dumps(progress))
         test = self._listener.get_data()
-        ref = JsonRpcProgress.deserialize(progress)
+        ref = JsonRpcProgress.from_dict(progress)
         self.assertEqual(test, ref)
 
     def test_dispatch_invalid_frame(self) -> None:

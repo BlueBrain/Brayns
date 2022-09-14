@@ -24,8 +24,8 @@ from dataclasses import dataclass
 @dataclass
 class RequestProgress:
 
-    operation: str
-    amount: float
+    operation: str = ''
+    amount: float = 0.0
 
     def __str__(self) -> str:
         return f'{self.operation}: {100 * self.amount}%'

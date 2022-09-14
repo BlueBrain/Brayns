@@ -39,38 +39,38 @@ class JsonRpcDispatcher:
             self._listener.on_invalid_message(data, e)
 
     def _dispatch(self, data: str) -> None:
-        message = self._parse(data)
-        if self._dispatch_error(message):
+        obj = self._parse(data)
+        if self._dispatch_error(obj):
             return
-        if self._dispatch_reply(message):
+        if self._dispatch_reply(obj):
             return
-        if self._dispatch_progress(message):
+        if self._dispatch_progress(obj):
             return
         raise ValueError('Unsupported JSON-RPC message')
 
     def _parse(self, data: str) -> dict[str, Any]:
-        message = json.loads(data)
-        if not isinstance(message, dict):
+        obj = json.loads(data)
+        if not isinstance(obj, dict):
             raise ValueError('Message is not a JSON object')
-        return message
+        return obj
 
-    def _dispatch_error(self, message: dict[str, Any]) -> bool:
-        if 'error' not in message:
+    def _dispatch_error(self, obj: dict[str, Any]) -> bool:
+        if 'error' not in obj:
             return False
-        error = JsonRpcError.deserialize(message)
+        error = JsonRpcError.from_dict(obj)
         self._listener.on_error(error)
         return True
 
-    def _dispatch_reply(self, message: dict[str, Any]) -> bool:
-        if 'result' not in message:
+    def _dispatch_reply(self, obj: dict[str, Any]) -> bool:
+        if 'result' not in obj:
             return False
-        reply = JsonRpcReply.deserialize(message)
+        reply = JsonRpcReply.from_dict(obj)
         self._listener.on_reply(reply)
         return True
 
-    def _dispatch_progress(self, message: dict[str, Any]) -> bool:
-        if 'id' in message:
+    def _dispatch_progress(self, obj: dict[str, Any]) -> bool:
+        if 'id' in obj:
             return False
-        progress = JsonRpcProgress.deserialize(message)
+        progress = JsonRpcProgress.from_dict(obj)
         self._listener.on_progress(progress)
         return True
