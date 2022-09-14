@@ -70,7 +70,7 @@ namespace brayns
 ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model &model)
     : _modelInstanceID(modelInstanceID)
     , _model(model)
-    , _osprayInstance(ExtractGroupHandle::extract(model))
+    , _handle(ExtractGroupHandle::extract(model))
 {
     computeBounds();
 }
@@ -88,18 +88,7 @@ const Bounds &ModelInstance::getBounds() const noexcept
 void ModelInstance::computeBounds() noexcept
 {
     Log::debug("[ModelInstance {}] Computing bounds", _modelInstanceID);
-
-    const auto matrix = _transform.toMatrix();
-    _bounds = _model.computeBounds(matrix);
-
-    // In the event that the model used by this instance has no geometry,
-    // The result of computeBounds() would be bounds with min > max.
-    const auto &min = _bounds.getMin();
-    const auto &max = _bounds.getMax();
-    if (glm::max(min, max) == min)
-    {
-        _bounds = Bounds(Vector3f(0.f), Vector3f(0.f));
-    }
+    _bounds = _model.computeBounds(_getFullTransform());
 }
 
 Model &ModelInstance::getModel() noexcept
@@ -112,9 +101,15 @@ const Model &ModelInstance::getModel() const noexcept
     return _model;
 }
 
-const Metadata &ModelInstance::getModelMetadata() const noexcept
+ModelInfo ModelInstance::getModelData() const noexcept
+{
+    return ModelInfo(_model);
+}
+
+const Metadata *ModelInstance::getModelMetadata() const noexcept
 {
     auto &components = _model.getComponents();
+    return components.find<Metadata>();
 }
 
 void ModelInstance::setVisible(const bool val) noexcept
@@ -129,13 +124,12 @@ bool ModelInstance::isVisible() const noexcept
 
 void ModelInstance::setTransform(const Transform &transform) noexcept
 {
-    if (_transform != transform)
+    if (_flag.update(_transform, transform))
     {
-        _transform = transform;
-        auto affine = MatrixConverter::glmToOspray(_transform.toMatrix());
-        _osprayInstance.setParam(InstanceParameters::transform, affine);
-        computeBounds();
-        _flag = true;
+        auto matrix = _getFullTransform();
+        auto affine = MatrixConverter::glmToOspray(matrix);
+        _handle.setParam(InstanceParameters::transform, affine);
+        _bounds = _model.computeBounds(matrix);
     }
 }
 
@@ -144,9 +138,9 @@ const Transform &ModelInstance::getTransform() const noexcept
     return _transform;
 }
 
-const ospray::cpp::Instance &ModelInstance::getOsprayInstance() const noexcept
+const ospray::cpp::Instance &ModelInstance::getHandle() const noexcept
 {
-    return _osprayInstance;
+    return _handle;
 }
 
 bool ModelInstance::commit()
@@ -155,9 +149,22 @@ bool ModelInstance::commit()
     {
         return false;
     }
-
-    _osprayInstance.commit();
-    _flag = false;
+    _handle.commit();
+    _flag.setModified(false);
     return true;
+}
+
+Matrix4f ModelInstance::_getFullTransform() const noexcept
+{
+    auto matrix = _transform.toMatrix();
+
+    auto &components = _model.getComponents();
+    auto baseTransform = components.find<Transform>();
+    if (baseTransform)
+    {
+        matrix = matrix * baseTransform->toMatrix();
+    }
+
+    return matrix;
 }
 }

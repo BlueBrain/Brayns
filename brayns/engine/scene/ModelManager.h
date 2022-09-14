@@ -22,7 +22,6 @@
 
 #include <brayns/engine/model/Model.h>
 #include <brayns/engine/model/ModelInstance.h>
-#include <brayns/json/JsonType.h>
 #include <brayns/utils/IDFactory.h>
 
 #include <memory>
@@ -31,24 +30,6 @@
 namespace brayns
 {
 /**
- * @brief The ModelsLoadParameters struct holds the information with which a group of models was loaded
- */
-struct ModelLoadParameters
-{
-    enum class LoadType
-    {
-        FromFile,
-        FromBlob,
-        None,
-    };
-
-    LoadType type{LoadType::None};
-    std::string path;
-    std::string loaderName;
-    JsonValue loadParameters;
-};
-
-/**
  * @brief The SceneModelManager class manages models within a scene
  */
 class ModelManager
@@ -56,22 +37,18 @@ class ModelManager
 public:
     /**
      * @brief Adds a model to the list and creates an instance out of it to be rendered.
-     * @param loadParameters Parameters with which the model was loaded
      * @param model
-     * @return ModelInstance&
+     * @return ModelInstance*
      */
-    ModelInstance &addModel(ModelLoadParameters loadParameters, std::unique_ptr<brayns::Model> model);
+    ModelInstance *addModel(std::unique_ptr<brayns::Model> model);
 
     /**
      * @brief Adds a list of new model to the scene and creates instances out of them to be rendered.
      * Will automatically trigger the scene to re-compute the bounds.
-     * @param loadParameters Parameters which were used to load the model
      * @param models The model to add to the scene
      * @return std::vector<ModelInstance *>
      */
-    std::vector<ModelInstance *> addModels(
-        ModelLoadParameters loadParameters,
-        std::vector<std::unique_ptr<Model>> models);
+    std::vector<ModelInstance *> addModels(std::vector<std::unique_ptr<Model>> models);
 
     /**
      * @brief Creates a new instance from the model that is being instantiated by the given instance ID
@@ -95,12 +72,6 @@ public:
     std::vector<ModelInstance *> &getAllModelInstances() noexcept;
 
     /**
-     * @brief Return a list of all model instances in the manager
-     * @returns const std::vector<ModelInstance *> &
-     */
-    const std::vector<ModelInstance *> &getAllModelInstances() const noexcept;
-
-    /**
      * @brief Removes all model instances from the scene, identified by the given instance IDs.
      * If the model to which the instance refers does not have any other instance, it will be deleted as well.
      * Will automatically trigger the scene to re-compute the bounds.
@@ -114,48 +85,35 @@ public:
      */
     void removeAllModelInstances();
 
-    /**
-     * @brief Returns the parameters with which a model referenced by the given instance was loaded
-     * @param instanceID ID of the instance that owns the model to fetch the load parameters
-     * @return ModelParameters &
-     * @throws std::invalid_argument if the given instanceID does not belong to any existing instance
-     */
-    const ModelLoadParameters &getModelLoadParameters(const uint32_t instanceID) const;
-
 private:
     friend class Scene;
 
     /**
-     * @brief Calls the preRender function on all components of all models
-     *
+     * @brief Calls the preRender system of all models
      * @param parameters
      */
     void preRender(const ParametersManager &parameters);
 
     /**
      * @brief Attempts to commit any unsynced data to Ospray.
-     *
-     * @return true if anything was commited to Ospray, false otherwise
+     * @return CommitResult information about the result of the commit
      */
-    bool commit();
+    CommitResult commit();
 
     /**
-     * @brief Calls the postRender function on all componnets of all models
-     *
+     * @brief Calls the postRender system on all models
      * @param parameters
      */
     void postRender(const ParametersManager &parameters);
 
     /**
-     * @brief Queries the bounds of all model instances and returns a Bounds object encapsulating all of them
-     *
+     * @brief Returns an aggregate of all instance bounds
      * @return Bounds
      */
     Bounds getBounds() const noexcept;
 
     /**
-     * @brief Return a list with all the model instance handles so that the scene can commit them
-     *
+     * @brief Return a list with all the ospray instance handles
      * @return std::vector<ospray::cpp::Instance>
      */
     std::vector<ospray::cpp::Instance> getHandles() noexcept;
@@ -167,19 +125,16 @@ private:
      */
     struct ModelEntry
     {
-        ModelLoadParameters params;
         std::unique_ptr<Model> model;
         std::vector<std::unique_ptr<ModelInstance>> instances;
     };
 
     /**
-     * @brief Creates a new model entry from the given load parameters and model object
-     *
-     * @param params Parameters used to load the model
+     * @brief Creates a new model entry from the given model object
      * @param model Model object
      * @return ModelEntry&
      */
-    ModelEntry &_createModelEntry(ModelLoadParameters params, std::unique_ptr<Model> model);
+    ModelEntry &_createModelEntry(std::unique_ptr<Model> model);
 
     /**
      * @brief Creates a new model instance from the given model entry

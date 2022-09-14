@@ -50,24 +50,30 @@ public:
     }
 
     template<typename T>
+    T &getOrAdd()
+    {
+        if (auto component = find<T>())
+        {
+            return *component;
+        }
+        return add<T>();
+    }
+
+    template<typename T>
     T &get()
     {
-        auto component = findComponent<T>();
+        auto component = find<T>();
         assert(component);
         return *component;
     }
 
     template<typename T>
-    T &getOrAdd()
+    const T &get() const
     {
         auto component = find<T>();
-        if (component)
-        {
-            return *component;
-        }
-
-        return add<T>();
-    };
+        assert(component);
+        return *component;
+    }
 
     template<typename T>
     T *find()
@@ -82,9 +88,28 @@ public:
         return static_cast<T *>(&component);
     }
 
+    template<typename T>
+    const T *find() const
+    {
+        auto it = _findIterator<T>();
+        if (it == _components.end())
+        {
+            return nullptr;
+        }
+        auto &entry = *it;
+        auto &component = *entry.component;
+        return static_cast<const T *>(&component);
+    }
+
 private:
     template<typename T>
     auto _findIterator()
+    {
+        return std::find(_components.begin(), _components.end(), std::type_index(typeid(T)));
+    }
+
+    template<typename T>
+    auto _findIterator() const
     {
         return std::find(_components.begin(), _components.end(), std::type_index(typeid(T)));
     }

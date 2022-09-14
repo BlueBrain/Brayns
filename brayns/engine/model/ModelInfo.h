@@ -19,56 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Scene.h"
+#pragma once
 
-#include <ospray/ospray_cpp/Data.h>
+#include <brayns/common/Bounds.h>
+#include <brayns/common/Transform.h>
+#include <brayns/engine/components/LoadParameters.h>
+#include <brayns/engine/components/Metadata.h>
 
-namespace
-{
-struct WorldParameters
-{
-    inline static const std::string instanceParameter = "instance";
-};
-}
+#include "Model.h"
 
 namespace brayns
 {
-Bounds Scene::getBounds() const noexcept
+struct ModelInfo
 {
-    return _models.getBounds();
+    ModelInfo(const Model &model);
+
+    const LoadParameters *loadParameters;
+    const Metadata *metadata;
+    const Transform *transform;
+};
 }
-
-void Scene::preRender(const ParametersManager &params)
-{
-    _models.preRender(params);
-}
-
-void Scene::postRender(const ParametersManager &params)
-{
-    _models.postRender(params);
-}
-
-bool Scene::commit()
-{
-    auto modelCommitResult = _models.commit();
-
-    if (modelCommitResult.needsRebuildBVH)
-    {
-        auto handles = _models.getHandles();
-        _handle.setParam(WorldParameters::instanceParameter, ospray::cpp::CopiedData(handles));
-        _handle.commit();
-    }
-
-    return modelCommitResult.needsRebuildBVH || modelCommitResult.needsRender;
-}
-
-ModelManager &Scene::getModels() noexcept
-{
-    return _models;
-}
-
-const ospray::cpp::World &Scene::getHandle() const noexcept
-{
-    return _handle;
-}
-} // namespace brayns

@@ -55,6 +55,11 @@ public:
     Components &getComponents() noexcept;
 
     /**
+     * @copydoc Model::getComponents() noexcept;
+     */
+    const Components &getComponents() const noexcept;
+
+    /**
      * @brief Process the model if it is the target of the inspect context
      * @param context Information about the hitted model on the inspection
      * @return InspectResult the result of checking the inspection context for this model
@@ -68,9 +73,6 @@ public:
      */
     Bounds computeBounds(const Matrix4f &matrix);
 
-private:
-    friend class ModelManager;
-
     /**
      * @brief Called when the model is added to the scene
      */
@@ -80,7 +82,7 @@ private:
      * @brief Called on the pre-render stage
      * @param parameters ParametersManager object to access system config
      */
-    void preRender(const ParametersManager &parameters);
+    void onPreRender(const ParametersManager &parameters);
 
     /**
      * @brief Called before rendering a new frame
@@ -92,7 +94,7 @@ private:
      * @brief Called on the post-render stage
      * @param parameters ParametersManager object to access system config
      */
-    void postRender(const ParametersManager &parameters);
+    void onPostRender(const ParametersManager &parameters);
 
 private:
     uint32_t _modelId{};

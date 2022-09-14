@@ -79,24 +79,22 @@ public:
 
 namespace brayns
 {
-ModelInstance &ModelManager::addModel(ModelLoadParameters params, std::unique_ptr<Model> model)
+ModelInstance *ModelManager::addModel(std::unique_ptr<Model> model)
 {
     std::vector<std::unique_ptr<Model>> models;
     models.push_back(std::move(model));
-    auto instances = addModels(std::move(params), std::move(models));
-    return *(instances.front());
+    auto instances = addModels(std::move(models));
+    return instances.front();
 }
 
-std::vector<ModelInstance *> ModelManager::addModels(
-    ModelLoadParameters params,
-    std::vector<std::unique_ptr<Model>> models)
+std::vector<ModelInstance *> ModelManager::addModels(std::vector<std::unique_ptr<Model>> models)
 {
     std::vector<ModelInstance *> result;
     result.reserve(models.size());
 
     for (auto &model : models)
     {
-        auto &entry = _createModelEntry(params, std::move(model));
+        auto &entry = _createModelEntry(std::move(model));
         auto &instance = _createModelInstance(entry);
         result.push_back(&instance);
     }
@@ -177,17 +175,6 @@ void ModelManager::removeAllModelInstances()
     _dirty = true;
 }
 
-const ModelLoadParameters &ModelManager::getModelLoadParameters(const uint32_t instanceID) const
-{
-    auto &modelInstance = ModelFinder::findInstance(_instances, instanceID);
-    auto &model = modelInstance.getModel();
-    auto modelId = model.getID();
-    auto &modelEntry = ModelFinder::findEntry(_models, modelId);
-    auto &loadParams = modelEntry.params;
-
-    return loadParams;
-}
-
 void ModelManager::preRender(const ParametersManager &parameters)
 {
     for (auto &entry : _models)
@@ -197,23 +184,28 @@ void ModelManager::preRender(const ParametersManager &parameters)
     }
 }
 
-bool ModelManager::commit()
+CommitResult ModelManager::commit()
 {
-    bool needsRecommit = _dirty;
+    CommitResult result;
+
+    result.needsRebuildBVH = _dirty;
     _dirty = false;
 
     for (auto &entry : _models)
     {
         auto &model = *entry.model;
-        needsRecommit = model.commit() || needsRecommit;
+        auto modelResult = model.commit();
+        result.needsRebuildBVH |= modelResult.needsRebuildBVH;
+        result.needsRender |= modelResult.needsRender;
     }
 
     for (auto instance : _instances)
     {
-        needsRecommit = instance->commit() || needsRecommit;
+        auto instanceResult = instance->commit();
+        result.needsRebuildBVH |= instanceResult;
     }
 
-    return needsRecommit;
+    return result;
 }
 
 void ModelManager::postRender(const ParametersManager &parameters)
@@ -237,10 +229,9 @@ Bounds ModelManager::getBounds() const noexcept
     return result;
 }
 
-ModelManager::ModelEntry &ModelManager::_createModelEntry(ModelLoadParameters params, std::unique_ptr<Model> model)
+ModelManager::ModelEntry &ModelManager::_createModelEntry(std::unique_ptr<Model> model)
 {
     auto &modelEntry = _models.emplace_back();
-    modelEntry.params = std::move(params);
     modelEntry.model = std::move(model);
     modelEntry.model->_modelId = _modelIdFactory.generateID();
     return modelEntry;
@@ -269,7 +260,7 @@ std::vector<ospray::cpp::Instance> ModelManager::getHandles() noexcept
         {
             continue;
         }
-        const auto &osprayInstance = instance->getOsprayInstance();
+        const auto &osprayInstance = instance->getHandle();
         handles.push_back(osprayInstance);
     }
     return handles;

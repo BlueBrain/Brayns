@@ -32,6 +32,11 @@ Components &Model::getComponents() noexcept
     return _components;
 }
 
+const Components &Model::getComponents() const noexcept
+{
+    return _components;
+}
+
 InspectResult Model::inspect(const InspectContext &context)
 {
     return _systems.inspect(context, _components);
@@ -47,7 +52,7 @@ void Model::init()
     _systems.init(_components);
 }
 
-void Model::preRender(const ParametersManager &parameters)
+void Model::onPreRender(const ParametersManager &parameters)
 {
     _systems.preRender(parameters, _components);
 }
@@ -57,7 +62,7 @@ CommitResult Model::commit()
     return _systems.commit(_components);
 }
 
-void Model::postRender(const ParametersManager &parameters)
+void Model::onPostRender(const ParametersManager &parameters)
 {
     return _systems.postRender(parameters, _components);
 }

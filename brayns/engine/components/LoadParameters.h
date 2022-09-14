@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,22 +20,24 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
+#include <brayns/json/JsonType.h>
+
+#include <string>
 
 namespace brayns
 {
-/**
- * @brief Defines the translation, rotation and scale parameters to be applied
- * to a scene asset.
- */
-struct Transform
+struct LoadParameters
 {
-    Vector3f translation{0.f};
-    Quaternion rotation{1, 0, 0, 0};
-    Vector3f scale{1.f};
+    enum class LoadType
+    {
+        FromFile,
+        FromBlob,
+        None,
+    };
 
-    Matrix4f toMatrix() const noexcept;
-    bool operator==(const Transform &other) const noexcept;
-    bool operator!=(const Transform &other) const noexcept;
+    LoadType type{LoadType::None};
+    std::string path;
+    std::string loaderName;
+    JsonValue loadParameters;
 };
-} // namespace brayns
+};
