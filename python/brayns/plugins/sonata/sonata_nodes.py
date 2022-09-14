@@ -41,6 +41,11 @@ class SonataNodes:
         return SonataNodes.from_density(1.0)
 
     @staticmethod
+    def default() -> SonataNodes:
+        """Load a reasonable proportion of nodes."""
+        return SonataNodes.from_density(0.01)
+
+    @staticmethod
     def from_density(density: float) -> SonataNodes:
         """Load a proportion of all nodes (0 = none, 1 = all)."""
         return SonataNodes(density=density)

@@ -49,11 +49,11 @@ time using the `logs` property of the object.
 
 .. code-block:: python
 
-    connector = brayns.Connector('localhost:5000')
+    connector = brayns.Connector('localhost:5000', max_attempts=None)
 
     with service.start() as process:
 
-        with connector.connect(max_attempts=100) as instance:
+        with connector.connect() as instance:
 
             print(brayns.get_version(instance))
             print(process.logs)
@@ -64,18 +64,19 @@ time using the `logs` property of the object.
     started by the service (or call it manually) otherwise it will never get
     terminated and keep running after your script is finished.
 
-Bundle
-------
+Start a service and connect to it in the same script
+----------------------------------------------------
 
 Brayns also provides a helper class to manage both the service and its
-connector named ``Bundle``. It automatically starts a service process on the
-given port and connects to it.
+connector named ``Manager``. It can be obtained using a ``Service`` and a
+``Connector`` with the ``start`` function.
 
 .. code-block:: python
 
-    bundle = brayns.Bundle(5000)
+    service = brayns.Service('localhost:5000')
+    connector = brayns.Connector('localhost:5000')
 
-    with bundle.start() as (process, instance):
+    with brayns.start(service, connector) as (process, instance):
 
         print(brayns.get_version(instance))
         print(process.logs)

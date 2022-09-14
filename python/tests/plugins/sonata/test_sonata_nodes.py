@@ -31,6 +31,11 @@ class TestSonataNodes(unittest.TestCase):
         self.assertIsNone(test.names)
         self.assertIsNone(test.ids)
 
+    def test_default(self) -> None:
+        test = brayns.SonataNodes.default()
+        ref = brayns.SonataNodes.from_density(0.01)
+        self.assertEqual(test, ref)
+
     def test_from_density(self) -> None:
         density = 0.3
         test = brayns.SonataNodes.from_density(density)

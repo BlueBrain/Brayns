@@ -141,7 +141,7 @@ def _euler_to_quaternion(euler: Vector3, degrees: bool) -> Quaternion:
         sx * cy * cz - cx * sy * sz,
         cx * sy * cz + sx * cy * sz,
         cx * cy * sz - sx * sy * cz,
-        cx * cy * cz + sx * sy * sz
+        cx * cy * cz + sx * sy * sz,
     )
 
 

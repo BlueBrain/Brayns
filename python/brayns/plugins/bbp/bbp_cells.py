@@ -24,7 +24,7 @@ from dataclasses import dataclass
 from typing import Any
 
 
-@dataclass(frozen=True)
+@dataclass
 class BbpCells:
     """BlueConfig cells selection.
 

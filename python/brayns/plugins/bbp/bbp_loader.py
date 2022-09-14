@@ -48,7 +48,7 @@ class BbpLoader(Loader):
     :type load_efferent_synapses: bool, optional
     """
 
-    cells: BbpCells = BbpCells.all()
+    cells: BbpCells = field(default_factory=BbpCells.all)
     report: BbpReport | None = None
     morphology: Morphology = field(default_factory=Morphology)
     load_afferent_synapses: bool = False

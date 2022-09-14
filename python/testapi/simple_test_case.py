@@ -30,16 +30,20 @@ class SimpleTestCase(ApiTestCase):
         return self.__manager.instance
 
     def setUp(self) -> None:
-        bundle = brayns.Bundle(
-            port=self.port,
-            service_executable=self.executable,
-            service_env=self.env,
-            connector_binary_handler=self.on_binary,
+        service = brayns.Service(
+            uri=f'localhost:{self.port}',
+            executable=self.executable,
+            env=self.env,
         )
-        self.__manager = bundle.start()
+        connector = brayns.Connector(
+            uri=service.uri,
+            binary_handler=self.on_binary,
+            max_attempts=None,
+        )
+        self.__manager = brayns.start(service, connector)
 
     def tearDown(self) -> None:
         self.__manager.stop()
 
-    def on_binary(self, _: bytes) -> None:
+    def on_binary(self, data: bytes) -> None:
         pass

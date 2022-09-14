@@ -18,36 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
+from brayns.network import Connector
 
-import argparse
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import TypeVar
-
-T = TypeVar('T', bound='Cli')
+from .manager import Manager
+from .service import Service
 
 
-@dataclass
-class Cli(ABC):
+def start(service: Service, connector: Connector) -> Manager:
+    """Start a braynsService instance and connect to it.
 
-    name: str | None = None
-    description: str | None = None
+    Returns the service process and the connected instance (see ``Manager``).
 
-    @abstractmethod
-    def register(self, parser: argparse.ArgumentParser) -> None:
-        pass
-
-    @abstractmethod
-    def load(self, args: argparse.Namespace) -> None:
-        pass
-
-    def parse(self, argv: list[str]) -> None:
-        parser = argparse.ArgumentParser(
-            prog=self.name,
-            description=self.description,
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        )
-        self.register(parser)
-        args = parser.parse_args(argv)
-        self.load(args)
+    :param service: Service specifications.
+    :type service: Service
+    :param connector: Connection specifications.
+    :type connector: Connector
+    :return: Running process and connected instance.
+    :rtype: Manager
+    """
+    process = service.start()
+    try:
+        instance = connector.connect()
+    except:
+        process.stop()
+        raise
+    return Manager(process, instance)
