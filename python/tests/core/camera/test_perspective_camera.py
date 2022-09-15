@@ -25,45 +25,51 @@ import brayns
 
 class TestPerspectiveCamera(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.target = brayns.Bounds(
+            min=-brayns.Vector3.one,
+            max=brayns.Vector3.one,
+        )
+
     def test_get_name(self) -> None:
         test = brayns.PerspectiveCamera.name
         ref = 'perspective'
         self.assertEqual(test, ref)
 
-    def test_from_target(self) -> None:
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
-        test = brayns.PerspectiveCamera.from_target(target)
-        ref = brayns.PerspectiveCamera()
-        self.assertEqual(test, ref)
-
-    def test_deserialize(self) -> None:
-        message = {
-            'fovy': 30,
-            'aperture_radius': 1,
-            'focus_distance': 2
-        }
-        test = brayns.PerspectiveCamera.deserialize(message)
-        self.assertAlmostEqual(test.fovy.degrees, 30)
-        self.assertEqual(test.aperture_radius, 1)
-        self.assertEqual(test.focus_distance, 2)
-
     def test_get_front_view(self) -> None:
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         camera = brayns.PerspectiveCamera()
-        test = camera.get_front_view(target)
-        ref = camera.fovy.get_front_view(target)
+        test = camera.get_front_view(self.target)
+        ref = camera.fovy.get_front_view(self.target)
         self.assertEqual(test, ref)
 
-    def test_serialize(self) -> None:
+    def test_from_target(self) -> None:
+        test = brayns.PerspectiveCamera()
+        ref = brayns.PerspectiveCamera()
+        test.set_target(self.target)
+        self.assertEqual(test, ref)
+
+    def test_get_properties(self) -> None:
         camera = brayns.PerspectiveCamera(
             fovy=brayns.Fovy(30, degrees=True),
             aperture_radius=1,
-            focus_distance=2
+            focus_distance=2,
         )
-        test = camera.serialize()
+        test = camera.get_properties()
         self.assertAlmostEqual(test['fovy'], 30)
         self.assertEqual(test['aperture_radius'], 1)
         self.assertEqual(test['focus_distance'], 2)
+
+    def test_update_properties(self) -> None:
+        message = {
+            'fovy': 30,
+            'aperture_radius': 1,
+            'focus_distance': 2,
+        }
+        test = brayns.PerspectiveCamera()
+        test.update_properties(message)
+        self.assertAlmostEqual(test.fovy.degrees, 30)
+        self.assertEqual(test.aperture_radius, 1)
+        self.assertEqual(test.focus_distance, 2)
 
 
 if __name__ == '__main__':

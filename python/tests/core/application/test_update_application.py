@@ -26,18 +26,21 @@ from tests.mock_instance import MockInstance
 
 class TestUpdateApplication(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.message = {
+            'viewport': [100, 200],
+            'jpeg_quality': 50,
+        }
+
     def test_update_application(self) -> None:
         instance = MockInstance()
         brayns.update_application(
             instance,
             resolution=brayns.Resolution(100, 200),
-            jpeg_quality=50
+            jpeg_quality=50,
         )
         self.assertEqual(instance.method, 'set-application-parameters')
-        self.assertEqual(instance.params, {
-            'viewport': [100, 200],
-            'jpeg_quality': 50
-        })
+        self.assertEqual(instance.params, self.message)
 
 
 if __name__ == '__main__':

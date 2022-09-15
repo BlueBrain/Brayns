@@ -25,44 +25,41 @@ import brayns
 
 class TestOrthographicCamera(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self.target = brayns.Bounds(
+            min=-brayns.Vector3.one,
+            max=brayns.Vector3.one,
+        )
+
     def test_name(self) -> None:
         test = brayns.OrthographicCamera.name
         ref = 'orthographic'
         self.assertEqual(test, ref)
 
-    def test_from_target(self) -> None:
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
-        test = brayns.OrthographicCamera.from_target(target)
-        self.assertEqual(test.height, target.height)
-
-    def test_deserialize(self) -> None:
-        message = {
-            'height': 3
-        }
-        test = brayns.OrthographicCamera.deserialize(message)
-        self.assertEqual(test.height, 3)
-
     def test_get_front_view(self) -> None:
         camera = brayns.OrthographicCamera()
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
-        test = camera.get_front_view(target)
+        test = camera.get_front_view(self.target)
         self.assertEqual(test.position, 2 * brayns.Vector3.forward)
         self.assertEqual(test.target, brayns.Vector3.zero)
         self.assertEqual(test.up, brayns.Vector3.up)
 
-    def test_serialize(self) -> None:
-        camera = brayns.OrthographicCamera(3)
-        test = camera.serialize()
-        self.assertEqual(test['height'], 3)
+    def test_set_target(self) -> None:
+        test = brayns.OrthographicCamera()
+        test.set_target(self.target)
+        self.assertEqual(test.height, self.target.height)
 
-    def test_serialize_with_name(self) -> None:
-        camera = brayns.OrthographicCamera()
-        test = camera.serialize_with_name()
-        ref = {
-            'name': brayns.OrthographicCamera.name,
-            'params': camera.serialize(),
-        }
-        self.assertEqual(test, ref)
+    def test_get_properties(self) -> None:
+        camera = brayns.OrthographicCamera(3)
+        test = camera.get_properties()
+        self.assertEqual(test, {
+            'height': 3,
+        })
+
+    def test_update_properties(self) -> None:
+        message = {'height': 3}
+        test = brayns.OrthographicCamera()
+        test.update_properties(message)
+        self.assertEqual(test.height, 3)
 
 
 if __name__ == '__main__':

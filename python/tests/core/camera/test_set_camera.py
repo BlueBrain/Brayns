@@ -31,7 +31,7 @@ class TestSetCamera(unittest.TestCase):
         camera = brayns.PerspectiveCamera()
         brayns.set_camera(instance, camera)
         self.assertEqual(instance.method, 'set-camera-perspective')
-        self.assertEqual(instance.params, camera.serialize())
+        self.assertEqual(instance.params, camera.get_properties())
 
 
 if __name__ == '__main__':
