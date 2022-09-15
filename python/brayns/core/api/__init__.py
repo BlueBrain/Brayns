@@ -25,7 +25,6 @@ from .get_entrypoints import get_entrypoints
 from .get_methods import get_methods
 from .json_schema import JsonSchema
 from .json_type import JsonType
-from .serialize_schema import serialize_schema
 
 __all__ = [
     'deserialize_schema',
@@ -35,5 +34,4 @@ __all__ = [
     'get_methods',
     'JsonSchema',
     'JsonType',
-    'serialize_schema',
 ]

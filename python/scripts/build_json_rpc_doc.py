@@ -24,6 +24,7 @@ import json
 import pathlib
 import sys
 from collections import defaultdict
+from typing import Any
 
 import brayns
 
@@ -208,11 +209,71 @@ def format_result(schema: brayns.JsonSchema | None) -> str:
 
 
 def format_schema(schema: brayns.JsonSchema) -> str:
-    message = schema.to_dict()
+    message = serialize_schema(schema)
     message.pop('title', None)
     data = json.dumps(message, indent=4)
     data = data.replace('\n', '\n    ')
     return SCHEMA.format(data=data)
+
+
+def serialize_schema(schema: brayns.JsonSchema) -> dict[str, Any]:
+    message = dict[str, Any]()
+    if schema.title:
+        message['title'] = schema.title
+    if schema.description:
+        message['description'] = schema.description
+    if schema.type is not brayns.JsonType.UNDEFINED:
+        message['type'] = schema.type.value
+    if schema.read_only:
+        message['readOnly'] = schema.read_only
+    if schema.write_only:
+        message['writeOnly'] = schema.write_only
+    if schema.default is not None:
+        message['default'] = schema.default
+    if schema.minimum is not None:
+        message['minimum'] = schema.minimum
+    if schema.maximum is not None:
+        message['maximum'] = schema.maximum
+    if schema.items is not None:
+        message['items'] = serialize_schema(schema.items)
+    if schema.min_items is not None:
+        message['minItems'] = schema.min_items
+    if schema.max_items is not None:
+        message['maxItems'] = schema.max_items
+    if schema.properties:
+        message['properties'] = serialize_properties(schema)
+    if schema.required:
+        message['required'] = schema.required
+    if schema.additional_properties is not None:
+        message['additionalProperties'] = serialize_additional(schema)
+    if schema.one_of:
+        message['oneOf'] = serialize_one_of(schema)
+    if schema.enum:
+        message['enum'] = schema.enum
+    return message
+
+
+def serialize_properties(schema: brayns.JsonSchema) -> dict[str, Any]:
+    return {
+        key: serialize_schema(value)
+        for key, value in schema.properties.items()
+    }
+
+
+def serialize_additional(schema: brayns.JsonSchema) -> bool | dict[str, Any] | None:
+    properties = schema.additional_properties
+    if properties is None:
+        return None
+    if isinstance(properties, bool):
+        return properties
+    return serialize_schema(properties)
+
+
+def serialize_one_of(schema: brayns.JsonSchema) -> list[dict[str, Any]]:
+    return [
+        serialize_schema(one_of)
+        for one_of in schema.one_of
+    ]
 
 
 if __name__ == '__main__':
