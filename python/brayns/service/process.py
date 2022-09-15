@@ -44,7 +44,7 @@ class Process:
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            text=True
+            text=True,
         )
         self._thread = threading.Thread(target=self._poll)
         self._logs = deque[str](maxlen=1000)
