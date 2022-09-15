@@ -31,5 +31,9 @@ __all__ = [
     'ProtocolError',
     'ServiceUnavailableError',
     'SslClientContext',
+    'WebSocket',
+    'WebSocketClient',
+    'WebSocketConnector',
     'WebSocketError',
+    'WebSocketListener',
 ]

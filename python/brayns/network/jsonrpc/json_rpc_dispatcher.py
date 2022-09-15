@@ -22,7 +22,13 @@ import json
 from typing import Any
 
 from .json_rpc_listener import JsonRpcListener
-from .messages import deserialize_error, deserialize_progress, deserialize_reply
+from .messages import (
+    JsonRpcError,
+    JsonRpcProgress,
+    JsonRpcReply,
+    RequestError,
+    RequestProgress,
+)
 
 
 class JsonRpcDispatcher:
@@ -55,20 +61,50 @@ class JsonRpcDispatcher:
     def _dispatch_error(self, message: dict[str, Any]) -> bool:
         if 'error' not in message:
             return False
-        error = deserialize_error(message)
+        error = _deserialize_error(message)
         self._listener.on_error(error)
         return True
 
     def _dispatch_reply(self, message: dict[str, Any]) -> bool:
         if 'result' not in message:
             return False
-        reply = deserialize_reply(message)
+        reply = _deserialize_reply(message)
         self._listener.on_reply(reply)
         return True
 
     def _dispatch_progress(self, message: dict[str, Any]) -> bool:
         if 'id' in message:
             return False
-        progress = deserialize_progress(message)
+        progress = _deserialize_progress(message)
         self._listener.on_progress(progress)
         return True
+
+
+def _deserialize_error(message: dict[str, Any]) -> JsonRpcError:
+    error: dict[str, Any] = message['error']
+    return JsonRpcError(
+        id=message.get('id'),
+        error=RequestError(
+            code=error['code'],
+            message=error['message'],
+            data=error.get('data'),
+        ),
+    )
+
+
+def _deserialize_reply(message: dict[str, Any]) -> JsonRpcReply:
+    return JsonRpcReply(
+        id=message['id'],
+        result=message['result'],
+    )
+
+
+def _deserialize_progress(message: dict[str, Any]) -> JsonRpcProgress:
+    params = message['params']
+    return JsonRpcProgress(
+        id=params['id'],
+        params=RequestProgress(
+            operation=params['operation'],
+            amount=params['amount'],
+        ),
+    )

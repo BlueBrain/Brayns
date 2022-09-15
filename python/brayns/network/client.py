@@ -22,9 +22,10 @@ from __future__ import annotations
 
 import json
 import logging
+from typing import Any
 
 from .instance import Instance
-from .jsonrpc import JsonRpcManager, JsonRpcRequest, RequestFuture, serialize_request
+from .jsonrpc import JsonRpcManager, JsonRpcRequest, RequestFuture
 from .websocket import WebSocket
 
 
@@ -50,8 +51,7 @@ class Client(Instance):
     def send(self, request: JsonRpcRequest) -> RequestFuture:
         self._logger.info('Send JSON-RPC request: %s.', request)
         self._logger.debug('Request params: %s.', request.params)
-        message = serialize_request(request)
-        data = json.dumps(message)
+        data = _stringify_request(request)
         self._websocket.send_text(data)
         id = request.id
         if id is None:
@@ -69,3 +69,20 @@ class Client(Instance):
     def cancel(self, id: int | str) -> None:
         self._logger.info('Cancel request with ID %s.', id)
         self.request('cancel', {'id': id})
+
+
+def _stringify_request(request: JsonRpcRequest) -> str:
+    message = _serialize_request(request)
+    return json.dumps(message)
+
+
+def _serialize_request(request: JsonRpcRequest) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'jsonrpc': '2.0',
+        'method': request.method,
+    }
+    if request.id is not None:
+        message['id'] = request.id
+    if request.params is not None:
+        message['params'] = request.params
+    return message

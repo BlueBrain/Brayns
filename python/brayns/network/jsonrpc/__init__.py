@@ -28,9 +28,6 @@ from .messages import *
 from .request_future import RequestFuture
 
 __all__ = [
-    'deserialize_error',
-    'deserialize_progress',
-    'deserialize_reply',
     'JsonRpcDispatcher',
     'JsonRpcError',
     'JsonRpcHandler',
@@ -44,5 +41,4 @@ __all__ = [
     'RequestError',
     'RequestFuture',
     'RequestProgress',
-    'serialize_request',
 ]
