@@ -18,11 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from brayns.network import Instance
+from brayns.utils import Color4
 
-from .deserialize_renderer import deserialize_renderer
 from .renderer import Renderer
 
 T = TypeVar('T', bound=Renderer)
@@ -44,4 +44,13 @@ def get_renderer(instance: Instance, renderer_type: type[T]) -> T:
     """
     name = renderer_type.name
     result = instance.request(f'get-renderer-{name}')
-    return deserialize_renderer(renderer_type, result)
+    return _deserialize_renderer(renderer_type, result)
+
+
+def _deserialize_renderer(renderer_type: type[T], message: dict[str, Any]) -> T:
+    renderer = renderer_type()
+    renderer.samples_per_pixel = message['samples_per_pixel']
+    renderer.max_ray_bounces = message['max_ray_bounces']
+    renderer.background_color = Color4(*message['background_color'])
+    renderer.update_additional_properties(message)
+    return renderer

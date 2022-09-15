@@ -20,12 +20,10 @@
 
 from .frame_exporter import FrameExporter
 from .key_frame import KeyFrame
-from .serialize_key_frame import serialize_key_frame
 from .snapshot import Snapshot
 
 __all__ = [
     'FrameExporter',
     'KeyFrame',
-    'serialize_key_frame',
     'Snapshot',
 ]

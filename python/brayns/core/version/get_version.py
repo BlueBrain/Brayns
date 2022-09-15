@@ -18,9 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from typing import Any
+
 from brayns.network import Instance
 
-from .deserialize_version import deserialize_version
 from .version import Version
 
 
@@ -33,4 +34,13 @@ def get_version(instance: Instance) -> Version:
     :rtype: Version
     """
     result = instance.request('get-version')
-    return deserialize_version(result)
+    return _deserialize_version(result)
+
+
+def _deserialize_version(message: dict[str, Any]) -> Version:
+    return Version(
+        major=message['major'],
+        minor=message['minor'],
+        patch=message['patch'],
+        revision=message['revision'],
+    )

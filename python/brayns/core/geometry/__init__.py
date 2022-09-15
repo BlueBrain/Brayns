@@ -23,7 +23,6 @@ from .box import Box
 from .capsule import Capsule
 from .geometry import Geometry
 from .plane import Plane
-from .serialize_geometry import serialize_geometry
 from .sphere import Sphere
 
 __all__ = [
@@ -32,6 +31,5 @@ __all__ = [
     'Capsule',
     'Geometry',
     'Plane',
-    'serialize_geometry',
     'Sphere',
 ]

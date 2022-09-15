@@ -18,10 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from typing import Any
+
 from brayns.network import Instance
 
 from .light import Light
-from .serialize_light import serialize_light
 
 
 def add_light(instance: Instance, light: Light) -> int:
@@ -35,5 +36,14 @@ def add_light(instance: Instance, light: Light) -> int:
     :rtype: int
     """
     name = light.name
-    params = serialize_light(light)
+    params = _serialize_light(light)
     return instance.request(f'add-light-{name}', params)
+
+
+def _serialize_light(light: Light) -> dict[str, Any]:
+    return {
+        'color': list(light.color),
+        'intensity': light.intensity,
+        'visible': light.visible,
+        **light.get_additional_properties(),
+    }

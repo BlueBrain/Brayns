@@ -22,7 +22,6 @@ from typing import TypeVar
 
 from brayns.network import Instance
 
-from .deserialize_material import deserialize_material
 from .material import Material
 
 T = TypeVar('T', bound=Material)
@@ -45,4 +44,6 @@ def get_material(instance: Instance, model_id: int, material_type: type[T]) -> T
     name = material_type.name
     params = {'id': model_id}
     result = instance.request(f'get-material-{name}', params)
-    return deserialize_material(material_type, result)
+    material = material_type()
+    material.update_properties(result)
+    return material

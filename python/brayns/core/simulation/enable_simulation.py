@@ -38,11 +38,11 @@ def enable_simulation(instance: Instance, model_id: int, enabled: bool) -> None:
     :param enabled: Simulation coloring enabled for given model.
     :type enabled: bool
     """
-    params = _serialize_simulation(model_id, enabled)
+    params = _serialize_enabled(model_id, enabled)
     instance.request('enable-simulation', params)
 
 
-def _serialize_simulation(model_id: int, enabled: bool) -> dict[str, Any]:
+def _serialize_enabled(model_id: int, enabled: bool) -> dict[str, Any]:
     return {
         'model_id': model_id,
         'enabled': enabled,

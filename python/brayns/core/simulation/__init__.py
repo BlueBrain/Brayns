@@ -18,7 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .deserialize_simulation import deserialize_simulation
 from .enable_simulation import enable_simulation
 from .get_simulation import get_simulation
 from .set_simulation_frame import set_simulation_frame
@@ -26,7 +25,6 @@ from .simulation import Simulation
 from .time_unit import TimeUnit
 
 __all__ = [
-    'deserialize_simulation',
     'enable_simulation',
     'get_simulation',
     'set_simulation_frame',

@@ -18,7 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .deserialize_entrypoint import deserialize_entrypoint
 from .deserialize_schema import deserialize_schema
 from .entrypoint import Entrypoint
 from .get_entrypoint import get_entrypoint
@@ -29,7 +28,6 @@ from .json_type import JsonType
 from .serialize_schema import serialize_schema
 
 __all__ = [
-    'deserialize_entrypoint',
     'deserialize_schema',
     'Entrypoint',
     'get_entrypoint',

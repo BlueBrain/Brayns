@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .camera import Camera
-from .deserialize_camera import deserialize_camera
 from .get_camera import get_camera
 from .get_camera_name import get_camera_name
 from .get_camera_view import get_camera_view
@@ -31,7 +30,6 @@ from .set_camera_view import set_camera_view
 
 __all__ = [
     'Camera',
-    'deserialize_camera',
     'get_camera_name',
     'get_camera_view',
     'get_camera',

@@ -114,16 +114,10 @@ def _serialize_with_path(snapshot: Snapshot, path: str) -> dict[str, Any]:
 
 
 def _serialize(snapshot: Snapshot, format: ImageFormat | None = None, path: str | None = None) -> dict[str, Any]:
-    message = {}
+    message = dict[str, Any]()
     if path is not None:
         message['file_path'] = path
-    image_settings = {}
-    if format is not None:
-        image_settings['format'] = format.value
-    if format is ImageFormat.JPEG:
-        image_settings['quality'] = snapshot.jpeg_quality
-    if snapshot.resolution is not None:
-        image_settings['size'] = list(snapshot.resolution)
+    image_settings = _serialize_image_settings(snapshot, format)
     if image_settings:
         message['image_settings'] = image_settings
     if snapshot.frame is not None:
@@ -134,6 +128,17 @@ def _serialize(snapshot: Snapshot, format: ImageFormat | None = None, path: str 
         message['camera'] = serialize_camera(snapshot.camera, name=True)
     if snapshot.renderer is not None:
         message['renderer'] = serialize_renderer(snapshot.renderer, name=True)
+    return message
+
+
+def _serialize_image_settings(snapshot: Snapshot, format: ImageFormat | None) -> dict[str, Any]:
+    message = dict[str, Any]()
+    if format is not None:
+        message['format'] = format.value
+    if format is ImageFormat.JPEG:
+        message['quality'] = snapshot.jpeg_quality
+    if snapshot.resolution is not None:
+        message['size'] = list(snapshot.resolution)
     return message
 
 

@@ -18,10 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from typing import Any
+
 from brayns.network import Instance
 
 from .color_ramp import ColorRamp
-from .serialize_color_ramp import serialize_color_ramp
 
 
 def set_color_ramp(instance: Instance, model_id: int, ramp: ColorRamp) -> None:
@@ -34,8 +35,22 @@ def set_color_ramp(instance: Instance, model_id: int, ramp: ColorRamp) -> None:
     :param color_ramp: Color ramp.
     :type color_ramp: ColorRamp
     """
-    params = {
-        'id': model_id,
-        'transfer_function': serialize_color_ramp(ramp),
-    }
+    params = _serialize_model_ramp(model_id, ramp)
     instance.request('set-model-transfer-function', params)
+
+
+def _serialize_model_ramp(model_id: int, ramp: ColorRamp) -> dict[str, Any]:
+    return {
+        'id': model_id,
+        'transfer_function': _serialize_ramp(ramp),
+    }
+
+
+def _serialize_ramp(ramp: ColorRamp) -> dict[str, Any]:
+    return {
+        'range': list(ramp.value_range),
+        'colors': [
+            list(color)
+            for color in ramp.colors
+        ],
+    }

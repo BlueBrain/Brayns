@@ -24,12 +24,11 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.network import Instance
-from brayns.utils import ImageFormat, Resolution
+from brayns.utils import ImageFormat, Resolution, serialize_view
 
 from ..camera import Camera, serialize_camera
 from ..renderer import Renderer, serialize_renderer
 from .key_frame import KeyFrame
-from .serialize_key_frame import serialize_key_frame
 
 
 @dataclass
@@ -81,20 +80,33 @@ def _serialize_exporter(exporter: FrameExporter, folder: str) -> dict[str, Any]:
     message: dict[str, Any] = {
         'path': folder,
         'key_frames': [
-            serialize_key_frame(frame)
+            _serialize_key_frame(frame)
             for frame in exporter.frames
         ],
+        'image_settings': _serialize_image_settings(exporter),
     }
-    image_settings: dict[str, Any] = {
-        'format': exporter.format.value,
-    }
-    if exporter.format is ImageFormat.JPEG:
-        image_settings['quality'] = exporter.jpeg_quality
-    if exporter.resolution is not None:
-        image_settings['size'] = list(exporter.resolution)
-    message['image_settings'] = image_settings
     if exporter.camera is not None:
         message['camera'] = serialize_camera(exporter.camera, name=True)
     if exporter.renderer is not None:
         message['renderer'] = serialize_renderer(exporter.renderer, name=True)
+    return message
+
+
+def _serialize_key_frame(frame: KeyFrame) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'frame_index': frame.index,
+    }
+    if frame.view is not None:
+        message['camera_view'] = serialize_view(frame.view)
+    return message
+
+
+def _serialize_image_settings(exporter: FrameExporter) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'format': exporter.format.value,
+    }
+    if exporter.format is ImageFormat.JPEG:
+        message['quality'] = exporter.jpeg_quality
+    if exporter.resolution is not None:
+        message['size'] = list(exporter.resolution)
     return message

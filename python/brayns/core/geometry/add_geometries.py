@@ -18,13 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from brayns.network import Instance
 
 from ..model import Model, deserialize_model
 from .geometry import Geometry
-from .serialize_geometry import serialize_geometry
 
 T = TypeVar('T', bound=Geometry)
 
@@ -48,8 +47,15 @@ def add_geometries(instance: Instance, geometries: list[T]) -> Model:
         raise ValueError('Cannot create a model with no geometries')
     method = geometries[0].method
     params = [
-        serialize_geometry(geometry)
+        _serialize_geometry(geometry)
         for geometry in geometries
     ]
     result = instance.request(method, params)
     return deserialize_model(result)
+
+
+def _serialize_geometry(geometry: Geometry) -> dict[str, Any]:
+    return {
+        'geometry': geometry.get_properties(),
+        'color': list(geometry.color),
+    }
