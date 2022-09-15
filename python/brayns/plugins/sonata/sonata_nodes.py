@@ -21,7 +21,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass
@@ -59,14 +58,3 @@ class SonataNodes:
     def from_ids(ids: list[int]) -> SonataNodes:
         """Load nodes with given IDs."""
         return SonataNodes(ids=ids)
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        message = {}
-        if self.density is not None:
-            message['node_percentage'] = self.density
-        if self.names is not None:
-            message['node_sets'] = self.names
-        if self.ids is not None:
-            message['node_ids'] = self.ids
-        return message

@@ -21,7 +21,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from .sonata_report_type import SonataReportType
 
@@ -99,14 +98,3 @@ class SonataReport:
             type=SonataReportType.BLOODFLOW_RADII,
             name=name,
         )
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        message: dict[str, Any] = {
-            'report_type': self.type.value
-        }
-        if self.name is not None:
-            message['report_name'] = self.name
-        if self.spike_transition_time is not None:
-            message['spike_transition_time'] = self.spike_transition_time
-        return message

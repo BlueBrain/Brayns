@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from typing import Any
+
 from brayns.network import Instance
 from brayns.utils import Color4
 
@@ -46,7 +48,12 @@ def color_circuit_by_method(
     :param colors: Mapping method value -> Color.
     :type colors: dict[str, Color4]
     """
-    params = {
+    params = _serialize_colors(model_id, method, colors)
+    instance.request('color-circuit-by-method', params)
+
+
+def _serialize_colors(model_id, method: ColorMethod, colors: dict[str, Color4]) -> dict[str, Any]:
+    return {
         'model_id': model_id,
         'method': method.value,
         'color_info': [
@@ -57,4 +64,3 @@ def color_circuit_by_method(
             for value, color in colors.items()
         ]
     }
-    instance.request('color-circuit-by-method', params)

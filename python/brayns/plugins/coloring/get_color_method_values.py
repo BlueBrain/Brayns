@@ -19,6 +19,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
+from typing import Any
+
 from brayns.network import Instance
 
 from .color_method import ColorMethod
@@ -43,9 +45,13 @@ def get_color_method_values(
     :return: List of values available for given method.
     :rtype: list[str]
     """
-    params = {
+    params = _serialize_method(model_id, method)
+    result = instance.request('get-circuit-color-method-variables', params)
+    return result['variables']
+
+
+def _serialize_method(model_id: int, method: ColorMethod) -> dict[str, Any]:
+    return {
         'model_id': model_id,
         'method': method.value
     }
-    result = instance.request('get-circuit-color-method-variables', params)
-    return result['variables']

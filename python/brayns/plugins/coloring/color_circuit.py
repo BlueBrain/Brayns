@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from typing import Any
+
 from brayns.network import Instance
 from brayns.utils import Color4
 
@@ -32,8 +34,12 @@ def color_circuit(instance: Instance, model_id: int, color: Color4) -> None:
     :param color: Circuit color.
     :type color: Color4
     """
-    params = {
+    params = _serialize_color(model_id, color)
+    instance.request('color-circuit-by-single-color', params)
+
+
+def _serialize_color(model_id: int, color: Color4) -> dict[str, Any]:
+    return {
         'model_id': model_id,
         'color': list(color)
     }
-    instance.request('color-circuit-by-single-color', params)

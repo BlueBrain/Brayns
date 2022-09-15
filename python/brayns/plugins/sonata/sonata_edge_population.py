@@ -21,7 +21,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass
@@ -47,15 +46,3 @@ class SonataEdgePopulation:
     density: float = 1.0
     radius: float = 2.0
     report: str | None = None
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        message = {
-            'edge_population': self.name,
-            'load_afferent': self.afferent,
-            'edge_percentage': self.density,
-            'radius': self.radius
-        }
-        if self.report is not None:
-            message['edge_report_name'] = self.report
-        return message

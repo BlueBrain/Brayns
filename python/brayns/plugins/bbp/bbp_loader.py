@@ -25,7 +25,7 @@ from typing import Any
 
 from brayns.core import Loader
 
-from ..morphology import Morphology
+from ..morphology import Morphology, serialize_morphology
 from .bbp_cells import BbpCells
 from .bbp_report import BbpReport
 
@@ -59,14 +59,40 @@ class BbpLoader(Loader):
     def name(cls) -> str:
         return 'BBP loader'
 
-    @property
-    def properties(self) -> dict[str, Any]:
-        properties: dict[str, Any] = {
-            'load_afferent_synapses': self.load_afferent_synapses,
-            'load_efferent_synapses': self.load_efferent_synapses
-        }
-        properties.update(self.cells.serialize())
-        properties['neuron_morphology_parameters'] = self.morphology.serialize()
-        if self.report is not None:
-            properties.update(self.report.serialize())
-        return properties
+    def get_properties(self) -> dict[str, Any]:
+        return _serialize_loader(self)
+
+
+def _serialize_loader(loader: BbpLoader) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'load_afferent_synapses': loader.load_afferent_synapses,
+        'load_efferent_synapses': loader.load_efferent_synapses,
+        **_serialize_cells(loader.cells),
+        'neuron_morphology_parameters': serialize_morphology(loader.morphology),
+    }
+    if loader.report is not None:
+        report = _serialize_report(loader.report)
+        message.update(report)
+    return message
+
+
+def _serialize_cells(cells: BbpCells) -> dict[str, Any]:
+    message = dict[str, Any]()
+    if cells.density is not None:
+        message['percentage'] = cells.density
+    if cells.targets is not None:
+        message['targets'] = cells.targets
+    if cells.gids is not None:
+        message['gids'] = cells.gids
+    return message
+
+
+def _serialize_report(report: BbpReport) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'report_type': report.type.value,
+    }
+    if report.name is not None:
+        message['report_name'] = report.name
+    if report.spike_transition_time is not None:
+        message['spike_transition_time'] = report.spike_transition_time
+    return message
