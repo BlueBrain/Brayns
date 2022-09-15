@@ -24,9 +24,9 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.network import Instance
-from brayns.utils import ImageFormat, Resolution, serialize_view
+from brayns.utils import ImageFormat, Resolution
 
-from ..camera import Camera, serialize_camera
+from ..camera import Camera, serialize_camera, serialize_view
 from ..renderer import Renderer, serialize_renderer
 from .key_frame import KeyFrame
 

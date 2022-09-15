@@ -20,8 +20,9 @@
 
 from typing import Any
 
-from brayns.utils import deserialize_bounds, deserialize_transform
+from brayns.utils import Quaternion, Rotation, Transform, Vector3
 
+from .deserialize_bounds import deserialize_bounds
 from .model import Model
 
 
@@ -31,5 +32,14 @@ def deserialize_model(message: dict[str, Any]) -> Model:
         bounds=deserialize_bounds(message['bounds']),
         metadata=message['metadata'],
         visible=message['is_visible'],
-        transform=deserialize_transform(message['transform']),
+        transform=_deserialize_transform(message['transform']),
+    )
+
+
+def _deserialize_transform(obj: dict[str, Any]) -> Transform:
+    quaternion = Quaternion(*obj['rotation'])
+    return Transform(
+        translation=Vector3(*obj['translation']),
+        rotation=Rotation.from_quaternion(quaternion),
+        scale=Vector3(*obj['scale']),
     )

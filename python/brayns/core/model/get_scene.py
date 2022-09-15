@@ -21,8 +21,8 @@
 from typing import Any
 
 from brayns.network import Instance
-from brayns.utils import deserialize_bounds
 
+from .deserialize_bounds import deserialize_bounds
 from .deserialize_model import deserialize_model
 from .scene import Scene
 

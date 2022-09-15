@@ -20,13 +20,12 @@
 
 from typing import Any
 
-from ..vector import Vector3
-from .view import View
+from brayns.utils import Bounds, Vector3
 
 
-def deserialize_view(obj: dict[str, Any]) -> View:
-    return View(
-        position=Vector3(*obj['position']),
-        target=Vector3(*obj['target']),
-        up=Vector3(*obj['up']),
+def deserialize_bounds(obj: dict[str, Any]) -> Bounds:
+    """Low level API to deserialize from JSON."""
+    return Bounds(
+        min=Vector3(*obj['min']),
+        max=Vector3(*obj['max']),
     )

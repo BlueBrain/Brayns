@@ -20,16 +20,12 @@
 
 from typing import Any
 
-from ..vector import Vector3
-from .quaternion import Quaternion
-from .rotation import Rotation
-from .transform import Transform
+from brayns.utils import View
 
 
-def deserialize_transform(obj: dict[str, Any]) -> Transform:
-    quaternion = Quaternion(*obj['rotation'])
-    return Transform(
-        translation=Vector3(*obj['translation']),
-        rotation=Rotation.from_quaternion(quaternion),
-        scale=Vector3(*obj['scale']),
-    )
+def serialize_view(view: View) -> dict[str, Any]:
+    return {
+        'position': list(view.position),
+        'target': list(view.target),
+        'up': list(view.up),
+    }

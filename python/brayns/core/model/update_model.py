@@ -23,7 +23,7 @@ from __future__ import annotations
 from typing import Any
 
 from brayns.network import Instance
-from brayns.utils import Transform, serialize_transform
+from brayns.utils import Transform
 
 from .deserialize_model import deserialize_model
 from .model import Model
@@ -64,8 +64,16 @@ def _serialize_model(
     if visible is not None:
         properties['is_visible'] = visible
     if transform is not None:
-        properties['transform'] = serialize_transform(transform)
+        properties['transform'] = _serialize_transform(transform)
     return {
         'model_id': model_id,
         'model': properties,
+    }
+
+
+def _serialize_transform(transform: Transform) -> dict[str, Any]:
+    return {
+        'translation': list(transform.translation),
+        'rotation': list(transform.rotation.quaternion),
+        'scale': list(transform.scale),
     }
