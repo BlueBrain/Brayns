@@ -35,6 +35,6 @@ def set_color_ramp(instance: Instance, model_id: int, color_ramp: ColorRamp) -> 
     """
     params = {
         'id': model_id,
-        'transfer_function': color_ramp.serialize(),
+        'transfer_function': color_ramp.to_dict(),
     }
     instance.request('set-model-transfer-function', params)

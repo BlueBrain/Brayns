@@ -23,11 +23,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from brayns.network import JsonRpcMessage
 from brayns.utils import Bounds, Transform
 
 
 @dataclass
-class Model:
+class Model(JsonRpcMessage):
     """Loaded model.
 
     All models are loaded without transform (identity) but it doesn't mean that
@@ -53,13 +54,10 @@ class Model:
     visible: bool
     transform: Transform
 
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> Model:
+    def update(self, obj: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        return Model(
-            id=message['model_id'],
-            bounds=Bounds.deserialize(message['bounds']),
-            metadata=message['metadata'],
-            visible=message['is_visible'],
-            transform=Transform.deserialize(message['transform']),
-        )
+        self.id = obj['model_id']
+        self.bounds = Bounds.from_dict(obj['bounds'])
+        self.metadata = obj['metadata']
+        self.visible = obj['is_visible']
+        self.transform = Transform.from_dict(obj['transform'])

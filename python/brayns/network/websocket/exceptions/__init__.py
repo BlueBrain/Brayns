@@ -18,24 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
+from .connection_closed_error import ConnectionClosedError
+from .invalid_server_certificate_error import InvalidServerCertificateError
+from .protocol_error import ProtocolError
+from .service_unavailable_error import ServiceUnavailableError
+from .web_socket_error import WebSocketError
 
-from dataclasses import dataclass, field
-from typing import Any
-
-from .json_rpc_message import JsonRpcMessage
-from .request_error import RequestError
-
-
-@dataclass
-class JsonRpcError(JsonRpcMessage):
-
-    id: int | str | None = None
-    error: RequestError = field(default_factory=RequestError)
-
-    def update(self, obj: dict[str, Any]) -> None:
-        error: dict[str, Any] = obj['error']
-        self.id = obj.get('id')
-        self.error.code = error['code']
-        self.error.message = error['message']
-        self.error.data = error.get('data')
+__all__ = [
+    'ConnectionClosedError',
+    'InvalidServerCertificateError',
+    'ProtocolError',
+    'ServiceUnavailableError',
+    'WebSocketError',
+]

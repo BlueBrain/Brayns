@@ -23,11 +23,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from brayns.network import JsonRpcMessage
+
 from .json_schema import JsonSchema
 
 
 @dataclass
-class Entrypoint:
+class Entrypoint(JsonRpcMessage):
     """Entrypoint (endpoint) of the JSON-RPC API.
 
     Describes how a given entrypoint of the JSON-RPC API can be used.
@@ -49,28 +51,25 @@ class Entrypoint:
     :type result: JsonSchema | None
     """
 
-    method: str
-    description: str
-    plugin: str
-    asynchronous: bool
+    method: str = ''
+    description: str = ''
+    plugin: str = ''
+    asynchronous: bool = False
     params: JsonSchema | None = None
     result: JsonSchema | None = None
 
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> Entrypoint:
+    def update(self, obj: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        return Entrypoint(
-            method=message['title'],
-            description=message['description'],
-            plugin=message['plugin'],
-            asynchronous=message['async'],
-            params=_deserialize_schema(message, 'params'),
-            result=_deserialize_schema(message, 'returns'),
-        )
+        self.method = obj['title']
+        self.description = obj['description']
+        self.plugin = obj['plugin']
+        self.asynchronous = obj['async']
+        self.params = _deserialize_schema(obj, 'params')
+        self.result = _deserialize_schema(obj, 'returns')
 
 
 def _deserialize_schema(message: dict[str, Any], key: str) -> JsonSchema | None:
     value = message.get(key)
     if value is None:
         return None
-    return JsonSchema.deserialize(value)
+    return JsonSchema.from_dict(value)

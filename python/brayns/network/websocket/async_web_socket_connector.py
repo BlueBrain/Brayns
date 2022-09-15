@@ -27,9 +27,11 @@ from websockets.client import connect
 from websockets.exceptions import WebSocketException
 
 from .async_web_socket import AsyncWebSocket
-from .invalid_server_certificate_error import InvalidServerCertificateError
-from .protocol_error import ProtocolError
-from .service_unavailable_error import ServiceUnavailableError
+from .exceptions import (
+    InvalidServerCertificateError,
+    ProtocolError,
+    ServiceUnavailableError,
+)
 from .ssl_client_context import SslClientContext
 
 

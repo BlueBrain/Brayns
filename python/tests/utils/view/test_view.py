@@ -27,10 +27,6 @@ from .mock_view import MockView
 
 class TestView(unittest.TestCase):
 
-    def test_deserialize(self) -> None:
-        test = brayns.View.deserialize(MockView.message)
-        self.assertEqual(test, MockView.view)
-
     def test_direction(self) -> None:
         test = brayns.View(
             position=brayns.Vector3.zero,
@@ -38,9 +34,13 @@ class TestView(unittest.TestCase):
         )
         self.assertEqual(test.direction, brayns.Vector3.one.normalized)
 
-    def test_serialize(self) -> None:
-        test = MockView.view.serialize()
+    def test_to_dict(self) -> None:
+        test = MockView.view.to_dict()
         self.assertEqual(test, MockView.message)
+
+    def test_from_dict(self) -> None:
+        test = brayns.View.from_dict(MockView.message)
+        self.assertEqual(test, MockView.view)
 
 
 if __name__ == '__main__':

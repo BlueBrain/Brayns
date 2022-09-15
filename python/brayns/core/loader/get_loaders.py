@@ -33,6 +33,6 @@ def get_loaders(instance: Instance) -> list[LoaderInfo]:
     """
     result = instance.request('get-loaders')
     return [
-        LoaderInfo.deserialize(item)
+        LoaderInfo.from_dict(item)
         for item in result
     ]

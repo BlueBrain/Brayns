@@ -37,4 +37,4 @@ def get_color_ramp(instance: Instance, model_id: int) -> ColorRamp:
     """
     params = {'id': model_id}
     result = instance.request('get-model-transfer-function', params)
-    return ColorRamp.deserialize(result)
+    return ColorRamp.from_dict(result)

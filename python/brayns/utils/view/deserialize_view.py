@@ -18,23 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
-from dataclasses import dataclass, field
 from typing import Any
 
-from .json_rpc_message import JsonRpcMessage
-from .request_progress import RequestProgress
+from ..vector import Vector3
+from .view import View
 
 
-@dataclass
-class JsonRpcProgress(JsonRpcMessage):
-
-    id: int | str = 0
-    params: RequestProgress = field(default_factory=RequestProgress)
-
-    def update(self, obj: dict[str, Any]) -> None:
-        params = obj['params']
-        self.id = params['id']
-        self.params.operation = params['operation']
-        self.params.amount = params['amount']
+def deserialize_view(obj: dict[str, Any]) -> View:
+    return View(
+        position=Vector3(*obj['position']),
+        target=Vector3(*obj['target']),
+        up=Vector3(*obj['up']),
+    )

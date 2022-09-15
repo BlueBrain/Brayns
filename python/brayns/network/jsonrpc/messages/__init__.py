@@ -18,31 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json
-from typing import Any, Protocol, TypeVar
+from .deserialize_error import deserialize_error
+from .deserialize_progress import deserialize_progress
+from .deserialize_reply import deserialize_reply
+from .json_rpc_error import JsonRpcError
+from .json_rpc_progress import JsonRpcProgress
+from .json_rpc_reply import JsonRpcReply
+from .json_rpc_request import JsonRpcRequest
+from .request_error import RequestError
+from .request_progress import RequestProgress
+from .serialize_request import serialize_request
 
-T = TypeVar('T', bound='JsonRpcMessage')
-
-
-class JsonRpcMessage(Protocol):
-
-    @classmethod
-    def from_json(cls: type[T], data: str) -> T:
-        obj = json.loads(data)
-        return cls.from_dict(obj)
-
-    @classmethod
-    def from_dict(cls: type[T], obj: dict[str, Any]) -> T:
-        message = cls()
-        message.update(obj)
-        return message
-
-    def to_json(self) -> str:
-        obj = self.to_dict()
-        return json.dumps(obj)
-
-    def to_dict(self) -> dict[str, Any]:
-        raise NotImplementedError()
-
-    def update(self, obj: dict[str, Any]) -> None:
-        raise NotImplementedError()
+__all__ = [
+    'deserialize_error',
+    'deserialize_progress',
+    'deserialize_reply',
+    'JsonRpcError',
+    'JsonRpcProgress',
+    'JsonRpcReply',
+    'JsonRpcRequest',
+    'RequestError',
+    'RequestProgress',
+    'serialize_request',
+]

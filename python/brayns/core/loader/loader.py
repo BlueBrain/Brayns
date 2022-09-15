@@ -69,7 +69,7 @@ class Loader(ABC):
         params = self.serialize(path)
         result = instance.request('add-model', params)
         return [
-            Model.deserialize(model)
+            Model.from_dict(model)
             for model in result
         ]
 

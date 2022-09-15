@@ -21,10 +21,8 @@
 import json
 from typing import Any
 
-from .json_rpc_error import JsonRpcError
 from .json_rpc_listener import JsonRpcListener
-from .json_rpc_progress import JsonRpcProgress
-from .json_rpc_reply import JsonRpcReply
+from .messages import deserialize_error, deserialize_progress, deserialize_reply
 
 
 class JsonRpcDispatcher:
@@ -39,38 +37,38 @@ class JsonRpcDispatcher:
             self._listener.on_invalid_message(data, e)
 
     def _dispatch(self, data: str) -> None:
-        obj = self._parse(data)
-        if self._dispatch_error(obj):
+        message = self._parse(data)
+        if self._dispatch_error(message):
             return
-        if self._dispatch_reply(obj):
+        if self._dispatch_reply(message):
             return
-        if self._dispatch_progress(obj):
+        if self._dispatch_progress(message):
             return
         raise ValueError('Unsupported JSON-RPC message')
 
     def _parse(self, data: str) -> dict[str, Any]:
-        obj = json.loads(data)
-        if not isinstance(obj, dict):
+        message = json.loads(data)
+        if not isinstance(message, dict):
             raise ValueError('Message is not a JSON object')
-        return obj
+        return message
 
-    def _dispatch_error(self, obj: dict[str, Any]) -> bool:
-        if 'error' not in obj:
+    def _dispatch_error(self, message: dict[str, Any]) -> bool:
+        if 'error' not in message:
             return False
-        error = JsonRpcError.from_dict(obj)
+        error = deserialize_error(message)
         self._listener.on_error(error)
         return True
 
-    def _dispatch_reply(self, obj: dict[str, Any]) -> bool:
-        if 'result' not in obj:
+    def _dispatch_reply(self, message: dict[str, Any]) -> bool:
+        if 'result' not in message:
             return False
-        reply = JsonRpcReply.from_dict(obj)
+        reply = deserialize_reply(message)
         self._listener.on_reply(reply)
         return True
 
-    def _dispatch_progress(self, obj: dict[str, Any]) -> bool:
-        if 'id' in obj:
+    def _dispatch_progress(self, message: dict[str, Any]) -> bool:
+        if 'id' in message:
             return False
-        progress = JsonRpcProgress.from_dict(obj)
+        progress = deserialize_progress(message)
         self._listener.on_progress(progress)
         return True

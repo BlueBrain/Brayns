@@ -21,7 +21,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from ..vector import Vector3
 from .rotation import Rotation
@@ -50,15 +49,6 @@ class Transform:
     rotation: Rotation = Rotation.identity
     scale: Vector3 = Vector3.one
 
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> Transform:
-        """Low level API to deserialize from JSON."""
-        return Transform(
-            translation=Vector3(*message['translation']),
-            rotation=Rotation.deserialize(message['rotation']),
-            scale=Vector3(*message['scale']),
-        )
-
     @classmethod
     @property
     def identity(cls) -> Transform:
@@ -68,11 +58,3 @@ class Transform:
         :rtype: Transform
         """
         return Transform()
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {
-            'translation': list(self.translation),
-            'rotation': self.rotation.serialize(),
-            'scale': list(self.scale),
-        }

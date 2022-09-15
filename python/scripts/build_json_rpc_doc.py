@@ -208,7 +208,7 @@ def format_result(schema: brayns.JsonSchema | None) -> str:
 
 
 def format_schema(schema: brayns.JsonSchema) -> str:
-    message = schema.serialize()
+    message = schema.to_dict()
     message.pop('title', None)
     data = json.dumps(message, indent=4)
     data = data.replace('\n', '\n    ')

@@ -23,11 +23,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from brayns.network import JsonRpcMessage
+
 from .json_type import JsonType
 
 
 @dataclass
-class JsonSchema:
+class JsonSchema(JsonRpcMessage):
     """JSON schema object to describe JSON data.
 
     :param title: Title (class name).
@@ -40,7 +42,7 @@ class JsonSchema:
     :type read_only: bool
     :param write_only: If true, this field cannot get retreived.
     :type write_only: bool
-    :param default: Optional default value if not specified in message.
+    :param default: Optional default value.
     :type default: Any
     :param minimum: Optional minimum value for numbers.
     :type minimum: float | None
@@ -83,112 +85,66 @@ class JsonSchema:
     one_of: list[JsonSchema] = field(default_factory=list)
     enum: list[Any] = field(default_factory=list)
 
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> JsonSchema:
-        """Low level API to deserialize from JSON."""
-        return JsonSchema(
-            title=message.get('title', ''),
-            description=message.get('description', ''),
-            type=_deserialize_type(message),
-            read_only=message.get('readOnly', False),
-            write_only=message.get('writeOnly', False),
-            default=message.get('default'),
-            minimum=message.get('minimum'),
-            maximum=message.get('maximum'),
-            items=_deserialize_items(message),
-            min_items=message.get('minItems'),
-            max_items=message.get('maxItems'),
-            properties=_deserialize_properties(message),
-            required=message.get('required', []),
-            additional_properties=_deserialize_additional(message),
-            one_of=_deserialize_one_of(message),
-            enum=message.get('enum', []),
-        )
-
-    def serialize(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        message = {}
+        obj = dict[str, Any]()
         if self.title:
-            message['title'] = self.title
+            obj['title'] = self.title
         if self.description:
-            message['description'] = self.description
+            obj['description'] = self.description
         if self.type is not JsonType.UNDEFINED:
-            message['type'] = self.type.value
+            obj['type'] = self.type.value
         if self.read_only:
-            message['readOnly'] = self.read_only
+            obj['readOnly'] = self.read_only
         if self.write_only:
-            message['writeOnly'] = self.write_only
+            obj['writeOnly'] = self.write_only
         if self.default is not None:
-            message['default'] = self.default
+            obj['default'] = self.default
         if self.minimum is not None:
-            message['minimum'] = self.minimum
+            obj['minimum'] = self.minimum
         if self.maximum is not None:
-            message['maximum'] = self.maximum
+            obj['maximum'] = self.maximum
         if self.items is not None:
-            message['items'] = self.items.serialize()
+            obj['items'] = self.items.to_dict()
         if self.min_items is not None:
-            message['minItems'] = self.min_items
+            obj['minItems'] = self.min_items
         if self.max_items is not None:
-            message['maxItems'] = self.max_items
+            obj['maxItems'] = self.max_items
         if self.properties:
-            message['properties'] = _serialize_properties(self)
+            obj['properties'] = _serialize_properties(self)
         if self.required:
-            message['required'] = self.required
+            obj['required'] = self.required
         if self.additional_properties is not None:
-            message['additionalProperties'] = _serialize_additional(self)
+            obj['additionalProperties'] = _serialize_additional(self)
         if self.one_of:
-            message['oneOf'] = _serialize_one_of(self)
+            obj['oneOf'] = _serialize_one_of(self)
         if self.enum:
-            message['enum'] = self.enum
-        return message
+            obj['enum'] = self.enum
+        return obj
 
-
-def _deserialize_type(message: dict[str, Any]) -> JsonType:
-    value = message.get('type')
-    if value is None:
-        return JsonType.UNDEFINED
-    return JsonType(value)
-
-
-def _deserialize_items(message: dict[str, Any]) -> JsonSchema | None:
-    value = message.get('items')
-    if value is None:
-        return None
-    if isinstance(value, dict):
-        return JsonSchema.deserialize(value)
-    raise TypeError(f'JSON API type error {value}')
-
-
-def _deserialize_properties(message: dict[str, Any]) -> dict[str, JsonSchema]:
-    value = message.get('properties', dict[str, Any]())
-    return {
-        key: JsonSchema.deserialize(schema)
-        for key, schema in value.items()
-    }
-
-
-def _deserialize_additional(message: dict[str, Any]) -> bool | JsonSchema | None:
-    value = message.get('additionalProperties')
-    if value is None:
-        return None
-    if value is False:
-        return value
-    if isinstance(value, dict):
-        return JsonSchema.deserialize(value)
-    raise TypeError(f'JSON API type error {value}')
-
-
-def _deserialize_one_of(message: dict[str, Any]) -> list[JsonSchema]:
-    value = message.get('oneOf', list[JsonSchema]())
-    return [
-        JsonSchema.deserialize(one_of)
-        for one_of in value
-    ]
+    def update(self, obj: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
+        self.title = obj.get('title', '')
+        self.description = obj.get('description', '')
+        self.type = _deserialize_type(obj)
+        self.read_only = obj.get('readOnly', False)
+        self.write_only = obj.get('writeOnly', False)
+        self.default = obj.get('default')
+        self.minimum = obj.get('minimum')
+        self.maximum = obj.get('maximum')
+        self.items = _deserialize_items(obj)
+        self.min_items = obj.get('minItems')
+        self.max_items = obj.get('maxItems')
+        self.properties = _deserialize_properties(obj)
+        self.required = obj.get('required', [])
+        self.additional_properties = _deserialize_additional(obj)
+        self.one_of = _deserialize_one_of(obj)
+        self.enum = obj.get('enum', [])
 
 
 def _serialize_properties(schema: JsonSchema) -> dict[str, Any]:
     return {
-        key: value.serialize()
+        key: value.to_dict()
         for key, value in schema.properties.items()
     }
 
@@ -199,11 +155,54 @@ def _serialize_additional(schema: JsonSchema) -> bool | dict[str, Any] | None:
         return None
     if isinstance(properties, bool):
         return properties
-    return properties.serialize()
+    return properties.to_dict()
 
 
 def _serialize_one_of(schema: JsonSchema) -> list[dict[str, Any]]:
     return [
-        one_of.serialize()
+        one_of.to_dict()
         for one_of in schema.one_of
+    ]
+
+
+def _deserialize_type(obj: dict[str, Any]) -> JsonType:
+    value = obj.get('type')
+    if value is None:
+        return JsonType.UNDEFINED
+    return JsonType(value)
+
+
+def _deserialize_items(obj: dict[str, Any]) -> JsonSchema | None:
+    value = obj.get('items')
+    if value is None:
+        return None
+    if isinstance(value, dict):
+        return JsonSchema.from_dict(value)
+    raise TypeError(f'JSON API type error {value}')
+
+
+def _deserialize_properties(obj: dict[str, Any]) -> dict[str, JsonSchema]:
+    value = obj.get('properties', dict[str, Any]())
+    return {
+        key: JsonSchema.from_dict(schema)
+        for key, schema in value.items()
+    }
+
+
+def _deserialize_additional(obj: dict[str, Any]) -> bool | JsonSchema | None:
+    value = obj.get('additionalProperties')
+    if value is None:
+        return None
+    if value is False:
+        return value
+    if isinstance(value, dict):
+        return JsonSchema.from_dict(value)
+    raise TypeError(f'JSON API type error {value}')
+
+
+def _deserialize_one_of(obj: dict[str, Any]) -> list[JsonSchema]:
+    value = obj.get('oneOf', list[JsonSchema]())
+    return [
+        JsonSchema.from_dict(one_of)
+        for one_of in value
     ]

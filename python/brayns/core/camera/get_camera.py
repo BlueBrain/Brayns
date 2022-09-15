@@ -43,4 +43,4 @@ def get_camera(instance: Instance, camera_type: type[T]) -> T:
     """
     name = camera_type.name
     result = instance.request(f'get-camera-{name}')
-    return camera_type.deserialize(result)
+    return camera_type.from_dict(result)

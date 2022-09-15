@@ -18,20 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
-from dataclasses import dataclass, field
 from typing import Any
 
-from .json_rpc_message import JsonRpcMessage
+from ..vector import Vector3
+from .quaternion import Quaternion
+from .rotation import Rotation
+from .transform import Transform
 
 
-@dataclass
-class JsonRpcReply(JsonRpcMessage):
-
-    id: int | str = 0
-    result: Any = field(default=None, repr=False)
-
-    def update(self, obj: dict[str, Any]) -> None:
-        self.id = obj['id']
-        self.result = obj['result']
+def deserialize_transform(obj: dict[str, Any]) -> Transform:
+    quaternion = Quaternion(*obj['rotation'])
+    return Transform(
+        translation=Vector3(*obj['translation']),
+        rotation=Rotation.from_quaternion(quaternion),
+        scale=Vector3(*obj['scale']),
+    )

@@ -18,16 +18,31 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .json_rpc_message import JsonRpcMessage
-from .json_rpc_request import JsonRpcRequest
-from .request_error import RequestError
+from .json_rpc_dispatcher import JsonRpcDispatcher
+from .json_rpc_handler import JsonRpcHandler
+from .json_rpc_listener import JsonRpcListener
+from .json_rpc_manager import JsonRpcManager
+from .json_rpc_task import JsonRpcTask
+from .json_rpc_tasks import JsonRpcTasks
+from .messages import *
 from .request_future import RequestFuture
-from .request_progress import RequestProgress
 
 __all__ = [
-    'JsonRpcMessage',
+    'deserialize_error',
+    'deserialize_progress',
+    'deserialize_reply',
+    'JsonRpcDispatcher',
+    'JsonRpcError',
+    'JsonRpcHandler',
+    'JsonRpcListener',
+    'JsonRpcManager',
+    'JsonRpcProgress',
+    'JsonRpcReply',
     'JsonRpcRequest',
+    'JsonRpcTask',
+    'JsonRpcTasks',
     'RequestError',
     'RequestFuture',
     'RequestProgress',
+    'serialize_request',
 ]

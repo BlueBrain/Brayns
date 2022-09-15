@@ -18,21 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
+import unittest
 
-from .light import Light
+import brayns
+
+from .mock_bounds import MockBounds
 
 
-def add_light(instance: Instance, light: Light) -> int:
-    """Add a given light to an instance and return its ID.
+class TestDeserializeBounds(unittest.TestCase):
 
-    :param instance: Instance.
-    :type instance: Instance
-    :param light: Light to add.
-    :type light: Light
-    :return: Light ID.
-    :rtype: int
-    """
-    name = light.name
-    params = light.to_dict()
-    return instance.request(f'add-light-{name}', params)
+    def test_from_dict(self) -> None:
+        test = brayns.deserialize_bounds(MockBounds.message)
+        self.assertEqual(test, MockBounds.bounds)
+
+
+if __name__ == '__main__':
+    unittest.main()

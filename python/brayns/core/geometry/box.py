@@ -49,7 +49,7 @@ class Box(Geometry):
         """
         return 'add-boxes'
 
-    def serialize(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'min': list(self.min),

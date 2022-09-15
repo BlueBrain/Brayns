@@ -31,4 +31,4 @@ def get_camera_view(instance: Instance) -> View:
     :rtype: View
     """
     result = instance.request('get-camera-look-at')
-    return View.deserialize(result)
+    return View.from_dict(result)

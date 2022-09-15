@@ -18,12 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .connection_closed_error import ConnectionClosedError
-from .invalid_server_certificate_error import InvalidServerCertificateError
-from .protocol_error import ProtocolError
-from .service_unavailable_error import ServiceUnavailableError
+from .exceptions import *
 from .ssl_client_context import SslClientContext
-from .web_socket_error import WebSocketError
+from .web_socket import WebSocket
+from .web_socket_client import WebSocketClient
+from .web_socket_connector import WebSocketConnector
+from .web_socket_listener import WebSocketListener
 
 __all__ = [
     'ConnectionClosedError',

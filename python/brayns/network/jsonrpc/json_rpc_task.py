@@ -23,8 +23,7 @@ from __future__ import annotations
 from collections import deque
 from typing import Any
 
-from .request_error import RequestError
-from .request_progress import RequestProgress
+from .messages import RequestError, RequestProgress
 
 
 class JsonRpcTask:

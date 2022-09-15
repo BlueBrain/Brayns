@@ -18,15 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
+from brayns.network import JsonRpcMessage
 from brayns.utils import Color3
 
 
 @dataclass
-class Light(ABC):
+class Light(JsonRpcMessage):
     """Base class for all light types.
 
     :param color: Light color, defaults to white.
@@ -67,6 +68,6 @@ class Light(ABC):
             'visible': self.visible,
         }
 
-    def serialize(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return self.base_properties | self.additional_properties

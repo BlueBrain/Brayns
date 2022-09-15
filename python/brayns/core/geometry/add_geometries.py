@@ -48,10 +48,10 @@ def add_geometries(instance: Instance, geometries: list[T]) -> Model:
     method = geometries[0].method
     params = [
         {
-            'geometry': geometry.serialize(),
+            'geometry': geometry.to_dict(),
             'color': list(geometry.color),
         }
         for geometry in geometries
     ]
     result = instance.request(method, params)
-    return Model.deserialize(result)
+    return Model.from_dict(result)

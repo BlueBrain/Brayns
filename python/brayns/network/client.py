@@ -20,13 +20,12 @@
 
 from __future__ import annotations
 
+import json
 import logging
 
 from .instance import Instance
-from .jsonrpc.json_rpc_manager import JsonRpcManager
-from .jsonrpc.json_rpc_request import JsonRpcRequest
-from .jsonrpc.request_future import RequestFuture
-from .websocket.web_socket import WebSocket
+from .jsonrpc import JsonRpcManager, JsonRpcRequest, RequestFuture, serialize_request
+from .websocket import WebSocket
 
 
 class Client(Instance):
@@ -51,7 +50,8 @@ class Client(Instance):
     def send(self, request: JsonRpcRequest) -> RequestFuture:
         self._logger.info('Send JSON-RPC request: %s.', request)
         self._logger.debug('Request params: %s.', request.params)
-        data = request.to_json()
+        message = serialize_request(request)
+        data = json.dumps(message)
         self._websocket.send_text(data)
         id = request.id
         if id is None:
@@ -59,7 +59,7 @@ class Client(Instance):
         return RequestFuture(
             task=self._manager.create_task(id),
             cancel=lambda: self.cancel(id),
-            poll=lambda: self.poll()
+            poll=lambda: self.poll(),
         )
 
     def poll(self, block: bool = True) -> None:

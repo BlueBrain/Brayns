@@ -27,9 +27,11 @@ It provides functionalities to send JSON-RPC requests and receive replies with a
 Brayns instance.
 """
 
+from .client import Client
 from .connector import Connector
 from .instance import Instance
 from .jsonrpc import *
+from .listener import Listener
 from .logger import Logger
 from .websocket import *
 
@@ -38,7 +40,6 @@ __all__ = [
     'Connector',
     'Instance',
     'InvalidServerCertificateError',
-    'JsonRpcMessage',
     'JsonRpcRequest',
     'Logger',
     'ProtocolError',

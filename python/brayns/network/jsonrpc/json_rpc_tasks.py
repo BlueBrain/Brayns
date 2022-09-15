@@ -24,8 +24,7 @@ from collections.abc import Iterator
 from typing import Any
 
 from .json_rpc_task import JsonRpcTask
-from .request_error import RequestError
-from .request_progress import RequestProgress
+from .messages import RequestError, RequestProgress
 
 
 class JsonRpcTasks:

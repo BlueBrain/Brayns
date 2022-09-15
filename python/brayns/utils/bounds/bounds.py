@@ -21,7 +21,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from ..vector import Vector3
 
@@ -38,14 +37,6 @@ class Bounds:
 
     min: Vector3
     max: Vector3
-
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> Bounds:
-        """Low level API to deserialize from JSON."""
-        return Bounds(
-            min=Vector3(*message['min']),
-            max=Vector3(*message['max'])
-        )
 
     @classmethod
     @property

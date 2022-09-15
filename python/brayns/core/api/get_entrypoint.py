@@ -35,4 +35,4 @@ def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
     """
     params = {'endpoint': method}
     result = instance.request('schema', params)
-    return Entrypoint.deserialize(result)
+    return Entrypoint.from_dict(result)

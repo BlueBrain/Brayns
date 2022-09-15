@@ -38,10 +38,6 @@ class TestBounds(unittest.TestCase):
         self.assertEqual(test.min, brayns.Vector3.zero)
         self.assertEqual(test.max, brayns.Vector3.zero)
 
-    def test_deserialize(self) -> None:
-        test = brayns.Bounds.deserialize(MockBounds.message)
-        self.assertEqual(test, MockBounds.bounds)
-
     def test_center(self) -> None:
         self.assertEqual(self._box.center, brayns.Vector3(2.5, 3.5, 4.5))
 
@@ -56,6 +52,10 @@ class TestBounds(unittest.TestCase):
 
     def test_depth(self) -> None:
         self.assertEqual(self._box.depth, 3)
+
+    def test_from_dict(self) -> None:
+        test = brayns.Bounds.from_dict(MockBounds.message)
+        self.assertEqual(test, MockBounds.bounds)
 
 
 if __name__ == '__main__':

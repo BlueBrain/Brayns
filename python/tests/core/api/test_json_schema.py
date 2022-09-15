@@ -86,11 +86,11 @@ class TestJsonSchema(unittest.TestCase):
         )
 
     def test_deserialize(self) -> None:
-        test = brayns.JsonSchema.deserialize(self._message)
+        test = brayns.JsonSchema.update(self._message)
         self.assertEqual(test, self._schema)
 
     def test_serialize(self) -> None:
-        test = self._schema.serialize()
+        test = self._schema.to_dict()
         self.assertEqual(test, self._message)
 
 

@@ -20,14 +20,16 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
+
+from brayns.network import JsonRpcMessage
 
 from ..api import JsonSchema
 
 
 @dataclass
-class LoaderInfo:
+class LoaderInfo(JsonRpcMessage):
     """Loader description.
 
     :param name: Loader name.
@@ -38,14 +40,12 @@ class LoaderInfo:
     :type schema: JsonSchema
     """
 
-    name: str
-    extensions: list[str]
-    schema: JsonSchema
+    name: str = ''
+    extensions: list[str] = field(default_factory=list)
+    schema: JsonSchema = field(default_factory=JsonSchema)
 
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> LoaderInfo:
-        return LoaderInfo(
-            name=message['name'],
-            extensions=message['extensions'],
-            schema=JsonSchema.deserialize(message['input_parameters_schema']),
-        )
+    def update(self, obj: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
+        self.name = obj['name']
+        self.extensions = obj['extensions']
+        self.schema.update(obj['input_parameters_schema'])

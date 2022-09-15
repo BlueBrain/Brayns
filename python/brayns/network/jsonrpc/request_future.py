@@ -24,7 +24,7 @@ from collections.abc import Callable, Iterator
 from typing import Any
 
 from .json_rpc_task import JsonRpcTask
-from .request_progress import RequestProgress
+from .messages import RequestProgress
 
 
 class RequestFuture:

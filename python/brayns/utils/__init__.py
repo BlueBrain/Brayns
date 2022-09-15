@@ -51,7 +51,6 @@ __all__ = [
     'Rotation',
     'Transform',
     'upper_bound',
-    'Vector',
     'Vector3',
     'View',
 ]

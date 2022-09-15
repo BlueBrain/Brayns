@@ -21,8 +21,8 @@
 import logging
 from collections.abc import Callable
 
-from .jsonrpc.json_rpc_manager import JsonRpcManager
-from .websocket.web_socket_listener import WebSocketListener
+from .jsonrpc import JsonRpcManager
+from .websocket import WebSocketListener
 
 
 class Listener(WebSocketListener):

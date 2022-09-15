@@ -22,8 +22,7 @@ from __future__ import annotations
 
 from typing import Any, Protocol, TypeVar
 
-from .jsonrpc.json_rpc_request import JsonRpcRequest
-from .jsonrpc.request_future import RequestFuture
+from .jsonrpc import JsonRpcRequest, RequestFuture
 
 T = TypeVar('T', bound='Instance')
 

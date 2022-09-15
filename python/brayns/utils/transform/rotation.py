@@ -60,11 +60,6 @@ class Rotation:
         quaternion = _axis_angle_to_quaternion(axis, angle, degrees)
         return Rotation(quaternion)
 
-    @staticmethod
-    def deserialize(message: list[float]) -> Rotation:
-        quaternion = Quaternion(*message)
-        return Rotation(quaternion)
-
     @classmethod
     @property
     def identity(cls) -> Rotation:
@@ -106,9 +101,6 @@ class Rotation:
     def inverse(self) -> Rotation:
         quaternion = self._quaternion.inverse
         return Rotation(quaternion)
-
-    def serialize(self) -> list[float]:
-        return list(self._quaternion)
 
     def combine(self, other: Rotation) -> Rotation:
         quaternion = self._quaternion * other._quaternion
