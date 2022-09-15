@@ -20,6 +20,7 @@
 
 from .car_paint_material import CarPaintMaterial
 from .default_material import DefaultMaterial
+from .deserialize_material import deserialize_material
 from .emissive_material import EmissiveMaterial
 from .get_material import get_material
 from .get_material_name import get_material_name
@@ -33,6 +34,7 @@ from .set_material import set_material
 __all__ = [
     'CarPaintMaterial',
     'DefaultMaterial',
+    'deserialize_material',
     'EmissiveMaterial',
     'get_material_name',
     'get_material',

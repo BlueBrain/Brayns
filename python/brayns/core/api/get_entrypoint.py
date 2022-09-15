@@ -20,6 +20,7 @@
 
 from brayns.network import Instance
 
+from .deserialize_entrypoint import deserialize_entrypoint
 from .entrypoint import Entrypoint
 
 
@@ -35,4 +36,4 @@ def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
     """
     params = {'endpoint': method}
     result = instance.request('schema', params)
-    return Entrypoint.from_dict(result)
+    return deserialize_entrypoint(result)

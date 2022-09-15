@@ -18,14 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-
-from brayns.network import JsonRpcMessage
+from typing import Any
 
 
 @dataclass
-class ClippingGeometry(JsonRpcMessage):
+class ClippingGeometry(ABC):
     """Base class used for clipping geometries."""
 
     @classmethod
@@ -37,4 +36,9 @@ class ClippingGeometry(JsonRpcMessage):
         :return: JSON-RPC method.
         :rtype: str
         """
+        pass
+
+    @abstractmethod
+    def get_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         pass

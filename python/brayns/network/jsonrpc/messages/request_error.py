@@ -27,8 +27,8 @@ from brayns.utils import Error
 @dataclass
 class RequestError(Error):
 
-    code: int = 0
-    message: str = ''
+    code: int
+    message: str
     data: Any = None
 
     def __str__(self) -> str:

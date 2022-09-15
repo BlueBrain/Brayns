@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from typing import Any
+
 from brayns.network import Instance
 
 
@@ -36,8 +38,12 @@ def enable_simulation(instance: Instance, model_id: int, enabled: bool) -> None:
     :param enabled: Simulation coloring enabled for given model.
     :type enabled: bool
     """
-    params = {
-        'model_id': model_id,
-        'enabled': enabled
-    }
+    params = _serialize_simulation(model_id, enabled)
     instance.request('enable-simulation', params)
+
+
+def _serialize_simulation(model_id: int, enabled: bool) -> dict[str, Any]:
+    return {
+        'model_id': model_id,
+        'enabled': enabled,
+    }

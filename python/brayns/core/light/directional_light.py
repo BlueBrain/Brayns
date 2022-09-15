@@ -46,8 +46,7 @@ class DirectionalLight(Light):
         """
         return 'directional'
 
-    @property
-    def additional_properties(self) -> dict[str, Any]:
+    def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'direction': list(self.direction)

@@ -20,6 +20,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from brayns.network import Instance
 from brayns.utils import Resolution
 
@@ -29,9 +31,9 @@ def update_application(
     resolution: Resolution | None = None,
     jpeg_quality: int | None = None,
 ) -> None:
-    """Change some application parameters of the given instance.
+    """Update application parameters of the instance.
 
-    Parameters not specified are left to their current value.
+    None parameters are left to their current value.
 
     :param instance: Instance.
     :type instance: Instance
@@ -40,9 +42,17 @@ def update_application(
     :param jpeg_quality: JPEG stream quality (0-100), defaults to None
     :type jpeg_quality: int | None, optional
     """
-    params = {}
+    params = _serialize_application(resolution, jpeg_quality)
+    instance.request('set-application-parameters', params)
+
+
+def _serialize_application(
+    resolution: Resolution | None = None,
+    jpeg_quality: int | None = None,
+) -> dict[str, Any]:
+    params = dict[str, Any]()
     if resolution is not None:
         params['viewport'] = list(resolution)
     if jpeg_quality is not None:
         params['jpeg_quality'] = jpeg_quality
-    instance.request('set-application-parameters', params)
+    return params

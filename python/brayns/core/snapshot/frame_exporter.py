@@ -26,9 +26,10 @@ from typing import Any
 from brayns.network import Instance
 from brayns.utils import ImageFormat, Resolution
 
-from ..camera import Camera
-from ..renderer import Renderer
+from ..camera import Camera, serialize_camera
+from ..renderer import Renderer, serialize_renderer
 from .key_frame import KeyFrame
+from .serialize_key_frame import serialize_key_frame
 
 
 @dataclass
@@ -72,28 +73,28 @@ class FrameExporter:
         :param folder: Output folder.
         :type folder: str
         """
-        params = self.serialize(folder)
+        params = _serialize_exporter(self, folder)
         instance.request('export-frames', params)
 
-    def serialize(self, folder: str) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        message = {
-            'path': folder,
-            'key_frames': [
-                frame.serialize()
-                for frame in self.frames
-            ]
-        }
-        image_settings = {
-            'format': self.format.value
-        }
-        if self.format is ImageFormat.JPEG:
-            image_settings['quality'] = self.jpeg_quality
-        if self.resolution is not None:
-            image_settings['size'] = list(self.resolution)
-        message['image_settings'] = image_settings
-        if self.camera is not None:
-            message['camera'] = self.camera.serialize_with_name()
-        if self.renderer is not None:
-            message['renderer'] = self.renderer.serialize_with_name()
-        return message
+
+def _serialize_exporter(exporter: FrameExporter, folder: str) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'path': folder,
+        'key_frames': [
+            serialize_key_frame(frame)
+            for frame in exporter.frames
+        ],
+    }
+    image_settings: dict[str, Any] = {
+        'format': exporter.format.value,
+    }
+    if exporter.format is ImageFormat.JPEG:
+        image_settings['quality'] = exporter.jpeg_quality
+    if exporter.resolution is not None:
+        image_settings['size'] = list(exporter.resolution)
+    message['image_settings'] = image_settings
+    if exporter.camera is not None:
+        message['camera'] = serialize_camera(exporter.camera, name=True)
+    if exporter.renderer is not None:
+        message['renderer'] = serialize_renderer(exporter.renderer, name=True)
+    return message

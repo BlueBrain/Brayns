@@ -30,7 +30,7 @@ class TestPlane(unittest.TestCase):
 
     def test_serialize(self) -> None:
         plane = brayns.Plane(1, 2, 3, 4)
-        test = plane.serialize()
+        test = plane.get_properties()
         ref = {
             'coefficients': [1, 2, 3, 4]
         }

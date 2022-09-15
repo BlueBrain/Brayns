@@ -18,18 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from .deserialize_renderer import deserialize_renderer
 from .get_renderer import get_renderer
 from .get_renderer_name import get_renderer_name
 from .interactive_renderer import InteractiveRenderer
 from .production_renderer import ProductionRenderer
 from .renderer import Renderer
+from .serialize_renderer import serialize_renderer
 from .set_renderer import set_renderer
 
 __all__ = [
+    'deserialize_renderer',
     'get_renderer_name',
     'get_renderer',
     'InteractiveRenderer',
     'ProductionRenderer',
     'Renderer',
+    'serialize_renderer',
     'set_renderer',
 ]

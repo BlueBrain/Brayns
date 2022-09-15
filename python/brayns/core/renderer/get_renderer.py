@@ -22,6 +22,7 @@ from typing import TypeVar
 
 from brayns.network import Instance
 
+from .deserialize_renderer import deserialize_renderer
 from .renderer import Renderer
 
 T = TypeVar('T', bound=Renderer)
@@ -43,4 +44,4 @@ def get_renderer(instance: Instance, renderer_type: type[T]) -> T:
     """
     name = renderer_type.name
     result = instance.request(f'get-renderer-{name}')
-    return renderer_type.deserialize(result)
+    return deserialize_renderer(renderer_type, result)

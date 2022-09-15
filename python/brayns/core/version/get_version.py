@@ -20,11 +20,12 @@
 
 from brayns.network import Instance
 
+from .deserialize_version import deserialize_version
 from .version import Version
 
 
 def get_version(instance: Instance) -> Version:
-    """Retreive the version of an instance.
+    """Retreive the version of a backend instance.
 
     :param instance: Instance.
     :type instance: Instance
@@ -32,4 +33,4 @@ def get_version(instance: Instance) -> Version:
     :rtype: Version
     """
     result = instance.request('get-version')
-    return Version.deserialize(result)
+    return deserialize_version(result)

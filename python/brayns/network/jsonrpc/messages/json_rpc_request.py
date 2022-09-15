@@ -27,6 +27,6 @@ from typing import Any
 @dataclass
 class JsonRpcRequest:
 
-    id: int | str | None = None
-    method: str = ''
+    id: int | str | None
+    method: str
     params: Any = field(default=None, repr=False)

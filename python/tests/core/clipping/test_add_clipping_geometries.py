@@ -32,7 +32,7 @@ class TestAddClippingGeometries(unittest.TestCase):
         test = brayns.add_clipping_geometry(instance, plane)
         self.assertEqual(test, 0)
         self.assertEqual(instance.method, brayns.ClipPlane.method)
-        self.assertEqual(instance.params, plane.serialize())
+        self.assertEqual(instance.params, plane.get_properties())
 
 
 if __name__ == '__main__':

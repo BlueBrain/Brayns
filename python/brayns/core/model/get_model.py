@@ -20,6 +20,7 @@
 
 from brayns.network import Instance
 
+from .deserialize_model import deserialize_model
 from .model import Model
 
 
@@ -34,4 +35,4 @@ def get_model(instance: Instance, id: int) -> Model:
     :rtype: Model
     """
     result = instance.request('get-model', {'id': id})
-    return Model.deserialize(result)
+    return deserialize_model(result)

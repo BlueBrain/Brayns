@@ -18,18 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TypeVar
+from typing import Any, TypeVar
 
-from brayns.network import JsonRpcMessage
 from brayns.utils import Color4
 
 T = TypeVar('T', bound='Geometry')
 
 
 @dataclass
-class Geometry(JsonRpcMessage):
+class Geometry(ABC):
     """Base class of all geometry types.
 
     The color attribute is white by default and is not in the constructor, use
@@ -50,6 +49,11 @@ class Geometry(JsonRpcMessage):
         :return: JSON-RPC method.
         :rtype: str
         """
+        pass
+
+    @abstractmethod
+    def get_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         pass
 
     def with_color(self: T, color: Color4) -> T:

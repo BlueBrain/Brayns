@@ -18,14 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Any
 
-from brayns.network import JsonRpcMessage
 from brayns.utils import Bounds, View
 
 
-class Camera(JsonRpcMessage):
+class Camera(ABC):
     """Base class of all supported cameras (plugin dependent).
 
     All cameras defined in the package inherit from this class.
@@ -64,9 +63,12 @@ class Camera(JsonRpcMessage):
         """
         pass
 
-    def to_dict_with_name(self) -> dict[str, Any]:
+    @abstractmethod
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        return {
-            'name': self.name,
-            'params': self.to_dict()
-        }
+        pass
+
+    @abstractmethod
+    def update_properties(self, message: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
+        pass

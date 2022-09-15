@@ -27,5 +27,5 @@ from typing import Any
 @dataclass
 class JsonRpcReply:
 
-    id: int | str = 0
-    result: Any = field(default=None, repr=False)
+    id: int | str
+    result: Any = field(repr=False)

@@ -78,12 +78,12 @@ class OrthographicCamera(Camera):
         """
         self.height = target.height
 
-    def to_dict(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'height': self.height
+            'height': self.height,
         }
 
-    def update(self, obj: dict[str, Any]) -> None:
+    def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.height = obj['height']
+        self.height = message['height']

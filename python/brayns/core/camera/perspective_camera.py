@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -72,7 +74,7 @@ class PerspectiveCamera(Camera):
         """Does nothing."""
         pass
 
-    def to_dict(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'fovy': self.fovy.degrees,
@@ -80,8 +82,8 @@ class PerspectiveCamera(Camera):
             'focus_distance': self.focus_distance,
         }
 
-    def update(self, obj: dict[str, Any]) -> None:
+    def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.fovy = Fovy(obj['fovy'], degrees=True)
-        self.aperture_radius = obj['aperture_radius']
-        self.focus_distance = obj['focus_distance']
+        self.fovy = Fovy(message['fovy'], degrees=True)
+        self.aperture_radius = message['aperture_radius']
+        self.focus_distance = message['focus_distance']

@@ -18,17 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any
 
-from brayns.network import JsonRpcMessage
 from brayns.utils import Bounds, Transform
 
 
 @dataclass
-class Model(JsonRpcMessage):
+class Model:
     """Loaded model.
 
     All models are loaded without transform (identity) but it doesn't mean that
@@ -53,11 +49,3 @@ class Model(JsonRpcMessage):
     metadata: dict[str, str]
     visible: bool
     transform: Transform
-
-    def update(self, obj: dict[str, Any]) -> None:
-        """Low level API to deserialize from JSON."""
-        self.id = obj['model_id']
-        self.bounds = Bounds.from_dict(obj['bounds'])
-        self.metadata = obj['metadata']
-        self.visible = obj['is_visible']
-        self.transform = Transform.from_dict(obj['transform'])

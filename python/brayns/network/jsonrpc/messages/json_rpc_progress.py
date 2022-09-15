@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from .request_progress import RequestProgress
 
@@ -28,5 +28,5 @@ from .request_progress import RequestProgress
 @dataclass
 class JsonRpcProgress:
 
-    id: int | str = 0
-    params: RequestProgress = field(default_factory=RequestProgress)
+    id: int | str
+    params: RequestProgress

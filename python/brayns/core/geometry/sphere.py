@@ -49,7 +49,7 @@ class Sphere(Geometry):
         """
         return 'add-spheres'
 
-    def to_dict(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'center': list(self.center),

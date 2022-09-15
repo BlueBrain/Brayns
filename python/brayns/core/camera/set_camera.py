@@ -21,6 +21,7 @@
 from brayns.network import Instance
 
 from .camera import Camera
+from .serialize_camera import serialize_camera
 
 
 def set_camera(instance: Instance, camera: Camera) -> None:
@@ -32,5 +33,5 @@ def set_camera(instance: Instance, camera: Camera) -> None:
     :type camera: Camera
     """
     name = camera.name
-    params = camera.to_dict()
+    params = serialize_camera(camera)
     instance.request(f'set-camera-{name}', params)

@@ -30,7 +30,7 @@ class TestBox(unittest.TestCase):
 
     def test_serialize(self) -> None:
         box = brayns.Box(brayns.Vector3.zero, brayns.Vector3.one)
-        test = box.serialize()
+        test = box.get_properties()
         ref = {
             'min': [0, 0, 0],
             'max': [1, 1, 1],

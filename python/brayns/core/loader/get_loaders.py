@@ -20,6 +20,7 @@
 
 from brayns.network import Instance
 
+from .deserialize_loader import deserialize_loader
 from .loader_info import LoaderInfo
 
 
@@ -33,6 +34,6 @@ def get_loaders(instance: Instance) -> list[LoaderInfo]:
     """
     result = instance.request('get-loaders')
     return [
-        LoaderInfo.from_dict(item)
-        for item in result
+        deserialize_loader(loader)
+        for loader in result
     ]

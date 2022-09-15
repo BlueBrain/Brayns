@@ -20,15 +20,13 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
 
-from brayns.network import JsonRpcMessage
 from brayns.utils import Resolution
 
 
 @dataclass
-class Application(JsonRpcMessage):
+class Application:
     """Store the application parameters of an instance.
 
     :param plugins: List of plugins loaded in the instance.
@@ -39,12 +37,6 @@ class Application(JsonRpcMessage):
     :type jpeg_quality: int
     """
 
-    plugins: list[str] = field(default_factory=list)
-    resolution: Resolution = Resolution.full_hd
-    jpeg_quality: int = 100
-
-    def update(self, obj: dict[str, Any]) -> None:
-        """Low level API to deserialize from JSON."""
-        self.plugins = obj['plugins']
-        self.resolution = Resolution(*obj['viewport'])
-        self.jpeg_quality = obj['jpeg_quality']
+    plugins: list[str]
+    resolution: Resolution
+    jpeg_quality: int

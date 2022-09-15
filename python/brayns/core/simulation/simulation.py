@@ -18,10 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any
 
 from .time_unit import TimeUnit
 
@@ -47,17 +44,6 @@ class Simulation:
     current_frame: int
     delta_time: float
     time_unit: TimeUnit
-
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> Simulation:
-        """Low level API to deserialize from JSON."""
-        return Simulation(
-            start_frame=message['start_frame'],
-            end_frame=message['end_frame'],
-            current_frame=message['current'],
-            delta_time=message['dt'],
-            time_unit=TimeUnit(message['unit'])
-        )
 
     @property
     def frame_count(self) -> int:

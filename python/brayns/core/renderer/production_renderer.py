@@ -19,11 +19,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any
 
 from .renderer import Renderer
-
-T = TypeVar('T', bound='ProductionRenderer')
 
 
 @dataclass
@@ -51,12 +49,10 @@ class ProductionRenderer(Renderer):
         """
         return 'production'
 
-    @classmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        """Low level API to deserialize from JSON."""
-        return cls.deserialize_with(message)
-
-    @property
-    def additional_properties(self) -> dict[str, Any]:
+    def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {}
+
+    def update_additional_properties(self, message: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
+        pass

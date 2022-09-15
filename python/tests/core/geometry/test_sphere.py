@@ -30,7 +30,7 @@ class TestSphere(unittest.TestCase):
 
     def test_serialize(self) -> None:
         sphere = brayns.Sphere(1, brayns.Vector3.one)
-        test = sphere.serialize()
+        test = sphere.get_properties()
         ref = {
             'center': [1, 1, 1],
             'radius': 1,

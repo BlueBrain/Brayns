@@ -19,11 +19,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any
 
 from .material import Material
-
-T = TypeVar('T', bound='GlassMaterial')
 
 
 @dataclass
@@ -46,15 +44,12 @@ class GlassMaterial(Material):
         """
         return 'glass'
 
-    @classmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        """Low level API to deserialize from JSON."""
-        return cls(
-            refraction_index=message['index_of_refraction']
-        )
-
-    def serialize(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'index_of_refraction': self.refraction_index
         }
+
+    def update_properties(self, message: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
+        self.refraction_index = message['index_of_refraction']

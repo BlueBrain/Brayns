@@ -21,6 +21,7 @@
 from brayns.network import Instance
 
 from .application import Application
+from .deserialize_application import deserialize_application
 
 
 def get_application(instance: Instance) -> Application:
@@ -32,4 +33,4 @@ def get_application(instance: Instance) -> Application:
     :rtype: Application
     """
     result = instance.request('get-application-parameters')
-    return Application.from_dict(result)
+    return deserialize_application(result)

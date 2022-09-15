@@ -18,18 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
-from dataclasses import dataclass, field
-from typing import Any
-
-from brayns.network import JsonRpcMessage
+from dataclasses import dataclass
 
 from ..api import JsonSchema
 
 
 @dataclass
-class LoaderInfo(JsonRpcMessage):
+class LoaderInfo:
     """Loader description.
 
     :param name: Loader name.
@@ -40,12 +35,6 @@ class LoaderInfo(JsonRpcMessage):
     :type schema: JsonSchema
     """
 
-    name: str = ''
-    extensions: list[str] = field(default_factory=list)
-    schema: JsonSchema = field(default_factory=JsonSchema)
-
-    def update(self, obj: dict[str, Any]) -> None:
-        """Low level API to deserialize from JSON."""
-        self.name = obj['name']
-        self.extensions = obj['extensions']
-        self.schema.update(obj['input_parameters_schema'])
+    name: str
+    extensions: list[str]
+    schema: JsonSchema

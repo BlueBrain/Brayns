@@ -23,6 +23,7 @@ from typing import TypeVar
 from brayns.network import Instance
 
 from .camera import Camera
+from .deserialize_camera import deserialize_camera
 
 T = TypeVar('T', bound=Camera)
 
@@ -43,4 +44,4 @@ def get_camera(instance: Instance, camera_type: type[T]) -> T:
     """
     name = camera_type.name
     result = instance.request(f'get-camera-{name}')
-    return camera_type.from_dict(result)
+    return deserialize_camera(camera_type, result)

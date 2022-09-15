@@ -25,6 +25,7 @@ from .directional_light import DirectionalLight
 from .light import Light
 from .quad_light import QuadLight
 from .remove_lights import remove_lights
+from .serialize_light import serialize_light
 
 __all__ = [
     'add_light',
@@ -34,4 +35,5 @@ __all__ = [
     'Light',
     'QuadLight',
     'remove_lights',
+    'serialize_light',
 ]

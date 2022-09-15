@@ -57,14 +57,14 @@ class ClipPlane(ClippingGeometry):
     @classmethod
     @property
     def method(cls) -> str:
-        """Get the JSON-RCP method to add the clipping geometry.
+        """Get the JSON-RPC method to add the clipping geometry.
 
         :return: JSON-RPC method.
         :rtype: str
         """
         return 'add-clip-plane'
 
-    def to_dict(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'coefficients': [self.a, self.b, self.c, self.d]

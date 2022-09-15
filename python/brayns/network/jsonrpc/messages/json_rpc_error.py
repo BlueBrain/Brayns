@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from .request_error import RequestError
 
@@ -28,5 +28,5 @@ from .request_error import RequestError
 @dataclass
 class JsonRpcError:
 
-    id: int | str | None = None
-    error: RequestError = field(default_factory=RequestError)
+    id: int | str | None
+    error: RequestError

@@ -21,6 +21,7 @@
 from brayns.network import Instance
 
 from .color_ramp import ColorRamp
+from .deserialize_color_ramp import deserialize_color_ramp
 
 
 def get_color_ramp(instance: Instance, model_id: int) -> ColorRamp:
@@ -37,4 +38,4 @@ def get_color_ramp(instance: Instance, model_id: int) -> ColorRamp:
     """
     params = {'id': model_id}
     result = instance.request('get-model-transfer-function', params)
-    return ColorRamp.from_dict(result)
+    return deserialize_color_ramp(result)

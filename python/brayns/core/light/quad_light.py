@@ -54,8 +54,7 @@ class QuadLight(Light):
         """
         return 'quad'
 
-    @property
-    def additional_properties(self) -> dict[str, Any]:
+    def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'position': list(self.bottom_left),

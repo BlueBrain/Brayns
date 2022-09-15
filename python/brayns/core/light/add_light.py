@@ -21,6 +21,7 @@
 from brayns.network import Instance
 
 from .light import Light
+from .serialize_light import serialize_light
 
 
 def add_light(instance: Instance, light: Light) -> int:
@@ -34,5 +35,5 @@ def add_light(instance: Instance, light: Light) -> int:
     :rtype: int
     """
     name = light.name
-    params = light.to_dict()
+    params = serialize_light(light)
     return instance.request(f'add-light-{name}', params)

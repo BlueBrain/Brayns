@@ -18,19 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any
 
-from brayns.network import JsonRpcMessage
 from brayns.utils import Color4
 
 from .value_range import ValueRange
 
 
 @dataclass
-class ColorRamp(JsonRpcMessage):
+class ColorRamp:
     """Color ramp to map simulation values to colors.
 
     Simulation values below value_range.min have colors[0].
@@ -47,21 +43,3 @@ class ColorRamp(JsonRpcMessage):
 
     value_range: ValueRange
     colors: list[Color4]
-
-    def to_dict(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {
-            'range': list(self.value_range),
-            'colors': [
-                list(color)
-                for color in self.colors
-            ]
-        }
-
-    def update(self, obj: dict[str, Any]) -> None:
-        """Low level API to deserialize from JSON."""
-        self.value_range = ValueRange(*obj['range'])
-        self.colors = [
-            Color4(*color)
-            for color in obj['colors']
-        ]

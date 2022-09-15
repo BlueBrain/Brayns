@@ -20,16 +20,20 @@
 
 from .color_ramp import ColorRamp
 from .control_point import ControlPoint
+from .deserialize_color_ramp import deserialize_color_ramp
 from .get_color_ramp import get_color_ramp
 from .opacity_curve import OpacityCurve
+from .serialize_color_ramp import serialize_color_ramp
 from .set_color_ramp import set_color_ramp
 from .value_range import ValueRange
 
 __all__ = [
+    'ColorRamp',
     'ControlPoint',
+    'deserialize_color_ramp',
     'get_color_ramp',
     'OpacityCurve',
+    'serialize_color_ramp',
     'set_color_ramp',
-    'ColorRamp',
     'ValueRange',
 ]

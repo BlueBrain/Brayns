@@ -20,11 +20,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any
 
 from brayns.utils import Color4
-
-T = TypeVar('T', bound='Renderer')
 
 
 @dataclass
@@ -58,44 +56,12 @@ class Renderer(ABC):
         """
         pass
 
-    @classmethod
     @abstractmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        """Low level API to deserialize from JSON."""
-        pass
-
-    @property
-    @abstractmethod
-    def additional_properties(self) -> dict[str, Any]:
+    def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         pass
 
-    @classmethod
-    def deserialize_with(cls: type[T], message: dict[str, Any], **kwargs) -> T:
+    @abstractmethod
+    def update_additional_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        return cls(
-            samples_per_pixel=message['samples_per_pixel'],
-            max_ray_bounces=message['max_ray_bounces'],
-            background_color=Color4(*message['background_color']),
-            **kwargs
-        )
-
-    @property
-    def base_properties(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {
-            'samples_per_pixel': self.samples_per_pixel,
-            'max_ray_bounces': self.max_ray_bounces,
-            'background_color': list(self.background_color)
-        }
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return self.base_properties | self.additional_properties
-
-    def serialize_with_name(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {
-            'name': self.name,
-            'params': self.serialize()
-        }
+        pass

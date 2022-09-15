@@ -30,7 +30,7 @@ class TestCapsule(unittest.TestCase):
 
     def test_serialize(self) -> None:
         capsule = brayns.Capsule(brayns.Vector3.zero, 0, brayns.Vector3.one, 1)
-        test = capsule.serialize()
+        test = capsule.get_properties()
         ref = {
             'p0': [0, 0, 0],
             'r0': 0,
