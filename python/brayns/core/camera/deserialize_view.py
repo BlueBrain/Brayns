@@ -20,25 +20,12 @@
 
 from typing import Any
 
-import brayns
+from brayns.utils import Vector3, View
 
 
-class MockApplication:
-
-    @classmethod
-    @property
-    def application(cls) -> brayns.Application:
-        return brayns.Application(
-            plugins=['test1', 'test2'],
-            resolution=brayns.Resolution(100, 200),
-            jpeg_quality=50
-        )
-
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
-            'plugins': ['test1', 'test2'],
-            'viewport': [100, 200],
-            'jpeg_quality': 50
-        }
+def deserialize_view(obj: dict[str, Any]) -> View:
+    return View(
+        position=Vector3(*obj['position']),
+        target=Vector3(*obj['target']),
+        up=Vector3(*obj['up']),
+    )

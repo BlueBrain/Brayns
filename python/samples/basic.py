@@ -97,7 +97,7 @@ with brayns.start(service, connector) as (process, instance):
         frame.unlink()
 
     exporter = brayns.FrameExporter(
-        frames=brayns.KeyFrame.from_indices(indices, view),
+        frames=[brayns.KeyFrame(index, view) for index in indices],
         format=brayns.ImageFormat.PNG,
         resolution=brayns.Resolution.full_hd,
         camera=camera,

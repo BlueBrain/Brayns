@@ -21,15 +21,20 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
-
-from .mock_application import MockApplication
+from tests.mock_instance import MockInstance
 
 
 class TestGetApplication(unittest.TestCase):
 
+    def setUp(self) -> None:
+        self._message = {
+            'plugins': ['test1', 'test2'],
+            'viewport': [100, 200],
+            'jpeg_quality': 50,
+        }
+
     def test_get_application(self) -> None:
-        instance = MockInstance(MockApplication.message)
+        instance = MockInstance(self._message)
         test = brayns.get_application(instance)
         self.assertEqual(test, MockApplication.application)
         self.assertEqual(instance.method, 'get-application-parameters')

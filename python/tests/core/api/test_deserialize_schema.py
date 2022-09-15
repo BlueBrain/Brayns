@@ -19,14 +19,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
+from typing import cast
 
 import brayns
+from brayns.core import deserialize_schema
 
 
-class TestJsonSchema(unittest.TestCase):
+class TestDeserializeSchema(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._message = {
+        self.message = {
             'title': 'test1',
             'description': 'test2',
             'type': 'integer',
@@ -37,61 +39,45 @@ class TestJsonSchema(unittest.TestCase):
             'maximum': 10,
             'items': {
                 'type': 'object',
-                'additionalProperties': False
+                'additionalProperties': False,
             },
             'minItems': 1,
             'maxItems': 3,
             'properties': {
-                '1': {
-                    'type': 'string'
-                },
-                '2': {
-                    'type': 'number'
-                }
+                '1': {'type': 'string'},
+                '2': {'type': 'number'},
             },
             'required': ['1', '2'],
             'additionalProperties': False,
             'oneOf': [
                 {'type': 'integer'},
-                {'type': 'string'}
+                {'type': 'string'},
             ],
             'enum': ['test', 12]
         }
-        self._schema = brayns.JsonSchema(
-            title='test1',
-            description='test2',
-            type=brayns.JsonType.INTEGER,
-            read_only=True,
-            write_only=True,
-            default=123,
-            minimum=0,
-            maximum=10,
-            items=brayns.JsonSchema(
-                type=brayns.JsonType.OBJECT,
-                additional_properties=False
-            ),
-            min_items=1,
-            max_items=3,
-            properties={
-                '1': brayns.JsonSchema(type=brayns.JsonType.STRING),
-                '2': brayns.JsonSchema(type=brayns.JsonType.NUMBER)
-            },
-            required=['1', '2'],
-            additional_properties=False,
-            one_of=[
-                brayns.JsonSchema(type=brayns.JsonType.INTEGER),
-                brayns.JsonSchema(type=brayns.JsonType.STRING)
-            ],
-            enum=['test', 12]
-        )
 
-    def test_deserialize(self) -> None:
-        test = brayns.JsonSchema.update(self._message)
-        self.assertEqual(test, self._schema)
-
-    def test_serialize(self) -> None:
-        test = self._schema.to_dict()
-        self.assertEqual(test, self._message)
+    def test_deserialize_schema(self) -> None:
+        test = deserialize_schema(self.message)
+        self.assertEqual(test.title, 'test1')
+        self.assertEqual(test.description, 'test2')
+        self.assertEqual(test.type, brayns.JsonType.INTEGER)
+        self.assertTrue(test.read_only)
+        self.assertTrue(test.write_only)
+        self.assertEqual(test.default, 123)
+        self.assertEqual(test.minimum, 0)
+        self.assertEqual(test.maximum, 10)
+        items = cast(brayns.JsonSchema, test.items)
+        self.assertEqual(items.type, brayns.JsonType.OBJECT)
+        self.assertFalse(items.additional_properties)
+        self.assertEqual(test.min_items, 1)
+        self.assertEqual(test.max_items, 3)
+        self.assertEqual(test.properties['1'].type, brayns.JsonType.STRING)
+        self.assertEqual(test.properties['2'].type, brayns.JsonType.NUMBER)
+        self.assertEqual(test.required, ['1', '2'])
+        self.assertFalse(test.additional_properties)
+        self.assertEqual(test.one_of[0].type, brayns.JsonType.INTEGER)
+        self.assertEqual(test.one_of[1].type, brayns.JsonType.STRING)
+        self.assertEqual(test.enum, ['test', 12])
 
 
 if __name__ == '__main__':
