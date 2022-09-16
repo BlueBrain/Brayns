@@ -18,12 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
 from brayns.network import Instance
 
+from .deserialize_simulation import deserialize_simulation
 from .simulation import Simulation
-from .time_unit import TimeUnit
 
 
 def get_simulation(instance: Instance) -> Simulation:
@@ -35,14 +33,4 @@ def get_simulation(instance: Instance) -> Simulation:
     :rtype: Simulation
     """
     result = instance.request('get-simulation-parameters')
-    return _deserialize_simulation(result)
-
-
-def _deserialize_simulation(message: dict[str, Any]) -> Simulation:
-    return Simulation(
-        start_frame=message['start_frame'],
-        end_frame=message['end_frame'],
-        current_frame=message['current'],
-        delta_time=message['dt'],
-        time_unit=TimeUnit(message['unit']),
-    )
+    return deserialize_simulation(result)

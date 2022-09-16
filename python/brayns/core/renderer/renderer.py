@@ -65,3 +65,25 @@ class Renderer(ABC):
     def update_additional_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
         pass
+
+    def get_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        return {
+            'samples_per_pixel': self.samples_per_pixel,
+            'max_ray_bounces': self.max_ray_bounces,
+            'background_color': list(self.background_color),
+            **self.get_additional_properties(),
+        }
+
+    def get_properties_with_name(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        return {
+            'name': self.name,
+            'params': self.get_properties(),
+        }
+
+    def update_properties(self, message: dict[str, Any]) -> None:
+        self.samples_per_pixel = message['samples_per_pixel']
+        self.max_ray_bounces = message['max_ray_bounces']
+        self.background_color = Color4(*message['background_color'])
+        self.update_additional_properties(message)

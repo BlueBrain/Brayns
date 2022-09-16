@@ -25,10 +25,16 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.network import Instance
-from brayns.utils import ImageFormat, Resolution, View, parse_image_format
+from brayns.utils import (
+    ImageFormat,
+    Resolution,
+    View,
+    parse_image_format,
+    serialize_view,
+)
 
-from ..camera import Camera, serialize_camera, serialize_view
-from ..renderer import Renderer, serialize_renderer
+from ..camera import Camera
+from ..renderer import Renderer
 
 
 @dataclass
@@ -83,7 +89,7 @@ class Snapshot:
         :param path: Output file.
         :type path: str
         """
-        params = _serialize_with_path(self, path)
+        params = _serialize(self, path=path)
         _request(instance, params)
 
     def download(self, instance: Instance, format: ImageFormat = ImageFormat.PNG) -> bytes:
@@ -94,17 +100,9 @@ class Snapshot:
         :param path: Output file.
         :type path: str
         """
-        params = _serialize_with_format(self, format)
+        params = _serialize(self, format=format)
         result = _request(instance, params)
         return base64.b64decode(result['data'])
-
-
-def _serialize_with_format(snapshot: Snapshot, format: ImageFormat) -> dict[str, Any]:
-    return _serialize(snapshot, format=format)
-
-
-def _serialize_with_path(snapshot: Snapshot, path: str) -> dict[str, Any]:
-    return _serialize(snapshot, path=path)
 
 
 def _serialize(snapshot: Snapshot, format: ImageFormat | None = None, path: str | None = None) -> dict[str, Any]:
@@ -119,9 +117,9 @@ def _serialize(snapshot: Snapshot, format: ImageFormat | None = None, path: str 
     if snapshot.view is not None:
         message['camera_view'] = serialize_view(snapshot.view)
     if snapshot.camera is not None:
-        message['camera'] = serialize_camera(snapshot.camera, name=True)
+        message['camera'] = snapshot.camera.get_properties_with_name()
     if snapshot.renderer is not None:
-        message['renderer'] = serialize_renderer(snapshot.renderer, name=True)
+        message['renderer'] = snapshot.renderer.get_properties_with_name()
     return message
 
 

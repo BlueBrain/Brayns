@@ -20,13 +20,12 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from brayns.network import Instance
 from brayns.utils import Transform
 
 from .deserialize_model import deserialize_model
 from .model import Model
+from .serialize_model import serialize_model
 
 
 def update_model(
@@ -50,30 +49,6 @@ def update_model(
     :return: Updated model.
     :rtype: Model
     """
-    params = _serialize_model(model_id, visible, transform)
+    params = serialize_model(model_id, visible, transform)
     result = instance.request('update-model', params)
     return deserialize_model(result)
-
-
-def _serialize_model(
-    model_id: int,
-    visible: bool | None = None,
-    transform: Transform | None = None,
-) -> dict[str, Any]:
-    properties = dict[str, Any]()
-    if visible is not None:
-        properties['is_visible'] = visible
-    if transform is not None:
-        properties['transform'] = _serialize_transform(transform)
-    return {
-        'model_id': model_id,
-        'model': properties,
-    }
-
-
-def _serialize_transform(transform: Transform) -> dict[str, Any]:
-    return {
-        'translation': list(transform.translation),
-        'rotation': list(transform.rotation.quaternion),
-        'scale': list(transform.scale),
-    }

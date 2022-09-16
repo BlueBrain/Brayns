@@ -20,16 +20,15 @@
 
 from typing import Any
 
-from brayns.utils import deserialize_bounds, deserialize_transform
+from .simulation import Simulation
+from .time_unit import TimeUnit
 
-from .model import Model
 
-
-def deserialize_model(message: dict[str, Any]) -> Model:
-    return Model(
-        id=message['model_id'],
-        bounds=deserialize_bounds(message['bounds']),
-        metadata=message['metadata'],
-        visible=message['is_visible'],
-        transform=deserialize_transform(message['transform']),
+def deserialize_simulation(message: dict[str, Any]) -> Simulation:
+    return Simulation(
+        start_frame=message['start_frame'],
+        end_frame=message['end_frame'],
+        current_frame=message['current'],
+        delta_time=message['dt'],
+        time_unit=TimeUnit(message['unit']),
     )

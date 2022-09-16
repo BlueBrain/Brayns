@@ -21,7 +21,6 @@
 from brayns.network import Instance
 
 from .renderer import Renderer
-from .serialize_renderer import serialize_renderer
 
 
 def set_renderer(instance: Instance, renderer: Renderer) -> None:
@@ -33,5 +32,5 @@ def set_renderer(instance: Instance, renderer: Renderer) -> None:
     :type renderer: Renderer
     """
     name = renderer.name
-    params = serialize_renderer(renderer)
+    params = renderer.get_properties()
     instance.request(f'set-renderer-{name}', params)

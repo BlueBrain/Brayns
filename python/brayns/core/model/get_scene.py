@@ -18,12 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
 from brayns.network import Instance
 
-from .deserialize_bounds import deserialize_bounds
-from .deserialize_model import deserialize_model
+from .deserialize_scene import deserialize_scene
 from .scene import Scene
 
 
@@ -36,14 +33,4 @@ def get_scene(instance: Instance) -> Scene:
     :rtype: Scene
     """
     result = instance.request('get-scene')
-    return _deserialize_scene(result)
-
-
-def _deserialize_scene(message: dict[str, Any]) -> Scene:
-    return Scene(
-        bounds=deserialize_bounds(message['bounds']),
-        models=[
-            deserialize_model(model)
-            for model in message['models']
-        ],
-    )
+    return deserialize_scene(result)

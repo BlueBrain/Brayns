@@ -44,13 +44,6 @@ def get_renderer(instance: Instance, renderer_type: type[T]) -> T:
     """
     name = renderer_type.name
     result = instance.request(f'get-renderer-{name}')
-    return _deserialize_renderer(renderer_type, result)
-
-
-def _deserialize_renderer(renderer_type: type[T], message: dict[str, Any]) -> T:
     renderer = renderer_type()
-    renderer.samples_per_pixel = message['samples_per_pixel']
-    renderer.max_ray_bounces = message['max_ray_bounces']
-    renderer.background_color = Color4(*message['background_color'])
-    renderer.update_additional_properties(message)
+    renderer.update_properties(result)
     return renderer

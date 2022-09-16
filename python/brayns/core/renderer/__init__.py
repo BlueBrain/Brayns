@@ -23,7 +23,6 @@ from .get_renderer_name import get_renderer_name
 from .interactive_renderer import InteractiveRenderer
 from .production_renderer import ProductionRenderer
 from .renderer import Renderer
-from .serialize_renderer import serialize_renderer
 from .set_renderer import set_renderer
 
 __all__ = [
@@ -32,6 +31,5 @@ __all__ = [
     'InteractiveRenderer',
     'ProductionRenderer',
     'Renderer',
-    'serialize_renderer',
     'set_renderer',
 ]

@@ -20,14 +20,17 @@
 
 from typing import Any
 
-from .camera import Camera
+from brayns.utils import deserialize_bounds
+
+from .deserialize_model import deserialize_model
+from .scene import Scene
 
 
-def serialize_camera(camera: Camera, name: bool = False) -> dict[str, Any]:
-    params = camera.get_properties()
-    if not name:
-        return params
-    return {
-        'name': camera.name,
-        'params': params,
-    }
+def deserialize_scene(message: dict[str, Any]) -> Scene:
+    return Scene(
+        bounds=deserialize_bounds(message['bounds']),
+        models=[
+            deserialize_model(model)
+            for model in message['models']
+        ],
+    )

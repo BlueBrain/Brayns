@@ -72,3 +72,9 @@ class Camera(ABC):
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
         pass
+
+    def get_properties_with_name(self) -> dict[str, Any]:
+        return {
+            'name': self.name,
+            'params': self.get_properties(),
+        }

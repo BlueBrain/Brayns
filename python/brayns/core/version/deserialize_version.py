@@ -20,12 +20,13 @@
 
 from typing import Any
 
-from brayns.utils import Bounds, Vector3
+from .version import Version
 
 
-def deserialize_bounds(obj: dict[str, Any]) -> Bounds:
-    """Low level API to deserialize from JSON."""
-    return Bounds(
-        min=Vector3(*obj['min']),
-        max=Vector3(*obj['max']),
+def deserialize_version(message: dict[str, Any]) -> Version:
+    return Version(
+        major=message['major'],
+        minor=message['minor'],
+        patch=message['patch'],
+        revision=message['revision'],
     )

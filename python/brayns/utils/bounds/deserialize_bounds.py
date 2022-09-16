@@ -20,16 +20,12 @@
 
 from typing import Any
 
-from brayns.utils import deserialize_bounds, deserialize_transform
+from ..vector import Vector3
+from .bounds import Bounds
 
-from .model import Model
 
-
-def deserialize_model(message: dict[str, Any]) -> Model:
-    return Model(
-        id=message['model_id'],
-        bounds=deserialize_bounds(message['bounds']),
-        metadata=message['metadata'],
-        visible=message['is_visible'],
-        transform=deserialize_transform(message['transform']),
+def deserialize_bounds(obj: dict[str, Any]) -> Bounds:
+    return Bounds(
+        min=Vector3(*obj['min']),
+        max=Vector3(*obj['max']),
     )

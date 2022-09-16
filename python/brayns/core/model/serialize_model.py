@@ -18,18 +18,24 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from typing import Any
 
-from brayns.utils import deserialize_bounds, deserialize_transform
-
-from .model import Model
+from brayns.utils import Transform, serialize_transform
 
 
-def deserialize_model(message: dict[str, Any]) -> Model:
-    return Model(
-        id=message['model_id'],
-        bounds=deserialize_bounds(message['bounds']),
-        metadata=message['metadata'],
-        visible=message['is_visible'],
-        transform=deserialize_transform(message['transform']),
-    )
+def serialize_model(
+    model_id: int,
+    visible: bool | None = None,
+    transform: Transform | None = None,
+) -> dict[str, Any]:
+    properties = dict[str, Any]()
+    if visible is not None:
+        properties['is_visible'] = visible
+    if transform is not None:
+        properties['transform'] = serialize_transform(transform)
+    return {
+        'model_id': model_id,
+        'model': properties,
+    }

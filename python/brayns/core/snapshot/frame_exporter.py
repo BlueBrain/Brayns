@@ -24,10 +24,10 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.network import Instance
-from brayns.utils import ImageFormat, Resolution
+from brayns.utils import ImageFormat, Resolution, serialize_view
 
-from ..camera import Camera, serialize_camera, serialize_view
-from ..renderer import Renderer, serialize_renderer
+from ..camera import Camera
+from ..renderer import Renderer
 from .key_frame import KeyFrame
 
 
@@ -86,9 +86,9 @@ def _serialize_exporter(exporter: FrameExporter, folder: str) -> dict[str, Any]:
         'image_settings': _serialize_image_settings(exporter),
     }
     if exporter.camera is not None:
-        message['camera'] = serialize_camera(exporter.camera, name=True)
+        message['camera'] = exporter.camera.get_properties_with_name()
     if exporter.renderer is not None:
-        message['renderer'] = serialize_renderer(exporter.renderer, name=True)
+        message['renderer'] = exporter.renderer.get_properties_with_name()
     return message
 
 

@@ -20,19 +20,12 @@
 
 from typing import Any
 
-from .renderer import Renderer
+from brayns.utils import Transform
 
 
-def serialize_renderer(renderer: Renderer, name: bool = False) -> dict[str, Any]:
-    params = {
-        'samples_per_pixel': renderer.samples_per_pixel,
-        'max_ray_bounces': renderer.max_ray_bounces,
-        'background_color': list(renderer.background_color),
-        **renderer.get_additional_properties(),
-    }
-    if not name:
-        return params
+def serialize_transform(transform: Transform) -> dict[str, Any]:
     return {
-        'name': renderer.name,
-        'params': params,
+        'translation': list(transform.translation),
+        'rotation': list(transform.rotation.quaternion),
+        'scale': list(transform.scale),
     }
