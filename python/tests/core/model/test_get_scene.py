@@ -33,7 +33,7 @@ class TestGetScene(unittest.TestCase):
         test = brayns.get_scene(instance)
         self.assertEqual(test, MockScene.scene)
         self.assertEqual(instance.method, 'get-scene')
-        self.assertEqual(instance.params, None)
+        self.assertIsNone(instance.params)
 
 
 if __name__ == '__main__':

@@ -20,19 +20,16 @@
 
 import unittest
 
-import brayns
-from tests.mock_instance import MockInstance
-from tests.mock_view import MockView
+from brayns.core import deserialize_simulation
+
+from .mock_simulation import MockSimulation
 
 
-class TestGetCameraView(unittest.TestCase):
+class TestDeserializeSimulation(unittest.TestCase):
 
-    def test_get_camera_view(self) -> None:
-        instance = MockInstance(MockView.message)
-        test = brayns.get_camera_view(instance)
-        self.assertEqual(test, MockView.view)
-        self.assertEqual(instance.method, 'get-camera-look-at')
-        self.assertIsNone(instance.params)
+    def test_deserialize_simulation(self) -> None:
+        test = deserialize_simulation(MockSimulation.message)
+        self.assertEqual(test, MockSimulation.simulation)
 
 
 if __name__ == '__main__':

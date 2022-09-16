@@ -27,11 +27,15 @@ class MockTransform:
 
     @classmethod
     @property
+    def quaternion(cls) -> brayns.Quaternion:
+        return brayns.Quaternion(1, 2, 3, 4) / 30
+
+    @classmethod
+    @property
     def transform(cls) -> brayns.Transform:
-        quaternion = brayns.Quaternion(3, 4, 5, 6)
         return brayns.Transform(
             translation=brayns.Vector3(0, 1, 2),
-            rotation=brayns.Rotation.from_quaternion(quaternion),
+            rotation=brayns.Rotation.from_quaternion(cls.quaternion),
             scale=brayns.Vector3(7, 8, 9),
         )
 
@@ -39,7 +43,7 @@ class MockTransform:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'translation': [1, 2, 3],
-            'rotation': list(brayns.Quaternion(3, 4, 5, 6).normalized),
-            'scale': [4, 5, 6],
+            'translation': [0, 1, 2],
+            'rotation': list(cls.quaternion),
+            'scale': [7, 8, 9],
         }

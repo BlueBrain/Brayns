@@ -20,16 +20,10 @@
 
 import unittest
 
-import brayns
-
 from .mock_simulation import MockSimulation
 
 
 class TestSimulation(unittest.TestCase):
-
-    def test_deserialize(self) -> None:
-        test = brayns.Simulation.deserialize(MockSimulation.message)
-        self.assertEqual(test, MockSimulation.simulation)
 
     def test_frame_count(self) -> None:
         self.assertEqual(MockSimulation.simulation.frame_count, 10)

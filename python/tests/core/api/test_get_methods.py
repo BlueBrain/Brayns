@@ -31,7 +31,7 @@ class TestGetMethods(unittest.TestCase):
         instance = MockInstance(methods)
         tests = brayns.get_methods(instance)
         self.assertEqual(instance.method, 'registry')
-        self.assertEqual(instance.params, None)
+        self.assertIsNone(instance.params)
         self.assertEqual(tests, methods)
 
 

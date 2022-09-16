@@ -19,26 +19,33 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
+from typing import Any
 
 import brayns
 
 
 class TestInteractiveRenderer(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._renderer = brayns.InteractiveRenderer(
-            samples_per_pixel=2,
-            max_ray_bounces=12,
+    @classmethod
+    @property
+    def renderer(cls) -> brayns.InteractiveRenderer:
+        return brayns.InteractiveRenderer(
+            samples_per_pixel=3,
+            max_ray_bounces=2,
             background_color=brayns.Color4(0, 0, 1, 1),
             enable_shadows=False,
-            ambient_occlusion_samples=15,
+            ambient_occlusion_samples=1,
         )
-        self._message = {
-            'samples_per_pixel': 2,
-            'max_ray_bounces': 12,
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'samples_per_pixel': 3,
+            'max_ray_bounces': 2,
             'background_color': [0, 0, 1, 1],
             'enable_shadows': False,
-            'ao_samples': 15,
+            'ao_samples': 1,
         }
 
     def test_name(self) -> None:
@@ -46,13 +53,13 @@ class TestInteractiveRenderer(unittest.TestCase):
         ref = 'interactive'
         self.assertEqual(test, ref)
 
-    def test_deserialize(self) -> None:
-        test = brayns.InteractiveRenderer.deserialize(self._message)
-        self.assertEqual(test, self._renderer)
+    def test_get_properties(self) -> None:
+        self.assertEqual(self.renderer.get_properties(), self.message)
 
-    def test_serialize(self) -> None:
-        test = self._renderer.serialize()
-        self.assertEqual(test, self._message)
+    def test_update_properties(self) -> None:
+        test = brayns.InteractiveRenderer()
+        test.update_properties(self.message)
+        self.assertEqual(test, self.renderer)
 
 
 if __name__ == '__main__':

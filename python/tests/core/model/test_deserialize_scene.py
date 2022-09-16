@@ -20,15 +20,15 @@
 
 import unittest
 
-import brayns
+from brayns.core import deserialize_scene
 
 from .mock_scene import MockScene
 
 
-class TestScene(unittest.TestCase):
+class TestDeserializeScene(unittest.TestCase):
 
-    def test_deserialize(self) -> None:
-        test = brayns.Scene.deserialize(MockScene.message)
+    def test_deserialize_scene(self) -> None:
+        test = deserialize_scene(MockScene.message)
         self.assertEqual(test, MockScene.scene)
 
 

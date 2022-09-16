@@ -33,7 +33,7 @@ class TestGetCamera(unittest.TestCase):
         test = brayns.get_camera(instance, brayns.OrthographicCamera)
         self.assertEqual(test, ref)
         self.assertEqual(instance.method, 'get-camera-orthographic')
-        self.assertEqual(instance.params, None)
+        self.assertIsNone(instance.params)
 
 
 if __name__ == '__main__':

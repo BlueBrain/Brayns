@@ -19,22 +19,29 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
+from typing import Any
 
 import brayns
 
 
 class TestProductionRenderer(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._renderer = brayns.ProductionRenderer(
-            samples_per_pixel=2,
-            max_ray_bounces=12,
-            background_color=brayns.Color4(0, 0, 1, 1)
+    @classmethod
+    @property
+    def renderer(cls) -> brayns.ProductionRenderer:
+        return brayns.ProductionRenderer(
+            samples_per_pixel=3,
+            max_ray_bounces=2,
+            background_color=brayns.Color4(0, 0, 1, 1),
         )
-        self._message = {
-            'samples_per_pixel': 2,
-            'max_ray_bounces': 12,
-            'background_color': [0, 0, 1, 1]
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'samples_per_pixel': 3,
+            'max_ray_bounces': 2,
+            'background_color': [0, 0, 1, 1],
         }
 
     def test_name(self) -> None:
@@ -42,22 +49,13 @@ class TestProductionRenderer(unittest.TestCase):
         ref = 'production'
         self.assertEqual(test, ref)
 
-    def test_deserialize(self) -> None:
-        test = brayns.ProductionRenderer.deserialize(self._message)
-        self.assertEqual(test, self._renderer)
+    def test_get_properties(self) -> None:
+        self.assertEqual(self.renderer.get_properties(), self.message)
 
-    def test_serialize(self) -> None:
-        test = self._renderer.serialize()
-        self.assertEqual(test, self._message)
-
-    def test_serialize_with_name(self) -> None:
-        renderer = brayns.ProductionRenderer()
-        test = renderer.serialize_with_name()
-        ref = {
-            'name': renderer.name,
-            'params': renderer.serialize()
-        }
-        self.assertEqual(test, ref)
+    def test_update_properties(self) -> None:
+        test = brayns.ProductionRenderer()
+        test.update_properties(self.message)
+        self.assertEqual(test, self.renderer)
 
 
 if __name__ == '__main__':

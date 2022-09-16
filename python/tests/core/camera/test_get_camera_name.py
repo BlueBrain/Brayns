@@ -32,7 +32,7 @@ class TestGetCameraName(unittest.TestCase):
         test = brayns.get_camera_name(instance)
         self.assertEqual(test, ref)
         self.assertEqual(instance.method, 'get-camera-type')
-        self.assertEqual(instance.params, None)
+        self.assertIsNone(instance.params)
 
 
 if __name__ == '__main__':
