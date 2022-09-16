@@ -21,10 +21,12 @@
 import json
 import unittest
 
-from brayns.network.jsonrpc.json_rpc_dispatcher import JsonRpcDispatcher
-from brayns.network.jsonrpc.json_rpc_error import JsonRpcError
-from brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress
-from brayns.network.jsonrpc.json_rpc_reply import JsonRpcReply
+from brayns.network import (
+    JsonRpcDispatcher,
+    deserialize_error,
+    deserialize_progress,
+    deserialize_reply,
+)
 
 from .mock_json_rpc_listener import MockJsonRpcListener
 
@@ -42,7 +44,7 @@ class TestJsonRpcDispatcher(unittest.TestCase):
         }
         self._dispatcher.dispatch(json.dumps(reply))
         test = self._listener.get_data()
-        ref = JsonRpcReply.from_dict(reply)
+        ref = deserialize_reply(reply)
         self.assertEqual(test, ref)
 
     def test_dispatch_error(self) -> None:
@@ -55,7 +57,7 @@ class TestJsonRpcDispatcher(unittest.TestCase):
         }
         self._dispatcher.dispatch(json.dumps(error))
         test = self._listener.get_data()
-        ref = JsonRpcError.from_dict(error)
+        ref = deserialize_error(error)
         self.assertEqual(test, ref)
 
     def test_dispatch_progress(self) -> None:
@@ -68,7 +70,7 @@ class TestJsonRpcDispatcher(unittest.TestCase):
         }
         self._dispatcher.dispatch(json.dumps(progress))
         test = self._listener.get_data()
-        ref = JsonRpcProgress.from_dict(progress)
+        ref = deserialize_progress(progress)
         self.assertEqual(test, ref)
 
     def test_dispatch_invalid_frame(self) -> None:

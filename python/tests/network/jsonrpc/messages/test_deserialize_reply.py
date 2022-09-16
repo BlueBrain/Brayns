@@ -18,36 +18,34 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import unittest
 from typing import Any
 
-from brayns.network import JsonRpcError, JsonRpcListener, JsonRpcProgress, JsonRpcReply
+from brayns.network import JsonRpcReply, deserialize_reply
 
 
-class MockJsonRpcListener(JsonRpcListener):
+class TestDeserializeReply(unittest.TestCase):
 
-    def __init__(self) -> None:
-        self._called = False
-        self._data = None
+    @classmethod
+    @property
+    def reply(cls) -> JsonRpcReply:
+        return JsonRpcReply(
+            id=1,
+            result=12,
+        )
 
-    def get_data(self) -> Any:
-        if not self._called:
-            raise RuntimeError('Data not received')
-        return self._data
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'id': 1,
+            'result': 12,
+        }
 
-    def on_reply(self, reply: JsonRpcReply) -> None:
-        self._set_data(reply)
+    def test_deserialize_reply(self) -> None:
+        test = deserialize_reply(self.message)
+        self.assertEqual(test, self.reply)
 
-    def on_error(self, error: JsonRpcError) -> None:
-        self._set_data(error)
 
-    def on_progress(self, progress: JsonRpcProgress) -> None:
-        self._set_data(progress)
-
-    def on_invalid_message(self, data: str, e: Exception) -> None:
-        self._set_data((data, e))
-
-    def _set_data(self, data: Any) -> None:
-        if self._called:
-            raise RuntimeError('Data received twice')
-        self._called = True
-        self._data = data
+if __name__ == '__main__':
+    unittest.main()

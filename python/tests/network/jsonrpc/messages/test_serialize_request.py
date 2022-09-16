@@ -18,27 +18,44 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json
 import unittest
+from typing import Any
 
-import brayns
+from brayns.network import JsonRpcRequest, serialize_request
 
 
-class TestJsonRpcRequest(unittest.TestCase):
+class TestSerializeRequest(unittest.TestCase):
 
-    def test_to_json_with_id(self) -> None:
-        request = brayns.JsonRpcRequest(1, 'test', [1, 2, 3])
-        obj = json.loads(request.to_json())
-        self.assertEqual(request.id, obj['id'])
-        self.assertEqual(request.method, obj['method'])
-        self.assertEqual(request.params, obj['params'])
+    @classmethod
+    @property
+    def request(cls) -> JsonRpcRequest:
+        return JsonRpcRequest(
+            id=1,
+            method='test',
+            params=123,
+        )
 
-    def test_to_json_notification(self) -> None:
-        notification = brayns.JsonRpcRequest(None, 'test', None)
-        obj = json.loads(notification.to_json())
-        self.assertNotIn('id', obj)
-        self.assertEqual(notification.method, obj['method'])
-        self.assertNotIn('params', obj)
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'jsonrpc': '2.0',
+            'id': 1,
+            'method': 'test',
+            'params': 123,
+        }
+
+    def test_serialize_request(self) -> None:
+        test = serialize_request(self.request)
+        self.assertEqual(test, self.message)
+
+    def test_serialize_request_notification(self) -> None:
+        notification = self.request
+        notification.id = None
+        test = serialize_request(notification)
+        ref = self.message
+        del ref['id']
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

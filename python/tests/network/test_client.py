@@ -23,9 +23,7 @@ import logging
 import unittest
 
 import brayns
-from brayns.network.client import Client
-from brayns.network.jsonrpc.json_rpc_manager import JsonRpcManager
-from brayns.network.listener import Listener
+from brayns.network import Client, JsonRpcManager, Listener, serialize_request
 
 from .mock_web_socket import MockWebSocket
 
@@ -57,23 +55,25 @@ class TestClient(unittest.TestCase):
         self.assertTrue(self._websocket.closed)
 
     def test_request(self) -> None:
-        request = brayns.JsonRpcRequest(0, 'test', 123)
+        request = brayns.Request(0, 'test', 123)
+        ref = json.dumps(serialize_request(request))
         self._websocket.text_reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
             result = client.request(request.method, request.params)
-            self.assertEqual(self._websocket.text_request, request.to_json())
+            self.assertEqual(self._websocket.text_request, ref)
             self.assertEqual(result, 456)
 
     def test_task(self) -> None:
-        request = brayns.JsonRpcRequest(0, 'test', 123)
+        request = brayns.Request(0, 'test', 123)
+        ref = json.dumps(serialize_request(request))
         self._websocket.text_reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
             future = client.task(request.method, request.params)
-            self.assertEqual(self._websocket.text_request, request.to_json())
+            self.assertEqual(self._websocket.text_request, ref)
             self.assertEqual(future.wait_for_result(), 456)
 
     def test_is_running(self) -> None:
-        request = brayns.JsonRpcRequest(0, 'test', 123)
+        request = brayns.Request(0, 'test', 123)
         self._websocket.text_reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
             future = client.send(request)
@@ -83,15 +83,16 @@ class TestClient(unittest.TestCase):
             self.assertFalse(client.is_running(0))
 
     def test_send(self) -> None:
-        request = brayns.JsonRpcRequest(0, 'test', 123)
+        request = brayns.Request(0, 'test', 123)
+        ref = json.dumps(serialize_request(request))
         self._websocket.text_reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
             future = client.send(request)
-            self.assertEqual(self._websocket.text_request, request.to_json())
+            self.assertEqual(self._websocket.text_request, ref)
             self.assertEqual(future.wait_for_result(), 456)
 
     def test_poll(self) -> None:
-        request = brayns.JsonRpcRequest(0, 'test', 123)
+        request = brayns.Request(0, 'test', 123)
         self._websocket.text_reply = json.dumps({'id': 0, 'result': 456})
         with self._connect() as client:
             future = client.send(request)
@@ -101,11 +102,12 @@ class TestClient(unittest.TestCase):
             self.assertEqual(future.wait_for_result(), 456)
 
     def test_cancel(self) -> None:
-        ref = brayns.JsonRpcRequest(0, 'cancel', {'id': 123})
+        request = brayns.Request(0, 'cancel', {'id': 123})
+        ref = json.dumps(serialize_request(request))
         self._websocket.text_reply = json.dumps({'id': 0, 'result': None})
         with self._connect() as client:
             client.cancel(123)
-            self.assertEqual(self._websocket.text_request, ref.to_json())
+            self.assertEqual(self._websocket.text_request, ref)
 
     def _connect(self) -> Client:
         return Client(self._websocket, logging.root, self._manager)

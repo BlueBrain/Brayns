@@ -17,28 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-import unittest
-
-from brayns.network.jsonrpc.json_rpc_error import JsonRpcError
-
-
-class TestJsonRpcError(unittest.TestCase):
-
-    def test_from_dict(self) -> None:
-        error = JsonRpcError.from_dict({
-            'id': 1,
-            'error': {
-                'message': 'test',
-                'code': 2,
-                'data': 123
-            }
-        })
-        self.assertEqual(error.id, 1)
-        self.assertEqual(error.error.message, 'test')
-        self.assertEqual(error.error.code, 2)
-        self.assertEqual(error.error.data, 123)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -19,23 +19,41 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
+from typing import Any
 
-from brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress
+import brayns
+from brayns.network import JsonRpcError, deserialize_error
 
 
-class TestJsonRpcProgress(unittest.TestCase):
+class TestDeserializeError(unittest.TestCase):
 
-    def test_from_dict(self) -> None:
-        progress = JsonRpcProgress.from_dict({
-            'params': {
-                'id': 1,
-                'operation': 'test',
-                'amount': 0.5
-            }
-        })
-        self.assertEqual(progress.id, 1)
-        self.assertEqual(progress.params.operation, 'test')
-        self.assertEqual(progress.params.amount, 0.5)
+    @classmethod
+    @property
+    def error(cls) -> JsonRpcError:
+        return JsonRpcError(
+            id=1,
+            error=brayns.RequestError(
+                code=2,
+                message='test',
+                data=123,
+            ),
+        )
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'id': 1,
+            'error': {
+                'code': 2,
+                'message': 'test',
+                'data': 123,
+            },
+        }
+
+    def test_deserialize_error(self) -> None:
+        test = deserialize_error(self.message)
+        self.assertEqual(test, self.error)
 
 
 if __name__ == '__main__':

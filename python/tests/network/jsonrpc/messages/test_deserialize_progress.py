@@ -19,19 +19,39 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
+from typing import Any
 
-from brayns.network.jsonrpc.json_rpc_reply import JsonRpcReply
+import brayns
+from brayns.network import JsonRpcProgress, deserialize_progress
 
 
-class TestJsonRpcReply(unittest.TestCase):
+class TestDeserializeProgress(unittest.TestCase):
 
-    def test_from_dict(self) -> None:
-        reply = JsonRpcReply.from_dict({
-            'id': 1,
-            'result': 12,
-        })
-        self.assertEqual(reply.id, 1)
-        self.assertEqual(reply.result, 12)
+    @classmethod
+    @property
+    def progress(cls) -> JsonRpcProgress:
+        return JsonRpcProgress(
+            id=1,
+            params=brayns.RequestProgress(
+                operation='test',
+                amount=0.5,
+            ),
+        )
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'params': {
+                'id': 1,
+                'operation': 'test',
+                'amount': 0.5,
+            },
+        }
+
+    def test_deserialize_progress(self) -> None:
+        test = deserialize_progress(self.message)
+        self.assertEqual(test, self.progress)
 
 
 if __name__ == '__main__':
