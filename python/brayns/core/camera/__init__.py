@@ -25,7 +25,6 @@ from .get_camera_view import get_camera_view
 from .orthographic_camera import OrthographicCamera
 from .perspective_camera import PerspectiveCamera
 from .serialize_camera import serialize_camera
-from .serialize_view import serialize_view
 from .set_camera import set_camera
 from .set_camera_view import set_camera_view
 
@@ -37,7 +36,6 @@ __all__ = [
     'OrthographicCamera',
     'PerspectiveCamera',
     'serialize_camera',
-    'serialize_view',
     'set_camera_view',
     'set_camera',
 ]

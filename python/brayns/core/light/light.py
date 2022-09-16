@@ -56,3 +56,12 @@ class Light(ABC):
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         pass
+
+    def get_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        return {
+            'color': list(self.color),
+            'intensity': self.intensity,
+            'visible': self.visible,
+            **self.get_additional_properties(),
+        }

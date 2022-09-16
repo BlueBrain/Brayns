@@ -59,7 +59,7 @@ class QuadLight(Light):
         return {
             'position': list(self.bottom_left),
             'edge1': list(self.edge1),
-            'edge2': list(self.edge2)
+            'edge2': list(self.edge2),
         }
 
     @property

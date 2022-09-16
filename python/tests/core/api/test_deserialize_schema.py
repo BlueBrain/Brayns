@@ -66,6 +66,7 @@ class TestDeserializeSchema(unittest.TestCase):
         self.assertEqual(test.default, 123)
         self.assertEqual(test.minimum, 0)
         self.assertEqual(test.maximum, 10)
+        self.assertIsNotNone(test.items)
         items = cast(brayns.JsonSchema, test.items)
         self.assertEqual(items.type, brayns.JsonType.OBJECT)
         self.assertFalse(items.additional_properties)

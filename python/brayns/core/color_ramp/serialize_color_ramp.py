@@ -20,29 +20,14 @@
 
 from typing import Any
 
-import brayns
+from .color_ramp import ColorRamp
 
 
-class MockColorRamp:
-
-    @classmethod
-    @property
-    def color_ramp(cls) -> brayns.ColorRamp:
-        return brayns.ColorRamp(
-            value_range=brayns.ValueRange(0, 1),
-            colors=[
-                brayns.Color4.red,
-                brayns.Color4.blue,
-            ]
-        )
-
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
-            'range': [0, 1],
-            'colors': [
-                [1, 0, 0, 1],
-                [0, 0, 1, 1],
-            ]
-        }
+def serialize_color_ramp(ramp: ColorRamp) -> dict[str, Any]:
+    return {
+        'range': list(ramp.value_range),
+        'colors': [
+            list(color)
+            for color in ramp.colors
+        ],
+    }

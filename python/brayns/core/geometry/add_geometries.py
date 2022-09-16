@@ -18,7 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, TypeVar
+from typing import TypeVar
 
 from brayns.network import Instance
 
@@ -29,11 +29,11 @@ T = TypeVar('T', bound=Geometry)
 
 
 def add_geometries(instance: Instance, geometries: list[T]) -> Model:
-    """Add a list of geometries to an instance as a single model.
+    """Create a model from a list of geometries.
 
     All geometries must have the same type.
 
-    Empty models (no geometries) are not supported.
+    Model witout geometries are not supported.
 
     :param instance: Instance.
     :type instance: Instance
@@ -46,16 +46,6 @@ def add_geometries(instance: Instance, geometries: list[T]) -> Model:
     if not geometries:
         raise ValueError('Cannot create a model with no geometries')
     method = geometries[0].method
-    params = [
-        _serialize_geometry(geometry)
-        for geometry in geometries
-    ]
+    params = [geometry.get_properties() for geometry in geometries]
     result = instance.request(method, params)
     return deserialize_model(result)
-
-
-def _serialize_geometry(geometry: Geometry) -> dict[str, Any]:
-    return {
-        'geometry': geometry.get_properties(),
-        'color': list(geometry.color),
-    }

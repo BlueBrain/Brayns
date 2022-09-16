@@ -18,24 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
+from typing import Any
 
-from brayns.network import Instance
-
-from .deserialize_entrypoint import deserialize_entrypoint
-from .entrypoint import Entrypoint
+from .view import View
 
 
-def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
-    """Retreive an entrypoint using its name (JSON-RPC method).
-
-    :param instance: Instance to query the entrypoint.
-    :type instance: Instance
-    :param method: JSON-RPC method name.
-    :type method: str
-    :return: Deserialized entrypoint.
-    :rtype: Entrypoint
-    """
-    params = {'endpoint': method}
-    result = instance.request('schema', params)
-    return deserialize_entrypoint(result)
+def serialize_view(view: View) -> dict[str, Any]:
+    return {
+        'position': list(view.position),
+        'target': list(view.target),
+        'up': list(view.up),
+    }

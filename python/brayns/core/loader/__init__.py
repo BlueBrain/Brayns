@@ -18,14 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from .deserialize_loader import deserialize_loader
 from .get_loaders import get_loaders
 from .loader import Loader
 from .loader_info import LoaderInfo
 from .mesh_loader import MeshLoader
+from .serialize_loader import serialize_loader
 
 __all__ = [
+    'deserialize_loader',
     'get_loaders',
     'Loader',
     'LoaderInfo',
     'MeshLoader',
+    'serialize_loader',
 ]

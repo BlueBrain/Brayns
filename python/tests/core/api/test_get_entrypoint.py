@@ -34,10 +34,10 @@ class TestGetEntrypoint(unittest.TestCase):
             'plugin': 'test3',
             'async': True,
             'params': {
-                'type': 'object'
+                'type': 'object',
             },
             'returns': {
-                'type': 'array'
+                'type': 'array',
             }
         }
 
@@ -52,10 +52,10 @@ class TestGetEntrypoint(unittest.TestCase):
         self.assertTrue(test.asynchronous)
         self.assertIsNotNone(test.params)
         params = cast(brayns.JsonSchema, test.params)
-        self.assertEqual(params.type, brayns.JsonType.OBJECT)
+        self.assertIs(params.type, brayns.JsonType.OBJECT)
         self.assertIsNotNone(test.result)
         result = cast(brayns.JsonSchema, test.result)
-        self.assertEqual(result.type, brayns.JsonType.ARRAY)
+        self.assertIs(result.type, brayns.JsonType.ARRAY)
 
 
 if __name__ == '__main__':

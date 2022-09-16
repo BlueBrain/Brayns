@@ -21,8 +21,6 @@
 from typing import Any
 
 import brayns
-from tests.utils.bounds.mock_bounds import MockBounds
-from tests.utils.transform.mock_transform import MockTransform
 
 
 class MockModel:
@@ -30,12 +28,20 @@ class MockModel:
     @classmethod
     @property
     def model(cls) -> brayns.Model:
+        quaternion = brayns.Quaternion(3, 4, 5, 6)
         return brayns.Model(
             id=0,
-            bounds=MockBounds.bounds,
+            bounds=brayns.Bounds(
+                min=brayns.Vector3.zero,
+                max=brayns.Vector3.one,
+            ),
             metadata={'test': '1'},
             visible=True,
-            transform=MockTransform.transform
+            transform=brayns.Transform(
+                translation=brayns.Vector3(0, 1, 2),
+                rotation=brayns.Rotation.from_quaternion(quaternion),
+                scale=brayns.Vector3(7, 8, 9),
+            ),
         )
 
     @classmethod

@@ -27,12 +27,11 @@ from tests.mock_instance import MockInstance
 class TestGetCameraView(unittest.TestCase):
 
     def test_get_camera_view(self) -> None:
-        message = {
+        instance = MockInstance({
             'position': [1, 2, 3],
             'target': [4, 5, 6],
             'up': [7, 8, 9],
-        }
-        instance = MockInstance(message)
+        })
         view = brayns.get_camera_view(instance)
         self.assertEqual(instance.method, 'get-camera-look-at')
         self.assertEqual(instance.params, None)

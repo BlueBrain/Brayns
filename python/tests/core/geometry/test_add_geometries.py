@@ -23,17 +23,15 @@ import unittest
 import brayns
 from tests.mock_instance import MockInstance
 
-from ..model.mock_model import MockModel
-
 
 class TestAddGeometries(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._geometries = [
+        self.geometries = [
             brayns.Plane(1, 2, 3, 4),
             brayns.Plane(5, 6, 7, 8).with_color(brayns.Color4.red),
         ]
-        self._message = [
+        self.message = [
             {
                 'geometry': {
                     'coefficients': [1, 2, 3, 4]
@@ -52,10 +50,10 @@ class TestAddGeometries(unittest.TestCase):
         ref = MockModel.model
         reply = MockModel.message
         instance = MockInstance(reply)
-        model = brayns.add_geometries(instance, self._geometries)
+        model = brayns.add_geometries(instance, self.geometries)
         self.assertEqual(model, ref)
         self.assertEqual(instance.method, 'add-planes')
-        self.assertEqual(instance.params, self._message)
+        self.assertEqual(instance.params, self.message)
 
 
 if __name__ == '__main__':

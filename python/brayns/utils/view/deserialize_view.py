@@ -20,7 +20,8 @@
 
 from typing import Any
 
-from brayns.utils import Vector3, View
+from ..vector import Vector3
+from .view import View
 
 
 def deserialize_view(obj: dict[str, Any]) -> View:

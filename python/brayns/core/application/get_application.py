@@ -18,12 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
 
 from brayns.network import Instance
-from brayns.utils import Resolution
 
 from .application import Application
+from .deserialize_application import deserialize_application
 
 
 def get_application(instance: Instance) -> Application:
@@ -35,12 +34,4 @@ def get_application(instance: Instance) -> Application:
     :rtype: Application
     """
     result = instance.request('get-application-parameters')
-    return _deserialize_application(result)
-
-
-def _deserialize_application(message: dict[str, Any]) -> Application:
-    return Application(
-        plugins=message['plugins'],
-        resolution=Resolution(*message['viewport']),
-        jpeg_quality=message['jpeg_quality'],
-    )
+    return deserialize_application(result)

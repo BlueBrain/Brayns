@@ -26,15 +26,12 @@ from tests.mock_instance import MockInstance
 
 class TestGetApplication(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self.message = {
+    def test_get_application(self) -> None:
+        instance = MockInstance({
             'plugins': ['test1', 'test2'],
             'viewport': [100, 200],
             'jpeg_quality': 50,
-        }
-
-    def test_get_application(self) -> None:
-        instance = MockInstance(self.message)
+        })
         test = brayns.get_application(instance)
         self.assertEqual(test.plugins, ['test1', 'test2'])
         self.assertEqual(test.resolution, brayns.Resolution(100, 200))

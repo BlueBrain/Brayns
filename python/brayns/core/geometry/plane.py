@@ -58,8 +58,8 @@ class Plane(Geometry):
         """
         return 'add-planes'
 
-    def get_properties(self) -> dict[str, Any]:
+    def get_additonal_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'coefficients': [self.a, self.b, self.c, self.d]
+            'coefficients': [self.a, self.b, self.c, self.d],
         }

@@ -18,23 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from typing import Any
 
-import brayns
+from brayns.utils import Color4
 
-from .mock_color_ramp import MockColorRamp
-
-
-class TestColorRamp(unittest.TestCase):
-
-    def test_deserialize(self) -> None:
-        test = brayns.ColorRamp.deserialize(MockColorRamp.message)
-        self.assertEqual(test, MockColorRamp.color_ramp)
-
-    def test_serialize(self) -> None:
-        test = MockColorRamp.color_ramp.serialize()
-        self.assertEqual(test, MockColorRamp.message)
+from .color_ramp import ColorRamp
+from .value_range import ValueRange
 
 
-if __name__ == '__main__':
-    unittest.main()
+def deserialize_color_ramp(message: dict[str, Any]) -> ColorRamp:
+    return ColorRamp(
+        value_range=ValueRange(*message['range']),
+        colors=[
+            Color4(*color)
+            for color in message['colors']
+        ],
+    )

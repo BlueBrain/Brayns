@@ -18,10 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from .deserialize_view import deserialize_view
 from .fovy import Fovy
+from .serialize_view import serialize_view
 from .view import View
 
 __all__ = [
+    'deserialize_view',
     'Fovy',
+    'serialize_view',
     'View',
 ]

@@ -18,13 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
 from brayns.network import Instance
-from brayns.utils import Color4
 
 from .color_ramp import ColorRamp
-from .value_range import ValueRange
+from .deserialize_color_ramp import deserialize_color_ramp
 
 
 def get_color_ramp(instance: Instance, model_id: int) -> ColorRamp:
@@ -41,14 +38,4 @@ def get_color_ramp(instance: Instance, model_id: int) -> ColorRamp:
     """
     params = {'id': model_id}
     result = instance.request('get-model-transfer-function', params)
-    return _deserialize_color_ramp(result)
-
-
-def _deserialize_color_ramp(message: dict[str, Any]) -> ColorRamp:
-    return ColorRamp(
-        value_range=ValueRange(*message['range']),
-        colors=[
-            Color4(*color)
-            for color in message['colors']
-        ],
-    )
+    return deserialize_color_ramp(result)

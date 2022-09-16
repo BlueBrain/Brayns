@@ -18,11 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
 from brayns.network import Instance
 
-from ..api import deserialize_schema
+from .deserialize_loader import deserialize_loader
 from .loader_info import LoaderInfo
 
 
@@ -36,14 +34,6 @@ def get_loaders(instance: Instance) -> list[LoaderInfo]:
     """
     result = instance.request('get-loaders')
     return [
-        _deserialize_loader(loader)
+        deserialize_loader(loader)
         for loader in result
     ]
-
-
-def _deserialize_loader(message: dict[str, Any]) -> LoaderInfo:
-    return LoaderInfo(
-        name=message['name'],
-        extensions=message['extensions'],
-        schema=deserialize_schema(message['input_parameters_schema']),
-    )

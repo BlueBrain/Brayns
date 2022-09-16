@@ -20,22 +20,26 @@
 
 from __future__ import annotations
 
-from brayns.network import Instance
+from typing import Any
 
-from .deserialize_entrypoint import deserialize_entrypoint
+from .deserialize_schema import deserialize_schema
 from .entrypoint import Entrypoint
+from .json_schema import JsonSchema
 
 
-def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
-    """Retreive an entrypoint using its name (JSON-RPC method).
+def deserialize_entrypoint(message: dict[str, Any]) -> Entrypoint:
+    return Entrypoint(
+        method=message['title'],
+        description=message['description'],
+        plugin=message['plugin'],
+        asynchronous=message['async'],
+        params=_deserialize_schema(message, 'params'),
+        result=_deserialize_schema(message, 'returns'),
+    )
 
-    :param instance: Instance to query the entrypoint.
-    :type instance: Instance
-    :param method: JSON-RPC method name.
-    :type method: str
-    :return: Deserialized entrypoint.
-    :rtype: Entrypoint
-    """
-    params = {'endpoint': method}
-    result = instance.request('schema', params)
-    return deserialize_entrypoint(result)
+
+def _deserialize_schema(message: dict[str, Any], key: str) -> JsonSchema | None:
+    value = message.get(key)
+    if value is None:
+        return None
+    return deserialize_schema(value)

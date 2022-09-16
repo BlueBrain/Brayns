@@ -18,10 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
 from brayns.network import Instance
-from brayns.utils import Vector3, View
+from brayns.utils import View, deserialize_view
 
 
 def get_camera_view(instance: Instance) -> View:
@@ -33,12 +31,4 @@ def get_camera_view(instance: Instance) -> View:
     :rtype: View
     """
     result = instance.request('get-camera-look-at')
-    return _deserialize_view(result)
-
-
-def _deserialize_view(obj: dict[str, Any]) -> View:
-    return View(
-        position=Vector3(*obj['position']),
-        target=Vector3(*obj['target']),
-        up=Vector3(*obj['up']),
-    )
+    return deserialize_view(result)

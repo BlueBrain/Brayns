@@ -60,13 +60,12 @@ class TestPerspectiveCamera(unittest.TestCase):
         self.assertEqual(test['focus_distance'], 2)
 
     def test_update_properties(self) -> None:
-        message = {
+        test = brayns.PerspectiveCamera()
+        test.update_properties({
             'fovy': 30,
             'aperture_radius': 1,
             'focus_distance': 2,
-        }
-        test = brayns.PerspectiveCamera()
-        test.update_properties(message)
+        })
         self.assertAlmostEqual(test.fovy.degrees, 30)
         self.assertEqual(test.aperture_radius, 1)
         self.assertEqual(test.focus_distance, 2)
