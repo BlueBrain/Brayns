@@ -25,24 +25,17 @@ import brayns
 
 class TestCarPaintMaterial(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._material = brayns.CarPaintMaterial(
-            flake_density=3
-        )
-        self._message = {
-            'flake_density': 3
-        }
-
     def test_name(self) -> None:
         self.assertEqual(brayns.CarPaintMaterial.name, 'carpaint')
 
-    def test_deserialize(self) -> None:
-        test = brayns.CarPaintMaterial.deserialize(self._message)
-        self.assertEqual(test, self._material)
+    def test_get_properties(self) -> None:
+        test = brayns.CarPaintMaterial(3)
+        self.assertEqual(test.get_properties(), {'flake_density': 3})
 
-    def test_serialize(self) -> None:
-        test = self._material.serialize()
-        self.assertEqual(test, self._message)
+    def test_update_properties(self) -> None:
+        test = brayns.CarPaintMaterial()
+        test.update_properties({'flake_density': 3})
+        self.assertEqual(test.flake_density, 3)
 
 
 if __name__ == '__main__':

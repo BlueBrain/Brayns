@@ -25,24 +25,17 @@ import brayns
 
 class TestDefaultMaterial(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._material = brayns.DefaultMaterial(
-            opacity=0.5
-        )
-        self._message = {
-            'opacity': 0.5
-        }
-
     def test_name(self) -> None:
         self.assertEqual(brayns.DefaultMaterial.name, 'default')
 
-    def test_deserialize(self) -> None:
-        test = brayns.DefaultMaterial.deserialize(self._message)
-        self.assertEqual(test, self._material)
+    def test_get_properties(self) -> None:
+        test = brayns.DefaultMaterial(0.5)
+        self.assertEqual(test.get_properties(), {'opacity': 0.5})
 
-    def test_serialize(self) -> None:
-        test = self._material.serialize()
-        self.assertEqual(test, self._message)
+    def test_update_properties(self) -> None:
+        test = brayns.DefaultMaterial()
+        test.update_properties({'opacity': 0.5})
+        self.assertEqual(test.opacity, 0.5)
 
 
 if __name__ == '__main__':
