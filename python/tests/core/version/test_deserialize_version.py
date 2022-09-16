@@ -20,30 +20,16 @@
 
 import unittest
 
-import brayns
-from brayns.version import DEV_VERSION
+from brayns.core import deserialize_version
 
 from .mock_version import MockVersion
 
 
-class TestVersion(unittest.TestCase):
+class TestDeserializeVersion(unittest.TestCase):
 
-    def test_release(self) -> None:
-        test = MockVersion.version.release
-        ref = (0, 1, 2)
-        self.assertEqual(test, ref)
-
-    def test_tag(self) -> None:
-        test = MockVersion.version.tag
-        ref = '0.1.2'
-        self.assertEqual(test, ref)
-
-    def test_check(self) -> None:
-        test = MockVersion.version
-        test.check(test.tag)
-        test.check(DEV_VERSION)
-        with self.assertRaises(brayns.VersionError):
-            test.check('5.6.7')
+    def test_deserialize_version(self) -> None:
+        test = deserialize_version(MockVersion.message)
+        self.assertEqual(test, MockVersion.version)
 
 
 if __name__ == '__main__':

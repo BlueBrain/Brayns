@@ -20,64 +20,62 @@
 
 import base64
 import unittest
+from typing import Any
 
 import brayns
 from tests.mock_instance import MockInstance
+from tests.mock_view import MockView
 
 
 class TestSnapshot(unittest.TestCase):
 
+    @classmethod
+    @property
+    def path(cls) -> str:
+        return 'path'
+
+    @classmethod
+    @property
+    def snapshot(cls) -> brayns.Snapshot:
+        return brayns.Snapshot(
+            jpeg_quality=50,
+            resolution=brayns.Resolution(1920, 1080),
+            frame=12,
+            view=MockView.view,
+            camera=brayns.PerspectiveCamera(),
+            renderer=brayns.ProductionRenderer(),
+        )
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'image_settings': {
+                'quality': 50,
+                'size': [1920, 1080],
+            },
+            'simulation_frame': 12,
+            'camera_view': MockView.message,
+            'camera': brayns.PerspectiveCamera().get_properties_with_name(),
+            'renderer': brayns.ProductionRenderer().get_properties_with_name(),
+        }
+
     def test_save_remotely(self) -> None:
         instance = MockInstance()
-        snapshot = brayns.Snapshot()
-        path = 'test.jpg'
-        ref = snapshot.serialize_with_path(path)
-        snapshot.save_remotely(instance, path)
+        self.snapshot.save_remotely(instance, self.path)
         self.assertEqual(instance.method, 'snapshot')
+        ref = self.message | {'file_path': self.path}
         self.assertEqual(instance.params, ref)
 
     def test_download(self) -> None:
         data = b'test'
-        reply = {'data': base64.b64encode(data)}
-        instance = MockInstance(reply)
-        snapshot = brayns.Snapshot()
-        test = snapshot.download(instance, brayns.ImageFormat.JPEG)
-        ref = snapshot.serialize_with_format(brayns.ImageFormat.JPEG)
+        instance = MockInstance({'data': base64.b64encode(data)})
+        test = self.snapshot.download(instance, brayns.ImageFormat.JPEG)
         self.assertEqual(test, data)
         self.assertEqual(instance.method, 'snapshot')
+        ref = self.message
+        ref['image_settings']['format'] = 'jpg'
         self.assertEqual(instance.params, ref)
-
-    def test_serialize_with_format(self) -> None:
-        snapshot = brayns.Snapshot(
-            jpeg_quality=50,
-            resolution=brayns.Resolution(1920, 1080),
-            frame=12,
-            view=brayns.View(),
-            camera=brayns.PerspectiveCamera(),
-            renderer=brayns.ProductionRenderer()
-        )
-        ref = {
-            'image_settings': {
-                'format': 'jpg',
-                'quality': 50,
-                'size': [1920, 1080]
-            },
-            'simulation_frame': 12,
-            'camera_view': brayns.View().serialize(),
-            'camera': brayns.PerspectiveCamera().serialize_with_name(),
-            'renderer': brayns.ProductionRenderer().serialize_with_name()
-        }
-        test = snapshot.serialize_with_format(brayns.ImageFormat.JPEG)
-        self.assertEqual(test, ref)
-
-    def test_serialize_with_path(self) -> None:
-        snapshot = brayns.Snapshot()
-        path = 'test.png'
-        ref = {
-            'file_path': path
-        }
-        test = snapshot.serialize_with_path(path)
-        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':
