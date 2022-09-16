@@ -20,7 +20,7 @@
 
 from typing import Any
 
-from brayns.utils import Transform
+from .transform import Transform
 
 
 def serialize_transform(transform: Transform) -> dict[str, Any]:

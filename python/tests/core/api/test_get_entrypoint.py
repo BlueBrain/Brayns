@@ -19,43 +19,24 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
-from typing import cast
 
 import brayns
+from brayns.core import deserialize_entrypoint
 from tests.mock_instance import MockInstance
+
+from .test_deserialize_entrypoint import TestDeserializeEntrypoint
 
 
 class TestGetEntrypoint(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self.message = {
-            'title': 'test',
-            'description': 'test2',
-            'plugin': 'test3',
-            'async': True,
-            'params': {
-                'type': 'object',
-            },
-            'returns': {
-                'type': 'array',
-            }
-        }
-
     def test_get_entrypoint(self) -> None:
-        instance = MockInstance(self.message)
+        message = TestDeserializeEntrypoint.test_message
+        instance = MockInstance(message)
         test = brayns.get_entrypoint(instance, 'test')
+        ref = deserialize_entrypoint(message)
+        self.assertEqual(test, ref)
         self.assertEqual(instance.method, 'schema')
         self.assertEqual(instance.params, {'endpoint': 'test'})
-        self.assertEqual(test.method, 'test')
-        self.assertEqual(test.description, 'test2')
-        self.assertEqual(test.plugin, 'test3')
-        self.assertTrue(test.asynchronous)
-        self.assertIsNotNone(test.params)
-        params = cast(brayns.JsonSchema, test.params)
-        self.assertIs(params.type, brayns.JsonType.OBJECT)
-        self.assertIsNotNone(test.result)
-        result = cast(brayns.JsonSchema, test.result)
-        self.assertIs(result.type, brayns.JsonType.ARRAY)
 
 
 if __name__ == '__main__':

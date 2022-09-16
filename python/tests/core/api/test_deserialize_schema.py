@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
-from typing import cast
+from typing import Any, cast
 
 import brayns
 from brayns.core import deserialize_schema
@@ -27,8 +27,10 @@ from brayns.core import deserialize_schema
 
 class TestDeserializeSchema(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self.message = {
+    @classmethod
+    @property
+    def test_message(cls) -> dict[str, Any]:
+        return {
             'title': 'test1',
             'description': 'test2',
             'type': 'integer',
@@ -53,11 +55,11 @@ class TestDeserializeSchema(unittest.TestCase):
                 {'type': 'integer'},
                 {'type': 'string'},
             ],
-            'enum': ['test', 12]
+            'enum': ['test', 12],
         }
 
     def test_deserialize_schema(self) -> None:
-        test = deserialize_schema(self.message)
+        test = deserialize_schema(self.test_message)
         self.assertEqual(test.title, 'test1')
         self.assertEqual(test.description, 'test2')
         self.assertEqual(test.type, brayns.JsonType.INTEGER)
