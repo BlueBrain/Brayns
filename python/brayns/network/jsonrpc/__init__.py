@@ -25,9 +25,13 @@ from .json_rpc_manager import JsonRpcManager
 from .json_rpc_task import JsonRpcTask
 from .json_rpc_tasks import JsonRpcTasks
 from .messages import *
+from .request import Request
 from .request_future import RequestFuture
 
 __all__ = [
+    'deserialize_error',
+    'deserialize_progress',
+    'deserialize_reply',
     'JsonRpcDispatcher',
     'JsonRpcError',
     'JsonRpcHandler',
@@ -38,7 +42,9 @@ __all__ = [
     'JsonRpcRequest',
     'JsonRpcTask',
     'JsonRpcTasks',
+    'Request',
     'RequestError',
     'RequestFuture',
     'RequestProgress',
+    'serialize_request',
 ]

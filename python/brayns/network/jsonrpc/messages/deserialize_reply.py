@@ -18,26 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .deserialize_error import deserialize_error
-from .deserialize_progress import deserialize_progress
-from .deserialize_reply import deserialize_reply
-from .json_rpc_error import JsonRpcError
-from .json_rpc_progress import JsonRpcProgress
-from .json_rpc_reply import JsonRpcReply
-from .json_rpc_request import JsonRpcRequest
-from .request_error import RequestError
-from .request_progress import RequestProgress
-from .serialize_request import serialize_request
+from typing import Any
 
-__all__ = [
-    'deserialize_error',
-    'deserialize_progress',
-    'deserialize_reply',
-    'JsonRpcError',
-    'JsonRpcProgress',
-    'JsonRpcReply',
-    'JsonRpcRequest',
-    'RequestError',
-    'RequestProgress',
-    'serialize_request',
-]
+from .json_rpc_reply import JsonRpcReply
+
+
+def deserialize_reply(message: dict[str, Any]) -> JsonRpcReply:
+    return JsonRpcReply(
+        id=message['id'],
+        result=message['result'],
+    )

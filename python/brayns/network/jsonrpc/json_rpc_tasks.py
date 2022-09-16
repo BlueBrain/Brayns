@@ -58,10 +58,7 @@ class JsonRpcTasks:
         task.set_result(result)
         del self._tasks[id]
 
-    def add_error(self, id: int | str | None, error: RequestError) -> None:
-        if id is None:
-            self.add_global_error(error)
-            return
+    def add_error(self, id: int | str, error: RequestError) -> None:
         task = self.find(id)
         if task is None:
             return

@@ -28,6 +28,18 @@ from .messages import RequestProgress
 
 
 class RequestFuture:
+    """Future used to monitor a running request.
+
+    Can be iterated to yield ``RequestProgress`` if the request send any.
+
+    Use ``wait_for_result`` to block until the request is over.
+
+    Use ``poll`` to refresh the state of the request.
+
+    Use ``cancel`` to send a message to cancel the request.
+
+    Future ready and progress state can also be queried.
+    """
 
     @staticmethod
     def from_result(result: Any) -> RequestFuture:

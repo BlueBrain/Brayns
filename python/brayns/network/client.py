@@ -22,10 +22,9 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any
 
 from .instance import Instance
-from .jsonrpc import JsonRpcManager, JsonRpcRequest, RequestFuture
+from .jsonrpc import JsonRpcManager, Request, RequestFuture, serialize_request
 from .websocket import WebSocket
 
 
@@ -48,19 +47,11 @@ class Client(Instance):
     def is_running(self, id: int | str) -> bool:
         return self._manager.is_running(id)
 
-    def send(self, request: JsonRpcRequest) -> RequestFuture:
+    def send(self, request: Request) -> RequestFuture:
         self._logger.info('Send JSON-RPC request: %s.', request)
         self._logger.debug('Request params: %s.', request.params)
-        data = _stringify_request(request)
-        self._websocket.send_text(data)
-        id = request.id
-        if id is None:
-            return RequestFuture.from_result(None)
-        return RequestFuture(
-            task=self._manager.create_task(id),
-            cancel=lambda: self.cancel(id),
-            poll=lambda: self.poll(),
-        )
+        self._send(request)
+        return self._create_future(request.id)
 
     def poll(self, block: bool = True) -> None:
         self._logger.debug('Waiting for messages from Brayns instance.')
@@ -70,19 +61,16 @@ class Client(Instance):
         self._logger.info('Cancel request with ID %s.', id)
         self.request('cancel', {'id': id})
 
+    def _send(self, request: Request) -> None:
+        message = serialize_request(request)
+        data = json.dumps(message)
+        self._websocket.send_text(data)
 
-def _stringify_request(request: JsonRpcRequest) -> str:
-    message = _serialize_request(request)
-    return json.dumps(message)
-
-
-def _serialize_request(request: JsonRpcRequest) -> dict[str, Any]:
-    message: dict[str, Any] = {
-        'jsonrpc': '2.0',
-        'method': request.method,
-    }
-    if request.id is not None:
-        message['id'] = request.id
-    if request.params is not None:
-        message['params'] = request.params
-    return message
+    def _create_future(self, id: int | str | None) -> RequestFuture:
+        if id is None:
+            return RequestFuture.from_result(None)
+        return RequestFuture(
+            task=self._manager.create_task(id),
+            cancel=lambda: self.cancel(id),
+            poll=lambda: self.poll(),
+        )

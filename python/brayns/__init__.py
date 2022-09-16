@@ -104,7 +104,7 @@ __all__ = [
     'Instance',
     'InteractiveRenderer',
     'InvalidServerCertificateError',
-    'JsonRpcRequest',
+    'Request',
     'JsonSchema',
     'JsonType',
     'KeyFrame',

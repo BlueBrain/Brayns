@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from typing import Any, Protocol, TypeVar
 
-from .jsonrpc import JsonRpcRequest, RequestFuture
+from .jsonrpc import Request, RequestFuture
 
 T = TypeVar('T', bound='Instance')
 
@@ -105,7 +105,7 @@ class Instance(Protocol):
         id = 0
         while self.is_running(id):
             id += 1
-        request = JsonRpcRequest(id, method, params)
+        request = Request(id, method, params)
         return self.send(request)
 
     def is_running(self, id: int | str) -> bool:
@@ -118,14 +118,14 @@ class Instance(Protocol):
         """
         return False
 
-    def send(self, request: JsonRpcRequest) -> RequestFuture:
-        """Send a JSON-RPC request in a non blocking way.
+    def send(self, request: Request) -> RequestFuture:
+        """Send a request in a non blocking way.
 
         This method is the most basic one, it doesn't generate any ID and can be
         used asynchronously (doesn't block until result is received).
 
-        :param request: JSON-RPC request.
-        :type request: JsonRpcRequest
+        :param request: Request.
+        :type request: Request
         :return: Future object to monitor the request.
         :rtype: RequestFuture
         """

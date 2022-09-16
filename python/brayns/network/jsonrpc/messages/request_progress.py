@@ -23,6 +23,13 @@ from dataclasses import dataclass
 
 @dataclass
 class RequestProgress:
+    """Request progress info.
+
+    :param operation: Description of the current task.
+    :type operation: str
+    :param amount: Progress amount [0-1].
+    :type amount: float
+    """
 
     operation: str
     amount: float

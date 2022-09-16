@@ -40,7 +40,7 @@ __all__ = [
     'Connector',
     'Instance',
     'InvalidServerCertificateError',
-    'JsonRpcRequest',
+    'Request',
     'Logger',
     'ProtocolError',
     'RequestError',

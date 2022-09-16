@@ -26,6 +26,15 @@ from brayns.utils import Error
 
 @dataclass
 class RequestError(Error):
+    """Error raised by an instance when a request fails.
+
+    :param code: Error code.
+    :type code: int
+    :param message: Error description.
+    :type message: str
+    :param data: Optional additional error information.
+    :type data: Any, optional
+    """
 
     code: int
     message: str

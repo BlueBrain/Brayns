@@ -38,6 +38,9 @@ class JsonRpcHandler(JsonRpcListener):
 
     def on_error(self, error: JsonRpcError) -> None:
         self._logger.info('JSON-RPC error received: %s.', error)
+        if error.id is None:
+            self._tasks.add_global_error(error.error)
+            return
         self._tasks.add_error(error.id, error.error)
 
     def on_progress(self, progress: JsonRpcProgress) -> None:

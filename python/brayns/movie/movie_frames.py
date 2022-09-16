@@ -56,23 +56,26 @@ class MovieFrames:
     end_frame: int = -1
 
     def get_indices(self, simulation: Simulation) -> list[int]:
-        start = self._get_frame(simulation, self.start_frame)
-        end = self._get_frame(simulation, self.end_frame)
-        step = self._get_step(simulation)
-        return list(self._yield_indices(start, end, step))
+        start = _get_frame(simulation, self.start_frame)
+        end = _get_frame(simulation, self.end_frame)
+        step = _get_step(simulation, self)
+        return list(_yield_indices(start, end, step))
 
-    def _get_frame(self, simulation: Simulation, frame: int) -> int:
-        if frame < 0:
-            frame += simulation.end_frame + 1
-        return simulation.clamp(frame)
 
-    def _get_step(self, simulation: Simulation) -> float:
-        return simulation.fps / self.fps / self.slowing_factor
+def _get_frame(simulation: Simulation, frame: int) -> int:
+    if frame < 0:
+        frame += simulation.end_frame + 1
+    return simulation.clamp(frame)
 
-    def _yield_indices(self, start: int, end: int, step: float) -> Iterator[int]:
-        current = float(start)
-        while True:
-            if current > end:
-                return
-            yield round(current)
-            current += step
+
+def _get_step(simulation: Simulation, frames: MovieFrames) -> float:
+    return simulation.fps / frames.fps / frames.slowing_factor
+
+
+def _yield_indices(start: int, end: int, step: float) -> Iterator[int]:
+    current = float(start)
+    while True:
+        if current > end:
+            return
+        yield round(current)
+        current += step
