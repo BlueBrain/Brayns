@@ -18,34 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from typing import Any
 
 import brayns
+from tests.mock_schema import MockSchema
 
 
-class TestQuadLight(unittest.TestCase):
+class MockLoader:
 
-    def test_name(self) -> None:
-        self.assertEqual(brayns.QuadLight.name, 'quad')
-
-    def test_emission_direction(self) -> None:
-        light = brayns.QuadLight(
-            edge1=brayns.Vector3.up,
-            edge2=brayns.Vector3.left
+    @classmethod
+    @property
+    def loader(cls) -> brayns.LoaderInfo:
+        return brayns.LoaderInfo(
+            name='test',
+            extensions=['test1', 'test2'],
+            schema=MockSchema.schema,
         )
-        self.assertEqual(light.emission_direction, brayns.Vector3.forward)
 
-    def test_get_properties(self) -> None:
-        test = brayns.QuadLight()
-        self.assertEqual(test.get_properties(), {
-            'color': [1, 1, 1],
-            'intensity': 1,
-            'visible': True,
-            'position': [0, 0, 0],
-            'edge1': [1, 0, 0],
-            'edge2': [0, 1, 0],
-        })
-
-
-if __name__ == '__main__':
-    unittest.main()
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'name': 'test',
+            'extensions': ['test1', 'test2'],
+            'input_parameters_schema': MockSchema.message,
+        }

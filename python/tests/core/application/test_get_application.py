@@ -21,22 +21,17 @@
 import unittest
 
 import brayns
-from brayns.core import deserialize_application
 from tests.mock_instance import MockInstance
 
-from .test_deserialize_application import TestDeserializeApplication
+from .mock_application import MockApplication
 
 
 class TestGetApplication(unittest.TestCase):
 
     def test_get_application(self) -> None:
-        message = TestDeserializeApplication.message
-        instance = MockInstance(message)
+        instance = MockInstance(MockApplication.message)
         test = brayns.get_application(instance)
-        ref = deserialize_application(message)
-        self.assertEqual(test, ref)
-        self.assertEqual(instance.method, 'get-application-parameters')
-        self.assertEqual(instance.params, None)
+        self.assertEqual(test, MockApplication.application)
 
 
 if __name__ == '__main__':

@@ -20,31 +20,16 @@
 
 import unittest
 
-import brayns
+from brayns.core import serialize_color_ramp
+
+from .mock_color_ramp import MockColorRamp
 
 
-class TestQuadLight(unittest.TestCase):
+class TestSerializeColorRamp(unittest.TestCase):
 
-    def test_name(self) -> None:
-        self.assertEqual(brayns.QuadLight.name, 'quad')
-
-    def test_emission_direction(self) -> None:
-        light = brayns.QuadLight(
-            edge1=brayns.Vector3.up,
-            edge2=brayns.Vector3.left
-        )
-        self.assertEqual(light.emission_direction, brayns.Vector3.forward)
-
-    def test_get_properties(self) -> None:
-        test = brayns.QuadLight()
-        self.assertEqual(test.get_properties(), {
-            'color': [1, 1, 1],
-            'intensity': 1,
-            'visible': True,
-            'position': [0, 0, 0],
-            'edge1': [1, 0, 0],
-            'edge2': [0, 1, 0],
-        })
+    def test_serialize_color_ramp(self) -> None:
+        test = serialize_color_ramp(MockColorRamp.color_ramp)
+        self.assertEqual(test, MockColorRamp.message)
 
 
 if __name__ == '__main__':

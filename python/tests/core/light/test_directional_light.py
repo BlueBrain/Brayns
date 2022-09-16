@@ -28,16 +28,14 @@ class TestDirectionalLight(unittest.TestCase):
     def test_name(self) -> None:
         self.assertEqual(brayns.DirectionalLight.name, 'directional')
 
-    def test_serialize(self) -> None:
-        light = brayns.DirectionalLight(direction=brayns.Vector3.up)
-        ref = {
+    def test_get_properties(self) -> None:
+        test = brayns.DirectionalLight(direction=brayns.Vector3.up)
+        self.assertEqual(test.get_properties(), {
             'color': [1, 1, 1],
             'intensity': 1,
             'visible': True,
-            'direction': [0, 1, 0]
-        }
-        test = light.serialize()
-        self.assertEqual(test, ref)
+            'direction': [0, 1, 0],
+        })
 
 
 if __name__ == '__main__':

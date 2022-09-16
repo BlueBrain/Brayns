@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
-from typing import Any, cast
 
 import brayns
 from brayns.core import deserialize_entrypoint
@@ -27,34 +26,23 @@ from brayns.core import deserialize_entrypoint
 
 class TestDeserializeEntrypoint(unittest.TestCase):
 
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
+    def test_deserialize_entrypoint(self) -> None:
+        test = deserialize_entrypoint({
             'title': 'test',
             'description': 'test2',
             'plugin': 'test3',
             'async': True,
-            'params': {
-                'type': 'object',
-            },
-            'returns': {
-                'type': 'array',
-            },
-        }
-
-    def test_deserialize_entrypoint(self) -> None:
-        test = deserialize_entrypoint(self.message)
-        self.assertEqual(test.method, 'test')
-        self.assertEqual(test.description, 'test2')
-        self.assertEqual(test.plugin, 'test3')
-        self.assertTrue(test.asynchronous)
-        self.assertIsNotNone(test.params)
-        params = cast(brayns.JsonSchema, test.params)
-        self.assertIs(params.type, brayns.JsonType.OBJECT)
-        self.assertIsNotNone(test.result)
-        result = cast(brayns.JsonSchema, test.result)
-        self.assertIs(result.type, brayns.JsonType.ARRAY)
+            'params': {'type': 'object'},
+            'returns': {'type': 'array'},
+        })
+        self.assertEqual(test, brayns.Entrypoint(
+            method='test1',
+            description='test2',
+            plugin='test3',
+            asynchronous=True,
+            params=brayns.JsonSchema(type=brayns.JsonType.OBJECT),
+            result=brayns.JsonSchema(type=brayns.JsonType.ARRAY),
+        ))
 
 
 if __name__ == '__main__':

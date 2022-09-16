@@ -21,20 +21,17 @@
 import unittest
 
 import brayns
-from brayns.core import deserialize_entrypoint
 from tests.mock_instance import MockInstance
-
-from .test_deserialize_entrypoint import TestDeserializeEntrypoint
+from tests.mock_schema import MockSchema
 
 
 class TestGetEntrypoint(unittest.TestCase):
 
     def test_get_entrypoint(self) -> None:
-        message = TestDeserializeEntrypoint.message
+        message = MockSchema.message
         instance = MockInstance(message)
         test = brayns.get_entrypoint(instance, 'test')
-        ref = deserialize_entrypoint(message)
-        self.assertEqual(test, ref)
+        self.assertEqual(test, MockSchema.schema)
         self.assertEqual(instance.method, 'schema')
         self.assertEqual(instance.params, {'endpoint': 'test'})
 

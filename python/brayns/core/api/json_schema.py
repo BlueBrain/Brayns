@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from .json_type import JsonType
@@ -66,19 +66,19 @@ class JsonSchema:
     :type enum: list[Any]
     """
 
-    title: str
-    description: str
-    type: JsonType
-    read_only: bool
-    write_only: bool
-    default: Any
-    minimum: float | None
-    maximum: float | None
-    items: JsonSchema | None
-    min_items: int | None
-    max_items: int | None
-    properties: dict[str, JsonSchema]
-    required: list[str]
-    additional_properties: bool | JsonSchema | None
-    one_of: list[JsonSchema]
-    enum: list[Any]
+    title: str = ''
+    description: str = ''
+    type: JsonType = JsonType.UNDEFINED
+    read_only: bool = False
+    write_only: bool = False
+    default: Any = None
+    minimum: float | None = None
+    maximum: float | None = None
+    items: JsonSchema | None = None
+    min_items: int | None = None
+    max_items: int | None = None
+    properties: dict[str, JsonSchema] = field(default_factory=dict)
+    required: list[str] = field(default_factory=list)
+    additional_properties: bool | JsonSchema | None = None
+    one_of: list[JsonSchema] = field(default_factory=list)
+    enum: list[Any] = field(default_factory=list)

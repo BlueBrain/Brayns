@@ -24,23 +24,14 @@ from typing import Any
 import brayns
 from brayns.core import deserialize_application
 
+from .mock_application import MockApplication
+
 
 class TestDeserializeApplication(unittest.TestCase):
 
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
-            'plugins': ['test1', 'test2'],
-            'viewport': [100, 200],
-            'jpeg_quality': 50,
-        }
-
     def test_deserialize_application(self) -> None:
-        test = deserialize_application(self.message)
-        self.assertEqual(test.plugins, ['test1', 'test2'])
-        self.assertEqual(test.resolution, brayns.Resolution(100, 200))
-        self.assertEqual(test.jpeg_quality, 50)
+        test = deserialize_application(MockApplication.message)
+        self.assertEqual(test.plugins, MockApplication.application)
 
 
 if __name__ == '__main__':

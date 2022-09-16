@@ -32,7 +32,7 @@ class TestAddLight(unittest.TestCase):
         id = brayns.add_light(instance, light)
         self.assertEqual(id, 0)
         self.assertEqual(instance.method, 'add-light-ambient')
-        self.assertEqual(instance.params, light.serialize())
+        self.assertEqual(instance.params, light.get_properties())
 
 
 if __name__ == '__main__':

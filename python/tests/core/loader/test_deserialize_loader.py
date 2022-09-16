@@ -18,29 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+import unittest
 
-import brayns
+from brayns.core import deserialize_loader
+
+from .mock_loader import MockLoader
 
 
-class MockLoaderInfo:
+class TestDeserializeLoader(unittest.TestCase):
 
-    @classmethod
-    @property
-    def loader_info(cls) -> brayns.LoaderInfo:
-        return brayns.LoaderInfo(
-            name='test',
-            extensions=['test1', 'test2'],
-            schema=brayns.JsonSchema(type=brayns.JsonType.INTEGER)
-        )
+    def test_deserialize_loader(self) -> None:
+        test = deserialize_loader(MockLoader.message)
+        self.assertEqual(test, MockLoader.loader)
 
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
-            'name': 'test',
-            'extensions': ['test1', 'test2'],
-            'input_parameters_schema': {
-                'type': 'integer'
-            }
-        }
+
+if __name__ == '__main__':
+    unittest.main()

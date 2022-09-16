@@ -28,15 +28,13 @@ class TestAmbientLight(unittest.TestCase):
     def test_name(self) -> None:
         self.assertEqual(brayns.AmbientLight.name, 'ambient')
 
-    def test_serialize(self) -> None:
-        light = brayns.AmbientLight(brayns.Color3.red, 12, False)
-        ref = {
+    def test_get_properties(self) -> None:
+        test = brayns.AmbientLight(brayns.Color3.red, 12, False)
+        self.assertEqual(test.get_properties(), {
             'color': [1, 0, 0],
             'intensity': 12,
-            'visible': False
-        }
-        test = light.serialize()
-        self.assertEqual(test, ref)
+            'visible': False,
+        })
 
 
 if __name__ == '__main__':

@@ -18,19 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from typing import Any
 
 import brayns
 
-from .mock_loader_info import MockLoaderInfo
 
+class MockApplication:
 
-class TestLoaderInfo(unittest.TestCase):
+    @classmethod
+    @property
+    def application(cls) -> brayns.Application:
+        return brayns.Application(
+            plugins=['test1', 'test2'],
+            resolution=brayns.Resolution.full_hd,
+            jpeg_quality=50,
+        )
 
-    def test_deserialize(self) -> None:
-        test = brayns.LoaderInfo.deserialize(MockLoaderInfo.message)
-        self.assertEqual(test, MockLoaderInfo.loader_info)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'plugins': ['test1', 'test2'],
+            'viewport': [1920, 1080],
+            'jpeg_quality': 50,
+        }
