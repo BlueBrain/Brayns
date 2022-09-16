@@ -30,7 +30,7 @@ from .test_deserialize_entrypoint import TestDeserializeEntrypoint
 class TestGetEntrypoint(unittest.TestCase):
 
     def test_get_entrypoint(self) -> None:
-        message = TestDeserializeEntrypoint.test_message
+        message = TestDeserializeEntrypoint.message
         instance = MockInstance(message)
         test = brayns.get_entrypoint(instance, 'test')
         ref = deserialize_entrypoint(message)

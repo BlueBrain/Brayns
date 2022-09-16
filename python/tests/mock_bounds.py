@@ -22,30 +22,21 @@ from typing import Any
 
 import brayns
 
-from .mock_bounds import MockBounds
-from .mock_transform import MockTransform
 
-
-class MockModel:
+class MockBounds:
 
     @classmethod
     @property
-    def model(cls) -> brayns.Model:
-        return brayns.Model(
-            id=0,
-            bounds=MockBounds.bounds,
-            metadata={'test': '1'},
-            visible=True,
-            transform=MockTransform.transform,
+    def bounds(cls) -> brayns.Bounds:
+        return brayns.Bounds(
+            min=brayns.Vector3(0, 1, 2),
+            max=brayns.Vector3(3, 4, 5),
         )
 
     @classmethod
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'model_id': 0,
-            'bounds': MockBounds.message,
-            'metadata': {'test': '1'},
-            'is_visible': True,
-            'transform': MockTransform.message,
+            'min': [0, 1, 2],
+            'max': [3, 4, 5],
         }

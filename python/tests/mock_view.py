@@ -18,20 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from typing import Any
 
-from brayns.utils import Resolution
+import brayns
 
 
-def serialize_application(
-    resolution: Resolution | None = None,
-    jpeg_quality: int | None = None,
-) -> dict[str, Any]:
-    params = dict[str, Any]()
-    if resolution is not None:
-        params['viewport'] = list(resolution)
-    if jpeg_quality is not None:
-        params['jpeg_quality'] = jpeg_quality
-    return params
+class MockView:
+
+    @classmethod
+    @property
+    def view(cls) -> brayns.View:
+        return brayns.View(
+            position=brayns.Vector3(0, 1, 2),
+            target=brayns.Vector3(3, 4 ,5),
+            up=brayns.Vector3(6, 7, 8),
+        )
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'position': [0, 1, 2],
+            'target': [3, 4, 5],
+            'up': [6, 7, 8],
+        }

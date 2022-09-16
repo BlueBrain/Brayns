@@ -29,7 +29,7 @@ class TestDeserializeSchema(unittest.TestCase):
 
     @classmethod
     @property
-    def test_message(cls) -> dict[str, Any]:
+    def message(cls) -> dict[str, Any]:
         return {
             'title': 'test1',
             'description': 'test2',
@@ -59,7 +59,7 @@ class TestDeserializeSchema(unittest.TestCase):
         }
 
     def test_deserialize_schema(self) -> None:
-        test = deserialize_schema(self.test_message)
+        test = deserialize_schema(self.message)
         self.assertEqual(test.title, 'test1')
         self.assertEqual(test.description, 'test2')
         self.assertEqual(test.type, brayns.JsonType.INTEGER)

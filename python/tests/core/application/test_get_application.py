@@ -21,21 +21,20 @@
 import unittest
 
 import brayns
+from brayns.core import deserialize_application
 from tests.mock_instance import MockInstance
+
+from .test_deserialize_application import TestDeserializeApplication
 
 
 class TestGetApplication(unittest.TestCase):
 
     def test_get_application(self) -> None:
-        instance = MockInstance({
-            'plugins': ['test1', 'test2'],
-            'viewport': [100, 200],
-            'jpeg_quality': 50,
-        })
+        message = TestDeserializeApplication.message
+        instance = MockInstance(message)
         test = brayns.get_application(instance)
-        self.assertEqual(test.plugins, ['test1', 'test2'])
-        self.assertEqual(test.resolution, brayns.Resolution(100, 200))
-        self.assertEqual(test.jpeg_quality, 50)
+        ref = deserialize_application(message)
+        self.assertEqual(test, ref)
         self.assertEqual(instance.method, 'get-application-parameters')
         self.assertEqual(instance.params, None)
 

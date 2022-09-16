@@ -22,30 +22,24 @@ from typing import Any
 
 import brayns
 
-from .mock_bounds import MockBounds
-from .mock_transform import MockTransform
 
-
-class MockModel:
+class MockTransform:
 
     @classmethod
     @property
-    def model(cls) -> brayns.Model:
-        return brayns.Model(
-            id=0,
-            bounds=MockBounds.bounds,
-            metadata={'test': '1'},
-            visible=True,
-            transform=MockTransform.transform,
+    def transform(cls) -> brayns.Transform:
+        quaternion = brayns.Quaternion(3, 4, 5, 6)
+        return brayns.Transform(
+            translation=brayns.Vector3(0, 1, 2),
+            rotation=brayns.Rotation.from_quaternion(quaternion),
+            scale=brayns.Vector3(7, 8, 9),
         )
 
     @classmethod
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'model_id': 0,
-            'bounds': MockBounds.message,
-            'metadata': {'test': '1'},
-            'is_visible': True,
-            'transform': MockTransform.message,
+            'translation': [1, 2, 3],
+            'rotation': list(brayns.Quaternion(3, 4, 5, 6).normalized),
+            'scale': [4, 5, 6],
         }

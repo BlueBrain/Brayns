@@ -21,13 +21,11 @@
 from .application import Application
 from .deserialize_application import deserialize_application
 from .get_application import get_application
-from .serialize_application import serialize_application
 from .update_application import update_application
 
 __all__ = [
     'Application',
     'deserialize_application',
     'get_application',
-    'serialize_application',
     'update_application',
 ]

@@ -27,16 +27,12 @@ from tests.mock_instance import MockInstance
 class TestGetCamera(unittest.TestCase):
 
     def test_get_camera(self) -> None:
-        instance = MockInstance({
-            'fovy': 45,
-            'aperture_radius': 0,
-            'focus_distance': 1,
-        })
-        test = brayns.get_camera(instance, brayns.PerspectiveCamera)
-        self.assertEqual(test.fovy.degrees, 45)
-        self.assertEqual(test.aperture_radius, 0)
-        self.assertEqual(test.focus_distance, 1)
-        self.assertEqual(instance.method, 'get-camera-perspective')
+        ref = brayns.OrthographicCamera(3)
+        message = ref.get_properties()
+        instance = MockInstance(message)
+        test = brayns.get_camera(instance, brayns.OrthographicCamera)
+        self.assertEqual(test, ref)
+        self.assertEqual(instance.method, 'get-camera-orthographic')
         self.assertEqual(instance.params, None)
 
 

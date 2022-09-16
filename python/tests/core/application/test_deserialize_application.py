@@ -19,42 +19,28 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
-from typing import Any, cast
+from typing import Any
 
 import brayns
-from brayns.core import deserialize_entrypoint
+from brayns.core import deserialize_application
 
 
-class TestDeserializeEntrypoint(unittest.TestCase):
+class TestDeserializeApplication(unittest.TestCase):
 
     @classmethod
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'title': 'test',
-            'description': 'test2',
-            'plugin': 'test3',
-            'async': True,
-            'params': {
-                'type': 'object',
-            },
-            'returns': {
-                'type': 'array',
-            },
+            'plugins': ['test1', 'test2'],
+            'viewport': [100, 200],
+            'jpeg_quality': 50,
         }
 
-    def test_deserialize_entrypoint(self) -> None:
-        test = deserialize_entrypoint(self.message)
-        self.assertEqual(test.method, 'test')
-        self.assertEqual(test.description, 'test2')
-        self.assertEqual(test.plugin, 'test3')
-        self.assertTrue(test.asynchronous)
-        self.assertIsNotNone(test.params)
-        params = cast(brayns.JsonSchema, test.params)
-        self.assertIs(params.type, brayns.JsonType.OBJECT)
-        self.assertIsNotNone(test.result)
-        result = cast(brayns.JsonSchema, test.result)
-        self.assertIs(result.type, brayns.JsonType.ARRAY)
+    def test_deserialize_application(self) -> None:
+        test = deserialize_application(self.message)
+        self.assertEqual(test.plugins, ['test1', 'test2'])
+        self.assertEqual(test.resolution, brayns.Resolution(100, 200))
+        self.assertEqual(test.jpeg_quality, 50)
 
 
 if __name__ == '__main__':
