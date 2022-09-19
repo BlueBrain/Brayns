@@ -73,6 +73,12 @@ public:
     ModelManager &getModels() noexcept;
 
     /**
+     * @copydoc Scene::getModels() noexcept
+     * @return const ModelManager&
+     */
+    const ModelManager &getModels() const noexcept;
+
+    /**
      * @brief Returns the Ospray handle of the scene
      */
     const ospray::cpp::World &getHandle() const noexcept;

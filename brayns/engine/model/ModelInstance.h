@@ -84,12 +84,6 @@ public:
     ModelInfo getModelData() const noexcept;
 
     /**
-     * @brief Utility function to return this Model Instance underlying model metadata
-     * @return const Metadata * if the model has metadata, null otherwise
-     */
-    const Metadata *getModelMetadata() const noexcept;
-
-    /**
      * @brief Sets wether this instance is visible or not.
      */
     void setVisible(const bool val) noexcept;

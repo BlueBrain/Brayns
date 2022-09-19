@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,32 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClearModelsEntrypoint.h"
+#pragma once
 
-#include <brayns/engine/common/SimulationScanner.h>
+#include <brayns/engine/model/systemtypes/InitSystem.h>
 
 namespace brayns
 {
-ClearModelsEntrypoint::ClearModelsEntrypoint(ModelManager &models, SimulationParameters &simulation)
-    : _models(models)
-    , _simulation(simulation)
+class ClipperInitSystem final : public InitSystem
 {
+public:
+    void execute(Components &components) override;
+};
 }
-
-std::string ClearModelsEntrypoint::getMethod() const
-{
-    return "clear-models";
-}
-
-std::string ClearModelsEntrypoint::getDescription() const
-{
-    return "Clear all models in the scene";
-}
-
-void ClearModelsEntrypoint::onRequest(const Request &request)
-{
-    _models.removeAllModelInstances();
-    SimulationScanner::scanAndUpdate(_models, _simulation);
-    request.reply(EmptyMessage());
-}
-} // namespace brayns

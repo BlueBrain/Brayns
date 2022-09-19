@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,30 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "RemoveClipPlanesEntrypoint.h"
+#pragma once
+
+#include <brayns/engine/geometry/Geometry.h>
 
 namespace brayns
 {
-RemoveClipPlanesEntrypoint::RemoveClipPlanesEntrypoint(Scene &scene)
-    : _scene(scene)
+struct Clippers
 {
+    std::vector<Geometry> elements;
+};
 }
-
-std::string RemoveClipPlanesEntrypoint::getMethod() const
-{
-    return "remove-clip-planes";
-}
-
-std::string RemoveClipPlanesEntrypoint::getDescription() const
-{
-    return "Remove clip planes from the scene given their ids";
-}
-
-void RemoveClipPlanesEntrypoint::onRequest(const Request &request)
-{
-    auto params = request.getParams();
-    auto &ids = params.ids;
-    _scene.removeClippingModels(ids);
-    request.reply(EmptyMessage());
-}
-} // namespace brayns

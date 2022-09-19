@@ -22,21 +22,22 @@
 #pragma once
 
 #include <brayns/engine/json/adapters/GeometryAdapters.h>
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
+#include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-class AddClipPlaneEntrypoint : public Entrypoint<Plane, uint32_t>
+class AddClipPlaneEntrypoint : public Entrypoint<Plane, ModelInstance>
 {
 public:
-    AddClipPlaneEntrypoint(Scene &scene);
+    AddClipPlaneEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Scene &_scene;
+    ModelManager &_models;
 };
 } // namespace brayns

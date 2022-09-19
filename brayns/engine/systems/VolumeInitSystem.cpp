@@ -21,12 +21,18 @@
 #include "VolumeInitSystem.h"
 
 #include <brayns/common/ColorRamp.h>
+#include <brayns/engine/components/Renderable.h>
 #include <brayns/engine/components/VolumeViews.h>
 #include <brayns/engine/components/Volumes.h>
-#include <brayns/engine/model/RenderGroup.h>
+
+#include <ospray/ospray_cpp/Data.h>
 
 namespace
 {
+struct GroupParameters
+{
+    inline static const std::string volume = "volume";
+};
 class VolumeInitializer
 {
 public:
@@ -38,6 +44,9 @@ public:
     void init()
     {
         auto &views = _initViews();
+        assert(_checkViews(views));
+        _initColorRamp(views);
+        _initGroup(views);
     }
 
 private:
@@ -62,31 +71,35 @@ private:
         viewList.reserve(volumeList.size());
         for (auto &volume : volumeList)
         {
+            volume.commit();
             viewList.emplace_back(volume);
         }
     }
 
+    bool _checkViews(brayns::VolumeViews &views)
+    {
+        auto &volumes = _components.get<brayns::Volumes>();
+        return volumes.elements.size() == views.elements.size();
+    }
+
     void _initColorRamp(brayns::VolumeViews &views)
     {
-        auto colorRamp = _components.find<brayns::ColorRamp>();
-        if (!colorRamp)
-        {
-            colorRamp = &_components.add<brayns::ColorRamp>();
-        }
+        auto &colorRamp = _components.getOrAdd<brayns::ColorRamp>();
         for (auto &view : views.elements)
         {
-            view.setColorRamp(*colorRamp);
+            view.setColorRamp(colorRamp);
         }
     }
 
     void _initGroup(brayns::VolumeViews &views)
     {
-        if (auto group = _components.find<brayns::RenderGroup>())
+        if (_components.has<brayns::Renderable>())
         {
             return;
         }
-        auto group = brayns::RenderGroupFactory::fromVolume(views.elements);
-        _components.add<brayns::RenderGroup>(std::move(group));
+
+        auto &renderable = _components.add<brayns::Renderable>();
+        renderable.group = brayns::RenderGroupFactory::fromVolumes(views.elements);
     }
 
 private:

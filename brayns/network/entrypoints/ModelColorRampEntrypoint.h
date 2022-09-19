@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
 
 #include <brayns/network/adapters/ColorRampAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
@@ -33,26 +33,26 @@ namespace brayns
 class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, ColorRamp>
 {
 public:
-    GetModelTransferFunctionEntrypoint(Scene &scene);
+    GetModelTransferFunctionEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Scene &_scene;
+    ModelManager &_models;
 };
 
 class SetModelTransferFunctionEntrypoint : public Entrypoint<SetColorRampMessage, EmptyMessage>
 {
 public:
-    SetModelTransferFunctionEntrypoint(Scene &scene);
+    SetModelTransferFunctionEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Scene &_scene;
+    ModelManager &_models;
 };
 } // namespace brayns

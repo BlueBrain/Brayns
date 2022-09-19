@@ -20,9 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/json/adapters/GeometryAdapters.h>
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -34,44 +39,78 @@ class AddGeometryEntrypoint : public Entrypoint<std::vector<GeometryWithColor<T>
 public:
     using Request = typename Entrypoint<std::vector<GeometryWithColor<T>>, ModelInstance>::Request;
 
-    AddGeometryEntrypoint(Scene &scene)
-        : _scene(scene)
+    AddGeometryEntrypoint(ModelManager &models)
+        : _models(models)
     {
     }
 
     void onRequest(const Request &request) override
     {
-        auto params = request.getParams();
-        auto numGeometries = params.size();
+        auto model = std::make_unique<Model>();
 
-        std::vector<T> geometries;
-        geometries.reserve(numGeometries);
-        std::vector<brayns::Vector4f> colors;
-        colors.reserve(numGeometries);
+        auto [primitives, colors] = _unpackRequest(request);
 
-        for (size_t i = 0; i < numGeometries; ++i)
-        {
-            auto &param = params[i];
-            geometries.push_back(std::move(param.geometry));
-            colors.push_back(param.color);
-        }
+        auto &geometry = _addGeometry(*model, std::move(primitives));
+        auto &view = _addView(*model, geometry);
+        view.setColorPerPrimitive(ospray::cpp::CopiedData(colors));
 
-        auto newModel = std::make_unique<Model>();
-        auto &renderComponent = newModel->addComponent<GeometryRendererComponent>(std::move(geometries));
-        renderComponent.setColors(colors);
+        _setUpSystems(*model);
 
-        auto &instance = _scene.addModel({}, std::move(newModel));
-        request.reply(instance);
+        auto *instance = _models.addModel(std::move(model));
+        request.reply(*instance);
     }
 
 private:
-    Scene &_scene;
+    std::tuple<std::vector<T>, std::vector<brayns::Vector4f>> _unpackRequest(const Request &request)
+    {
+        auto params = request.getParams();
+        auto numPrimitives = params.size();
+
+        std::vector<T> primitives;
+        primitives.reserve(numPrimitives);
+        std::vector<brayns::Vector4f> colors;
+        colors.reserve(numPrimitives);
+
+        for (size_t i = 0; i < numPrimitives; ++i)
+        {
+            auto &param = params[i];
+            primitives.push_back(std::move(param.geometry));
+            colors.push_back(param.color);
+        }
+
+        return std::make_tuple(std::move(primitives), std::move(colors));
+    }
+
+    Geometry &_addGeometry(Model &model, std::vector<T> primitives)
+    {
+        auto &components = model.getComponents();
+        auto &geometries = components.add<Geometries>();
+        return geometries.elements.emplace_back(std::move(primitives));
+    }
+
+    GeometryView &_addView(Model &model, const Geometry &geometry)
+    {
+        auto &components = model.getComponents();
+        auto &views = components.add<GeometryViews>();
+        return views.elements.emplace_back(geometry);
+    }
+
+    void _setUpSystems(Model &model)
+    {
+        auto &systems = model.getSystems();
+        systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
+        systems.setInitSystem<GeometryInitSystem>();
+        systems.setCommitSystem<GeometryCommitSystem>();
+    }
+
+private:
+    ModelManager &_models;
 };
 
 class AddBoxesEntrypoint final : public AddGeometryEntrypoint<Box>
 {
 public:
-    AddBoxesEntrypoint(Scene &scene);
+    AddBoxesEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -80,7 +119,7 @@ public:
 class AddPlanesEntrypoint final : public AddGeometryEntrypoint<Plane>
 {
 public:
-    AddPlanesEntrypoint(Scene &scene);
+    AddPlanesEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -89,7 +128,7 @@ public:
 class AddCapsulesEntrypoint final : public AddGeometryEntrypoint<Capsule>
 {
 public:
-    AddCapsulesEntrypoint(Scene &scene);
+    AddCapsulesEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -98,7 +137,7 @@ public:
 class AddSpheresEntrypoint final : public AddGeometryEntrypoint<Sphere>
 {
 public:
-    AddSpheresEntrypoint(Scene &scene);
+    AddSpheresEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
     std::string getDescription() const override;

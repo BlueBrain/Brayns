@@ -31,8 +31,5 @@ struct MetadataEntry
     std::string value;
 };
 
-struct Metadata
-{
-    std::vector<MetadataEntry> entries;
-};
+using Metadata = std::vector<MetadataEntry>;
 }

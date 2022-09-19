@@ -20,27 +20,26 @@
 
 #pragma once
 
-#include <brayns/engine/components/MaterialComponent.h>
-#include <brayns/engine/scene/Scene.h>
-
+#include <brayns/engine/material/Material.h>
+#include <brayns/engine/scene/ModelManager.h>
+#include <brayns/network/common/ExtractModel.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetModelMessage.h>
 #include <brayns/network/messages/MaterialMessage.h>
-
-#include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
 class GetMaterialType : public Entrypoint<GetModelMessage, std::string>
 {
 public:
-    GetMaterialType(Scene &scene);
+    GetMaterialType(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Scene &_modelManager;
+    ModelManager &_models;
 };
 
 template<typename MaterialType>
@@ -49,8 +48,8 @@ class SetMaterialEntrypoint : public Entrypoint<SetMaterialMessage<MaterialType>
 public:
     using Request = typename Entrypoint<SetMaterialMessage<MaterialType>, EmptyMessage>::Request;
 
-    SetMaterialEntrypoint(Scene &Scene)
-        : _scene(Scene)
+    SetMaterialEntrypoint(ModelManager &models)
+        : _models(models)
     {
     }
 
@@ -59,23 +58,30 @@ public:
         auto params = request.getParams();
         auto modelId = params.model_id;
         auto &buffer = params.material;
-        auto &instance = _scene.getModelInstance(modelId);
+        auto &instance = ExtractModel::fromId(_models, modelId);
         Model &model = instance.getModel();
-        auto &component = model.getComponent<MaterialComponent>();
+        auto &components = model.getComponents();
+
+        auto material = components.find<Material>();
+        if (!material)
+        {
+            throw JsonRpcException("The model does not have material");
+        }
+
         MaterialType materialData;
         buffer.extract(materialData);
-        component.setMaterial(Material(std::move(materialData)));
+        *material = Material(std::move(materialData));
         request.reply(EmptyMessage());
     }
 
 private:
-    Scene &_scene;
+    ModelManager &_models;
 };
 
 class SetMaterialCarPaint : public SetMaterialEntrypoint<CarPaint>
 {
 public:
-    SetMaterialCarPaint(Scene &Scene);
+    SetMaterialCarPaint(ModelManager &ModelManager);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -83,7 +89,7 @@ public:
 class SetMaterialPhong : public SetMaterialEntrypoint<Phong>
 {
 public:
-    SetMaterialPhong(Scene &Scene);
+    SetMaterialPhong(ModelManager &ModelManager);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -91,7 +97,7 @@ public:
 class SetMaterialEmissive : public SetMaterialEntrypoint<Emissive>
 {
 public:
-    SetMaterialEmissive(Scene &Scene);
+    SetMaterialEmissive(ModelManager &ModelManager);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -99,7 +105,7 @@ public:
 class SetMaterialGlass : public SetMaterialEntrypoint<Glass>
 {
 public:
-    SetMaterialGlass(Scene &Scene);
+    SetMaterialGlass(ModelManager &ModelManager);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -107,7 +113,7 @@ public:
 class SetMaterialMatte : public SetMaterialEntrypoint<Matte>
 {
 public:
-    SetMaterialMatte(Scene &Scene);
+    SetMaterialMatte(ModelManager &ModelManager);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -115,7 +121,7 @@ public:
 class SetMaterialMetal : public SetMaterialEntrypoint<Metal>
 {
 public:
-    SetMaterialMetal(Scene &Scene);
+    SetMaterialMetal(ModelManager &ModelManager);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -123,7 +129,7 @@ public:
 class SetMaterialPlastic : public SetMaterialEntrypoint<Plastic>
 {
 public:
-    SetMaterialPlastic(Scene &Scene);
+    SetMaterialPlastic(ModelManager &ModelManager);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -134,8 +140,8 @@ class GetMaterialEntrypoint : public Entrypoint<GetModelMessage, MaterialType>
 public:
     using Request = typename Entrypoint<GetModelMessage, MaterialType>::Request;
 
-    GetMaterialEntrypoint(Scene &scene)
-        : _scene(scene)
+    GetMaterialEntrypoint(ModelManager &models)
+        : _models(models)
     {
     }
 
@@ -143,26 +149,32 @@ public:
     {
         auto params = request.getParams();
         auto modelId = params.id;
-        auto &instance = _scene.getModelInstance(modelId);
+        auto &instance = ExtractModel::fromId(_models, modelId);
         Model &model = instance.getModel();
-        auto &component = model.getComponent<MaterialComponent>();
-        auto &material = component.getMaterial();
-        if (auto cast = material.as<MaterialType>())
+        auto &components = model.getComponents();
+
+        auto material = components.find<Material>();
+        if (!material)
+        {
+            throw JsonRpcException("The model does not have material");
+        }
+
+        if (auto cast = material->as<MaterialType>())
         {
             request.reply(*cast);
             return;
         }
-        throw InvalidRequestException("Invalid material type (should be '" + material.getName() + "')");
+        throw InvalidRequestException("Invalid material type (should be '" + material->getName() + "')");
     }
 
 private:
-    Scene &_scene;
+    ModelManager &_models;
 };
 
 class GetMaterialCarPaint : public GetMaterialEntrypoint<CarPaint>
 {
 public:
-    GetMaterialCarPaint(Scene &scene);
+    GetMaterialCarPaint(ModelManager &scene);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -170,7 +182,7 @@ public:
 class GetMaterialPhong : public GetMaterialEntrypoint<Phong>
 {
 public:
-    GetMaterialPhong(Scene &scene);
+    GetMaterialPhong(ModelManager &scene);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -178,7 +190,7 @@ public:
 class GetMaterialEmissive : public GetMaterialEntrypoint<Emissive>
 {
 public:
-    GetMaterialEmissive(Scene &scene);
+    GetMaterialEmissive(ModelManager &scene);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -186,7 +198,7 @@ public:
 class GetMaterialGlass : public GetMaterialEntrypoint<Glass>
 {
 public:
-    GetMaterialGlass(Scene &scene);
+    GetMaterialGlass(ModelManager &scene);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -194,7 +206,7 @@ public:
 class GetMaterialMatte : public GetMaterialEntrypoint<Matte>
 {
 public:
-    GetMaterialMatte(Scene &scene);
+    GetMaterialMatte(ModelManager &scene);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -202,7 +214,7 @@ public:
 class GetMaterialMetal : public GetMaterialEntrypoint<Metal>
 {
 public:
-    GetMaterialMetal(Scene &scene);
+    GetMaterialMetal(ModelManager &scene);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -210,7 +222,7 @@ public:
 class GetMaterialPlastic : public GetMaterialEntrypoint<Plastic>
 {
 public:
-    GetMaterialPlastic(Scene &scene);
+    GetMaterialPlastic(ModelManager &scene);
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };

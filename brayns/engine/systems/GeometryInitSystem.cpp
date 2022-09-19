@@ -22,9 +22,9 @@
 
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
+#include <brayns/engine/components/Renderable.h>
 #include <brayns/engine/material/Material.h>
 #include <brayns/engine/material/types/Phong.h>
-#include <brayns/engine/model/RenderGroup.h>
 
 namespace
 {
@@ -38,36 +38,36 @@ public:
 
     void init()
     {
-        auto &views = _initViews();
-        _initMaterial(views);
-        _initGroup(views);
+        _initGeometryViews();
+        _initMaterial();
     }
 
 private:
-    brayns::GeometryViews &_initViews()
-    {
-        if (auto views = _components.find<brayns::GeometryViews>())
-        {
-            return *views;
-        }
-        auto &views = _components.add<brayns::GeometryViews>();
-        _constructViews(views);
-        return views;
-    }
-
-    void _constructViews(brayns::GeometryViews &views)
+    bool _checkGeometryViewIntegrity()
     {
         auto &geometries = _components.get<brayns::Geometries>();
-        auto &geometryList = geometries.elements;
-        auto &viewList = views.elements;
-        viewList.reserve(geometryList.size());
-        for (auto &geometry : geometryList)
+        auto &views = _components.get<brayns::GeometryViews>();
+        return views.elements.size() == geometries.elements.size();
+    }
+
+    void _initGeometryViews()
+    {
+        if (_components.has<brayns::GeometryViews>())
         {
-            viewList.emplace_back(geometry);
+            assert(_checkGeometryViewIntegrity());
+            return;
+        }
+
+        auto &geometries = _components.get<brayns::Geometries>();
+        auto &views = _components.add<brayns::GeometryViews>();
+        views.elements.reserve(geometries.elements.size());
+        for (auto &geometry : geometries.elements)
+        {
+            views.elements.emplace_back(geometry);
         }
     }
 
-    void _initMaterial(brayns::GeometryViews &views)
+    void _initMaterial()
     {
         auto material = _components.find<brayns::Material>();
         if (!material)
@@ -75,20 +75,11 @@ private:
             material = &_components.add<brayns::Material>(brayns::Phong());
         }
 
+        auto &views = _components.get<brayns::GeometryViews>();
         for (auto &view : views.elements)
         {
             view.setMaterial(*material);
         }
-    }
-
-    void _initGroup(brayns::GeometryViews &views)
-    {
-        if (auto group = _components.find<brayns::RenderGroup>())
-        {
-            return;
-        }
-        auto group = brayns::RenderGroupFactory::fromGeometry(views.elements);
-        _components.add<brayns::RenderGroup>(std::move(group));
     }
 
 private:

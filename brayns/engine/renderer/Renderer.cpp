@@ -24,7 +24,7 @@ namespace brayns
 {
 Renderer::Renderer(Renderer &&other) noexcept
 {
-    *this = other;
+    *this = std::move(other);
 }
 
 Renderer &Renderer::operator=(Renderer &&other) noexcept

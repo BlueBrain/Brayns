@@ -21,7 +21,13 @@
 
 #pragma once
 
+<<<<<<< HEAD:brayns/network/entrypoints/UploadModelEntrypoint.h
 #include <brayns/engine/scene/Scene.h>
+=======
+#include <optional>
+
+#include <brayns/engine/scene/ModelManager.h>
+>>>>>>> Checkpoint:brayns/network/entrypoints/RequestModelUploadEntrypoint.h
 
 #include <brayns/io/LoaderRegistry.h>
 
@@ -35,8 +41,13 @@ namespace brayns
 class UploadModelEntrypoint : public Entrypoint<BinaryLoadParameters, std::vector<ModelInstance *>>
 {
 public:
+<<<<<<< HEAD:brayns/network/entrypoints/UploadModelEntrypoint.h
     UploadModelEntrypoint(
         Scene &scene,
+=======
+    RequestModelUploadEntrypoint(
+        ModelManager &models,
+>>>>>>> Checkpoint:brayns/network/entrypoints/RequestModelUploadEntrypoint.h
         const LoaderRegistry &loaders,
         SimulationParameters &simulation,
         CancellationToken token);
@@ -49,7 +60,7 @@ public:
     virtual void onDisconnect() override;
 
 private:
-    Scene &_scene;
+    ModelManager &_models;
     const LoaderRegistry &_loaders;
     SimulationParameters &_simulation;
     CancellationToken _token;

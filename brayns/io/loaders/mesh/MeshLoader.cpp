@@ -22,6 +22,9 @@
 
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/Metadata.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
 
 #include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
 #include <brayns/io/loaders/mesh/parsers/OffMeshParser.h>
@@ -92,9 +95,15 @@ public:
     static std::unique_ptr<brayns::Model> load(const brayns::TriangleMesh &mesh)
     {
         auto model = std::make_unique<brayns::Model>();
+
         auto &components = model->getComponents();
         auto &geometries = components.add<brayns::Geometries>();
         geometries.elements.push_back(brayns::Geometry(mesh));
+
+        auto &systems = model->getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+        systems.setInitSystem<brayns::GeometryInitSystem>();
+        systems.setCommitSystem<brayns::GeometryCommitSystem>();
 
         return model;
     }
@@ -107,10 +116,10 @@ public:
     {
         auto vertexCount = mesh.vertices.size();
         auto triangleCount = mesh.indices.size();
-        return {std::vector<brayns::MetadataEntry>{
+        return brayns::Metadata{
             {"meshes", "1"},
             {"vertices", std::to_string(vertexCount)},
-            {"faces", std::to_string(triangleCount)}}};
+            {"faces", std::to_string(triangleCount)}};
     }
 };
 

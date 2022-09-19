@@ -69,7 +69,7 @@ public:
      * @brief Return a list of all model instances in the manager
      * @return std::vector<ModelInstance *> &
      */
-    std::vector<ModelInstance *> &getAllModelInstances() noexcept;
+    const std::vector<ModelInstance *> &getAllModelInstances() const noexcept;
 
     /**
      * @brief Removes all model instances from the scene, identified by the given instance IDs.
@@ -77,7 +77,7 @@ public:
      * Will automatically trigger the scene to re-compute the bounds.
      * @param instanceIDs list of IDs of instances to remove
      */
-    void removeModels(const std::vector<uint32_t> &instanceIDs);
+    void removeModelInstances(const std::vector<uint32_t> &instanceIDs);
 
     /**
      * @brief Clear all models and instances.

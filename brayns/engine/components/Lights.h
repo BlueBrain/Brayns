@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,23 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/light/Light.h>
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/RemoveLightsMessage.h>
+#include <vector>
 
 namespace brayns
 {
-class RemoveLightsEntrypoint : public Entrypoint<RemoveLightsMessage, EmptyMessage>
+struct Lights
 {
-public:
-    RemoveLightsEntrypoint(Scene &scene);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-
-private:
-    Scene &_scene;
+    std::vector<Light> elements;
 };
-} // namespace brayns
+}

@@ -70,11 +70,14 @@ public:
         _bounds = std::make_unique<T>(std::forward<Args>(args)...);
     }
 
+private:
+    friend class Model;
+
     void init(Components &components);
     CommitResult commit(Components &components);
     void preRender(const ParametersManager &parameters, Components &components);
     void postRender(const ParametersManager &parameters, Components &components);
-    InspectResult inspect(const InspectContext &context, Components &components);
+    InspectResultData inspect(const InspectContext &context, Components &components);
     Bounds computeBounds(const Matrix4f &matrix, Components &components);
 
 private:

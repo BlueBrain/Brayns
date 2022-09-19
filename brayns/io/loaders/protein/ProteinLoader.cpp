@@ -22,9 +22,13 @@
 #include "ProteinLoader.h"
 #include "ProteinData.h"
 
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Sphere.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
 #include <brayns/utils/FileReader.h>
 #include <brayns/utils/string/StringCounter.h>
 #include <brayns/utils/string/StringExtractor.h>
@@ -80,6 +84,7 @@ private:
                 auto atom = _processLine(line);
                 tempBuffer.push_back(std::move(atom));
             }
+            brayns::StringExtractor::extract(content, 1);
             line = brayns::StringExtractor::extractLine(content);
         }
 
@@ -110,7 +115,7 @@ private:
 
         Atom result;
         result.id = std::stoi(tokens[PdbFormatColumns::atomId]);
-        result.chainId = std::stoi(tokens[PdbFormatColumns::chainId]);
+        result.chainId = static_cast<int32_t>(tokens[PdbFormatColumns::chainId][0]) - 64;
         result.residue = std::stoi(tokens[PdbFormatColumns::residue]);
         result.position.x = std::stof(tokens[PdbFormatColumns::x]);
         result.position.y = std::stof(tokens[PdbFormatColumns::y]);
@@ -193,6 +198,7 @@ public:
                 result.push_back(index);
             }
         }
+        return result;
     }
 };
 }
@@ -213,14 +219,18 @@ std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
     auto &colors = ProteinData::colors;
 
     auto model = std::make_unique<Model>();
+
     auto &components = model->getComponents();
-
     auto &geometries = components.add<Geometries>();
-    geometries.elements.push_back(Geometry(std::move(spheres)));
-
+    auto &geometry = geometries.elements.emplace_back(std::move(spheres));
     auto &views = components.add<GeometryViews>();
-    auto &view = views.elements.emplace_back(geometries.elements.back());
+    auto &view = views.elements.emplace_back(geometry);
     view.setColorMap(ospray::cpp::CopiedData(colorIndices), ospray::cpp::CopiedData(colors));
+
+    auto &systems = model->getSystems();
+    systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
+    systems.setInitSystem<GeometryInitSystem>();
+    systems.setCommitSystem<GeometryCommitSystem>();
 
     std::vector<std::unique_ptr<Model>> result;
     result.push_back(std::move(model));

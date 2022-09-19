@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
@@ -29,13 +29,13 @@ namespace brayns
 class ClearLightsEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
-    ClearLightsEntrypoint(Scene &scene);
+    ClearLightsEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Scene &_scene;
+    ModelManager &_models;
 };
 } // namespace brayns

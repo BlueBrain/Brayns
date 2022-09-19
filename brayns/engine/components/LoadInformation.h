@@ -20,17 +20,24 @@
 
 #pragma once
 
-#include <brayns/common/ColorRamp.h>
-#include <brayns/engine/material/Material.h>
-#include <brayns/engine/model/Model.h>
+#include <brayns/json/JsonType.h>
+
+#include <string>
 
 namespace brayns
 {
-class ExtractComponent
+struct LoadInformation
 {
-public:
-    static Material &material(Model &model);
-    static ColorRamp &colorRamp(Model &model);
-    static bool simulationEnabled(Model &model);
+    enum class LoadType
+    {
+        FromFile,
+        FromBlob,
+        None,
+    };
+
+    LoadType type{LoadType::None};
+    std::string path;
+    std::string loaderName;
+    JsonValue loadParameters;
 };
 }

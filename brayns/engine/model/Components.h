@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <any>
 #include <cassert>
 #include <typeindex>
@@ -84,8 +85,8 @@ public:
             return nullptr;
         }
         auto &entry = *it;
-        auto &component = *entry.component;
-        return static_cast<T *>(&component);
+        auto &component = entry.component;
+        return std::any_cast<T>(&component);
     }
 
     template<typename T>
@@ -97,8 +98,14 @@ public:
             return nullptr;
         }
         auto &entry = *it;
-        auto &component = *entry.component;
-        return static_cast<const T *>(&component);
+        auto &component = entry.component;
+        return std::any_cast<T>(&component);
+    }
+
+    template<typename T>
+    bool has() const
+    {
+        return find<T>() != nullptr;
     }
 
 private:

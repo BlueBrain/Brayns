@@ -22,7 +22,7 @@
 
 namespace brayns
 {
-Matrix4f Transform::toMatrix() const
+Matrix4f Transform::toMatrix() const noexcept
 {
     return glm::translate(Matrix4f(1.), translation) * glm::mat4_cast(rotation) * glm::scale(Matrix4f(1.), scale);
 }

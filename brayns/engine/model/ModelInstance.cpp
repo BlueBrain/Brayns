@@ -20,9 +20,9 @@
  */
 
 #include "ModelInstance.h"
-#include "RenderGroup.h"
 
 #include <brayns/common/Log.h>
+#include <brayns/engine/components/Renderable.h>
 
 #include <ospray/SDK/common/OSPCommon.h>
 
@@ -54,7 +54,8 @@ public:
     static OSPGroup extract(brayns::Model &model)
     {
         auto &components = model.getComponents();
-        auto &group = components.get<brayns::RenderGroup>();
+        auto &renderable = components.get<brayns::Renderable>();
+        auto &group = renderable.group;
         return group.getHandle().handle();
     }
 };
@@ -104,12 +105,6 @@ const Model &ModelInstance::getModel() const noexcept
 ModelInfo ModelInstance::getModelData() const noexcept
 {
     return ModelInfo(_model);
-}
-
-const Metadata *ModelInstance::getModelMetadata() const noexcept
-{
-    auto &components = _model.getComponents();
-    return components.find<Metadata>();
 }
 
 void ModelInstance::setVisible(const bool val) noexcept

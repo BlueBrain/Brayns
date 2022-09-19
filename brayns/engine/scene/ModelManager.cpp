@@ -116,17 +116,12 @@ ModelInstance &ModelManager::getModelInstance(const uint32_t modelID)
     return ModelFinder::findInstance(_instances, modelID);
 }
 
-std::vector<ModelInstance *> &ModelManager::getAllModelInstances() noexcept
-{
-    return _instances;
-}
-
 const std::vector<ModelInstance *> &ModelManager::getAllModelInstances() const noexcept
 {
     return _instances;
 }
 
-void ModelManager::removeModels(const std::vector<uint32_t> &instanceIDs)
+void ModelManager::removeModelInstances(const std::vector<uint32_t> &instanceIDs)
 {
     if (instanceIDs.empty())
     {
@@ -234,6 +229,7 @@ ModelManager::ModelEntry &ModelManager::_createModelEntry(std::unique_ptr<Model>
     auto &modelEntry = _models.emplace_back();
     modelEntry.model = std::move(model);
     modelEntry.model->_modelId = _modelIdFactory.generateID();
+    modelEntry.model->init();
     return modelEntry;
 }
 

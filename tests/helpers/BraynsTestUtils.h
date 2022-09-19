@@ -25,6 +25,10 @@
 #include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
 
+#include <brayns/engine/components/Lights.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/LightInitSystem.h>
+
 /**
  * @brief Encapsulates some utilities used across all the tests
  */
@@ -42,17 +46,26 @@ public:
     {
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
-        scene.addLight(std::move(light));
+        auto &models = scene.getModels();
+
+        auto model = std::make_unique<brayns::Model>();
+        auto &components = model->getComponents();
+        components.add<brayns::Lights>(std::vector<brayns::Light>{std::move(light)});
+        auto &systems = model->getSystems();
+        systems.setInitSystem<brayns::LightInitSystem>();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Lights>>();
+        models.addModel(std::move(model));
     }
 
     static void addModel(brayns::Brayns &brayns, const std::string &path)
     {
         const auto &loadRegistry = brayns.getLoaderRegistry();
         const auto &loader = loadRegistry.getSuitableLoader(path, "", "");
-        auto models = loader.loadFromFile(path, {}, {});
+        auto loadedModels = loader.loadFromFile(path, {}, {});
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
-        scene.addModels({}, std::move(models));
+        auto &models = scene.getModels();
+        models.addModels(std::move(loadedModels));
     }
 
     static void adjustPerspectiveView(brayns::Brayns &brayns)

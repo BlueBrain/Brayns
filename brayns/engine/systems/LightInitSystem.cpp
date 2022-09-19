@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,25 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "LightInitSystem.h"
 
-#include <brayns/engine/scene/Scene.h>
-
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/RemoveClipPlanesMessage.h>
+#include <brayns/engine/components/Lights.h>
+#include <brayns/engine/components/Renderable.h>
 
 namespace brayns
 {
-class RemoveClipPlanesEntrypoint : public Entrypoint<RemoveClipPlanesMessage, EmptyMessage>
+void LightInitSystem::execute(Components &components)
 {
-public:
-    RemoveClipPlanesEntrypoint(Scene &scene);
+    auto &lights = components.get<Lights>();
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
+    if (components.has<Renderable>())
+    {
+        return;
+    }
 
-private:
-    Scene &_scene;
-};
-} // namespace brayns
+    auto &renderable = components.add<Renderable>();
+    renderable.group = RenderGroupFactory::fromLights(lights.elements);
+}
+}

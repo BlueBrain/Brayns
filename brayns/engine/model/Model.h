@@ -22,7 +22,10 @@
 #pragma once
 
 #include "Components.h"
+#include "RenderGroup.h"
 #include "Systems.h"
+
+#include <ospray/ospray_cpp/Group.h>
 
 namespace brayns
 {
@@ -49,6 +52,12 @@ public:
     uint32_t getID() const noexcept;
 
     /**
+     * @brief Returns the OSPRay group handle
+     * @return ospray::cpp::Group&
+     */
+    ospray::cpp::Group &getHandle() noexcept;
+
+    /**
      * @brief Returns the model's component list
      * @return Components&
      */
@@ -60,11 +69,17 @@ public:
     const Components &getComponents() const noexcept;
 
     /**
+     * @brief Returns the model's systems manager
+     * @return Systems&
+     */
+    Systems &getSystems() noexcept;
+
+    /**
      * @brief Process the model if it is the target of the inspect context
      * @param context Information about the hitted model on the inspection
      * @return InspectResult the result of checking the inspection context for this model
      */
-    InspectResult inspect(const InspectContext &context);
+    InspectResultData inspect(const InspectContext &context);
 
     /**
      * @brief Compute the spatial bounds of the model
@@ -97,7 +112,11 @@ public:
     void onPostRender(const ParametersManager &parameters);
 
 private:
+    friend class ModelManager;
+
     uint32_t _modelId{};
+    ospray::cpp::Group _handle;
+
     Components _components;
     Systems _systems;
 };

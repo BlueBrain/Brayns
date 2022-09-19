@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/engine/common/InspectContext.h>
-#include <brayns/engine/common/InspectResult.h>
+#include <brayns/engine/common/InspectResultData.h>
 #include <brayns/engine/model/Components.h>
 
 namespace brayns
@@ -31,6 +31,6 @@ class InspectSystem
 public:
     virtual ~InspectSystem() = default;
 
-    virtual InspectResult execute(const InspectContext &context, Components &components) = 0;
+    virtual InspectResultData execute(const InspectContext &context, Components &components) = 0;
 };
 }

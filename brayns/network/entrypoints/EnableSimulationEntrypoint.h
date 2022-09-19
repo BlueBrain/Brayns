@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/EnableSimulationMessage.h>
 
@@ -29,7 +29,7 @@ namespace brayns
 class EnableSimulationEntrypoint final : public Entrypoint<EnableSimulationMessage, EmptyMessage>
 {
 public:
-    EnableSimulationEntrypoint(Scene &scene);
+    EnableSimulationEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
 
@@ -38,6 +38,6 @@ public:
     void onRequest(const Request &request) override;
 
 private:
-    Scene &_scene;
+    ModelManager &_models;
 };
 }

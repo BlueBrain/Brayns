@@ -18,33 +18,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ExtractComponent.h"
+#include "ClipperInitSystem.h"
 
-#include <brayns/engine/components/ColorRampComponent.h>
-#include <brayns/engine/components/MaterialComponent.h>
-#include <brayns/engine/components/SimulationComponent.h>
+#include <brayns/engine/components/Clippers.h>
+#include <brayns/engine/components/GeometryViews.h>
+#include <brayns/engine/components/Renderable.h>
 
 namespace brayns
 {
-Material &ExtractComponent::material(Model &model)
+void ClipperInitSystem::execute(Components &components)
 {
-    auto &component = model.getComponent<MaterialComponent>();
-    return component.getMaterial();
-}
+    auto &clippers = components.get<Clippers>();
 
-ColorRamp &ExtractComponent::colorRamp(Model &model)
-{
-    auto &component = model.getComponent<ColorRampComponent>();
-    return component.getColorRamp();
-}
-
-bool ExtractComponent::simulationEnabled(Model &model)
-{
-    auto component = model.findComponent<SimulationComponent>();
-    if (!component || !component->enabled())
+    auto views = components.find<GeometryViews>();
+    if (!views)
     {
-        return false;
+        views = &components.add<GeometryViews>();
+
+        views->elements.reserve(clippers.elements.size());
+        for (auto &geometry : clippers.elements)
+        {
+            geometry.commit();
+            auto &view = views->elements.emplace_back(geometry);
+            view.commit();
+        }
     }
-    return true;
+
+    if (!components.has<Renderable>())
+    {
+        auto &renderable = components.add<Renderable>();
+        renderable.group = RenderGroupFactory::fromClippers(views->elements);
+    }
 }
 }

@@ -56,8 +56,6 @@
 #include <brayns/network/entrypoints/ModelMaterialEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RegistryEntrypoint.h>
-#include <brayns/network/entrypoints/RemoveClipPlanesEntrypoint.h>
-#include <brayns/network/entrypoints/RemoveLightsEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
@@ -85,6 +83,7 @@ public:
 
         auto &engine = api.getEngine();
         auto &scene = engine.getScene();
+        auto &models = scene.getModels();
 
         auto &loaders = api.getLoaderRegistry();
 
@@ -95,20 +94,20 @@ public:
         brayns::CancellationToken token(interface);
         brayns::EntrypointBuilder builder("Core", interface);
 
-        builder.add<brayns::AddBoxesEntrypoint>(scene);
-        builder.add<brayns::AddCapsulesEntrypoint>(scene);
-        builder.add<brayns::AddClipPlaneEntrypoint>(scene);
-        builder.add<brayns::AddLightAmbientEntrypoint>(scene);
-        builder.add<brayns::AddLightDirectionalEntrypoint>(scene);
-        builder.add<brayns::AddLightQuadEntrypoint>(scene);
-        builder.add<brayns::AddModelEntrypoint>(scene, loaders, simulation, token);
-        builder.add<brayns::AddPlanesEntrypoint>(scene);
-        builder.add<brayns::AddSpheresEntrypoint>(scene);
+        builder.add<brayns::AddBoxesEntrypoint>(models);
+        builder.add<brayns::AddCapsulesEntrypoint>(models);
+        builder.add<brayns::AddClipPlaneEntrypoint>(models);
+        builder.add<brayns::AddLightAmbientEntrypoint>(models);
+        builder.add<brayns::AddLightDirectionalEntrypoint>(models);
+        builder.add<brayns::AddLightQuadEntrypoint>(models);
+        builder.add<brayns::AddModelEntrypoint>(models, loaders, simulation, token);
+        builder.add<brayns::AddPlanesEntrypoint>(models);
+        builder.add<brayns::AddSpheresEntrypoint>(models);
         builder.add<brayns::CancelEntrypoint>(tasks);
-        builder.add<brayns::ClearClipPlanesEntrypoint>(scene);
-        builder.add<brayns::ClearLightsEntrypoint>(scene);
-        builder.add<brayns::ClearModelsEntrypoint>(scene);
-        builder.add<brayns::EnableSimulationEntrypoint>(scene);
+        builder.add<brayns::ClearClipPlanesEntrypoint>(models);
+        builder.add<brayns::ClearLightsEntrypoint>(models);
+        builder.add<brayns::ClearModelsEntrypoint>(models, simulation);
+        builder.add<brayns::EnableSimulationEntrypoint>(models);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
         builder.add<brayns::ExportFramesEntrypoint>(engine, parameters, token);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
@@ -117,16 +116,16 @@ public:
         builder.add<brayns::GetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::GetCameraTypeEntrypoint>(engine);
         builder.add<brayns::GetLoadersEntrypoint>(loaders);
-        builder.add<brayns::GetMaterialCarPaint>(scene);
-        builder.add<brayns::GetMaterialPhong>(scene);
-        builder.add<brayns::GetMaterialEmissive>(scene);
-        builder.add<brayns::GetMaterialGlass>(scene);
-        builder.add<brayns::GetMaterialMatte>(scene);
-        builder.add<brayns::GetMaterialMetal>(scene);
-        builder.add<brayns::GetMaterialPlastic>(scene);
-        builder.add<brayns::GetMaterialType>(scene);
-        builder.add<brayns::GetModelEntrypoint>(scene);
-        builder.add<brayns::GetModelTransferFunctionEntrypoint>(scene);
+        builder.add<brayns::GetMaterialCarPaint>(models);
+        builder.add<brayns::GetMaterialPhong>(models);
+        builder.add<brayns::GetMaterialEmissive>(models);
+        builder.add<brayns::GetMaterialGlass>(models);
+        builder.add<brayns::GetMaterialMatte>(models);
+        builder.add<brayns::GetMaterialMetal>(models);
+        builder.add<brayns::GetMaterialPlastic>(models);
+        builder.add<brayns::GetMaterialType>(models);
+        builder.add<brayns::GetModelEntrypoint>(models);
+        builder.add<brayns::GetModelTransferFunctionEntrypoint>(models);
         builder.add<brayns::GetRendererInteractiveEntrypoint>(engine);
         builder.add<brayns::GetRendererProductionEntrypoint>(engine);
         builder.add<brayns::GetRendererTypeEntrypoint>(engine);
@@ -136,29 +135,27 @@ public:
         builder.add<brayns::InspectEntrypoint>(engine);
         builder.add<brayns::QuitEntrypoint>(engine);
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
-        builder.add<brayns::RemoveClipPlanesEntrypoint>(scene);
-        builder.add<brayns::RemoveLightsEntrypoint>(scene);
-        builder.add<brayns::RemoveModelEntrypoint>(scene, simulation);
-        builder.add<brayns::UploadModelEntrypoint>(scene, loaders, simulation, token);
+        builder.add<brayns::RemoveModelEntrypoint>(models, simulation);
+        builder.add<brayns::UploadModelEntrypoint>(models, loaders, simulation, token);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
         builder.add<brayns::SetCameraLookAtEntrypoint>(engine);
         builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::SetCameraPerspectiveEntrypoint>(engine);
-        builder.add<brayns::SetMaterialCarPaint>(scene);
-        builder.add<brayns::SetMaterialPhong>(scene);
-        builder.add<brayns::SetMaterialEmissive>(scene);
-        builder.add<brayns::SetMaterialGlass>(scene);
-        builder.add<brayns::SetMaterialMatte>(scene);
-        builder.add<brayns::SetMaterialMetal>(scene);
-        builder.add<brayns::SetMaterialPlastic>(scene);
-        builder.add<brayns::SetModelTransferFunctionEntrypoint>(scene);
+        builder.add<brayns::SetMaterialCarPaint>(models);
+        builder.add<brayns::SetMaterialPhong>(models);
+        builder.add<brayns::SetMaterialEmissive>(models);
+        builder.add<brayns::SetMaterialGlass>(models);
+        builder.add<brayns::SetMaterialMatte>(models);
+        builder.add<brayns::SetMaterialMetal>(models);
+        builder.add<brayns::SetMaterialPlastic>(models);
+        builder.add<brayns::SetModelTransferFunctionEntrypoint>(models);
         builder.add<brayns::SetRendererInteractiveEntrypoint>(engine);
         builder.add<brayns::SetRendererProductionEntrypoint>(engine);
         builder.add<brayns::SetSimulationParametersEntrypoint>(simulation);
         builder.add<brayns::SnapshotEntrypoint>(engine, interface);
         builder.add<brayns::TriggerJpegStreamEntrypoint>(stream);
-        builder.add<brayns::UpdateModelEntrypoint>(scene);
+        builder.add<brayns::UpdateModelEntrypoint>(models);
         builder.add<brayns::VersionEntrypoint>();
     }
 };

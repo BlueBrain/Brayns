@@ -23,7 +23,6 @@
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/material/Material.h>
-#include <brayns/engine/model/RenderGroup.h>
 
 namespace brayns
 {
@@ -32,7 +31,6 @@ CommitResult GeometryCommitSystem::execute(Components &components)
     auto &geometries = components.get<Geometries>();
     auto &views = components.get<GeometryViews>();
     auto &material = components.get<Material>();
-    auto &group = components.get<RenderGroup>();
 
     auto geometryModified = static_cast<bool>(geometries.modified);
     auto viewModified = static_cast<bool>(views.modified);
@@ -62,8 +60,7 @@ CommitResult GeometryCommitSystem::execute(Components &components)
             geometry.commit();
         }
     }
-    auto groupModified = group.commit();
 
-    return {geometryModified || groupModified, viewModified};
+    return {geometryModified || viewModified};
 }
 }

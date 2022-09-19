@@ -48,11 +48,11 @@ public:
 namespace brayns
 {
 AddModelEntrypoint::AddModelEntrypoint(
-    Scene &scene,
+    ModelManager &models,
     LoaderRegistry &loaders,
     SimulationParameters &simulation,
     CancellationToken token)
-    : _scene(scene)
+    : _models(models)
     , _loaders(loaders)
     , _simulation(simulation)
     , _token(token)
@@ -85,16 +85,9 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto &parameters = params.loadParameters;
     auto callback = [&](const auto &operation, auto amount) { progress.notify(operation, amount); };
     auto models = loader.loadFromFile(path, {callback}, parameters);
+    auto result = _models.addModels(std::move(models));
 
-    ModelLoadParameters loadParameters;
-    loadParameters.type = ModelLoadParameters::LoadType::FromFile;
-    loadParameters.path = path;
-    loadParameters.loaderName = name;
-    loadParameters.loadParameters = parameters;
-
-    auto result = _scene.addModels(std::move(loadParameters), std::move(models));
-
-    SimulationScanner::scanAndUpdate(_scene, _simulation);
+    SimulationScanner::scanAndUpdate(_models, _simulation);
 
     request.reply(result);
 }

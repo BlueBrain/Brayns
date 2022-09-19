@@ -21,39 +21,53 @@
 
 #pragma once
 
+#include <brayns/engine/components/Lights.h>
 #include <brayns/engine/json/adapters/LightAdapters.h>
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/LightInitSystem.h>
+#include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
 template<typename T>
-class AddLightEntrypoint : public Entrypoint<T, uint32_t>
+class AddLightEntrypoint : public Entrypoint<T, ModelInstance>
 {
 public:
-    using Request = typename Entrypoint<T, uint32_t>::Request;
+    using Request = typename Entrypoint<T, ModelInstance>::Request;
 
-    AddLightEntrypoint(Scene &scene)
-        : _scene(scene)
+    AddLightEntrypoint(ModelManager &models)
+        : _models(models)
     {
     }
 
     virtual void onRequest(const Request &request) override
     {
+        auto model = std::make_unique<Model>();
+
         T data = request.getParams();
-        auto light = Light(std::move(data));
-        auto lightId = _scene.addLight(std::move(light));
-        request.reply(Json::serialize(lightId));
+
+        auto &components = model->getComponents();
+        auto &lights = components.add<Lights>();
+        lights.elements.emplace_back(std::move(data));
+
+        auto &systems = model->getSystems();
+        systems.setInitSystem<LightInitSystem>();
+        systems.setBoundsSystem<GenericBoundsSystem<Lights>>();
+
+        auto instance = _models.addModel(std::move(model));
+        request.reply(*instance);
     }
 
 private:
-    Scene &_scene;
+    ModelManager &_models;
 };
 
 class AddLightAmbientEntrypoint : public AddLightEntrypoint<AmbientLight>
 {
 public:
-    AddLightAmbientEntrypoint(Scene &scene);
+    AddLightAmbientEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -62,7 +76,7 @@ public:
 class AddLightDirectionalEntrypoint : public AddLightEntrypoint<DirectionalLight>
 {
 public:
-    AddLightDirectionalEntrypoint(Scene &scene);
+    AddLightDirectionalEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -71,7 +85,7 @@ public:
 class AddLightQuadEntrypoint : public AddLightEntrypoint<QuadLight>
 {
 public:
-    AddLightQuadEntrypoint(Scene &scene);
+    AddLightQuadEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

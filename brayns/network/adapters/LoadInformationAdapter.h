@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -20,24 +20,22 @@
 
 #pragma once
 
-#include <brayns/json/JsonType.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
-#include <string>
+#include <brayns/engine/components/LoadInformation.h>
 
 namespace brayns
 {
-struct LoadParameters
-{
-    enum class LoadType
-    {
-        FromFile,
-        FromBlob,
-        None,
-    };
+BRAYNS_JSON_ADAPTER_ENUM(
+    LoadInformation::LoadType,
+    {"from_file", LoadInformation::LoadType::FromFile},
+    {"from_blob", LoadInformation::LoadType::FromBlob},
+    {"none", LoadInformation::LoadType::None})
 
-    LoadType type{LoadType::None};
-    std::string path;
-    std::string loaderName;
-    JsonValue loadParameters;
-};
-};
+BRAYNS_JSON_ADAPTER_BEGIN(LoadInformation)
+BRAYNS_JSON_ADAPTER_ENTRY(type, "Type of model load")
+BRAYNS_JSON_ADAPTER_ENTRY(path, "File path in case of file load type")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("loader_name", loaderName, "Loader used")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("load_parameters", loadParameters, "Loader configuration")
+BRAYNS_JSON_ADAPTER_END()
+} // namespace brayns

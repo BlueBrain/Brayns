@@ -38,9 +38,24 @@ public:
 namespace brayns
 {
 ModelInfo::ModelInfo(const Model &model)
-    : loadParameters(Extractor::extract<LoadParameters>(model))
-    , metadata(Extractor::extract<Metadata>(model))
-    , transform(Extractor::extract<Transform>(model))
+    : _loadInfo(Extractor::extract<LoadInformation>(model))
+    , _metadata(Extractor::extract<Metadata>(model))
+    , _baseTransform(Extractor::extract<Transform>(model))
 {
+}
+
+const LoadInformation *ModelInfo::getLoadInfo() const noexcept
+{
+    return _loadInfo;
+}
+
+const Metadata *ModelInfo::getMetadata() const noexcept
+{
+    return _metadata;
+}
+
+const Transform *ModelInfo::getBaseTransform() const noexcept
+{
+    return _baseTransform;
 }
 }

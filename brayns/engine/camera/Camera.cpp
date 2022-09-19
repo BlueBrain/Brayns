@@ -37,7 +37,7 @@ namespace brayns
 {
 Camera::Camera(Camera &&other) noexcept
 {
-    *this = other;
+    *this = std::move(other);
 }
 
 Camera &Camera::operator=(Camera &&other) noexcept

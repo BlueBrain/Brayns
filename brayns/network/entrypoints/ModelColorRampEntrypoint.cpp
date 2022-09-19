@@ -21,13 +21,12 @@
 
 #include "ModelColorRampEntrypoint.h"
 
-#include <brayns/engine/components/ColorRampComponent.h>
 #include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
 {
-GetModelTransferFunctionEntrypoint::GetModelTransferFunctionEntrypoint(Scene &scene)
-    : _scene(scene)
+GetModelTransferFunctionEntrypoint::GetModelTransferFunctionEntrypoint(ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -45,20 +44,19 @@ void GetModelTransferFunctionEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.id;
-    auto &modelInstance = ExtractModel::fromId(_scene, modelId);
+    auto &modelInstance = ExtractModel::fromId(_models, modelId);
     auto &model = modelInstance.getModel();
-
-    if (auto component = model.findComponent<ColorRampComponent>())
+    auto &components = model.getComponents();
+    if (auto colorRamp = components.find<ColorRamp>())
     {
-        auto &colorRamp = component->getColorRamp();
-        request.reply(colorRamp);
+        request.reply(*colorRamp);
         return;
     }
     throw JsonRpcException("The requested model does not have a transfer function");
 }
 
-SetModelTransferFunctionEntrypoint::SetModelTransferFunctionEntrypoint(Scene &scene)
-    : _scene(scene)
+SetModelTransferFunctionEntrypoint::SetModelTransferFunctionEntrypoint(ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -77,13 +75,12 @@ void SetModelTransferFunctionEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     auto modelId = params.id;
     auto &buffer = params.transfer_function;
-    auto &modelInstance = _scene.getModelInstance(modelId);
+    auto &modelInstance = ExtractModel::fromId(_models, modelId);
     auto &model = modelInstance.getModel();
-
-    if (auto component = model.findComponent<ColorRampComponent>())
+    auto &components = model.getComponents();
+    if (auto colorRamp = components.find<ColorRamp>())
     {
-        auto &colorRamp = component->getColorRamp();
-        buffer.extract(colorRamp);
+        buffer.extract(*colorRamp);
         request.reply(EmptyMessage());
         return;
     }

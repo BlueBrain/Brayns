@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include <ospray/ospray_cpp/Group.h>
+#include <brayns/engine/model/RenderGroup.h>
 
 namespace brayns
 {
 struct Renderable
 {
-    ospray::cpp::Group handle;
+    RenderGroup group;
 };
 }

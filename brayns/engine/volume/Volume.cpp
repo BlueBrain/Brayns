@@ -24,7 +24,7 @@ namespace brayns
 {
 Volume::Volume(Volume &&other) noexcept
 {
-    *this = other;
+    *this = std::move(other);
 }
 
 Volume &Volume::operator=(Volume &&other) noexcept

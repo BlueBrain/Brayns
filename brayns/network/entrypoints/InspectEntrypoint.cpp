@@ -43,9 +43,8 @@ public:
         const auto inspectContext = _buildInspectContext(pickResult);
         auto metadata = brayns::JsonObject();
         auto &model = instance->getModel();
-        model.onInspect(inspectContext, metadata);
-
-        return _buildResult(inspectContext, *instance, std::move(metadata));
+        auto inspectData = model.inspect(inspectContext);
+        return _buildResult(inspectContext, *instance, std::move(inspectData));
     }
 
 private:
@@ -71,16 +70,16 @@ private:
         auto pickedInstanceHandle = pickedInstance.handle();
 
         auto &scene = _engine.getScene();
-        auto &instances = scene.getAllModelInstances();
+        auto &instances = scene.getModels().getAllModelInstances();
 
         auto begin = instances.begin();
         auto end = instances.end();
         auto instanceIterator = std::find_if(
             begin,
             end,
-            [&](brayns::ModelInstance *instancePtr)
+            [&](auto instancePtr)
             {
-                auto &osprayInstance = instancePtr->getOsprayInstance();
+                auto &osprayInstance = instancePtr->getHandle();
                 auto handle = osprayInstance.handle();
                 return handle == pickedInstanceHandle;
             });

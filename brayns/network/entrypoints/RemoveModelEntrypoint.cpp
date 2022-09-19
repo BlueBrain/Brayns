@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-RemoveModelEntrypoint::RemoveModelEntrypoint(Scene &scene, SimulationParameters &simulation)
-    : _scene(scene)
+RemoveModelEntrypoint::RemoveModelEntrypoint(ModelManager &models, SimulationParameters &simulation)
+    : _models(models)
     , _simulation(simulation)
 {
 }
@@ -44,8 +44,8 @@ std::string RemoveModelEntrypoint::getDescription() const
 void RemoveModelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    _scene.removeModelInstances(params.ids);
-    SimulationScanner::scanAndUpdate(_scene, _simulation);
+    _models.removeModelInstances(params.ids);
+    SimulationScanner::scanAndUpdate(_models, _simulation);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

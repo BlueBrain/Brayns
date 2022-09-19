@@ -55,13 +55,13 @@ void Systems::postRender(const ParametersManager &parameters, Components &compon
     }
 }
 
-InspectResult Systems::inspect(const InspectContext &context, Components &components)
+InspectResultData Systems::inspect(const InspectContext &context, Components &components)
 {
     if (_inspect)
     {
         return _inspect->execute(context, components);
     }
-    return {};
+    return InspectResultData();
 }
 
 Bounds Systems::computeBounds(const Matrix4f &matrix, Components &components)

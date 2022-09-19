@@ -21,21 +21,26 @@
 
 #pragma once
 
-#include <brayns/common/Bounds.h>
 #include <brayns/common/Transform.h>
-#include <brayns/engine/components/LoadParameters.h>
+#include <brayns/engine/components/LoadInformation.h>
 #include <brayns/engine/components/Metadata.h>
 
 #include "Model.h"
 
 namespace brayns
 {
-struct ModelInfo
+class ModelInfo
 {
+public:
     ModelInfo(const Model &model);
 
-    const LoadParameters *loadParameters;
-    const Metadata *metadata;
-    const Transform *transform;
+    const LoadInformation *getLoadInfo() const noexcept;
+    const Metadata *getMetadata() const noexcept;
+    const Transform *getBaseTransform() const noexcept;
+
+private:
+    const LoadInformation *_loadInfo;
+    const Metadata *_metadata;
+    const Transform *_baseTransform;
 };
 }

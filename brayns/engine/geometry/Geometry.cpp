@@ -24,7 +24,7 @@ namespace brayns
 {
 Geometry::Geometry(Geometry &&other) noexcept
 {
-    *this = other;
+    *this = std::move(other);
 }
 
 Geometry &Geometry::operator=(Geometry &&other) noexcept

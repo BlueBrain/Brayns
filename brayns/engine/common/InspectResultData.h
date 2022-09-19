@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,30 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "RemoveLightsEntrypoint.h"
+#pragma once
+
+#include <brayns/json/JsonType.h>
 
 namespace brayns
 {
-RemoveLightsEntrypoint::RemoveLightsEntrypoint(Scene &scene)
-    : _scene(scene)
-{
+using InspectResultData = JsonObject;
 }
-
-std::string RemoveLightsEntrypoint::getMethod() const
-{
-    return "remove-lights";
-}
-
-std::string RemoveLightsEntrypoint::getDescription() const
-{
-    return "Remove the model(s) from the ID list from the scene";
-}
-
-void RemoveLightsEntrypoint::onRequest(const Request &request)
-{
-    auto params = request.getParams();
-    auto &ids = params.ids;
-    _scene.removeLights(ids);
-    request.reply(EmptyMessage());
-}
-} // namespace brayns

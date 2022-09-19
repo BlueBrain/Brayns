@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/common/parameters/SimulationParameters.h>
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
 
 namespace brayns
 {
@@ -31,6 +31,6 @@ namespace brayns
  */
 struct SimulationScanner
 {
-    static void scanAndUpdate(Scene &scene, SimulationParameters &globalSimulation);
+    static void scanAndUpdate(ModelManager &models, SimulationParameters &globalSimulation);
 };
 }

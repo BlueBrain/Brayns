@@ -67,6 +67,11 @@ ModelManager &Scene::getModels() noexcept
     return _models;
 }
 
+const ModelManager &Scene::getModels() const noexcept
+{
+    return _models;
+}
+
 const ospray::cpp::World &Scene::getHandle() const noexcept
 {
     return _handle;
