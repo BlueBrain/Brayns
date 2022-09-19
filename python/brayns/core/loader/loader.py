@@ -24,7 +24,6 @@ from typing import Any
 from brayns.network import Instance
 
 from ..model import Model, deserialize_model
-from .serialize_loader import serialize_loader
 
 
 class Loader(ABC):
@@ -66,9 +65,17 @@ class Loader(ABC):
         :return: List of created models.
         :rtype: list[Model]
         """
-        params = serialize_loader(self.name, self.get_properties(), path)
+        params = _serialize_loader(self, path)
         result = instance.request('add-model', params)
         return [
             deserialize_model(model)
             for model in result
         ]
+
+
+def _serialize_loader(loader: Loader, path: str) -> dict[str, Any]:
+    return {
+        'path': path,
+        'loader_name': loader.name,
+        'loader_properties': loader.get_properties(),
+    }

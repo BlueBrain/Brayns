@@ -23,7 +23,6 @@ from .get_loaders import get_loaders
 from .loader import Loader
 from .loader_info import LoaderInfo
 from .mesh_loader import MeshLoader
-from .serialize_loader import serialize_loader
 
 __all__ = [
     'deserialize_loader',
@@ -31,5 +30,4 @@ __all__ = [
     'Loader',
     'LoaderInfo',
     'MeshLoader',
-    'serialize_loader',
 ]
