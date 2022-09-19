@@ -86,7 +86,7 @@ class Connector:
         """Connect to instance and return it.
 
         Try to connect ``max_attempts`` times waiting ``attempt_period`` between
-        two tries. If it fails, ServiceUnavailableError will be raised.
+        two attempts. If it fails, ServiceUnavailableError will be raised.
 
         :raises WebSocketError
         :return: Connected braynsService instance.

@@ -28,7 +28,6 @@ from .get_scene import get_scene
 from .model import Model
 from .remove_models import remove_models
 from .scene import Scene
-from .serialize_model import serialize_model
 from .update_model import update_model
 
 __all__ = [
@@ -42,6 +41,5 @@ __all__ = [
     'Model',
     'remove_models',
     'Scene',
-    'serialize_model',
     'update_model',
 ]

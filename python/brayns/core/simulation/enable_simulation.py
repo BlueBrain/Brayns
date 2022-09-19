@@ -36,5 +36,8 @@ def enable_simulation(instance: Instance, model_id: int, enabled: bool) -> None:
     :param enabled: Simulation coloring enabled for given model.
     :type enabled: bool
     """
-    params = {'model_id': model_id, 'enabled': enabled}
+    params = {
+        'model_id': model_id,
+        'enabled': enabled,
+    }
     instance.request('enable-simulation', params)

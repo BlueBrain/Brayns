@@ -94,7 +94,7 @@ class Snapshot:
         :type path: str
         """
         format = parse_image_format(path)
-        params = _serialize(self, format, path)
+        params = _serialize_snapshot(self, format, path)
         _request(instance, params)
 
     def download(self, instance: Instance, format: ImageFormat = ImageFormat.PNG) -> bytes:
@@ -105,12 +105,12 @@ class Snapshot:
         :param path: Output file.
         :type path: str
         """
-        params = _serialize(self, format)
+        params = _serialize_snapshot(self, format)
         result = _request(instance, params)
         return base64.b64decode(result['data'])
 
 
-def _serialize(snapshot: Snapshot, format: ImageFormat, path: str | None = None) -> dict[str, Any]:
+def _serialize_snapshot(snapshot: Snapshot, format: ImageFormat, path: str | None = None) -> dict[str, Any]:
     message: dict[str, Any] = {
         'image_settings': _serialize_image_settings(snapshot, format),
     }
