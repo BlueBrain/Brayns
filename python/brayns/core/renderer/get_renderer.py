@@ -18,10 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, TypeVar
+from typing import TypeVar
 
 from brayns.network import Instance
-from brayns.utils import Color4
 
 from .renderer import Renderer
 
