@@ -30,7 +30,7 @@ class MockInstance(brayns.Instance):
         self.method = ''
         self.params = None
 
-    def send(self, request: brayns.JsonRpcRequest) -> brayns.RequestFuture:
+    def send(self, request: brayns.Request) -> brayns.RequestFuture:
         self.method = request.method
         self.params = request.params
         return brayns.RequestFuture.from_result(self.reply)

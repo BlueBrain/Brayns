@@ -28,13 +28,7 @@ class TestSerializeTransform(unittest.TestCase):
 
     def test_serialize_transform(self) -> None:
         test = serialize_transform(MockTransform.transform)
-        ref = MockTransform.message
-        self.assertEqual(test['translation'], ref['translation'])
-        self.assertEqual(test['scale'], ref['scale'])
-        q1 = test['rotation']
-        q2 = ref['rotation']
-        for i, j in zip(q1, q2):
-            self.assertAlmostEqual(i, j)
+        self.assertEqual(test, MockTransform.message)
 
 
 if __name__ == '__main__':

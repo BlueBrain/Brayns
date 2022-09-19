@@ -29,7 +29,7 @@ class TestEmissiveMaterial(unittest.TestCase):
         self.assertEqual(brayns.EmissiveMaterial.name, 'emissive')
 
     def test_get_properties(self) -> None:
-        test = brayns.EmissiveMaterial(3)
+        test = brayns.EmissiveMaterial(2)
         self.assertEqual(test.get_properties(), {'intensity': 2})
 
     def test_update_properties(self) -> None:

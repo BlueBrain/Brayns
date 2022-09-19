@@ -32,18 +32,18 @@ class TestSnapshot(unittest.TestCase):
     @classmethod
     @property
     def path(cls) -> str:
-        return 'path'
+        return 'test.jpg'
 
     @classmethod
     @property
     def snapshot(cls) -> brayns.Snapshot:
         return brayns.Snapshot(
-            jpeg_quality=50,
             resolution=brayns.Resolution(1920, 1080),
             frame=12,
             view=MockView.view,
             camera=brayns.PerspectiveCamera(),
             renderer=brayns.ProductionRenderer(),
+            jpeg_quality=50,
         )
 
     @classmethod
@@ -51,8 +51,9 @@ class TestSnapshot(unittest.TestCase):
     def message(cls) -> dict[str, Any]:
         return {
             'image_settings': {
-                'quality': 50,
+                'format': 'jpg',
                 'size': [1920, 1080],
+                'quality': 50,
             },
             'simulation_frame': 12,
             'camera_view': MockView.message,
@@ -64,7 +65,8 @@ class TestSnapshot(unittest.TestCase):
         instance = MockInstance()
         self.snapshot.save_remotely(instance, self.path)
         self.assertEqual(instance.method, 'snapshot')
-        ref = self.message | {'file_path': self.path}
+        ref = self.message
+        ref['file_path'] = self.path
         self.assertEqual(instance.params, ref)
 
     def test_download(self) -> None:
@@ -73,9 +75,7 @@ class TestSnapshot(unittest.TestCase):
         test = self.snapshot.download(instance, brayns.ImageFormat.JPEG)
         self.assertEqual(test, data)
         self.assertEqual(instance.method, 'snapshot')
-        ref = self.message
-        ref['image_settings']['format'] = 'jpg'
-        self.assertEqual(instance.params, ref)
+        self.assertEqual(instance.params, self.message)
 
 
 if __name__ == '__main__':

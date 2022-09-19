@@ -43,6 +43,10 @@ class Snapshot:
 
     For None parameters, the current values of the instance are used.
 
+    Note: snapshots create a temporary context in the instance to avoid
+    overriding current instance settings. Therefore, for multiple snapshots, it
+    is more efficient to use a ``FrameExporter``.
+
     :param resolution: Image resolution, defaults to None.
     :type resolution: Resolution | None, optional
     :param frame: Simulation index, defaults to None.
@@ -89,7 +93,8 @@ class Snapshot:
         :param path: Output file.
         :type path: str
         """
-        params = _serialize(self, path=path)
+        format = parse_image_format(path)
+        params = _serialize(self, format, path)
         _request(instance, params)
 
     def download(self, instance: Instance, format: ImageFormat = ImageFormat.PNG) -> bytes:
@@ -100,18 +105,17 @@ class Snapshot:
         :param path: Output file.
         :type path: str
         """
-        params = _serialize(self, format=format)
+        params = _serialize(self, format)
         result = _request(instance, params)
         return base64.b64decode(result['data'])
 
 
-def _serialize(snapshot: Snapshot, format: ImageFormat | None = None, path: str | None = None) -> dict[str, Any]:
-    message = dict[str, Any]()
+def _serialize(snapshot: Snapshot, format: ImageFormat, path: str | None = None) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'image_settings': _serialize_image_settings(snapshot, format),
+    }
     if path is not None:
         message['file_path'] = path
-    image_settings = _serialize_image_settings(snapshot, format)
-    if image_settings:
-        message['image_settings'] = image_settings
     if snapshot.frame is not None:
         message['simulation_frame'] = snapshot.frame
     if snapshot.view is not None:
@@ -123,10 +127,10 @@ def _serialize(snapshot: Snapshot, format: ImageFormat | None = None, path: str 
     return message
 
 
-def _serialize_image_settings(snapshot: Snapshot, format: ImageFormat | None) -> dict[str, Any]:
-    message = dict[str, Any]()
-    if format is not None:
-        message['format'] = format.value
+def _serialize_image_settings(snapshot: Snapshot, format: ImageFormat) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'format': format.value,
+    }
     if format is ImageFormat.JPEG:
         message['quality'] = snapshot.jpeg_quality
     if snapshot.resolution is not None:

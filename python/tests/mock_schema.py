@@ -31,14 +31,14 @@ class MockSchema:
         return brayns.JsonSchema(
             title='test1',
             description='test2',
-            type=brayns.JsonType.UNDEFINED,
+            type=brayns.JsonType.NULL,
             read_only=True,
             write_only=True,
             default=123,
             minimum=0,
             maximum=10,
             items=brayns.JsonSchema(
-                type=brayns.JsonType.NULL,
+                type=brayns.JsonType.UNDEFINED,
                 additional_properties=False,
             ),
             min_items=1,
@@ -64,14 +64,13 @@ class MockSchema:
         return {
             'title': 'test1',
             'description': 'test2',
-            'type': 'undefined',
+            'type': 'null',
             'readOnly': True,
             'writeOnly': True,
             'default': 123,
             'minimum': 0,
             'maximum': 10,
             'items': {
-                'type': 'null',
                 'additionalProperties': False,
             },
             'minItems': 1,
@@ -88,5 +87,5 @@ class MockSchema:
                 {'type': 'object'},
                 {'type': 'array'},
             ],
-            'enum': ['test', 12],
+            'enum': ['test', 123],
         }

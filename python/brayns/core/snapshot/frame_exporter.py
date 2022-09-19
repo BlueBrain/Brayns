@@ -37,11 +37,13 @@ class FrameExporter:
 
     Camera position can be different for each frame using KeyFrame objects.
 
+    Does not modify the current settings of the instance (resolution, camera,
+    etc...).
+
     For parameters with None value, the current ones of the instance are used.
 
-    Exported frames are named using 5 digits filenames.
-
-    For example 00000.png, 00001.png, 00003.png.
+    Exported frames are named using 5 digits filenames (00000.png, 00001.png,
+    00003.png, etc...).
 
     :param frames: Like of key frames to export.
     :type frames: list[KeyFrame]

@@ -20,16 +20,15 @@
 
 import unittest
 
-from brayns.core import deserialize_entrypoint
+from brayns.core import serialize_schema
+from tests.mock_schema import MockSchema
 
-from .mock_entrypoint import MockEntrypoint
 
+class TestSerializeSchema(unittest.TestCase):
 
-class TestDeserializeEntrypoint(unittest.TestCase):
-
-    def test_deserialize_entrypoint(self) -> None:
-        test = deserialize_entrypoint(MockEntrypoint.message)
-        self.assertEqual(test, MockEntrypoint.entrypoint)
+    def test_serialize_schema(self) -> None:
+        test = serialize_schema(MockSchema.schema)
+        self.assertEqual(test, MockSchema.message)
 
 
 if __name__ == '__main__':

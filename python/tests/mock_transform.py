@@ -28,7 +28,7 @@ class MockTransform:
     @classmethod
     @property
     def rotation(cls) -> brayns.Rotation:
-        quaternion = brayns.Quaternion(3, 4, 5, 6)
+        quaternion = brayns.Quaternion.identity
         return brayns.Rotation.from_quaternion(quaternion)
 
     @classmethod

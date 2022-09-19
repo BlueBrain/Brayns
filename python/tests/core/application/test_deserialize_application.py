@@ -19,9 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
-from typing import Any
 
-import brayns
 from brayns.core import deserialize_application
 
 from .mock_application import MockApplication
@@ -31,7 +29,7 @@ class TestDeserializeApplication(unittest.TestCase):
 
     def test_deserialize_application(self) -> None:
         test = deserialize_application(MockApplication.message)
-        self.assertEqual(test.plugins, MockApplication.application)
+        self.assertEqual(test, MockApplication.application)
 
 
 if __name__ == '__main__':

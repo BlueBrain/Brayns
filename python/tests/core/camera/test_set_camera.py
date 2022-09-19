@@ -30,7 +30,7 @@ class TestSetCamera(unittest.TestCase):
         instance = MockInstance()
         test = brayns.OrthographicCamera(3)
         brayns.set_camera(instance, test)
-        self.assertEqual(instance.method, 'set-camera-perspective')
+        self.assertEqual(instance.method, 'set-camera-orthographic')
         self.assertEqual(instance.params, test.get_properties())
 
 

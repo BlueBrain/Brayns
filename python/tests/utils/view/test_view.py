@@ -28,7 +28,7 @@ class TestView(unittest.TestCase):
     def test_direction(self) -> None:
         test = brayns.View(
             position=brayns.Vector3.zero,
-            target=brayns.Vector3.one
+            target=brayns.Vector3.one,
         )
         self.assertEqual(test.direction, brayns.Vector3.one.normalized)
 

@@ -18,19 +18,33 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from typing import Any
 
-from brayns.core import deserialize_entrypoint
-
-from .mock_entrypoint import MockEntrypoint
+import brayns
 
 
-class TestDeserializeEntrypoint(unittest.TestCase):
+class MockEntrypoint:
 
-    def test_deserialize_entrypoint(self) -> None:
-        test = deserialize_entrypoint(MockEntrypoint.message)
-        self.assertEqual(test, MockEntrypoint.entrypoint)
+    @classmethod
+    @property
+    def entrypoint(cls) -> brayns.Entrypoint:
+        return brayns.Entrypoint(
+            method='test1',
+            description='test2',
+            plugin='test3',
+            asynchronous=True,
+            params=brayns.JsonSchema(type=brayns.JsonType.OBJECT),
+            result=brayns.JsonSchema(type=brayns.JsonType.ARRAY),
+        )
 
-
-if __name__ == '__main__':
-    unittest.main()
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'title': 'test1',
+            'description': 'test2',
+            'plugin': 'test3',
+            'async': True,
+            'params': {'type': 'object'},
+            'returns': {'type': 'array'},
+        }

@@ -28,15 +28,7 @@ class TestDeserializeTransform(unittest.TestCase):
 
     def test_deserialize_transform(self) -> None:
         test = deserialize_transform(MockTransform.message)
-        ref = MockTransform.transform
-        self.assertEqual(test.translation, ref.translation)
-        self.assertEqual(test.scale, ref.scale)
-        q1 = test.rotation.quaternion
-        q2 = ref.rotation.quaternion
-        self.assertAlmostEqual(q1.x, q2.x)
-        self.assertAlmostEqual(q1.y, q2.y)
-        self.assertAlmostEqual(q1.z, q2.z)
-        self.assertAlmostEqual(q1.w, q2.w)
+        self.assertEqual(test, MockTransform.transform)
 
 
 if __name__ == '__main__':
