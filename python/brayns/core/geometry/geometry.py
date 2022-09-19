@@ -52,7 +52,7 @@ class Geometry(ABC):
         pass
 
     @abstractmethod
-    def get_additonal_properties(self) -> dict[str, Any]:
+    def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         pass
 
@@ -72,6 +72,6 @@ class Geometry(ABC):
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'geometry': self.get_additonal_properties(),
+            'geometry': self.get_additional_properties(),
             'color': list(self.color),
         }

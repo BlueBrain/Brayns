@@ -65,17 +65,13 @@ class Loader(ABC):
         :return: List of created models.
         :rtype: list[Model]
         """
-        params = _serialize_loader(self, path)
+        params = {
+            'path': path,
+            'loader_name': self.name,
+            'loader_properties': self.get_properties(),
+        }
         result = instance.request('add-model', params)
         return [
             deserialize_model(model)
             for model in result
         ]
-
-
-def _serialize_loader(loader: Loader, path: str) -> dict[str, Any]:
-    return {
-        'path': path,
-        'loader_name': loader.name,
-        'loader_properties': loader.get_properties(),
-    }

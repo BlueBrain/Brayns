@@ -18,8 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
 from brayns.network import Instance
 
 from .material import Material
@@ -36,12 +34,8 @@ def set_material(instance: Instance, model_id: int, material: Material) -> None:
     :type material: Material
     """
     name = material.name
-    params = _serialize_material(model_id, material)
-    instance.request(f'set-material-{name}', params)
-
-
-def _serialize_material(model_id: int, material: Material) -> dict[str, Any]:
-    return {
+    params = {
         'model_id': model_id,
         'material': material.get_properties(),
     }
+    instance.request(f'set-material-{name}', params)

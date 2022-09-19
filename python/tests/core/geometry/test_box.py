@@ -33,7 +33,7 @@ class TestBox(unittest.TestCase):
             min=brayns.Vector3.zero,
             max=brayns.Vector3.one,
         )
-        test = box.get_additonal_properties()
+        test = box.get_additional_properties()
         self.assertEqual(test, {
             'min': [0, 0, 0],
             'max': [1, 1, 1],

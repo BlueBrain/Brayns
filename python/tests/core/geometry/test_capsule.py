@@ -35,7 +35,7 @@ class TestCapsule(unittest.TestCase):
             end_point=brayns.Vector3.one,
             end_radius=1,
         )
-        test = capsule.get_additonal_properties()
+        test = capsule.get_additional_properties()
         self.assertEqual(test, {
             'p0': [0, 0, 0],
             'r0': 0,

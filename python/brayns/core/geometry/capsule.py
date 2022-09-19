@@ -55,7 +55,7 @@ class Capsule(Geometry):
         """
         return 'add-capsules'
 
-    def get_additonal_properties(self) -> dict[str, Any]:
+    def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'p0': list(self.start_point),

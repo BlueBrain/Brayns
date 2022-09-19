@@ -30,7 +30,7 @@ class TestSphere(unittest.TestCase):
 
     def test_get_properties(self) -> None:
         sphere = brayns.Sphere(1, brayns.Vector3.one)
-        test = sphere.get_additonal_properties()
+        test = sphere.get_additional_properties()
         self.assertEqual(test, {
             'center': [1, 1, 1],
             'radius': 1,

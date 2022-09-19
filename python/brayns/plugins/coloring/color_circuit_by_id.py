@@ -18,8 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
-
 from brayns.network import Instance
 from brayns.utils import Color4
 
@@ -42,18 +40,14 @@ def color_circuit_by_id(
     :return: List of GIDs that were not colored.
     :rtype: list[int]
     """
-    params = _serialize_colors(model_id, colors)
-    return instance.request('color-circuit-by-id', params)
-
-
-def _serialize_colors(model_id: int, colors: dict[CellId, Color4]) -> dict[str, Any]:
-    return {
+    params = {
         'model_id': model_id,
         'color_info': [
             {
                 'variable': id.value,
-                'color': list(color)
+                'color': list(color),
             }
             for id, color in colors.items()
         ]
     }
+    return instance.request('color-circuit-by-id', params)
