@@ -29,24 +29,23 @@ class TestColorCircuitByMethod(unittest.TestCase):
     def test_color_circuit_by_method(self) -> None:
         instance = MockInstance()
         method = brayns.ColorMethod.HEMISPHERE
-        colors = {
+        brayns.color_circuit_by_method(instance, 0, method, {
             'test1': brayns.Color4.white,
-            'test2': brayns.Color4.red
-        }
-        brayns.color_circuit_by_method(instance, 0, method, colors)
+            'test2': brayns.Color4.red,
+        })
         self.assertEqual(instance.method, 'color-circuit-by-method')
         self.assertEqual(instance.params, {
             'model_id': 0,
-            'method': method.value,
+            'method': 'hemisphere',
             'color_info': [
                 {
                     'variable': 'test1',
-                    'color': [1, 1, 1, 1]
+                    'color': [1, 1, 1, 1],
                 },
                 {
                     'variable': 'test2',
-                    'color': [1, 0, 0, 1]
-                }
+                    'color': [1, 0, 0, 1],
+                },
             ]
         })
 

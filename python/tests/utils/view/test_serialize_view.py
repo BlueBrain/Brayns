@@ -18,27 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+import unittest
 
-import brayns
+from brayns.utils import serialize_view
+from tests.mock_view import MockView
 
 
-class MockView:
+class TestSerializeView(unittest.TestCase):
 
-    @classmethod
-    @property
-    def view(cls) -> brayns.View:
-        return brayns.View(
-            position=brayns.Vector3(1, 2, 3),
-            target=brayns.Vector3(4, 5, 6),
-            up=brayns.Vector3(7, 8, 9),
-        )
+    def test_serialize_view(self) -> None:
+        test = serialize_view(MockView.view)
+        self.assertEqual(test, MockView.message)
 
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
-            'position': [1, 2, 3],
-            'target': [4, 5, 6],
-            'up': [7, 8, 9],
-        }
+
+if __name__ == '__main__':
+    unittest.main()

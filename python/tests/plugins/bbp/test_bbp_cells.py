@@ -58,11 +58,6 @@ class TestBbpCells(unittest.TestCase):
         self.assertIsNone(cells.targets)
         self.assertEqual(cells.gids, gids)
 
-    def test_serialize(self) -> None:
-        test = brayns.BbpCells.from_gids([1, 2, 3])
-        ref = {'gids': [1, 2, 3]}
-        self.assertEqual(test.serialize(), ref)
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -41,6 +41,5 @@ class MorphologyLoader(Loader):
     def name(cls) -> str:
         return 'Neuron Morphology loader'
 
-    @property
-    def properties(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         return serialize_morphology(self.morphology)

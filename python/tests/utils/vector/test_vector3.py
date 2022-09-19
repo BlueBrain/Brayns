@@ -67,68 +67,78 @@ class TestVector3(unittest.TestCase):
         self.assertEqual(-brayns.Vector3(1, 2, 3), brayns.Vector3(-1, -2, -3))
 
     def test_abs(self) -> None:
-        self.assertEqual(
-            abs(brayns.Vector3(1, -2, -3)),
-            brayns.Vector3(1, 2, 3)
-        )
+        test = abs(brayns.Vector3(1, -2, -3))
+        ref = brayns.Vector3(1, 2, 3)
+        self.assertEqual(test, ref)
 
     def test_add(self) -> None:
-        self.assertEqual(
-            brayns.Vector3(1, 2, 3) + brayns.Vector3(4, 5, 6),
-            brayns.Vector3(5, 7, 9)
-        )
+        test = brayns.Vector3(1, 2, 3) + brayns.Vector3(4, 5, 6)
+        ref = brayns.Vector3(5, 7, 9)
+        self.assertEqual(test, ref)
 
     def test_sub(self) -> None:
-        self.assertEqual(
-            brayns.Vector3(4, 2, 7) - brayns.Vector3(1, 2, 3),
-            brayns.Vector3(3, 0, 4)
-        )
+        test = brayns.Vector3(4, 2, 7) - brayns.Vector3(1, 2, 3)
+        ref = brayns.Vector3(3, 0, 4)
+        self.assertEqual(test, ref)
 
-    def test_mul(self) -> None:
-        self.assertEqual(
-            brayns.Vector3(1, 2, 3) * brayns.Vector3(3, 4, 2),
-            brayns.Vector3(3, 8, 6)
-        )
-        self.assertEqual(3 * brayns.Vector3(1, 2, 3), brayns.Vector3(3, 6, 9))
-        self.assertEqual(brayns.Vector3(1, 2, 3) * 3, brayns.Vector3(3, 6, 9))
+    def test_mul_scalar(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        ref = brayns.Vector3.unpack(i * 3 for i in test)
+        self.assertEqual(test * 3, ref)
+        self.assertEqual(3 * test, ref)
 
-    def test_truediv(self) -> None:
-        self.assertEqual(
-            brayns.Vector3(1, 2, 3) / brayns.Vector3(1, 2, 4),
-            brayns.Vector3(1, 1, 0.75)
-        )
-        self.assertEqual(
-            brayns.Vector3(1, 2, 4) / 4,
-            brayns.Vector3(0.25, 0.5, 1)
-        )
-        self.assertEqual(
-            2 / brayns.Vector3(1, 2, 4),
-            brayns.Vector3(2, 1, 0.5)
-        )
+    def test_mul_other(self) -> None:
+        test = brayns.Vector3(1, 2, 3) * brayns.Vector3(4, 5, 6)
+        ref = brayns.Vector3(4, 10, 18)
+        self.assertEqual(test, ref)
 
-    def test_floordiv(self) -> None:
-        self.assertEqual(
-            brayns.Vector3(1, 2, 3) // brayns.Vector3(1, 2, 4),
-            brayns.Vector3(1, 1, 0)
-        )
-        self.assertEqual(brayns.Vector3(1, 2, 4) // 4, brayns.Vector3(0, 0, 1))
-        self.assertEqual(2 // brayns.Vector3(1, 2, 4), brayns.Vector3(2, 1, 0))
+    def test_truediv_scalar(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        ref = brayns.Vector3.unpack(i / 3 for i in test)
+        self.assertEqual(test / 3, ref)
+        ref = brayns.Vector3.unpack(3 / i for i in test)
+        self.assertEqual(3 / test, ref)
 
-    def test_mod(self) -> None:
-        self.assertEqual(
-            brayns.Vector3(10, 12, 14) % brayns.Vector3(2, 5, 6),
-            brayns.Vector3(0, 2, 2)
-        )
-        self.assertEqual(brayns.Vector3(3, 4, 5) % 3, brayns.Vector3(0, 1, 2))
-        self.assertEqual(3 % brayns.Vector3(3, 4, 5), brayns.Vector3(0, 3, 3))
+    def test_truediv_other(self) -> None:
+        test = brayns.Vector3(1, 2, 3) / brayns.Vector3(4, 5, 6)
+        ref = brayns.Vector3(1/4, 2/5, 3/6)
+        self.assertEqual(test, ref)
 
-    def test_pow(self) -> None:
-        self.assertEqual(
-            brayns.Vector3(1, 2, 3) ** brayns.Vector3(2, 3, 3),
-            brayns.Vector3(1, 8, 27)
-        )
-        self.assertEqual(brayns.Vector3(1, 2, 3) ** 2, brayns.Vector3(1, 4, 9))
-        self.assertEqual(2 ** brayns.Vector3(1, 2, 3), brayns.Vector3(2, 4, 8))
+    def test_floordiv_scalar(self) -> None:
+        test = brayns.Vector3(4, 6, 10)
+        ref = brayns.Vector3.unpack(i // 3 for i in test)
+        self.assertEqual(test // 3, ref)
+        ref = brayns.Vector3.unpack(3 // i for i in test)
+        self.assertEqual(3 // test, ref)
+
+    def test_floordiv_other(self) -> None:
+        test = brayns.Vector3(1, 5, 10) // brayns.Vector3(1, 2, 3)
+        ref = brayns.Vector3(1, 2, 3)
+        self.assertEqual(test, ref)
+
+    def test_mod_scalar(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        ref = brayns.Vector3.unpack(i % 3 for i in test)
+        self.assertEqual(test % 3, ref)
+        ref = brayns.Vector3.unpack(3 % i for i in test)
+        self.assertEqual(3 % test, ref)
+
+    def test_mod_other(self) -> None:
+        test = brayns.Vector3(1, 5, 11) % brayns.Vector3(1, 2, 3)
+        ref = brayns.Vector3(0, 1, 2)
+        self.assertEqual(test, ref)
+
+    def test_pow_scalar(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        ref = brayns.Vector3.unpack(i ** 3 for i in test)
+        self.assertEqual(test ** 3, ref)
+        ref = brayns.Vector3.unpack(3 ** i for i in test)
+        self.assertEqual(3 ** test, ref)
+
+    def test_pow_other(self) -> None:
+        test = brayns.Vector3(1, 2, 3) ** brayns.Vector3(4, 5, 6)
+        ref = brayns.Vector3(1, 32, 729)
+        self.assertEqual(test, ref)
 
     def test_square_norm(self) -> None:
         self.assertEqual(brayns.Vector3(1, 2, 3).square_norm, 14)
@@ -146,16 +156,14 @@ class TestVector3(unittest.TestCase):
         self.assertAlmostEqual(test.z, value.z)
 
     def test_dot(self) -> None:
-        self.assertEqual(
-            brayns.Vector3(1, 2, 3).dot(brayns.Vector3(4, 5, 6)),
-            32
-        )
+        left = brayns.Vector3(1, 2, 3)
+        right = brayns.Vector3(4, 5, 6)
+        self.assertEqual(left.dot(right), 32)
 
     def test_cross(self) -> None:
-        self.assertEqual(
-            brayns.Vector3(1, 2, 3).cross(brayns.Vector3(4, 5, 6)),
-            brayns.Vector3(-3, 6, -3)
-        )
+        left = brayns.Vector3(1, 2, 3)
+        right = brayns.Vector3(4, 5, 6)
+        self.assertEqual(left.cross(right), brayns.Vector3(-3, 6, -3))
 
 
 if __name__ == '__main__':

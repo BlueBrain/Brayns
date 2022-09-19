@@ -22,13 +22,13 @@ import unittest
 
 import brayns
 
-from .mock_bounds import MockBounds
-
 
 class TestBounds(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._box = brayns.Bounds(
+    @classmethod
+    @property
+    def bounds(cls) -> brayns.Bounds:
+        return brayns.Bounds(
             min=brayns.Vector3(1, 2, 3),
             max=brayns.Vector3(4, 5, 6),
         )
@@ -39,23 +39,19 @@ class TestBounds(unittest.TestCase):
         self.assertEqual(test.max, brayns.Vector3.zero)
 
     def test_center(self) -> None:
-        self.assertEqual(self._box.center, brayns.Vector3(2.5, 3.5, 4.5))
+        self.assertEqual(self.bounds.center, brayns.Vector3(2.5, 3.5, 4.5))
 
     def test_size(self) -> None:
-        self.assertEqual(self._box.size, brayns.Vector3(3, 3, 3))
+        self.assertEqual(self.bounds.size, brayns.Vector3(3, 3, 3))
 
     def test_width(self) -> None:
-        self.assertEqual(self._box.width, 3)
+        self.assertEqual(self.bounds.width, 3)
 
     def test_height(self) -> None:
-        self.assertEqual(self._box.height, 3)
+        self.assertEqual(self.bounds.height, 3)
 
     def test_depth(self) -> None:
-        self.assertEqual(self._box.depth, 3)
-
-    def test_from_dict(self) -> None:
-        test = brayns.Bounds.from_dict(MockBounds.message)
-        self.assertEqual(test, MockBounds.bounds)
+        self.assertEqual(self.bounds.depth, 3)
 
 
 if __name__ == '__main__':

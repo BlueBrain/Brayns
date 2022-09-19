@@ -20,30 +20,21 @@
 
 import unittest
 
-import brayns
+from brayns.utils import serialize_transform
+from tests.mock_transform import MockTransform
 
 
-class TestSslServerContext(unittest.TestCase):
+class TestSerializeTransform(unittest.TestCase):
 
-    def test_get_command_line(self) -> None:
-        ssl = brayns.SslServerContext(
-            private_key_file='private',
-            private_key_passphrase='passphrase',
-            certificate_file='certificate',
-            ca_location='ca',
-        )
-        test = ssl.get_command_line()
-        ref = [
-            '--private-key-file',
-            'private',
-            '--private-key-passphrase',
-            'passphrase',
-            '--certificate-file',
-            'certificate',
-            '--ca-location',
-            'ca',
-        ]
-        self.assertEqual(test, ref)
+    def test_serialize_transform(self) -> None:
+        test = serialize_transform(MockTransform.transform)
+        ref = MockTransform.message
+        self.assertEqual(test['translation'], ref['translation'])
+        self.assertEqual(test['scale'], ref['scale'])
+        q1 = test['rotation']
+        q2 = ref['rotation']
+        for i, j in zip(q1, q2):
+            self.assertAlmostEqual(i, j)
 
 
 if __name__ == '__main__':

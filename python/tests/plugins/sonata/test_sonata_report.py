@@ -73,14 +73,6 @@ class TestSonataNodes(unittest.TestCase):
         self.assertEqual(test.name, 'test')
         self.assertIsNone(test.spike_transition_time)
 
-    def test_serialize(self) -> None:
-        test = brayns.SonataReport.bloodflow_pressure('test')
-        ref = {
-            'report_type': 'bloodflow_pressure',
-            'report_name': 'test'
-        }
-        self.assertEqual(test.serialize(), ref)
-
 
 if __name__ == '__main__':
     unittest.main()

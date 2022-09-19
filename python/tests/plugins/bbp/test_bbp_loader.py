@@ -28,23 +28,23 @@ class TestBbpLoader(unittest.TestCase):
     def test_name(self) -> None:
         self.assertEqual(brayns.BbpLoader.name, 'BBP loader')
 
-    def test_properties(self) -> None:
+    def test_get_properties(self) -> None:
         loader = brayns.BbpLoader(
-            cells=brayns.BbpCells.from_targets(['tests'], 0.5),
+            cells=brayns.BbpCells.from_targets(['1', '2'], 0.5),
             report=brayns.BbpReport.compartment('test'),
             morphology=brayns.Morphology(
                 radius_multiplier=3,
                 load_soma=True,
                 load_axon=True,
                 load_dendrites=True,
-                geometry_type=brayns.GeometryType.ORIGINAL
+                geometry_type=brayns.GeometryType.ORIGINAL,
             ),
             load_afferent_synapses=True,
-            load_efferent_synapses=True
+            load_efferent_synapses=True,
         )
-        properties = {
+        self.assertEqual(loader.get_properties(), {
             'percentage': 0.5,
-            'targets': ['tests'],
+            'targets': ['1', '2'],
             'report_type': 'compartment',
             'report_name': 'test',
             'load_afferent_synapses': True,
@@ -54,10 +54,9 @@ class TestBbpLoader(unittest.TestCase):
                 'load_soma': True,
                 'load_axon': True,
                 'load_dendrites': True,
-                'geometry_type': 'original'
-            }
-        }
-        self.assertEqual(loader.properties, properties)
+                'geometry_type': 'original',
+            },
+        })
 
 
 if __name__ == '__main__':

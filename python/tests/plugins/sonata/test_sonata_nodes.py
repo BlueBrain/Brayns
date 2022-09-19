@@ -58,13 +58,6 @@ class TestSonataNodes(unittest.TestCase):
         self.assertIsNone(test.names)
         self.assertEqual(test.ids, ids)
 
-    def test_serialize(self) -> None:
-        test = brayns.SonataNodes.from_ids([1, 2, 3])
-        ref = {
-            'node_ids': [1, 2, 3]
-        }
-        self.assertEqual(test.serialize(), ref)
-
 
 if __name__ == '__main__':
     unittest.main()

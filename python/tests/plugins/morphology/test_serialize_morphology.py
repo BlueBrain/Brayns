@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -21,26 +20,26 @@
 import unittest
 
 import brayns
+from brayns.plugins import serialize_morphology
 
 
-class TestSonataEdgePopulation(unittest.TestCase):
+class TestSerializeMorphology(unittest.TestCase):
 
-    def test_serialize(self) -> None:
-        test = brayns.SonataEdgePopulation(
-            name='test',
-            afferent=True,
-            density=0.5,
-            radius=3.0,
-            report='report'
+    def test_serialize_morphology(self) -> None:
+        test = brayns.Morphology(
+            radius_multiplier=3,
+            load_soma=False,
+            load_axon=True,
+            load_dendrites=True,
+            geometry_type=brayns.GeometryType.CONSTANT_RADII,
         )
-        ref = {
-            'edge_population': 'test',
-            'load_afferent': True,
-            'edge_percentage': 0.5,
-            'radius': 3.0,
-            'edge_report_name': 'report'
-        }
-        self.assertEqual(test.serialize(), ref)
+        self.assertEqual(serialize_morphology(test), {
+            'radius_multiplier': 3,
+            'load_soma': False,
+            'load_axon': True,
+            'load_dendrites': True,
+            'geometry_type': brayns.GeometryType.CONSTANT_RADII.value,
+        })
 
 
 if __name__ == '__main__':

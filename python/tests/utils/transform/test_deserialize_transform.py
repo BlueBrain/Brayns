@@ -18,25 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+import unittest
 
-import brayns
+from brayns.utils import deserialize_transform
+from tests.mock_transform import MockTransform
 
 
-class MockBounds:
+class TestDeserializeTransform(unittest.TestCase):
 
-    @classmethod
-    @property
-    def bounds(cls) -> brayns.Bounds:
-        return brayns.Bounds(
-            min=brayns.Vector3.zero,
-            max=brayns.Vector3.one
-        )
+    def test_deserialize_transform(self) -> None:
+        test = deserialize_transform(MockTransform.message)
+        ref = MockTransform.transform
+        self.assertEqual(test.translation, ref.translation)
+        self.assertEqual(test.scale, ref.scale)
+        q1 = test.rotation.quaternion
+        q2 = ref.rotation.quaternion
+        self.assertAlmostEqual(q1.x, q2.x)
+        self.assertAlmostEqual(q1.y, q2.y)
+        self.assertAlmostEqual(q1.z, q2.z)
+        self.assertAlmostEqual(q1.w, q2.w)
 
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
-            'min': [0, 0, 0],
-            'max': [1, 1, 1]
-        }
+
+if __name__ == '__main__':
+    unittest.main()

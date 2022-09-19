@@ -20,15 +20,14 @@
 
 import unittest
 
-import brayns
-
-from .mock_bounds import MockBounds
+from brayns.utils import deserialize_bounds
+from tests.mock_bounds import MockBounds
 
 
 class TestDeserializeBounds(unittest.TestCase):
 
     def test_from_dict(self) -> None:
-        test = brayns.deserialize_bounds(MockBounds.message)
+        test = deserialize_bounds(MockBounds.message)
         self.assertEqual(test, MockBounds.bounds)
 
 

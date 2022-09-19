@@ -51,14 +51,6 @@ class TestBbpReport(unittest.TestCase):
         self.assertEqual(report.name, name)
         self.assertIsNone(report.spike_transition_time)
 
-    def test_serialize(self) -> None:
-        test = brayns.BbpReport.compartment('test')
-        ref = {
-            'report_type': 'compartment',
-            'report_name': 'test'
-        }
-        self.assertEqual(test.serialize(), ref)
-
 
 if __name__ == '__main__':
     unittest.main()

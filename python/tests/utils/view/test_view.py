@@ -22,8 +22,6 @@ import unittest
 
 import brayns
 
-from .mock_view import MockView
-
 
 class TestView(unittest.TestCase):
 
@@ -33,14 +31,6 @@ class TestView(unittest.TestCase):
             target=brayns.Vector3.one
         )
         self.assertEqual(test.direction, brayns.Vector3.one.normalized)
-
-    def test_to_dict(self) -> None:
-        test = MockView.view.to_dict()
-        self.assertEqual(test, MockView.message)
-
-    def test_from_dict(self) -> None:
-        test = brayns.View.from_dict(MockView.message)
-        self.assertEqual(test, MockView.view)
 
 
 if __name__ == '__main__':

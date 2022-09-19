@@ -1,6 +1,7 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+#
+# Responsible Author: adrien.fleury@epfl.ch
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -19,27 +20,15 @@
 
 import unittest
 
-import brayns
+from brayns.utils import deserialize_view
+from tests.mock_view import MockView
 
 
-class TestMorphology(unittest.TestCase):
+class TestDeserializeView(unittest.TestCase):
 
-    def test_serialize(self) -> None:
-        test = brayns.Morphology(
-            radius_multiplier=3,
-            load_soma=False,
-            load_axon=True,
-            load_dendrites=True,
-            geometry_type=brayns.GeometryType.CONSTANT_RADII,
-        )
-        ref = {
-            'radius_multiplier': 3,
-            'load_soma': False,
-            'load_axon': True,
-            'load_dendrites': True,
-            'geometry_type': brayns.GeometryType.CONSTANT_RADII.value
-        }
-        self.assertEqual(test.serialize(), ref)
+    def test_deserialize_view(self) -> None:
+        test = deserialize_view(MockView.message)
+        self.assertEqual(test, MockView.view)
 
 
 if __name__ == '__main__':

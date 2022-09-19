@@ -50,8 +50,7 @@ class SonataLoader(Loader):
     def name(cls) -> str:
         return 'SONATA loader'
 
-    @property
-    def properties(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         return _serialize_loader(self)
 
 

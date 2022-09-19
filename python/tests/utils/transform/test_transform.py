@@ -22,8 +22,6 @@ import unittest
 
 import brayns
 
-from .mock_transform import MockTransform
-
 
 class TestTransform(unittest.TestCase):
 
@@ -32,16 +30,6 @@ class TestTransform(unittest.TestCase):
         self.assertEqual(test.translation, brayns.Vector3.zero)
         self.assertEqual(test.rotation, brayns.Rotation.identity)
         self.assertEqual(test.scale, brayns.Vector3.one)
-
-    def test_to_dict(self) -> None:
-        test = MockTransform.transform.to_dict()
-        ref = MockTransform.message
-        self.assertEqual(test, ref)
-
-    def test_from_dict(self) -> None:
-        test = brayns.Transform.from_dict(MockTransform.message)
-        ref = MockTransform.transform
-        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':
