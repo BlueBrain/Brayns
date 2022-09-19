@@ -56,19 +56,19 @@ class TestInstance(SimpleTestCase):
         self.assertTrue(result)
 
     def test_is_running(self) -> None:
-        request = brayns.JsonRpcRequest(0, 'registry')
+        request = brayns.Request(0, 'registry')
         task = self.instance.send(request)
         self.assertTrue(self.instance.is_running(0))
         task.wait_for_result()
 
     def test_send(self) -> None:
-        string = brayns.JsonRpcRequest('test', 'registry')
+        string = brayns.Request('test', 'registry')
         task = self.instance.send(string)
         task.wait_for_result()
-        integer = brayns.JsonRpcRequest(0, 'registry')
+        integer = brayns.Request(0, 'registry')
         task = self.instance.send(integer)
         task.wait_for_result()
-        notification = brayns.JsonRpcRequest(None, 'registry')
+        notification = brayns.Request(None, 'registry')
         task = self.instance.send(notification)
         task.wait_for_result()
 
@@ -79,7 +79,7 @@ class TestInstance(SimpleTestCase):
         task.wait_for_result()
 
     def test_cancel(self) -> None:
-        request = brayns.JsonRpcRequest(0, 'snapshot', {})
+        request = brayns.Request(0, 'snapshot', {})
         task = self.instance.send(request)
         self.instance.cancel(0)
         with self.assertRaises(brayns.RequestError):

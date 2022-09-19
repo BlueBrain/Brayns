@@ -68,4 +68,7 @@ class Loader(ABC):
         """
         params = serialize_loader(self.name, self.get_properties(), path)
         result = instance.request('add-model', params)
-        return [deserialize_model(model) for model in result]
+        return [
+            deserialize_model(model)
+            for model in result
+        ]

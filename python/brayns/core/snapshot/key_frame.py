@@ -37,3 +37,10 @@ class KeyFrame:
 
     index: int
     view: View | None = None
+
+    @staticmethod
+    def from_indices(indices: list[int], view: View | None = None) -> list[KeyFrame]:
+        return [
+            KeyFrame(index, view)
+            for index in indices
+        ]

@@ -38,4 +38,7 @@ def get_color_methods(
     """
     params = {'model_id': model_id}
     result = instance.request('get-circuit-color-methods', params)
-    return [ColorMethod(method) for method in result['methods']]
+    return [
+        ColorMethod(method)
+        for method in result['methods']
+    ]

@@ -46,6 +46,9 @@ def add_geometries(instance: Instance, geometries: list[T]) -> Model:
     if not geometries:
         raise ValueError('Cannot create a model with no geometries')
     method = geometries[0].method
-    params = [geometry.get_properties() for geometry in geometries]
+    params = [
+        geometry.get_properties()
+        for geometry in geometries
+    ]
     result = instance.request(method, params)
     return deserialize_model(result)
