@@ -40,6 +40,15 @@ class KeyFrame:
 
     @staticmethod
     def from_indices(indices: list[int], view: View | None = None) -> list[KeyFrame]:
+        """Generate key frames with a fixed camera view.
+
+        :param indices: Frame indices.
+        :type indices: list[int]
+        :param view: Camera view, defaults to None
+        :type view: View | None, optional
+        :return: Key frames.
+        :rtype: list[KeyFrame]
+        """
         return [
             KeyFrame(index, view)
             for index in indices
