@@ -21,9 +21,10 @@
 from brayns.network import Instance
 
 from .color_ramp import ColorRamp
+from .serialize_color_ramp import serialize_color_ramp
 
 
-def set_color_ramp(instance: Instance, model_id: int, color_ramp: ColorRamp) -> None:
+def set_color_ramp(instance: Instance, model_id: int, ramp: ColorRamp) -> None:
     """Set the current color ramp of the given model.
 
     :param instance: Instance.
@@ -35,6 +36,6 @@ def set_color_ramp(instance: Instance, model_id: int, color_ramp: ColorRamp) -> 
     """
     params = {
         'id': model_id,
-        'transfer_function': color_ramp.serialize(),
+        'transfer_function': serialize_color_ramp(ramp),
     }
     instance.request('set-model-transfer-function', params)

@@ -21,41 +21,34 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
-
-from ..model.mock_model import MockModel
+from tests.mock_instance import MockInstance
+from tests.mock_model import MockModel
 
 
 class TestAddGeometries(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._geometries = [
+    def test_add_geometries(self) -> None:
+        instance = MockInstance(MockModel.message)
+        model = brayns.add_geometries(instance, [
             brayns.Plane(1, 2, 3, 4),
             brayns.Plane(5, 6, 7, 8).with_color(brayns.Color4.red),
-        ]
-        self._message = [
+        ])
+        self.assertEqual(model, MockModel.model)
+        self.assertEqual(instance.method, 'add-planes')
+        self.assertEqual(instance.params, [
             {
                 'geometry': {
-                    'coefficients': [1, 2, 3, 4]
+                    'coefficients': [1, 2, 3, 4],
                 },
-                'color': [1, 1, 1, 1]
+                'color': [1, 1, 1, 1],
             },
             {
                 'geometry': {
-                    'coefficients': [5, 6, 7, 8]
+                    'coefficients': [5, 6, 7, 8],
                 },
-                'color': [1, 0, 0, 1]
-            }
-        ]
-
-    def test_add_geometries(self) -> None:
-        ref = MockModel.model
-        reply = MockModel.message
-        instance = MockInstance(reply)
-        model = brayns.add_geometries(instance, self._geometries)
-        self.assertEqual(model, ref)
-        self.assertEqual(instance.method, 'add-planes')
-        self.assertEqual(instance.params, self._message)
+                'color': [1, 0, 0, 1],
+            },
+        ])
 
 
 if __name__ == '__main__':

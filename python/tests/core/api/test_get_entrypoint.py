@@ -21,39 +21,19 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
+
+from .mock_entrypoint import MockEntrypoint
 
 
 class TestGetEntrypoint(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._message = {
-            'title': 'test',
-            'description': 'test2',
-            'plugin': 'stuff',
-            'async': True,
-            'params': {
-                'type': 'object'
-            },
-            'returns': {
-                'type': 'array'
-            }
-        }
-        self._entrypoint = brayns.Entrypoint(
-            method='test',
-            description='test2',
-            plugin='stuff',
-            asynchronous=True,
-            params=brayns.JsonSchema(type=brayns.JsonType.OBJECT),
-            result=brayns.JsonSchema(type=brayns.JsonType.ARRAY)
-        )
-
     def test_get_entrypoint(self) -> None:
-        instance = MockInstance(self._message)
+        instance = MockInstance(MockEntrypoint.message)
         test = brayns.get_entrypoint(instance, 'test')
+        self.assertEqual(test, MockEntrypoint.entrypoint)
         self.assertEqual(instance.method, 'schema')
         self.assertEqual(instance.params, {'endpoint': 'test'})
-        self.assertEqual(test, self._entrypoint)
 
 
 if __name__ == '__main__':

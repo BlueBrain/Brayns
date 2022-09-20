@@ -34,5 +34,5 @@ def add_light(instance: Instance, light: Light) -> int:
     :rtype: int
     """
     name = light.name
-    params = light.serialize()
+    params = light.get_properties()
     return instance.request(f'add-light-{name}', params)

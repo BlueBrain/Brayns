@@ -19,11 +19,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any
 
 from .material import Material
-
-T = TypeVar('T', bound='CarPaintMaterial')
 
 
 @dataclass
@@ -46,15 +44,12 @@ class CarPaintMaterial(Material):
         """
         return 'carpaint'
 
-    @classmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        """Low level API to deserialize from JSON."""
-        return cls(
-            flake_density=message['flake_density']
-        )
-
-    def serialize(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'flake_density': self.flake_density
         }
+
+    def update_properties(self, message: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
+        self.flake_density = message['flake_density']

@@ -28,13 +28,10 @@ class TestPlane(unittest.TestCase):
     def test_method(self) -> None:
         self.assertEqual(brayns.Plane.method, 'add-planes')
 
-    def test_serialize(self) -> None:
+    def test_get_properties(self) -> None:
         plane = brayns.Plane(1, 2, 3, 4)
-        test = plane.serialize()
-        ref = {
-            'coefficients': [1, 2, 3, 4]
-        }
-        self.assertEqual(test, ref)
+        test = plane.get_additional_properties()
+        self.assertEqual(test, {'coefficients': [1, 2, 3, 4]})
 
 
 if __name__ == '__main__':

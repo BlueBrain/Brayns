@@ -18,10 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any
 
 from brayns.utils import Bounds
 
@@ -42,14 +39,3 @@ class Scene:
 
     bounds: Bounds
     models: list[Model]
-
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> Scene:
-        """Low level API to deserialize from JSON."""
-        return Scene(
-            bounds=Bounds.deserialize(message['bounds']),
-            models=[
-                Model.deserialize(model)
-                for model in message['models']
-            ],
-        )

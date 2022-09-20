@@ -18,10 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any
 
 from brayns.utils import Color4
 
@@ -46,24 +43,3 @@ class ColorRamp:
 
     value_range: ValueRange
     colors: list[Color4]
-
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> ColorRamp:
-        """Low level API to deserialize from JSON."""
-        return ColorRamp(
-            value_range=ValueRange(*message['range']),
-            colors=[
-                Color4(*color)
-                for color in message['colors']
-            ]
-        )
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {
-            'range': list(self.value_range),
-            'colors': [
-                list(color)
-                for color in self.colors
-            ]
-        }

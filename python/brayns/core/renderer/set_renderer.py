@@ -32,5 +32,5 @@ def set_renderer(instance: Instance, renderer: Renderer) -> None:
     :type renderer: Renderer
     """
     name = renderer.name
-    params = renderer.serialize()
+    params = renderer.get_properties()
     instance.request(f'set-renderer-{name}', params)

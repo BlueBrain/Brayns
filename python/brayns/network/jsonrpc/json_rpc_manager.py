@@ -26,7 +26,7 @@ from .json_rpc_dispatcher import JsonRpcDispatcher
 from .json_rpc_handler import JsonRpcHandler
 from .json_rpc_task import JsonRpcTask
 from .json_rpc_tasks import JsonRpcTasks
-from .request_error import RequestError
+from .messages import RequestError
 
 
 class JsonRpcManager:

@@ -36,20 +36,3 @@ class SslServerContext:
     private_key_passphrase: str | None = None
     certificate_file: str | None = None
     ca_location: str | None = None
-
-    def get_command_line(self) -> list[str]:
-        """Low level command line building."""
-        args = []
-        if self.private_key_file is not None:
-            args.append('--private-key-file')
-            args.append(self.private_key_file)
-        if self.private_key_passphrase is not None:
-            args.append('--private-key-passphrase')
-            args.append(self.private_key_passphrase)
-        if self.certificate_file is not None:
-            args.append('--certificate-file')
-            args.append(self.certificate_file)
-        if self.ca_location is not None:
-            args.append('--ca-location')
-            args.append(self.ca_location)
-        return args

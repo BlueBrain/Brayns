@@ -20,6 +20,7 @@
 
 from brayns.network import Instance
 
+from .deserialize_simulation import deserialize_simulation
 from .simulation import Simulation
 
 
@@ -32,4 +33,4 @@ def get_simulation(instance: Instance) -> Simulation:
     :rtype: Simulation
     """
     result = instance.request('get-simulation-parameters')
-    return Simulation.deserialize(result)
+    return deserialize_simulation(result)

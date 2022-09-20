@@ -32,5 +32,5 @@ def set_camera(instance: Instance, camera: Camera) -> None:
     :type camera: Camera
     """
     name = camera.name
-    params = camera.serialize()
+    params = camera.get_properties()
     instance.request(f'set-camera-{name}', params)

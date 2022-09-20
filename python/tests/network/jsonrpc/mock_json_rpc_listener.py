@@ -20,12 +20,10 @@
 
 from typing import Any
 
-from brayns.network.jsonrpc.json_rpc_error import JsonRpcError
-from brayns.network.jsonrpc.json_rpc_progress import JsonRpcProgress
-from brayns.network.jsonrpc.json_rpc_reply import JsonRpcReply
+from brayns.network import JsonRpcError, JsonRpcListener, JsonRpcProgress, JsonRpcReply
 
 
-class MockJsonRpcListener:
+class MockJsonRpcListener(JsonRpcListener):
 
     def __init__(self) -> None:
         self._called = False

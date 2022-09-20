@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 
 class TestColorCircuit(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestColorCircuit(unittest.TestCase):
         self.assertEqual(instance.method, 'color-circuit-by-single-color')
         self.assertEqual(instance.params, {
             'model_id': 0,
-            'color': [1, 0, 0, 1]
+            'color': [1, 0, 0, 1],
         })
 
 

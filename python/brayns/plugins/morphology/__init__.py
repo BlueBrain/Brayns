@@ -20,9 +20,11 @@
 from .geometry_type import GeometryType
 from .morphology import Morphology
 from .morphology_loader import MorphologyLoader
+from .serialize_morphology import serialize_morphology
 
 __all__ = [
     'GeometryType',
     'Morphology',
     'MorphologyLoader',
+    'serialize_morphology',
 ]

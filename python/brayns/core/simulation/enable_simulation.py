@@ -38,6 +38,6 @@ def enable_simulation(instance: Instance, model_id: int, enabled: bool) -> None:
     """
     params = {
         'model_id': model_id,
-        'enabled': enabled
+        'enabled': enabled,
     }
     instance.request('enable-simulation', params)

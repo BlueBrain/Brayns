@@ -26,6 +26,7 @@ import sys
 from collections import defaultdict
 
 import brayns
+from brayns.core import serialize_schema
 
 SUMMARY_FILENAME = 'api.rst'
 
@@ -208,7 +209,7 @@ def format_result(schema: brayns.JsonSchema | None) -> str:
 
 
 def format_schema(schema: brayns.JsonSchema) -> str:
-    message = schema.serialize()
+    message = serialize_schema(schema)
     message.pop('title', None)
     data = json.dumps(message, indent=4)
     data = data.replace('\n', '\n    ')

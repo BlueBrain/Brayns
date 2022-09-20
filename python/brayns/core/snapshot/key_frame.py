@@ -21,7 +21,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from brayns.utils import View
 
@@ -54,12 +53,3 @@ class KeyFrame:
             KeyFrame(index, view)
             for index in indices
         ]
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        message: dict[str, Any] = {
-            'frame_index': self.index,
-        }
-        if self.view is not None:
-            message['camera_view'] = self.view.serialize()
-        return message

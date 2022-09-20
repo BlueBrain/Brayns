@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 
 class TestSetMaterial(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestSetMaterial(unittest.TestCase):
         self.assertEqual(instance.method, 'set-material-default')
         self.assertEqual(instance.params, {
             'model_id': 0,
-            'material': material.serialize()
+            'material': material.get_properties()
         })
 
 

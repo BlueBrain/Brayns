@@ -44,9 +44,9 @@ class TestMorphologyLoader(unittest.TestCase):
             'load_soma': True,
             'load_axon': True,
             'load_dendrites': True,
-            'geometry_type': 'original'
+            'geometry_type': 'original',
         }
-        self.assertEqual(loader.properties, properties)
+        self.assertEqual(loader.get_properties(), properties)
 
 
 if __name__ == '__main__':

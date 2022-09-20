@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 
 class TestUpdateApplication(unittest.TestCase):
@@ -31,12 +31,12 @@ class TestUpdateApplication(unittest.TestCase):
         brayns.update_application(
             instance,
             resolution=brayns.Resolution(100, 200),
-            jpeg_quality=50
+            jpeg_quality=50,
         )
         self.assertEqual(instance.method, 'set-application-parameters')
         self.assertEqual(instance.params, {
             'viewport': [100, 200],
-            'jpeg_quality': 50
+            'jpeg_quality': 50,
         })
 
 

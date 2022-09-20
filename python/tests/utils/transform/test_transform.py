@@ -22,26 +22,14 @@ import unittest
 
 import brayns
 
-from .mock_transform import MockTransform
-
 
 class TestTransform(unittest.TestCase):
-
-    def test_deserialize(self) -> None:
-        test = brayns.Transform.deserialize(MockTransform.message)
-        ref = MockTransform.transform
-        self.assertEqual(test, ref)
 
     def test_identity(self) -> None:
         test = brayns.Transform.identity
         self.assertEqual(test.translation, brayns.Vector3.zero)
         self.assertEqual(test.rotation, brayns.Rotation.identity)
         self.assertEqual(test.scale, brayns.Vector3.one)
-
-    def test_serialize(self) -> None:
-        test = MockTransform.transform.serialize()
-        ref = MockTransform.message
-        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

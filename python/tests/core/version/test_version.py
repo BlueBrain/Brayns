@@ -28,10 +28,6 @@ from .mock_version import MockVersion
 
 class TestVersion(unittest.TestCase):
 
-    def test_deserialize(self) -> None:
-        test = brayns.Version.deserialize(MockVersion.message)
-        self.assertEqual(test, MockVersion.version)
-
     def test_release(self) -> None:
         test = MockVersion.version.release
         ref = (0, 1, 2)

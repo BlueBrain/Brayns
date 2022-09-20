@@ -28,16 +28,20 @@ class TestCapsule(unittest.TestCase):
     def test_method(self) -> None:
         self.assertEqual(brayns.Capsule.method, 'add-capsules')
 
-    def test_serialize(self) -> None:
-        capsule = brayns.Capsule(brayns.Vector3.zero, 0, brayns.Vector3.one, 1)
-        test = capsule.serialize()
-        ref = {
+    def test_get_properties(self) -> None:
+        capsule = brayns.Capsule(
+            start_point=brayns.Vector3.zero,
+            start_radius=0,
+            end_point=brayns.Vector3.one,
+            end_radius=1,
+        )
+        test = capsule.get_additional_properties()
+        self.assertEqual(test, {
             'p0': [0, 0, 0],
             'r0': 0,
             'p1': [1, 1, 1],
             'r1': 1,
-        }
-        self.assertEqual(test, ref)
+        })
 
 
 if __name__ == '__main__':

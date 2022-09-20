@@ -28,7 +28,12 @@ class TestService(unittest.TestCase):
     def test_get_command_line(self) -> None:
         service = brayns.Service(
             uri='uri',
-            ssl_context=brayns.SslServerContext(),
+            ssl_context=brayns.SslServerContext(
+                private_key_file='private',
+                private_key_passphrase='passphrase',
+                certificate_file='certificate',
+                ca_location='ca',
+            ),
             log_level=brayns.LogLevel.CRITICAL,
             plugins=[
                 brayns.Plugin.ATLAS_EXPLORER.value,
@@ -49,6 +54,14 @@ class TestService(unittest.TestCase):
             brayns.Plugin.CIRCUIT_EXPLORER.value,
             '--secure',
             'true',
+            '--private-key-file',
+            'private',
+            '--private-key-passphrase',
+            'passphrase',
+            '--certificate-file',
+            'certificate',
+            '--ca-location',
+            'ca',
         ]
         self.assertEqual(test, ref)
 

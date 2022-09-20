@@ -30,8 +30,8 @@ class MockApplication:
     def application(cls) -> brayns.Application:
         return brayns.Application(
             plugins=['test1', 'test2'],
-            resolution=brayns.Resolution(100, 200),
-            jpeg_quality=50
+            resolution=brayns.Resolution.full_hd,
+            jpeg_quality=50,
         )
 
     @classmethod
@@ -39,6 +39,6 @@ class MockApplication:
     def message(cls) -> dict[str, Any]:
         return {
             'plugins': ['test1', 'test2'],
-            'viewport': [100, 200],
-            'jpeg_quality': 50
+            'viewport': [1920, 1080],
+            'jpeg_quality': 50,
         }

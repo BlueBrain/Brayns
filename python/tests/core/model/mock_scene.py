@@ -22,9 +22,8 @@ import dataclasses
 from typing import Any
 
 import brayns
-from tests.utils.bounds.mock_bounds import MockBounds
-
-from .mock_model import MockModel
+from tests.mock_bounds import MockBounds
+from tests.mock_model import MockModel
 
 
 class MockScene:
@@ -36,7 +35,7 @@ class MockScene:
             bounds=MockBounds.bounds,
             models=[
                 MockModel.model,
-                dataclasses.replace(MockModel.model, id=1)
+                dataclasses.replace(MockModel.model, id=1),
             ],
         )
 
@@ -48,5 +47,5 @@ class MockScene:
             'models': [
                 MockModel.message,
                 MockModel.message | {'model_id': 1},
-            ]
+            ],
         }

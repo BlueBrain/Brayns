@@ -27,9 +27,11 @@ from websockets.client import connect
 from websockets.exceptions import WebSocketException
 
 from .async_web_socket import AsyncWebSocket
-from .invalid_server_certificate_error import InvalidServerCertificateError
-from .protocol_error import ProtocolError
-from .service_unavailable_error import ServiceUnavailableError
+from .exceptions import (
+    InvalidServerCertificateError,
+    ProtocolError,
+    ServiceUnavailableError,
+)
 from .ssl_client_context import SslClientContext
 
 
@@ -42,8 +44,8 @@ class AsyncWebSocketConnector:
     async def connect(self) -> AsyncWebSocket:
         try:
             websocket = await connect(
-                uri=self._format_uri(),
-                ssl=self._create_ssl_context(),
+                uri=_format_uri(self.uri, self.ssl_context),
+                ssl=_try_create_ssl_context(self.ssl_context),
                 ping_interval=None,
                 close_timeout=0,
                 max_size=int(2e9),
@@ -56,11 +58,21 @@ class AsyncWebSocketConnector:
         except OSError as e:
             raise ServiceUnavailableError(str(e))
 
-    def _format_uri(self) -> str:
-        protocol = 'ws://' if self.ssl_context is None else 'wss://'
-        return protocol + self.uri
 
-    def _create_ssl_context(self) -> ssl.SSLContext | None:
-        if self.ssl_context is None:
-            return None
-        return self.ssl_context.create()
+def _format_uri(uri: str, context: SslClientContext | None) -> str:
+    protocol = 'ws://' if context is None else 'wss://'
+    return protocol + uri
+
+
+def _try_create_ssl_context(context: SslClientContext | None) -> ssl.SSLContext | None:
+    if context is None:
+        return None
+    return _create_ssl_context(context)
+
+
+def _create_ssl_context(context: SslClientContext) -> ssl.SSLContext:
+    return ssl.create_default_context(
+        cafile=context.cafile,
+        capath=context.capath,
+        cadata=context.cadata
+    )

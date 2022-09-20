@@ -41,7 +41,6 @@ class MeshLoader(Loader):
         """
         return 'mesh'
 
-    @property
-    def properties(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {}

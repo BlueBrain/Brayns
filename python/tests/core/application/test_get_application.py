@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 from .mock_application import MockApplication
 
@@ -32,8 +32,6 @@ class TestGetApplication(unittest.TestCase):
         instance = MockInstance(MockApplication.message)
         test = brayns.get_application(instance)
         self.assertEqual(test, MockApplication.application)
-        self.assertEqual(instance.method, 'get-application-parameters')
-        self.assertEqual(instance.params, None)
 
 
 if __name__ == '__main__':

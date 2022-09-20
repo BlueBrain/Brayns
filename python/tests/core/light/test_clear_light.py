@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 
 class TestClearLight(unittest.TestCase):
@@ -30,7 +30,7 @@ class TestClearLight(unittest.TestCase):
         instance = MockInstance()
         brayns.clear_lights(instance)
         self.assertEqual(instance.method, 'clear-lights')
-        self.assertEqual(instance.params, None)
+        self.assertIsNone(instance.params)
 
 
 if __name__ == '__main__':

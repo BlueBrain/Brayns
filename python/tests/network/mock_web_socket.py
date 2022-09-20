@@ -18,9 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
-from brayns.network.websocket.web_socket import WebSocket
-from brayns.network.websocket.web_socket_listener import WebSocketListener
+from brayns.network import WebSocket, WebSocketListener
 
 
 class MockWebSocket(WebSocket):

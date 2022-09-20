@@ -21,9 +21,8 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
-
-from .mock_model import MockModel
+from tests.mock_instance import MockInstance
+from tests.mock_model import MockModel
 
 
 class TestGetModel(unittest.TestCase):

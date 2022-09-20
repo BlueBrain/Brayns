@@ -30,19 +30,6 @@ class TestCylindricCamera(unittest.TestCase):
         ref = 'cylindric'
         self.assertEqual(test, ref)
 
-    def test_from_target(self) -> None:
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
-        test = brayns.CylindricCamera.from_target(target)
-        ref = brayns.CylindricCamera()
-        self.assertEqual(test, ref)
-
-    def test_deserialize(self) -> None:
-        message = {
-            'fovy': 30
-        }
-        test = brayns.CylindricCamera.deserialize(message)
-        self.assertAlmostEqual(test.fovy.degrees, 30)
-
     def test_get_front_view(self) -> None:
         target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         camera = brayns.CylindricCamera()
@@ -50,12 +37,24 @@ class TestCylindricCamera(unittest.TestCase):
         ref = camera.fovy.get_front_view(target)
         self.assertEqual(test, ref)
 
-    def test_serialize(self) -> None:
+    def test_set_target(self) -> None:
+        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
+        test = brayns.CylindricCamera()
+        test.set_target(target)
+        ref = brayns.CylindricCamera()
+        self.assertEqual(test, ref)
+
+    def test_get_properties(self) -> None:
         camera = brayns.CylindricCamera(
-            fovy=brayns.Fovy(30, degrees=True)
+            fovy=brayns.Fovy(30, degrees=True),
         )
-        test = camera.serialize()
+        test = camera.get_properties()
         self.assertAlmostEqual(test['fovy'], 30)
+
+    def test_update_properties(self) -> None:
+        test = brayns.CylindricCamera()
+        test.update_properties({'fovy': 30})
+        self.assertAlmostEqual(test.fovy.degrees, 30)
 
 
 if __name__ == '__main__':

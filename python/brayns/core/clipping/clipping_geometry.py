@@ -39,6 +39,6 @@ class ClippingGeometry(ABC):
         pass
 
     @abstractmethod
-    def serialize(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         pass

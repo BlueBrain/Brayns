@@ -30,13 +30,12 @@ def set_material(instance: Instance, model_id: int, material: Material) -> None:
     :type instance: Instance
     :param model_id: Model ID.
     :type model_id: int
-    :param material: Material to apply.
+    :param material: Material to apply on model.
     :type material: Material
     """
     name = material.name
-    properties = material.serialize()
     params = {
         'model_id': model_id,
-        'material': properties
+        'material': material.get_properties(),
     }
     instance.request(f'set-material-{name}', params)

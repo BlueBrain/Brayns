@@ -21,14 +21,14 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 
 class TestGetMaterial(unittest.TestCase):
 
     def test_get_material(self) -> None:
         material = brayns.DefaultMaterial()
-        reply = material.serialize()
+        reply = material.get_properties()
         instance = MockInstance(reply)
         test = brayns.get_material(instance, 0, brayns.DefaultMaterial)
         self.assertEqual(test, material)

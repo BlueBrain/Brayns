@@ -23,7 +23,7 @@ from typing import Any
 
 from brayns.network import Instance
 
-from ..model import Model
+from ..model import Model, deserialize_model
 
 
 class Loader(ABC):
@@ -50,9 +50,8 @@ class Loader(ABC):
         """
         pass
 
-    @property
     @abstractmethod
-    def properties(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         pass
 
@@ -66,17 +65,13 @@ class Loader(ABC):
         :return: List of created models.
         :rtype: list[Model]
         """
-        params = self.serialize(path)
-        result = instance.request('add-model', params)
-        return [
-            Model.deserialize(model)
-            for model in result
-        ]
-
-    def serialize(self, path: str) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {
+        params = {
             'path': path,
             'loader_name': self.name,
-            'loader_properties': self.properties
+            'loader_properties': self.get_properties(),
         }
+        result = instance.request('add-model', params)
+        return [
+            deserialize_model(model)
+            for model in result
+        ]

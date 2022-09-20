@@ -65,11 +65,11 @@ class Quaternion(Vector[float]):
             return self.unpack(i * value for i in self)
         x0, y0, z0, w0 = self
         x1, y1, z1, w1 = value
-        return type(self)(
+        return Quaternion(
             w0 * x1 + x0 * w1 + y0 * z1 - z0 * y1,
             w0 * y1 - x0 * z1 + y0 * w1 + z0 * x1,
             w0 * z1 + x0 * y1 - y0 * x1 + z0 * w1,
-            w0 * w1 - x0 * x1 - y0 * y1 - z0 * z1
+            w0 * w1 - x0 * x1 - y0 * y1 - z0 * z1,
         )
 
     def __rmul__(self, value: int | float | Quaternion) -> Quaternion:
@@ -102,7 +102,7 @@ class Quaternion(Vector[float]):
 
     @property
     def conjugate(self) -> Quaternion:
-        return type(self)(-self.x, -self.y, -self.z, self.w)
+        return Quaternion(-self.x, -self.y, -self.z, self.w)
 
     @property
     def inverse(self) -> Quaternion:

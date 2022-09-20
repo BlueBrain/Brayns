@@ -20,11 +20,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any
 
 from brayns.utils import Color4
-
-T = TypeVar('T', bound='Renderer')
 
 
 @dataclass
@@ -58,44 +56,34 @@ class Renderer(ABC):
         """
         pass
 
-    @classmethod
     @abstractmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        """Low level API to deserialize from JSON."""
-        pass
-
-    @property
-    @abstractmethod
-    def additional_properties(self) -> dict[str, Any]:
+    def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         pass
 
-    @classmethod
-    def deserialize_with(cls: type[T], message: dict[str, Any], **kwargs) -> T:
+    @abstractmethod
+    def update_additional_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        return cls(
-            samples_per_pixel=message['samples_per_pixel'],
-            max_ray_bounces=message['max_ray_bounces'],
-            background_color=Color4(*message['background_color']),
-            **kwargs
-        )
+        pass
 
-    @property
-    def base_properties(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'samples_per_pixel': self.samples_per_pixel,
             'max_ray_bounces': self.max_ray_bounces,
-            'background_color': list(self.background_color)
+            'background_color': list(self.background_color),
+            **self.get_additional_properties(),
         }
 
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return self.base_properties | self.additional_properties
-
-    def serialize_with_name(self) -> dict[str, Any]:
+    def get_properties_with_name(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'name': self.name,
-            'params': self.serialize()
+            'params': self.get_properties(),
         }
+
+    def update_properties(self, message: dict[str, Any]) -> None:
+        self.samples_per_pixel = message['samples_per_pixel']
+        self.max_ray_bounces = message['max_ray_bounces']
+        self.background_color = Color4(*message['background_color'])
+        self.update_additional_properties(message)

@@ -19,13 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any
 
 from brayns.utils import Bounds, Fovy, View
 
 from .camera import Camera
-
-T = TypeVar('T', bound='PerspectiveCamera')
 
 
 @dataclass
@@ -60,24 +58,6 @@ class PerspectiveCamera(Camera):
         """
         return 'perspective'
 
-    @classmethod
-    def from_target(cls: type[T], _: Bounds) -> T:
-        """Return a default constructed camera.
-
-        :return: Default perspective camera.
-        :rtype: T
-        """
-        return cls()
-
-    @classmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        """Low level API to deserialize from JSON."""
-        return cls(
-            fovy=Fovy(message['fovy'], degrees=True),
-            aperture_radius=message['aperture_radius'],
-            focus_distance=message['focus_distance'],
-        )
-
     def get_front_view(self, target: Bounds) -> View:
         """Use fovy to compute the front view.
 
@@ -88,10 +68,20 @@ class PerspectiveCamera(Camera):
         """
         return self.fovy.get_front_view(target)
 
-    def serialize(self) -> dict[str, Any]:
+    def set_target(self, target: Bounds) -> None:
+        """Does nothing."""
+        pass
+
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'fovy': self.fovy.degrees,
             'aperture_radius': self.aperture_radius,
             'focus_distance': self.focus_distance,
         }
+
+    def update_properties(self, message: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
+        self.fovy = Fovy(message['fovy'], degrees=True)
+        self.aperture_radius = message['aperture_radius']
+        self.focus_distance = message['focus_distance']

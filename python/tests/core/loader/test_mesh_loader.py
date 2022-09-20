@@ -21,9 +21,8 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
-
-from ..model.mock_model import MockModel
+from tests.mock_instance import MockInstance
+from tests.mock_model import MockModel
 
 
 class TestMeshLoader(unittest.TestCase):
@@ -31,30 +30,21 @@ class TestMeshLoader(unittest.TestCase):
     def test_name(self) -> None:
         self.assertEqual(brayns.MeshLoader.name, 'mesh')
 
-    def test_properties(self) -> None:
+    def test_get_properties(self) -> None:
         loader = brayns.MeshLoader()
-        self.assertEqual(loader.properties, {})
+        self.assertEqual(loader.get_properties(), {})
 
     def test_load(self) -> None:
-        instance = MockInstance([MockModel.message])
+        instance = MockInstance([MockModel.message, MockModel.message])
         loader = brayns.MeshLoader()
         path = 'path'
         test = loader.load(instance, path)
-        ref = [MockModel.model]
-        self.assertEqual(test, ref)
-        params = loader.serialize(path)
-        self.assertEqual(instance.params, params)
-
-    def test_serialize(self) -> None:
-        loader = brayns.MeshLoader()
-        path = 'path'
-        ref = {
+        self.assertEqual(test, [MockModel.model, MockModel.model])
+        self.assertEqual(instance.params, {
             'path': path,
             'loader_name': brayns.MeshLoader.name,
-            'loader_properties': loader.properties
-        }
-        test = loader.serialize(path)
-        self.assertEqual(test, ref)
+            'loader_properties': loader.get_properties(),
+        })
 
 
 if __name__ == '__main__':

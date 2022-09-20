@@ -21,7 +21,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from .json_schema import JsonSchema
 
@@ -43,9 +42,9 @@ class Entrypoint:
     :type plugin: str
     :param asynchronous: Check wether progress and cancellation are supported.
     :type asynchronous: bool
-    :param params: Input JSON schema if needed, otherwise None.
+    :param params: Schema of input if any, otherwise None.
     :type params: JsonSchema | None
-    :param result: Output JSON schema if needed, otherwise None.
+    :param result: Schema of output if any, otherwise None.
     :type result: JsonSchema | None
     """
 
@@ -53,24 +52,5 @@ class Entrypoint:
     description: str
     plugin: str
     asynchronous: bool
-    params: JsonSchema | None = None
-    result: JsonSchema | None = None
-
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> Entrypoint:
-        """Low level API to deserialize from JSON."""
-        return Entrypoint(
-            method=message['title'],
-            description=message['description'],
-            plugin=message['plugin'],
-            asynchronous=message['async'],
-            params=_deserialize_schema(message, 'params'),
-            result=_deserialize_schema(message, 'returns'),
-        )
-
-
-def _deserialize_schema(message: dict[str, Any], key: str) -> JsonSchema | None:
-    value = message.get(key)
-    if value is None:
-        return None
-    return JsonSchema.deserialize(value)
+    params: JsonSchema | None
+    result: JsonSchema | None

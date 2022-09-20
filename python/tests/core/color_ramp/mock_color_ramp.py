@@ -33,7 +33,7 @@ class MockColorRamp:
             colors=[
                 brayns.Color4.red,
                 brayns.Color4.blue,
-            ]
+            ],
         )
 
     @classmethod
@@ -44,5 +44,5 @@ class MockColorRamp:
             'colors': [
                 [1, 0, 0, 1],
                 [0, 0, 1, 1],
-            ]
+            ],
         }

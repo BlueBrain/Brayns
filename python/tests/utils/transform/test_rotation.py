@@ -52,15 +52,9 @@ class TestRotation(unittest.TestCase):
         self.assertAlmostEqual(quaternion.z, 0.2075169)
         self.assertAlmostEqual(quaternion.w, 0.96592583)
 
-    def test_deserialize(self) -> None:
-        test = brayns.Rotation.deserialize([0, 0, 0, 1])
-        quaternion = brayns.Quaternion(0, 0, 0, 1)
-        ref = brayns.Rotation.from_quaternion(quaternion)
-        self.assertEqual(test, ref)
-
     def test_identity(self) -> None:
-        quaternion = brayns.Quaternion.identity
-        self.assertEqual(brayns.Rotation.identity, brayns.Rotation(quaternion))
+        ref = brayns.Rotation(brayns.Quaternion.identity)
+        self.assertEqual(brayns.Rotation.identity, ref)
 
     def test_quaternion(self) -> None:
         quaternion = brayns.Quaternion(1, 2, 3, 4)
@@ -106,12 +100,6 @@ class TestRotation(unittest.TestCase):
         quaternion = brayns.Quaternion(1, 2, 3, 4).normalized
         rotation = brayns.Rotation.from_quaternion(quaternion)
         self.assertEqual(rotation.inverse.quaternion, quaternion.inverse)
-
-    def test_serialize(self) -> None:
-        quaternion = brayns.Quaternion(1, 2, 3, 4)
-        rotation = brayns.Rotation.from_quaternion(quaternion)
-        test = rotation.serialize()
-        self.assertEqual(test, list(quaternion.normalized))
 
     def test_combine(self) -> None:
         r1 = brayns.Rotation.from_axis_angle(

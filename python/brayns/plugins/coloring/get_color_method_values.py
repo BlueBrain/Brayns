@@ -18,7 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
 from brayns.network import Instance
 
 from .color_method import ColorMethod
@@ -45,7 +44,7 @@ def get_color_method_values(
     """
     params = {
         'model_id': model_id,
-        'method': method.value
+        'method': method.value,
     }
     result = instance.request('get-circuit-color-method-variables', params)
     return result['variables']

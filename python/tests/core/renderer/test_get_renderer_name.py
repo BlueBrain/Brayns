@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 
 class TestGetRendererName(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestGetRendererName(unittest.TestCase):
         test = brayns.get_renderer_name(instance)
         self.assertEqual(test, name)
         self.assertEqual(instance.method, 'get-renderer-type')
-        self.assertEqual(instance.params, None)
+        self.assertIsNone(instance.params)
 
 
 if __name__ == '__main__':

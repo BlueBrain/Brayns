@@ -52,21 +52,16 @@ class Light(ABC):
         """
         pass
 
-    @property
     @abstractmethod
-    def additional_properties(self) -> dict[str, Any]:
+    def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         pass
 
-    @property
-    def base_properties(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'color': list(self.color),
             'intensity': self.intensity,
             'visible': self.visible,
+            **self.get_additional_properties(),
         }
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return self.base_properties | self.additional_properties

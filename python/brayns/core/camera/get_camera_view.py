@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.network import Instance
-from brayns.utils import View
+from brayns.utils import View, deserialize_view
 
 
 def get_camera_view(instance: Instance) -> View:
@@ -31,4 +31,4 @@ def get_camera_view(instance: Instance) -> View:
     :rtype: View
     """
     result = instance.request('get-camera-look-at')
-    return View.deserialize(result)
+    return deserialize_view(result)

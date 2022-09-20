@@ -24,7 +24,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.network import Instance
-from brayns.utils import ImageFormat, Resolution
+from brayns.utils import ImageFormat, Resolution, serialize_view
 
 from ..camera import Camera
 from ..renderer import Renderer
@@ -37,11 +37,13 @@ class FrameExporter:
 
     Camera position can be different for each frame using KeyFrame objects.
 
+    Does not modify the current settings of the instance (resolution, camera,
+    etc...).
+
     For parameters with None value, the current ones of the instance are used.
 
-    Exported frames are named using 5 digits filenames.
-
-    For example 00000.png, 00001.png, 00003.png.
+    Exported frames are named using 5 digits filenames (00000.png, 00001.png,
+    00003.png, etc...).
 
     :param frames: Like of key frames to export.
     :type frames: list[KeyFrame]
@@ -72,28 +74,41 @@ class FrameExporter:
         :param folder: Output folder.
         :type folder: str
         """
-        params = self.serialize(folder)
+        params = _serialize_exporter(self, folder)
         instance.request('export-frames', params)
 
-    def serialize(self, folder: str) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        message = {
-            'path': folder,
-            'key_frames': [
-                frame.serialize()
-                for frame in self.frames
-            ]
-        }
-        image_settings = {
-            'format': self.format.value
-        }
-        if self.format is ImageFormat.JPEG:
-            image_settings['quality'] = self.jpeg_quality
-        if self.resolution is not None:
-            image_settings['size'] = list(self.resolution)
-        message['image_settings'] = image_settings
-        if self.camera is not None:
-            message['camera'] = self.camera.serialize_with_name()
-        if self.renderer is not None:
-            message['renderer'] = self.renderer.serialize_with_name()
-        return message
+
+def _serialize_exporter(exporter: FrameExporter, folder: str) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'path': folder,
+        'key_frames': [
+            _serialize_key_frame(frame)
+            for frame in exporter.frames
+        ],
+        'image_settings': _serialize_image_settings(exporter),
+    }
+    if exporter.camera is not None:
+        message['camera'] = exporter.camera.get_properties_with_name()
+    if exporter.renderer is not None:
+        message['renderer'] = exporter.renderer.get_properties_with_name()
+    return message
+
+
+def _serialize_key_frame(frame: KeyFrame) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'frame_index': frame.index,
+    }
+    if frame.view is not None:
+        message['camera_view'] = serialize_view(frame.view)
+    return message
+
+
+def _serialize_image_settings(exporter: FrameExporter) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'format': exporter.format.value,
+    }
+    if exporter.format is ImageFormat.JPEG:
+        message['quality'] = exporter.jpeg_quality
+    if exporter.resolution is not None:
+        message['size'] = list(exporter.resolution)
+    return message

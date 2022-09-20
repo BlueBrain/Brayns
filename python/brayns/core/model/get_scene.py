@@ -20,6 +20,7 @@
 
 from brayns.network import Instance
 
+from .deserialize_scene import deserialize_scene
 from .scene import Scene
 
 
@@ -32,4 +33,4 @@ def get_scene(instance: Instance) -> Scene:
     :rtype: Scene
     """
     result = instance.request('get-scene')
-    return Scene.deserialize(result)
+    return deserialize_scene(result)

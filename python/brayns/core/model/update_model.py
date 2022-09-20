@@ -20,9 +20,12 @@
 
 from __future__ import annotations
 
-from brayns.network import Instance
-from brayns.utils import Transform
+from typing import Any
 
+from brayns.network import Instance
+from brayns.utils import Transform, serialize_transform
+
+from .deserialize_model import deserialize_model
 from .model import Model
 
 
@@ -34,7 +37,7 @@ def update_model(
 ) -> Model:
     """Modify the properties of a given model and return its updated version.
 
-    All unspecified values will be remain to their current state.
+    Parameters left as None will be remain to their current state.
 
     :param instance: Instance.
     :type instance: Instance
@@ -47,14 +50,14 @@ def update_model(
     :return: Updated model.
     :rtype: Model
     """
-    properties = {}
+    properties = dict[str, Any]()
     if visible is not None:
         properties['is_visible'] = visible
     if transform is not None:
-        properties['transform'] = transform.serialize()
+        properties['transform'] = serialize_transform(transform)
     params = {
         'model_id': model_id,
         'model': properties,
     }
     result = instance.request('update-model', params)
-    return Model.deserialize(result)
+    return deserialize_model(result)

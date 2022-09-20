@@ -21,19 +21,18 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 
 class TestGetRenderer(unittest.TestCase):
 
     def test_get_renderer(self) -> None:
         ref = brayns.ProductionRenderer()
-        reply = ref.serialize()
-        instance = MockInstance(reply)
+        instance = MockInstance(ref.get_properties())
         test = brayns.get_renderer(instance, brayns.ProductionRenderer)
         self.assertEqual(test, ref)
         self.assertEqual(instance.method, 'get-renderer-production')
-        self.assertEqual(instance.params, None)
+        self.assertIsNone(instance.params)
 
 
 if __name__ == '__main__':

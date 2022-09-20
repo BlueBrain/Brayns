@@ -45,7 +45,7 @@ def color_circuit_by_id(
         'color_info': [
             {
                 'variable': id.value,
-                'color': list(color)
+                'color': list(color),
             }
             for id, color in colors.items()
         ]

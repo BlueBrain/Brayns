@@ -22,24 +22,23 @@ import dataclasses
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
-from .mock_loader_info import MockLoaderInfo
+from .mock_loader import MockLoader
 
 
 class TestGetLoaders(unittest.TestCase):
 
     def test_get_loaders(self) -> None:
         instance = MockInstance([
-            MockLoaderInfo.message,
-            MockLoaderInfo.message | {'name': 'test2'},
+            MockLoader.message,
+            MockLoader.message | {'name': 'test2'},
         ])
-        ref = [
-            MockLoaderInfo.loader_info,
-            dataclasses.replace(MockLoaderInfo.loader_info, name='test2'),
-        ]
         test = brayns.get_loaders(instance)
-        self.assertEqual(test, ref)
+        self.assertEqual(test, [
+            MockLoader.loader,
+            dataclasses.replace(MockLoader.loader, name='test2'),
+        ])
         self.assertIsNone(instance.params)
 
 

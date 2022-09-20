@@ -34,5 +34,5 @@ def add_clipping_geometry(instance: Instance, geometry: ClippingGeometry) -> int
     :rtype: int
     """
     method = geometry.method
-    params = geometry.serialize()
+    params = geometry.get_properties()
     return instance.request(method, params)

@@ -21,10 +21,8 @@
 import json
 from typing import Any
 
-from .json_rpc_error import JsonRpcError
 from .json_rpc_listener import JsonRpcListener
-from .json_rpc_progress import JsonRpcProgress
-from .json_rpc_reply import JsonRpcReply
+from .messages import deserialize_error, deserialize_progress, deserialize_reply
 
 
 class JsonRpcDispatcher:
@@ -57,20 +55,20 @@ class JsonRpcDispatcher:
     def _dispatch_error(self, message: dict[str, Any]) -> bool:
         if 'error' not in message:
             return False
-        error = JsonRpcError.deserialize(message)
+        error = deserialize_error(message)
         self._listener.on_error(error)
         return True
 
     def _dispatch_reply(self, message: dict[str, Any]) -> bool:
         if 'result' not in message:
             return False
-        reply = JsonRpcReply.deserialize(message)
+        reply = deserialize_reply(message)
         self._listener.on_reply(reply)
         return True
 
     def _dispatch_progress(self, message: dict[str, Any]) -> bool:
         if 'id' in message:
             return False
-        progress = JsonRpcProgress.deserialize(message)
+        progress = deserialize_progress(message)
         self._listener.on_progress(progress)
         return True

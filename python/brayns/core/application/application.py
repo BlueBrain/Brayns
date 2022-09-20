@@ -18,10 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any
 
 from brayns.utils import Resolution
 
@@ -41,12 +38,3 @@ class Application:
     plugins: list[str]
     resolution: Resolution
     jpeg_quality: int
-
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> Application:
-        """Low level API to deserialize from JSON."""
-        return Application(
-            plugins=message['plugins'],
-            resolution=Resolution(*message['viewport']),
-            jpeg_quality=message['jpeg_quality'],
-        )

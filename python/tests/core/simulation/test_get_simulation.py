@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 from .mock_simulation import MockSimulation
 
@@ -33,7 +33,7 @@ class TestGetSimulation(unittest.TestCase):
         test = brayns.get_simulation(instance)
         self.assertEqual(test, MockSimulation.simulation)
         self.assertEqual(instance.method, 'get-simulation-parameters')
-        self.assertEqual(instance.params, None)
+        self.assertIsNone(instance.params)
 
 
 if __name__ == '__main__':

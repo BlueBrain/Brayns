@@ -19,6 +19,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .clear_models import clear_models
+from .deserialize_model import deserialize_model
+from .deserialize_scene import deserialize_scene
 from .get_bounds import get_bounds
 from .get_model import get_model
 from .get_models import get_models
@@ -30,6 +32,8 @@ from .update_model import update_model
 
 __all__ = [
     'clear_models',
+    'deserialize_model',
+    'deserialize_scene',
     'get_bounds',
     'get_model',
     'get_models',

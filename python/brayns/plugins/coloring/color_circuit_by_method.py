@@ -52,7 +52,7 @@ def color_circuit_by_method(
         'color_info': [
             {
                 'variable': value,
-                'color': list(color)
+                'color': list(color),
             }
             for value, color in colors.items()
         ]

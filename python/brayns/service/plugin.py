@@ -40,7 +40,4 @@ class Plugin(Enum):
     @property
     def all(cls) -> list[str]:
         """Shortcut to get all the plugin names."""
-        return [
-            plugin.value
-            for plugin in Plugin
-        ]
+        return [plugin.value for plugin in Plugin]

@@ -18,10 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any
 
 from brayns.version import DEV_VERSION, __version__
 
@@ -46,16 +43,6 @@ class Version:
     minor: int
     patch: int
     revision: str
-
-    @staticmethod
-    def deserialize(message: dict[str, Any]) -> Version:
-        """Low level API to deserialize from JSON."""
-        return Version(
-            major=message['major'],
-            minor=message['minor'],
-            patch=message['patch'],
-            revision=message['revision']
-        )
 
     @property
     def release(self) -> tuple[int, int, int]:

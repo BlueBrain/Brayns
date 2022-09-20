@@ -55,15 +55,6 @@ class QuadLight(Light):
         return 'quad'
 
     @property
-    def additional_properties(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {
-            'position': list(self.bottom_left),
-            'edge1': list(self.edge1),
-            'edge2': list(self.edge2)
-        }
-
-    @property
     def emission_direction(self) -> Vector3:
         """Get the emission direction of the light.
 
@@ -73,3 +64,11 @@ class QuadLight(Light):
         :rtype: Vector3
         """
         return self.edge1.cross(self.edge2).normalized
+
+    def get_additional_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        return {
+            'position': list(self.bottom_left),
+            'edge1': list(self.edge1),
+            'edge2': list(self.edge2),
+        }

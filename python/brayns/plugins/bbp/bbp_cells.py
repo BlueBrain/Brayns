@@ -21,7 +21,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass
@@ -57,14 +56,3 @@ class BbpCells:
     def from_gids(gids: list[int]) -> BbpCells:
         """Select cells using their GIDs."""
         return BbpCells(gids=gids)
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        message = {}
-        if self.density is not None:
-            message['percentage'] = self.density
-        if self.targets is not None:
-            message['targets'] = self.targets
-        if self.gids is not None:
-            message['gids'] = self.gids
-        return message

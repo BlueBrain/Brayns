@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 
 class TestGetColorMethodValues(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestGetColorMethodValues(unittest.TestCase):
         self.assertEqual(instance.method, 'get-circuit-color-method-variables')
         self.assertEqual(instance.params, {
             'model_id': 0,
-            'method': method.value
+            'method': 'etype',
         })
         self.assertEqual(test, ref)
 

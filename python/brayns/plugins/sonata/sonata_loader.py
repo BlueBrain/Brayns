@@ -25,7 +25,11 @@ from typing import Any
 
 from brayns.core import Loader
 
+from ..morphology import serialize_morphology
+from .sonata_edge_population import SonataEdgePopulation
 from .sonata_node_population import SonataNodePopulation
+from .sonata_nodes import SonataNodes
+from .sonata_report import SonataReport
 
 
 @dataclass
@@ -46,14 +50,71 @@ class SonataLoader(Loader):
     def name(cls) -> str:
         return 'SONATA loader'
 
-    @property
-    def properties(self) -> dict[str, Any]:
-        properties: dict[str, Any] = {
-            'node_population_settings': [
-                node_population.serialize()
-                for node_population in self.node_populations
-            ]
-        }
-        if self.simulation_config is not None:
-            properties['simulation_config_path'] = self.simulation_config
-        return properties
+    def get_properties(self) -> dict[str, Any]:
+        return _serialize_loader(self)
+
+
+def _serialize_loader(loader: SonataLoader) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'node_population_settings': [
+            _serialize_node_population(node_population)
+            for node_population in loader.node_populations
+        ],
+    }
+    if loader.simulation_config is not None:
+        message['simulation_config_path'] = loader.simulation_config
+    return message
+
+
+def _serialize_node_population(population: SonataNodePopulation) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'node_population': population.name,
+        'vasculature_geometry_parameters': {
+            'radius_multiplier': population.vasculature_radius_multiplier,
+        },
+        **_serialize_nodes(population.nodes),
+        'neuron_morphology_parameters': serialize_morphology(population.morphology),
+    }
+    if population.report is not None:
+        report = _serialize_report(population.report)
+        message.update(report)
+    if population.edges is not None:
+        message['edge_populations'] = [
+            _serialize_edge_population(edge)
+            for edge in population.edges
+        ]
+    return message
+
+
+def _serialize_nodes(nodes: SonataNodes) -> dict[str, Any]:
+    message = dict[str, Any]()
+    if nodes.density is not None:
+        message['node_percentage'] = nodes.density
+    if nodes.names is not None:
+        message['node_sets'] = nodes.names
+    if nodes.ids is not None:
+        message['node_ids'] = nodes.ids
+    return message
+
+
+def _serialize_report(report: SonataReport) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'report_type': report.type.value,
+    }
+    if report.name is not None:
+        message['report_name'] = report.name
+    if report.spike_transition_time is not None:
+        message['spike_transition_time'] = report.spike_transition_time
+    return message
+
+
+def _serialize_edge_population(population: SonataEdgePopulation) -> dict[str, Any]:
+    message: dict[str, Any] = {
+        'edge_population': population.name,
+        'load_afferent': population.afferent,
+        'edge_percentage': population.density,
+        'radius': population.radius,
+    }
+    if population.report is not None:
+        message['edge_report_name'] = population.report
+    return message

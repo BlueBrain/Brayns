@@ -20,7 +20,6 @@
 
 from __future__ import annotations
 
-import ssl
 from dataclasses import dataclass
 
 
@@ -30,10 +29,3 @@ class SslClientContext:
     cafile: str | None = None
     capath: str | None = None
     cadata: str | None = None
-
-    def create(self) -> ssl.SSLContext:
-        return ssl.create_default_context(
-            cafile=self.cafile,
-            capath=self.capath,
-            cadata=self.cadata
-        )

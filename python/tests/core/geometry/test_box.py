@@ -28,14 +28,16 @@ class TestBox(unittest.TestCase):
     def test_method(self) -> None:
         self.assertEqual(brayns.Box.method, 'add-boxes')
 
-    def test_serialize(self) -> None:
-        box = brayns.Box(brayns.Vector3.zero, brayns.Vector3.one)
-        test = box.serialize()
-        ref = {
+    def test_get_properties(self) -> None:
+        box = brayns.Box(
+            min=brayns.Vector3.zero,
+            max=brayns.Vector3.one,
+        )
+        test = box.get_additional_properties()
+        self.assertEqual(test, {
             'min': [0, 0, 0],
             'max': [1, 1, 1],
-        }
-        self.assertEqual(test, ref)
+        })
 
 
 if __name__ == '__main__':

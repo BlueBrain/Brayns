@@ -22,25 +22,15 @@ import unittest
 
 import brayns
 
-from .mock_view import MockView
-
 
 class TestView(unittest.TestCase):
-
-    def test_deserialize(self) -> None:
-        test = brayns.View.deserialize(MockView.message)
-        self.assertEqual(test, MockView.view)
 
     def test_direction(self) -> None:
         test = brayns.View(
             position=brayns.Vector3.zero,
-            target=brayns.Vector3.one
+            target=brayns.Vector3.one,
         )
         self.assertEqual(test.direction, brayns.Vector3.one.normalized)
-
-    def test_serialize(self) -> None:
-        test = MockView.view.serialize()
-        self.assertEqual(test, MockView.message)
 
 
 if __name__ == '__main__':

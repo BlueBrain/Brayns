@@ -34,6 +34,6 @@ def color_circuit(instance: Instance, model_id: int, color: Color4) -> None:
     """
     params = {
         'model_id': model_id,
-        'color': list(color)
+        'color': list(color),
     }
     instance.request('color-circuit-by-single-color', params)

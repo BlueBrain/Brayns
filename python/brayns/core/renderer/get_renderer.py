@@ -43,4 +43,6 @@ def get_renderer(instance: Instance, renderer_type: type[T]) -> T:
     """
     name = renderer_type.name
     result = instance.request(f'get-renderer-{name}')
-    return renderer_type.deserialize(result)
+    renderer = renderer_type()
+    renderer.update_properties(result)
+    return renderer

@@ -26,15 +26,17 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import cast
 
-from.client import Client
-from.instance import Instance
-from.jsonrpc.json_rpc_manager import JsonRpcManager
-from.listener import Listener
-from.logger import Logger
-from.websocket.service_unavailable_error import ServiceUnavailableError
-from.websocket.ssl_client_context import SslClientContext
-from.websocket.web_socket_client import WebSocketClient
-from.websocket.web_socket_connector import WebSocketConnector
+from .client import Client
+from .instance import Instance
+from .jsonrpc import JsonRpcManager
+from .listener import Listener
+from .logger import Logger
+from .websocket import (
+    ServiceUnavailableError,
+    SslClientContext,
+    WebSocketClient,
+    WebSocketConnector,
+)
 
 
 @dataclass
@@ -83,8 +85,8 @@ class Connector:
     def connect(self) -> Instance:
         """Connect to instance and return it.
 
-        Try to connect ``max_attempts`` times waiting ``attempt_period`` between two
-        tries. If it fails, ServiceUnavailableError will be raised.
+        Try to connect ``max_attempts`` times waiting ``attempt_period`` between
+        two attempts. If it fails, ServiceUnavailableError will be raised.
 
         :raises WebSocketError
         :return: Connected braynsService instance.

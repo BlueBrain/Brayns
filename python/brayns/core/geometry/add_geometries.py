@@ -22,18 +22,18 @@ from typing import TypeVar
 
 from brayns.network import Instance
 
-from ..model import Model
+from ..model import Model, deserialize_model
 from .geometry import Geometry
 
 T = TypeVar('T', bound=Geometry)
 
 
 def add_geometries(instance: Instance, geometries: list[T]) -> Model:
-    """Add a list of geometries to an instance as a single model.
+    """Create a model from a list of geometries.
 
     All geometries must have the same type.
 
-    Empty models (no geometries) are not supported.
+    Model witout geometries are not supported.
 
     :param instance: Instance.
     :type instance: Instance
@@ -44,14 +44,11 @@ def add_geometries(instance: Instance, geometries: list[T]) -> Model:
     :rtype: Model
     """
     if not geometries:
-        raise ValueError('Creation of an empty model is not supported')
+        raise ValueError('Cannot create a model with no geometries')
     method = geometries[0].method
     params = [
-        {
-            'geometry': geometry.serialize(),
-            'color': list(geometry.color),
-        }
+        geometry.get_properties()
         for geometry in geometries
     ]
     result = instance.request(method, params)
-    return Model.deserialize(result)
+    return deserialize_model(result)

@@ -21,18 +21,19 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 
 class TestGetCamera(unittest.TestCase):
 
     def test_get_camera(self) -> None:
-        camera = brayns.PerspectiveCamera()
-        instance = MockInstance(camera.serialize())
-        test = brayns.get_camera(instance, brayns.PerspectiveCamera)
-        self.assertEqual(test, camera)
-        self.assertEqual(instance.method, 'get-camera-perspective')
-        self.assertEqual(instance.params, None)
+        ref = brayns.OrthographicCamera(3)
+        message = ref.get_properties()
+        instance = MockInstance(message)
+        test = brayns.get_camera(instance, brayns.OrthographicCamera)
+        self.assertEqual(test, ref)
+        self.assertEqual(instance.method, 'get-camera-orthographic')
+        self.assertIsNone(instance.params)
 
 
 if __name__ == '__main__':

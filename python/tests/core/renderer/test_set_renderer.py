@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 
 class TestSetRenderer(unittest.TestCase):
@@ -31,7 +31,7 @@ class TestSetRenderer(unittest.TestCase):
         renderer = brayns.ProductionRenderer()
         brayns.set_renderer(instance, renderer)
         self.assertEqual(instance.method, 'set-renderer-production')
-        self.assertEqual(instance.params, renderer.serialize())
+        self.assertEqual(instance.params, renderer.get_properties())
 
 
 if __name__ == '__main__':

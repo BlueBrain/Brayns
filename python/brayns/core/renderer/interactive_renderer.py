@@ -19,11 +19,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any
 
 from .renderer import Renderer
-
-T = TypeVar('T', bound='InteractiveRenderer')
 
 
 @dataclass
@@ -49,19 +47,14 @@ class InteractiveRenderer(Renderer):
         """
         return 'interactive'
 
-    @classmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        """Low level API to deserialize from JSON."""
-        return cls.deserialize_with(
-            message,
-            enable_shadows=message['enable_shadows'],
-            ambient_occlusion_samples=message['ao_samples']
-        )
-
-    @property
-    def additional_properties(self) -> dict[str, Any]:
+    def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             'enable_shadows': self.enable_shadows,
-            'ao_samples': self.ambient_occlusion_samples
+            'ao_samples': self.ambient_occlusion_samples,
         }
+
+    def update_additional_properties(self, message: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
+        self.enable_shadows = message['enable_shadows']
+        self.ambient_occlusion_samples = message['ao_samples']

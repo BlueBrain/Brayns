@@ -19,13 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any
 
 from brayns.utils import Bounds, Vector3, View
 
 from .camera import Camera
-
-T = TypeVar('T', bound='OrthographicCamera')
 
 
 @dataclass
@@ -54,24 +52,6 @@ class OrthographicCamera(Camera):
         """
         return 'orthographic'
 
-    @classmethod
-    def from_target(cls: type[T], target: Bounds) -> T:
-        """Create a camera with target height.
-
-        :param target: Camera target.
-        :type target: Bounds
-        :return: Camera to see target entirely.
-        :rtype: T
-        """
-        return cls(target.height)
-
-    @classmethod
-    def deserialize(cls: type[T], message: dict[str, Any]) -> T:
-        """Low level API to deserialize from JSON."""
-        return cls(
-            height=message['height']
-        )
-
     def get_front_view(self, target: Bounds) -> View:
         """Helper method to get the front view of a target object.
 
@@ -90,8 +70,20 @@ class OrthographicCamera(Camera):
         position = center + distance * Vector3.forward
         return View(position, center)
 
-    def serialize(self) -> dict[str, Any]:
+    def set_target(self, target: Bounds) -> None:
+        """Set camera height to target height.
+
+        :param target: Camera target.
+        :type target: Bounds
+        """
+        self.height = target.height
+
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'height': self.height
+            'height': self.height,
         }
+
+    def update_properties(self, message: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
+        self.height = message['height']

@@ -28,9 +28,9 @@ class TestClipPlane(unittest.TestCase):
     def test_method(self) -> None:
         self.assertEqual(brayns.ClipPlane.method, 'add-clip-plane')
 
-    def test_serialize(self) -> None:
+    def test_get_properties(self) -> None:
         plane = brayns.ClipPlane(1, 2, 3, 4)
-        test = plane.serialize()
+        test = plane.get_properties()
         ref = {'coefficients': [1, 2, 3, 4]}
         self.assertEqual(test, ref)
 

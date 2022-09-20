@@ -27,26 +27,20 @@ It provides functionalities to send JSON-RPC requests and receive replies with a
 Brayns instance.
 """
 
+from .client import Client
 from .connector import Connector
 from .instance import Instance
-from .jsonrpc.json_rpc_request import JsonRpcRequest
-from .jsonrpc.request_error import RequestError
-from .jsonrpc.request_future import RequestFuture
-from .jsonrpc.request_progress import RequestProgress
+from .jsonrpc import *
+from .listener import Listener
 from .logger import Logger
-from .websocket.connection_closed_error import ConnectionClosedError
-from .websocket.invalid_server_certificate_error import InvalidServerCertificateError
-from .websocket.protocol_error import ProtocolError
-from .websocket.service_unavailable_error import ServiceUnavailableError
-from .websocket.ssl_client_context import SslClientContext
-from .websocket.web_socket_error import WebSocketError
+from .websocket import *
 
 __all__ = [
     'ConnectionClosedError',
     'Connector',
     'Instance',
     'InvalidServerCertificateError',
-    'JsonRpcRequest',
+    'Request',
     'Logger',
     'ProtocolError',
     'RequestError',

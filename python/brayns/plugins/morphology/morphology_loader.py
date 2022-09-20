@@ -23,6 +23,7 @@ from typing import Any
 from brayns.core import Loader
 
 from .morphology import Morphology
+from .serialize_morphology import serialize_morphology
 
 
 @dataclass
@@ -40,6 +41,5 @@ class MorphologyLoader(Loader):
     def name(cls) -> str:
         return 'Neuron Morphology loader'
 
-    @property
-    def properties(self) -> dict[str, Any]:
-        return self.morphology.serialize()
+    def get_properties(self) -> dict[str, Any]:
+        return serialize_morphology(self.morphology)

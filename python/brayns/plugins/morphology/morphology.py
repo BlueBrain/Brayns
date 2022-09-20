@@ -18,7 +18,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any
 
 from .geometry_type import GeometryType
 
@@ -44,13 +43,3 @@ class Morphology:
     load_axon: bool = False
     load_dendrites: bool = False
     geometry_type: GeometryType = GeometryType.SMOOTH
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {
-            'radius_multiplier': self.radius_multiplier,
-            'load_soma': self.load_soma,
-            'load_axon': self.load_axon,
-            'load_dendrites': self.load_dendrites,
-            'geometry_type': self.geometry_type.value
-        }

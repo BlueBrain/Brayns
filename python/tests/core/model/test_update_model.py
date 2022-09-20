@@ -21,9 +21,9 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
-
-from .mock_model import MockModel
+from tests.mock_instance import MockInstance
+from tests.mock_model import MockModel
+from tests.mock_transform import MockTransform
 
 
 class TestUpdateModel(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestUpdateModel(unittest.TestCase):
             instance,
             model_id=0,
             visible=True,
-            transform=brayns.Transform.identity,
+            transform=MockTransform.transform,
         )
         self.assertEqual(model, MockModel.model)
         self.assertEqual(instance.method, 'update-model')
@@ -42,8 +42,8 @@ class TestUpdateModel(unittest.TestCase):
             'model_id': 0,
             'model': {
                 'is_visible': True,
-                'transform': brayns.Transform.identity.serialize()
-            }
+                'transform': MockTransform.message,
+            },
         })
 
 

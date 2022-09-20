@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from tests.network.mock_instance import MockInstance
+from tests.mock_instance import MockInstance
 
 from .mock_color_ramp import MockColorRamp
 
@@ -30,12 +30,11 @@ class TestSetColorRamp(unittest.TestCase):
 
     def test_set_color_ramp(self) -> None:
         instance = MockInstance()
-        function = MockColorRamp.color_ramp
-        brayns.set_color_ramp(instance, 0, function)
+        brayns.set_color_ramp(instance, 0, MockColorRamp.color_ramp)
         self.assertEqual(instance.method, 'set-model-transfer-function')
         self.assertEqual(instance.params, {
             'id': 0,
-            'transfer_function': MockColorRamp.message
+            'transfer_function': MockColorRamp.message,
         })
 
 

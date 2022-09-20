@@ -21,7 +21,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 from ..morphology import Morphology
 from .sonata_edge_population import SonataEdgePopulation
@@ -53,22 +52,3 @@ class SonataNodePopulation:
     edges: list[SonataEdgePopulation] | None = None
     morphology: Morphology = field(default_factory=Morphology)
     vasculature_radius_multiplier: float = 1.0
-
-    def serialize(self) -> dict[str, Any]:
-        """Low level JSON API to serialize to JSON."""
-        message = {
-            'node_population': self.name,
-            'vasculature_geometry_parameters': {
-                'radius_multiplier': self.vasculature_radius_multiplier
-            }
-        }
-        message.update(self.nodes.serialize())
-        if self.report is not None:
-            message.update(self.report.serialize())
-        if self.edges is not None:
-            message['edge_populations'] = [
-                edge.serialize()
-                for edge in self.edges
-            ]
-        message['neuron_morphology_parameters'] = self.morphology.serialize()
-        return message
