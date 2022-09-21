@@ -40,8 +40,7 @@ class TestSnapshot(unittest.TestCase):
         return brayns.Snapshot(
             resolution=brayns.Resolution(1920, 1080),
             frame=12,
-            view=MockView.view,
-            camera=brayns.PerspectiveProjection(),
+            camera=brayns.Camera(view=MockView.view),
             renderer=brayns.ProductionRenderer(),
             jpeg_quality=50,
         )

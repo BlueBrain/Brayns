@@ -18,28 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from brayns.network import Instance
+
 from .camera import Camera
-from .get_camera import get_camera
-from .get_camera_name import get_camera_name
-from .get_camera_projection import get_camera_projection
-from .get_camera_view import get_camera_view
-from .orthographic_projection import OrthographicProjection
-from .perspective_projection import PerspectiveProjection
-from .projection import Projection
-from .set_camera import set_camera
 from .set_camera_projection import set_camera_projection
 from .set_camera_view import set_camera_view
 
-__all__ = [
-    'Camera',
-    'get_camera_name',
-    'get_camera_projection',
-    'get_camera_view',
-    'get_camera',
-    'OrthographicProjection',
-    'PerspectiveProjection',
-    'Projection',
-    'set_camera_projection',
-    'set_camera_view',
-    'set_camera',
-]
+
+def set_camera(instance: Instance, camera: Camera) -> None:
+    """Shortcut to update the camera view and projection.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param camera: Current camera to use for instance.
+    :type camera: Camera
+    """
+    set_camera_view(instance, camera.view)
+    set_camera_projection(instance, camera.projection)

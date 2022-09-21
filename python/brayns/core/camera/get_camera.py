@@ -18,28 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from brayns.network import Instance
+
 from .camera import Camera
-from .get_camera import get_camera
-from .get_camera_name import get_camera_name
 from .get_camera_projection import get_camera_projection
 from .get_camera_view import get_camera_view
-from .orthographic_projection import OrthographicProjection
-from .perspective_projection import PerspectiveProjection
 from .projection import Projection
-from .set_camera import set_camera
-from .set_camera_projection import set_camera_projection
-from .set_camera_view import set_camera_view
 
-__all__ = [
-    'Camera',
-    'get_camera_name',
-    'get_camera_projection',
-    'get_camera_view',
-    'get_camera',
-    'OrthographicProjection',
-    'PerspectiveProjection',
-    'Projection',
-    'set_camera_projection',
-    'set_camera_view',
-    'set_camera',
-]
+
+def get_camera(instance: Instance, projection_type: type[Projection]) -> Camera:
+    """Shortcut to retreive the current camera of an instance.
+
+    Use get_camera_projection and get_camera_view.
+
+    projection_type must be of the same type as the current projection.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param projection_type: Current camera projection type of instance.
+    :type projection_type: type[Projection]
+    :return: Camera with current view and projection.
+    :rtype: Camera
+    """
+    view = get_camera_view(instance)
+    projection = get_camera_projection(instance, projection_type)
+    return Camera(view, projection)

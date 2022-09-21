@@ -19,10 +19,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
-from typing import cast
 
 import brayns
 from testapi.image_validator import ImageValidator
+from testapi.quick_render import quick_snapshot
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -41,38 +41,13 @@ class TestBbpLoader(SimpleTestCase):
         loader = brayns.BbpLoader(
             cells=brayns.BbpCells.from_density(0.5),
             report=brayns.BbpReport.compartment('somas'),
-            morphology=brayns.Morphology(
-                load_dendrites=True,
-            )
+            morphology=brayns.Morphology(load_dendrites=True),
         )
         models = loader.load(self.instance, self.circuit)
+        self._validate_result(models)
+
+    def _validate_result(self, models: list[brayns.Model]) -> None:
         self.assertEqual(len(models), 1)
-        model = models[0]
-        self._snapshot(model.bounds)
+        quick_snapshot(self.instance, str(self.output), 50)
         validator = ImageValidator()
         validator.validate_file(self.output, self.ref)
-
-    def _snapshot(self, bounds: brayns.Bounds) -> None:
-        snapshot = self._create_snapshot(bounds)
-        view = cast(brayns.View, snapshot.view)
-        self._adjust_lights(view)
-        snapshot.save(self.instance, str(self.output))
-
-    def _create_snapshot(self, bounds: brayns.Bounds) -> brayns.Snapshot:
-        projection = brayns.PerspectiveProjection()
-        view = projection.fovy.get_front_view(bounds)
-        renderer = brayns.InteractiveRenderer()
-        return brayns.Snapshot(
-            resolution=brayns.Resolution.full_hd,
-            frame=50,
-            view=view,
-            camera=projection,
-            renderer=renderer,
-        )
-
-    def _adjust_lights(self, view: brayns.View) -> None:
-        light = brayns.DirectionalLight(
-            intensity=5,
-            direction=view.direction
-        )
-        brayns.add_light(self.instance, light)
