@@ -21,89 +21,46 @@
 #include "VolumeInitSystem.h"
 
 #include <brayns/common/ColorRamp.h>
-#include <brayns/engine/components/Renderable.h>
 #include <brayns/engine/components/VolumeViews.h>
 #include <brayns/engine/components/Volumes.h>
 
-#include <ospray/ospray_cpp/Data.h>
-
 namespace
 {
-struct GroupParameters
-{
-    inline static const std::string volume = "volume";
-};
 class VolumeInitializer
 {
 public:
-    VolumeInitializer(brayns::Components &components)
-        : _components(components)
+    static void init(brayns::Components &components)
     {
-    }
-
-    void init()
-    {
-        auto &views = _initViews();
-        assert(_checkViews(views));
-        _initColorRamp(views);
-        _initGroup(views);
+        _initVolumeViews(components);
+        _initColorRamp(components);
     }
 
 private:
-    brayns::VolumeViews &_initViews()
+    static void _initVolumeViews(brayns::Components &components)
     {
-        if (auto views = _components.find<brayns::VolumeViews>())
+        if (components.has<brayns::VolumeViews>())
         {
-            return *views;
+            return;
         }
 
-        auto &views = _components.add<brayns::VolumeViews>();
-        _constructViews(views);
-        return views;
-    }
-
-    void _constructViews(brayns::VolumeViews &views)
-    {
-        auto &volumes = _components.get<brayns::Volumes>();
-        auto &volumeList = volumes.elements;
-
-        auto &viewList = views.elements;
-        viewList.reserve(volumeList.size());
-        for (auto &volume : volumeList)
+        auto &views = components.add<brayns::VolumeViews>();
+        auto &volumes = components.get<brayns::Volumes>();
+        views.elements.reserve(volumes.elements.size());
+        for (auto &volume : volumes.elements)
         {
-            volume.commit();
-            viewList.emplace_back(volume);
+            views.elements.emplace_back(volume);
         }
     }
 
-    bool _checkViews(brayns::VolumeViews &views)
+    static void _initColorRamp(brayns::Components &components)
     {
-        auto &volumes = _components.get<brayns::Volumes>();
-        return volumes.elements.size() == views.elements.size();
-    }
-
-    void _initColorRamp(brayns::VolumeViews &views)
-    {
-        auto &colorRamp = _components.getOrAdd<brayns::ColorRamp>();
+        auto &colorRamp = components.getOrAdd<brayns::ColorRamp>();
+        auto &views = components.get<brayns::VolumeViews>();
         for (auto &view : views.elements)
         {
             view.setColorRamp(colorRamp);
         }
     }
-
-    void _initGroup(brayns::VolumeViews &views)
-    {
-        if (_components.has<brayns::Renderable>())
-        {
-            return;
-        }
-
-        auto &renderable = _components.add<brayns::Renderable>();
-        renderable.group = brayns::RenderGroupFactory::fromVolumes(views.elements);
-    }
-
-private:
-    brayns::Components &_components;
 };
 }
 
@@ -111,7 +68,6 @@ namespace brayns
 {
 void VolumeInitSystem::execute(Components &components)
 {
-    VolumeInitializer initializer(components);
-    initializer.init();
+    VolumeInitializer::init(components);
 }
 }

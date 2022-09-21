@@ -23,7 +23,57 @@
 #include <brayns/common/ColorRamp.h>
 #include <brayns/engine/components/VolumeViews.h>
 #include <brayns/engine/components/Volumes.h>
-#include <brayns/engine/model/RenderGroup.h>
+
+namespace
+{
+class VolumeCommitter
+{
+public:
+    static bool commitColorRamp(brayns::ColorRamp &colorRamp, brayns::VolumeViews &views)
+    {
+        if (!colorRamp.isModified())
+        {
+            return false;
+        }
+        colorRamp.resetModified();
+        for (auto &view : views.elements)
+        {
+            view.setColorRamp(colorRamp);
+        }
+        return true;
+    }
+
+    static bool commitVolumes(brayns::Volumes &volumes)
+    {
+        if (!volumes.modified)
+        {
+            return false;
+        }
+
+        volumes.modified.setModified(false);
+        for (auto &volume : volumes.elements)
+        {
+            volume.commit();
+        }
+        return true;
+    }
+
+    static bool commitVolumeViews(brayns::VolumeViews &views)
+    {
+        if (!views.modified)
+        {
+            return false;
+        }
+
+        views.modified.setModified(false);
+        for (auto &view : views.elements)
+        {
+            view.commit();
+        }
+        return true;
+    }
+};
+}
 
 namespace brayns
 {
@@ -32,40 +82,14 @@ CommitResult VolumeCommitSystem::execute(Components &components)
     auto &volumes = components.get<Volumes>();
     auto &views = components.get<VolumeViews>();
     auto &colorRamp = components.get<ColorRamp>();
-    auto &group = components.get<RenderGroup>();
 
-    auto volumeModified = static_cast<bool>(volumes.modified);
-    auto viewsModified = static_cast<bool>(views.modified);
+    bool rebuildBVH = false;
+    rebuildBVH |= VolumeCommitter::commitVolumes(volumes);
 
-    volumes.modified = false;
-    views.modified = false;
+    bool renderFrame = false;
+    renderFrame |= VolumeCommitter::commitColorRamp(colorRamp, views);
+    renderFrame |= VolumeCommitter::commitVolumeViews(views);
 
-    if (colorRamp.isModified())
-    {
-        colorRamp.resetModified();
-        viewsModified = true;
-        for (auto &view : views.elements)
-        {
-            view.setColorRamp(colorRamp);
-        }
-    }
-
-    if (volumeModified)
-    {
-        for (auto &volume : volumes.elements)
-        {
-            volume.commit();
-        }
-    }
-    if (viewsModified)
-    {
-        for (auto &view : views.elements)
-        {
-            view.commit();
-        }
-    }
-    auto groupModified = group.commit();
-
-    return {volumeModified || groupModified, viewsModified};
+    return {rebuildBVH, renderFrame};
 }
 }

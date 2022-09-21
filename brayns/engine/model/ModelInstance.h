@@ -122,15 +122,12 @@ private:
     Matrix4f _getFullTransform() const noexcept;
 
 private:
-    const uint32_t _modelInstanceID{};
-    Model &_model;
-
+    uint32_t _instanceID;
     bool _visible = true;
     Transform _transform;
     Bounds _bounds;
-
     ospray::cpp::Instance _handle;
-
     ModifiedFlag _flag;
+    Model &_model;
 };
 }

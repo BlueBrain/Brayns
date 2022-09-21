@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include <brayns/engine/geometry/Geometry.h>
+#include <brayns/engine/geometry/GeometryView.h>
 
 namespace brayns
 {
-struct Clippers
+struct ClipperViews
 {
-    std::vector<Geometry> elements;
+    std::vector<GeometryView> elements;
 };
 }

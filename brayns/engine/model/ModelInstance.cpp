@@ -22,8 +22,6 @@
 #include "ModelInstance.h"
 
 #include <brayns/common/Log.h>
-#include <brayns/engine/components/Renderable.h>
-
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace
@@ -48,18 +46,6 @@ public:
     }
 };
 
-class ExtractGroupHandle
-{
-public:
-    static OSPGroup extract(brayns::Model &model)
-    {
-        auto &components = model.getComponents();
-        auto &renderable = components.get<brayns::Renderable>();
-        auto &group = renderable.group;
-        return group.getHandle().handle();
-    }
-};
-
 struct InstanceParameters
 {
     inline static const std::string transform = "transform";
@@ -69,16 +55,16 @@ struct InstanceParameters
 namespace brayns
 {
 ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model &model)
-    : _modelInstanceID(modelInstanceID)
+    : _instanceID(modelInstanceID)
+    , _handle(model.getHandle())
     , _model(model)
-    , _handle(ExtractGroupHandle::extract(model))
 {
     computeBounds();
 }
 
 uint32_t ModelInstance::getID() const noexcept
 {
-    return _modelInstanceID;
+    return _instanceID;
 }
 
 const Bounds &ModelInstance::getBounds() const noexcept
@@ -88,7 +74,7 @@ const Bounds &ModelInstance::getBounds() const noexcept
 
 void ModelInstance::computeBounds() noexcept
 {
-    Log::debug("[ModelInstance {}] Computing bounds", _modelInstanceID);
+    Log::debug("[ModelInstance {}] Computing bounds", _instanceID);
     _bounds = _model.computeBounds(_getFullTransform());
 }
 

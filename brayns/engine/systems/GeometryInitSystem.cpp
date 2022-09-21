@@ -22,44 +22,29 @@
 
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
-#include <brayns/engine/components/Renderable.h>
 #include <brayns/engine/material/Material.h>
-#include <brayns/engine/material/types/Phong.h>
 
 namespace
 {
 class GeometryInitializer
 {
 public:
-    GeometryInitializer(brayns::Components &components)
-        : _components(components)
+    static void init(brayns::Components &components)
     {
-    }
-
-    void init()
-    {
-        _initGeometryViews();
-        _initMaterial();
+        _initGeometryViews(components);
+        _initMaterial(components);
     }
 
 private:
-    bool _checkGeometryViewIntegrity()
+    static void _initGeometryViews(brayns::Components &components)
     {
-        auto &geometries = _components.get<brayns::Geometries>();
-        auto &views = _components.get<brayns::GeometryViews>();
-        return views.elements.size() == geometries.elements.size();
-    }
-
-    void _initGeometryViews()
-    {
-        if (_components.has<brayns::GeometryViews>())
+        if (components.has<brayns::GeometryViews>())
         {
-            assert(_checkGeometryViewIntegrity());
             return;
         }
 
-        auto &geometries = _components.get<brayns::Geometries>();
-        auto &views = _components.add<brayns::GeometryViews>();
+        auto &geometries = components.get<brayns::Geometries>();
+        auto &views = components.add<brayns::GeometryViews>();
         views.elements.reserve(geometries.elements.size());
         for (auto &geometry : geometries.elements)
         {
@@ -67,23 +52,15 @@ private:
         }
     }
 
-    void _initMaterial()
+    static void _initMaterial(brayns::Components &components)
     {
-        auto material = _components.find<brayns::Material>();
-        if (!material)
-        {
-            material = &_components.add<brayns::Material>(brayns::Phong());
-        }
-
-        auto &views = _components.get<brayns::GeometryViews>();
+        auto material = components.getOrAdd<brayns::Material>();
+        auto &views = components.get<brayns::GeometryViews>();
         for (auto &view : views.elements)
         {
-            view.setMaterial(*material);
+            view.setMaterial(material);
         }
     }
-
-private:
-    brayns::Components &_components;
 };
 }
 
@@ -91,7 +68,6 @@ namespace brayns
 {
 void GeometryInitSystem::execute(Components &components)
 {
-    GeometryInitializer initializer(components);
-    initializer.init();
+    GeometryInitializer::init(components);
 }
 }

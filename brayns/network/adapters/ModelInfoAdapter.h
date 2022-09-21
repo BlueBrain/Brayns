@@ -30,11 +30,6 @@
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(MetadataEntry)
-BRAYNS_JSON_ADAPTER_ENTRY(key, "Entry key")
-BRAYNS_JSON_ADAPTER_ENTRY(value, "Entry value")
-BRAYNS_JSON_ADAPTER_END()
-
 BRAYNS_JSON_ADAPTER_BEGIN(ModelInfo)
 BRAYNS_JSON_ADAPTER_GET("load_info", getLoadInfo, "Model load information")
 BRAYNS_JSON_ADAPTER_GET("metadata", getMetadata, "Model-specific metadata")

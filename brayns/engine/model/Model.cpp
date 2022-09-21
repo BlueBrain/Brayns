@@ -20,10 +20,10 @@
 
 #include "Model.h"
 
-#include <brayns/engine/components/Clippers.h>
-#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/ClipperViews.h>
+#include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/components/Lights.h>
-#include <brayns/engine/components/Volumes.h>
+#include <brayns/engine/components/VolumeViews.h>
 
 namespace
 {
@@ -33,23 +33,28 @@ public:
     static ospray::cpp::Group build(brayns::Components &components)
     {
         ospray::cpp::Group group;
-        _addGeometry(components, group);
-        _addVolume(components, group);
-        _addClippers(components, group);
-        _addLights(components, group);
+        _add<ospray::cpp::GeometricModel, brayns::GeometryViews>(components, group, _geometryParam);
+        _add<ospray::cpp::VolumetricModel, brayns::VolumeViews>(components, group, _volumeParam);
+        _add<ospray::cpp::GeometricModel, brayns::ClipperViews>(components, group, _clippingParam);
+        _add<ospray::cpp::Light, brayns::Lights>(components, group, _lightParam);
         group.commit();
         return group;
     }
 
 private:
+    inline static const std::string _geometryParam = "geometry";
+    inline static const std::string _volumeParam = "volume";
+    inline static const std::string _clippingParam = "clippingGeometry";
+    inline static const std::string _lightParam = "light";
+
     template<typename HandleType, typename ComponentType>
     static std::vector<HandleType> _compileHandles(brayns::Components &components)
     {
         std::vector<HandleType> result;
         if (auto component = components.find<ComponentType>())
         {
-            result.reserve(component.elements.size());
-            for (auto &element : component.elements)
+            result.reserve(component->elements.size());
+            for (auto &element : component->elements)
             {
                 result.push_back(element.getHandle());
             }
@@ -65,27 +70,6 @@ private:
         {
             group.setParam(param, ospray::cpp::CopiedData(handles));
         }
-    }
-
-    static void _addGeometry(brayns::Components &components, ospray::cpp::Group &group)
-    {
-        inline static const std::string param = "geometry";
-        _add<ospray::cpp::GeometricModel, brayns::GeometryViews>(components, group, param);
-    }
-
-    static void _addVolume(brayns::Components &components, ospray::cpp::Group &group)
-    {
-        inline static const std::string param = "volume";
-    }
-
-    static void _addClippers(brayns::Components &components, ospray::cpp::Group &group)
-    {
-        inline static const std::string param = "clippingGeometry";
-    }
-
-    static void _addLights(brayns::Components &components, ospray::cpp::Group &group)
-    {
-        inline static const std::string param = "light";
     }
 };
 }

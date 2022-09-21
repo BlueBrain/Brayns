@@ -24,6 +24,56 @@
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/material/Material.h>
 
+namespace
+{
+class GeometryCommitter
+{
+public:
+    static bool commitMaterial(brayns::Material &material, brayns::GeometryViews &views)
+    {
+        if (!material.commit())
+        {
+            return false;
+        }
+        for (auto &view : views.elements)
+        {
+            view.setMaterial(material);
+        }
+        return true;
+    }
+
+    static bool commitGeometries(brayns::Geometries &geometries)
+    {
+        if (!geometries.modified)
+        {
+            return false;
+        }
+
+        geometries.modified.setModified(false);
+        for (auto &geometry : geometries.elements)
+        {
+            geometry.commit();
+        }
+        return true;
+    }
+
+    static bool commitGeometryViews(brayns::GeometryViews &views)
+    {
+        if (!views.modified)
+        {
+            return false;
+        }
+
+        views.modified.setModified(false);
+        for (auto &view : views.elements)
+        {
+            view.commit();
+        }
+        return true;
+    }
+};
+}
+
 namespace brayns
 {
 CommitResult GeometryCommitSystem::execute(Components &components)
@@ -32,35 +82,13 @@ CommitResult GeometryCommitSystem::execute(Components &components)
     auto &views = components.get<GeometryViews>();
     auto &material = components.get<Material>();
 
-    auto geometryModified = static_cast<bool>(geometries.modified);
-    auto viewModified = static_cast<bool>(views.modified);
+    bool rebuildBVH = false;
+    rebuildBVH |= GeometryCommitter::commitGeometries(geometries);
 
-    geometries.modified = false;
-    views.modified = false;
+    bool renderFrame = false;
+    renderFrame |= GeometryCommitter::commitMaterial(material, views);
+    renderFrame |= GeometryCommitter::commitGeometryViews(views);
 
-    if (material.commit())
-    {
-        for (auto &view : views.elements)
-        {
-            view.setMaterial(material);
-        }
-        viewModified = true;
-    }
-    if (viewModified)
-    {
-        for (auto &view : views.elements)
-        {
-            view.commit();
-        }
-    }
-    if (geometryModified)
-    {
-        for (auto &geometry : geometries.elements)
-        {
-            geometry.commit();
-        }
-    }
-
-    return {geometryModified || viewModified};
+    return {rebuildBVH || renderFrame};
 }
 }

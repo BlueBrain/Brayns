@@ -18,14 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/engine/model/RenderGroup.h>
+#include "ModelOperations.h"
 
 namespace brayns
 {
-struct Renderable
-{
-    RenderGroup group;
-};
 }

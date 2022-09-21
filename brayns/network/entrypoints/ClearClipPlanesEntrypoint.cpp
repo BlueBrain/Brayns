@@ -21,7 +21,7 @@
 
 #include "ClearClipPlanesEntrypoint.h"
 
-#include <brayns/engine/components/Clippers.h>
+#include <brayns/engine/components/ClipperViews.h>
 
 namespace brayns
 {
@@ -51,7 +51,7 @@ void ClearClipPlanesEntrypoint::onRequest(const Request &request)
     {
         auto &model = instance->getModel();
         auto &components = model.getComponents();
-        if (components.has<Clippers>())
+        if (components.has<ClipperViews>())
         {
             deleteInstances.push_back(instance->getID());
         }

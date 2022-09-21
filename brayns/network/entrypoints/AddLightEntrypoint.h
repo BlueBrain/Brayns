@@ -25,7 +25,6 @@
 #include <brayns/engine/json/adapters/LightAdapters.h>
 #include <brayns/engine/scene/ModelManager.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/LightInitSystem.h>
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -53,7 +52,6 @@ public:
         lights.elements.emplace_back(std::move(data));
 
         auto &systems = model->getSystems();
-        systems.setInitSystem<LightInitSystem>();
         systems.setBoundsSystem<GenericBoundsSystem<Lights>>();
 
         auto instance = _models.addModel(std::move(model));

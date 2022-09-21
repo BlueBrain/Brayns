@@ -27,7 +27,6 @@
 
 #include <brayns/engine/components/Lights.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/LightInitSystem.h>
 
 /**
  * @brief Encapsulates some utilities used across all the tests
@@ -49,11 +48,13 @@ public:
         auto &models = scene.getModels();
 
         auto model = std::make_unique<brayns::Model>();
+
         auto &components = model->getComponents();
         components.add<brayns::Lights>(std::vector<brayns::Light>{std::move(light)});
+
         auto &systems = model->getSystems();
-        systems.setInitSystem<brayns::LightInitSystem>();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Lights>>();
+
         models.addModel(std::move(model));
     }
 

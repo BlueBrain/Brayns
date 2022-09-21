@@ -18,23 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "LightInitSystem.h"
-
-#include <brayns/engine/components/Lights.h>
-#include <brayns/engine/components/Renderable.h>
+#pragma once
 
 namespace brayns
 {
-void LightInitSystem::execute(Components &components)
+class ModelOperations
 {
-    auto &lights = components.get<Lights>();
-
-    if (components.has<Renderable>())
-    {
-        return;
-    }
-
-    auto &renderable = components.add<Renderable>();
-    renderable.group = RenderGroupFactory::fromLights(lights.elements);
-}
+};
 }

@@ -21,7 +21,7 @@
 
 #include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
 
-#include <brayns/engine/components/Clippers.h>
+#include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/systems/ClipperInitSystem.h>
 
 namespace brayns
@@ -47,8 +47,8 @@ void AddClipPlaneEntrypoint::onRequest(const Request &request)
     auto model = std::make_unique<Model>();
 
     auto &components = model->getComponents();
-    auto &clippers = components.add<Clippers>();
-    clippers.elements.emplace_back(plane);
+    auto &geometries = components.add<Geometries>();
+    geometries.elements.emplace_back(plane);
 
     auto &systems = model->getSystems();
     systems.setInitSystem<ClipperInitSystem>();

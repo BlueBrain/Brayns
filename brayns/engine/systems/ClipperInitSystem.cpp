@@ -20,34 +20,58 @@
 
 #include "ClipperInitSystem.h"
 
-#include <brayns/engine/components/Clippers.h>
-#include <brayns/engine/components/GeometryViews.h>
-#include <brayns/engine/components/Renderable.h>
+#include <brayns/engine/components/ClipperViews.h>
+#include <brayns/engine/components/Geometries.h>
+
+namespace
+{
+class ClippingInitializer
+{
+public:
+    static void init(brayns::Components &components)
+    {
+        if (components.has<brayns::ClipperViews>())
+        {
+            _commit(components);
+            return;
+        }
+
+        _createAndCommit(components);
+    }
+
+private:
+    static void _createAndCommit(brayns::Components &components)
+    {
+        auto &geometries = components.get<brayns::Geometries>();
+        auto &views = components.add<brayns::ClipperViews>();
+        views.elements.reserve(geometries.elements.size());
+        for (auto &geometry : geometries.elements)
+        {
+            geometry.commit();
+            auto &view = views.elements.emplace_back(geometry);
+            view.commit();
+        }
+    }
+
+    static void _commit(brayns::Components &components)
+    {
+        auto &geometries = components.get<brayns::Geometries>();
+        auto &views = components.add<brayns::ClipperViews>();
+
+        assert(geometries.elements.size() == views.elements.size());
+        for (size_t i = 0; i < geometries.elements.size(); ++i)
+        {
+            geometries.elements[i].commit();
+            views.elements[i].commit();
+        }
+    }
+};
+}
 
 namespace brayns
 {
 void ClipperInitSystem::execute(Components &components)
 {
-    auto &clippers = components.get<Clippers>();
-
-    auto views = components.find<GeometryViews>();
-    if (!views)
-    {
-        views = &components.add<GeometryViews>();
-
-        views->elements.reserve(clippers.elements.size());
-        for (auto &geometry : clippers.elements)
-        {
-            geometry.commit();
-            auto &view = views->elements.emplace_back(geometry);
-            view.commit();
-        }
-    }
-
-    if (!components.has<Renderable>())
-    {
-        auto &renderable = components.add<Renderable>();
-        renderable.group = RenderGroupFactory::fromClippers(views->elements);
-    }
+    ClippingInitializer::init(components);
 }
 }

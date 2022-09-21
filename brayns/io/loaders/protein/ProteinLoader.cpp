@@ -120,7 +120,7 @@ private:
         result.position.x = std::stof(tokens[PdbFormatColumns::x]);
         result.position.y = std::stof(tokens[PdbFormatColumns::y]);
         result.position.z = std::stof(tokens[PdbFormatColumns::z]);
-        result.name = std::move(tokens[PdbFormatColumns::name]);
+        result.name = tokens[PdbFormatColumns::name].substr(0, 2);
 
         return result;
     }
@@ -152,6 +152,10 @@ public:
 class SphereGenerator
 {
 public:
+    inline static constexpr float nanoToMicrons = 0.001f;
+    inline static constexpr float angstromsToMicrons = 0.0001f;
+    inline static constexpr float positionMultiplier = 10.f;
+
     static std::vector<brayns::Sphere> generate(const std::vector<Atom> &atoms, const std::vector<float> &radii)
     {
         std::vector<brayns::Sphere> spheres;
@@ -159,9 +163,9 @@ public:
 
         for (size_t i = 0; i < atoms.size(); ++i)
         {
-            auto &atom = atoms[i];
-            auto radius = radii[i];
-            spheres.push_back({atom.position, radius});
+            auto position = atoms[i].position * nanoToMicrons * positionMultiplier;
+            auto radius = radii[i] * angstromsToMicrons;
+            spheres.push_back({position, radius});
         }
 
         return spheres;
@@ -171,12 +175,14 @@ public:
 class ColormapIndexer
 {
 public:
-    static std::vector<size_t> indexAtoms(const brayns::ProteinLoaderParameters &params, const std::vector<Atom> &atoms)
+    static std::vector<uint8_t> indexAtoms(
+        const brayns::ProteinLoaderParameters &params,
+        const std::vector<Atom> &atoms)
     {
         auto &colorMap = brayns::ProteinData::colorIndices;
         auto &colors = brayns::ProteinData::colors;
 
-        auto result = std::vector<size_t>();
+        auto result = std::vector<uint8_t>();
         result.reserve(atoms.size());
 
         for (auto &atom : atoms)
@@ -184,10 +190,10 @@ public:
             switch (params.color_scheme)
             {
             case brayns::ProteinLoaderColorScheme::ProteinChains:
-                result.push_back(static_cast<size_t>(atom.chainId));
+                result.push_back(static_cast<uint8_t>(atom.chainId));
                 break;
             case brayns::ProteinLoaderColorScheme::ProteinResidues:
-                result.push_back(static_cast<size_t>(atom.residue));
+                result.push_back(static_cast<uint8_t>(atom.residue));
                 break;
             case brayns::ProteinLoaderColorScheme::ById:
                 result.push_back(atom.id % colors.size());
@@ -195,7 +201,7 @@ public:
             default:
                 auto it = std::find(colorMap.begin(), colorMap.end(), atom.name);
                 auto index = it == colorMap.end() ? 0 : it->colorIndex;
-                result.push_back(index);
+                result.push_back(static_cast<uint8_t>(index));
             }
         }
         return result;

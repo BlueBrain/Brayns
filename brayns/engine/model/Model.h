@@ -22,7 +22,6 @@
 #pragma once
 
 #include "Components.h"
-#include "RenderGroup.h"
 #include "Systems.h"
 
 #include <ospray/ospray_cpp/Group.h>

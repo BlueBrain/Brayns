@@ -21,7 +21,8 @@
 #include <brayns/Brayns.h>
 #include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
-#include <brayns/engine/components/Clippers.h>
+#include <brayns/engine/components/ClipperViews.h>
+#include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/core/Engine.h>
 #include <brayns/engine/geometry/types/Plane.h>
 #include <brayns/engine/light/types/AmbientLight.h>
@@ -63,7 +64,7 @@ struct ZParallelSliceManager
             brayns::Plane{{planeA, planeADistance}},
             brayns::Plane{{planeB, planeBDistance}}};
         auto &components = model->getComponents();
-        auto &clippers = components.add<brayns::Clippers>();
+        auto &clippers = components.add<brayns::Geometries>();
         clippers.elements.emplace_back(std::move(planes));
 
         auto &systems = model->getSystems();
@@ -86,7 +87,7 @@ struct ZParallelSliceManager
         {
             auto &model = instance->getModel();
             auto &components = model.getComponents();
-            if (components.has<brayns::Clippers>())
+            if (components.has<brayns::ClipperViews>())
             {
                 toRemove.push_back(instance->getID());
             }

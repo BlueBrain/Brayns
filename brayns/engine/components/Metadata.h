@@ -20,16 +20,10 @@
 
 #pragma once
 
+#include <map>
 #include <string>
-#include <vector>
 
 namespace brayns
 {
-struct MetadataEntry
-{
-    std::string key;
-    std::string value;
-};
-
-using Metadata = std::vector<MetadataEntry>;
+using Metadata = std::map<std::string, std::string>;
 }
