@@ -19,9 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, TypeVar
 
 from brayns.utils import Bounds, View
+
+T = TypeVar('T', bound='Projection')
 
 
 class Projection(ABC):
@@ -73,7 +75,15 @@ class Projection(ABC):
         """Low level API to deserialize from JSON."""
         pass
 
+    @classmethod
+    def from_properties(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
+        projection = cls()
+        projection.update_properties(message)
+        return projection
+
     def get_properties_with_name(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
         return {
             'name': self.name,
             'params': self.get_properties(),

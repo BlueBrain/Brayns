@@ -20,7 +20,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
+
+T = TypeVar('T', bound='Material')
 
 
 @dataclass
@@ -50,3 +52,10 @@ class Material(ABC):
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
         pass
+
+    @classmethod
+    def from_properties(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
+        material = cls()
+        material.update_properties(message)
+        return material

@@ -43,6 +43,4 @@ def get_camera_projection(instance: Instance, projection_type: type[T]) -> T:
     """
     name = projection_type.name
     result = instance.request(f'get-camera-{name}')
-    projection = projection_type()
-    projection.update_properties(result)
-    return projection
+    return projection_type.from_properties(result)

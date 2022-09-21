@@ -20,9 +20,11 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 from brayns.utils import Color4
+
+T = TypeVar('T', bound='Renderer')
 
 
 @dataclass
@@ -75,6 +77,13 @@ class Renderer(ABC):
             **self.get_additional_properties(),
         }
 
+    @classmethod
+    def from_properties(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
+        renderer = cls()
+        renderer.update_properties(message)
+        return renderer
+
     def get_properties_with_name(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
@@ -83,6 +92,7 @@ class Renderer(ABC):
         }
 
     def update_properties(self, message: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
         self.samples_per_pixel = message['samples_per_pixel']
         self.max_ray_bounces = message['max_ray_bounces']
         self.background_color = Color4(*message['background_color'])
