@@ -19,16 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
+from testapi.projection_test_case import ProjectionTestCase
 
-from .camera_test_case import CameraTestCase
 
-
-class TestPerspectiveCamera(CameraTestCase):
+class TestOrthographicProjection(ProjectionTestCase):
 
     def test_all(self) -> None:
-        camera = brayns.PerspectiveCamera(
-            fovy=brayns.Fovy(30, degrees=True),
-            aperture_radius=1,
-            focus_distance=2
-        )
-        self.run_tests(camera)
+        projection = brayns.OrthographicProjection(height=10)
+        self.run_tests(projection)

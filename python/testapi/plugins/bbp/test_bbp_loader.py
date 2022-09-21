@@ -42,7 +42,7 @@ class TestBbpLoader(SimpleTestCase):
             cells=brayns.BbpCells.from_density(0.5),
             report=brayns.BbpReport.compartment('somas'),
             morphology=brayns.Morphology(
-                load_dendrites=True
+                load_dendrites=True,
             )
         )
         models = loader.load(self.instance, self.circuit)
@@ -59,15 +59,15 @@ class TestBbpLoader(SimpleTestCase):
         snapshot.save(self.instance, str(self.output))
 
     def _create_snapshot(self, bounds: brayns.Bounds) -> brayns.Snapshot:
-        camera = brayns.PerspectiveCamera()
-        view = camera.fovy.get_front_view(bounds)
+        projection = brayns.PerspectiveProjection()
+        view = projection.fovy.get_front_view(bounds)
         renderer = brayns.InteractiveRenderer()
         return brayns.Snapshot(
             resolution=brayns.Resolution.full_hd,
             frame=50,
             view=view,
-            camera=camera,
-            renderer=renderer
+            camera=projection,
+            renderer=renderer,
         )
 
     def _adjust_lights(self, view: brayns.View) -> None:

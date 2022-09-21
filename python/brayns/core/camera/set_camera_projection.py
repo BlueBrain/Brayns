@@ -18,15 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
-from testapi.simple_test_case import SimpleTestCase
+from brayns.network import Instance
+
+from .projection import Projection
 
 
-class CameraTestCase(SimpleTestCase):
+def set_camera_projection(instance: Instance, camera: Projection) -> None:
+    """Set the current camera of the given instance.
 
-    def run_tests(self, camera: brayns.Camera) -> None:
-        brayns.set_camera(self.instance, camera)
-        name = brayns.get_camera_name(self.instance)
-        self.assertEqual(name, camera.name)
-        test = brayns.get_camera(self.instance, type(camera))
-        self.assertEqual(test, camera)
+    :param instance: Instance.
+    :type instance: Instance
+    :param camera: Current camera.
+    :type camera: Camera
+    """
+    name = camera.name
+    params = camera.get_properties()
+    instance.request(f'set-camera-{name}', params)

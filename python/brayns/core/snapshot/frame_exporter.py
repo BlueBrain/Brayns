@@ -26,7 +26,7 @@ from typing import Any
 from brayns.network import Instance
 from brayns.utils import ImageFormat, Resolution, serialize_view
 
-from ..camera import Camera
+from ..camera import Projection
 from ..renderer import Renderer
 from .key_frame import KeyFrame
 
@@ -51,8 +51,8 @@ class FrameExporter:
     :type format: ImageFormat, optional
     :param resolution: Resolution of the exported frames, defaults to None.
     :type resolution: Resolution | None, optional
-    :param camera: Camera to use for render, defaults to None.
-    :type camera: Camera | None, optional
+    :param projection: Projection to use for render, defaults to None.
+    :type projection: Projection | None, optional
     :param renderer: Renderer to use for render, defaults to None.
     :type renderer: Renderer | None, optional
     :param jpeg_quality: JPEG quality if format is JPEG, defaults to 100.
@@ -62,7 +62,7 @@ class FrameExporter:
     frames: list[KeyFrame]
     format: ImageFormat = ImageFormat.PNG
     resolution: Resolution | None = None
-    camera: Camera | None = None
+    projection: Projection | None = None
     renderer: Renderer | None = None
     jpeg_quality: int = 100
 
@@ -87,8 +87,8 @@ def _serialize_exporter(exporter: FrameExporter, folder: str) -> dict[str, Any]:
         ],
         'image_settings': _serialize_image_settings(exporter),
     }
-    if exporter.camera is not None:
-        message['camera'] = exporter.camera.get_properties_with_name()
+    if exporter.projection is not None:
+        message['camera'] = exporter.projection.get_properties_with_name()
     if exporter.renderer is not None:
         message['renderer'] = exporter.renderer.get_properties_with_name()
     return message

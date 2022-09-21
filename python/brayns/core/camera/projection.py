@@ -24,19 +24,19 @@ from typing import Any
 from brayns.utils import Bounds, View
 
 
-class Camera(ABC):
-    """Base class of all supported cameras (plugin dependent).
+class Projection(ABC):
+    """Base class of all supported camera projections (plugin dependent).
 
-    All cameras defined in the package inherit from this class.
+    All camera projections defined in the package inherit from this class.
 
-    Cameras can be identified using a unique name (ex: 'perspective').
+    Projections can be identified using a unique name (ex: 'perspective').
     """
 
     @classmethod
     @property
     @abstractmethod
     def name(cls) -> str:
-        """Name of the camera to identify it.
+        """Name of the projection to identify it.
 
         :return: Camera name.
         :rtype: str
@@ -56,7 +56,7 @@ class Camera(ABC):
 
     @abstractmethod
     def set_target(self, target: Bounds) -> None:
-        """Update the camera parameters to focus on given target.
+        """Update the projection parameters to focus on given target.
 
         :param target: Camera target.
         :type target: Bounds

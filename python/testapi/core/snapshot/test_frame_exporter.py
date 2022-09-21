@@ -45,7 +45,7 @@ class TestFrameExporter(SimpleTestCase):
         loader = brayns.BbpLoader(
             report=brayns.BbpReport.compartment('somas'),
             morphology=brayns.Morphology(
-                radius_multiplier=10
+                radius_multiplier=10,
             )
         )
         models = loader.load(self.instance, self.circuit)
@@ -58,29 +58,29 @@ class TestFrameExporter(SimpleTestCase):
         exporter.export_frames(self.instance, str(folder))
 
     def _create_exporter(self, bounds: brayns.Bounds) -> brayns.FrameExporter:
-        camera = brayns.PerspectiveCamera()
-        view = camera.fovy.get_front_view(bounds)
+        projection = brayns.PerspectiveProjection()
+        view = projection.fovy.get_front_view(bounds)
         self._adjust_lights(view)
         renderer = brayns.InteractiveRenderer()
         frames = self._get_frames(view)
         return brayns.FrameExporter(
             frames=frames,
             resolution=brayns.Resolution.full_hd,
-            camera=camera,
-            renderer=renderer
+            projection=projection,
+            renderer=renderer,
         )
 
     def _adjust_lights(self, view: brayns.View) -> None:
         light = brayns.DirectionalLight(
             intensity=5,
-            direction=view.direction
+            direction=view.direction,
         )
         brayns.add_light(self.instance, light)
 
     def _get_frames(self, view: brayns.View) -> list[brayns.KeyFrame]:
         frames = brayns.MovieFrames(
             fps=5,
-            slowing_factor=100
+            slowing_factor=100,
         )
         simulation = brayns.get_simulation(self.instance)
         indices = frames.get_indices(simulation)

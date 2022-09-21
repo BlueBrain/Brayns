@@ -18,23 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
 import brayns
-from tests.mock_instance import MockInstance
+from testapi.projection_test_case import ProjectionTestCase
 
 
-class TestGetCamera(unittest.TestCase):
+class TestCylindricProjection(ProjectionTestCase):
 
-    def test_get_camera(self) -> None:
-        ref = brayns.OrthographicCamera(3)
-        message = ref.get_properties()
-        instance = MockInstance(message)
-        test = brayns.get_camera(instance, brayns.OrthographicCamera)
-        self.assertEqual(test, ref)
-        self.assertEqual(instance.method, 'get-camera-orthographic')
-        self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_all(self) -> None:
+        projection = brayns.CylindricProjection(
+            fovy=brayns.Fovy(45, degrees=True),
+        )
+        self.run_tests(projection)

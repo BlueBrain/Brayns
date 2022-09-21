@@ -18,13 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import unittest
+
 import brayns
+from tests.mock_instance import MockInstance
 
-from .camera_test_case import CameraTestCase
+
+class TestGetCameraProjection(unittest.TestCase):
+
+    def test_get_camera_projection(self) -> None:
+        ref = brayns.OrthographicProjection(3)
+        message = ref.get_properties()
+        instance = MockInstance(message)
+        test = brayns.get_camera_projection(instance, type(ref))
+        self.assertEqual(test, ref)
+        self.assertEqual(instance.method, 'get-camera-orthographic')
+        self.assertIsNone(instance.params)
 
 
-class TestOrthographicCamera(CameraTestCase):
-
-    def test_all(self) -> None:
-        camera = brayns.OrthographicCamera(height=10)
-        self.run_tests(camera)
+if __name__ == '__main__':
+    unittest.main()

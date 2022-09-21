@@ -18,19 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
+import unittest
 
-from .camera import Camera
+import brayns
+from tests.mock_instance import MockInstance
 
 
-def set_camera(instance: Instance, camera: Camera) -> None:
-    """Set the current camera of the given instance.
+class TestSetCameraProjection(unittest.TestCase):
 
-    :param instance: Instance.
-    :type instance: Instance
-    :param camera: Current camera.
-    :type camera: Camera
-    """
-    name = camera.name
-    params = camera.get_properties()
-    instance.request(f'set-camera-{name}', params)
+    def test_set_camera_projection(self) -> None:
+        instance = MockInstance()
+        test = brayns.OrthographicProjection(3)
+        brayns.set_camera_projection(instance, test)
+        self.assertEqual(instance.method, 'set-camera-orthographic')
+        self.assertEqual(instance.params, test.get_properties())
+
+
+if __name__ == '__main__':
+    unittest.main()

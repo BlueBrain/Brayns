@@ -18,31 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import TypeVar
-
-from brayns.network import Instance
-
-from .camera import Camera
-
-T = TypeVar('T', bound=Camera)
+import brayns
+from testapi.projection_test_case import ProjectionTestCase
 
 
-def get_camera(instance: Instance, camera_type: type[T]) -> T:
-    """Retreive the current camera from an instance.
+class TestPerspectiveProjection(ProjectionTestCase):
 
-    The provided camera type must be the same as the current one.
-
-    Returned camera is of type ``camera_type``.
-
-    :param instance: Instance.
-    :type instance: Instance
-    :param camera_type: Camera type (ex: brayns.PerspectiveCamera).
-    :type camera_type: type[T]
-    :return: Current camera of ``instance``.
-    :rtype: T
-    """
-    name = camera_type.name
-    result = instance.request(f'get-camera-{name}')
-    camera = camera_type()
-    camera.update_properties(result)
-    return camera
+    def test_all(self) -> None:
+        projection = brayns.PerspectiveProjection(
+            fovy=brayns.Fovy(30, degrees=True),
+            aperture_radius=1,
+            focus_distance=2,
+        )
+        self.run_tests(projection)

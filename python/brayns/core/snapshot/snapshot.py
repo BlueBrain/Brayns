@@ -33,7 +33,7 @@ from brayns.utils import (
     serialize_view,
 )
 
-from ..camera import Camera
+from ..camera import Projection
 from ..renderer import Renderer
 
 
@@ -64,7 +64,7 @@ class Snapshot:
     resolution: Resolution | None = None
     frame: int | None = None
     view: View | None = None
-    camera: Camera | None = None
+    camera: Projection | None = None
     renderer: Renderer | None = None
     jpeg_quality: int = 100
 

@@ -60,9 +60,9 @@ with brayns.start(service, connector) as (process, instance):
     models = loader.load(instance, CIRCUIT)
     model = models[0]
 
-    camera = brayns.PerspectiveCamera()
+    projection = brayns.PerspectiveProjection()
 
-    view = camera.fovy.get_front_view(model.bounds)
+    view = projection.fovy.get_front_view(model.bounds)
 
     renderer = brayns.InteractiveRenderer()
 
@@ -76,7 +76,7 @@ with brayns.start(service, connector) as (process, instance):
     snapshot = brayns.Snapshot(
         resolution=brayns.Resolution.full_hd,
         view=view,
-        camera=camera,
+        camera=projection,
         renderer=renderer,
     )
 
@@ -100,7 +100,7 @@ with brayns.start(service, connector) as (process, instance):
         frames=brayns.KeyFrame.from_indices(indices, view),
         format=brayns.ImageFormat.PNG,
         resolution=brayns.Resolution.full_hd,
-        camera=camera,
+        projection=projection,
         renderer=renderer,
     )
 

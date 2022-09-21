@@ -18,21 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
 import brayns
-from tests.mock_instance import MockInstance
+
+from .simple_test_case import SimpleTestCase
 
 
-class TestSetCamera(unittest.TestCase):
+class ProjectionTestCase(SimpleTestCase):
 
-    def test_set_camera(self) -> None:
-        instance = MockInstance()
-        test = brayns.OrthographicCamera(3)
-        brayns.set_camera(instance, test)
-        self.assertEqual(instance.method, 'set-camera-orthographic')
-        self.assertEqual(instance.params, test.get_properties())
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def run_tests(self, projection: brayns.Projection) -> None:
+        brayns.set_camera_projection(self.instance, projection)
+        name = brayns.get_camera_name(self.instance)
+        self.assertEqual(name, projection.name)
+        test = brayns.get_camera_projection(self.instance, type(projection))
+        self.assertEqual(test, projection)

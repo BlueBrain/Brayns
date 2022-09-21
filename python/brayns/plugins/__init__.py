@@ -43,7 +43,7 @@ __all__ = [
     'color_circuit_by_method',
     'color_circuit',
     'ColorMethod',
-    'CylindricCamera',
+    'CylindricProjection',
     'GeometryType',
     'get_color_method_values',
     'get_color_methods',

@@ -23,12 +23,12 @@ from typing import Any
 
 from brayns.utils import Bounds, Vector3, View
 
-from .camera import Camera
+from .projection import Projection
 
 
 @dataclass
-class OrthographicCamera(Camera):
-    """Orthographic camera.
+class OrthographicProjection(Projection):
+    """Orthographic camera projection.
 
     Orthographic camera makes all objects having the same size regardless their
     distance from the camera.
@@ -45,9 +45,9 @@ class OrthographicCamera(Camera):
     @classmethod
     @property
     def name(cls) -> str:
-        """Camera name.
+        """Projection name.
 
-        :return: Camera name.
+        :return: Projection name.
         :rtype: str
         """
         return 'orthographic'

@@ -21,40 +21,52 @@
 import unittest
 
 import brayns
+from tests.mock_bounds import MockBounds
 
 
-class TestCylindricCamera(unittest.TestCase):
+class TestPerspectiveProjection(unittest.TestCase):
 
     def test_get_name(self) -> None:
-        test = brayns.CylindricCamera.name
-        ref = 'cylindric'
+        test = brayns.PerspectiveProjection.name
+        ref = 'perspective'
         self.assertEqual(test, ref)
 
     def test_get_front_view(self) -> None:
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
-        camera = brayns.CylindricCamera()
-        test = camera.get_front_view(target)
-        ref = camera.fovy.get_front_view(target)
+        target = MockBounds.bounds
+        projection = brayns.PerspectiveProjection()
+        test = projection.get_front_view(target)
+        ref = projection.fovy.get_front_view(target)
         self.assertEqual(test, ref)
 
     def test_set_target(self) -> None:
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
-        test = brayns.CylindricCamera()
+        target = MockBounds.bounds
+        test = brayns.PerspectiveProjection()
+        ref = brayns.PerspectiveProjection()
         test.set_target(target)
-        ref = brayns.CylindricCamera()
         self.assertEqual(test, ref)
 
     def test_get_properties(self) -> None:
-        camera = brayns.CylindricCamera(
+        projection = brayns.PerspectiveProjection(
             fovy=brayns.Fovy(30, degrees=True),
+            aperture_radius=1,
+            focus_distance=2,
         )
-        test = camera.get_properties()
+        test = projection.get_properties()
+        self.assertEqual(len(test), 3)
         self.assertAlmostEqual(test['fovy'], 30)
+        self.assertEqual(test['aperture_radius'], 1)
+        self.assertEqual(test['focus_distance'], 2)
 
     def test_update_properties(self) -> None:
-        test = brayns.CylindricCamera()
-        test.update_properties({'fovy': 30})
+        test = brayns.PerspectiveProjection()
+        test.update_properties({
+            'fovy': 30,
+            'aperture_radius': 1,
+            'focus_distance': 2,
+        })
         self.assertAlmostEqual(test.fovy.degrees, 30)
+        self.assertEqual(test.aperture_radius, 1)
+        self.assertEqual(test.focus_distance, 2)
 
 
 if __name__ == '__main__':

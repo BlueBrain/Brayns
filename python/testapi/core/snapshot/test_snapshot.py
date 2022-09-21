@@ -65,7 +65,7 @@ class TestSnapshot(SimpleTestCase):
     def _add_light(self, direction: brayns.Vector3) -> None:
         light = brayns.DirectionalLight(
             intensity=5,
-            direction=direction
+            direction=direction,
         )
         brayns.add_light(self.instance, light)
 
@@ -76,7 +76,7 @@ class TestSnapshot(SimpleTestCase):
         return models[0]
 
     def _create_snapshot(self, bounds: brayns.Bounds) -> brayns.Snapshot:
-        camera = brayns.PerspectiveCamera()
+        camera = brayns.PerspectiveProjection()
         view = camera.fovy.get_front_view(bounds)
         view.position += brayns.Vector3.forward
         renderer = brayns.InteractiveRenderer()
@@ -85,5 +85,5 @@ class TestSnapshot(SimpleTestCase):
             frame=0,
             view=view,
             camera=camera,
-            renderer=renderer
+            renderer=renderer,
         )
