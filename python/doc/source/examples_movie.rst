@@ -48,3 +48,5 @@ FFMPEG executable is `ffmpeg` by default but can be modified.
     The frame filenames must have the exporter format with 5 digits specifying
     the frame index and the format extension (.png or .jpg). If the
     `FrameExporter` was used, they are already at the good format.
+
+    Example: 00001.png, 00002.png, ...

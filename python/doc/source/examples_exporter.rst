@@ -3,14 +3,14 @@ Export frames
 
 When a model has a simulation attached, we might want to render multiple frames
 to make a movie from them. To avoid recreating a snapshot context in the backend
-for each image, a frame export allows to create the context once and use it
-to take multiple snapshots with different parameters.
+for each image, a frame export allows us to create the context once and use it
+to take multiple snapshots more efficiently.
 
 Simulation
 ----------
 
-As previously mentioned, the simulation settings are global in Brayns, which
-means we have one single state for the simulation in an instance.
+The simulation settings are global in Brayns, which means we have one single
+state for the simulation in an instance.
 
 .. code-block:: python
 
@@ -34,12 +34,13 @@ timestamp and vice-versa.
 Frame indices
 -------------
 
-If we use the parameters set when we took a snapshot, we will need the indices
-of the frames we want to export.
+First we have to specify the indices of the simulation frames we want to export.
 
 Usually, we just know the start and end frame we want to render, the movie FPS
-(frames per second) and possibly how much slower we want the movie. We can use a
-helper class `MovieFrames` to generate the indices from these data.
+(frames per second) and possibly how much slower we want the movie.
+
+To generate frame indices from these informations, We can use a helper class
+named `MovieFrames`.
 
 .. code-block:: python
 
@@ -54,8 +55,7 @@ helper class `MovieFrames` to generate the indices from these data.
 
 .. attention::
 
-    The formula used to compute the frame indices is using the following formula
-    to compute the index step between two frames to render:
+    The index step is computed with the following formula:
 
     step = simulation_fps / movie_fps / slowing_factor
     
@@ -72,7 +72,8 @@ View
 
 As we render multiple frames, we can have one view per frame. This is specified
 using a list `KeyFrame` objects, each having a frame index and a camera view.
-Here we will suppose it is the same for all (static camera).
+
+Here we will suppose the view is the same for all frames (static camera).
 
 .. code-block:: python
 
@@ -82,7 +83,7 @@ Color ramp
 ----------
 
 The color ramp is an object attached to models with a simulation. It allows to
-map a value range (usually voltage) to a color range (list of color).
+map a value range (usually voltages) to a color range (list of colors).
 
 This part is optional as Brayns build a default color ramp for circuits.
 
@@ -94,7 +95,7 @@ This part is optional as Brayns build a default color ramp for circuits.
     # Set the simulation values.
     ramp.value_range = brayns.ValueRange(-80, 10)
 
-    # Choose colors (could be Color4 for simple cases) as follows:
+    # Choose colors (could be Color4 for simple cases):
     # Simulation values of -80 and below will be red.
     # Simulation values around -35 (middle of value range) will be green.
     # Simulation values of +10 and above will be blue.
@@ -105,9 +106,10 @@ This part is optional as Brayns build a default color ramp for circuits.
         brayns.Color3.blue,
     ]
 
-    # Optional opacity curve for complex alpha channel as follows:
+    # Optional opacity curve for complex alpha channels:
     # Colors from 0% to 50% of the value range will be transparent.
-    # Other colors will be interpolated from alpha = 0 to alpha = 1.
+    # Colors from 50% to 100% of the value range will be interpolated from alpha
+    # = 0 to alpha = 1.
     curve = brayns.OpacityCurve([
         brayns.ControlPoint(0.0, 0.0),
         brayns.ControlPoint(0.5, 0.0),
@@ -129,13 +131,13 @@ constructor.
 
 .. code-block:: python
 
-    # Frame exporter specifications.
+    # Frame export specifications.
     exporter = brayns.FrameExporter(
         frames=key_frames,
         format=brayns.ImageFormat.PNG,
         resolution=brayns.Resolution.full_hd,
-        camera=camera,
-        renderer=renderer,
+        projection=brayns.PerspectiveProjection(),
+        renderer=brayns.InteractiveRenderer(),
     )
 
     # Export to given folder.

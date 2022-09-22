@@ -3,7 +3,7 @@ Take a snapshot
 
 Now that we can load models, it is time to render something.
 
-Bounds
+Target
 ------
 
 First we have to choose which models to render and for that we need the bounds
@@ -12,13 +12,13 @@ of the area we want to see in the snapshot.
 .. code-block:: python
 
     # Focus on a specific model.
-    bounds = model.bounds
+    target = model.bounds
 
     # Or the entire scene.
-    bounds = brayns.get_bounds(instance)
+    target = brayns.get_bounds(instance)
 
-    # Or some models.
-    bounds = brayns.merge_bounds([
+    # Or a list of models.
+    target = brayns.merge_bounds([
         item.bounds
         for item in models
     ])
@@ -26,55 +26,31 @@ of the area we want to see in the snapshot.
 Camera
 ------
 
-Brayns has a default camera it uses to render stream images
-(BraynsCircuitStudio) but it is usally better to define a snapshot specific
-camera.
+A camera is composed of a view (position, target and up direction) and a
+projection (3D -> 2D transformation).
+
+As the current camera of a brayns instance is not automatically moved to focus
+on the current scene, a custom camera is needed to see something.
 
 .. code-block:: python
 
-    camera = brayns.PerspectiveCamera(
-        fovy=brayns.Fovy(45, degrees=True),
-    )
+    # Compute camera view and projection to focus on target.
+    # The camera use the front view by default (X right, Y up and Z front).
+    camera = brayns.look_at(target)
 
-    # Or
+    # We can also specify the projection manually (Perspective by default).
+    projection = brayns.OrthographicProjection()
+    camera = brayns.look_at(target, projection)
 
-    camera = brayns.OrthographicCamera(
-        height=1.5 * bounds.height,
-    )
-
-Here we can choose to use a perspective camera with a given field of view (zoom
-level) or an orthographic one with given height (the width is computed using the
-aspect ratio of the snapshot resolution).
-
-View
-----
-
-Depending on the bounds and the camera, we need also to choose the point of view
-from which we want to render our snapshot.
-
-.. code-block:: python
-
-    # For a perspective camera, the FOVY gives the full-screen distance.
-    view = camera.fovy.get_front_view(bounds)
-
-    # For an orthographic camera, we just take some margin as the viewport is
-    # already defined by the camera height.
-    view = brayns.OrthographicCamera.get_front_view(bounds)
-
-    # We can also rotate the camera position around the target.
-    euler = brayns.Vector3(0, 90, 0)
-    rotation = brayns.Rotation.from_euler(euler, degrees=True)
-    view.position = rotation.apply(view.position, center=view.target)
-
-    # Or move it closer to the target.
-    vector = view.position - view.target
-    vector *= 0.75
-    view.position = view.target + vector
+    # The camera can be moved manually.
+    # Here we rotate of -90 degrees around X using the camera target as center.
+    top_view = brayns.Vector3(-90, 0, 0)
+    camera.position = top_view.apply(camera.position, center=camera.target)
 
 Renderer
 --------
 
-Brayns has two renderers available, one for fast, interactive rendering and
+Brayns has two renderers available, one for fast / interactive rendering and
 another one for slow and precise rendering (production).
 
 .. code-block:: python
@@ -99,7 +75,7 @@ to see the models we want to render.
 
     light = brayns.DirectionalLight(
         intensity=4,
-        direction=view.direction,
+        direction=camera.direction,
     )
 
     light_id = brayns.add_light(instance, light)
@@ -119,7 +95,6 @@ Now we have everything we need to take a snapshot.
     snapshot = brayns.Snapshot(
         resolution=brayns.Resolution.full_hd,
         frame=3,
-        view=view,
         camera=camera,
         renderer=renderer,
     )
@@ -129,5 +104,5 @@ Now we have everything we need to take a snapshot.
 We can here specify also a resolution and a simulation frame. If any of the
 parameter is None, then the current object of the instance is taken.
 
-That's it, snapshots can also be saved on the instance machine using
+That's it, snapshots can also be saved on the backend machine using
 `save_remotely` or retreived as raw bytes using `download`.
