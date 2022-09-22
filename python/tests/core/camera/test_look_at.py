@@ -18,30 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .camera import Camera
-from .get_camera import get_camera
-from .get_camera_name import get_camera_name
-from .get_camera_projection import get_camera_projection
-from .get_camera_view import get_camera_view
-from .look_at import look_at
-from .orthographic_projection import OrthographicProjection
-from .perspective_projection import PerspectiveProjection
-from .projection import Projection
-from .set_camera import set_camera
-from .set_camera_projection import set_camera_projection
-from .set_camera_view import set_camera_view
+import unittest
 
-__all__ = [
-    'Camera',
-    'get_camera_name',
-    'get_camera_projection',
-    'get_camera_view',
-    'get_camera',
-    'look_at',
-    'OrthographicProjection',
-    'PerspectiveProjection',
-    'Projection',
-    'set_camera_projection',
-    'set_camera_view',
-    'set_camera',
-]
+import brayns
+from tests.mock_bounds import MockBounds
+
+
+class TestLookAt(unittest.TestCase):
+
+    def test_look_at(self) -> None:
+        target = MockBounds.bounds
+        test = brayns.look_at(target, brayns.OrthographicProjection())
+        ref = brayns.Camera(projection=brayns.OrthographicProjection())
+        ref.look_at(target)
+        self.assertEqual(test, ref)
+
+    def test_look_at_default(self) -> None:
+        target = MockBounds.bounds
+        test = brayns.look_at(target)
+        ref = brayns.Camera()
+        ref.look_at(target)
+        self.assertEqual(test, ref)
+
+
+if __name__ == '__main__':
+    unittest.main()

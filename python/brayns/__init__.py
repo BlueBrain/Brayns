@@ -113,6 +113,7 @@ __all__ = [
     'LoaderInfo',
     'Logger',
     'LogLevel',
+    'look_at',
     'lower_bound',
     'Manager',
     'Material',

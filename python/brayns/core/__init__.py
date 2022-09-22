@@ -95,6 +95,7 @@ __all__ = [
     'Light',
     'Loader',
     'LoaderInfo',
+    'look_at',
     'Material',
     'MatteMaterial',
     'MeshLoader',

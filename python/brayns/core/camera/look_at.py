@@ -18,30 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
+from brayns.utils import Bounds
+
 from .camera import Camera
-from .get_camera import get_camera
-from .get_camera_name import get_camera_name
-from .get_camera_projection import get_camera_projection
-from .get_camera_view import get_camera_view
-from .look_at import look_at
-from .orthographic_projection import OrthographicProjection
 from .perspective_projection import PerspectiveProjection
 from .projection import Projection
-from .set_camera import set_camera
-from .set_camera_projection import set_camera_projection
-from .set_camera_view import set_camera_view
 
-__all__ = [
-    'Camera',
-    'get_camera_name',
-    'get_camera_projection',
-    'get_camera_view',
-    'get_camera',
-    'look_at',
-    'OrthographicProjection',
-    'PerspectiveProjection',
-    'Projection',
-    'set_camera_projection',
-    'set_camera_view',
-    'set_camera',
-]
+
+def look_at(target: Bounds, projection: Projection | None = None) -> Camera:
+    """Shortcut to create a camera focusing on given target.
+
+    See ``Camera.look_at`` for more details.
+
+    :param target: Camera target bounds.
+    :type target: Bounds
+    :param projection: Camera projection, defaults to PerspectiveProjection.
+    :type projection: Projection | None, optional
+    :return: Camera looking at target.
+    :rtype: Camera
+    """
+    if projection is None:
+        projection = PerspectiveProjection()
+    camera = Camera(projection=projection)
+    camera.look_at(target)
+    return camera
