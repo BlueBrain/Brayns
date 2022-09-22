@@ -18,72 +18,73 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any
+from abc import ABC, abstractmethod
+from typing import Any, TypeVar
 
-from brayns.utils import Bounds, Vector3, View
+from brayns.utils import Bounds, View
 
-from .camera import Camera
+T = TypeVar('T', bound='Projection')
 
 
-@dataclass
-class OrthographicCamera(Camera):
-    """Orthographic camera.
+class Projection(ABC):
+    """Base class of all supported camera projections (plugin dependent).
 
-    Orthographic camera makes all objects having the same size regardless their
-    distance from the camera.
+    All camera projections defined in the package inherit from this class.
 
-    The viewport width is computed using the aspect ratio of the current
-    resolution of the instance (framebuffer size).
-
-    :param height: Viewport height in world coordinates.
-    :type height: float
+    Projections can be identified using a unique name (ex: 'perspective').
     """
-
-    height: float = 0.0
 
     @classmethod
     @property
+    @abstractmethod
     def name(cls) -> str:
-        """Camera name.
+        """Name of the projection to identify it.
 
         :return: Camera name.
         :rtype: str
         """
-        return 'orthographic'
+        pass
 
+    @abstractmethod
     def get_front_view(self, target: Bounds) -> View:
-        """Helper method to get the front view of a target object.
-
-        Distance from the object doesn't matter as long as no other objects are
-        between the camera and the target.
-
-        By default, the margin is half of the target depth.
+        """Compute the front view to focus on given target.
 
         :param target: Camera target.
         :type target: Bounds
         :return: Front view to see the target entirely.
         :rtype: View
         """
-        center = target.center
-        distance = target.depth
-        position = center + distance * Vector3.forward
-        return View(position, center)
+        pass
 
+    @abstractmethod
     def set_target(self, target: Bounds) -> None:
-        """Set camera height to target height.
+        """Update the projection parameters to focus on given target.
 
         :param target: Camera target.
         :type target: Bounds
         """
-        self.height = target.height
+        pass
 
+    @abstractmethod
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        return {
-            'height': self.height,
-        }
+        pass
 
+    @abstractmethod
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.height = message['height']
+        pass
+
+    @classmethod
+    def from_properties(cls: type[T], message: dict[str, Any]) -> T:
+        """Low level API to deserialize from JSON."""
+        projection = cls()
+        projection.update_properties(message)
+        return projection
+
+    def get_properties_with_name(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        return {
+            'name': self.name,
+            'params': self.get_properties(),
+        }

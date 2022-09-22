@@ -4,17 +4,8 @@ Running a Brayns backend service
 ================================
 
 For any kind of vizualization, a running instance of Brayns renderer backend
-with a websocket server (braynsService) is required. This component will
-perform the computationally expensive tasks and is monitored using a JSON-RPC
-API on websockets (e.g. from the Python client).
-
-The URI of the websocket server of the backend instance is specified when it is
-started with the format "host:port" (ex: localhost:5000). The host specfies the
-IP addresses that can connect to it, use 0.0.0.0 (wildcard) to bypass this
-restriction.
-
-The Python API will need the IP address of the machine on which the backed
-instance has been started and the port specified in the server URI (i.e. 5000).
+with a websocket server (braynsService) is required to perform the
+computationally expensive tasks.
 
 An instance can be started using its executable (braynsService binary) with the
 following command line:
@@ -23,8 +14,20 @@ following command line:
 
     $ braynsService --uri 0.0.0.0:5000
 
-To be able to load circuits, additional plugins must be loaded using keyword
-arguments (see :ref:`plugins-label`).
+Websocket server
+----------------
+
+A brayns instance runs a websocket server if an URI is specified in the command
+line and can be monitored from an external application using JSON-RPC messages.
+
+Plugins
+-------
+
+Science-specific tasks (loading circuits, etc...) are performed by plugins.
+Plugins can be loaded as command line arguments (see :ref:`plugins-label`).
+
+Log level
+---------
 
 The log level can also be configured using --log-level followed by either trace,
 debug, info, warn, error, critical or off. This is useful for debugging and see
@@ -34,13 +37,16 @@ the requests sent from and received by the instance.
 
     $ braynsService --uri 0.0.0.0:5000 --log-level debug
 
+Examples
+--------
+
 Example of commonly used instance:
 
 .. code-block:: console
 
     $ braynsService --uri 0.0.0.0:5000 --log-level debug --plugin braynsCircuitExplorer
 
-The command line usage of an instance can be retreived with:
+The command line usage of an instance can also be retreived with:
 
 .. code-block:: console
 
@@ -50,6 +56,8 @@ Running an instance on BB5
 --------------------------
 
 On BB5 the binary executable of braynsService is provided through spack.
+
+An instance can be run on a BB5 node with the following steps:
 
 * 1 - Allocate a node on BB5:
 
@@ -63,10 +71,7 @@ After a successful allocation, an SSH connection with the node is opened
 automatically. The node ID is composed of alpha-numeric characters, for example:
 ``r2i2n11``.
 
-To connect to a ``braynsService`` instance running on this node, the URI from a
-BB5 client will be r2i2n11:5000.
-
-* 2 - Launch the ``braynsService`` server:
+* 2 - Launch the ``braynsService`` backend instance:
 
 To access Brayns binary executable, user must load brayns module using:
 

@@ -18,41 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Plugins subpackage.
+from brayns.network import Instance
 
-It includes all science related features and optional components.
+from .projection import Projection
 
-Main functionalities are BBP circuit loading support, circuit coloring, raw
-morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
-"""
 
-from .bbp import *
-from .coloring import *
-from .cylindric_camera import *
-from .morphology import *
-from .sonata import *
+def set_camera_projection(instance: Instance, camera: Projection) -> None:
+    """Set the current camera of the given instance.
 
-__all__ = [
-    'BbpCells',
-    'BbpLoader',
-    'BbpReport',
-    'BbpReportType',
-    'CellId',
-    'color_circuit_by_id',
-    'color_circuit_by_method',
-    'color_circuit',
-    'ColorMethod',
-    'CylindricProjection',
-    'GeometryType',
-    'get_color_method_values',
-    'get_color_methods',
-    'Morphology',
-    'MorphologyLoader',
-    'SonataEdgePopulation',
-    'SonataLoader',
-    'SonataNodePopulation',
-    'SonataNodes',
-    'SonataReport',
-    'SonataReportType',
-]
+    :param instance: Instance.
+    :type instance: Instance
+    :param camera: Current camera.
+    :type camera: Camera
+    """
+    name = camera.name
+    params = camera.get_properties()
+    instance.request(f'set-camera-{name}', params)

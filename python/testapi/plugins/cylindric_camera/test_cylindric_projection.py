@@ -18,41 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Plugins subpackage.
+import brayns
+from testapi.projection_test_case import ProjectionTestCase
 
-It includes all science related features and optional components.
 
-Main functionalities are BBP circuit loading support, circuit coloring, raw
-morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
-"""
+class TestCylindricProjection(ProjectionTestCase):
 
-from .bbp import *
-from .coloring import *
-from .cylindric_camera import *
-from .morphology import *
-from .sonata import *
-
-__all__ = [
-    'BbpCells',
-    'BbpLoader',
-    'BbpReport',
-    'BbpReportType',
-    'CellId',
-    'color_circuit_by_id',
-    'color_circuit_by_method',
-    'color_circuit',
-    'ColorMethod',
-    'CylindricProjection',
-    'GeometryType',
-    'get_color_method_values',
-    'get_color_methods',
-    'Morphology',
-    'MorphologyLoader',
-    'SonataEdgePopulation',
-    'SonataLoader',
-    'SonataNodePopulation',
-    'SonataNodes',
-    'SonataReport',
-    'SonataReportType',
-]
+    def test_all(self) -> None:
+        projection = brayns.CylindricProjection(
+            fovy=brayns.Fovy(45, degrees=True),
+        )
+        self.run_tests(projection)

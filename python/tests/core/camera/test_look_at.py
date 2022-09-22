@@ -21,17 +21,24 @@
 import unittest
 
 import brayns
-from tests.mock_instance import MockInstance
+from tests.mock_bounds import MockBounds
 
 
-class TestSetCamera(unittest.TestCase):
+class TestLookAt(unittest.TestCase):
 
-    def test_set_camera(self) -> None:
-        instance = MockInstance()
-        test = brayns.OrthographicCamera(3)
-        brayns.set_camera(instance, test)
-        self.assertEqual(instance.method, 'set-camera-orthographic')
-        self.assertEqual(instance.params, test.get_properties())
+    def test_look_at(self) -> None:
+        target = MockBounds.bounds
+        test = brayns.look_at(target, brayns.OrthographicProjection())
+        ref = brayns.Camera(projection=brayns.OrthographicProjection())
+        ref.look_at(target)
+        self.assertEqual(test, ref)
+
+    def test_look_at_default(self) -> None:
+        target = MockBounds.bounds
+        test = brayns.look_at(target)
+        ref = brayns.Camera()
+        ref.look_at(target)
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

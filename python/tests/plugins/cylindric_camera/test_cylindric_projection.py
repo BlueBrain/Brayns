@@ -21,52 +21,40 @@
 import unittest
 
 import brayns
-from tests.mock_bounds import MockBounds
 
 
-class TestPerspectiveCamera(unittest.TestCase):
+class TestCylindricProjection(unittest.TestCase):
 
     def test_get_name(self) -> None:
-        test = brayns.PerspectiveCamera.name
-        ref = 'perspective'
+        test = brayns.CylindricProjection.name
+        ref = 'cylindric'
         self.assertEqual(test, ref)
 
     def test_get_front_view(self) -> None:
-        target = MockBounds.bounds
-        camera = brayns.PerspectiveCamera()
-        test = camera.get_front_view(target)
-        ref = camera.fovy.get_front_view(target)
+        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
+        projection = brayns.CylindricProjection()
+        test = projection.get_front_view(target)
+        ref = projection.fovy.get_front_view(target)
         self.assertEqual(test, ref)
 
     def test_set_target(self) -> None:
-        target = MockBounds.bounds
-        test = brayns.PerspectiveCamera()
-        ref = brayns.PerspectiveCamera()
+        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
+        test = brayns.CylindricProjection()
         test.set_target(target)
+        ref = brayns.CylindricProjection()
         self.assertEqual(test, ref)
 
     def test_get_properties(self) -> None:
-        camera = brayns.PerspectiveCamera(
+        projection = brayns.CylindricProjection(
             fovy=brayns.Fovy(30, degrees=True),
-            aperture_radius=1,
-            focus_distance=2,
         )
-        test = camera.get_properties()
-        self.assertEqual(len(test), 3)
+        test = projection.get_properties()
         self.assertAlmostEqual(test['fovy'], 30)
-        self.assertEqual(test['aperture_radius'], 1)
-        self.assertEqual(test['focus_distance'], 2)
 
     def test_update_properties(self) -> None:
-        test = brayns.PerspectiveCamera()
-        test.update_properties({
-            'fovy': 30,
-            'aperture_radius': 1,
-            'focus_distance': 2,
-        })
+        test = brayns.CylindricProjection()
+        test.update_properties({'fovy': 30})
         self.assertAlmostEqual(test.fovy.degrees, 30)
-        self.assertEqual(test.aperture_radius, 1)
-        self.assertEqual(test.focus_distance, 2)
 
 
 if __name__ == '__main__':

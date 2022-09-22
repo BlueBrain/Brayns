@@ -21,67 +21,69 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.utils import Bounds, Fovy, View
+from brayns.utils import Bounds, Vector3, View
 
-from .camera import Camera
+from .projection import Projection
 
 
 @dataclass
-class PerspectiveCamera(Camera):
-    """Perspective camera.
+class OrthographicProjection(Projection):
+    """Orthographic camera projection.
 
-    Perspective camera use a field of view angle to compute the size of the
-    objects depending on their distance from the camera.
+    Orthographic camera makes all objects having the same size regardless their
+    distance from the camera.
 
-    The field of view (fovy) can be used to compute full screen view of a given
-    target object.
+    The viewport width is computed using the aspect ratio of the current
+    resolution of the instance (framebuffer size).
 
-    :param fovy: Field of view angle (45 degrees by default).
-    :type fovy: Fovy
-    :param aperture_radius: Optional aperture radius.
-    :type aperture_radius: float
-    :param focus_distance: Optional focus distance.
-    :type focus_distance: float
+    :param height: Viewport height in world coordinates.
+    :type height: float
     """
 
-    fovy: Fovy = Fovy(45, degrees=True)
-    aperture_radius: float = 0.0
-    focus_distance: float = 1.0
+    height: float = 0.0
 
     @classmethod
     @property
     def name(cls) -> str:
-        """Camera name.
+        """Projection name.
 
-        :return: Camera name.
+        :return: Projection name.
         :rtype: str
         """
-        return 'perspective'
+        return 'orthographic'
 
     def get_front_view(self, target: Bounds) -> View:
-        """Use fovy to compute the front view.
+        """Helper method to get the front view of a target object.
+
+        Distance from the object doesn't matter as long as no other objects are
+        between the camera and the target.
+
+        By default, the margin is half of the target depth.
 
         :param target: Camera target.
         :type target: Bounds
-        :return: Front view based on self.fovy.
+        :return: Front view to see the target entirely.
         :rtype: View
         """
-        return self.fovy.get_front_view(target)
+        center = target.center
+        distance = target.depth
+        position = center + distance * Vector3.forward
+        return View(position, center)
 
     def set_target(self, target: Bounds) -> None:
-        """Does nothing."""
-        pass
+        """Set camera height to target height.
+
+        :param target: Camera target.
+        :type target: Bounds
+        """
+        self.height = target.height
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'fovy': self.fovy.degrees,
-            'aperture_radius': self.aperture_radius,
-            'focus_distance': self.focus_distance,
+            'height': self.height,
         }
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.fovy = Fovy(message['fovy'], degrees=True)
-        self.aperture_radius = message['aperture_radius']
-        self.focus_distance = message['focus_distance']
+        self.height = message['height']

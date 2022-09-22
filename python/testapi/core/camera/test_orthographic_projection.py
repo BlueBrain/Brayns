@@ -19,14 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+from testapi.projection_test_case import ProjectionTestCase
 
 
-class CameraTestCase(SimpleTestCase):
+class TestOrthographicProjection(ProjectionTestCase):
 
-    def run_tests(self, camera: brayns.Camera) -> None:
-        brayns.set_camera(self.instance, camera)
-        name = brayns.get_camera_name(self.instance)
-        self.assertEqual(name, camera.name)
-        test = brayns.get_camera(self.instance, type(camera))
-        self.assertEqual(test, camera)
+    def test_all(self) -> None:
+        projection = brayns.OrthographicProjection(height=10)
+        self.run_tests(projection)

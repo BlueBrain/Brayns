@@ -21,16 +21,17 @@
 from brayns.network import Instance
 
 from .camera import Camera
+from .set_camera_projection import set_camera_projection
+from .set_camera_view import set_camera_view
 
 
 def set_camera(instance: Instance, camera: Camera) -> None:
-    """Set the current camera of the given instance.
+    """Shortcut to update the camera view and projection.
 
     :param instance: Instance.
     :type instance: Instance
-    :param camera: Current camera.
+    :param camera: Current camera to use for instance.
     :type camera: Camera
     """
-    name = camera.name
-    params = camera.get_properties()
-    instance.request(f'set-camera-{name}', params)
+    set_camera_view(instance, camera.view)
+    set_camera_projection(instance, camera.projection)

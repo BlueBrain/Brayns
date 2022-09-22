@@ -25,13 +25,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.network import Instance
-from brayns.utils import (
-    ImageFormat,
-    Resolution,
-    View,
-    parse_image_format,
-    serialize_view,
-)
+from brayns.utils import ImageFormat, Resolution, parse_image_format, serialize_view
 
 from ..camera import Camera
 from ..renderer import Renderer
@@ -51,8 +45,6 @@ class Snapshot:
     :type resolution: Resolution | None, optional
     :param frame: Simulation index, defaults to None.
     :type frame: int | None, optional
-    :param view: Camera view, defaults to None.
-    :type view: View | None, optional
     :param camera: Camera used to render, defaults to None.
     :type camera: Camera | None, optional
     :param renderer: Renderer used to render, defaults to None.
@@ -63,7 +55,6 @@ class Snapshot:
 
     resolution: Resolution | None = None
     frame: int | None = None
-    view: View | None = None
     camera: Camera | None = None
     renderer: Renderer | None = None
     jpeg_quality: int = 100
@@ -118,10 +109,10 @@ def _serialize_snapshot(snapshot: Snapshot, format: ImageFormat, path: str | Non
         message['file_path'] = path
     if snapshot.frame is not None:
         message['simulation_frame'] = snapshot.frame
-    if snapshot.view is not None:
-        message['camera_view'] = serialize_view(snapshot.view)
     if snapshot.camera is not None:
-        message['camera'] = snapshot.camera.get_properties_with_name()
+        camera = snapshot.camera
+        message['camera_view'] = serialize_view(camera.view)
+        message['camera'] = camera.projection.get_properties_with_name()
     if snapshot.renderer is not None:
         message['renderer'] = snapshot.renderer.get_properties_with_name()
     return message

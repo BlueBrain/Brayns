@@ -21,6 +21,9 @@ Otherwise the Brayns Python client is distributed as a Python package named
 Currently only Python 3.9+ is supported so for platforms with older system
 version, it can be installed using:
 
+Python version
+--------------
+
 .. code-block:: console
 
     $ sudo apt install python3.9
@@ -29,9 +32,12 @@ As for all Python projects, it is recommended (but not required) to use a
 virtual environment. It can be created with the following commands (update the
 paths with the one your environment folder):
 
+Python virtual environment (optional)
+-------------------------------------
+
 .. code-block:: console
 
-    # Use python3.9 (or python3.10, ...) if system version is older
+    # Use python3.9 instead of python if system version is older
     $ python -m venv mypythonvenv
 
 Now it can be activated with:
@@ -49,6 +55,9 @@ And deactivated with:
 With the Python environment activated (optional) one of the following methods
 can be used to install brayns Python package.
 
+Package installation
+--------------------
+
 From Python Pacakge Index (PyPI)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -60,8 +69,8 @@ The easiest way is to access the latest release is the following:
 
 And that's it, no other steps are required.
 
-Alternative from source
-~~~~~~~~~~~~~~~~~~~~~~~
+From source
+~~~~~~~~~~~
 
 For development or to get a more recent version than the one released on PyPI,
 the package can also be installed from the github repository sources using:
@@ -92,14 +101,14 @@ It can be activated as follows:
 .. code-block:: console
 
     # Allocate a node, can also be done with sbatch
-    $ salloc --account=proj3 -p interactive -t 8:00:00 --exclusive --constraint=cpu -c 72 --mem 0
+    $ salloc --account=<projXXX> -p interactive -t 8:00:00 --exclusive --constraint=cpu -c 72 --mem 0
 
     # Load brayns module with Python
     $ module load unstable
     $ module load python
     $ module load brayns/latest
 
-Now brayns should be available in the Python system version.
+Now brayns package should be available in the Python system version.
 
 The renderer backend (braynsService) should also be available in the current
 path once brayns module is loaded. Otherwise on a local machine, it must be

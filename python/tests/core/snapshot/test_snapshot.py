@@ -40,8 +40,7 @@ class TestSnapshot(unittest.TestCase):
         return brayns.Snapshot(
             resolution=brayns.Resolution(1920, 1080),
             frame=12,
-            view=MockView.view,
-            camera=brayns.PerspectiveCamera(),
+            camera=brayns.Camera(view=MockView.view),
             renderer=brayns.ProductionRenderer(),
             jpeg_quality=50,
         )
@@ -57,7 +56,7 @@ class TestSnapshot(unittest.TestCase):
             },
             'simulation_frame': 12,
             'camera_view': MockView.message,
-            'camera': brayns.PerspectiveCamera().get_properties_with_name(),
+            'camera': brayns.PerspectiveProjection().get_properties_with_name(),
             'renderer': brayns.ProductionRenderer().get_properties_with_name(),
         }
 

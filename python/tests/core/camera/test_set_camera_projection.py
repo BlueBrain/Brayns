@@ -18,41 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Plugins subpackage.
+import unittest
 
-It includes all science related features and optional components.
+import brayns
+from tests.mock_instance import MockInstance
 
-Main functionalities are BBP circuit loading support, circuit coloring, raw
-morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
-"""
 
-from .bbp import *
-from .coloring import *
-from .cylindric_camera import *
-from .morphology import *
-from .sonata import *
+class TestSetCameraProjection(unittest.TestCase):
 
-__all__ = [
-    'BbpCells',
-    'BbpLoader',
-    'BbpReport',
-    'BbpReportType',
-    'CellId',
-    'color_circuit_by_id',
-    'color_circuit_by_method',
-    'color_circuit',
-    'ColorMethod',
-    'CylindricProjection',
-    'GeometryType',
-    'get_color_method_values',
-    'get_color_methods',
-    'Morphology',
-    'MorphologyLoader',
-    'SonataEdgePopulation',
-    'SonataLoader',
-    'SonataNodePopulation',
-    'SonataNodes',
-    'SonataReport',
-    'SonataReportType',
-]
+    def test_set_camera_projection(self) -> None:
+        instance = MockInstance()
+        test = brayns.OrthographicProjection(3)
+        brayns.set_camera_projection(instance, test)
+        self.assertEqual(instance.method, 'set-camera-orthographic')
+        self.assertEqual(instance.params, test.get_properties())
+
+
+if __name__ == '__main__':
+    unittest.main()

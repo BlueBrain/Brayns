@@ -18,13 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
+from __future__ import annotations
 
-from .camera_test_case import CameraTestCase
+from brayns.utils import Bounds
+
+from .camera import Camera
+from .perspective_projection import PerspectiveProjection
+from .projection import Projection
 
 
-class TestOrthographicCamera(CameraTestCase):
+def look_at(target: Bounds, projection: Projection | None = None) -> Camera:
+    """Shortcut to create a camera focusing on given target.
 
-    def test_all(self) -> None:
-        camera = brayns.OrthographicCamera(height=10)
-        self.run_tests(camera)
+    See ``Camera.look_at`` for more details.
+
+    :param target: Camera target bounds.
+    :type target: Bounds
+    :param projection: Camera projection, defaults to PerspectiveProjection.
+    :type projection: Projection | None, optional
+    :return: Camera looking at target.
+    :rtype: Camera
+    """
+    if projection is None:
+        projection = PerspectiveProjection()
+    camera = Camera(projection=projection)
+    camera.look_at(target)
+    return camera

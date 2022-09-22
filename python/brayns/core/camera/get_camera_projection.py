@@ -18,41 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Plugins subpackage.
+from typing import TypeVar
 
-It includes all science related features and optional components.
+from brayns.network import Instance
 
-Main functionalities are BBP circuit loading support, circuit coloring, raw
-morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
-"""
+from .projection import Projection
 
-from .bbp import *
-from .coloring import *
-from .cylindric_camera import *
-from .morphology import *
-from .sonata import *
+T = TypeVar('T', bound=Projection)
 
-__all__ = [
-    'BbpCells',
-    'BbpLoader',
-    'BbpReport',
-    'BbpReportType',
-    'CellId',
-    'color_circuit_by_id',
-    'color_circuit_by_method',
-    'color_circuit',
-    'ColorMethod',
-    'CylindricProjection',
-    'GeometryType',
-    'get_color_method_values',
-    'get_color_methods',
-    'Morphology',
-    'MorphologyLoader',
-    'SonataEdgePopulation',
-    'SonataLoader',
-    'SonataNodePopulation',
-    'SonataNodes',
-    'SonataReport',
-    'SonataReportType',
-]
+
+def get_camera_projection(instance: Instance, projection_type: type[T]) -> T:
+    """Retreive the current camera projection from an instance.
+
+    The provided projection type must be the same as the current one.
+
+    Returned camera is of type ``camera_type``.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param camera_type: Camera type (ex: brayns.PerspectiveCamera).
+    :type camera_type: type[T]
+    :return: Current camera of ``instance``.
+    :rtype: T
+    """
+    name = projection_type.name
+    result = instance.request(f'get-camera-{name}')
+    return projection_type.from_properties(result)

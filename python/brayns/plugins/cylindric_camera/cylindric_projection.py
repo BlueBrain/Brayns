@@ -18,44 +18,55 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any, ClassVar
 
-T = TypeVar('T', bound='Material')
+from brayns.core import Projection
+from brayns.utils import Bounds, Fovy, View
 
 
 @dataclass
-class Material(ABC):
-    """Base class for all material types.
+class CylindricProjection(Projection):
+    """Cylindric camera projection used to correct curved screen distorsion.
 
-    Material are applied on model to change their aspect (but not their color).
+    :param fovy: Field of view, defaults to OpenDeck one.
+    :type fovy: Fovy, optional
     """
+
+    OPENDECK_FOVY: ClassVar[Fovy] = Fovy(48.549, degrees=True)
+
+    fovy: Fovy = OPENDECK_FOVY
 
     @classmethod
     @property
-    @abstractmethod
     def name(cls) -> str:
-        """Get the material name.
+        """Get projection name.
 
-        :return: Material name
+        :return: Projection name.
         :rtype: str
         """
+        return 'cylindric'
+
+    def get_front_view(self, target: Bounds) -> View:
+        """Use fovy to compute the front view.
+
+        :param target: Camera target.
+        :type target: Bounds
+        :return: Front view based on self.fovy.
+        :rtype: View
+        """
+        return self.fovy.get_front_view(target)
+
+    def set_target(self, target: Bounds) -> None:
+        """Does nothing."""
         pass
 
-    @abstractmethod
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        pass
+        return {
+            'fovy': self.fovy.degrees,
+        }
 
-    @abstractmethod
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        pass
-
-    @classmethod
-    def from_properties(cls: type[T], message: dict[str, Any]) -> T:
-        """Low level API to deserialize from JSON."""
-        material = cls()
-        material.update_properties(message)
-        return material
+        self.fovy = Fovy(message['fovy'], degrees=True)

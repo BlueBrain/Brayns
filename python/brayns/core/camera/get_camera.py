@@ -18,31 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import TypeVar
-
 from brayns.network import Instance
 
 from .camera import Camera
+from .get_camera_projection import get_camera_projection
+from .get_camera_view import get_camera_view
+from .projection import Projection
 
-T = TypeVar('T', bound=Camera)
 
+def get_camera(instance: Instance, projection_type: type[Projection]) -> Camera:
+    """Shortcut to retreive the current camera of an instance.
 
-def get_camera(instance: Instance, camera_type: type[T]) -> T:
-    """Retreive the current camera from an instance.
+    Use get_camera_projection and get_camera_view.
 
-    The provided camera type must be the same as the current one.
-
-    Returned camera is of type ``camera_type``.
+    projection_type must be of the same type as the current projection.
 
     :param instance: Instance.
     :type instance: Instance
-    :param camera_type: Camera type (ex: brayns.PerspectiveCamera).
-    :type camera_type: type[T]
-    :return: Current camera of ``instance``.
-    :rtype: T
+    :param projection_type: Current camera projection type of instance.
+    :type projection_type: type[Projection]
+    :return: Camera with current view and projection.
+    :rtype: Camera
     """
-    name = camera_type.name
-    result = instance.request(f'get-camera-{name}')
-    camera = camera_type()
-    camera.update_properties(result)
-    return camera
+    view = get_camera_view(instance)
+    projection = get_camera_projection(instance, projection_type)
+    return Camera(view, projection)

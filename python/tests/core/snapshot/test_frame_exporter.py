@@ -41,7 +41,7 @@ class TestFrameExporter(unittest.TestCase):
             format=brayns.ImageFormat.JPEG,
             jpeg_quality=50,
             resolution=brayns.Resolution(600, 900),
-            camera=brayns.PerspectiveCamera(),
+            projection=brayns.PerspectiveProjection(),
             renderer=brayns.ProductionRenderer(),
         )
 
@@ -65,7 +65,7 @@ class TestFrameExporter(unittest.TestCase):
                 'quality': 50,
                 'size': [600, 900],
             },
-            'camera': brayns.PerspectiveCamera().get_properties_with_name(),
+            'camera': brayns.PerspectiveProjection().get_properties_with_name(),
             'renderer': brayns.ProductionRenderer().get_properties_with_name(),
         }
 

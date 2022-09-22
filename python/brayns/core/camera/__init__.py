@@ -21,19 +21,27 @@
 from .camera import Camera
 from .get_camera import get_camera
 from .get_camera_name import get_camera_name
+from .get_camera_projection import get_camera_projection
 from .get_camera_view import get_camera_view
-from .orthographic_camera import OrthographicCamera
-from .perspective_camera import PerspectiveCamera
+from .look_at import look_at
+from .orthographic_projection import OrthographicProjection
+from .perspective_projection import PerspectiveProjection
+from .projection import Projection
 from .set_camera import set_camera
+from .set_camera_projection import set_camera_projection
 from .set_camera_view import set_camera_view
 
 __all__ = [
     'Camera',
     'get_camera_name',
+    'get_camera_projection',
     'get_camera_view',
     'get_camera',
-    'OrthographicCamera',
-    'PerspectiveCamera',
+    'look_at',
+    'OrthographicProjection',
+    'PerspectiveProjection',
+    'Projection',
+    'set_camera_projection',
     'set_camera_view',
     'set_camera',
 ]

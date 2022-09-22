@@ -88,25 +88,24 @@ Models can be moved and made invisible using the `update_model` function.
 .. hint::
 
     The model transform is the identity by default and is relative to the
-    original location
+    original location of the object when loaded.
 
 .. code-block:: python
 
-    import dataclasses
+    # We use the transform to move the model.
+    transform = model.transform
 
-    old_model = models[0]
-
-    # Here we make a copy of the old transform but we could also modify it
-    # directly as we are going to trash the old model object.
-    transform = dataclasses.replace(old_model.transform)
-
+    # Move the model upward.
     transform.translation += 3 * brayns.Vector3.up
 
+    # Rotate the model of 90 degrees around Y.
     euler = brayns.Vector3(0, 90, 0)
     transform.rotation = brayns.Rotation.from_euler(euler, degrees=True)
 
-    # The model is really updated on the instance here.
-    updated_model = brayns.update_model(
+    # Upload the model and retreive its new state.
+    # It is important to use the model returned by update_model as the bounds
+    # will be updated if we change the transform.
+    model = brayns.update_model(
         instance,
         model.id,
         transform=transform,
@@ -139,12 +138,11 @@ Here is an example to color SSCX circuit by layer.
 Available color methods and method values for a given circuit (model) can be
 retreived using `get_color_methods` and `get_color_method_values`.
 
-Some alternatives exist with `color_circuit_by_id` and `color_circuit`
+Some alternatives exist with `color_circuit_by_id` and `color_circuit`.
 
 Switch between original color and simulation color
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a model has a simulation attached, its original color can be overriden by
-the simulation color. To avoid this `enable_simulation` can be used to enable/
-disable simulation colors for a given model. It allows to switch between the
-original color and the simulation one at the current frame.
+the simulation color. To avoid this `enable_simulation` can be used to enable /
+disable simulation colors for a given model.

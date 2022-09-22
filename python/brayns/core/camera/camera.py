@@ -18,63 +18,62 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import ABC, abstractmethod
-from typing import Any
+from dataclasses import dataclass, field
 
-from brayns.utils import Bounds, View
+from brayns.utils import Bounds, Vector3, View
+
+from .perspective_projection import PerspectiveProjection
+from .projection import Projection
 
 
-class Camera(ABC):
-    """Base class of all supported cameras (plugin dependent).
+@dataclass
+class Camera:
+    """Camera used to render.
 
-    All cameras defined in the package inherit from this class.
+    A camera is composed of a ``View`` and a ``Projection``.
 
-    Cameras can be identified using a unique name (ex: 'perspective').
+    The view defines the camera position and orientation while the projection
+    defines how the model will be projected from 3D to 2D.
+
+    To focus the camera to a given target (bounds) use ``look_at`` to set the
+    default full-screen front view.
     """
 
-    @classmethod
+    view: View = field(default_factory=View)
+    projection: Projection = field(default_factory=PerspectiveProjection)
+
     @property
-    @abstractmethod
-    def name(cls) -> str:
-        """Name of the camera to identify it.
+    def name(self) -> str:
+        return self.projection.name
 
-        :return: Camera name.
-        :rtype: str
-        """
-        pass
+    @property
+    def position(self) -> Vector3:
+        return self.view.position
 
-    @abstractmethod
-    def get_front_view(self, target: Bounds) -> View:
-        """Compute the front view to focus on given target.
+    @position.setter
+    def position(self, value: Vector3) -> None:
+        self.view.position = value
 
-        :param target: Camera target.
-        :type target: Bounds
-        :return: Front view to see the target entirely.
-        :rtype: View
-        """
-        pass
+    @property
+    def target(self) -> Vector3:
+        return self.view.target
 
-    @abstractmethod
-    def set_target(self, target: Bounds) -> None:
-        """Update the camera parameters to focus on given target.
+    @target.setter
+    def target(self, value: Vector3) -> None:
+        self.view.target = value
 
-        :param target: Camera target.
-        :type target: Bounds
-        """
-        pass
+    @property
+    def up(self) -> Vector3:
+        return self.view.up
 
-    @abstractmethod
-    def get_properties(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        pass
+    @up.setter
+    def up(self, value: Vector3) -> None:
+        self.view.up = value
 
-    @abstractmethod
-    def update_properties(self, message: dict[str, Any]) -> None:
-        """Low level API to deserialize from JSON."""
-        pass
+    @property
+    def direction(self) -> Vector3:
+        return self.view.direction
 
-    def get_properties_with_name(self) -> dict[str, Any]:
-        return {
-            'name': self.name,
-            'params': self.get_properties(),
-        }
+    def look_at(self, target: Bounds) -> None:
+        self.projection.set_target(target)
+        self.view = self.projection.get_front_view(target)

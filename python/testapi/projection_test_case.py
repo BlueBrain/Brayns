@@ -18,41 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Plugins subpackage.
+import brayns
 
-It includes all science related features and optional components.
+from .simple_test_case import SimpleTestCase
 
-Main functionalities are BBP circuit loading support, circuit coloring, raw
-morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
-"""
 
-from .bbp import *
-from .coloring import *
-from .cylindric_camera import *
-from .morphology import *
-from .sonata import *
+class ProjectionTestCase(SimpleTestCase):
 
-__all__ = [
-    'BbpCells',
-    'BbpLoader',
-    'BbpReport',
-    'BbpReportType',
-    'CellId',
-    'color_circuit_by_id',
-    'color_circuit_by_method',
-    'color_circuit',
-    'ColorMethod',
-    'CylindricProjection',
-    'GeometryType',
-    'get_color_method_values',
-    'get_color_methods',
-    'Morphology',
-    'MorphologyLoader',
-    'SonataEdgePopulation',
-    'SonataLoader',
-    'SonataNodePopulation',
-    'SonataNodes',
-    'SonataReport',
-    'SonataReportType',
-]
+    def run_tests(self, projection: brayns.Projection) -> None:
+        brayns.set_camera_projection(self.instance, projection)
+        name = brayns.get_camera_name(self.instance)
+        self.assertEqual(name, projection.name)
+        test = brayns.get_camera_projection(self.instance, type(projection))
+        self.assertEqual(test, projection)

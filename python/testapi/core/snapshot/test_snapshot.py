@@ -19,10 +19,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
-from typing import cast
 
 import brayns
 from testapi.image_validator import ImageValidator
+from testapi.quick_render import prepare_quick_snapshot
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -56,34 +56,10 @@ class TestSnapshot(SimpleTestCase):
         validator.validate_data(test, self.ref)
 
     def _prepare_snapshot(self) -> brayns.Snapshot:
-        model = self._load_model()
-        snapshot = self._create_snapshot(model.bounds)
-        view = cast(brayns.View, snapshot.view)
-        self._add_light(view.direction)
-        return snapshot
+        self._load_model()
+        return prepare_quick_snapshot(self.instance)
 
-    def _add_light(self, direction: brayns.Vector3) -> None:
-        light = brayns.DirectionalLight(
-            intensity=5,
-            direction=direction
-        )
-        brayns.add_light(self.instance, light)
-
-    def _load_model(self) -> brayns.Model:
+    def _load_model(self) -> None:
         path = self.asset_folder / 'cube.ply'
         loader = brayns.MeshLoader()
-        models = loader.load(self.instance, str(path))
-        return models[0]
-
-    def _create_snapshot(self, bounds: brayns.Bounds) -> brayns.Snapshot:
-        camera = brayns.PerspectiveCamera()
-        view = camera.fovy.get_front_view(bounds)
-        view.position += brayns.Vector3.forward
-        renderer = brayns.InteractiveRenderer()
-        return brayns.Snapshot(
-            resolution=brayns.Resolution.full_hd,
-            frame=0,
-            view=view,
-            camera=camera,
-            renderer=renderer
-        )
+        loader.load(self.instance, str(path))

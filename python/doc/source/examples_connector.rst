@@ -37,23 +37,21 @@ Here is an example of connector with more settings:
 URI
 ~~~
 
-The URI is to reach the backend instance as mentioned in the usage section
-:ref:`usepythonapi-label`.
+The URI parameter is used to find the backend instance as mentioned in the
+usage section :ref:`usepythonapi-label`.
 
 SSL context
 ~~~~~~~~~~~
 
 The SSL context depends on the backend SSL settings. If left to None (the
-default), the connection will not be secured and might fail to reach the backend
-if this one is secure. To enable secure connection, just pass an
-SslClientContext to the connector. The `ssl_context` should be chosen as
-follows:
+default), the connection will not be secured. The `ssl_context` should be chosen
+as follows:
 
 - If the backend is not secure, it can be left to None.
 - If the backend certificate is signed by a recognized certification authority
     (CA) installed on the client machine, it can be default constructed.
-- If the backend certificate is signed by a custom CA (self-signed), this CA
-    can be trusted by setting it in the SSL context (like above).
+- If the backend certificate is signed by a custom CA (or self-signed), this CA
+    can be set as trusted by setting it in the SSL context (like above).
 
 Binary frames
 ~~~~~~~~~~~~~
@@ -74,10 +72,12 @@ User can specify a custom logger to redirect the logs or change the level as
 long as the logger is a subclass of logging.Logger. Brayns default logger can
 be constructed with brayns.Logger(<level>).
 
-Usually for production it is better not to log anything but warnings (default)
-but logging.INFO will trace JSON-RPC messages (useful for debugging). For more
-advanced debug, logging.DEBUG can be used but it prints the requests / replies
-content (not only the method and ID) so it can be slow the program a lot.
+Usually for production it is better not to log anything but warnings (default).
+However, logging.INFO can be used to trace JSON-RPC messages (useful for
+debugging).
+
+For more advanced debug, logging.DEBUG can be used but it prints the requests /
+replies content (not only the method and ID) so it can be very verbose.
 
 Attempts
 ~~~~~~~~

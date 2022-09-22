@@ -22,6 +22,7 @@ import pathlib
 
 import brayns
 from testapi.image_validator import ImageValidator
+from testapi.quick_render import quick_export
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -37,54 +38,30 @@ class TestFrameExporter(SimpleTestCase):
         return self.asset_folder / 'frames'
 
     def test_export_frames(self) -> None:
-        model = self._load_circuit()
-        self._export_frames(model.bounds)
+        self._load_circuit()
+        self._export_frames()
         self._check_frames()
 
-    def _load_circuit(self) -> brayns.Model:
+    def _load_circuit(self) -> None:
         loader = brayns.BbpLoader(
             report=brayns.BbpReport.compartment('somas'),
-            morphology=brayns.Morphology(
-                radius_multiplier=10
-            )
+            morphology=brayns.Morphology(radius_multiplier=10)
         )
-        models = loader.load(self.instance, self.circuit)
-        return models[0]
+        loader.load(self.instance, self.circuit)
 
-    def _export_frames(self, bounds: brayns.Bounds) -> None:
-        exporter = self._create_exporter(bounds)
-        folder = self.output
-        folder.mkdir(exist_ok=True)
-        exporter.export_frames(self.instance, str(folder))
+    def _export_frames(self) -> None:
+        frames = self._get_frames()
+        self.output.mkdir(exist_ok=True)
+        quick_export(self.instance, str(self.output), frames)
 
-    def _create_exporter(self, bounds: brayns.Bounds) -> brayns.FrameExporter:
-        camera = brayns.PerspectiveCamera()
-        view = camera.fovy.get_front_view(bounds)
-        self._adjust_lights(view)
-        renderer = brayns.InteractiveRenderer()
-        frames = self._get_frames(view)
-        return brayns.FrameExporter(
-            frames=frames,
-            resolution=brayns.Resolution.full_hd,
-            camera=camera,
-            renderer=renderer
-        )
-
-    def _adjust_lights(self, view: brayns.View) -> None:
-        light = brayns.DirectionalLight(
-            intensity=5,
-            direction=view.direction
-        )
-        brayns.add_light(self.instance, light)
-
-    def _get_frames(self, view: brayns.View) -> list[brayns.KeyFrame]:
+    def _get_frames(self) -> list[int]:
         frames = brayns.MovieFrames(
             fps=5,
-            slowing_factor=100
+            slowing_factor=100,
         )
         simulation = brayns.get_simulation(self.instance)
         indices = frames.get_indices(simulation)
-        return brayns.KeyFrame.from_indices(indices, view)
+        return indices
 
     def _check_frames(self) -> None:
         errors = list[str]()

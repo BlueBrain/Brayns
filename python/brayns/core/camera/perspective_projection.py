@@ -19,33 +19,44 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any, ClassVar
+from typing import Any
 
-from brayns.core import Camera
 from brayns.utils import Bounds, Fovy, View
+
+from .projection import Projection
 
 
 @dataclass
-class CylindricCamera(Camera):
-    """Cylindric camera used to correct curved screen distorsion.
+class PerspectiveProjection(Projection):
+    """Perspective camera projection.
 
-    :param fovy: Field of view, defaults to OpenDeck's.
-    :type fovy: Fovy, optional
+    Perspective projection use a field of view angle to compute the size of the
+    objects depending on their distance from the camera.
+
+    The field of view (fovy) can be used to compute full screen view of a given
+    target object.
+
+    :param fovy: Field of view angle (45 degrees by default).
+    :type fovy: Fovy
+    :param aperture_radius: Optional aperture radius.
+    :type aperture_radius: float
+    :param focus_distance: Optional focus distance.
+    :type focus_distance: float
     """
 
-    OPENDECK_FOVY: ClassVar[Fovy] = Fovy(48.549, degrees=True)
-
-    fovy: Fovy = OPENDECK_FOVY
+    fovy: Fovy = Fovy(45, degrees=True)
+    aperture_radius: float = 0.0
+    focus_distance: float = 1.0
 
     @classmethod
     @property
     def name(cls) -> str:
-        """Get camera name.
+        """Camera name.
 
         :return: Camera name.
         :rtype: str
         """
-        return 'cylindric'
+        return 'perspective'
 
     def get_front_view(self, target: Bounds) -> View:
         """Use fovy to compute the front view.
@@ -65,8 +76,12 @@ class CylindricCamera(Camera):
         """Low level API to serialize to JSON."""
         return {
             'fovy': self.fovy.degrees,
+            'aperture_radius': self.aperture_radius,
+            'focus_distance': self.focus_distance,
         }
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
         self.fovy = Fovy(message['fovy'], degrees=True)
+        self.aperture_radius = message['aperture_radius']
+        self.focus_distance = message['focus_distance']
