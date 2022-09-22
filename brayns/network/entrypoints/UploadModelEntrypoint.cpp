@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "RequestModelUploadEntrypoint.h"
+#include "UploadModelEntrypoint.h"
 
 #include <brayns/engine/common/SimulationScanner.h>
 #include <brayns/network/common/ProgressHandler.h>
@@ -27,7 +27,7 @@
 
 namespace
 {
-using Request = brayns::RequestModelUploadEntrypoint::Request;
+using Request = brayns::UploadModelEntrypoint::Request;
 using Progress = brayns::ProgressHandler<Request>;
 
 class BinaryParamsValidator
@@ -133,7 +133,7 @@ private:
 
 namespace brayns
 {
-RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
+UploadModelEntrypoint::UploadModelEntrypoint(
     Scene &scene,
     const LoaderRegistry &loaders,
     SimulationParameters &simulation,
@@ -145,34 +145,34 @@ RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
 {
 }
 
-std::string RequestModelUploadEntrypoint::getMethod() const
+std::string UploadModelEntrypoint::getMethod() const
 {
-    return "request-model-upload";
+    return "upload-model";
 }
 
-std::string RequestModelUploadEntrypoint::getDescription() const
+std::string UploadModelEntrypoint::getDescription() const
 {
     return "Upload a model from binary request data and return model descriptors on success";
 }
 
-bool RequestModelUploadEntrypoint::isAsync() const
+bool UploadModelEntrypoint::isAsync() const
 {
     return true;
 }
 
-void RequestModelUploadEntrypoint::onRequest(const Request &request)
+void UploadModelEntrypoint::onRequest(const Request &request)
 {
     SimulationScanner::scanAndUpdate(_scene, _simulation);
     BinaryModelHandler handler(_scene, _loaders, _token);
     handler.handle(request);
 }
 
-void RequestModelUploadEntrypoint::onCancel()
+void UploadModelEntrypoint::onCancel()
 {
     _token.cancel();
 }
 
-void RequestModelUploadEntrypoint::onDisconnect()
+void UploadModelEntrypoint::onDisconnect()
 {
     _token.cancel();
 }

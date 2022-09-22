@@ -32,10 +32,10 @@
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryLoadParameters, std::vector<ModelInstance *>>
+class UploadModelEntrypoint : public Entrypoint<BinaryLoadParameters, std::vector<ModelInstance *>>
 {
 public:
-    RequestModelUploadEntrypoint(
+    UploadModelEntrypoint(
         Scene &scene,
         const LoaderRegistry &loaders,
         SimulationParameters &simulation,
