@@ -28,9 +28,10 @@
 
 namespace brayns
 {
-JsonRpcRequest::JsonRpcRequest(ClientRef client, RequestMessage message)
+JsonRpcRequest::JsonRpcRequest(ClientRef client, RequestMessage message, std::string binary)
     : _client(std::move(client))
     , _message(std::move(message))
+    , _binary(std::move(binary))
 {
 }
 
@@ -57,6 +58,11 @@ const std::string &JsonRpcRequest::getMethod() const
 const JsonValue &JsonRpcRequest::getParams() const
 {
     return _message.params;
+}
+
+const std::string &JsonRpcRequest::getBinary() const
+{
+    return _binary;
 }
 
 void JsonRpcRequest::reply(const JsonValue &result) const

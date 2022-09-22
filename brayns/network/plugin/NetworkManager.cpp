@@ -188,11 +188,10 @@ private:
 
     static std::unique_ptr<brayns::ISocketListener> _createListener(brayns::NetworkContext &context)
     {
-        auto &binary = context.binary;
         auto &clients = context.clients;
         auto &entrypoints = context.entrypoints;
         auto &tasks = context.tasks;
-        return std::make_unique<brayns::SocketListener>(binary, clients, entrypoints, tasks);
+        return std::make_unique<brayns::SocketListener>(clients, entrypoints, tasks);
     }
 };
 

@@ -44,7 +44,7 @@ public:
      * @param client Client that sent the message.
      * @param message Request message received from client.
      */
-    JsonRpcRequest(ClientRef client, RequestMessage message);
+    JsonRpcRequest(ClientRef client, RequestMessage message, std::string binary = {});
 
     /**
      * @brief Return the client sending the request.
@@ -82,6 +82,13 @@ public:
     const JsonValue &getParams() const;
 
     /**
+     * @brief Get the Binary data of the request if any.
+     *
+     * @return const std::string& Binary data as string.
+     */
+    const std::string &getBinary() const;
+
+    /**
      * @brief Send a reply message in case of success.
      *
      * The message sent will be formatted according to the RequestMessage
@@ -109,6 +116,7 @@ public:
 private:
     ClientRef _client;
     RequestMessage _message;
+    std::string _binary;
 };
 } // namespace brayns
 

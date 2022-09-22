@@ -27,13 +27,8 @@
 
 namespace brayns
 {
-SocketListener::SocketListener(
-    BinaryManager &binary,
-    ClientManager &clients,
-    const EntrypointRegistry &entrypoints,
-    TaskManager &tasks)
-    : _binary(binary)
-    , _clients(clients)
+SocketListener::SocketListener(ClientManager &clients, const EntrypointRegistry &entrypoints, TaskManager &tasks)
+    : _clients(clients)
     , _entrypoints(entrypoints)
     , _tasks(tasks)
 {
@@ -54,7 +49,7 @@ void SocketListener::onDisconnect(const ClientRef &client)
 
 void SocketListener::onRequest(ClientRequest request)
 {
-    RequestDispatcher dispatcher(_binary, _entrypoints, _tasks);
+    RequestDispatcher dispatcher(_entrypoints, _tasks);
     Log::info("Received request {}.", request);
     if (request.isText())
     {

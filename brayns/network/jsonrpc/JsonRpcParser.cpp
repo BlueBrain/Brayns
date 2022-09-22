@@ -25,6 +25,8 @@
 
 #include <brayns/json/Json.h>
 #include <brayns/json/JsonSchemaValidator.h>
+#include <brayns/utils/parsing/Parser.h>
+#include <brayns/utils/string/StringExtractor.h>
 
 #include "JsonRpcException.h"
 
@@ -33,11 +35,11 @@ namespace
 class JsonParser
 {
 public:
-    static brayns::JsonValue parse(const std::string &data)
+    static brayns::JsonValue parse(std::string_view data)
     {
         try
         {
-            return brayns::Json::parse(data);
+            return brayns::Json::parse(std::string(data));
         }
         catch (const Poco::JSON::JSONException &e)
         {
@@ -79,10 +81,10 @@ public:
     }
 };
 
-class ParserHelper
+class RequestMessageParser
 {
 public:
-    static brayns::RequestMessage parse(const std::string &data)
+    static brayns::RequestMessage parse(std::string_view data)
     {
         auto json = JsonParser::parse(data);
         RequestSchemaValidator::validate(json);
@@ -91,15 +93,67 @@ public:
         return message;
     }
 };
+
+class JsonSizeParser
+{
+public:
+    static size_t extract(std::string_view &data)
+    {
+        auto size = data.size();
+        if (size < 4)
+        {
+            throw brayns::ParsingErrorException("Invalid binary packet, expected at least 4 bytes for the JSON size.");
+        }
+        auto jsonSize = brayns::Parser::extractChunk<size_t>(data, brayns::ByteOrder::LittleEndian);
+        if (jsonSize > size - 4)
+        {
+            auto message = "Invalid binary packet, JSON size too big: " + std::to_string(jsonSize);
+            throw brayns::ParsingErrorException(message);
+        }
+        return jsonSize;
+    }
+};
+
+class BinaryParser
+{
+public:
+    static brayns::JsonRpcRequest parse(const brayns::ClientRequest &request)
+    {
+        auto &client = request.getClient();
+        auto data = request.getData();
+        auto size = JsonSizeParser::extract(data);
+        auto json = brayns::StringExtractor::extract(data, size);
+        auto message = RequestMessageParser::parse(json);
+        auto binary = std::string(data);
+        return {client, std::move(message), std::move(binary)};
+    }
+};
+
+class TextParser
+{
+public:
+    static brayns::JsonRpcRequest parse(const brayns::ClientRequest &request)
+    {
+        auto &client = request.getClient();
+        auto data = request.getData();
+        auto message = RequestMessageParser::parse(data);
+        return {client, std::move(message)};
+    }
+};
 } // namespace
 
 namespace brayns
 {
 JsonRpcRequest JsonRpcParser::parse(const ClientRequest &request)
 {
-    auto &client = request.getClient();
-    auto data = std::string(request.getData());
-    auto message = ParserHelper::parse(data);
-    return {client, std::move(message)};
+    if (request.isBinary())
+    {
+        return BinaryParser::parse(request);
+    }
+    if (request.isText())
+    {
+        return TextParser::parse(request);
+    }
+    throw InvalidRequestException("Expected text or binary request");
 }
 } // namespace brayns

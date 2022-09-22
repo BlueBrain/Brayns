@@ -65,7 +65,7 @@ public:
     }
 };
 
-class TextDispatcher
+class RawRequestDispatcher
 {
 public:
     static void dispatch(
@@ -97,24 +97,12 @@ public:
         }
     }
 };
-
-class BinaryDispatcher
-{
-public:
-    static void dispatch(brayns::ClientRequest request, brayns::BinaryManager &binary, brayns::TaskManager &tasks)
-    {
-        brayns::Log::debug("Create task to process binary request.");
-        auto task = std::make_unique<brayns::BinaryTask>(std::move(request), binary);
-        tasks.add(std::move(task));
-    }
-};
 } // namespace
 
 namespace brayns
 {
-RequestDispatcher::RequestDispatcher(BinaryManager &binary, const EntrypointRegistry &entrypoints, TaskManager &tasks)
-    : _binary(binary)
-    , _entrypoints(entrypoints)
+RequestDispatcher::RequestDispatcher(const EntrypointRegistry &entrypoints, TaskManager &tasks)
+    : _entrypoints(entrypoints)
     , _tasks(tasks)
 {
 }
@@ -122,16 +110,7 @@ RequestDispatcher::RequestDispatcher(BinaryManager &binary, const EntrypointRegi
 void RequestDispatcher::dispatch(ClientRequest request)
 {
     Log::debug("Dispatch request {}.", request);
-    if (request.isBinary())
-    {
-        BinaryDispatcher::dispatch(std::move(request), _binary, _tasks);
-        return;
-    }
-    if (request.isText())
-    {
-        TextDispatcher::dispatch(request, _entrypoints, _tasks);
-        return;
-    }
+    RawRequestDispatcher::dispatch(request, _entrypoints, _tasks);
     brayns::Log::error("Invalid request, discard it.");
 }
 } // namespace brayns
