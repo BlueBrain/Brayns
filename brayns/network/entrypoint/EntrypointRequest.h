@@ -108,6 +108,16 @@ public:
     }
 
     /**
+     * @brief Get the Binary data of the request if any.
+     *
+     * @return const std::string& Binary data (can be empty).
+     */
+    const std::string &getBinary() const
+    {
+        return _request.getBinary();
+    }
+
+    /**
      * @brief Send a success reply with the given result.
      *
      * @param result Result data of the reply.

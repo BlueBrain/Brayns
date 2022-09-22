@@ -88,7 +88,6 @@ public:
 
         auto &loaders = api.getLoaderRegistry();
 
-        auto &binary = context.binary;
         auto &entrypoints = context.entrypoints;
         auto &tasks = context.tasks;
         auto &stream = context.stream;
@@ -140,7 +139,7 @@ public:
         builder.add<brayns::RemoveClipPlanesEntrypoint>(scene);
         builder.add<brayns::RemoveLightsEntrypoint>(scene);
         builder.add<brayns::RemoveModelEntrypoint>(scene, simulation);
-        builder.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, simulation, binary, token);
+        builder.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, simulation, token);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
         builder.add<brayns::SetCameraLookAtEntrypoint>(engine);

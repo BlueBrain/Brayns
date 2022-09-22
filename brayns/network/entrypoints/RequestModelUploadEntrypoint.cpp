@@ -21,9 +21,6 @@
 
 #include "RequestModelUploadEntrypoint.h"
 
-#include <sstream>
-#include <thread>
-
 #include <brayns/engine/common/SimulationScanner.h>
 #include <brayns/network/common/ProgressHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
@@ -38,15 +35,38 @@ class BinaryParamsValidator
 public:
     static void validate(const brayns::BinaryLoadParameters &params)
     {
-        if (params.size == 0)
-        {
-            throw brayns::InvalidParamsException("Cannot load an empty model");
-        }
-        auto &type = params.type;
-        if (type.empty())
+        if (params.type.empty())
         {
             throw brayns::InvalidParamsException("Missing model type");
         }
+    }
+};
+
+class BlobLoader
+{
+public:
+    static brayns::Blob load(const brayns::BinaryLoadParameters &params, std::string_view data)
+    {
+        auto blob = _prepare(params);
+        _load(data, blob);
+        return blob;
+    }
+
+private:
+    static brayns::Blob _prepare(const brayns::BinaryLoadParameters &params)
+    {
+        brayns::Blob blob;
+        blob.type = params.type;
+        blob.name = params.loaderName;
+        return blob;
+    }
+
+    static void _load(std::string_view data, brayns::Blob &blob)
+    {
+        auto &destination = blob.data;
+        auto size = data.size();
+        destination.reserve(size);
+        destination.insert(destination.end(), data.begin(), data.end());
     }
 };
 
@@ -70,102 +90,27 @@ public:
     }
 };
 
-class BinaryLock
-{
-public:
-    static brayns::ClientRequest waitForBinary(brayns::BinaryManager &binary, const Progress &progress)
-    {
-        while (true)
-        {
-            progress.poll();
-            auto request = binary.poll();
-            if (request)
-            {
-                return std::move(*request);
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
-    }
-};
-
-class BlobValidator
-{
-public:
-    static void throwIfTooBig(const brayns::BinaryLoadParameters &params, std::string_view data)
-    {
-        auto modelSize = params.size;
-        auto frameSize = data.size();
-        _throwIfTooBig(modelSize, frameSize);
-    }
-
-private:
-    static void _throwIfTooBig(size_t modelSize, size_t frameSize)
-    {
-        if (frameSize == modelSize)
-        {
-            return;
-        }
-        std::ostringstream stream;
-        stream << "Frame size of " << frameSize << " different from model size of " << modelSize;
-        throw brayns::InvalidParamsException(stream.str());
-    }
-};
-
-class BlobLoader
-{
-public:
-    static brayns::Blob
-        load(const brayns::BinaryLoadParameters &params, std::string_view data, const Progress &progress)
-    {
-        auto blob = _prepare(params);
-        BlobValidator::throwIfTooBig(params, data);
-        _load(data, blob);
-        progress.notify("Model uploaded", 0.5);
-        return blob;
-    }
-
-private:
-    static brayns::Blob _prepare(const brayns::BinaryLoadParameters &params)
-    {
-        brayns::Blob blob;
-        blob.type = params.type;
-        blob.name = params.loaderName;
-        return blob;
-    }
-
-    static void _load(std::string_view data, brayns::Blob &blob)
-    {
-        auto &destination = blob.data;
-        auto size = data.size();
-        destination.reserve(size);
-        destination.insert(destination.end(), data.begin(), data.end());
-    }
-};
-
 class BinaryModelHandler
 {
 public:
-    BinaryModelHandler(
-        brayns::Scene &scene,
-        const brayns::LoaderRegistry &loaders,
-        brayns::BinaryManager &binary,
-        brayns::CancellationToken &token)
+    BinaryModelHandler(brayns::Scene &scene, const brayns::LoaderRegistry &loaders, brayns::CancellationToken &token)
         : _scene(scene)
         , _loaders(loaders)
-        , _binary(binary)
         , _token(token)
     {
     }
 
     void handle(const Request &request)
     {
-        auto progress = Progress(_token, request);
         auto params = request.getParams();
         BinaryParamsValidator::validate(params);
+
+        auto progress = Progress(_token, request);
+        auto &data = request.getBinary();
+        auto blob = BlobLoader::load(params, data);
+        progress.notify("Model uploaded", 0.5);
+
         auto &loader = LoaderFinder::find(params, _loaders);
-        auto binaryRequest = BinaryLock::waitForBinary(_binary, progress);
-        auto data = binaryRequest.getData();
-        auto blob = BlobLoader::load(params, data, progress);
         auto parameters = params.loadParameters;
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
         auto models = loader.loadFromBlob(blob, {callback}, parameters);
@@ -182,7 +127,6 @@ public:
 private:
     brayns::Scene &_scene;
     const brayns::LoaderRegistry &_loaders;
-    brayns::BinaryManager &_binary;
     brayns::CancellationToken &_token;
 };
 } // namespace
@@ -193,12 +137,10 @@ RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
     Scene &scene,
     const LoaderRegistry &loaders,
     SimulationParameters &simulation,
-    BinaryManager &binary,
     CancellationToken token)
     : _scene(scene)
     , _loaders(loaders)
     , _simulation(simulation)
-    , _binary(binary)
     , _token(token)
 {
 }
@@ -210,7 +152,7 @@ std::string RequestModelUploadEntrypoint::getMethod() const
 
 std::string RequestModelUploadEntrypoint::getDescription() const
 {
-    return "Request model upload from next binary frame received and return model descriptors on success";
+    return "Upload a model from binary request data and return model descriptors on success";
 }
 
 bool RequestModelUploadEntrypoint::isAsync() const
@@ -220,14 +162,9 @@ bool RequestModelUploadEntrypoint::isAsync() const
 
 void RequestModelUploadEntrypoint::onRequest(const Request &request)
 {
-    BinaryModelHandler handler(_scene, _loaders, _binary, _token);
     SimulationScanner::scanAndUpdate(_scene, _simulation);
+    BinaryModelHandler handler(_scene, _loaders, _token);
     handler.handle(request);
-}
-
-void RequestModelUploadEntrypoint::onPreRender()
-{
-    _binary.flush();
 }
 
 void RequestModelUploadEntrypoint::onCancel()
