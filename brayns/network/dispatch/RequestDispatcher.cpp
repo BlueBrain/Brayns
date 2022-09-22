@@ -26,7 +26,6 @@
 #include <brayns/network/entrypoint/EntrypointFinder.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/network/jsonrpc/JsonRpcParser.h>
-#include <brayns/network/task/BinaryTask.h>
 #include <brayns/network/task/JsonRpcTask.h>
 
 namespace

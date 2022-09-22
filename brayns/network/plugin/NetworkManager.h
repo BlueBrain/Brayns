@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/network/binary/BinaryManager.h>
 #include <brayns/network/client/ClientManager.h>
 #include <brayns/network/client/RequestBuffer.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
@@ -39,7 +38,6 @@ struct NetworkContext
     PluginAPI &api;
     std::unique_ptr<INetworkInterface> interface;
     std::unique_ptr<ISocket> socket;
-    BinaryManager binary;
     ClientManager clients;
     EntrypointRegistry entrypoints;
     StreamManager stream;
