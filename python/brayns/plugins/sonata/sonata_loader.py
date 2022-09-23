@@ -21,7 +21,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, ClassVar
 
 from brayns.core import Loader
 
@@ -41,6 +41,8 @@ class SonataLoader(Loader):
     :param simulation_config: Override configuration file, defaults to None.
     :type simulation_config: str | None
     """
+
+    JSON: ClassVar[str] = 'json'
 
     node_populations: list[SonataNodePopulation]
     simulation_config: str | None = None

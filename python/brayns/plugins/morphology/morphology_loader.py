@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, ClassVar
 
 from brayns.core import Loader
 
@@ -33,6 +33,10 @@ class MorphologyLoader(Loader):
     :param morphology: How to load the morphologies, default constructed.
     :type morphology: Morphology, optional
     """
+
+    SWC: ClassVar[str] = 'swc'
+    H5: ClassVar[str] = 'h5'
+    ASC: ClassVar[str] = 'asc'
 
     morphology: Morphology = field(default_factory=Morphology)
 
