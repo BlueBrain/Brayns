@@ -18,19 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass, field
 from typing import Any
 
 import brayns
 
 
-@dataclass
 class MockInstance(brayns.Instance):
 
-    reply: Any = None
-    method: str = field(default='', init=False)
-    params: Any = field(default=None, init=False)
-    binary: bytes = field(default=b'', init=False)
+    def __init__(self, reply: Any = None) -> None:
+        self.reply: Any = reply
+        self.method = ''
+        self.params: Any = None
+        self.binary = b''
 
     def send(self, request: brayns.Request) -> brayns.RequestFuture:
         self.method = request.method
