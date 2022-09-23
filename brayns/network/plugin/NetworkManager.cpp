@@ -60,13 +60,13 @@
 #include <brayns/network/entrypoints/RemoveLightsEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
-#include <brayns/network/entrypoints/RequestModelUploadEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
 #include <brayns/network/entrypoints/SimulationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/SnapshotEntrypoint.h>
 #include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateModelEntrypoint.h>
+#include <brayns/network/entrypoints/UploadModelEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
 
 namespace
@@ -88,7 +88,6 @@ public:
 
         auto &loaders = api.getLoaderRegistry();
 
-        auto &binary = context.binary;
         auto &entrypoints = context.entrypoints;
         auto &tasks = context.tasks;
         auto &stream = context.stream;
@@ -140,7 +139,7 @@ public:
         builder.add<brayns::RemoveClipPlanesEntrypoint>(scene);
         builder.add<brayns::RemoveLightsEntrypoint>(scene);
         builder.add<brayns::RemoveModelEntrypoint>(scene, simulation);
-        builder.add<brayns::RequestModelUploadEntrypoint>(scene, loaders, simulation, binary, token);
+        builder.add<brayns::UploadModelEntrypoint>(scene, loaders, simulation, token);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
         builder.add<brayns::SetCameraLookAtEntrypoint>(engine);
@@ -188,11 +187,10 @@ private:
 
     static std::unique_ptr<brayns::ISocketListener> _createListener(brayns::NetworkContext &context)
     {
-        auto &binary = context.binary;
         auto &clients = context.clients;
         auto &entrypoints = context.entrypoints;
         auto &tasks = context.tasks;
-        return std::make_unique<brayns::SocketListener>(binary, clients, entrypoints, tasks);
+        return std::make_unique<brayns::SocketListener>(clients, entrypoints, tasks);
     }
 };
 

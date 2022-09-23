@@ -28,8 +28,6 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(BinaryLoadParameters)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("chunks_id", chunksID, "Chunk ID");
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("size", size, "File size in bytes");
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("type", type, "File extension");
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("loader_name", loaderName, "Loader name");
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY("loader_properties", loadParameters, "Loader properties");

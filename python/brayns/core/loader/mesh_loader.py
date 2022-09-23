@@ -31,6 +31,11 @@ class MeshLoader(Loader):
     Format support can be queried using ``get_loaders(instance)``.
     """
 
+    OBJ: str = 'obj'
+    PLY: str = 'ply'
+    STL: str = 'stl'
+    OFF: str = 'off'
+
     @classmethod
     @property
     def name(cls) -> str:

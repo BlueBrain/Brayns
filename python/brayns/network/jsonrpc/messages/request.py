@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from .messages import JsonRpcRequest
+from .json_rpc_request import JsonRpcRequest
 
 
 @dataclass
@@ -36,4 +36,4 @@ class Request(JsonRpcRequest):
     :type params: Any, optional
     """
 
-    pass
+    binary: bytes = field(default=b'', repr=False)

@@ -28,9 +28,10 @@
 
 namespace brayns
 {
-JsonRpcRequest::JsonRpcRequest(ClientRef client, RequestMessage message)
+JsonRpcRequest::JsonRpcRequest(ClientRef client, RequestMessage message, std::string binary)
     : _client(std::move(client))
     , _message(std::move(message))
+    , _binary(std::move(binary))
 {
 }
 
@@ -59,6 +60,11 @@ const JsonValue &JsonRpcRequest::getParams() const
     return _message.params;
 }
 
+const std::string &JsonRpcRequest::getBinary() const
+{
+    return _binary;
+}
+
 void JsonRpcRequest::reply(const JsonValue &result) const
 {
     auto message = JsonRpcFactory::reply(_message, result);
@@ -85,6 +91,11 @@ std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcRequest &req
     auto &client = request.getClient();
     auto &id = request.getId();
     auto &method = request.getMethod();
-    return stream << "{client = " << client << ", id = " << id << ", method = " << method << "}";
+    auto &binary = request.getBinary();
+    stream << "{client = " << client;
+    stream << ", id = " << id;
+    stream << ", method = " << method;
+    stream << ", binary = " << binary.size() << " bytes}";
+    return stream;
 }
 } // namespace std

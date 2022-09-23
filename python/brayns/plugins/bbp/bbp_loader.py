@@ -21,7 +21,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, ClassVar
 
 from brayns.core import Loader
 
@@ -47,6 +47,9 @@ class BbpLoader(Loader):
     :param load_efferent_synapses: Wether to load efferent, defaults to False.
     :type load_efferent_synapses: bool, optional
     """
+
+    BLUE_CONFIG: ClassVar[str] = 'BlueConfig'
+    CIRCUIT_CONFIG: ClassVar[str] = 'CircuitConfig'
 
     cells: BbpCells = field(default_factory=BbpCells.all)
     report: BbpReport | None = None

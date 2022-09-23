@@ -75,3 +75,28 @@ class Loader(ABC):
             deserialize_model(model)
             for model in result
         ]
+
+    def load_binary(self, instance: Instance, format: str, data: bytes) -> list[Model]:
+        """Load a model from binary data.
+
+        As the model format cannot be deduced from a path, it must be specified.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param format: Model format (see loader class variables).
+        :type format: str
+        :param data: Model binary data.
+        :type data: bytes
+        :return: List of created models.
+        :rtype: list[Model]
+        """
+        params = {
+            'type': format,
+            'loader_name': self.name,
+            'loader_properties': self.get_properties(),
+        }
+        result = instance.request('upload-model', params, data)
+        return [
+            deserialize_model(model)
+            for model in result
+        ]

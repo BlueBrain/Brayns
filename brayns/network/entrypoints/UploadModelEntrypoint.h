@@ -21,35 +21,30 @@
 
 #pragma once
 
-#include <optional>
-
 #include <brayns/engine/scene/Scene.h>
 
 #include <brayns/io/LoaderRegistry.h>
 
 #include <brayns/network/adapters/BinaryLoadParametersAdapter.h>
 #include <brayns/network/adapters/ModelInstanceAdapter.h>
-#include <brayns/network/binary/BinaryManager.h>
 #include <brayns/network/common/CancellationToken.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-class RequestModelUploadEntrypoint : public Entrypoint<BinaryLoadParameters, std::vector<ModelInstance *>>
+class UploadModelEntrypoint : public Entrypoint<BinaryLoadParameters, std::vector<ModelInstance *>>
 {
 public:
-    RequestModelUploadEntrypoint(
+    UploadModelEntrypoint(
         Scene &scene,
         const LoaderRegistry &loaders,
         SimulationParameters &simulation,
-        BinaryManager &binary,
         CancellationToken token);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual bool isAsync() const override;
     virtual void onRequest(const Request &request) override;
-    virtual void onPreRender() override;
     virtual void onCancel() override;
     virtual void onDisconnect() override;
 
@@ -57,7 +52,6 @@ private:
     Scene &_scene;
     const LoaderRegistry &_loaders;
     SimulationParameters &_simulation;
-    BinaryManager &_binary;
     CancellationToken _token;
 };
 } // namespace brayns

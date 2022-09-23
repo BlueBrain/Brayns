@@ -18,35 +18,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Subpackage to connect to a Brayns service instance (backend).
+import unittest
 
-An instance is a wrapper around a websocket connection and a JSON-RPC context.
+import brayns
+from brayns.network import serialize_request_as_bytes, serialize_request_as_json
 
-It provides functionalities to send JSON-RPC requests and receive replies with a
-Brayns instance.
-"""
 
-from .client import Client
-from .connector import Connector
-from .instance import Instance
-from .jsonrpc import *
-from .listener import Listener
-from .logger import Logger
-from .websocket import *
+class TestSerializeRequestAsBytes(unittest.TestCase):
 
-__all__ = [
-    'ConnectionClosedError',
-    'Connector',
-    'Instance',
-    'InvalidServerCertificateError',
-    'Logger',
-    'ProtocolError',
-    'Request',
-    'RequestError',
-    'RequestFuture',
-    'RequestProgress',
-    'ServiceUnavailableError',
-    'SslClientContext',
-    'WebSocketError',
-]
+    def test_serialize_request_as_bytes(self) -> None:
+        request = brayns.Request(0, 'test', 123, b'123')
+        test = serialize_request_as_bytes(request)
+        ref = serialize_request_as_json(request)
+        size = int.from_bytes(test[:4], byteorder='little', signed=False)
+        self.assertEqual(size, len(ref))
+        text = test[4:size+4].decode('utf-8')
+        self.assertEqual(text, ref)
+        binary = test[size+4:]
+        self.assertEqual(binary, request.binary)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -20,11 +20,16 @@
 
 from __future__ import annotations
 
-import json
 import logging
 
 from .instance import Instance
-from .jsonrpc import JsonRpcManager, Request, RequestFuture, serialize_request
+from .jsonrpc import (
+    JsonRpcManager,
+    Request,
+    RequestFuture,
+    serialize_request_as_bytes,
+    serialize_request_as_json,
+)
 from .websocket import WebSocket
 
 
@@ -48,7 +53,8 @@ class Client(Instance):
         return self._manager.is_running(id)
 
     def send(self, request: Request) -> RequestFuture:
-        self._logger.info('Send JSON-RPC request: %s.', request)
+        self._logger.info('Send request: %s.', request)
+        self._logger.info('Request binary: %d bytes.', len(request.binary))
         self._logger.debug('Request params: %s.', request.params)
         self._send(request)
         return self._create_future(request.id)
@@ -62,8 +68,13 @@ class Client(Instance):
         self.request('cancel', {'id': id})
 
     def _send(self, request: Request) -> None:
-        message = serialize_request(request)
-        data = json.dumps(message)
+        if request.binary:
+            data = serialize_request_as_bytes(request)
+            self._logger.debug('Request binary frame data: "%s".', data)
+            self._websocket.send_binary(data)
+            return
+        data = serialize_request_as_json(request)
+        self._logger.debug('Request text frame data: "%s".', data)
         self._websocket.send_text(data)
 
     def _create_future(self, id: int | str | None) -> RequestFuture:

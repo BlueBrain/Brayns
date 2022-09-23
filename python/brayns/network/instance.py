@@ -73,7 +73,7 @@ class Instance(Protocol):
         """Disconnect instance (mandatory)."""
         pass
 
-    def request(self, method: str, params: Any = None) -> Any:
+    def request(self, method: str, params: Any = None, binary: bytes = b'') -> Any:
         """Send a request to the instance and wait for the result.
 
         Generate automatically the JSON-RPC ID using integers.
@@ -85,10 +85,10 @@ class Instance(Protocol):
         :return: JSON-RPC result.
         :rtype: Any
         """
-        task = self.task(method, params)
+        task = self.task(method, params, binary)
         return task.wait_for_result()
 
-    def task(self, method: str, params: Any = None) -> RequestFuture:
+    def task(self, method: str, params: Any = None, binary: bytes = b'') -> RequestFuture:
         """Send a request to the instance in a non-blocking way.
 
         Generate automatically the JSON-RPC ID using integers.
@@ -105,7 +105,7 @@ class Instance(Protocol):
         id = 0
         while self.is_running(id):
             id += 1
-        request = Request(id, method, params)
+        request = Request(id, method, params, binary)
         return self.send(request)
 
     def is_running(self, id: int | str) -> bool:

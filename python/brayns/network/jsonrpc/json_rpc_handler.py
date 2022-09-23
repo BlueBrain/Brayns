@@ -32,22 +32,22 @@ class JsonRpcHandler(JsonRpcListener):
         self._logger = logger
 
     def on_reply(self, reply: JsonRpcReply) -> None:
-        self._logger.info('JSON-RPC reply received: %s.', reply)
+        self._logger.info('Reply received: %s.', reply)
         self._logger.debug('Reply result: %s.', reply.result)
         self._tasks.add_result(reply.id, reply.result)
 
     def on_error(self, error: JsonRpcError) -> None:
-        self._logger.info('JSON-RPC error received: %s.', error)
+        self._logger.info('Error received: %s.', error)
         if error.id is None:
             self._tasks.add_global_error(error.error)
             return
         self._tasks.add_error(error.id, error.error)
 
     def on_progress(self, progress: JsonRpcProgress) -> None:
-        self._logger.info('JSON-RPC progress received: %s.', progress)
+        self._logger.info('Progress received: %s.', progress)
         self._tasks.add_progress(progress.id, progress.params)
 
     def on_invalid_message(self, data: str, e: Exception) -> None:
-        self._logger.error('Invalid JSON-RPC message (%s): "%s".', e, data)
-        error = RequestError(0, 'Invalid JSON-RPC message received')
+        self._logger.error('Invalid message (%s): "%s".', e, data)
+        error = RequestError(0, 'Invalid message received')
         self._tasks.add_global_error(error)

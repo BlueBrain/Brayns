@@ -18,35 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Subpackage to connect to a Brayns service instance (backend).
+import json
 
-An instance is a wrapper around a websocket connection and a JSON-RPC context.
+from .json_rpc_request import JsonRpcRequest
+from .serialize_request import serialize_request
 
-It provides functionalities to send JSON-RPC requests and receive replies with a
-Brayns instance.
-"""
 
-from .client import Client
-from .connector import Connector
-from .instance import Instance
-from .jsonrpc import *
-from .listener import Listener
-from .logger import Logger
-from .websocket import *
-
-__all__ = [
-    'ConnectionClosedError',
-    'Connector',
-    'Instance',
-    'InvalidServerCertificateError',
-    'Logger',
-    'ProtocolError',
-    'Request',
-    'RequestError',
-    'RequestFuture',
-    'RequestProgress',
-    'ServiceUnavailableError',
-    'SslClientContext',
-    'WebSocketError',
-]
+def serialize_request_as_json(request: JsonRpcRequest) -> str:
+    message = serialize_request(request)
+    return json.dumps(message)

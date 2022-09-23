@@ -26,11 +26,13 @@ import brayns
 class MockInstance(brayns.Instance):
 
     def __init__(self, reply: Any = None) -> None:
-        self.reply = reply
+        self.reply: Any = reply
         self.method = ''
-        self.params = None
+        self.params: Any = None
+        self.binary = b''
 
     def send(self, request: brayns.Request) -> brayns.RequestFuture:
         self.method = request.method
         self.params = request.params
+        self.binary = request.binary
         return brayns.RequestFuture.from_result(self.reply)
