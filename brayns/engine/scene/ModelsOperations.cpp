@@ -18,8 +18,41 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ModelOperations.h"
+#include "ModelsOperations.h"
+
+#include <brayns/engine/components/ClipperViews.h>
+#include <brayns/engine/components/Lights.h>
 
 namespace brayns
 {
+void ModelsOperations::removeLights(ModelManager &models)
+{
+    removeModelsWithComponent<Lights>(models);
+}
+
+void ModelsOperations::removeClippers(ModelManager &models)
+{
+    removeModelsWithComponent<ClipperViews>(models);
+}
+
+void ModelsOperations::removeObjects(ModelManager &models)
+{
+    auto &instances = models.getAllModelInstances();
+
+    std::vector<uint32_t> ids;
+    ids.reserve(instances.size());
+
+    for (auto instance : instances)
+    {
+        auto &model = instance->getModel();
+        auto &components = model.getComponents();
+        if (components.has<Lights>() || components.has<ClipperViews>())
+        {
+            continue;
+        }
+        ids.push_back(instance->getID());
+    }
+
+    models.removeModelInstances(ids);
+}
 }

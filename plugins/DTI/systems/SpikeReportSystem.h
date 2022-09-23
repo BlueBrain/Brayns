@@ -20,39 +20,13 @@
 
 #pragma once
 
-#include <brayns/engine/model/ModelComponents.h>
-
-#include <brain/spikeReportReader.h>
-
-#include <unordered_map>
+#include <brayns/engine/model/systemtypes/ParameterSystem.h>
 
 namespace dti
 {
-class SpikeReportComponent final : public brayns::Component
+class SpikeReportSystem final : public brayns::ParameterSystem
 {
 public:
-    /**
-     * @brief Construct a new Spike Report Component object
-     *
-     * @param report
-     * @param gidStreamlineMap
-     * @param spikeDecayTIme
-     */
-    SpikeReportComponent(
-        std::unique_ptr<brain::SpikeReportReader> report,
-        std::unordered_map<uint64_t, std::vector<size_t>> gidStreamlineMap,
-        float spikeDecayTime);
-
-    void onCreate() override;
-
-    void onPreRender(const brayns::ParametersManager &parameters) override;
-
-private:
-    const std::unique_ptr<brain::SpikeReportReader> _report;
-    const std::unordered_map<uint64_t, std::vector<size_t>> _gidStreamlineMap;
-    const float _invSpikeDecayTime{};
-
-    // Flag used to force the simulations color update when re-enabling a simulation after it was disabled
-    bool _lastEnabledValue{true};
+    void execute(const brayns::ParametersManager &parameters, brayns::Components &components) override;
 };
 }

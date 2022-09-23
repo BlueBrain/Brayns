@@ -27,6 +27,7 @@
 #include <brayns/engine/geometry/types/Plane.h>
 #include <brayns/engine/light/types/AmbientLight.h>
 #include <brayns/engine/light/types/DirectionalLight.h>
+#include <brayns/engine/scene/ModelsOperations.h>
 #include <brayns/engine/systems/ClipperInitSystem.h>
 
 #include <tests/paths.h>
@@ -79,20 +80,7 @@ struct ZParallelSliceManager
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
         auto &models = scene.getModels();
-
-        auto &instances = models.getAllModelInstances();
-        std::vector<uint32_t> toRemove;
-        toRemove.reserve(instances.size());
-        for (auto instance : instances)
-        {
-            auto &model = instance->getModel();
-            auto &components = model.getComponents();
-            if (components.has<brayns::ClipperViews>())
-            {
-                toRemove.push_back(instance->getID());
-            }
-        }
-        models.removeModelInstances(toRemove);
+        brayns::ModelsOperations::removeClippers(models);
     }
 };
 } // namespace

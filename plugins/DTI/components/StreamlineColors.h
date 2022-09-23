@@ -20,30 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/model/ModelComponents.h>
+#include <brayns/common/MathTypes.h>
 
-#include <api/reports/IColormapIndexer.h>
-#include <api/reports/IReportData.h>
+#include <vector>
 
-class ReportComponent final : public brayns::Component
+namespace dti
 {
-public:
-    /**
-     * @brief Construct a new Report Component object
-     *
-     * @param data source of report data
-     * @param frameIndexer transforms report data into color map indices
-     */
-    ReportComponent(std::unique_ptr<IReportData> data, std::unique_ptr<IColormapIndexer> frameIndexer);
-
-    void onCreate() override;
-
-    void onPreRender(const brayns::ParametersManager &parameters) override;
-
-private:
-    const std::unique_ptr<IReportData> _report;
-    const std::unique_ptr<IColormapIndexer> _indexer;
-
-    // Flag used to force the simulations color update when re-enabling a simulation after it was disabled
-    bool _lastEnabledValue{true};
+struct StreamlineColors
+{
+    std::vector<std::vector<brayns::Vector4f>> elements;
 };
+}

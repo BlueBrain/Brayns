@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 #include <api/UseCaseManager.h>
@@ -33,13 +33,13 @@ class GetAvailableAtlasUseCasesEntrypoint
     : public brayns::Entrypoint<AvailableUseCasesMessage, std::vector<std::string>>
 {
 public:
-    GetAvailableAtlasUseCasesEntrypoint(brayns::Scene &scene);
+    GetAvailableAtlasUseCasesEntrypoint(brayns::ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    brayns::Scene &_scene;
+    brayns::ModelManager &_models;
     UseCaseManager _useCases;
 };

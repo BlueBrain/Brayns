@@ -18,6 +18,7 @@
 
 #include "CellLoader.h"
 
+#include <brayns/engine/components/Metadata.h>
 #include <brayns/utils/string/StringJoiner.h>
 
 #include <api/circuit/MorphologyCircuitBuilder.h>
@@ -115,7 +116,7 @@ struct MetadataFactory
 {
     static void create(const bbploader::LoadContext &ctxt, brayns::Model &dst)
     {
-        std::map<std::string, std::string> metadata;
+        auto &metadata = dst.getComponents().add<brayns::Metadata>();
 
         const auto &gids = ctxt.gids;
         const auto &params = ctxt.loadParameters;
@@ -126,8 +127,6 @@ struct MetadataFactory
             metadata["targets"] = targetList;
         }
         metadata["loaded_neuron_count"] = std::to_string(gids.size());
-
-        dst.setMetaData(std::move(metadata));
     }
 };
 }

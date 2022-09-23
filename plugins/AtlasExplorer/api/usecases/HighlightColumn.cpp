@@ -20,8 +20,13 @@
 
 #include "HighlightColumn.h"
 
-#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Box.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
 
 #include <api/usecases/common/ParamsParser.h>
 
@@ -82,6 +87,35 @@ public:
 private:
     const AtlasVolume &_volume;
 };
+
+class ModelBuilder
+{
+public:
+    ModelBuilder(brayns::Model &model)
+        : _model(model)
+    {
+    }
+    void addComponents(std::vector<brayns::Box> primitives, const std::vector<brayns::Vector4f> &colors)
+    {
+        auto &components = _model.getComponents();
+        auto &geometries = components.add<brayns::Geometries>();
+        auto &geometry = geometries.elements.emplace_back(std::move(primitives));
+        auto &views = components.add<brayns::GeometryViews>();
+        auto &view = views.elements.emplace_back(geometry);
+        view.setColorPerPrimitive(ospray::cpp::CopiedData(colors));
+    }
+
+    void addSystems()
+    {
+        auto &systems = _model.getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+        systems.setInitSystem<brayns::GeometryInitSystem>();
+        systems.setCommitSystem<brayns::GeometryCommitSystem>();
+    }
+
+private:
+    brayns::Model &_model;
+};
 }
 
 std::string HighlightColumn::getName() const
@@ -122,8 +156,9 @@ std::unique_ptr<brayns::Model> HighlightColumn::execute(const AtlasVolume &volum
 
     auto model = std::make_unique<brayns::Model>();
 
-    auto &component = model->addComponent<brayns::GeometryRendererComponent>(std::move(geometry));
-    component.setColors(colors);
+    ModelBuilder builder(*model);
+    builder.addComponents(std::move(geometry), colors);
+    builder.addSystems();
 
     return model;
 }

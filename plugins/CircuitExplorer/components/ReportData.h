@@ -18,20 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CircuitColorComponent.h"
+#pragma once
 
-CircuitColorComponent::CircuitColorComponent(std::unique_ptr<IColorData> data, std::unique_ptr<IColorHandler> handler)
-    : _colorData(std::move(data))
-    , _colorHandler(std::move(handler))
-{
-}
+#include <api/reports/IColormapIndexer.h>
+#include <api/reports/IReportData.h>
 
-IColorData &CircuitColorComponent::getColorData() noexcept
-{
-    return *_colorData;
-}
+#include <memory>
 
-IColorHandler &CircuitColorComponent::getColorHandler() noexcept
+struct ReportData
 {
-    return *_colorHandler;
-}
+    std::unique_ptr<IReportData> data;
+    std::unique_ptr<IColormapIndexer> indexer;
+    bool lastEnabledFlag = false;
+};

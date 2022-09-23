@@ -21,7 +21,7 @@
 
 #include "ClearLightsEntrypoint.h"
 
-#include <brayns/engine/components/Lights.h>
+#include <brayns/engine/scene/ModelsOperations.h>
 
 namespace brayns
 {
@@ -42,22 +42,7 @@ std::string ClearLightsEntrypoint::getDescription() const
 
 void ClearLightsEntrypoint::onRequest(const Request &request)
 {
-    auto instances = _models.getAllModelInstances();
-
-    std::vector<uint32_t> deleteInstances;
-    deleteInstances.reserve(instances.size());
-
-    for (auto instance : instances)
-    {
-        auto &model = instance->getModel();
-        auto &components = model.getComponents();
-        if (components.has<Lights>())
-        {
-            deleteInstances.push_back(instance->getID());
-        }
-    }
-
-    _models.removeModelInstances(deleteInstances);
+    ModelsOperations::removeLights(_models);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

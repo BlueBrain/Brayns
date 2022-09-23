@@ -27,7 +27,7 @@ namespace brayns
 {
 struct Volumes
 {
-    ModifiedFlag modified;
     std::vector<Volume> elements;
+    ModifiedFlag modified;
 };
 }

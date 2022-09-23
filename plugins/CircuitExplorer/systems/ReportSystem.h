@@ -20,25 +20,10 @@
 
 #pragma once
 
-#include <brayns/engine/geometry/GeometryView.h>
-#include <brayns/engine/geometry/types/Capsule.h>
-#include <brayns/engine/model/ModelComponents.h>
+#include <brayns/engine/model/systemtypes/ParameterSystem.h>
 
-class RotationVolumeComponent final : public brayns::Component
+class ReportSystem final : public brayns::ParameterSystem
 {
 public:
-    RotationVolumeComponent(
-        const brayns::Vector3ui &sizes,
-        const brayns::Vector3f &dimensions,
-        const std::vector<brayns::Quaternion> &rotations);
-
-    brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
-
-    void onCreate() override;
-
-    bool commit() override;
-
-private:
-    std::vector<brayns::Geometry> _primitives;
-    std::vector<brayns::GeometryView> _views;
+    void execute(const brayns::ParametersManager &parameters, brayns::Components &components) override;
 };

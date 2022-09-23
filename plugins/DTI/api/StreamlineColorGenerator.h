@@ -20,49 +20,15 @@
 
 #pragma once
 
-#include <brayns/engine/geometry/GeometryView.h>
 #include <brayns/engine/geometry/types/Capsule.h>
-#include <brayns/engine/model/ModelComponents.h>
+
+#include <vector>
 
 namespace dti
 {
-class DTIComponent final : public brayns::Component
+class StreamlineColorGenerator
 {
 public:
-    struct Streamline
-    {
-        Streamline(std::vector<brayns::Capsule> primitives)
-            : geometry(std::move(primitives))
-            , view(geometry)
-        {
-            geometry.commit();
-        }
-        brayns::Geometry geometry;
-
-        brayns::GeometryView view;
-        std::vector<brayns::Vector4f> colors;
-    };
-
-public:
-    DTIComponent(std::vector<std::vector<brayns::Capsule>> streamlineGeometries);
-
-    brayns::Bounds computeBounds(const brayns::Matrix4f &transform) const noexcept override;
-
-    void onCreate() override;
-
-    bool commit() override;
-
-    size_t getNumStreamlines() const noexcept;
-
-    void setDefaultColors() noexcept;
-
-    void updateSimulation(const std::vector<std::vector<float>> &data);
-
-private:
-    void _commitColors() noexcept;
-
-private:
-    std::vector<Streamline> _streamlines;
-    bool _colorsDirty{false};
+    static std::vector<brayns::Vector4f> generate(const std::vector<brayns::Capsule> &primitives);
 };
 }

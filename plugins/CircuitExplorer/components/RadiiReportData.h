@@ -20,19 +20,15 @@
 
 #pragma once
 
-#include <brayns/engine/model/ModelComponents.h>
-
-#include <api/AtlasVolume.h>
+#include <api/reports/IReportData.h>
 
 #include <memory>
+#include <vector>
 
-class AtlasComponent final : public brayns::Component
+struct RadiiReportData
 {
-public:
-    AtlasComponent(const std::shared_ptr<AtlasVolume> &volume);
-
-    const std::shared_ptr<AtlasVolume> &getVolume() const noexcept;
-
-private:
-    std::shared_ptr<AtlasVolume> _volume;
+    std::unique_ptr<IReportData> data;
+    std::vector<size_t> offsets;
+    std::vector<float> originalRadii;
+    bool lastEnabledFlag = false;
 };

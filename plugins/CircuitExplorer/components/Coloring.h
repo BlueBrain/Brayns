@@ -20,9 +20,18 @@
 
 #pragma once
 
-namespace brayns
+#include <api/coloring/IColorData.h>
+#include <api/coloring/IColorHandler.h>
+
+#include <memory>
+
+/**
+ * @brief Holds logic on how to color the underlying geometry from a data source (loader specific)
+ * using a color handler (geometry specific)
+ * TODO: Temporary until coloring system is added to brayns core
+ */
+struct Coloring
 {
-class ModelOperations
-{
+    std::unique_ptr<IColorData> data;
+    std::unique_ptr<IColorHandler> painter;
 };
-}

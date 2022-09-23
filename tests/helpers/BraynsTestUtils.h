@@ -50,7 +50,8 @@ public:
         auto model = std::make_unique<brayns::Model>();
 
         auto &components = model->getComponents();
-        components.add<brayns::Lights>(std::vector<brayns::Light>{std::move(light)});
+        auto &lights = components.add<brayns::Lights>(); //(std::vector<brayns::Light>{std::move(light)});
+        lights.elements.push_back(std::move(light));
 
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Lights>>();

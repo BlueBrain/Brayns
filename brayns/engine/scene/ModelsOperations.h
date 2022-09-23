@@ -20,16 +20,38 @@
 
 #pragma once
 
-#include <string>
+#include "ModelManager.h"
 
 namespace brayns
 {
-struct SimulationInfo
+class ModelsOperations
 {
-    float startTime = 0.f;
-    float endTime = 0.f;
-    float dt = 0.f;
-    std::string timeUnit;
-    bool enabled = false;
+public:
+    template<typename Component>
+    static void removeModelsWithComponent(ModelManager &models)
+    {
+        static_assert(std::is_same_v<Component, std::decay_t<Component>>, "Only decayed types allowed");
+
+        auto &instances = models.getAllModelInstances();
+
+        std::vector<uint32_t> ids;
+        ids.reserve(instances.size());
+
+        for (auto instance : instances)
+        {
+            auto &model = instance->getModel();
+            auto &components = model.getComponents();
+            if (components.has<Component>())
+            {
+                ids.push_back(instance->getID());
+            }
+        }
+
+        models.removeModelInstances(ids);
+    }
+
+    static void removeLights(ModelManager &models);
+    static void removeClippers(ModelManager &models);
+    static void removeObjects(ModelManager &models);
 };
 }

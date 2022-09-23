@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: nadir.romanguerrero@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,16 +20,10 @@
 
 #pragma once
 
-#include <brayns/engine/scene/ModelManager.h>
+#include <cstdint>
+#include <vector>
 
-#include <api/AtlasVolume.h>
-#include <components/AtlasData.h>
-
-class ExtractAtlas
+struct CircuitIds
 {
-public:
-    static const AtlasVolume &atlasFromId(brayns::ModelManager &models, uint32_t id);
-    static const AtlasVolume &atlasFromModel(brayns::Model &model);
-    static const AtlasData &componentFromId(brayns::ModelManager &models, uint32_t id);
-    static const AtlasData &componentFromModel(brayns::Model &model);
+    std::vector<uint64_t> elements;
 };

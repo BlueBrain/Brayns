@@ -27,7 +27,7 @@ namespace brayns
 {
 struct Geometries
 {
-    ModifiedFlag modified;
     std::vector<Geometry> elements;
+    ModifiedFlag modified;
 };
 }

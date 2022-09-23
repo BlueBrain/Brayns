@@ -20,27 +20,76 @@
 
 #include "SomaColorHandler.h"
 
+#include <brayns/engine/components/GeometryViews.h>
+
+#include <api/coloring/ColorByIDAlgorithm.h>
 #include <api/coloring/ColorUtils.h>
 #include <api/neuron/NeuronSection.h>
+#include <components/CircuitIds.h>
+#include <components/SomaColors.h>
 
-SomaColorHandler::SomaColorHandler(SomaCircuitComponent &circuit)
-    : _circuit(circuit)
+namespace
+{
+class Extractor
+{
+public:
+    static brayns::GeometryView &extractView(brayns::Components &components)
+    {
+        auto &views = components.get<brayns::GeometryViews>();
+        assert(views.elements.size() == 1);
+        views.modified = true;
+        return views.elements.back();
+    }
+
+    static std::vector<uint64_t> &extractIds(brayns::Components &components)
+    {
+        auto &ids = components.get<CircuitIds>();
+        return ids.elements;
+    }
+
+    static std::vector<brayns::Vector4f> &extractSomaColors(brayns::Components &components)
+    {
+        auto &colors = components.get<SomaColors>();
+        return colors.elements;
+    }
+};
+}
+
+SomaColorHandler::SomaColorHandler(brayns::Components &components)
+    : _components(components)
 {
 }
 
 void SomaColorHandler::updateColor(const brayns::Vector4f &color)
 {
-    _circuit.setColor(color);
+    auto view = Extractor::extractView(_components);
+    view.setColor(color);
 }
 
 std::vector<uint64_t> SomaColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    return _circuit.setColorById(colorMap);
+    auto &view = Extractor::extractView(_components);
+    auto &ids = Extractor::extractIds(_components);
+    auto &colors = Extractor::extractSomaColors(_components);
+    auto nonColoredIds = ColorByIDAlgorithm::execute(
+        colorMap,
+        ids,
+        [&](uint64_t id, size_t index, const brayns::Vector4f &color)
+        {
+            (void)id;
+            colors[index] = color;
+        });
+    view.setColorPerPrimitive(ospray::cpp::SharedData(colors));
+    return nonColoredIds;
 }
 
-void SomaColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)
+void SomaColorHandler::updateColorById(const std::vector<brayns::Vector4f> &inputColors)
 {
-    _circuit.setColorById(colors);
+    auto &view = Extractor::extractView(_components);
+    auto &colors = Extractor::extractSomaColors(_components);
+
+    colors = inputColors;
+    view.setColorPerPrimitive(ospray::cpp::SharedData(colors));
 }
 
 void SomaColorHandler::updateColorByMethod(

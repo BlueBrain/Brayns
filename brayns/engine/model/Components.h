@@ -21,8 +21,8 @@
 #pragma once
 
 #include <algorithm>
-#include <any>
 #include <cassert>
+#include <memory>
 #include <typeindex>
 #include <vector>
 
@@ -36,18 +36,20 @@ public:
     {
         static_assert(std::is_same_v<std::decay_t<T>, T>, "Only decayed components allowed");
 
-        auto type = std::type_index(typeid(T));
+        auto &entry = _components.emplace_back(typeid(T), std::make_unique<Component<T>>());
+        auto &component = static_cast<Component<T> &>(*entry.component);
+        auto &data = component.data;
 
         if constexpr (std::is_aggregate_v<T>)
         {
-            _components.push_back(Entry{type, T{std::forward<Args>(args)...}});
+            data = T{std::forward<Args>(args)...};
         }
         else
         {
-            _components.push_back(Entry{type, T(std::forward<Args>(args)...)});
+            data = T(std::forward<Args>(args)...);
         }
 
-        return std::any_cast<T &>(_components.back().component);
+        return data;
     }
 
     template<typename T>
@@ -86,7 +88,8 @@ public:
         }
         auto &entry = *it;
         auto &component = entry.component;
-        return std::any_cast<T>(&component);
+        auto &cast = static_cast<Component<T> &>(*component);
+        return &cast.data;
     }
 
     template<typename T>
@@ -99,7 +102,8 @@ public:
         }
         auto &entry = *it;
         auto &component = entry.component;
-        return std::any_cast<T>(&component);
+        auto &cast = static_cast<Component<T> &>(*component);
+        return &cast.data;
     }
 
     template<typename T>
@@ -121,10 +125,27 @@ private:
         return std::find(_components.begin(), _components.end(), std::type_index(typeid(T)));
     }
 
+    struct IComponent
+    {
+        virtual ~IComponent() = default;
+    };
+
+    template<typename T>
+    struct Component : public IComponent
+    {
+        T data;
+    };
+
     struct Entry
     {
         std::type_index type;
-        std::any component;
+        std::unique_ptr<IComponent> component;
+
+        Entry(std::type_index type, std::unique_ptr<IComponent> component)
+            : type(type)
+            , component(std::move(component))
+        {
+        }
 
         bool operator==(std::type_index typeTest) const noexcept
         {

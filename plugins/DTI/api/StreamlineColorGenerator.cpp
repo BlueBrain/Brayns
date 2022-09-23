@@ -18,14 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtlasComponent.h"
+#include "StreamlineColorGenerator.h"
 
-AtlasComponent::AtlasComponent(const std::shared_ptr<AtlasVolume> &volume)
-    : _volume(volume)
+namespace dti
 {
+std::vector<brayns::Vector4f> StreamlineColorGenerator::generate(const std::vector<brayns::Capsule> &primitives)
+{
+    std::vector<brayns::Vector4f> colors;
+    colors.reserve(primitives.size());
+
+    for (auto &primitive : primitives)
+    {
+        auto &p1 = primitive.p0;
+        auto &p2 = primitive.p1;
+        auto dir = glm::normalize(p2 - p1);
+        auto n = brayns::Vector3f(0.5f) + dir * 0.5f;
+        colors.emplace_back(n, 1.f);
+    }
+
+    return colors;
 }
-
-const std::shared_ptr<AtlasVolume> &AtlasComponent::getVolume() const noexcept
-{
-    return _volume;
 }

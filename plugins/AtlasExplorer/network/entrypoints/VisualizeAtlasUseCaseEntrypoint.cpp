@@ -22,8 +22,8 @@
 
 #include <network/entrypoints/common/ExtractAtlas.h>
 
-VisualizeAtlasUseCaseEntrypoint::VisualizeAtlasUseCaseEntrypoint(brayns::Scene &scene)
-    : _scene(scene)
+VisualizeAtlasUseCaseEntrypoint::VisualizeAtlasUseCaseEntrypoint(brayns::ModelManager &models)
+    : _models(models)
     , _useCases(UseCaseManager::defaultUseCases())
 {
 }
@@ -46,10 +46,9 @@ void VisualizeAtlasUseCaseEntrypoint::onRequest(const Request &request)
     auto useCase = params.use_case;
     auto useCaseParams = params.params;
 
-    auto &component = ExtractAtlas::componentFromId(_scene, modelId);
-    auto &atlas = component.getVolume();
-    auto newModel = _useCases.executeUseCase(useCase, *atlas, useCaseParams);
-    newModel->addComponent<AtlasComponent>(atlas);
-    auto &instance = _scene.addModel({}, std::move(newModel));
-    request.reply(instance);
+    auto &component = ExtractAtlas::componentFromId(_models, modelId);
+    auto newModel = _useCases.executeUseCase(useCase, *component.volume, useCaseParams);
+    newModel->getComponents().add<AtlasData>(component.volume);
+    auto instance = _models.addModel(std::move(newModel));
+    request.reply(*instance);
 }

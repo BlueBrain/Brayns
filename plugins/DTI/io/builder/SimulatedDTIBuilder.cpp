@@ -23,8 +23,10 @@
 #include "common/RowTreamlineMapReader.h"
 #include "common/StreamlineComponentBuilder.h"
 
-#include <components/SpikeReportComponent.h>
+#include <components/SpikeReportData.h>
+#include <systems/SpikeReportSystem.h>
 
+#include <brayns/engine/components/SimulationInfo.h>
 #include <brayns/utils/FileReader.h>
 
 #include <brain/spikeReportReader.h>
@@ -34,7 +36,7 @@
 
 namespace
 {
-class GIDsToStreamlineIndicesMapping
+class GIDsToFibersMapping
 {
 public:
     static std::unordered_map<uint64_t, std::vector<size_t>> generate(
@@ -56,6 +58,35 @@ public:
 
         return result;
     }
+};
+
+class SpikeReader
+{
+public:
+    SpikeReader(const std::string &blueConfigPath)
+        : _reader(brion::BlueConfig(blueConfigPath).getSpikeSource())
+    {
+    }
+
+    std::vector<dti::SpikeReportData::Spike> readAll()
+    {
+        auto allSpikes = _reader.getSpikes(0.f, _reader.getEndTime());
+        auto result = std::vector<dti::SpikeReportData::Spike>();
+        result.reserve(allSpikes.size());
+        for (auto &spike : allSpikes)
+        {
+            result.push_back({spike.first, spike.second});
+        }
+        return result;
+    }
+
+    float getEndTime()
+    {
+        return _reader.getEndTime();
+    }
+
+private:
+    brain::SpikeReportReader _reader;
 };
 }
 
@@ -100,10 +131,20 @@ void SimulatedDTIBuilder::buildGeometry(float radius, brayns::Model &model)
 
 void SimulatedDTIBuilder::buildSimulation(const std::string &path, float spikeDecayTime, brayns::Model &model)
 {
-    auto gidStreamlineMap = GIDsToStreamlineIndicesMapping::generate(_gidRows, _streamlines);
-    const auto blueConfig = brion::BlueConfig(path);
-    const auto spikesURI = blueConfig.getSpikeSource();
-    auto spikeReport = std::make_unique<brain::SpikeReportReader>(spikesURI);
-    model.addComponent<dti::SpikeReportComponent>(std::move(spikeReport), std::move(gidStreamlineMap), spikeDecayTime);
+    auto spikeReader = SpikeReader(path);
+    auto spikes = spikeReader.readAll();
+    auto endTime = spikeReader.getEndTime();
+
+    auto &components = model.getComponents();
+    auto &spikeData = components.add<SpikeReportData>();
+    spikeData.numStreamlines = _streamlines.size();
+    spikeData.spikes = std::move(spikes);
+    spikeData.gidToFibers = GIDsToFibersMapping::generate(_gidRows, _streamlines);
+    spikeData.decayTime = spikeDecayTime;
+
+    components.add<brayns::SimulationInfo>(0.f, endTime, 0.01f);
+
+    auto &systems = model.getSystems();
+    systems.setPreRenderSystem<SpikeReportSystem>();
 }
 }

@@ -20,34 +20,121 @@
 
 #include "StreamlineComponentBuilder.h"
 
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Capsule.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
 
-#include <components/DTIComponent.h>
+#include <api/StreamlineColorGenerator.h>
+#include <components/StreamlineColors.h>
+
+namespace
+{
+using StreamlineMap = std::map<uint64_t, dti::StreamlineData>;
+using StreamlineGeometry = std::vector<brayns::Capsule>;
+using StreamlineGeometries = std::vector<StreamlineGeometry>;
+using StreamlineColor = std::vector<brayns::Vector4f>;
+using StreamlineColors = std::vector<StreamlineColor>;
+
+class GeometryGenerator
+{
+public:
+    static StreamlineGeometries generate(const StreamlineMap &data, float radius)
+    {
+        StreamlineGeometries geometryList;
+        geometryList.reserve(data.size());
+
+        for (auto &[row, streamline] : data)
+        {
+            auto &points = streamline.points;
+
+            auto &geometries = geometryList.emplace_back();
+            geometries.reserve(points.size() - 1);
+
+            for (size_t i = 1; i < points.size(); ++i)
+            {
+                auto &start = points[i - 1];
+                auto &end = points[i];
+                geometries.push_back(brayns::CapsuleFactory::cylinder(start, end, radius));
+            }
+        }
+
+        return geometryList;
+    }
+};
+
+class ModelBuilder
+{
+public:
+    ModelBuilder(brayns::Model &model)
+        : _model(model)
+    {
+    }
+
+    void addComponents(StreamlineGeometries inputGeometry)
+    {
+        auto count = inputGeometry.size();
+        auto &geometries = _addGeometryComponent(count);
+        auto &views = _addViewComponent(count);
+        auto &colors = _addColorComponent(count);
+
+        for (size_t i = 0; i < inputGeometry.size(); ++i)
+        {
+            auto &capsules = inputGeometry[i];
+            auto &color = colors.emplace_back(dti::StreamlineColorGenerator::generate(capsules));
+            auto &geometry = geometries.emplace_back(std::move(capsules));
+            auto &view = views.emplace_back(geometry);
+            view.setColorPerPrimitive(ospray::cpp::SharedData(color));
+        }
+    }
+
+    void addSystems()
+    {
+        auto &systems = _model.getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+        systems.setInitSystem<brayns::GeometryInitSystem>();
+        systems.setCommitSystem<brayns::GeometryCommitSystem>();
+    }
+
+private:
+    std::vector<brayns::Geometry> &_addGeometryComponent(size_t count)
+    {
+        auto &geometryComponent = _model.getComponents().add<brayns::Geometries>();
+        auto &geometries = geometryComponent.elements;
+        geometries.reserve(count);
+        return geometries;
+    }
+
+    std::vector<brayns::GeometryView> &_addViewComponent(size_t count)
+    {
+        auto &viewComponent = _model.getComponents().add<brayns::GeometryViews>();
+        auto &views = viewComponent.elements;
+        views.reserve(count);
+        return views;
+    }
+
+    std::vector<std::vector<brayns::Vector4f>> &_addColorComponent(size_t count)
+    {
+        auto &colorComponent = _model.getComponents().add<dti::StreamlineColors>();
+        auto &colors = colorComponent.elements;
+        colors.reserve(count);
+        return colors;
+    }
+
+private:
+    brayns::Model &_model;
+};
+}
 
 namespace dti
 {
-void StreamlineComponentBuilder::build(
-    const std::map<uint64_t, StreamlineData> &streamlines,
-    float radius,
-    brayns::Model &model)
+void StreamlineComponentBuilder::build(const StreamlineMap &data, float radius, brayns::Model &model)
 {
-    std::vector<std::vector<brayns::Capsule>> geometries;
-    geometries.reserve(streamlines.size());
-
-    for (const auto &[row, streamline] : streamlines)
-    {
-        const auto &points = streamline.points;
-
-        auto &geometry = geometries.emplace_back();
-        geometry.reserve(points.size() - 1);
-
-        for (size_t i = 1; i < points.size(); ++i)
-        {
-            const auto &start = points[i - 1];
-            const auto &end = points[i];
-            geometry.push_back(brayns::CapsuleFactory::cylinder(start, end, radius));
-        }
-    }
-    model.addComponent<dti::DTIComponent>(std::move(geometries));
+    auto builder = ModelBuilder(model);
+    builder.addComponents(GeometryGenerator::generate(data, radius));
+    builder.addSystems();
 }
 }

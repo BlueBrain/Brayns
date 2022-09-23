@@ -68,7 +68,7 @@ public:
     template<typename Type>
     const Type *as() const noexcept
     {
-        if (auto cast = dynamic_cast<Data<Type> *>(_data.get()))
+        if (auto cast = dynamic_cast<const Data<Type> *>(_data.get()))
         {
             return &cast->data;
         }

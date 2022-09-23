@@ -33,7 +33,7 @@ class SimulatedDTIBuilder final : public IDTIBuilder
 public:
     struct GIDRow
     {
-        uint64_t gid{};
+        uint32_t gid{};
         uint64_t row{};
     };
 

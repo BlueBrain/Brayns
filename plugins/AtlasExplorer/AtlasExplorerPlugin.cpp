@@ -43,11 +43,12 @@ void AtlasExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &interfa
 {
     auto &engine = _api.getEngine();
     auto &scene = engine.getScene();
+    auto &models = scene.getModels();
 
     auto builder = brayns::EntrypointBuilder("Atlas Explorer", interface);
 
-    builder.add<GetAvailableAtlasUseCasesEntrypoint>(scene);
-    builder.add<VisualizeAtlasUseCaseEntrypoint>(scene);
+    builder.add<GetAvailableAtlasUseCasesEntrypoint>(models);
+    builder.add<VisualizeAtlasUseCaseEntrypoint>(models);
 }
 
 extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)

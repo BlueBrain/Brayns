@@ -20,35 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/model/ModelComponents.h>
+#include <api/neuron/NeuronGeometry.h>
 
-#include <api/coloring/IColorData.h>
-#include <api/coloring/IColorHandler.h>
+#include <vector>
 
-class CircuitColorComponent final : public brayns::Component
+/**
+ * @brief Holds indices into the geometry on a per neuron basis for morphology-loaded circuits
+ */
+struct NeuronSectionList
 {
-public:
-    /**
-     * @brief Creates the circuit color component with both the interface to the circuit data and the
-     * geometry coloring handler
-     * @param data
-     * @param handler
-     */
-    CircuitColorComponent(std::unique_ptr<IColorData> data, std::unique_ptr<IColorHandler> handler);
-
-    /**
-     * @brief Returns the circuit data interface
-     * @return CircuitColorData &
-     */
-    IColorData &getColorData() noexcept;
-
-    /**
-     * @brief Returns the circuit geometry color handler interface
-     * @return CircuitColorHandler &
-     */
-    IColorHandler &getColorHandler() noexcept;
-
-private:
-    std::unique_ptr<IColorData> _colorData;
-    std::unique_ptr<IColorHandler> _colorHandler;
+    std::vector<std::vector<NeuronSectionMapping>> mappings;
 };

@@ -20,32 +20,26 @@
 
 #pragma once
 
-#include <brayns/engine/model/ModelComponents.h>
+#include <brain/spikeReportReader.h>
 
-#include <api/reports/IReportData.h>
+#include <memory>
+#include <unordered_map>
+#include <vector>
 
-class VasculatureRadiiReportComponent final : public brayns::Component
+namespace dti
 {
-public:
-    /**
-     * @brief Construct a new Vasculature Radii Report Component object
-     *
-     * @param data
-     * @param offsets
-     */
-    VasculatureRadiiReportComponent(std::unique_ptr<IReportData> data, std::vector<size_t> offsets);
+struct SpikeReportData
+{
+    struct Spike
+    {
+        float time;
+        uint32_t gid;
+    };
 
-    void onCreate() override;
-
-    void onPreRender(const brayns::ParametersManager &parameters) override;
-
-private:
-    const std::unique_ptr<IReportData> _report;
-    const std::vector<size_t> _offsets;
-
-    // Vasculature radii as it was loaded from disk
-    std::vector<float> _originalRadii;
-
-    // Flag used to force the simulations color update when re-enabling a simulation after it was disabled
-    bool _lastEnabledValue{true};
+    size_t numStreamlines;
+    std::vector<Spike> spikes;
+    std::unordered_map<uint64_t, std::vector<size_t>> gidToFibers;
+    float decayTime = 1.f;
+    bool lastEnabledFlag = true;
 };
+}

@@ -22,6 +22,7 @@
 #include "ClearModelsEntrypoint.h"
 
 #include <brayns/engine/common/SimulationScanner.h>
+#include <brayns/engine/scene/ModelsOperations.h>
 
 namespace brayns
 {
@@ -43,7 +44,7 @@ std::string ClearModelsEntrypoint::getDescription() const
 
 void ClearModelsEntrypoint::onRequest(const Request &request)
 {
-    _models.removeAllModelInstances();
+    ModelsOperations::removeObjects(_models);
     SimulationScanner::scanAndUpdate(_models, _simulation);
     request.reply(EmptyMessage());
 }
