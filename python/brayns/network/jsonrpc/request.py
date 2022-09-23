@@ -36,4 +36,4 @@ class Request(JsonRpcRequest):
     :type params: Any, optional
     """
 
-    pass
+    binary: bytes = b''

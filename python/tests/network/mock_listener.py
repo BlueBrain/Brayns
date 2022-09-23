@@ -18,36 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""
-Subpackage to connect to a Brayns service instance (backend).
+from dataclasses import dataclass, field
 
-An instance is a wrapper around a websocket connection and a JSON-RPC context.
+from brayns.network import WebSocketListener
 
-It provides functionalities to send JSON-RPC requests and receive replies with a
-Brayns instance.
-"""
 
-from .client import Client
-from .connector import Connector
-from .instance import Instance
-from .jsonrpc import *
-from .listener import Listener
-from .logger import Logger
-from .send_request import send_request
-from .websocket import *
+@dataclass
+class MockListener(WebSocketListener):
 
-__all__ = [
-    'ConnectionClosedError',
-    'Connector',
-    'Instance',
-    'InvalidServerCertificateError',
-    'Logger',
-    'ProtocolError',
-    'Request',
-    'RequestError',
-    'RequestFuture',
-    'RequestProgress',
-    'ServiceUnavailableError',
-    'SslClientContext',
-    'WebSocketError',
-]
+    binary: bytes = field(default=b'', init=False)
+    text: str = field(default='', init=False)
+
+    def on_binary(self, data: bytes) -> None:
+        self.binary = data
+
+    def on_text(self, data: str) -> None:
+        self.text = data
