@@ -104,7 +104,7 @@ public:
         {
             throw brayns::ParsingErrorException("Invalid binary packet, expected at least 4 bytes for the JSON size.");
         }
-        auto jsonSize = brayns::Parser::extractChunk<size_t>(data, brayns::ByteOrder::LittleEndian);
+        auto jsonSize = brayns::Parser::extractChunk<uint32_t>(data, brayns::ByteOrder::LittleEndian);
         if (jsonSize > size - 4)
         {
             auto message = "Invalid binary packet, JSON size too big: " + std::to_string(jsonSize);

@@ -110,6 +110,6 @@ void RequestDispatcher::dispatch(ClientRequest request)
 {
     Log::debug("Dispatch request {}.", request);
     RawRequestDispatcher::dispatch(request, _entrypoints, _tasks);
-    brayns::Log::error("Invalid request, discard it.");
+    Log::debug("Request dispatched {}.", request);
 }
 } // namespace brayns

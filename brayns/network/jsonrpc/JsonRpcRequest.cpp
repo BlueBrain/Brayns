@@ -91,6 +91,11 @@ std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcRequest &req
     auto &client = request.getClient();
     auto &id = request.getId();
     auto &method = request.getMethod();
-    return stream << "{client = " << client << ", id = " << id << ", method = " << method << "}";
+    auto &binary = request.getBinary();
+    stream << "{client = " << client;
+    stream << ", id = " << id;
+    stream << ", method = " << method;
+    stream << ", binary = " << binary.size() << " bytes}";
+    return stream;
 }
 } // namespace std

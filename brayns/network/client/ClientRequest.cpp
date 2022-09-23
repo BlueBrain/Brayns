@@ -66,6 +66,10 @@ std::ostream &operator<<(std::ostream &stream, const brayns::ClientRequest &requ
     auto &client = request.getClient();
     auto data = request.getData();
     auto size = data.size();
-    return stream << "{client = " << client << ", size = " << size << ", binary = " << request.isBinary() << "}";
+    auto binary = request.isBinary() ? "true" : "false";
+    stream << "{client = " << client;
+    stream << ", size = " << size;
+    stream << ", binary = " << binary << "}";
+    return stream;
 }
 } // namespace std

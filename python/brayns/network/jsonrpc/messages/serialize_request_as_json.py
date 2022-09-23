@@ -20,26 +20,10 @@
 
 import json
 
-from .jsonrpc import Request, serialize_request
-from .websocket import WebSocket
+from .json_rpc_request import JsonRpcRequest
+from .serialize_request import serialize_request
 
 
-def send_request(request: Request, websocket: WebSocket) -> None:
-    if request.binary:
-        data = _serialize_binary(request)
-        websocket.send_binary(data)
-        return
-    data = _serialize_text(request)
-    websocket.send_text(data)
-
-
-def _serialize_text(request: Request) -> str:
+def serialize_request_as_json(request: JsonRpcRequest) -> str:
     message = serialize_request(request)
     return json.dumps(message)
-
-
-def _serialize_binary(request: Request) -> bytes:
-    text = _serialize_text(request).encode('utf-8')
-    size = len(text).to_bytes(4, byteorder='little', signed=False)
-    binary = request.binary
-    return b''.join([size, text, binary])

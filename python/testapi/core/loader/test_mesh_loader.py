@@ -64,6 +64,31 @@ class TestMeshLoader(SimpleTestCase):
         path = self.asset_folder / 'cube.stl'
         loader = brayns.MeshLoader()
         models = loader.load(self.instance, str(path))
+        self._check_stl(models)
+
+    def test_load_stl_binary(self) -> None:
+        path = self.asset_folder / 'cube_binary.stl'
+        loader = brayns.MeshLoader()
+        models = loader.load(self.instance, str(path))
+        self._check_stl_binary(models)
+
+    def test_load_binary_stl(self) -> None:
+        path = self.asset_folder / 'cube.stl'
+        loader = brayns.MeshLoader()
+        with path.open('rb') as file:
+            data = file.read()
+        models = loader.load_binary(self.instance, loader.STL, data)
+        self._check_stl(models)
+
+    def test_load_binary_stl_binary(self) -> None:
+        path = self.asset_folder / 'cube_binary.stl'
+        loader = brayns.MeshLoader()
+        with path.open('rb') as file:
+            data = file.read()
+        models = loader.load_binary(self.instance, loader.STL, data)
+        self._check_stl_binary(models)
+
+    def _check_stl(self, models: list[brayns.Model]) -> None:
         self.assertEqual(len(models), 1)
         model = models[0]
         ref = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
@@ -72,10 +97,7 @@ class TestMeshLoader(SimpleTestCase):
         self.assertEqual(model.metadata['meshes'], '1')
         self.assertEqual(model.metadata['vertices'], '36')
 
-    def test_load_stl_binary(self) -> None:
-        path = self.asset_folder / 'cube_binary.stl'
-        loader = brayns.MeshLoader()
-        models = loader.load(self.instance, str(path))
+    def _check_stl_binary(self, models: list[brayns.Model]) -> None:
         self.assertEqual(len(models), 1)
         model = models[0]
         min = brayns.Vector3(-0.5, -0.5, 0)

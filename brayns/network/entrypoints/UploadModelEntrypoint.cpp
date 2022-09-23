@@ -27,17 +27,18 @@
 
 namespace
 {
-using Request = brayns::UploadModelEntrypoint::Request;
-using Progress = brayns::ProgressHandler<Request>;
-
-class BinaryParamsValidator
+class RequestValidator
 {
 public:
-    static void validate(const brayns::BinaryLoadParameters &params)
+    static void validate(const brayns::BinaryLoadParameters &params, std::string_view data)
     {
         if (params.type.empty())
         {
-            throw brayns::InvalidParamsException("Missing model type");
+            throw brayns::InvalidParamsException("No model type");
+        }
+        if (data.empty())
+        {
+            throw brayns::InvalidParamsException("Mo model binary data");
         }
     }
 };
@@ -100,13 +101,14 @@ public:
     {
     }
 
-    void handle(const Request &request)
+    void handle(const brayns::UploadModelEntrypoint::Request &request)
     {
         auto params = request.getParams();
-        BinaryParamsValidator::validate(params);
-
-        auto progress = Progress(_token, request);
         auto &data = request.getBinary();
+
+        RequestValidator::validate(params, data);
+
+        auto progress = brayns::ProgressHandler(_token, request);
         auto blob = BlobLoader::load(params, data);
         progress.notify("Model uploaded", 0.5);
 

@@ -25,9 +25,12 @@ from .json_rpc_error import JsonRpcError
 from .json_rpc_progress import JsonRpcProgress
 from .json_rpc_reply import JsonRpcReply
 from .json_rpc_request import JsonRpcRequest
+from .request import Request
 from .request_error import RequestError
 from .request_progress import RequestProgress
 from .serialize_request import serialize_request
+from .serialize_request_as_bytes import serialize_request_as_bytes
+from .serialize_request_as_json import serialize_request_as_json
 
 __all__ = [
     'deserialize_error',
@@ -37,7 +40,10 @@ __all__ = [
     'JsonRpcProgress',
     'JsonRpcReply',
     'JsonRpcRequest',
+    'Request',
     'RequestError',
     'RequestProgress',
+    'serialize_request_as_bytes',
+    'serialize_request_as_json',
     'serialize_request',
 ]

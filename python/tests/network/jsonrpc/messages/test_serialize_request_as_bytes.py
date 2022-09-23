@@ -18,22 +18,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+import unittest
 
-from .messages import JsonRpcRequest
+import brayns
+from brayns.network import serialize_request_as_bytes, serialize_request_as_json
 
 
-@dataclass
-class Request(JsonRpcRequest):
-    """Request to send to a running instance of brayns service.
+class TestSerializeRequestAsBytes(unittest.TestCase):
 
-    :param id: Request ID to monitor the request.
-        No replies will be received if set to None.
-    :type id: int | str | None
-    :param method: JSON-RPC method.
-    :type method: str
-    :param params: Request parameters (usually objects).
-    :type params: Any, optional
-    """
+    def test_serialize_request_as_bytes(self) -> None:
+        request = brayns.Request(0, 'test', 123, b'123')
+        test = serialize_request_as_bytes(request)
+        ref = serialize_request_as_json(request)
+        size = int.from_bytes(test[:4], byteorder='little', signed=False)
+        self.assertEqual(size, len(ref))
+        text = test[4:size+4].decode('utf-8')
+        self.assertEqual(text, ref)
+        binary = test[size+4:]
+        self.assertEqual(binary, request.binary)
 
-    binary: bytes = b''
+
+if __name__ == '__main__':
+    unittest.main()

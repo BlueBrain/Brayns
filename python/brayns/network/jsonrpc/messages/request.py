@@ -20,17 +20,20 @@
 
 from dataclasses import dataclass, field
 
-from brayns.network import WebSocketListener
+from .json_rpc_request import JsonRpcRequest
 
 
 @dataclass
-class MockListener(WebSocketListener):
+class Request(JsonRpcRequest):
+    """Request to send to a running instance of brayns service.
 
-    binary: bytes = field(default=b'', init=False)
-    text: str = field(default='', init=False)
+    :param id: Request ID to monitor the request.
+        No replies will be received if set to None.
+    :type id: int | str | None
+    :param method: JSON-RPC method.
+    :type method: str
+    :param params: Request parameters (usually objects).
+    :type params: Any, optional
+    """
 
-    def on_binary(self, data: bytes) -> None:
-        self.binary = data
-
-    def on_text(self, data: str) -> None:
-        self.text = data
+    binary: bytes = field(default=b'', repr=False)
