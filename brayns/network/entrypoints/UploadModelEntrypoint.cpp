@@ -94,17 +94,11 @@ public:
 class BinaryModelHandler
 {
 public:
-<<<<<<< HEAD:brayns/network/entrypoints/UploadModelEntrypoint.cpp
-    BinaryModelHandler(brayns::Scene &scene, const brayns::LoaderRegistry &loaders, brayns::CancellationToken &token)
-        : _scene(scene)
-=======
     BinaryModelHandler(
         brayns::ModelManager &models,
         const brayns::LoaderRegistry &loaders,
-        brayns::BinaryManager &binary,
         brayns::CancellationToken &token)
         : _models(models)
->>>>>>> Checkpoint:brayns/network/entrypoints/RequestModelUploadEntrypoint.cpp
         , _loaders(loaders)
         , _token(token)
     {
@@ -138,13 +132,8 @@ private:
 
 namespace brayns
 {
-<<<<<<< HEAD:brayns/network/entrypoints/UploadModelEntrypoint.cpp
 UploadModelEntrypoint::UploadModelEntrypoint(
-    Scene &scene,
-=======
-RequestModelUploadEntrypoint::RequestModelUploadEntrypoint(
     ModelManager &models,
->>>>>>> Checkpoint:brayns/network/entrypoints/RequestModelUploadEntrypoint.cpp
     const LoaderRegistry &loaders,
     SimulationParameters &simulation,
     CancellationToken token)
@@ -172,14 +161,9 @@ bool UploadModelEntrypoint::isAsync() const
 
 void UploadModelEntrypoint::onRequest(const Request &request)
 {
-<<<<<<< HEAD:brayns/network/entrypoints/UploadModelEntrypoint.cpp
-    SimulationScanner::scanAndUpdate(_scene, _simulation);
-    BinaryModelHandler handler(_scene, _loaders, _token);
-=======
-    BinaryModelHandler handler(_models, _loaders, _binary, _token);
-    SimulationScanner::scanAndUpdate(_models, _simulation);
->>>>>>> Checkpoint:brayns/network/entrypoints/RequestModelUploadEntrypoint.cpp
+    BinaryModelHandler handler(_models, _loaders, _token);
     handler.handle(request);
+    SimulationScanner::scanAndUpdate(_models, _simulation);
 }
 
 void UploadModelEntrypoint::onCancel()
