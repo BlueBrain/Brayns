@@ -20,15 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/model/Model.h>
+#include <brayns/engine/model/Components.h>
 
 #include <api/coloring/IColorHandler.h>
-#include <components/VasculatureComponent.h>
 
 class VasculatureColorHandler final : public IColorHandler
 {
 public:
-    VasculatureColorHandler(VasculatureComponent &vasculature);
+    VasculatureColorHandler(brayns::Components &components);
 
     void updateColor(const brayns::Vector4f &color) override;
 
@@ -48,5 +47,5 @@ private:
     void _colorAll(const std::string &method);
 
 private:
-    VasculatureComponent &_vasculature;
+    brayns::Components &_components;
 };

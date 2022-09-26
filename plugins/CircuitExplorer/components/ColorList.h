@@ -25,9 +25,9 @@
 #include <vector>
 
 /**
- * @brief Holds the colors for vasculature circuits
+ * @brief Holds a list of colors (Used for soma and vasculature circuits)
  */
-struct VasculatureColors
+struct ColorList
 {
     std::vector<brayns::Vector4f> elements;
 };

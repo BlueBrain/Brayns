@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -30,12 +30,12 @@
 class SetCircuitThicknessEntrypoint : public brayns::Entrypoint<SetCircuitThicknessMessage, brayns::EmptyMessage>
 {
 public:
-    SetCircuitThicknessEntrypoint(brayns::Scene &scene);
+    SetCircuitThicknessEntrypoint(brayns::ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    brayns::Scene &_scene;
+    brayns::ModelManager &_models;
 };

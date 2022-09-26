@@ -20,11 +20,10 @@
 
 #pragma once
 
-#include <brayns/engine/model/Model.h>
+#include <brayns/engine/model/Components.h>
 
 #include <api/coloring/IColorHandler.h>
 #include <api/neuron/NeuronColorMethod.h>
-#include <components/MorphologyCircuitComponent.h>
 
 /**
  * @brief The MorphologyColorHandler class is the handler interface implementation to update colors on
@@ -33,7 +32,7 @@
 class MorphologyColorHandler final : public IColorHandler
 {
 public:
-    MorphologyColorHandler(MorphologyCircuitComponent &circuit);
+    MorphologyColorHandler(brayns::Components &components);
 
     void updateColor(const brayns::Vector4f &color) override;
 
@@ -57,5 +56,5 @@ private:
     void _colorAll(const IColorData &colorData, const std::string &method);
 
 private:
-    MorphologyCircuitComponent &_circuit;
+    brayns::Components &_components;
 };

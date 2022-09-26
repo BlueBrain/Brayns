@@ -21,52 +21,93 @@
 
 #include "SetCircuitThicknessEntrypoint.h"
 
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/geometry/types/Capsule.h>
+#include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/network/common/ExtractModel.h>
 
-#include <components/MorphologyCircuitComponent.h>
+#include <components/CircuitIds.h>
 
 namespace
 {
 class CircuitThicknessModifier
 {
 public:
-    static void setCircuitThickness(brayns::Scene &scene, const SetCircuitThicknessMessage &params)
+    static void set(brayns::ModelManager &models, const SetCircuitThicknessMessage &params)
     {
         // Extract params
         auto modelId = params.model_id;
         auto radiusMultiplier = params.radius_multiplier;
-
         if (radiusMultiplier == 1.f)
         {
             return;
         }
 
         // Extract model
-        auto &instance = brayns::ExtractModel::fromId(scene, modelId);
+        auto &instance = brayns::ExtractModel::fromId(models, modelId);
         auto &model = instance.getModel();
-
-        MorphologyCircuitComponent *circuit = nullptr;
-        try
-        {
-            auto &circuitComponent = model.getComponent<MorphologyCircuitComponent>();
-            circuit = &circuitComponent;
-        }
-        catch (const std::exception &)
+        auto &components = model.getComponents();
+        if (!components.has<CircuitIds>())
         {
             throw brayns::JsonRpcException("The model is not a morphological neuron circuit");
         }
 
-        circuit->changeThickness(radiusMultiplier);
+        if (_setThickness(components.get<brayns::Geometries>(), radiusMultiplier))
+        {
+            instance.computeBounds();
+        }
+    }
 
-        // We have modified the thickness, lets recompute the bounds
-        instance.computeBounds();
-        scene.computeBounds();
+private:
+    template<typename T>
+    static bool _testValidPrimitive(brayns::Geometries &geometries)
+    {
+        auto &first = geometries.elements.front();
+        return first.as<T>() != nullptr;
+    }
+
+    static bool _setThickness(brayns::Geometries &geometries, float multiplier)
+    {
+        if (_testValidPrimitive<brayns::Capsule>(geometries))
+        {
+            _setCapsules(geometries, multiplier);
+            return true;
+        }
+        if (_testValidPrimitive<brayns::Sphere>(geometries))
+        {
+            _setSpheres(geometries, multiplier);
+            return true;
+        }
+        return false;
+    }
+
+    static void _setCapsules(brayns::Geometries &geometries, float multiplier)
+    {
+        geometries.modified = true;
+        for (auto &geometry : geometries.elements)
+        {
+            geometry.forEach(
+                [&](brayns::Capsule &capsule)
+                {
+                    capsule.r0 *= multiplier;
+                    capsule.r1 *= multiplier;
+                });
+        }
+    }
+
+    static void _setSpheres(brayns::Geometries &geometries, float multiplier)
+    {
+        geometries.modified = true;
+        for (auto &geometry : geometries.elements)
+        {
+            geometry.forEach([&](brayns::Sphere &sphere) { sphere.radius *= multiplier; });
+        }
     }
 };
 } // namespace
 
-SetCircuitThicknessEntrypoint::SetCircuitThicknessEntrypoint(brayns::Scene &scene)
-    : _scene(scene)
+SetCircuitThicknessEntrypoint::SetCircuitThicknessEntrypoint(brayns::ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -83,6 +124,6 @@ std::string SetCircuitThicknessEntrypoint::getDescription() const
 void SetCircuitThicknessEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-    CircuitThicknessModifier::setCircuitThickness(_scene, params);
+    CircuitThicknessModifier::set(_models, params);
     request.reply(brayns::EmptyMessage());
 }

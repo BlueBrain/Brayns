@@ -18,14 +18,14 @@
 
 #pragma once
 
-#include <api/coloring/IColorHandler.h>
+#include <brayns/engine/model/Components.h>
 
-#include <components/EndfeetComponent.h>
+#include <api/coloring/IColorHandler.h>
 
 class EndfeetColorHandler final : public IColorHandler
 {
 public:
-    EndfeetColorHandler(EndfeetComponent &endfeet);
+    EndfeetColorHandler(brayns::Components &components);
 
     void updateColor(const brayns::Vector4f &color) override;
 
@@ -49,5 +49,5 @@ private:
     void _colorAll(const IColorData &colorData, const std::string &method);
 
 private:
-    EndfeetComponent &_endfeet;
+    brayns::Components &_components;
 };

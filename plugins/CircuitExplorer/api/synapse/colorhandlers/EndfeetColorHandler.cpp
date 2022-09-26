@@ -18,26 +18,70 @@
 
 #include "EndfeetColorHandler.h"
 
+#include <brayns/engine/components/GeometryViews.h>
+
+#include <components/CircuitIds.h>
+
+#include <api/coloring/ColorByIDAlgorithm.h>
 #include <api/coloring/ColorUtils.h>
 
-EndfeetColorHandler::EndfeetColorHandler(EndfeetComponent &endfeet)
-    : _endfeet(endfeet)
+namespace
+{
+class Extractor
+{
+public:
+    static std::vector<brayns::GeometryView> &extractViews(brayns::Components &components)
+    {
+        auto &views = components.get<brayns::GeometryViews>();
+        views.modified = true;
+        return views.elements;
+    }
+
+    static std::vector<uint64_t> &extractIds(brayns::Components &components)
+    {
+        auto &ids = components.get<CircuitIds>();
+        return ids.elements;
+    }
+};
+}
+
+EndfeetColorHandler::EndfeetColorHandler(brayns::Components &components)
+    : _components(components)
 {
 }
 
 void EndfeetColorHandler::updateColor(const brayns::Vector4f &color)
 {
-    _endfeet.setColor(color);
+    auto &views = Extractor::extractViews(_components);
+    for (auto &view : views)
+    {
+        view.setColor(color);
+    }
 }
 
 std::vector<uint64_t> EndfeetColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    return _endfeet.setColorById(colorMap);
+    auto &views = Extractor::extractViews(_components);
+    auto &ids = Extractor::extractIds(_components);
+
+    return ColorByIDAlgorithm::execute(
+        colorMap,
+        ids,
+        [&](uint64_t id, size_t index, const brayns::Vector4f &color)
+        {
+            (void)id;
+            views[index].setColor(color);
+        });
 }
 
 void EndfeetColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)
 {
-    _endfeet.setColorById(colors);
+    auto &views = Extractor::extractViews(_components);
+    assert(views.size() == colors.size());
+    for (size_t i = 0; i < views.size(); ++i)
+    {
+        views[i].setColor(colors[i]);
+    }
 }
 
 void EndfeetColorHandler::updateColorByMethod(
@@ -69,22 +113,22 @@ void EndfeetColorHandler::_colorWithInput(
     const std::string &method,
     const std::vector<ColoringInformation> &vars)
 {
-    const auto &ids = _endfeet.getAstroctyeIds();
-    const auto perIdValues = colorData.getMethodValuesForIDs(method, ids);
+    auto &ids = Extractor::extractIds(_components);
+    auto perIdValues = colorData.getMethodValuesForIDs(method, ids);
 
     std::unordered_map<std::string, brayns::Vector4f> groupedVariables;
     for (const auto &variable : vars)
     {
-        const auto &name = variable.variable;
-        const auto &color = variable.color;
+        auto &name = variable.variable;
+        auto &color = variable.color;
         groupedVariables[name] = color;
     }
 
     std::map<uint64_t, brayns::Vector4f> colorMap;
     for (size_t i = 0; i < perIdValues.size(); ++i)
     {
-        const auto id = ids[i];
-        const auto &value = perIdValues[i];
+        auto id = ids[i];
+        auto &value = perIdValues[i];
 
         auto it = groupedVariables.find(value);
         if (it == groupedVariables.end())
@@ -96,20 +140,21 @@ void EndfeetColorHandler::_colorWithInput(
         colorMap[id] = color;
     }
 
-    _endfeet.setColorById(colorMap);
+    updateColorById(colorMap);
 }
 
 void EndfeetColorHandler::_colorAll(const IColorData &colorData, const std::string &method)
 {
+    auto &ids = Extractor::extractIds(_components);
+    auto perIdValues = colorData.getMethodValuesForIDs(method, ids);
+
+    std::vector<brayns::Vector4f> result;
+    result.reserve(ids.size());
+
     ColorDeck deck;
-    const auto &ids = _endfeet.getAstroctyeIds();
-    const auto perIdValues = colorData.getMethodValuesForIDs(method, ids);
-    std::vector<brayns::Vector4f> result(ids.size());
-    for (size_t i = 0; i < ids.size(); ++i)
+    for (auto &value : perIdValues)
     {
-        const auto &value = perIdValues[i];
-        const auto &color = deck.getColorForKey(value);
-        result[i] = color;
+        result.push_back(deck.getColorForKey(value));
     }
-    _endfeet.setColorById(result);
+    updateColorById(result);
 }

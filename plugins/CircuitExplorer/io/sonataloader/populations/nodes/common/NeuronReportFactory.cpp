@@ -21,10 +21,11 @@
 #include <api/reports/ReportMapping.h>
 #include <api/reports/indexers/OffsetIndexer.h>
 #include <api/reports/indexers/SpikeIndexer.h>
-#include <components/ReportComponent.h>
+#include <components/ReportData.h>
 #include <io/sonataloader/data/SonataSimulationMapping.h>
 #include <io/sonataloader/reports/SonataReportData.h>
 #include <io/sonataloader/reports/SonataSpikeData.h>
+#include <systems/ReportSystem.h>
 
 namespace
 {
@@ -129,6 +130,11 @@ void NeuronReportFactory::create(NodeLoadContext &ctxt, const std::vector<CellCo
     }
 
     auto &model = ctxt.model;
-    model.addComponent<ReportComponent>(std::move(data), std::move(indexer));
+
+    auto &components = model.getComponents();
+    components.add<ReportData>(std::move(data), std::move(indexer));
+
+    auto &systems = model.getSystems();
+    systems.setPreRenderSystem<ReportSystem>();
 }
 }

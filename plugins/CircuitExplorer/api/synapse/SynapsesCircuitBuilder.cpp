@@ -1,8 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
- *
- * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,12 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SomaCircuitBuilder.h"
+#include "SynapseCircuitBuilder.h"
 
-#include "colorhandlers/SomaColorHandler.h"
+#include "colorhandlers/SynapseColorHandler.h"
 
 #include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
@@ -41,23 +38,28 @@ public:
     {
     }
 
-    void addIds(const std::vector<uint64_t> &ids)
-    {
-        _model.getComponents().add<CircuitIds>(ids);
-    }
-
-    void addGeometry(std::vector<brayns::Sphere> primitives)
+    void addGeometry(std::map<uint64_t, std::vector<brayns::Sphere>> groupedSynapses)
     {
         auto &components = _model.getComponents();
+
+        auto &ids = components.add<CircuitIds>();
+        ids.elements.reserve(groupedSynapses.size());
+
         auto &geometries = components.add<brayns::Geometries>();
-        geometries.elements.emplace_back(std::move(primitives));
+        geometries.elements.reserve(groupedSynapses.size());
+
+        for (auto &[id, primitives] : groupedSynapses)
+        {
+            ids.elements.push_back(id);
+            geometries.elements.push_back(std::move(primitives));
+        }
     }
 
-    void addColoring(std::unique_ptr<IColorData> data)
+    void addColoring(std::unique_ptr<IColorData> colorData)
     {
         auto &components = _model.getComponents();
-        auto handler = std::make_unique<SomaColorHandler>(components);
-        components.add<Coloring>(std::move(data), std::move(handler));
+        auto handler = std::make_unique<SynapseColorHandler>(components);
+        components.add<Coloring>(std::move(colorData), std::move(handler));
     }
 
     void addSystems()
@@ -73,45 +75,13 @@ private:
 };
 }
 
-SomaCircuitBuilder::Context::Context(
-    const std::vector<uint64_t> &ids,
-    const std::vector<brayns::Vector3f> &positions,
-    float radius)
-    : ids(ids)
-    , positions(positions)
-    , radius(radius)
+void SynapseCircuitBuilder::build(
+    brayns::Model &model,
+    std::map<uint64_t, std::vector<brayns::Sphere>> groupedSynapses,
+    std::unique_ptr<IColorData> colorData)
 {
-}
-
-std::vector<CellCompartments>
-    SomaCircuitBuilder::load(const Context &context, brayns::Model &model, std::unique_ptr<IColorData> colorData)
-{
-    const auto &ids = context.ids;
-    const auto &positions = context.positions;
-    const auto radius = context.radius;
-
-    std::vector<CellCompartments> result(ids.size());
-    std::vector<brayns::Sphere> geometry(ids.size());
-
-#pragma omp parallel for
-    for (size_t i = 0; i < ids.size(); ++i)
-    {
-        const auto &pos = positions[i];
-        auto &somaSphere = geometry[i];
-        somaSphere.center = pos;
-        somaSphere.radius = radius;
-
-        auto &compartment = result[i];
-
-        compartment.numItems = 1;
-        compartment.sectionSegments[-1].push_back(0);
-    }
-
     auto builder = ModelBuilder(model);
-    builder.addIds(ids);
-    builder.addGeometry(std::move(geometry));
+    builder.addGeometry(std::move(groupedSynapses));
     builder.addColoring(std::move(colorData));
     builder.addSystems();
-
-    return result;
 }

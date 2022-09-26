@@ -20,87 +20,37 @@
 
 #include <filesystem>
 
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
 #include <brayns/json/Json.h>
 
-#include <api/synapse/EndfeetColorHandler.h>
-#include <components/CircuitColorComponent.h>
-#include <components/EndfeetComponent.h>
+#include <api/synapse/colorhandlers/EndfeetColorHandler.h>
+#include <components/CircuitIds.h>
+#include <components/Coloring.h>
 #include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
 #include <io/sonataloader/data/SonataEndFeetReader.h>
 #include <io/sonataloader/data/SonataSynapses.h>
 
 namespace
 {
-namespace sl = sonataloader;
-struct EndFeetAreasPathResolver
+class EndFeetAreasPath
 {
-    // The endfeet mesh file is not retruned by bbp::sonata::CircuitConfig (by now).
-    // Get it manually from the expanded json
-    static std::string resolve(const sl::EdgeLoadContext &context)
+public:
+    EndFeetAreasPath(const sonataloader::EdgeLoadContext &context)
+        : _json(_parseConfig(context))
+        , _rootPath(_getConfigRootPath(context))
+        , _edgeName(context.edgePopulation.name())
     {
-        const auto &network = context.config;
-        const auto &config = network.circuitConfig();
-        const auto basePath = std::filesystem::path(network.circuitConfigDir());
-        auto parsedJson = brayns::Json::parse(config.getExpandedJSON());
-        const auto json = parsedJson.extract<brayns::JsonObject::Ptr>();
-        const auto &population = context.edgePopulation;
-        const auto edgeName = population.name();
+    }
 
-        std::string resultPath = "";
-
-        // First fetch default one, if any
-        if (const auto components = json->getObject("components"))
+    std::string resolve()
+    {
+        auto resultPath = _findEndfeetPath();
+        if (resultPath.empty())
         {
-            if (components->has("end_feet_area"))
-                resultPath = components->get("end_feet_area").extract<std::string>();
-        }
-
-        const auto edgeNetworkList = json->getObject("networks")->getArray("edges");
-        bool found = false;
-        for (const auto &entry : *edgeNetworkList)
-        {
-            if (found)
-            {
-                break;
-            }
-
-            const auto &entryObject = entry.extract<Poco::JSON::Object::Ptr>();
-            auto edgeFile = entryObject->get("edges_file").extract<std::string>();
-
-            if (!std::filesystem::path(edgeFile).is_absolute())
-            {
-                const auto edgeFileSubpath = std::filesystem::path(edgeFile);
-                const auto edgeFileFullPath = std::filesystem::path(basePath) / std::filesystem::path(edgeFile);
-                edgeFile = edgeFileFullPath.string();
-            }
-
-            const auto populationStorage = bbp::sonata::EdgeStorage(edgeFile);
-            for (const auto &population : populationStorage.populationNames())
-            {
-                if (population != edgeName)
-                {
-                    continue;
-                }
-
-                found = true;
-
-                if (const auto popObject = entryObject->getObject("populations"))
-                {
-                    if (const auto edgePopObject = popObject->getObject(edgeName))
-                    {
-                        if (edgePopObject->has("endfeet_meshes"))
-                        {
-                            resultPath = edgePopObject->get("endfeet_meshes").extract<std::string>();
-                        }
-
-                        if (edgePopObject->has("endfeet_meshes_file"))
-                        {
-                            resultPath = edgePopObject->get("endfeet_meshes_file").extract<std::string>();
-                        }
-                    }
-                }
-                break;
-            }
+            resultPath = _getDefaultPath();
         }
 
         if (resultPath.empty())
@@ -110,14 +60,142 @@ struct EndFeetAreasPathResolver
 
         if (!std::filesystem::path(resultPath).is_absolute())
         {
-            const auto resultSubpath = std::filesystem::path(resultPath);
-            auto fullPath = std::filesystem::path(basePath) / resultSubpath;
-            fullPath = fullPath.lexically_normal();
-            resultPath = fullPath.string();
+            auto fullPath = _rootPath / std::filesystem::path(resultPath);
+            resultPath = fullPath.lexically_normal().string();
         }
 
         return resultPath;
     }
+
+private:
+    Poco::JSON::Object::Ptr _parseConfig(const sonataloader::EdgeLoadContext &context)
+    {
+        auto &network = context.config;
+        auto &config = network.circuitConfig();
+        auto parsedJson = brayns::Json::parse(config.getExpandedJSON());
+        return parsedJson.extract<brayns::JsonObject::Ptr>();
+    }
+
+    std::filesystem::path _getConfigRootPath(const sonataloader::EdgeLoadContext &context)
+    {
+        auto &network = context.config;
+        return std::filesystem::path(network.circuitConfigDir());
+    }
+
+    std::string _getDefaultPath()
+    {
+        // First fetch default one, if any
+        if (const auto components = _json->getObject("components"))
+        {
+            if (components->has("end_feet_area"))
+            {
+                return components->get("end_feet_area").extract<std::string>();
+            }
+        }
+        return {};
+    }
+
+    Poco::JSON::Object::Ptr _findPopulationObject()
+    {
+        auto edgeNetworks = _json->getObject("networks")->getArray("edges");
+        for (auto &entry : *edgeNetworks)
+        {
+            auto &entryObject = entry.extract<Poco::JSON::Object::Ptr>();
+            auto edgeFile = _getPathToEdgeFile(entryObject);
+
+            auto populationStorage = bbp::sonata::EdgeStorage(edgeFile);
+            for (auto &population : populationStorage.populationNames())
+            {
+                if (population != _edgeName)
+                {
+                    continue;
+                }
+                auto popObject = entryObject->getObject("populations");
+                if (!popObject)
+                {
+                    return nullptr;
+                }
+                return popObject->getObject(_edgeName);
+            }
+        }
+        return nullptr;
+    }
+
+    std::string _findEndfeetPath()
+    {
+        auto json = _findPopulationObject();
+
+        if (json->has("endfeet_meshes"))
+        {
+            return json->get("endfeet_meshes").extract<std::string>();
+        }
+        if (json->has("endfeet_meshes_file"))
+        {
+            return json->get("endfeet_meshes_file").extract<std::string>();
+        }
+        return {};
+    }
+
+    std::string _getPathToEdgeFile(const Poco::JSON::Object::Ptr &json)
+    {
+        auto edgeFile = json->get("edges_file").extract<std::string>();
+        auto edgeFilePath = std::filesystem::path(edgeFile);
+        if (!edgeFilePath.is_absolute())
+        {
+            auto edgeFileFullPath = _rootPath / edgeFilePath;
+            edgeFile = edgeFileFullPath.string();
+        }
+        return edgeFile;
+    }
+
+private:
+    Poco::JSON::Object::Ptr _json;
+    std::filesystem::path _rootPath;
+    std::string _edgeName;
+};
+
+class ModelBuilder
+{
+public:
+    ModelBuilder(brayns::Model &model)
+        : _model(model)
+    {
+    }
+
+    void addGeometry(std::map<uint64_t, std::vector<brayns::TriangleMesh>> endfeetGeometry)
+    {
+        auto &components = _model.getComponents();
+
+        auto &ids = components.add<CircuitIds>();
+        ids.elements.reserve(endfeetGeometry.size());
+
+        auto &geometries = components.add<brayns::Geometries>();
+        geometries.elements.reserve(endfeetGeometry.size());
+
+        for (auto &[id, primitives] : endfeetGeometry)
+        {
+            ids.elements.push_back(id);
+            geometries.elements.emplace_back(std::move(primitives));
+        }
+    }
+
+    void addColoring(std::unique_ptr<IColorData> colorData)
+    {
+        auto &components = _model.getComponents();
+        auto handler = std::make_unique<EndfeetColorHandler>(components);
+        components.add<Coloring>(std::move(colorData), std::move(handler));
+    }
+
+    void addSystems()
+    {
+        auto &systems = _model.getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+        systems.setInitSystem<brayns::GeometryInitSystem>();
+        systems.setCommitSystem<brayns::GeometryCommitSystem>();
+    }
+
+private:
+    brayns::Model &_model;
 };
 } // namespace
 
@@ -130,7 +208,7 @@ std::string EndFootPopulationLoader::getPopulationType() const noexcept
 
 void EndFootPopulationLoader::load(EdgeLoadContext &context) const
 {
-    const auto path = EndFeetAreasPathResolver::resolve(context);
+    auto path = EndFeetAreasPath(context).resolve();
 
     const auto &nodeSelection = context.nodeSelection;
     const auto nodes = nodeSelection.flatten();
@@ -153,17 +231,15 @@ void EndFootPopulationLoader::load(EdgeLoadContext &context) const
 
     auto &model = context.model;
 
-    // Geometry
-    auto &endfeet = model.addComponent<EndfeetComponent>();
-    endfeet.addEndfeet(endfeetGeometry);
-
-    // Coloring
-    const auto &network = context.config;
-    const auto &config = network.circuitConfig();
-    const auto astrocytePopulationName = population.target();
+    auto &network = context.config;
+    auto &config = network.circuitConfig();
+    auto astrocytePopulationName = population.target();
     auto astrocytePopulation = config.getNodePopulation(astrocytePopulationName);
     auto colorData = std::make_unique<CommonEdgeColorData>(std::move(astrocytePopulation));
-    auto colorHandler = std::make_unique<EndfeetColorHandler>(endfeet);
-    model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
+
+    auto builder = ModelBuilder(model);
+    builder.addGeometry(std::move(endfeetGeometry));
+    builder.addColoring(std::move(colorData));
+    builder.addSystems();
 }
 } // namespace sonataloader

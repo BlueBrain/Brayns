@@ -22,11 +22,10 @@
 
 #include <api/reports/indexers/OffsetIndexer.h>
 #include <api/reports/indexers/SpikeIndexer.h>
-
-#include <components/ReportComponent.h>
-
+#include <components/ReportData.h>
 #include <io/bbploader/reports/CompartmentData.h>
 #include <io/bbploader/reports/SpikeData.h>
+#include <systems/ReportSystem.h>
 
 namespace bbploader
 {
@@ -76,6 +75,7 @@ void ReportLoader::load(
         indexer = std::make_unique<SpikeIndexer>(compartments);
     }
 
-    model.addComponent<ReportComponent>(std::move(data), std::move(indexer));
+    model.getComponents().add<ReportData>(std::move(data), std::move(indexer));
+    model.getSystems().setPreRenderSystem<ReportSystem>();
 }
 }

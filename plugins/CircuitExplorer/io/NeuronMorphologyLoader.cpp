@@ -21,8 +21,11 @@
 #include <brayns/common/Log.h>
 #include <brayns/utils/Timer.h>
 
-#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Capsule.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
 
 #include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
@@ -94,7 +97,15 @@ std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
     auto &primitives = neuronGeometry.geometry;
 
     auto model = std::make_unique<brayns::Model>();
-    model->addComponent<brayns::GeometryRendererComponent>(std::move(primitives));
+
+    auto &components = model->getComponents();
+    auto &geometries = components.add<brayns::Geometries>();
+    geometries.elements.emplace_back(std::move(primitives));
+
+    auto &systems = model->getSystems();
+    systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+    systems.setInitSystem<brayns::GeometryInitSystem>();
+    systems.setCommitSystem<brayns::GeometryCommitSystem>();
 
     brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.seconds());
 
