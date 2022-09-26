@@ -47,9 +47,17 @@ class TestCamera(unittest.TestCase):
         camera.up = brayns.Vector3.one
         self.assertEqual(camera.up, brayns.Vector3.one)
 
+    def test_vector(self) -> None:
+        camera = brayns.Camera()
+        self.assertEqual(camera.vector, camera.view.vector)
+
     def test_direction(self) -> None:
         camera = brayns.Camera()
         self.assertEqual(camera.direction, camera.view.direction)
+
+    def test_distance(self) -> None:
+        camera = brayns.Camera()
+        self.assertEqual(camera.distance, camera.view.distance)
 
     def test_look_at(self) -> None:
         camera = brayns.Camera(projection=brayns.OrthographicProjection())
@@ -59,6 +67,15 @@ class TestCamera(unittest.TestCase):
         camera.look_at(target)
         self.assertEqual(camera.view, view)
         self.assertEqual(camera.projection, projection)
+
+    def test_rotate_around_target(self) -> None:
+        euler = brayns.Vector3(1, 2, 3)
+        rotation = brayns.Rotation.from_euler(euler, degrees=True)
+        test = brayns.Camera()
+        ref = brayns.Camera()
+        test.rotate_around_target(rotation)
+        ref.view.rotate_around_target(rotation)
+        self.assertEqual(test, ref)
 
 
 if __name__ == '__main__':

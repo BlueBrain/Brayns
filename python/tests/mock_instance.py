@@ -26,7 +26,7 @@ import brayns
 class MockInstance(brayns.Instance):
 
     def __init__(self, reply: Any = None) -> None:
-        self.reply: Any = reply
+        self.reply = reply
         self.method = ''
         self.params: Any = None
         self.binary = b''
