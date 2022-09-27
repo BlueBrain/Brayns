@@ -78,12 +78,13 @@ to see the models we want to render.
         direction=camera.direction,
     )
 
-    light_id = brayns.add_light(instance, light)
+    light_model = brayns.add_light(instance, light)
 
-Here we add a directional light oriented from the camera to the target. The ID
-returned can be used to remove it but in this example we don't use it.
+Here we add a directional light oriented from the camera to the target. The model
+returned can be used to remove or tranform it, but in this example we don't use it.
 
-Lights can be removed / cleared using `remove_lights` and `clear_lights`.
+Lights can be selectively removed with `remove_models`, or cleared using
+`clear_lights`.
 
 Snapshot
 --------

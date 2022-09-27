@@ -71,6 +71,7 @@ public:
         MaterialType materialData;
         buffer.extract(materialData);
         *material = Material(std::move(materialData));
+
         request.reply(EmptyMessage());
     }
 

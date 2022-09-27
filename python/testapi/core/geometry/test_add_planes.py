@@ -31,6 +31,6 @@ class TestAddPlanes(SimpleTestCase):
         ])
         self.assertEqual(model.id, 0)
         self.assertEqual(model.bounds, brayns.Bounds.empty)
-        self.assertEqual(model.metadata, {})
+        self.assertEqual(model.info, {})
         self.assertEqual(model.visible, True)
         self.assertEqual(model.transform, brayns.Transform.identity)

@@ -21,18 +21,20 @@
 from brayns.network import Instance
 
 from .light import Light
+from ..model import Model, deserialize_model
 
 
-def add_light(instance: Instance, light: Light) -> int:
-    """Add a given light to an instance and return its ID.
+def add_light(instance: Instance, light: Light) -> Model:
+    """Add a given light to an instance and return the model.
 
     :param instance: Instance.
     :type instance: Instance
     :param light: Light to add.
     :type light: Light
-    :return: Light ID.
-    :rtype: int
+    :return: Light model.
+    :rtype: Model
     """
     name = light.name
     params = light.get_properties()
-    return instance.request(f'add-light-{name}', params)
+    result = instance.request(f'add-light-{name}', params)
+    return deserialize_model(result)

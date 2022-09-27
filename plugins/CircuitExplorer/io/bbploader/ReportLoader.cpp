@@ -18,7 +18,8 @@
 
 #include "ReportLoader.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/common/ColorRamp.h>
+#include <brayns/engine/components/SimulationInfo.h>
 
 #include <api/reports/indexers/OffsetIndexer.h>
 #include <api/reports/indexers/SpikeIndexer.h>
@@ -26,6 +27,145 @@
 #include <io/bbploader/reports/CompartmentData.h>
 #include <io/bbploader/reports/SpikeData.h>
 #include <systems/ReportSystem.h>
+
+namespace
+{
+class IHandler
+{
+public:
+    virtual ~IHandler() = default;
+    virtual ReportData createData() = 0;
+};
+
+class CompartmentHandler : public IHandler
+{
+public:
+    CompartmentHandler(const bbploader::LoadContext &context, const std::vector<CellCompartments> &compartments)
+        : _context(context)
+        , _compartments(compartments)
+    {
+    }
+
+    ReportData createData() override
+    {
+        auto reportData = ReportData();
+        reportData.data = _createData();
+        reportData.indexer = _createIndexer(reportData.data);
+        return reportData;
+    }
+
+private:
+    std::unique_ptr<IReportData> _createData()
+    {
+        auto &params = _context.loadParameters;
+        auto &config = _context.config;
+        auto &gids = _context.gids;
+
+        auto &reportName = params.report_name;
+        auto reportPath = config.getReportSource(reportName).getPath();
+        auto uri = brion::URI(reportPath);
+        auto report = std::make_unique<brion::CompartmentReport>(uri, brion::AccessMode::MODE_READ, gids);
+
+        return std::make_unique<bbploader::CompartmentData>(std::move(report));
+    }
+
+    std::unique_ptr<IColormapIndexer> _createIndexer(std::unique_ptr<IReportData> &data)
+    {
+        auto &compartmentData = static_cast<bbploader::CompartmentData &>(*data);
+        const auto reportCompartments = compartmentData.computeMapping();
+        return std::make_unique<OffsetIndexer>(_compartments, reportCompartments);
+    }
+
+private:
+    const bbploader::LoadContext &_context;
+    const std::vector<CellCompartments> &_compartments;
+};
+
+class SpikeHandler : public IHandler
+{
+public:
+    SpikeHandler(const bbploader::LoadContext &context, const std::vector<CellCompartments> &compartments)
+        : _context(context)
+        , _compartments(compartments)
+    {
+    }
+
+    ReportData createData() override
+    {
+        auto reportData = ReportData();
+        reportData.data = _createData();
+        reportData.indexer = _createIndexer();
+        return reportData;
+    }
+
+private:
+    std::unique_ptr<IReportData> _createData()
+    {
+        auto &config = _context.config;
+        auto &params = _context.loadParameters;
+        auto &gids = _context.gids;
+
+        auto reportPath = config.getSpikeSource().getPath();
+        auto uri = brion::URI(reportPath);
+        auto report = std::make_unique<brain::SpikeReportReader>(uri);
+
+        auto spikeTransition = params.spike_transition_time;
+
+        const std::vector<uint64_t> flatGids(gids.begin(), gids.end());
+        return std::make_unique<bbploader::SpikeData>(std::move(report), flatGids, spikeTransition);
+    }
+
+    std::unique_ptr<IColormapIndexer> _createIndexer()
+    {
+        return std::make_unique<SpikeIndexer>(_compartments);
+    }
+
+private:
+    const bbploader::LoadContext &_context;
+    const std::vector<CellCompartments> &_compartments;
+};
+
+class ReportHandlerFactory
+{
+public:
+    static std::unique_ptr<IHandler> createHandler(
+        const bbploader::LoadContext &context,
+        const std::vector<CellCompartments> &compartments,
+        ProgressUpdater &callback)
+    {
+        auto &params = context.loadParameters;
+        auto reportType = params.report_type;
+
+        if (reportType == bbploader::ReportType::None)
+        {
+            return {};
+        }
+
+        if (reportType == bbploader::ReportType::Compartment)
+        {
+            callback.update("Loading compartment report");
+            return std::make_unique<CompartmentHandler>(context, compartments);
+        }
+
+        callback.update("Loading spikes");
+        return std::make_unique<SpikeHandler>(context, compartments);
+    }
+};
+
+class SimulationInfoFactory
+{
+public:
+    static brayns::SimulationInfo create(const IReportData &data)
+    {
+        auto simInfo = brayns::SimulationInfo();
+        simInfo.dt = data.getTimeStep();
+        simInfo.endTime = data.getEndTime();
+        simInfo.startTime = data.getStartTime();
+        simInfo.timeUnit = data.getTimeUnit();
+        return simInfo;
+    }
+};
+}
 
 namespace bbploader
 {
@@ -35,47 +175,21 @@ void ReportLoader::load(
     ProgressUpdater &callback,
     brayns::Model &model)
 {
-    const auto &params = context.loadParameters;
-    const auto reportType = params.report_type;
-    if (reportType == ReportType::None)
+    auto handler = ReportHandlerFactory::createHandler(context, compartments, callback);
+
+    if (!handler)
     {
         return;
     }
+    auto reportData = handler->createData();
+    auto &data = *reportData.data;
 
-    const auto &config = context.config;
-    const auto &gids = context.gids;
+    auto &components = model.getComponents();
+    components.add<brayns::SimulationInfo>(SimulationInfoFactory::create(data));
+    components.add<ReportData>(std::move(reportData));
+    components.add<brayns::ColorRamp>();
 
-    std::unique_ptr<IReportData> data;
-    std::unique_ptr<IColormapIndexer> indexer;
-
-    if (reportType == bbploader::ReportType::Compartment)
-    {
-        const auto &reportName = params.report_name;
-        callback.update("Loading report " + reportName);
-
-        const auto reportPath = config.getReportSource(reportName).getPath();
-        const brion::URI uri(reportPath);
-        auto report = std::make_unique<brion::CompartmentReport>(uri, brion::AccessMode::MODE_READ, gids);
-        data = std::make_unique<CompartmentData>(std::move(report));
-
-        CompartmentData &compartmentData = static_cast<CompartmentData &>(*data);
-        const auto reportCompartments = compartmentData.computeMapping();
-        indexer = std::make_unique<OffsetIndexer>(compartments, reportCompartments);
-    }
-    else if (reportType == bbploader::ReportType::Spikes)
-    {
-        callback.update("Loading spikes");
-
-        const auto reportPath = config.getSpikeSource().getPath();
-        const brion::URI uri(reportPath);
-        auto report = std::make_unique<brain::SpikeReportReader>(uri);
-        auto spikeTransition = params.spike_transition_time;
-        const std::vector<uint64_t> flatGids(gids.begin(), gids.end());
-        data = std::make_unique<SpikeData>(std::move(report), flatGids, spikeTransition);
-        indexer = std::make_unique<SpikeIndexer>(compartments);
-    }
-
-    model.getComponents().add<ReportData>(std::move(data), std::move(indexer));
-    model.getSystems().setPreRenderSystem<ReportSystem>();
+    auto &systems = model.getSystems();
+    systems.setPreRenderSystem<ReportSystem>();
 }
 }

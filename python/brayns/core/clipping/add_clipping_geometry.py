@@ -20,19 +20,21 @@
 
 from brayns.network import Instance
 
+from ..model import Model, deserialize_model
 from .clipping_geometry import ClippingGeometry
 
 
-def add_clipping_geometry(instance: Instance, geometry: ClippingGeometry) -> int:
-    """Add a clipping geometry to the given instance and return its ID.
+def add_clipping_geometry(instance: Instance, geometry: ClippingGeometry) -> Model:
+    """Add a clipping geometry to the given instance and return the model.
 
     :param instance: Instance.
     :type instance: Instance
     :param geometry: Clipping geometry to add.
     :type geometry: ClippingGeometry
-    :return: Clipping geometry ID.
-    :rtype: int
+    :return: Clipping model.
+    :rtype: Model
     """
     method = geometry.method
     params = geometry.get_properties()
-    return instance.request(method, params)
+    result = instance.request(method, params)
+    return deserialize_model(result)

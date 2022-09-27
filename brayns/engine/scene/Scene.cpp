@@ -27,7 +27,21 @@ namespace
 {
 struct WorldParameters
 {
-    inline static const std::string instanceParameter = "instance";
+    inline static const std::string instance = "instance";
+};
+
+class WorldInstances
+{
+public:
+    static void set(ospray::cpp::World &world, const std::vector<ospray::cpp::Instance> &instances)
+    {
+        if (instances.empty())
+        {
+            world.removeParam(WorldParameters::instance);
+            return;
+        }
+        world.setParam(WorldParameters::instance, ospray::cpp::CopiedData(instances));
+    }
 };
 }
 
@@ -54,8 +68,7 @@ bool Scene::commit()
 
     if (modelCommitResult.needsRebuildBVH)
     {
-        auto handles = _models.getHandles();
-        _handle.setParam(WorldParameters::instanceParameter, ospray::cpp::CopiedData(handles));
+        WorldInstances::set(_handle, _models.getHandles());
         _handle.commit();
     }
 

@@ -47,6 +47,7 @@ void GetMaterialType::onRequest(const Request &request)
     if (auto material = components.find<Material>())
     {
         request.reply(material->getName());
+        return;
     }
     throw JsonRpcException("The model does not have material");
 }

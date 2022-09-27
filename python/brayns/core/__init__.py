@@ -109,8 +109,6 @@ __all__ = [
     'ProductionRenderer',
     'Projection',
     'QuadLight',
-    'remove_clipping_geometries',
-    'remove_lights',
     'remove_models',
     'Renderer',
     'Scene',

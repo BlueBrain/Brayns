@@ -32,9 +32,6 @@ class TestMeshLoader(SimpleTestCase):
         model = models[0]
         ref = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         self.assertEqual(model.bounds, ref)
-        self.assertEqual(model.metadata['faces'], '24')
-        self.assertEqual(model.metadata['meshes'], '1')
-        self.assertEqual(model.metadata['vertices'], '72')
 
     def test_load_off(self) -> None:
         path = self.asset_folder / 'cube.off'
@@ -44,9 +41,6 @@ class TestMeshLoader(SimpleTestCase):
         model = models[0]
         ref = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         self.assertEqual(model.bounds, ref)
-        self.assertEqual(model.metadata['faces'], '12')
-        self.assertEqual(model.metadata['meshes'], '1')
-        self.assertEqual(model.metadata['vertices'], '36')
 
     def test_load_ply(self) -> None:
         path = self.asset_folder / 'cube.ply'
@@ -56,9 +50,6 @@ class TestMeshLoader(SimpleTestCase):
         model = models[0]
         ref = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         self.assertEqual(model.bounds, ref)
-        self.assertEqual(model.metadata['faces'], '12')
-        self.assertEqual(model.metadata['meshes'], '1')
-        self.assertEqual(model.metadata['vertices'], '36')
 
     def test_load_stl(self) -> None:
         path = self.asset_folder / 'cube.stl'
@@ -93,9 +84,6 @@ class TestMeshLoader(SimpleTestCase):
         model = models[0]
         ref = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         self.assertEqual(model.bounds, ref)
-        self.assertEqual(model.metadata['faces'], '12')
-        self.assertEqual(model.metadata['meshes'], '1')
-        self.assertEqual(model.metadata['vertices'], '36')
 
     def _check_stl_binary(self, models: list[brayns.Model]) -> None:
         self.assertEqual(len(models), 1)
@@ -104,6 +92,3 @@ class TestMeshLoader(SimpleTestCase):
         max = brayns.Vector3(0.5, 0.5, 1)
         ref = brayns.Bounds(min, max)
         self.assertEqual(model.bounds, ref)
-        self.assertEqual(model.metadata['faces'], '12')
-        self.assertEqual(model.metadata['meshes'], '1')
-        self.assertEqual(model.metadata['vertices'], '36')
