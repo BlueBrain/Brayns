@@ -40,8 +40,7 @@ class Camera:
 
     The front view has X-right, Y-up and Z-forward.
 
-    To rotate the camera around its target, use ``rotate_around_target`` to
-    rotate both the position around the target and the up direction.
+    Then, to rotate the camera around its target, use ``rotate_around_target``.
     """
 
     view: View = field(default_factory=View)
