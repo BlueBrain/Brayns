@@ -45,7 +45,7 @@ on the current scene, a custom camera is needed to see something.
     # The camera can be moved manually.
     # Here we rotate of -90 degrees around X using the camera target as center.
     top_view = brayns.Vector3(-90, 0, 0)
-    camera.position = top_view.apply(camera.position, center=camera.target)
+    camera.rotate_around_target(top_view)
 
 Renderer
 --------

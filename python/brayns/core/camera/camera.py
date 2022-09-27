@@ -20,7 +20,7 @@
 
 from dataclasses import dataclass, field
 
-from brayns.utils import Bounds, Vector3, View
+from brayns.utils import Bounds, Rotation, Vector3, View
 
 from .perspective_projection import PerspectiveProjection
 from .projection import Projection
@@ -37,6 +37,10 @@ class Camera:
 
     To focus the camera to a given target (bounds) use ``look_at`` to set the
     default full-screen front view.
+
+    The front view has X-right, Y-up and Z-forward.
+
+    Then, to rotate the camera around its target, use ``rotate_around_target``.
     """
 
     view: View = field(default_factory=View)
@@ -71,9 +75,20 @@ class Camera:
         self.view.up = value
 
     @property
+    def vector(self) -> Vector3:
+        return self.view.vector
+
+    @property
     def direction(self) -> Vector3:
         return self.view.direction
+
+    @property
+    def distance(self) -> float:
+        return self.view.distance
 
     def look_at(self, target: Bounds) -> None:
         self.projection.set_target(target)
         self.view = self.projection.get_front_view(target)
+
+    def rotate_around_target(self, rotation: Rotation) -> None:
+        self.view.rotate_around_target(rotation)

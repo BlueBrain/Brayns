@@ -68,8 +68,18 @@ class Fovy:
         """
         return math.degrees(self._angle)
 
+    def get_full_screen_distance(self, height: float) -> float:
+        """Compute the distance to see a target of given height entirely.
+
+        :param height: Viewport height.
+        :type height: float
+        :return: Distance to have the given viewport height.
+        :rtype: float
+        """
+        return height / 2 / math.tan(self.radians / 2)
+
     def get_front_view(self, target: Bounds) -> View:
-        """Compute the view necessary to see the target in full screen.
+        """Compute the front view to see the target in full screen.
 
         :param target: Bounds of the target to look.
         :type target: Bounds
@@ -77,7 +87,7 @@ class Fovy:
         :rtype: View
         """
         center = target.center
-        distance = target.height / 2 / math.tan(self.radians / 2)
+        distance = self.get_full_screen_distance(target.height)
         distance += target.depth / 2
         position = center + distance * Vector3.forward
         return View(position, center)

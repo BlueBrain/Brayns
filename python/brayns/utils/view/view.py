@@ -20,6 +20,7 @@
 
 from dataclasses import dataclass
 
+from ..transform import Rotation
 from ..vector import Vector3
 
 
@@ -40,10 +41,39 @@ class View:
     up: Vector3 = Vector3.up
 
     @property
-    def direction(self) -> Vector3:
-        """Get normalized view direction (target - position).
+    def vector(self) -> Vector3:
+        """Get view vector (target - position).
 
-        :return: View direction normalized.
+        :return: View vector.
         :rtype: Vector3
         """
-        return (self.target - self.position).normalized
+        return (self.target - self.position)
+
+    @property
+    def direction(self) -> Vector3:
+        """Get normalized view vector.
+
+        :return: View vector normalized.
+        :rtype: Vector3
+        """
+        return self.vector.normalized
+
+    @property
+    def distance(self) -> float:
+        """Get the distance between the observator and the target.
+
+        :return: View vector norm.
+        :rtype: float
+        """
+        return self.vector.norm
+
+    def rotate_around_target(self, rotation: Rotation) -> None:
+        """Rotate the observation position around the target.
+
+        Rotate position around target and up around origin.
+
+        :param rotation: Observation point rotation.
+        :type rotation: Rotation
+        """
+        self.position = rotation.apply(self.position, center=self.target)
+        self.up = rotation.apply(self.up)
