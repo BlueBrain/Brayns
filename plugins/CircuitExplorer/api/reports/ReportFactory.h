@@ -1,8 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
- *
- * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,16 +18,12 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
+#include <brayns/engine/model/Model.h>
 
-#include <ospray/ospray_cpp/GeometricModel.h>
+#include <components/ReportData.h>
 
-namespace brayns
+class ReportFactory
 {
-struct InspectContext
-{
-    Vector3f hitPosition;
-    ospray::cpp::GeometricModel model;
-    uint32_t primitiveIndex;
+public:
+    static void create(brayns::Model &model, ReportData reportData);
 };
-}

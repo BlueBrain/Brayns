@@ -31,10 +31,10 @@ class LightTestCase(SimpleTestCase):
         ]
         self.assertEqual(models[0].id, 0)
         self.assertEqual(models[1].id, 1)
-        self.assertEqual(models[1].id, 2)
+        self.assertEqual(models[2].id, 2)
         brayns.remove_models(self.instance, [1, 2])
         model = brayns.add_light(self.instance, light)
         self.assertIn(model.id, [1, 2])
         brayns.clear_lights(self.instance)
         model = brayns.add_light(self.instance, light)
-        self.assertEqual(model.id, 0)
+        self.assertIn(model.id, [0, 1, 2])

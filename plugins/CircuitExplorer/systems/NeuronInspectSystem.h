@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,16 +20,16 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
+#include <brayns/engine/model/systemtypes/InspectSystem.h>
 
-#include <ospray/ospray_cpp/GeometricModel.h>
-
-namespace brayns
+class SomaInspectSystem : public brayns::InspectSystem
 {
-struct InspectContext
-{
-    Vector3f hitPosition;
-    ospray::cpp::GeometricModel model;
-    uint32_t primitiveIndex;
+public:
+    brayns::InspectResultData execute(const brayns::InspectContext &context, brayns::Components &components) override;
 };
-}
+
+class MorphologyInspectSystem : public brayns::InspectSystem
+{
+public:
+    brayns::InspectResultData execute(const brayns::InspectContext &context, brayns::Components &components) override;
+};

@@ -33,6 +33,7 @@
 #include <components/CircuitIds.h>
 #include <components/Coloring.h>
 #include <components/NeuronSectionList.h>
+#include <systems/NeuronInspectSystem.h>
 
 #include <deque>
 #include <future>
@@ -166,6 +167,7 @@ public:
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
         systems.setInitSystem<brayns::GeometryInitSystem>();
         systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        systems.setInspectSystem<MorphologyInspectSystem>();
     }
 
 private:
@@ -193,13 +195,13 @@ std::vector<CellCompartments> MorphologyCircuitBuilder::load(
     ProgressUpdater &updater,
     std::unique_ptr<IColorData> colorData)
 {
-    const auto &morphPaths = context.morphologyPaths;
-    const auto &ids = context.ids;
-    const auto &morphParams = context.morphologyParams;
-    const auto &positions = context.positions;
-    const auto &rotations = context.rotations;
+    auto &morphPaths = context.morphologyPaths;
+    auto &ids = context.ids;
+    auto &morphParams = context.morphologyParams;
+    auto &positions = context.positions;
+    auto &rotations = context.rotations;
 
-    const auto morphologyPathMap = MorphologyMapBuilder::build(morphPaths);
+    auto morphologyPathMap = MorphologyMapBuilder::build(morphPaths);
     auto morphologies = ParallelMorphologyLoader::load(morphologyPathMap, morphParams, positions, rotations, updater);
 
     std::vector<CellCompartments> compartments(ids.size());

@@ -57,9 +57,9 @@ public:
         return true;
     }
 
-    static bool commitGeometryViews(brayns::GeometryViews &views)
+    static bool commitGeometryViews(brayns::GeometryViews &views, bool force)
     {
-        if (!views.modified)
+        if (!views.modified && !force)
         {
             return false;
         }
@@ -85,10 +85,10 @@ CommitResult GeometryCommitSystem::execute(Components &components)
     bool rebuildBVH = false;
     rebuildBVH |= GeometryCommitter::commitGeometries(geometries);
 
-    bool renderFrame = false;
-    renderFrame |= GeometryCommitter::commitMaterial(material, views);
-    renderFrame |= GeometryCommitter::commitGeometryViews(views);
+    auto matModified = GeometryCommitter::commitMaterial(material, views);
+    auto viewModified = GeometryCommitter::commitGeometryViews(views, matModified);
+    auto renderFrame = matModified || viewModified;
 
-    return {rebuildBVH || renderFrame};
+    return {rebuildBVH, renderFrame};
 }
 }

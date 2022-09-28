@@ -20,6 +20,7 @@
 
 #include <brayns/engine/geometry/types/Sphere.h>
 
+#include <api/reports/ReportFactory.h>
 #include <api/reports/ReportMapping.h>
 #include <api/reports/indexers/OffsetIndexer.h>
 #include <api/synapse/SynapseCircuitBuilder.h>
@@ -29,7 +30,6 @@
 #include <io/sonataloader/data/SonataSimulationMapping.h>
 #include <io/sonataloader/data/SonataSynapses.h>
 #include <io/sonataloader/reports/SonataReportData.h>
-#include <systems/ReportSystem.h>
 
 namespace
 {
@@ -44,16 +44,15 @@ public:
 
         for (size_t i = 0; i < elementIds.size(); ++i)
         {
-            const auto elementId = elementIds[i];
-
+            auto elementId = elementIds[i];
             auto it = mapping.find(elementId);
             if (it == mapping.end())
             {
                 throw std::runtime_error("No report mapping information for element " + std::to_string(elementId));
             }
 
-            const auto &entry = *it;
-            const auto offset = entry.second;
+            auto &entry = *it;
+            auto offset = entry.second;
             result[i] = offset;
         }
 
@@ -97,14 +96,9 @@ public:
         auto reportPath = _getReportFilePath(context);
         auto data = _createReportData(context, reportPath);
         auto indexer = _createReportIndexer(context, reportPath, orderedEdgeIds);
-
+        auto reportData = ReportData{std::move(data), std::move(indexer)};
         auto &model = context.model;
-
-        auto &components = model.getComponents();
-        components.add<ReportData>(std::move(data), std::move(indexer));
-
-        auto &systems = model.getSystems();
-        systems.setPreRenderSystem<ReportSystem>();
+        ReportFactory::create(model, std::move(reportData));
     }
 
 private:

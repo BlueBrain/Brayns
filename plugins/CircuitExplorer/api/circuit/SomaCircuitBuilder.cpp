@@ -29,7 +29,9 @@
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
 #include <components/CircuitIds.h>
+#include <components/ColorList.h>
 #include <components/Coloring.h>
+#include <systems/NeuronInspectSystem.h>
 
 namespace
 {
@@ -60,12 +62,20 @@ public:
         components.add<Coloring>(std::move(data), std::move(handler));
     }
 
+    void addColorList(size_t numElements)
+    {
+        auto &components = _model.getComponents();
+        auto &colorList = components.add<ColorList>();
+        colorList.elements.resize(numElements, brayns::Vector4f(1.f));
+    }
+
     void addSystems()
     {
         auto &systems = _model.getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
         systems.setInitSystem<brayns::GeometryInitSystem>();
         systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        systems.setInspectSystem<SomaInspectSystem>();
     }
 
 private:
@@ -111,6 +121,7 @@ std::vector<CellCompartments>
     builder.addIds(ids);
     builder.addGeometry(std::move(geometry));
     builder.addColoring(std::move(colorData));
+    builder.addColorList(ids.size());
     builder.addSystems();
 
     return result;

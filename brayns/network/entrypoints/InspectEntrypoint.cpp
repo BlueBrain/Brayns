@@ -39,12 +39,11 @@ public:
             return brayns::InspectResult{false};
         }
 
+        auto inspectContext = _buildInspectContext(pickResult);
         auto instance = _findHittedInstance(pickResult.instance);
-        const auto inspectContext = _buildInspectContext(pickResult);
-        auto metadata = brayns::JsonObject();
         auto &model = instance->getModel();
-        auto inspectData = model.inspect(inspectContext);
-        return _buildResult(inspectContext, *instance, std::move(inspectData));
+        auto inspectResult = model.inspect(inspectContext);
+        return _buildResult(inspectContext, *instance, std::move(inspectResult));
     }
 
 private:
@@ -52,6 +51,8 @@ private:
     {
         auto x = position.x;
         auto y = position.y;
+
+        _engine.commit();
 
         auto &framebuffer = _engine.getFramebuffer();
         auto &renderer = _engine.getRenderer();
@@ -91,7 +92,7 @@ private:
 
     brayns::InspectContext _buildInspectContext(const ospray::cpp::PickResult &osprayPickResult)
     {
-        const auto &ospHitPosition = osprayPickResult.worldPosition;
+        auto &ospHitPosition = osprayPickResult.worldPosition;
         auto hitPosition = brayns::Vector3f(ospHitPosition[0], ospHitPosition[1], ospHitPosition[2]);
         auto geometricModel = osprayPickResult.model;
         auto primitiveIndex = osprayPickResult.primID;

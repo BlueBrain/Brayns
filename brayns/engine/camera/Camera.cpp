@@ -75,10 +75,7 @@ const std::string &Camera::getName() const noexcept
 
 void Camera::setView(const View &view)
 {
-    if (_flag.update(_view, view))
-    {
-        _updateView();
-    }
+    _flag.update(_view, view);
 }
 
 const View &Camera::getView() const noexcept
@@ -88,10 +85,7 @@ const View &Camera::getView() const noexcept
 
 void Camera::setAspectRatio(float aspectRatio)
 {
-    if (_flag.update(_aspectRatio, aspectRatio))
-    {
-        _updateAspectRatio();
-    }
+    _flag.update(_aspectRatio, aspectRatio);
 }
 
 bool Camera::commit()
@@ -100,6 +94,9 @@ bool Camera::commit()
     {
         return false;
     }
+    _data->pushTo(_handle);
+    _updateView();
+    _updateAspectRatio();
     _handle.commit();
     _flag = false;
     return true;

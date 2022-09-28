@@ -18,15 +18,11 @@
 
 #include "ReportLoader.h"
 
-#include <brayns/common/ColorRamp.h>
-#include <brayns/engine/components/SimulationInfo.h>
-
+#include <api/reports/ReportFactory.h>
 #include <api/reports/indexers/OffsetIndexer.h>
 #include <api/reports/indexers/SpikeIndexer.h>
-#include <components/ReportData.h>
 #include <io/bbploader/reports/CompartmentData.h>
 #include <io/bbploader/reports/SpikeData.h>
-#include <systems/ReportSystem.h>
 
 namespace
 {
@@ -151,20 +147,6 @@ public:
         return std::make_unique<SpikeHandler>(context, compartments);
     }
 };
-
-class SimulationInfoFactory
-{
-public:
-    static brayns::SimulationInfo create(const IReportData &data)
-    {
-        auto simInfo = brayns::SimulationInfo();
-        simInfo.dt = data.getTimeStep();
-        simInfo.endTime = data.getEndTime();
-        simInfo.startTime = data.getStartTime();
-        simInfo.timeUnit = data.getTimeUnit();
-        return simInfo;
-    }
-};
 }
 
 namespace bbploader
@@ -176,20 +158,11 @@ void ReportLoader::load(
     brayns::Model &model)
 {
     auto handler = ReportHandlerFactory::createHandler(context, compartments, callback);
-
     if (!handler)
     {
         return;
     }
     auto reportData = handler->createData();
-    auto &data = *reportData.data;
-
-    auto &components = model.getComponents();
-    components.add<brayns::SimulationInfo>(SimulationInfoFactory::create(data));
-    components.add<ReportData>(std::move(reportData));
-    components.add<brayns::ColorRamp>();
-
-    auto &systems = model.getSystems();
-    systems.setPreRenderSystem<ReportSystem>();
+    ReportFactory::create(model, std::move(reportData));
 }
 }
