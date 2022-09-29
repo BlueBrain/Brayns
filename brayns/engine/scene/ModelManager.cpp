@@ -81,10 +81,8 @@ namespace brayns
 {
 ModelInstance *ModelManager::addModel(std::unique_ptr<Model> model)
 {
-    std::vector<std::unique_ptr<Model>> models;
-    models.push_back(std::move(model));
-    auto instances = addModels(std::move(models));
-    return instances.front();
+    auto &entry = _createModelEntry(std::move(model));
+    return &_createModelInstance(entry);
 }
 
 std::vector<ModelInstance *> ModelManager::addModels(std::vector<std::unique_ptr<Model>> models)
@@ -94,9 +92,7 @@ std::vector<ModelInstance *> ModelManager::addModels(std::vector<std::unique_ptr
 
     for (auto &model : models)
     {
-        auto &entry = _createModelEntry(std::move(model));
-        auto &instance = _createModelInstance(entry);
-        result.push_back(&instance);
+        result.push_back(addModel(std::move(model)));
     }
 
     return result;

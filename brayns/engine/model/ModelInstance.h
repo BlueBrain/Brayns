@@ -43,7 +43,7 @@ public:
     /**
      * @brief Initializes the instance with the unique ID and the given model
      */
-    ModelInstance(const uint32_t modelInstanceID, Model &model);
+    ModelInstance(const uint32_t instanceId, Model &model);
 
     ModelInstance(const ModelInstance &) = delete;
     ModelInstance &operator=(const ModelInstance &) = delete;
@@ -115,14 +115,14 @@ public:
 
 private:
     /**
-     * @brief Returns the transform matrix obtained by multiplying the underlying Model base trasnform (if any)
+     * @brief Returns the transform matrix obtained by multiplying the underlying Model base transform (if any)
      * by this instance's transform
      * @return Matrix4f
      */
     Matrix4f _getFullTransform() const noexcept;
 
 private:
-    uint32_t _instanceID;
+    uint32_t _id;
     bool _visible = true;
     Transform _transform;
     Bounds _bounds;

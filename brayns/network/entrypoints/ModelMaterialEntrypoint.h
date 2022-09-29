@@ -160,12 +160,12 @@ public:
             throw JsonRpcException("The model does not have material");
         }
 
-        if (auto cast = material->as<MaterialType>())
+        auto cast = material->as<MaterialType>();
+        if (!cast)
         {
-            request.reply(*cast);
-            return;
+            throw InvalidRequestException("Invalid material type (should be '" + material->getName() + "')");
         }
-        throw InvalidRequestException("Invalid material type (should be '" + material->getName() + "')");
+        request.reply(*cast);
     }
 
 private:

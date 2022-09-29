@@ -30,8 +30,6 @@ public:
     template<typename Component>
     static void removeModelsWithComponent(ModelManager &models)
     {
-        static_assert(std::is_same_v<Component, std::decay_t<Component>>, "Only decayed types allowed");
-
         auto &instances = models.getAllModelInstances();
 
         std::vector<uint32_t> ids;
@@ -52,6 +50,6 @@ public:
 
     static void removeLights(ModelManager &models);
     static void removeClippers(ModelManager &models);
-    static void removeObjects(ModelManager &models);
+    static void removeRenderables(ModelManager &models);
 };
 }

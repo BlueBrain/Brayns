@@ -25,7 +25,7 @@ from .clipping_geometry import ClippingGeometry
 
 
 def add_clipping_geometry(instance: Instance, geometry: ClippingGeometry) -> Model:
-    """Add a clipping geometry to the given instance and return the model.
+    """Add a clipping geometry to the given instance and return its model.
 
     :param instance: Instance.
     :type instance: Instance

@@ -21,6 +21,7 @@
 
 #include "AddModelEntrypoint.h"
 
+#include <brayns/engine/common/AddLoadInfo.h>
 #include <brayns/engine/common/SimulationScanner.h>
 #include <brayns/network/common/ProgressHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
@@ -41,6 +42,20 @@ public:
         {
             throw brayns::InvalidParamsException("Unsupported file type: '" + path + "'");
         }
+    }
+};
+
+class LoadInfoFactory
+{
+public:
+    static brayns::LoadInfo create(const brayns::FileLoadParameters &params)
+    {
+        auto info = brayns::LoadInfo();
+        info.source = brayns::LoadInfo::LoadSource::FromFile;
+        info.loaderName = params.loaderName;
+        info.loadParameters = params.loadParameters;
+        info.path = params.filePath;
+        return info;
     }
 };
 } // namespace
@@ -85,11 +100,13 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto &parameters = params.loadParameters;
     auto callback = [&](const auto &operation, auto amount) { progress.notify(operation, amount); };
     auto models = loader.loadFromFile(path, {callback}, parameters);
-    auto result = _models.addModels(std::move(models));
+    auto instances = _models.addModels(std::move(models));
 
+    auto loadInfo = LoadInfoFactory::create(params);
+    AddLoadInfo::toInstances(loadInfo, instances);
     SimulationScanner::scanAndUpdate(_models, _simulation);
 
-    request.reply(result);
+    request.reply(instances);
 }
 
 void AddModelEntrypoint::onCancel()

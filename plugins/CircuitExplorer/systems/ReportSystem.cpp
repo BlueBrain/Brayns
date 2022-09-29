@@ -34,12 +34,13 @@ class SimulationChecks
 public:
     static bool enabled(brayns::SimulationInfo &info, ReportData &report)
     {
-        if (!info.enabled)
+        if (info.enabled)
         {
-            report.lastEnabledFlag = false;
-            return false;
+            return true;
         }
-        return true;
+
+        report.lastEnabledFlag = false;
+        return false;
     }
 
     static bool mustUpdate(ReportData &report, brayns::ColorRamp &colorRamp, const brayns::SimulationParameters &sim)

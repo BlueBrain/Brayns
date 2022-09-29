@@ -105,17 +105,18 @@ class SimulationChecks
 public:
     static bool enabled(const brayns::SimulationInfo &info, dti::SpikeReportData &data, brayns::Components &components)
     {
-        if (!info.enabled)
+        if (info.enabled)
         {
-            // First onPreRender after disabling simulation - restore default colors
-            if (data.lastEnabledFlag)
-            {
-                DefaultColorPainter::paint(components);
-            }
-            data.lastEnabledFlag = false;
-            return false;
+            return true;
         }
-        return true;
+
+        // First onPreRender after disabling simulation - restore default colors
+        if (data.lastEnabledFlag)
+        {
+            DefaultColorPainter::paint(components);
+        }
+        data.lastEnabledFlag = false;
+        return false;
     }
 
     static bool requiresUpdate(const brayns::SimulationParameters &simulationParams, dti::SpikeReportData &data)

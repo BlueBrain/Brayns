@@ -22,7 +22,7 @@
 #pragma once
 
 #include <brayns/common/Transform.h>
-#include <brayns/engine/components/LoadInformation.h>
+#include <brayns/engine/components/LoadInfo.h>
 #include <brayns/engine/components/Metadata.h>
 
 #include "Model.h"
@@ -34,12 +34,12 @@ class ModelInfo
 public:
     ModelInfo(const Model &model);
 
-    const LoadInformation *getLoadInfo() const noexcept;
+    const LoadInfo *getLoadInfo() const noexcept;
     const Metadata *getMetadata() const noexcept;
     const Transform *getBaseTransform() const noexcept;
 
 private:
-    const LoadInformation *_loadInfo;
+    const LoadInfo *_loadInfo;
     const Metadata *_metadata;
     const Transform *_baseTransform;
 };

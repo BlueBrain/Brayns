@@ -21,7 +21,6 @@
 
 #include "ModelInstance.h"
 
-#include <brayns/common/Log.h>
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace
@@ -54,8 +53,8 @@ struct InstanceParameters
 
 namespace brayns
 {
-ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model &model)
-    : _instanceID(modelInstanceID)
+ModelInstance::ModelInstance(const uint32_t instanceId, Model &model)
+    : _id(instanceId)
     , _handle(model.getHandle())
     , _model(model)
 {
@@ -64,7 +63,7 @@ ModelInstance::ModelInstance(const uint32_t modelInstanceID, Model &model)
 
 uint32_t ModelInstance::getID() const noexcept
 {
-    return _instanceID;
+    return _id;
 }
 
 const Bounds &ModelInstance::getBounds() const noexcept
@@ -74,7 +73,6 @@ const Bounds &ModelInstance::getBounds() const noexcept
 
 void ModelInstance::computeBounds() noexcept
 {
-    Log::debug("[ModelInstance {}] Computing bounds", _instanceID);
     _bounds = _model.computeBounds(_getFullTransform());
 }
 

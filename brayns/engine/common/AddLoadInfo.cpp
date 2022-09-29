@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,26 +18,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/json/JsonType.h>
-
-#include <string>
+#include "AddLoadInfo.h"
 
 namespace brayns
 {
-struct LoadInformation
+void AddLoadInfo::toInstance(const LoadInfo &info, brayns::ModelInstance &instance)
 {
-    enum class LoadType
-    {
-        FromFile,
-        FromBlob,
-        None,
-    };
+    auto &model = instance.getModel();
+    auto &components = model.getComponents();
 
-    LoadType type{LoadType::None};
-    std::string path;
-    std::string loaderName;
-    JsonValue loadParameters;
-};
+    if (components.has<LoadInfo>())
+    {
+        return;
+    }
+
+    components.add<LoadInfo>(info);
+}
+
+void AddLoadInfo::toInstances(const LoadInfo &info, std::vector<brayns::ModelInstance *> &instances)
+{
+    for (auto instance : instances)
+    {
+        toInstance(info, *instance);
+    }
+}
 }

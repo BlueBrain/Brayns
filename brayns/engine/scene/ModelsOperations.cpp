@@ -21,7 +21,9 @@
 #include "ModelsOperations.h"
 
 #include <brayns/engine/components/ClipperViews.h>
+#include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/components/Lights.h>
+#include <brayns/engine/components/VolumeViews.h>
 
 namespace brayns
 {
@@ -35,7 +37,7 @@ void ModelsOperations::removeClippers(ModelManager &models)
     removeModelsWithComponent<ClipperViews>(models);
 }
 
-void ModelsOperations::removeObjects(ModelManager &models)
+void ModelsOperations::removeRenderables(ModelManager &models)
 {
     auto &instances = models.getAllModelInstances();
 
@@ -46,11 +48,10 @@ void ModelsOperations::removeObjects(ModelManager &models)
     {
         auto &model = instance->getModel();
         auto &components = model.getComponents();
-        if (components.has<Lights>() || components.has<ClipperViews>())
+        if (components.has<GeometryViews>() || components.has<VolumeViews>())
         {
-            continue;
+            ids.push_back(instance->getID());
         }
-        ids.push_back(instance->getID());
     }
 
     models.removeModelInstances(ids);

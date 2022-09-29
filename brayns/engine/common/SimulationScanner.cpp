@@ -69,9 +69,9 @@ void SimulationScanner::scanAndUpdate(ModelManager &models, SimulationParameters
         auto endTime = simulation->endTime;
         auto dt = simulation->dt;
 
-        earlierStart = startTime < earlierStart ? startTime : earlierStart;
-        latestEnd = endTime > latestEnd ? endTime : latestEnd;
-        smallestDt = dt < smallestDt ? dt : smallestDt;
+        earlierStart = std::min(startTime, earlierStart);
+        latestEnd = std::max(endTime, latestEnd);
+        smallestDt = std::min(dt, smallestDt);
     }
 
     // Update only if we actually have any simulaiton

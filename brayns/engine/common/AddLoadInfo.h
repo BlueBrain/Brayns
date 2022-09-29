@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,18 +20,17 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/engine/components/LoadInfo.h>
+#include <brayns/engine/model/ModelInstance.h>
 
-#include "LoadInfoAdapter.h"
-#include "TransformAdapter.h"
-
-#include <brayns/engine/model/ModelInfo.h>
+#include <vector>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ModelInfo)
-BRAYNS_JSON_ADAPTER_GET("load_info", getLoadInfo, "Model load information")
-BRAYNS_JSON_ADAPTER_GET("metadata", getMetadata, "Model-specific metadata")
-BRAYNS_JSON_ADAPTER_GET("base_transform", getBaseTransform, "Model transform")
-BRAYNS_JSON_ADAPTER_END()
-} // namespace brayns
+class AddLoadInfo
+{
+public:
+    static void toInstance(const LoadInfo &info, brayns::ModelInstance &instance);
+    static void toInstances(const LoadInfo &info, std::vector<brayns::ModelInstance *> &instances);
+};
+}

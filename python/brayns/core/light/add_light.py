@@ -25,7 +25,7 @@ from ..model import Model, deserialize_model
 
 
 def add_light(instance: Instance, light: Light) -> Model:
-    """Add a given light to an instance and return the model.
+    """Add a given light to an instance and return its model.
 
     :param instance: Instance.
     :type instance: Instance

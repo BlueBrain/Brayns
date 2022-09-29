@@ -56,9 +56,9 @@ public:
         return *this;
     }
 
-    void setModified(bool val) noexcept
+    void setModified(bool modified) noexcept
     {
-        _modified = val;
+        _modified = modified;
     }
 
     template<typename T, typename U>

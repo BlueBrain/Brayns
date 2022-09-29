@@ -21,6 +21,7 @@
 
 #include "UploadModelEntrypoint.h"
 
+#include <brayns/engine/common/AddLoadInfo.h>
 #include <brayns/engine/common/SimulationScanner.h>
 #include <brayns/network/common/ProgressHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
@@ -91,6 +92,19 @@ public:
     }
 };
 
+class LoadInfoFactory
+{
+public:
+    static brayns::LoadInfo create(const brayns::BinaryLoadParameters &parameters)
+    {
+        auto info = brayns::LoadInfo();
+        info.source = brayns::LoadInfo::LoadSource::FromBlob;
+        info.loaderName = parameters.loaderName;
+        info.loadParameters = parameters.loadParameters;
+        return info;
+    }
+};
+
 class BinaryModelHandler
 {
 public:
@@ -120,6 +134,10 @@ public:
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
         auto models = loader.loadFromBlob(blob, {callback}, parameters);
         auto result = _models.addModels(std::move(models));
+
+        auto loadInfo = LoadInfoFactory::create(params);
+        brayns::AddLoadInfo::toInstances(loadInfo, result);
+
         request.reply(result);
     }
 

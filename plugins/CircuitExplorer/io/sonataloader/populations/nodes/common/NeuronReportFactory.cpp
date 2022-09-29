@@ -162,11 +162,7 @@ public:
     {
         auto &params = context.params;
         auto reportType = params.report_type;
-        if (reportType == sl::ReportType::None)
-        {
-            return false;
-        }
-        return true;
+        return reportType != sl::ReportType::None;
     }
 
     static ReportData createReportData(

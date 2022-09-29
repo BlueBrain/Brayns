@@ -38,18 +38,8 @@ public:
 
         auto &entry = _components.emplace_back(typeid(T), std::make_unique<Component<T>>());
         auto &component = static_cast<Component<T> &>(*entry.component);
-        auto &data = component.data;
-
-        if constexpr (std::is_aggregate_v<T>)
-        {
-            data = T{std::forward<Args>(args)...};
-        }
-        else
-        {
-            data = T(std::forward<Args>(args)...);
-        }
-
-        return data;
+        component.data = T{std::forward<Args>(args)...};
+        return component.data;
     }
 
     template<typename T>
@@ -81,29 +71,13 @@ public:
     template<typename T>
     T *find()
     {
-        auto it = _findIterator<T>();
-        if (it == _components.end())
-        {
-            return nullptr;
-        }
-        auto &entry = *it;
-        auto &component = entry.component;
-        auto &cast = static_cast<Component<T> &>(*component);
-        return &cast.data;
+        return _find<T>();
     }
 
     template<typename T>
     const T *find() const
     {
-        auto it = _findIterator<T>();
-        if (it == _components.end())
-        {
-            return nullptr;
-        }
-        auto &entry = *it;
-        auto &component = entry.component;
-        auto &cast = static_cast<Component<T> &>(*component);
-        return &cast.data;
+        return _find<T>();
     }
 
     template<typename T>
@@ -114,15 +88,17 @@ public:
 
 private:
     template<typename T>
-    auto _findIterator()
+    T *_find() const
     {
-        return std::find(_components.begin(), _components.end(), std::type_index(typeid(T)));
-    }
-
-    template<typename T>
-    auto _findIterator() const
-    {
-        return std::find(_components.begin(), _components.end(), std::type_index(typeid(T)));
+        auto it = std::find(_components.begin(), _components.end(), std::type_index(typeid(T)));
+        if (it == _components.end())
+        {
+            return nullptr;
+        }
+        auto &entry = *it;
+        auto &component = entry.component;
+        auto &cast = static_cast<Component<T> &>(*component);
+        return &cast.data;
     }
 
     struct IComponent

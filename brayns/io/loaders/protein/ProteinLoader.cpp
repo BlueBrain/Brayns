@@ -50,6 +50,8 @@ struct Atom
     std::string name;
 };
 
+/*
+ * Unused, but left for token position reference
 struct PdbFormatColumns
 {
     inline static constexpr size_t type = 0;
@@ -61,6 +63,7 @@ struct PdbFormatColumns
     inline static constexpr size_t z = 8;
     inline static constexpr size_t name = 11;
 };
+*/
 
 class PdbReader
 {
@@ -110,17 +113,33 @@ private:
 
     static Atom _processLine(std::string_view line)
     {
-        auto tokens = brayns::StringSplitter::splitTokens(line);
-        assert(tokens.size() >= 12);
+        auto tokenCount = brayns::StringCounter::countTokens(line);
+        if (tokenCount < 12)
+        {
+            throw std::runtime_error("Invalid number of tokens on line");
+        }
+
+        brayns::StringExtractor::extractToken(line);
+        auto atomIdToken = brayns::StringExtractor::extractToken(line);
+        brayns::StringExtractor::extractToken(line);
+        brayns::StringExtractor::extractToken(line);
+        auto chainToken = brayns::StringExtractor::extractToken(line);
+        auto residueToken = brayns::StringExtractor::extractToken(line);
+        auto xToken = brayns::StringExtractor::extractToken(line);
+        auto yToken = brayns::StringExtractor::extractToken(line);
+        auto zToken = brayns::StringExtractor::extractToken(line);
+        brayns::StringExtractor::extractToken(line);
+        brayns::StringExtractor::extractToken(line);
+        auto nameToken = brayns::StringExtractor::extractToken(line);
 
         Atom result;
-        result.id = std::stoi(tokens[PdbFormatColumns::atomId]);
-        result.chainId = static_cast<int32_t>(tokens[PdbFormatColumns::chainId][0]) - 64;
-        result.residue = std::stoi(tokens[PdbFormatColumns::residue]);
-        result.position.x = std::stof(tokens[PdbFormatColumns::x]);
-        result.position.y = std::stof(tokens[PdbFormatColumns::y]);
-        result.position.z = std::stof(tokens[PdbFormatColumns::z]);
-        result.name = tokens[PdbFormatColumns::name].substr(0, 2);
+        result.id = std::stoi(std::string(atomIdToken));
+        result.chainId = static_cast<int32_t>(chainToken[0]) - 64;
+        result.residue = std::stoi(std::string(residueToken));
+        result.position.x = std::stof(std::string(xToken));
+        result.position.y = std::stof(std::string(yToken));
+        result.position.z = std::stof(std::string(zToken));
+        result.name = nameToken.substr(0, 2);
 
         return result;
     }

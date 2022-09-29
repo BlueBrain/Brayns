@@ -30,8 +30,8 @@ class TestAddClippingGeometries(unittest.TestCase):
     def test_add_clipping_geometry(self) -> None:
         instance = MockInstance(MockModel.message)
         plane = brayns.ClipPlane(1, 2, 3, 4)
-        test_model = brayns.add_clipping_geometry(instance, plane)
-        self.assertEqual(test_model, MockModel.model)
+        test = brayns.add_clipping_geometry(instance, plane)
+        self.assertEqual(test, MockModel.model)
         self.assertEqual(instance.method, brayns.ClipPlane.method)
         self.assertEqual(instance.params, plane.get_properties())
 
