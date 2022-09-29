@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from typing import Any
 
 from brayns.utils import Bounds, Transform
 
@@ -36,8 +37,8 @@ class Model:
     :type id: int
     :param bounds: Model bounding box.
     :type bounds: Bounds
-    :param metadata: Model metadata.
-    :type metadata: dict[str, str]
+    :param info: Intrinsic nodel information.
+    :type info: dict[str, Any]
     :param visible: Check wether the model is rendered or not.
     :type visible: bool
     :param transform: Model transform relative to the origin.
@@ -46,6 +47,6 @@ class Model:
 
     id: int
     bounds: Bounds
-    metadata: dict[str, str]
+    info: dict[str, Any]
     visible: bool
     transform: Transform

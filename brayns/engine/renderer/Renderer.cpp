@@ -24,7 +24,7 @@ namespace brayns
 {
 Renderer::Renderer(Renderer &&other) noexcept
 {
-    *this = other;
+    *this = std::move(other);
 }
 
 Renderer &Renderer::operator=(Renderer &&other) noexcept
@@ -49,7 +49,7 @@ Renderer &Renderer::operator=(const Renderer &other)
     _handle = ospray::cpp::Renderer(_handleName);
     _data = other._data->clone();
     _data->pushTo(_handle);
-    _flag = true;
+    _flag.setModified(true);
     return *this;
 }
 

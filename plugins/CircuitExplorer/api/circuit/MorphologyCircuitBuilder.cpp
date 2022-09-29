@@ -19,13 +19,21 @@
  */
 
 #include "MorphologyCircuitBuilder.h"
+
 #include "colorhandlers/MorphologyColorHandler.h"
+
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
 
 #include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
 #include <api/neuron/NeuronMorphologyReader.h>
-#include <components/CircuitColorComponent.h>
-#include <components/MorphologyCircuitComponent.h>
+#include <components/CircuitIds.h>
+#include <components/Coloring.h>
+#include <components/NeuronSectionList.h>
+#include <systems/NeuronInspectSystem.h>
 
 #include <deque>
 #include <future>
@@ -116,6 +124,55 @@ public:
         return morphologies;
     }
 };
+
+class ModelBuilder
+{
+public:
+    ModelBuilder(brayns::Model &model)
+        : _model(model)
+    {
+    }
+
+    void addIds(const std::vector<uint64_t> &ids)
+    {
+        _model.getComponents().add<CircuitIds>(ids);
+    }
+
+    void addGeometry(std::vector<std::vector<brayns::Capsule>> primitiveList)
+    {
+        auto &components = _model.getComponents();
+        auto &geometries = components.add<brayns::Geometries>();
+        geometries.elements.reserve(primitiveList.size());
+        for (auto &primitives : primitiveList)
+        {
+            geometries.elements.emplace_back(std::move(primitives));
+        }
+    }
+
+    void addNeuronSections(std::vector<std::vector<NeuronSectionMapping>> sections)
+    {
+        _model.getComponents().add<NeuronSectionList>(std::move(sections));
+    }
+
+    void addColoring(std::unique_ptr<IColorData> data)
+    {
+        auto &components = _model.getComponents();
+        auto handler = std::make_unique<MorphologyColorHandler>(components);
+        components.add<Coloring>(std::move(data), std::move(handler));
+    }
+
+    void addSystems()
+    {
+        auto &systems = _model.getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+        systems.setInitSystem<brayns::GeometryInitSystem>();
+        systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        systems.setInspectSystem<MorphologyInspectSystem>();
+    }
+
+private:
+    brayns::Model &_model;
+};
 }
 
 MorphologyCircuitBuilder::Context::Context(
@@ -138,13 +195,13 @@ std::vector<CellCompartments> MorphologyCircuitBuilder::load(
     ProgressUpdater &updater,
     std::unique_ptr<IColorData> colorData)
 {
-    const auto &morphPaths = context.morphologyPaths;
-    const auto &ids = context.ids;
-    const auto &morphParams = context.morphologyParams;
-    const auto &positions = context.positions;
-    const auto &rotations = context.rotations;
+    auto &morphPaths = context.morphologyPaths;
+    auto &ids = context.ids;
+    auto &morphParams = context.morphologyParams;
+    auto &positions = context.positions;
+    auto &rotations = context.rotations;
 
-    const auto morphologyPathMap = MorphologyMapBuilder::build(morphPaths);
+    auto morphologyPathMap = MorphologyMapBuilder::build(morphPaths);
     auto morphologies = ParallelMorphologyLoader::load(morphologyPathMap, morphParams, positions, rotations, updater);
 
     std::vector<CellCompartments> compartments(ids.size());
@@ -168,9 +225,12 @@ std::vector<CellCompartments> MorphologyCircuitBuilder::load(
         geometries[i] = std::move(geometry);
     }
 
-    auto &circuit = model.addComponent<MorphologyCircuitComponent>(ids, std::move(geometries), std::move(mappings));
-    auto colorHandler = std::make_unique<MorphologyColorHandler>(circuit);
-    model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
+    auto builder = ModelBuilder(model);
+    builder.addIds(ids);
+    builder.addGeometry(std::move(geometries));
+    builder.addNeuronSections(std::move(mappings));
+    builder.addColoring(std::move(colorData));
+    builder.addSystems();
 
     return compartments;
 }

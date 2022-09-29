@@ -56,6 +56,11 @@ public:
         return *this;
     }
 
+    void setModified(bool modified) noexcept
+    {
+        _modified = modified;
+    }
+
     template<typename T, typename U>
     bool update(T &value, U &&newValue)
     {

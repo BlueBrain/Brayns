@@ -28,30 +28,14 @@ namespace brayns
  * @brief Defines the translation, rotation and scale parameters to be applied
  * to a scene asset.
  */
-class Transform
+struct Transform
 {
-public:
-    Transform() = default;
+    Vector3f translation{0.f};
+    Quaternion rotation{1, 0, 0, 0};
+    Vector3f scale{1.f};
 
-    Transform(const Vector3f &translation, const Quaternion &rotation, const Vector3f &scale);
-
-    const Vector3f &getTranslation() const noexcept;
-    void setTranslation(const Vector3f &value) noexcept;
-
-    const Quaternion &getRotation() const noexcept;
-    void setRotation(const Quaternion &value) noexcept;
-
-    const Vector3f &getScale() const noexcept;
-    void setScale(const Vector3f &value) noexcept;
-
-    Matrix4f toMatrix() const;
-
-private:
-    Vector3f _translation{0.f};
-    Quaternion _rotation{1, 0, 0, 0};
-    Vector3f _scale{1.f};
+    Matrix4f toMatrix() const noexcept;
+    bool operator==(const Transform &other) const noexcept;
+    bool operator!=(const Transform &other) const noexcept;
 };
-
-bool operator==(const Transform &lhs, const Transform &rhs);
-bool operator!=(const Transform &lhs, const Transform &rhs);
 } // namespace brayns

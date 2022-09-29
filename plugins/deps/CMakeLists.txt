@@ -11,7 +11,7 @@ set(CMAKE_INSTALL_LIBDIR lib)
 # =============================================================================
 # libsonata
 # =============================================================================
-if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)
+if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libsonata")
         message(STATUS "Downloading libsonata from submodules")
         FetchContent_Declare(
@@ -34,7 +34,7 @@ endif()
 # =============================================================================
 # MorphIO
 # =============================================================================
-if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio)
+if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/MorphIO")
         message(STATUS "Downloading MorphIO from submodules")
         FetchContent_Declare(
@@ -76,8 +76,7 @@ endif()
 # =============================================================================
 # MVDTool
 # =============================================================================
-if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT MVDTool_FOUND AND NOT TARGET MVDTool)
-
+if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT MVDTool_FOUND AND NOT TARGET MVDTool)
     find_package(Boost 1.41 QUIET REQUIRED COMPONENTS system)
 
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/MVDTool")

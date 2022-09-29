@@ -21,6 +21,7 @@
 
 #include "UploadModelEntrypoint.h"
 
+#include <brayns/engine/common/AddLoadInfo.h>
 #include <brayns/engine/common/SimulationScanner.h>
 #include <brayns/network/common/ProgressHandler.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
@@ -91,11 +92,27 @@ public:
     }
 };
 
+class LoadInfoFactory
+{
+public:
+    static brayns::LoadInfo create(const brayns::BinaryLoadParameters &parameters)
+    {
+        auto info = brayns::LoadInfo();
+        info.source = brayns::LoadInfo::LoadSource::FromBlob;
+        info.loaderName = parameters.loaderName;
+        info.loadParameters = parameters.loadParameters;
+        return info;
+    }
+};
+
 class BinaryModelHandler
 {
 public:
-    BinaryModelHandler(brayns::Scene &scene, const brayns::LoaderRegistry &loaders, brayns::CancellationToken &token)
-        : _scene(scene)
+    BinaryModelHandler(
+        brayns::ModelManager &models,
+        const brayns::LoaderRegistry &loaders,
+        brayns::CancellationToken &token)
+        : _models(models)
         , _loaders(loaders)
         , _token(token)
     {
@@ -116,18 +133,16 @@ public:
         auto parameters = params.loadParameters;
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
         auto models = loader.loadFromBlob(blob, {callback}, parameters);
+        auto result = _models.addModels(std::move(models));
 
-        brayns::ModelLoadParameters loadParameters;
-        loadParameters.type = brayns::ModelLoadParameters::LoadType::FromBlob;
-        loadParameters.loaderName = params.loaderName;
-        loadParameters.loadParameters = parameters;
+        auto loadInfo = LoadInfoFactory::create(params);
+        brayns::AddLoadInfo::toInstances(loadInfo, result);
 
-        auto result = _scene.addModels(std::move(loadParameters), std::move(models));
         request.reply(result);
     }
 
 private:
-    brayns::Scene &_scene;
+    brayns::ModelManager &_models;
     const brayns::LoaderRegistry &_loaders;
     brayns::CancellationToken &_token;
 };
@@ -136,11 +151,11 @@ private:
 namespace brayns
 {
 UploadModelEntrypoint::UploadModelEntrypoint(
-    Scene &scene,
+    ModelManager &models,
     const LoaderRegistry &loaders,
     SimulationParameters &simulation,
     CancellationToken token)
-    : _scene(scene)
+    : _models(models)
     , _loaders(loaders)
     , _simulation(simulation)
     , _token(token)
@@ -164,9 +179,9 @@ bool UploadModelEntrypoint::isAsync() const
 
 void UploadModelEntrypoint::onRequest(const Request &request)
 {
-    SimulationScanner::scanAndUpdate(_scene, _simulation);
-    BinaryModelHandler handler(_scene, _loaders, _token);
+    BinaryModelHandler handler(_models, _loaders, _token);
     handler.handle(request);
+    SimulationScanner::scanAndUpdate(_models, _simulation);
 }
 
 void UploadModelEntrypoint::onCancel()

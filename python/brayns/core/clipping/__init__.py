@@ -22,12 +22,10 @@ from .add_clipping_geometry import add_clipping_geometry
 from .clear_clipping_geometries import clear_clipping_geometries
 from .clip_plane import ClipPlane
 from .clipping_geometry import ClippingGeometry
-from .remove_clipping_geometries import remove_clipping_geometries
 
 __all__ = [
     'add_clipping_geometry',
     'clear_clipping_geometries',
     'ClipPlane',
     'ClippingGeometry',
-    'remove_clipping_geometries',
 ]

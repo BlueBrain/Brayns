@@ -20,7 +20,7 @@
 
 #include "SimulationScanner.h"
 
-#include <brayns/engine/components/SimulationComponent.h>
+#include <brayns/engine/components/SimulationInfo.h>
 
 namespace
 {
@@ -45,43 +45,41 @@ struct SimulationUpdater
 
 namespace brayns
 {
-void SimulationScanner::scanAndUpdate(Scene &scene, SimulationParameters &globalSimulation)
+void SimulationScanner::scanAndUpdate(ModelManager &models, SimulationParameters &globalSimulation)
 {
     float earlierStart = std::numeric_limits<float>::max();
     float latestEnd = std::numeric_limits<float>::lowest();
     float smallestDt = std::numeric_limits<float>::max();
     bool foundSimulation{false};
 
-    auto &instances = scene.getAllModelInstances();
+    auto &instances = models.getAllModelInstances();
     for (auto instancePtr : instances)
     {
         auto &model = instancePtr->getModel();
-        SimulationComponent *simulation = nullptr;
+        auto &components = model.getComponents();
+        auto simulation = components.find<SimulationInfo>();
 
-        try
-        {
-            auto &component = model.getComponent<SimulationComponent>();
-            simulation = &component;
-            foundSimulation = true;
-        }
-        catch (...)
+        if (!simulation)
         {
             continue;
         }
+        foundSimulation = true;
 
-        auto startTime = simulation->getStartTime();
-        auto endTime = simulation->getEndTime();
-        auto dt = simulation->getDT();
+        auto startTime = simulation->startTime;
+        auto endTime = simulation->endTime;
+        auto dt = simulation->dt;
 
-        earlierStart = startTime < earlierStart ? startTime : earlierStart;
-        latestEnd = endTime > latestEnd ? endTime : latestEnd;
-        smallestDt = dt < smallestDt ? dt : smallestDt;
+        earlierStart = std::min(startTime, earlierStart);
+        latestEnd = std::max(endTime, latestEnd);
+        smallestDt = std::min(dt, smallestDt);
     }
 
     // Update only if we actually have any simulaiton
-    if (foundSimulation)
+    if (!foundSimulation)
     {
-        SimulationUpdater::update(globalSimulation, earlierStart, latestEnd, smallestDt);
+        globalSimulation.reset();
+        return;
     }
+    SimulationUpdater::update(globalSimulation, earlierStart, latestEnd, smallestDt);
 }
 }

@@ -141,8 +141,6 @@ __all__ = [
     'ProtocolError',
     'QuadLight',
     'Quaternion',
-    'remove_clipping_geometries',
-    'remove_lights',
     'remove_models',
     'Renderer',
     'Request',

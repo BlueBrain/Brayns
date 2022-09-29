@@ -19,10 +19,69 @@
  */
 
 #include "SomaCircuitBuilder.h"
+
 #include "colorhandlers/SomaColorHandler.h"
 
-#include <components/CircuitColorComponent.h>
-#include <components/SomaCircuitComponent.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/geometry/types/Sphere.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
+
+#include <components/CircuitIds.h>
+#include <components/ColorList.h>
+#include <components/Coloring.h>
+#include <systems/NeuronInspectSystem.h>
+
+namespace
+{
+class ModelBuilder
+{
+public:
+    ModelBuilder(brayns::Model &model)
+        : _model(model)
+    {
+    }
+
+    void addIds(const std::vector<uint64_t> &ids)
+    {
+        _model.getComponents().add<CircuitIds>(ids);
+    }
+
+    void addGeometry(std::vector<brayns::Sphere> primitives)
+    {
+        auto &components = _model.getComponents();
+        auto &geometries = components.add<brayns::Geometries>();
+        geometries.elements.emplace_back(std::move(primitives));
+    }
+
+    void addColoring(std::unique_ptr<IColorData> data)
+    {
+        auto &components = _model.getComponents();
+        auto handler = std::make_unique<SomaColorHandler>(components);
+        components.add<Coloring>(std::move(data), std::move(handler));
+    }
+
+    void addColorList(size_t numElements)
+    {
+        auto &components = _model.getComponents();
+        auto &colorList = components.add<ColorList>();
+        colorList.elements.resize(numElements, brayns::Vector4f(1.f));
+    }
+
+    void addSystems()
+    {
+        auto &systems = _model.getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+        systems.setInitSystem<brayns::GeometryInitSystem>();
+        systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        systems.setInspectSystem<SomaInspectSystem>();
+    }
+
+private:
+    brayns::Model &_model;
+};
+}
 
 SomaCircuitBuilder::Context::Context(
     const std::vector<uint64_t> &ids,
@@ -42,7 +101,6 @@ std::vector<CellCompartments>
     const auto radius = context.radius;
 
     std::vector<CellCompartments> result(ids.size());
-
     std::vector<brayns::Sphere> geometry(ids.size());
 
 #pragma omp parallel for
@@ -59,9 +117,12 @@ std::vector<CellCompartments>
         compartment.sectionSegments[-1].push_back(0);
     }
 
-    auto &somaCircuit = model.addComponent<SomaCircuitComponent>(ids, std::move(geometry));
-    auto colorHandler = std::make_unique<SomaColorHandler>(somaCircuit);
-    model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
+    auto builder = ModelBuilder(model);
+    builder.addIds(ids);
+    builder.addGeometry(std::move(geometry));
+    builder.addColoring(std::move(colorData));
+    builder.addColorList(ids.size());
+    builder.addSystems();
 
     return result;
 }

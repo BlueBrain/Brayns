@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-UpdateModelEntrypoint::UpdateModelEntrypoint(Scene &scene)
-    : _scene(scene)
+UpdateModelEntrypoint::UpdateModelEntrypoint(ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -45,12 +45,8 @@ void UpdateModelEntrypoint::onRequest(const Request &request)
     const auto params = request.getParams();
     auto modelId = params.model_id;
     auto &buffer = params.model;
-    auto &model = ExtractModel::fromId(_scene, modelId);
+    auto &model = ExtractModel::fromId(_models, modelId);
     buffer.extract(model);
-
-    // In case the transform was updated, and thus the model bounds, we need to recompute scene bounds
-    _scene.computeBounds();
-
     request.reply(model);
 }
 } // namespace brayns

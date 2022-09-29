@@ -70,20 +70,10 @@ public:
     Bounds computeBounds(const Matrix4f &matrix) const noexcept override
     {
         Bounds result;
-#pragma omp parallel
+        for (auto &primitive : primitives)
         {
-            Bounds local;
-
-#pragma omp for
-            for (size_t i = 0; i < primitives.size(); ++i)
-            {
-                local.expand(GeometryTraits<Type>::computeBounds(matrix, primitives[i]));
-            }
-
-#pragma omp critical(local_bounds_merge_section)
-            result.expand(local);
+            result.expand(GeometryTraits<Type>::computeBounds(matrix, primitive));
         }
-
         return result;
     }
 

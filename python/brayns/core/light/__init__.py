@@ -24,7 +24,6 @@ from .clear_lights import clear_lights
 from .directional_light import DirectionalLight
 from .light import Light
 from .quad_light import QuadLight
-from .remove_lights import remove_lights
 
 __all__ = [
     'add_light',
@@ -33,5 +32,4 @@ __all__ = [
     'DirectionalLight',
     'Light',
     'QuadLight',
-    'remove_lights',
 ]

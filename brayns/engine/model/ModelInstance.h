@@ -24,8 +24,10 @@
 #include <brayns/common/Bounds.h>
 #include <brayns/common/ModifiedFlag.h>
 #include <brayns/common/Transform.h>
+#include <brayns/engine/components/Metadata.h>
 
 #include "Model.h"
+#include "ModelInfo.h"
 
 #include <ospray/ospray_cpp/Instance.h>
 
@@ -41,7 +43,7 @@ public:
     /**
      * @brief Initializes the instance with the unique ID and the given model
      */
-    ModelInstance(const uint32_t modelInstanceID, Model &model);
+    ModelInstance(const uint32_t instanceId, Model &model);
 
     ModelInstance(const ModelInstance &) = delete;
     ModelInstance &operator=(const ModelInstance &) = delete;
@@ -65,19 +67,21 @@ public:
     void computeBounds() noexcept;
 
     /**
-     * @brief Returns a mutable version of the model this instance refers to.
+     * @brief Returns a reference to the underlying model of this instance
+     * @return Model &
      */
     Model &getModel() noexcept;
 
     /**
-     * @brief Returns a const reference to the model this instance refers to.
+     * @copydoc ModelInstance::getModel() noexcept
      */
     const Model &getModel() const noexcept;
 
     /**
-     * @brief Utility function to return this Model Instance underlying model metadata
+     * @brief Returns the common information of the underlying model
+     * @return ModelInfo
      */
-    const std::map<std::string, std::string> &getModelMetadata() const noexcept;
+    ModelInfo getModelData() const noexcept;
 
     /**
      * @brief Sets wether this instance is visible or not.
@@ -102,11 +106,7 @@ public:
     /**
      * @brief Returns the Ospray handle of this instance.
      */
-    const ospray::cpp::Instance &getOsprayInstance() const noexcept;
-
-private:
-    friend class ClipManager;
-    friend class ModelManager;
+    const ospray::cpp::Instance &getHandle() const noexcept;
 
     /**
      * @brief Commit implementation
@@ -114,15 +114,20 @@ private:
     bool commit();
 
 private:
-    const uint32_t _modelInstanceID{};
-    Model &_model;
+    /**
+     * @brief Returns the transform matrix obtained by multiplying the underlying Model base transform (if any)
+     * by this instance's transform
+     * @return Matrix4f
+     */
+    Matrix4f _getFullTransform() const noexcept;
 
-    bool _visible{true};
+private:
+    uint32_t _id;
+    bool _visible = true;
     Transform _transform;
     Bounds _bounds;
-
-    ospray::cpp::Instance _osprayInstance;
-
+    ospray::cpp::Instance _handle;
     ModifiedFlag _flag;
+    Model &_model;
 };
 }

@@ -23,37 +23,43 @@
 #include <brayns/network/common/ExtractModel.h>
 
 #include <api/coloring/ColorIDParser.h>
-#include <components/CircuitColorComponent.h>
+#include <components/Coloring.h>
 
 namespace
 {
 struct ColorHandlerExtractor
 {
-    static IColorHandler &extract(brayns::Scene &scene, const uint32_t modelId)
+    static IColorHandler &extract(brayns::ModelManager &models, const uint32_t modelId)
     {
-        auto &modelInstance = brayns::ExtractModel::fromId(scene, modelId);
+        auto &modelInstance = brayns::ExtractModel::fromId(models, modelId);
         auto &model = modelInstance.getModel();
-        auto &colorComponent = model.getComponent<CircuitColorComponent>();
-        auto &colorHandler = colorComponent.getColorHandler();
-        return colorHandler;
+        auto coloring = model.getComponents().find<Coloring>();
+        if (!coloring)
+        {
+            throw std::runtime_error("The model does not have coloring capacity");
+        }
+        return *coloring->painter;
     }
 };
 
 struct ColorDataExtractor
 {
-    static IColorData &extract(brayns::Scene &scene, const uint32_t modelId)
+    static IColorData &extract(brayns::ModelManager &models, const uint32_t modelId)
     {
-        auto &modelInstance = brayns::ExtractModel::fromId(scene, modelId);
+        auto &modelInstance = brayns::ExtractModel::fromId(models, modelId);
         auto &model = modelInstance.getModel();
-        auto &colorComponent = model.getComponent<CircuitColorComponent>();
-        auto &colorData = colorComponent.getColorData();
-        return colorData;
+        auto coloring = model.getComponents().find<Coloring>();
+        if (!coloring)
+        {
+            throw std::runtime_error("The model does not have coloring capacity");
+        }
+        return *coloring->data;
     }
 };
 }
 
-ColorCircuitByIdEntrypoint::ColorCircuitByIdEntrypoint(brayns::Scene &scene)
-    : _scene(scene)
+ColorCircuitByIdEntrypoint::ColorCircuitByIdEntrypoint(brayns::ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -73,7 +79,7 @@ void ColorCircuitByIdEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     const auto modelId = params.model_id;
     const auto &colorInfo = params.color_info;
-    auto &colorHandler = ColorHandlerExtractor::extract(_scene, modelId);
+    auto &colorHandler = ColorHandlerExtractor::extract(_models, modelId);
     const auto colorMap = ColorIDParser::parse(colorInfo);
 
     auto nonColored = colorHandler.updateColorById(colorMap);
@@ -81,8 +87,8 @@ void ColorCircuitByIdEntrypoint::onRequest(const Request &request)
     request.reply(nonColored);
 }
 
-ColorCircuitBySingleColorEntrypoint::ColorCircuitBySingleColorEntrypoint(brayns::Scene &scene)
-    : _scene(scene)
+ColorCircuitBySingleColorEntrypoint::ColorCircuitBySingleColorEntrypoint(brayns::ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -101,13 +107,13 @@ void ColorCircuitBySingleColorEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     const auto modelId = params.model_id;
     const auto &color = params.color;
-    auto &colorHandler = ColorHandlerExtractor::extract(_scene, modelId);
+    auto &colorHandler = ColorHandlerExtractor::extract(_models, modelId);
     colorHandler.updateColor(color);
     request.reply(brayns::EmptyMessage());
 }
 
-AvailableColorMethodsEntrypoint::AvailableColorMethodsEntrypoint(brayns::Scene &scene)
-    : _scene(scene)
+AvailableColorMethodsEntrypoint::AvailableColorMethodsEntrypoint(brayns::ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -125,12 +131,12 @@ void AvailableColorMethodsEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     const auto modelId = params.model_id;
-    auto &colorData = ColorDataExtractor::extract(_scene, modelId);
+    auto &colorData = ColorDataExtractor::extract(_models, modelId);
     request.reply({colorData.getMethods()});
 }
 
-AvailableColorMethodVariablesEntrypoint::AvailableColorMethodVariablesEntrypoint(brayns::Scene &scene)
-    : _scene(scene)
+AvailableColorMethodVariablesEntrypoint::AvailableColorMethodVariablesEntrypoint(brayns::ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -149,12 +155,12 @@ void AvailableColorMethodVariablesEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     const auto modelId = params.model_id;
     const auto &method = params.method;
-    auto &colorData = ColorDataExtractor::extract(_scene, modelId);
+    auto &colorData = ColorDataExtractor::extract(_models, modelId);
     request.reply({colorData.getMethodVariables(method)});
 }
 
-ColorCircuitByMethodEntrypoint::ColorCircuitByMethodEntrypoint(brayns::Scene &scene)
-    : _scene(scene)
+ColorCircuitByMethodEntrypoint::ColorCircuitByMethodEntrypoint(brayns::ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -175,8 +181,8 @@ void ColorCircuitByMethodEntrypoint::onRequest(const Request &request)
     const auto modelId = params.model_id;
     const auto &method = params.method;
     const auto &variables = params.color_info;
-    auto &colorData = ColorDataExtractor::extract(_scene, modelId);
-    auto &colorHandler = ColorHandlerExtractor::extract(_scene, modelId);
+    auto &colorData = ColorDataExtractor::extract(_models, modelId);
+    auto &colorHandler = ColorHandlerExtractor::extract(_models, modelId);
     colorHandler.updateColorByMethod(colorData, method, variables);
     request.reply(brayns::EmptyMessage());
 }

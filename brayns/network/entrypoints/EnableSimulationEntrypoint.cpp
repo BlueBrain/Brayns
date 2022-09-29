@@ -20,13 +20,13 @@
 
 #include "EnableSimulationEntrypoint.h"
 
-#include <brayns/engine/components/SimulationComponent.h>
+#include <brayns/engine/components/SimulationInfo.h>
 #include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
 {
-EnableSimulationEntrypoint::EnableSimulationEntrypoint(Scene &scene)
-    : _scene(scene)
+EnableSimulationEntrypoint::EnableSimulationEntrypoint(ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -44,11 +44,17 @@ void EnableSimulationEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.model_id;
-    auto enableSimulation = params.enabled;
-    auto &instance = ExtractModel::fromId(_scene, modelId);
+    auto &instance = ExtractModel::fromId(_models, modelId);
     auto &model = instance.getModel();
-    auto &simulation = model.getComponent<SimulationComponent>();
-    simulation.setEnabled(enableSimulation);
+    auto &components = model.getComponents();
+
+    auto simulation = components.find<SimulationInfo>();
+    if (!simulation)
+    {
+        throw JsonRpcException("The model does not have simulation");
+    }
+
+    simulation->enabled = params.enabled;
     request.reply(EmptyMessage());
 }
 }

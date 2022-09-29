@@ -20,27 +20,87 @@
 
 #include "SomaColorHandler.h"
 
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/GeometryViews.h>
+
+#include <api/coloring/ColorByIDAlgorithm.h>
 #include <api/coloring/ColorUtils.h>
 #include <api/neuron/NeuronSection.h>
+#include <components/CircuitIds.h>
+#include <components/ColorList.h>
 
-SomaColorHandler::SomaColorHandler(SomaCircuitComponent &circuit)
-    : _circuit(circuit)
+namespace
+{
+class Extractor
+{
+public:
+    static brayns::GeometryView &extractView(brayns::Components &components)
+    {
+        auto &views = components.get<brayns::GeometryViews>();
+        assert(views.elements.size() == 1);
+        views.modified = true;
+        return views.elements.back();
+    }
+
+    static size_t extractNumPrimitives(brayns::Components &components)
+    {
+        auto &geometries = components.get<brayns::Geometries>();
+        assert(geometries.elements.size() == 1);
+        return geometries.elements.front().numPrimitives();
+    }
+
+    static std::vector<uint64_t> &extractIds(brayns::Components &components)
+    {
+        auto &ids = components.get<CircuitIds>();
+        return ids.elements;
+    }
+
+    static std::vector<brayns::Vector4f> &extractColors(brayns::Components &components)
+    {
+        auto &colors = components.get<ColorList>();
+        return colors.elements;
+    }
+};
+}
+
+SomaColorHandler::SomaColorHandler(brayns::Components &components)
+    : _components(components)
 {
 }
 
 void SomaColorHandler::updateColor(const brayns::Vector4f &color)
 {
-    _circuit.setColor(color);
+    auto view = Extractor::extractView(_components);
+    view.setColor(color);
 }
 
 std::vector<uint64_t> SomaColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    return _circuit.setColorById(colorMap);
+    auto &view = Extractor::extractView(_components);
+    auto &ids = Extractor::extractIds(_components);
+    auto &colors = Extractor::extractColors(_components);
+    auto nonColoredIds = ColorByIDAlgorithm::execute(
+        colorMap,
+        ids,
+        [&](uint64_t id, size_t index, const brayns::Vector4f &color)
+        {
+            (void)id;
+            colors[index] = color;
+        });
+    view.setColorPerPrimitive(ospray::cpp::SharedData(colors));
+    return nonColoredIds;
 }
 
-void SomaColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)
+void SomaColorHandler::updateColorById(const std::vector<brayns::Vector4f> &inputColors)
 {
-    _circuit.setColorById(colors);
+    assert(inputColors.size() == Extractor::extractNumPrimitives(_components));
+
+    auto &view = Extractor::extractView(_components);
+    auto &colors = Extractor::extractColors(_components);
+
+    colors = inputColors;
+    view.setColorPerPrimitive(ospray::cpp::SharedData(colors));
 }
 
 void SomaColorHandler::updateColorByMethod(
@@ -62,7 +122,8 @@ void SomaColorHandler::updateIndexedColor(
     const std::vector<brayns::Vector4f> &color,
     const std::vector<uint8_t> &indices)
 {
-    _circuit.setIndexedColor(color, indices);
+    auto &view = Extractor::extractView(_components);
+    view.setColorMap(ospray::cpp::CopiedData(indices), ospray::cpp::CopiedData(color));
 }
 
 void SomaColorHandler::_colorWithInput(
@@ -74,48 +135,44 @@ void SomaColorHandler::_colorWithInput(
     if (methodEnum == NeuronColorMethod::ByMorphologySection)
     {
         // Search for soma
-        for (const auto &variable : vars)
+        for (auto &variable : vars)
         {
-            const auto &sectionName = variable.variable;
-            const auto &sectionColor = variable.color;
+            auto &sectionName = variable.variable;
+            auto &sectionColor = variable.color;
             auto sectionType = brayns::EnumInfo::getValue<NeuronSection>(sectionName);
             if (sectionType == NeuronSection::Soma)
             {
-                _circuit.setColor(sectionColor);
-                break;
+                updateColor(sectionColor);
             }
         }
     }
     else
     {
-        const auto &ids = _circuit.getIDs();
-        const auto perIdValues = colorData.getMethodValuesForIDs(method, ids);
+        auto &ids = Extractor::extractIds(_components);
+        auto perIdValues = colorData.getMethodValuesForIDs(method, ids);
 
         std::unordered_map<std::string, brayns::Vector4f> groupedVariables;
         for (const auto &variable : vars)
         {
-            const auto &name = variable.variable;
-            const auto &color = variable.color;
+            auto &name = variable.variable;
+            auto &color = variable.color;
             groupedVariables[name] = color;
         }
 
         std::map<uint64_t, brayns::Vector4f> colorMap;
         for (size_t i = 0; i < perIdValues.size(); ++i)
         {
-            const auto id = ids[i];
-            const auto &value = perIdValues[i];
+            auto id = ids[i];
+            auto &value = perIdValues[i];
 
             auto it = groupedVariables.find(value);
-            if (it == groupedVariables.end())
+            if (it != groupedVariables.end())
             {
-                continue;
+                colorMap[id] = it->second;
             }
-
-            const auto &color = it->second;
-            colorMap[id] = color;
         }
 
-        _circuit.setColorById(colorMap);
+        updateColorById(colorMap);
     }
 }
 
@@ -125,13 +182,13 @@ void SomaColorHandler::_colorAll(const IColorData &colorData, const std::string 
     if (methodEnum == NeuronColorMethod::ByMorphologySection)
     {
         ColorRoulette roulette;
-        _circuit.setColor(roulette.getNextColor());
+        updateColor(roulette.getNextColor());
     }
     else
     {
         ColorDeck deck;
-        const auto &ids = _circuit.getIDs();
-        const auto perIdValues = colorData.getMethodValuesForIDs(method, ids);
+        auto &ids = Extractor::extractIds(_components);
+        auto perIdValues = colorData.getMethodValuesForIDs(method, ids);
         std::vector<brayns::Vector4f> result(ids.size());
         for (size_t i = 0; i < ids.size(); ++i)
         {
@@ -139,6 +196,6 @@ void SomaColorHandler::_colorAll(const IColorData &colorData, const std::string 
             const auto &color = deck.getColorForKey(value);
             result[i] = color;
         }
-        _circuit.setColorById(result);
+        updateColorById(result);
     }
 }

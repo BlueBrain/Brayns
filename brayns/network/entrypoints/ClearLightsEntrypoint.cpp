@@ -21,10 +21,12 @@
 
 #include "ClearLightsEntrypoint.h"
 
+#include <brayns/engine/scene/ModelsOperations.h>
+
 namespace brayns
 {
-ClearLightsEntrypoint::ClearLightsEntrypoint(Scene &scene)
-    : _scene(scene)
+ClearLightsEntrypoint::ClearLightsEntrypoint(ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -40,7 +42,7 @@ std::string ClearLightsEntrypoint::getDescription() const
 
 void ClearLightsEntrypoint::onRequest(const Request &request)
 {
-    _scene.removeAllLights();
+    ModelsOperations::removeLights(_models);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

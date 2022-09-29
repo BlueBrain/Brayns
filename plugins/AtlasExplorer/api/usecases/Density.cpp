@@ -20,8 +20,11 @@
 
 #include "Density.h"
 
-#include <brayns/engine/common/ExtractComponent.h>
-#include <brayns/engine/components/VolumeRendererComponent.h>
+#include <brayns/common/ColorRamp.h>
+#include <brayns/engine/components/Volumes.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/VolumeCommitSystem.h>
+#include <brayns/engine/systems/VolumeInitSystem.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
 
 #include <api/usecases/common/DataUtils.h>
@@ -129,10 +132,19 @@ std::unique_ptr<brayns::Model> Density::execute(const AtlasVolume &volume, const
     densityVolume.spacing = volume.getSpacing();
 
     auto model = std::make_unique<brayns::Model>();
-    model->addComponent<brayns::VolumeRendererComponent>(brayns::Volume(std::move(densityVolume)));
 
-    auto &colorRamp = brayns::ExtractComponent::colorRamp(*model);
+    auto &components = model->getComponents();
+
+    auto &volumes = components.add<brayns::Volumes>();
+    volumes.elements.emplace_back(std::move(densityVolume));
+
+    auto &colorRamp = components.add<brayns::ColorRamp>();
     colorRamp.setValuesRange(densityData.minMax);
+
+    auto &systems = model->getSystems();
+    systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Volumes>>();
+    systems.setInitSystem<brayns::VolumeInitSystem>();
+    systems.setCommitSystem<brayns::VolumeCommitSystem>();
 
     return model;
 }

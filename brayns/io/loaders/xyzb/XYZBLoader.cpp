@@ -22,7 +22,11 @@
 
 #include <brayns/common/Log.h>
 
-#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
+
 #include <brayns/engine/geometry/types/Sphere.h>
 
 #include <brayns/utils/string/StringTrimmer.h>
@@ -31,38 +35,58 @@
 #include <fstream>
 #include <sstream>
 
-namespace brayns
+namespace
 {
-std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob, const LoaderProgress &callback) const
+class XYZBReader
 {
-    Log::info("Loading xyz {}.", blob.name);
+public:
+    inline static constexpr float defaultRadius = 0.15f;
 
-    std::stringstream stream(std::string(blob.data.begin(), blob.data.end()));
-
-    // Apprimately compute how much memory we will need
-    size_t numlines = 0;
+    static std::vector<brayns::Sphere> fromBytes(const brayns::LoaderProgress &callback, const std::string &bytes)
     {
-        numlines = std::count(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>(), '\n');
-    }
-    stream.seekg(0);
+        std::vector<brayns::Sphere> spheres;
 
-    const auto name = std::filesystem::path({blob.name}).stem().string();
-    const auto msg = "Loading " + name + " ...";
+        std::stringstream stream(bytes);
+        auto lineCount = _computeSphereCount(stream);
 
-    std::vector<Sphere> spheres;
-    spheres.reserve(numlines);
+        spheres.reserve(lineCount);
 
-    size_t i = 0;
-    std::string line;
-    while (std::getline(stream, line))
-    {
-        // Handle comments
-        line = StringTrimmer::trim(line);
-        if (line[0] == '#')
+        size_t i = 0;
+        std::string line;
+        while (std::getline(stream, line))
         {
-            continue;
+            // Handle comments
+            line = brayns::StringTrimmer::trim(line);
+            if (_filterLine(line))
+            {
+                continue;
+            }
+
+            auto sphere = _parseSphere(line, i + 1);
+            spheres.push_back(sphere);
+
+            const std::string msg = "Loading...";
+            callback.updateProgress(msg, i++ / static_cast<float>(lineCount));
         }
 
+        return spheres;
+    }
+
+private:
+    static size_t _computeSphereCount(std::stringstream &stream)
+    {
+        size_t numlines = std::count(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>(), '\n');
+        stream.seekg(0);
+        return numlines;
+    }
+
+    static bool _filterLine(const std::string &line)
+    {
+        return line[0] == '#';
+    }
+
+    static std::vector<float> _tokenizeLine(const std::string &line)
+    {
         std::vector<float> lineData;
         std::stringstream lineStream(line);
 
@@ -71,25 +95,40 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob,
         {
             lineData.push_back(value);
         }
-
-        switch (lineData.size())
-        {
-        case 3:
-        {
-            const Vector3f position(lineData[0], lineData[1], lineData[2]);
-            spheres.push_back({position, 0.15f});
-            break;
-        }
-        default:
-        {
-            throw std::runtime_error("Invalid content in line " + std::to_string(i + 1) + ": " + line);
-        }
-        }
-        callback.updateProgress(msg, i++ / static_cast<float>(numlines));
+        return lineData;
     }
 
+    static brayns::Sphere _parseSphere(const std::string &line, const size_t lineNumber)
+    {
+        auto lineData = _tokenizeLine(line);
+        if (lineData.size() != 3)
+        {
+            throw std::runtime_error("Invalid content in line " + std::to_string(lineNumber + 1) + ": " + line);
+        }
+
+        return {{lineData[0], lineData[1], lineData[2]}, defaultRadius};
+    }
+};
+}
+
+namespace brayns
+{
+std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob, const LoaderProgress &callback) const
+{
+    Log::info("Loading xyz {}.", blob.name);
+
+    auto spheres = XYZBReader::fromBytes(callback, std::string(blob.data.begin(), blob.data.end()));
+
     auto model = std::make_unique<Model>();
-    model->addComponent<GeometryRendererComponent>(std::move(spheres));
+
+    auto &components = model->getComponents();
+    auto &geometries = components.add<Geometries>();
+    geometries.elements.emplace_back(std::move(spheres));
+
+    auto &systems = model->getSystems();
+    systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
+    systems.setInitSystem<GeometryInitSystem>();
+    systems.setCommitSystem<GeometryCommitSystem>();
 
     std::vector<std::unique_ptr<Model>> result;
     result.push_back(std::move(model));

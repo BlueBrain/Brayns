@@ -22,15 +22,16 @@ import unittest
 
 import brayns
 from tests.mock_instance import MockInstance
+from tests.mock_model import MockModel
 
 
 class TestAddLight(unittest.TestCase):
 
     def test_add_light(self) -> None:
-        instance = MockInstance(0)
+        instance = MockInstance(MockModel.message)
         light = brayns.AmbientLight(brayns.Color3.red, 3, False)
-        id = brayns.add_light(instance, light)
-        self.assertEqual(id, 0)
+        model = brayns.add_light(instance, light)
+        self.assertEqual(model, MockModel.model)
         self.assertEqual(instance.method, 'add-light-ambient')
         self.assertEqual(instance.params, light.get_properties())
 

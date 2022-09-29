@@ -28,6 +28,7 @@
 #include <brayns/network/messages/GetModelMessage.h>
 
 #include "BoundsAdapter.h"
+#include "ModelInfoAdapter.h"
 #include "TransformAdapter.h"
 
 namespace brayns
@@ -35,7 +36,7 @@ namespace brayns
 BRAYNS_JSON_ADAPTER_BEGIN(ModelInstance)
 BRAYNS_JSON_ADAPTER_GET("model_id", getID, "Model ID")
 BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Model axis-aligned bounds")
-BRAYNS_JSON_ADAPTER_GET("metadata", getModelMetadata, "Model-specific metadata")
+BRAYNS_JSON_ADAPTER_GET("info", getModelData, "Model-specific metadata")
 BRAYNS_JSON_ADAPTER_GETSET("transform", getTransform, setTransform, "Model transform")
 BRAYNS_JSON_ADAPTER_GETSET("is_visible", isVisible, setVisible, "Wether the model is being rendered or not")
 BRAYNS_JSON_ADAPTER_END()

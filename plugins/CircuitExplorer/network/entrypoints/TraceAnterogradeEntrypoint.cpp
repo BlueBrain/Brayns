@@ -23,10 +23,10 @@
 
 #include <brayns/network/common/ExtractModel.h>
 
-#include <components/CircuitColorComponent.h>
+#include <components/Coloring.h>
 
-TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(brayns::Scene &scene)
-    : _scene(scene)
+TraceAnterogradeEntrypoint::TraceAnterogradeEntrypoint(brayns::ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -53,10 +53,16 @@ void TraceAnterogradeEntrypoint::onRequest(const Request &request)
 
     // Extract API data
     auto modelId = params.model_id;
-    auto &modelInstance = brayns::ExtractModel::fromId(_scene, modelId);
+    auto &modelInstance = brayns::ExtractModel::fromId(_models, modelId);
     auto &model = modelInstance.getModel();
-    auto &colorComponent = model.getComponent<CircuitColorComponent>();
-    auto &colorHandler = colorComponent.getColorHandler();
+    auto &components = model.getComponents();
+    auto coloring = components.find<Coloring>();
+    if (!coloring)
+    {
+        throw brayns::JsonRpcException("The model does not have coloring capabilities");
+    }
+
+    auto &colorHandler = *coloring->painter;
 
     const auto &srcIDs = params.cell_gids;
     const auto &targetIDs = params.target_cell_gids;

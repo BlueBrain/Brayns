@@ -24,7 +24,7 @@ namespace brayns
 {
 Volume::Volume(Volume &&other) noexcept
 {
-    *this = other;
+    *this = std::move(other);
 }
 
 Volume &Volume::operator=(Volume &&other) noexcept
@@ -48,7 +48,7 @@ Volume &Volume::operator=(const Volume &other)
     _volumeName = other._volumeName;
     _handle = ospray::cpp::Volume(_handleName);
     _data = other._data->clone();
-    _flag = true;
+    _flag.setModified(true);
     return *this;
 }
 

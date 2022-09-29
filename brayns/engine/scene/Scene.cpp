@@ -27,155 +27,62 @@ namespace
 {
 struct WorldParameters
 {
-    inline static const std::string instanceParameter = "instance";
-    inline static const std::string lightParameter = "light";
+    inline static const std::string instance = "instance";
 };
 
-class WorldParameterUpdater
+class WorldInstances
 {
 public:
-    template<typename T>
-    static void update(const ospray::cpp::World &world, const std::string &parameter, const std::vector<T> &objects)
+    static void set(ospray::cpp::World &world, const std::vector<ospray::cpp::Instance> &instances)
     {
-        if (objects.empty())
+        if (instances.empty())
         {
-            world.removeParam(parameter);
+            world.removeParam(WorldParameters::instance);
             return;
         }
-        world.setParam(parameter, ospray::cpp::CopiedData(objects));
+        world.setParam(WorldParameters::instance, ospray::cpp::CopiedData(instances));
     }
 };
 }
 
 namespace brayns
 {
-const Bounds &Scene::getBounds() const noexcept
+Bounds Scene::getBounds() const noexcept
 {
-    return _bounds;
-}
-
-void Scene::computeBounds() noexcept
-{
-    _bounds = Bounds();
-    _bounds.expand(_modelManager.getBounds());
-    _bounds.expand(_lightManager.getBounds());
+    return _models.getBounds();
 }
 
 void Scene::preRender(const ParametersManager &params)
 {
-    _modelManager.preRender(params);
+    _models.preRender(params);
 }
 
 void Scene::postRender(const ParametersManager &params)
 {
-    _modelManager.postRender(params);
+    _models.postRender(params);
 }
 
 bool Scene::commit()
 {
-    bool needsCommit = false;
+    auto modelCommitResult = _models.commit();
 
-    // Commit models
-    if (_modelManager.commit() || _clippingManager.commit())
+    if (modelCommitResult.needsRebuildBVH)
     {
-        std::vector<ospray::cpp::Instance> instances;
-        auto modelInstances = _modelManager.getHandles();
-        instances.insert(instances.end(), modelInstances.begin(), modelInstances.end());
-        auto clipInstances = _clippingManager.getHandles();
-        instances.insert(instances.end(), clipInstances.begin(), clipInstances.end());
-        WorldParameterUpdater::update(_handle, WorldParameters::instanceParameter, instances);
-        needsCommit = true;
-    }
-
-    if (_lightManager.commit())
-    {
-        auto lights = _lightManager.getHandles();
-        WorldParameterUpdater::update(_handle, WorldParameters::lightParameter, lights);
-        needsCommit = true;
-    }
-
-    // Commit handle
-    if (needsCommit)
-    {
+        WorldInstances::set(_handle, _models.getHandles());
         _handle.commit();
     }
 
-    return needsCommit;
+    return modelCommitResult.needsRebuildBVH || modelCommitResult.needsRender;
 }
 
-ModelInstance &Scene::addModel(ModelLoadParameters params, std::unique_ptr<Model> model)
+ModelManager &Scene::getModels() noexcept
 {
-    auto &instance = _modelManager.addModel(std::move(params), std::move(model));
-    computeBounds();
-    return instance;
+    return _models;
 }
 
-std::vector<ModelInstance *> Scene::addModels(ModelLoadParameters params, std::vector<std::unique_ptr<Model>> models)
+const ModelManager &Scene::getModels() const noexcept
 {
-    auto instances = _modelManager.addModels(std::move(params), std::move(models));
-    computeBounds();
-    return instances;
-}
-
-void Scene::removeModelInstances(const std::vector<uint32_t> &instanceIds)
-{
-    _modelManager.removeModels(instanceIds);
-    computeBounds();
-}
-
-void Scene::removeAllModelInstances() noexcept
-{
-    _modelManager.removeAllModelInstances();
-    computeBounds();
-}
-
-ModelInstance &Scene::getModelInstance(uint32_t instanceId)
-{
-    return _modelManager.getModelInstance(instanceId);
-}
-
-const std::vector<ModelInstance *> &Scene::getAllModelInstances() const noexcept
-{
-    return _modelManager.getAllModelInstances();
-}
-
-const ModelLoadParameters &Scene::getModelLoadParameters(uint32_t instanceId) const
-{
-    return _modelManager.getModelLoadParameters(instanceId);
-}
-
-uint32_t Scene::addLight(Light light)
-{
-    auto lightId = _lightManager.addLight(std::move(light));
-    computeBounds();
-    return lightId;
-}
-
-void Scene::removeLights(const std::vector<uint32_t> &lightIds)
-{
-    _lightManager.removeLights(lightIds);
-    computeBounds();
-}
-
-void Scene::removeAllLights() noexcept
-{
-    _lightManager.removeAllLights();
-    computeBounds();
-}
-
-uint32_t Scene::addClippingModel(std::unique_ptr<Model> model)
-{
-    return _clippingManager.addClippingModel(std::move(model));
-}
-
-void Scene::removeClippingModels(const std::vector<uint32_t> &modelIds)
-{
-    _clippingManager.removeClippingModels(modelIds);
-}
-
-void Scene::removeAllClippingModels() noexcept
-{
-    _clippingManager.removeAllClippingModels();
+    return _models;
 }
 
 const ospray::cpp::World &Scene::getHandle() const noexcept

@@ -25,14 +25,16 @@ from testapi.simple_test_case import SimpleTestCase
 class LightTestCase(SimpleTestCase):
 
     def run_tests(self, light: brayns.Light) -> None:
-        ids = [
+        models = [
             brayns.add_light(self.instance, light)
             for _ in range(3)
         ]
-        self.assertEqual(ids, [0, 1, 2])
-        brayns.remove_lights(self.instance, [1, 2])
-        id = brayns.add_light(self.instance, light)
-        self.assertIn(id, [1, 2])
+        self.assertEqual(models[0].id, 0)
+        self.assertEqual(models[1].id, 1)
+        self.assertEqual(models[2].id, 2)
+        brayns.remove_models(self.instance, [1, 2])
+        model = brayns.add_light(self.instance, light)
+        self.assertIn(model.id, [1, 2])
         brayns.clear_lights(self.instance)
-        id = brayns.add_light(self.instance, light)
-        self.assertEqual(id, 0)
+        model = brayns.add_light(self.instance, light)
+        self.assertIn(model.id, [0, 1, 2])

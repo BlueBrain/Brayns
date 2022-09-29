@@ -28,7 +28,7 @@ namespace brayns
 {
 struct InspectContext
 {
-    const Vector3f hitPosition;
+    Vector3f hitPosition;
     ospray::cpp::GeometricModel model;
     uint32_t primitiveIndex;
 };

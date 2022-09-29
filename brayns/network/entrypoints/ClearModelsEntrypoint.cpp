@@ -23,8 +23,9 @@
 
 namespace brayns
 {
-ClearModelsEntrypoint::ClearModelsEntrypoint(Scene &scene)
-    : _scene(scene)
+ClearModelsEntrypoint::ClearModelsEntrypoint(ModelManager &models, SimulationParameters &simulation)
+    : _models(models)
+    , _simulation(simulation)
 {
 }
 
@@ -40,7 +41,8 @@ std::string ClearModelsEntrypoint::getDescription() const
 
 void ClearModelsEntrypoint::onRequest(const Request &request)
 {
-    _scene.removeAllModelInstances();
+    _models.removeAllModelInstances();
+    _simulation.reset();
     request.reply(EmptyMessage());
 }
 } // namespace brayns

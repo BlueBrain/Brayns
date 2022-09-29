@@ -21,12 +21,13 @@
 
 #include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
 
-#include <brayns/engine/components/ClippingComponent.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/systems/ClipperInitSystem.h>
 
 namespace brayns
 {
-AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(Scene &scene)
-    : _scene(scene)
+AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -44,8 +45,15 @@ void AddClipPlaneEntrypoint::onRequest(const Request &request)
 {
     auto plane = request.getParams();
     auto model = std::make_unique<Model>();
-    model->addComponent<ClippingComponent>(plane);
-    auto id = _scene.addClippingModel(std::move(model));
-    request.reply(id);
+
+    auto &components = model->getComponents();
+    auto &geometries = components.add<Geometries>();
+    geometries.elements.emplace_back(plane);
+
+    auto &systems = model->getSystems();
+    systems.setInitSystem<ClipperInitSystem>();
+
+    auto *instance = _models.addModel(std::move(model));
+    request.reply(*instance);
 }
 } // namespace brayns

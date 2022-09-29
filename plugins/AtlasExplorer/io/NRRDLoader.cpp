@@ -23,7 +23,7 @@
 #include <brayns/utils/FileReader.h>
 
 #include <api/usecases/OutlineShell.h>
-#include <components/AtlasComponent.h>
+#include <components/AtlasData.h>
 #include <io/nrrdloader/data/DataParser.h>
 #include <io/nrrdloader/header/HeaderLimitCheck.h>
 #include <io/nrrdloader/header/HeaderParser.h>
@@ -63,7 +63,8 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromBlob(
 
     callback.updateProgress("Generating volume mesh", 0.8f);
     auto model = OutlineShell().execute(*atlasVolume, {});
-    model->addComponent<AtlasComponent>(atlasVolume);
+    auto &components = model->getComponents();
+    components.add<AtlasData>(atlasVolume);
 
     callback.updateProgress("Done", 1.f);
     auto result = std::vector<std::unique_ptr<brayns::Model>>();

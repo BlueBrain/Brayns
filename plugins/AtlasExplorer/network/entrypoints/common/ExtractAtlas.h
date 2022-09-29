@@ -20,16 +20,16 @@
 
 #pragma once
 
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
 
 #include <api/AtlasVolume.h>
-#include <components/AtlasComponent.h>
+#include <components/AtlasData.h>
 
 class ExtractAtlas
 {
 public:
-    static const AtlasVolume &atlasFromId(brayns::Scene &scene, uint32_t id);
+    static const AtlasVolume &atlasFromId(brayns::ModelManager &models, uint32_t id);
     static const AtlasVolume &atlasFromModel(brayns::Model &model);
-    static const AtlasComponent &componentFromId(brayns::Scene &scene, uint32_t id);
-    static const AtlasComponent &componentFromModel(brayns::Model &model);
+    static const AtlasData &componentFromId(brayns::ModelManager &models, uint32_t id);
+    static const AtlasData &componentFromModel(brayns::Model &model);
 };

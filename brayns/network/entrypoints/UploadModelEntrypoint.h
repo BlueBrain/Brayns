@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
 
 #include <brayns/io/LoaderRegistry.h>
 
@@ -36,7 +36,7 @@ class UploadModelEntrypoint : public Entrypoint<BinaryLoadParameters, std::vecto
 {
 public:
     UploadModelEntrypoint(
-        Scene &scene,
+        ModelManager &models,
         const LoaderRegistry &loaders,
         SimulationParameters &simulation,
         CancellationToken token);
@@ -49,7 +49,7 @@ public:
     virtual void onDisconnect() override;
 
 private:
-    Scene &_scene;
+    ModelManager &_models;
     const LoaderRegistry &_loaders;
     SimulationParameters &_simulation;
     CancellationToken _token;

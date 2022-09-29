@@ -20,12 +20,13 @@
 
 #include "SynapseLoader.h"
 
+#include "colordata/BBPSynapseColorData.h"
+
+#include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 
-#include <api/synapse/SynapseColorHandler.h>
-#include <components/CircuitColorComponent.h>
-#include <components/SynapseComponent.h>
-#include <io/bbploader/colordata/BBPSynapseColorData.h>
+#include <api/synapse/SynapseCircuitBuilder.h>
+#include <components/Coloring.h>
 
 #include <brain/synapse.h>
 #include <brain/synapses.h>
@@ -36,54 +37,70 @@
 
 namespace
 {
-struct AfferentLoader
-{
-    static void load(const bbploader::LoadContext &context, brayns::Model &model)
-    {
-        const auto &circuit = context.circuit;
-        const auto &gids = context.gids;
+using IdSynapsesMap = std::map<uint64_t, std::vector<brayns::Sphere>>;
 
-        std::map<uint64_t, std::vector<brayns::Sphere>> synapseGeometry;
-        const brain::Synapses synapseData(circuit.getAfferentSynapses(gids));
+class AfferentGeometryLoader
+{
+public:
+    static IdSynapsesMap load(const bbploader::LoadContext &context)
+    {
+        auto &circuit = context.circuit;
+        auto &gids = context.gids;
+
+        auto synapseGeometry = IdSynapsesMap();
+        auto synapseData = brain::Synapses(circuit.getAfferentSynapses(gids));
+
         for (const auto &synapse : synapseData)
         {
-            const auto position = synapse.getPostsynapticSurfacePosition();
-            const auto gid = synapse.getPresynapticGID();
+            auto position = synapse.getPostsynapticSurfacePosition();
+            auto gid = synapse.getPresynapticGID();
             auto &buffer = synapseGeometry[gid];
             buffer.push_back({position, 2.f});
         }
-
-        model.addComponent<SynapseComponent>(synapseGeometry);
+        return synapseGeometry;
     }
 };
 
-struct EfferentLoader
+class EfferentGeometryLoader
 {
-    static void load(const bbploader::LoadContext &context, brayns::Model &model)
+public:
+    static IdSynapsesMap load(const bbploader::LoadContext &context)
     {
-        const auto &circuit = context.circuit;
-        const auto &gids = context.gids;
+        auto &circuit = context.circuit;
+        auto &gids = context.gids;
 
-        std::map<uint64_t, std::vector<brayns::Sphere>> synapseGeometry;
-        const brain::Synapses synapseData(circuit.getEfferentSynapses(gids));
+        auto synapseGeometry = IdSynapsesMap();
+        auto synapseData = brain::Synapses(circuit.getEfferentSynapses(gids));
+
         for (const auto &synapse : synapseData)
         {
-            const auto position = synapse.getPresynapticSurfacePosition();
-            const auto gid = synapse.getPostsynapticGID();
+            auto position = synapse.getPresynapticSurfacePosition();
+            auto gid = synapse.getPostsynapticGID();
             auto &buffer = synapseGeometry[gid];
             buffer.push_back({position, 2.f});
         }
+        return synapseGeometry;
+    }
+};
 
-        model.addComponent<SynapseComponent>(synapseGeometry);
+class GeometryLoader
+{
+public:
+    static IdSynapsesMap load(const bbploader::LoadContext &context, bool post)
+    {
+        if (post)
+        {
+            return AfferentGeometryLoader::load(context);
+        }
+        return EfferentGeometryLoader::load(context);
     }
 };
 
 struct SynapseColorComponentFactory
 {
-    static void create(const bbploader::LoadContext &context, brayns::Model &model)
+    static std::unique_ptr<IColorData> create(const bbploader::LoadContext &context)
     {
-        auto &synapses = model.getComponent<SynapseComponent>();
-        const auto &config = context.config;
+        auto &config = context.config;
         auto circuitURI = config.getCircuitSource();
         auto path = circuitURI.getPath();
         if (!std::filesystem::exists(path))
@@ -92,26 +109,17 @@ struct SynapseColorComponentFactory
             path = circuitURI.getPath();
         }
         auto population = config.getCircuitPopulation();
-        auto colorData = std::make_unique<bbploader::BBPSynapseColorData>(std::move(path), std::move(population));
-        auto colorHandler = std::make_unique<SynapseColorHandler>(synapses);
-        model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
+        return std::make_unique<bbploader::BBPSynapseColorData>(std::move(path), std::move(population));
     }
 };
 }
 
 namespace bbploader
 {
-void SynapseLoader::load(const LoadContext &context, const bool post, brayns::Model &model)
+void SynapseLoader::load(const LoadContext &context, bool post, brayns::Model &model)
 {
-    if (post)
-    {
-        AfferentLoader::load(context, model);
-    }
-    else
-    {
-        EfferentLoader::load(context, model);
-    }
-
-    SynapseColorComponentFactory::create(context, model);
+    auto geometryData = GeometryLoader::load(context, post);
+    auto colorData = SynapseColorComponentFactory::create(context);
+    SynapseCircuitBuilder::build(model, std::move(geometryData), std::move(colorData));
 }
 } // namespace bbploader

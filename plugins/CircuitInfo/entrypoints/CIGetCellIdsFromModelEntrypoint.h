@@ -21,10 +21,11 @@
 
 #pragma once
 
-#include <brayns/utils/string/StringSplitter.h>
-
+#include <brayns/engine/components/LoadInfo.h>
+#include <brayns/engine/components/Metadata.h>
 #include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/utils/string/StringSplitter.h>
 
 #include <messages/CIGetCellIdsFromModelMessage.h>
 #include <messages/CIGetCellIdsMessage.h>
@@ -36,37 +37,41 @@ class ModelCellIdsRetriever
 public:
     static CIGetCellIdsResult getCellIds(brayns::Scene &scene, uint32_t modelId)
     {
-        // Circuit info
-        CIGetCellIdsParams params;
-
-        const auto &loadParams = scene.getModelLoadParameters(modelId);
-        if (loadParams.type != brayns::ModelLoadParameters::LoadType::FromFile)
-        {
-            throw brayns::JsonRpcException("Cannot retrieve cell data from blob-loaded models");
-        }
-
-        // Path
-        params.path = loadParams.path;
-
         auto &instance = brayns::ExtractModel::fromId(scene, modelId);
         auto &model = instance.getModel();
+        auto &components = model.getComponents();
 
-        // Targets
-        auto &metadata = model.getMetaData();
-        auto i = metadata.find("Targets");
-        if (i != metadata.end())
+        auto loadInfo = components.find<brayns::LoadInfo>();
+        if (!loadInfo || loadInfo->source != brayns::LoadInfo::LoadSource::FromFile)
         {
-            auto &target = i->second;
-            if (!target.empty())
+            throw brayns::JsonRpcException("The model was not loaded through a file");
+        }
+
+        CIGetCellIdsParams params;
+        params.path = loadInfo->path;
+
+        auto metadata = components.find<brayns::Metadata>();
+        if (!metadata)
+        {
+            return CellIdsRetriever::getCellIds(params);
+        }
+
+        auto it = metadata->find("targets");
+        if (it == metadata->end())
+        {
+            return CellIdsRetriever::getCellIds(params);
+        }
+
+        auto &target = it->second;
+        if (!target.empty())
+        {
+            if (target.find(',') == std::string::npos)
             {
-                if (target.find(',') == std::string::npos)
-                {
-                    params.targets.push_back(target);
-                }
-                else
-                {
-                    params.targets = brayns::StringSplitter::split(target, ',');
-                }
+                params.targets.push_back(target);
+            }
+            else
+            {
+                params.targets = brayns::StringSplitter::split(target, ',');
             }
         }
 

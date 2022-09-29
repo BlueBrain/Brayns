@@ -20,12 +20,11 @@
 
 #include <brayns/engine/geometry/types/Sphere.h>
 
+#include <api/reports/ReportFactory.h>
 #include <api/reports/ReportMapping.h>
 #include <api/reports/indexers/OffsetIndexer.h>
-#include <api/synapse/SynapseColorHandler.h>
-#include <components/CircuitColorComponent.h>
-#include <components/ReportComponent.h>
-#include <components/SynapseComponent.h>
+#include <api/synapse/SynapseCircuitBuilder.h>
+#include <components/ReportData.h>
 #include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
 #include <io/sonataloader/data/SonataConfig.h>
 #include <io/sonataloader/data/SonataSimulationMapping.h>
@@ -45,16 +44,15 @@ public:
 
         for (size_t i = 0; i < elementIds.size(); ++i)
         {
-            const auto elementId = elementIds[i];
-
+            auto elementId = elementIds[i];
             auto it = mapping.find(elementId);
             if (it == mapping.end())
             {
                 throw std::runtime_error("No report mapping information for element " + std::to_string(elementId));
             }
 
-            const auto &entry = *it;
-            const auto offset = entry.second;
+            auto &entry = *it;
+            auto offset = entry.second;
             result[i] = offset;
         }
 
@@ -85,33 +83,60 @@ struct SynapseReportMapping
     }
 };
 
-struct SynapseReportImporter
+class SynapseReportImporter
 {
-    static void import(sl::EdgeLoadContext &context, std::vector<uint64_t> orderedEdgeIds)
+public:
+    static void import(sl::EdgeLoadContext &context, const std::vector<uint64_t> &orderedEdgeIds)
     {
-        const auto &params = context.params;
-        const auto &reportName = params.edge_report_name;
-
-        if (reportName.empty())
+        if (!_hasReport(context))
         {
             return;
         }
 
-        const auto &edgePopulation = context.edgePopulation;
-        const auto edgePopulationName = edgePopulation.name();
-        const auto &nodeSelection = context.nodeSelection;
-        const auto &network = context.config;
-        const auto &simConfig = network.simulationConfig();
-        const auto path = sl::SonataConfig::resolveReportPath(simConfig, reportName);
-
-        auto data = std::make_unique<sl::SonataReportData>(path, edgePopulationName, nodeSelection);
-
-        const auto mapping = SynapseReportMapping::generate(path, edgePopulationName, nodeSelection);
-        auto offsets = SynapseOffsetGenerator::generate(orderedEdgeIds, mapping);
-        auto indexer = std::make_unique<OffsetIndexer>(std::move(offsets));
-
+        auto reportPath = _getReportFilePath(context);
+        auto data = _createReportData(context, reportPath);
+        auto indexer = _createReportIndexer(context, reportPath, orderedEdgeIds);
+        auto reportData = ReportData{std::move(data), std::move(indexer)};
         auto &model = context.model;
-        model.addComponent<ReportComponent>(std::move(data), std::move(indexer));
+        ReportFactory::create(model, std::move(reportData));
+    }
+
+private:
+    static bool _hasReport(sl::EdgeLoadContext &context)
+    {
+        auto &params = context.params;
+        auto &reportName = params.edge_report_name;
+        return !reportName.empty();
+    }
+
+    static std::string _getReportFilePath(sl::EdgeLoadContext &context)
+    {
+        auto &params = context.params;
+        auto &reportName = params.edge_report_name;
+        auto &network = context.config;
+        auto &simConfig = network.simulationConfig();
+        return sl::SonataConfig::resolveReportPath(simConfig, reportName);
+    }
+
+    static std::unique_ptr<sl::SonataReportData> _createReportData(sl::EdgeLoadContext &context, std::string &path)
+    {
+        auto &edgePopulation = context.edgePopulation;
+        auto edgePopulationName = edgePopulation.name();
+        auto &nodeSelection = context.nodeSelection;
+        return std::make_unique<sl::SonataReportData>(path, edgePopulationName, nodeSelection);
+    }
+
+    static std::unique_ptr<OffsetIndexer> _createReportIndexer(
+        sl::EdgeLoadContext &context,
+        std::string &path,
+        const std::vector<uint64_t> &orderedEdgeIds)
+    {
+        auto &edgePopulation = context.edgePopulation;
+        auto edgePopulationName = edgePopulation.name();
+        auto &nodeSelection = context.nodeSelection;
+        auto mapping = SynapseReportMapping::generate(path, edgePopulationName, nodeSelection);
+        auto offsets = SynapseOffsetGenerator::generate(orderedEdgeIds, mapping);
+        return std::make_unique<OffsetIndexer>(std::move(offsets));
     }
 };
 
@@ -120,8 +145,9 @@ struct SynapseReportImporter
  * IDs are ordered in sync with their global index in the geometry, needed to properly
  * create the synapse report mapping
  */
-struct SynapseAppender
+class SynapseAppender
 {
+public:
     SynapseAppender(
         const std::vector<uint64_t> &edgeIds,
         const std::vector<uint64_t> &nodeIds,
@@ -201,30 +227,23 @@ void SynapseImporter::fromData(
     const std::vector<uint64_t> &nodeIds,
     const std::vector<brayns::Vector3f> &positions)
 {
-    const auto &params = context.params;
-    const auto radius = params.radius;
-    const auto afferent = params.load_afferent;
-    auto &model = context.model;
-    const auto &network = context.config;
-    const auto &config = network.circuitConfig();
-    const auto &edgePopulation = context.edgePopulation;
-    const auto targetPopulationName = afferent ? edgePopulation.target() : edgePopulation.source();
-    const auto &edgeSelection = context.edgeSelection;
-    const auto flatEdgeIds = edgeSelection.flatten();
+    auto &params = context.params;
+    auto radius = params.radius;
+    auto afferent = params.load_afferent;
+    auto &network = context.config;
+    auto &config = network.circuitConfig();
+    auto &edgePopulation = context.edgePopulation;
+    auto targetPopulationName = afferent ? edgePopulation.target() : edgePopulation.source();
+    auto &edgeSelection = context.edgeSelection;
+    auto flatEdgeIds = edgeSelection.flatten();
 
-    // Geometry
     SynapseAppender appender(flatEdgeIds, nodeIds, positions, radius);
+
     auto &synapseGeometry = appender.geometry;
-    auto &orderedEdgeIds = appender.orderedSynapseIds;
+    auto nodePopulation = config.getNodePopulation(targetPopulationName);
+    auto colorData = std::make_unique<CommonEdgeColorData>(std::move(nodePopulation));
+    SynapseCircuitBuilder::build(context.model, std::move(synapseGeometry), std::move(colorData));
 
-    auto &synapses = model.addComponent<SynapseComponent>(synapseGeometry);
-
-    // Coloring
-    auto colorHandler = std::make_unique<SynapseColorHandler>(synapses);
-    auto colorData = std::make_unique<CommonEdgeColorData>(config.getNodePopulation(targetPopulationName));
-    model.addComponent<CircuitColorComponent>(std::move(colorData), std::move(colorHandler));
-
-    // Simulation
-    SynapseReportImporter::import(context, orderedEdgeIds);
+    SynapseReportImporter::import(context, appender.orderedSynapseIds);
 }
 }

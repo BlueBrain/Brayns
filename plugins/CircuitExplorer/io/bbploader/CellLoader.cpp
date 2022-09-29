@@ -18,6 +18,7 @@
 
 #include "CellLoader.h"
 
+#include <brayns/engine/components/Metadata.h>
 #include <brayns/utils/string/StringJoiner.h>
 
 #include <api/circuit/MorphologyCircuitBuilder.h>
@@ -31,8 +32,9 @@
 
 namespace
 {
-struct BBPNeuronColorCreator
+class BBPNeuronColorCreator
 {
+public:
     static std::unique_ptr<bbploader::BBPNeuronColorData> newData(const bbploader::LoadContext &context)
     {
         const auto &config = context.config;
@@ -48,8 +50,9 @@ struct BBPNeuronColorCreator
     }
 };
 
-struct SomaImporter
+class SomaImporter
 {
+public:
     static std::vector<CellCompartments> import(const bbploader::LoadContext &context, brayns::Model &model)
     {
         auto colorData = BBPNeuronColorCreator::newData(context);
@@ -70,26 +73,28 @@ struct SomaImporter
     }
 };
 
-struct MorphologyPathLoader
+class MorphologyPathLoader
 {
+public:
     static std::vector<std::string> load(const brain::Circuit &circuit, const brain::GIDSet &gids)
     {
-        const auto morphPaths = circuit.getMorphologyURIs(gids);
-        std::vector<std::string> result(morphPaths.size());
+        auto morphPaths = circuit.getMorphologyURIs(gids);
 
-#pragma omp parallel for
-        for (size_t i = 0; i < morphPaths.size(); ++i)
+        std::vector<std::string> result;
+        result.reserve(morphPaths.size());
+
+        for (auto &uri : morphPaths)
         {
-            const auto &uri = morphPaths[i];
-            result[i] = uri.getPath();
+            result.push_back(uri.getPath());
         }
 
         return result;
     }
 };
 
-struct MorphologyImporter
+class MorphologyImporter
 {
+public:
     static auto import(const bbploader::LoadContext &context, brayns::Model &model, ProgressUpdater &updater)
     {
         auto colorData = BBPNeuronColorCreator::newData(context);
@@ -111,14 +116,15 @@ struct MorphologyImporter
     }
 };
 
-struct MetadataFactory
+class MetadataFactory
 {
-    static void create(const bbploader::LoadContext &ctxt, brayns::Model &dst)
+public:
+    static void create(const bbploader::LoadContext &context, brayns::Model &dst)
     {
-        std::map<std::string, std::string> metadata;
+        auto &metadata = dst.getComponents().add<brayns::Metadata>();
 
-        const auto &gids = ctxt.gids;
-        const auto &params = ctxt.loadParameters;
+        const auto &gids = context.gids;
+        const auto &params = context.loadParameters;
         const auto &targets = params.targets;
         if (targets.has_value())
         {
@@ -126,8 +132,6 @@ struct MetadataFactory
             metadata["targets"] = targetList;
         }
         metadata["loaded_neuron_count"] = std::to_string(gids.size());
-
-        dst.setMetaData(std::move(metadata));
     }
 };
 }

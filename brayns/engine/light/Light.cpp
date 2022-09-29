@@ -24,7 +24,7 @@ namespace brayns
 {
 Light::Light(Light &&other) noexcept
 {
-    *this = other;
+    *this = std::move(other);
 }
 
 Light &Light::operator=(Light &&other) noexcept

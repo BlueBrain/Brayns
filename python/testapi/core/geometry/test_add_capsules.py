@@ -44,6 +44,6 @@ class TestAddCapsules(SimpleTestCase):
             -2 * brayns.Vector3.one,
             2 * brayns.Vector3.one
         ))
-        self.assertEqual(model.metadata, {})
+        self.assertEqual(model.info, {})
         self.assertEqual(model.visible, True)
         self.assertEqual(model.transform, brayns.Transform.identity)

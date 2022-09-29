@@ -19,28 +19,131 @@
  */
 
 #include "VasculatureColorHandler.h"
+
 #include "VasculatureColorMethod.h"
+#include "VasculatureSection.h"
 
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/GeometryViews.h>
+
+#include <api/coloring/ColorByIDAlgorithm.h>
 #include <api/coloring/ColorUtils.h>
+#include <api/neuron/NeuronSection.h>
+#include <components/CircuitIds.h>
+#include <components/ColorList.h>
+#include <components/VasculatureSectionList.h>
 
-VasculatureColorHandler::VasculatureColorHandler(VasculatureComponent &vasculature)
-    : _vasculature(vasculature)
+namespace
+{
+class Extractor
+{
+public:
+    static brayns::GeometryView &extractView(brayns::Components &components)
+    {
+        auto &views = components.get<brayns::GeometryViews>();
+        assert(views.elements.size() == 1);
+        views.modified = true;
+        return views.elements.back();
+    }
+
+    static size_t extractNumPrimitives(brayns::Components &components)
+    {
+        auto &geometries = components.get<brayns::Geometries>();
+        assert(geometries.elements.size() == 1);
+        return geometries.elements.front().numPrimitives();
+    }
+
+    static std::vector<uint64_t> &extractIds(brayns::Components &components)
+    {
+        auto &ids = components.get<CircuitIds>();
+        return ids.elements;
+    }
+
+    static std::vector<brayns::Vector4f> &extractColors(brayns::Components &components)
+    {
+        auto &colors = components.get<ColorList>();
+        return colors.elements;
+    }
+
+    static std::vector<VasculatureSection> &extractSections(brayns::Components &components)
+    {
+        auto &sections = components.get<VasculatureSectionList>();
+        return sections.sections;
+    }
+};
+
+struct SectionColor
+{
+    VasculatureSection section;
+    brayns::Vector4f color;
+};
+
+class SectionPainter
+{
+public:
+    static void paint(brayns::Components &components, const std::vector<SectionColor> &colorMap)
+    {
+        auto &colors = Extractor::extractColors(components);
+        auto &sections = Extractor::extractSections(components);
+
+        bool somethingColored = false;
+        for (size_t i = 0; i < colors.size(); ++i)
+        {
+            auto &section = sections[i];
+            for (auto &entry : colorMap)
+            {
+                if (entry.section == section)
+                {
+                    colors[i] = entry.color;
+                    somethingColored = true;
+                }
+            }
+        }
+        if (somethingColored)
+        {
+            auto &view = Extractor::extractView(components);
+            view.setColorPerPrimitive(ospray::cpp::SharedData(colors));
+        }
+    }
+};
+}
+
+VasculatureColorHandler::VasculatureColorHandler(brayns::Components &components)
+    : _components(components)
 {
 }
 
 void VasculatureColorHandler::updateColor(const brayns::Vector4f &color)
 {
-    _vasculature.setColor(color);
+    auto &view = Extractor::extractView(_components);
+    view.setColor(color);
 }
 
 std::vector<uint64_t> VasculatureColorHandler::updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap)
 {
-    return _vasculature.setColorById(colorMap);
+    auto &view = Extractor::extractView(_components);
+    auto &ids = Extractor::extractIds(_components);
+    auto &colors = Extractor::extractColors(_components);
+    auto nonColoredIds = ColorByIDAlgorithm::execute(
+        colorMap,
+        ids,
+        [&](uint64_t id, size_t index, const brayns::Vector4f &color)
+        {
+            (void)id;
+            colors[index] = color;
+        });
+    view.setColorPerPrimitive(ospray::cpp::SharedData(colors));
+    return nonColoredIds;
 }
 
-void VasculatureColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)
+void VasculatureColorHandler::updateColorById(const std::vector<brayns::Vector4f> &inputColors)
 {
-    _vasculature.setColorById(colors);
+    assert(inputColors.size() == Extractor::extractNumPrimitives(_components));
+    auto &view = Extractor::extractView(_components);
+    auto &colors = Extractor::extractColors(_components);
+    colors = inputColors;
+    view.setColorPerPrimitive(ospray::cpp::SharedData(colors));
 }
 
 void VasculatureColorHandler::updateColorByMethod(
@@ -64,7 +167,8 @@ void VasculatureColorHandler::updateIndexedColor(
     const std::vector<brayns::Vector4f> &color,
     const std::vector<uint8_t> &indices)
 {
-    _vasculature.setSimulationColor(color, indices);
+    auto &view = Extractor::extractView(_components);
+    view.setColorMap(ospray::cpp::CopiedData(indices), ospray::cpp::CopiedData(color));
 }
 
 void VasculatureColorHandler::_colorWithInput(const std::string &method, const std::vector<ColoringInformation> &vars)
@@ -75,18 +179,17 @@ void VasculatureColorHandler::_colorWithInput(const std::string &method, const s
         return;
     }
 
-    std::vector<std::pair<VasculatureSection, brayns::Vector4f>> sectionColorMap;
+    std::vector<SectionColor> sectionColorMap;
     sectionColorMap.reserve(vars.size());
 
-    for (const auto &variable : vars)
+    for (auto &variable : vars)
     {
-        const auto &sectionName = variable.variable;
-        const auto &sectionColor = variable.color;
+        auto &sectionName = variable.variable;
+        auto &sectionColor = variable.color;
         auto sectionType = brayns::EnumInfo::getValue<VasculatureSection>(sectionName);
-        sectionColorMap.push_back(std::make_pair(sectionType, sectionColor));
+        sectionColorMap.push_back({sectionType, sectionColor});
     }
-
-    _vasculature.setColorBySection(sectionColorMap);
+    SectionPainter::paint(_components, sectionColorMap);
 }
 
 void VasculatureColorHandler::_colorAll(const std::string &method)
@@ -98,13 +201,13 @@ void VasculatureColorHandler::_colorAll(const std::string &method)
     }
 
     ColorRoulette roulette;
-    const std::vector<std::pair<VasculatureSection, brayns::Vector4f>> sectionColorMap = {
-        std::make_pair(VasculatureSection::Artery, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::Vein, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::Arteriole, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::Venule, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::ArterialCapillary, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::VenousCapillary, roulette.getNextColor()),
-        std::make_pair(VasculatureSection::Transitional, roulette.getNextColor())};
-    _vasculature.setColorBySection(sectionColorMap);
+    std::vector<SectionColor> sectionColorMap = {
+        {VasculatureSection::Artery, roulette.getNextColor()},
+        {VasculatureSection::Vein, roulette.getNextColor()},
+        {VasculatureSection::Arteriole, roulette.getNextColor()},
+        {VasculatureSection::Venule, roulette.getNextColor()},
+        {VasculatureSection::ArterialCapillary, roulette.getNextColor()},
+        {VasculatureSection::VenousCapillary, roulette.getNextColor()},
+        {VasculatureSection::Transitional, roulette.getNextColor()}};
+    SectionPainter::paint(_components, sectionColorMap);
 }

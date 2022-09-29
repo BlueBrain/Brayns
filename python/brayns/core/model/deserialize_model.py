@@ -29,7 +29,7 @@ def deserialize_model(message: dict[str, Any]) -> Model:
     return Model(
         id=message['model_id'],
         bounds=deserialize_bounds(message['bounds']),
-        metadata=message['metadata'],
+        info=message.get('info', {}),
         visible=message['is_visible'],
         transform=deserialize_transform(message['transform']),
     )

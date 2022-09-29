@@ -21,11 +21,14 @@
 #include <brayns/Brayns.h>
 #include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
-#include <brayns/engine/components/ClippingComponent.h>
+#include <brayns/engine/components/ClipperViews.h>
+#include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/core/Engine.h>
 #include <brayns/engine/geometry/types/Plane.h>
 #include <brayns/engine/light/types/AmbientLight.h>
 #include <brayns/engine/light/types/DirectionalLight.h>
+#include <brayns/engine/scene/ModelsOperations.h>
+#include <brayns/engine/systems/ClipperInitSystem.h>
 
 #include <tests/paths.h>
 
@@ -57,18 +60,27 @@ struct ZParallelSliceManager
         const auto planeBDistance = -center.z - sliceThickness * 0.5f;
 
         auto model = std::make_unique<brayns::Model>();
+
         auto planes = std::vector<brayns::Plane>{
             brayns::Plane{{planeA, planeADistance}},
             brayns::Plane{{planeB, planeBDistance}}};
-        model->addComponent<brayns::ClippingComponent>(std::move(planes));
-        scene.addClippingModel(std::move(model));
+        auto &components = model->getComponents();
+        auto &clippers = components.add<brayns::Geometries>();
+        clippers.elements.emplace_back(std::move(planes));
+
+        auto &systems = model->getSystems();
+        systems.setInitSystem<brayns::ClipperInitSystem>();
+
+        auto &models = scene.getModels();
+        models.addModel(std::move(model));
     }
 
     static void clear(brayns::Brayns &brayns)
     {
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
-        scene.removeAllClippingModels();
+        auto &models = scene.getModels();
+        brayns::ModelsOperations::removeClippers(models);
     }
 };
 } // namespace

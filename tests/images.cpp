@@ -20,7 +20,7 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/engine/components/GeometryRendererComponent.h>
+#include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/light/types/AmbientLight.h>
 #include <brayns/engine/light/types/DirectionalLight.h>
@@ -72,11 +72,14 @@ TEST_CASE("render_xyz_and_compare")
     CHECK(ImageValidator::validate(engine, "testImagesXYZ.png"));
 
     auto &scene = engine.getScene();
-    auto &instance = scene.getModelInstance(0);
+    auto &models = scene.getModels();
+    auto &instance = models.getModelInstance(0);
     auto &model = instance.getModel();
-    auto &component = model.getComponent<brayns::GeometryRendererComponent>();
-    auto &geometry = component.getGeometry();
+    auto &components = model.getComponents();
+    auto &geometries = components.get<brayns::Geometries>();
+    auto &geometry = geometries.elements.front();
     geometry.forEach([](brayns::Sphere &sphere) { sphere.radius *= 0.5f; });
+    geometries.modified = true;
     brayns.commitAndRender();
 
     CHECK(ImageValidator::validate(engine, "testImagesXYZSmaller.png"));

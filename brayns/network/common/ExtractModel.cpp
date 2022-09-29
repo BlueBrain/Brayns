@@ -27,10 +27,14 @@ namespace brayns
 {
 ModelInstance &ExtractModel::fromId(Scene &scene, uint32_t id)
 {
+    return fromId(scene.getModels(), id);
+}
+
+ModelInstance &ExtractModel::fromId(ModelManager &models, uint32_t id)
+{
     try
     {
-        auto &model = scene.getModelInstance(id);
-        return model;
+        return models.getModelInstance(id);
     }
     catch (const std::invalid_argument &)
     {

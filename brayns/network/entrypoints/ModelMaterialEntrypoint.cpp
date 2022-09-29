@@ -22,8 +22,8 @@
 
 namespace brayns
 {
-GetMaterialType::GetMaterialType(Scene &scene)
-    : _modelManager(scene)
+GetMaterialType::GetMaterialType(ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -41,16 +41,19 @@ void GetMaterialType::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.id;
-    auto &modelInstance = _modelManager.getModelInstance(modelId);
+    auto &modelInstance = ExtractModel::fromId(_models, modelId);
     auto &model = modelInstance.getModel();
-    auto &materialComponent = model.getComponent<MaterialComponent>();
-    auto &material = materialComponent.getMaterial();
-    auto name = material.getName();
-    request.reply(name);
+    auto &components = model.getComponents();
+    if (auto material = components.find<Material>())
+    {
+        request.reply(material->getName());
+        return;
+    }
+    throw JsonRpcException("The model does not have material");
 }
 
-SetMaterialCarPaint::SetMaterialCarPaint(Scene &scene)
-    : SetMaterialEntrypoint<CarPaint>(scene)
+SetMaterialCarPaint::SetMaterialCarPaint(ModelManager &models)
+    : SetMaterialEntrypoint<CarPaint>(models)
 {
 }
 
@@ -65,8 +68,8 @@ std::string SetMaterialCarPaint::getDescription() const
            "This material is only usable with the production renderer";
 }
 
-SetMaterialPhong::SetMaterialPhong(Scene &scene)
-    : SetMaterialEntrypoint<Phong>(scene)
+SetMaterialPhong::SetMaterialPhong(ModelManager &models)
+    : SetMaterialEntrypoint<Phong>(models)
 {
 }
 
@@ -81,8 +84,8 @@ std::string SetMaterialPhong::getDescription() const
            "It has a matte appearance.";
 }
 
-SetMaterialEmissive::SetMaterialEmissive(Scene &scene)
-    : SetMaterialEntrypoint<Emissive>(scene)
+SetMaterialEmissive::SetMaterialEmissive(ModelManager &models)
+    : SetMaterialEntrypoint<Emissive>(models)
 {
 }
 
@@ -97,8 +100,8 @@ std::string SetMaterialEmissive::getDescription() const
            "This material is only usable with the production renderer";
 }
 
-SetMaterialGlass::SetMaterialGlass(Scene &scene)
-    : SetMaterialEntrypoint<Glass>(scene)
+SetMaterialGlass::SetMaterialGlass(ModelManager &models)
+    : SetMaterialEntrypoint<Glass>(models)
 {
 }
 
@@ -113,8 +116,8 @@ std::string SetMaterialGlass::getDescription() const
            "This material is only usable with the production renderer";
 }
 
-SetMaterialMatte::SetMaterialMatte(Scene &scene)
-    : SetMaterialEntrypoint<Matte>(scene)
+SetMaterialMatte::SetMaterialMatte(ModelManager &models)
+    : SetMaterialEntrypoint<Matte>(models)
 {
 }
 
@@ -129,8 +132,8 @@ std::string SetMaterialMatte::getDescription() const
            "This material is only usable with the production renderer";
 }
 
-SetMaterialMetal::SetMaterialMetal(Scene &scene)
-    : SetMaterialEntrypoint<Metal>(scene)
+SetMaterialMetal::SetMaterialMetal(ModelManager &models)
+    : SetMaterialEntrypoint<Metal>(models)
 {
 }
 
@@ -145,8 +148,8 @@ std::string SetMaterialMetal::getDescription() const
            "This material is only usable with the production renderer";
 }
 
-SetMaterialPlastic::SetMaterialPlastic(Scene &scene)
-    : SetMaterialEntrypoint<Plastic>(scene)
+SetMaterialPlastic::SetMaterialPlastic(ModelManager &models)
+    : SetMaterialEntrypoint<Plastic>(models)
 {
 }
 
@@ -161,8 +164,8 @@ std::string SetMaterialPlastic::getDescription() const
            "This material is only usable with the production renderer";
 }
 
-GetMaterialCarPaint::GetMaterialCarPaint(Scene &scene)
-    : GetMaterialEntrypoint<CarPaint>(scene)
+GetMaterialCarPaint::GetMaterialCarPaint(ModelManager &models)
+    : GetMaterialEntrypoint<CarPaint>(models)
 {
 }
 
@@ -176,8 +179,8 @@ std::string GetMaterialCarPaint::getDescription() const
     return "Returns the material of the given model as a car paint material, if possible";
 }
 
-GetMaterialPhong::GetMaterialPhong(Scene &scene)
-    : GetMaterialEntrypoint<Phong>(scene)
+GetMaterialPhong::GetMaterialPhong(ModelManager &models)
+    : GetMaterialEntrypoint<Phong>(models)
 {
 }
 
@@ -191,8 +194,8 @@ std::string GetMaterialPhong::getDescription() const
     return "Returns the material of the given model as a phong material, if possible";
 }
 
-GetMaterialEmissive::GetMaterialEmissive(Scene &scene)
-    : GetMaterialEntrypoint<Emissive>(scene)
+GetMaterialEmissive::GetMaterialEmissive(ModelManager &models)
+    : GetMaterialEntrypoint<Emissive>(models)
 {
 }
 
@@ -206,8 +209,8 @@ std::string GetMaterialEmissive::getDescription() const
     return "Returns the material of the given model as a emissive material, if possible";
 }
 
-GetMaterialGlass::GetMaterialGlass(Scene &scene)
-    : GetMaterialEntrypoint<Glass>(scene)
+GetMaterialGlass::GetMaterialGlass(ModelManager &models)
+    : GetMaterialEntrypoint<Glass>(models)
 {
 }
 
@@ -221,8 +224,8 @@ std::string GetMaterialGlass::getDescription() const
     return "Returns the material of the given model as a glass material, if possible";
 }
 
-GetMaterialMatte::GetMaterialMatte(Scene &scene)
-    : GetMaterialEntrypoint<Matte>(scene)
+GetMaterialMatte::GetMaterialMatte(ModelManager &models)
+    : GetMaterialEntrypoint<Matte>(models)
 {
 }
 
@@ -236,8 +239,8 @@ std::string GetMaterialMatte::getDescription() const
     return "Returns the material of the given model as a matte material, if possible";
 }
 
-GetMaterialMetal::GetMaterialMetal(Scene &scene)
-    : GetMaterialEntrypoint<Metal>(scene)
+GetMaterialMetal::GetMaterialMetal(ModelManager &models)
+    : GetMaterialEntrypoint<Metal>(models)
 {
 }
 
@@ -251,8 +254,8 @@ std::string GetMaterialMetal::getDescription() const
     return "Returns the material of the given model as a metal material, if possible";
 }
 
-GetMaterialPlastic::GetMaterialPlastic(Scene &scene)
-    : GetMaterialEntrypoint<Plastic>(scene)
+GetMaterialPlastic::GetMaterialPlastic(ModelManager &models)
+    : GetMaterialEntrypoint<Plastic>(models)
 {
 }
 

@@ -25,6 +25,7 @@
 #include <brayns/engine/common/DataWrapper.h>
 
 #include "MaterialTraits.h"
+#include "types/Phong.h"
 
 #include <ospray/ospray_cpp/Material.h>
 
@@ -42,8 +43,8 @@ public:
     template<typename T>
     using Traits = MaterialTraits<T>;
 
-    template<typename MaterialType>
-    Material(MaterialType data)
+    template<typename MaterialType = Phong>
+    Material(MaterialType data = MaterialType())
         : _handleName(MaterialTraits<MaterialType>::handleName)
         , _materialName(MaterialTraits<MaterialType>::name)
         , _handle("", _handleName)

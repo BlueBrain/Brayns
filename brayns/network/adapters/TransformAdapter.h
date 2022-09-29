@@ -28,8 +28,8 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(Transform)
-BRAYNS_JSON_ADAPTER_GETSET("translation", getTranslation, setTranslation, "Translation XYZ")
-BRAYNS_JSON_ADAPTER_GETSET("rotation", getRotation, setRotation, "Rotation XYZW")
-BRAYNS_JSON_ADAPTER_GETSET("scale", getScale, setScale, "Scale XYZ")
+BRAYNS_JSON_ADAPTER_ENTRY(translation, "Translation XYZ", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(rotation, "Rotation XYZW", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(scale, "Scale XYZ", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

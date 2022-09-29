@@ -21,10 +21,12 @@
 
 #include "ClearClipPlanesEntrypoint.h"
 
+#include <brayns/engine/scene/ModelsOperations.h>
+
 namespace brayns
 {
-ClearClipPlanesEntrypoint::ClearClipPlanesEntrypoint(Scene &scene)
-    : _scene(scene)
+ClearClipPlanesEntrypoint::ClearClipPlanesEntrypoint(ModelManager &models)
+    : _models(models)
 {
 }
 
@@ -40,7 +42,7 @@ std::string ClearClipPlanesEntrypoint::getDescription() const
 
 void ClearClipPlanesEntrypoint::onRequest(const Request &request)
 {
-    _scene.removeAllClippingModels();
+    ModelsOperations::removeClippers(_models);
     request.reply(EmptyMessage());
 }
 } // namespace brayns

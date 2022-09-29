@@ -26,6 +26,6 @@ namespace bbploader
 {
 struct SynapseLoader
 {
-    static void load(const LoadContext &context, const bool post, brayns::Model &model);
+    static void load(const LoadContext &context, bool post, brayns::Model &model);
 };
 } // namespace bbploader

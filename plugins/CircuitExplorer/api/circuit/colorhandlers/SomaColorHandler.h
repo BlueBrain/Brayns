@@ -20,16 +20,15 @@
 
 #pragma once
 
-#include <brayns/engine/model/Model.h>
+#include <brayns/engine/model/Components.h>
 
 #include <api/coloring/IColorHandler.h>
 #include <api/neuron/NeuronColorMethod.h>
-#include <components/SomaCircuitComponent.h>
 
 class SomaColorHandler final : public IColorHandler
 {
 public:
-    SomaColorHandler(SomaCircuitComponent &circuit);
+    SomaColorHandler(brayns::Components &components);
 
     void updateColor(const brayns::Vector4f &color) override;
 
@@ -53,5 +52,5 @@ private:
     void _colorAll(const IColorData &colorData, const std::string &method);
 
 private:
-    SomaCircuitComponent &_circuit;
+    brayns::Components &_components;
 };

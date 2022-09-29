@@ -18,10 +18,10 @@
 
 #include "NeuronReportFactory.h"
 
+#include <api/reports/ReportFactory.h>
 #include <api/reports/ReportMapping.h>
 #include <api/reports/indexers/OffsetIndexer.h>
 #include <api/reports/indexers/SpikeIndexer.h>
-#include <components/ReportComponent.h>
 #include <io/sonataloader/data/SonataSimulationMapping.h>
 #include <io/sonataloader/reports/SonataReportData.h>
 #include <io/sonataloader/reports/SonataSpikeData.h>
@@ -82,53 +82,119 @@ struct SonataCompartmentMapping
         return mapping;
     }
 };
+
+class CompartmentReportData
+{
+public:
+    static ReportData create(const sl::NodeLoadContext &context, const std::vector<CellCompartments> &compartments)
+    {
+        auto path = resolveCompartmentPath(context);
+        auto reportData = ReportData();
+        reportData.data = _createData(context, path);
+        reportData.indexer = _createIndexer(context, compartments, path);
+        return reportData;
+    }
+
+private:
+    static std::string resolveCompartmentPath(const sl::NodeLoadContext &context)
+    {
+        auto &simConfig = context.config.simulationConfig();
+        auto &params = context.params;
+        auto &reportName = params.report_name;
+        return sl::SonataConfig::resolveReportPath(simConfig, reportName).string();
+    }
+
+    static std::unique_ptr<IReportData> _createData(const sl::NodeLoadContext &context, const std::string &path)
+    {
+        auto &params = context.params;
+        auto &populationName = params.node_population;
+        auto &selection = context.selection;
+        return std::make_unique<sl::SonataReportData>(path, populationName, selection);
+    }
+
+    static std::unique_ptr<IColormapIndexer> _createIndexer(
+        const sl::NodeLoadContext &context,
+        const std::vector<CellCompartments> &compartments,
+        const std::string &path)
+    {
+        auto &params = context.params;
+        auto &populationName = params.node_population;
+        auto &selection = context.selection;
+        auto flatSelection = selection.flatten();
+        auto reportMapping = SonataCompartmentMapping::generate(path, populationName, flatSelection);
+        return std::make_unique<OffsetIndexer>(compartments, reportMapping);
+    }
+};
+
+class SpikeReportData
+{
+public:
+    static ReportData create(const sl::NodeLoadContext &context, const std::vector<CellCompartments> &compartments)
+    {
+        auto reportData = ReportData();
+        reportData.data = _createData(context);
+        reportData.indexer = _createIndexer(compartments);
+        return reportData;
+    }
+
+private:
+    static std::unique_ptr<IReportData> _createData(const sl::NodeLoadContext &context)
+    {
+        auto &simConfig = context.config.simulationConfig();
+        auto path = sl::SonataConfig::resolveSpikesPath(simConfig);
+        auto &params = context.params;
+        auto &population = params.node_population;
+        auto &selection = context.selection;
+        auto spikeTransition = params.spike_transition_time;
+        return std::make_unique<sl::SonataSpikeData>(path, population, selection, spikeTransition);
+    }
+
+    static std::unique_ptr<IColormapIndexer> _createIndexer(const std::vector<CellCompartments> &compartments)
+    {
+        return std::make_unique<SpikeIndexer>(compartments);
+    }
+};
+
+class ReportHandler
+{
+public:
+    static bool hasReport(const sl::NodeLoadContext &context)
+    {
+        auto &params = context.params;
+        auto reportType = params.report_type;
+        return reportType != sl::ReportType::None;
+    }
+
+    static ReportData createReportData(
+        const sl::NodeLoadContext &context,
+        const std::vector<CellCompartments> &compartments)
+    {
+        auto &callback = context.progress;
+
+        auto &params = context.params;
+        auto reportType = params.report_type;
+        if (reportType == sl::ReportType::Spikes)
+        {
+            callback.update("Loading spikes");
+            return SpikeReportData::create(context, compartments);
+        }
+
+        callback.update("Loading compartment report");
+        return CompartmentReportData::create(context, compartments);
+    }
+};
 }
 
 namespace sonataloader
 {
-void NeuronReportFactory::create(NodeLoadContext &ctxt, const std::vector<CellCompartments> &compartments)
+void NeuronReportFactory::create(NodeLoadContext &context, const std::vector<CellCompartments> &compartments)
 {
-    const auto &params = ctxt.params;
-    const auto reportType = params.report_type;
-
-    if (reportType == ReportType::None)
+    if (!ReportHandler::hasReport(context))
     {
         return;
     }
 
-    auto &cb = ctxt.progress;
-    const auto &network = ctxt.config;
-    const auto &simConfig = network.simulationConfig();
-    const auto &population = ctxt.population;
-    const auto populationName = population.name();
-    const auto &selection = ctxt.selection;
-
-    std::unique_ptr<IReportData> data;
-    std::unique_ptr<IColormapIndexer> indexer;
-
-    if (reportType == ReportType::Spikes)
-    {
-        cb.update("Loading spikes");
-
-        const auto path = SonataConfig::resolveSpikesPath(simConfig);
-        auto spikeTransition = params.spike_transition_time;
-        data = std::make_unique<SonataSpikeData>(path, populationName, selection, spikeTransition);
-        indexer = std::make_unique<SpikeIndexer>(compartments);
-    }
-    else
-    {
-        const auto &reportName = params.report_name;
-        cb.update("Loading report " + reportName);
-
-        const auto path = sl::SonataConfig::resolveReportPath(simConfig, reportName);
-        data = std::make_unique<SonataReportData>(path, populationName, selection);
-
-        const auto flatSelection = selection.flatten();
-        const auto reportMapping = SonataCompartmentMapping::generate(path, populationName, flatSelection);
-        indexer = std::make_unique<OffsetIndexer>(compartments, reportMapping);
-    }
-
-    auto &model = ctxt.model;
-    model.addComponent<ReportComponent>(std::move(data), std::move(indexer));
+    auto reportData = ReportHandler::createReportData(context, compartments);
+    ReportFactory::create(context.model, std::move(reportData));
 }
 }
