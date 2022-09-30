@@ -178,7 +178,7 @@ RUN cd ${BRAYNS_SRC}/build && make -j4 install \
    && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it
-FROM debian:buster-slim
+FROM debian
 ARG DIST_PATH=/app/dist
 
 RUN apt-get update \
@@ -186,6 +186,7 @@ RUN apt-get update \
    libarchive13 \
    libgomp1 \
    libhdf5-103 \
+   libssl-dev \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -201,7 +202,7 @@ COPY --from=builder ${DIST_PATH} ${DIST_PATH}
 COPY --from=builder ${BOOST_LIB} ${BOOST_LIB}
 
 # Add binaries from dist to the PATH
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:${DIST_PATH}/lib:${BOOST_LIB}
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:${DIST_PATH}/lib:${BOOST_LIB}:/${DIST_PATH}/lib/intel64/gcc4.8
 ENV PATH ${DIST_PATH}/bin:$PATH
 
 # Expose a port from the container
