@@ -32,8 +32,8 @@ BRAYNS_JSON_ADAPTER_ENTRY(height, "Orthographic projection plane height")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(Perspective)
-BRAYNS_JSON_ADAPTER_ENTRY(fovy, "Vertical field of view")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("aperture_radius", apertureRadius, "Lens aperture radius")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("focus_distance", focusDistance, "Camera focus distance")
+BRAYNS_JSON_ADAPTER_ENTRY(fovy, "Vertical field of view", Required(false))
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("aperture_radius", apertureRadius, "Lens aperture radius", Required(false))
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("focus_distance", focusDistance, "Camera focus distance", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 }

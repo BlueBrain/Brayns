@@ -28,16 +28,30 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(Interactive)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("samples_per_pixel", samplesPerPixel, "Ray samples per pixel", Minimum(1))
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("max_ray_bounces", maxRayBounces, "Maximum ray bounces")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("background_color", backgroundColor, "Background color")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("enable_shadows", shadowsEnabled, "Enable casted shadows when rendering")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("ao_samples", aoSamples, "Ambient occlusion samples")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
+    "samples_per_pixel",
+    samplesPerPixel,
+    "Ray samples per pixel",
+    Minimum(1),
+    Required(false))
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("max_ray_bounces", maxRayBounces, "Maximum ray bounces", Required(false))
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("background_color", backgroundColor, "Background color", Required(false))
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
+    "enable_shadows",
+    shadowsEnabled,
+    "Enable casted shadows when rendering",
+    Required(false))
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("ao_samples", aoSamples, "Ambient occlusion samples", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(Production)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("samples_per_pixel", samplesPerPixel, "Ray samples per pixel", Minimum(1))
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("max_ray_bounces", maxRayBounces, "Maximum ray bounces")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("background_color", backgroundColor, "Background color")
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
+    "samples_per_pixel",
+    samplesPerPixel,
+    "Ray samples per pixel",
+    Minimum(1),
+    Required(false))
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("max_ray_bounces", maxRayBounces, "Maximum ray bounces", Required(false))
+BRAYNS_JSON_ADAPTER_NAMED_ENTRY("background_color", backgroundColor, "Background color", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 }
