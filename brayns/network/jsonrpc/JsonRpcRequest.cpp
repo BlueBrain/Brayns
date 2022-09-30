@@ -71,6 +71,12 @@ void JsonRpcRequest::reply(const JsonValue &result) const
     JsonRpcSender::reply(message, _client);
 }
 
+void JsonRpcRequest::reply(const JsonValue &result, std::string_view binary) const
+{
+    auto message = JsonRpcFactory::reply(_message, result);
+    JsonRpcSender::reply(message, binary, _client);
+}
+
 void JsonRpcRequest::error(const JsonRpcException &e) const
 {
     auto message = brayns::JsonRpcFactory::error(_message, e);
