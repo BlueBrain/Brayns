@@ -23,13 +23,15 @@
 
 #include <brayns/json/JsonObjectMacro.h>
 
-#include <brayns/network/adapters/BoundsAdapter.h>
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
-
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(SceneMessage)
-BRAYNS_JSON_OBJECT_ENTRY(Bounds, bounds, "Scene bounds")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<ModelInstance *>, models, "Scene models")
+BRAYNS_JSON_OBJECT_BEGIN(RenderImageParams)
+BRAYNS_JSON_OBJECT_ENTRY(bool, send, "Send image once rendered", Default(true))
+BRAYNS_JSON_OBJECT_ENTRY(bool, force, "Send image even if nothing new was rendered", Default(false))
+BRAYNS_JSON_OBJECT_END()
+
+BRAYNS_JSON_OBJECT_BEGIN(RenderImageResult)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, accumulation, "Current frame accumulation")
+BRAYNS_JSON_OBJECT_ENTRY(size_t, max_accumulation, "Maximum frame accumulation")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

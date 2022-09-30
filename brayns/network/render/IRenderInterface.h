@@ -21,15 +21,18 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
-
-#include <brayns/network/adapters/BoundsAdapter.h>
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
+#include <brayns/utils/image/Image.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(SceneMessage)
-BRAYNS_JSON_OBJECT_ENTRY(Bounds, bounds, "Scene bounds")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<ModelInstance *>, models, "Scene models")
-BRAYNS_JSON_OBJECT_END()
+class IRenderInterface
+{
+public:
+    virtual ~IRenderInterface() = default;
+
+    virtual bool render() = 0;
+    virtual Image getCurrentFrame() const = 0;
+    virtual size_t getAccumulation() const = 0;
+    virtual size_t getMaxAccumulation() const = 0;
+};
 } // namespace brayns

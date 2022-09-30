@@ -21,15 +21,28 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <memory>
 
-#include <brayns/network/adapters/BoundsAdapter.h>
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
+#include <brayns/network/render/IRenderInterface.h>
+
+#include <brayns/common/parameters/ApplicationParameters.h>
+
+#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/RenderImageMessage.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(SceneMessage)
-BRAYNS_JSON_OBJECT_ENTRY(Bounds, bounds, "Scene bounds")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<ModelInstance *>, models, "Scene models")
-BRAYNS_JSON_OBJECT_END()
+class RenderImageEntrypoint : public Entrypoint<RenderImageParams, RenderImageResult>
+{
+public:
+    RenderImageEntrypoint(const ApplicationParameters &parameters, std::unique_ptr<IRenderInterface> interface);
+
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
+
+private:
+    const ApplicationParameters &_parameters;
+    std::unique_ptr<IRenderInterface> _interface;
+};
 } // namespace brayns
