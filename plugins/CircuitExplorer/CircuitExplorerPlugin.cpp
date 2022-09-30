@@ -29,6 +29,7 @@
 #include <io/SonataLoader.h>
 #include <io/SonataNGVLoader.h>
 #include <network/entrypoints/ColorCircuitEntrypoint.h>
+#include <network/entrypoints/GetCircuitIdsEntrypoint.h>
 #include <network/entrypoints/SetCircuitThicknessEntrypoint.h>
 #include <network/entrypoints/TraceAnterogradeEntrypoint.h>
 
@@ -59,6 +60,7 @@ void CircuitExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &inter
     builder.add<ColorCircuitByIdEntrypoint>(models);
     builder.add<ColorCircuitByMethodEntrypoint>(models);
     builder.add<ColorCircuitBySingleColorEntrypoint>(models);
+    builder.add<GetCircuitIdsEntrypoint>(models);
     builder.add<SetCircuitThicknessEntrypoint>(models);
     builder.add<TraceAnterogradeEntrypoint>(models);
 }
