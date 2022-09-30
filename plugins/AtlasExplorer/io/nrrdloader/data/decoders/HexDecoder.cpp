@@ -20,7 +20,7 @@
 
 #include "HexDecoder.h"
 
-#include <brayns/utils/StringUtils.h>
+#include "common/Tokenizer.h"
 
 #include <io/nrrdloader/data/decoders/RawDecoder.h>
 
@@ -31,7 +31,7 @@ class HexContentParser
 public:
     static std::string toBinary(std::string_view input)
     {
-        auto tokens = brayns::string_utils::split(input, " /r/v/f/t/n");
+        auto tokens = Tokenizer::fromView(input);
 
         size_t expectedResultSize = 0;
         for (auto token : tokens)

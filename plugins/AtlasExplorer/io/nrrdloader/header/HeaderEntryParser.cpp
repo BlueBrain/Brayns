@@ -198,10 +198,11 @@ public:
         result.reserve(tokens.size());
         for (size_t i = 0; i < tokens.size(); ++i)
         {
-            if (tokens[i] != "none")
+            if (tokens[i] == "none")
             {
-                result.push_back(parseFloatVector(tokens[i]));
+                continue;
             }
+            result.push_back(parseFloatVector(tokens[i]));
         }
         return result;
     }

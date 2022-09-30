@@ -20,6 +20,10 @@
 
 #include "HeaderParser.h"
 
+#include <brayns/utils/string/StringCounter.h>
+#include <brayns/utils/string/StringExtractor.h>
+#include <brayns/utils/string/StringInfo.h>
+
 #include <io/nrrdloader/header/HeaderEntryParser.h>
 
 #include <filesystem>
@@ -29,71 +33,59 @@
 
 namespace
 {
+class LineBreakFinder
+{
+public:
+    static std::string fromView(std::string_view view)
+    {
+        auto windowEndingIndex = view.find("\r\n");
+        auto unixEndingIndex = view.find("\n");
+        if (windowEndingIndex < unixEndingIndex)
+        {
+            return "\r\n";
+        }
+        return "\n";
+    }
+};
+
 class HeaderReader
 {
 public:
-    static std::vector<std::string_view> readLines(std::string_view &nrrdContentView)
+    static std::vector<std::string_view> readLines(std::string_view &data)
     {
-        // Extracts magic, which we do not use
-        _extractLine(nrrdContentView);
+        auto lineBreak = LineBreakFinder::fromView(data);
+        auto result = std::vector<std::string_view>();
+        result.reserve(10);
 
-        std::vector<std::string_view> result;
-        while (true)
+        // Extracts magic, which we do not use
+        _extractLine(data, lineBreak);
+        while (!data.empty())
         {
-            auto sv = _extractLine(nrrdContentView);
+            auto sv = _extractLine(data, lineBreak);
 
             // Header ends with blank line
             if (sv.empty())
             {
                 break;
             }
-
             // Comments starts with #, with no preceeding whitespace. Ignore them
-            if (sv[0] != '#')
+            if (sv[0] == '#')
             {
-                result.push_back(sv);
+                continue;
             }
 
-            // On detached-data nrrd files, header may end by eof
-            if (nrrdContentView.empty())
-            {
-                break;
-            }
+            result.push_back(sv);
         }
 
         return result;
     }
 
 private:
-    static std::string_view _extractLine(std::string_view &src)
+    static std::string_view _extractLine(std::string_view &data, std::string_view lineBreak)
     {
-        size_t pivot = 0;
-
-        size_t srcSubstrStart = 0;
-        while (true)
-        {
-            auto currentChar = src[pivot];
-
-            if (currentChar == '\n')
-            {
-                srcSubstrStart = pivot + 1;
-                break;
-            }
-
-            if (currentChar == '\r' && src.length() > pivot + 1 && src[pivot + 1] == '\n')
-            {
-                srcSubstrStart = pivot + 2;
-            }
-
-            ++pivot;
-        }
-
-        auto result = src.substr(0, pivot);
-
-        auto srcNewStart = std::min(src.length(), srcSubstrStart);
-        src = src.substr(srcNewStart);
-
-        return result;
+        auto line = brayns::StringExtractor::extractUntil(data, lineBreak);
+        brayns::StringExtractor::extract(data, lineBreak.length());
+        return line;
     }
 };
 
@@ -108,21 +100,20 @@ class HeaderEntrySplitter
 public:
     static std::vector<NRRDHeaderEntry> split(const std::vector<std::string_view> &headerLines)
     {
-        std::vector<NRRDHeaderEntry> result(headerLines.size());
+        std::vector<NRRDHeaderEntry> result;
+        result.reserve(headerLines.size());
 
-        for (size_t i = 0; i < headerLines.size(); ++i)
+        for (auto line : headerLines)
         {
-            auto line = headerLines[i];
-
-            auto colonPosition = line.find(":");
-            if (colonPosition == std::string_view::npos)
+            if (!brayns::StringInfo::contains(line, ":"))
             {
                 throw std::invalid_argument("Ill-formed NRRD header at " + std::string(line));
             }
 
-            auto &entry = result[i];
-            entry.key = line.substr(0, colonPosition);
-            entry.value = line.substr(colonPosition + 1);
+            auto &entry = result.emplace_back();
+            entry.key = brayns::StringExtractor::extractUntil(line, ":");
+            brayns::StringExtractor::extract(line, 1);
+            entry.value = line;
         }
 
         return result;
@@ -149,8 +140,8 @@ public:
 
 NRRDHeader HeaderParser::parse(std::string nrrdPath, std::string_view &nrrdContentView)
 {
-    const auto headerLines = HeaderReader::readLines(nrrdContentView);
-    const auto headerEntryList = HeaderEntrySplitter::split(headerLines);
+    auto headerLines = HeaderReader::readLines(nrrdContentView);
+    auto headerEntryList = HeaderEntrySplitter::split(headerLines);
     auto header = EntryListParser::parse(headerEntryList);
     header.filePath = std::move(nrrdPath);
     return header;
