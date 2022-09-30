@@ -28,7 +28,7 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(ColorRamp)
-BRAYNS_JSON_ADAPTER_GETSET("range", getValuesRange, setValuesRange, "Values range")
-BRAYNS_JSON_ADAPTER_GETSET("colors", getColors, setColors, "List of colors (RGBA) to map")
+BRAYNS_JSON_ADAPTER_GETSET("range", getValuesRange, setValuesRange, "Values range", Required(false))
+BRAYNS_JSON_ADAPTER_GETSET("colors", getColors, setColors, "List of colors (RGBA) to map", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

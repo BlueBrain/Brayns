@@ -53,9 +53,9 @@ BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(TriangleMesh)
 BRAYNS_JSON_ADAPTER_ENTRY(vertices, "Mesh vertex positions")
-BRAYNS_JSON_ADAPTER_ENTRY(normals, "Mesh vertex normals")
-BRAYNS_JSON_ADAPTER_ENTRY(colors, "Mesh vertex colors")
-BRAYNS_JSON_ADAPTER_ENTRY(uvs, "Mesh vertex texture coordinates")
+BRAYNS_JSON_ADAPTER_ENTRY(normals, "Mesh vertex normals", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(colors, "Mesh vertex colors", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(uvs, "Mesh vertex texture coordinates", Required(false))
 BRAYNS_JSON_ADAPTER_ENTRY(indices, "Mesh triangle vertex indices")
 BRAYNS_JSON_ADAPTER_END()
 

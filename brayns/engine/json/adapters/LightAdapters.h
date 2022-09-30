@@ -29,23 +29,23 @@
 namespace brayns
 {
 #define BRAYNS_LIGHT_PROPERTIES() \
-    BRAYNS_JSON_ADAPTER_ENTRY(color, "Light color (Normalized RGB)") \
-    BRAYNS_JSON_ADAPTER_ENTRY(intensity, "Light intensity", Minimum(0.0)) \
-    BRAYNS_JSON_ADAPTER_ENTRY(visible, "Light visibility")
+    BRAYNS_JSON_ADAPTER_ENTRY(color, "Light color (Normalized RGB)", Required(false)) \
+    BRAYNS_JSON_ADAPTER_ENTRY(intensity, "Light intensity", Minimum(0.0), Required(false)) \
+    BRAYNS_JSON_ADAPTER_ENTRY(visible, "Light visibility", Required(false))
 
 BRAYNS_JSON_ADAPTER_BEGIN(AmbientLight)
 BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(DirectionalLight)
-BRAYNS_JSON_ADAPTER_ENTRY(direction, "Light direction vector")
+BRAYNS_JSON_ADAPTER_ENTRY(direction, "Light direction vector", Required(false))
 BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(QuadLight)
-BRAYNS_JSON_ADAPTER_ENTRY(position, "Sets the corner position of the quad light")
-BRAYNS_JSON_ADAPTER_ENTRY(edge1, "Sets one of the quad light edges")
-BRAYNS_JSON_ADAPTER_ENTRY(edge2, "Sets one of the quad light edges")
+BRAYNS_JSON_ADAPTER_ENTRY(position, "Sets the corner position of the quad light", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(edge1, "Sets one of the quad light edges", Required(false))
+BRAYNS_JSON_ADAPTER_ENTRY(edge2, "Sets one of the quad light edges", Required(false))
 BRAYNS_LIGHT_PROPERTIES()
 BRAYNS_JSON_ADAPTER_END()
 
