@@ -26,6 +26,8 @@
 #include <brayns/utils/string/StringExtractor.h>
 #include <brayns/utils/string/StringParser.h>
 
+#include <stdexcept>
+
 namespace
 {
 class AsciiParser
