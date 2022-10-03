@@ -18,21 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json
-import unittest
-
-from brayns.network import JsonRpcRequest, serialize_request, serialize_request_as_json
+from .json_rpc_request import JsonRpcRequest
+from .serialize_request_to_text import serialize_request_to_text
 
 
-class TestSerializeRequestAsJson(unittest.TestCase):
-
-    def test_serialize_request_as_json(self) -> None:
-        request = JsonRpcRequest(0, 'test', 123)
-        message = serialize_request(request)
-        ref = json.dumps(message)
-        test = serialize_request_as_json(request)
-        self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()
+def serialize_request_to_binary(request: JsonRpcRequest) -> bytes:
+    json = serialize_request_to_text(request)
+    text = json.encode('utf-8')
+    json_size = len(text)
+    header = json_size.to_bytes(4, byteorder='little', signed=False)
+    binary = request.binary
+    return b''.join([header, text, binary])

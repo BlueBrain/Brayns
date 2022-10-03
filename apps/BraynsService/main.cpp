@@ -30,12 +30,14 @@ int main(int argc, const char **argv)
     try
     {
         auto commandLine = brayns::CommandLine(argc, argv);
+
         if (commandLine.hasVersion())
         {
             auto version = commandLine.getVersion();
             std::cout << version << '\n';
             return 0;
         }
+
         if (commandLine.hasHelp())
         {
             auto help = commandLine.getHelp();
@@ -59,6 +61,11 @@ int main(int argc, const char **argv)
     catch (const std::exception &e)
     {
         brayns::Log::critical(e.what());
+        return 1;
+    }
+    catch (...)
+    {
+        brayns::Log::critical("Unknown error.");
         return 1;
     }
 

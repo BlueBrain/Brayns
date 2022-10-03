@@ -18,18 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
-from testapi.simple_test_case import SimpleTestCase
+import json
+
+from .deserialize_reply import deserialize_reply
+from .json_rpc_reply import JsonRpcReply
 
 
-class TestClearModels(SimpleTestCase):
-
-    def test_clear_models(self) -> None:
-        models = [
-            brayns.add_geometries(self.instance, [brayns.Sphere(i)])
-            for i in range(1, 4)
-        ]
-        brayns.clear_models(self.instance)
-        for model in models:
-            with self.assertRaises(brayns.JsonRpcError):
-                brayns.get_model(self.instance, model.id)
+def deserialize_reply_from_text(data: str) -> JsonRpcReply:
+    message = json.loads(data)
+    return deserialize_reply(message)

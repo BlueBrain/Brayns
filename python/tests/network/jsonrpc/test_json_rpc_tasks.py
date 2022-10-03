@@ -19,70 +19,83 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
+from typing import cast
 
 import brayns
 from brayns.network import JsonRpcTask, JsonRpcTasks
 
+from .messages.mock_error import MockError
+from .messages.mock_progress import MockProgress
+from .messages.mock_reply import MockReply
+
 
 class TestJsonRpcTasks(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self._tasks = JsonRpcTasks()
-
     def test_len(self) -> None:
+        tasks = JsonRpcTasks()
         for i in range(10):
-            self._tasks.create_task(i)
-        self.assertEqual(len(self._tasks), 10)
+            tasks.create_task(i)
+        self.assertEqual(len(tasks), 10)
 
     def test_iter(self) -> None:
+        tasks = JsonRpcTasks()
         for i in range(10):
-            self._tasks.create_task(i)
-        ids = [id for id, _ in self._tasks]
+            tasks.create_task(i)
+        ids = [id for id, _ in tasks]
         self.assertEqual(ids, list(range(10)))
-        for _, task in self._tasks:
+        for _, task in tasks:
             self.assertIsInstance(task, JsonRpcTask)
 
     def test_contains(self) -> None:
-        self._tasks.create_task(0)
-        self.assertIn(0, self._tasks)
+        tasks = JsonRpcTasks()
+        tasks.create_task(0)
+        self.assertIn(0, tasks)
 
     def test_find(self) -> None:
-        self._tasks.create_task(0)
-        self.assertIsNotNone(self._tasks.find(0))
-        self.assertIsNone(self._tasks.find(1))
+        tasks = JsonRpcTasks()
+        tasks.create_task(0)
+        self.assertIsNotNone(tasks.find(0))
+        self.assertIsNone(tasks.find(1))
 
     def test_create_task(self) -> None:
-        task = self._tasks.create_task(0)
+        tasks = JsonRpcTasks()
+        task = tasks.create_task(0)
         self.assertFalse(task.is_ready())
 
     def test_add_result(self) -> None:
-        result = 123
-        task = self._tasks.create_task(0)
-        self._tasks.add_result(0, result)
-        self.assertEqual(task.get_result(), result)
+        tasks = JsonRpcTasks()
+        reply = MockReply.reply
+        id = cast(int, reply.id)
+        task = tasks.create_task(id)
+        tasks.add_reply(reply)
+        self.assertEqual(task.get_reply(), reply)
 
     def test_add_error(self) -> None:
-        error = brayns.RequestError(0, 'test', 123)
-        task = self._tasks.create_task(0)
-        self._tasks.add_error(0, error)
-        with self.assertRaises(brayns.RequestError) as context:
-            task.get_result()
+        tasks = JsonRpcTasks()
+        error = MockError.error
+        id = cast(int, error.id)
+        task = tasks.create_task(id)
+        tasks.add_error(error)
+        with self.assertRaises(brayns.JsonRpcError) as context:
+            task.get_reply()
         self.assertEqual(context.exception, error)
 
-    def test_add_global_error(self) -> None:
-        error = brayns.RequestError(0, 'test', 123)
-        tasks = [self._tasks.create_task(i) for i in range(10)]
-        self._tasks.add_global_error(error)
-        self.assertEqual(len(self._tasks), 0)
-        for task in tasks:
-            with self.assertRaises(brayns.RequestError) as context:
-                task.get_result()
+    def test_add_general_error(self) -> None:
+        tasks = JsonRpcTasks()
+        error = MockError.error
+        ref = [tasks.create_task(i) for i in range(10)]
+        tasks._add_general_error(error)
+        self.assertEqual(len(tasks), 0)
+        for task in ref:
+            with self.assertRaises(brayns.JsonRpcError) as context:
+                task.get_reply()
             self.assertEqual(context.exception, error)
 
     def test_add_progress(self) -> None:
-        progress = brayns.RequestProgress('test', 0.5)
-        task = self._tasks.create_task(0)
-        self._tasks.add_progress(0, progress)
+        tasks = JsonRpcTasks()
+        progress = MockProgress.progress
+        task = tasks.create_task(progress.id)
+        tasks.add_progress(progress)
         self.assertTrue(task.has_progress())
         self.assertEqual(task.get_progress(), progress)
 

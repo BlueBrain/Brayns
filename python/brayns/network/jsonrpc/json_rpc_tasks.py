@@ -21,10 +21,9 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any
 
 from .json_rpc_task import JsonRpcTask
-from .messages import RequestError, RequestProgress
+from .messages import JsonRpcError, JsonRpcProgress, JsonRpcReply
 
 
 class JsonRpcTasks:
@@ -46,32 +45,37 @@ class JsonRpcTasks:
 
     def create_task(self, id: int | str) -> JsonRpcTask:
         if id in self._tasks:
-            raise RuntimeError('Request with same ID already running')
+            raise ValueError('Request with same ID already running')
         task = JsonRpcTask()
         self._tasks[id] = task
         return task
 
-    def add_result(self, id: int | str, result: Any) -> None:
-        task = self.find(id)
+    def add_reply(self, reply: JsonRpcReply) -> None:
+        if reply.id is None:
+            raise ValueError('No request ID in reply')
+        task = self.find(reply.id)
         if task is None:
             return
-        task.set_result(result)
-        del self._tasks[id]
+        task.set_reply(reply)
+        del self._tasks[reply.id]
 
-    def add_error(self, id: int | str, error: RequestError) -> None:
-        task = self.find(id)
+    def add_error(self, error: JsonRpcError) -> None:
+        if error.id is None:
+            self._add_general_error(error)
+            return
+        task = self.find(error.id)
         if task is None:
             return
         task.set_error(error)
-        del self._tasks[id]
+        del self._tasks[error.id]
 
-    def add_global_error(self, error: RequestError) -> None:
-        for task in self._tasks.values():
-            task.set_error(error)
-        self._tasks.clear()
-
-    def add_progress(self, id: int | str, progress: RequestProgress) -> None:
-        task = self.find(id)
+    def add_progress(self, progress: JsonRpcProgress) -> None:
+        task = self.find(progress.id)
         if task is None:
             return
         task.add_progress(progress)
+
+    def _add_general_error(self, error: JsonRpcError) -> None:
+        for task in self._tasks.values():
+            task.set_error(error)
+        self._tasks.clear()

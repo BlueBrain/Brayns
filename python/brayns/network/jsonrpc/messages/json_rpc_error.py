@@ -21,12 +21,43 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-
-from .request_error import RequestError
+from typing import Any
 
 
 @dataclass
-class JsonRpcError:
+class JsonRpcError(Exception):
+    """Error raised by an instance when a request fails.
+
+    :param id: ID of the request sending the error.
+        None for global errors with no requests attached (like invalid JSON). 
+    :type id: int | str | None
+    :param code: Error code.
+    :type code: int
+    :param message: Error description.
+    :type message: str
+    :param data: Optional additional error information, defaults to None.
+    :type data: Any, optional
+    """
 
     id: int | str | None
-    error: RequestError
+    code: int
+    message: str
+    data: Any = None
+
+    @staticmethod
+    def general(message: str) -> JsonRpcError:
+        return JsonRpcError(
+            id=None,
+            code=0,
+            message=message,
+        )
+
+    def __str__(self) -> str:
+        description = self.message
+        details = [f'code={self.code}']
+        if self.id is not None:
+            details.append(f'request ID={self.id})')
+        if self.data is not None:
+            details.append(f'data={self.data})')
+        detail = ', '.join(details)
+        return f'{description} ({detail})'

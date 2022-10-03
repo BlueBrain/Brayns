@@ -30,6 +30,7 @@
 #include <brayns/network/jsonrpc/JsonRpcFactory.h>
 #include <brayns/network/jsonrpc/JsonRpcParser.h>
 #include <brayns/network/jsonrpc/JsonRpcSender.h>
+#include <brayns/network/render/RenderInterface.h>
 #include <brayns/network/socket/ClientSocket.h>
 #include <brayns/network/socket/ServerSocket.h>
 #include <brayns/network/socket/SocketListener.h>
@@ -50,13 +51,13 @@
 #include <brayns/network/entrypoints/ExportFramesEntrypoint.h>
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
-#include <brayns/network/entrypoints/ImageJpegEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
 #include <brayns/network/entrypoints/ModelColorRampEntrypoint.h>
 #include <brayns/network/entrypoints/ModelMaterialEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RegistryEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
+#include <brayns/network/entrypoints/RenderImageEntrypoint.h>
 #include <brayns/network/entrypoints/RendererEntrypoint.h>
 #include <brayns/network/entrypoints/SceneEntrypoint.h>
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
@@ -91,6 +92,8 @@ public:
         auto &tasks = context.tasks;
         auto &stream = context.stream;
 
+        auto render = std::make_unique<brayns::RenderInterface>();
+
         brayns::CancellationToken token(interface);
         brayns::EntrypointBuilder builder("Core", interface);
 
@@ -117,11 +120,11 @@ public:
         builder.add<brayns::GetCameraTypeEntrypoint>(engine);
         builder.add<brayns::GetLoadersEntrypoint>(loaders);
         builder.add<brayns::GetMaterialCarPaint>(models);
-        builder.add<brayns::GetMaterialPhong>(models);
         builder.add<brayns::GetMaterialEmissive>(models);
         builder.add<brayns::GetMaterialGlass>(models);
         builder.add<brayns::GetMaterialMatte>(models);
         builder.add<brayns::GetMaterialMetal>(models);
+        builder.add<brayns::GetMaterialPhong>(models);
         builder.add<brayns::GetMaterialPlastic>(models);
         builder.add<brayns::GetMaterialType>(models);
         builder.add<brayns::GetModelEntrypoint>(models);
@@ -131,31 +134,31 @@ public:
         builder.add<brayns::GetRendererTypeEntrypoint>(engine);
         builder.add<brayns::GetSceneEntrypoint>(scene);
         builder.add<brayns::GetSimulationParametersEntrypoint>(simulation);
-        builder.add<brayns::ImageJpegEntrypoint>(application, engine);
         builder.add<brayns::InspectEntrypoint>(engine);
         builder.add<brayns::QuitEntrypoint>(engine);
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
         builder.add<brayns::RemoveModelEntrypoint>(models, simulation);
-        builder.add<brayns::UploadModelEntrypoint>(models, loaders, simulation, token);
+        builder.add<brayns::RenderImageEntrypoint>(application, std::move(render));
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
         builder.add<brayns::SetCameraLookAtEntrypoint>(engine);
         builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::SetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::SetMaterialCarPaint>(models);
-        builder.add<brayns::SetMaterialPhong>(models);
         builder.add<brayns::SetMaterialEmissive>(models);
         builder.add<brayns::SetMaterialGlass>(models);
         builder.add<brayns::SetMaterialMatte>(models);
         builder.add<brayns::SetMaterialMetal>(models);
+        builder.add<brayns::SetMaterialPhong>(models);
         builder.add<brayns::SetMaterialPlastic>(models);
         builder.add<brayns::SetModelTransferFunctionEntrypoint>(models);
         builder.add<brayns::SetRendererInteractiveEntrypoint>(engine);
         builder.add<brayns::SetRendererProductionEntrypoint>(engine);
         builder.add<brayns::SetSimulationParametersEntrypoint>(simulation);
-        builder.add<brayns::SnapshotEntrypoint>(engine, interface);
+        builder.add<brayns::SnapshotEntrypoint>(engine, token);
         builder.add<brayns::TriggerJpegStreamEntrypoint>(stream);
         builder.add<brayns::UpdateModelEntrypoint>(models);
+        builder.add<brayns::UploadModelEntrypoint>(models, loaders, simulation, token);
         builder.add<brayns::VersionEntrypoint>();
     }
 };

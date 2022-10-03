@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
-from collections.abc import Callable
 
 from .jsonrpc import JsonRpcManager
 from .websocket import WebSocketListener
@@ -27,17 +26,16 @@ from .websocket import WebSocketListener
 
 class Listener(WebSocketListener):
 
-    def __init__(self, logger: logging.Logger, binary_handler: Callable[[bytes], None], manager: JsonRpcManager) -> None:
+    def __init__(self, logger: logging.Logger, manager: JsonRpcManager) -> None:
         self._logger = logger
         self._manager = manager
-        self._binary_handler = binary_handler
 
     def on_binary(self, data: bytes) -> None:
         self._logger.info('Binary frame received of %d bytes.', len(data))
         self._logger.debug('Reply binary frame data: "%s".', data)
-        self._binary_handler(data)
+        self._manager.process_binary(data)
 
     def on_text(self, data: str) -> None:
         self._logger.info('Text frame received of %d chars.', len(data))
         self._logger.debug('Reply text frame data: "%s".', data)
-        self._manager.process_message(data)
+        self._manager.process_text(data)

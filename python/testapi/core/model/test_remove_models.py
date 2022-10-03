@@ -30,7 +30,7 @@ class TestRemoveModels(SimpleTestCase):
         model3 = brayns.add_geometries(self.instance, [brayns.Sphere(2)])
         brayns.remove_models(self.instance, [1, 2])
         brayns.get_model(self.instance, 0)
-        with self.assertRaises(brayns.RequestError):
+        with self.assertRaises(brayns.JsonRpcError):
             brayns.get_model(self.instance, 1)
-        with self.assertRaises(brayns.RequestError):
+        with self.assertRaises(brayns.JsonRpcError):
             brayns.get_model(self.instance, 2)

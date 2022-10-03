@@ -18,16 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json
 import unittest
 
-from brayns.network import (
-    JsonRpcDispatcher,
-    deserialize_error,
-    deserialize_progress,
-    deserialize_reply,
-)
+from brayns.network import JsonRpcDispatcher
 
+from .messages.mock_error import MockError
+from .messages.mock_progress import MockProgress
+from .messages.mock_reply import MockReply
 from .mock_json_rpc_listener import MockJsonRpcListener
 
 
@@ -37,47 +34,34 @@ class TestJsonRpcDispatcher(unittest.TestCase):
         self._listener = MockJsonRpcListener()
         self._dispatcher = JsonRpcDispatcher(self._listener)
 
-    def test_dispatch_reply(self) -> None:
-        reply = {
-            'id': 1,
-            'result': [1, 2, 3]
-        }
-        self._dispatcher.dispatch(json.dumps(reply))
+    def test_dispatch_binary(self) -> None:
+        data = MockReply.binary
+        self._dispatcher.dispatch_binary(data)
         test = self._listener.get_data()
-        ref = deserialize_reply(reply)
-        self.assertEqual(test, ref)
+        self.assertEqual(test, MockReply.binary_reply)
 
-    def test_dispatch_error(self) -> None:
-        error = {
-            'id': 1,
-            'error': {
-                'code': 1,
-                'message': 'test'
-            }
-        }
-        self._dispatcher.dispatch(json.dumps(error))
+    def test_dispatch_text_reply(self) -> None:
+        data = MockReply.text
+        self._dispatcher.dispatch_text(data)
         test = self._listener.get_data()
-        ref = deserialize_error(error)
-        self.assertEqual(test, ref)
+        self.assertEqual(test, MockReply.reply)
 
-    def test_dispatch_progress(self) -> None:
-        progress = {
-            'params': {
-                'id': 1,
-                'operation': 'test',
-                'amount': 0.5
-            }
-        }
-        self._dispatcher.dispatch(json.dumps(progress))
+    def test_dispatch_text_error(self) -> None:
+        data = MockError.data
+        self._dispatcher.dispatch_text(data)
         test = self._listener.get_data()
-        ref = deserialize_progress(progress)
-        self.assertEqual(test, ref)
+        self.assertEqual(test, MockError.error)
 
-    def test_dispatch_invalid_frame(self) -> None:
-        invalid_frame = 'sdfbxcbxbcv'
-        self._dispatcher.dispatch(invalid_frame)
-        data, e = self._listener.get_data()
-        self.assertEqual(data, invalid_frame)
+    def test_dispatch_text_progress(self) -> None:
+        data = MockProgress.data
+        self._dispatcher.dispatch_text(data)
+        test = self._listener.get_data()
+        self.assertEqual(test, MockProgress.progress)
+
+    def test_dispatch_text_invalid_frame(self) -> None:
+        data = 'sdfbxcbxbcv'
+        self._dispatcher.dispatch_text(data)
+        e = self._listener.get_data()
         self.assertIsInstance(e, Exception)
 
 

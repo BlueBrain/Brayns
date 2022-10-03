@@ -44,43 +44,43 @@ class TestInstance(SimpleTestCase):
         test = self.instance.request('schema', {'endpoint': 'get-version'})
         self.assertIsInstance(test, dict)
         self.assertTrue(test)
-        with self.assertRaises(brayns.RequestError):
+        with self.assertRaises(brayns.JsonRpcError):
             self.instance.request('invalid')
 
     def test_task(self) -> None:
         task = self.instance.task('snapshot', {})
         progresses = list(task)
-        result = task.wait_for_result()
+        result = task.wait_for_reply()
         self.assertTrue(progresses)
         self.assertIsInstance(result, dict)
         self.assertTrue(result)
 
     def test_is_running(self) -> None:
-        request = brayns.Request(0, 'registry')
+        request = brayns.JsonRpcRequest(0, 'registry')
         task = self.instance.send(request)
         self.assertTrue(self.instance.is_running(0))
-        task.wait_for_result()
+        task.wait_for_reply()
 
     def test_send(self) -> None:
-        string = brayns.Request('test', 'registry')
+        string = brayns.JsonRpcRequest('test', 'registry')
         task = self.instance.send(string)
-        task.wait_for_result()
-        integer = brayns.Request(0, 'registry')
+        task.wait_for_reply()
+        integer = brayns.JsonRpcRequest(0, 'registry')
         task = self.instance.send(integer)
-        task.wait_for_result()
-        notification = brayns.Request(None, 'registry')
+        task.wait_for_reply()
+        notification = brayns.JsonRpcRequest(None, 'registry')
         task = self.instance.send(notification)
-        task.wait_for_result()
+        task.wait_for_reply()
 
     def test_poll(self) -> None:
         task = self.instance.task('registry')
         self.instance.poll()
         self.assertTrue(task.is_ready())
-        task.wait_for_result()
+        task.wait_for_reply()
 
     def test_cancel(self) -> None:
-        request = brayns.Request(0, 'snapshot', {})
+        request = brayns.JsonRpcRequest(0, 'snapshot', {})
         task = self.instance.send(request)
         self.instance.cancel(0)
-        with self.assertRaises(brayns.RequestError):
-            task.wait_for_result()
+        with self.assertRaises(brayns.JsonRpcError):
+            task.wait_for_reply()

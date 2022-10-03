@@ -21,13 +21,20 @@
 
 #include "JsonRpcSender.h"
 
+#include <limits>
+
 #include <brayns/json/Json.h>
 
 #include <brayns/network/client/ClientSender.h>
 
+#include <brayns/utils/binary/ByteConverter.h>
+#include <brayns/utils/binary/ByteOrder.h>
+
+#include "JsonRpcFactory.h"
+
 namespace
 {
-class MessageSenderHelper
+class TextSender
 {
 public:
     template<typename MessageType>
@@ -35,6 +42,64 @@ public:
     {
         auto json = brayns::Json::stringify(message);
         auto packet = brayns::OutputPacket::fromText(json);
+        brayns::ClientSender::send(packet, client);
+    }
+};
+
+class BinaryFormatter
+{
+public:
+    static std::string format(const brayns::ReplyMessage &message, std::string_view binary)
+    {
+        auto json = brayns::Json::stringify(message);
+        auto size = json.size();
+        auto result = _formatHeader(size);
+        result.append(json);
+        result.append(binary);
+        return result;
+    }
+
+private:
+    static std::string _formatHeader(size_t size)
+    {
+        if (size > std::numeric_limits<uint32_t>::max())
+        {
+            throw brayns::InternalErrorException("Reply JSON too big: " + std::to_string(size));
+        }
+        auto jsonSize = static_cast<uint32_t>(size);
+        return _formatJsonSize(jsonSize);
+    }
+
+    static std::string _formatJsonSize(uint32_t size)
+    {
+        auto bytes = brayns::ByteConverter::getBytes(size);
+        auto stride = sizeof(size);
+        brayns::ByteOrderHelper::convertFromSystemByteOrder(bytes, brayns::ByteOrder::LittleEndian);
+        return {bytes, stride};
+    }
+};
+
+class BinarySender
+{
+public:
+    static void send(const brayns::ReplyMessage &message, std::string_view binary, const brayns::ClientRef &client)
+    {
+        try
+        {
+            _send(message, binary, client);
+        }
+        catch (const brayns::JsonRpcException &e)
+        {
+            auto error = brayns::JsonRpcFactory::error(message, e);
+            TextSender::send(error, client);
+        }
+    }
+
+private:
+    static void _send(const brayns::ReplyMessage &message, std::string_view binary, const brayns::ClientRef &client)
+    {
+        auto data = BinaryFormatter::format(message, binary);
+        auto packet = brayns::OutputPacket::fromBinary(data);
         brayns::ClientSender::send(packet, client);
     }
 };
@@ -48,12 +113,21 @@ void JsonRpcSender::reply(const ReplyMessage &message, const ClientRef &client)
     {
         return;
     }
-    MessageSenderHelper::send(message, client);
+    TextSender::send(message, client);
+}
+
+void JsonRpcSender::reply(const ReplyMessage &message, std::string_view binary, const ClientRef &client)
+{
+    if (message.id.isEmpty())
+    {
+        return;
+    }
+    BinarySender::send(message, binary, client);
 }
 
 void JsonRpcSender::error(const ErrorMessage &message, const ClientRef &client)
 {
-    MessageSenderHelper::send(message, client);
+    TextSender::send(message, client);
 }
 
 void JsonRpcSender::progress(const ProgressMessage &message, const ClientRef &client)
@@ -62,6 +136,6 @@ void JsonRpcSender::progress(const ProgressMessage &message, const ClientRef &cl
     {
         return;
     }
-    MessageSenderHelper::send(message, client);
+    TextSender::send(message, client);
 }
 } // namespace brayns

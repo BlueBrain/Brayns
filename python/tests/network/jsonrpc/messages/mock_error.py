@@ -19,11 +19,37 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import json
+from typing import Any
 
-from .json_rpc_request import JsonRpcRequest
-from .serialize_request import serialize_request
+import brayns
 
 
-def serialize_request_as_json(request: JsonRpcRequest) -> str:
-    message = serialize_request(request)
-    return json.dumps(message)
+class MockError:
+
+    @classmethod
+    @property
+    def error(cls) -> brayns.JsonRpcError:
+        return brayns.JsonRpcError(
+            id=0,
+            code=1,
+            message='test',
+            data=[1, 2, 3],
+        )
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'jsonrpc': '2.0',
+            'id': 0,
+            'error': {
+                'code': 1,
+                'message': 'test',
+                'data': [1, 2, 3],
+            }
+        }
+
+    @classmethod
+    @property
+    def data(cls) -> str:
+        return json.dumps(cls.message, sort_keys=True)

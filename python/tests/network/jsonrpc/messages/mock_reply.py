@@ -18,27 +18,47 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import json
 from typing import Any
 
 import brayns
 
 
-class MockInstance(brayns.Instance):
+class MockReply:
 
-    def __init__(self, result: Any = None, binary: bytes = b'') -> None:
-        self._result = result
-        self._binary = binary
-        self.method = ''
-        self.params: Any = None
-        self.binary = b''
-
-    def send(self, request: brayns.JsonRpcRequest) -> brayns.JsonRpcFuture:
-        self.method = request.method
-        self.params = request.params
-        self.binary = request.binary
-        reply = brayns.JsonRpcReply(
-            id=request.id,
-            result=self._result,
-            binary=self._binary,
+    @classmethod
+    @property
+    def reply(cls) -> brayns.JsonRpcReply:
+        return brayns.JsonRpcReply(
+            id=0,
+            result=123,
         )
-        return brayns.JsonRpcFuture.from_reply(reply)
+
+    @classmethod
+    @property
+    def binary_reply(cls) -> brayns.JsonRpcReply:
+        reply = cls.reply
+        reply.binary = b'123'
+        return reply
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'jsonrpc': '2.0',
+            'id': 0,
+            'result': 123,
+        }
+
+    @classmethod
+    @property
+    def text(cls) -> str:
+        return json.dumps(cls.message, sort_keys=True)
+
+    @classmethod
+    @property
+    def binary(cls) -> bytes:
+        text = cls.text.encode('utf-8')
+        size = len(text).to_bytes(4, byteorder='little', signed=False)
+        binary = cls.binary_reply.binary
+        return b''.join([size, text, binary])

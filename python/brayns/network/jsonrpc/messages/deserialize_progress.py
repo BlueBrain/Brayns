@@ -21,15 +21,12 @@
 from typing import Any
 
 from .json_rpc_progress import JsonRpcProgress
-from .request_progress import RequestProgress
 
 
 def deserialize_progress(message: dict[str, Any]) -> JsonRpcProgress:
     params = message['params']
     return JsonRpcProgress(
         id=params['id'],
-        params=RequestProgress(
-            operation=params['operation'],
-            amount=params['amount'],
-        ),
+        operation=params['operation'],
+        amount=params['amount'],
     )

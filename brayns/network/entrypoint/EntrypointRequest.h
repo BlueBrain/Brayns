@@ -129,6 +129,18 @@ public:
     }
 
     /**
+     * @brief Send a success reply with the given result and binary data.
+     *
+     * @param result Result field of the reply.
+     * @param binary Binary data of the reply.
+     */
+    void reply(const ResultType &result, std::string_view binary) const
+    {
+        auto json = Json::serialize(result);
+        _request.reply(json, binary);
+    }
+
+    /**
      * @brief Send an error message in case of exception.
      *
      * @param e Source of the error.

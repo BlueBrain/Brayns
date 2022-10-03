@@ -19,34 +19,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ImageJpegEntrypoint.h"
-
-#include <brayns/utils/image/ImageEncoder.h>
+#include "RenderInterface.h"
 
 namespace brayns
 {
-ImageJpegEntrypoint::ImageJpegEntrypoint(const ApplicationParameters &parameters, Engine &engine)
-    : _parameters(parameters)
-    , _engine(engine)
+bool RenderInterface::render()
 {
+    return false;
 }
 
-std::string ImageJpegEntrypoint::getMethod() const
+Image RenderInterface::getCurrentFrame() const
 {
-    return "image-jpeg";
+    auto info = ImageInfo();
+    info.width = 3;
+    info.height = 1;
+    info.channelCount = 1;
+    info.channelSize = 1;
+    return Image(info, "123");
 }
 
-std::string ImageJpegEntrypoint::getDescription() const
+size_t RenderInterface::getAccumulation() const
 {
-    return "Take a snapshot at JPEG format";
+    return 0;
 }
 
-void ImageJpegEntrypoint::onRequest(const Request &request)
+size_t RenderInterface::getMaxAccumulation() const
 {
-    auto &framebuffer = _engine.getFramebuffer();
-    auto quality = _parameters.getJpegQuality();
-    auto image = framebuffer.getImage();
-    auto data = ImageEncoder::encodeToBase64(image, "jpg", quality);
-    request.reply({data});
+    return 1;
 }
 } // namespace brayns

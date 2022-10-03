@@ -21,26 +21,16 @@
 
 #pragma once
 
-#include <brayns/engine/core/Engine.h>
-
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ImageBase64Message.h>
-
-#include <brayns/common/parameters/ApplicationParameters.h>
+#include "IRenderInterface.h"
 
 namespace brayns
 {
-class ImageJpegEntrypoint : public Entrypoint<EmptyMessage, ImageBase64Message>
+class RenderInterface : public IRenderInterface
 {
 public:
-    ImageJpegEntrypoint(const ApplicationParameters &parameters, Engine &engine);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
-
-private:
-    const ApplicationParameters &_parameters;
-    Engine &_engine;
+    virtual bool render() override;
+    virtual Image getCurrentFrame() const override;
+    virtual size_t getAccumulation() const override;
+    virtual size_t getMaxAccumulation() const override;
 };
 } // namespace brayns

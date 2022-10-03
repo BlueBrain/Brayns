@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include <spdlog/fmt/ostr.h>
 
 #include <brayns/network/client/ClientRef.h>
@@ -97,6 +99,17 @@ public:
      * @param result Message content stored under "result" in the reply.
      */
     void reply(const JsonValue &result) const;
+
+    /**
+     * @brief Send a reply message with binary data in case of success.
+     *
+     * The message sent will be formatted according to the RequestMessage
+     * stored in the instance.
+     *
+     * @param result Message content stored under "result" in the reply.
+     * @param binary Binary data packed with JSON reply.
+     */
+    void reply(const JsonValue &result, std::string_view binary) const;
 
     /**
      * @brief Send an error message in case of exception.

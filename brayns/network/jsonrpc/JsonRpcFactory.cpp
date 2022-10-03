@@ -43,6 +43,17 @@ ErrorMessage JsonRpcFactory::error(const RequestMessage &request, const JsonRpcE
     return error;
 }
 
+ErrorMessage JsonRpcFactory::error(const ReplyMessage &reply, const JsonRpcException &e)
+{
+    ErrorMessage error;
+    error.jsonrpc = reply.jsonrpc;
+    error.id = reply.id;
+    error.error.code = e.getCode();
+    error.error.message = e.what();
+    error.error.data = e.getData();
+    return error;
+}
+
 ErrorMessage JsonRpcFactory::error(const JsonRpcException &e)
 {
     ErrorMessage error;
