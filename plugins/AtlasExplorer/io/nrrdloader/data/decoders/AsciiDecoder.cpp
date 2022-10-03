@@ -20,122 +20,16 @@
 
 #include "AsciiDecoder.h"
 
-#include <brayns/utils/StringUtils.h>
+#include "common/Tokenizer.h"
 
-#include <io/nrrdloader/data/DataFlipper.h>
+#include <brayns/utils/string/StringCounter.h>
+#include <brayns/utils/string/StringExtractor.h>
+#include <brayns/utils/string/StringParser.h>
+
+#include <stdexcept>
 
 namespace
 {
-template<typename T>
-class StringCast
-{
-public:
-    static T cast(std::string_view token)
-    {
-        throw std::runtime_error("Not implemented");
-    }
-};
-
-template<>
-class StringCast<char>
-{
-public:
-    static char cast(std::string_view token)
-    {
-        return token.at(0);
-    }
-};
-
-template<>
-class StringCast<uint8_t>
-{
-public:
-    static uint8_t cast(std::string_view token)
-    {
-        return static_cast<uint8_t>(token.at(0));
-    }
-};
-
-template<>
-class StringCast<int16_t>
-{
-public:
-    static int16_t cast(std::string_view token)
-    {
-        return static_cast<int16_t>(std::stoi(std::string(token)));
-    }
-};
-
-template<>
-class StringCast<uint16_t>
-{
-public:
-    static uint16_t cast(std::string_view token)
-    {
-        return static_cast<uint16_t>(std::stoul(std::string(token)));
-    }
-};
-
-template<>
-class StringCast<int32_t>
-{
-public:
-    static uint32_t cast(std::string_view token)
-    {
-        return std::stoi(std::string(token));
-    }
-};
-
-template<>
-class StringCast<uint32_t>
-{
-public:
-    static uint32_t cast(std::string_view token)
-    {
-        return std::stoul(std::string(token));
-    }
-};
-
-template<>
-class StringCast<int64_t>
-{
-public:
-    static int64_t cast(std::string_view token)
-    {
-        return std::stol(std::string(token));
-    }
-};
-
-template<>
-class StringCast<uint64_t>
-{
-public:
-    static uint64_t cast(std::string_view token)
-    {
-        return std::stoul(std::string(token));
-    }
-};
-
-template<>
-class StringCast<float>
-{
-public:
-    static float cast(std::string_view token)
-    {
-        return std::stof(std::string(token));
-    }
-};
-
-template<>
-class StringCast<double>
-{
-public:
-    static double cast(std::string_view token)
-    {
-        return std::stod(std::string(token));
-    }
-};
-
 class AsciiParser
 {
 public:
@@ -146,83 +40,55 @@ public:
 
         for (size_t i = 0; i < tokens.size(); ++i)
         {
-            result[i] = StringCast<T>::cast(tokens[i]);
+            brayns::StringParser<T>::parse(tokens[i], result[i]);
         }
         return result;
     }
 };
 
+template<typename T>
 class DecodedDataBuilder
 {
 public:
-    template<typename T>
-    static std::unique_ptr<IDataMangler> parseAndBuild(
-        const NRRDHeader &header,
-        const std::vector<std::string_view> &tokens)
+    static std::unique_ptr<IDataMangler> parseAndBuild(const std::vector<std::string_view> &tokens)
     {
         auto data = AsciiParser::parse<T>(tokens);
-        auto flippedData = DataFlipper::flipVertically(header, data);
-        return std::make_unique<DataMangler<T>>(std::move(flippedData));
+        return std::make_unique<DataMangler<T>>(std::move(data));
     }
 };
 }
 
 std::unique_ptr<IDataMangler> AsciiDecoder::decode(const NRRDHeader &header, std::string_view input) const
 {
-    const auto tokens = brayns::string_utils::split(input, " /r/v/f/t/n");
+    auto tokens = Tokenizer::fromView(input);
 
-    const auto expectedSize = NRRDExpectedSize::compute(header);
+    auto expectedSize = NRRDExpectedSize::compute(header);
     if (expectedSize != tokens.size())
     {
         throw std::runtime_error("Expected size and parsed element count is different");
     }
 
-    const auto type = header.type;
-
-    if (type == NRRDType::Char)
+    switch (header.type)
     {
-        return DecodedDataBuilder::parseAndBuild<char>(header, tokens);
+    case NRRDType::Char:
+        return DecodedDataBuilder<char>::parseAndBuild(tokens);
+    case NRRDType::UnsignedChar:
+        return DecodedDataBuilder<uint8_t>::parseAndBuild(tokens);
+    case NRRDType::Short:
+        return DecodedDataBuilder<int16_t>::parseAndBuild(tokens);
+    case NRRDType::UnsignedShort:
+        return DecodedDataBuilder<uint16_t>::parseAndBuild(tokens);
+    case NRRDType::Int:
+        return DecodedDataBuilder<int32_t>::parseAndBuild(tokens);
+    case NRRDType::UnsignedInt:
+        return DecodedDataBuilder<uint32_t>::parseAndBuild(tokens);
+    case NRRDType::Long:
+        return DecodedDataBuilder<int64_t>::parseAndBuild(tokens);
+    case NRRDType::UnsignedLong:
+        return DecodedDataBuilder<uint64_t>::parseAndBuild(tokens);
+    case NRRDType::Float:
+        return DecodedDataBuilder<float>::parseAndBuild(tokens);
+    default:
+        return DecodedDataBuilder<double>::parseAndBuild(tokens);
     }
-
-    if (type == NRRDType::UnsignedChar)
-    {
-        return DecodedDataBuilder::parseAndBuild<uint8_t>(header, tokens);
-    }
-
-    if (type == NRRDType::Short)
-    {
-        return DecodedDataBuilder::parseAndBuild<int16_t>(header, tokens);
-    }
-
-    if (type == NRRDType::UnsignedShort)
-    {
-        return DecodedDataBuilder::parseAndBuild<uint16_t>(header, tokens);
-    }
-
-    if (type == NRRDType::Int)
-    {
-        return DecodedDataBuilder::parseAndBuild<int32_t>(header, tokens);
-    }
-
-    if (type == NRRDType::UnsignedInt)
-    {
-        return DecodedDataBuilder::parseAndBuild<uint32_t>(header, tokens);
-    }
-
-    if (type == NRRDType::Long)
-    {
-        return DecodedDataBuilder::parseAndBuild<int64_t>(header, tokens);
-    }
-
-    if (type == NRRDType::UnsignedLong)
-    {
-        return DecodedDataBuilder::parseAndBuild<uint64_t>(header, tokens);
-    }
-
-    if (type == NRRDType::Float)
-    {
-        return DecodedDataBuilder::parseAndBuild<float>(header, tokens);
-    }
-
-    return DecodedDataBuilder::parseAndBuild<double>(header, tokens);
 }

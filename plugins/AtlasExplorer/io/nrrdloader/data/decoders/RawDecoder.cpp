@@ -20,10 +20,9 @@
 
 #include "RawDecoder.h"
 
-#include <io/nrrdloader/data/DataFlipper.h>
-
 #include <cassert>
 #include <cstring>
+#include <stdexcept>
 
 namespace
 {
@@ -72,6 +71,38 @@ public:
         default:
             throw std::runtime_error("Unsupported type");
         }
+    }
+};
+
+class ExpectedSizeCheck
+{
+public:
+    static void fromAvailable(const NRRDHeader &header, std::string_view input)
+    {
+        auto type = header.type;
+        auto typeSize = NRRDTypeSize::inBytes(type);
+        auto availableSize = input.size() / typeSize;
+        auto expectedSize = NRRDExpectedSize::compute(header);
+        if (availableSize != expectedSize)
+        {
+            throw std::runtime_error("Expected size and parsed element count is different");
+        }
+    }
+};
+
+class HeaderEndiannessExtractor
+{
+public:
+    static NRRDEndianness extract(const NRRDHeader &header)
+    {
+        auto type = header.type;
+        auto typeSize = NRRDTypeSize::inBytes(type);
+        auto &endianness = header.endian;
+        if (typeSize > 1 && !endianness.has_value())
+        {
+            throw std::runtime_error("Binary data larger than 1 byte requires endianness");
+        }
+        return endianness.value_or(NRRDEndianness::Big);
     }
 };
 
@@ -188,12 +219,11 @@ template<typename T>
 class DecodedDataBuilder
 {
 public:
-    static std::unique_ptr<IDataMangler> parseAndBuild(const NRRDHeader &header, std::string_view input)
+    static std::unique_ptr<IDataMangler> parseAndBuild(NRRDEndianness endianness, std::string_view input)
     {
-        bool isLittleEndian = header.endian == NRRDEndianness::Little;
+        bool isLittleEndian = endianness == NRRDEndianness::Little;
         auto data = ByteAssemblerDecorator<T>::assemble(input, isLittleEndian);
-        auto flippedData = DataFlipper::flipVertically(header, data);
-        return std::make_unique<DataMangler<T>>(std::move(flippedData));
+        return std::make_unique<DataMangler<T>>(std::move(data));
     }
 };
 }
@@ -202,60 +232,31 @@ std::unique_ptr<IDataMangler> RawDecoder::decode(const NRRDHeader &header, std::
 {
     input = InputSanitizer::sanitize(input);
 
-    const auto type = header.type;
-    const auto typeSize = NRRDTypeSize::inBytes(type);
-    const auto availableSize = input.size() / typeSize;
-    const auto expectedSize = NRRDExpectedSize::compute(header);
+    ExpectedSizeCheck::fromAvailable(header, input);
 
-    if (availableSize != expectedSize)
+    auto endianness = HeaderEndiannessExtractor::extract(header);
+
+    switch (header.type)
     {
-        throw std::runtime_error("Expected size and parsed element count is different");
+    case NRRDType::Char:
+        return DecodedDataBuilder<char>::parseAndBuild(endianness, input);
+    case NRRDType::UnsignedChar:
+        return DecodedDataBuilder<uint8_t>::parseAndBuild(endianness, input);
+    case NRRDType::Short:
+        return DecodedDataBuilder<int16_t>::parseAndBuild(endianness, input);
+    case NRRDType::UnsignedShort:
+        return DecodedDataBuilder<uint16_t>::parseAndBuild(endianness, input);
+    case NRRDType::Int:
+        return DecodedDataBuilder<int32_t>::parseAndBuild(endianness, input);
+    case NRRDType::UnsignedInt:
+        return DecodedDataBuilder<uint32_t>::parseAndBuild(endianness, input);
+    case NRRDType::Long:
+        return DecodedDataBuilder<int64_t>::parseAndBuild(endianness, input);
+    case NRRDType::UnsignedLong:
+        return DecodedDataBuilder<uint64_t>::parseAndBuild(endianness, input);
+    case NRRDType::Float:
+        return DecodedDataBuilder<float>::parseAndBuild(endianness, input);
+    default:
+        return DecodedDataBuilder<double>::parseAndBuild(endianness, input);
     }
-
-    if (type == NRRDType::Char)
-    {
-        return DecodedDataBuilder<char>::parseAndBuild(header, input);
-    }
-
-    if (type == NRRDType::UnsignedChar)
-    {
-        return DecodedDataBuilder<uint8_t>::parseAndBuild(header, input);
-    }
-
-    if (type == NRRDType::Short)
-    {
-        return DecodedDataBuilder<int16_t>::parseAndBuild(header, input);
-    }
-
-    if (type == NRRDType::UnsignedShort)
-    {
-        return DecodedDataBuilder<uint16_t>::parseAndBuild(header, input);
-    }
-
-    if (type == NRRDType::Int)
-    {
-        return DecodedDataBuilder<int32_t>::parseAndBuild(header, input);
-    }
-
-    if (type == NRRDType::UnsignedInt)
-    {
-        return DecodedDataBuilder<uint32_t>::parseAndBuild(header, input);
-    }
-
-    if (type == NRRDType::Long)
-    {
-        return DecodedDataBuilder<int64_t>::parseAndBuild(header, input);
-    }
-
-    if (type == NRRDType::UnsignedLong)
-    {
-        return DecodedDataBuilder<uint64_t>::parseAndBuild(header, input);
-    }
-
-    if (type == NRRDType::Float)
-    {
-        return DecodedDataBuilder<float>::parseAndBuild(header, input);
-    }
-
-    return DecodedDataBuilder<double>::parseAndBuild(header, input);
 }
