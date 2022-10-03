@@ -50,10 +50,11 @@ class TestInstance(SimpleTestCase):
     def test_task(self) -> None:
         task = self.instance.task('snapshot', {})
         progresses = list(task)
-        result = task.wait_for_reply()
+        reply = task.wait_for_reply()
         self.assertTrue(progresses)
-        self.assertIsInstance(result, dict)
-        self.assertTrue(result)
+        self.assertIsInstance(reply.result, dict)
+        self.assertTrue(reply.result)
+        self.assertFalse(reply.binary)
 
     def test_is_running(self) -> None:
         request = brayns.JsonRpcRequest(0, 'registry')
