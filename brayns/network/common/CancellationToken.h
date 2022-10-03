@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/interface/INetworkInterface.h>
+#include <brayns/network/INetworkInterface.h>
 
 namespace brayns
 {

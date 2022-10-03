@@ -44,12 +44,4 @@ void EntrypointRegistry::add(EntrypointRef entrypoint)
     }
     _entrypoints.emplace(method, std::move(entrypoint));
 }
-
-void EntrypointRegistry::onCreate()
-{
-    for (auto &[method, entrypoint] : _entrypoints)
-    {
-        entrypoint.onCreate();
-    }
-}
 } // namespace brayns

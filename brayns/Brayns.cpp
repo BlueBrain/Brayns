@@ -66,6 +66,25 @@ private:
         }
     }
 };
+
+class NetworkStartup
+{
+public:
+    static bool isEnabled(brayns::PluginAPI &api)
+    {
+        auto &manager = api.getParametersManager();
+        auto &parameters = manager.getNetworkParameters();
+        auto &uri = parameters.getUri();
+        return !uri.empty();
+    }
+
+    static void run(brayns::NetworkManager &network, brayns::PluginManager &plugins)
+    {
+        network.registerEntrypoints();
+        plugins.forEach([&](auto &plugin) { plugin.registerEntrypoints(network); });
+        network.start();
+    }
+};
 } // namespace
 
 namespace brayns
@@ -103,6 +122,11 @@ Brayns::Brayns(int argc, const char **argv)
     LoggingStartup::run(_parametersManager);
     _loaderRegistry = LoaderRegistry::createWithCoreLoaders();
     _pluginManager.loadPlugins();
+    if (NetworkStartup::isEnabled(_pluginAPI))
+    {
+        _network.emplace(_pluginAPI);
+        NetworkStartup::run(*_network, _pluginManager);
+    }
 }
 
 Brayns::~Brayns()
@@ -116,8 +140,11 @@ Brayns::~Brayns()
 
 bool Brayns::commitAndRender()
 {
-    // Pre render plugins
-    _pluginManager.preRender();
+    // Poll socket before rendering.
+    if (_network)
+    {
+        _network->update();
+    }
 
     // Pre render engine
     _engine.preRender();
@@ -128,14 +155,11 @@ bool Brayns::commitAndRender()
     // Render new frame, if needed
     _engine.render();
 
-    // The parameters are modified on pluginManager.preRender, and processed on engine.preRender and engine.commit
+    // The parameters are modified on network update, and processed on engine.preRender and engine.commit
     _parametersManager.resetModified();
 
     // Post render engine
     _engine.postRender();
-
-    // Post render plugins
-    _pluginManager.postRender();
 
     return _engine.isRunning();
 }

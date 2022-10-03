@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/network/interface/INetworkInterface.h>
+#include <brayns/network/INetworkInterface.h>
 
 namespace brayns
 {
@@ -63,22 +63,6 @@ public:
     virtual void registerEntrypoints(INetworkInterface &interface)
     {
         (void)interface;
-    }
-
-    /**
-     * @brief Called on each update before rendering.
-     *
-     */
-    virtual void onPreRender()
-    {
-    }
-
-    /**
-     * @brief Called on each update after rendering.
-     *
-     */
-    virtual void onPostRender()
-    {
     }
 };
 } // namespace brayns

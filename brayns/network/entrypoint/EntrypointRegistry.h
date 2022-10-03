@@ -52,12 +52,6 @@ public:
     void add(EntrypointRef entrypoint);
 
     /**
-     * @brief Call onCreate() on all entrypoints.
-     *
-     */
-    void onCreate();
-
-    /**
      * @brief Iterate over all registered entrypoints.
      *
      * @tparam FunctorType Functor type.
@@ -67,6 +61,21 @@ public:
     void forEach(FunctorType functor) const
     {
         for (const auto &[method, entrypoint] : _entrypoints)
+        {
+            functor(entrypoint);
+        }
+    }
+
+    /**
+     * @brief Iterate over all registered entrypoints.
+     *
+     * @tparam FunctorType Functor type.
+     * @param functor Functor with signature void(EntrypointRef &).
+     */
+    template<typename FunctorType>
+    void forEach(FunctorType functor)
+    {
+        for (auto &[method, entrypoint] : _entrypoints)
         {
             functor(entrypoint);
         }

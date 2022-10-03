@@ -22,37 +22,23 @@
 #pragma once
 
 #include <brayns/network/client/ClientManager.h>
-#include <brayns/network/client/RequestBuffer.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/socket/ISocket.h>
-#include <brayns/network/stream/StreamManager.h>
 #include <brayns/network/task/TaskManager.h>
 
-#include <brayns/pluginapi/IPlugin.h>
 #include <brayns/pluginapi/PluginAPI.h>
+
+#include "INetworkInterface.h"
 
 namespace brayns
 {
-struct NetworkContext
-{
-    PluginAPI &api;
-    std::unique_ptr<INetworkInterface> interface;
-    std::unique_ptr<ISocket> socket;
-    ClientManager clients;
-    EntrypointRegistry entrypoints;
-    StreamManager stream;
-    TaskManager tasks;
-
-    NetworkContext(PluginAPI &pluginAPI);
-};
-
 /**
- * @brief Network manager plugin.
+ * @brief Network manager.
  *
- * Provide the network action interface and core entrypoints.
+ * Provide a network interface and register core entrypoints.
  *
  */
-class NetworkManager : public IPlugin
+class NetworkManager : public INetworkInterface
 {
 public:
     /**
@@ -62,11 +48,10 @@ public:
     NetworkManager(PluginAPI &api);
 
     /**
-     * @brief Get the interface to access network from plugins.
+     * @brief Register core entrypoints.
      *
-     * @return INetworkInterface& Network interface.
      */
-    INetworkInterface &getInterface();
+    void registerEntrypoints();
 
     /**
      * @brief Load schemas and call onCreate() of all entrypoints.
@@ -79,31 +64,30 @@ public:
     void start();
 
     /**
-     * @brief Initialize network components.
+     * @brief Poll socket and run pending tasks.
      *
      */
-    virtual void onCreate() override;
+    void update();
 
     /**
-     * @brief Register core entrypoints.
+     * @brief Register an entrypoint.
      *
-     * @param interface Network access.
+     * @param entrypoint Entrypoint to register.
      */
-    virtual void registerEntrypoints(INetworkInterface &interface) override;
+    virtual void add(EntrypointRef entrypoint) override;
 
     /**
-     * @brief Notify entrypoints.
+     * @brief Poll socket to receive incoming messages.
      *
+     * Automatically called in update().
      */
-    virtual void onPreRender() override;
-
-    /**
-     * @brief Notify entrypoints and stream image if needed.
-     *
-     */
-    virtual void onPostRender() override;
+    virtual void poll() override;
 
 private:
-    NetworkContext _context;
+    PluginAPI &_api;
+    std::unique_ptr<ISocket> _socket;
+    ClientManager _clients;
+    EntrypointRegistry _entrypoints;
+    TaskManager _tasks;
 };
 } // namespace brayns

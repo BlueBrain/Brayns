@@ -22,10 +22,13 @@
 
 #pragma once
 
+#include <optional>
+
 #include <brayns/PluginManager.h>
 #include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/core/Engine.h>
 #include <brayns/io/LoaderRegistry.h>
+#include <brayns/network/NetworkManager.h>
 
 namespace brayns
 {
@@ -100,5 +103,6 @@ private:
     Engine _engine;
     SystemPluginAPI _pluginAPI;
     PluginManager _pluginManager;
+    std::optional<NetworkManager> _network;
 };
 } // namespace brayns

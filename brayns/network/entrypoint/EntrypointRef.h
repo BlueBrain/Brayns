@@ -45,10 +45,16 @@ public:
     EntrypointRef(std::string plugin, std::unique_ptr<IEntrypoint> entrypoint);
 
     /**
-     * @brief Call implementation onCreate() and build JSON schema.
+     * @brief Build entrypoint JSON schema and store it internally.
      *
      */
-    void onCreate();
+    void buildSchema();
+
+    /**
+     * @brief Call implementation onCreate().
+     *
+     */
+    void onCreate() const;
 
     /**
      * @brief Call implementation onRequest() with given request.
@@ -59,16 +65,10 @@ public:
     void onRequest(const JsonRpcRequest &request) const;
 
     /**
-     * @brief Call implementation onPreRender().
+     * @brief Call implementation onUpdate().
      *
      */
-    void onPreRender() const;
-
-    /**
-     * @brief Call implementation onPostRender().
-     *
-     */
-    void onPostRender() const;
+    void onUpdate() const;
 
     /**
      * @brief Call implementation onCancel().
@@ -135,10 +135,10 @@ public:
     const std::optional<JsonSchema> &getResultSchema() const;
 
     /**
-     * @brief Check if the request can be cancelled.
+     * @brief Check if the request can be cancelled and sends progresses.
      *
-     * @return true Can be cancelled.
-     * @return false Cannot be cancelled.
+     * @return true Asynchronous.
+     * @return false Synchronous (blocking).
      */
     bool isAsync() const;
 

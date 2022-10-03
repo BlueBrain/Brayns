@@ -25,7 +25,6 @@
 
 #include <brayns/network/dispatch/RequestDispatcher.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/network/interface/NetworkInterface.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/network/jsonrpc/JsonRpcFactory.h>
 #include <brayns/network/jsonrpc/JsonRpcParser.h>
@@ -63,7 +62,6 @@
 #include <brayns/network/entrypoints/SchemaEntrypoint.h>
 #include <brayns/network/entrypoints/SimulationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/SnapshotEntrypoint.h>
-#include <brayns/network/entrypoints/TriggerJpegStreamEntrypoint.h>
 #include <brayns/network/entrypoints/UpdateModelEntrypoint.h>
 #include <brayns/network/entrypoints/UploadModelEntrypoint.h>
 #include <brayns/network/entrypoints/VersionEntrypoint.h>
@@ -73,11 +71,12 @@ namespace
 class CoreEntrypointRegistry
 {
 public:
-    static void registerEntrypoints(brayns::NetworkContext &context)
+    static void registerEntrypoints(
+        brayns::INetworkInterface &interface,
+        brayns::PluginAPI &api,
+        const brayns::EntrypointRegistry &entrypoints,
+        brayns::TaskManager &tasks)
     {
-        auto &api = context.api;
-        auto &interface = *context.interface;
-
         auto &parameters = api.getParametersManager();
         auto &application = parameters.getApplicationParameters();
         auto &simulation = parameters.getSimulationParameters();
@@ -87,10 +86,6 @@ public:
         auto &models = scene.getModels();
 
         auto &loaders = api.getLoaderRegistry();
-
-        auto &entrypoints = context.entrypoints;
-        auto &tasks = context.tasks;
-        auto &stream = context.stream;
 
         auto render = std::make_unique<brayns::RenderInterface>();
 
@@ -156,7 +151,6 @@ public:
         builder.add<brayns::SetRendererProductionEntrypoint>(engine);
         builder.add<brayns::SetSimulationParametersEntrypoint>(simulation);
         builder.add<brayns::SnapshotEntrypoint>(engine, token);
-        builder.add<brayns::TriggerJpegStreamEntrypoint>(stream);
         builder.add<brayns::UpdateModelEntrypoint>(models);
         builder.add<brayns::UploadModelEntrypoint>(models, loaders, simulation, token);
         builder.add<brayns::VersionEntrypoint>();
@@ -166,185 +160,71 @@ public:
 class SocketFactory
 {
 public:
-    static std::unique_ptr<brayns::ISocket> create(brayns::NetworkContext &context)
+    static std::unique_ptr<brayns::ISocket> createSocket(
+        brayns::PluginAPI &api,
+        std::unique_ptr<brayns::ISocketListener> listener)
     {
-        auto &parameters = _getParameters(context);
-        auto listener = _createListener(context);
+        auto &manager = api.getParametersManager();
+        auto &parameters = manager.getNetworkParameters();
+        return createSocket(parameters, std::move(listener));
+    }
+
+    static std::unique_ptr<brayns::ISocket> createSocket(
+        const brayns::NetworkParameters &parameters,
+        std::unique_ptr<brayns::ISocketListener> listener)
+    {
         if (parameters.isClient())
         {
             return std::make_unique<brayns::ClientSocket>(parameters, std::move(listener));
         }
         return std::make_unique<brayns::ServerSocket>(parameters, std::move(listener));
     }
-
-private:
-    static const brayns::NetworkParameters &_getParameters(brayns::NetworkContext &context)
-    {
-        auto &api = context.api;
-        auto &manager = api.getParametersManager();
-        return manager.getNetworkParameters();
-    }
-
-    static std::unique_ptr<brayns::ISocketListener> _createListener(brayns::NetworkContext &context)
-    {
-        auto &clients = context.clients;
-        auto &entrypoints = context.entrypoints;
-        auto &tasks = context.tasks;
-        return std::make_unique<brayns::SocketListener>(clients, entrypoints, tasks);
-    }
-};
-
-class NetworkInitialization
-{
-public:
-    static void run(brayns::NetworkContext &context)
-    {
-        _createSocket(context);
-        _createInterface(context);
-    }
-
-private:
-    static void _createSocket(brayns::NetworkContext &context)
-    {
-        context.socket = SocketFactory::create(context);
-    }
-
-    static void _createInterface(brayns::NetworkContext &context)
-    {
-        auto &entrypoints = context.entrypoints;
-        auto &socket = *context.socket;
-        context.interface = std::make_unique<brayns::NetworkInterface>(entrypoints, socket);
-    }
-};
-
-class NetworkStartup
-{
-public:
-    static void run(brayns::NetworkContext &context)
-    {
-        _notifyEntrypoints(context);
-        _startSocket(context);
-    }
-
-private:
-    static void _notifyEntrypoints(brayns::NetworkContext &context)
-    {
-        auto &entrypoints = context.entrypoints;
-        entrypoints.onCreate();
-    }
-
-    static void _startSocket(brayns::NetworkContext &context)
-    {
-        auto &socket = *context.socket;
-        socket.start();
-    }
-};
-
-class NetworkPreRender
-{
-public:
-    static void run(brayns::NetworkContext &context)
-    {
-        _pollSocket(context);
-        _runTasks(context);
-        _notifyEntrypoints(context);
-    }
-
-private:
-    static void _pollSocket(brayns::NetworkContext &context)
-    {
-        auto &socket = *context.socket;
-        socket.poll();
-    }
-
-    static void _runTasks(brayns::NetworkContext &context)
-    {
-        auto &tasks = context.tasks;
-        tasks.runAllTasks();
-    }
-
-    static void _notifyEntrypoints(brayns::NetworkContext &context)
-    {
-        auto &entrypoints = context.entrypoints;
-        entrypoints.forEach([](auto &entrypoint) { entrypoint.onPreRender(); });
-    }
-};
-
-class NetworkPostRender
-{
-public:
-    static void run(brayns::NetworkContext &context)
-    {
-        _notifyEntrypoints(context);
-        _broadcastImage(context);
-    }
-
-private:
-    static void _notifyEntrypoints(brayns::NetworkContext &context)
-    {
-        auto &entrypoints = context.entrypoints;
-        entrypoints.forEach([](auto &entrypoint) { entrypoint.onPostRender(); });
-    }
-
-    static void _broadcastImage(brayns::NetworkContext &context)
-    {
-        auto &api = context.api;
-        auto &manager = api.getParametersManager();
-        auto &parameters = manager.getApplicationParameters();
-        auto &engine = api.getEngine();
-        auto &stream = context.stream;
-        auto &framebuffer = engine.getFramebuffer();
-        auto &clients = context.clients;
-        stream.broadcast(framebuffer, clients, parameters);
-    }
 };
 } // namespace
 
 namespace brayns
 {
-NetworkContext::NetworkContext(PluginAPI &pluginAPI)
-    : api(pluginAPI)
-{
-}
-
 NetworkManager::NetworkManager(PluginAPI &api)
-    : _context(api)
+    : _api(api)
 {
-    Log::info("Network plugin is enabled.");
+    Log::info("Network enabled.");
+    auto listener = std::make_unique<brayns::SocketListener>(_clients, _entrypoints, _tasks);
+    _socket = SocketFactory::createSocket(_api, std::move(listener));
 }
 
-INetworkInterface &NetworkManager::getInterface()
+void NetworkManager::registerEntrypoints()
 {
-    return *_context.interface;
+    CoreEntrypointRegistry::registerEntrypoints(*this, _api, _entrypoints, _tasks);
 }
 
 void NetworkManager::start()
 {
-    Log::info("Network plugin started.");
-    NetworkStartup::run(_context);
+    Log::info("Starting network manager.");
+    _entrypoints.forEach([](auto &entrypoint) { entrypoint.buildSchema(); });
+    _entrypoints.forEach([](auto &entrypoint) { entrypoint.onCreate(); });
+    _socket->start();
+    Log::info("Network manager started.");
 }
 
-void NetworkManager::onCreate()
+void NetworkManager::update()
 {
-    Log::info("Initializing network plugin.");
-    NetworkInitialization::run(_context);
+    Log::trace("Network update.");
+    _socket->poll();
+    _tasks.runAllTasks();
+    _entrypoints.forEach([](auto &entrypoint) { entrypoint.onUpdate(); });
 }
 
-void NetworkManager::registerEntrypoints(INetworkInterface &interface)
+void NetworkManager::add(EntrypointRef entrypoint)
 {
-    (void)interface;
-    CoreEntrypointRegistry::registerEntrypoints(_context);
+    auto &plugin = entrypoint.getPlugin();
+    auto &method = entrypoint.getMethod();
+    Log::info("Plugin '{}' registered entrypoint '{}'.", plugin, method);
+    _entrypoints.add(std::move(entrypoint));
 }
 
-void NetworkManager::onPreRender()
+void NetworkManager::poll()
 {
-    Log::trace("Network pre render.");
-    NetworkPreRender::run(_context);
-}
-
-void NetworkManager::onPostRender()
-{
-    Log::trace("Network post render.");
-    NetworkPostRender::run(_context);
+    Log::trace("Poll requests from plugin or entrypoint");
+    _socket->poll();
 }
 } // namespace brayns

@@ -114,18 +114,10 @@ public:
     }
 
     /**
-     * @brief Called before each render.
+     * @brief Called once per update.
      *
      */
-    virtual void onPreRender()
-    {
-    }
-
-    /**
-     * @brief Called after each render.
-     *
-     */
-    virtual void onPostRender()
+    virtual void onUpdate()
     {
     }
 
