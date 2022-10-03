@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: nadir.romanguerrero@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,24 +18,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ExtractAtlas.h"
+#pragma once
 
-#include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/jsonrpc/JsonRpcException.h>
+#include <brayns/common/MathTypes.h>
 
-const AtlasData &ExtractAtlas::fromId(brayns::ModelManager &models, uint32_t id)
+#include "AtlasType.h"
+#include "IVoxelList.h"
+
+class Atlas
 {
-    auto &instance = brayns::ExtractModel::fromId(models, id);
-    auto &model = instance.getModel();
-    return fromModel(model);
-}
+public:
+    Atlas(AtlasType type, const brayns::Vector3f &size);
 
-const AtlasData &ExtractAtlas::fromModel(brayns::Model &model)
-{
-    auto component = model.getComponents().find<AtlasData>();
-    if (!component)
-    {
-        throw brayns::InvalidParamsException("The requested model does not have an Atlas component");
-    }
-    return *component;
-}
+    AtlasType getType() const noexcept;
+    const brayns::Vector3ui &getSize() const noexcept;
+    bool isValidVoxel(size_t x, size_t y, size_t z) const;
+    bool isValidVoxel(size_t linealIndex) const;
+    const IVoxelList &getVoxels() const noexcept;
+
+private:
+    AtlasType _type;
+    brayns::Vector3f _size;
+    std::unique_ptr<IVoxelList> _voxels;
+};

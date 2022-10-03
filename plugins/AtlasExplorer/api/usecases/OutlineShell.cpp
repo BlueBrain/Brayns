@@ -102,17 +102,17 @@ private:
 class FeaturesExtractor
 {
 public:
-    static brayns::RegularVolume extract(const AtlasVolume &volume)
+    static brayns::RegularVolume extract(const AtlasData &volume)
     {
-        const auto &data = volume.getData();
-        const auto doubles = data.asDoubles();
-        const auto voxelSize = volume.getVoxelSize();
+        auto &data = *volume.data;
+        auto doubles = data.asDoubles();
+        auto voxelSize = volume.voxelSize;
 
         brayns::RegularVolume result;
         result.dataType = brayns::VolumeDataType::UnsignedChar;
         result.voxels = ValidVoxelGridFilter::filter(voxelSize, doubles);
-        result.size = volume.getSize();
-        result.spacing = volume.getSpacing();
+        result.size = volume.size;
+        result.spacing = volume.spacing;
         return result;
     }
 };
@@ -123,20 +123,20 @@ std::string OutlineShell::getName() const
     return "Outline mesh shell";
 }
 
-bool OutlineShell::isVolumeValid(const AtlasVolume &volume) const
+bool OutlineShell::isVolumeValid(const AtlasData &volume) const
 {
     (void)volume;
     return true;
 }
 
-std::unique_ptr<brayns::Model> OutlineShell::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> OutlineShell::execute(const AtlasData &volume, const brayns::JsonValue &payload) const
 {
     (void)payload;
 
     auto model = std::make_unique<brayns::Model>();
 
     auto isoVolume = brayns::Volume(FeaturesExtractor::extract(volume));
-    auto isoValues = std::vector<float>{1.f};
+    auto isoValues = std::vector<float>{255.f};
     auto isoSurface = brayns::Isosurface{std::move(isoVolume), std::move(isoValues)};
 
     auto &components = model->getComponents();

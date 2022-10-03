@@ -22,7 +22,7 @@
 
 #include <brayns/network/common/ExtractModel.h>
 
-#include <network/entrypoints/common/ExtractAtlas.h>
+#include "common/ExtractAtlas.h"
 
 GetAvailableAtlasUseCasesEntrypoint::GetAvailableAtlasUseCasesEntrypoint(brayns::ModelManager &models)
     : _models(models)
@@ -44,7 +44,7 @@ void GetAvailableAtlasUseCasesEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.model_id;
-    const auto &atlas = ExtractAtlas::atlasFromId(_models, modelId);
-    auto useCases = _useCases.getValidUseCasesForVolume(atlas);
+    auto &component = ExtractAtlas::fromId(_models, modelId);
+    auto useCases = _useCases.getValidUseCasesForVolume(*component.data);
     request.reply(useCases);
 }

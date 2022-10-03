@@ -28,32 +28,31 @@
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
-#include <api/usecases/common/ParamsParser.h>
+#include "common/ParamsParser.h"
 
 namespace
 {
 class CoordinatesValidator
 {
 public:
-    static void validate(const HighlighColumParams &params, const AtlasVolume &volume)
+    static void validate(const HighlighColumParams &params, const AtlasData &volume)
     {
-        const auto &size = volume.getSize();
-
-        const auto &mainCoords = params.xz_coordinate;
-        const auto mainX = static_cast<uint32_t>(mainCoords.x);
-        const auto mainZ = static_cast<uint32_t>(mainCoords.y);
+        auto &size = volume.size;
+        auto &mainCoords = params.xz_coordinate;
+        auto mainX = static_cast<uint32_t>(mainCoords.x);
+        auto mainZ = static_cast<uint32_t>(mainCoords.y);
 
         if (size.x <= mainX || size.z <= mainZ)
         {
             throw std::invalid_argument("Column coordinates are out of volume bounds");
         }
 
-        const auto &neighbours = params.neighbours;
-        for (const auto &neighbour : neighbours)
+        auto &neighbours = params.neighbours;
+        for (auto &neighbour : neighbours)
         {
-            const auto neighbourCoords = neighbour.relative_xz;
-            const auto nx = mainX + neighbourCoords.x;
-            const auto nz = mainZ + neighbourCoords.y;
+            auto neighbourCoords = neighbour.relative_xz;
+            auto nx = mainX + neighbourCoords.x;
+            auto nz = mainZ + neighbourCoords.y;
             if (size.x <= nx || size.z <= nz)
             {
                 throw std::invalid_argument("Neighbour coordinates are out of volume bounds");
@@ -65,27 +64,27 @@ public:
 class ColumnBoundFinder
 {
 public:
-    ColumnBoundFinder(const AtlasVolume &volume)
-        : _volume(volume)
+    ColumnBoundFinder(const AtlasData &volume)
+        : _size(volume.size)
+        , _spacing(volume.spacing)
     {
     }
 
     brayns::Box find(const brayns::Vector2ui &xz) const noexcept
     {
-        const auto &size = _volume.getSize();
-        const auto &spacing = _volume.getSpacing();
-        const auto x = static_cast<float>(xz.x);
-        const auto z = static_cast<float>(xz.y);
-        const auto y = static_cast<float>(size.y);
+        auto x = static_cast<float>(xz.x);
+        auto z = static_cast<float>(xz.y);
+        auto y = static_cast<float>(_size.y);
 
         brayns::Vector3f min(x, -1.f, z);
         brayns::Vector3f max(x + 1.f, y, z + 1.f);
 
-        return brayns::Box{min * spacing, max * spacing};
+        return brayns::Box{min * _spacing, max * _spacing};
     }
 
 private:
-    const AtlasVolume &_volume;
+    brayns::Vector3ui _size;
+    brayns::Vector3f _spacing;
 };
 
 class ModelBuilder
@@ -123,14 +122,13 @@ std::string HighlightColumn::getName() const
     return "Highlight column";
 }
 
-bool HighlightColumn::isVolumeValid(const AtlasVolume &volume) const
+bool HighlightColumn::isVolumeValid(const AtlasData &volume) const
 {
     (void)volume;
     return true;
 }
 
-std::unique_ptr<brayns::Model> HighlightColumn::execute(const AtlasVolume &volume, const brayns::JsonValue &payload)
-    const
+std::unique_ptr<brayns::Model> HighlightColumn::execute(const AtlasData &volume, const brayns::JsonValue &payload) const
 {
     const auto params = ParamsParser::parse<HighlighColumParams>(payload);
     CoordinatesValidator::validate(params, volume);

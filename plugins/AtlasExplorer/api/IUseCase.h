@@ -23,17 +23,31 @@
 #include <brayns/engine/model/Model.h>
 #include <brayns/json/JsonType.h>
 
-#include <api/AtlasVolume.h>
+#include "Atlas.h"
 
 class IUseCase
 {
 public:
     virtual ~IUseCase() = default;
 
+    /**
+     * @brief Returns the identification name of the use case.
+     * @return std::string
+     */
     virtual std::string getName() const = 0;
 
-    virtual bool isVolumeValid(const AtlasVolume &volume) const = 0;
+    /**
+     * @brief Tests wether the use case can be applied to the volume.
+     * @param volume Volume to be tested.
+     * @return true If the volume is valid for this use case, false otherwise.
+     */
+    virtual bool isVolumeValid(const Atlas &volume) const = 0;
 
-    virtual std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload)
-        const = 0;
+    /**
+     * @brief Applies the use case to the given model and returns a new model with the result.
+     * @param volume The volume to which to apply the use case
+     * @param payload Optional parameters to configure the use case behaviour
+     * @return std::unique_ptr<brayns::Model> The result of the use case.
+     */
+    virtual std::unique_ptr<brayns::Model> run(const Atlas &volume, const brayns::JsonValue &payload) const = 0;
 };

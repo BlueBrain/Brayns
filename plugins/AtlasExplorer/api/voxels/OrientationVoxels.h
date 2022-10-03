@@ -18,27 +18,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "HeaderLimitCheck.h"
+#pragma once
 
-#include <stdexcept>
+#include <brayns/common/MathTypes.h>
 
-void HeaderLimitCheck::check(const NRRDHeader &header)
+#include <api/DataMangler.h>
+#include <api/IVoxelList.h>
+
+class OrientationVoxels : public IVoxelList
 {
-    const auto dimensions = header.dimensions;
-    if (dimensions != 3 && dimensions != 4)
-    {
-        throw std::runtime_error("Only 3D scalar and 4D orientation volumes are supported");
-    }
+public:
+    OrientationVoxels(const IDataMangler &dataMangler);
+    bool isValidVoxel(size_t linealIndex) const override;
+    const std::vector<brayns::Quaternion> &getQuaternions() const noexcept;
 
-    const auto &sizes = header.sizes;
-    if (dimensions == 4 && sizes[0] != 4)
-    {
-        throw std::runtime_error("Only 4D volumes suported are orientation fields");
-    }
-
-    const auto &spaceDimensions = header.spaceDimensions;
-    if (spaceDimensions && *spaceDimensions != 3)
-    {
-        throw std::runtime_error("Only 3D spatial volumes are allowed (space dimensions must be 3)");
-    }
-}
+private:
+    std::vector<brayns::Quaternion> _voxels;
+};

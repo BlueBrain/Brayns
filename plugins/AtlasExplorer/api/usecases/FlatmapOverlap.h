@@ -20,29 +20,12 @@
 
 #pragma once
 
-#include <api/DataMangler.h>
-#include <brayns/common/MathTypes.h>
+#include <api/IUseCase.h>
 
-class AtlasVolume
+class FlatmapOverlap final : public IUseCase
 {
 public:
-    AtlasVolume(
-        const brayns::Vector3ui &size,
-        const brayns::Vector3f &spacing,
-        size_t voxelSize,
-        std::unique_ptr<IDataMangler> data);
-
-    const brayns::Vector3ui &getSize() const noexcept;
-
-    const brayns::Vector3f &getSpacing() const noexcept;
-
-    size_t getVoxelSize() const noexcept;
-
-    const IDataMangler &getData() const noexcept;
-
-private:
-    brayns::Vector3ui _size;
-    brayns::Vector3f _spacing;
-    size_t _voxelSize;
-    std::unique_ptr<IDataMangler> _data;
+    std::string getName() const override;
+    bool isVolumeValid(const AtlasData &volume) const override;
+    std::unique_ptr<brayns::Model> execute(const AtlasData &volume, const brayns::JsonValue &payload) const override;
 };

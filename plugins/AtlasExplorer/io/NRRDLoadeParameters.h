@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: nadir.romanguerrero@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,24 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ExtractAtlas.h"
+#pragma once
 
-#include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/jsonrpc/JsonRpcException.h>
+#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-const AtlasData &ExtractAtlas::fromId(brayns::ModelManager &models, uint32_t id)
+#include <api/AtlasType.h>
+
+namespace brayns
 {
-    auto &instance = brayns::ExtractModel::fromId(models, id);
-    auto &model = instance.getModel();
-    return fromModel(model);
+BRAYNS_JSON_ADAPTER_ENUM(
+    AtlasType,
+    {"scalar", AtlasType::scalar},
+    {"orientation", AtlasType::orientation},
+    {"flatmap", AtlasType::flatmap})
 }
 
-const AtlasData &ExtractAtlas::fromModel(brayns::Model &model)
-{
-    auto component = model.getComponents().find<AtlasData>();
-    if (!component)
-    {
-        throw brayns::InvalidParamsException("The requested model does not have an Atlas component");
-    }
-    return *component;
-}
+BRAYNS_JSON_OBJECT_BEGIN(NRRDLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(AtlasType, type, "Type of atlas being loaded")
+BRAYNS_JSON_OBJECT_END()

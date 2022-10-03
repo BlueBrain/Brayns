@@ -18,25 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SharedCoordinatesAreaBorders.h"
+#pragma once
 
-std::string SharedCoordinatesAreaBorders::getName() const
+#include <brayns/io/Loader.h>
+
+#include <components/AtlasData.h>
+
+#include <string_view>
+
+class NRRDReader
 {
-    return "Borders of areas with shared coordinates";
-}
-
-bool SharedCoordinatesAreaBorders::isVolumeValid(const AtlasVolume &volume) const
-{
-    (void)volume;
-    return false;
-}
-
-std::unique_ptr<brayns::Model> SharedCoordinatesAreaBorders::execute(
-    const AtlasVolume &volume,
-    const brayns::JsonValue &payload) const
-{
-    (void)volume;
-    (void)payload;
-
-    throw std::runtime_error("Shared coordinates area borders use case not implemented");
-}
+public:
+    static AtlasData
+        read(const std::string &path, std::string_view data, const brayns::LoaderProgress &callback, AtlasType type);
+    static AtlasData read(const std::string &path, AtlasType type);
+};

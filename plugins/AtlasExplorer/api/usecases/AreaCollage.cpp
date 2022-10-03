@@ -25,13 +25,13 @@ std::string AreaCollage::getName() const
     return "Area collage";
 }
 
-bool AreaCollage::isVolumeValid(const AtlasVolume &volume) const
+bool AreaCollage::isVolumeValid(const AtlasData &volume) const
 {
     (void)volume;
     return false;
 }
 
-std::unique_ptr<brayns::Model> AreaCollage::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> AreaCollage::execute(const AtlasData &volume, const brayns::JsonValue &payload) const
 {
     (void)volume;
     (void)payload;

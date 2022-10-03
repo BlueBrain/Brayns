@@ -22,8 +22,8 @@
 
 #include <brayns/engine/model/Model.h>
 
-#include <api/AtlasVolume.h>
-#include <api/IUseCase.h>
+#include "Atlas.h"
+#include "IUseCase.h"
 
 #include <memory>
 #include <vector>
@@ -35,10 +35,10 @@ public:
 
     static UseCaseManager defaultUseCases();
 
-    std::vector<std::string> getValidUseCasesForVolume(const AtlasVolume &volume) const;
+    std::vector<std::string> getValidUseCasesForVolume(const Atlas &volume) const;
 
-    std::unique_ptr<brayns::Model>
-        executeUseCase(const std::string &useCase, const AtlasVolume &volume, const brayns::JsonValue &payload) const;
+    std::unique_ptr<brayns::Model> run(const std::string &useCase, const Atlas &atlas, const brayns::JsonValue &payload)
+        const;
 
 private:
     std::vector<std::unique_ptr<IUseCase>> _useCases;

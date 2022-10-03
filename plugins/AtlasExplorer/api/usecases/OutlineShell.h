@@ -22,10 +22,13 @@
 
 #include <api/IUseCase.h>
 
+/**
+ * @brief Generates a solid isosurface around the valid voxels of the atlas volume.
+ */
 class OutlineShell final : public IUseCase
 {
 public:
     std::string getName() const override;
-    bool isVolumeValid(const AtlasVolume &volume) const override;
-    std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const override;
+    bool isVolumeValid(const AtlasData &volume) const override;
+    std::unique_ptr<brayns::Model> execute(const AtlasData &volume, const brayns::JsonValue &payload) const override;
 };

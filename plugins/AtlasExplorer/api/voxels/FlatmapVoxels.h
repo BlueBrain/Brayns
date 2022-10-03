@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: nadir.romanguerrero@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,24 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ExtractAtlas.h"
+#pragma once
 
-#include <brayns/network/common/ExtractModel.h>
-#include <brayns/network/jsonrpc/JsonRpcException.h>
+#include <brayns/common/MathTypes.h>
 
-const AtlasData &ExtractAtlas::fromId(brayns::ModelManager &models, uint32_t id)
+#include <api/DataMangler.h>
+#include <api/IVoxelList.h>
+
+class FlatmapVoxels : public IVoxelList
 {
-    auto &instance = brayns::ExtractModel::fromId(models, id);
-    auto &model = instance.getModel();
-    return fromModel(model);
-}
+public:
+    FlatmapVoxels(const IDataMangler &dataMangler);
+    bool isValidVoxel(size_t linealIndex) const override;
+    int64_t getMinCoordinate();
+    int64_t getMaxCoordinate();
+    const std::vector<brayns::Vector2l> &getCoordinates() const noexcept;
 
-const AtlasData &ExtractAtlas::fromModel(brayns::Model &model)
-{
-    auto component = model.getComponents().find<AtlasData>();
-    if (!component)
-    {
-        throw brayns::InvalidParamsException("The requested model does not have an Atlas component");
-    }
-    return *component;
-}
+private:
+    std::vector<brayns::Vector2l> _voxels;
+    int64_t _min;
+    int64_t _max;
+};

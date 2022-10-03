@@ -18,28 +18,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Tokenizer.h"
+#include "ScalarVoxels.h"
 
-#include <brayns/utils/string/StringCounter.h>
-#include <brayns/utils/string/StringExtractor.h>
+#include <api/utils/DataUtils.h>
 
-namespace
+#include <cassert>
+#include <cmath>
+
+ScalarVoxels::ScalarVoxels(const IDataMangler &data)
+    : _data(data.asDoubles())
 {
-inline static const std::string_view delimiters = " /r/v/f/t/n";
+    auto minMax = DataMinMax::compute(_data);
+    _min = minMax.first;
+    _max = minMax.second;
 }
 
-std::vector<std::string_view> Tokenizer::fromView(std::string_view input)
+bool ScalarVoxels::isValidVoxel(size_t linealIndex) const
 {
-    auto tokens = std::vector<std::string_view>();
+    assert(linealIndex < _data.size());
+    auto value = _data[linealIndex];
+    return value > _min && std::isfinite(value);
+}
 
-    auto tokenCount = brayns::StringCounter::countOneOf(input, delimiters);
-    tokens.reserve(tokenCount);
+double ScalarVoxels::getMinValue() const noexcept
+{
+    return _min;
+}
 
-    while (!input.empty())
-    {
-        auto token = brayns::StringExtractor::extractUntilOneOf(input, delimiters);
-        tokens.push_back(token);
-        brayns::StringExtractor::extract(input, 1);
-    }
-    return tokens;
+double ScalarVoxels::getMaxValue() const noexcept
+{
+    return _max;
+}
+
+const std::vector<double> &ScalarVoxels::getValues() const noexcept
+{
+    return _data;
 }

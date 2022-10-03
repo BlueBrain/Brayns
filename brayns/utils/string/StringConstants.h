@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -18,37 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtlasVolume.h"
+#pragma once
 
-AtlasVolume::AtlasVolume(
-    const brayns::Vector3ui &size,
-    const brayns::Vector3f &spacing,
-    size_t voxelSize,
-    std::unique_ptr<IDataMangler> data)
-    : _size(size)
-    , _spacing(spacing)
-    , _voxelSize(voxelSize)
-    , _data(std::move(data))
-{
-    assert(_data);
-}
+#include <string_view>
 
-const brayns::Vector3ui &AtlasVolume::getSize() const noexcept
+namespace brayns
 {
-    return _size;
-}
-
-const brayns::Vector3f &AtlasVolume::getSpacing() const noexcept
+class StringConstants
 {
-    return _spacing;
-}
-
-size_t AtlasVolume::getVoxelSize() const noexcept
-{
-    return _voxelSize;
-}
-
-const IDataMangler &AtlasVolume::getData() const noexcept
-{
-    return *_data;
+public:
+    static inline const std::string_view tokenDelimiters = " /r/v/f/t/n";
+};
 }

@@ -18,14 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "FlatmapVoxels.h"
 
-#include <api/IUseCase.h>
-
-class SharedCoordinatesAreaBorders final : public IUseCase
+FlatmapVoxels::FlatmapVoxels(const IDataMangler &dataMangler)
 {
-public:
-    std::string getName() const override;
-    bool isVolumeValid(const AtlasVolume &volume) const override;
-    std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const override;
-};
+}
+
+bool FlatmapVoxels::isValidVoxel(size_t linealIndex) const
+{
+}
+
+int64_t FlatmapVoxels::getMinCoordinate()
+{
+}
+
+int64_t FlatmapVoxels::getMaxCoordinate()
+{
+}
+
+const std::vector<brayns::Vector2l> &FlatmapVoxels::getCoordinates() const noexcept
+{
+}

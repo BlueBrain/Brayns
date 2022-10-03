@@ -20,11 +20,21 @@
 
 #pragma once
 
-#include <string_view>
-#include <vector>
+#include <api/DataMangler.h>
+#include <api/IVoxelList.h>
 
-class Tokenizer
+class ScalarVoxels : public IVoxelList
 {
 public:
-    static std::vector<std::string_view> fromView(std::string_view input);
+    ScalarVoxels(const IDataMangler &dataMangler);
+
+    bool isValidVoxel(size_t linealIndex) const override;
+    double getMinValue() const noexcept;
+    double getMaxValue() const noexcept;
+    const std::vector<double> &getValues() const noexcept;
+
+private:
+    std::vector<double> _data;
+    double _min = 0.;
+    double _max = 0.;
 };

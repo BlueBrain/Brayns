@@ -22,11 +22,11 @@
 
 #include <api/usecases/AreaCollage.h>
 #include <api/usecases/Density.h>
+#include <api/usecases/FlatmapOverlap.h>
 #include <api/usecases/HighlightColumn.h>
 #include <api/usecases/LayerDistance.h>
 #include <api/usecases/OrientationField.h>
 #include <api/usecases/OutlineShell.h>
-#include <api/usecases/SharedCoordinatesAreaBorders.h>
 
 UseCaseManager::UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases)
     : _useCases(std::move(useCases))
@@ -42,11 +42,11 @@ UseCaseManager UseCaseManager::defaultUseCases()
     useCases.push_back(std::make_unique<LayerDistance>());
     useCases.push_back(std::make_unique<OrientationField>());
     useCases.push_back(std::make_unique<OutlineShell>());
-    useCases.push_back(std::make_unique<SharedCoordinatesAreaBorders>());
+    useCases.push_back(std::make_unique<FlatmapOverlap>());
     return UseCaseManager(std::move(useCases));
 }
 
-std::vector<std::string> UseCaseManager::getValidUseCasesForVolume(const AtlasVolume &volume) const
+std::vector<std::string> UseCaseManager::getValidUseCasesForVolume(const Atlas &volume) const
 {
     std::vector<std::string> result;
     result.reserve(_useCases.size());
@@ -61,10 +61,8 @@ std::vector<std::string> UseCaseManager::getValidUseCasesForVolume(const AtlasVo
     return result;
 }
 
-std::unique_ptr<brayns::Model> UseCaseManager::executeUseCase(
-    const std::string &useCaseName,
-    const AtlasVolume &volume,
-    const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model>
+    UseCaseManager::run(const std::string &useCaseName, const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     auto it = std::find_if(
         _useCases.begin(),
@@ -77,10 +75,10 @@ std::unique_ptr<brayns::Model> UseCaseManager::executeUseCase(
     }
 
     const auto &useCase = (**it);
-    if (!useCase.isVolumeValid(volume))
+    if (!useCase.isVolumeValid(atlas))
     {
         throw std::runtime_error("The volume is not valid to execute the use case " + useCaseName);
     }
 
-    return useCase.execute(volume, payload);
+    return useCase.run(atlas, payload);
 }

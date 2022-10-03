@@ -39,9 +39,9 @@ struct QuaternionEntry
 class QuaternionExtractor
 {
 public:
-    static std::vector<QuaternionEntry> extract(const AtlasVolume &volume)
+    static std::vector<QuaternionEntry> extract(const AtlasData &volume)
     {
-        auto &mangler = volume.getData();
+        auto &mangler = *volume.data;
         auto data = mangler.asFloats();
 
         auto numQuaternions = data.size() / 4u;
@@ -91,13 +91,13 @@ struct GizmoAxis
 class GizmoBuilder
 {
 public:
-    static std::array<GizmoAxis, 3> build(const AtlasVolume &volume)
+    static std::array<GizmoAxis, 3> build(const AtlasData &volume)
     {
         auto quaternions = QuaternionExtractor::extract(volume);
         auto result = _allocateResult(quaternions.size());
 
-        auto &size = volume.getSize();
-        auto &spacing = volume.getSpacing();
+        auto &size = volume.size;
+        auto &spacing = volume.spacing;
         auto frameSize = size.x * size.y;
         auto minDimension = glm::compMin(spacing);
         auto radius = minDimension * 0.05f;
@@ -194,12 +194,12 @@ std::string OrientationField::getName() const
     return "Orientation field";
 }
 
-bool OrientationField::isVolumeValid(const AtlasVolume &volume) const
+bool OrientationField::isVolumeValid(const AtlasData &volume) const
 {
-    return volume.getVoxelSize() == 4;
+    return volume.voxelSize == 4;
 }
 
-std::unique_ptr<brayns::Model> OrientationField::execute(const AtlasVolume &volume, const brayns::JsonValue &payload)
+std::unique_ptr<brayns::Model> OrientationField::execute(const AtlasData &volume, const brayns::JsonValue &payload)
     const
 {
     (void)payload;

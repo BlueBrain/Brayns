@@ -41,14 +41,15 @@ std::string VisualizeAtlasUseCaseEntrypoint::getDescription() const
 void VisualizeAtlasUseCaseEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-
     auto modelId = params.model_id;
     auto useCase = params.use_case;
     auto useCaseParams = params.params;
+    auto &atlas = ExtractAtlas::fromId(_models, modelId);
 
-    auto &component = ExtractAtlas::componentFromId(_models, modelId);
-    auto newModel = _useCases.executeUseCase(useCase, *component.volume, useCaseParams);
-    newModel->getComponents().add<AtlasData>(component.volume);
+    auto newModel = _useCases.run(useCase, *atlas.data, useCaseParams);
+
+    auto &components = newModel->getComponents();
+    components.add<AtlasData>(atlas);
     auto instance = _models.addModel(std::move(newModel));
     request.reply(*instance);
 }

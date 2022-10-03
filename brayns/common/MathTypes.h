@@ -38,10 +38,14 @@ using Matrix4f = glm::mat4;
  * Vector definitions
  */
 using Vector2i = glm::vec<2, int32_t>;
+using Vector2l = glm::vec<2, int64_t>;
 using Vector3i = glm::vec<3, int32_t>;
+using Vector3l = glm::vec<3, int64_t>;
 
 using Vector2ui = glm::vec<2, uint32_t>;
+using Vector2ul = glm::vec<2, uint64_t>;
 using Vector3ui = glm::vec<3, uint32_t>;
+using Vector3ul = glm::vec<3, uint64_t>;
 
 using Vector2f = glm::vec2;
 using Vector3f = glm::vec3;

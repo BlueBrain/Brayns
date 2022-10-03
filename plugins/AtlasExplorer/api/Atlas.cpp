@@ -18,17 +18,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Atlas.h"
 
-#include <io/nrrdloader/NRRDHeader.h>
-
-class HeaderLimitCheck
+Atlas::Atlas(AtlasType type, const brayns::Vector3f &size)
+    : _type(type)
+    , _size(size)
 {
-public:
-    /**
-     * @brief Checks the header metadata and throws if any parameter exceeds the implementation capabilities
-     *
-     * @param header
-     */
-    static void check(const NRRDHeader &header);
-};
+}
+
+AtlasType Atlas::getType() const noexcept
+{
+    return _type;
+}
+
+const brayns::Vector3ui &Atlas::getSize() const noexcept
+{
+    return _size;
+}
+
+bool Atlas::isValidVoxel(size_t x, size_t y, size_t z) const
+{
+    auto framePos = y * _size.x + x;
+    auto frameSize = _size.x * _size.y;
+    auto linealIndex = frameSize * z + framePos;
+    return isValidVoxel(linealIndex);
+}
+
+bool Atlas::isValidVoxel(size_t linealIndex) const
+{
+    return _voxels->isValidVoxel(linealIndex);
+}
+
+const IVoxelList &Atlas::getVoxels() const noexcept
+{
+    return *_voxels;
+}

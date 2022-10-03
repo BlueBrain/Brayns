@@ -41,10 +41,10 @@ struct DensityVolumeInfo
 class DensityVolumeBuilder
 {
 public:
-    static DensityVolumeInfo build(const AtlasVolume &volume)
+    static DensityVolumeInfo build(const AtlasData &volume)
     {
-        const auto &data = volume.getData();
-        const auto isSigned = data.isTypeSigned();
+        auto &data = *volume.data;
+        auto isSigned = data.isTypeSigned();
         if (isSigned)
         {
             return _processSignedData(data);
@@ -114,12 +114,12 @@ std::string Density::getName() const
     return "Density";
 }
 
-bool Density::isVolumeValid(const AtlasVolume &volume) const
+bool Density::isVolumeValid(const AtlasData &volume) const
 {
-    return volume.getVoxelSize() == 1;
+    return volume.voxelSize == 1;
 }
 
-std::unique_ptr<brayns::Model> Density::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> Density::execute(const AtlasData &volume, const brayns::JsonValue &payload) const
 {
     (void)payload;
 
@@ -128,8 +128,8 @@ std::unique_ptr<brayns::Model> Density::execute(const AtlasVolume &volume, const
     brayns::RegularVolume densityVolume;
     densityVolume.voxels = std::move(densityData.data);
     densityVolume.dataType = densityData.dataType;
-    densityVolume.size = volume.getSize();
-    densityVolume.spacing = volume.getSpacing();
+    densityVolume.size = volume.size;
+    densityVolume.spacing = volume.spacing;
 
     auto model = std::make_unique<brayns::Model>();
 

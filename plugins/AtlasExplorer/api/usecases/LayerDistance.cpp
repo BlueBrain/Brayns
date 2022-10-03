@@ -25,13 +25,13 @@ std::string LayerDistance::getName() const
     return "Layer distance";
 }
 
-bool LayerDistance::isVolumeValid(const AtlasVolume &volume) const
+bool LayerDistance::isVolumeValid(const AtlasData &volume) const
 {
     (void)volume;
     return false;
 }
 
-std::unique_ptr<brayns::Model> LayerDistance::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> LayerDistance::execute(const AtlasData &volume, const brayns::JsonValue &payload) const
 {
     (void)volume;
     (void)payload;
