@@ -95,7 +95,7 @@ class Loader(ABC):
             'loader_name': self.name,
             'loader_properties': self.get_properties(),
         }
-        result = instance.request('upload-model', params, data)
+        result, _ = instance.execute('upload-model', params, data)
         return [
             deserialize_model(model)
             for model in result

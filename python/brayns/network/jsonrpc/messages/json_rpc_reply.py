@@ -26,6 +26,20 @@ from typing import Any
 
 @dataclass
 class JsonRpcReply:
+    """Reply received from a request sent to a brayns instance.
 
-    id: int | str
-    result: Any = field(repr=False)
+    :param id: ID of the corresponding request.
+    :type id: int | str
+    :param result: Reply result (usually objects), defaults to None.
+    :type result: Any, optional
+    :param binary: Reply binary data, defaults to empty bytes.
+    :type binary: bytes, optional
+    """
+
+    id: int | str | None
+    result: Any = field(default=None, repr=False)
+    binary: bytes = field(default=b'', repr=False)
+
+    @staticmethod
+    def for_notifications() -> JsonRpcReply:
+        return JsonRpcReply(id=None)

@@ -19,20 +19,23 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .json_rpc_dispatcher import JsonRpcDispatcher
+from .json_rpc_future import JsonRpcFuture
 from .json_rpc_handler import JsonRpcHandler
 from .json_rpc_listener import JsonRpcListener
 from .json_rpc_manager import JsonRpcManager
 from .json_rpc_task import JsonRpcTask
 from .json_rpc_tasks import JsonRpcTasks
 from .messages import *
-from .request_future import RequestFuture
 
 __all__ = [
     'deserialize_error',
     'deserialize_progress',
+    'deserialize_reply_from_binary',
+    'deserialize_reply_from_text',
     'deserialize_reply',
     'JsonRpcDispatcher',
     'JsonRpcError',
+    'JsonRpcFuture',
     'JsonRpcHandler',
     'JsonRpcListener',
     'JsonRpcManager',
@@ -41,11 +44,7 @@ __all__ = [
     'JsonRpcRequest',
     'JsonRpcTask',
     'JsonRpcTasks',
-    'Request',
-    'RequestError',
-    'RequestFuture',
-    'RequestProgress',
-    'serialize_request_as_bytes',
-    'serialize_request_as_json',
+    'serialize_request_to_binary',
+    'serialize_request_to_text',
     'serialize_request',
 ]

@@ -18,14 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .request import Request
-from .serialize_request_as_json import serialize_request_as_json
+from .deserialize_reply_from_text import deserialize_reply_from_text
+from .json_rpc_reply import JsonRpcReply
 
 
-def serialize_request_as_bytes(request: Request) -> bytes:
-    json = serialize_request_as_json(request)
-    text = json.encode('utf-8')
-    json_size = len(text)
-    header = json_size.to_bytes(4, byteorder='little', signed=False)
-    binary = request.binary
-    return b''.join([header, text, binary])
+def deserialize_reply_from_binary(data: bytes) -> JsonRpcReply:
+    json_size = int.from_bytes(data[0:4], byteorder='little', signed=False)
+    text = data[4:4+json_size].decode('utf-8')
+    reply = deserialize_reply_from_text(text)
+    reply.binary = data[4+json_size:]
+    return reply

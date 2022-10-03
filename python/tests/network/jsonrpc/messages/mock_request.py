@@ -18,35 +18,49 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+import json
 from typing import Any
 
 import brayns
-from brayns.network import deserialize_reply
 
 
-class TestDeserializeReply(unittest.TestCase):
+class MockRequest:
 
     @classmethod
     @property
-    def reply(cls) -> brayns.JsonRpcReply:
-        return brayns.JsonRpcReply(
-            id=1,
-            result=12,
+    def request(cls) -> brayns.JsonRpcRequest:
+        return brayns.JsonRpcRequest(
+            id=0,
+            method='test',
+            params=123,
         )
+
+    @classmethod
+    @property
+    def binary_request(cls) -> brayns.JsonRpcRequest:
+        request = cls.request
+        request.binary = b'123'
+        return request
 
     @classmethod
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'id': 1,
-            'result': 12,
+            'jsonrpc': '2.0',
+            'id': 0,
+            'method': 'test',
+            'params': 123,
         }
 
-    def test_deserialize_reply(self) -> None:
-        test = deserialize_reply(self.message)
-        self.assertEqual(test, self.reply)
+    @classmethod
+    @property
+    def text(cls) -> str:
+        return json.dumps(cls.message, sort_keys=True)
 
-
-if __name__ == '__main__':
-    unittest.main()
+    @classmethod
+    @property
+    def binary(cls) -> bytes:
+        text = cls.text.encode('utf-8')
+        size = len(text).to_bytes(4, byteorder='little', signed=False)
+        binary = cls.binary_request.binary
+        return b''.join([size, text, binary])

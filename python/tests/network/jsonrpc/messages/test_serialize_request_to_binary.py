@@ -18,21 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+import unittest
+
+from brayns.network import serialize_request_to_binary, serialize_request_to_text
+
+from .mock_request import MockRequest
 
 
-@dataclass
-class RequestProgress:
-    """Request progress info.
+class TestSerializeRequestToBinary(unittest.TestCase):
 
-    :param operation: Description of the current task.
-    :type operation: str
-    :param amount: Progress amount [0-1].
-    :type amount: float
-    """
+    def test_serialize_request_to_binary(self) -> None:
+        test = serialize_request_to_binary(MockRequest.binary_request)
+        self.assertEqual(test, MockRequest.binary)
 
-    operation: str
-    amount: float
+    def test_serialize_request_to_binary_no_binary(self) -> None:
+        data = serialize_request_to_binary(MockRequest.request)
+        test = data[4:].decode('utf-8')
+        ref = serialize_request_to_text(MockRequest.request)
+        self.assertEqual(test, ref)
+        self.assertEqual(test, MockRequest.text)
 
-    def __str__(self) -> str:
-        return f'{self.operation}: {100 * self.amount}%'
+
+if __name__ == '__main__':
+    unittest.main()

@@ -37,13 +37,9 @@ class SimpleTestCase(ApiTestCase):
         )
         connector = brayns.Connector(
             uri=service.uri,
-            binary_handler=self.on_binary,
             max_attempts=None,
         )
         self.__manager = brayns.start(service, connector)
 
     def tearDown(self) -> None:
         self.__manager.stop()
-
-    def on_binary(self, data: bytes) -> None:
-        pass

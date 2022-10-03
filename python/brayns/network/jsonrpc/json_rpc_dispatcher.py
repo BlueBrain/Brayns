@@ -22,7 +22,12 @@ import json
 from typing import Any
 
 from .json_rpc_listener import JsonRpcListener
-from .messages import deserialize_error, deserialize_progress, deserialize_reply
+from .messages import (
+    deserialize_error,
+    deserialize_progress,
+    deserialize_reply,
+    deserialize_reply_from_binary,
+)
 
 
 class JsonRpcDispatcher:
@@ -30,11 +35,18 @@ class JsonRpcDispatcher:
     def __init__(self, listener: JsonRpcListener) -> None:
         self._listener = listener
 
-    def dispatch(self, data: str) -> None:
+    def dispatch_binary(self, data: bytes) -> None:
+        try:
+            reply = deserialize_reply_from_binary(data)
+            self._listener.on_reply(reply)
+        except Exception as e:
+            self._listener.on_invalid_message(e)
+
+    def dispatch_text(self, data: str) -> None:
         try:
             self._dispatch(data)
         except Exception as e:
-            self._listener.on_invalid_message(data, e)
+            self._listener.on_invalid_message(e)
 
     def _dispatch(self, data: str) -> None:
         message = self._parse(data)

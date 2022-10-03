@@ -18,30 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any
+import json
+import unittest
 
-from brayns.utils import Error
+from brayns.network import deserialize_reply_from_binary, deserialize_reply_from_text
 
 
-@dataclass
-class RequestError(Error):
-    """Error raised by an instance when a request fails.
+class TestDeserializeReplyFromBinary(unittest.TestCase):
 
-    :param code: Error code.
-    :type code: int
-    :param message: Error description.
-    :type message: str
-    :param data: Optional additional error information.
-    :type data: Any, optional
-    """
+    def test_deserialize_reply_from_binary(self) -> None:
+        text = json.dumps({
+            'id': 1,
+            'result': 123,
+        })
+        size = len(text).to_bytes(4, byteorder='little', signed=False)
+        binary = b'123'
+        data = b''.join([size, text.encode('utf-8'), binary])
+        test = deserialize_reply_from_binary(data)
+        ref = deserialize_reply_from_text(text)
+        self.assertEqual(test.id, ref.id)
+        self.assertEqual(test.result, ref.result)
+        self.assertEqual(test.binary, binary)
 
-    code: int
-    message: str
-    data: Any = None
 
-    def __str__(self) -> str:
-        description = f'{self.message} (code={self.code})'
-        if self.data is None:
-            return description
-        return f'{description} (data={self.data})'
+if __name__ == '__main__':
+    unittest.main()

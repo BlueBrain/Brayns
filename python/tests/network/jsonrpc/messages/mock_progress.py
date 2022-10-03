@@ -18,22 +18,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass, field
+import json
+from typing import Any
 
-from .json_rpc_request import JsonRpcRequest
+import brayns
 
 
-@dataclass
-class Request(JsonRpcRequest):
-    """Request to send to a running instance of brayns service.
+class MockProgress:
 
-    :param id: Request ID to monitor the request.
-        No replies will be received if set to None.
-    :type id: int | str | None
-    :param method: JSON-RPC method.
-    :type method: str
-    :param params: Request parameters (usually objects).
-    :type params: Any, optional
-    """
+    @classmethod
+    @property
+    def progress(cls) -> brayns.JsonRpcProgress:
+        return brayns.JsonRpcProgress(
+            id=0,
+            operation='test',
+            amount=0.5,
+        )
 
-    binary: bytes = field(default=b'', repr=False)
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'jsonrpc': '2.0',
+            'params': {
+                'id': 0,
+                'operation': 'test',
+                'amount': 0.5,
+            }
+        }
+
+    @classmethod
+    @property
+    def data(cls) -> str:
+        return json.dumps(cls.message, sort_keys=True)

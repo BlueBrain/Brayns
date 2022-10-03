@@ -26,7 +26,7 @@ from .json_rpc_dispatcher import JsonRpcDispatcher
 from .json_rpc_handler import JsonRpcHandler
 from .json_rpc_task import JsonRpcTask
 from .json_rpc_tasks import JsonRpcTasks
-from .messages import RequestError
+from .messages import JsonRpcError
 
 
 class JsonRpcManager:
@@ -34,22 +34,25 @@ class JsonRpcManager:
     def __init__(self, logger: logging.Logger) -> None:
         self._logger = logger
         self._tasks = JsonRpcTasks()
-        self._dispatcher = JsonRpcDispatcher(
-            listener=JsonRpcHandler(self._tasks, self._logger)
-        )
+        listener = JsonRpcHandler(self._tasks, self._logger)
+        self._dispatcher = JsonRpcDispatcher(listener)
 
     def is_running(self, id: int | str) -> bool:
         return id in self._tasks
 
     def clear(self) -> None:
         self._logger.debug('Clear all JSON-RPC tasks.')
-        error = RequestError(0, 'Disconnection from client side')
-        self._tasks.add_global_error(error)
+        error = JsonRpcError.general('Disconnection from client side')
+        self._tasks.add_error(error)
 
     def create_task(self, id: int | str) -> JsonRpcTask:
         self._logger.debug('Create JSON-RPC task with ID %s.', id)
         return self._tasks.create_task(id)
 
-    def process_message(self, data: str) -> None:
-        self._logger.debug('Processing JSON-RPC message: %s.', data)
-        self._dispatcher.dispatch(data)
+    def process_binary(self, data: bytes) -> None:
+        self._logger.debug('Processing JSON-RPC binary message: %s.', data)
+        self._dispatcher.dispatch_binary(data)
+
+    def process_text(self, data: str) -> None:
+        self._logger.debug('Processing JSON-RPC text message: %s.', data)
+        self._dispatcher.dispatch_text(data)

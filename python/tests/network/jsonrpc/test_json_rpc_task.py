@@ -23,65 +23,68 @@ import unittest
 import brayns
 from brayns.network import JsonRpcTask
 
+from .messages.mock_error import MockError
+from .messages.mock_progress import MockProgress
+from .messages.mock_reply import MockReply
+
 
 class TestJsonRpcTask(unittest.TestCase):
 
-    def test_from_result(self) -> None:
-        result = 123
-        task = JsonRpcTask.from_result(result)
-        self.assertEqual(task.get_result(), result)
+    def test_from_reply(self) -> None:
+        reply = MockReply.reply
+        task = JsonRpcTask.from_reply(reply)
+        self.assertEqual(task.get_reply(), reply)
 
     def test_init(self) -> None:
         task = JsonRpcTask()
         self.assertFalse(task.is_ready())
         with self.assertRaises(RuntimeError):
-            task.get_result()
+            task.get_reply()
 
     def test_is_ready(self) -> None:
         task = JsonRpcTask()
         self.assertFalse(task.is_ready())
         task = JsonRpcTask()
-        task.set_result(123)
+        task.set_reply(MockReply.reply)
         self.assertTrue(task.is_ready())
         task = JsonRpcTask()
-        task.set_error(brayns.RequestError(0, 'test'))
+        task.set_error(MockError.error)
         self.assertTrue(task.is_ready())
 
     def test_has_progress(self) -> None:
         task = JsonRpcTask()
         self.assertFalse(task.has_progress())
-        progress = brayns.RequestProgress('test', 0.5)
-        task.add_progress(progress)
+        task.add_progress(MockProgress.progress)
         self.assertTrue(task.has_progress())
 
     def test_get_result(self) -> None:
         task = JsonRpcTask()
         with self.assertRaises(RuntimeError):
-            task.get_result()
-        result = 123
-        task.set_result(result)
-        self.assertEqual(task.get_result(), result)
+            task.get_reply()
+        reply = MockReply.reply
+        task.set_reply(reply)
+        self.assertEqual(task.get_reply(), reply)
         task = JsonRpcTask()
-        error = brayns.RequestError(0, 'test', 123)
+        error = MockError.error
         task.set_error(error)
-        with self.assertRaises(brayns.RequestError) as context:
-            task.get_result()
+        with self.assertRaises(brayns.JsonRpcError) as context:
+            task.get_reply()
         self.assertEqual(context.exception, error)
 
     def test_set_result(self) -> None:
         task = JsonRpcTask()
-        result = 123
-        task.set_result(result)
-        self.assertEqual(task.get_result(), result)
+        reply = MockReply.reply
+        task.set_reply(reply)
+        self.assertEqual(task.get_reply(), reply)
         with self.assertRaises(RuntimeError):
-            task.set_result(result)
+            task.set_reply(reply)
 
     def test_set_error(self) -> None:
         task = JsonRpcTask()
-        error = brayns.RequestError(1, 'test', 123)
+        error = MockError.error
         task.set_error(error)
-        with self.assertRaises(brayns.RequestError) as context:
-            task.get_result()
+        with self.assertRaises(brayns.JsonRpcError) as context:
+            task.get_reply()
         self.assertEqual(context.exception, error)
         with self.assertRaises(RuntimeError):
             task.set_error(error)
@@ -90,13 +93,13 @@ class TestJsonRpcTask(unittest.TestCase):
         task = JsonRpcTask()
         with self.assertRaises(RuntimeError):
             task.get_progress()
-        progress = brayns.RequestProgress('test', 0.5)
+        progress = MockProgress.progress
         task.add_progress(progress)
         self.assertEqual(task.get_progress(), progress)
 
     def test_add_progress(self) -> None:
         task = JsonRpcTask()
-        progress = brayns.RequestProgress('test', 0.5)
+        progress = MockProgress.progress
         for _ in range(3):
             task.add_progress(progress)
         for _ in range(3):
