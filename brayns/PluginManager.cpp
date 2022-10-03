@@ -71,20 +71,6 @@ private:
         return reinterpret_cast<Factory>(address);
     }
 };
-
-class PluginBuilder
-{
-public:
-    static std::vector<brayns::Plugin> buildPlugins(brayns::PluginAPI &api)
-    {
-        auto plugins = PluginLoader::loadPlugins(api);
-        for (const auto &[library, plugin] : plugins)
-        {
-            plugin->onCreate();
-        }
-        return plugins;
-    }
-};
 } // namespace
 
 namespace brayns
@@ -96,7 +82,11 @@ PluginManager::PluginManager(PluginAPI &api)
 
 void PluginManager::loadPlugins()
 {
-    _plugins = PluginBuilder::buildPlugins(_api);
+    _plugins = PluginLoader::loadPlugins(_api);
+    for (const auto &[library, plugin] : _plugins)
+    {
+        plugin->onCreate();
+    }
 }
 
 void PluginManager::destroyPlugins()

@@ -80,8 +80,11 @@ public:
 
     static void run(brayns::NetworkManager &network, brayns::PluginManager &plugins)
     {
+        brayns::Log::debug("Registering core entrypoints.");
         network.registerEntrypoints();
+        brayns::Log::debug("Registering plugin entrypoints.");
         plugins.forEach([&](auto &plugin) { plugin.registerEntrypoints(network); });
+        brayns::Log::debug("Start network manager.");
         network.start();
     }
 };
@@ -120,10 +123,16 @@ Brayns::Brayns(int argc, const char **argv)
     , _pluginManager(_pluginAPI)
 {
     LoggingStartup::run(_parametersManager);
+
+    Log::info("Registering core loaders.");
     _loaderRegistry = LoaderRegistry::createWithCoreLoaders();
+
+    Log::info("Loading plugins.");
     _pluginManager.loadPlugins();
+
     if (NetworkStartup::isEnabled(_pluginAPI))
     {
+        Log::info("Running network startup.");
         _network.emplace(_pluginAPI);
         NetworkStartup::run(*_network, _pluginManager);
     }

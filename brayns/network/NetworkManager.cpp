@@ -187,7 +187,6 @@ namespace brayns
 NetworkManager::NetworkManager(PluginAPI &api)
     : _api(api)
 {
-    Log::info("Network enabled.");
     auto listener = std::make_unique<brayns::SocketListener>(_clients, _entrypoints, _tasks);
     _socket = SocketFactory::createSocket(_api, std::move(listener));
 }
@@ -199,16 +198,14 @@ void NetworkManager::registerEntrypoints()
 
 void NetworkManager::start()
 {
-    Log::info("Starting network manager.");
     _entrypoints.forEach([](auto &entrypoint) { entrypoint.buildSchema(); });
     _entrypoints.forEach([](auto &entrypoint) { entrypoint.onCreate(); });
     _socket->start();
-    Log::info("Network manager started.");
 }
 
 void NetworkManager::update()
 {
-    Log::trace("Network update.");
+    Log::trace("Network update");
     _socket->poll();
     _tasks.runAllTasks();
     _entrypoints.forEach([](auto &entrypoint) { entrypoint.onUpdate(); });
@@ -224,7 +221,7 @@ void NetworkManager::add(EntrypointRef entrypoint)
 
 void NetworkManager::poll()
 {
-    Log::trace("Poll requests from plugin or entrypoint");
+    Log::trace("Poll network requests from plugin or entrypoint");
     _socket->poll();
 }
 } // namespace brayns
