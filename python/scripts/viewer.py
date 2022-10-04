@@ -118,7 +118,9 @@ def process_events(instance: brayns.Instance, window: sg.Window) -> None:
         event, values = window.read(timeout=20)
         if event == sg.WIN_CLOSED:
             return
-        instance.poll(block=False)
+        image = brayns.render_image(instance)
+        if image.received:
+            on_binary(window, image.data)
         if event == sg.TIMEOUT_EVENT:
             continue
         if event == SEND:
@@ -129,8 +131,7 @@ def run(uri: str) -> None:
     window = create_window()
     connector = brayns.Connector(
         uri=uri,
-        binary_handler=lambda data: on_binary(window, data),
-        logger=brayns.Logger(logging.DEBUG)
+        logger=brayns.Logger(logging.INFO)
     )
     with connector.connect() as instance:
         process_events(instance, window)
