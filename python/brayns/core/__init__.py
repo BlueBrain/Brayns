@@ -37,9 +37,9 @@ from .light import *
 from .loader import *
 from .material import *
 from .model import *
+from .render import *
 from .renderer import *
 from .simulation import *
-from .snapshot import *
 from .version import *
 
 __all__ = [
