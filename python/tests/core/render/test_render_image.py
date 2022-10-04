@@ -36,14 +36,14 @@ class TestRenderImage(unittest.TestCase):
         test = brayns.render_image(instance)
         self.assertEqual(instance.params, {
             'send': True,
-            'force': True,
+            'force': False,
         })
         self.assertEqual(test.accumulation, 1)
         self.assertEqual(test.max_accumulation, 2)
         self.assertEqual(test.data, data)
         self.assertTrue(test.received)
 
-    def test_render_image_not_sent(self) -> None:
+    def test_render_image_params(self) -> None:
         result = {
             'accumulation': 1,
             'max_accumulation': 2,

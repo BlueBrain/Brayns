@@ -21,6 +21,19 @@
 import brayns
 
 
+def prepare_quick_render_image(instance: brayns.Instance, frame: int = 0) -> None:
+    brayns.update_application(
+        instance,
+        resolution=brayns.Resolution.full_hd,
+        jpeg_quality=100,
+    )
+    camera = _prepare_camera_and_light(instance)
+    brayns.set_camera(instance, camera)
+    renderer = brayns.InteractiveRenderer()
+    brayns.set_renderer(instance, renderer)
+    brayns.set_simulation_frame(instance, frame)
+
+
 def quick_snapshot(instance: brayns.Instance, path: str, frame: int = 0) -> None:
     snapshot = prepare_quick_snapshot(instance, frame)
     snapshot.save(instance, path)

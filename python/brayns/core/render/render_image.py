@@ -23,7 +23,7 @@ from brayns.network import Instance
 from .jpeg_image import JpegImage
 
 
-def render_image(instance: Instance, send: bool = True, force: bool = True) -> JpegImage:
+def render_image(instance: Instance, send: bool = True, force: bool = False) -> JpegImage:
     """Render an image using current instance parameters.
 
     If the current framebuffer content is already up-to-date with its max
@@ -37,7 +37,7 @@ def render_image(instance: Instance, send: bool = True, force: bool = True) -> J
     :type instance: Instance
     :param send: Send image in JPEG once render, defaults to True.
     :type send: bool, optional
-    :param force: Force send JPEG, defaults to True.
+    :param force: Force send JPEG, defaults to False.
     :type force: bool, optional
     :return: JPEG image if received.
     :rtype: JpegImage
