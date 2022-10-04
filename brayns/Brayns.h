@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <optional>
+#include <memory>
 
 #include <brayns/PluginManager.h>
 #include <brayns/common/parameters/ParametersManager.h>
@@ -33,30 +33,11 @@
 namespace brayns
 {
 /**
- * @brief The SystemPluginAPI class is an implementation of the PluginAPI, a class designed to give access
- * to the system resources to the plugins.
- */
-class SystemPluginAPI : public PluginAPI
-{
-public:
-    SystemPluginAPI(ParametersManager &paramManager, Engine &engine, LoaderRegistry &loadRegistry);
-
-    ParametersManager &getParametersManager() final;
-    LoaderRegistry &getLoaderRegistry() final;
-    Engine &getEngine() final;
-
-private:
-    ParametersManager &_paramManager;
-    Engine &_engine;
-    LoaderRegistry &_loadRegistry;
-};
-
-/**
  * @brief The Brayns class is the entry point to the system, which initializes
  * all the necessary componenets to run the render engine and add plugins to the
  * framework
  */
-class Brayns
+class Brayns : public PluginAPI
 {
 public:
     Brayns(int argc = 0, const char **argv = nullptr);
@@ -81,28 +62,34 @@ public:
      *
      * @return ParametersManager& Brayns parameters.
      */
-    ParametersManager &getParametersManager();
+    virtual ParametersManager &getParametersManager() override;
 
     /**
      * @brief Gives access to the loaders registry
      *
      * @return LoaderRegistry& All available loaders.
      */
-    LoaderRegistry &getLoaderRegistry();
+    virtual LoaderRegistry &getLoaderRegistry() override;
 
     /**
      * @brief Get engine.
      *
      * @return Engine& Engine.
      */
-    Engine &getEngine();
+    virtual Engine &getEngine() override;
+
+    /**
+     * @brief Get network interface if enabled.
+     *
+     * @return INetworkInterface* Network interface, can be null.
+     */
+    virtual INetworkInterface *getNetworkInterface() override;
 
 private:
     ParametersManager _parametersManager;
     LoaderRegistry _loaderRegistry;
     Engine _engine;
-    SystemPluginAPI _pluginAPI;
     PluginManager _pluginManager;
-    std::optional<NetworkManager> _network;
+    std::unique_ptr<NetworkManager> _network;
 };
 } // namespace brayns

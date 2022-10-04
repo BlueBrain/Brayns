@@ -45,18 +45,6 @@ public:
     EntrypointRef(std::string plugin, std::unique_ptr<IEntrypoint> entrypoint);
 
     /**
-     * @brief Build entrypoint JSON schema and store it internally.
-     *
-     */
-    void buildSchema();
-
-    /**
-     * @brief Call implementation onCreate().
-     *
-     */
-    void onCreate() const;
-
-    /**
      * @brief Call implementation onRequest() with given request.
      *
      * @param request Client request to the underlying entrypoint.

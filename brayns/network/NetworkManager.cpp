@@ -189,17 +189,11 @@ NetworkManager::NetworkManager(PluginAPI &api)
 {
     auto listener = std::make_unique<brayns::SocketListener>(_clients, _entrypoints, _tasks);
     _socket = SocketFactory::createSocket(_api, std::move(listener));
-}
-
-void NetworkManager::registerEntrypoints()
-{
     CoreEntrypointRegistry::registerEntrypoints(*this, _api, _entrypoints, _tasks);
 }
 
 void NetworkManager::start()
 {
-    _entrypoints.forEach([](auto &entrypoint) { entrypoint.buildSchema(); });
-    _entrypoints.forEach([](auto &entrypoint) { entrypoint.onCreate(); });
     _socket->start();
 }
 
@@ -211,7 +205,7 @@ void NetworkManager::update()
     _entrypoints.forEach([](auto &entrypoint) { entrypoint.onUpdate(); });
 }
 
-void NetworkManager::add(EntrypointRef entrypoint)
+void NetworkManager::registerEntrypoint(EntrypointRef entrypoint)
 {
     auto &plugin = entrypoint.getPlugin();
     auto &method = entrypoint.getMethod();

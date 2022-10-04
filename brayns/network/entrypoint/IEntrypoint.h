@@ -106,14 +106,6 @@ public:
     }
 
     /**
-     * @brief Called once when all plugins are initialized.
-     *
-     */
-    virtual void onCreate()
-    {
-    }
-
-    /**
      * @brief Called once per update.
      *
      */

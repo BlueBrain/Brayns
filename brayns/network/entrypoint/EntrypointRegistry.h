@@ -66,21 +66,6 @@ public:
         }
     }
 
-    /**
-     * @brief Iterate over all registered entrypoints.
-     *
-     * @tparam FunctorType Functor type.
-     * @param functor Functor with signature void(EntrypointRef &).
-     */
-    template<typename FunctorType>
-    void forEach(FunctorType functor)
-    {
-        for (auto &[method, entrypoint] : _entrypoints)
-        {
-            functor(entrypoint);
-        }
-    }
-
 private:
     std::unordered_map<std::string, EntrypointRef> _entrypoints;
 };

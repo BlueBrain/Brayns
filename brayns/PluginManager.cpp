@@ -83,10 +83,6 @@ PluginManager::PluginManager(PluginAPI &api)
 void PluginManager::loadPlugins()
 {
     _plugins = PluginLoader::loadPlugins(_api);
-    for (const auto &[library, plugin] : _plugins)
-    {
-        plugin->onCreate();
-    }
 }
 
 void PluginManager::destroyPlugins()

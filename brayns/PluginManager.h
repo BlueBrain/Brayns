@@ -62,15 +62,6 @@ public:
      */
     void destroyPlugins();
 
-    template<typename FunctorType>
-    void forEach(FunctorType functor) const
-    {
-        for (auto &[library, interface] : _plugins)
-        {
-            functor(*interface);
-        }
-    }
-
 private:
     PluginAPI &_api;
     std::vector<Plugin> _plugins;

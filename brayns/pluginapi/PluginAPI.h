@@ -24,6 +24,7 @@
 #include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/core/Engine.h>
 #include <brayns/io/LoaderRegistry.h>
+#include <brayns/network/INetworkInterface.h>
 
 namespace brayns
 {
@@ -56,5 +57,12 @@ public:
      * @return Engine& Engine.
      */
     virtual Engine &getEngine() = 0;
+
+    /**
+     * @brief Get the network interface if enabled.
+     *
+     * @return INetworkInterface& Network interface.
+     */
+    virtual INetworkInterface *getNetworkInterface() = 0;
 };
 } // namespace brayns

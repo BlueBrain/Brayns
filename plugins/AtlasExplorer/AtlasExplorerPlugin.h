@@ -31,10 +31,4 @@ class AtlasExplorerPlugin final : public brayns::IPlugin
 {
 public:
     AtlasExplorerPlugin(brayns::PluginAPI &api);
-
-    void onCreate() override;
-    void registerEntrypoints(brayns::INetworkInterface &interface) override;
-
-private:
-    brayns::PluginAPI &_api;
 };

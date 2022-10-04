@@ -77,64 +77,34 @@ public:
         auto &uri = parameters.getUri();
         return !uri.empty();
     }
-
-    static void run(brayns::NetworkManager &network, brayns::PluginManager &plugins)
-    {
-        brayns::Log::debug("Registering core entrypoints.");
-        network.registerEntrypoints();
-        brayns::Log::debug("Registering plugin entrypoints.");
-        plugins.forEach([&](auto &plugin) { plugin.registerEntrypoints(network); });
-        brayns::Log::debug("Start network manager.");
-        network.start();
-    }
 };
 } // namespace
 
 namespace brayns
 {
-SystemPluginAPI::SystemPluginAPI(ParametersManager &paramManager, Engine &engine, LoaderRegistry &loadRegistry)
-    : _paramManager(paramManager)
-    , _engine(engine)
-    , _loadRegistry(loadRegistry)
-{
-}
-
-Engine &SystemPluginAPI::getEngine()
-{
-    return _engine;
-}
-
-ParametersManager &SystemPluginAPI::getParametersManager()
-{
-    return _paramManager;
-}
-
-LoaderRegistry &SystemPluginAPI::getLoaderRegistry()
-{
-    return _loadRegistry;
-}
-
-// -----------------------------------------------------------------------------
-
 Brayns::Brayns(int argc, const char **argv)
     : _parametersManager(argc, argv)
     , _engine(_parametersManager)
-    , _pluginAPI(_parametersManager, _engine, _loaderRegistry)
-    , _pluginManager(_pluginAPI)
+    , _pluginManager(*this)
 {
     LoggingStartup::run(_parametersManager);
 
-    Log::info("Registering core loaders.");
+    Log::info("Register core loaders.");
     _loaderRegistry = LoaderRegistry::createWithCoreLoaders();
 
-    Log::info("Loading plugins.");
+    if (NetworkStartup::isEnabled(*this))
+    {
+        Log::info("Initialize network manager.");
+        _network = std::make_unique<NetworkManager>(*this);
+    }
+
+    Log::info("Load plugins.");
     _pluginManager.loadPlugins();
 
-    if (NetworkStartup::isEnabled(_pluginAPI))
+    if (_network)
     {
-        Log::info("Running network startup.");
-        _network.emplace(_pluginAPI);
-        NetworkStartup::run(*_network, _pluginManager);
+        Log::info("Start network manager.");
+        _network->start();
     }
 }
 
@@ -186,5 +156,10 @@ ParametersManager &Brayns::getParametersManager()
 LoaderRegistry &Brayns::getLoaderRegistry()
 {
     return _loaderRegistry;
+}
+
+INetworkInterface *Brayns::getNetworkInterface()
+{
+    return _network.get();
 }
 } // namespace brayns

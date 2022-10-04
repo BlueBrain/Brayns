@@ -48,12 +48,6 @@ public:
     NetworkManager(PluginAPI &api);
 
     /**
-     * @brief Register core entrypoints.
-     *
-     */
-    void registerEntrypoints();
-
-    /**
      * @brief Load schemas and call onCreate() of all entrypoints.
      *
      * This method must be separated from the construction because it can only
@@ -74,7 +68,7 @@ public:
      *
      * @param entrypoint Entrypoint to register.
      */
-    virtual void add(EntrypointRef entrypoint) override;
+    virtual void registerEntrypoint(EntrypointRef entrypoint) override;
 
     /**
      * @brief Poll socket to receive incoming messages.

@@ -23,35 +23,32 @@
 
 #include <brayns/common/Log.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/pluginapi/PluginAPI.h>
 
 #include "camera/CylindricAdapter.h"
 #include "camera/ospray/OsprayCylindricCamera.h"
 #include "network/entrypoints/CylindricCameraEntrypoint.h"
 
-CylindricCameraPlugin::CylindricCameraPlugin(brayns::Engine &engine)
-    : _engine(engine)
-{
-}
-
-void CylindricCameraPlugin::onCreate()
+CylindricCameraPlugin::CylindricCameraPlugin(brayns::PluginAPI &api)
 {
     ospray::Camera::registerType<OsprayCylindricCamera>(brayns::ProjectionTraits<Cylindric>::name.c_str());
 
-    auto &factories = _engine.getFactories();
+    auto &engine = api.getEngine();
+    auto &factories = engine.getFactories();
     auto &cameras = factories.cameras;
     cameras.addType<Cylindric>();
-}
 
-void CylindricCameraPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
-{
-    auto builder = brayns::EntrypointBuilder("Cylindric Camera", interface);
-    builder.add<SetCylindricCameraEntrypoint>(_engine);
-    builder.add<GetCylindricCameraEntrypoint>(_engine);
+    auto interface = api.getNetworkInterface();
+    if (!interface)
+    {
+        return;
+    }
+    auto builder = brayns::EntrypointBuilder("Cylindric Camera", *interface);
+    builder.add<SetCylindricCameraEntrypoint>(engine);
+    builder.add<GetCylindricCameraEntrypoint>(engine);
 }
 
 extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)
 {
     brayns::Log::info("[CC] Loading Cylindric Camera plugin.");
-    return std::make_unique<CylindricCameraPlugin>(api.getEngine());
+    return std::make_unique<CylindricCameraPlugin>(api);
 }

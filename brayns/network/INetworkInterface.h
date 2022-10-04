@@ -39,7 +39,7 @@ public:
      *
      * @param entrypoint Entrypoint to register.
      */
-    virtual void add(EntrypointRef entrypoint) = 0;
+    virtual void registerEntrypoint(EntrypointRef entrypoint) = 0;
 
     /**
      * @brief Can be used to poll requests from an entrypoint or plugin.

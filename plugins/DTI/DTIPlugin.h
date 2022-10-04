@@ -33,10 +33,5 @@ class DTIPlugin : public brayns::IPlugin
 {
 public:
     DTIPlugin(brayns::PluginAPI &api);
-
-    void onCreate() final;
-
-private:
-    brayns::PluginAPI &_api;
 };
 } // namespace dti
