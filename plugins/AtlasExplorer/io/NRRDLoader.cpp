@@ -20,7 +20,7 @@
 
 #include "NRRDLoader.h"
 
-#include "nrrdloader/VolumeReader.h"
+#include "nrrdloader/NRRDReader.h"
 
 #include <brayns/utils/FileReader.h>
 
@@ -47,12 +47,13 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromBlob(
     auto charCast = static_cast<const char *>(tempCast);
     auto contentView = std::string_view(charCast, bytes.size());
 
-    auto atlasData = VolumeReader::read(blob.name, contentView, callback);
+    auto reader = NRRDReader(callback);
+    auto atlas = reader.read(blob.name, contentView, parameters.type);
 
     callback.updateProgress("Generating volume mesh", 0.8f);
-    auto model = OutlineShell().execute(atlasData, {});
+    auto model = OutlineShell().run(atlas, {});
     auto &components = model->getComponents();
-    components.add<AtlasData>(std::move(atlasData));
+    components.add<AtlasData>(std::make_shared<Atlas>(std::move(atlas)));
 
     callback.updateProgress("Done", 1.f);
     auto result = std::vector<std::unique_ptr<brayns::Model>>();
@@ -65,8 +66,7 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
     const brayns::LoaderProgress &callback,
     const NRRDLoaderParameters &parameters) const
 {
-    callback.updateProgress("Reading " + path, 0.f);
-    const auto fileContent = brayns::FileReader::read(path);
+    auto fileContent = brayns::FileReader::read(path);
 
     brayns::Blob blob;
     blob.type = "nrrd";

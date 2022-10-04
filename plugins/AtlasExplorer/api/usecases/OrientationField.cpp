@@ -28,6 +28,8 @@
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
+#include <api/voxels/OrientationVoxels.h>
+
 namespace
 {
 struct QuaternionEntry
@@ -91,13 +93,14 @@ struct GizmoAxis
 class GizmoBuilder
 {
 public:
-    static std::array<GizmoAxis, 3> build(const AtlasData &volume)
+    static std::array<GizmoAxis, 3> build(const Atlas &atlas)
     {
-        auto quaternions = QuaternionExtractor::extract(volume);
+        auto &voxels = atlas.getVoxels();
+        auto &quaternionVoxels = static_cast<const OrientationVoxels &>(voxels);
+        auto quaternions = quaternionVoxels.getQuaternions();
         auto result = _allocateResult(quaternions.size());
 
-        auto &size = volume.size;
-        auto &spacing = volume.spacing;
+        auto &size = atlas.getSize();
         auto frameSize = size.x * size.y;
         auto minDimension = glm::compMin(spacing);
         auto radius = minDimension * 0.05f;
@@ -194,13 +197,12 @@ std::string OrientationField::getName() const
     return "Orientation field";
 }
 
-bool OrientationField::isVolumeValid(const AtlasData &volume) const
+bool OrientationField::isVolumeValid(const Atlas &atlas) const
 {
-    return volume.voxelSize == 4;
+    return atlas.getVoxels().getVoxelType() == VoxelType::orientation;
 }
 
-std::unique_ptr<brayns::Model> OrientationField::execute(const AtlasData &volume, const brayns::JsonValue &payload)
-    const
+std::unique_ptr<brayns::Model> OrientationField::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
 

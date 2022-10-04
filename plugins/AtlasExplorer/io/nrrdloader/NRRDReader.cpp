@@ -26,84 +26,30 @@
 
 #include <brayns/utils/FileReader.h>
 
-namespace
-{
-class AtlasTypeChecker
-{
-public:
-    static void check(const NRRDHeader &header, AtlasType type)
-    {
-        switch (type)
-        {
-        case AtlasType::flatmap:
-        {
-            if (header.dimensions < 4)
-            {
-                throw std::invalid_argument("Flatmaps must be 4-dimensional");
-            }
-            if (header.sizes[0] != 2)
-            {
-                throw std::invalid_argument("Flatmaps must have voxels with 2 elements");
-            }
-            break;
-        case AtlasType::orientation:
-        {
-            if (header.dimensions < 4)
-            {
-                throw std::invalid_argument("Orientation volumes must be 4-dimensional");
-            }
-            if (header.sizes[0] != 4)
-            {
-                throw std::invalid_argument("Orientation volumes must have voxels with 4 elements");
-            }
-            break;
-        }
-        default:
-        }
-        }
-    }
-};
+#include <api/VoxelFactory.h>
 
-class AtlasDataBuilder
+NRRDReader::NRRDReader(const brayns::LoaderProgress &progressCallback)
+    : _callback(progressCallback)
 {
-public:
-    static AtlasData build(const NRRDHeader &header, std::unique_ptr<IDataMangler> parsedData, AtlasType type)
-    {
-        AtlasData atlas;
-        atlas.type = type;
-        atlas.voxelSize = HeaderUtils::getVoxelDimension(header);
-        atlas.size = HeaderUtils::get3DSize(header);
-        atlas.spacing = HeaderUtils::get3DDimensions(header);
-        atlas.data = std::move(parsedData);
-        return atlas;
-    }
-};
 }
 
-AtlasData NRRDReader::read(
-    const std::string &path,
-    std::string_view data,
-    const brayns::LoaderProgress &callback,
-    AtlasType type)
+Atlas NRRDReader::read(const std::string &path, std::string_view data, VoxelType type)
 {
-    callback.updateProgress("Parsing NRRD header", 0.2f);
+    _callback.updateProgress("Parsing NRRD header", 0.2f);
     auto header = HeaderParser::parse(path, data);
-    AtlasTypeChecker::check(header, type);
+    auto size = HeaderUtils::get3DSize(header);
 
-    callback.updateProgress("Parsing NRRD data", 0.4f);
+    _callback.updateProgress("Parsing NRRD data", 0.4f);
     auto parsedData = DataParser::parse(header, data);
+    auto voxelFactory = VoxelFactory::createDefault();
+    auto voxels = voxelFactory.create(type, *parsedData);
 
-    callback.updateProgress("Transforming data", 0.6f);
-    return AtlasDataBuilder::build(header, std::move(parsedData), type);
+    _callback.updateProgress("Transforming data", 0.6f);
+    return Atlas(size, std::move(voxels));
 }
 
-AtlasData NRRDReader::read(const std::string &path, AtlasType type)
+Atlas NRRDReader::read(const std::string &path, VoxelType type)
 {
     auto content = brayns::FileReader::read(path);
-    auto data = std::string_view(content);
-
-    auto header = HeaderParser::parse(path, data);
-    AtlasTypeChecker::check(header, type);
-    auto parsedData = DataParser::parse(header, data);
-    return AtlasDataBuilder::build(header, std::move(parsedData), type);
+    return read(path, content, type);
 }

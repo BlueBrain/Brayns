@@ -20,13 +20,45 @@
 
 #pragma once
 
+#include "DataMangler.h"
+#include "IVoxelList.h"
 #include "VoxelType.h"
 
-#include <cstring>
+#include <functional>
+#include <memory>
+#include <unordered_map>
 
-class IVoxelList
+class VoxelFactory
 {
 public:
-    virtual VoxelType getVoxelType() const noexcept = 0;
-    virtual bool isValidVoxel(size_t index) const = 0;
+    static VoxelFactory createDefault();
+
+public:
+    template<typename T>
+    void registerType()
+    {
+        _factories[T::type] = std::make_unique<VoxelListFactory<T>>();
+    }
+
+    std::unique_ptr<IVoxelList> create(VoxelType type, const IDataMangler &mangler);
+
+private:
+    class IVoxelListFactory
+    {
+    public:
+        virtual ~IVoxelListFactory() = default;
+        virtual std::unique_ptr<IVoxelList> create(const IDataMangler &mangler) = 0;
+    };
+
+    template<typename T>
+    class VoxelListFactory : public IVoxelListFactory
+    {
+    public:
+        std::unique_ptr<IVoxelList> create(const IDataMangler &mangler) override
+        {
+            return std::make_unique<T>(mangler);
+        }
+    };
+
+    std::unordered_map<VoxelType, std::unique_ptr<IVoxelListFactory>> _factories;
 };

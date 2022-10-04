@@ -22,14 +22,19 @@
 
 #include <brayns/io/Loader.h>
 
-#include <components/AtlasData.h>
+#include <api/Atlas.h>
+#include <api/VoxelType.h>
 
 #include <string_view>
 
 class NRRDReader
 {
 public:
-    static AtlasData
-        read(const std::string &path, std::string_view data, const brayns::LoaderProgress &callback, AtlasType type);
-    static AtlasData read(const std::string &path, AtlasType type);
+    NRRDReader(const brayns::LoaderProgress &progressCallback = brayns::LoaderProgress());
+
+    Atlas read(const std::string &path, std::string_view data, VoxelType voxelType);
+    Atlas read(const std::string &path, VoxelType voxelType);
+
+private:
+    brayns::LoaderProgress _callback;
 };

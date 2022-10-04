@@ -20,22 +20,76 @@
 
 #include "FlatmapVoxels.h"
 
+#include <api/utils/DataUtils.h>
+
+namespace
+{
+class Extractor
+{
+public:
+    Extractor(const IDataMangler &mangler)
+        : _values(mangler.asLongs())
+    {
+    }
+
+    std::vector<brayns::Vector2l> extractCoordinates()
+    {
+        auto numCoordinates = _values.size() / 2;
+
+        auto result = std::vector<brayns::Vector2l>();
+        result.reserve(numCoordinates);
+
+        for (size_t i = 0; i < numCoordinates; ++i)
+        {
+            auto index = i * 2;
+            result.emplace_back(_values[index], _values[index + 1]);
+        }
+
+        return result;
+    }
+
+    std::pair<int64_t, int64_t> extractMinMax()
+    {
+        return DataMinMax::compute(_values);
+    }
+
+private:
+    std::vector<int64_t> _values;
+};
+}
+
 FlatmapVoxels::FlatmapVoxels(const IDataMangler &dataMangler)
 {
+    Extractor extractor(dataMangler);
+    _voxels = extractor.extractCoordinates();
+    auto minMax = extractor.extractMinMax();
+    _min = minMax.first;
+    _max = minMax.second;
+}
+
+VoxelType FlatmapVoxels::getVoxelType() const noexcept
+{
+    return type;
 }
 
 bool FlatmapVoxels::isValidVoxel(size_t linealIndex) const
 {
+    assert(linealIndex < _voxels.size());
+    auto &element = _voxels[linealIndex];
+    return element.x > _min && element.y > _min;
 }
 
 int64_t FlatmapVoxels::getMinCoordinate()
 {
+    return _min;
 }
 
 int64_t FlatmapVoxels::getMaxCoordinate()
 {
+    return _max;
 }
 
 const std::vector<brayns::Vector2l> &FlatmapVoxels::getCoordinates() const noexcept
 {
+    return _voxels;
 }

@@ -18,44 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ScalarVoxels.h"
+#include "VoxelFactory.h"
 
-#include <api/utils/DataUtils.h>
+#include "voxels/FlatmapVoxels.h"
+#include "voxels/OrientationVoxels.h"
+#include "voxels/ScalarVoxels.h"
 
-#include <cassert>
-#include <cmath>
-
-ScalarVoxels::ScalarVoxels(const IDataMangler &data)
-    : _data(data.asDoubles())
+VoxelFactory VoxelFactory::createDefault()
 {
-    auto minMax = DataMinMax::compute(_data);
-    _min = minMax.first;
-    _max = minMax.second;
+    VoxelFactory factory;
+    factory.registerType<FlatmapVoxels>();
+    factory.registerType<OrientationVoxels>();
+    factory.registerType<ScalarVoxels>();
+    return factory;
 }
 
-VoxelType ScalarVoxels::getVoxelType() const noexcept
+std::unique_ptr<IVoxelList> VoxelFactory::create(VoxelType type, const IDataMangler &mangler)
 {
-    return type;
-}
-
-bool ScalarVoxels::isValidVoxel(size_t linealIndex) const
-{
-    assert(linealIndex < _data.size());
-    auto value = _data[linealIndex];
-    return value > _min && std::isfinite(value);
-}
-
-double ScalarVoxels::getMinValue() const noexcept
-{
-    return _min;
-}
-
-double ScalarVoxels::getMaxValue() const noexcept
-{
-    return _max;
-}
-
-const std::vector<double> &ScalarVoxels::getValues() const noexcept
-{
-    return _data;
+    auto it = _factories.find(type);
+    assert(it != _factories.end());
+    return it->second->create(mangler);
 }

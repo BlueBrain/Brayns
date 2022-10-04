@@ -20,7 +20,31 @@
 
 #include "VisualizeAtlasUseCaseEntrypoint.h"
 
+#include <brayns/common/Transform.h>
+#include <brayns/network/common/ExtractModel.h>
+
 #include <network/entrypoints/common/ExtractAtlas.h>
+
+namespace
+{
+class AtlasDataCloner
+{
+public:
+    static void clone(const brayns::Model &src, brayns::Model &dst)
+    {
+        auto &srcComponents = src.getComponents();
+        auto &dstComponents = dst.getComponents();
+
+        auto &atlas = srcComponents.get<AtlasData>();
+        dstComponents.add<AtlasData>(atlas);
+
+        if (auto transform = srcComponents.find<brayns::Transform>())
+        {
+            dstComponents.add<brayns::Transform>(*transform);
+        }
+    }
+};
+}
 
 VisualizeAtlasUseCaseEntrypoint::VisualizeAtlasUseCaseEntrypoint(brayns::ModelManager &models)
     : _models(models)
@@ -44,12 +68,13 @@ void VisualizeAtlasUseCaseEntrypoint::onRequest(const Request &request)
     auto modelId = params.model_id;
     auto useCase = params.use_case;
     auto useCaseParams = params.params;
-    auto &atlas = ExtractAtlas::fromId(_models, modelId);
+
+    auto &instance = brayns::ExtractModel::fromId(_models, modelId);
+    auto &model = instance.getModel();
+    auto &atlas = ExtractAtlas::fromModel(model);
 
     auto newModel = _useCases.run(useCase, *atlas.data, useCaseParams);
-
-    auto &components = newModel->getComponents();
-    components.add<AtlasData>(atlas);
+    AtlasDataCloner::clone(model, *newModel);
     auto instance = _models.addModel(std::move(newModel));
     request.reply(*instance);
 }

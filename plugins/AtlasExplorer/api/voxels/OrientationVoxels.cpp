@@ -71,6 +71,11 @@ OrientationVoxels::OrientationVoxels(const IDataMangler &dataMangler)
 {
 }
 
+VoxelType OrientationVoxels::getVoxelType() const noexcept
+{
+    return type;
+}
+
 bool OrientationVoxels::isValidVoxel(size_t linealIndex) const
 {
     assert(linealIndex < _voxels.size());

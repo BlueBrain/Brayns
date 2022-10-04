@@ -44,7 +44,7 @@ public:
     virtual bool isVolumeValid(const Atlas &volume) const = 0;
 
     /**
-     * @brief Applies the use case to the given model and returns a new model with the result.
+     * @brief Applies the use case to the given atlas data and returns a new model with the result.
      * @param volume The volume to which to apply the use case
      * @param payload Optional parameters to configure the use case behaviour
      * @return std::unique_ptr<brayns::Model> The result of the use case.

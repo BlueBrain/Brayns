@@ -22,22 +22,19 @@
 
 #include <brayns/common/MathTypes.h>
 
-#include "AtlasType.h"
 #include "IVoxelList.h"
 
 class Atlas
 {
 public:
-    Atlas(AtlasType type, const brayns::Vector3f &size);
-
-    AtlasType getType() const noexcept;
+    Atlas(const brayns::Vector3f &size, std::unique_ptr<IVoxelList> voxels);
     const brayns::Vector3ui &getSize() const noexcept;
+    size_t getVoxelCount() const noexcept;
     bool isValidVoxel(size_t x, size_t y, size_t z) const;
     bool isValidVoxel(size_t linealIndex) const;
     const IVoxelList &getVoxels() const noexcept;
 
 private:
-    AtlasType _type;
     brayns::Vector3f _size;
     std::unique_ptr<IVoxelList> _voxels;
 };

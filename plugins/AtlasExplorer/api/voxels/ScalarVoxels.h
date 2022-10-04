@@ -26,8 +26,12 @@
 class ScalarVoxels : public IVoxelList
 {
 public:
+    inline static const VoxelType type = VoxelType::scalar;
+
+public:
     ScalarVoxels(const IDataMangler &dataMangler);
 
+    VoxelType getVoxelType() const noexcept override;
     bool isValidVoxel(size_t linealIndex) const override;
     double getMinValue() const noexcept;
     double getMaxValue() const noexcept;

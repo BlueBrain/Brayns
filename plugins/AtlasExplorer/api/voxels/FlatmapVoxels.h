@@ -24,11 +24,16 @@
 
 #include <api/DataMangler.h>
 #include <api/IVoxelList.h>
+#include <api/VoxelType.h>
 
 class FlatmapVoxels : public IVoxelList
 {
 public:
+    inline static const VoxelType type = VoxelType::flatmap;
+
+public:
     FlatmapVoxels(const IDataMangler &dataMangler);
+    VoxelType getVoxelType() const noexcept override;
     bool isValidVoxel(size_t linealIndex) const override;
     int64_t getMinCoordinate();
     int64_t getMaxCoordinate();

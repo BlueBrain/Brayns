@@ -23,17 +23,17 @@
 #include <brayns/json/JsonAdapterMacro.h>
 #include <brayns/json/JsonObjectMacro.h>
 
-#include <api/AtlasType.h>
+#include <api/VoxelType.h>
 
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_ENUM(
-    AtlasType,
-    {"scalar", AtlasType::scalar},
-    {"orientation", AtlasType::orientation},
-    {"flatmap", AtlasType::flatmap})
+    VoxelType,
+    {"scalar", VoxelType::scalar},
+    {"orientation", VoxelType::orientation},
+    {"flatmap", VoxelType::flatmap})
 }
 
 BRAYNS_JSON_OBJECT_BEGIN(NRRDLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(AtlasType, type, "Type of atlas being loaded")
+BRAYNS_JSON_OBJECT_ENTRY(VoxelType, type, "Voxel type to interpret the atlas being loaded")
 BRAYNS_JSON_OBJECT_END()

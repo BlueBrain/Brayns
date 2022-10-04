@@ -20,7 +20,7 @@
 
 #pragma once
 
-enum class AtlasType
+enum class VoxelType
 {
     scalar,
     orientation,

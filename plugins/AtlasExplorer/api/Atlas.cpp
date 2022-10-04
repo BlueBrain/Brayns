@@ -20,20 +20,20 @@
 
 #include "Atlas.h"
 
-Atlas::Atlas(AtlasType type, const brayns::Vector3f &size)
-    : _type(type)
-    , _size(size)
+Atlas::Atlas(const brayns::Vector3f &size, std::unique_ptr<IVoxelList> voxels)
+    : _size(size)
+    , _voxels(std::move(voxels))
 {
-}
-
-AtlasType Atlas::getType() const noexcept
-{
-    return _type;
 }
 
 const brayns::Vector3ui &Atlas::getSize() const noexcept
 {
     return _size;
+}
+
+size_t Atlas::getVoxelCount() const noexcept
+{
+    return glm::compMul(_size);
 }
 
 bool Atlas::isValidVoxel(size_t x, size_t y, size_t z) const
