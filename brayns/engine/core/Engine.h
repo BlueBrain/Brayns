@@ -47,6 +47,12 @@ public:
     Engine(ParametersManager &parameters);
 
     /**
+     * @brief Render a new image if needed.
+     *
+     */
+    void commitAndRender();
+
+    /**
      * @brief Called before commit() and render()
      */
     void preRender();
@@ -59,7 +65,7 @@ public:
 
     /**
      * @brief Attempts to render a frame (if accumulation hasnt finish integrating the current frame and/or the
-     * contents of the engine have changed). It has built-in FPS limiter.
+     * contents of the engine have changed).
      */
     void render();
 

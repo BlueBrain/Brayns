@@ -29,7 +29,6 @@
 #include <brayns/network/jsonrpc/JsonRpcFactory.h>
 #include <brayns/network/jsonrpc/JsonRpcParser.h>
 #include <brayns/network/jsonrpc/JsonRpcSender.h>
-#include <brayns/network/render/RenderInterface.h>
 #include <brayns/network/socket/ClientSocket.h>
 #include <brayns/network/socket/ServerSocket.h>
 #include <brayns/network/socket/SocketListener.h>
@@ -87,8 +86,6 @@ public:
 
         auto &loaders = api.getLoaderRegistry();
 
-        auto render = std::make_unique<brayns::RenderInterface>();
-
         brayns::CancellationToken token(interface);
         brayns::EntrypointBuilder builder("Core", interface);
 
@@ -133,7 +130,7 @@ public:
         builder.add<brayns::QuitEntrypoint>(engine);
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
         builder.add<brayns::RemoveModelEntrypoint>(models, simulation);
-        builder.add<brayns::RenderImageEntrypoint>(application, std::move(render));
+        builder.add<brayns::RenderImageEntrypoint>(engine);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
         builder.add<brayns::SetCameraLookAtEntrypoint>(engine);

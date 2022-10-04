@@ -53,9 +53,14 @@ public:
     /**
      * @brief commit Processes incomming client requests and makes the data available to the rendering
      * engine, then proceeds to render a new frame (if needed).
-     * Returns wether the system is still running or not
      */
-    bool commitAndRender();
+    void commitAndRender();
+
+    /**
+     * @brief Poll socket while engine is running.
+     *
+     */
+    void runAsService();
 
     /**
      * @brief Get parameters.

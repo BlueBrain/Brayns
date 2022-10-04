@@ -51,10 +51,7 @@ int main(int argc, const char **argv)
 
         brayns::Timer timer;
 
-        while (instance.commitAndRender())
-        {
-            brayns::Log::trace("Service update.");
-        }
+        instance.runAsService();
 
         brayns::Log::info("Service was running for {} seconds.", timer.seconds());
     }

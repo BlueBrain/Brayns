@@ -21,11 +21,7 @@
 
 #pragma once
 
-#include <memory>
-
-#include <brayns/network/render/IRenderInterface.h>
-
-#include <brayns/common/parameters/ApplicationParameters.h>
+#include <brayns/engine/core/Engine.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/RenderImageMessage.h>
@@ -35,14 +31,13 @@ namespace brayns
 class RenderImageEntrypoint : public Entrypoint<RenderImageParams, RenderImageResult>
 {
 public:
-    RenderImageEntrypoint(const ApplicationParameters &parameters, std::unique_ptr<IRenderInterface> interface);
+    RenderImageEntrypoint(Engine &engine);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    const ApplicationParameters &_parameters;
-    std::unique_ptr<IRenderInterface> _interface;
+    Engine &_engine;
 };
 } // namespace brayns

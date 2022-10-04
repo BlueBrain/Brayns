@@ -19,10 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/Brayns.h>
+#include "Brayns.h"
+
+#include <thread>
+
 #include <brayns/Version.h>
 
 #include <brayns/common/Log.h>
+
+#include <brayns/network/common/Clock.h>
 
 namespace
 {
@@ -78,6 +83,31 @@ public:
         return !uri.empty();
     }
 };
+
+class RateLimiter
+{
+public:
+    RateLimiter(brayns::Duration period)
+        : _period(period)
+    {
+    }
+
+    void wait()
+    {
+        auto now = brayns::Clock::now();
+        auto delta = now - _lastCall;
+        if (delta >= _period)
+        {
+            return;
+        }
+        std::this_thread::sleep_for(_period - delta);
+        _lastCall = brayns::Clock::now();
+    }
+
+private:
+    brayns::Duration _period;
+    brayns::TimePoint _lastCall = brayns::Clock::now();
+};
 } // namespace
 
 namespace brayns
@@ -117,30 +147,23 @@ Brayns::~Brayns()
     _pluginManager.destroyPlugins();
 }
 
-bool Brayns::commitAndRender()
+void Brayns::commitAndRender()
 {
-    // Poll socket before rendering.
-    if (_network)
+    _engine.commitAndRender();
+}
+
+void Brayns::runAsService()
+{
+    if (!_network)
+    {
+        throw std::runtime_error("Trying to run a service without URI");
+    }
+    auto limiter = RateLimiter(std::chrono::milliseconds(1));
+    while (_engine.isRunning())
     {
         _network->update();
+        limiter.wait();
     }
-
-    // Pre render engine
-    _engine.preRender();
-
-    // Commit any change to the engine (scene, camera, renderer, parameters, ...)
-    _engine.commit();
-
-    // Render new frame, if needed
-    _engine.render();
-
-    // The parameters are modified on network update, and processed on engine.preRender and engine.commit
-    _parametersManager.resetModified();
-
-    // Post render engine
-    _engine.postRender();
-
-    return _engine.isRunning();
 }
 
 Engine &Brayns::getEngine()
