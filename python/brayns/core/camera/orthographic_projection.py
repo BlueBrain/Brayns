@@ -52,31 +52,27 @@ class OrthographicProjection(Projection):
         """
         return 'orthographic'
 
-    def get_front_view(self, target: Bounds) -> View:
-        """Helper method to get the front view of a target object.
+    def look_at(self, target: Bounds, aspect_ratio: float) -> View:
+        """Adjust camera viewport to look at target.
 
         Distance from the object doesn't matter as long as no other objects are
         between the camera and the target.
 
-        By default, the margin is half of the target depth.
+        By default, the margin between target surface and the camera is half of
+        the target depth.
 
         :param target: Camera target.
         :type target: Bounds
+        :param aspect_ratio: Viewport aspect ratio.
+        :type aspect_ratio: float
         :return: Front view to see the target entirely.
         :rtype: View
         """
         center = target.center
-        distance = target.depth
-        position = center + distance * Vector3.forward
+        width, height, depth = target.size
+        self.height = max(height, width / aspect_ratio)
+        position = center + depth * Vector3.forward
         return View(position, center)
-
-    def set_target(self, target: Bounds) -> None:
-        """Set camera height to target height.
-
-        :param target: Camera target.
-        :type target: Bounds
-        """
-        self.height = target.height
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

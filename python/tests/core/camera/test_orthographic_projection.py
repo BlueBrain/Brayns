@@ -30,19 +30,15 @@ class TestOrthographicProjection(unittest.TestCase):
         ref = 'orthographic'
         self.assertEqual(test, ref)
 
-    def test_get_front_view(self) -> None:
+    def test_look_at(self) -> None:
+        aspect_ratio = 2
         target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         projection = brayns.OrthographicProjection()
-        test = projection.get_front_view(target)
+        test = projection.look_at(target, aspect_ratio)
         self.assertEqual(test.position, 2 * brayns.Vector3.forward)
         self.assertEqual(test.target, brayns.Vector3.zero)
         self.assertEqual(test.up, brayns.Vector3.up)
-
-    def test_set_target(self) -> None:
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
-        test = brayns.OrthographicProjection()
-        test.set_target(target)
-        self.assertEqual(test.height, target.height)
+        self.assertEqual(projection.height, target.height)
 
     def test_get_properties(self) -> None:
         projection = brayns.OrthographicProjection(3)

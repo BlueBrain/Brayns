@@ -27,7 +27,7 @@ from .perspective_projection import PerspectiveProjection
 from .projection import Projection
 
 
-def look_at(target: Bounds, projection: Projection | None = None) -> Camera:
+def look_at(target: Bounds, aspect_ratio: float = 1.0, projection: Projection | None = None) -> Camera:
     """Shortcut to create a camera focusing on given target.
 
     See ``Camera.look_at`` for more details.
@@ -42,5 +42,5 @@ def look_at(target: Bounds, projection: Projection | None = None) -> Camera:
     if projection is None:
         projection = PerspectiveProjection()
     camera = Camera(projection=projection)
-    camera.look_at(target)
+    camera.look_at(target, aspect_ratio)
     return camera

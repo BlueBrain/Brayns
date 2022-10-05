@@ -28,7 +28,11 @@ class TestLookAt(unittest.TestCase):
 
     def test_look_at(self) -> None:
         target = MockBounds.bounds
-        test = brayns.look_at(target, brayns.OrthographicProjection())
+        test = brayns.look_at(
+            target,
+            aspect_ratio=1,
+            projection=brayns.OrthographicProjection(),
+        )
         ref = brayns.Camera(projection=brayns.OrthographicProjection())
         ref.look_at(target)
         self.assertEqual(test, ref)

@@ -58,19 +58,17 @@ class PerspectiveProjection(Projection):
         """
         return 'perspective'
 
-    def get_front_view(self, target: Bounds) -> View:
-        """Use fovy to compute the front view.
+    def look_at(self, target: Bounds, aspect_ratio: float) -> View:
+        """Compute front view using field of view.
 
         :param target: Camera target.
         :type target: Bounds
-        :return: Front view based on self.fovy.
+        :param aspect_ratio: Viewport aspect ratio.
+        :type aspect_ratio: float
+        :return: Front view to see the target entirely.
         :rtype: View
         """
-        return self.fovy.get_front_view(target)
-
-    def set_target(self, target: Bounds) -> None:
-        """Does nothing."""
-        pass
+        return self.fovy.look_at(target, aspect_ratio)
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

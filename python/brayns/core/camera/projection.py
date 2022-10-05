@@ -46,22 +46,18 @@ class Projection(ABC):
         pass
 
     @abstractmethod
-    def get_front_view(self, target: Bounds) -> View:
-        """Compute the front view to focus on given target.
+    def look_at(self, target: Bounds, aspect_ratio: float) -> View:
+        """Return the front view to focus on given target.
+
+        Update projection properties to look a target and returns the
+        corresponding front view.
 
         :param target: Camera target.
         :type target: Bounds
+        :param aspect_ratio: Viewport aspect ratio.
+        :type aspect_ratio: float
         :return: Front view to see the target entirely.
         :rtype: View
-        """
-        pass
-
-    @abstractmethod
-    def set_target(self, target: Bounds) -> None:
-        """Update the projection parameters to focus on given target.
-
-        :param target: Camera target.
-        :type target: Bounds
         """
         pass
 
