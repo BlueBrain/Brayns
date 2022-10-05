@@ -18,18 +18,52 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .axis import Axis
-from .deserialize_view import deserialize_view
-from .fovy import Fovy
-from .serialize_view import serialize_view
-from .side import Side
-from .view import View
+from ..vector import Vector3
 
-__all__ = [
-    'Axis',
-    'deserialize_view',
-    'Fovy',
-    'serialize_view',
-    'Side',
-    'View',
-]
+
+class Axis:
+
+    @classmethod
+    @property
+    def x(cls) -> Vector3:
+        return Vector3(1.0, 0.0, 0.0)
+
+    @classmethod
+    @property
+    def right(cls) -> Vector3:
+        return cls.x
+
+    @classmethod
+    @property
+    def left(cls) -> Vector3:
+        return -cls.right
+
+    @classmethod
+    @property
+    def y(cls) -> Vector3:
+        return Vector3(0.0, 1.0, 0.0)
+
+    @classmethod
+    @property
+    def up(cls) -> Vector3:
+        return cls.y
+
+    @classmethod
+    @property
+    def down(cls) -> Vector3:
+        return -cls.up
+
+    @classmethod
+    @property
+    def z(cls) -> Vector3:
+        return Vector3(0.0, 0.0, 1.0)
+
+    @classmethod
+    @property
+    def front(cls) -> Vector3:
+        return cls.z
+
+    @classmethod
+    @property
+    def back(cls) -> Vector3:
+        return -cls.front
