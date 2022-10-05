@@ -18,18 +18,38 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .axis import Axis
-from .deserialize_view import deserialize_view
-from .fovy import Fovy
-from .serialize_view import serialize_view
-from .side import Side
-from .view import View
+from ..transform import Rotation
+from ..vector import Vector3
 
-__all__ = [
-    'Axis',
-    'deserialize_view',
-    'Fovy',
-    'serialize_view',
-    'Side',
-    'View',
-]
+
+class Side:
+
+    @classmethod
+    @property
+    def front(cls) -> Rotation:
+        return Rotation.from_euler(Vector3(0, 0, 0), degrees=True)
+
+    @classmethod
+    @property
+    def back(cls) -> Rotation:
+        return Rotation.from_euler(Vector3(0, 180, 0), degrees=True)
+
+    @classmethod
+    @property
+    def top(cls) -> Rotation:
+        return Rotation.from_euler(Vector3(-90, 0, 0), degrees=True)
+
+    @classmethod
+    @property
+    def bottom(cls) -> Rotation:
+        return Rotation.from_euler(Vector3(90, 0, 0), degrees=True)
+
+    @classmethod
+    @property
+    def right(cls) -> Rotation:
+        return Rotation.from_euler(Vector3(0, 90, 0), degrees=True)
+
+    @classmethod
+    @property
+    def left(cls) -> Rotation:
+        return Rotation.from_euler(Vector3(0, -90, 0), degrees=True)
