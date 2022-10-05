@@ -60,11 +60,12 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(camera.distance, camera.view.distance)
 
     def test_look_at(self) -> None:
+        aspect_ratio = 2
         camera = brayns.Camera(projection=brayns.OrthographicProjection())
         target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
-        projection = brayns.OrthographicProjection(target.height)
-        view = projection.get_front_view(target)
-        camera.look_at(target)
+        projection = brayns.OrthographicProjection()
+        view = projection.look_at(target, aspect_ratio)
+        camera.look_at(target, aspect_ratio)
         self.assertEqual(camera.view, view)
         self.assertEqual(camera.projection, projection)
 

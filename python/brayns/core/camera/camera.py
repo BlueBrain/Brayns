@@ -86,9 +86,8 @@ class Camera:
     def distance(self) -> float:
         return self.view.distance
 
-    def look_at(self, target: Bounds) -> None:
-        self.projection.set_target(target)
-        self.view = self.projection.get_front_view(target)
+    def look_at(self, target: Bounds, aspect_ratio: float = 1.0) -> None:
+        self.view = self.projection.look_at(target, aspect_ratio)
 
     def rotate_around_target(self, rotation: Rotation) -> None:
         self.view.rotate_around_target(rotation)
