@@ -20,7 +20,9 @@
 
 #include "OutlineShell.h"
 
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Isosurface.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
@@ -44,19 +46,20 @@ public:
                 result[i] = 255u;
             }
         }
+        return result;
     }
 };
 
-class FeaturesExtractor
+class VolumeBuilder
 {
 public:
-    static brayns::RegularVolume extract(const Atlas &atlas)
+    static brayns::Volume fromAtlas(const Atlas &atlas)
     {
-        brayns::RegularVolume result;
-        result.dataType = brayns::VolumeDataType::UnsignedChar;
-        result.voxels = ValidVoxelGridFilter::filter(atlas);
-        result.size = atlas.getSize();
-        return result;
+        brayns::RegularVolume grid;
+        grid.dataType = brayns::VolumeDataType::UnsignedChar;
+        grid.voxels = ValidVoxelGridFilter::filter(atlas);
+        grid.size = atlas.getSize();
+        return brayns::Volume(grid);
     }
 };
 }
@@ -66,25 +69,28 @@ std::string OutlineShell::getName() const
     return "Outline mesh shell";
 }
 
-bool OutlineShell::isVolumeValid(const Atlas &volume) const
+bool OutlineShell::isAtlasValid(const Atlas &atlas) const
 {
-    (void)volume;
+    (void)atlas;
     return true;
 }
 
-std::unique_ptr<brayns::Model> OutlineShell::run(const Atlas &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> OutlineShell::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
 
     auto model = std::make_unique<brayns::Model>();
 
-    auto isoVolume = brayns::Volume(FeaturesExtractor::extract(volume));
+    auto isoVolume = VolumeBuilder::fromAtlas(atlas);
     auto isoValues = std::vector<float>{1.f};
     auto isoSurface = brayns::Isosurface{std::move(isoVolume), std::move(isoValues)};
 
     auto &components = model->getComponents();
     auto &geometries = components.add<brayns::Geometries>();
-    geometries.elements.emplace_back(std::move(isoSurface));
+    auto &geometry = geometries.elements.emplace_back(std::move(isoSurface));
+    auto &views = components.add<brayns::GeometryViews>();
+    auto &view = views.elements.emplace_back(geometry);
+    view.setColor(brayns::Vector4f(1.f, 1.f, 1.f, 0.5f));
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();

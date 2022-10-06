@@ -37,17 +37,17 @@ public:
     virtual std::string getName() const = 0;
 
     /**
-     * @brief Tests wether the use case can be applied to the volume.
-     * @param volume Volume to be tested.
-     * @return true If the volume is valid for this use case, false otherwise.
+     * @brief Tests wether the use case can be applied to the atlas.
+     * @param atlas Atlas to be tested.
+     * @return true If the atlas is valid for this use case, false otherwise.
      */
-    virtual bool isVolumeValid(const Atlas &volume) const = 0;
+    virtual bool isAtlasValid(const Atlas &atlas) const = 0;
 
     /**
      * @brief Applies the use case to the given atlas data and returns a new model with the result.
-     * @param volume The volume to which to apply the use case
+     * @param atlas The atlas to which to apply the use case
      * @param payload Optional parameters to configure the use case behaviour
      * @return std::unique_ptr<brayns::Model> The result of the use case.
      */
-    virtual std::unique_ptr<brayns::Model> run(const Atlas &volume, const brayns::JsonValue &payload) const = 0;
+    virtual std::unique_ptr<brayns::Model> run(const Atlas &atlas, const brayns::JsonValue &payload) const = 0;
 };

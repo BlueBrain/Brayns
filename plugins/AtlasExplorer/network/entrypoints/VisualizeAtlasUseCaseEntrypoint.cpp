@@ -48,7 +48,7 @@ public:
 
 VisualizeAtlasUseCaseEntrypoint::VisualizeAtlasUseCaseEntrypoint(brayns::ModelManager &models)
     : _models(models)
-    , _useCases(UseCaseManager::defaultUseCases())
+    , _useCases(UseCaseManager::createDefault())
 {
 }
 
@@ -66,15 +66,22 @@ void VisualizeAtlasUseCaseEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.model_id;
-    auto useCase = params.use_case;
+    auto useCaseName = params.use_case;
     auto useCaseParams = params.params;
 
     auto &instance = brayns::ExtractModel::fromId(_models, modelId);
     auto &model = instance.getModel();
-    auto &atlas = ExtractAtlas::fromModel(model);
+    auto &component = ExtractAtlas::fromModel(model);
+    auto &atlas = *component.atlas;
 
-    auto newModel = _useCases.run(useCase, *atlas.data, useCaseParams);
+    auto &useCase = _useCases.getUseCase(useCaseName);
+    if (!useCase.isAtlasValid(atlas))
+    {
+        throw brayns::JsonRpcException("The use-case is not valid for the given type of atlas");
+    }
+
+    auto newModel = useCase.run(atlas, useCaseParams);
     AtlasDataCloner::clone(model, *newModel);
-    auto instance = _models.addModel(std::move(newModel));
-    request.reply(*instance);
+    auto newInstance = _models.addModel(std::move(newModel));
+    request.reply(*newInstance);
 }

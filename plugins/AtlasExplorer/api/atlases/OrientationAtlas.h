@@ -20,22 +20,20 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-
+#include <api/Atlas.h>
 #include <api/DataMangler.h>
-#include <api/IVoxelList.h>
-#include <api/VoxelType.h>
 
-class OrientationVoxels : public IVoxelList
+class OrientationAtlas final : public Atlas
 {
 public:
     inline static const VoxelType type = VoxelType::orientation;
 
 public:
-    OrientationVoxels(const IDataMangler &dataMangler);
-    VoxelType getVoxelType() const noexcept override;
+    OrientationAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
     bool isValidVoxel(size_t linealIndex) const override;
-    const std::vector<brayns::Quaternion> &getQuaternions() const noexcept;
+    const brayns::Quaternion &operator[](size_t index) const noexcept;
+    const brayns::Quaternion &at(size_t index) const;
+    VoxelType getVoxelType() const noexcept override;
 
 private:
     std::vector<brayns::Quaternion> _voxels;

@@ -20,58 +20,130 @@
 
 #include "FlatmapOverlap.h"
 
-#include <io/nrrdloader/VolumeReader.h>
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/GeometryViews.h>
+#include <brayns/engine/geometry/types/Box.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
 
-#include "common/DataUtils.h"
+#include <api/atlases/FlatmapAtlas.h>
 
 namespace
 {
 class ValidVoxels
 {
 public:
-    static std::vector<size_t> getIndexList(const std::vector<int64_t> &data)
+    static std::vector<size_t> getIndexList(const FlatmapAtlas &atlas)
     {
-        auto minMax = DataMinMax::compute(data);
-        std::cout << minMax.first << ", " << minMax.second << std::endl;
-
-        auto numVoxels = data.size() / 2;
-        std::vector<size_t> indices;
-        indices.reserve(numVoxels);
-
-        for (size_t i = 0; i < numVoxels; ++i)
+        auto voxelCount = atlas.getVoxelCount();
+        auto result = std::vector<size_t>();
+        result.reserve(voxelCount);
+        for (size_t i = 0; i < voxelCount; ++i)
         {
-            if (!_filterVoxel(data, i))
+            if (!atlas.isValidVoxel(i))
             {
                 continue;
             }
-            indices.push_back(i);
+            result.push_back(i);
         }
-        return indices;
-    }
 
-private:
-    static bool _filterVoxel(const std::vector<int64_t> &, size_t)
-    {
-        // auto globalIndex = index * 2;
-        // auto coords = brayns::Vector2ui(data[globalIndex], data[globalIndex + 1]);
-
-        return true;
-        // return glm::compAdd(coords)
+        return result;
     }
 };
-/*
+
 class OverlappingAreas
 {
 public:
-    static std::vector<size_t> getIndexList(const std::vector<uint64_t> &flatmap)
+    using OverlapMap = std::unordered_map<uint64_t, std::unordered_map<uint64_t, std::vector<size_t>>>;
+    static OverlapMap compute(const FlatmapAtlas &atlas)
     {
+        auto map = OverlapMap();
+
+        auto validVoxelsIndices = ValidVoxels::getIndexList(atlas);
+        for (auto index : validVoxelsIndices)
+        {
+            auto &coordinate = atlas[index];
+            auto &overlapList = map[coordinate.x][coordinate.y];
+            overlapList.push_back(index);
+        }
+
+        return map;
+    }
+};
+
+class PrimitiveBuilder
+{
+public:
+    static std::vector<brayns::Box> fromOverlapMap(const FlatmapAtlas &atlas, const OverlappingAreas::OverlapMap &map)
+    {
+        auto geometry = std::vector<brayns::Box>();
+        geometry.reserve(_countTotalGeometries(map));
+
+        for (auto &[x, subMap] : map)
+        {
+            for (auto &[y, overlapIndices] : subMap)
+            {
+                auto localVoxels = _generatePrimitives(atlas, overlapIndices);
+                geometry.insert(geometry.end(), localVoxels.begin(), localVoxels.end());
+            }
+        }
+        return geometry;
     }
 
 private:
-    using OverlapMap = std::unordered_map<uint64_t, std::unordered_map<uint64_t, size_t>>;
+    static size_t _countTotalGeometries(const OverlappingAreas::OverlapMap &map)
+    {
+        size_t result = 0;
 
-    static OverlapMap _buildOverlapMap(const std::vector<uint64_t> &flatmap)
-};*/
+        for (auto &[x, subMap] : map)
+        {
+            for (auto &[y, overlapIndices] : subMap)
+            {
+                result += overlapIndices.size();
+            }
+        }
+        return result;
+    }
+
+    static std::vector<brayns::Box> _generatePrimitives(const FlatmapAtlas &atlas, const std::vector<size_t> &indices)
+    {
+        auto result = std::vector<brayns::Box>();
+        result.reserve(indices.size());
+
+        for (auto index : indices)
+        {
+            auto bounds = atlas.getVoxelBounds(index);
+            result.push_back(brayns::Box{bounds.getMin(), bounds.getMax()});
+        }
+        return result;
+    }
+};
+
+class ModelBuilder
+{
+public:
+    static std::unique_ptr<brayns::Model> build(std::vector<brayns::Box> primitives)
+    {
+        auto model = std::make_unique<brayns::Model>();
+
+        auto &components = model->getComponents();
+
+        auto &geometries = components.add<brayns::Geometries>();
+        auto &geometry = geometries.elements.emplace_back(std::move(primitives));
+        auto &views = components.add<brayns::GeometryViews>();
+        auto &view = views.elements.emplace_back(geometry);
+        view.setColor(brayns::Vector4f(1.f, 0.f, 0.f, 1.f));
+
+        auto &systems = model->getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+        systems.setInitSystem<brayns::GeometryInitSystem>();
+        systems.setCommitSystem<brayns::GeometryCommitSystem>();
+
+        return model;
+    }
+};
 }
 
 std::string FlatmapOverlap::getName() const
@@ -79,15 +151,19 @@ std::string FlatmapOverlap::getName() const
     return "Flatmap overlapping areas";
 }
 
-bool FlatmapOverlap::isVolumeValid(const AtlasData &volume) const
+bool FlatmapOverlap::isAtlasValid(const Atlas &atlas) const
 {
-    return volume.voxelSize == 2;
+    return atlas.getVoxelType() == VoxelType::flatmap;
 }
 
-std::unique_ptr<brayns::Model> FlatmapOverlap::execute(const AtlasData &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> FlatmapOverlap::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
-    auto coordinateData = volume.data->asLongs();
-    auto validIndices = ValidVoxels::getIndexList(coordinateData);
-    return {};
+    assert(dynamic_cast<const FlatmapAtlas *>(&atlas));
+
+    auto &flatmapAtlas = static_cast<const FlatmapAtlas &>(atlas);
+    auto overlapAreas = OverlappingAreas::compute(flatmapAtlas);
+    auto primitives = PrimitiveBuilder::fromOverlapMap(flatmapAtlas, overlapAreas);
+
+    return ModelBuilder::build(std::move(primitives));
 }

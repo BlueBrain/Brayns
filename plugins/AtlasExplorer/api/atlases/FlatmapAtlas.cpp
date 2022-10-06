@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FlatmapVoxels.h"
+#include "FlatmapAtlas.h"
 
 #include <api/utils/DataUtils.h>
 
@@ -58,38 +58,34 @@ private:
 };
 }
 
-FlatmapVoxels::FlatmapVoxels(const IDataMangler &dataMangler)
+FlatmapAtlas::FlatmapAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &data)
+    : Atlas(size, spacing)
 {
-    Extractor extractor(dataMangler);
+    Extractor extractor(data);
     _voxels = extractor.extractCoordinates();
     auto minMax = extractor.extractMinMax();
     _min = minMax.first;
-    _max = minMax.second;
 }
 
-VoxelType FlatmapVoxels::getVoxelType() const noexcept
+bool FlatmapAtlas::isValidVoxel(size_t linealIndex) const
 {
-    return type;
-}
-
-bool FlatmapVoxels::isValidVoxel(size_t linealIndex) const
-{
-    assert(linealIndex < _voxels.size());
+    _checkIndex(linealIndex);
     auto &element = _voxels[linealIndex];
     return element.x > _min && element.y > _min;
 }
 
-int64_t FlatmapVoxels::getMinCoordinate()
+const brayns::Vector2l &FlatmapAtlas::operator[](size_t index) const noexcept
 {
-    return _min;
+    return _voxels[index];
 }
 
-int64_t FlatmapVoxels::getMaxCoordinate()
+const brayns::Vector2l &FlatmapAtlas::at(size_t index) const
 {
-    return _max;
+    _checkIndex(index);
+    return _voxels[index];
 }
 
-const std::vector<brayns::Vector2l> &FlatmapVoxels::getCoordinates() const noexcept
+VoxelType FlatmapAtlas::getVoxelType() const noexcept
 {
-    return _voxels;
+    return type;
 }

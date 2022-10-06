@@ -26,6 +26,6 @@ class OrientationField final : public IUseCase
 {
 public:
     std::string getName() const override;
-    bool isVolumeValid(const Atlas &volume) const override;
+    bool isAtlasValid(const Atlas &atlas) const override;
     std::unique_ptr<brayns::Model> run(const Atlas &atlas, const brayns::JsonValue &payload) const override;
 };

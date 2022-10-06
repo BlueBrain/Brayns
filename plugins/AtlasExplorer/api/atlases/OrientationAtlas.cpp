@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OrientationVoxels.h"
+#include "OrientationAtlas.h"
 
 namespace
 {
@@ -45,7 +45,7 @@ public:
                 continue;
             }
 
-            result[i] = brayns::Quaternion(w, x, y, z);
+            result[i] = glm::normalize(brayns::Quaternion(w, x, y, z));
         }
         return result;
     }
@@ -53,36 +53,38 @@ public:
 private:
     static bool _validQuaternion(const brayns::Vector4f &test)
     {
-        if (glm::length(test) == 0.f)
-        {
-            return false;
-        }
-        if (!glm::compMin(glm::isfinite(test)))
-        {
-            return false;
-        }
-        return true;
+        return glm::length2(test) > 0.f && glm::compMin(glm::isfinite(test));
     }
 };
 }
 
-OrientationVoxels::OrientationVoxels(const IDataMangler &dataMangler)
-    : _voxels(QuaternionExtractor::extract(dataMangler))
+OrientationAtlas::OrientationAtlas(
+    const brayns::Vector3ui &size,
+    const brayns::Vector3f &spacing,
+    const IDataMangler &dataMangler)
+    : Atlas(size, spacing)
+    , _voxels(QuaternionExtractor::extract(dataMangler))
 {
 }
 
-VoxelType OrientationVoxels::getVoxelType() const noexcept
+bool OrientationAtlas::isValidVoxel(size_t linealIndex) const
 {
-    return type;
-}
-
-bool OrientationVoxels::isValidVoxel(size_t linealIndex) const
-{
-    assert(linealIndex < _voxels.size());
+    _checkIndex(linealIndex);
     return glm::length2(_voxels[linealIndex]) > 0.f;
 }
 
-const std::vector<brayns::Quaternion> &OrientationVoxels::getQuaternions() const noexcept
+const brayns::Quaternion &OrientationAtlas::operator[](size_t index) const noexcept
 {
-    return _voxels;
+    return _voxels[index];
+}
+
+const brayns::Quaternion &OrientationAtlas::at(size_t index) const
+{
+    _checkIndex(index);
+    return _voxels[index];
+}
+
+VoxelType OrientationAtlas::getVoxelType() const noexcept
+{
+    return type;
 }

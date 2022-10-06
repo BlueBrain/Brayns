@@ -20,21 +20,78 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
+#include <brayns/common/Bounds.h>
 
-#include "IVoxelList.h"
+#include "VoxelType.h"
 
+/**
+ * @brief Abstract representation of an atlas volume.
+ */
 class Atlas
 {
 public:
-    Atlas(const brayns::Vector3f &size, std::unique_ptr<IVoxelList> voxels);
+    Atlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing);
+
+    /**
+     * @brief Get the volume grid dimensions.
+     * @return const brayns::Vector3ui&
+     */
     const brayns::Vector3ui &getSize() const noexcept;
+
+    /**
+     * @brief Get the cell dimensions.
+     * @return const brayns::Vector3f&
+     */
+    const brayns::Vector3f &getSpacing() const noexcept;
+
+    /**
+     * @brief Get the number of voxels (width * height * depth)
+     * @return size_t
+     */
     size_t getVoxelCount() const noexcept;
-    bool isValidVoxel(size_t x, size_t y, size_t z) const;
-    bool isValidVoxel(size_t linealIndex) const;
-    const IVoxelList &getVoxels() const noexcept;
+
+    /**
+     * @brief Computes a voxel bounds.
+     * @param coordinates Cartesian coordinates of the voxel.
+     * @return Bounds The bounds of the voxel.
+     */
+    brayns::Bounds getVoxelBounds(const brayns::Vector3ui &coordinates) const;
+
+    /**
+     * @brief Computes a voxel bounds from a lineal index.
+     * @param linealIndex Lineal index of the voxel.
+     * @return Bounds The bounds of the voxel.
+     */
+    brayns::Bounds getVoxelBounds(size_t linealIndex) const;
+
+    /**
+     * @brief Returns wether the pointed voxel contains a valid value.
+     * @param coordinates Cartesian coordinates of the voxel.
+     * @return true if the voxel value is not empty and the value is usable.
+     */
+    bool isValidVoxel(const brayns::Vector3ui &coordinates) const;
+
+    /**
+     * @brief Returns wether the pointed voxel contains a valid value.
+     * @param linealIndex flattened voxels index.
+     * @return true if the voxel value is not empty and the value is usable.
+     */
+    virtual bool isValidVoxel(size_t linealIndex) const = 0;
+
+    /**
+     * @brief Returns the type of voxel of this Atlas volume.
+     * @return VoxelType type of voxel.
+     */
+    virtual VoxelType getVoxelType() const noexcept = 0;
+
+protected:
+    /**
+     * @brief Checks if the given lineal index is within the volume bounds.
+     * @param linealIndex
+     */
+    void _checkIndex(size_t linealIndex) const;
 
 private:
-    brayns::Vector3f _size;
-    std::unique_ptr<IVoxelList> _voxels;
+    brayns::Vector3ui _size;
+    brayns::Vector3f _spacing;
 };

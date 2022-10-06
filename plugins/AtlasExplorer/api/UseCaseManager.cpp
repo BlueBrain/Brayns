@@ -28,12 +28,7 @@
 #include <api/usecases/OrientationField.h>
 #include <api/usecases/OutlineShell.h>
 
-UseCaseManager::UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases)
-    : _useCases(std::move(useCases))
-{
-}
-
-UseCaseManager UseCaseManager::defaultUseCases()
+UseCaseManager UseCaseManager::createDefault()
 {
     std::vector<std::unique_ptr<IUseCase>> useCases;
     useCases.push_back(std::make_unique<AreaCollage>());
@@ -46,14 +41,19 @@ UseCaseManager UseCaseManager::defaultUseCases()
     return UseCaseManager(std::move(useCases));
 }
 
-std::vector<std::string> UseCaseManager::getValidUseCasesForVolume(const Atlas &volume) const
+UseCaseManager::UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases)
+    : _useCases(std::move(useCases))
+{
+}
+
+std::vector<std::string> UseCaseManager::getValidUseCasesForAtlas(const Atlas &atlas) const
 {
     std::vector<std::string> result;
     result.reserve(_useCases.size());
 
     for (const auto &useCase : _useCases)
     {
-        if (useCase->isVolumeValid(volume))
+        if (useCase->isAtlasValid(atlas))
         {
             result.push_back(useCase->getName());
         }
@@ -61,24 +61,17 @@ std::vector<std::string> UseCaseManager::getValidUseCasesForVolume(const Atlas &
     return result;
 }
 
-std::unique_ptr<brayns::Model>
-    UseCaseManager::run(const std::string &useCaseName, const Atlas &atlas, const brayns::JsonValue &payload) const
+const IUseCase &UseCaseManager::getUseCase(const std::string &name) const
 {
     auto it = std::find_if(
         _useCases.begin(),
         _useCases.end(),
-        [&](const std::unique_ptr<IUseCase> &useCase) { return useCase->getName() == useCaseName; });
+        [&](const std::unique_ptr<IUseCase> &useCase) { return useCase->getName() == name; });
 
     if (it == _useCases.end())
     {
-        throw std::runtime_error("Unhandled use-case");
+        throw std::invalid_argument("Unhandled use-case");
     }
 
-    const auto &useCase = (**it);
-    if (!useCase.isVolumeValid(atlas))
-    {
-        throw std::runtime_error("The volume is not valid to execute the use case " + useCaseName);
-    }
-
-    return useCase.run(atlas, payload);
+    return **it;
 }

@@ -25,15 +25,15 @@ std::string AreaCollage::getName() const
     return "Area collage";
 }
 
-bool AreaCollage::isVolumeValid(const AtlasData &volume) const
+bool AreaCollage::isAtlasValid(const Atlas &atlas) const
 {
-    (void)volume;
+    (void)atlas;
     return false;
 }
 
-std::unique_ptr<brayns::Model> AreaCollage::execute(const AtlasData &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> AreaCollage::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
-    (void)volume;
+    (void)atlas;
     (void)payload;
 
     throw std::runtime_error("Area collage use case not implemented");

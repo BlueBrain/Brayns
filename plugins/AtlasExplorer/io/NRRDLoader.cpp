@@ -20,10 +20,13 @@
 
 #include "NRRDLoader.h"
 
-#include "nrrdloader/NRRDReader.h"
+#include "nrrdloader/data/DataParser.h"
+#include "nrrdloader/header/HeaderParser.h"
+#include "nrrdloader/header/HeaderUtils.h"
 
 #include <brayns/utils/FileReader.h>
 
+#include <api/AtlasFactory.h>
 #include <api/usecases/OutlineShell.h>
 #include <components/AtlasData.h>
 
@@ -42,23 +45,10 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromBlob(
     const brayns::LoaderProgress &callback,
     const NRRDLoaderParameters &parameters) const
 {
-    auto &bytes = blob.data;
-    auto tempCast = static_cast<const void *>(bytes.data());
-    auto charCast = static_cast<const char *>(tempCast);
-    auto contentView = std::string_view(charCast, bytes.size());
-
-    auto reader = NRRDReader(callback);
-    auto atlas = reader.read(blob.name, contentView, parameters.type);
-
-    callback.updateProgress("Generating volume mesh", 0.8f);
-    auto model = OutlineShell().run(atlas, {});
-    auto &components = model->getComponents();
-    components.add<AtlasData>(std::make_shared<Atlas>(std::move(atlas)));
-
-    callback.updateProgress("Done", 1.f);
-    auto result = std::vector<std::unique_ptr<brayns::Model>>();
-    result.push_back(std::move(model));
-    return result;
+    (void)blob;
+    (void)callback;
+    (void)parameters;
+    throw std::runtime_error("Binary load is not allowed for NRRD files");
 }
 
 std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
@@ -67,11 +57,26 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
     const NRRDLoaderParameters &parameters) const
 {
     auto fileContent = brayns::FileReader::read(path);
+    auto contentView = std::string_view(fileContent);
 
-    brayns::Blob blob;
-    blob.type = "nrrd";
-    blob.name = path;
-    blob.data = std::vector<uint8_t>(fileContent.begin(), fileContent.end());
+    auto header = HeaderParser::parse(path, contentView);
+    auto size = HeaderUtils::get3DSize(header);
+    auto spacing = HeaderUtils::get3DDimensions(header);
 
-    return importFromBlob(blob, callback, parameters);
+    callback.updateProgress("Parsing NRRD data", 0.4f);
+    auto data = DataParser::parse(header, contentView);
+
+    callback.updateProgress("Transforming data", 0.6f);
+    auto factory = AtlasFactory::createDefault();
+    auto atlas = factory.create(parameters.type, size, spacing, *data);
+
+    callback.updateProgress("Generating volume mesh", 0.8f);
+    auto model = OutlineShell().run(*atlas, {});
+    auto &components = model->getComponents();
+    components.add<AtlasData>(std::move(atlas));
+
+    callback.updateProgress("Done", 1.f);
+    auto result = std::vector<std::unique_ptr<brayns::Model>>();
+    result.push_back(std::move(model));
+    return result;
 }

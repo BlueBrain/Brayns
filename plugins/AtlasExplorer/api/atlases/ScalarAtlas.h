@@ -20,13 +20,27 @@
 
 #pragma once
 
-#include "VoxelType.h"
+#include <api/Atlas.h>
+#include <api/DataMangler.h>
 
-#include <cstring>
-
-class IVoxelList
+class ScalarAtlas final : public Atlas
 {
 public:
-    virtual VoxelType getVoxelType() const noexcept = 0;
-    virtual bool isValidVoxel(size_t index) const = 0;
+    inline static const VoxelType type = VoxelType::scalar;
+
+public:
+    ScalarAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
+
+    double getMinValue() const noexcept;
+    double getMaxValue() const noexcept;
+    bool isValidVoxel(size_t linealIndex) const override;
+    double operator[](size_t index) const noexcept;
+    double at(size_t index) const;
+    const std::vector<double> &getValues() const noexcept;
+    VoxelType getVoxelType() const noexcept override;
+
+private:
+    std::vector<double> _data;
+    double _min = 0.;
+    double _max = 0.;
 };

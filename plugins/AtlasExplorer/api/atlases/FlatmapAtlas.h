@@ -20,27 +20,22 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-
+#include <api/Atlas.h>
 #include <api/DataMangler.h>
-#include <api/IVoxelList.h>
-#include <api/VoxelType.h>
 
-class FlatmapVoxels : public IVoxelList
+class FlatmapAtlas final : public Atlas
 {
 public:
     inline static const VoxelType type = VoxelType::flatmap;
 
 public:
-    FlatmapVoxels(const IDataMangler &dataMangler);
-    VoxelType getVoxelType() const noexcept override;
+    FlatmapAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
     bool isValidVoxel(size_t linealIndex) const override;
-    int64_t getMinCoordinate();
-    int64_t getMaxCoordinate();
-    const std::vector<brayns::Vector2l> &getCoordinates() const noexcept;
+    const brayns::Vector2l &operator[](size_t index) const noexcept;
+    const brayns::Vector2l &at(size_t index) const;
+    VoxelType getVoxelType() const noexcept override;
 
 private:
     std::vector<brayns::Vector2l> _voxels;
     int64_t _min;
-    int64_t _max;
 };

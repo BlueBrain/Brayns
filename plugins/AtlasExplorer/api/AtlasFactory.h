@@ -18,44 +18,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ScalarVoxels.h"
+#pragma once
 
-#include <api/utils/DataUtils.h>
+#include "Atlas.h"
+#include "DataMangler.h"
 
-#include <cassert>
-#include <cmath>
+#include <memory>
+#include <unordered_map>
 
-ScalarVoxels::ScalarVoxels(const IDataMangler &data)
-    : _data(data.asDoubles())
+class AtlasFactory
 {
-    auto minMax = DataMinMax::compute(_data);
-    _min = minMax.first;
-    _max = minMax.second;
-}
+public:
+    using Factory = std::shared_ptr<Atlas> (
+            *)(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &data);
 
-VoxelType ScalarVoxels::getVoxelType() const noexcept
-{
-    return type;
-}
+    using Factories = std::unordered_map<VoxelType, Factory>;
 
-bool ScalarVoxels::isValidVoxel(size_t linealIndex) const
-{
-    assert(linealIndex < _data.size());
-    auto value = _data[linealIndex];
-    return value > _min && std::isfinite(value);
-}
+public:
+    static AtlasFactory createDefault();
 
-double ScalarVoxels::getMinValue() const noexcept
-{
-    return _min;
-}
+public:
+    AtlasFactory(Factories factories);
 
-double ScalarVoxels::getMaxValue() const noexcept
-{
-    return _max;
-}
+    std::shared_ptr<Atlas> create(
+        VoxelType type,
+        const brayns::Vector3ui &size,
+        const brayns::Vector3f &spacing,
+        const IDataMangler &data) const;
 
-const std::vector<double> &ScalarVoxels::getValues() const noexcept
-{
-    return _data;
-}
+private:
+    std::unordered_map<VoxelType, Factory> _factories;
+};

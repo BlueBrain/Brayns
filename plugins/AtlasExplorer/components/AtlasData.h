@@ -26,5 +26,5 @@
 
 struct AtlasData
 {
-    std::shared_ptr<Atlas> data;
+    std::shared_ptr<Atlas> atlas;
 };

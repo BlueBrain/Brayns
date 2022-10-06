@@ -26,7 +26,7 @@
 
 GetAvailableAtlasUseCasesEntrypoint::GetAvailableAtlasUseCasesEntrypoint(brayns::ModelManager &models)
     : _models(models)
-    , _useCases(UseCaseManager::defaultUseCases())
+    , _useCases(UseCaseManager::createDefault())
 {
 }
 
@@ -45,6 +45,6 @@ void GetAvailableAtlasUseCasesEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     auto modelId = params.model_id;
     auto &component = ExtractAtlas::fromId(_models, modelId);
-    auto useCases = _useCases.getValidUseCasesForVolume(*component.data);
+    auto useCases = _useCases.getValidUseCasesForAtlas(*component.atlas);
     request.reply(useCases);
 }

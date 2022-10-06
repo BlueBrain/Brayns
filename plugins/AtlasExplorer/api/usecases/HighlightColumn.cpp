@@ -35,9 +35,8 @@ namespace
 class CoordinatesValidator
 {
 public:
-    static void validate(const HighlighColumParams &params, const AtlasData &volume)
+    static void validate(const HighlighColumParams &params, const brayns::Vector3ui &size)
     {
-        auto &size = volume.size;
         auto &mainCoords = params.xz_coordinate;
         auto mainX = static_cast<uint32_t>(mainCoords.x);
         auto mainZ = static_cast<uint32_t>(mainCoords.y);
@@ -64,9 +63,9 @@ public:
 class ColumnBoundFinder
 {
 public:
-    ColumnBoundFinder(const AtlasData &volume)
-        : _size(volume.size)
-        , _spacing(volume.spacing)
+    ColumnBoundFinder(const brayns::Vector3ui &size, const brayns::Vector3f &spacing)
+        : _size(size)
+        , _spacing(spacing)
     {
     }
 
@@ -122,16 +121,16 @@ std::string HighlightColumn::getName() const
     return "Highlight column";
 }
 
-bool HighlightColumn::isVolumeValid(const AtlasData &volume) const
+bool HighlightColumn::isAtlasValid(const Atlas &atlas) const
 {
-    (void)volume;
+    (void)atlas;
     return true;
 }
 
-std::unique_ptr<brayns::Model> HighlightColumn::execute(const AtlasData &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> HighlightColumn::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     const auto params = ParamsParser::parse<HighlighColumParams>(payload);
-    CoordinatesValidator::validate(params, volume);
+    CoordinatesValidator::validate(params, atlas.getSize());
 
     const auto numColumns = params.neighbours.size() + 1;
     std::vector<brayns::Box> geometry;
@@ -139,8 +138,8 @@ std::unique_ptr<brayns::Model> HighlightColumn::execute(const AtlasData &volume,
     std::vector<brayns::Vector4f> colors;
     colors.reserve(numColumns);
 
-    ColumnBoundFinder finder(volume);
-    const auto coords = params.xz_coordinate;
+    ColumnBoundFinder finder(atlas.getSize(), atlas.getSpacing());
+    auto coords = params.xz_coordinate;
 
     geometry.push_back(finder.find(coords));
     colors.push_back(params.color);

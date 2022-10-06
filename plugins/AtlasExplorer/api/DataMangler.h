@@ -129,10 +129,11 @@ private:
             return _data;
         }
 
-        std::vector<To> result(_data.size());
+        std::vector<To> result;
+        result.reserve(_data.size());
         for (size_t i = 0; i < _data.size(); ++i)
         {
-            result[i] = static_cast<To>(_data[i]);
+            result.push_back(static_cast<To>(_data[i]));
         }
         return result;
     }

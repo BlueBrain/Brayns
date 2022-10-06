@@ -43,6 +43,6 @@ class HighlightColumn final : public IUseCase
 {
 public:
     std::string getName() const override;
-    bool isVolumeValid(const AtlasData &volume) const override;
-    std::unique_ptr<brayns::Model> execute(const AtlasData &volume, const brayns::JsonValue &payload) const override;
+    bool isAtlasValid(const Atlas &atlas) const override;
+    std::unique_ptr<brayns::Model> run(const Atlas &atlas, const brayns::JsonValue &payload) const override;
 };

@@ -28,98 +28,39 @@
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
-#include <api/voxels/OrientationVoxels.h>
+#include <api/atlases/OrientationAtlas.h>
+
+#include <cassert>
 
 namespace
 {
-struct QuaternionEntry
-{
-    size_t index;
-    brayns::Quaternion quat;
-};
-
-class QuaternionExtractor
-{
-public:
-    static std::vector<QuaternionEntry> extract(const AtlasData &volume)
-    {
-        auto &mangler = *volume.data;
-        auto data = mangler.asFloats();
-
-        auto numQuaternions = data.size() / 4u;
-        auto result = std::vector<QuaternionEntry>();
-        result.reserve(numQuaternions);
-
-        for (size_t i = 0; i < numQuaternions; ++i)
-        {
-            auto index = i * 4;
-            auto w = data[index];
-            auto x = data[index + 1];
-            auto y = data[index + 2];
-            auto z = data[index + 3];
-
-            if (!_isValidQuaternion({w, x, y, z}))
-            {
-                continue;
-            }
-
-            result.push_back({i, glm::normalize(brayns::Quaternion(w, x, y, z))});
-        }
-
-        return result;
-    }
-
-private:
-    static bool _isValidQuaternion(const brayns::Vector4f &test)
-    {
-        if (glm::length(test) == 0.f)
-        {
-            return false;
-        }
-        if (!glm::compMin(glm::isfinite(test)))
-        {
-            return false;
-        }
-        return true;
-    }
-};
-
 struct GizmoAxis
 {
-    brayns::Vector3f axis;
+    brayns::Vector3f axis = brayns::Vector3f(0.f);
     std::vector<brayns::Capsule> geometry;
 };
 
 class GizmoBuilder
 {
 public:
-    static std::array<GizmoAxis, 3> build(const Atlas &atlas)
+    static std::array<GizmoAxis, 3> build(const OrientationAtlas &atlas)
     {
-        auto &voxels = atlas.getVoxels();
-        auto &quaternionVoxels = static_cast<const OrientationVoxels &>(voxels);
-        auto quaternions = quaternionVoxels.getQuaternions();
-        auto result = _allocateResult(quaternions.size());
+        auto validQuaternionIndices = _getValidQuaternionIndices(atlas);
+        auto result = _allocateResult(validQuaternionIndices.size());
 
-        auto &size = atlas.getSize();
-        auto frameSize = size.x * size.y;
-        auto minDimension = glm::compMin(spacing);
-        auto radius = minDimension * 0.05f;
+        auto [length, radius] = _getGeometrySizes(atlas.getSpacing());
 
 #pragma omp parallel for
-        for (size_t i = 0; i < quaternions.size(); ++i)
+        for (size_t i = 0; i < validQuaternionIndices.size(); ++i)
         {
-            auto &entry = quaternions[i];
-
-            const auto z = entry.index / frameSize;
-            const auto localFrame = entry.index % frameSize;
-            const auto y = localFrame / size.x;
-            const auto x = localFrame % size.x;
-
-            const auto voxelCenter = _computeVoxelCenter(spacing, x, y, z);
+            auto index = validQuaternionIndices[i];
+            auto voxelBounds = atlas.getVoxelBounds(index);
+            auto voxelCenter = voxelBounds.center();
+            auto &quaternion = atlas[index];
             for (auto &axis : result)
             {
                 // * 0.5f so that the axis length does not invade surronding voxels
-                const auto vector = (entry.quat * axis.axis) * minDimension * 0.5f;
+                auto vector = (quaternion * axis.axis) * length * 0.5f;
                 auto &buffer = axis.geometry;
                 buffer[i] = brayns::CapsuleFactory::cylinder(voxelCenter, voxelCenter + vector, radius);
             }
@@ -129,28 +70,38 @@ public:
     }
 
 private:
+    static std::vector<size_t> _getValidQuaternionIndices(const OrientationAtlas &atlas)
+    {
+        auto quaternionCount = atlas.getVoxelCount();
+        auto result = std::vector<size_t>();
+        result.reserve(quaternionCount);
+        for (size_t i = 0; i < quaternionCount; ++i)
+        {
+            if (glm::length2(atlas[i]) == 0.f)
+            {
+                continue;
+            }
+            result.push_back(i);
+        }
+        return result;
+    }
+
+    static std::tuple<float, float> _getGeometrySizes(const brayns::Vector3f &spacing)
+    {
+        auto length = glm::compMin(spacing);
+        auto radius = length * 0.05f;
+        return std::make_tuple(length, radius);
+    }
+
     static std::array<GizmoAxis, 3> _allocateResult(size_t validQuaternionCount)
     {
         auto result = std::array<GizmoAxis, 3>();
         for (size_t i = 0; i < 3; ++i)
         {
-            auto axis = brayns::Vector3f(0.f);
-            axis[i] = 1.f;
-            result[i].axis = axis;
+            result[i].axis[i] = 1.f;
             result[i].geometry.resize(validQuaternionCount);
         }
         return result;
-    }
-
-    static brayns::Vector3f _computeVoxelCenter(const brayns::Vector3f &spacing, size_t x, size_t y, size_t z)
-    {
-        // Bottom front left corner
-        const auto worldX = x * spacing.x;
-        const auto worldY = y * spacing.y;
-        const auto worldZ = z * spacing.z;
-        const auto minCorner = brayns::Vector3f(worldX, worldY, worldZ - spacing.z);
-        const auto maxCorner = brayns::Vector3f(worldX + spacing.x, worldY + spacing.y, worldZ);
-        return (maxCorner + minCorner) * 0.5f;
     }
 };
 
@@ -197,16 +148,18 @@ std::string OrientationField::getName() const
     return "Orientation field";
 }
 
-bool OrientationField::isVolumeValid(const Atlas &atlas) const
+bool OrientationField::isAtlasValid(const Atlas &atlas) const
 {
-    return atlas.getVoxels().getVoxelType() == VoxelType::orientation;
+    return atlas.getVoxelType() == VoxelType::orientation;
 }
 
 std::unique_ptr<brayns::Model> OrientationField::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
 
-    auto gizmo = GizmoBuilder::build(volume);
+    assert(dynamic_cast<const OrientationAtlas *>(&atlas));
+    auto orientationAtlas = static_cast<const OrientationAtlas &>(atlas);
+    auto gizmo = GizmoBuilder::build(orientationAtlas);
 
     auto model = std::make_unique<brayns::Model>();
     auto builder = ModelBuilder(*model);
