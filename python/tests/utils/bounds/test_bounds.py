@@ -33,6 +33,25 @@ class TestBounds(unittest.TestCase):
             max=brayns.Vector3(4, 5, 6),
         )
 
+    @classmethod
+    @property
+    def corners(cls) -> list[brayns.Vector3]:
+        return [
+            brayns.Vector3(-1, -1, -1),
+            brayns.Vector3(-1, -1, 1),
+            brayns.Vector3(-1, 1, -1),
+            brayns.Vector3(-1, 1, 1),
+            brayns.Vector3(1, -1, -1),
+            brayns.Vector3(1, -1, 1),
+            brayns.Vector3(1, 1, -1),
+            brayns.Vector3(1, 1, 1),
+        ]
+
+    def test_from_corners(self) -> None:
+        test = brayns.Bounds.from_corners(self.corners)
+        ref = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
+        self.assertEqual(test, ref)
+
     def test_empty(self) -> None:
         test = brayns.Bounds.empty
         self.assertEqual(test.min, brayns.Vector3.zero)
@@ -52,6 +71,10 @@ class TestBounds(unittest.TestCase):
 
     def test_depth(self) -> None:
         self.assertEqual(self.bounds.depth, 3)
+
+    def test_corners(self) -> None:
+        test = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
+        self.assertEqual(test.corners, self.corners)
 
 
 if __name__ == '__main__':

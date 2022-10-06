@@ -83,5 +83,5 @@ class Resolution(Vector[int]):
     @property
     def aspect_ratio(self) -> float:
         if self.height == 0:
-            return 0.0
+            return 1
         return self.width / self.height

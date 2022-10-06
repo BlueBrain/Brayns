@@ -31,16 +31,6 @@ class Camera:
     """Camera used to render.
 
     A camera is composed of a ``View`` and a ``Projection``.
-
-    The view defines the camera position and orientation while the projection
-    defines how the model will be projected from 3D to 2D.
-
-    To focus the camera to a given target (bounds) use ``look_at`` to set the
-    default full-screen front view.
-
-    The front view has X-right, Y-up and Z-forward.
-
-    Then, to rotate the camera around its target, use ``rotate_around_target``.
     """
 
     view: View = field(default_factory=View)
@@ -48,47 +38,111 @@ class Camera:
 
     @property
     def name(self) -> str:
+        """Get the camera name (can be compared with ``get_camera_name``).
+
+        :return: Camera projection name.
+        :rtype: str
+        """
         return self.projection.name
 
     @property
     def position(self) -> Vector3:
+        """Get camera position.
+
+        :return: Camera position.
+        :rtype: Vector3
+        """
         return self.view.position
 
     @position.setter
     def position(self, value: Vector3) -> None:
+        """Set camera position.
+
+        :param value: New camera position.
+        :type value: Vector3
+        """
         self.view.position = value
 
     @property
     def target(self) -> Vector3:
+        """Get camera target.
+
+        :return: Camera target.
+        :rtype: Vector3
+        """
         return self.view.target
 
     @target.setter
     def target(self, value: Vector3) -> None:
+        """Set camera target.
+
+        :param value: New camera target.
+        :type value: Vector3
+        """
         self.view.target = value
 
     @property
     def up(self) -> Vector3:
+        """Get camera up direction.
+
+        :return: Camera up.
+        :rtype: Vector3
+        """
         return self.view.up
 
     @up.setter
     def up(self, value: Vector3) -> None:
+        """Set camera up direction.
+
+        :param value: New camera up.
+        :type value: Vector3
+        """
         self.view.up = value
 
     @property
     def vector(self) -> Vector3:
+        """Get camera vector (target - position).
+
+        :return: Camera vector.
+        :rtype: Vector3
+        """
         return self.view.vector
 
     @property
     def direction(self) -> Vector3:
+        """Get camera direction (vector.normalized).
+
+        :return: Normalized camera direction.
+        :rtype: Vector3
+        """
         return self.view.direction
 
     @property
     def distance(self) -> float:
+        """Get distance between camera position and target.
+
+        :return: Camera distance.
+        :rtype: float
+        """
         return self.view.distance
 
     @distance.setter
     def distance(self, value: float) -> None:
-        self.position = self.target - self.direction * value
+        """Move the camera position to be at given distance from target.
+
+        Camera direction remains unchanged.
+
+        :param value: New camera distance.
+        :type value: float
+        """
+        self.view.distance = value
 
     def rotate_around_target(self, rotation: Rotation) -> None:
-        self.view.rotate_around_target(rotation)
+        """Rotate camera around its target.
+
+        Mutate the current camera view.
+
+        :param rotation: Camera rotation.
+        :type rotation: Rotation
+        """
+        self.view = self.view.rotate_around_target(rotation)

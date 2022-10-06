@@ -35,8 +35,7 @@ def look_at(
 ) -> Camera:
     """Create a camera to look at given target.
 
-    If no aspect ratio is given (1), then only the target height is taken into
-    account for the distance computation.
+    Aspect ratio is usually the one of the resolution of the final image.
 
     :param target: Camera target bounds.
     :type target: Bounds
@@ -53,23 +52,21 @@ def look_at(
         projection = PerspectiveProjection()
     target = _get_apparent_target(target, rotation.inverse)
     view = _get_front_view(target, aspect_ratio, projection)
-    view.rotate_around_target(rotation)
-    return Camera(view, projection)
+    return Camera(
+        view=view.rotate_around_target(rotation),
+        projection=projection,
+    )
 
 
 def _get_apparent_target(target: Bounds, rotation: Rotation) -> Bounds:
-    center = target.center
-    return Bounds(
-        min=rotation.apply(target.min, center),
-        max=rotation.apply(target.max, center),
-    )
+    return target.rotate(rotation, target.center)
 
 
 def _get_front_view(target: Bounds, aspect_ratio: float, projection: Projection) -> View:
     center = target.center
     width, height, depth = target.size
     height = _get_viewport_height(width, height, aspect_ratio)
-    distance = projection.look_at(height) + depth / 2
+    distance = _get_camera_distance(height, depth, projection)
     return View(
         position=center + distance * Axis.front,
         target=center,
@@ -78,3 +75,7 @@ def _get_front_view(target: Bounds, aspect_ratio: float, projection: Projection)
 
 def _get_viewport_height(width: float, height: float, aspect_ratio: float) -> float:
     return max(height, width / aspect_ratio)
+
+
+def _get_camera_distance(height: float, depth: float, projection: Projection) -> float:
+    return projection.look_at(height) + depth / 2

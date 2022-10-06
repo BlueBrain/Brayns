@@ -18,9 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from ..vector import componentwise_max, componentwise_min
 from .bounds import Bounds
-from .lower_bound import lower_bound
-from .upper_bound import upper_bound
 
 
 def merge_bounds(values: list[Bounds]) -> Bounds:
@@ -36,6 +35,6 @@ def merge_bounds(values: list[Bounds]) -> Bounds:
     :rtype: Bounds
     """
     return Bounds(
-        min=lower_bound([value.min for value in values]),
-        max=upper_bound([value.max for value in values]),
+        min=componentwise_min([value.min for value in values]),
+        max=componentwise_max([value.max for value in values]),
     )

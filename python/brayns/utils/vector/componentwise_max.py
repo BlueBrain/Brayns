@@ -18,25 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from ..vector import Vector3
+from .vector3 import Vector3
 
 
-def lower_bound(values: list[Vector3]) -> Vector3:
-    """Take the smallest value for each component and make a new vector.
+def componentwise_max(values: list[Vector3]) -> Vector3:
+    """Return maximum of each component among values.
 
-    Example: lower_bound([1, -2, 3], [-1, 2, -3]) = [-1, -2, -3].
+    If values is empty, zero is returned.
 
-    Return zero if values are empty.
-
-    :param values: Values to find the lower bound.
+    :param values: List of vectors.
     :type values: list[Vector3]
-    :return: Lowest value for each component among given values.
+    :return: Max value for each component.
     :rtype: Vector3
     """
     if not values:
         return Vector3.zero
     return Vector3(
-        min(value.x for value in values),
-        min(value.y for value in values),
-        min(value.z for value in values),
+        max(value.x for value in values),
+        max(value.y for value in values),
+        max(value.z for value in values),
     )

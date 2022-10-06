@@ -22,12 +22,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..vector import Vector3
+from ..transform import Rotation
+from ..vector import Vector3, componentwise_max, componentwise_min
 
 
 @dataclass
 class Bounds:
-    """3D boundary in world coordinates.
+    """Axis aligned bounding box.
 
     :param min: Minimum XYZ.
     :type min: Vector3
@@ -37,6 +38,20 @@ class Bounds:
 
     min: Vector3
     max: Vector3
+
+    @staticmethod
+    def of(values: list[Vector3]) -> Bounds:
+        """Compute the bounds of given 3D points.
+
+        :param values: List of points to include in bounds.
+        :type values: list[Vector3]
+        :return: Points boundary
+        :rtype: Bounds
+        """
+        return Bounds(
+            min=componentwise_min(values),
+            max=componentwise_max(values),
+        )
 
     @classmethod
     @property
@@ -92,3 +107,49 @@ class Bounds:
         :rtype: float
         """
         return self.size.z
+
+    @property
+    def corners(self) -> list[Vector3]:
+        """List the 8 corners of the box.
+
+        :return: List of corner points.
+        :rtype: list[Vector3]
+        """
+        return [
+            self.min,
+            Vector3(self.min.x, self.min.y, self.max.z),
+            Vector3(self.min.x, self.max.y, self.min.z),
+            Vector3(self.min.x, self.max.y, self.max.z),
+            Vector3(self.max.x, self.min.y, self.min.z),
+            Vector3(self.max.x, self.min.y, self.max.z),
+            Vector3(self.max.x, self.max.y, self.min.z),
+            self.max,
+        ]
+
+    def translate(self, translation: Vector3) -> Bounds:
+        """Translate bounds by given value.
+
+        :param translation: Translation for min and max.
+        :type translation: Vector3
+        :return: Translated bounds.
+        :rtype: Bounds
+        """
+        return Bounds(
+            min=self.min + translation,
+            max=self.max + translation,
+        )
+
+    def rotate(self, rotation: Rotation, center: Vector3 = Vector3.zero) -> Bounds:
+        """Rotate bounds by given value around optional center.
+
+        :param rotation: Rotation to apply.
+        :type rotation: Rotation
+        :param center: Rotation center, defaults to Vector3.zero.
+        :type center: Vector3, optional
+        :return: New axis aligned bounds after rotation.
+        :rtype: Bounds
+        """
+        return Bounds.of([
+            rotation.apply(corner, center)
+            for corner in self.corners
+        ])

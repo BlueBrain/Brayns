@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from ..transform import Rotation
@@ -67,13 +69,27 @@ class View:
         """
         return self.vector.norm
 
-    def rotate_around_target(self, rotation: Rotation) -> None:
-        """Rotate the observation position around the target.
+    @distance.setter
+    def distance(self, value: float) -> None:
+        """Move the observer position to be at given distance from target.
 
-        Rotate position around target and up around origin.
+        View direction remains unchanged.
 
-        :param rotation: Observation point rotation.
-        :type rotation: Rotation
+        :param value: New observer distance.
+        :type value: float
         """
-        self.position = rotation.apply(self.position, center=self.target)
-        self.up = rotation.apply(self.up)
+        self.position = self.target - value * self.direction
+
+    def rotate_around_target(self, rotation: Rotation) -> View:
+        """Rotate observation position around target.
+
+        :param rotation: Rotation to apply on observer.
+        :type rotation: Rotation
+        :return: New rotated view.
+        :rtype: View
+        """
+        return View(
+            position=rotation.apply(self.position, center=self.target),
+            target=self.target,
+            up=rotation.apply(self.up),
+        )

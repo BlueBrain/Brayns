@@ -19,11 +19,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .axis import Axis
+from .componentwise_max import componentwise_max
+from .componentwise_min import componentwise_min
 from .vector import Vector
 from .vector3 import Vector3
 
 __all__ = [
     'Axis',
+    'componentwise_max',
+    'componentwise_min',
     'Vector',
     'Vector3',
 ]

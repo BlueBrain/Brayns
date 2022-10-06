@@ -27,22 +27,34 @@ from tests.mock_bounds import MockBounds
 class TestLookAt(unittest.TestCase):
 
     def test_look_at(self) -> None:
-        target = MockBounds.bounds
+        target = brayns.Bounds(
+            min=brayns.Vector3.zero,
+            max=brayns.Vector3(4, 1, 3),
+        )
+        projection = brayns.OrthographicProjection()
         test = brayns.look_at(
             target,
-            aspect_ratio=1,
-            projection=brayns.OrthographicProjection(),
+            aspect_ratio=2,
+            rotation=brayns.CameraRotation.left,
+            projection=projection,
         )
-        ref = brayns.Camera(projection=brayns.OrthographicProjection())
-        ref.look_at(target)
-        self.assertEqual(test, ref)
+        view = test.view
+        ref = target.center + 2 * brayns.Axis.left
+        self.assertEqual(view.position, ref)
+        self.assertEqual(view.target, target.center)
+        self.assertEqual(view.up, brayns.Axis.up)
+        self.assertAlmostEqual(projection.height, 1.5)
 
     def test_look_at_default(self) -> None:
-        target = MockBounds.bounds
+        target = brayns.Bounds(
+            min=-brayns.Vector3.one,
+            max=brayns.Vector3.one,
+        )
         test = brayns.look_at(target)
-        ref = brayns.Camera()
-        ref.look_at(target)
-        self.assertEqual(test, ref)
+        view = test.view
+        self.assertAlmostEqual(view.distance, 3)
+        self.assertEqual(view.target, target.center)
+        self.assertEqual(view.up, brayns.Axis.up)
 
 
 if __name__ == '__main__':
