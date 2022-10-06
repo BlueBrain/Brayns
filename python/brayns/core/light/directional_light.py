@@ -21,7 +21,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.utils import Vector3
+from brayns.utils import Axis, Vector3
 
 from .light import Light
 
@@ -34,7 +34,7 @@ class DirectionalLight(Light):
     :type direction: Vector3, optional
     """
 
-    direction: Vector3 = Vector3.back
+    direction: Vector3 = Axis.back
 
     @classmethod
     @property

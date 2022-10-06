@@ -39,24 +39,6 @@ class TestVector3(unittest.TestCase):
     def test_one(self) -> None:
         self.assertEqual(brayns.Vector3.one, brayns.Vector3.full(1))
 
-    def test_right(self) -> None:
-        self.assertEqual(brayns.Vector3.right, brayns.Vector3(1, 0, 0))
-
-    def test_left(self) -> None:
-        self.assertEqual(brayns.Vector3.left, -brayns.Vector3.right)
-
-    def test_up(self) -> None:
-        self.assertEqual(brayns.Vector3.up, brayns.Vector3(0, 1, 0))
-
-    def test_down(self) -> None:
-        self.assertEqual(brayns.Vector3.down, -brayns.Vector3.up)
-
-    def test_forward(self) -> None:
-        self.assertEqual(brayns.Vector3.forward, brayns.Vector3(0, 0, 1))
-
-    def test_back(self) -> None:
-        self.assertEqual(brayns.Vector3.back, -brayns.Vector3.forward)
-
     def test_iter(self) -> None:
         values = [1, 2, 3]
         test = brayns.Vector3(*values)

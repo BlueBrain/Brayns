@@ -32,12 +32,12 @@ def get_camera_projection(instance: Instance, projection_type: type[T]) -> T:
 
     The provided projection type must be the same as the current one.
 
-    Returned camera is of type ``camera_type``.
+    Returned projection is of type ``projection_type``.
 
     :param instance: Instance.
     :type instance: Instance
-    :param camera_type: Camera type (ex: brayns.PerspectiveCamera).
-    :type camera_type: type[T]
+    :param projection_type: Projection type (ex: brayns.PerspectiveProjection).
+    :type projection_type: type[T]
     :return: Current camera of ``instance``.
     :rtype: T
     """

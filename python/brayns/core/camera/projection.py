@@ -21,8 +21,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, TypeVar
 
-from brayns.utils import Bounds, View
-
 T = TypeVar('T', bound='Projection')
 
 
@@ -46,22 +44,16 @@ class Projection(ABC):
         pass
 
     @abstractmethod
-    def get_front_view(self, target: Bounds) -> View:
-        """Compute the front view to focus on given target.
+    def look_at(self, height: float) -> float:
+        """Focus on a target with given height.
 
-        :param target: Camera target.
-        :type target: Bounds
-        :return: Front view to see the target entirely.
-        :rtype: View
-        """
-        pass
+        Update projection properties to look at a target of given height and
+        return the minimal distance to see it entirely.
 
-    @abstractmethod
-    def set_target(self, target: Bounds) -> None:
-        """Update the projection parameters to focus on given target.
-
-        :param target: Camera target.
-        :type target: Bounds
+        :param height: Target height.
+        :type target: float
+        :return: Distance to see target entirely.
+        :rtype: float
         """
         pass
 

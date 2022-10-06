@@ -18,16 +18,53 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .axis import Axis
-from .componentwise_max import componentwise_max
-from .componentwise_min import componentwise_min
-from .vector import Vector
 from .vector3 import Vector3
 
-__all__ = [
-    'Axis',
-    'componentwise_max',
-    'componentwise_min',
-    'Vector',
-    'Vector3',
-]
+
+class Axis:
+    """Helper class to store the principal axes of Brayns coordinate system."""
+
+    @classmethod
+    @property
+    def x(cls) -> Vector3:
+        return Vector3(1.0, 0.0, 0.0)
+
+    @classmethod
+    @property
+    def right(cls) -> Vector3:
+        return cls.x
+
+    @classmethod
+    @property
+    def left(cls) -> Vector3:
+        return -cls.right
+
+    @classmethod
+    @property
+    def y(cls) -> Vector3:
+        return Vector3(0.0, 1.0, 0.0)
+
+    @classmethod
+    @property
+    def up(cls) -> Vector3:
+        return cls.y
+
+    @classmethod
+    @property
+    def down(cls) -> Vector3:
+        return -cls.up
+
+    @classmethod
+    @property
+    def z(cls) -> Vector3:
+        return Vector3(0.0, 0.0, 1.0)
+
+    @classmethod
+    @property
+    def front(cls) -> Vector3:
+        return cls.z
+
+    @classmethod
+    @property
+    def back(cls) -> Vector3:
+        return -cls.front

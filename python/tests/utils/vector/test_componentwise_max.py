@@ -18,25 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from ..vector import Vector3
+import unittest
+
+import brayns
 
 
-def lower_bound(values: list[Vector3]) -> Vector3:
-    """Take the smallest value for each component and make a new vector.
+class TestComponentwiseMax(unittest.TestCase):
 
-    Example: lower_bound([1, -2, 3], [-1, 2, -3]) = [-1, -2, -3].
+    def test_componentwise_max(self) -> None:
+        test = brayns.componentwise_max([
+            brayns.Vector3(-3, -2, 1),
+            brayns.Vector3(1, 4, 2),
+            brayns.Vector3(-2, 1, 3),
+        ])
+        ref = brayns.Vector3(1, 4, 3)
+        self.assertEqual(test, ref)
 
-    Return zero if values are empty.
+    def test_componentwise_max_empty(self) -> None:
+        test = brayns.componentwise_max([])
+        ref = brayns.Vector3.zero
+        self.assertEqual(test, ref)
 
-    :param values: Values to find the lower bound.
-    :type values: list[Vector3]
-    :return: Lowest value for each component among given values.
-    :rtype: Vector3
-    """
-    if not values:
-        return Vector3.zero
-    return Vector3(
-        min(value.x for value in values),
-        min(value.y for value in values),
-        min(value.z for value in values),
-    )
+
+if __name__ == '__main__':
+    unittest.main()

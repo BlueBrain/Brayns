@@ -36,13 +36,16 @@ from .vector import *
 from .view import *
 
 __all__ = [
+    'Axis',
     'Bounds',
     'Color3',
     'Color4',
+    'componentwise_max',
+    'componentwise_min',
     'Error',
+    'euler',
     'Fovy',
     'ImageFormat',
-    'lower_bound',
     'merge_bounds',
     'parse_hex_color',
     'parse_image_format',
@@ -50,7 +53,6 @@ __all__ = [
     'Resolution',
     'Rotation',
     'Transform',
-    'upper_bound',
     'Vector3',
     'View',
 ]

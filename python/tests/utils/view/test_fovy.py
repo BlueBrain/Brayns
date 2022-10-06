@@ -43,20 +43,10 @@ class TestFovy(unittest.TestCase):
         self.assertAlmostEqual(fovy.radians, math.radians(angle))
         self.assertAlmostEqual(fovy.degrees, angle)
 
-    def test_get_full_screen_distance(self) -> None:
+    def test_get_distance(self) -> None:
         fovy = brayns.Fovy(90, degrees=True)
-        test = fovy.get_full_screen_distance(2)
+        test = fovy.get_distance(2)
         self.assertAlmostEqual(test, 1)
-
-    def test_get_front_view(self) -> None:
-        fovy = brayns.Fovy(90, degrees=True)
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
-        test = fovy.get_front_view(target)
-        self.assertAlmostEqual(test.position.x, 0)
-        self.assertAlmostEqual(test.position.y, 0)
-        self.assertAlmostEqual(test.position.z, 2)
-        self.assertEqual(test.target, brayns.Vector3.zero)
-        self.assertEqual(test.up, brayns.Vector3.up)
 
 
 if __name__ == '__main__':

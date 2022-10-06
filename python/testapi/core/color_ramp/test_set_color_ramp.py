@@ -42,5 +42,5 @@ class TestSetColorRamp(SimpleTestCase):
         loader = brayns.BbpLoader(
             report=brayns.BbpReport.compartment('somas')
         )
-        models = loader.load(self.instance, self.circuit)
+        models = loader.load_models(self.instance, self.circuit)
         return models[0]

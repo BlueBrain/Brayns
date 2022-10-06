@@ -20,20 +20,30 @@
 
 from __future__ import annotations
 
-from brayns.utils import Bounds
+from brayns.utils import Axis, Bounds, Rotation, Vector3, View
 
 from .camera import Camera
+from .camera_rotation import CameraRotation
 from .perspective_projection import PerspectiveProjection
 from .projection import Projection
 
 
-def look_at(target: Bounds, projection: Projection | None = None) -> Camera:
-    """Shortcut to create a camera focusing on given target.
+def look_at(
+    target: Bounds,
+    aspect_ratio: float = 1.0,
+    rotation: Rotation = CameraRotation.front,
+    projection: Projection | None = None
+) -> Camera:
+    """Create a camera to look at given target.
 
-    See ``Camera.look_at`` for more details.
+    Aspect ratio is usually the one of the resolution of the final image.
 
     :param target: Camera target bounds.
     :type target: Bounds
+    :param aspect_ratio: Viewport aspect ratio (width / height), defaults to 1.
+    :type aspect_ratio: float
+    :param rotation: Camera rotation, defaults to identity.
+    :type rotation: Rotation, optional
     :param projection: Camera projection, defaults to PerspectiveProjection.
     :type projection: Projection | None, optional
     :return: Camera looking at target.
@@ -41,6 +51,36 @@ def look_at(target: Bounds, projection: Projection | None = None) -> Camera:
     """
     if projection is None:
         projection = PerspectiveProjection()
-    camera = Camera(projection=projection)
-    camera.look_at(target)
-    return camera
+    target = _get_apparent_target(target, rotation.inverse)
+    view = _get_front_view(target, aspect_ratio, projection)
+    return Camera(
+        view=view.rotate_around_target(rotation),
+        projection=projection,
+    )
+
+
+def _get_apparent_target(target: Bounds, rotation: Rotation) -> Bounds:
+    return target.rotate(rotation, target.center)
+
+
+def _get_front_view(target: Bounds, aspect_ratio: float, projection: Projection) -> View:
+    center = target.center
+    vector = _get_camera_vector(target, aspect_ratio, projection)
+    return View(
+        position=center + vector,
+        target=center,
+    )
+
+
+def _get_camera_vector(target: Bounds, aspect_ratio: float, projection: Projection) -> Vector3:
+    height = _get_viewport_height(target.width, target.height, aspect_ratio)
+    distance = _get_camera_distance(height, target.depth, projection)
+    return distance * Axis.front
+
+
+def _get_viewport_height(width: float, height: float, aspect_ratio: float) -> float:
+    return max(height, width / aspect_ratio)
+
+
+def _get_camera_distance(height: float, depth: float, projection: Projection) -> float:
+    return projection.look_at(height) + depth / 2

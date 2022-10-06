@@ -18,25 +18,41 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from ..vector import Vector3
+from brayns.utils import Rotation, euler
 
 
-def upper_bound(values: list[Vector3]) -> Vector3:
-    """Take the highest value for each component and make a new vector.
+class CameraRotation:
+    """Helper class to store camera rotations to reach different object views.
 
-    Example: upper_bound([1, -2, 3], [-1, 2, -3]) = [1, 2, 3].
-
-    Return zero if values are empty.
-
-    :param values: Values to find the upper bound.
-    :type values: list[Vector3]
-    :return: Highest value for each component among given values.
-    :rtype: Vector3
+    All rotations are relative to front view (X-right, Y-up, Z-front).
     """
-    if not values:
-        return Vector3.zero
-    return Vector3(
-        max(value.x for value in values),
-        max(value.y for value in values),
-        max(value.z for value in values),
-    )
+
+    @classmethod
+    @property
+    def front(cls) -> Rotation:
+        return Rotation.identity
+
+    @classmethod
+    @property
+    def back(cls) -> Rotation:
+        return euler(0, 180, 0, degrees=True)
+
+    @classmethod
+    @property
+    def top(cls) -> Rotation:
+        return euler(-90, 0, 0, degrees=True)
+
+    @classmethod
+    @property
+    def bottom(cls) -> Rotation:
+        return euler(90, 0, 0, degrees=True)
+
+    @classmethod
+    @property
+    def right(cls) -> Rotation:
+        return euler(0, 90, 0, degrees=True)
+
+    @classmethod
+    @property
+    def left(cls) -> Rotation:
+        return euler(0, -90, 0, degrees=True)

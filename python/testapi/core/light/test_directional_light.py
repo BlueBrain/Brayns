@@ -30,6 +30,6 @@ class TestDirectionalLight(LightTestCase):
             color=brayns.Color3.red,
             intensity=5,
             visible=True,
-            direction=brayns.Vector3.up
+            direction=brayns.Axis.up
         )
         self.run_tests(light)

@@ -21,8 +21,6 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.utils import Bounds, Vector3, View
-
 from .projection import Projection
 
 
@@ -52,31 +50,18 @@ class OrthographicProjection(Projection):
         """
         return 'orthographic'
 
-    def get_front_view(self, target: Bounds) -> View:
-        """Helper method to get the front view of a target object.
+    def look_at(self, height: float) -> float:
+        """Update viewport height to given one.
 
-        Distance from the object doesn't matter as long as no other objects are
-        between the camera and the target.
+        Camera distance doesn't matter in orthographic projections.
 
-        By default, the margin is half of the target depth.
-
-        :param target: Camera target.
-        :type target: Bounds
-        :return: Front view to see the target entirely.
-        :rtype: View
+        :param height: Target height.
+        :type target: float
+        :return: Distance to see target entirely.
+        :rtype: float
         """
-        center = target.center
-        distance = target.depth
-        position = center + distance * Vector3.forward
-        return View(position, center)
-
-    def set_target(self, target: Bounds) -> None:
-        """Set camera height to target height.
-
-        :param target: Camera target.
-        :type target: Bounds
-        """
-        self.height = target.height
+        self.height = height
+        return 0
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

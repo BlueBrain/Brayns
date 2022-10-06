@@ -21,24 +21,51 @@
 import unittest
 
 import brayns
-from tests.mock_bounds import MockBounds
 
 
 class TestLookAt(unittest.TestCase):
 
     def test_look_at(self) -> None:
-        target = MockBounds.bounds
-        test = brayns.look_at(target, brayns.OrthographicProjection())
-        ref = brayns.Camera(projection=brayns.OrthographicProjection())
-        ref.look_at(target)
-        self.assertEqual(test, ref)
+        target = brayns.Bounds(
+            min=brayns.Vector3.zero,
+            max=brayns.Vector3(4, 1, 3),
+        )
+        projection = brayns.OrthographicProjection()
+        test = brayns.look_at(
+            target,
+            aspect_ratio=2,
+            rotation=brayns.CameraRotation.left,
+            projection=projection,
+        )
+        view = test.view
+        ref = target.center + 2 * brayns.Axis.left
+        self.assertAlmostEqual(view.position.x, ref.x)
+        self.assertAlmostEqual(view.position.y, ref.y)
+        self.assertAlmostEqual(view.position.z, ref.z)
+        self.assertAlmostEqual(view.distance, 2)
+        self.assertAlmostEqual(projection.height, 1.5)
+        self.assertAlmostEqual(view.up.x, 0)
+        self.assertAlmostEqual(view.up.y, 1)
+        self.assertAlmostEqual(view.up.z, 0)
 
     def test_look_at_default(self) -> None:
-        target = MockBounds.bounds
+        target = brayns.Bounds(
+            min=-brayns.Vector3.one,
+            max=brayns.Vector3.one,
+        )
         test = brayns.look_at(target)
-        ref = brayns.Camera()
-        ref.look_at(target)
-        self.assertEqual(test, ref)
+        view = test.view
+        projection = brayns.PerspectiveProjection()
+        distance = projection.look_at(target.height) + target.depth / 2
+        ref = target.center + distance * brayns.Axis.front
+        self.assertAlmostEqual(view.position.x, ref.x)
+        self.assertAlmostEqual(view.position.y, ref.y)
+        self.assertAlmostEqual(view.position.z, ref.z)
+        self.assertAlmostEqual(view.distance, distance)
+        self.assertAlmostEqual(view.up.x, 0)
+        self.assertAlmostEqual(view.up.y, 1)
+        self.assertAlmostEqual(view.up.z, 0)
+        self.assertEqual(test.projection, projection)
 
 
 if __name__ == '__main__':

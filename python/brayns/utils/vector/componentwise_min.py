@@ -18,13 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
-from testapi.simple_test_case import SimpleTestCase
+from .vector3 import Vector3
 
 
-class TestColorCircuit(SimpleTestCase):
+def componentwise_min(values: list[Vector3]) -> Vector3:
+    """Return minimum of each component among values.
 
-    def test_color_circuit(self) -> None:
-        loader = brayns.BbpLoader()
-        models = loader.load_models(self.instance, self.circuit)
-        brayns.color_circuit(self.instance, models[0].id, brayns.Color4.red)
+    If values is empty, zero is returned.
+
+    :param values: List of vectors.
+    :type values: list[Vector3]
+    :return: Min value for each component.
+    :rtype: Vector3
+    """
+    if not values:
+        return Vector3.zero
+    return Vector3(
+        min(value.x for value in values),
+        min(value.y for value in values),
+        min(value.z for value in values),
+    )

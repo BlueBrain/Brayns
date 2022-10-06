@@ -21,7 +21,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.utils import Bounds, Fovy, View
+from brayns.utils import Fovy
 
 from .projection import Projection
 
@@ -58,19 +58,15 @@ class PerspectiveProjection(Projection):
         """
         return 'perspective'
 
-    def get_front_view(self, target: Bounds) -> View:
-        """Use fovy to compute the front view.
+    def look_at(self, height: float) -> float:
+        """Compute camera distance using field of view.
 
-        :param target: Camera target.
-        :type target: Bounds
-        :return: Front view based on self.fovy.
-        :rtype: View
+        :param height: Target height.
+        :type target: float
+        :return: Distance to see target entirely.
+        :rtype: float
         """
-        return self.fovy.get_front_view(target)
-
-    def set_target(self, target: Bounds) -> None:
-        """Does nothing."""
-        pass
+        return self.fovy.get_distance(height)
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

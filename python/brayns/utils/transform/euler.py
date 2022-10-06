@@ -18,27 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
-import brayns
-
-
-class TestUpperBound(unittest.TestCase):
-
-    def test_upper_bound(self) -> None:
-        test = brayns.upper_bound([
-            brayns.Vector3(-3, -2, 1),
-            brayns.Vector3(1, 4, 2),
-            brayns.Vector3(-2, 1, 3),
-        ])
-        ref = brayns.Vector3(1, 4, 3)
-        self.assertEqual(test, ref)
-
-    def test_empty(self) -> None:
-        test = brayns.upper_bound([])
-        ref = brayns.Vector3.zero
-        self.assertEqual(test, ref)
+from ..vector import Vector3
+from .rotation import Rotation
 
 
-if __name__ == '__main__':
-    unittest.main()
+def euler(x: float, y: float, z: float, degrees: bool = False) -> Rotation:
+    """Shortcut to build a rotation from euler angles.
+
+    :param x: X rotation.
+    :type x: float
+    :param y:  Y rotation.
+    :type y: float
+    :param z:  Z rotation.
+    :type z: float
+    :param degrees: Wether given angles are in degrees, defaults to False
+    :type degrees: bool, optional
+    :return: Rotation corresponding to angles.
+    :rtype: Rotation
+    """
+    angles = Vector3(x, y, z)
+    return Rotation.from_euler(angles, degrees)

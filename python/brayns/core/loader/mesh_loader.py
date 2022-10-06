@@ -18,7 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+from typing import Any, ClassVar
 
 from .loader import Loader
 
@@ -31,10 +31,10 @@ class MeshLoader(Loader):
     Format support can be queried using ``get_loaders(instance)``.
     """
 
-    OBJ: str = 'obj'
-    PLY: str = 'ply'
-    STL: str = 'stl'
-    OFF: str = 'off'
+    OBJ: ClassVar[str] = 'obj'
+    PLY: ClassVar[str] = 'ply'
+    STL: ClassVar[str] = 'stl'
+    OFF: ClassVar[str] = 'off'
 
     @classmethod
     @property

@@ -37,13 +37,13 @@ class TestBbpLoader(SimpleTestCase):
         folder = pathlib.Path(__file__).parent
         return folder / 'bbp.png'
 
-    def test_load(self) -> None:
+    def test_load_models(self) -> None:
         loader = brayns.BbpLoader(
             cells=brayns.BbpCells.from_density(0.5),
             report=brayns.BbpReport.compartment('somas'),
             morphology=brayns.Morphology(load_dendrites=True),
         )
-        models = loader.load(self.instance, self.circuit)
+        models = loader.load_models(self.instance, self.circuit)
         self._validate_result(models)
 
     def _validate_result(self, models: list[brayns.Model]) -> None:

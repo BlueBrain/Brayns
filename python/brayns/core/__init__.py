@@ -50,6 +50,7 @@ __all__ = [
     'Application',
     'Box',
     'Camera',
+    'CameraRotation',
     'Capsule',
     'CarPaintMaterial',
     'check_version',

@@ -31,7 +31,7 @@ class TestQuadLight(LightTestCase):
             intensity=5,
             visible=True,
             bottom_left=brayns.Vector3.zero,
-            edge1=brayns.Vector3.up,
-            edge2=brayns.Vector3.right
+            edge1=brayns.Axis.up,
+            edge2=brayns.Axis.right
         )
         self.run_tests(light)

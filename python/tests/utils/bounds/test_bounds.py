@@ -33,10 +33,34 @@ class TestBounds(unittest.TestCase):
             max=brayns.Vector3(4, 5, 6),
         )
 
+    @classmethod
+    @property
+    def corners(cls) -> list[brayns.Vector3]:
+        return [
+            brayns.Vector3(-1, -1, -1),
+            brayns.Vector3(-1, -1, 1),
+            brayns.Vector3(-1, 1, -1),
+            brayns.Vector3(-1, 1, 1),
+            brayns.Vector3(1, -1, -1),
+            brayns.Vector3(1, -1, 1),
+            brayns.Vector3(1, 1, -1),
+            brayns.Vector3(1, 1, 1),
+        ]
+
+    def test_of(self) -> None:
+        test = brayns.Bounds.of(self.corners)
+        ref = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
+        self.assertEqual(test, ref)
+
     def test_empty(self) -> None:
         test = brayns.Bounds.empty
         self.assertEqual(test.min, brayns.Vector3.zero)
         self.assertEqual(test.max, brayns.Vector3.zero)
+
+    def test_one(self) -> None:
+        test = brayns.Bounds.one
+        self.assertEqual(test.min, -brayns.Vector3.one / 2)
+        self.assertEqual(test.max, brayns.Vector3.one / 2)
 
     def test_center(self) -> None:
         self.assertEqual(self.bounds.center, brayns.Vector3(2.5, 3.5, 4.5))
@@ -52,6 +76,37 @@ class TestBounds(unittest.TestCase):
 
     def test_depth(self) -> None:
         self.assertEqual(self.bounds.depth, 3)
+
+    def test_corners(self) -> None:
+        test = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
+        self.assertEqual(test.corners, self.corners)
+
+    def test_translate(self) -> None:
+        translation = brayns.Vector3(7, 8, 9)
+        test = self.bounds.translate(translation)
+        self.assertEqual(test.min, self.bounds.min + translation)
+        self.assertEqual(test.max, self.bounds.max + translation)
+
+    def test_rotate(self) -> None:
+        rotation = brayns.CameraRotation.top
+        bounds = brayns.Bounds(
+            brayns.Vector3.zero,
+            brayns.Vector3(1, 2, 3),
+        )
+        test = bounds.rotate(rotation, center=bounds.center)
+        self.assertAlmostEqual(test.width, bounds.width)
+        self.assertAlmostEqual(test.height, bounds.depth)
+        self.assertAlmostEqual(test.depth, bounds.height)
+        self.assertAlmostEqual(test.center.x, bounds.center.x)
+        self.assertAlmostEqual(test.center.y, bounds.center.y)
+        self.assertAlmostEqual(test.center.z, bounds.center.z)
+
+    def test_rescale(self) -> None:
+        scale = brayns.Vector3(1, 2, 3)
+        bounds = brayns.Bounds.one
+        test = bounds.rescale(scale)
+        self.assertEqual(test.size, scale)
+        self.assertEqual(test.center, bounds.center)
 
 
 if __name__ == '__main__':
