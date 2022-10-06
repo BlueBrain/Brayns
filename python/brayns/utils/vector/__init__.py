@@ -18,10 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from .axis import Axis
 from .vector import Vector
 from .vector3 import Vector3
 
 __all__ = [
+    'Axis',
     'Vector',
     'Vector3',
 ]

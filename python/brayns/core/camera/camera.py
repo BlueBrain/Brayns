@@ -20,7 +20,7 @@
 
 from dataclasses import dataclass, field
 
-from brayns.utils import Bounds, Rotation, Vector3, View
+from brayns.utils import Rotation, Vector3, View
 
 from .perspective_projection import PerspectiveProjection
 from .projection import Projection
@@ -86,8 +86,9 @@ class Camera:
     def distance(self) -> float:
         return self.view.distance
 
-    def look_at(self, target: Bounds, aspect_ratio: float = 1.0) -> None:
-        self.view = self.projection.look_at(target, aspect_ratio)
+    @distance.setter
+    def distance(self, value: float) -> None:
+        self.position = self.target - self.direction * value
 
     def rotate_around_target(self, rotation: Rotation) -> None:
         self.view.rotate_around_target(rotation)

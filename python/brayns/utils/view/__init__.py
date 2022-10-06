@@ -18,18 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .axis import Axis
 from .deserialize_view import deserialize_view
 from .fovy import Fovy
 from .serialize_view import serialize_view
-from .side import Side
 from .view import View
 
 __all__ = [
-    'Axis',
     'deserialize_view',
     'Fovy',
     'serialize_view',
-    'Side',
     'View',
 ]

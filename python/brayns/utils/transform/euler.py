@@ -19,51 +19,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from ..vector import Vector3
+from .rotation import Rotation
 
 
-class Axis:
+def euler(x: float, y: float, z: float, degrees: bool = False) -> Rotation:
+    """Shortcut to build a rotation from euler angles.
 
-    @classmethod
-    @property
-    def x(cls) -> Vector3:
-        return Vector3(1.0, 0.0, 0.0)
-
-    @classmethod
-    @property
-    def right(cls) -> Vector3:
-        return cls.x
-
-    @classmethod
-    @property
-    def left(cls) -> Vector3:
-        return -cls.right
-
-    @classmethod
-    @property
-    def y(cls) -> Vector3:
-        return Vector3(0.0, 1.0, 0.0)
-
-    @classmethod
-    @property
-    def up(cls) -> Vector3:
-        return cls.y
-
-    @classmethod
-    @property
-    def down(cls) -> Vector3:
-        return -cls.up
-
-    @classmethod
-    @property
-    def z(cls) -> Vector3:
-        return Vector3(0.0, 0.0, 1.0)
-
-    @classmethod
-    @property
-    def front(cls) -> Vector3:
-        return cls.z
-
-    @classmethod
-    @property
-    def back(cls) -> Vector3:
-        return -cls.front
+    :param x: X rotation.
+    :type x: float
+    :param y:  Y rotation.
+    :type y: float
+    :param z:  Z rotation.
+    :type z: float
+    :param degrees: Wether given angles are in degrees, defaults to False
+    :type degrees: bool, optional
+    :return: Rotation corresponding to angles.
+    :rtype: Rotation
+    """
+    angles = Vector3(x, y, z)
+    return Rotation.from_euler(angles, degrees)

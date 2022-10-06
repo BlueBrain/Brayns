@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from typing import Any, ClassVar
 
 from brayns.core import Projection
-from brayns.utils import Bounds, Fovy, View
+from brayns.utils import Fovy
 
 
 @dataclass
@@ -47,17 +47,15 @@ class CylindricProjection(Projection):
         """
         return 'cylindric'
 
-    def look_at(self, target: Bounds, aspect_ratio: float) -> View:
-        """Compute front view using field of view.
+    def look_at(self, height: float) -> float:
+        """Compute camera distance using field of view.
 
-        :param target: Camera target.
-        :type target: Bounds
-        :param aspect_ratio: Viewport aspect ratio.
-        :type aspect_ratio: float
-        :return: Front view to see the target entirely.
-        :rtype: View
+        :param height: Target height.
+        :type target: float
+        :return: Distance to see target entirely.
+        :rtype: float
         """
-        return self.fovy.look_at(target, aspect_ratio)
+        return self.fovy.get_distance(height)
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

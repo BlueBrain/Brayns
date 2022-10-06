@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .deserialize_transform import deserialize_transform
+from .euler import euler
 from .quaternion import Quaternion
 from .rotation import Rotation
 from .serialize_transform import serialize_transform
@@ -26,6 +27,7 @@ from .transform import Transform
 
 __all__ = [
     'deserialize_transform',
+    'euler',
     'Quaternion',
     'Rotation',
     'serialize_transform',
