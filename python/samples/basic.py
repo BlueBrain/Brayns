@@ -57,7 +57,7 @@ with brayns.start(service, connector) as (process, instance):
         )
     )
 
-    models = loader.load(instance, CIRCUIT)
+    models = loader.load_models(instance, CIRCUIT)
     model = models[0]
 
     camera = brayns.look_at(model.bounds)

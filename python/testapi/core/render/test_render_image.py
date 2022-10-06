@@ -84,4 +84,4 @@ class TestRenderImage(SimpleTestCase):
     def _load_model(self) -> None:
         path = self.asset_folder / 'cube.ply'
         loader = brayns.MeshLoader()
-        loader.load(self.instance, str(path))
+        loader.load_models(self.instance, str(path))

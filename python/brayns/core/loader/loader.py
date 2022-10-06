@@ -55,7 +55,7 @@ class Loader(ABC):
         """Low level API to serialize to JSON."""
         pass
 
-    def load(self, instance: Instance, path: str) -> list[Model]:
+    def load_models(self, instance: Instance, path: str) -> list[Model]:
         """Load the given file into an instance and return the models.
 
         :param instance: Instance.
@@ -76,10 +76,13 @@ class Loader(ABC):
             for model in result
         ]
 
-    def load_binary(self, instance: Instance, format: str, data: bytes) -> list[Model]:
-        """Load a model from binary data.
+    def load_models_from_binary(self, instance: Instance, format: str, data: bytes) -> list[Model]:
+        """Load models from binary data.
 
         As the model format cannot be deduced from a path, it must be specified.
+
+        The format is the file extension without the dot, check the class
+        variables to see supported formats (ex: MeshLoader.PLY).
 
         :param instance: Instance.
         :type instance: Instance

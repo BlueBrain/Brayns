@@ -34,11 +34,11 @@ class TestMeshLoader(unittest.TestCase):
         loader = brayns.MeshLoader()
         self.assertEqual(loader.get_properties(), {})
 
-    def test_load(self) -> None:
+    def test_load_models(self) -> None:
         instance = MockInstance([MockModel.message, MockModel.message])
         loader = brayns.MeshLoader()
         path = 'path'
-        test = loader.load(instance, path)
+        test = loader.load_models(instance, path)
         self.assertEqual(test, [MockModel.model, MockModel.model])
         self.assertEqual(instance.method, 'add-model')
         self.assertEqual(instance.params, {
@@ -47,12 +47,12 @@ class TestMeshLoader(unittest.TestCase):
             'loader_properties': loader.get_properties(),
         })
 
-    def test_load_binary(self) -> None:
+    def test_load_models_from_binary(self) -> None:
         instance = MockInstance([MockModel.message, MockModel.message])
         loader = brayns.MeshLoader()
         format = loader.PLY
         data = b'123'
-        test = loader.load_binary(instance, format, data)
+        test = loader.load_models_from_binary(instance, format, data)
         self.assertEqual(test, [MockModel.model, MockModel.model])
         self.assertEqual(instance.method, 'upload-model')
         self.assertEqual(instance.params, {

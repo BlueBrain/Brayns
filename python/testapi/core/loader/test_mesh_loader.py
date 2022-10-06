@@ -24,59 +24,61 @@ from testapi.simple_test_case import SimpleTestCase
 
 class TestMeshLoader(SimpleTestCase):
 
-    def test_load_obj(self) -> None:
+    def test_load_models_obj(self) -> None:
         path = self.asset_folder / 'cube.obj'
         loader = brayns.MeshLoader()
-        models = loader.load(self.instance, str(path))
+        models = loader.load_models(self.instance, str(path))
         self.assertEqual(len(models), 1)
         model = models[0]
         ref = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         self.assertEqual(model.bounds, ref)
 
-    def test_load_off(self) -> None:
+    def test_load_models_off(self) -> None:
         path = self.asset_folder / 'cube.off'
         loader = brayns.MeshLoader()
-        models = loader.load(self.instance, str(path))
+        models = loader.load_models(self.instance, str(path))
         self.assertEqual(len(models), 1)
         model = models[0]
         ref = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         self.assertEqual(model.bounds, ref)
 
-    def test_load_ply(self) -> None:
+    def test_load_models_ply(self) -> None:
         path = self.asset_folder / 'cube.ply'
         loader = brayns.MeshLoader()
-        models = loader.load(self.instance, str(path))
+        models = loader.load_models(self.instance, str(path))
         self.assertEqual(len(models), 1)
         model = models[0]
         ref = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         self.assertEqual(model.bounds, ref)
 
-    def test_load_stl(self) -> None:
+    def test_load_models_stl(self) -> None:
         path = self.asset_folder / 'cube.stl'
         loader = brayns.MeshLoader()
-        models = loader.load(self.instance, str(path))
+        models = loader.load_models(self.instance, str(path))
         self._check_stl(models)
 
-    def test_load_stl_binary(self) -> None:
+    def test_load_models_stl_binary(self) -> None:
         path = self.asset_folder / 'cube_binary.stl'
         loader = brayns.MeshLoader()
-        models = loader.load(self.instance, str(path))
+        models = loader.load_models(self.instance, str(path))
         self._check_stl_binary(models)
 
-    def test_load_binary_stl(self) -> None:
+    def test_load_models_from_binary_stl(self) -> None:
         path = self.asset_folder / 'cube.stl'
         loader = brayns.MeshLoader()
         with path.open('rb') as file:
             data = file.read()
-        models = loader.load_binary(self.instance, loader.STL, data)
+        models = loader.load_models_from_binary(
+            self.instance, loader.STL, data)
         self._check_stl(models)
 
-    def test_load_binary_stl_binary(self) -> None:
+    def test_load_models_from_binary_stl_binary(self) -> None:
         path = self.asset_folder / 'cube_binary.stl'
         loader = brayns.MeshLoader()
         with path.open('rb') as file:
             data = file.read()
-        models = loader.load_binary(self.instance, loader.STL, data)
+        models = loader.load_models_from_binary(
+            self.instance, loader.STL, data)
         self._check_stl_binary(models)
 
     def _check_stl(self, models: list[brayns.Model]) -> None:
