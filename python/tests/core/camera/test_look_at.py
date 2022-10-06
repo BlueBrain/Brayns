@@ -21,7 +21,6 @@
 import unittest
 
 import brayns
-from tests.mock_bounds import MockBounds
 
 
 class TestLookAt(unittest.TestCase):
@@ -40,10 +39,14 @@ class TestLookAt(unittest.TestCase):
         )
         view = test.view
         ref = target.center + 2 * brayns.Axis.left
-        self.assertEqual(view.position, ref)
-        self.assertEqual(view.target, target.center)
-        self.assertEqual(view.up, brayns.Axis.up)
+        self.assertAlmostEqual(view.position.x, ref.x)
+        self.assertAlmostEqual(view.position.y, ref.y)
+        self.assertAlmostEqual(view.position.z, ref.z)
+        self.assertAlmostEqual(view.distance, 2)
         self.assertAlmostEqual(projection.height, 1.5)
+        self.assertAlmostEqual(view.up.x, 0)
+        self.assertAlmostEqual(view.up.y, 1)
+        self.assertAlmostEqual(view.up.z, 0)
 
     def test_look_at_default(self) -> None:
         target = brayns.Bounds(
@@ -52,9 +55,17 @@ class TestLookAt(unittest.TestCase):
         )
         test = brayns.look_at(target)
         view = test.view
-        self.assertAlmostEqual(view.distance, 3)
-        self.assertEqual(view.target, target.center)
-        self.assertEqual(view.up, brayns.Axis.up)
+        projection = brayns.PerspectiveProjection()
+        distance = projection.look_at(target.height) + target.depth / 2
+        ref = target.center + distance * brayns.Axis.front
+        self.assertAlmostEqual(view.position.x, ref.x)
+        self.assertAlmostEqual(view.position.y, ref.y)
+        self.assertAlmostEqual(view.position.z, ref.z)
+        self.assertAlmostEqual(view.distance, distance)
+        self.assertAlmostEqual(view.up.x, 0)
+        self.assertAlmostEqual(view.up.y, 1)
+        self.assertAlmostEqual(view.up.z, 0)
+        self.assertEqual(test.projection, projection)
 
 
 if __name__ == '__main__':

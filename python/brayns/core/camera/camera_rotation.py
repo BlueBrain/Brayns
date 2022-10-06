@@ -22,11 +22,15 @@ from brayns.utils import Rotation, euler
 
 
 class CameraRotation:
+    """Helper class to store camera rotations to reach different object views.
+
+    All rotations are relative to front view (X-right, Y-up, Z-front).
+    """
 
     @classmethod
     @property
     def front(cls) -> Rotation:
-        return euler(0, 0, 0, degrees=True)
+        return Rotation.identity
 
     @classmethod
     @property

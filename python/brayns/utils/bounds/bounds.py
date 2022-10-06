@@ -63,6 +63,16 @@ class Bounds:
         """
         return Bounds(Vector3.zero, Vector3.zero)
 
+    @classmethod
+    @property
+    def one(cls) -> Bounds:
+        """Create unit bounds (size = [1, 1, 1]).
+
+        :return: Unit bounds centered in [0, 0, 0].
+        :rtype: Bounds
+        """
+        return Bounds(-Vector3.one / 2, Vector3.one / 2)
+
     @property
     def center(self) -> Vector3:
         """Compute the center point of the bounds.
@@ -153,3 +163,16 @@ class Bounds:
             rotation.apply(corner, center)
             for corner in self.corners
         ])
+
+    def rescale(self, scale: Vector3) -> Bounds:
+        """Multiply limits by given scale componentwise.
+
+        :param scale: Scale XYZ.
+        :type scale: Vector3
+        :return: Rescaled bounds.
+        :rtype: Bounds
+        """
+        return Bounds(
+            min=scale * self.min,
+            max=scale * self.max,
+        )

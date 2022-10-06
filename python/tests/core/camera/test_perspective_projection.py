@@ -21,7 +21,6 @@
 import unittest
 
 import brayns
-from tests.mock_bounds import MockBounds
 
 
 class TestPerspectiveProjection(unittest.TestCase):
@@ -32,12 +31,12 @@ class TestPerspectiveProjection(unittest.TestCase):
         self.assertEqual(test, ref)
 
     def test_look_at(self) -> None:
-        aspect_ratio = 3
-        target = MockBounds.bounds
         projection = brayns.PerspectiveProjection()
-        test = projection.look_at(target, aspect_ratio)
-        ref = projection.fovy.look_at(target, aspect_ratio)
-        self.assertEqual(test, ref)
+        height = 1
+        distance = projection.look_at(height)
+        ref = projection.fovy.get_distance(height)
+        self.assertEqual(projection, brayns.PerspectiveProjection())
+        self.assertEqual(distance, ref)
 
     def test_get_properties(self) -> None:
         projection = brayns.PerspectiveProjection(

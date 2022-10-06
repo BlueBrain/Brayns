@@ -39,6 +39,8 @@ class TestView(unittest.TestCase):
     def test_distance(self) -> None:
         test = brayns.View()
         self.assertEqual(test.distance, test.vector.norm)
+        test.distance = 3
+        self.assertEqual(test.distance, 3)
 
     def test_rotate_around_target(self) -> None:
         rotation = brayns.euler(0, 180, 0, degrees=True)
@@ -47,7 +49,7 @@ class TestView(unittest.TestCase):
             target=brayns.Axis.front,
             up=brayns.Axis.right,
         )
-        test.rotate_around_target(rotation)
+        test = test.rotate_around_target(rotation)
         ref = 2 * brayns.Axis.front
         self.assertAlmostEqual(test.position.x, ref.x)
         self.assertAlmostEqual(test.position.y, ref.y)

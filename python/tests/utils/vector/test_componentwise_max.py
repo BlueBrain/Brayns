@@ -23,10 +23,10 @@ import unittest
 import brayns
 
 
-class TestUpperBound(unittest.TestCase):
+class TestComponentwiseMax(unittest.TestCase):
 
-    def test_upper_bound(self) -> None:
-        test = brayns.upper_bound([
+    def test_componentwise_max(self) -> None:
+        test = brayns.componentwise_max([
             brayns.Vector3(-3, -2, 1),
             brayns.Vector3(1, 4, 2),
             brayns.Vector3(-2, 1, 3),
@@ -34,8 +34,8 @@ class TestUpperBound(unittest.TestCase):
         ref = brayns.Vector3(1, 4, 3)
         self.assertEqual(test, ref)
 
-    def test_empty(self) -> None:
-        test = brayns.upper_bound([])
+    def test_componentwise_max_empty(self) -> None:
+        test = brayns.componentwise_max([])
         ref = brayns.Vector3.zero
         self.assertEqual(test, ref)
 

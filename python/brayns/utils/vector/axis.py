@@ -22,6 +22,7 @@ from .vector3 import Vector3
 
 
 class Axis:
+    """Helper class to store the principal axes of Brayns coordinate system."""
 
     @classmethod
     @property

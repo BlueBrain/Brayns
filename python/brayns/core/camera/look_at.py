@@ -20,9 +20,10 @@
 
 from __future__ import annotations
 
-from brayns.utils import Axis, Bounds, Rotation, View
+from brayns.utils import Axis, Bounds, Rotation, Vector3, View
 
 from .camera import Camera
+from .camera_rotation import CameraRotation
 from .perspective_projection import PerspectiveProjection
 from .projection import Projection
 
@@ -30,7 +31,7 @@ from .projection import Projection
 def look_at(
     target: Bounds,
     aspect_ratio: float = 1.0,
-    rotation: Rotation = Rotation.identity,
+    rotation: Rotation = CameraRotation.front,
     projection: Projection | None = None
 ) -> Camera:
     """Create a camera to look at given target.
@@ -64,13 +65,17 @@ def _get_apparent_target(target: Bounds, rotation: Rotation) -> Bounds:
 
 def _get_front_view(target: Bounds, aspect_ratio: float, projection: Projection) -> View:
     center = target.center
-    width, height, depth = target.size
-    height = _get_viewport_height(width, height, aspect_ratio)
-    distance = _get_camera_distance(height, depth, projection)
+    vector = _get_camera_vector(target, aspect_ratio, projection)
     return View(
-        position=center + distance * Axis.front,
+        position=center + vector,
         target=center,
     )
+
+
+def _get_camera_vector(target: Bounds, aspect_ratio: float, projection: Projection) -> Vector3:
+    height = _get_viewport_height(target.width, target.height, aspect_ratio)
+    distance = _get_camera_distance(height, target.depth, projection)
+    return distance * Axis.front
 
 
 def _get_viewport_height(width: float, height: float, aspect_ratio: float) -> float:

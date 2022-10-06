@@ -23,10 +23,10 @@ import unittest
 import brayns
 
 
-class TestLowerBound(unittest.TestCase):
+class TestComponentwiseMin(unittest.TestCase):
 
-    def test_lower_bound(self) -> None:
-        test = brayns.lower_bound([
+    def test_componentwise_min(self) -> None:
+        test = brayns.componentwise_min([
             brayns.Vector3(-3, 2, 1),
             brayns.Vector3(-1, -4, 2),
             brayns.Vector3(-2, 1, 3),
@@ -34,8 +34,8 @@ class TestLowerBound(unittest.TestCase):
         ref = brayns.Vector3(-3, -4, 1)
         self.assertEqual(test, ref)
 
-    def test_empty(self) -> None:
-        test = brayns.lower_bound([])
+    def test_componentwise_min_empty(self) -> None:
+        test = brayns.componentwise_min([])
         ref = brayns.Vector3.zero
         self.assertEqual(test, ref)
 

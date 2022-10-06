@@ -31,12 +31,12 @@ class TestCylindricProjection(unittest.TestCase):
         self.assertEqual(test, ref)
 
     def test_look_at(self) -> None:
-        aspect_ratio = 2
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
         projection = brayns.CylindricProjection()
-        test = projection.look_at(target, aspect_ratio)
-        ref = projection.fovy.look_at(target, aspect_ratio)
-        self.assertEqual(test, ref)
+        height = 1
+        distance = projection.look_at(height)
+        ref = projection.fovy.get_distance(height)
+        self.assertEqual(projection, brayns.CylindricProjection())
+        self.assertEqual(distance, ref)
 
     def test_get_properties(self) -> None:
         projection = brayns.CylindricProjection(

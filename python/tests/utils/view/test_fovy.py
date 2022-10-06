@@ -48,16 +48,6 @@ class TestFovy(unittest.TestCase):
         test = fovy.get_distance(2)
         self.assertAlmostEqual(test, 1)
 
-    def test_look_at(self) -> None:
-        fovy = brayns.Fovy(90, degrees=True)
-        target = brayns.Bounds(-brayns.Vector3.one, brayns.Vector3.one)
-        test = fovy.look_at(target, 1)
-        self.assertAlmostEqual(test.position.x, 0)
-        self.assertAlmostEqual(test.position.y, 0)
-        self.assertAlmostEqual(test.position.z, 2)
-        self.assertEqual(test.target, brayns.Vector3.zero)
-        self.assertEqual(test.up, brayns.Axis.up)
-
 
 if __name__ == '__main__':
     unittest.main()
