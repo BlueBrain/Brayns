@@ -18,32 +18,52 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .camera import Camera
-from .camera_rotation import CameraRotation
-from .get_camera import get_camera
-from .get_camera_name import get_camera_name
-from .get_camera_projection import get_camera_projection
-from .get_camera_view import get_camera_view
-from .look_at import look_at
-from .orthographic_projection import OrthographicProjection
-from .perspective_projection import PerspectiveProjection
-from .projection import Projection
-from .set_camera import set_camera
-from .set_camera_projection import set_camera_projection
-from .set_camera_view import set_camera_view
+from . import Vector3
 
-__all__ = [
-    'Camera',
-    'CameraRotation',
-    'get_camera_name',
-    'get_camera_projection',
-    'get_camera_view',
-    'get_camera',
-    'look_at',
-    'OrthographicProjection',
-    'PerspectiveProjection',
-    'Projection',
-    'set_camera_projection',
-    'set_camera_view',
-    'set_camera',
-]
+
+class Axis:
+
+    @classmethod
+    @property
+    def x(cls) -> Vector3:
+        return Vector3(1.0, 0.0, 0.0)
+
+    @classmethod
+    @property
+    def right(cls) -> Vector3:
+        return cls.x
+
+    @classmethod
+    @property
+    def left(cls) -> Vector3:
+        return -cls.right
+
+    @classmethod
+    @property
+    def y(cls) -> Vector3:
+        return Vector3(0.0, 1.0, 0.0)
+
+    @classmethod
+    @property
+    def up(cls) -> Vector3:
+        return cls.y
+
+    @classmethod
+    @property
+    def down(cls) -> Vector3:
+        return -cls.up
+
+    @classmethod
+    @property
+    def z(cls) -> Vector3:
+        return Vector3(0.0, 0.0, 1.0)
+
+    @classmethod
+    @property
+    def front(cls) -> Vector3:
+        return cls.z
+
+    @classmethod
+    @property
+    def back(cls) -> Vector3:
+        return -cls.front
