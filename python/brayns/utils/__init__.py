@@ -36,10 +36,12 @@ from .vector import *
 from .view import *
 
 __all__ = [
+    'Axis',
     'Bounds',
     'Color3',
     'Color4',
     'Error',
+    'euler',
     'Fovy',
     'ImageFormat',
     'lower_bound',
