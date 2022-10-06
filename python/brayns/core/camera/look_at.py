@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from brayns.utils import Bounds, Rotation, Vector3, View
+from brayns.utils import Axis, Bounds, Rotation, View
 
 from .camera import Camera
 from .perspective_projection import PerspectiveProjection
@@ -71,7 +71,7 @@ def _get_front_view(target: Bounds, aspect_ratio: float, projection: Projection)
     height = _get_viewport_height(width, height, aspect_ratio)
     distance = projection.look_at(height) + depth / 2
     return View(
-        position=center + distance * Vector3.forward,
+        position=center + distance * Axis.front,
         target=center,
     )
 

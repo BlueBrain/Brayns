@@ -70,8 +70,7 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(camera.projection, projection)
 
     def test_rotate_around_target(self) -> None:
-        euler = brayns.Vector3(1, 2, 3)
-        rotation = brayns.Rotation.from_euler(euler, degrees=True)
+        rotation = brayns.euler(1, 2, 3, degrees=True)
         test = brayns.Camera()
         ref = brayns.Camera()
         test.rotate_around_target(rotation)

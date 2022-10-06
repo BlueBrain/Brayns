@@ -30,10 +30,10 @@ class TestQuadLight(unittest.TestCase):
 
     def test_emission_direction(self) -> None:
         light = brayns.QuadLight(
-            edge1=brayns.Vector3.up,
-            edge2=brayns.Vector3.left
+            edge1=brayns.Axis.up,
+            edge2=brayns.Axis.left
         )
-        self.assertEqual(light.emission_direction, brayns.Vector3.forward)
+        self.assertEqual(light.emission_direction, brayns.Axis.front)
 
     def test_get_properties(self) -> None:
         test = brayns.QuadLight()

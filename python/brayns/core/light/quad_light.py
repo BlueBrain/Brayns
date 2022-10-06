@@ -21,7 +21,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.utils import Vector3
+from brayns.utils import Axis, Vector3
 
 from .light import Light
 
@@ -41,8 +41,8 @@ class QuadLight(Light):
     """
 
     bottom_left: Vector3 = Vector3.zero
-    edge1: Vector3 = Vector3.right
-    edge2: Vector3 = Vector3.up
+    edge1: Vector3 = Axis.right
+    edge2: Vector3 = Axis.up
 
     @classmethod
     @property

@@ -78,9 +78,9 @@ class TestRotation(unittest.TestCase):
         self.assertAlmostEqual(test.z, ref.z)
 
     def test_axis(self) -> None:
-        ref = brayns.Vector3.up
+        ref = brayns.Axis.up
         rotation = brayns.Rotation.from_axis_angle(
-            brayns.Vector3.up, 30, degrees=True)
+            brayns.Axis.up, 30, degrees=True)
         test = rotation.axis.normalized
         self.assertAlmostEqual(test.x, ref.x)
         self.assertAlmostEqual(test.y, ref.y)
@@ -88,12 +88,12 @@ class TestRotation(unittest.TestCase):
 
     def test_angle_radians(self) -> None:
         rotation = brayns.Rotation.from_axis_angle(
-            brayns.Vector3.up, 30, degrees=True)
+            brayns.Axis.up, 30, degrees=True)
         self.assertAlmostEqual(rotation.angle_radians, math.radians(30))
 
     def test_angle_degrees(self) -> None:
         rotation = brayns.Rotation.from_axis_angle(
-            brayns.Vector3.up, 30, degrees=True)
+            brayns.Axis.up, 30, degrees=True)
         self.assertAlmostEqual(rotation.angle_degrees, 30)
 
     def test_inverse(self) -> None:
@@ -102,17 +102,14 @@ class TestRotation(unittest.TestCase):
         self.assertEqual(rotation.inverse.quaternion, quaternion.inverse)
 
     def test_combine(self) -> None:
-        r1 = brayns.Rotation.from_axis_angle(
-            brayns.Vector3.up, 30, degrees=True)
-        r2 = brayns.Rotation.from_axis_angle(
-            brayns.Vector3.up, 30, degrees=True)
+        r1 = brayns.Rotation.from_axis_angle(brayns.Axis.up, 30, degrees=True)
+        r2 = brayns.Rotation.from_axis_angle(brayns.Axis.up, 30, degrees=True)
         ref = r1.quaternion * r2.quaternion
         test = r1.combine(r2).quaternion
         self.assertEqual(test, ref)
 
     def test_apply(self) -> None:
-        rotation = brayns.Rotation.from_euler(
-            brayns.Vector3(22, 35, 68), degrees=True)
+        rotation = brayns.euler(22, 35, 68, degrees=True)
         value = brayns.Vector3(1, 2, 3)
         test = rotation.apply(value)
         self.assertAlmostEqual(test.x, 0.3881471)
@@ -120,8 +117,7 @@ class TestRotation(unittest.TestCase):
         self.assertAlmostEqual(test.z, 2.31865673)
 
     def test_apply_center(self) -> None:
-        rotation = brayns.Rotation.from_euler(
-            brayns.Vector3(22, 35, 68), degrees=True)
+        rotation = brayns.euler(22, 35, 68, degrees=True)
         value = brayns.Vector3(1, 2, 3)
         center = brayns.Vector3(4, 5, 6)
         test = rotation.apply(value, center)

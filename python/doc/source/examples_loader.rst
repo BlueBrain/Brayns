@@ -96,11 +96,10 @@ Models can be moved and made invisible using the `update_model` function.
     transform = model.transform
 
     # Move the model upward.
-    transform.translation += 3 * brayns.Vector3.up
+    transform.translation += 3 * brayns.Axis.up
 
     # Rotate the model of 90 degrees around Y.
-    euler = brayns.Vector3(0, 90, 0)
-    transform.rotation = brayns.Rotation.from_euler(euler, degrees=True)
+    transform.rotation = brayns.euler(0, 90, 0, degrees=True)
 
     # Upload the model and retreive its new state.
     # It is important to use the model returned by update_model as the bounds

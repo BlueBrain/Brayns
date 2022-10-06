@@ -60,36 +60,6 @@ class Vector3(Vector[float]):
     def one(cls) -> Vector3:
         return Vector3.full(1.0)
 
-    @classmethod
-    @property
-    def right(cls) -> Vector3:
-        return Vector3(1.0, 0.0, 0.0)
-
-    @classmethod
-    @property
-    def left(cls) -> Vector3:
-        return Vector3(-1.0, 0.0, 0.0)
-
-    @classmethod
-    @property
-    def up(cls) -> Vector3:
-        return Vector3(0.0, 1.0, 0.0)
-
-    @classmethod
-    @property
-    def down(cls) -> Vector3:
-        return Vector3(0.0, -1.0, 0.0)
-
-    @classmethod
-    @property
-    def forward(cls) -> Vector3:
-        return Vector3(0.0, 0.0, 1.0)
-
-    @classmethod
-    @property
-    def back(cls) -> Vector3:
-        return Vector3(0.0, 0.0, -1.0)
-
     def __iter__(self) -> Iterator[float]:
         yield self.x
         yield self.y

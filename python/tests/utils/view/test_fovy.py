@@ -56,7 +56,7 @@ class TestFovy(unittest.TestCase):
         self.assertAlmostEqual(test.position.y, 0)
         self.assertAlmostEqual(test.position.z, 2)
         self.assertEqual(test.target, brayns.Vector3.zero)
-        self.assertEqual(test.up, brayns.Vector3.up)
+        self.assertEqual(test.up, brayns.Axis.up)
 
 
 if __name__ == '__main__':

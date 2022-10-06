@@ -21,7 +21,7 @@
 from dataclasses import dataclass
 
 from ..transform import Rotation
-from ..vector import Vector3
+from ..vector import Axis, Vector3
 
 
 @dataclass
@@ -37,8 +37,8 @@ class View:
     """
 
     position: Vector3 = Vector3.zero
-    target: Vector3 = Vector3.forward
-    up: Vector3 = Vector3.up
+    target: Vector3 = Axis.front
+    up: Vector3 = Axis.up
 
     @property
     def vector(self) -> Vector3:
