@@ -19,41 +19,23 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
-from typing import Any
 
-from brayns.network import JsonRpcRequest, serialize_request
+from brayns.network import serialize_request
+
+from .mock_request import MockRequest
 
 
 class TestSerializeRequest(unittest.TestCase):
 
-    @classmethod
-    @property
-    def request(cls) -> JsonRpcRequest:
-        return JsonRpcRequest(
-            id=1,
-            method='test',
-            params=123,
-        )
-
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
-            'jsonrpc': '2.0',
-            'id': 1,
-            'method': 'test',
-            'params': 123,
-        }
-
     def test_serialize_request(self) -> None:
-        test = serialize_request(self.request)
-        self.assertEqual(test, self.message)
+        test = serialize_request(MockRequest.request)
+        self.assertEqual(test, MockRequest.message)
 
     def test_serialize_request_notification(self) -> None:
-        notification = self.request
+        notification = MockRequest.request
         notification.id = None
         test = serialize_request(notification)
-        ref = self.message
+        ref = MockRequest.message
         del ref['id']
         self.assertEqual(test, ref)
 

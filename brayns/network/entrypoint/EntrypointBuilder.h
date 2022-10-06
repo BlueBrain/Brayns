@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/network/interface/INetworkInterface.h>
+#include <brayns/network/INetworkInterface.h>
 
 namespace brayns
 {
@@ -38,7 +38,7 @@ public:
     void add(Args &&...args) const
     {
         auto entrypoint = std::make_unique<EntrypointType>(std::forward<Args>(args)...);
-        _interface.add({_plugin, std::move(entrypoint)});
+        _interface.registerEntrypoint({_plugin, std::move(entrypoint)});
     }
 
 private:

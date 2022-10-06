@@ -37,17 +37,15 @@
 #include <entrypoints/CIInfoEntrypoint.h>
 
 CircuitInfoPlugin::CircuitInfoPlugin(brayns::PluginAPI &api)
-    : _api(api)
 {
-}
-
-void CircuitInfoPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
-{
-    auto &engine = _api.getEngine();
+    auto *interface = api.getNetworkInterface();
+    if (!interface)
+    {
+        return;
+    }
+    auto &engine = api.getEngine();
     auto &scene = engine.getScene();
-
-    auto builder = brayns::EntrypointBuilder("Circuit Info", interface);
-
+    auto builder = brayns::EntrypointBuilder("Circuit Info", *interface);
     builder.add<CIInfoEntrypoint>();
     builder.add<CIGetCellDataEntrypoint>();
     builder.add<CIGetCellIdsEntrypoint>();

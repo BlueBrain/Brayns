@@ -1,7 +1,7 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Authors: Daniel.Nachbaur@epfl.ch
+ *                      Nadir Román Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,26 +21,31 @@
 
 #pragma once
 
-#include <brayns/engine/core/Engine.h>
-
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ImageBase64Message.h>
-
-#include <brayns/common/parameters/ApplicationParameters.h>
+#include <brayns/network/entrypoint/EntrypointRef.h>
 
 namespace brayns
 {
-class ImageJpegEntrypoint : public Entrypoint<EmptyMessage, ImageBase64Message>
+/**
+ * Access to network API.
+ *
+ */
+class INetworkInterface
 {
 public:
-    ImageJpegEntrypoint(const ApplicationParameters &parameters, Engine &engine);
+    virtual ~INetworkInterface() = default;
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
+    /**
+     * @brief Register an entrypoint.
+     *
+     * @param entrypoint Entrypoint to register.
+     */
+    virtual void registerEntrypoint(EntrypointRef entrypoint) = 0;
 
-private:
-    const ApplicationParameters &_parameters;
-    Engine &_engine;
+    /**
+     * @brief Can be used to poll requests from an entrypoint or plugin.
+     *
+     * @note The network manager already calls it on each update.
+     */
+    virtual void poll() = 0;
 };
 } // namespace brayns

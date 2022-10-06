@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include <brayns/network/client/ClientRef.h>
 #include <brayns/network/jsonrpc/JsonRpcMessages.h>
 
@@ -42,6 +44,15 @@ public:
      * @param client Client ref.
      */
     static void reply(const ReplyMessage &message, const ClientRef &client);
+
+    /**
+     * @brief Send a reply with binary data.
+     *
+     * @param message Reply full message.
+     * @param binary Additional binary data.
+     * @param client Client ref.
+     */
+    static void reply(const ReplyMessage &message, std::string_view binary, const ClientRef &client);
 
     /**
      * @brief Send an error message to the given client.

@@ -22,11 +22,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .request_progress import RequestProgress
-
 
 @dataclass
 class JsonRpcProgress:
+    """Request progress info.
+
+    :param id: Request ID.
+    :type id: int | str
+    :param operation: Description of the current task.
+    :type operation: str
+    :param amount: Progress amount [0-1].
+    :type amount: float
+    """
 
     id: int | str
-    params: RequestProgress
+    operation: str
+    amount: float
+
+    def __str__(self) -> str:
+        return f'[{self.id}] {self.operation}: {100 * self.amount}%'

@@ -33,9 +33,4 @@ class CircuitInfoPlugin : public brayns::IPlugin
 {
 public:
     CircuitInfoPlugin(brayns::PluginAPI &api);
-
-    void registerEntrypoints(brayns::INetworkInterface &interface) final;
-
-private:
-    brayns::PluginAPI &_api;
 };

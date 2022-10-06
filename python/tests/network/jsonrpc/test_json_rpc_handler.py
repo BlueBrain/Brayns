@@ -23,13 +23,7 @@ import sys
 import unittest
 
 import brayns
-from brayns.network import (
-    JsonRpcError,
-    JsonRpcHandler,
-    JsonRpcProgress,
-    JsonRpcReply,
-    JsonRpcTasks,
-)
+from brayns.network import JsonRpcHandler, JsonRpcTasks
 
 
 class TestJsonRpcHandler(unittest.TestCase):
@@ -41,41 +35,43 @@ class TestJsonRpcHandler(unittest.TestCase):
         self._handler = JsonRpcHandler(self._tasks, self._logger)
 
     def test_on_reply(self) -> None:
-        reply = JsonRpcReply(0, 123)
-        task = self._tasks.create_task(reply.id)
+        reply = brayns.JsonRpcReply(0, 123)
+        task = self._tasks.create_task(0)
         with self.assertLogs(self._logger, logging.INFO) as context:
             self._handler.on_reply(reply)
         self.assertEqual(len(context.output), 1)
-        self.assertEqual(task.get_result(), reply.result)
+        self.assertEqual(task.get_reply(), reply)
 
     def test_on_error(self) -> None:
-        error = JsonRpcError(0, brayns.RequestError(0, 'test', 123))
+        error = brayns.JsonRpcError(0, 1, 'test', 123)
         task = self._tasks.create_task(0)
         with self.assertLogs(self._logger, logging.INFO) as context:
             self._handler.on_error(error)
         self.assertEqual(len(context.output), 1)
-        with self.assertRaises(brayns.RequestError) as context:
-            task.get_result()
+        with self.assertRaises(brayns.JsonRpcError) as context:
+            task.get_reply()
+        self.assertEqual(context.exception, error)
 
-    def test_on_error_global(self) -> None:
-        error = JsonRpcError(None, brayns.RequestError(0, 'test'))
+    def test_on_error_general(self) -> None:
+        error = brayns.JsonRpcError.general('test')
         tasks = [self._tasks.create_task(i) for i in range(3)]
         self._handler.on_error(error)
         for task in tasks:
-            with self.assertRaises(brayns.RequestError):
-                task.get_result()
+            with self.assertRaises(brayns.JsonRpcError) as context:
+                task.get_reply()
+            self.assertEqual(context.exception, error)
 
     def test_on_progress(self) -> None:
-        progress = JsonRpcProgress(0, brayns.RequestProgress('test', 0.5))
+        progress = brayns.JsonRpcProgress(0, 'test', 0.5)
         task = self._tasks.create_task(progress.id)
         with self.assertLogs(self._logger, logging.INFO) as context:
             self._handler.on_progress(progress)
         self.assertEqual(len(context.output), 1)
-        self.assertEqual(task.get_progress(), progress.params)
+        self.assertEqual(task.get_progress(), progress)
 
     def test_on_invalid_message(self) -> None:
         with self.assertLogs(self._logger, logging.ERROR) as context:
-            self._handler.on_invalid_message('test', Exception())
+            self._handler.on_invalid_message(Exception())
         self.assertEqual(len(context.output), 1)
 
 

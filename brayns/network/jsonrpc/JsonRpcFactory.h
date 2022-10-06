@@ -38,7 +38,7 @@ public:
      * @brief Create a ReplyMessage corresponding to a RequestMessage.
      *
      * The resulting reply message will have the same attributes as the request
-     * (id, method, etc).
+     * (id, version, etc).
      *
      * @param request Request message containing the transaction info.
      * @param result "result" field of the reply message.
@@ -50,13 +50,25 @@ public:
      * @brief Create an ErrorMessage corresponding to a RequestMessage.
      *
      * The resulting error message will have the same attributes as the request
-     * (id, method, etc).
+     * (id, version, etc).
      *
      * @param request Request message containing the transaction info.
      * @param e Exception to fill "error" field.
      * @return ErrorMessage The error message corresponding to request.
      */
     static ErrorMessage error(const RequestMessage &request, const JsonRpcException &e);
+
+    /**
+     * @brief Create an ErrorMessage corresponding to a ReplyMessage.
+     *
+     * The resulting error message will have the same attributes as the request
+     * (id, version, etc).
+     *
+     * @param request Request message containing the transaction info.
+     * @param e Exception to fill "error" field.
+     * @return ErrorMessage The error message corresponding to request.
+     */
+    static ErrorMessage error(const ReplyMessage &reply, const JsonRpcException &e);
 
     /**
      * @brief Create an ErrorMessage without the request message.

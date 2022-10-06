@@ -19,41 +19,17 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
-from typing import Any
 
-import brayns
-from brayns.network import JsonRpcError, deserialize_error
+from brayns.network import deserialize_error
+
+from .mock_error import MockError
 
 
 class TestDeserializeError(unittest.TestCase):
 
-    @classmethod
-    @property
-    def error(cls) -> JsonRpcError:
-        return JsonRpcError(
-            id=1,
-            error=brayns.RequestError(
-                code=2,
-                message='test',
-                data=123,
-            ),
-        )
-
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
-            'id': 1,
-            'error': {
-                'code': 2,
-                'message': 'test',
-                'data': 123,
-            },
-        }
-
     def test_deserialize_error(self) -> None:
-        test = deserialize_error(self.message)
-        self.assertEqual(test, self.error)
+        test = deserialize_error(MockError.message)
+        self.assertEqual(test, MockError.error)
 
 
 if __name__ == '__main__':

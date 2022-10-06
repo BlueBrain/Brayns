@@ -21,18 +21,17 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator
-from typing import Any
 
 from .json_rpc_task import JsonRpcTask
-from .messages import RequestProgress
+from .messages import JsonRpcProgress, JsonRpcReply
 
 
-class RequestFuture:
-    """Future used to monitor a running request.
+class JsonRpcFuture:
+    """Future used to monitor a running JSON-RPC request.
 
-    Can be iterated to yield ``RequestProgress`` if the request send any.
+    Can be iterated to yield ``JsonRpcProgress`` if the request send any.
 
-    Use ``wait_for_result`` to block until the request is over.
+    Use ``wait_for_reply`` to wait and get the reply or raise the error.
 
     Use ``poll`` to refresh the state of the request.
 
@@ -42,11 +41,11 @@ class RequestFuture:
     """
 
     @staticmethod
-    def from_result(result: Any) -> RequestFuture:
-        return RequestFuture(
-            task=JsonRpcTask.from_result(result),
+    def from_reply(reply: JsonRpcReply) -> JsonRpcFuture:
+        return JsonRpcFuture(
+            task=JsonRpcTask.from_reply(reply),
             cancel=lambda: None,
-            poll=lambda: None
+            poll=lambda: None,
         )
 
     def __init__(self, task: JsonRpcTask, cancel: Callable[[], None], poll: Callable[[], None]) -> None:
@@ -54,7 +53,7 @@ class RequestFuture:
         self._cancel = cancel
         self._poll = poll
 
-    def __iter__(self) -> Iterator[RequestProgress]:
+    def __iter__(self) -> Iterator[JsonRpcProgress]:
         while True:
             while self.has_progress():
                 yield self.get_progress()
@@ -68,13 +67,13 @@ class RequestFuture:
     def has_progress(self) -> bool:
         return self._task.has_progress()
 
-    def get_progress(self) -> RequestProgress:
+    def get_progress(self) -> JsonRpcProgress:
         return self._task.get_progress()
 
-    def wait_for_result(self) -> Any:
+    def wait_for_reply(self) -> JsonRpcReply:
         for _ in self:
             pass
-        return self._task.get_result()
+        return self._task.get_reply()
 
     def poll(self) -> None:
         self._poll()

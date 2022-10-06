@@ -34,27 +34,22 @@
 #include <network/entrypoints/TraceAnterogradeEntrypoint.h>
 
 CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
-    : _api(api)
 {
-}
-
-void CircuitExplorerPlugin::onCreate()
-{
-    auto &registry = _api.getLoaderRegistry();
+    auto &registry = api.getLoaderRegistry();
     registry.registerLoader(std::make_unique<BBPLoader>());
     registry.registerLoader(std::make_unique<NeuronMorphologyLoader>());
     registry.registerLoader(std::make_unique<SonataLoader>());
     registry.registerLoader(std::make_unique<SonataNGVLoader>());
-}
 
-void CircuitExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
-{
-    auto &engine = _api.getEngine();
+    auto interface = api.getNetworkInterface();
+    if (!interface)
+    {
+        return;
+    }
+    auto &engine = api.getEngine();
     auto &scene = engine.getScene();
     auto &models = scene.getModels();
-
-    auto builder = brayns::EntrypointBuilder("Circuit Explorer", interface);
-
+    auto builder = brayns::EntrypointBuilder("Circuit Explorer", *interface);
     builder.add<AvailableColorMethodsEntrypoint>(models);
     builder.add<AvailableColorMethodVariablesEntrypoint>(models);
     builder.add<ColorCircuitByIdEntrypoint>(models);

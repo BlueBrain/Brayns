@@ -19,10 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/Brayns.h>
+#include "Brayns.h"
+
+#include <thread>
+
 #include <brayns/Version.h>
 
 #include <brayns/common/Log.h>
+
+#include <brayns/network/common/Clock.h>
 
 namespace
 {
@@ -66,43 +71,71 @@ private:
         }
     }
 };
+
+class NetworkStartup
+{
+public:
+    static bool isEnabled(brayns::PluginAPI &api)
+    {
+        auto &manager = api.getParametersManager();
+        auto &parameters = manager.getNetworkParameters();
+        auto &uri = parameters.getUri();
+        return !uri.empty();
+    }
+};
+
+class RateLimiter
+{
+public:
+    RateLimiter(brayns::Duration period)
+        : _period(period)
+    {
+    }
+
+    void wait()
+    {
+        auto now = brayns::Clock::now();
+        auto delta = now - _lastCall;
+        if (delta >= _period)
+        {
+            return;
+        }
+        std::this_thread::sleep_for(_period - delta);
+        _lastCall = brayns::Clock::now();
+    }
+
+private:
+    brayns::Duration _period;
+    brayns::TimePoint _lastCall = brayns::Clock::now();
+};
 } // namespace
 
 namespace brayns
 {
-SystemPluginAPI::SystemPluginAPI(ParametersManager &paramManager, Engine &engine, LoaderRegistry &loadRegistry)
-    : _paramManager(paramManager)
-    , _engine(engine)
-    , _loadRegistry(loadRegistry)
-{
-}
-
-Engine &SystemPluginAPI::getEngine()
-{
-    return _engine;
-}
-
-ParametersManager &SystemPluginAPI::getParametersManager()
-{
-    return _paramManager;
-}
-
-LoaderRegistry &SystemPluginAPI::getLoaderRegistry()
-{
-    return _loadRegistry;
-}
-
-// -----------------------------------------------------------------------------
-
 Brayns::Brayns(int argc, const char **argv)
     : _parametersManager(argc, argv)
     , _engine(_parametersManager)
-    , _pluginAPI(_parametersManager, _engine, _loaderRegistry)
-    , _pluginManager(_pluginAPI)
+    , _pluginManager(*this)
 {
     LoggingStartup::run(_parametersManager);
+
+    Log::info("Register core loaders.");
     _loaderRegistry = LoaderRegistry::createWithCoreLoaders();
+
+    if (NetworkStartup::isEnabled(*this))
+    {
+        Log::info("Initialize network manager.");
+        _network = std::make_unique<NetworkManager>(*this);
+    }
+
+    Log::info("Load plugins.");
     _pluginManager.loadPlugins();
+
+    if (_network)
+    {
+        Log::info("Start network manager.");
+        _network->start();
+    }
 }
 
 Brayns::~Brayns()
@@ -114,30 +147,23 @@ Brayns::~Brayns()
     _pluginManager.destroyPlugins();
 }
 
-bool Brayns::commitAndRender()
+void Brayns::commitAndRender()
 {
-    // Pre render plugins
-    _pluginManager.preRender();
+    _engine.commitAndRender();
+}
 
-    // Pre render engine
-    _engine.preRender();
-
-    // Commit any change to the engine (scene, camera, renderer, parameters, ...)
-    _engine.commit();
-
-    // Render new frame, if needed
-    _engine.render();
-
-    // The parameters are modified on pluginManager.preRender, and processed on engine.preRender and engine.commit
-    _parametersManager.resetModified();
-
-    // Post render engine
-    _engine.postRender();
-
-    // Post render plugins
-    _pluginManager.postRender();
-
-    return _engine.isRunning();
+void Brayns::runAsService()
+{
+    if (!_network)
+    {
+        throw std::runtime_error("Trying to run a service without URI");
+    }
+    auto limiter = RateLimiter(std::chrono::milliseconds(1));
+    while (_engine.isRunning())
+    {
+        _network->update();
+        limiter.wait();
+    }
 }
 
 Engine &Brayns::getEngine()
@@ -153,5 +179,10 @@ ParametersManager &Brayns::getParametersManager()
 LoaderRegistry &Brayns::getLoaderRegistry()
 {
     return _loaderRegistry;
+}
+
+INetworkInterface *Brayns::getNetworkInterface()
+{
+    return _network.get();
 }
 } // namespace brayns

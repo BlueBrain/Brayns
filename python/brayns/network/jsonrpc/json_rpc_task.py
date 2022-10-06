@@ -21,56 +21,52 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Any
 
-from .messages import RequestError, RequestProgress
+from .messages import JsonRpcError, JsonRpcProgress, JsonRpcReply
 
 
 class JsonRpcTask:
 
     @staticmethod
-    def from_result(result: Any) -> JsonRpcTask:
+    def from_reply(reply: JsonRpcReply) -> JsonRpcTask:
         task = JsonRpcTask()
-        task.set_result(result)
+        task.set_reply(reply)
         return task
 
     def __init__(self) -> None:
-        self._ready = False
-        self._result: Any = None
-        self._error: RequestError | None = None
-        self._progresses = deque[RequestProgress]()
+        self._reply: JsonRpcReply | None = None
+        self._error: JsonRpcError | None = None
+        self._progresses = deque[JsonRpcProgress]()
 
     def is_ready(self) -> bool:
-        return self._ready
+        return self._reply is not None or self._error is not None
 
     def has_progress(self) -> bool:
         return bool(self._progresses)
 
-    def get_result(self) -> Any:
-        if not self.is_ready():
-            raise RuntimeError('Task is still running')
+    def get_reply(self) -> JsonRpcReply:
         if self._error is not None:
             raise self._error
-        return self._result
+        if self._reply is None:
+            raise RuntimeError('Task is still running')
+        return self._reply
 
-    def set_result(self, result: Any) -> None:
+    def set_reply(self, reply: JsonRpcReply) -> None:
         if self.is_ready():
             raise RuntimeError('Task already finished')
-        self._result = result
-        self._ready = True
+        self._reply = reply
 
-    def set_error(self, error: RequestError) -> None:
+    def set_error(self, error: JsonRpcError) -> None:
         if self.is_ready():
             raise RuntimeError('Task already finished')
         self._error = error
-        self._ready = True
 
-    def get_progress(self) -> RequestProgress:
-        if not self.has_progress():
+    def get_progress(self) -> JsonRpcProgress:
+        if not self._progresses:
             raise RuntimeError('No progress received')
         return self._progresses.popleft()
 
-    def add_progress(self, progress: RequestProgress) -> None:
+    def add_progress(self, progress: JsonRpcProgress) -> None:
         if self.is_ready():
             raise RuntimeError('Task already finished')
         self._progresses.append(progress)

@@ -18,45 +18,60 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json
 import logging
 import unittest
+from typing import cast
 
 import brayns
 from brayns.network import JsonRpcManager
 
+from .messages.mock_reply import MockReply
+
 
 class TestJsonRpcManager(unittest.TestCase):
 
-    def setUp(self) -> None:
-        logger = logging.root
-        self._manager = JsonRpcManager(logger)
-
     def test_is_running(self) -> None:
-        self._manager.create_task(0)
-        self.assertTrue(self._manager.is_running(0))
-        self.assertFalse(self._manager.is_running(1))
+        manager = self._create_manager()
+        manager.create_task(0)
+        self.assertTrue(manager.is_running(0))
+        self.assertFalse(manager.is_running(1))
 
     def test_clear(self) -> None:
-        task = self._manager.create_task(0)
-        self._manager.clear()
-        with self.assertRaises(brayns.RequestError):
-            task.get_result()
-        self.assertFalse(self._manager.is_running(0))
+        manager = self._create_manager()
+        task = manager.create_task(0)
+        manager.clear()
+        with self.assertRaises(brayns.JsonRpcError):
+            task.get_reply()
+        self.assertFalse(manager.is_running(0))
 
     def test_create_task(self) -> None:
-        self._manager.create_task(0)
-        self.assertTrue(self._manager.is_running(0))
+        manager = self._create_manager()
+        manager.create_task(0)
+        self.assertTrue(manager.is_running(0))
 
-    def test_process_message(self) -> None:
-        task = self._manager.create_task(0)
-        reply = {
-            'id': 0,
-            'result': 123
-        }
-        self._manager.process_message(json.dumps(reply))
-        self.assertEqual(task.get_result(), 123)
-        self.assertFalse(self._manager.is_running(0))
+    def test_process_binary(self) -> None:
+        manager = self._create_manager()
+        reply = MockReply.binary_reply
+        id = cast(int, reply.id)
+        task = manager.create_task(id)
+        data = MockReply.binary
+        manager.process_binary(data)
+        self.assertEqual(task.get_reply(), reply)
+        self.assertFalse(manager.is_running(0))
+
+    def test_process_text(self) -> None:
+        manager = self._create_manager()
+        reply = MockReply.reply
+        id = cast(int, reply.id)
+        task = manager.create_task(id)
+        data = MockReply.text
+        manager.process_text(data)
+        self.assertEqual(task.get_reply(), reply)
+        self.assertFalse(manager.is_running(0))
+
+    def _create_manager(self) -> JsonRpcManager:
+        logger = logging.Logger('test')
+        return JsonRpcManager(logger)
 
 
 if __name__ == '__main__':

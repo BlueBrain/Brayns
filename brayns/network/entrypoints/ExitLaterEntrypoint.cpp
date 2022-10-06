@@ -46,7 +46,7 @@ void ExitLaterEntrypoint::onRequest(const Request &request)
     request.reply(EmptyMessage());
 }
 
-void ExitLaterEntrypoint::onPreRender()
+void ExitLaterEntrypoint::onUpdate()
 {
     if (!_start || !_duration)
     {

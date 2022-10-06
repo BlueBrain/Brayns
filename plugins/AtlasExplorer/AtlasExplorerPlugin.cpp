@@ -29,24 +29,19 @@
 #include <network/entrypoints/VisualizeAtlasUseCaseEntrypoint.h>
 
 AtlasExplorerPlugin::AtlasExplorerPlugin(brayns::PluginAPI &api)
-    : _api(api)
 {
-}
-
-void AtlasExplorerPlugin::onCreate()
-{
-    auto &registry = _api.getLoaderRegistry();
+    auto &registry = api.getLoaderRegistry();
     registry.registerLoader(std::make_unique<NRRDLoader>());
-}
 
-void AtlasExplorerPlugin::registerEntrypoints(brayns::INetworkInterface &interface)
-{
-    auto &engine = _api.getEngine();
+    auto interface = api.getNetworkInterface();
+    if (!interface)
+    {
+        return;
+    }
+    auto &engine = api.getEngine();
     auto &scene = engine.getScene();
     auto &models = scene.getModels();
-
-    auto builder = brayns::EntrypointBuilder("Atlas Explorer", interface);
-
+    auto builder = brayns::EntrypointBuilder("Atlas Explorer", *interface);
     builder.add<GetAvailableAtlasUseCasesEntrypoint>(models);
     builder.add<VisualizeAtlasUseCaseEntrypoint>(models);
 }

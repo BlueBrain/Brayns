@@ -52,12 +52,6 @@ public:
     void add(EntrypointRef entrypoint);
 
     /**
-     * @brief Call onCreate() on all entrypoints.
-     *
-     */
-    void onCreate();
-
-    /**
      * @brief Iterate over all registered entrypoints.
      *
      * @tparam FunctorType Functor type.

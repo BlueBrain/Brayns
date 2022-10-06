@@ -22,13 +22,13 @@ from __future__ import annotations
 
 from typing import Any, Protocol, TypeVar
 
-from .jsonrpc import Request, RequestFuture
+from .jsonrpc import JsonRpcFuture, JsonRpcRequest
 
 T = TypeVar('T', bound='Instance')
 
 
 class Instance(Protocol):
-    """Protocol used to interact with a connected instance of the backend.
+    """Object used to interact with a connected instance of the backend.
 
     Contains the connection state with a backend instance and provide methods to
     interact with it.
@@ -70,11 +70,11 @@ class Instance(Protocol):
         return True
 
     def disconnect(self) -> None:
-        """Disconnect instance (mandatory)."""
+        """Disconnect instance (mandatory once done with it)."""
         pass
 
-    def request(self, method: str, params: Any = None, binary: bytes = b'') -> Any:
-        """Send a request to the instance and wait for the result.
+    def request(self, method: str, params: Any = None) -> Any:
+        """Send a request to the instance and wait its result.
 
         Generate automatically the JSON-RPC ID using integers.
 
@@ -85,10 +85,26 @@ class Instance(Protocol):
         :return: JSON-RPC result.
         :rtype: Any
         """
-        task = self.task(method, params, binary)
-        return task.wait_for_result()
+        result, _ = self.execute(method, params)
+        return result
 
-    def task(self, method: str, params: Any = None, binary: bytes = b'') -> RequestFuture:
+    def execute(self, method: str, params: Any = None, binary: bytes = b'') -> tuple[Any, bytes]:
+        """Extended version of request to accept and return binary data.
+
+        :param method: JSON-RPC method.
+        :type method: str
+        :param params: JSON-RPC params, defaults to None
+        :type params: Any, optional
+        :param binary: Binary data to send with the request, defaults to b''
+        :type binary: bytes, optional
+        :return: JSON-RPC result and binary data received with the reply.
+        :rtype: tuple[Any, bytes]
+        """
+        task = self.task(method, params, binary)
+        reply = task.wait_for_reply()
+        return reply.result, reply.binary
+
+    def task(self, method: str, params: Any = None, binary: bytes = b'') -> JsonRpcFuture:
         """Send a request to the instance in a non-blocking way.
 
         Generate automatically the JSON-RPC ID using integers.
@@ -105,7 +121,7 @@ class Instance(Protocol):
         id = 0
         while self.is_running(id):
             id += 1
-        request = Request(id, method, params, binary)
+        request = JsonRpcRequest(id, method, params, binary)
         return self.send(request)
 
     def is_running(self, id: int | str) -> bool:
@@ -118,14 +134,14 @@ class Instance(Protocol):
         """
         return False
 
-    def send(self, request: Request) -> RequestFuture:
+    def send(self, request: JsonRpcRequest) -> JsonRpcFuture:
         """Send a request in a non blocking way.
 
         This method is the most basic one, it doesn't generate any ID and can be
         used asynchronously (doesn't block until result is received).
 
-        :param request: Request.
-        :type request: Request
+        :param request: JSON-RPC request to send.
+        :type request: JsonRpcRequest
         :return: Future object to monitor the request.
         :rtype: RequestFuture
         """

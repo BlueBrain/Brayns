@@ -37,9 +37,9 @@ from .light import *
 from .loader import *
 from .material import *
 from .model import *
+from .render import *
 from .renderer import *
 from .simulation import *
-from .snapshot import *
 from .version import *
 
 __all__ = [
@@ -89,6 +89,7 @@ __all__ = [
     'get_version',
     'GlassMaterial',
     'InteractiveRenderer',
+    'JpegImage',
     'JsonSchema',
     'JsonType',
     'KeyFrame',
@@ -110,6 +111,7 @@ __all__ = [
     'Projection',
     'QuadLight',
     'remove_models',
+    'render_image',
     'Renderer',
     'Scene',
     'set_camera_projection',

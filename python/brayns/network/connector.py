@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import logging
 import time
-from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import cast
 
@@ -65,8 +64,6 @@ class Connector:
     :type uri: str
     :param ssl_context: SSL context if secure, defaults to None.
     :type ssl_context: SslClientContext | None, optional
-    :param binary_handler: Callback for binary, defaults to (bytes) -> None.
-    :type binary_handler: Callable[[bytes], None], optional
     :param logger: Instance logger, defaults to brayns.Logger().
     :type logger: logging.Logger, optional
     :param max_attempts: Max connection attempts, defaults to 1.
@@ -77,7 +74,6 @@ class Connector:
 
     uri: str
     ssl_context: SslClientContext | None = None
-    binary_handler: Callable[[bytes], None] = lambda _: None
     logger: logging.Logger = field(default_factory=Logger)
     max_attempts: int | None = 1
     attempt_period: float = 0.1
@@ -93,7 +89,7 @@ class Connector:
         :rtype: Instance
         """
         manager = JsonRpcManager(self.logger)
-        listener = Listener(self.logger, self.binary_handler, manager)
+        listener = Listener(self.logger, manager)
         connector = WebSocketConnector(self.uri, listener, self.ssl_context)
         websocket = self._open_websocket(connector)
         return Client(websocket, self.logger, manager)

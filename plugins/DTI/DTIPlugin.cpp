@@ -27,13 +27,8 @@
 namespace dti
 {
 DTIPlugin::DTIPlugin(brayns::PluginAPI &api)
-    : _api(api)
 {
-}
-
-void DTIPlugin::onCreate()
-{
-    auto &registry = _api.getLoaderRegistry();
+    auto &registry = api.getLoaderRegistry();
     registry.registerLoader(std::make_unique<DTILoader>());
 }
 } // namespace dti

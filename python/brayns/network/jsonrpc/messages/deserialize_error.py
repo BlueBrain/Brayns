@@ -21,16 +21,13 @@
 from typing import Any
 
 from .json_rpc_error import JsonRpcError
-from .request_error import RequestError
 
 
 def deserialize_error(message: dict[str, Any]) -> JsonRpcError:
     error: dict[str, Any] = message['error']
     return JsonRpcError(
         id=message.get('id'),
-        error=RequestError(
-            code=error['code'],
-            message=error['message'],
-            data=error.get('data'),
-        ),
+        code=error['code'],
+        message=error['message'],
+        data=error.get('data'),
     )

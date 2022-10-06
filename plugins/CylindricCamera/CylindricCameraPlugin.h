@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/engine/core/Engine.h>
 #include <brayns/pluginapi/IPlugin.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 /**
  * @brief The CylindricalCameraPlugin adds a new camera type to use for curved inmersive projections
@@ -29,11 +29,5 @@
 class CylindricCameraPlugin : public brayns::IPlugin
 {
 public:
-    CylindricCameraPlugin(brayns::Engine &engine);
-
-    void onCreate() final;
-    void registerEntrypoints(brayns::INetworkInterface &interface) final;
-
-private:
-    brayns::Engine &_engine;
+    CylindricCameraPlugin(brayns::PluginAPI &api);
 };

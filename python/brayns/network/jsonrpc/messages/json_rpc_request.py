@@ -26,7 +26,20 @@ from typing import Any
 
 @dataclass
 class JsonRpcRequest:
+    """Request to send to a running instance of brayns service.
+
+    :param id: Request ID to monitor the request.
+        No replies will be received if set to None.
+    :type id: int | str | None
+    :param method: JSON-RPC method.
+    :type method: str
+    :param params: Request parameters (usually objects), defaults to None.
+    :type params: Any, optional
+    :param binary: Request binary data, defaults to empty bytes.
+    :type binary: bytes, optional
+    """
 
     id: int | str | None
     method: str
     params: Any = field(default=None, repr=False)
+    binary: bytes = field(default=b'', repr=False)

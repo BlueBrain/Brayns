@@ -110,6 +110,24 @@ Engine::Engine(ParametersManager &parameters)
     EngineFactoriesInitializer::init(_factories);
 }
 
+void Engine::commitAndRender()
+{
+    // Pre render engine
+    preRender();
+
+    // Commit any change to the engine (scene, camera, renderer, parameters, ...)
+    commit();
+
+    // Render new frame, if needed
+    render();
+
+    // The parameters are modified on network update, and processed on engine.preRender and engine.commit
+    _params.resetModified();
+
+    // Post render engine
+    postRender();
+}
+
 void Engine::preRender()
 {
     _scene.preRender(_params);

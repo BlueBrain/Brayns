@@ -106,26 +106,10 @@ public:
     }
 
     /**
-     * @brief Called once when all plugins are initialized.
+     * @brief Called once per update.
      *
      */
-    virtual void onCreate()
-    {
-    }
-
-    /**
-     * @brief Called before each render.
-     *
-     */
-    virtual void onPreRender()
-    {
-    }
-
-    /**
-     * @brief Called after each render.
-     *
-     */
-    virtual void onPostRender()
+    virtual void onUpdate()
     {
     }
 

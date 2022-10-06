@@ -18,12 +18,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .frame_exporter import FrameExporter
-from .key_frame import KeyFrame
-from .snapshot import Snapshot
+import json
+from typing import Any
 
-__all__ = [
-    'FrameExporter',
-    'KeyFrame',
-    'Snapshot',
-]
+import brayns
+
+
+class MockProgress:
+
+    @classmethod
+    @property
+    def progress(cls) -> brayns.JsonRpcProgress:
+        return brayns.JsonRpcProgress(
+            id=0,
+            operation='test',
+            amount=0.5,
+        )
+
+    @classmethod
+    @property
+    def message(cls) -> dict[str, Any]:
+        return {
+            'jsonrpc': '2.0',
+            'params': {
+                'id': 0,
+                'operation': 'test',
+                'amount': 0.5,
+            }
+        }
+
+    @classmethod
+    @property
+    def data(cls) -> str:
+        return json.dumps(cls.message, sort_keys=True)

@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <brayns/json/JsonBuffer.h>
 #include <brayns/json/JsonObjectMacro.h>
 
 #include <brayns/network/adapters/BoundsAdapter.h>

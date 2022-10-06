@@ -19,34 +19,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ImageJpegEntrypoint.h"
+#pragma once
 
-#include <brayns/utils/image/ImageEncoder.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-ImageJpegEntrypoint::ImageJpegEntrypoint(const ApplicationParameters &parameters, Engine &engine)
-    : _parameters(parameters)
-    , _engine(engine)
-{
-}
+BRAYNS_JSON_OBJECT_BEGIN(RenderImageParams)
+BRAYNS_JSON_OBJECT_ENTRY(bool, send, "Send image once rendered", Default(true))
+BRAYNS_JSON_OBJECT_ENTRY(bool, force, "Send image even if nothing new was rendered", Default(false))
+BRAYNS_JSON_OBJECT_END()
 
-std::string ImageJpegEntrypoint::getMethod() const
-{
-    return "image-jpeg";
-}
-
-std::string ImageJpegEntrypoint::getDescription() const
-{
-    return "Take a snapshot at JPEG format";
-}
-
-void ImageJpegEntrypoint::onRequest(const Request &request)
-{
-    auto &framebuffer = _engine.getFramebuffer();
-    auto quality = _parameters.getJpegQuality();
-    auto image = framebuffer.getImage();
-    auto data = ImageEncoder::encodeToBase64(image, "jpg", quality);
-    request.reply({data});
-}
+BRAYNS_JSON_OBJECT_BEGIN(RenderImageResult)
+BRAYNS_JSON_OBJECT_ENTRY(size_t, accumulation, "Current frame accumulation")
+BRAYNS_JSON_OBJECT_ENTRY(size_t, max_accumulation, "Maximum frame accumulation")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

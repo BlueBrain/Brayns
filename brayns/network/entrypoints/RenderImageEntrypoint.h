@@ -21,21 +21,23 @@
 
 #pragma once
 
+#include <brayns/engine/core/Engine.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/stream/StreamManager.h>
+#include <brayns/network/messages/RenderImageMessage.h>
 
 namespace brayns
 {
-class TriggerJpegStreamEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
+class RenderImageEntrypoint : public Entrypoint<RenderImageParams, RenderImageResult>
 {
 public:
-    TriggerJpegStreamEntrypoint(StreamManager &stream);
+    RenderImageEntrypoint(Engine &engine);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    StreamManager &_stream;
+    Engine &_engine;
 };
 } // namespace brayns

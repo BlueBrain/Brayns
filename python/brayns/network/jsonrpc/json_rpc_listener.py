@@ -34,5 +34,5 @@ class JsonRpcListener(Protocol):
     def on_progress(self, progress: JsonRpcProgress) -> None:
         pass
 
-    def on_invalid_message(self, data: str, e: Exception) -> None:
+    def on_invalid_message(self, e: Exception) -> None:
         pass

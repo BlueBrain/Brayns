@@ -54,11 +54,6 @@ EntrypointRef::EntrypointRef(std::string plugin, std::unique_ptr<IEntrypoint> en
     assert(_entrypoint);
     _schema.plugin = std::move(plugin);
     _schema.title = _entrypoint->getMethod();
-}
-
-void EntrypointRef::onCreate()
-{
-    _entrypoint->onCreate();
     EntrypointSchemaBuilder::build(_schema, *_entrypoint);
 }
 
@@ -67,14 +62,9 @@ void EntrypointRef::onRequest(const JsonRpcRequest &request) const
     _entrypoint->onRequest(request);
 }
 
-void EntrypointRef::onPreRender() const
+void EntrypointRef::onUpdate() const
 {
-    _entrypoint->onPreRender();
-}
-
-void EntrypointRef::onPostRender() const
-{
-    _entrypoint->onPostRender();
+    _entrypoint->onUpdate();
 }
 
 void EntrypointRef::onCancel() const

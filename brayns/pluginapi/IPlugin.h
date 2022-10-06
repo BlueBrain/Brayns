@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <brayns/network/interface/INetworkInterface.h>
-
 namespace brayns
 {
 /**
@@ -44,41 +42,5 @@ class IPlugin
 {
 public:
     virtual ~IPlugin() = default;
-
-    /**
-     * @brief Called once when everything is initialized.
-     *
-     * Called before all other methods.
-     *
-     */
-    virtual void onCreate()
-    {
-    }
-
-    /**
-     * @brief Called once if the network plugin is enabled.
-     *
-     * @param interface Network access.
-     */
-    virtual void registerEntrypoints(INetworkInterface &interface)
-    {
-        (void)interface;
-    }
-
-    /**
-     * @brief Called on each update before rendering.
-     *
-     */
-    virtual void onPreRender()
-    {
-    }
-
-    /**
-     * @brief Called on each update after rendering.
-     *
-     */
-    virtual void onPostRender()
-    {
-    }
 };
 } // namespace brayns

@@ -32,10 +32,4 @@ class CircuitExplorerPlugin : public brayns::IPlugin
 {
 public:
     CircuitExplorerPlugin(brayns::PluginAPI &api);
-
-    void onCreate() final;
-    void registerEntrypoints(brayns::INetworkInterface &interface) final;
-
-private:
-    brayns::PluginAPI &_api;
 };

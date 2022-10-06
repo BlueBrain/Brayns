@@ -25,15 +25,14 @@
 #include <brayns/utils/DynamicLib.h>
 
 #include <memory>
-#include <optional>
 #include <vector>
 
 namespace brayns
 {
-struct PluginRef
+struct Plugin
 {
-    std::optional<DynamicLib> library;
-    std::unique_ptr<IPlugin> plugin;
+    DynamicLib library;
+    std::unique_ptr<IPlugin> interface;
 };
 
 /**
@@ -44,14 +43,14 @@ class PluginManager
 {
 public:
     /**
-     * @brief Construct with API access
+     * @brief Construct plugin manager with API access.
      *
-     * @param api Brayns API interface.
+     * @param api Brayns API for plugins.
      */
     PluginManager(PluginAPI &api);
 
     /**
-     * @brief Load network engine if required and call onCreate() on plugins.
+     * @brief Load all plugins using API.
      *
      * @param api API access.
      */
@@ -63,20 +62,8 @@ public:
      */
     void destroyPlugins();
 
-    /**
-     * @brief Call preRender() on all plugins.
-     *
-     */
-    void preRender();
-
-    /**
-     * @brief Call postRender() on all plugins
-     *
-     */
-    void postRender();
-
 private:
     PluginAPI &_api;
-    std::vector<PluginRef> _plugins;
+    std::vector<Plugin> _plugins;
 };
 } // namespace brayns

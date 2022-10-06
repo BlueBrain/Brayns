@@ -18,22 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass, field
+from .frame_exporter import FrameExporter
+from .jpeg_image import JpegImage
+from .key_frame import KeyFrame
+from .render_image import render_image
+from .snapshot import Snapshot
 
-from .json_rpc_request import JsonRpcRequest
-
-
-@dataclass
-class Request(JsonRpcRequest):
-    """Request to send to a running instance of brayns service.
-
-    :param id: Request ID to monitor the request.
-        No replies will be received if set to None.
-    :type id: int | str | None
-    :param method: JSON-RPC method.
-    :type method: str
-    :param params: Request parameters (usually objects).
-    :type params: Any, optional
-    """
-
-    binary: bytes = field(default=b'', repr=False)
+__all__ = [
+    'FrameExporter',
+    'JpegImage',
+    'KeyFrame',
+    'render_image',
+    'Snapshot',
+]

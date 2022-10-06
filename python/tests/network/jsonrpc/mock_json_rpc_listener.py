@@ -20,7 +20,8 @@
 
 from typing import Any
 
-from brayns.network import JsonRpcError, JsonRpcListener, JsonRpcProgress, JsonRpcReply
+import brayns
+from brayns.network import JsonRpcListener
 
 
 class MockJsonRpcListener(JsonRpcListener):
@@ -34,17 +35,17 @@ class MockJsonRpcListener(JsonRpcListener):
             raise RuntimeError('Data not received')
         return self._data
 
-    def on_reply(self, reply: JsonRpcReply) -> None:
+    def on_reply(self, reply: brayns.JsonRpcReply) -> None:
         self._set_data(reply)
 
-    def on_error(self, error: JsonRpcError) -> None:
+    def on_error(self, error: brayns.JsonRpcError) -> None:
         self._set_data(error)
 
-    def on_progress(self, progress: JsonRpcProgress) -> None:
+    def on_progress(self, progress: brayns.JsonRpcProgress) -> None:
         self._set_data(progress)
 
-    def on_invalid_message(self, data: str, e: Exception) -> None:
-        self._set_data((data, e))
+    def on_invalid_message(self, e: Exception) -> None:
+        self._set_data(e)
 
     def _set_data(self, data: Any) -> None:
         if self._called:
