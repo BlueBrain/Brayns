@@ -55,7 +55,7 @@ brayns::Vector4f ColorDeck::getColorForKey(const std::string &key) noexcept
         return colorList[it->second];
     }
 
-    auto index = _lastColortListIndex++;
+    auto index = _lastColortListIndex++ % colorList.size();
     _colorMap[key] = index;
     return colorList[index];
 }
