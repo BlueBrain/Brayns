@@ -71,6 +71,10 @@ class Resolution(Vector[int]):
         """
         return 8 * cls.full_hd
 
+    def __post_init__(self) -> None:
+        if not all(i > 0 for i in self):
+            raise ValueError(f'Invalid resolution: {self}')
+
     def __iter__(self) -> Iterator[int]:
         """Iterate over width and height.
 
@@ -82,6 +86,9 @@ class Resolution(Vector[int]):
 
     @property
     def aspect_ratio(self) -> float:
-        if self.height == 0:
-            return 1
+        """Get aspect ratio.
+
+        :return: Width / height.
+        :rtype: float
+        """
         return self.width / self.height
