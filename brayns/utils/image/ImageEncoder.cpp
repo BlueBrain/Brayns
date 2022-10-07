@@ -22,7 +22,6 @@
 #include "ImageEncoder.h"
 
 #include <brayns/utils/FileWriter.h>
-#include <brayns/utils/base64/base64.h>
 
 #include "ImageCodecRegistry.h"
 #include "ImageFormat.h"
@@ -45,13 +44,5 @@ std::string ImageEncoder::encode(const Image &image, const std::string &format, 
         throw std::runtime_error("Failed to encode to '" + format + "'");
     }
     return data;
-}
-
-std::string ImageEncoder::encodeToBase64(const Image &image, const std::string &format, int quality)
-{
-    auto data = encode(image, format, quality);
-    auto bytes = reinterpret_cast<const unsigned char *>(data.data());
-    auto size = data.size();
-    return base64_encode(bytes, size);
 }
 } // namespace brayns

@@ -29,7 +29,7 @@
 namespace brayns
 {
 /**
- * @brief Class to encode images to memory or file with base64 support.
+ * @brief Class to encode images to memory or file.
  *
  */
 class ImageEncoder
@@ -55,16 +55,5 @@ public:
      * @throw std::runtime_error Invalid format or image.
      */
     static std::string encode(const Image &image, const std::string &format, int quality = 0);
-
-    /**
-     * @brief Encode the image with given format and then to base64.
-     *
-     * @param image Image to encode.
-     * @param format Encoding format.
-     * @param quality Image quality if compressed.
-     * @return std::string Encoded image in format and then base64.
-     * @throw std::runtime_error Invalid format or image.
-     */
-    static std::string encodeToBase64(const Image &image, const std::string &format, int quality = 0);
 };
 } // namespace brayns

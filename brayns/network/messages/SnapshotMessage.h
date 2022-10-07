@@ -28,8 +28,6 @@
 #include <brayns/network/adapters/SimulationParametersAdapter.h>
 #include <brayns/network/messages/ImageSettingsMessage.h>
 
-#include <optional>
-
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(SnapshotParams)
@@ -41,8 +39,21 @@ BRAYNS_JSON_OBJECT_ENTRY(uint32_t, simulation_frame, "Simulation frame to render
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     file_path,
-    "Snapshot will be saved at this path if specified, otherwise it will be returned encoded in base64 with format from image_settings",
+    "Snapshot will be saved at this path if specified, otherwise it will be returned as binary data with format from image_settings",
     Required(false))
 BRAYNS_JSON_OBJECT_END()
 
+#define BRAYNS_BUFFER_PROPERTIES() \
+    BRAYNS_JSON_OBJECT_ENTRY(size_t, offset, "Buffer data offset in attached binary") \
+    BRAYNS_JSON_OBJECT_ENTRY(size_t, size, "Buffer data size in attached binary")
+
+BRAYNS_JSON_OBJECT_BEGIN(ColorBufferMessage)
+BRAYNS_BUFFER_PROPERTIES()
+BRAYNS_JSON_OBJECT_END()
+
+BRAYNS_JSON_OBJECT_BEGIN(SnapshotResult)
+BRAYNS_JSON_OBJECT_ENTRY(ColorBufferMessage, color_buffer, "Snapshot color buffer encoded in params format")
+BRAYNS_JSON_OBJECT_END()
+
+#undef BRAYNS_BUFFER_PROPERTIES
 } // namespace brayns
