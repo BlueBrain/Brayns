@@ -67,8 +67,8 @@ public:
         for (auto index : validVoxelsIndices)
         {
             auto &coordinate = atlas[index];
-            auto &overlapList = map[coordinate.x][coordinate.y];
-            overlapList.push_back(index);
+            auto &areaList = map[coordinate.x][coordinate.y];
+            areaList.push_back(index);
         }
 
         return map;
