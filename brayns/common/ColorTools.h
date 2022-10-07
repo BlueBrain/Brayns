@@ -21,20 +21,9 @@
 #include "MathTypes.h"
 
 #include <unordered_map>
-#include <vector>
 
 namespace brayns
 {
-/**
- * @brief List of colors used by the ColorDeck and the ColorRoulette as color backend
- */
-struct ColorList
-{
-    std::vector<Vector4f> values;
-
-    ColorList();
-};
-
 /**
  * @brief The ColorDeck allows to associate std::string keys with colors.
  */
@@ -50,7 +39,6 @@ public:
     Vector4f getColorForKey(const std::string &key) noexcept;
 
 private:
-    inline static const ColorList _colorList;
     std::unordered_map<std::string, size_t> _colorMap;
     size_t _lastColortListIndex = 0;
 };
@@ -68,7 +56,6 @@ public:
     Vector4f getNextColor() noexcept;
 
 private:
-    inline static const ColorList _colorList;
     size_t _lastColortListIndex = 0u;
 };
 }
