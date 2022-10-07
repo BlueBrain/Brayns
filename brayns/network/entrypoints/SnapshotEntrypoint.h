@@ -21,18 +21,15 @@
 
 #pragma once
 
-#include <optional>
-
 #include <brayns/engine/core/Engine.h>
 
 #include <brayns/network/common/CancellationToken.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ImageBase64Message.h>
 #include <brayns/network/messages/SnapshotMessage.h>
 
 namespace brayns
 {
-class SnapshotEntrypoint : public Entrypoint<SnapshotParams, ImageBase64Message>
+class SnapshotEntrypoint : public Entrypoint<SnapshotParams, SnapshotResult>
 {
 public:
     SnapshotEntrypoint(Engine &engine, CancellationToken token);

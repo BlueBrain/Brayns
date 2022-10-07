@@ -35,64 +35,114 @@
 
 namespace
 {
-struct SnapshotResultHandler
+class ParamsBuilder
 {
-    static void
-        writeToDisk(const std::string &path, const brayns::ImageSettings &imageSettings, brayns::Framebuffer &fb)
+public:
+    static brayns::SnapshotParams build(const brayns::SnapshotEntrypoint::Request &request, brayns::Engine &engine)
     {
-        const auto quality = imageSettings.getQuality();
-        auto image = fb.getImage();
+        brayns::SnapshotParams params;
+
+        auto &camera = engine.getCamera();
+        auto view = camera.getView();
+        params.camera_view = view;
+
+        auto &systemFramebuffer = engine.getFramebuffer();
+        auto systemSize = systemFramebuffer.getFrameSize();
+        params.image_settings = brayns::ImageSettings(systemSize);
+
+        auto &paramsManager = engine.getParametersManager();
+        auto &simulation = paramsManager.getSimulationParameters();
+        params.simulation_frame = simulation.getFrame();
+
+        request.getParams(params);
+
+        return params;
+    }
+};
+
+class ImageHelper
+{
+public:
+    static void save(const brayns::Image &image, const std::string &path, int quality)
+    {
         try
         {
             brayns::ImageEncoder::save(image, path, quality);
         }
         catch (const std::exception &e)
         {
-            brayns::Log::error("Error while saving image: '{}'.", e.what());
+            brayns::Log::error("Failed to save snapshot: '{}'.", e.what());
             throw brayns::InternalErrorException(e.what());
         }
     }
 
-    static std::string encodeToBase64(const brayns::ImageSettings &imageSettings, brayns::Framebuffer &fb)
+    static std::string encode(const brayns::Image &image, const std::string &extension, int quality)
     {
-        const auto &formatName = imageSettings.getFormat();
-        const auto fixedFormat = brayns::StringCase::toLower(formatName);
-        const auto format = brayns::ImageFormat::fromExtension(fixedFormat);
-        const auto quality = imageSettings.getQuality();
-        auto image = fb.getImage();
+        const auto lower = brayns::StringCase::toLower(extension);
+        const auto format = brayns::ImageFormat::fromExtension(lower);
         try
         {
-            return brayns::ImageEncoder::encodeToBase64(image, format, quality);
+            return brayns::ImageEncoder::encode(image, format, quality);
         }
         catch (const std::exception &e)
         {
-            brayns::Log::error("Error while encoding image to base64: '{}'.", e.what());
+            brayns::Log::error("Failed to encode snapshot: '{}'.", e.what());
             throw brayns::InternalErrorException(e.what());
         }
+    }
+};
+
+class ReplyHandler
+{
+public:
+    static void reply(
+        const brayns::SnapshotEntrypoint::Request &request,
+        const brayns::SnapshotParams &params,
+        brayns::Framebuffer &framebuffer)
+    {
+        auto &path = params.file_path;
+        auto &settings = params.image_settings;
+        auto quality = settings.getQuality();
+        auto format = settings.getFormat();
+        auto image = framebuffer.getImage();
+        if (path.empty())
+        {
+            auto data = ImageHelper::encode(image, format, quality);
+            auto result = _formatResult(data.size());
+            request.reply(result, data);
+            return;
+        }
+        ImageHelper::save(image, path, quality);
+        auto result = _formatResult(0);
+        request.reply(result);
+    }
+
+private:
+    static brayns::SnapshotResult _formatResult(size_t colorBufferSize)
+    {
+        brayns::SnapshotResult result;
+        result.color_buffer.offset = 0;
+        result.color_buffer.size = colorBufferSize;
+        return result;
     }
 };
 
 class SnapshotHandler
 {
 public:
-    using SnapshotProgress =
-        brayns::ProgressHandler<brayns::EntrypointRequest<brayns::SnapshotParams, brayns::ImageBase64Message>>;
-
-    static brayns::ImageBase64Message
-        handle(brayns::SnapshotParams &params, SnapshotProgress &progress, brayns::Engine &engine)
+    static void handle(
+        const brayns::SnapshotEntrypoint::Request &request,
+        const brayns::SnapshotParams &params,
+        brayns::CancellationToken token,
+        brayns::Engine &engine)
     {
-        auto &factories = engine.getFactories();
-
-        // Initialize parameters
-        auto &imageSettings = params.image_settings;
-        const auto &imageSize = imageSettings.getSize();
-        auto &imagePath = params.file_path;
-
         // Parameters
         auto paramsManager = engine.getParametersManager();
         auto &simulation = paramsManager.getSimulationParameters();
         auto frame = params.simulation_frame;
         simulation.setFrame(frame);
+
+        auto &factories = engine.getFactories();
 
         // Renderer
         auto &rendererData = params.renderer;
@@ -101,6 +151,8 @@ public:
         renderer.commit();
 
         // Framebuffer
+        auto &imageSettings = params.image_settings;
+        const auto &imageSize = imageSettings.getSize();
         brayns::Framebuffer framebuffer;
         framebuffer.setAccumulation(false);
         framebuffer.setFormat(brayns::PixelFormat::StandardRgbaI8);
@@ -121,6 +173,7 @@ public:
         scene.commit();
 
         // Render
+        auto progress = brayns::ProgressHandler(token, request);
         auto future = brayns::FrameRenderer::asynchronous(camera, framebuffer, renderer, scene);
         const auto msg = "Rendering snapshot ...";
         while (!future.isReady())
@@ -130,19 +183,7 @@ public:
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
-        // Handle result
-        brayns::ImageBase64Message image;
-
-        if (!params.file_path.empty())
-        {
-            SnapshotResultHandler::writeToDisk(imagePath, imageSettings, framebuffer);
-        }
-        else
-        {
-            image.data = SnapshotResultHandler::encodeToBase64(imageSettings, framebuffer);
-        }
-
-        return image;
+        ReplyHandler::reply(request, params, framebuffer);
     }
 };
 } // namespace
@@ -172,29 +213,9 @@ bool SnapshotEntrypoint::isAsync() const
 
 void SnapshotEntrypoint::onRequest(const Request &request)
 {
-    SnapshotParams params;
-
-    auto &camera = _engine.getCamera();
-    auto view = camera.getView();
-    params.camera_view = view;
-
-    auto &systemFramebuffer = _engine.getFramebuffer();
-    auto systemSize = systemFramebuffer.getFrameSize();
-    params.image_settings = ImageSettings(systemSize);
-
-    auto &paramsManager = _engine.getParametersManager();
-    auto &simulation = paramsManager.getSimulationParameters();
-    params.simulation_frame = simulation.getFrame();
-
-    request.getParams(params);
-
+    auto params = ParamsBuilder::build(request, _engine);
     _download = params.file_path.empty();
-
-    brayns::ProgressHandler progress(_token, request);
-
-    auto result = SnapshotHandler::handle(params, progress, _engine);
-
-    request.reply(result);
+    SnapshotHandler::handle(request, params, _token, _engine);
 }
 
 void SnapshotEntrypoint::onCancel()
