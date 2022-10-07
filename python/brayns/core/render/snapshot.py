@@ -20,7 +20,6 @@
 
 from __future__ import annotations
 
-import base64
 from dataclasses import dataclass
 from typing import Any
 
@@ -97,8 +96,8 @@ class Snapshot:
         :type path: str
         """
         params = _serialize_snapshot(self, format)
-        result = _request(instance, params)
-        return base64.b64decode(result['data'])
+        result, binary = _request(instance, params)
+        return _get_color_buffer(result, binary)
 
 
 def _serialize_snapshot(snapshot: Snapshot, format: ImageFormat, path: str | None = None) -> dict[str, Any]:
@@ -129,5 +128,12 @@ def _serialize_image_settings(snapshot: Snapshot, format: ImageFormat) -> dict[s
     return message
 
 
-def _request(instance: Instance, params: dict[str, Any]) -> dict[str, Any]:
-    return instance.request('snapshot', params)
+def _request(instance: Instance, params: dict[str, Any]) -> tuple[Any, bytes]:
+    return instance.execute('snapshot', params)
+
+
+def _get_color_buffer(result: dict[str, Any], data: bytes) -> bytes:
+    buffer = result['color_buffer']
+    offset = buffer['offset']
+    size = buffer['size']
+    return data[offset:size]
