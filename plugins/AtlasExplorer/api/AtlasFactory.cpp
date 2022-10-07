@@ -36,15 +36,27 @@ public:
         return std::make_shared<T>(size, spacing, data);
     }
 };
+
+class FactoryBuilder
+{
+public:
+    AtlasFactory::Factories factories;
+
+    template<typename T>
+    void registerType()
+    {
+        factories[T::type] = DefaultFactory<T>::create;
+    }
+};
 }
 
 AtlasFactory AtlasFactory::createDefault()
 {
-    auto factories = AtlasFactory::Factories();
-    factories[VoxelType::flatmap] = DefaultFactory<FlatmapAtlas>::create;
-    factories[VoxelType::orientation] = DefaultFactory<OrientationAtlas>::create;
-    factories[VoxelType::scalar] = DefaultFactory<ScalarAtlas>::create;
-    return AtlasFactory(std::move(factories));
+    auto builder = FactoryBuilder();
+    builder.registerType<FlatmapAtlas>();
+    builder.registerType<OrientationAtlas>();
+    builder.registerType<ScalarAtlas>();
+    return AtlasFactory(std::move(builder.factories));
 }
 
 AtlasFactory::AtlasFactory(Factories factories)
