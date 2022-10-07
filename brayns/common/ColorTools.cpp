@@ -16,11 +16,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ColorUtils.h"
+#include "ColorTools.h"
 
-ColorTable::ColorTable()
+namespace brayns
 {
-    VALUES = {
+ColorList::ColorList()
+{
+    values = {
         {1.0, 0.9490196078431372, 0.0, 1.0},
         {0.9686274509803922, 0.5803921568627451, 0.11372549019607843, 1.0},
         {0.8784313725490196, 0.1843137254901961, 0.3803921568627451, 1.0},
@@ -43,28 +45,22 @@ ColorTable::ColorTable()
         {0.21568627450980393, 0.49411764705882355, 0.7215686274509804, 1.0}};
 }
 
-ColorTable ColorDeck::_TABLE;
-
-const brayns::Vector4f &ColorDeck::getColorForKey(const std::string &k) noexcept
+brayns::Vector4f ColorDeck::getColorForKey(const std::string &key) noexcept
 {
-    const auto it = _colorMap.find(k);
-    if (it == _colorMap.end())
-        return _emplaceColor(k);
+    const auto it = _colorMap.find(key);
+    if (it != _colorMap.end())
+    {
+        return _colorList.values[it->second];
+    }
 
-    return _TABLE.VALUES[it->second];
+    auto index = _lastColortListIndex++;
+    _colorMap[key] = index;
+    return _colorList.values[index];
 }
 
-const brayns::Vector4f &ColorDeck::_emplaceColor(const std::string &k) noexcept
+brayns::Vector4f ColorRoulette::getNextColor() noexcept
 {
-    const auto nextIndex = _lastIndex++ % _TABLE.VALUES.size();
-    _colorMap[k] = nextIndex;
-    return _TABLE.VALUES[nextIndex];
+    auto index = _lastColortListIndex++ % _colorList.values.size();
+    return _colorList.values[index];
 }
-
-ColorTable ColorRoulette::_TABLE;
-
-const brayns::Vector4f &ColorRoulette::getNextColor() noexcept
-{
-    const auto index = _lastIndex++ % _TABLE.VALUES.size();
-    return _TABLE.VALUES[index];
 }

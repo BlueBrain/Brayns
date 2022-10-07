@@ -18,7 +18,7 @@
 
 #include "ColorByIDAlgorithm.h"
 
-#include <api/coloring/ColorUtils.h>
+#include <brayns/common/ColorTools.h>
 
 std::vector<uint64_t> ColorByIDAlgorithm::execute(
     const std::map<uint64_t, brayns::Vector4f> &colorMap,
@@ -110,7 +110,7 @@ std::vector<uint64_t> ColorByIDAlgorithm::_randomly(
     const std::function<void(uint64_t, size_t, const brayns::Vector4f &)> &elementCallback)
 {
     const auto numCells = ids.size();
-    ColorRoulette roulette;
+    auto roulette = brayns::ColorRoulette();
     for (size_t i = 0; i < numCells; ++i)
     {
         elementCallback(ids[i], i, roulette.getNextColor());

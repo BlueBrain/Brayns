@@ -38,7 +38,7 @@ public:
 };
 }
 
-AtlasFactory createDefault()
+AtlasFactory AtlasFactory::createDefault()
 {
     auto factories = AtlasFactory::Factories();
     factories[VoxelType::flatmap] = DefaultFactory<FlatmapAtlas>::create;

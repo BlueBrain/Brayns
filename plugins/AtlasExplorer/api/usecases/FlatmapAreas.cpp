@@ -18,8 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FlatmapOverlap.h"
+#include "FlatmapAreas.h"
 
+#include <brayns/common/ColorTools.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
@@ -53,13 +54,14 @@ public:
     }
 };
 
-class OverlappingAreas
+using AreaMap = std::unordered_map<uint64_t, std::unordered_map<uint64_t, std::vector<size_t>>>;
+
+class AreaMapGenerator
 {
 public:
-    using OverlapMap = std::unordered_map<uint64_t, std::unordered_map<uint64_t, std::vector<size_t>>>;
-    static OverlapMap compute(const FlatmapAtlas &atlas)
+    static AreaMap fromAtlas(const FlatmapAtlas &atlas)
     {
-        auto map = OverlapMap();
+        auto map = AreaMap();
 
         auto validVoxelsIndices = ValidVoxels::getIndexList(atlas);
         for (auto index : validVoxelsIndices)
@@ -76,33 +78,32 @@ public:
 class PrimitiveBuilder
 {
 public:
-    static std::vector<brayns::Box> fromOverlapMap(const FlatmapAtlas &atlas, const OverlappingAreas::OverlapMap &map)
+    static std::vector<std::vector<brayns::Box>> build(const FlatmapAtlas &atlas)
     {
-        auto geometry = std::vector<brayns::Box>();
-        geometry.reserve(_countTotalGeometries(map));
+        auto map = AreaMapGenerator::fromAtlas(atlas);
+
+        auto geometry = std::vector<std::vector<brayns::Box>>();
+        geometry.reserve(_countTotalAreas(map));
 
         for (auto &[x, subMap] : map)
         {
             for (auto &[y, overlapIndices] : subMap)
             {
-                auto localVoxels = _generatePrimitives(atlas, overlapIndices);
-                geometry.insert(geometry.end(), localVoxels.begin(), localVoxels.end());
+                auto areaVoxels = _generatePrimitives(atlas, overlapIndices);
+                geometry.push_back(std::move(areaVoxels));
             }
         }
         return geometry;
     }
 
 private:
-    static size_t _countTotalGeometries(const OverlappingAreas::OverlapMap &map)
+    static size_t _countTotalAreas(const AreaMap &map)
     {
         size_t result = 0;
 
         for (auto &[x, subMap] : map)
         {
-            for (auto &[y, overlapIndices] : subMap)
-            {
-                result += overlapIndices.size();
-            }
+            result += subMap.size();
         }
         return result;
     }
@@ -124,17 +125,23 @@ private:
 class ModelBuilder
 {
 public:
-    static std::unique_ptr<brayns::Model> build(std::vector<brayns::Box> primitives)
+    static std::unique_ptr<brayns::Model> build(std::vector<std::vector<brayns::Box>> primitives)
     {
         auto model = std::make_unique<brayns::Model>();
 
         auto &components = model->getComponents();
 
         auto &geometries = components.add<brayns::Geometries>();
-        auto &geometry = geometries.elements.emplace_back(std::move(primitives));
+        geometries.elements.reserve(primitives.size());
         auto &views = components.add<brayns::GeometryViews>();
-        auto &view = views.elements.emplace_back(geometry);
-        view.setColor(brayns::Vector4f(1.f, 0.f, 0.f, 1.f));
+        views.elements.reserve(primitives.size());
+        auto roulette = brayns::ColorRoulette();
+        for (auto &primitiveList : primitives)
+        {
+            auto &geometry = geometries.elements.emplace_back(std::move(primitiveList));
+            auto &view = views.elements.emplace_back(geometry);
+            view.setColor(roulette.getNextColor());
+        }
 
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
@@ -146,24 +153,23 @@ public:
 };
 }
 
-std::string FlatmapOverlap::getName() const
+std::string FlatmapAreas::getName() const
 {
-    return "Flatmap overlapping areas";
+    return "Flatmap areas";
 }
 
-bool FlatmapOverlap::isAtlasValid(const Atlas &atlas) const
+bool FlatmapAreas::isAtlasValid(const Atlas &atlas) const
 {
     return atlas.getVoxelType() == VoxelType::flatmap;
 }
 
-std::unique_ptr<brayns::Model> FlatmapOverlap::run(const Atlas &atlas, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> FlatmapAreas::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
     assert(dynamic_cast<const FlatmapAtlas *>(&atlas));
 
     auto &flatmapAtlas = static_cast<const FlatmapAtlas &>(atlas);
-    auto overlapAreas = OverlappingAreas::compute(flatmapAtlas);
-    auto primitives = PrimitiveBuilder::fromOverlapMap(flatmapAtlas, overlapAreas);
+    auto primitives = PrimitiveBuilder::build(flatmapAtlas);
 
     return ModelBuilder::build(std::move(primitives));
 }

@@ -22,7 +22,7 @@
 
 #include <api/IUseCase.h>
 
-class FlatmapOverlap final : public IUseCase
+class FlatmapAreas final : public IUseCase
 {
 public:
     std::string getName() const override;

@@ -59,6 +59,7 @@ public:
         grid.dataType = brayns::VolumeDataType::UnsignedChar;
         grid.voxels = ValidVoxelGridFilter::filter(atlas);
         grid.size = atlas.getSize();
+        grid.spacing = atlas.getSpacing();
         return brayns::Volume(grid);
     }
 };
@@ -90,7 +91,7 @@ std::unique_ptr<brayns::Model> OutlineShell::run(const Atlas &atlas, const brayn
     auto &geometry = geometries.elements.emplace_back(std::move(isoSurface));
     auto &views = components.add<brayns::GeometryViews>();
     auto &view = views.elements.emplace_back(geometry);
-    view.setColor(brayns::Vector4f(1.f, 1.f, 1.f, 0.5f));
+    view.setColor(brayns::Vector4f(1.f, 1.f, 1.f, 0.3f));
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();

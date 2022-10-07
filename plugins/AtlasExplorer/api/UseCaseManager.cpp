@@ -22,7 +22,7 @@
 
 #include <api/usecases/AreaCollage.h>
 #include <api/usecases/Density.h>
-#include <api/usecases/FlatmapOverlap.h>
+#include <api/usecases/FlatmapAreas.h>
 #include <api/usecases/HighlightColumn.h>
 #include <api/usecases/LayerDistance.h>
 #include <api/usecases/OrientationField.h>
@@ -37,7 +37,7 @@ UseCaseManager UseCaseManager::createDefault()
     useCases.push_back(std::make_unique<LayerDistance>());
     useCases.push_back(std::make_unique<OrientationField>());
     useCases.push_back(std::make_unique<OutlineShell>());
-    useCases.push_back(std::make_unique<FlatmapOverlap>());
+    useCases.push_back(std::make_unique<FlatmapAreas>());
     return UseCaseManager(std::move(useCases));
 }
 
