@@ -43,7 +43,7 @@ public:
         {
             if (atlas.isValidVoxel(i))
             {
-                result[i] = 255u;
+                result[i] = std::numeric_limits<uint8_t>::max();
             }
         }
         return result;
@@ -70,7 +70,7 @@ std::string OutlineShell::getName() const
     return "Outline mesh shell";
 }
 
-bool OutlineShell::isAtlasValid(const Atlas &atlas) const
+bool OutlineShell::isValidAtlas(const Atlas &atlas) const
 {
     (void)atlas;
     return true;

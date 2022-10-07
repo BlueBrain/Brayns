@@ -20,7 +20,6 @@
 
 #include "HexDecoder.h"
 
-#include <brayns/utils/string/StringConstants.h>
 #include <brayns/utils/string/StringCounter.h>
 #include <brayns/utils/string/StringExtractor.h>
 
@@ -33,7 +32,7 @@ class HexContentParser
 public:
     static std::string toBinary(std::string_view input)
     {
-        auto tokenCount = brayns::StringCounter::countOneOf(input, brayns::StringConstants::tokenDelimiters);
+        auto tokenCount = brayns::StringCounter::countTokens(input);
         auto expectedResultSize = input.length() - tokenCount;
 
         std::string result;
@@ -44,7 +43,7 @@ public:
 
         while (!input.empty())
         {
-            auto token = brayns::StringExtractor::extractUntilOneOf(input, brayns::StringConstants::tokenDelimiters);
+            auto token = brayns::StringExtractor::extractToken(input);
 
             for (size_t i = 0; i < token.size(); ++i)
             {

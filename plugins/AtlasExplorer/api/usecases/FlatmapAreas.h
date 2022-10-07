@@ -26,6 +26,6 @@ class FlatmapAreas final : public IUseCase
 {
 public:
     std::string getName() const override;
-    bool isAtlasValid(const Atlas &atlas) const override;
+    bool isValidAtlas(const Atlas &atlas) const override;
     std::unique_ptr<brayns::Model> run(const Atlas &atlas, const brayns::JsonValue &payload) const override;
 };

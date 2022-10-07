@@ -148,7 +148,7 @@ std::string OrientationField::getName() const
     return "Orientation field";
 }
 
-bool OrientationField::isAtlasValid(const Atlas &atlas) const
+bool OrientationField::isValidAtlas(const Atlas &atlas) const
 {
     return atlas.getVoxelType() == VoxelType::orientation;
 }

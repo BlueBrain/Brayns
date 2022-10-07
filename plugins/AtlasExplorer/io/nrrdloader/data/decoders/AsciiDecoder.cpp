@@ -20,10 +20,10 @@
 
 #include "AsciiDecoder.h"
 
-#include <brayns/utils/string/StringConstants.h>
 #include <brayns/utils/string/StringCounter.h>
 #include <brayns/utils/string/StringExtractor.h>
 #include <brayns/utils/string/StringParser.h>
+#include <brayns/utils/parsing/Parser.h>
 
 #include <stdexcept>
 
@@ -39,9 +39,8 @@ public:
         result.reserve(tokenCount);
         while (!input.empty())
         {
-            auto token = brayns::StringExtractor::extractUntilOneOf(input, brayns::StringConstants::tokenDelimiters);
             auto &value = result.emplace_back();
-            brayns::StringParser<T>::parse(token, value);
+            brayns::Parser::extractToken<T>(input, value);
             brayns::StringExtractor::extract(input, 1);
         }
         return result;
@@ -62,7 +61,7 @@ public:
 
 std::unique_ptr<IDataMangler> AsciiDecoder::decode(const NRRDHeader &header, std::string_view input) const
 {
-    auto tokenCount = brayns::StringCounter::countOneOf(input, brayns::StringConstants::tokenDelimiters);
+    auto tokenCount = brayns::StringCounter::countTokens(input);
     auto expectedTokens = NRRDExpectedSize::compute(header);
     if (tokenCount != expectedTokens)
     {

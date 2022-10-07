@@ -75,9 +75,9 @@ void VisualizeAtlasUseCaseEntrypoint::onRequest(const Request &request)
     auto &atlas = *component.atlas;
 
     auto &useCase = _useCases.getUseCase(useCaseName);
-    if (!useCase.isAtlasValid(atlas))
+    if (!useCase.isValidAtlas(atlas))
     {
-        throw brayns::JsonRpcException("The use-case is not valid for the given type of atlas");
+        throw brayns::InvalidParamsException("The use-case is not valid for the given type of atlas");
     }
 
     auto newModel = useCase.run(atlas, useCaseParams);

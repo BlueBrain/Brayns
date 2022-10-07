@@ -53,7 +53,7 @@ std::vector<std::string> UseCaseManager::getValidUseCasesForAtlas(const Atlas &a
 
     for (const auto &useCase : _useCases)
     {
-        if (useCase->isAtlasValid(atlas))
+        if (useCase->isValidAtlas(atlas))
         {
             result.push_back(useCase->getName());
         }

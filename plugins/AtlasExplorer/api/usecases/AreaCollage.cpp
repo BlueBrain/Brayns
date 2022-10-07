@@ -25,7 +25,7 @@ std::string AreaCollage::getName() const
     return "Area collage";
 }
 
-bool AreaCollage::isAtlasValid(const Atlas &atlas) const
+bool AreaCollage::isValidAtlas(const Atlas &atlas) const
 {
     (void)atlas;
     return false;

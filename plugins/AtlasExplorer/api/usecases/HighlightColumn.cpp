@@ -121,7 +121,7 @@ std::string HighlightColumn::getName() const
     return "Highlight column";
 }
 
-bool HighlightColumn::isAtlasValid(const Atlas &atlas) const
+bool HighlightColumn::isValidAtlas(const Atlas &atlas) const
 {
     (void)atlas;
     return true;

@@ -158,7 +158,7 @@ std::string FlatmapAreas::getName() const
     return "Flatmap areas";
 }
 
-bool FlatmapAreas::isAtlasValid(const Atlas &atlas) const
+bool FlatmapAreas::isValidAtlas(const Atlas &atlas) const
 {
     return atlas.getVoxelType() == VoxelType::flatmap;
 }

@@ -25,7 +25,7 @@ std::string LayerDistance::getName() const
     return "Layer distance";
 }
 
-bool LayerDistance::isAtlasValid(const Atlas &atlas) const
+bool LayerDistance::isValidAtlas(const Atlas &atlas) const
 {
     (void)atlas;
     return false;

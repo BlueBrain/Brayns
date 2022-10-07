@@ -35,7 +35,7 @@ std::string Density::getName() const
     return "Density";
 }
 
-bool Density::isAtlasValid(const Atlas &atlas) const
+bool Density::isValidAtlas(const Atlas &atlas) const
 {
     return atlas.getVoxelType() == VoxelType::scalar;
 }

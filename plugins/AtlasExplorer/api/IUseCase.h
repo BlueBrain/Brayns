@@ -41,7 +41,7 @@ public:
      * @param atlas Atlas to be tested.
      * @return true If the atlas is valid for this use case, false otherwise.
      */
-    virtual bool isAtlasValid(const Atlas &atlas) const = 0;
+    virtual bool isValidAtlas(const Atlas &atlas) const = 0;
 
     /**
      * @brief Applies the use case to the given atlas data and returns a new model with the result.
