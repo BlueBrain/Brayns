@@ -87,9 +87,9 @@ public:
 
         for (auto &[x, subMap] : map)
         {
-            for (auto &[y, overlapIndices] : subMap)
+            for (auto &[y, areaVoxelIndices] : subMap)
             {
-                auto areaVoxels = _generatePrimitives(atlas, overlapIndices);
+                auto areaVoxels = _generatePrimitives(atlas, areaVoxelIndices);
                 geometry.push_back(std::move(areaVoxels));
             }
         }

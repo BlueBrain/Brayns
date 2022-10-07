@@ -34,8 +34,8 @@ public:
 
         for (size_t i = 0; i < input.size(); ++i)
         {
-            min = glm::min(input[i], min);
-            max = glm::max(input[i], max);
+            min = std::min(input[i], min);
+            max = std::max(input[i], max);
         }
 
         return std::make_pair(min, max);
