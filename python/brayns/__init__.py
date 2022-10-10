@@ -150,6 +150,8 @@ __all__ = [
     'Process',
     'ProductionRenderer',
     'Projection',
+    'ProteinColorScheme',
+    'ProteinLoader',
     'ProtocolError',
     'QuadLight',
     'Quaternion',
