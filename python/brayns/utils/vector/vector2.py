@@ -20,13 +20,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from dataclasses import dataclass
+from typing import TypeVar
 
 from .vector import Vector
 
+T = TypeVar('T', bound='Vector2')
 
-@dataclass(frozen=True, order=True)
+
 class Vector2(Vector[float]):
     """2D vector with XY components.
 
@@ -38,26 +38,31 @@ class Vector2(Vector[float]):
     :type y: float
     """
 
-    x: float = 0.0
-    y: float = 0.0
-
-    @staticmethod
-    def full(value: float) -> Vector2:
-        return Vector2(value, value)
+    @classmethod
+    @property
+    def component_count(cls) -> int:
+        return 2
 
     @classmethod
     @property
-    def zero(cls) -> Vector2:
-        return Vector2()
+    def zero(cls: type[T]) -> T:
+        return cls.full(0.0)
 
     @classmethod
     @property
-    def one(cls) -> Vector2:
-        return Vector2.full(1.0)
+    def one(cls: type[T]) -> T:
+        return cls.full(1.0)
 
-    def __iter__(self) -> Iterator[float]:
-        yield self.x
-        yield self.y
+    def __init__(self, x: float = 0.0, y: float = 0.0) -> None:
+        super().__init__(x, y)
 
-    def dot(self, other: Vector2) -> float:
+    @property
+    def x(self) -> float:
+        return self[0]
+
+    @property
+    def y(self) -> float:
+        return self[1]
+
+    def dot(self: T, other: T) -> float:
         return sum(i * j for i, j in zip(self, other))

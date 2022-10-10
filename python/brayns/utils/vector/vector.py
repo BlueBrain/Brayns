@@ -32,12 +32,8 @@ U = TypeVar('U', int, float)
 class Vector(ABC, Generic[U]):
     """Generic vector base class.
 
-    Child has to implement __iter__ special methods to yield components.
-
     Provide either componentwise (with another vector) and scalar operators (
     apply the scalar to all components).
-
-    Provides also normalization and unpack operations.
 
     Examples of arithmetic operations with vector = [1, 1, 1]:
 
@@ -54,18 +50,69 @@ class Vector(ABC, Generic[U]):
     """
 
     @classmethod
-    def unpack(cls: type[T], values: Iterable[U]) -> T:
-        return cls(*values)
-
-    def __init__(self, *_: U) -> None:
-        pass
-
+    @property
     @abstractmethod
-    def __iter__(self) -> Iterator[U]:
+    def component_count(cls) -> int:
         pass
+
+    @classmethod
+    def unpack(cls: type[T], components: Iterable[U]) -> T:
+        return cls(*components)
+
+    @classmethod
+    def full(cls: type[T], value: U) -> T:
+        return cls.unpack(value for _ in range(cls.component_count))
+
+    def __init__(self, *components: U) -> None:
+        if len(components) != self.component_count:
+            raise ValueError(f'Invalid component count: {components}')
+        self._components = components
+
+    def __str__(self) -> str:
+        return type(self).__name__ + self._components.__str__()
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+        return self._components == other._components
+
+    def __lt__(self: T, other: T) -> bool:
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self._components < other._components
+
+    def __le__(self: T, other: T) -> bool:
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self._components <= other._components
+
+    def __gt__(self: T, other: T) -> bool:
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self._components > other._components
+
+    def __ge__(self: T, other: T) -> bool:
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self._components >= other._components
+
+    def __iter__(self) -> Iterator[U]:
+        yield from self._components
+
+    def __len__(self) -> int:
+        return len(self._components)
+
+    def __getitem__(self, index: int) -> U:
+        return self._components[index]
 
     def __neg__(self: T) -> T:
         return self.unpack(-i for i in self)
+
+    def __pos__(self: T) -> T:
+        return self.unpack(+i for i in self)
 
     def __abs__(self: T) -> T:
         return self.unpack(abs(i) for i in self)

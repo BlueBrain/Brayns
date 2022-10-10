@@ -20,13 +20,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from dataclasses import dataclass
-
 from ..vector import Vector
 
 
-@dataclass(frozen=True, order=True)
 class Resolution(Vector[int]):
     """Image resolution.
 
@@ -38,8 +34,10 @@ class Resolution(Vector[int]):
     :type height: int
     """
 
-    width: int
-    height: int
+    @classmethod
+    @property
+    def component_count(cls) -> int:
+        return 2
 
     @classmethod
     @property
@@ -71,18 +69,18 @@ class Resolution(Vector[int]):
         """
         return 8 * cls.full_hd
 
-    def __post_init__(self) -> None:
-        if not all(i > 0 for i in self):
+    def __init__(self, width: int, height: int) -> None:
+        if width <= 0 or height <= 0:
             raise ValueError(f'Invalid resolution: {self}')
+        super().__init__(width, height)
 
-    def __iter__(self) -> Iterator[int]:
-        """Iterate over width and height.
+    @property
+    def width(self) -> int:
+        return self[0]
 
-        :yield: Width and height components.
-        :rtype: Iterator[int]
-        """
-        yield self.width
-        yield self.height
+    @property
+    def height(self) -> int:
+        return self[1]
 
     @property
     def aspect_ratio(self) -> float:

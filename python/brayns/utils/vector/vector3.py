@@ -20,14 +20,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from dataclasses import dataclass
-
-from .vector import Vector
+from .vector2 import Vector2
 
 
-@dataclass(frozen=True, order=True)
-class Vector3(Vector[float]):
+class Vector3(Vector2):
     """3D vector with XYZ components.
 
     Provides dot and cross product in addition to Vector operators.
@@ -40,31 +36,25 @@ class Vector3(Vector[float]):
     :type z: float
     """
 
-    x: float = 0.0
-    y: float = 0.0
-    z: float = 0.0
-
     @staticmethod
-    def full(value: float) -> Vector3:
-        return Vector3(value, value, value)
+    def from_vector2(value: Vector2, z: float = 0.0) -> Vector3:
+        return Vector3(value.x, value.y, z)
 
     @classmethod
     @property
-    def zero(cls) -> Vector3:
-        return Vector3()
+    def component_count(cls) -> int:
+        return 3
 
-    @classmethod
+    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0) -> None:
+        super(Vector2, self).__init__(x, y, z)
+
     @property
-    def one(cls) -> Vector3:
-        return Vector3.full(1.0)
+    def z(self) -> float:
+        return self[2]
 
-    def __iter__(self) -> Iterator[float]:
-        yield self.x
-        yield self.y
-        yield self.z
-
-    def dot(self, other: Vector3) -> float:
-        return sum(i * j for i, j in zip(self, other))
+    @property
+    def vector2(self) -> Vector2:
+        return Vector2(self.x, self.y)
 
     def cross(self, other: Vector3) -> Vector3:
         return Vector3(

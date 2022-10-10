@@ -21,13 +21,10 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Iterator
-from dataclasses import dataclass
 
 from ..vector import Vector, Vector3
 
 
-@dataclass(frozen=True, order=True)
 class Quaternion(Vector[float]):
     """Quaternion with XYZW components.
 
@@ -44,21 +41,18 @@ class Quaternion(Vector[float]):
     :type w: float
     """
 
-    x: float = 0.0
-    y: float = 0.0
-    z: float = 0.0
-    w: float = 1.0
+    @classmethod
+    @property
+    def component_count(cls) -> int:
+        return 4
 
     @classmethod
     @property
     def identity(cls) -> Quaternion:
         return Quaternion()
 
-    def __iter__(self) -> Iterator[float]:
-        yield self.x
-        yield self.y
-        yield self.z
-        yield self.w
+    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0, w: float = 1.0) -> None:
+        super().__init__(x, y, z, w)
 
     def __mul__(self, value: int | float | Quaternion) -> Quaternion:
         if isinstance(value, (int, float)):
@@ -86,6 +80,22 @@ class Quaternion(Vector[float]):
         if isinstance(value, (int, float)):
             return self.unpack(value / i for i in self)
         return value * self.inverse
+
+    @property
+    def x(self) -> float:
+        return self[0]
+
+    @property
+    def y(self) -> float:
+        return self[1]
+
+    @property
+    def z(self) -> float:
+        return self[2]
+
+    @property
+    def w(self) -> float:
+        return self[3]
 
     @property
     def axis(self) -> Vector3:
