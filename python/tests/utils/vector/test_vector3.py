@@ -31,18 +31,15 @@ class TestVector3(unittest.TestCase):
         test = brayns.Vector3.from_vector2(vector2, 3)
         self.assertEqual(test, brayns.Vector3(1, 2, 3))
 
-    def test_full(self) -> None:
-        self.assertEqual(brayns.Vector3.full(5), brayns.Vector3(5, 5, 5))
-
     def test_unpack(self) -> None:
         test = [1, 2, 3]
         self.assertEqual(brayns.Vector3.unpack(test), brayns.Vector3(*test))
 
     def test_zero(self) -> None:
-        self.assertEqual(brayns.Vector3.zero, brayns.Vector3.full(0))
+        self.assertEqual(brayns.Vector3.zero, brayns.Vector3(0, 0, 0))
 
     def test_one(self) -> None:
-        self.assertEqual(brayns.Vector3.one, brayns.Vector3.full(1))
+        self.assertEqual(brayns.Vector3.one, brayns.Vector3(1, 1, 1))
 
     def test_str(self) -> None:
         test = brayns.Vector3(1, 2, 3)

@@ -21,15 +21,14 @@
 from __future__ import annotations
 
 import math
-from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterable, Iterator
-from typing import Generic, TypeVar
+from collections.abc import Callable, Iterable
+from typing import TypeVar
 
 T = TypeVar('T', bound='Vector')
 U = TypeVar('U', int, float)
 
 
-class Vector(ABC, Generic[U]):
+class Vector(tuple[U, ...]):
     """Generic vector base class.
 
     Provide either componentwise (with another vector) and scalar operators (
@@ -41,7 +40,7 @@ class Vector(ABC, Generic[U]):
         vector * 3 # 3 3 3
         vector / 2 # 0.5 0.5 0.5
         2 / vector # 2 2 2
-        vector = Vector3.unpack(i*i for i in range(3)) # 1 4 9
+        vector = Vector3.unpack(i * i for i in range(3)) # 1 4 9
         vector = vector.normalized # vector.norm ~ 1
         vector.square_norm # 3
         vector.norm # sqrt(3)
@@ -50,63 +49,19 @@ class Vector(ABC, Generic[U]):
     """
 
     @classmethod
-    @property
-    @abstractmethod
-    def component_count(cls) -> int:
-        pass
-
-    @classmethod
     def unpack(cls: type[T], components: Iterable[U]) -> T:
         return cls(*components)
 
-    @classmethod
-    def full(cls: type[T], value: U) -> T:
-        return cls.unpack(value for _ in range(cls.component_count))
-
-    def __init__(self, *components: U) -> None:
-        if len(components) != self.component_count:
-            raise ValueError(f'Invalid component count: {components}')
-        self._components = components
+    def __new__(cls: type[T], *components: U) -> T:
+        return super().__new__(cls, components)
 
     def __str__(self) -> str:
-        return type(self).__name__ + self._components.__str__()
+        name = type(self).__name__
+        values = ', '.join(str(i) for i in self)
+        return f'{name}({values})'
 
     def __repr__(self) -> str:
         return self.__str__()
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, type(self)):
-            return False
-        return self._components == other._components
-
-    def __lt__(self: T, other: T) -> bool:
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return self._components < other._components
-
-    def __le__(self: T, other: T) -> bool:
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return self._components <= other._components
-
-    def __gt__(self: T, other: T) -> bool:
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return self._components > other._components
-
-    def __ge__(self: T, other: T) -> bool:
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return self._components >= other._components
-
-    def __iter__(self) -> Iterator[U]:
-        yield from self._components
-
-    def __len__(self) -> int:
-        return len(self._components)
-
-    def __getitem__(self, index: int) -> U:
-        return self._components[index]
 
     def __neg__(self: T) -> T:
         return self.unpack(-i for i in self)
@@ -164,6 +119,9 @@ class Vector(ABC, Generic[U]):
     @property
     def normalized(self: T) -> T:
         return self / self.norm
+
+    def dot(self: T, other: T) -> float:
+        return sum(i * j for i, j in zip(self, other))
 
     def __unpack(self: T, value: int | float | T, operation: Callable[[float, float], float]) -> T:
         if isinstance(value, (int, float)):

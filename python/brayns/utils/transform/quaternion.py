@@ -43,16 +43,11 @@ class Quaternion(Vector[float]):
 
     @classmethod
     @property
-    def component_count(cls) -> int:
-        return 4
-
-    @classmethod
-    @property
     def identity(cls) -> Quaternion:
         return Quaternion()
 
-    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0, w: float = 1.0) -> None:
-        super().__init__(x, y, z, w)
+    def __new__(cls, x: float = 0.0, y: float = 0.0, z: float = 0.0, w: float = 1.0) -> Quaternion:
+        return super().__new__(cls, x, y, z, w)
 
     def __mul__(self, value: int | float | Quaternion) -> Quaternion:
         if isinstance(value, (int, float)):

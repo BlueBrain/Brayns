@@ -36,11 +36,6 @@ class Resolution(Vector[int]):
 
     @classmethod
     @property
-    def component_count(cls) -> int:
-        return 2
-
-    @classmethod
-    @property
     def full_hd(cls) -> Resolution:
         """Create a full HD (1920x1080) resolution.
 
@@ -69,10 +64,10 @@ class Resolution(Vector[int]):
         """
         return 8 * cls.full_hd
 
-    def __init__(self, width: int, height: int) -> None:
+    def __new__(cls, width: int, height: int) -> Resolution:
         if width <= 0 or height <= 0:
-            raise ValueError(f'Invalid resolution: {self}')
-        super().__init__(width, height)
+            raise ValueError(f'Invalid resolution: {width}x{height}')
+        return super().__new__(cls, width, height)
 
     @property
     def width(self) -> int:

@@ -40,11 +40,6 @@ class Color3(Vector[float]):
 
     @classmethod
     @property
-    def component_count(cls) -> int:
-        return 3
-
-    @classmethod
-    @property
     def black(cls: type[T]) -> T:
         """Create a black color.
 
@@ -103,8 +98,8 @@ class Color3(Vector[float]):
         """
         return cls(0.004, 0.016, 0.102)
 
-    def __init__(self, r: float = 0.0, g: float = 0.0, b: float = 0.0) -> None:
-        super().__init__(r, g, b)
+    def __new__(cls: type[T], r: float = 0.0, g: float = 0.0, b: float = 0.0) -> T:
+        return super().__new__(cls, r, g, b)
 
     @property
     def r(self) -> float:

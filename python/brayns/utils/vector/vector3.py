@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+from .vector import Vector
 from .vector2 import Vector2
 
 
@@ -42,11 +43,24 @@ class Vector3(Vector2):
 
     @classmethod
     @property
-    def component_count(cls) -> int:
-        return 3
+    def zero(cls) -> Vector3:
+        return Vector3(0.0, 0.0, 0.0)
 
-    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0) -> None:
-        super(Vector2, self).__init__(x, y, z)
+    @classmethod
+    @property
+    def one(cls) -> Vector3:
+        return Vector3(1.0, 1.0, 1.0)
+
+    def __new__(cls, x: float = 0.0, y: float = 0.0, z: float = 0.0) -> Vector3:
+        return Vector[float].__new__(cls, x, y, z)
+
+    @property
+    def x(self) -> float:
+        return self[0]
+
+    @property
+    def y(self) -> float:
+        return self[1]
 
     @property
     def z(self) -> float:

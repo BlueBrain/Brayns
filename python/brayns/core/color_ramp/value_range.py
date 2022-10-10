@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from brayns.utils import Vector
 
 
@@ -32,13 +34,8 @@ class ValueRange(Vector[float]):
     :type max: float
     """
 
-    @classmethod
-    @property
-    def component_count(cls) -> int:
-        return 2
-
-    def __init__(self, min: float, max: float) -> None:
-        super().__init__(min, max)
+    def __new__(cls, min: float, max: float) -> ValueRange:
+        return super().__new__(cls, min, max)
 
     @property
     def min(self) -> float:

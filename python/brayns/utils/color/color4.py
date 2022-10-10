@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+from ..vector.vector import Vector
 from .color3 import Color3
 
 
@@ -49,13 +50,8 @@ class Color4(Color3):
         """
         return Color4(color.r, color.g, color.b, alpha)
 
-    @classmethod
-    @property
-    def component_count(cls) -> int:
-        return 4
-
-    def __init__(self, r: float = 0.0, g: float = 0.0, b: float = 0.0, a: float = 1.0) -> None:
-        super(Color3, self).__init__(r, g, b, a)
+    def __new__(cls, r: float = 0.0, g: float = 0.0, b: float = 0.0, a: float = 1.0) -> Color4:
+        return Vector[float].__new__(cls, r, g, b, a)
 
     @property
     def a(self) -> float:

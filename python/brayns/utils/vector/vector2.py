@@ -20,11 +20,7 @@
 
 from __future__ import annotations
 
-from typing import TypeVar
-
 from .vector import Vector
-
-T = TypeVar('T', bound='Vector2')
 
 
 class Vector2(Vector[float]):
@@ -38,23 +34,8 @@ class Vector2(Vector[float]):
     :type y: float
     """
 
-    @classmethod
-    @property
-    def component_count(cls) -> int:
-        return 2
-
-    @classmethod
-    @property
-    def zero(cls: type[T]) -> T:
-        return cls.full(0.0)
-
-    @classmethod
-    @property
-    def one(cls: type[T]) -> T:
-        return cls.full(1.0)
-
-    def __init__(self, x: float = 0.0, y: float = 0.0) -> None:
-        super().__init__(x, y)
+    def __new__(cls, x: float = 0.0, y: float = 0.0) -> Vector2:
+        return super().__new__(cls, x, y)
 
     @property
     def x(self) -> float:
@@ -63,6 +44,3 @@ class Vector2(Vector[float]):
     @property
     def y(self) -> float:
         return self[1]
-
-    def dot(self: T, other: T) -> float:
-        return sum(i * j for i, j in zip(self, other))
