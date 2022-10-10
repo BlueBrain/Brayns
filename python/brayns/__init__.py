@@ -74,6 +74,7 @@ __all__ = [
     'CylindricProjection',
     'DefaultMaterial',
     'DirectionalLight',
+    'DtiLoader',
     'EmissiveMaterial',
     'enable_simulation',
     'Entrypoint',
