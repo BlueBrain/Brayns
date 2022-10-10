@@ -30,9 +30,7 @@ from .vector import Vector
 class Vector3(Vector[float]):
     """3D vector with XYZ components.
 
-    Provides scalar and dot product in addition to Vector operators.
-
-    Also gives the basic space directions (up, down, front, etc...).
+    Provides dot and cross product in addition to Vector operators.
 
     :param x: X component.
     :type x: float

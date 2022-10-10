@@ -18,18 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .axis import Axis
-from .componentwise_max import componentwise_max
-from .componentwise_min import componentwise_min
-from .vector import Vector
-from .vector2 import Vector2
-from .vector3 import Vector3
+from __future__ import annotations
 
-__all__ = [
-    'Axis',
-    'componentwise_max',
-    'componentwise_min',
-    'Vector',
-    'Vector2',
-    'Vector3',
-]
+from typing import Any
+
+from brayns.utils import Vector3
+
+from .inspect_result import InspectResult
+
+
+def deserialize_inspect_result(message: dict[str, Any]) -> InspectResult | None:
+    hit = message['hit']
+    if not hit:
+        return None
+    return InspectResult(
+        position=Vector3(*message['position']),
+        model_id=message['model_id'],
+        metadata=message['metadata'],
+    )

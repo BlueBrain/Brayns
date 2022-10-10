@@ -18,18 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .axis import Axis
-from .componentwise_max import componentwise_max
-from .componentwise_min import componentwise_min
-from .vector import Vector
-from .vector2 import Vector2
-from .vector3 import Vector3
+from .deserialize_inspect_result import deserialize_inspect_result
+from .inspect import inspect
+from .inspect_result import InspectResult
 
 __all__ = [
-    'Axis',
-    'componentwise_max',
-    'componentwise_min',
-    'Vector',
-    'Vector2',
-    'Vector3',
+    'deserialize_inspect_result',
+    'inspect',
+    'InspectResult',
 ]

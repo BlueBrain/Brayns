@@ -18,18 +18,46 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .axis import Axis
-from .componentwise_max import componentwise_max
-from .componentwise_min import componentwise_min
-from .vector import Vector
-from .vector2 import Vector2
-from .vector3 import Vector3
+from __future__ import annotations
 
-__all__ = [
-    'Axis',
-    'componentwise_max',
-    'componentwise_min',
-    'Vector',
-    'Vector2',
-    'Vector3',
-]
+from collections.abc import Iterator
+from dataclasses import dataclass
+
+from .vector import Vector
+
+
+@dataclass(frozen=True, order=True)
+class Vector2(Vector[float]):
+    """2D vector with XY components.
+
+    Provides dot product in addition to Vector operators.
+
+    :param x: X component.
+    :type x: float
+    :param y: Y component.
+    :type y: float
+    """
+
+    x: float = 0.0
+    y: float = 0.0
+
+    @staticmethod
+    def full(value: float) -> Vector2:
+        return Vector2(value, value)
+
+    @classmethod
+    @property
+    def zero(cls) -> Vector2:
+        return Vector2()
+
+    @classmethod
+    @property
+    def one(cls) -> Vector2:
+        return Vector2.full(1.0)
+
+    def __iter__(self) -> Iterator[float]:
+        yield self.x
+        yield self.y
+
+    def dot(self, other: Vector2) -> float:
+        return sum(i * j for i, j in zip(self, other))

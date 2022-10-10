@@ -18,18 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .axis import Axis
-from .componentwise_max import componentwise_max
-from .componentwise_min import componentwise_min
-from .vector import Vector
-from .vector2 import Vector2
-from .vector3 import Vector3
+from dataclasses import dataclass
+from typing import Any
 
-__all__ = [
-    'Axis',
-    'componentwise_max',
-    'componentwise_min',
-    'Vector',
-    'Vector2',
-    'Vector3',
-]
+from brayns.utils import Vector3
+
+
+@dataclass
+class InspectResult:
+    """Information about the model found at an inspected screen position.
+
+    Metadata depend on the kind of model found at given position and are
+    specific to the primitive (subpart) hitted.
+
+    :param position: World position matching screen coordinates.
+    :type position: Vector3
+    :param model_id: ID of them model at screen position.
+    :type model_id: int
+    :param metadata: Information about the model primitive at given position.
+    :type metadata: Any
+    """
+
+    position: Vector3
+    model_id: int
+    metadata: Any

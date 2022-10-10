@@ -33,6 +33,7 @@ from .camera import *
 from .clipping import *
 from .color_ramp import *
 from .geometry import *
+from .inspect import *
 from .light import *
 from .loader import *
 from .material import *
@@ -89,6 +90,8 @@ __all__ = [
     'get_simulation',
     'get_version',
     'GlassMaterial',
+    'inspect',
+    'InspectResult',
     'InteractiveRenderer',
     'JpegImage',
     'JsonSchema',
