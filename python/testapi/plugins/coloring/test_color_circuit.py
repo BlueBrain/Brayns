@@ -26,5 +26,5 @@ class TestColorCircuit(SimpleTestCase):
 
     def test_color_circuit(self) -> None:
         loader = brayns.BbpLoader()
-        models = loader.load_models(self.instance, self.circuit)
+        models = loader.load_models(self.instance, self.bbp_circuit)
         brayns.color_circuit(self.instance, models[0].id, brayns.Color4.red)

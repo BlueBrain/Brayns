@@ -28,7 +28,7 @@ class TestColorCircuitById(SimpleTestCase):
         loader = brayns.BbpLoader(
             cells=brayns.BbpCells.from_gids([1, 2])
         )
-        models = loader.load_models(self.instance, self.circuit)
+        models = loader.load_models(self.instance, self.bbp_circuit)
         brayns.color_circuit_by_id(self.instance, models[0].id, {
             brayns.CellId('1'): brayns.Color4.green,
             brayns.CellId('2'): brayns.Color4.blue,

@@ -47,7 +47,7 @@ class TestFrameExporter(SimpleTestCase):
             report=brayns.BbpReport.compartment('somas'),
             morphology=brayns.Morphology(radius_multiplier=10)
         )
-        loader.load_models(self.instance, self.circuit)
+        loader.load_models(self.instance, self.bbp_circuit)
 
     def _export_frames(self) -> None:
         frames = self._get_frames()

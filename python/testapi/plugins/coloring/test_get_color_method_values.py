@@ -26,7 +26,7 @@ class TestGetColorMethodValues(SimpleTestCase):
 
     def test_get_color_method_values(self) -> None:
         loader = brayns.BbpLoader()
-        models = loader.load_models(self.instance, self.circuit)
+        models = loader.load_models(self.instance, self.bbp_circuit)
         id = models[0].id
         method = brayns.ColorMethod.LAYER
         values = brayns.get_color_method_values(self.instance, id, method)

@@ -43,8 +43,8 @@ class ApiTestCase(unittest.TestCase):
         return result
 
     @property
-    def circuit(self) -> str:
-        return os.environ['BRAYNS_TEST_CIRCUIT']
+    def bbp_circuit(self) -> str:
+        return os.environ['BRAYNS_TEST_BBP_CIRCUIT']
 
     @property
     def ffmpeg(self) -> str:

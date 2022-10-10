@@ -46,7 +46,7 @@ class TestInspect(SimpleTestCase):
                 radius_multiplier=10,
             ),
         )
-        models = loader.load_models(self.instance, self.circuit)
+        models = loader.load_models(self.instance, self.bbp_circuit)
         target = models[0].bounds
         resolution = brayns.Resolution.full_hd
         camera = brayns.look_at(target, resolution.aspect_ratio)

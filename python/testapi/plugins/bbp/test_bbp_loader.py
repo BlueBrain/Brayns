@@ -43,7 +43,7 @@ class TestBbpLoader(SimpleTestCase):
             report=brayns.BbpReport.compartment('somas'),
             morphology=brayns.Morphology(load_dendrites=True),
         )
-        models = loader.load_models(self.instance, self.circuit)
+        models = loader.load_models(self.instance, self.bbp_circuit)
         self._validate_result(models)
 
     def _validate_result(self, models: list[brayns.Model]) -> None:
