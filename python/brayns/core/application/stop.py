@@ -18,16 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .application import Application
-from .deserialize_application import deserialize_application
-from .get_application import get_application
-from .stop import stop
-from .update_application import update_application
+from brayns.network import Instance
 
-__all__ = [
-    'Application',
-    'deserialize_application',
-    'get_application',
-    'stop',
-    'update_application',
-]
+
+def stop(instance: Instance) -> None:
+    """Stop a running instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    """
+    instance.request('quit')

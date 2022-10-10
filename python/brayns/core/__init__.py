@@ -128,6 +128,7 @@ __all__ = [
     'Simulation',
     'Snapshot',
     'Sphere',
+    'stop',
     'TimeUnit',
     'update_application',
     'update_model',

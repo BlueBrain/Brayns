@@ -183,6 +183,7 @@ __all__ = [
     'SslClientContext',
     'SslServerContext',
     'start',
+    'stop',
     'TimeUnit',
     'Transform',
     'update_application',
