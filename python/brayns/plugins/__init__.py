@@ -38,7 +38,6 @@ from .sonata import *
 from .xyz import *
 
 __all__ = [
-    'AnterogradeTracer',
     'BbpCells',
     'BbpLoader',
     'BbpReport',
@@ -55,6 +54,7 @@ __all__ = [
     'get_color_methods',
     'Morphology',
     'MorphologyLoader',
+    'NeuronalTracer',
     'ProteinColorScheme',
     'ProteinLoader',
     'set_circuit_thickness',

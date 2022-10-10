@@ -18,10 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .anterograde_tracer import AnterogradeTracer
+from .neuronal_tracer import NeuronalTracer
 from .set_circuit_thickness import set_circuit_thickness
 
 __all__ = [
-    'AnterogradeTracer',
+    'NeuronalTracer',
     'set_circuit_thickness',
 ]

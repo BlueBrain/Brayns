@@ -25,7 +25,7 @@ from brayns.utils import Color4
 
 
 @dataclass
-class AnterogradeTracer:
+class NeuronalTracer:
 
     source_cells: list[int]
     target_cells: list[int]
@@ -38,8 +38,8 @@ class AnterogradeTracer:
             'model_id': model_id,
             'cell_gids': self.source_cells,
             'target_cell_gids': self.target_cells,
-            'source_cell_color': self.source_color,
-            'connected_cells_color': self.connected_color,
-            'non_connected_cells_color': self.non_connected_color,
+            'source_cell_color': list(self.source_color),
+            'connected_cells_color': list(self.connected_color),
+            'non_connected_cells_color': list(self.non_connected_color),
         }
         instance.request('trace-anterograde', params)
