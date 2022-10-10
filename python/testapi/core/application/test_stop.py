@@ -19,31 +19,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-from .api_test_case import ApiTestCase
 
+class TestStop(SimpleTestCase):
 
-class SimpleTestCase(ApiTestCase):
-
-    @property
-    def instance(self) -> brayns.Instance:
-        return self.__manager.instance
-
-    @property
-    def process(self) -> brayns.Process:
-        return self.__manager.process
-
-    def setUp(self) -> None:
-        service = brayns.Service(
-            uri=f'localhost:{self.port}',
-            executable=self.executable,
-            env=self.env,
-        )
-        connector = brayns.Connector(
-            uri=service.uri,
-            max_attempts=None,
-        )
-        self.__manager = brayns.start(service, connector)
-
-    def tearDown(self) -> None:
-        self.__manager.stop()
+    def test_stop(self) -> None:
+        brayns.stop(self.instance)
+        with self.assertRaises(brayns.ConnectionClosedError):
+            brayns.get_application(self.instance)

@@ -194,6 +194,11 @@ void NetworkManager::start()
     _socket->start();
 }
 
+void NetworkManager::stop()
+{
+    _socket->stop();
+}
+
 void NetworkManager::update()
 {
     Log::trace("Network update");

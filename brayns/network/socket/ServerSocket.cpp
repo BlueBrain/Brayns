@@ -182,6 +182,19 @@ void ServerSocket::start()
     Log::info("Server started on '{}'.", address.toString());
 }
 
+void ServerSocket::stop()
+{
+    try
+    {
+        Log::info("Stopping server socket.");
+        _server->stopAll(true);
+    }
+    catch (const std::exception &e)
+    {
+        Log::error("Failed to stop server: '{}'.", e.what());
+    }
+}
+
 void ServerSocket::poll()
 {
     _manager.poll();

@@ -43,6 +43,7 @@ public:
     ~ClientTask();
 
     void start();
+    void stop();
     void poll();
 
 private:
@@ -83,6 +84,12 @@ public:
      *
      */
     virtual void start() override;
+
+    /**
+     * @brief Close connection and stop client task.
+     *
+     */
+    virtual void stop() override;
 
     /**
      * @brief Poll connections and requests and trigger listener.

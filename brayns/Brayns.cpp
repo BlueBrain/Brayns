@@ -140,6 +140,10 @@ Brayns::Brayns(int argc, const char **argv)
 
 Brayns::~Brayns()
 {
+    if (_network)
+    {
+        _network->stop();
+    }
     _loaderRegistry.clear();
     // make sure that plugin objects are removed first, as plugins are
     // destroyed before the engine, but plugin destruction still should have
