@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include <api/AtlasVolume.h>
+#include <api/Atlas.h>
 
 #include <memory>
 
 struct AtlasData
 {
-    std::shared_ptr<AtlasVolume> volume;
+    std::shared_ptr<Atlas> atlas;
 };

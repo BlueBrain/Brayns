@@ -18,25 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SharedCoordinatesAreaBorders.h"
+#pragma once
 
-std::string SharedCoordinatesAreaBorders::getName() const
+#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/JsonObjectMacro.h>
+
+#include <api/VoxelType.h>
+
+namespace brayns
 {
-    return "Borders of areas with shared coordinates";
+BRAYNS_JSON_ADAPTER_ENUM(
+    VoxelType,
+    {"scalar", VoxelType::scalar},
+    {"orientation", VoxelType::orientation},
+    {"flatmap", VoxelType::flatmap})
 }
 
-bool SharedCoordinatesAreaBorders::isVolumeValid(const AtlasVolume &volume) const
-{
-    (void)volume;
-    return false;
-}
-
-std::unique_ptr<brayns::Model> SharedCoordinatesAreaBorders::execute(
-    const AtlasVolume &volume,
-    const brayns::JsonValue &payload) const
-{
-    (void)volume;
-    (void)payload;
-
-    throw std::runtime_error("Shared coordinates area borders use case not implemented");
-}
+BRAYNS_JSON_OBJECT_BEGIN(NRRDLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(VoxelType, type, "Voxel type to interpret the atlas being loaded")
+BRAYNS_JSON_OBJECT_END()

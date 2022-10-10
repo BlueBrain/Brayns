@@ -20,100 +20,47 @@
 
 #include "OutlineShell.h"
 
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Isosurface.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
 
-#include <api/usecases/common/DataUtils.h>
-
 namespace
 {
 class ValidVoxelGridFilter
 {
 public:
-    static std::vector<uint8_t> filter(size_t voxelSize, const std::vector<double> &data)
+    static std::vector<uint8_t> filter(const Atlas &atlas)
     {
-        if (voxelSize == 1)
+        auto voxelCount = atlas.getVoxelCount();
+        auto result = std::vector<uint8_t>(voxelCount, 0u);
+
+        for (size_t i = 0; i < voxelCount; ++i)
         {
-            return _filterScalar(data);
-        }
-
-        return _filterNDimensional(voxelSize, data);
-    }
-
-private:
-    static std::vector<uint8_t> _filterScalar(const std::vector<double> &data)
-    {
-        const auto minMax = DataMinMax::compute(data);
-        const auto minValue = minMax.first;
-
-        std::vector<uint8_t> result(data.size(), 0u);
-#pragma omp parallel for
-        for (size_t i = 0; i < data.size(); ++i)
-        {
-            auto isEmpty = data[i] == minValue;
-
-            if (!std::isfinite(data[i]) || isEmpty)
+            if (atlas.isValidVoxel(i))
             {
-                continue;
+                result[i] = std::numeric_limits<uint8_t>::max();
             }
-
-            result[i] = 255;
-        }
-
-        return result;
-    }
-
-    static std::vector<uint8_t> _filterNDimensional(size_t voxelSize, const std::vector<double> &data)
-    {
-        std::vector<uint8_t> result(data.size() / voxelSize, 0u);
-#pragma omp parallel for
-        for (size_t i = 0; i < result.size(); ++i)
-        {
-            size_t zeroCount = 0;
-            bool validElement = true;
-            size_t index = i * voxelSize;
-            for (size_t j = 0; j < voxelSize; ++j)
-            {
-                if (!std::isfinite(data[index + j]))
-                {
-                    validElement = false;
-                    break;
-                }
-                if (data[index + j] == 0.0)
-                {
-                    ++zeroCount;
-                }
-            }
-            if (zeroCount == voxelSize || !validElement)
-            {
-                continue;
-            }
-
-            result[i] = 255;
         }
         return result;
     }
 };
 
-class FeaturesExtractor
+class VolumeBuilder
 {
 public:
-    static brayns::RegularVolume extract(const AtlasVolume &volume)
+    static brayns::Volume fromAtlas(const Atlas &atlas)
     {
-        const auto &data = volume.getData();
-        const auto doubles = data.asDoubles();
-        const auto voxelSize = volume.getVoxelSize();
-
-        brayns::RegularVolume result;
-        result.dataType = brayns::VolumeDataType::UnsignedChar;
-        result.voxels = ValidVoxelGridFilter::filter(voxelSize, doubles);
-        result.size = volume.getSize();
-        result.spacing = volume.getSpacing();
-        return result;
+        brayns::RegularVolume grid;
+        grid.dataType = brayns::VolumeDataType::UnsignedChar;
+        grid.voxels = ValidVoxelGridFilter::filter(atlas);
+        grid.size = atlas.getSize();
+        grid.spacing = atlas.getSpacing();
+        return brayns::Volume(grid);
     }
 };
 }
@@ -123,25 +70,28 @@ std::string OutlineShell::getName() const
     return "Outline mesh shell";
 }
 
-bool OutlineShell::isVolumeValid(const AtlasVolume &volume) const
+bool OutlineShell::isValidAtlas(const Atlas &atlas) const
 {
-    (void)volume;
+    (void)atlas;
     return true;
 }
 
-std::unique_ptr<brayns::Model> OutlineShell::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> OutlineShell::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
 
     auto model = std::make_unique<brayns::Model>();
 
-    auto isoVolume = brayns::Volume(FeaturesExtractor::extract(volume));
+    auto isoVolume = VolumeBuilder::fromAtlas(atlas);
     auto isoValues = std::vector<float>{1.f};
     auto isoSurface = brayns::Isosurface{std::move(isoVolume), std::move(isoValues)};
 
     auto &components = model->getComponents();
     auto &geometries = components.add<brayns::Geometries>();
-    geometries.elements.emplace_back(std::move(isoSurface));
+    auto &geometry = geometries.elements.emplace_back(std::move(isoSurface));
+    auto &views = components.add<brayns::GeometryViews>();
+    auto &view = views.elements.emplace_back(geometry);
+    view.setColor(brayns::Vector4f(1.f, 1.f, 1.f, 0.3f));
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();

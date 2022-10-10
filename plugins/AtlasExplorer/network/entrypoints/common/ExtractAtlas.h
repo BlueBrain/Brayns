@@ -22,14 +22,11 @@
 
 #include <brayns/engine/scene/ModelManager.h>
 
-#include <api/AtlasVolume.h>
 #include <components/AtlasData.h>
 
 class ExtractAtlas
 {
 public:
-    static const AtlasVolume &atlasFromId(brayns::ModelManager &models, uint32_t id);
-    static const AtlasVolume &atlasFromModel(brayns::Model &model);
-    static const AtlasData &componentFromId(brayns::ModelManager &models, uint32_t id);
-    static const AtlasData &componentFromModel(brayns::Model &model);
+    static const AtlasData &fromId(brayns::ModelManager &models, uint32_t id);
+    static const AtlasData &fromModel(brayns::Model &model);
 };

@@ -18,28 +18,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Tokenizer.h"
+#pragma once
 
-#include <brayns/utils/string/StringCounter.h>
-#include <brayns/utils/string/StringExtractor.h>
+#include "Atlas.h"
+#include "DataMangler.h"
 
-namespace
+#include <memory>
+#include <unordered_map>
+
+class AtlasFactory
 {
-inline static const std::string_view delimiters = " /r/v/f/t/n";
-}
+public:
+    using Factory = std::shared_ptr<Atlas> (
+            *)(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &data);
 
-std::vector<std::string_view> Tokenizer::fromView(std::string_view input)
-{
-    auto tokens = std::vector<std::string_view>();
+    using Factories = std::unordered_map<VoxelType, Factory>;
 
-    auto tokenCount = brayns::StringCounter::countOneOf(input, delimiters);
-    tokens.reserve(tokenCount);
+public:
+    static AtlasFactory createDefault();
 
-    while (!input.empty())
-    {
-        auto token = brayns::StringExtractor::extractUntilOneOf(input, delimiters);
-        tokens.push_back(token);
-        brayns::StringExtractor::extract(input, 1);
-    }
-    return tokens;
-}
+public:
+    AtlasFactory(Factories factories);
+
+    std::shared_ptr<Atlas> create(
+        VoxelType type,
+        const brayns::Vector3ui &size,
+        const brayns::Vector3f &spacing,
+        const IDataMangler &data) const;
+
+private:
+    std::unordered_map<VoxelType, Factory> _factories;
+};

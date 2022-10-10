@@ -20,12 +20,12 @@
 
 #include "MorphologyColorHandler.h"
 
+#include <brayns/common/ColorTools.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 
 #include <api/coloring/ColorByIDAlgorithm.h>
-#include <api/coloring/ColorUtils.h>
 #include <api/neuron/NeuronColorMethod.h>
 #include <api/neuron/NeuronSection.h>
 #include <components/CircuitIds.h>
@@ -266,7 +266,7 @@ void MorphologyColorHandler::_colorAll(const IColorData &colorData, const std::s
     const auto methodEnum = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
     if (methodEnum == NeuronColorMethod::ByMorphologySection)
     {
-        ColorRoulette roulette;
+        auto roulette = brayns::ColorRoulette();
         std::vector<SectionColor> sectionColorMap{
             {NeuronSection::Soma, roulette.getNextColor()},
             {NeuronSection::Axon, roulette.getNextColor()},
@@ -276,7 +276,7 @@ void MorphologyColorHandler::_colorAll(const IColorData &colorData, const std::s
     }
     else
     {
-        ColorDeck deck;
+        auto deck = brayns::ColorDeck();
         auto &ids = Extractor::extractIds(_components);
         auto perIdValues = colorData.getMethodValuesForIDs(method, ids);
         std::vector<brayns::Vector4f> result(ids.size());

@@ -37,7 +37,7 @@ struct RegularVolume
     VolumeDataType dataType;
     std::vector<uint8_t> voxels;
     Vector3ui size;
-    Vector3f spacing;
+    Vector3f spacing = Vector3f(1.f);
     bool perVertexData = false;
 };
 

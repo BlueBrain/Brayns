@@ -22,8 +22,8 @@
 
 #include <brayns/engine/model/Model.h>
 
-#include <api/AtlasVolume.h>
-#include <api/IUseCase.h>
+#include "Atlas.h"
+#include "IUseCase.h"
 
 #include <memory>
 #include <vector>
@@ -31,14 +31,29 @@
 class UseCaseManager
 {
 public:
+    static UseCaseManager createDefault();
+
+public:
+    /**
+     * @brief Construct a new UseCaseManager object with the given use-cases to handle
+     * @param useCases List of use-cases to handle.
+     */
     UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases);
 
-    static UseCaseManager defaultUseCases();
+    /**
+     * @brief Return the names of the valid use-cases for a specific atlas object.
+     * @param atlas Atlas object to check for valid use cases.
+     * @return std::vector<std::string> Names of the valid use cases
+     */
+    std::vector<std::string> getValidUseCasesForAtlas(const Atlas &atlas) const;
 
-    std::vector<std::string> getValidUseCasesForVolume(const AtlasVolume &volume) const;
-
-    std::unique_ptr<brayns::Model>
-        executeUseCase(const std::string &useCase, const AtlasVolume &volume, const brayns::JsonValue &payload) const;
+    /**
+     * @brief Returns the use-case handler for the given use-case name.
+     * @param name Name of the use case
+     * @return const IUseCase& Use-case handler object.
+     * @throws std::invalid_argument if the name does not correspond to any existing use-case.
+     */
+    const IUseCase &getUseCase(const std::string &name) const;
 
 private:
     std::vector<std::unique_ptr<IUseCase>> _useCases;

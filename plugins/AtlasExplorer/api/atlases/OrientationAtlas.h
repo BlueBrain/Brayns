@@ -20,15 +20,21 @@
 
 #pragma once
 
-#include <io/nrrdloader/NRRDHeader.h>
+#include <api/Atlas.h>
+#include <api/DataMangler.h>
 
-class HeaderLimitCheck
+class OrientationAtlas final : public Atlas
 {
 public:
-    /**
-     * @brief Checks the header metadata and throws if any parameter exceeds the implementation capabilities
-     *
-     * @param header
-     */
-    static void check(const NRRDHeader &header);
+    inline static const VoxelType type = VoxelType::orientation;
+
+public:
+    OrientationAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
+    bool isValidVoxel(size_t linealIndex) const override;
+    const brayns::Quaternion &operator[](size_t index) const noexcept;
+    const brayns::Quaternion &at(size_t index) const;
+    VoxelType getVoxelType() const noexcept override;
+
+private:
+    std::vector<brayns::Quaternion> _voxels;
 };

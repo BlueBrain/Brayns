@@ -27,109 +27,31 @@
 #include <brayns/engine/systems/VolumeInitSystem.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
 
-#include <api/usecases/common/DataUtils.h>
-
-namespace
-{
-struct DensityVolumeInfo
-{
-    std::vector<uint8_t> data;
-    brayns::VolumeDataType dataType;
-    brayns::Vector2f minMax;
-};
-
-class DensityVolumeBuilder
-{
-public:
-    static DensityVolumeInfo build(const AtlasVolume &volume)
-    {
-        const auto &data = volume.getData();
-        const auto isSigned = data.isTypeSigned();
-        if (isSigned)
-        {
-            return _processSignedData(data);
-        }
-
-        return _processUnsignedData(data);
-    }
-
-private:
-    static DensityVolumeInfo _processSignedData(const IDataMangler &data)
-    {
-        const auto typeSize = data.getTypeSize();
-        if (typeSize <= 2)
-        {
-            return _buildProcessedData(brayns::VolumeDataType::Short, data.asShorts());
-        }
-
-        if (typeSize <= 4)
-        {
-            return _buildProcessedData(brayns::VolumeDataType::Float, data.asFloats());
-        }
-
-        return _buildProcessedData(brayns::VolumeDataType::Double, data.asDoubles());
-    }
-
-    static DensityVolumeInfo _processUnsignedData(const IDataMangler &data)
-    {
-        const auto typeSize = data.getTypeSize();
-        if (typeSize == 1)
-        {
-            return _buildProcessedData(brayns::VolumeDataType::UnsignedChar, data.asBytes());
-        }
-        if (typeSize == 2)
-        {
-            return _buildProcessedData(brayns::VolumeDataType::UnsignedShort, data.asUnsingedShorts());
-        }
-        if (typeSize <= 4)
-        {
-            return _buildProcessedData(brayns::VolumeDataType::Float, data.asFloats());
-        }
-
-        return _buildProcessedData(brayns::VolumeDataType::Double, data.asDoubles());
-    }
-
-    template<typename T>
-    static DensityVolumeInfo _buildProcessedData(brayns::VolumeDataType type, const std::vector<T> &values)
-    {
-        const auto minMax = DataMinMax::compute(values);
-
-        DensityVolumeInfo result;
-        result.dataType = type;
-        result.data = DataToBytes::convert(values);
-        result.minMax = _castMinMax(minMax);
-        return result;
-    }
-
-    template<typename T>
-    static brayns::Vector2f _castMinMax(const std::pair<T, T> &input)
-    {
-        return {static_cast<float>(input.first), static_cast<float>(input.second)};
-    }
-};
-}
+#include <api/atlases/ScalarAtlas.h>
+#include <api/utils/DataUtils.h>
 
 std::string Density::getName() const
 {
     return "Density";
 }
 
-bool Density::isVolumeValid(const AtlasVolume &volume) const
+bool Density::isValidAtlas(const Atlas &atlas) const
 {
-    return volume.getVoxelSize() == 1;
+    return atlas.getVoxelType() == VoxelType::scalar;
 }
 
-std::unique_ptr<brayns::Model> Density::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> Density::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
 
-    auto densityData = DensityVolumeBuilder::build(volume);
+    assert(dynamic_cast<const ScalarAtlas *>(&atlas));
+    auto &scalarAtlas = static_cast<const ScalarAtlas &>(atlas);
 
     brayns::RegularVolume densityVolume;
-    densityVolume.voxels = std::move(densityData.data);
-    densityVolume.dataType = densityData.dataType;
-    densityVolume.size = volume.getSize();
-    densityVolume.spacing = volume.getSpacing();
+    densityVolume.voxels = DataToBytes::convert(scalarAtlas.getValues());
+    densityVolume.dataType = brayns::VolumeDataType::Double;
+    densityVolume.size = scalarAtlas.getSize();
+    densityVolume.spacing = scalarAtlas.getSpacing();
 
     auto model = std::make_unique<brayns::Model>();
 
@@ -139,7 +61,7 @@ std::unique_ptr<brayns::Model> Density::execute(const AtlasVolume &volume, const
     volumes.elements.emplace_back(std::move(densityVolume));
 
     auto &colorRamp = components.add<brayns::ColorRamp>();
-    colorRamp.setValuesRange(densityData.minMax);
+    colorRamp.setValuesRange({scalarAtlas.getMinValue(), scalarAtlas.getMaxValue()});
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Volumes>>();

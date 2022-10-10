@@ -18,27 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "HeaderLimitCheck.h"
+#pragma once
 
-#include <stdexcept>
+#include <api/Atlas.h>
+#include <api/DataMangler.h>
 
-void HeaderLimitCheck::check(const NRRDHeader &header)
+class FlatmapAtlas final : public Atlas
 {
-    const auto dimensions = header.dimensions;
-    if (dimensions != 3 && dimensions != 4)
-    {
-        throw std::runtime_error("Only 3D scalar and 4D orientation volumes are supported");
-    }
+public:
+    inline static const VoxelType type = VoxelType::flatmap;
 
-    const auto &sizes = header.sizes;
-    if (dimensions == 4 && sizes[0] != 4)
-    {
-        throw std::runtime_error("Only 4D volumes suported are orientation fields");
-    }
+public:
+    FlatmapAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
+    bool isValidVoxel(size_t linealIndex) const override;
+    const brayns::Vector2l &operator[](size_t index) const noexcept;
+    const brayns::Vector2l &at(size_t index) const;
+    VoxelType getVoxelType() const noexcept override;
 
-    const auto &spaceDimensions = header.spaceDimensions;
-    if (spaceDimensions && *spaceDimensions != 3)
-    {
-        throw std::runtime_error("Only 3D spatial volumes are allowed (space dimensions must be 3)");
-    }
-}
+private:
+    std::vector<brayns::Vector2l> _voxels;
+    int64_t _min;
+};

@@ -20,11 +20,9 @@
 
 #pragma once
 
-#include <string_view>
-#include <vector>
-
-class Tokenizer
+enum class VoxelType
 {
-public:
-    static std::vector<std::string_view> fromView(std::string_view input);
+    scalar,
+    orientation,
+    flatmap
 };

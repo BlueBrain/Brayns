@@ -18,37 +18,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtlasVolume.h"
+#pragma once
 
-AtlasVolume::AtlasVolume(
-    const brayns::Vector3ui &size,
-    const brayns::Vector3f &spacing,
-    size_t voxelSize,
-    std::unique_ptr<IDataMangler> data)
-    : _size(size)
-    , _spacing(spacing)
-    , _voxelSize(voxelSize)
-    , _data(std::move(data))
-{
-    assert(_data);
-}
+#include <api/Atlas.h>
+#include <api/DataMangler.h>
 
-const brayns::Vector3ui &AtlasVolume::getSize() const noexcept
+class ScalarAtlas final : public Atlas
 {
-    return _size;
-}
+public:
+    inline static const VoxelType type = VoxelType::scalar;
 
-const brayns::Vector3f &AtlasVolume::getSpacing() const noexcept
-{
-    return _spacing;
-}
+public:
+    ScalarAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
 
-size_t AtlasVolume::getVoxelSize() const noexcept
-{
-    return _voxelSize;
-}
+    double getMinValue() const noexcept;
+    double getMaxValue() const noexcept;
+    bool isValidVoxel(size_t linealIndex) const override;
+    double operator[](size_t index) const noexcept;
+    double at(size_t index) const;
+    const std::vector<double> &getValues() const noexcept;
+    VoxelType getVoxelType() const noexcept override;
 
-const IDataMangler &AtlasVolume::getData() const noexcept
-{
-    return *_data;
-}
+private:
+    std::vector<double> _data;
+    double _min = 0.;
+    double _max = 0.;
+};

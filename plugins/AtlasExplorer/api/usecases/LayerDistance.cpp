@@ -25,15 +25,15 @@ std::string LayerDistance::getName() const
     return "Layer distance";
 }
 
-bool LayerDistance::isVolumeValid(const AtlasVolume &volume) const
+bool LayerDistance::isValidAtlas(const Atlas &atlas) const
 {
-    (void)volume;
+    (void)atlas;
     return false;
 }
 
-std::unique_ptr<brayns::Model> LayerDistance::execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const
+std::unique_ptr<brayns::Model> LayerDistance::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
-    (void)volume;
+    (void)atlas;
     (void)payload;
 
     throw std::runtime_error("Layer distance use case not implemented");

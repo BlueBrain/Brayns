@@ -30,6 +30,6 @@ struct SimulationInfo
     float endTime = 0.f;
     float dt = 0.f;
     std::string timeUnit;
-    bool enabled = false;
+    bool enabled = true;
 };
 }

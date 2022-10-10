@@ -18,14 +18,13 @@
 
 #include "SynapseColorHandler.h"
 
+#include <brayns/common/ColorTools.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 
-#include <components/CircuitIds.h>
-
 #include <api/coloring/ColorByIDAlgorithm.h>
-#include <api/coloring/ColorUtils.h>
+#include <components/CircuitIds.h>
 
 namespace
 {
@@ -173,7 +172,7 @@ void SynapseColorHandler::_colorAll(const IColorData &colorData, const std::stri
     std::vector<brayns::Vector4f> result;
     result.reserve(ids.size());
 
-    ColorDeck deck;
+    auto deck = brayns::ColorDeck();
     for (auto &value : perIdValues)
     {
         result.push_back(deck.getColorForKey(value));

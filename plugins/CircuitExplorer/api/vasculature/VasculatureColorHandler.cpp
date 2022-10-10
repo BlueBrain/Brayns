@@ -23,12 +23,12 @@
 #include "VasculatureColorMethod.h"
 #include "VasculatureSection.h"
 
+#include <brayns/common/ColorTools.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 
 #include <api/coloring/ColorByIDAlgorithm.h>
-#include <api/coloring/ColorUtils.h>
 #include <api/neuron/NeuronSection.h>
 #include <components/CircuitIds.h>
 #include <components/ColorList.h>
@@ -200,7 +200,7 @@ void VasculatureColorHandler::_colorAll(const std::string &method)
         return;
     }
 
-    ColorRoulette roulette;
+    auto roulette = brayns::ColorRoulette();
     std::vector<SectionColor> sectionColorMap = {
         {VasculatureSection::Artery, roulette.getNextColor()},
         {VasculatureSection::Vein, roulette.getNextColor()},

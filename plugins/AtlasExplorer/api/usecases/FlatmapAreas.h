@@ -22,10 +22,10 @@
 
 #include <api/IUseCase.h>
 
-class SharedCoordinatesAreaBorders final : public IUseCase
+class FlatmapAreas final : public IUseCase
 {
 public:
     std::string getName() const override;
-    bool isVolumeValid(const AtlasVolume &volume) const override;
-    std::unique_ptr<brayns::Model> execute(const AtlasVolume &volume, const brayns::JsonValue &payload) const override;
+    bool isValidAtlas(const Atlas &atlas) const override;
+    std::unique_ptr<brayns::Model> run(const Atlas &atlas, const brayns::JsonValue &payload) const override;
 };

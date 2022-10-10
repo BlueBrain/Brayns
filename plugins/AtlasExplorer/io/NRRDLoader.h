@@ -22,7 +22,9 @@
 
 #include <brayns/io/Loader.h>
 
-class NRRDLoader final : public brayns::NoInputLoader
+#include "NRRDLoadeParameters.h"
+
+class NRRDLoader final : public brayns::Loader<NRRDLoaderParameters>
 {
 public:
     std::vector<std::string> getSupportedExtensions() const override;
@@ -31,9 +33,11 @@ public:
 
     std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
         const brayns::Blob &blob,
-        const brayns::LoaderProgress &callback) const override;
+        const brayns::LoaderProgress &callback,
+        const NRRDLoaderParameters &parameters) const override;
 
     std::vector<std::unique_ptr<brayns::Model>> importFromFile(
         const std::string &path,
-        const brayns::LoaderProgress &callback) const override;
+        const brayns::LoaderProgress &callback,
+        const NRRDLoaderParameters &parameters) const override;
 };

@@ -23,24 +23,14 @@
 #include <brayns/network/common/ExtractModel.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
-const AtlasVolume &ExtractAtlas::atlasFromId(brayns::ModelManager &models, uint32_t id)
-{
-    return *componentFromId(models, id).volume;
-}
-
-const AtlasVolume &ExtractAtlas::atlasFromModel(brayns::Model &model)
-{
-    return *componentFromModel(model).volume;
-}
-
-const AtlasData &ExtractAtlas::componentFromId(brayns::ModelManager &models, uint32_t id)
+const AtlasData &ExtractAtlas::fromId(brayns::ModelManager &models, uint32_t id)
 {
     auto &instance = brayns::ExtractModel::fromId(models, id);
     auto &model = instance.getModel();
-    return componentFromModel(model);
+    return fromModel(model);
 }
 
-const AtlasData &ExtractAtlas::componentFromModel(brayns::Model &model)
+const AtlasData &ExtractAtlas::fromModel(brayns::Model &model)
 {
     auto component = model.getComponents().find<AtlasData>();
     if (!component)

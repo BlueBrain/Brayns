@@ -20,11 +20,35 @@
 
 #include "VisualizeAtlasUseCaseEntrypoint.h"
 
+#include <brayns/common/Transform.h>
+#include <brayns/network/common/ExtractModel.h>
+
 #include <network/entrypoints/common/ExtractAtlas.h>
+
+namespace
+{
+class AtlasDataCloner
+{
+public:
+    static void clone(const brayns::Model &src, brayns::Model &dst)
+    {
+        auto &srcComponents = src.getComponents();
+        auto &dstComponents = dst.getComponents();
+
+        auto &atlas = srcComponents.get<AtlasData>();
+        dstComponents.add<AtlasData>(atlas);
+
+        if (auto transform = srcComponents.find<brayns::Transform>())
+        {
+            dstComponents.add<brayns::Transform>(*transform);
+        }
+    }
+};
+}
 
 VisualizeAtlasUseCaseEntrypoint::VisualizeAtlasUseCaseEntrypoint(brayns::ModelManager &models)
     : _models(models)
-    , _useCases(UseCaseManager::defaultUseCases())
+    , _useCases(UseCaseManager::createDefault())
 {
 }
 
@@ -41,14 +65,23 @@ std::string VisualizeAtlasUseCaseEntrypoint::getDescription() const
 void VisualizeAtlasUseCaseEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
-
     auto modelId = params.model_id;
-    auto useCase = params.use_case;
+    auto useCaseName = params.use_case;
     auto useCaseParams = params.params;
 
-    auto &component = ExtractAtlas::componentFromId(_models, modelId);
-    auto newModel = _useCases.executeUseCase(useCase, *component.volume, useCaseParams);
-    newModel->getComponents().add<AtlasData>(component.volume);
-    auto instance = _models.addModel(std::move(newModel));
-    request.reply(*instance);
+    auto &instance = brayns::ExtractModel::fromId(_models, modelId);
+    auto &model = instance.getModel();
+    auto &component = ExtractAtlas::fromModel(model);
+    auto &atlas = *component.atlas;
+
+    auto &useCase = _useCases.getUseCase(useCaseName);
+    if (!useCase.isValidAtlas(atlas))
+    {
+        throw brayns::InvalidParamsException("The use-case is not valid for the given type of atlas");
+    }
+
+    auto newModel = useCase.run(atlas, useCaseParams);
+    AtlasDataCloner::clone(model, *newModel);
+    auto newInstance = _models.addModel(std::move(newModel));
+    request.reply(*newInstance);
 }
