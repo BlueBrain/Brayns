@@ -51,6 +51,10 @@ class ApiTestCase(unittest.TestCase):
         return os.environ['BRAYNS_TEST_PROTEIN_FILE']
 
     @property
+    def xyz_file(self) -> str:
+        return os.environ['BRAYNS_TEST_XYZ_FILE']
+
+    @property
     def ffmpeg(self) -> str:
         return os.environ.get('BRAYNS_TEST_FFMPEG', 'ffmpeg')
 

@@ -17,17 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-import brayns
-from testapi.simple_test_case import SimpleTestCase
-
-
-class TestProteinLoader(SimpleTestCase):
-
-    def test_load_models(self) -> None:
-        loader = brayns.ProteinLoader(
-            color_scheme=brayns.ProteinColorScheme.BY_ID,
-            radius_multiplier=10,
-        )
-        models = loader.load_models(self.instance, self.protein_file)
-        self.assertEqual(len(models), 1)

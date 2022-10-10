@@ -22,12 +22,9 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestProteinLoader(SimpleTestCase):
+class TestXyzLoader(SimpleTestCase):
 
     def test_load_models(self) -> None:
-        loader = brayns.ProteinLoader(
-            color_scheme=brayns.ProteinColorScheme.BY_ID,
-            radius_multiplier=10,
-        )
-        models = loader.load_models(self.instance, self.protein_file)
+        loader = brayns.XyzLoader()
+        models = loader.load_models(self.instance, self.xyz_file)
         self.assertEqual(len(models), 1)
