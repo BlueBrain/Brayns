@@ -28,6 +28,7 @@ morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
 """
 
 from .bbp import *
+from .circuit import *
 from .coloring import *
 from .cylindric_camera import *
 from .dti import *
@@ -55,6 +56,7 @@ __all__ = [
     'MorphologyLoader',
     'ProteinColorScheme',
     'ProteinLoader',
+    'set_circuit_thickness',
     'SonataEdgePopulation',
     'SonataLoader',
     'SonataNodePopulation',

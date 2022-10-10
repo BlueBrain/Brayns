@@ -167,6 +167,7 @@ __all__ = [
     'set_camera_projection',
     'set_camera_view',
     'set_camera',
+    'set_circuit_thickness',
     'set_color_ramp',
     'set_material',
     'set_renderer',
