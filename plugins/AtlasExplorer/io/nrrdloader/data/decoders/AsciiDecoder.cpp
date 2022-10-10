@@ -20,10 +20,10 @@
 
 #include "AsciiDecoder.h"
 
+#include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/string/StringCounter.h>
 #include <brayns/utils/string/StringExtractor.h>
 #include <brayns/utils/string/StringParser.h>
-#include <brayns/utils/parsing/Parser.h>
 
 #include <stdexcept>
 
