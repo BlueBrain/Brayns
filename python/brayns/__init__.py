@@ -193,4 +193,5 @@ __all__ = [
     'VersionError',
     'View',
     'WebSocketError',
+    'XyzLoader',
 ]

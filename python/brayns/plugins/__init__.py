@@ -33,6 +33,7 @@ from .cylindric_camera import *
 from .morphology import *
 from .protein import *
 from .sonata import *
+from .xyz import XyzLoader
 
 __all__ = [
     'BbpCells',
@@ -58,4 +59,5 @@ __all__ = [
     'SonataNodes',
     'SonataReport',
     'SonataReportType',
+    'XyzLoader',
 ]
