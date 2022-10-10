@@ -18,10 +18,28 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .anterograde_tracer import AnterogradeTracer
-from .set_circuit_thickness import set_circuit_thickness
+from dataclasses import dataclass
 
-__all__ = [
-    'AnterogradeTracer',
-    'set_circuit_thickness',
-]
+from brayns.network import Instance
+from brayns.utils import Color4
+
+
+@dataclass
+class AnterogradeTracer:
+
+    source_cells: list[int]
+    target_cells: list[int]
+    source_color: Color4
+    connected_color: Color4
+    non_connected_color: Color4
+
+    def trace_anterograde(self, instance: Instance, model_id: int) -> None:
+        params = {
+            'model_id': model_id,
+            'cell_gids': self.source_cells,
+            'target_cell_gids': self.target_cells,
+            'source_cell_color': self.source_color,
+            'connected_cells_color': self.connected_color,
+            'non_connected_cells_color': self.non_connected_color,
+        }
+        instance.request('trace-anterograde', params)

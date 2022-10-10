@@ -40,6 +40,7 @@ __all__ = [
     'add_geometries',
     'add_light',
     'AmbientLight',
+    'AnterogradeTracer',
     'Application',
     'Axis',
     'BbpCells',

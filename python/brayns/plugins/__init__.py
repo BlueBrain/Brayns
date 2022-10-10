@@ -38,6 +38,7 @@ from .sonata import *
 from .xyz import *
 
 __all__ = [
+    'AnterogradeTracer',
     'BbpCells',
     'BbpLoader',
     'BbpReport',
