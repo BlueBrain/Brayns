@@ -22,13 +22,12 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestXyzLoader(SimpleTestCase):
-
-    @property
-    def xyz_file(self) -> str:
-        return str(self.asset_folder / 'monkey.xyz')
+class TestDtiLoader(SimpleTestCase):
 
     def test_load_models(self) -> None:
-        loader = brayns.XyzLoader()
-        models = loader.load_models(self.instance, self.xyz_file)
+        loader = brayns.DtiLoader(
+            streamline_radius=2,
+            spike_decay_time=3,
+        )
+        models = loader.load_models(self.instance, self.dti_file)
         self.assertEqual(len(models), 1)

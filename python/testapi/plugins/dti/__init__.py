@@ -17,18 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-import brayns
-from testapi.simple_test_case import SimpleTestCase
-
-
-class TestXyzLoader(SimpleTestCase):
-
-    @property
-    def xyz_file(self) -> str:
-        return str(self.asset_folder / 'monkey.xyz')
-
-    def test_load_models(self) -> None:
-        loader = brayns.XyzLoader()
-        models = loader.load_models(self.instance, self.xyz_file)
-        self.assertEqual(len(models), 1)

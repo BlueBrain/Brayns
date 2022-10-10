@@ -47,12 +47,8 @@ class ApiTestCase(unittest.TestCase):
         return os.environ['BRAYNS_TEST_BBP_CIRCUIT']
 
     @property
-    def protein_file(self) -> str:
-        return os.environ['BRAYNS_TEST_PROTEIN_FILE']
-
-    @property
-    def xyz_file(self) -> str:
-        return os.environ['BRAYNS_TEST_XYZ_FILE']
+    def dti_file(self) -> str:
+        return os.environ['BRAYNS_TEST_DTI_FILE']
 
     @property
     def ffmpeg(self) -> str:

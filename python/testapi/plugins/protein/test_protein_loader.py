@@ -24,6 +24,10 @@ from testapi.simple_test_case import SimpleTestCase
 
 class TestProteinLoader(SimpleTestCase):
 
+    @property
+    def protein_file(self) -> str:
+        return str(self.asset_folder / '1bna.pdb')
+
     def test_load_models(self) -> None:
         loader = brayns.ProteinLoader(
             color_scheme=brayns.ProteinColorScheme.BY_ID,
