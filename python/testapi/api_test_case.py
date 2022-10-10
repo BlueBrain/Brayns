@@ -47,6 +47,10 @@ class ApiTestCase(unittest.TestCase):
         return os.environ['BRAYNS_TEST_BBP_CIRCUIT']
 
     @property
+    def protein_file(self) -> str:
+        return os.environ['BRAYNS_TEST_PROTEIN_FILE']
+
+    @property
     def ffmpeg(self) -> str:
         return os.environ.get('BRAYNS_TEST_FFMPEG', 'ffmpeg')
 
