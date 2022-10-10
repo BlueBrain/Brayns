@@ -30,7 +30,8 @@ from .inspect_result import InspectResult
 def inspect(instance: Instance, position: Vector2) -> InspectResult | None:
     """Inspect instance at given screen position.
 
-    Screen position must be normalized [0-1].
+    Screen position must be normalized with [0, 0] being bottom-left of
+    and [1, 1] top-right.
 
     If a model is found on given coordinates, return its ID with the world
     position corresponding to the pixel where the model was rendered.
