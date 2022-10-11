@@ -102,12 +102,7 @@ void ClientTask::start()
     _handle = std::async(std::launch::async, [this] { _run(); });
 }
 
-void ClientTask::poll()
-{
-    _manager.poll();
-}
-
-ClientTask::~ClientTask()
+void ClientTask::stop()
 {
     if (!_handle.valid() || !_running)
     {
@@ -122,6 +117,16 @@ ClientTask::~ClientTask()
     {
         Log::error("Error while terminating client task: '{}'.", e.what());
     }
+}
+
+void ClientTask::poll()
+{
+    _manager.poll();
+}
+
+ClientTask::~ClientTask()
+{
+    stop();
 }
 
 void ClientTask::_run()
@@ -160,6 +165,12 @@ void ClientSocket::start()
 {
     _task.start();
     Log::info("Client task started.");
+}
+
+void ClientSocket::stop()
+{
+    _task.stop();
+    Log::info("Client task stopped.");
 }
 
 void ClientSocket::poll()

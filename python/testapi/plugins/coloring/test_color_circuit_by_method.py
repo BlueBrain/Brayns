@@ -26,7 +26,7 @@ class TestColorCircuitByMethod(SimpleTestCase):
 
     def test_apply(self) -> None:
         loader = brayns.BbpLoader()
-        models = loader.load_models(self.instance, self.circuit)
+        models = loader.load_models(self.instance, self.bbp_circuit)
         id = models[0].id
         method = brayns.ColorMethod.ETYPE
         brayns.color_circuit_by_method(self.instance, id, method, {

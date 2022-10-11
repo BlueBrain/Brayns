@@ -21,23 +21,18 @@
 from __future__ import annotations
 
 import math
-from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterable, Iterator
-from typing import Generic, TypeVar
+from collections.abc import Callable, Iterable
+from typing import TypeVar
 
 T = TypeVar('T', bound='Vector')
 U = TypeVar('U', int, float)
 
 
-class Vector(ABC, Generic[U]):
+class Vector(tuple[U, ...]):
     """Generic vector base class.
-
-    Child has to implement __iter__ special methods to yield components.
 
     Provide either componentwise (with another vector) and scalar operators (
     apply the scalar to all components).
-
-    Provides also normalization and unpack operations.
 
     Examples of arithmetic operations with vector = [1, 1, 1]:
 
@@ -45,7 +40,7 @@ class Vector(ABC, Generic[U]):
         vector * 3 # 3 3 3
         vector / 2 # 0.5 0.5 0.5
         2 / vector # 2 2 2
-        vector = Vector3.unpack(i*i for i in range(3)) # 1 4 9
+        vector = Vector3.unpack(i * i for i in range(3)) # 1 4 9
         vector = vector.normalized # vector.norm ~ 1
         vector.square_norm # 3
         vector.norm # sqrt(3)
@@ -54,18 +49,25 @@ class Vector(ABC, Generic[U]):
     """
 
     @classmethod
-    def unpack(cls: type[T], values: Iterable[U]) -> T:
-        return cls(*values)
+    def unpack(cls: type[T], components: Iterable[U]) -> T:
+        return cls(*components)
 
-    def __init__(self, *_: U) -> None:
-        pass
+    def __new__(cls: type[T], *components: U) -> T:
+        return super().__new__(cls, components)
 
-    @abstractmethod
-    def __iter__(self) -> Iterator[U]:
-        pass
+    def __str__(self) -> str:
+        name = type(self).__name__
+        values = ', '.join(str(i) for i in self)
+        return f'{name}({values})'
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def __neg__(self: T) -> T:
         return self.unpack(-i for i in self)
+
+    def __pos__(self: T) -> T:
+        return self.unpack(+i for i in self)
 
     def __abs__(self: T) -> T:
         return self.unpack(abs(i) for i in self)
@@ -117,6 +119,9 @@ class Vector(ABC, Generic[U]):
     @property
     def normalized(self: T) -> T:
         return self / self.norm
+
+    def dot(self: T, other: T) -> float:
+        return sum(i * j for i, j in zip(self, other))
 
     def __unpack(self: T, value: int | float | T, operation: Callable[[float, float], float]) -> T:
         if isinstance(value, (int, float)):

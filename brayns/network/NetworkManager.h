@@ -48,14 +48,16 @@ public:
     NetworkManager(PluginAPI &api);
 
     /**
-     * @brief Load schemas and call onCreate() of all entrypoints.
-     *
-     * This method must be separated from the construction because it can only
-     * be called once all plugins and entrypoints are registered to have correct
-     * schemas.
+     * @brief Start network server / client to accept incoming requests.
      *
      */
     void start();
+
+    /**
+     * @brief Close all connections.
+     *
+     */
+    void stop();
 
     /**
      * @brief Poll socket and run pending tasks.

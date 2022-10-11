@@ -18,14 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from collections.abc import Iterator
-from dataclasses import dataclass
+from __future__ import annotations
 
 from brayns.utils import Vector
 
 
-@dataclass(frozen=True, order=True)
-class ValueRange(Vector):
+class ValueRange(Vector[float]):
     """Specify color ramp value range.
 
     Usually the simulation values are voltages but it can be anything.
@@ -36,17 +34,16 @@ class ValueRange(Vector):
     :type max: float
     """
 
-    min: float
-    max: float
+    def __new__(cls, min: float, max: float) -> ValueRange:
+        return super().__new__(cls, min, max)
 
-    def __iter__(self) -> Iterator[float]:
-        """Iterate over min and max.
+    @property
+    def min(self) -> float:
+        return self[0]
 
-        :yield: Value range.
-        :rtype: Iterator[float]
-        """
-        yield self.min
-        yield self.max
+    @property
+    def max(self) -> float:
+        return self[1]
 
     @property
     def size(self) -> float:

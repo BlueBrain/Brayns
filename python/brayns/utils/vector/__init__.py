@@ -22,6 +22,7 @@ from .axis import Axis
 from .componentwise_max import componentwise_max
 from .componentwise_min import componentwise_min
 from .vector import Vector
+from .vector2 import Vector2
 from .vector3 import Vector3
 
 __all__ = [
@@ -29,5 +30,6 @@ __all__ = [
     'componentwise_max',
     'componentwise_min',
     'Vector',
+    'Vector2',
     'Vector3',
 ]

@@ -65,7 +65,7 @@ class Bounds:
 
     @classmethod
     @property
-    def one(cls) -> Bounds:
+    def unit(cls) -> Bounds:
         """Create unit bounds (size = [1, 1, 1]).
 
         :return: Unit bounds centered in [0, 0, 0].

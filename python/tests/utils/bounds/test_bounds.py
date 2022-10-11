@@ -57,8 +57,8 @@ class TestBounds(unittest.TestCase):
         self.assertEqual(test.min, brayns.Vector3.zero)
         self.assertEqual(test.max, brayns.Vector3.zero)
 
-    def test_one(self) -> None:
-        test = brayns.Bounds.one
+    def test_unit(self) -> None:
+        test = brayns.Bounds.unit
         self.assertEqual(test.min, -brayns.Vector3.one / 2)
         self.assertEqual(test.max, brayns.Vector3.one / 2)
 
@@ -103,7 +103,7 @@ class TestBounds(unittest.TestCase):
 
     def test_rescale(self) -> None:
         scale = brayns.Vector3(1, 2, 3)
-        bounds = brayns.Bounds.one
+        bounds = brayns.Bounds.unit
         test = bounds.rescale(scale)
         self.assertEqual(test.size, scale)
         self.assertEqual(test.center, bounds.center)

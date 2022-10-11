@@ -26,18 +26,25 @@ import brayns
 
 class TestVector3(unittest.TestCase):
 
-    def test_full(self) -> None:
-        self.assertEqual(brayns.Vector3.full(5), brayns.Vector3(5, 5, 5))
+    def test_from_vector2(self) -> None:
+        vector2 = brayns.Vector2(1, 2)
+        test = brayns.Vector3.from_vector2(vector2, 3)
+        self.assertEqual(test, brayns.Vector3(1, 2, 3))
 
     def test_unpack(self) -> None:
         test = [1, 2, 3]
         self.assertEqual(brayns.Vector3.unpack(test), brayns.Vector3(*test))
 
     def test_zero(self) -> None:
-        self.assertEqual(brayns.Vector3.zero, brayns.Vector3.full(0))
+        self.assertEqual(brayns.Vector3.zero, brayns.Vector3(0, 0, 0))
 
     def test_one(self) -> None:
-        self.assertEqual(brayns.Vector3.one, brayns.Vector3.full(1))
+        self.assertEqual(brayns.Vector3.one, brayns.Vector3(1, 1, 1))
+
+    def test_str(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        self.assertEqual(str(test), 'Vector3(1, 2, 3)')
+        self.assertEqual(repr(test), str(test))
 
     def test_iter(self) -> None:
         values = [1, 2, 3]
@@ -45,8 +52,32 @@ class TestVector3(unittest.TestCase):
         self.assertEqual(list(test), values)
         self.assertEqual([test.x, test.y, test.z], values)
 
+    def test_len(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        self.assertEqual(len(test), 3)
+
+    def test_getitem(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        self.assertEqual(test[0], 1)
+        self.assertEqual(test[1], 2)
+        self.assertEqual(test[2], 3)
+        with self.assertRaises(IndexError):
+            test[3]
+
+    def test_compare(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        self.assertEqual(test, brayns.Vector3(1, 2, 3))
+        self.assertNotEqual(test, brayns.Vector3(1, 3, 3))
+        self.assertLess(test, brayns.Vector3(3, 1, 2))
+        self.assertLessEqual(test, brayns.Vector3(3, 1, 2))
+        self.assertGreater(test, brayns.Vector3(0, 1, 2))
+        self.assertGreaterEqual(test, brayns.Vector3(0, 1, 2))
+
     def test_neg(self) -> None:
         self.assertEqual(-brayns.Vector3(1, 2, 3), brayns.Vector3(-1, -2, -3))
+
+    def test_pos(self) -> None:
+        self.assertEqual(+brayns.Vector3(1, 2, 3), brayns.Vector3(1, 2, 3))
 
     def test_abs(self) -> None:
         test = abs(brayns.Vector3(1, -2, -3))
@@ -127,6 +158,10 @@ class TestVector3(unittest.TestCase):
 
     def test_norm(self) -> None:
         self.assertEqual(brayns.Vector3(1, 2, 3).norm, math.sqrt(14))
+
+    def test_vector2(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        self.assertEqual(test.vector2, brayns.Vector2(1, 2))
 
     def test_normalized(self) -> None:
         value = brayns.Vector3(1, 2, 3)

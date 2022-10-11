@@ -18,8 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from collections.abc import Iterator
-from dataclasses import dataclass
 from typing import TypeVar
 
 from ..vector import Vector
@@ -27,7 +25,6 @@ from ..vector import Vector
 T = TypeVar('T', bound='Color3')
 
 
-@dataclass(frozen=True, order=True)
 class Color3(Vector[float]):
     """Color with RGB normalized components.
 
@@ -40,10 +37,6 @@ class Color3(Vector[float]):
     :param b: Blue component 0-1.
     :type b: float
     """
-
-    r: float = 0.0
-    g: float = 0.0
-    b: float = 0.0
 
     @classmethod
     @property
@@ -105,12 +98,17 @@ class Color3(Vector[float]):
         """
         return cls(0.004, 0.016, 0.102)
 
-    def __iter__(self) -> Iterator[float]:
-        """Iterate over components.
+    def __new__(cls: type[T], r: float = 0.0, g: float = 0.0, b: float = 0.0) -> T:
+        return super().__new__(cls, r, g, b)
 
-        :yield: Color components.
-        :rtype: Iterator[float]
-        """
-        yield self.r
-        yield self.g
-        yield self.b
+    @property
+    def r(self) -> float:
+        return self[0]
+
+    @property
+    def g(self) -> float:
+        return self[1]
+
+    @property
+    def b(self) -> float:
+        return self[2]

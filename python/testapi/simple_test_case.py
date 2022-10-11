@@ -29,6 +29,10 @@ class SimpleTestCase(ApiTestCase):
     def instance(self) -> brayns.Instance:
         return self.__manager.instance
 
+    @property
+    def process(self) -> brayns.Process:
+        return self.__manager.process
+
     def setUp(self) -> None:
         service = brayns.Service(
             uri=f'localhost:{self.port}',

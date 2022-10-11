@@ -53,6 +53,7 @@ __all__ = [
     'Resolution',
     'Rotation',
     'Transform',
+    'Vector2',
     'Vector3',
     'View',
 ]

@@ -20,16 +20,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from dataclasses import dataclass, replace
-from typing import TypeVar
-
+from ..vector.vector import Vector
 from .color3 import Color3
 
-T = TypeVar('T', bound='Color4')
 
-
-@dataclass(frozen=True, order=True)
 class Color4(Color3):
     """Color with RGBA normalized components.
 
@@ -43,10 +37,8 @@ class Color4(Color3):
     :type a: float, optional
     """
 
-    a: float = 1.0
-
-    @classmethod
-    def from_color3(cls: type[T], color: Color3, alpha: float = 1.0) -> T:
+    @staticmethod
+    def from_color3(color: Color3, alpha: float = 1.0) -> Color4:
         """Helper to build a Color4 from a Color3.
 
         :param color: Color3 to convert.
@@ -56,16 +48,14 @@ class Color4(Color3):
         :return: Color4 converted.
         :rtype: Color4
         """
-        return cls(color.r, color.g, color.b, alpha)
+        return Color4(color.r, color.g, color.b, alpha)
 
-    def __iter__(self) -> Iterator[float]:
-        """Iterate over the color.
+    def __new__(cls, r: float = 0.0, g: float = 0.0, b: float = 0.0, a: float = 1.0) -> Color4:
+        return Vector[float].__new__(cls, r, g, b, a)
 
-        :yield: Color components.
-        :rtype: Iterator[float]
-        """
-        yield from super().__iter__()
-        yield self.a
+    @property
+    def a(self) -> float:
+        return self[3]
 
     @property
     def transparent(self) -> Color4:
@@ -74,7 +64,7 @@ class Color4(Color3):
         :return: Color but fully transparent.
         :rtype: Color4
         """
-        return replace(self, a=0.0)
+        return Color4(self.r, self.g, self.b, a=0.0)
 
     @property
     def opaque(self) -> Color4:
@@ -83,7 +73,7 @@ class Color4(Color3):
         :return: Color but fully opaque.
         :rtype: Color4
         """
-        return replace(self, a=1.0)
+        return Color4(self.r, self.g, self.b, a=1.0)
 
     @property
     def without_alpha(self) -> Color3:

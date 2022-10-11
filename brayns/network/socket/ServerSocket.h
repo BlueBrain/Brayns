@@ -58,6 +58,12 @@ public:
     virtual void start() override;
 
     /**
+     * @brief Close all connections.
+     *
+     */
+    virtual void stop() override;
+
+    /**
      * @brief Poll connections and requests and trigger listener.
      *
      */

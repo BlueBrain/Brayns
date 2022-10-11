@@ -28,10 +28,14 @@ morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
 """
 
 from .bbp import *
+from .circuit import *
 from .coloring import *
 from .cylindric_camera import *
+from .dti import *
 from .morphology import *
+from .protein import *
 from .sonata import *
+from .xyz import *
 
 __all__ = [
     'BbpCells',
@@ -44,15 +48,22 @@ __all__ = [
     'color_circuit',
     'ColorMethod',
     'CylindricProjection',
+    'DtiLoader',
     'GeometryType',
+    'get_circuit_ids',
     'get_color_method_values',
     'get_color_methods',
     'Morphology',
     'MorphologyLoader',
+    'NeuronalTracer',
+    'ProteinColorScheme',
+    'ProteinLoader',
+    'set_circuit_thickness',
     'SonataEdgePopulation',
     'SonataLoader',
     'SonataNodePopulation',
     'SonataNodes',
     'SonataReport',
     'SonataReportType',
+    'XyzLoader',
 ]
