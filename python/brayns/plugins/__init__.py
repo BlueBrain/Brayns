@@ -50,6 +50,7 @@ __all__ = [
     'CylindricProjection',
     'DtiLoader',
     'GeometryType',
+    'get_circuit_ids',
     'get_color_method_values',
     'get_color_methods',
     'Morphology',

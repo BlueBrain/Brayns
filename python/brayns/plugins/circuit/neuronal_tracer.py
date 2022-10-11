@@ -26,6 +26,19 @@ from brayns.utils import Color4
 
 @dataclass
 class NeuronalTracer:
+    """Helper class to trace neuron connections.
+
+    :param source_cells: List of source cells by ID.
+    :type source_cells: list[int]
+    :param target_cells: List of target cells by ID.
+    :type target_cells: list[int]
+    :param source_color: Color of the source cells.
+    :type source_color: Color4
+    :param connected_color: Color of the cells connected to source.
+    :type connected_color: Color4
+    :param non_connected_color: Color of the cells not connected to source.
+    :type non_connected_color: Color4
+    """
 
     source_cells: list[int]
     target_cells: list[int]
@@ -34,6 +47,13 @@ class NeuronalTracer:
     non_connected_color: Color4
 
     def trace_anterograde(self, instance: Instance, model_id: int) -> None:
+        """Color cells of given circuit.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param model_id: Circuit model ID.
+        :type model_id: int
+        """
         params = {
             'model_id': model_id,
             'cell_gids': self.source_cells,

@@ -18,12 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .get_circuit_ids import get_circuit_ids
-from .neuronal_tracer import NeuronalTracer
-from .set_circuit_thickness import set_circuit_thickness
+from brayns.network import Instance
 
-__all__ = [
-    'get_circuit_ids',
-    'NeuronalTracer',
-    'set_circuit_thickness',
-]
+
+def get_circuit_ids(instance: Instance, model_id: int) -> list[int]:
+    """Retreive the list of loaded neurons / astrocytes / vasculatures by ID.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: ID of the circuit model.
+    :type model_id: int
+    :return: ID list of the element loaded in given circuit.
+    :rtype: list[int]
+    """
+    params = {'model_id': model_id}
+    return instance.request('get-circuit-ids', params)

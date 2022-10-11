@@ -18,12 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .get_circuit_ids import get_circuit_ids
-from .neuronal_tracer import NeuronalTracer
-from .set_circuit_thickness import set_circuit_thickness
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-__all__ = [
-    'get_circuit_ids',
-    'NeuronalTracer',
-    'set_circuit_thickness',
-]
+
+class TestGetCircuitIds(SimpleTestCase):
+
+    def test_get_circuit_ids(self) -> None:
+        id = self._load_model()
+        ids = brayns.get_circuit_ids(self.instance, id)
+        self.assertEqual(ids, list(range(1, 1001)))
+
+    def _load_model(self) -> int:
+        loader = brayns.BbpLoader()
+        models = loader.load_models(self.instance, self.bbp_circuit)
+        return models[0].id

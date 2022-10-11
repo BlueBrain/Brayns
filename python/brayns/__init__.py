@@ -90,6 +90,7 @@ __all__ = [
     'get_camera_projection',
     'get_camera_view',
     'get_camera',
+    'get_circuit_ids',
     'get_color_method_values',
     'get_color_methods',
     'get_color_ramp',
