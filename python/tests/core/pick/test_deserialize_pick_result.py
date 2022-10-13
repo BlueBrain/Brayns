@@ -18,21 +18,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
+import unittest
 
-from typing import Any
+from brayns.core import deserialize_pick_result
 
-from brayns.utils import Vector3
-
-from .inspect_result import InspectResult
+from .mock_pick_result import MockPickResult
 
 
-def deserialize_inspect_result(message: dict[str, Any]) -> InspectResult | None:
-    hit = message['hit']
-    if not hit:
-        return None
-    return InspectResult(
-        position=Vector3(*message['position']),
-        model_id=message['model_id'],
-        metadata=message['metadata'],
-    )
+class TestDeserializePickResult(unittest.TestCase):
+
+    def test_deserialize_pick_result(self) -> None:
+        message = MockPickResult.create_message(hit=True)
+        test = deserialize_pick_result(message)
+        self.assertEqual(test, MockPickResult.result)
+
+    def test_deserialize_pick_result_no_hit(self) -> None:
+        message = MockPickResult.create_message(hit=False)
+        test = deserialize_pick_result(message)
+        self.assertIsNone(test)
+
+
+if __name__ == '__main__':
+    unittest.main()

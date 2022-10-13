@@ -24,20 +24,25 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestInspect(SimpleTestCase):
+class TestPick(SimpleTestCase):
 
-    def test_inspect(self) -> None:
+    def test_pick(self) -> None:
         self._prepare_scene()
-        test = brayns.inspect(self.instance, brayns.Vector2(0.5, 0.5))
+        test = brayns.pick(self.instance, brayns.Vector2(0.5, 0.5))
         self.assertIsNotNone(test)
-        test = cast(brayns.InspectResult, test)
+        test = cast(brayns.PickResult, test)
         position = brayns.Vector3(x=38.38946, y=999.41394, z=56.914795)
         self.assertEqual(test.position, position)
         self.assertEqual(test.model_id, 0)
         self.assertEqual(test.metadata, {'neuron_id': 559})
 
-    def test_inspect_empty_scene(self) -> None:
-        test = brayns.inspect(self.instance, brayns.Vector2(0.5, 0.5))
+    def test_pick_missed(self) -> None:
+        self._prepare_scene()
+        test = brayns.pick(self.instance, brayns.Vector2(0, 0))
+        self.assertIsNone(test)
+
+    def test_pick_empty_scene(self) -> None:
+        test = brayns.pick(self.instance, brayns.Vector2(0.5, 0.5))
         self.assertIsNone(test)
 
     def _prepare_scene(self) -> None:

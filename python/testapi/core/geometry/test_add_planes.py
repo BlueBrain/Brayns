@@ -25,11 +25,12 @@ from testapi.simple_test_case import SimpleTestCase
 class TestAddPlanes(SimpleTestCase):
 
     def test_add_planes(self) -> None:
-        model = brayns.add_geometries(self.instance, [
+        test = brayns.add_geometries(self.instance, [
             brayns.Plane(1, 2, 3).with_color(brayns.Color4.red),
             brayns.Plane(4, 5, 6, 7)
         ])
-        self.assertEqual(model.id, 0)
-        self.assertEqual(model.info, {})
-        self.assertEqual(model.visible, True)
-        self.assertEqual(model.transform, brayns.Transform.identity)
+        ref = brayns.get_model(self.instance, test.id)
+        self.assertEqual(test, ref)
+        self.assertEqual(test.info, {})
+        self.assertEqual(test.visible, True)
+        self.assertEqual(test.transform, brayns.Transform.identity)

@@ -20,22 +20,21 @@
 
 import unittest
 
-from brayns.core import deserialize_inspect_result
+import brayns
+from tests.mock_instance import MockInstance
 
-from .mock_inspect_result import MockInspectResult
+from .mock_pick_result import MockPickResult
 
 
-class TestDeserializeInspectResult(unittest.TestCase):
+class TestPick(unittest.TestCase):
 
-    def test_deserialize_inspect_result(self) -> None:
-        message = MockInspectResult.create_message(hit=True)
-        test = deserialize_inspect_result(message)
-        self.assertEqual(test, MockInspectResult.result)
-
-    def test_deserialize_inspect_result_no_hit(self) -> None:
-        message = MockInspectResult.create_message(hit=False)
-        test = deserialize_inspect_result(message)
-        self.assertIsNone(test)
+    def test_pick(self) -> None:
+        result = MockPickResult.create_message(hit=True)
+        instance = MockInstance(result)
+        position = brayns.Vector2(0.5, 0.6)
+        test = brayns.pick(instance, position)
+        self.assertEqual(test, MockPickResult.result)
+        self.assertEqual(instance.params, {'position': [0.5, 0.6]})
 
 
 if __name__ == '__main__':

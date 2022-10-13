@@ -28,9 +28,9 @@ class TestRemoveModels(SimpleTestCase):
         model1 = brayns.add_geometries(self.instance, [brayns.Sphere(1)])
         model2 = brayns.add_geometries(self.instance, [brayns.Sphere(2)])
         model3 = brayns.add_geometries(self.instance, [brayns.Sphere(2)])
-        brayns.remove_models(self.instance, [1, 2])
-        brayns.get_model(self.instance, 0)
+        brayns.remove_models(self.instance, [model2.id, model3.id])
+        brayns.get_model(self.instance, model1.id)
         with self.assertRaises(brayns.JsonRpcError):
-            brayns.get_model(self.instance, 1)
+            brayns.get_model(self.instance, model2.id)
         with self.assertRaises(brayns.JsonRpcError):
-            brayns.get_model(self.instance, 2)
+            brayns.get_model(self.instance, model3.id)

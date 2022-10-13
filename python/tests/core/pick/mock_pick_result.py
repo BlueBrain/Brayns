@@ -18,27 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
 from typing import Any
 
-from brayns.utils import Vector3
+import brayns
 
 
-@dataclass
-class InspectResult:
-    """Information about the model found at an inspected screen position.
+class MockPickResult:
 
-    Metadata depend on the kind of model found at given position and are
-    specific to the primitive (subpart) hitted.
+    @staticmethod
+    def create_message(hit: bool) -> dict[str, Any]:
+        return {
+            'hit': hit,
+            'position': [1, 2, 3],
+            'model_id': 3,
+            'metadata': {'test': 1},
+        }
 
-    :param position: World position matching screen coordinates.
-    :type position: Vector3
-    :param model_id: ID of them model at screen position.
-    :type model_id: int
-    :param metadata: Information about the model primitive at given position.
-    :type metadata: Any
-    """
-
-    position: Vector3
-    model_id: int
-    metadata: Any
+    @classmethod
+    @property
+    def result(cls) -> brayns.PickResult:
+        return brayns.PickResult(
+            position=brayns.Vector3(1, 2, 3),
+            model_id=3,
+            metadata={'test': 1},
+        )

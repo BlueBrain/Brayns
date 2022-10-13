@@ -56,10 +56,7 @@ class TestSnapshot(SimpleTestCase):
         validator.validate_data(test, self.ref)
 
     def _prepare_snapshot(self) -> brayns.Snapshot:
-        self._load_model()
-        return prepare_quick_snapshot(self.instance)
-
-    def _load_model(self) -> None:
         path = self.asset_folder / 'cube.ply'
         loader = brayns.MeshLoader()
         loader.load_models(self.instance, str(path))
+        return prepare_quick_snapshot(self.instance)

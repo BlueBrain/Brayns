@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import inspect
+
 import brayns
 from testapi.simple_test_case import SimpleTestCase
 
@@ -25,5 +27,17 @@ from testapi.simple_test_case import SimpleTestCase
 class TestGetLoaders(SimpleTestCase):
 
     def test_get_loaders(self) -> None:
-        test = brayns.get_loaders(self.instance)
-        self.assertTrue(test)
+        refs = self._get_api_loaders()
+        tests = brayns.get_loaders(self.instance)
+        names = [test.name for test in tests]
+        for ref in refs:
+            self.assertIn(ref, names)
+
+    def _get_api_loaders(self) -> set[str]:
+        return {
+            obj.name
+            for obj in brayns.__dict__.values()
+            if inspect.isclass(obj)
+            and issubclass(obj, brayns.Loader)
+            and obj is not brayns.Loader
+        }

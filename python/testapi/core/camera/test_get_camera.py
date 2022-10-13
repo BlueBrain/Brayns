@@ -25,10 +25,5 @@ from testapi.simple_test_case import SimpleTestCase
 class TestGetCamera(SimpleTestCase):
 
     def test_get_camera(self) -> None:
-        view = brayns.View(target=brayns.Vector3.one)
-        brayns.set_camera_view(self.instance, view)
-        projection = brayns.PerspectiveProjection()
-        brayns.set_camera_projection(self.instance, projection)
-        camera = brayns.get_camera(self.instance, type(projection))
-        self.assertEqual(camera.view, view)
-        self.assertEqual(camera.projection, projection)
+        test = brayns.get_camera(self.instance, brayns.PerspectiveProjection)
+        self.assertIsInstance(test.projection, brayns.PerspectiveProjection)

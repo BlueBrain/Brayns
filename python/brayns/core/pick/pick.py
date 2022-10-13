@@ -23,12 +23,12 @@ from __future__ import annotations
 from brayns.network import Instance
 from brayns.utils import Vector2
 
-from .deserialize_inspect_result import deserialize_inspect_result
-from .inspect_result import InspectResult
+from .deserialize_pick_result import deserialize_pick_result
+from .pick_result import PickResult
 
 
-def inspect(instance: Instance, position: Vector2) -> InspectResult | None:
-    """Inspect instance at given screen position.
+def pick(instance: Instance, position: Vector2) -> PickResult | None:
+    """Pick a given screen position and inspect it.
 
     Screen position must be normalized with [0, 0] being bottom-left of
     and [1, 1] top-right.
@@ -43,8 +43,8 @@ def inspect(instance: Instance, position: Vector2) -> InspectResult | None:
     :param x: Screen position X normalized.
     :type x: float
     :return: Information about model in given XY if any, otherwise None.
-    :rtype: InspectResult | None
+    :rtype: PickResult | None
     """
     params = {'position': list(position)}
     result = instance.request('inspect', params)
-    return deserialize_inspect_result(result)
+    return deserialize_pick_result(result)

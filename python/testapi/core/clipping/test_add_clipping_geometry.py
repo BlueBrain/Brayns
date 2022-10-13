@@ -26,5 +26,6 @@ class TestAddClippingGeometry(SimpleTestCase):
 
     def test_add_clipping_geometry(self) -> None:
         plane = brayns.ClipPlane(1, 2, 3, 4)
-        model = brayns.add_clipping_geometry(self.instance, plane)
-        self.assertEqual(model.id, 0)
+        test = brayns.add_clipping_geometry(self.instance, plane)
+        ref = brayns.get_model(self.instance, test.id)
+        self.assertEqual(test, ref)

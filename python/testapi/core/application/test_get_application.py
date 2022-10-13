@@ -26,8 +26,6 @@ class TestGetApplication(SimpleTestCase):
 
     def test_get_application(self) -> None:
         application = brayns.get_application(self.instance)
-        self.assertSetEqual(set(application.plugins), set(
-            plugin.value for plugin in brayns.Plugin
-        ))
+        self.assertEqual(application.plugins, brayns.Plugin.all)
         self.assertIsInstance(application.resolution, brayns.Resolution)
         self.assertIsInstance(application.jpeg_quality, int)

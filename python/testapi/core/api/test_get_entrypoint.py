@@ -25,6 +25,6 @@ from testapi.simple_test_case import SimpleTestCase
 class TestGetEntrypoint(SimpleTestCase):
 
     def test_get_entrypoint(self) -> None:
-        method = 'get-camera-perspective'
+        method = 'snapshot'
         entrypoint = brayns.get_entrypoint(self.instance, method)
         self.assertEqual(entrypoint.method, method)

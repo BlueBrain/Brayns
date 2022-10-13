@@ -57,18 +57,6 @@ class TestConnector(ApiTestCase):
                 with self._connect(secure=True):
                     pass
 
-    def test_connect_unsecure_server(self) -> None:
-        with self._start_service(secure=False):
-            with self.assertRaises(brayns.InvalidServerCertificateError):
-                with self._connect(secure=True):
-                    pass
-
-    def test_connect_unsecure_client(self) -> None:
-        with self._start_service(secure=True):
-            with self.assertRaises(brayns.ProtocolError):
-                with self._connect(secure=False):
-                    pass
-
     def _start_service(self, secure: bool = False) -> brayns.Process:
         service = brayns.Service(
             uri=self.uri,

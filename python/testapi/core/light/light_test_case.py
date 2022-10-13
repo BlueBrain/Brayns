@@ -25,16 +25,22 @@ from testapi.simple_test_case import SimpleTestCase
 class LightTestCase(SimpleTestCase):
 
     def run_tests(self, light: brayns.Light) -> None:
-        models = [
+        tests = [
             brayns.add_light(self.instance, light)
             for _ in range(3)
         ]
-        self.assertEqual(models[0].id, 0)
-        self.assertEqual(models[1].id, 1)
-        self.assertEqual(models[2].id, 2)
-        brayns.remove_models(self.instance, [1, 2])
-        model = brayns.add_light(self.instance, light)
-        self.assertIn(model.id, [1, 2])
+        refs = [
+            brayns.get_model(self.instance, model.id)
+            for model in tests
+        ]
+        self.assertEqual(tests, refs)
+        remaining = tests[0].id
+        removed = [model.id for model in tests[1:]]
+        brayns.remove_models(self.instance, removed)
+        for id in removed:
+            with self.assertRaises(brayns.JsonRpcError):
+                brayns.get_model(self.instance, id)
+        brayns.get_model(self.instance, remaining)
         brayns.clear_lights(self.instance)
-        model = brayns.add_light(self.instance, light)
-        self.assertIn(model.id, [0, 1, 2])
+        with self.assertRaises(brayns.JsonRpcError):
+            brayns.get_model(self.instance, remaining)
