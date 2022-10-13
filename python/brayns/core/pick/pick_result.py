@@ -18,12 +18,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .deserialize_inspect_result import deserialize_inspect_result
-from .inspect import inspect
-from .inspect_result import InspectResult
+from dataclasses import dataclass
+from typing import Any
 
-__all__ = [
-    'deserialize_inspect_result',
-    'inspect',
-    'InspectResult',
-]
+from brayns.utils import Vector3
+
+
+@dataclass
+class PickResult:
+    """Information about the model found at an inspected screen position.
+
+    Metadata depend on the kind of model found at given position and are
+    specific to the primitive (subpart) hitted.
+
+    :param position: World position matching screen coordinates.
+    :type position: Vector3
+    :param model_id: ID of them model at screen position.
+    :type model_id: int
+    :param metadata: Information about the model primitive at given position.
+    :type metadata: Any
+    """
+
+    position: Vector3
+    model_id: int
+    metadata: Any

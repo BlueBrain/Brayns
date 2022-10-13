@@ -18,27 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from typing import Any
 
-import brayns
+from brayns.utils import Vector3
+
+from .pick_result import PickResult
 
 
-class MockInspectResult:
-
-    @staticmethod
-    def create_message(hit: bool) -> dict[str, Any]:
-        return {
-            'hit': hit,
-            'position': [1, 2, 3],
-            'model_id': 3,
-            'metadata': {'test': 1},
-        }
-
-    @classmethod
-    @property
-    def result(cls) -> brayns.InspectResult:
-        return brayns.InspectResult(
-            position=brayns.Vector3(1, 2, 3),
-            model_id=3,
-            metadata={'test': 1},
-        )
+def deserialize_pick_result(message: dict[str, Any]) -> PickResult | None:
+    hit = message['hit']
+    if not hit:
+        return None
+    return PickResult(
+        position=Vector3(*message['position']),
+        model_id=message['model_id'],
+        metadata=message['metadata'],
+    )

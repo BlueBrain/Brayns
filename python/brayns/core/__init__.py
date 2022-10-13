@@ -33,11 +33,11 @@ from .camera import *
 from .clipping import *
 from .color_ramp import *
 from .geometry import *
-from .inspect import *
 from .light import *
 from .loader import *
 from .material import *
 from .model import *
+from .pick import *
 from .render import *
 from .renderer import *
 from .simulation import *
@@ -90,8 +90,6 @@ __all__ = [
     'get_simulation',
     'get_version',
     'GlassMaterial',
-    'inspect',
-    'InspectResult',
     'InteractiveRenderer',
     'JpegImage',
     'JsonSchema',
@@ -109,6 +107,8 @@ __all__ = [
     'OpacityCurve',
     'OrthographicProjection',
     'PerspectiveProjection',
+    'pick',
+    'PickResult',
     'Plane',
     'PlasticMaterial',
     'ProductionRenderer',

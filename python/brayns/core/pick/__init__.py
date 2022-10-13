@@ -18,24 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from .deserialize_pick_result import deserialize_pick_result
+from .pick import pick
+from .pick_result import PickResult
 
-import brayns
-from tests.mock_instance import MockInstance
-
-from .mock_inspect_result import MockInspectResult
-
-
-class TestInspect(unittest.TestCase):
-
-    def test_inspect(self) -> None:
-        result = MockInspectResult.create_message(hit=True)
-        instance = MockInstance(result)
-        position = brayns.Vector2(0.5, 0.6)
-        test = brayns.inspect(instance, position)
-        self.assertEqual(test, MockInspectResult.result)
-        self.assertEqual(instance.params, {'position': [0.5, 0.6]})
-
-
-if __name__ == '__main__':
-    unittest.main()
+__all__ = [
+    'deserialize_pick_result',
+    'pick',
+    'PickResult',
+]
