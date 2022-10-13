@@ -33,6 +33,6 @@ class TestGetColorMethods(SimpleTestCase):
             brayns.ColorMethod.MTYPE,
             brayns.ColorMethod.ETYPE,
             brayns.ColorMethod.MORPHOLOGY,
-            brayns.ColorMethod.MORPHOLOGY_SECTION
+            brayns.ColorMethod.MORPHOLOGY_SECTION,
         ]
         self.assertEqual(methods, ref)

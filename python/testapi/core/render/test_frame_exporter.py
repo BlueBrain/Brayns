@@ -45,23 +45,19 @@ class TestFrameExporter(SimpleTestCase):
     def _load_circuit(self) -> None:
         loader = brayns.BbpLoader(
             report=brayns.BbpReport.compartment('somas'),
-            morphology=brayns.Morphology(radius_multiplier=10)
+            morphology=brayns.Morphology(radius_multiplier=10),
         )
         loader.load_models(self.instance, self.bbp_circuit)
 
     def _export_frames(self) -> None:
-        frames = self._get_frames()
-        self.output.mkdir(exist_ok=True)
-        quick_export(self.instance, str(self.output), frames)
-
-    def _get_frames(self) -> list[int]:
         frames = brayns.MovieFrames(
             fps=5,
             slowing_factor=100,
         )
         simulation = brayns.get_simulation(self.instance)
         indices = frames.get_indices(simulation)
-        return indices
+        self.output.mkdir(exist_ok=True)
+        quick_export(self.instance, str(self.output), indices)
 
     def _check_frames(self) -> None:
         errors = list[str]()

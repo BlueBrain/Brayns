@@ -29,16 +29,16 @@ class TestClearClippingGeometries(SimpleTestCase):
             brayns.ClipPlane(1, 2, 3, 4),
             brayns.ClipPlane(1, 1, 1, 1),
         ]
-        models = [
+        tests = [
             brayns.add_clipping_geometry(self.instance, plane)
             for plane in planes
         ]
-        self.assertEqual(models[0].id, 0)
-        self.assertEqual(models[1].id, 1)
+        refs = [
+            brayns.get_model(self.instance, model.id)
+            for model in tests
+        ]
+        self.assertEqual(tests, refs)
         brayns.clear_clipping_geometries(self.instance)
-        models = [
-            brayns.add_clipping_geometry(self.instance, plane)
-            for plane in planes
-        ]
-        self.assertIn(models[0].id, [0, 1])
-        self.assertIn(models[1].id, [0, 1])
+        for model in tests:
+            with self.assertRaises(brayns.JsonRpcError):
+                brayns.get_model(self.instance, model.id)

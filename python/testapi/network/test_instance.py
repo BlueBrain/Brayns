@@ -47,6 +47,12 @@ class TestInstance(SimpleTestCase):
         with self.assertRaises(brayns.JsonRpcError):
             self.instance.request('invalid')
 
+    def test_execute(self) -> None:
+        result, binary = self.instance.execute('snapshot', {})
+        self.assertIsInstance(result, dict)
+        self.assertTrue(result)
+        self.assertTrue(binary)
+
     def test_task(self) -> None:
         task = self.instance.task('snapshot', {})
         progresses = list(task)
@@ -78,3 +84,7 @@ class TestInstance(SimpleTestCase):
         self.instance.poll()
         self.assertTrue(task.is_ready())
         task.wait_for_reply()
+
+    def test_cancel(self) -> None:
+        with self.assertRaises(brayns.JsonRpcError):
+            self.instance.cancel(0)

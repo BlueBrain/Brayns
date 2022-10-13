@@ -26,17 +26,17 @@ class TestSetColorRamp(SimpleTestCase):
 
     def test_set_color_ramp(self) -> None:
         model = self._load_circuit()
-        function = brayns.ColorRamp(
+        ramp = brayns.ColorRamp(
             brayns.ValueRange(20, 30),
             colors=[
                 brayns.Color4.red,
                 brayns.Color4.green,
                 brayns.Color4.blue
-            ]
+            ],
         )
-        brayns.set_color_ramp(self.instance, model.id, function)
+        brayns.set_color_ramp(self.instance, model.id, ramp)
         test = brayns.get_color_ramp(self.instance, model.id)
-        self.assertEqual(test, function)
+        self.assertEqual(test, ramp)
 
     def _load_circuit(self) -> brayns.Model:
         loader = brayns.BbpLoader(

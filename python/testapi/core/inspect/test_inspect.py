@@ -36,6 +36,11 @@ class TestInspect(SimpleTestCase):
         self.assertEqual(test.model_id, 0)
         self.assertEqual(test.metadata, {'neuron_id': 559})
 
+    def test_inspect_missed(self) -> None:
+        self._prepare_scene()
+        test = brayns.inspect(self.instance, brayns.Vector2(0, 0))
+        self.assertIsNone(test)
+
     def test_inspect_empty_scene(self) -> None:
         test = brayns.inspect(self.instance, brayns.Vector2(0.5, 0.5))
         self.assertIsNone(test)
