@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/utils/ModifiedFlag.h>
 #include <brayns/utils/MathTypes.h>
+#include <brayns/utils/ModifiedFlag.h>
 
 #include <vector>
 
