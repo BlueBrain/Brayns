@@ -18,7 +18,7 @@
 
 #include "NeuronMorphologyLoader.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 #include <brayns/utils/Timer.h>
 
 #include <brayns/engine/components/Geometries.h>

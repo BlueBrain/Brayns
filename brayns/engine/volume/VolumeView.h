@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/common/ModifiedFlag.h>
+#include <brayns/utils/ModifiedFlag.h>
 
 #include "ShadingColorRamp.h"
 #include "Volume.h"

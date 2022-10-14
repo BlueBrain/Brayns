@@ -24,11 +24,12 @@
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/json/adapters/GeometryAdapters.h>
+#include <brayns/engine/json/adapters/ModelInstanceAdapter.h>
 #include <brayns/engine/scene/ModelManager.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns

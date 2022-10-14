@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/common/Log.h>
-#include <brayns/common/MathTypes.h>
-#include <brayns/common/parameters/AbstractParameters.h>
+#include <brayns/parameters/AbstractParameters.h>
+#include <brayns/utils/Log.h>
+#include <brayns/utils/MathTypes.h>
 
 #include <string>
 #include <vector>

@@ -20,7 +20,7 @@
 
 #include "VolumeCommitSystem.h"
 
-#include <brayns/common/ColorRamp.h>
+#include <brayns/engine/components/ColorRamp.h>
 #include <brayns/engine/components/VolumeViews.h>
 #include <brayns/engine/components/Volumes.h>
 

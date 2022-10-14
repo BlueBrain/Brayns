@@ -23,8 +23,6 @@
 
 #include <array>
 
-#include <brayns/common/GlmParsers.h>
-
 #include <brayns/utils/binary/ByteOrder.h>
 #include <brayns/utils/parsing/FileStream.h>
 #include <brayns/utils/parsing/Parser.h>

@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/common/Bounds.h>
-#include <brayns/common/parameters/ParametersManager.h>
+#include <brayns/engine/components/Bounds.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #include "ModelManager.h"
 

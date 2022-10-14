@@ -18,7 +18,7 @@
 
 #include "SonataNGVLoader.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 #include <brayns/utils/Timer.h>
 
 #include <brion/blueConfig.h>

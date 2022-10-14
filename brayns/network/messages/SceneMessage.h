@@ -23,8 +23,8 @@
 
 #include <brayns/json/JsonObjectMacro.h>
 
-#include <brayns/network/adapters/BoundsAdapter.h>
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
+#include <brayns/engine/json/adapters/BoundsAdapter.h>
+#include <brayns/engine/json/adapters/ModelInstanceAdapter.h>
 
 namespace brayns
 {

@@ -25,6 +25,7 @@
 #include <string_view>
 #include <vector>
 
+#include <brayns/utils/MathTypes.h>
 #include <brayns/utils/binary/ByteParser.h>
 #include <brayns/utils/string/StringExtractor.h>
 
@@ -61,6 +62,30 @@ struct ChunkExtractor<std::array<T, S>>
         for (auto &value : values)
         {
             ChunkExtractor<T>::extract(data, value, order);
+        }
+    }
+};
+
+template<glm::length_t S, typename T>
+struct ChunkExtractor<glm::vec<S, T>>
+{
+    static void extract(std::string_view &data, glm::vec<S, T> &value, ByteOrder order)
+    {
+        for (glm::length_t i = 0; i < S; ++i)
+        {
+            ChunkExtractor<T>::extract(data, value[i], order);
+        }
+    }
+};
+
+template<typename T>
+struct ChunkExtractor<glm::qua<T>>
+{
+    static void extract(std::string_view &data, glm::qua<T> &value, ByteOrder order)
+    {
+        for (glm::length_t i = 0; i < 4; ++i)
+        {
+            ChunkExtractor<T>::extract(data, value[i], order);
         }
     }
 };

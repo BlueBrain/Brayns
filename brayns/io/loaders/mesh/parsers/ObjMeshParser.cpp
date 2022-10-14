@@ -23,9 +23,7 @@
 
 #include <utility>
 
-#include <brayns/common/Log.h>
-
-#include <brayns/common/GlmParsers.h>
+#include <brayns/utils/Log.h>
 
 #include <brayns/utils/parsing/FileStream.h>
 #include <brayns/utils/parsing/Parser.h>

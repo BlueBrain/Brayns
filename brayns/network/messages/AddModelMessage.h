@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -20,31 +20,13 @@
 
 #pragma once
 
+#include <brayns/json/JsonObjectMacro.h>
+
 namespace brayns
 {
-enum class PixelFormat
-{
-    RgbaI8,
-    StandardRgbaI8,
-    RgbaF32
-};
-
-/**
- * @brief Returns the size, in bytes, of each color channel of a given pixel format
- *
- */
-class PixelFormatChannelByteSize
-{
-public:
-    static size_t get(PixelFormat format)
-    {
-        switch (format)
-        {
-        case PixelFormat::RgbaF32:
-            return 4;
-        default:
-            return 1;
-        }
-    }
-};
-}
+BRAYNS_JSON_OBJECT_BEGIN(AddModelParams)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to the file to load")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, loader_name, "Name of the loader to use")
+BRAYNS_JSON_OBJECT_ENTRY(JsonValue, loader_properties, "Settings to configure the loading process")
+BRAYNS_JSON_OBJECT_END()
+} // namespace brayns

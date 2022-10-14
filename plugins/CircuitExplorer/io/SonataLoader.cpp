@@ -18,7 +18,7 @@
 
 #include "SonataLoader.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 #include <brayns/utils/Timer.h>
 
 #include <io/sonataloader/EdgeLoader.h>

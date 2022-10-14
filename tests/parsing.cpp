@@ -17,8 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/GlmParsers.h>
-
 #include <brayns/utils/parsing/ChunkExtractor.h>
 #include <brayns/utils/parsing/FileStream.h>
 #include <brayns/utils/parsing/Parser.h>

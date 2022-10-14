@@ -23,7 +23,6 @@
 
 #include <brayns/engine/scene/ModelManager.h>
 
-#include <brayns/network/adapters/ColorRampAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 #include <brayns/network/messages/GetModelMessage.h>
 #include <brayns/network/messages/SetColorRampMessage.h>

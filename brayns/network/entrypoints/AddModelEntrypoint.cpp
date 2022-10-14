@@ -31,9 +31,9 @@ namespace
 class ModelParametersValidator
 {
 public:
-    static void validate(const brayns::FileLoadParameters &params, const brayns::LoaderRegistry &loaders)
+    static void validate(const brayns::AddModelParams &params, const brayns::LoaderRegistry &loaders)
     {
-        auto &path = params.filePath;
+        auto &path = params.path;
         if (path.empty())
         {
             throw brayns::InvalidParamsException("Missing model path");
@@ -48,13 +48,13 @@ public:
 class LoadInfoFactory
 {
 public:
-    static brayns::LoadInfo create(const brayns::FileLoadParameters &params)
+    static brayns::LoadInfo create(const brayns::AddModelParams &params)
     {
         auto info = brayns::LoadInfo();
         info.source = brayns::LoadInfo::LoadSource::FromFile;
-        info.loaderName = params.loaderName;
-        info.loadParameters = params.loadParameters;
-        info.path = params.filePath;
+        info.loaderName = params.loader_name;
+        info.loadParameters = params.loader_properties;
+        info.path = params.path;
         return info;
     }
 };
@@ -94,10 +94,10 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     ModelParametersValidator::validate(params, _loaders);
     auto progress = brayns::ProgressHandler(_token, request);
-    auto &path = params.filePath;
-    auto &name = params.loaderName;
+    auto &path = params.path;
+    auto &name = params.loader_name;
     auto &loader = _loaders.getSuitableLoader(path, "", name);
-    auto &parameters = params.loadParameters;
+    auto &parameters = params.loader_properties;
     auto callback = [&](const auto &operation, auto amount) { progress.notify(operation, amount); };
     auto models = loader.loadFromFile(path, {callback}, parameters);
     auto instances = _models.addModels(std::move(models));

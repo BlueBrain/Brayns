@@ -22,10 +22,10 @@
 
 #include <filesystem>
 
-#include <brayns/common/Log.h>
 #include <brayns/engine/core/FrameRenderer.h>
 #include <brayns/engine/framebuffer/Framebuffer.h>
 #include <brayns/network/common/ProgressHandler.h>
+#include <brayns/utils/Log.h>
 #include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
 #include <brayns/utils/string/StringCase.h>

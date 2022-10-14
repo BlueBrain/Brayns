@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,25 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <brayns/engine/model/ModelInstance.h>
-
-#include <brayns/network/messages/GetModelMessage.h>
-
-#include "BoundsAdapter.h"
-#include "ModelInfoAdapter.h"
-#include "TransformAdapter.h"
+#include <brayns/engine/components/Transform.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ModelInstance)
-BRAYNS_JSON_ADAPTER_GET("model_id", getID, "Model ID")
-BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Model axis-aligned bounds")
-BRAYNS_JSON_ADAPTER_GET("info", getModelData, "Model-specific metadata")
-BRAYNS_JSON_ADAPTER_GETSET("transform", getTransform, setTransform, "Model transform")
-BRAYNS_JSON_ADAPTER_GETSET("is_visible", isVisible, setVisible, "Wether the model is being rendered or not")
-BRAYNS_JSON_ADAPTER_END()
+Matrix4f Transform::toMatrix() const noexcept
+{
+    return glm::translate(Matrix4f(1.), translation) * glm::mat4_cast(rotation) * glm::scale(Matrix4f(1.), scale);
+}
+
+bool Transform::operator==(const Transform &other) const noexcept
+{
+    return translation == other.translation && rotation == other.rotation && scale == other.scale;
+}
+
+bool Transform::operator!=(const Transform &other) const noexcept
+{
+    return !(*this == other);
+}
 } // namespace brayns

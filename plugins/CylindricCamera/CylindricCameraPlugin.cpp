@@ -21,8 +21,8 @@
 
 #include "CylindricCameraPlugin.h"
 
-#include <brayns/common/Log.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
+#include <brayns/utils/Log.h>
 
 #include "camera/CylindricAdapter.h"
 #include "camera/ospray/OsprayCylindricCamera.h"

@@ -20,7 +20,7 @@
 
 #include "SnapshotEntrypoint.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 #include <brayns/engine/core/FrameRenderer.h>
 

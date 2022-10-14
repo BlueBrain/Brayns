@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "MathTypes.h"
+#include <brayns/utils/MathTypes.h>
 
 #include <unordered_map>
 

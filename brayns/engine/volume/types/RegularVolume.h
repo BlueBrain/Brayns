@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
 #include <brayns/engine/volume/Volume.h>
 #include <brayns/engine/volume/VolumeDataType.h>
+#include <brayns/utils/MathTypes.h>
 
 #include <vector>
 

@@ -24,7 +24,7 @@
 #include <cassert>
 #include <optional>
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 namespace
 {

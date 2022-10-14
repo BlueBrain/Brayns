@@ -22,9 +22,9 @@
 
 #include <filesystem>
 
-#include <brayns/common/Log.h>
 #include <brayns/io/loaders/mesh/MeshLoader.h>
 #include <brayns/io/loaders/protein/ProteinLoader.h>
+#include <brayns/utils/Log.h>
 //#include <brayns/io/loaders/VolumeLoader.h>
 #include <brayns/io/loaders/xyzb/XYZBLoader.h>
 

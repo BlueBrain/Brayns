@@ -20,7 +20,7 @@
 
 #include "VisualizeAtlasUseCaseEntrypoint.h"
 
-#include <brayns/common/Transform.h>
+#include <brayns/engine/components/Transform.h>
 #include <brayns/network/common/ExtractModel.h>
 
 #include <network/entrypoints/common/ExtractAtlas.h>

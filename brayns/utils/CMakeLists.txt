@@ -8,9 +8,20 @@ file(GLOB_RECURSE BRAYNSUTILS_SOURCES RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.cpp)
 
 add_library(braynsUtils SHARED ${BRAYNSUTILS_SOURCES} ${BRAYNSUTILS_HEADERS})
 
+set(BRAYNSUTILS_INCLUDE_DIRS_LIST
+    ${PROJECT_SOURCE_DIR}
+    ${CMAKE_BINARY_DIR}/include
+)
+
 target_include_directories(braynsUtils PUBLIC
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:include>)
+    "$<BUILD_INTERFACE:${BRAYNSUTILS_INCLUDE_DIRS_LIST}>"
+    "$<INSTALL_INTERFACE:include>"
+)
+
+target_link_libraries(braynsUtils PUBLIC
+    glm
+    spdlog::spdlog
+)
 
 target_link_libraries(braynsUtils PRIVATE stb)
 
@@ -21,8 +32,8 @@ target_compile_options(braynsUtils PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 
 set_target_properties(braynsUtils
     PROPERTIES
-        VERSION ${BRAYNS_VERSION}
-        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    VERSION ${BRAYNS_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
 install(TARGETS braynsUtils

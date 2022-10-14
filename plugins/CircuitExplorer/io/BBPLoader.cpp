@@ -21,7 +21,7 @@
 
 #include "BBPLoader.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 #include <brayns/utils/Timer.h>
 #include <brayns/utils/string/StringCase.h>
 

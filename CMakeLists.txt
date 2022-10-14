@@ -64,7 +64,7 @@ add_subdirectory(plugins)
 
 # BRAYNS tests
 if(BRAYNS_TESTS_ENABLED)
-  add_subdirectory(tests)
+    add_subdirectory(tests)
 endif()
 
 # BRAYNS python client

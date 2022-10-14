@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/common/Bounds.h>
+#include <brayns/engine/components/Bounds.h>
 
 #include <ospray/ospray_cpp/Geometry.h>
 

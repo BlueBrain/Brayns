@@ -23,8 +23,8 @@
 #include "VasculatureColorMethod.h"
 #include "VasculatureSection.h"
 
-#include <brayns/common/ColorTools.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <brayns/engine/components/ColorTools.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 

@@ -18,7 +18,7 @@
 
 #include "ColorByIDAlgorithm.h"
 
-#include <brayns/common/ColorTools.h>
+#include <brayns/engine/components/ColorTools.h>
 
 std::vector<uint64_t> ColorByIDAlgorithm::execute(
     const std::map<uint64_t, brayns::Vector4f> &colorMap,

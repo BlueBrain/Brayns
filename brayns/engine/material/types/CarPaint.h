@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
 #include <brayns/engine/material/MaterialTraits.h>
+#include <brayns/utils/MathTypes.h>
 
 namespace brayns
 {

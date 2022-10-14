@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/model/Components.h>
+#include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {

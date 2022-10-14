@@ -23,9 +23,9 @@
 
 #include <brayns/engine/components/Lights.h>
 #include <brayns/engine/json/adapters/LightAdapters.h>
+#include <brayns/engine/json/adapters/ModelInstanceAdapter.h>
 #include <brayns/engine/scene/ModelManager.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns

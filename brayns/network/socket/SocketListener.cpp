@@ -21,7 +21,7 @@
 
 #include "SocketListener.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 #include <brayns/network/dispatch/RequestDispatcher.h>
 

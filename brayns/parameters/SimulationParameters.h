@@ -23,7 +23,7 @@
 
 #include "AbstractParameters.h"
 
-#include <brayns/common/ModifiedFlag.h>
+#include <brayns/utils/ModifiedFlag.h>
 
 namespace brayns
 {

@@ -27,9 +27,7 @@
 #include <limits>
 #include <stdexcept>
 
-#include <brayns/common/Log.h>
-
-#include <brayns/common/GlmParsers.h>
+#include <brayns/utils/Log.h>
 
 #include <brayns/utils/binary/ByteOrder.h>
 #include <brayns/utils/parsing/FileStream.h>

@@ -18,7 +18,7 @@
 
 #include "EndfeetColorHandler.h"
 
-#include <brayns/common/ColorTools.h>
+#include <brayns/engine/components/ColorTools.h>
 #include <brayns/engine/components/GeometryViews.h>
 
 #include <api/coloring/ColorByIDAlgorithm.h>

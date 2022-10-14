@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,15 +21,13 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-
-#include <brayns/io/LoadParameters.h>
+#include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(FileLoadParameters)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("path", filePath, "Path to the file to load");
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("loader_name", loaderName, "Name of the loader to use");
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("loader_properties", loadParameters, "Settings to configure the loading process");
-BRAYNS_JSON_ADAPTER_END()
+BRAYNS_JSON_OBJECT_BEGIN(UploadModelParams)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, type, "File extension")
+BRAYNS_JSON_OBJECT_ENTRY(std::string, loader_name, "Loader name")
+BRAYNS_JSON_OBJECT_ENTRY(JsonValue, loader_properties, "Loader properties")
+BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

@@ -21,7 +21,7 @@
 
 #include "ClientSender.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 #include <brayns/network/websocket/WebSocket.h>
 

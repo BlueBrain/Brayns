@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/common/Transform.h>
+#include <brayns/engine/components/Transform.h>
 
 #include <brayns/json/JsonAdapterMacro.h>
 

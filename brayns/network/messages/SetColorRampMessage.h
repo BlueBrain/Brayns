@@ -24,7 +24,7 @@
 #include <brayns/json/JsonBuffer.h>
 #include <brayns/json/JsonObjectMacro.h>
 
-#include <brayns/network/adapters/ColorRampAdapter.h>
+#include <brayns/engine/json/adapters/ColorRampAdapter.h>
 
 namespace brayns
 {

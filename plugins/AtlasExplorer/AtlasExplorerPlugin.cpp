@@ -20,8 +20,8 @@
 
 #include "AtlasExplorerPlugin.h"
 
-#include <brayns/common/Log.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
+#include <brayns/utils/Log.h>
 
 #include <io/NRRDLoader.h>
 

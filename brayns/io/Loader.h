@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/common/Blob.h>
 #include <brayns/engine/model/Model.h>
 #include <brayns/json/Json.h>
 #include <brayns/json/JsonSchema.h>
@@ -28,9 +27,36 @@
 #include <brayns/utils/string/StringJoiner.h>
 
 #include <functional>
+#include <string>
+#include <vector>
 
 namespace brayns
 {
+/**
+ * @brief Model binary data.
+ *
+ */
+struct Blob
+{
+    /**
+     * @brief File type.
+     *
+     */
+    std::string type;
+
+    /**
+     * @brief Loader name.
+     *
+     */
+    std::string name;
+
+    /**
+     * @brief Binary data.
+     *
+     */
+    std::vector<uint8_t> data;
+};
+
 /**
  * A class for providing progress feedback
  */
