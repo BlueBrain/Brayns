@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include <brayns/common/Bounds.h>
-#include <brayns/common/ModifiedFlag.h>
-#include <brayns/common/Transform.h>
+#include <brayns/engine/components/Bounds.h>
 #include <brayns/engine/components/Metadata.h>
+#include <brayns/engine/components/Transform.h>
+#include <brayns/utils/ModifiedFlag.h>
 
 #include "Model.h"
 #include "ModelInfo.h"

@@ -21,8 +21,6 @@
 
 #include "OffMeshParser.h"
 
-#include <brayns/common/GlmParsers.h>
-
 #include <brayns/utils/parsing/FileStream.h>
 #include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/parsing/ParsingException.h>

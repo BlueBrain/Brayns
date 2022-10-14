@@ -20,10 +20,10 @@
 
 #include "Engine.h"
 
-#include <brayns/common/Log.h>
 #include <brayns/engine/camera/projections/Perspective.h>
 #include <brayns/engine/core/FrameRenderer.h>
 #include <brayns/engine/renderer/types/Interactive.h>
+#include <brayns/utils/Log.h>
 
 #include <thread>
 

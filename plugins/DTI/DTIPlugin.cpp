@@ -22,7 +22,7 @@
 
 #include <io/DTILoader.h>
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 namespace dti
 {

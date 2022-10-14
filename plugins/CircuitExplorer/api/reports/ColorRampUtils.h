@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/common/ColorRamp.h>
+#include <brayns/engine/components/ColorRamp.h>
 
 struct ColorRampUtils
 {

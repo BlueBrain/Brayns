@@ -20,7 +20,7 @@
 
 #include <bbp/sonata/node_sets.h>
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 namespace sonataloader
 {

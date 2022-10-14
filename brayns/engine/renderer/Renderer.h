@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/ModifiedFlag.h>
 #include <brayns/engine/renderer/RendererData.h>
+#include <brayns/utils/ModifiedFlag.h>
 
 #include "RendererTraits.h"
 

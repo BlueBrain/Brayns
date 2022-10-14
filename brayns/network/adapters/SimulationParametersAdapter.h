@@ -23,7 +23,7 @@
 
 #include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/common/parameters/SimulationParameters.h>
+#include <brayns/parameters/SimulationParameters.h>
 
 namespace brayns
 {

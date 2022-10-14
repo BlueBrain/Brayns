@@ -23,7 +23,7 @@
 
 #include <sstream>
 
-#include <brayns/common/MathTypes.h>
+#include <brayns/utils/MathTypes.h>
 
 #include "ArgvProperty.h"
 

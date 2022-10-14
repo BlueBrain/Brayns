@@ -20,7 +20,7 @@
 
 #include <bbp/sonata/nodes.h>
 
-#include <brayns/common/MathTypes.h>
+#include <brayns/utils/MathTypes.h>
 
 namespace sonataloader
 {

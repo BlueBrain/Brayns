@@ -31,7 +31,7 @@ namespace
 class RequestValidator
 {
 public:
-    static void validate(const brayns::BinaryLoadParameters &params, std::string_view data)
+    static void validate(const brayns::UploadModelParams &params, std::string_view data)
     {
         if (params.type.empty())
         {
@@ -47,7 +47,7 @@ public:
 class BlobLoader
 {
 public:
-    static brayns::Blob load(const brayns::BinaryLoadParameters &params, std::string_view data)
+    static brayns::Blob load(const brayns::UploadModelParams &params, std::string_view data)
     {
         auto blob = _prepare(params);
         _load(data, blob);
@@ -55,11 +55,11 @@ public:
     }
 
 private:
-    static brayns::Blob _prepare(const brayns::BinaryLoadParameters &params)
+    static brayns::Blob _prepare(const brayns::UploadModelParams &params)
     {
         brayns::Blob blob;
         blob.type = params.type;
-        blob.name = params.loaderName;
+        blob.name = params.loader_name;
         return blob;
     }
 
@@ -76,10 +76,10 @@ class LoaderFinder
 {
 public:
     static const brayns::AbstractLoader &find(
-        const brayns::BinaryLoadParameters &params,
+        const brayns::UploadModelParams &params,
         const brayns::LoaderRegistry &loaders)
     {
-        auto &name = params.loaderName;
+        auto &name = params.loader_name;
         auto &type = params.type;
         try
         {
@@ -95,12 +95,12 @@ public:
 class LoadInfoFactory
 {
 public:
-    static brayns::LoadInfo create(const brayns::BinaryLoadParameters &parameters)
+    static brayns::LoadInfo create(const brayns::UploadModelParams &parameters)
     {
         auto info = brayns::LoadInfo();
         info.source = brayns::LoadInfo::LoadSource::FromBlob;
-        info.loaderName = parameters.loaderName;
-        info.loadParameters = parameters.loadParameters;
+        info.loaderName = parameters.loader_name;
+        info.loadParameters = parameters.loader_properties;
         return info;
     }
 };
@@ -130,7 +130,7 @@ public:
         progress.notify("Model uploaded", 0.5);
 
         auto &loader = LoaderFinder::find(params, _loaders);
-        auto parameters = params.loadParameters;
+        auto parameters = params.loader_properties;
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
         auto models = loader.loadFromBlob(blob, {callback}, parameters);
         auto result = _models.addModels(std::move(models));

@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,14 +21,21 @@
 
 #pragma once
 
-#include <brayns/common/Bounds.h>
-
 #include <brayns/json/JsonAdapterMacro.h>
+
+#include <brayns/engine/model/ModelInstance.h>
+
+#include "BoundsAdapter.h"
+#include "ModelInfoAdapter.h"
+#include "TransformAdapter.h"
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Bounds)
-BRAYNS_JSON_ADAPTER_GET("min", getMin, "Bounds minimum (bottom back left corner)")
-BRAYNS_JSON_ADAPTER_GET("max", getMax, "Bounds maximum (top front right corner)")
+BRAYNS_JSON_ADAPTER_BEGIN(ModelInstance)
+BRAYNS_JSON_ADAPTER_GET("model_id", getID, "Model ID")
+BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Model axis-aligned bounds")
+BRAYNS_JSON_ADAPTER_GET("info", getModelData, "Model-specific metadata")
+BRAYNS_JSON_ADAPTER_GETSET("transform", getTransform, setTransform, "Model transform")
+BRAYNS_JSON_ADAPTER_GETSET("is_visible", isVisible, setVisible, "Wether the model is being rendered or not")
 BRAYNS_JSON_ADAPTER_END()
-}
+} // namespace brayns

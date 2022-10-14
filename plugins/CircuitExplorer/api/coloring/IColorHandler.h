@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
+#include <brayns/utils/MathTypes.h>
 
 #include <api/coloring/IColorData.h>
 

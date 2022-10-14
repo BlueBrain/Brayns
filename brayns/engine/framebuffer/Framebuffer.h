@@ -21,15 +21,58 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
-#include <brayns/common/ModifiedFlag.h>
-#include <brayns/common/PixelFormat.h>
+#include <brayns/utils/MathTypes.h>
+#include <brayns/utils/ModifiedFlag.h>
 #include <brayns/utils/image/Image.h>
 
 #include <ospray/ospray_cpp/FrameBuffer.h>
 
 namespace brayns
 {
+/**
+ * @brief Pixel storage format in framebuffer.
+ *
+ */
+enum class PixelFormat
+{
+    /**
+     * @brief 4 channels of 8 bits each with lineal color curve.
+     *
+     */
+    RgbaI8,
+
+    /**
+     * @brief 4 channels of 8 bits each with non-lineal color curve.
+     *
+     */
+    StandardRgbaI8,
+
+    /**
+     * @brief 4 channels of 32 bits each.
+     *
+     */
+    RgbaF32
+};
+
+/**
+ * @brief Returns the size, in bytes, of each color channel of a given pixel format
+ *
+ */
+class PixelFormatChannelByteSize
+{
+public:
+    static size_t get(PixelFormat format)
+    {
+        switch (format)
+        {
+        case PixelFormat::RgbaF32:
+            return 4;
+        default:
+            return 1;
+        }
+    }
+};
+
 /**
  * @brief The Framebuffer class is the object that handles the frames rendered by a given renderer
  */

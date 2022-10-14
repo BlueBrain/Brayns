@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/ModifiedFlag.h>
 #include <brayns/engine/material/Material.h>
+#include <brayns/utils/ModifiedFlag.h>
 
 #include "Geometry.h"
 

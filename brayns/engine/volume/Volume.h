@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include <brayns/common/Bounds.h>
-#include <brayns/common/ModifiedFlag.h>
 #include <brayns/engine/common/DataWrapper.h>
+#include <brayns/engine/components/Bounds.h>
 #include <brayns/utils/FunctorInfo.h>
+#include <brayns/utils/ModifiedFlag.h>
 
 #include "VolumeTraits.h"
 

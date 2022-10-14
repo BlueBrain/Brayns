@@ -21,7 +21,7 @@
 
 #include "RequestDispatcher.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 #include <brayns/network/entrypoint/EntrypointFinder.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>

@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/camera/Camera.h>
 #include <brayns/engine/framebuffer/Framebuffer.h>
 #include <brayns/engine/json/EngineFactories.h>
 #include <brayns/engine/renderer/Renderer.h>
 #include <brayns/engine/scene/Scene.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #include <ospray/ospray_cpp/Device.h>
 

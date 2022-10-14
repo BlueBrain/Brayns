@@ -21,15 +21,14 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/engine/components/ColorRamp.h>
 
-#include <brayns/io/LoadParameters.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(BinaryLoadParameters)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("type", type, "File extension");
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("loader_name", loaderName, "Loader name");
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("loader_properties", loadParameters, "Loader properties");
+BRAYNS_JSON_ADAPTER_BEGIN(ColorRamp)
+BRAYNS_JSON_ADAPTER_GETSET("range", getValuesRange, setValuesRange, "Values range", Required(false))
+BRAYNS_JSON_ADAPTER_GETSET("colors", getColors, setColors, "List of colors (RGBA) to map", Required(false))
 BRAYNS_JSON_ADAPTER_END()
 } // namespace brayns

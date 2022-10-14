@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
 #include <brayns/engine/model/Model.h>
+#include <brayns/utils/MathTypes.h>
 
 #include <api/coloring/IColorData.h>
 #include <api/reports/ReportMapping.h>

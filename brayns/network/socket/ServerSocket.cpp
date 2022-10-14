@@ -30,7 +30,7 @@
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/SecureServerSocket.h>
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 namespace
 {

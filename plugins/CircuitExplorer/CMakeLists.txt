@@ -16,7 +16,6 @@ target_include_directories(braynsCircuitExplorer PUBLIC
     "$<INSTALL_INTERFACE:include>")
 
 target_link_libraries(braynsCircuitExplorer PRIVATE
-    braynsCommon
     braynsPluginAPI
     braynsNetwork
     sonata::sonata_shared

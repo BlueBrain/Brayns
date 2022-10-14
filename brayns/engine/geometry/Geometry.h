@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/ModifiedFlag.h>
 #include <brayns/utils/FunctorInfo.h>
+#include <brayns/utils/ModifiedFlag.h>
 
 #include "GeometryData.h"
 #include "GeometryTraits.h"

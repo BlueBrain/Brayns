@@ -13,11 +13,10 @@ list(REMOVE_ITEM BRAYNSIO_HEADERS loaders/volume/RawVolumeLoaderParameters.h)
 add_library(braynsIO SHARED ${BRAYNSIO_SOURCES} ${BRAYNSIO_HEADERS})
 
 target_include_directories(braynsIO PUBLIC
-   "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
-   "$<INSTALL_INTERFACE:include>")
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+    "$<INSTALL_INTERFACE:include>")
 
 target_link_libraries(braynsIO PRIVATE
-    braynsCommon
     braynsEngine
 )
 
@@ -25,8 +24,8 @@ target_compile_options(braynsIO PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 
 set_target_properties(braynsIO
     PROPERTIES
-        VERSION ${BRAYNS_VERSION}
-        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    VERSION ${BRAYNS_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
 install(TARGETS braynsIO

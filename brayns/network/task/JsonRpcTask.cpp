@@ -21,7 +21,7 @@
 
 #include "JsonRpcTask.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 #include <cassert>
 

@@ -21,10 +21,10 @@
 
 #include "DTILoader.h"
 
-#include <brayns/common/Log.h>
 #include <brayns/json/JsonObjectMacro.h>
 #include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/utils/FileReader.h>
+#include <brayns/utils/Log.h>
 #include <brayns/utils/string/StringJoiner.h>
 
 #include "builder/DTIBuilder.h"

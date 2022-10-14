@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/parameters/SimulationParameters.h>
 #include <brayns/engine/scene/ModelManager.h>
+#include <brayns/parameters/SimulationParameters.h>
 
 namespace brayns
 {

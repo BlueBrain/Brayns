@@ -11,29 +11,26 @@ set(BRAYNSNETWORK_INCLUDE_DIR ${PROJECT_SOURCE_DIR})
 add_library(braynsNetwork SHARED ${BRAYNSNETWORK_SOURCES} ${BRAYNSNETWORK_HEADERS})
 
 target_include_directories(braynsNetwork PUBLIC
-  $<BUILD_INTERFACE:${BRAYNSNETWORK_INCLUDE_DIR}>
-  $<INSTALL_INTERFACE:include>)
+    $<BUILD_INTERFACE:${BRAYNSNETWORK_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(braynsNetwork PRIVATE
-  braynsCommon
-  braynsPluginAPI
-  braynsUtils
+    braynsPluginAPI
 )
 
 target_link_libraries(braynsNetwork PUBLIC
-  braynsJson
-  braynsIO
-  Poco::Foundation
-  Poco::Net
-  Poco::NetSSL
+    braynsIO
+    Poco::Foundation
+    Poco::Net
+    Poco::NetSSL
 )
 
 target_compile_options(braynsNetwork PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 
 set_target_properties(braynsNetwork
     PROPERTIES
-        VERSION ${BRAYNS_VERSION}
-        SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    VERSION ${BRAYNS_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
 install(TARGETS braynsNetwork

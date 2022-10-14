@@ -29,7 +29,7 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 namespace
 {

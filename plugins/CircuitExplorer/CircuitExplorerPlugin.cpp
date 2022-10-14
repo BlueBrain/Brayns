@@ -21,8 +21,8 @@
 
 #include "CircuitExplorerPlugin.h"
 
-#include <brayns/common/Log.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
+#include <brayns/utils/Log.h>
 
 #include <io/BBPLoader.h>
 #include <io/NeuronMorphologyLoader.h>

@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/ModifiedFlag.h>
 #include <brayns/engine/geometry/GeometryView.h>
+#include <brayns/utils/ModifiedFlag.h>
 
 namespace brayns
 {

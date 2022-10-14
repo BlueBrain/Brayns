@@ -25,7 +25,7 @@
 
 #include <brayns/Version.h>
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 #include <brayns/network/common/Clock.h>
 

@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/common/ModifiedFlag.h>
 #include <brayns/engine/common/DataWrapper.h>
+#include <brayns/utils/ModifiedFlag.h>
 
 #include "MaterialTraits.h"
 #include "types/Phong.h"

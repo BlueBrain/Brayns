@@ -25,6 +25,7 @@
 #include <string_view>
 #include <vector>
 
+#include <brayns/utils/MathTypes.h>
 #include <brayns/utils/string/StringExtractor.h>
 #include <brayns/utils/string/StringInfo.h>
 #include <brayns/utils/string/StringParser.h>
@@ -62,6 +63,30 @@ struct TokenExtractor<std::array<T, S>>
         for (auto &value : values)
         {
             TokenExtractor<T>::extract(data, value);
+        }
+    }
+};
+
+template<glm::length_t S, typename T>
+struct TokenExtractor<glm::vec<S, T>>
+{
+    static void extract(std::string_view &data, glm::vec<S, T> &value)
+    {
+        for (glm::length_t i = 0; i < S; ++i)
+        {
+            TokenExtractor<T>::extract(data, value[i]);
+        }
+    }
+};
+
+template<typename T>
+struct TokenExtractor<glm::qua<T>>
+{
+    static void extract(std::string_view &data, glm::qua<T> &value)
+    {
+        for (glm::length_t i = 0; i < 4; ++i)
+        {
+            TokenExtractor<T>::extract(data, value[i]);
         }
     }
 };

@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/engine/core/Engine.h>
 #include <brayns/io/LoaderRegistry.h>
 #include <brayns/network/INetworkInterface.h>
+#include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {

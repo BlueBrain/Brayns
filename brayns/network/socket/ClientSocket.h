@@ -25,7 +25,7 @@
 #include <future>
 #include <memory>
 
-#include <brayns/common/parameters/NetworkParameters.h>
+#include <brayns/parameters/NetworkParameters.h>
 
 #include "ISocket.h"
 #include "SocketManager.h"

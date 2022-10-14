@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include <brayns/common/Transform.h>
 #include <brayns/engine/components/LoadInfo.h>
 #include <brayns/engine/components/Metadata.h>
+#include <brayns/engine/components/Transform.h>
 
 #include "Model.h"
 

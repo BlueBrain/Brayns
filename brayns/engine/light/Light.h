@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <brayns/common/Bounds.h>
 #include <brayns/engine/common/DataWrapper.h>
+#include <brayns/engine/components/Bounds.h>
 
 #include "LightTraits.h"
 

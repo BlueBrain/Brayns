@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
+#include <brayns/utils/MathTypes.h>
 
 #include <ospray/ospray_cpp/Traits.h>
 

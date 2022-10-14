@@ -20,8 +20,8 @@
 
 #include "CircuitInfoPlugin.h"
 
-#include <brayns/common/Log.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
+#include <brayns/utils/Log.h>
 
 #include <entrypoints/CIGetAfferentCellIdsEntrypoint.h>
 #include <entrypoints/CIGetCellDataEntrypoint.h>

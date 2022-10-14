@@ -25,7 +25,7 @@
 
 #include <brayns/Version.h>
 
-#include <brayns/common/parameters/ParametersManager.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #include <brayns/utils/string/StringJoiner.h>
 

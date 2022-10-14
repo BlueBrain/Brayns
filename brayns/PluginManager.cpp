@@ -20,7 +20,7 @@
 
 #include "PluginManager.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 
 namespace
 {

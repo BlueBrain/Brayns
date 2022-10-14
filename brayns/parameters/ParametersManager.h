@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <brayns/common/parameters/ApplicationParameters.h>
-#include <brayns/common/parameters/NetworkParameters.h>
-#include <brayns/common/parameters/SimulationParameters.h>
+#include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/parameters/NetworkParameters.h>
+#include <brayns/parameters/SimulationParameters.h>
 
 namespace brayns
 {

@@ -20,7 +20,7 @@
 
 #include "ReportSystem.h"
 
-#include <brayns/common/ColorRamp.h>
+#include <brayns/engine/components/ColorRamp.h>
 #include <brayns/engine/components/SimulationInfo.h>
 
 #include <api/reports/ColorRampUtils.h>

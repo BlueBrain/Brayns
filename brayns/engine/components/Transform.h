@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,34 +20,22 @@
 
 #pragma once
 
-#include "MathTypes.h"
-
-#include <brayns/utils/parsing/ChunkExtractor.h>
-#include <brayns/utils/parsing/TokenExtractor.h>
+#include <brayns/utils/MathTypes.h>
 
 namespace brayns
 {
-template<glm::length_t S, typename T>
-struct ChunkExtractor<glm::vec<S, T>>
+/**
+ * @brief Defines the translation, rotation and scale parameters to be applied
+ * to a scene asset.
+ */
+struct Transform
 {
-    static void extract(std::string_view &data, glm::vec<S, T> &value, ByteOrder order)
-    {
-        for (glm::length_t i = 0; i < S; ++i)
-        {
-            ChunkExtractor<T>::extract(data, value[i], order);
-        }
-    }
-};
+    Vector3f translation{0.f};
+    Quaternion rotation{1, 0, 0, 0};
+    Vector3f scale{1.f};
 
-template<glm::length_t S, typename T>
-struct TokenExtractor<glm::vec<S, T>>
-{
-    static void extract(std::string_view &data, glm::vec<S, T> &value)
-    {
-        for (glm::length_t i = 0; i < S; ++i)
-        {
-            TokenExtractor<T>::extract(data, value[i]);
-        }
-    }
+    Matrix4f toMatrix() const noexcept;
+    bool operator==(const Transform &other) const noexcept;
+    bool operator!=(const Transform &other) const noexcept;
 };
 } // namespace brayns

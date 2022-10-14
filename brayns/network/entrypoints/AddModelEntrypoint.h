@@ -25,16 +25,17 @@
 
 #include <brayns/io/LoaderRegistry.h>
 
-#include <brayns/network/adapters/FileLoadParametersAdapter.h>
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
+#include <brayns/engine/json/adapters/ModelInstanceAdapter.h>
+
 #include <brayns/network/common/CancellationToken.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/AddModelMessage.h>
 
-#include <brayns/common/parameters/SimulationParameters.h>
+#include <brayns/parameters/SimulationParameters.h>
 
 namespace brayns
 {
-class AddModelEntrypoint : public Entrypoint<FileLoadParameters, std::vector<ModelInstance *>>
+class AddModelEntrypoint : public Entrypoint<AddModelParams, std::vector<ModelInstance *>>
 {
 public:
     AddModelEntrypoint(

@@ -20,7 +20,7 @@
 
 #include "HeaderEntryParser.h"
 
-#include <brayns/common/Log.h>
+#include <brayns/utils/Log.h>
 #include <brayns/utils/string/StringCase.h>
 #include <brayns/utils/string/StringSplitter.h>
 #include <brayns/utils/string/StringTrimmer.h>

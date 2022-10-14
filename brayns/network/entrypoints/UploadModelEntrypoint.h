@@ -21,18 +21,18 @@
 
 #pragma once
 
+#include <brayns/engine/json/adapters/ModelInstanceAdapter.h>
 #include <brayns/engine/scene/ModelManager.h>
 
 #include <brayns/io/LoaderRegistry.h>
 
-#include <brayns/network/adapters/BinaryLoadParametersAdapter.h>
-#include <brayns/network/adapters/ModelInstanceAdapter.h>
 #include <brayns/network/common/CancellationToken.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/UploadModelMessage.h>
 
 namespace brayns
 {
-class UploadModelEntrypoint : public Entrypoint<BinaryLoadParameters, std::vector<ModelInstance *>>
+class UploadModelEntrypoint : public Entrypoint<UploadModelParams, std::vector<ModelInstance *>>
 {
 public:
     UploadModelEntrypoint(

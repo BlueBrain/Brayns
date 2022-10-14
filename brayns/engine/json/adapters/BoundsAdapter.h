@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,22 +20,14 @@
 
 #pragma once
 
-#include <brayns/common/MathTypes.h>
+#include <brayns/engine/components/Bounds.h>
+
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-/**
- * @brief Defines the translation, rotation and scale parameters to be applied
- * to a scene asset.
- */
-struct Transform
-{
-    Vector3f translation{0.f};
-    Quaternion rotation{1, 0, 0, 0};
-    Vector3f scale{1.f};
-
-    Matrix4f toMatrix() const noexcept;
-    bool operator==(const Transform &other) const noexcept;
-    bool operator!=(const Transform &other) const noexcept;
-};
-} // namespace brayns
+BRAYNS_JSON_ADAPTER_BEGIN(Bounds)
+BRAYNS_JSON_ADAPTER_GET("min", getMin, "Bounds minimum (bottom back left corner)")
+BRAYNS_JSON_ADAPTER_GET("max", getMax, "Bounds maximum (top front right corner)")
+BRAYNS_JSON_ADAPTER_END()
+}
