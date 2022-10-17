@@ -18,23 +18,39 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from __future__ import annotations
 
-import brayns
-
-
-class TestClipPlane(unittest.TestCase):
-
-    def test_method(self) -> None:
-        self.assertEqual(brayns.ClipPlane.method, 'add-clip-plane')
-
-    def test_get_properties(self) -> None:
-        equation = brayns.PlaneEquation(1, 2, 3, 4)
-        plane = brayns.ClipPlane(equation)
-        test = plane.get_properties()
-        ref = {'coefficients': [1, 2, 3, 4]}
-        self.assertEqual(test, ref)
+from ..vector import Vector
 
 
-if __name__ == '__main__':
-    unittest.main()
+class PlaneEquation(Vector[float]):
+    """Plane equation such as ax + by + cz + d = 0.
+
+    :param x: X component.
+    :type x: float
+    :param y: Y component.
+    :type y: float
+    :param z: Z component.
+    :type z: float
+    :param d: D component.
+    :type d: float
+    """
+
+    def __new__(cls, a: float, b: float, c: float, d: float = 0.0) -> PlaneEquation:
+        return super().__new__(cls, a, b, c, d)
+
+    @property
+    def a(self) -> float:
+        return self[0]
+
+    @property
+    def b(self) -> float:
+        return self[1]
+
+    @property
+    def c(self) -> float:
+        return self[2]
+
+    @property
+    def d(self) -> float:
+        return self[3]

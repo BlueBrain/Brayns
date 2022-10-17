@@ -21,6 +21,8 @@
 from dataclasses import dataclass
 from typing import Any
 
+from brayns.utils import PlaneEquation
+
 from .geometry import Geometry
 
 
@@ -28,25 +30,11 @@ from .geometry import Geometry
 class Plane(Geometry):
     """Infinite plane.
 
-    Described by the equation ``ax + by + cz + d = 0``.
-
-    Where [a, b, c] is the normal of the plane and d the orthogonal distance
-    from the origin.
-
-    :param a: X term of the plane equation.
-    :type a: float
-    :param b: Y term of the plane equation.
-    :type b: float
-    :param c: Y term of the plane equation.
-    :type c: float
-    :param d: Scalar term of the plane equation.
-    :type d: float
+    :param equation: Plane equation coefficients.
+    :type equation: PlaneEquation
     """
 
-    a: float
-    b: float
-    c: float
-    d: float = 0.0
+    equation: PlaneEquation
 
     @classmethod
     @property
@@ -61,5 +49,5 @@ class Plane(Geometry):
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'coefficients': [self.a, self.b, self.c, self.d],
+            'coefficients': list(self.equation),
         }

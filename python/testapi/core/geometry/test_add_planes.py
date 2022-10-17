@@ -26,8 +26,10 @@ class TestAddPlanes(SimpleTestCase):
 
     def test_add_planes(self) -> None:
         test = brayns.add_geometries(self.instance, [
-            brayns.Plane(1, 2, 3).with_color(brayns.Color4.red),
-            brayns.Plane(4, 5, 6, 7)
+            brayns.Plane(
+                brayns.PlaneEquation(1, 2, 3)
+            ).with_color(brayns.Color4.red),
+            brayns.Plane(brayns.PlaneEquation(4, 5, 6, 7))
         ])
         ref = brayns.get_model(self.instance, test.id)
         self.assertEqual(test, ref)

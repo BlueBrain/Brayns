@@ -26,8 +26,8 @@ class TestClearClippingGeometries(SimpleTestCase):
 
     def test_clear_clipping_geometries(self) -> None:
         planes = [
-            brayns.ClipPlane(1, 2, 3, 4),
-            brayns.ClipPlane(1, 1, 1, 1),
+            brayns.ClipPlane(brayns.PlaneEquation(1, 2, 3, 4)),
+            brayns.ClipPlane(brayns.PlaneEquation(1, 1, 1, 1)),
         ]
         tests = [
             brayns.add_clipping_geometry(self.instance, plane)

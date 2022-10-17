@@ -21,7 +21,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.utils import Vector3
+from brayns.utils import Vector3, serialize_bounds
 
 from .geometry import Geometry
 
@@ -51,7 +51,4 @@ class Box(Geometry):
 
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        return {
-            'min': list(self.min),
-            'max': list(self.max),
-        }
+        return serialize_bounds(self)

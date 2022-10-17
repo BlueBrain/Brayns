@@ -18,23 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
+from typing import Any, Protocol
 
-import brayns
-
-
-class TestClipPlane(unittest.TestCase):
-
-    def test_method(self) -> None:
-        self.assertEqual(brayns.ClipPlane.method, 'add-clip-plane')
-
-    def test_get_properties(self) -> None:
-        equation = brayns.PlaneEquation(1, 2, 3, 4)
-        plane = brayns.ClipPlane(equation)
-        test = plane.get_properties()
-        ref = {'coefficients': [1, 2, 3, 4]}
-        self.assertEqual(test, ref)
+from ..vector import Vector3
 
 
-if __name__ == '__main__':
-    unittest.main()
+class BoundsLike(Protocol):
+
+    min: Vector3
+    max: Vector3
+
+
+def serialize_bounds(bounds: BoundsLike) -> dict[str, Any]:
+    return {
+        'min': list(bounds.min),
+        'max': list(bounds.max),
+    }
