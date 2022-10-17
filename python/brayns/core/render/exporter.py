@@ -32,7 +32,7 @@ from .key_frame import KeyFrame
 
 
 @dataclass
-class FrameExporter:
+class Exporter:
     """Frame exporter to take multiple snapshots in an optimized way.
 
     Camera position can be different for each frame using KeyFrame objects.
@@ -94,7 +94,7 @@ class FrameExporter:
         return Future(task, lambda _: None)
 
 
-def _serialize_exporter(exporter: FrameExporter, folder: str) -> dict[str, Any]:
+def _serialize_exporter(exporter: Exporter, folder: str) -> dict[str, Any]:
     message: dict[str, Any] = {
         'path': folder,
         'key_frames': [
@@ -119,7 +119,7 @@ def _serialize_key_frame(frame: KeyFrame) -> dict[str, Any]:
     return message
 
 
-def _serialize_image_settings(exporter: FrameExporter) -> dict[str, Any]:
+def _serialize_image_settings(exporter: Exporter) -> dict[str, Any]:
     message: dict[str, Any] = {
         'format': exporter.format.value,
     }

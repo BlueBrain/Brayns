@@ -93,7 +93,7 @@ with brayns.start(service, connector) as (process, instance):
     for frame in pathlib.Path(FRAMES).glob('*.*'):
         frame.unlink()
 
-    exporter = brayns.FrameExporter(
+    exporter = brayns.Exporter(
         frames=brayns.KeyFrame.from_indices(indices, camera.view),
         format=brayns.ImageFormat.PNG,
         resolution=brayns.Resolution.full_hd,

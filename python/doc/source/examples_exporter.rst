@@ -132,7 +132,7 @@ constructor.
 .. code-block:: python
 
     # Frame export specifications.
-    exporter = brayns.FrameExporter(
+    exporter = brayns.Exporter(
         frames=key_frames,
         format=brayns.ImageFormat.PNG,
         resolution=brayns.Resolution.full_hd,

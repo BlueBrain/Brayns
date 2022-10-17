@@ -26,7 +26,7 @@ from testapi.quick_render import prepare_quick_export
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestFrameExporter(SimpleTestCase):
+class TestExporter(SimpleTestCase):
 
     @property
     def output(self) -> pathlib.Path:
@@ -58,7 +58,7 @@ class TestFrameExporter(SimpleTestCase):
         )
         loader.load_models(self.instance, self.bbp_circuit)
 
-    def _prepare_export(self) -> brayns.FrameExporter:
+    def _prepare_export(self) -> brayns.Exporter:
         frames = brayns.MovieFrames(
             fps=5,
             slowing_factor=100,

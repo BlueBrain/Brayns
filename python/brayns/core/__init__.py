@@ -67,7 +67,7 @@ __all__ = [
     'EmissiveMaterial',
     'enable_simulation',
     'Entrypoint',
-    'FrameExporter',
+    'Exporter',
     'Geometry',
     'get_application',
     'get_bounds',

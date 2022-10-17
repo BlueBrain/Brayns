@@ -26,7 +26,7 @@ from tests.mock_instance import MockInstance
 from tests.mock_view import MockView
 
 
-class TestFrameExporter(unittest.TestCase):
+class TestExporter(unittest.TestCase):
 
     @classmethod
     @property
@@ -35,8 +35,8 @@ class TestFrameExporter(unittest.TestCase):
 
     @classmethod
     @property
-    def exporter(cls) -> brayns.FrameExporter:
-        return brayns.FrameExporter(
+    def exporter(cls) -> brayns.Exporter:
+        return brayns.Exporter(
             frames=[brayns.KeyFrame(i, MockView.view) for i in range(2)],
             format=brayns.ImageFormat.JPEG,
             jpeg_quality=50,

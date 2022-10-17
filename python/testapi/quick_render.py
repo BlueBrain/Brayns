@@ -49,7 +49,7 @@ def quick_export(instance: brayns.Instance, folder: str, frames: list[int]) -> N
     exporter.export_frames(instance, folder)
 
 
-def prepare_quick_export(instance: brayns.Instance, frames: list[int]) -> brayns.FrameExporter:
+def prepare_quick_export(instance: brayns.Instance, frames: list[int]) -> brayns.Exporter:
     camera = _prepare_camera_and_light(instance)
     return _create_exporter(camera, frames)
 
@@ -83,8 +83,8 @@ def _create_snapshot(camera: brayns.Camera, frame: int) -> brayns.Snapshot:
     )
 
 
-def _create_exporter(camera: brayns.Camera, frames: list[int]) -> brayns.FrameExporter:
-    return brayns.FrameExporter(
+def _create_exporter(camera: brayns.Camera, frames: list[int]) -> brayns.Exporter:
+    return brayns.Exporter(
         frames=brayns.KeyFrame.from_indices(frames, camera.view),
         resolution=brayns.Resolution.full_hd,
         projection=camera.projection,
