@@ -30,11 +30,8 @@ class TestBoundedPlane(unittest.TestCase):
 
     def test_get_properties(self) -> None:
         bounded_plane = brayns.BoundedPlane(
-            a=0,
-            b=0,
-            c=1,
-            d=0,
-            bounds=brayns.Box(
+            brayns.PlaneEquation(0, 0, 1, 0),
+            bounds=brayns.Bounds(
                 min=brayns.Vector3.zero,
                 max=brayns.Vector3.one,
             )

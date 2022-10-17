@@ -27,21 +27,15 @@ class TestAddBoundedPlanes(SimpleTestCase):
     def test_add_bounded_planes(self) -> None:
         test = brayns.add_geometries(self.instance, [
             brayns.BoundedPlane(
-                a=0,
-                b=0,
-                c=1,
-                d=0,
-                bounds=brayns.Box(
+                brayns.PlaneEquation(0, 0, 1, 0),
+                bounds=brayns.Bounds(
                     min=-brayns.Vector3.one,
                     max=brayns.Vector3.one
                 )
             ).with_color(brayns.Color4.red),
             brayns.BoundedPlane(
-                a=0,
-                b=0,
-                c=1,
-                d=0.5,
-                bounds=brayns.Box(
+                brayns.PlaneEquation(0, 0, 1, 0.5),
+                bounds=brayns.Bounds(
                     min=-2 * brayns.Vector3.one,
                     max=brayns.Vector3.one
                 )
