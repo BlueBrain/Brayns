@@ -63,23 +63,39 @@ class TestMeshLoader(SimpleTestCase):
         models = loader.load_models(self.instance, str(path))
         self._check_stl_binary(models)
 
-    def test_load_models_from_binary_stl(self) -> None:
+    def test_load_models_task(self) -> None:
+        path = self.asset_folder / 'cube.stl'
+        loader = brayns.MeshLoader()
+        task = loader.load_models_task(self.instance, str(path))
+        self.assertFalse(list(task))
+        models = task.wait_for_result()
+        self._check_stl(models)
+
+    def test_upload_models_stl(self) -> None:
         path = self.asset_folder / 'cube.stl'
         loader = brayns.MeshLoader()
         with path.open('rb') as file:
             data = file.read()
-        models = loader.load_models_from_binary(
-            self.instance, loader.STL, data)
+        models = loader.upload_models(self.instance, loader.STL, data)
         self._check_stl(models)
 
-    def test_load_models_from_binary_stl_binary(self) -> None:
+    def test_upload_models_stl_binary(self) -> None:
         path = self.asset_folder / 'cube_binary.stl'
         loader = brayns.MeshLoader()
         with path.open('rb') as file:
             data = file.read()
-        models = loader.load_models_from_binary(
-            self.instance, loader.STL, data)
+        models = loader.upload_models(self.instance, loader.STL, data)
         self._check_stl_binary(models)
+
+    def test_upload_models_task(self) -> None:
+        path = self.asset_folder / 'cube.stl'
+        loader = brayns.MeshLoader()
+        with path.open('rb') as file:
+            data = file.read()
+        task = loader.upload_models_task(self.instance, loader.STL, data)
+        self.assertEqual(len(list(task)), 1)
+        models = task.wait_for_result()
+        self._check_stl(models)
 
     def _check_stl(self, models: list[brayns.Model]) -> None:
         self.assertEqual(len(models), 1)

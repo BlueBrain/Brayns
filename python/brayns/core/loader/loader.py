@@ -18,10 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Any
 
-from brayns.network import Instance
+from brayns.network import Future, Instance, JsonRpcReply
 
 from ..model import Model, deserialize_model
 
@@ -65,18 +67,24 @@ class Loader(ABC):
         :return: List of created models.
         :rtype: list[Model]
         """
-        params = {
-            'path': path,
-            'loader_name': self.name,
-            'loader_properties': self.get_properties(),
-        }
-        result = instance.request('add-model', params)
-        return [
-            deserialize_model(model)
-            for model in result
-        ]
+        task = self.load_models_task(instance, path)
+        return task.wait_for_result()
 
-    def load_models_from_binary(self, instance: Instance, format: str, data: bytes) -> list[Model]:
+    def load_models_task(self, instance: Instance, path: str) -> Future[list[Model]]:
+        """Asynchronous version of ``load_models``.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param path: Model(s) file path.
+        :type path: str
+        :return: Future to monitor the task.
+        :rtype: Future[list[Model]]
+        """
+        params = _get_params(self, path=path)
+        task = instance.task('add-model', params)
+        return Future(task, _get_models)
+
+    def upload_models(self, instance: Instance, format: str, data: bytes) -> list[Model]:
         """Load models from binary data.
 
         As the model format cannot be deduced from a path, it must be specified.
@@ -93,13 +101,40 @@ class Loader(ABC):
         :return: List of created models.
         :rtype: list[Model]
         """
-        params = {
-            'type': format,
-            'loader_name': self.name,
-            'loader_properties': self.get_properties(),
-        }
-        reply = instance.execute('upload-model', params, data)
-        return [
-            deserialize_model(model)
-            for model in reply.result
-        ]
+        task = self.upload_models_task(instance, format, data)
+        return task.wait_for_result()
+
+    def upload_models_task(self, instance: Instance, format: str, data: bytes) -> Future[list[Model]]:
+        """Asynchronous version of ``upload_models``.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param format: Model format (see loader class variables).
+        :type format: str
+        :param data: Model binary data.
+        :type data: bytes
+        :return: Future to monitor the task.
+        :rtype: Future[list[Model]]
+        """
+        params = _get_params(self, format=format)
+        task = instance.task('upload-model', params, data)
+        return Future(task, _get_models)
+
+
+def _get_params(loader: Loader, path: str | None = None, format: str | None = None) -> dict[str, Any]:
+    params = {
+        'loader_name': loader.name,
+        'loader_properties': loader.get_properties(),
+    }
+    if path is not None:
+        params['path'] = path
+    if format is not None:
+        params['type'] = format
+    return params
+
+
+def _get_models(reply: JsonRpcReply) -> list[Model]:
+    return [
+        deserialize_model(model)
+        for model in reply.result
+    ]
