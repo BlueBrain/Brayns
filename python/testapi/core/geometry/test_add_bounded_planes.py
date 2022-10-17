@@ -22,7 +22,7 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestAddBoxes(SimpleTestCase):
+class TestAddBoundedPlanes(SimpleTestCase):
 
     def test_add_bounded_planes(self) -> None:
         test = brayns.add_geometries(self.instance, [

@@ -40,7 +40,7 @@ Bounds GeometryTraits<BoundedPlane>::computeBounds(const Matrix4f &matrix, const
 
 void GeometryTraits<BoundedPlane>::updateData(ospray::cpp::Geometry &handle, std::vector<BoundedPlane> &data)
 {
-    constexpr auto stride = sizeof(float) * 10;
+    auto stride = sizeof(BoundedPlane);
 
     auto &first = data.front();
     auto size = data.size();

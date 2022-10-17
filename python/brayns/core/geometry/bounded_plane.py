@@ -21,43 +21,30 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from multiprocessing.sharedctypes import Value
 from typing import Any
 
+from brayns.utils import Bounds
+from brayns.utils import PlaneEquation
+from brayns.utils.bounds import serialize_bounds
+
 from .geometry import Geometry
-from .box import Box
 
 
 @dataclass
 class BoundedPlane(Geometry):
     """Axis-aligned bounded plane.
 
-    Described by the equation ``ax + by + cz + d = 0``.
-
-    Where [a, b, c] is the normal of the plane and d the orthogonal distance
-    from the origin.
-
-    :param a: X term of the plane equation.
-    :type a: float
-    :param b: Y term of the plane equation.
-    :type b: float
-    :param c: Y term of the plane equation.
-    :type c: float
-    :param d: Scalar term of the plane equation.
-    :type d: float
+    :param equation: Plane equation coefficients.
+    :type equation: PlaneEquation
     :param bounds: Axis aligned bounds to limit the plane.
-    :type bounds: Box
+    :type bounds: Bounds
     """
 
-    a: float
-    b: float
-    c: float
-    d: float
-    bounds: Box
+    equation: PlaneEquation
+    bounds: Bounds
 
-    def __new__(cls, a: float, b: float, c: float, d: float, bounds: Box) -> BoundedPlane:
-        diff = bounds.max - bounds.min
-        if diff.x <= 0 or diff.y <= 0 or diff.z <= 0:
+    def __new__(cls, equation: PlaneEquation, bounds: Bounds) -> BoundedPlane:
+        if min(bounds.size) <= 0:
             raise ValueError("All bound dimensions must be greater than 0")
         return object.__new__(cls)
 
@@ -74,6 +61,6 @@ class BoundedPlane(Geometry):
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'coefficients': [self.a, self.b, self.c, self.d],
-            'bounds': self.bounds.get_additional_properties(),
+            'coefficients': list(self.equation),
+            'bounds': serialize_bounds(self.bounds),
         }
