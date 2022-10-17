@@ -82,6 +82,7 @@ __all__ = [
     'euler',
     'Fovy',
     'FrameExporter',
+    'Future',
     'Geometry',
     'GeometryType',
     'get_application',

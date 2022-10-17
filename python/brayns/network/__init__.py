@@ -29,6 +29,7 @@ Brayns instance.
 
 from .client import Client
 from .connector import Connector
+from .future import Future
 from .instance import Instance
 from .jsonrpc import *
 from .listener import Listener
@@ -38,6 +39,7 @@ from .websocket import *
 __all__ = [
     'ConnectionClosedError',
     'Connector',
+    'Future',
     'Instance',
     'InvalidServerCertificateError',
     'JsonRpcError',
