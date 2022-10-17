@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.network import Instance, JsonRpcReply
+from brayns.network import Future, Instance, JsonRpcFuture, JsonRpcReply
 from brayns.utils import ImageFormat, Resolution, parse_image_format, serialize_view
 
 from ..camera import Camera
@@ -68,10 +68,22 @@ class Snapshot:
         :param path: Output file.
         :type path: str
         """
+        task = self.save_task(instance, path)
+        task.wait_for_result()
+
+    def save_task(self, instance: Instance, path: str) -> Future[None]:
+        """Asynchronous version of ``save``.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param path: Output file.
+        :type path: str
+        :return: Future to monitor the task.
+        :rtype: Future[None]
+        """
         format = parse_image_format(path)
-        data = self.download(instance, format)
-        with open(path, 'wb') as file:
-            file.write(data)
+        task = self._download(instance, format)
+        return Future(task, lambda reply: _save_color_buffer(reply, path))
 
     def save_remotely(self, instance: Instance, path: str) -> None:
         """Save the snapshot remotely under given file.
@@ -83,9 +95,23 @@ class Snapshot:
         :param path: Output file.
         :type path: str
         """
+        task = self.save_remotely_task(instance, path)
+        task.wait_for_result()
+
+    def save_remotely_task(self, instance: Instance, path: str) -> Future[None]:
+        """Asynchronous version of ``save_remotely``.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param path: Output file.
+        :type path: str
+        :return: Future to monitor the task.
+        :rtype: Future[None]
+        """
         format = parse_image_format(path)
         params = _serialize_snapshot(self, format, path)
-        _request(instance, params)
+        task = _task(instance, params)
+        return Future(task, lambda _: None)
 
     def download(self, instance: Instance, format: ImageFormat = ImageFormat.PNG) -> bytes:
         """Download the rendered image as bytes at given format.
@@ -94,10 +120,28 @@ class Snapshot:
         :type instance: Instance
         :param path: Output file.
         :type path: str
+        :return: Image data.
+        :rtype: bytes
         """
+        task = self.download_task(instance, format)
+        return task.wait_for_result()
+
+    def download_task(self, instance: Instance, format: ImageFormat = ImageFormat.PNG) -> Future[bytes]:
+        """Asynchronous version of ``download``.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param path: Output file.
+        :type path: str
+        :return: Future to monitor the task.
+        :rtype: Future[bytes]
+        """
+        task = self._download(instance, format)
+        return Future(task, _get_color_buffer)
+
+    def _download(self, instance: Instance, format: ImageFormat) -> JsonRpcFuture:
         params = _serialize_snapshot(self, format)
-        reply = _request(instance, params)
-        return _get_color_buffer(reply)
+        return _task(instance, params)
 
 
 def _serialize_snapshot(snapshot: Snapshot, format: ImageFormat, path: str | None = None) -> dict[str, Any]:
@@ -128,8 +172,8 @@ def _serialize_image_settings(snapshot: Snapshot, format: ImageFormat) -> dict[s
     return message
 
 
-def _request(instance: Instance, params: dict[str, Any]) -> JsonRpcReply:
-    return instance.execute('snapshot', params)
+def _task(instance: Instance, params: dict[str, Any]) -> JsonRpcFuture:
+    return instance.task('snapshot', params)
 
 
 def _get_color_buffer(reply: JsonRpcReply) -> bytes:
@@ -138,3 +182,9 @@ def _get_color_buffer(reply: JsonRpcReply) -> bytes:
     offset = buffer['offset']
     size = buffer['size']
     return data[offset:size]
+
+
+def _save_color_buffer(reply: JsonRpcReply, path: str) -> None:
+    data = _get_color_buffer(reply)
+    with open(path, 'wb') as file:
+        file.write(data)
