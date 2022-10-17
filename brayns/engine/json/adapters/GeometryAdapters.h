@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/engine/geometry/types/BoundedPlane.h>
 #include <brayns/engine/geometry/types/Box.h>
 #include <brayns/engine/geometry/types/Capsule.h>
 #include <brayns/engine/geometry/types/Plane.h>
@@ -33,6 +34,11 @@ namespace brayns
 BRAYNS_JSON_ADAPTER_BEGIN(Box)
 BRAYNS_JSON_ADAPTER_ENTRY(min, "Minimum bound corner (bottom back left)")
 BRAYNS_JSON_ADAPTER_ENTRY(max, "Maximum bound corner (top front right)")
+BRAYNS_JSON_ADAPTER_END()
+
+BRAYNS_JSON_ADAPTER_BEGIN(BoundedPlane)
+BRAYNS_JSON_ADAPTER_ENTRY(coefficients, "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)")
+BRAYNS_JSON_ADAPTER_ENTRY(bounds, "Axis-aligned bounds to limit the plane geometry")
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(Plane)
@@ -72,6 +78,7 @@ struct GeometryWithColor
     BRAYNS_JSON_ADAPTER_ENTRY(color, "Geometry color") \
     BRAYNS_JSON_ADAPTER_END()
 
+ADD_GEOMETRY_ADAPTER(BoundedPlane)
 ADD_GEOMETRY_ADAPTER(Box)
 ADD_GEOMETRY_ADAPTER(Plane)
 ADD_GEOMETRY_ADAPTER(Capsule)

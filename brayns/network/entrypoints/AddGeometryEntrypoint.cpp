@@ -22,6 +22,21 @@
 
 namespace brayns
 {
+AddBoundedPlanesEntrypoint::AddBoundedPlanesEntrypoint(ModelManager &models)
+    : AddGeometryEntrypoint<BoundedPlane>(models)
+{
+}
+
+std::string AddBoundedPlanesEntrypoint::getMethod() const
+{
+    return "add-bounded-planes";
+}
+
+std::string AddBoundedPlanesEntrypoint::getDescription() const
+{
+    return "Adds a list of axis-aligned bound limited planes";
+}
+
 AddBoxesEntrypoint::AddBoxesEntrypoint(ModelManager &models)
     : AddGeometryEntrypoint<Box>(models)
 {

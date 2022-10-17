@@ -89,6 +89,7 @@ public:
         brayns::CancellationToken token(interface);
         brayns::EntrypointBuilder builder("Core", interface);
 
+        builder.add<brayns::AddBoundedPlanesEntrypoint>(models);
         builder.add<brayns::AddBoxesEntrypoint>(models);
         builder.add<brayns::AddCapsulesEntrypoint>(models);
         builder.add<brayns::AddClipPlaneEntrypoint>(models);
