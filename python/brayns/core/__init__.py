@@ -49,6 +49,7 @@ __all__ = [
     'add_light',
     'AmbientLight',
     'Application',
+    'BoundedPlane',
     'Box',
     'Camera',
     'CameraRotation',

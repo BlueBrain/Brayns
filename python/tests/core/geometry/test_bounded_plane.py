@@ -1,7 +1,7 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 #
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: nadir.romanguerrero@epfl.ch
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,20 +18,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .add_geometries import add_geometries
-from .bounded_plane import BoundedPlane
-from .box import Box
-from .capsule import Capsule
-from .geometry import Geometry
-from .plane import Plane
-from .sphere import Sphere
+import unittest
 
-__all__ = [
-    'add_geometries',
-    'BoundedPlane',
-    'Box',
-    'Capsule',
-    'Geometry',
-    'Plane',
-    'Sphere',
-]
+import brayns
+
+
+class TestBoundedPlane(unittest.TestCase):
+
+    def test_method(self) -> None:
+        self.assertEqual(brayns.BoundedPlane.method, 'add-bounded-planes')
+
+    def test_get_properties(self) -> None:
+        bounded_plane = brayns.BoundedPlane(
+            a=0,
+            b=0,
+            c=1,
+            d=0,
+            bounds=brayns.Box(
+                min=brayns.Vector3.zero,
+                max=brayns.Vector3.one,
+            )
+        )
+        test = bounded_plane.get_additional_properties()
+        self.assertEqual(test, {
+            'coefficients': [0, 0, 1, 0],
+            'bounds': {
+                'min': [0, 0, 0],
+                'max': [1, 1, 1],
+            }
+        })
+
+
+if __name__ == '__main__':
+    unittest.main()

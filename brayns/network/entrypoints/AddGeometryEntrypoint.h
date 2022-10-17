@@ -108,6 +108,15 @@ private:
     ModelManager &_models;
 };
 
+class AddBoundedPlanesEntrypoint final : public AddGeometryEntrypoint<BoundedPlane>
+{
+public:
+    AddBoundedPlanesEntrypoint(ModelManager &models);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+};
+
 class AddBoxesEntrypoint final : public AddGeometryEntrypoint<Box>
 {
 public:

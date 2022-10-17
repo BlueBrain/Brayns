@@ -46,6 +46,7 @@ __all__ = [
     'BbpLoader',
     'BbpReport',
     'BbpReportType',
+    'BoundedPlane',
     'Bounds',
     'Box',
     'Camera',
