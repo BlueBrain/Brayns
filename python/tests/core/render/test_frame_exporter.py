@@ -75,6 +75,13 @@ class TestFrameExporter(unittest.TestCase):
         self.assertEqual(instance.method, 'export-frames')
         self.assertEqual(instance.params, self.message)
 
+    def test_export_frames_task(self) -> None:
+        instance = MockInstance()
+        task = self.exporter.export_frames_task(instance, self.path)
+        task.wait_for_result()
+        self.assertEqual(instance.method, 'export-frames')
+        self.assertEqual(instance.params, self.message)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -22,7 +22,7 @@ import pathlib
 
 import brayns
 from testapi.image_validator import ImageValidator
-from testapi.quick_render import quick_export
+from testapi.quick_render import prepare_quick_export
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -39,7 +39,16 @@ class TestFrameExporter(SimpleTestCase):
 
     def test_export_frames(self) -> None:
         self._load_circuit()
-        self._export_frames()
+        exporter = self._prepare_export()
+        exporter.export_frames(self.instance, str(self.output))
+        self._check_frames()
+
+    def test_export_frames_task(self) -> None:
+        self._load_circuit()
+        exporter = self._prepare_export()
+        task = exporter.export_frames_task(self.instance, str(self.output))
+        self.assertEqual(len(list(task)), 5)
+        task.wait_for_result()
         self._check_frames()
 
     def _load_circuit(self) -> None:
@@ -49,7 +58,7 @@ class TestFrameExporter(SimpleTestCase):
         )
         loader.load_models(self.instance, self.bbp_circuit)
 
-    def _export_frames(self) -> None:
+    def _prepare_export(self) -> brayns.FrameExporter:
         frames = brayns.MovieFrames(
             fps=5,
             slowing_factor=100,
@@ -57,7 +66,7 @@ class TestFrameExporter(SimpleTestCase):
         simulation = brayns.get_simulation(self.instance)
         indices = frames.get_indices(simulation)
         self.output.mkdir(exist_ok=True)
-        quick_export(self.instance, str(self.output), indices)
+        return prepare_quick_export(self.instance, indices)
 
     def _check_frames(self) -> None:
         errors = list[str]()

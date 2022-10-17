@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.network import Instance
+from brayns.network import Future, Instance
 from brayns.utils import ImageFormat, Resolution, serialize_view
 
 from ..camera import Projection
@@ -74,8 +74,24 @@ class FrameExporter:
         :param folder: Output folder.
         :type folder: str
         """
+        task = self.export_frames_task(instance, folder)
+        task.wait_for_result()
+
+    def export_frames_task(self, instance: Instance, folder: str) -> Future[None]:
+        """Async version of ``export_frames``.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param folder: Output folder.
+        :type folder: str
+        :param folder: Output folder.
+        :type folder: str
+        :return: Future to monitor the task.
+        :rtype: Future[None]
+        """
         params = _serialize_exporter(self, folder)
-        instance.request('export-frames', params)
+        task = instance.task('export-frames', params)
+        return Future(task, lambda _: None)
 
 
 def _serialize_exporter(exporter: FrameExporter, folder: str) -> dict[str, Any]:

@@ -45,9 +45,13 @@ def prepare_quick_snapshot(instance: brayns.Instance, frame: int = 0) -> brayns.
 
 
 def quick_export(instance: brayns.Instance, folder: str, frames: list[int]) -> None:
-    camera = _prepare_camera_and_light(instance)
-    exporter = _create_exporter(camera, frames)
+    exporter = prepare_quick_export(instance, frames)
     exporter.export_frames(instance, folder)
+
+
+def prepare_quick_export(instance: brayns.Instance, frames: list[int]) -> brayns.FrameExporter:
+    camera = _prepare_camera_and_light(instance)
+    return _create_exporter(camera, frames)
 
 
 def _prepare_camera_and_light(instance: brayns.Instance) -> brayns.Camera:
