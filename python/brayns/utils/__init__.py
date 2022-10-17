@@ -31,6 +31,7 @@ from .bounds import *
 from .color import *
 from .exceptions import *
 from .image import *
+from .plane import *
 from .transform import *
 from .vector import *
 from .view import *
@@ -49,6 +50,7 @@ __all__ = [
     'merge_bounds',
     'parse_hex_color',
     'parse_image_format',
+    'PlaneEquation',
     'Quaternion',
     'Resolution',
     'Rotation',

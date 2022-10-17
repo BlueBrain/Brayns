@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
+import tempfile
 
 import brayns
 from testapi.image_validator import ImageValidator
@@ -32,11 +33,6 @@ class TestBbpLoader(SimpleTestCase):
     def ref(self) -> pathlib.Path:
         return self.asset_folder / 'bbp.png'
 
-    @property
-    def output(self) -> pathlib.Path:
-        folder = pathlib.Path(__file__).parent
-        return folder / 'bbp.png'
-
     def test_load_models(self) -> None:
         loader = brayns.BbpLoader(
             cells=brayns.BbpCells.from_density(0.5),
@@ -48,6 +44,8 @@ class TestBbpLoader(SimpleTestCase):
 
     def _validate_result(self, models: list[brayns.Model]) -> None:
         self.assertEqual(len(models), 1)
-        quick_snapshot(self.instance, str(self.output), 50)
-        validator = ImageValidator()
-        validator.validate_file(self.output, self.ref)
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / 'test_bbp_loader.png'
+            quick_snapshot(self.instance, str(path), 50)
+            validator = ImageValidator()
+            validator.validate_file(path, self.ref)

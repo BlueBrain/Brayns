@@ -150,6 +150,7 @@ __all__ = [
     'pick',
     'PickResult',
     'Plane',
+    'PlaneEquation',
     'PlasticMaterial',
     'Plugin',
     'Process',

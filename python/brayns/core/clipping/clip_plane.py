@@ -21,6 +21,8 @@
 from dataclasses import dataclass
 from typing import Any
 
+from brayns.utils import PlaneEquation
+
 from .clipping_geometry import ClippingGeometry
 
 
@@ -28,31 +30,15 @@ from .clipping_geometry import ClippingGeometry
 class ClipPlane(ClippingGeometry):
     """Clip plane.
 
-    Described by the equation ``ax + by + cz + d = 0``.
-
-    Where [a, b, c] is the normal of the plane and d the orthogonal distance
-    from the origin.
-
-    The normal vector indicates the upper side of the plane.
-
-    Everything below the given plane is clipped:
+    Everything below the given plane is clipped (see PlaneEquation).
 
     Multiple clip planes can be combined to slice a model in complex ways.
 
-    :param a: X term of the plane equation.
-    :type a: float
-    :param b: Y term of the plane equation.
-    :type b: float
-    :param c: Y term of the plane equation.
-    :type c: float
-    :param d: Scalar term of the plane equation.
-    :type d: float
+    :param equation: Plane equation coefficients.
+    :type equation: PlaneEquation
     """
 
-    a: float
-    b: float
-    c: float
-    d: float = 0.0
+    equation: PlaneEquation
 
     @classmethod
     @property
@@ -67,5 +53,5 @@ class ClipPlane(ClippingGeometry):
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'coefficients': [self.a, self.b, self.c, self.d],
+            'coefficients': list(self.equation),
         }

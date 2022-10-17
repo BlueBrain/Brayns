@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
+import tempfile
 
 import brayns
 from testapi.image_validator import ImageValidator
@@ -29,36 +30,33 @@ from testapi.simple_test_case import SimpleTestCase
 class TestExporter(SimpleTestCase):
 
     @property
-    def output(self) -> pathlib.Path:
-        folder = pathlib.Path(__file__).parent
-        return folder / 'frames'
-
-    @property
     def ref(self) -> pathlib.Path:
         return self.asset_folder / 'frames'
 
     def test_export_frames(self) -> None:
         self._load_circuit()
         exporter = self._prepare_export()
-        exporter.export_frames(self.instance, str(self.output))
-        self._check_frames()
+        with tempfile.TemporaryDirectory() as directory:
+            exporter.export_frames(self.instance, directory)
+            self._check_frames(directory)
 
     def test_export_frames_task(self) -> None:
         self._load_circuit()
         exporter = self._prepare_export()
-        task = exporter.export_frames_task(self.instance, str(self.output))
-        self.assertEqual(len(list(task)), 5)
-        task.wait_for_result()
-        self._check_frames()
+        with tempfile.TemporaryDirectory() as directory:
+            task = exporter.export_frames_task(self.instance, directory)
+            self.assertEqual(len(list(task)), 5)
+            task.wait_for_result()
+            self._check_frames(directory)
 
     def test_cancel(self) -> None:
         self._load_circuit()
         exporter = self._prepare_export()
-        task = exporter.export_frames_task(self.instance, str(self.output))
-        task.cancel()
-        with self.assertRaises(brayns.JsonRpcError):
-            task.wait_for_result()
-        self._cleanup()
+        with tempfile.TemporaryDirectory() as directory:
+            task = exporter.export_frames_task(self.instance, directory)
+            task.cancel()
+            with self.assertRaises(brayns.JsonRpcError):
+                task.wait_for_result()
 
     def _load_circuit(self) -> None:
         loader = brayns.BbpLoader(
@@ -68,28 +66,18 @@ class TestExporter(SimpleTestCase):
         loader.load_models(self.instance, self.bbp_circuit)
 
     def _prepare_export(self) -> brayns.Exporter:
-        frames = brayns.MovieFrames(
-            fps=5,
-            slowing_factor=100,
-        )
+        frames = brayns.MovieFrames(fps=5, slowing_factor=100)
         simulation = brayns.get_simulation(self.instance)
         indices = frames.get_indices(simulation)
-        self.output.mkdir(exist_ok=True)
         return prepare_quick_export(self.instance, indices)
 
-    def _check_frames(self) -> None:
+    def _check_frames(self, directory: str) -> None:
         errors = list[str]()
         validator = ImageValidator()
-        for test in self.output.glob('*.png'):
+        for test in pathlib.Path(directory).glob('*.png'):
             ref = self.ref / test.name
             try:
                 validator.validate_file(test, ref)
             except RuntimeError as e:
                 errors.append(str(e))
-        self._cleanup()
         self.assertFalse(errors)
-
-    def _cleanup(self) -> None:
-        for path in self.output.glob('*'):
-            path.unlink()
-        self.output.rmdir()

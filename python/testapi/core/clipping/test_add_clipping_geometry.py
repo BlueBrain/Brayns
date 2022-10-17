@@ -25,7 +25,8 @@ from testapi.simple_test_case import SimpleTestCase
 class TestAddClippingGeometry(SimpleTestCase):
 
     def test_add_clipping_geometry(self) -> None:
-        plane = brayns.ClipPlane(1, 2, 3, 4)
+        equation = brayns.PlaneEquation(1, 2, 3, 4)
+        plane = brayns.ClipPlane(equation)
         test = brayns.add_clipping_geometry(self.instance, plane)
         ref = brayns.get_model(self.instance, test.id)
         self.assertEqual(test, ref)

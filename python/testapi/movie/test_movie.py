@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
+import tempfile
 
 import brayns
 from testapi.image_validator import ImageValidator
@@ -32,11 +33,6 @@ class TestMovie(SimpleTestCase):
         return self.asset_folder / 'frames'
 
     @property
-    def output(self) -> pathlib.Path:
-        folder = pathlib.Path(__file__).parent
-        return folder / 'movie.mp4'
-
-    @property
     def ref(self) -> pathlib.Path:
         return self.asset_folder / 'movie.mp4'
 
@@ -47,6 +43,8 @@ class TestMovie(SimpleTestCase):
             fps=1,
             ffmpeg_executable=self.ffmpeg,
         )
-        movie.save(str(self.output))
-        validator = ImageValidator()
-        validator.validate_file(self.output, self.ref)
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / 'movie.mp4'
+            movie.save(str(path))
+            validator = ImageValidator()
+            validator.validate_file(path, self.ref)

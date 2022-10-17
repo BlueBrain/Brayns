@@ -26,13 +26,10 @@ from dataclasses import dataclass
 class ImageValidator:
 
     threshold: float = 1.0
-    erase: bool = True
 
     def validate_file(self, test: pathlib.Path, ref: pathlib.Path) -> None:
         with test.open('rb') as file:
             data = file.read()
-        if self.erase:
-            test.unlink()
         self.validate_data(data, ref)
 
     def validate_data(self, test: bytes, ref: pathlib.Path) -> None:

@@ -30,8 +30,10 @@ class TestAddGeometries(unittest.TestCase):
     def test_add_geometries(self) -> None:
         instance = MockInstance(MockModel.message)
         model = brayns.add_geometries(instance, [
-            brayns.Plane(1, 2, 3, 4),
-            brayns.Plane(5, 6, 7, 8).with_color(brayns.Color4.red),
+            brayns.Plane(brayns.PlaneEquation(1, 2, 3, 4)),
+            brayns.Plane(
+                brayns.PlaneEquation(5, 6, 7, 8)
+            ).with_color(brayns.Color4.red),
         ])
         self.assertEqual(model, MockModel.model)
         self.assertEqual(instance.method, 'add-planes')

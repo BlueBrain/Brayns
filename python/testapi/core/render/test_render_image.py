@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
+import tempfile
 
 import brayns
 from testapi.image_validator import ImageValidator
@@ -27,11 +28,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestRenderImage(SimpleTestCase):
-
-    @property
-    def output(self) -> pathlib.Path:
-        folder = pathlib.Path(__file__).parent
-        return folder / 'test_render_image.jpg'
 
     @property
     def ref(self) -> pathlib.Path:
@@ -43,9 +39,11 @@ class TestRenderImage(SimpleTestCase):
         self.assertTrue(image.received)
         self.assertEqual(image.accumulation, 1)
         self.assertEqual(image.max_accumulation, 1)
-        image.save(str(self.output))
-        validator = ImageValidator()
-        validator.validate_file(self.output, self.ref)
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / 'test_render_image.jpg'
+            image.save(str(path))
+            validator = ImageValidator()
+            validator.validate_file(path, self.ref)
 
     def test_render_image_accumulation(self) -> None:
         self._prepare_render()

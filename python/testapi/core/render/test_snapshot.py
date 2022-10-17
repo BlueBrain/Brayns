@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pathlib
+import tempfile
 
 import brayns
 from testapi.image_validator import ImageValidator
@@ -29,41 +30,44 @@ from testapi.simple_test_case import SimpleTestCase
 class TestSnapshot(SimpleTestCase):
 
     @property
-    def output(self) -> pathlib.Path:
-        folder = pathlib.Path(__file__).parent
-        return folder / 'test_snapshot.png'
-
-    @property
     def ref(self) -> pathlib.Path:
         return self.asset_folder / 'snapshot.png'
 
     def test_save(self) -> None:
         snapshot = self._prepare_snapshot()
-        snapshot.save(self.instance, str(self.output))
-        validator = ImageValidator()
-        validator.validate_file(self.output, self.ref)
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / 'test_save.png'
+            snapshot.save(self.instance, str(path))
+            validator = ImageValidator()
+            validator.validate_file(path, self.ref)
 
     def test_save_task(self) -> None:
         snapshot = self._prepare_snapshot()
-        task = snapshot.save_task(self.instance, str(self.output))
-        self.assertTrue(list(task))
-        task.wait_for_result()
-        validator = ImageValidator()
-        validator.validate_file(self.output, self.ref)
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / 'test_save_task.png'
+            task = snapshot.save_task(self.instance, str(path))
+            self.assertTrue(list(task))
+            task.wait_for_result()
+            validator = ImageValidator()
+            validator.validate_file(path, self.ref)
 
     def test_save_remotely(self) -> None:
         snapshot = self._prepare_snapshot()
-        snapshot.save_remotely(self.instance, str(self.output))
-        validator = ImageValidator()
-        validator.validate_file(self.output, self.ref)
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / 'test_save_remotely.png'
+            snapshot.save_remotely(self.instance, str(path))
+            validator = ImageValidator()
+            validator.validate_file(path, self.ref)
 
     def test_save_remotely_task(self) -> None:
         snapshot = self._prepare_snapshot()
-        task = snapshot.save_remotely_task(self.instance, str(self.output))
-        self.assertTrue(list(task))
-        task.wait_for_result()
-        validator = ImageValidator()
-        validator.validate_file(self.output, self.ref)
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / 'test_save_remotely_task.png'
+            task = snapshot.save_remotely_task(self.instance, str(path))
+            self.assertTrue(list(task))
+            task.wait_for_result()
+            validator = ImageValidator()
+            validator.validate_file(path, self.ref)
 
     def test_download(self) -> None:
         snapshot = self._prepare_snapshot()
