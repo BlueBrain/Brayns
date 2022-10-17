@@ -146,15 +146,15 @@ class Instance(Protocol):
         """
         raise NotImplementedError()
 
-    def poll(self, block: bool = True) -> None:
+    def poll(self, block: bool) -> None:
         """Check if messages are received from the instance.
 
         When a message is received, it will update all existing futures.
 
         The futures call this method in blocking mode when iterated.
 
-        :param block: Wait until a message is received, defaults to True
-        :type block: bool, optional
+        :param block: Wait until a message is received if True.
+        :type block: bool
         """
         pass
 

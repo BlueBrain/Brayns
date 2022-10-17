@@ -45,10 +45,10 @@ class JsonRpcFuture:
         return JsonRpcFuture(
             task=JsonRpcTask.from_reply(reply),
             cancel=lambda: None,
-            poll=lambda: None,
+            poll=lambda _: None,
         )
 
-    def __init__(self, task: JsonRpcTask, cancel: Callable[[], None], poll: Callable[[], None]) -> None:
+    def __init__(self, task: JsonRpcTask, cancel: Callable[[], None], poll: Callable[[bool], None]) -> None:
         self._task = task
         self._cancel = cancel
         self._poll = poll
@@ -59,7 +59,7 @@ class JsonRpcFuture:
                 yield self.get_progress()
             if self.is_ready():
                 return
-            self.poll()
+            self.poll(block=True)
 
     def is_ready(self) -> bool:
         return self._task.is_ready()
@@ -75,8 +75,8 @@ class JsonRpcFuture:
             pass
         return self._task.get_reply()
 
-    def poll(self) -> None:
-        self._poll()
+    def poll(self, block: bool) -> None:
+        self._poll(block)
 
     def cancel(self) -> None:
         self._cancel()

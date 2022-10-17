@@ -81,7 +81,7 @@ class TestInstance(SimpleTestCase):
 
     def test_poll(self) -> None:
         task = self.instance.task('registry')
-        self.instance.poll()
+        self.instance.poll(block=True)
         self.assertTrue(task.is_ready())
         task.wait_for_reply()
 

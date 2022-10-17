@@ -133,7 +133,7 @@ class TestClient(unittest.TestCase):
         with self._connect(websocket) as client:
             future = client.send(request)
             self.assertFalse(future.is_ready())
-            client.poll()
+            client.poll(block=True)
             self.assertTrue(future.is_ready())
             self.assertEqual(future.wait_for_reply(), MockReply.reply)
 
