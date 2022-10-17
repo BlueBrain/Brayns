@@ -62,16 +62,16 @@ class TestClient(unittest.TestCase):
     def test_request_with_binary(self) -> None:
         websocket = self._create_websocket()
         request = MockRequest.binary_request
-        reply = MockReply.binary_reply
+        ref = MockReply.binary_reply
         websocket.binary_reply = MockReply.binary
         with self._connect(websocket) as client:
-            result, binary = client.execute(
+            reply = client.execute(
                 request.method,
                 request.params,
                 request.binary,
             )
-            self.assertEqual(result, reply.result)
-            self.assertEqual(binary, reply.binary)
+            self.assertEqual(reply.result, ref.result)
+            self.assertEqual(reply.binary, ref.binary)
         self.assertEqual(websocket.binary_request, MockRequest.binary)
 
     def test_task(self) -> None:

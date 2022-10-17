@@ -48,10 +48,10 @@ class TestInstance(SimpleTestCase):
             self.instance.request('invalid')
 
     def test_execute(self) -> None:
-        result, binary = self.instance.execute('snapshot', {})
-        self.assertIsInstance(result, dict)
-        self.assertTrue(result)
-        self.assertTrue(binary)
+        reply = self.instance.execute('snapshot', {})
+        self.assertIsInstance(reply.result, dict)
+        self.assertTrue(reply.result)
+        self.assertTrue(reply.binary)
 
     def test_task(self) -> None:
         task = self.instance.task('snapshot', {})

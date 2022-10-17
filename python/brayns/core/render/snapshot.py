@@ -23,7 +23,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.network import Instance
+from brayns.network import Instance, JsonRpcReply
 from brayns.utils import ImageFormat, Resolution, parse_image_format, serialize_view
 
 from ..camera import Camera
@@ -96,8 +96,8 @@ class Snapshot:
         :type path: str
         """
         params = _serialize_snapshot(self, format)
-        result, binary = _request(instance, params)
-        return _get_color_buffer(result, binary)
+        reply = _request(instance, params)
+        return _get_color_buffer(reply)
 
 
 def _serialize_snapshot(snapshot: Snapshot, format: ImageFormat, path: str | None = None) -> dict[str, Any]:
@@ -128,11 +128,12 @@ def _serialize_image_settings(snapshot: Snapshot, format: ImageFormat) -> dict[s
     return message
 
 
-def _request(instance: Instance, params: dict[str, Any]) -> tuple[Any, bytes]:
+def _request(instance: Instance, params: dict[str, Any]) -> JsonRpcReply:
     return instance.execute('snapshot', params)
 
 
-def _get_color_buffer(result: dict[str, Any], data: bytes) -> bytes:
+def _get_color_buffer(reply: JsonRpcReply) -> bytes:
+    result, data = reply.result, reply.binary
     buffer = result['color_buffer']
     offset = buffer['offset']
     size = buffer['size']
