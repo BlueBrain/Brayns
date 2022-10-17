@@ -46,7 +46,8 @@ def render_image(instance: Instance, send: bool = True, force: bool = False) -> 
         'send': send,
         'force': force,
     }
-    result, binary = instance.execute('render-image', params)
+    reply = instance.execute('render-image', params)
+    result, binary = reply.result, reply.binary
     return JpegImage(
         accumulation=result['accumulation'],
         max_accumulation=result['max_accumulation'],

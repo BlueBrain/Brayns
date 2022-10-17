@@ -47,7 +47,7 @@ int main(int argc, const char **argv)
 
         brayns::Brayns instance(argc, argv);
 
-        brayns::Log::info("Start Brayns service.");
+        brayns::Log::info("Starting Brayns service.");
 
         brayns::Timer timer;
 

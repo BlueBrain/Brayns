@@ -18,14 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .frame_exporter import FrameExporter
+from .exporter import Exporter
 from .jpeg_image import JpegImage
 from .key_frame import KeyFrame
 from .render_image import render_image
 from .snapshot import Snapshot
 
 __all__ = [
-    'FrameExporter',
+    'Exporter',
     'JpegImage',
     'KeyFrame',
     'render_image',

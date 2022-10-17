@@ -119,21 +119,21 @@ Brayns::Brayns(int argc, const char **argv)
 {
     LoggingStartup::run(_parametersManager);
 
-    Log::info("Register core loaders.");
+    Log::info("Registering core loaders.");
     _loaderRegistry = LoaderRegistry::createWithCoreLoaders();
 
     if (NetworkStartup::isEnabled(*this))
     {
-        Log::info("Initialize network manager.");
+        Log::info("Initializing network manager.");
         _network = std::make_unique<NetworkManager>(*this);
     }
 
-    Log::info("Load plugins.");
+    Log::info("Loading plugins.");
     _pluginManager.loadPlugins();
 
     if (_network)
     {
-        Log::info("Start network manager.");
+        Log::info("Starting network manager.");
         _network->start();
     }
 }
@@ -162,6 +162,7 @@ void Brayns::runAsService()
     {
         throw std::runtime_error("Trying to run a service without URI");
     }
+    Log::info("Brayns service started.");
     auto limiter = RateLimiter(std::chrono::milliseconds(1));
     while (_engine.isRunning())
     {

@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from typing import Any, Protocol, TypeVar
 
-from .jsonrpc import JsonRpcFuture, JsonRpcRequest
+from .jsonrpc import JsonRpcFuture, JsonRpcReply, JsonRpcRequest
 
 T = TypeVar('T', bound='Instance')
 
@@ -85,10 +85,10 @@ class Instance(Protocol):
         :return: JSON-RPC result.
         :rtype: Any
         """
-        result, _ = self.execute(method, params)
-        return result
+        reply = self.execute(method, params)
+        return reply.result
 
-    def execute(self, method: str, params: Any = None, binary: bytes = b'') -> tuple[Any, bytes]:
+    def execute(self, method: str, params: Any = None, binary: bytes = b'') -> JsonRpcReply:
         """Extended version of request to accept and return binary data.
 
         :param method: JSON-RPC method.
@@ -101,8 +101,7 @@ class Instance(Protocol):
         :rtype: tuple[Any, bytes]
         """
         task = self.task(method, params, binary)
-        reply = task.wait_for_reply()
-        return reply.result, reply.binary
+        return task.wait_for_reply()
 
     def task(self, method: str, params: Any = None, binary: bytes = b'') -> JsonRpcFuture:
         """Send a request to the instance in a non-blocking way.
@@ -147,15 +146,15 @@ class Instance(Protocol):
         """
         raise NotImplementedError()
 
-    def poll(self, block: bool = True) -> None:
+    def poll(self, block: bool) -> None:
         """Check if messages are received from the instance.
 
         When a message is received, it will update all existing futures.
 
         The futures call this method in blocking mode when iterated.
 
-        :param block: Wait until a message is received, defaults to True
-        :type block: bool, optional
+        :param block: Wait until a message is received if True.
+        :type block: bool
         """
         pass
 

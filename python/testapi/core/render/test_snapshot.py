@@ -43,9 +43,25 @@ class TestSnapshot(SimpleTestCase):
         validator = ImageValidator()
         validator.validate_file(self.output, self.ref)
 
+    def test_save_task(self) -> None:
+        snapshot = self._prepare_snapshot()
+        task = snapshot.save_task(self.instance, str(self.output))
+        self.assertTrue(list(task))
+        task.wait_for_result()
+        validator = ImageValidator()
+        validator.validate_file(self.output, self.ref)
+
     def test_save_remotely(self) -> None:
         snapshot = self._prepare_snapshot()
         snapshot.save_remotely(self.instance, str(self.output))
+        validator = ImageValidator()
+        validator.validate_file(self.output, self.ref)
+
+    def test_save_remotely_task(self) -> None:
+        snapshot = self._prepare_snapshot()
+        task = snapshot.save_remotely_task(self.instance, str(self.output))
+        self.assertTrue(list(task))
+        task.wait_for_result()
         validator = ImageValidator()
         validator.validate_file(self.output, self.ref)
 
@@ -54,6 +70,25 @@ class TestSnapshot(SimpleTestCase):
         test = snapshot.download(self.instance)
         validator = ImageValidator()
         validator.validate_data(test, self.ref)
+
+    def test_download_task(self) -> None:
+        snapshot = self._prepare_snapshot()
+        task = snapshot.download_task(self.instance)
+        self.assertTrue(list(task))
+        test = task.wait_for_result()
+        validator = ImageValidator()
+        validator.validate_data(test, self.ref)
+
+    def test_cancel(self) -> None:
+        loader = brayns.BbpLoader()
+        loader.load_models(self.instance, self.bbp_circuit)
+        snapshot = brayns.Snapshot(
+            renderer=brayns.InteractiveRenderer(2000),
+        )
+        task = snapshot.download_task(self.instance)
+        task.cancel()
+        with self.assertRaises(brayns.JsonRpcError):
+            task.wait_for_result()
 
     def _prepare_snapshot(self) -> brayns.Snapshot:
         path = self.asset_folder / 'cube.ply'

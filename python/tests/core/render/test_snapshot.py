@@ -67,11 +67,30 @@ class TestSnapshot(unittest.TestCase):
         ref = self.message | {'file_path': self.path}
         self.assertEqual(instance.params, ref)
 
+    def test_save_remotely_task(self) -> None:
+        reply = self._reply(0)
+        instance = MockInstance(reply)
+        task = self.snapshot.save_remotely_task(instance, self.path)
+        task.wait_for_result()
+        self.assertEqual(instance.method, 'snapshot')
+        ref = self.message | {'file_path': self.path}
+        self.assertEqual(instance.params, ref)
+
     def test_download(self) -> None:
         data = b'test'
         reply = self._reply(len(data))
         instance = MockInstance(reply, data)
         test = self.snapshot.download(instance, brayns.ImageFormat.JPEG)
+        self.assertEqual(test, data)
+        self.assertEqual(instance.method, 'snapshot')
+        self.assertEqual(instance.params, self.message)
+
+    def test_download_task(self) -> None:
+        data = b'test'
+        reply = self._reply(len(data))
+        instance = MockInstance(reply, data)
+        task = self.snapshot.download_task(instance, brayns.ImageFormat.JPEG)
+        test = task.wait_for_result()
         self.assertEqual(test, data)
         self.assertEqual(instance.method, 'snapshot')
         self.assertEqual(instance.params, self.message)

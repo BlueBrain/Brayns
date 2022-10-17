@@ -60,8 +60,8 @@ class Client(Instance):
         self._send(request)
         return self._create_future(request.id)
 
-    def poll(self, block: bool = True) -> None:
-        self._logger.debug('Waiting for messages from Brayns instance.')
+    def poll(self, block: bool) -> None:
+        self._logger.debug('Polling messages from Brayns instance.')
         self._websocket.poll(block)
 
     def cancel(self, id: int | str) -> None:
@@ -85,5 +85,5 @@ class Client(Instance):
         return JsonRpcFuture(
             task=self._manager.create_task(id),
             cancel=lambda: self.cancel(id),
-            poll=lambda: self.poll(),
+            poll=lambda block: self.poll(block),
         )
