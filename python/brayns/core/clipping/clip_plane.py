@@ -30,9 +30,7 @@ from .clipping_geometry import ClippingGeometry
 class ClipPlane(ClippingGeometry):
     """Clip plane.
 
-    The normal vector indicates the upper side of the plane.
-
-    Everything below the given plane is clipped:
+    Everything below the given plane is clipped (see PlaneEquation).
 
     Multiple clip planes can be combined to slice a model in complex ways.
 

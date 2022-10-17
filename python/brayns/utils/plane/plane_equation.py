@@ -20,11 +20,13 @@
 
 from __future__ import annotations
 
-from ..vector import Vector
+from ..vector import Vector, Vector3
 
 
 class PlaneEquation(Vector[float]):
     """Plane equation such as ax + by + cz + d = 0.
+
+    Normal and direction point to the upper side of the plane.
 
     :param x: X component.
     :type x: float
@@ -54,3 +56,11 @@ class PlaneEquation(Vector[float]):
     @property
     def d(self) -> float:
         return self[3]
+
+    @property
+    def normal(self) -> Vector3:
+        return Vector3(self.a, self.b, self.c)
+
+    @property
+    def direction(self) -> Vector3:
+        return self.normal.normalized
