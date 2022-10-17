@@ -133,7 +133,7 @@ public:
     static void handle(
         const brayns::SnapshotEntrypoint::Request &request,
         const brayns::SnapshotParams &params,
-        brayns::CancellationToken token,
+        brayns::CancellationToken &token,
         brayns::Engine &engine)
     {
         // Parameters

@@ -79,6 +79,17 @@ class TestSnapshot(SimpleTestCase):
         validator = ImageValidator()
         validator.validate_data(test, self.ref)
 
+    def test_cancel(self) -> None:
+        loader = brayns.BbpLoader()
+        loader.load_models(self.instance, self.bbp_circuit)
+        snapshot = brayns.Snapshot(
+            renderer=brayns.InteractiveRenderer(2000),
+        )
+        task = snapshot.download_task(self.instance)
+        task.cancel()
+        with self.assertRaises(brayns.JsonRpcError):
+            task.wait_for_result()
+
     def _prepare_snapshot(self) -> brayns.Snapshot:
         path = self.asset_folder / 'cube.ply'
         loader = brayns.MeshLoader()

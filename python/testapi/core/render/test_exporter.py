@@ -51,6 +51,15 @@ class TestExporter(SimpleTestCase):
         task.wait_for_result()
         self._check_frames()
 
+    def test_cancel(self) -> None:
+        self._load_circuit()
+        exporter = self._prepare_export()
+        task = exporter.export_frames_task(self.instance, str(self.output))
+        task.cancel()
+        with self.assertRaises(brayns.JsonRpcError):
+            task.wait_for_result()
+        self._cleanup()
+
     def _load_circuit(self) -> None:
         loader = brayns.BbpLoader(
             report=brayns.BbpReport.compartment('somas'),
@@ -77,5 +86,10 @@ class TestExporter(SimpleTestCase):
                 validator.validate_file(test, ref)
             except RuntimeError as e:
                 errors.append(str(e))
-        self.output.rmdir()
+        self._cleanup()
         self.assertFalse(errors)
+
+    def _cleanup(self) -> None:
+        for path in self.output.glob('*'):
+            path.unlink()
+        self.output.rmdir()
