@@ -136,6 +136,7 @@ __all__ = [
     'MeshLoader',
     'MetalMaterial',
     'Model',
+    'ModelRotation',
     'Morphology',
     'MorphologyLoader',
     'Movie',

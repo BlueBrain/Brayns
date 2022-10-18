@@ -48,6 +48,7 @@ __all__ = [
     'Fovy',
     'ImageFormat',
     'merge_bounds',
+    'ModelRotation',
     'parse_hex_color',
     'parse_image_format',
     'PlaneEquation',

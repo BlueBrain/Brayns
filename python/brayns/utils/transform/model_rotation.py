@@ -18,20 +18,42 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .deserialize_transform import deserialize_transform
 from .euler import euler
-from .model_rotation import ModelRotation
-from .quaternion import Quaternion
 from .rotation import Rotation
-from .serialize_transform import serialize_transform
-from .transform import Transform
 
-__all__ = [
-    'deserialize_transform',
-    'euler',
-    'ModelRotation',
-    'Quaternion',
-    'Rotation',
-    'serialize_transform',
-    'Transform',
-]
+
+class ModelRotation:
+    """Helper class to store model rotations to reach different views.
+
+    All rotations are relative to front view (X-right, Y-up, Z-front).
+    """
+
+    @classmethod
+    @property
+    def front(cls) -> Rotation:
+        return Rotation.identity
+
+    @classmethod
+    @property
+    def back(cls) -> Rotation:
+        return euler(0, 180, 0, degrees=True)
+
+    @classmethod
+    @property
+    def top(cls) -> Rotation:
+        return euler(90, 0, 0, degrees=True)
+
+    @classmethod
+    @property
+    def bottom(cls) -> Rotation:
+        return euler(-90, 0, 0, degrees=True)
+
+    @classmethod
+    @property
+    def right(cls) -> Rotation:
+        return euler(0, -90, 0, degrees=True)
+
+    @classmethod
+    @property
+    def left(cls) -> Rotation:
+        return euler(0, 90, 0, degrees=True)
