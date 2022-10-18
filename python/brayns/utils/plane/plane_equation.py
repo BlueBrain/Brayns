@@ -33,8 +33,8 @@ class PlaneEquation(Vector[float]):
     :param b: B component.
     :type b: float
     :param c: C component.
-    :type z: float
-    :param c: D component.
+    :type c: float
+    :param d: D component.
     :type d: float
     """
 
