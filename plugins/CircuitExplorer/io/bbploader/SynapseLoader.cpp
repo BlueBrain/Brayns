@@ -120,7 +120,7 @@ namespace bbploader
 std::unique_ptr<brayns::Model> SynapseLoader::load(const LoadContext &context, bool post)
 {
     auto modelType = post ? ModelType::afferentSynapses : ModelType::efferentSynapses;
-    auto model = std::make_unique<brayns::Model>(std::string(modelType));
+    auto model = std::make_unique<brayns::Model>(modelType);
     auto geometryData = GeometryLoader::load(context, post);
     auto colorData = SynapseColorComponentFactory::create(context);
     SynapseCircuitBuilder::build(*model, std::move(geometryData), std::move(colorData));

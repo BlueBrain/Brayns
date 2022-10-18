@@ -109,7 +109,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
         auto nodes = network.circuitConfig().getNodePopulation(nodeName);
         auto nodeSelection = sl::NodeSelector::select(network, nodeParams);
         auto nodeModelType = sl::SonataModelType::fromNodes(nodes);
-        auto nodeModel = std::make_unique<brayns::Model>(std::string(nodeModelType));
+        auto nodeModel = std::make_unique<brayns::Model>(nodeModelType);
         auto nodeContext = sl::NodeLoadContext{network, nodeParams, nodes, nodeSelection, *nodeModel, progress};
         sl::NodeLoader::loadNodes(nodeContext);
         result.push_back(std::move(nodeModel));
@@ -124,7 +124,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
             auto edges = network.circuitConfig().getEdgePopulation(edgeName);
             auto edgeSelection = sl::EdgeSelector::select(network, edgeParams, nodeSelection);
             auto edgeModelType = sl::SonataModelType::fromEdges(edges, edgeParams.load_afferent);
-            auto edgeModel = std::make_unique<brayns::Model>(std::string(edgeModelType));
+            auto edgeModel = std::make_unique<brayns::Model>(edgeModelType);
             auto edgeContext = sl::EdgeLoadContext{
                 network,
                 edgeParams,

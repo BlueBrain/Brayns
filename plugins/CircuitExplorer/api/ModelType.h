@@ -18,15 +18,15 @@
 
 #pragma once
 
-#include <string_view>
+#include <string>
 
 struct ModelType
 {
-    static constexpr std::string_view neurons = "neurons";
-    static constexpr std::string_view astroctyes = "astrocytes";
-    static constexpr std::string_view vasculature = "vasculature";
-    static constexpr std::string_view afferentSynapses = "afferent_synapses";
-    static constexpr std::string_view efferentSynapses = "efferent_synapses";
-    static constexpr std::string_view endfeet = "endfeet";
-    static constexpr std::string_view morphology = "morphology";
+    inline static const std::string neurons = "neurons";
+    inline static const std::string astroctyes = "astrocytes";
+    inline static const std::string vasculature = "vasculature";
+    inline static const std::string afferentSynapses = "afferent_synapses";
+    inline static const std::string efferentSynapses = "efferent_synapses";
+    inline static const std::string endfeet = "endfeet";
+    inline static const std::string morphology = "morphology";
 };

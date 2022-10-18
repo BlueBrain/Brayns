@@ -54,7 +54,7 @@ std::unique_ptr<brayns::Model> Density::run(const Atlas &atlas, const brayns::Js
     densityVolume.size = scalarAtlas.getSize();
     densityVolume.spacing = scalarAtlas.getSpacing();
 
-    auto model = std::make_unique<brayns::Model>(std::string(atlasModelType));
+    auto model = std::make_unique<brayns::Model>(ModelType::atlas);
 
     auto &components = model->getComponents();
 

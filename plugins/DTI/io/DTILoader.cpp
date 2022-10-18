@@ -108,7 +108,7 @@ std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromFile(
     const DTILoaderParameters &params) const
 {
     std::vector<std::unique_ptr<brayns::Model>> result;
-    result.push_back(std::make_unique<brayns::Model>(std::string(dtiModelType)));
+    result.push_back(std::make_unique<brayns::Model>(ModelType::dti));
     auto &model = *(result.back());
 
     callback.updateProgress("Reading configuration", 0.f);

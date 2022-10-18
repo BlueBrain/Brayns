@@ -162,7 +162,7 @@ std::unique_ptr<brayns::Model> OrientationField::run(const Atlas &atlas, const b
     auto orientationAtlas = static_cast<const OrientationAtlas &>(atlas);
     auto gizmo = GizmoBuilder::build(orientationAtlas);
 
-    auto model = std::make_unique<brayns::Model>(std::string(atlasModelType));
+    auto model = std::make_unique<brayns::Model>(ModelType::atlas);
     auto builder = ModelBuilder(*model);
     builder.addComponents(gizmo);
     builder.addSystems();

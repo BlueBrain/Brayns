@@ -82,7 +82,7 @@ std::unique_ptr<brayns::Model> OutlineShell::run(const Atlas &atlas, const brayn
 {
     (void)payload;
 
-    auto model = std::make_unique<brayns::Model>(std::string(atlasModelType));
+    auto model = std::make_unique<brayns::Model>(ModelType::atlas);
 
     auto isoVolume = VolumeBuilder::fromAtlas(atlas);
     auto isoValues = std::vector<float>{1.f};

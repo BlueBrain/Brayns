@@ -28,7 +28,7 @@ namespace sonataloader
 class SonataModelType
 {
 public:
-    static std::string_view fromNodes(const bbp::sonata::NodePopulation &population);
-    static std::string_view fromEdges(const bbp::sonata::EdgePopulation &population, bool afferent);
+    static const std::string &fromNodes(const bbp::sonata::NodePopulation &population);
+    static const std::string &fromEdges(const bbp::sonata::EdgePopulation &population, bool afferent);
 };
 }

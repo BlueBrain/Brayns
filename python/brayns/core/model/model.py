@@ -35,6 +35,8 @@ class Model:
 
     :param id: Model ID.
     :type id: int
+    :param type: Model type.
+    :type type: str
     :param bounds: Model bounding box.
     :type bounds: Bounds
     :param info: Intrinsic nodel information.
@@ -46,6 +48,7 @@ class Model:
     """
 
     id: int
+    type: str
     bounds: Bounds
     info: dict[str, Any]
     visible: bool

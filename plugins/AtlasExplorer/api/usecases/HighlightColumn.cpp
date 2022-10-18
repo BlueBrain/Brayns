@@ -152,7 +152,7 @@ std::unique_ptr<brayns::Model> HighlightColumn::run(const Atlas &atlas, const br
         colors.push_back(neighbour.color);
     }
 
-    auto model = std::make_unique<brayns::Model>(std::string(atlasModelType));
+    auto model = std::make_unique<brayns::Model>(ModelType::atlas);
 
     ModelBuilder builder(*model);
     builder.addComponents(std::move(geometry), colors);

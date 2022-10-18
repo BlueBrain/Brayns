@@ -20,9 +20,12 @@
 
 #pragma once
 
-#include <string_view>
+#include <string>
 
 namespace dti
 {
-constexpr static std::string_view dtiModelType = "dti";
+struct ModelType
+{
+    inline static const std::string dti = "dti";
+};
 }

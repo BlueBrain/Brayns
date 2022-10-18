@@ -33,6 +33,7 @@ class MockModel:
     def model(cls) -> brayns.Model:
         return brayns.Model(
             id=0,
+            type='test',
             bounds=MockBounds.bounds,
             info={'test': '1'},
             visible=True,
@@ -44,6 +45,7 @@ class MockModel:
     def message(cls) -> dict[str, Any]:
         return {
             'model_id': 0,
+            'model_type': 'test',
             'bounds': MockBounds.message,
             'info': {'test': '1'},
             'is_visible': True,

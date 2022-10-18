@@ -29,19 +29,19 @@ namespace
 {
 namespace sl = sonataloader;
 
-inline static const std::unordered_map<std::string, std::string> nodeToType = {
-    {std::string(sl::SonataNodeNames::astrocyte), std::string(ModelType::astroctyes)},
-    {std::string(sl::SonataNodeNames::biophysical), std::string(ModelType::neurons)},
-    {std::string(sl::SonataNodeNames::pointNeuron), std::string(ModelType::neurons)},
-    {std::string(sl::SonataNodeNames::vasculature), std::string(ModelType::vasculature)}};
+inline static const std::unordered_map<std::string_view, std::string> nodeToType = {
+    {sl::SonataNodeNames::astrocyte, ModelType::astroctyes},
+    {sl::SonataNodeNames::biophysical, ModelType::neurons},
+    {sl::SonataNodeNames::pointNeuron, ModelType::neurons},
+    {sl::SonataNodeNames::vasculature, ModelType::vasculature}};
 }
 
 namespace sonataloader
 {
-std::string_view SonataModelType::fromNodes(const bbp::sonata::NodePopulation &population)
+const std::string &SonataModelType::fromNodes(const bbp::sonata::NodePopulation &population)
 {
     auto populationType = SonataCells::getPopulationType(population);
-    auto it = nodeToType.find(std::string(populationType));
+    auto it = nodeToType.find(populationType);
     if (it == nodeToType.end())
     {
         throw std::invalid_argument("Unsupported population type");
@@ -50,7 +50,7 @@ std::string_view SonataModelType::fromNodes(const bbp::sonata::NodePopulation &p
     return it->second;
 }
 
-std::string_view SonataModelType::fromEdges(const bbp::sonata::EdgePopulation &population, bool afferent)
+const std::string &SonataModelType::fromEdges(const bbp::sonata::EdgePopulation &population, bool afferent)
 {
     auto populationType = SonataSynapses::getPopulationType(population);
     if (populationType == SonataEdgeNames::endfoot)

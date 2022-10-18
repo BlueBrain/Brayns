@@ -97,7 +97,7 @@ std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
     auto neuronGeometry = builder.instantiate({}, {});
     auto &primitives = neuronGeometry.geometry;
 
-    auto model = std::make_unique<brayns::Model>(std::string(ModelType::morphology));
+    auto model = std::make_unique<brayns::Model>(ModelType::morphology);
 
     auto &components = model->getComponents();
     auto &geometries = components.add<brayns::Geometries>();

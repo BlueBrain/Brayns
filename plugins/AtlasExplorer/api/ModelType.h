@@ -20,6 +20,9 @@
 
 #pragma once
 
-#include <string_view>
+#include <string>
 
-static constexpr std::string_view atlasModelType = "atlas";
+struct ModelType
+{
+    inline static const std::string atlas = "atlas";
+};

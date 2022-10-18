@@ -128,7 +128,7 @@ class ModelBuilder
 public:
     static std::unique_ptr<brayns::Model> build(std::vector<std::vector<brayns::Box>> primitives)
     {
-        auto model = std::make_unique<brayns::Model>(std::string(atlasModelType));
+        auto model = std::make_unique<brayns::Model>(ModelType::atlas);
 
         auto &components = model->getComponents();
 

@@ -28,6 +28,7 @@ from .model import Model
 def deserialize_model(message: dict[str, Any]) -> Model:
     return Model(
         id=message['model_id'],
+        type=message['model_type'],
         bounds=deserialize_bounds(message['bounds']),
         info=message.get('info', {}),
         visible=message['is_visible'],

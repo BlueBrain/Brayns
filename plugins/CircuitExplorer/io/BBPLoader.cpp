@@ -132,7 +132,7 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
 
     std::vector<std::unique_ptr<brayns::Model>> result;
 
-    auto model = std::make_unique<brayns::Model>(std::string(ModelType::neurons));
+    auto model = std::make_unique<brayns::Model>(ModelType::neurons);
 
     // Load neurons
     updater.beginStage(gids.size());
