@@ -102,7 +102,7 @@ ModelInstance &ModelManager::createInstance(const uint32_t instanceID)
 {
     auto &sourceInstance = ModelFinder::findInstance(_instances, instanceID);
     auto &model = sourceInstance.getModel();
-    auto modelId = model._modelId;
+    auto modelId = model.getID();
     auto &modelEntry = ModelFinder::findEntry(_models, modelId);
     return _createModelInstance(modelEntry);
 }
@@ -224,7 +224,7 @@ ModelManager::ModelEntry &ModelManager::_createModelEntry(std::unique_ptr<Model>
 {
     auto &modelEntry = _models.emplace_back();
     modelEntry.model = std::move(model);
-    modelEntry.model->_modelId = _modelIdFactory.generateID();
+    modelEntry.model->_id = _modelIdFactory.generateID();
     modelEntry.model->init();
     return modelEntry;
 }

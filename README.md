@@ -1,4 +1,4 @@
-![Banner](/doc/banner.png?raw=true "Brayns banner")
+![Banner](/doc/banner.jpg?raw=true "Brayns banner")
 
 [![DOI](https://zenodo.org/badge/61363694.svg)](https://zenodo.org/badge/latestdoi/61363694)
 

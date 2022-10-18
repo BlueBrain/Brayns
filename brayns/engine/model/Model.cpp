@@ -76,9 +76,19 @@ private:
 
 namespace brayns
 {
+Model::Model(std::string type)
+    : _type(std::move(type))
+{
+}
+
 uint32_t Model::getID() const noexcept
 {
-    return _modelId;
+    return _id;
+}
+
+const std::string &Model::getType() const noexcept
+{
+    return _type;
 }
 
 ospray::cpp::Group &Model::getHandle() noexcept

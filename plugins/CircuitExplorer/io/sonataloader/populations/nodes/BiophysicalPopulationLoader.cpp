@@ -20,6 +20,7 @@
 
 #include <io/sonataloader/colordata/node/BiophysicalColorData.h>
 #include <io/sonataloader/data/SonataCells.h>
+#include <io/sonataloader/data/SonataNames.h>
 #include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
 #include <io/sonataloader/populations/nodes/common/MorphologyImporter.h>
 #include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
@@ -27,9 +28,9 @@
 
 namespace sonataloader
 {
-std::string BiophysicalPopulationLoader::getPopulationType() const noexcept
+std::string_view BiophysicalPopulationLoader::getPopulationType() const noexcept
 {
-    return "biophysical";
+    return SonataNodeNames::biophysical;
 }
 
 void BiophysicalPopulationLoader::load(NodeLoadContext &context) const

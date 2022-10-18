@@ -1,6 +1,8 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,18 +20,6 @@
 
 #pragma once
 
-#include <io/sonataloader/populations/EdgePopulationLoader.h>
+#include <string_view>
 
-namespace sonataloader
-{
-/**
- * @brief Implements the edge load functionality to read 'chemical' edge population types
- */
-class ChemicalSynapsePopulationLoader final : public EdgePopulationLoader
-{
-public:
-    std::string_view getPopulationType() const noexcept override;
-
-    void load(EdgeLoadContext &context) const override;
-};
-} // namespace sonataloader
+static constexpr std::string_view atlasModelType = "atlas";

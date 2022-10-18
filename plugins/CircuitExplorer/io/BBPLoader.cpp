@@ -25,6 +25,7 @@
 #include <brayns/utils/Timer.h>
 #include <brayns/utils/string/StringCase.h>
 
+#include <api/ModelType.h>
 #include <io/bbploader/CellLoader.h>
 #include <io/bbploader/GIDLoader.h>
 #include <io/bbploader/LoadContext.h>
@@ -51,16 +52,14 @@ struct SynapseImporter
         if (afferent)
         {
             updater.update("Loading afferent synapses");
-            modelList.push_back(std::make_unique<brayns::Model>());
-            auto &model = *(modelList.back());
-            bbploader::SynapseLoader::load(context, true, model);
+            auto model = bbploader::SynapseLoader::load(context, true);
+            modelList.push_back(std::move(model));
         }
         if (efferent)
         {
             updater.update("Loading efferent synapses");
-            modelList.push_back(std::make_unique<brayns::Model>());
-            auto &model = *(modelList.back());
-            bbploader::SynapseLoader::load(context, false, model);
+            auto model = bbploader::SynapseLoader::load(context, false);
+            modelList.push_back(std::move(model));
         }
     }
 };
@@ -133,18 +132,19 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
 
     std::vector<std::unique_ptr<brayns::Model>> result;
 
-    result.push_back(std::make_unique<brayns::Model>());
-    auto &cellModel = *(result.back());
+    auto model = std::make_unique<brayns::Model>(std::string(ModelType::neurons));
 
     // Load neurons
     updater.beginStage(gids.size());
-    auto compartments = bbploader::CellLoader::load(context, updater, cellModel);
+    auto compartments = bbploader::CellLoader::load(context, updater, *model);
     updater.endStage();
 
     // Load simulation
     updater.beginStage();
-    bbploader::ReportLoader::load(context, compartments, updater, cellModel);
+    bbploader::ReportLoader::load(context, compartments, updater, *model);
     updater.endStage();
+
+    result.push_back(std::move(model));
 
     // Load synapses
     updater.beginStage(2);

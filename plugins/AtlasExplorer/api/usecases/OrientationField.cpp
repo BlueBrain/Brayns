@@ -28,6 +28,7 @@
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
+#include <api/ModelType.h>
 #include <api/atlases/OrientationAtlas.h>
 
 #include <cassert>
@@ -161,7 +162,7 @@ std::unique_ptr<brayns::Model> OrientationField::run(const Atlas &atlas, const b
     auto orientationAtlas = static_cast<const OrientationAtlas &>(atlas);
     auto gizmo = GizmoBuilder::build(orientationAtlas);
 
-    auto model = std::make_unique<brayns::Model>();
+    auto model = std::make_unique<brayns::Model>(std::string(atlasModelType));
     auto builder = ModelBuilder(*model);
     builder.addComponents(gizmo);
     builder.addSystems();

@@ -31,6 +31,7 @@
 #include <components/Coloring.h>
 #include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
 #include <io/sonataloader/data/SonataEndFeetReader.h>
+#include <io/sonataloader/data/SonataNames.h>
 #include <io/sonataloader/data/SonataSynapses.h>
 
 namespace
@@ -201,9 +202,9 @@ private:
 
 namespace sonataloader
 {
-std::string EndFootPopulationLoader::getPopulationType() const noexcept
+std::string_view EndFootPopulationLoader::getPopulationType() const noexcept
 {
-    return "endfoot";
+    return SonataEdgeNames::endfoot;
 }
 
 void EndFootPopulationLoader::load(EdgeLoadContext &context) const

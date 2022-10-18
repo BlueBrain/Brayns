@@ -28,7 +28,7 @@ namespace sonataloader
 class VasculaturePopulationLoader final : public NodePopulationLoader
 {
 public:
-    std::string getPopulationType() const noexcept override;
+    std::string_view getPopulationType() const noexcept override;
 
     void load(NodeLoadContext &context) const override;
 };

@@ -18,18 +18,17 @@
 
 #pragma once
 
-#include <io/sonataloader/populations/EdgePopulationLoader.h>
+#include <bbp/sonata/edges.h>
+#include <bbp/sonata/nodes.h>
+
+#include <string_view>
 
 namespace sonataloader
 {
-/**
- * @brief Implements the edge load functionality to read 'chemical' edge population types
- */
-class ChemicalSynapsePopulationLoader final : public EdgePopulationLoader
+class SonataModelType
 {
 public:
-    std::string_view getPopulationType() const noexcept override;
-
-    void load(EdgeLoadContext &context) const override;
+    static std::string_view fromNodes(const bbp::sonata::NodePopulation &population);
+    static std::string_view fromEdges(const bbp::sonata::EdgePopulation &population, bool afferent);
 };
-} // namespace sonataloader
+}

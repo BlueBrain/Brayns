@@ -59,7 +59,7 @@ struct ZParallelSliceManager
         const auto planeB = brayns::Vector3f(0.f, 0.f, -1.f);
         const auto planeBDistance = -center.z - sliceThickness * 0.5f;
 
-        auto model = std::make_unique<brayns::Model>();
+        auto model = std::make_unique<brayns::Model>("");
 
         auto planes = std::vector<brayns::Plane>{
             brayns::Plane{{planeA, planeADistance}},

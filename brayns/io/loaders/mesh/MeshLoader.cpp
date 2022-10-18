@@ -94,7 +94,7 @@ class MeshLoadingHelper
 public:
     static std::unique_ptr<brayns::Model> load(const brayns::TriangleMesh &mesh)
     {
-        auto model = std::make_unique<brayns::Model>();
+        auto model = std::make_unique<brayns::Model>("mesh");
 
         auto &components = model->getComponents();
         auto &geometries = components.add<brayns::Geometries>();

@@ -21,6 +21,8 @@
 #include <io/sonataloader/LoadContext.h>
 #include <io/util/ProgressUpdater.h>
 
+#include <string_view>
+
 namespace sonataloader
 {
 /**
@@ -38,7 +40,7 @@ public:
      *
      * @return std::string
      */
-    virtual std::string getPopulationType() const noexcept = 0;
+    virtual std::string_view getPopulationType() const noexcept = 0;
 
     /**
      * @brief Interface to load a node population

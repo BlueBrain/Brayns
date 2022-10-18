@@ -18,13 +18,14 @@
 
 #include "ElectricalSynapsePopulationLoader.h"
 
+#include <io/sonataloader/data/SonataNames.h>
 #include <io/sonataloader/populations/edges/common/SynapseImporter.h>
 
 namespace sonataloader
 {
-std::string ElectricalSynapsePopulationLoader::getPopulationType() const noexcept
+std::string_view ElectricalSynapsePopulationLoader::getPopulationType() const noexcept
 {
-    return "electrical_synapse";
+    return SonataEdgeNames::electrical;
 }
 
 void ElectricalSynapsePopulationLoader::load(EdgeLoadContext &context) const

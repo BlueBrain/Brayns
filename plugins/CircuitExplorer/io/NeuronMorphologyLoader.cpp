@@ -27,6 +27,7 @@
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
+#include <api/ModelType.h>
 #include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
 #include <api/neuron/NeuronMorphologyReader.h>
@@ -96,7 +97,7 @@ std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
     auto neuronGeometry = builder.instantiate({}, {});
     auto &primitives = neuronGeometry.geometry;
 
-    auto model = std::make_unique<brayns::Model>();
+    auto model = std::make_unique<brayns::Model>(std::string(ModelType::morphology));
 
     auto &components = model->getComponents();
     auto &geometries = components.add<brayns::Geometries>();

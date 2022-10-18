@@ -47,7 +47,7 @@ public:
 
     void onRequest(const Request &request) override
     {
-        auto model = std::make_unique<Model>();
+        auto model = std::make_unique<Model>("geometry");
 
         auto [primitives, colors] = _unpackRequest(request);
 
