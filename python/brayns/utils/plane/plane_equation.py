@@ -24,7 +24,7 @@ from ..vector import Vector, Vector3
 
 
 class PlaneEquation(Vector[float]):
-    """Plane equation such as ax + by + cz + d = 0.
+    """Plane equation satisfying ax + by + cz + d = 0.
 
     Normal and direction point to the upper side of the plane.
 
