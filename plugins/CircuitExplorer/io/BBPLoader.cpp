@@ -60,7 +60,7 @@ struct SynapseImporter
             updater.update("Loading efferent synapses");
             modelList.push_back(std::make_unique<brayns::Model>());
             auto &model = *(modelList.back());
-            bbploader::SynapseLoader::load(context, true, model);
+            bbploader::SynapseLoader::load(context, false, model);
         }
     }
 };
