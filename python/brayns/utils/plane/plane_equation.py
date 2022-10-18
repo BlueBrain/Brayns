@@ -28,13 +28,13 @@ class PlaneEquation(Vector[float]):
 
     Normal and direction point to the upper side of the plane.
 
-    :param x: X component.
-    :type x: float
-    :param y: Y component.
-    :type y: float
-    :param z: Z component.
+    :param a: A component.
+    :type a: float
+    :param b: B component.
+    :type b: float
+    :param c: C component.
     :type z: float
-    :param d: D component.
+    :param c: D component.
     :type d: float
     """
 
