@@ -1,27 +1,33 @@
 Load a model
 ============
 
-Everything that is rendered by Brayns is called `Model`. A model is usually an
-assembly of primitives (spheres, boxes, planes, meshes, ...) and can have
-a simulation attached to it.
+Now that we are connected to a braynsService instance, it is time to load
+something to render.
+
+All entities in Brayns are models and refered as ``Model`` in the API. A model
+can be something to render (circuit, mesh, morphology, etc...), a light or a
+clipping geometry.
+
+Everything that is going to be rendered is usually an assembly of primitives
+(spheres, capsules, meshes, etc...) and can have a simulation attached.
 
 A simulation can change the model color or radius depending on the global
-`Simulation` state (current frame). The user is responsible to choose the
+``Simulation`` state (current frame). The user is responsible to choose the
 current simulation frame, the backend doesn't perform any update on this.
 
 Models can be built from different file formats. The support to parse and load
 different files (SONATA, BlueConfig, DTI, ...) is added by plugins
-:ref:`plugins-label`. By default, Brayns only supports mesh loading without
+:ref:``plugins-label``. By default, Brayns only supports mesh loading without
 plugins.
 
 Loader
 ------
 
 Loaders contain the settings to load specific file formats. They are mostly
-contained in the `braynsCircuitExplorer` plugin (SONATA, BBP) for the backend
-support and in `SonataLoader` and `BbpLoader` for the Python API.
+contained in the ``braynsCircuitExplorer`` plugin (SONATA, BBP) for the backend
+support and in ``SonataLoader`` and ``BbpLoader`` for the Python API.
 
-Here in this example, we will load a file a BBP format (BlueConfig).
+Here in this example, we will load a file at BBP format (BlueConfig).
 
 .. code-block:: python
 
@@ -40,11 +46,9 @@ Here in this example, we will load a file a BBP format (BlueConfig).
 Here we won't get too much in the details of the parameters as they depend on
 the loader but basically user can specify:
 
-- The density of cells to load, it can also be specified by target or by listing
-    the GIDs.
+- The cells to load, can be specified using density, targets or GIDs.
 - Which report to load (here compartment or spike) with the report parameters.
-- How to load the morphologies of the circuit (radius multiplier, which parts
-    to load, ...).
+- The morphologies to load and how to load them.
 
 Geometries
 ----------
@@ -69,21 +73,21 @@ Now we can use the loader to load models from a file and retreive them.
 
     circuit_path = 'path/to/BlueConfig'
 
-    models = loader.load(instance, circuit_path)
+    models = loader.load_models(instance, circuit_path)
 
     # We will take the first one for the next examples.
     model = models[0]
 
-It returns a list of `Model` created by the loader (usually it is a single
-model). It is important to get their ID (`model.id`) if you need to update them.
+It returns a list of ``Model`` created by the loader (usually it is a single
+model). It is important to get their ID (``model.id``) if you need to update them.
 
-Model can also be retreived with `get_model` and removed using `remove_models`,
-to select the IDs to erase, or `clear_models` to remove them all.
+Model can also be retreived with ``get_model`` and removed using ``remove_models``
+(from their IDs) or ``clear_models`` (remove all).
 
 Update a model
 ~~~~~~~~~~~~~~
 
-Models can be moved and made invisible using the `update_model` function.
+Models can be moved and made invisible using the ``update_model`` function.
 
 .. hint::
 
@@ -125,7 +129,7 @@ Here is an example to color SSCX circuit by layer.
     method = brayns.ColorMethod.LAYER
 
     # Map method value to color.
-    color = brayns.color_circuit_by_method(instance, model.id, method, {
+    brayns.color_circuit_by_method(instance, model.id, method, {
         '1': brayns.Color4(255, 242, 59, 255) / 255,
         '2': brayns.Color4(248, 148, 48, 255) / 255,
         '3': brayns.Color4(225, 45, 97, 255) / 255,
@@ -135,13 +139,13 @@ Here is an example to color SSCX circuit by layer.
     })
 
 Available color methods and method values for a given circuit (model) can be
-retreived using `get_color_methods` and `get_color_method_values`.
+retreived using ``get_color_methods`` and ``get_color_method_values``.
 
-Some alternatives exist with `color_circuit_by_id` and `color_circuit`.
+Some alternatives exist with ``color_circuit_by_id`` and ``color_circuit``.
 
 Switch between original color and simulation color
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a model has a simulation attached, its original color can be overriden by
-the simulation color. To avoid this `enable_simulation` can be used to enable /
+the simulation color. To avoid this ``enable_simulation`` can be used to enable /
 disable simulation colors for a given model.
