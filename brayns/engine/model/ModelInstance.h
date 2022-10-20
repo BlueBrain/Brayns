@@ -78,6 +78,12 @@ public:
     const Model &getModel() const noexcept;
 
     /**
+     * @copydoc Model::getType()
+     * @return const std::string&
+     */
+    const std::string &getModelType() const noexcept;
+
+    /**
      * @brief Returns the common information of the underlying model
      * @return ModelInfo
      */

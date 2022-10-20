@@ -35,6 +35,7 @@
 #include <components/VasculatureSectionList.h>
 #include <io/sonataloader/colordata/node/VasculatureColorData.h>
 #include <io/sonataloader/data/SonataConfig.h>
+#include <io/sonataloader/data/SonataNames.h>
 #include <io/sonataloader/data/SonataSimulationMapping.h>
 #include <io/sonataloader/data/SonataVasculature.h>
 #include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
@@ -266,9 +267,9 @@ private:
 
 namespace sonataloader
 {
-std::string VasculaturePopulationLoader::getPopulationType() const noexcept
+std::string_view VasculaturePopulationLoader::getPopulationType() const noexcept
 {
-    return "vasculature";
+    return SonataNodeNames::vasculature;
 }
 
 void VasculaturePopulationLoader::load(NodeLoadContext &context) const

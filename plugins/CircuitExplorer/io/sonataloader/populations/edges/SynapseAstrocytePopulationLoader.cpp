@@ -18,14 +18,15 @@
 
 #include "SynapseAstrocytePopulationLoader.h"
 
+#include <io/sonataloader/data/SonataNames.h>
 #include <io/sonataloader/data/SonataSynapses.h>
 #include <io/sonataloader/populations/edges/common/SynapseImporter.h>
 
 namespace sonataloader
 {
-std::string SynapseAstrocytePopulationLoader::getPopulationType() const noexcept
+std::string_view SynapseAstrocytePopulationLoader::getPopulationType() const noexcept
 {
-    return "synapse_astrocyte";
+    return SonataEdgeNames::synapseAstrocyte;
 }
 
 void SynapseAstrocytePopulationLoader::load(EdgeLoadContext &context) const

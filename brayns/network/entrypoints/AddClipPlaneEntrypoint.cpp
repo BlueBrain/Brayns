@@ -44,7 +44,7 @@ std::string AddClipPlaneEntrypoint::getDescription() const
 void AddClipPlaneEntrypoint::onRequest(const Request &request)
 {
     auto plane = request.getParams();
-    auto model = std::make_unique<Model>();
+    auto model = std::make_unique<Model>("clipping_geometry");
 
     auto &components = model->getComponents();
     auto &geometries = components.add<Geometries>();

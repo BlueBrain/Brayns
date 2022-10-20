@@ -43,7 +43,7 @@ public:
 
     virtual void onRequest(const Request &request) override
     {
-        auto model = std::make_unique<Model>();
+        auto model = std::make_unique<Model>("light");
 
         T data = request.getParams();
 

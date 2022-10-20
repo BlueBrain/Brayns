@@ -18,18 +18,15 @@
 
 #pragma once
 
-#include <io/sonataloader/populations/EdgePopulationLoader.h>
+#include <string>
 
-namespace sonataloader
+struct ModelType
 {
-/**
- * @brief Implements the edge load functionality to read 'chemical' edge population types
- */
-class ChemicalSynapsePopulationLoader final : public EdgePopulationLoader
-{
-public:
-    std::string_view getPopulationType() const noexcept override;
-
-    void load(EdgeLoadContext &context) const override;
+    inline static const std::string neurons = "neurons";
+    inline static const std::string astroctyes = "astrocytes";
+    inline static const std::string vasculature = "vasculature";
+    inline static const std::string afferentSynapses = "afferent_synapses";
+    inline static const std::string efferentSynapses = "efferent_synapses";
+    inline static const std::string endfeet = "endfeet";
+    inline static const std::string morphology = "morphology";
 };
-} // namespace sonataloader

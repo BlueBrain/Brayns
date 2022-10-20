@@ -119,7 +119,7 @@ std::vector<std::unique_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob,
 
     auto spheres = XYZBReader::fromBytes(callback, std::string(blob.data.begin(), blob.data.end()));
 
-    auto model = std::make_unique<Model>();
+    auto model = std::make_unique<Model>("xyz");
 
     auto &components = model->getComponents();
     auto &geometries = components.add<Geometries>();

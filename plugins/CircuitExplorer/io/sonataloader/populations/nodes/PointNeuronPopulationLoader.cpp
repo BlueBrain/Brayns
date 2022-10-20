@@ -19,14 +19,15 @@
 #include "PointNeuronPopulationLoader.h"
 
 #include <io/sonataloader/colordata/node/PointNeuronColorData.h>
+#include <io/sonataloader/data/SonataNames.h>
 #include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
 #include <io/sonataloader/populations/nodes/common/SomaImporter.h>
 
 namespace sonataloader
 {
-std::string PointNeuronPopulationLoader::getPopulationType() const noexcept
+std::string_view PointNeuronPopulationLoader::getPopulationType() const noexcept
 {
-    return "point_neuron";
+    return SonataNodeNames::pointNeuron;
 }
 
 void PointNeuronPopulationLoader::load(NodeLoadContext &context) const

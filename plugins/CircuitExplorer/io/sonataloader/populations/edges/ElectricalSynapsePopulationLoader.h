@@ -28,7 +28,7 @@ namespace sonataloader
 class ElectricalSynapsePopulationLoader final : public EdgePopulationLoader
 {
 public:
-    std::string getPopulationType() const noexcept override;
+    std::string_view getPopulationType() const noexcept override;
 
     void load(EdgeLoadContext &context) const override;
 };

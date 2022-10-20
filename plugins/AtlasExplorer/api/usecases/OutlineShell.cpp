@@ -29,6 +29,8 @@
 #include <brayns/engine/systems/GeometryInitSystem.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
 
+#include <api/ModelType.h>
+
 namespace
 {
 class ValidVoxelGridFilter
@@ -80,7 +82,7 @@ std::unique_ptr<brayns::Model> OutlineShell::run(const Atlas &atlas, const brayn
 {
     (void)payload;
 
-    auto model = std::make_unique<brayns::Model>();
+    auto model = std::make_unique<brayns::Model>(ModelType::atlas);
 
     auto isoVolume = VolumeBuilder::fromAtlas(atlas);
     auto isoValues = std::vector<float>{1.f};

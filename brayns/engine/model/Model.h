@@ -36,7 +36,7 @@ namespace brayns
 class Model
 {
 public:
-    Model() = default;
+    Model(std::string type);
 
     Model(const Model &) = delete;
     Model &operator=(const Model &) = delete;
@@ -45,10 +45,16 @@ public:
     Model &operator=(Model &&) = delete;
 
     /**
-     * @brief returns the model ID
+     * @brief Returns the model ID
      * @return uint32_t
      */
     uint32_t getID() const noexcept;
+
+    /**
+     * @brief Returns the type of model.
+     * @return const std::string&
+     */
+    const std::string &getType() const noexcept;
 
     /**
      * @brief Returns the OSPRay group handle
@@ -113,7 +119,8 @@ public:
 private:
     friend class ModelManager;
 
-    uint32_t _modelId{};
+    uint32_t _id{};
+    std::string _type;
     ospray::cpp::Group _handle;
 
     Components _components;

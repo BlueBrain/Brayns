@@ -47,7 +47,7 @@ public:
         auto &scene = engine.getScene();
         auto &models = scene.getModels();
 
-        auto model = std::make_unique<brayns::Model>();
+        auto model = std::make_unique<brayns::Model>("");
 
         auto &components = model->getComponents();
         auto &lights = components.add<brayns::Lights>();

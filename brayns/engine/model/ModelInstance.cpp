@@ -86,6 +86,11 @@ const Model &ModelInstance::getModel() const noexcept
     return _model;
 }
 
+const std::string &ModelInstance::getModelType() const noexcept
+{
+    return _model.getType();
+}
+
 ModelInfo ModelInstance::getModelData() const noexcept
 {
     return ModelInfo(_model);

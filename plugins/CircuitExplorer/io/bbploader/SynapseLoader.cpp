@@ -25,6 +25,7 @@
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 
+#include <api/ModelType.h>
 #include <api/synapse/SynapseCircuitBuilder.h>
 #include <components/Coloring.h>
 
@@ -116,10 +117,13 @@ struct SynapseColorComponentFactory
 
 namespace bbploader
 {
-void SynapseLoader::load(const LoadContext &context, bool post, brayns::Model &model)
+std::unique_ptr<brayns::Model> SynapseLoader::load(const LoadContext &context, bool post)
 {
+    auto modelType = post ? ModelType::afferentSynapses : ModelType::efferentSynapses;
+    auto model = std::make_unique<brayns::Model>(modelType);
     auto geometryData = GeometryLoader::load(context, post);
     auto colorData = SynapseColorComponentFactory::create(context);
-    SynapseCircuitBuilder::build(model, std::move(geometryData), std::move(colorData));
+    SynapseCircuitBuilder::build(*model, std::move(geometryData), std::move(colorData));
+    return model;
 }
 } // namespace bbploader

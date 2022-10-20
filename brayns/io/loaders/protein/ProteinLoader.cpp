@@ -243,7 +243,7 @@ std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
     auto colorIndices = ColormapIndexer::indexAtoms(parameters, atoms);
     auto &colors = ProteinData::colors;
 
-    auto model = std::make_unique<Model>();
+    auto model = std::make_unique<Model>("protein");
 
     auto &components = model->getComponents();
     auto &geometries = components.add<Geometries>();

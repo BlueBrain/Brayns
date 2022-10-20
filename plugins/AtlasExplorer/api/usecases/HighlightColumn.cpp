@@ -28,6 +28,7 @@
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
+#include <api/ModelType.h>
 #include "common/ParamsParser.h"
 
 namespace
@@ -151,7 +152,7 @@ std::unique_ptr<brayns::Model> HighlightColumn::run(const Atlas &atlas, const br
         colors.push_back(neighbour.color);
     }
 
-    auto model = std::make_unique<brayns::Model>();
+    auto model = std::make_unique<brayns::Model>(ModelType::atlas);
 
     ModelBuilder builder(*model);
     builder.addComponents(std::move(geometry), colors);

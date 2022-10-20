@@ -26,24 +26,42 @@
 #include <io/sonataloader/NodeLoader.h>
 #include <io/sonataloader/ParameterCheck.h>
 #include <io/sonataloader/Selector.h>
+#include <io/sonataloader/SonataModelType.h>
 #include <io/util/ProgressUpdater.h>
 
 namespace
 {
-struct LoadStageCountComputer
+namespace sl = sonataloader;
+
+class ProgressUpdaterFactory
 {
-    static size_t compute(const SonataLoaderParameters &params)
+public:
+    static ProgressUpdater create(const brayns::LoaderProgress &callback, const SonataLoaderParameters &params)
+    {
+        auto numSteps = _computeNumSteps(params);
+        return ProgressUpdater(callback, numSteps);
+    }
+
+private:
+    static size_t _computeNumSteps(const SonataLoaderParameters &params)
     {
         size_t count = 0;
-        const auto &nodes = params.node_population_settings;
-        for (const auto &node : nodes)
+        for (auto &node : params.node_population_settings)
         {
-            count += 1;
-
-            const auto &edges = node.edge_populations;
-            count += edges.size();
+            count += node.edge_populations.size() + 1;
         }
         return count;
+    }
+};
+
+class ConfigReader
+{
+public:
+    static sl::SonataNetworkConfig read(const std::string &path, const SonataLoaderParameters &parameters)
+    {
+        auto network = sl::SonataConfig::readNetwork(path, parameters.simulation_config_path);
+        sl::ParameterCheck::checkInput(network, parameters);
+        return network;
     }
 };
 }
@@ -77,60 +95,52 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
     const brayns::Timer timer;
     brayns::Log::info("[CE] {}: loading {}.", getName(), path);
 
-    // Load config files
-    const auto &circuitConfigPath = path;
-    const auto &simulationConfigPath = input.simulation_config_path;
-    const auto network = sonataloader::SonataConfig::readNetwork(circuitConfigPath, simulationConfigPath);
-    const auto &circuitConfig = network.circuitConfig();
+    auto network = ConfigReader::read(path, input);
 
-    sonataloader::ParameterCheck::checkInput(network, input);
-
-    const auto stages = LoadStageCountComputer::compute(input);
-    ProgressUpdater progress(callback, stages);
-
+    auto progress = ProgressUpdaterFactory::create(callback, input);
     std::vector<std::unique_ptr<brayns::Model>> result;
 
-    const auto &inputNodes = input.node_population_settings;
-    for (const auto &nodeParams : inputNodes)
+    for (auto &nodeParams : input.node_population_settings)
     {
-        result.push_back(std::make_unique<brayns::Model>());
-        auto &nodeModel = *(result.back());
-
-        const auto &nodeName = nodeParams.node_population;
-        const auto nodes = circuitConfig.getNodePopulation(nodeName);
-        const auto nodeSelection = sonataloader::NodeSelector::select(network, nodeParams);
-        sonataloader::NodeLoadContext ctxt{network, nodeParams, nodes, nodeSelection, nodeModel, progress};
-
+        auto &nodeName = nodeParams.node_population;
         brayns::Log::info("[CE] - Loading {} node population.", nodeName);
+
         progress.beginStage(2);
-
-        sonataloader::NodeLoader::loadNodes(ctxt);
-
+        auto nodes = network.circuitConfig().getNodePopulation(nodeName);
+        auto nodeSelection = sl::NodeSelector::select(network, nodeParams);
+        auto nodeModelType = sl::SonataModelType::fromNodes(nodes);
+        auto nodeModel = std::make_unique<brayns::Model>(nodeModelType);
+        auto nodeContext = sl::NodeLoadContext{network, nodeParams, nodes, nodeSelection, *nodeModel, progress};
+        sl::NodeLoader::loadNodes(nodeContext);
+        result.push_back(std::move(nodeModel));
         progress.endStage();
 
-        // Load edges for this node population
-        const auto &inputEdges = nodeParams.edge_populations;
-        for (const auto &edgeParams : inputEdges)
+        for (auto &edgeParams : nodeParams.edge_populations)
         {
-            result.push_back(std::make_unique<brayns::Model>());
-            auto &edgeModel = *(result.back());
+            auto &edgeName = edgeParams.edge_population;
+            brayns::Log::info("[CE] - Loading {} edge population.", edgeName);
 
-            const auto &edgeName = edgeParams.edge_population;
-            const auto edges = circuitConfig.getEdgePopulation(edgeName);
-            const auto edgeSelection = sonataloader::EdgeSelector::select(network, edgeParams, nodeSelection);
-            sonataloader::EdgeLoadContext
-                edgeCtxt{network, edgeParams, nodes, edges, nodeSelection, edgeSelection, edgeModel, progress};
-
-            brayns::Log::info("[CE] \t - Loading {} edge population.", edgeName);
             progress.beginStage(2);
-
-            sonataloader::EdgeLoader::loadEdges(edgeCtxt);
-
+            auto edges = network.circuitConfig().getEdgePopulation(edgeName);
+            auto edgeSelection = sl::EdgeSelector::select(network, edgeParams, nodeSelection);
+            auto edgeModelType = sl::SonataModelType::fromEdges(edges, edgeParams.load_afferent);
+            auto edgeModel = std::make_unique<brayns::Model>(edgeModelType);
+            auto edgeContext = sl::EdgeLoadContext{
+                network,
+                edgeParams,
+                nodes,
+                edges,
+                nodeSelection,
+                edgeSelection,
+                *edgeModel,
+                progress};
+            sl::EdgeLoader::loadEdges(edgeContext);
+            result.push_back(std::move(edgeModel));
             progress.endStage();
         }
     }
 
-    const auto time = timer.seconds();
+    auto time = timer.seconds();
     brayns::Log::info("[CE] {}: done in {} second(s).", getName(), time);
 
     return result;

@@ -19,15 +19,16 @@
 #include "AstrocytePopulationLoader.h"
 
 #include <io/sonataloader/colordata/node/AstrocyteColorData.h>
+#include <io/sonataloader/data/SonataNames.h>
 #include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
 #include <io/sonataloader/populations/nodes/common/MorphologyImporter.h>
 #include <io/sonataloader/populations/nodes/common/SomaImporter.h>
 
 namespace sonataloader
 {
-std::string AstrocytePopulationLoader::getPopulationType() const noexcept
+std::string_view AstrocytePopulationLoader::getPopulationType() const noexcept
 {
-    return "astrocyte";
+    return SonataNodeNames::astrocyte;
 }
 
 void AstrocytePopulationLoader::load(NodeLoadContext &context) const
