@@ -42,7 +42,7 @@ struct SynapseImporter
 {
     static void import(
         const bbploader::LoadContext &context,
-        std::vector<std::unique_ptr<brayns::Model>> &modelList,
+        std::vector<std::shared_ptr<brayns::Model>> &modelList,
         ProgressUpdater &updater)
     {
         const auto &params = context.loadParameters;
@@ -91,7 +91,7 @@ std::string BBPLoader::getName() const
     return "BBP loader";
 }
 
-std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlob(
+std::vector<std::shared_ptr<brayns::Model>> BBPLoader::importFromBlob(
     const brayns::Blob &blob,
     const brayns::LoaderProgress &callback,
     const BBPLoaderParameters &params) const
@@ -102,7 +102,7 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlob(
     throw std::runtime_error("BBP loader: import from blob not supported");
 }
 
-std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromFile(
+std::vector<std::shared_ptr<brayns::Model>> BBPLoader::importFromFile(
     const std::string &path,
     const brayns::LoaderProgress &callback,
     const BBPLoaderParameters &params) const
@@ -117,7 +117,7 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromFile(
     return result;
 }
 
-std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
+std::vector<std::shared_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
     const brayns::LoaderProgress &callback,
     const BBPLoaderParameters &params,
     const brion::BlueConfig &config) const
@@ -130,9 +130,9 @@ std::vector<std::unique_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
     const auto gids = bbploader::GIDLoader::compute(config, circuit, params);
     const bbploader::LoadContext context{circuit, gids, config, params};
 
-    std::vector<std::unique_ptr<brayns::Model>> result;
+    std::vector<std::shared_ptr<brayns::Model>> result;
 
-    auto model = std::make_unique<brayns::Model>(ModelType::neurons);
+    auto model = std::make_shared<brayns::Model>(ModelType::neurons);
 
     // Load neurons
     updater.beginStage(gids.size());

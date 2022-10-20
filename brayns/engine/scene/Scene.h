@@ -56,11 +56,6 @@ public:
     void preRender(const ParametersManager &params);
 
     /**
-     * @brief Called after a new frame is rendered. Will call onPostRender on all the models of the scene
-     */
-    void postRender(const ParametersManager &params);
-
-    /**
      * @brief commit implementation.
      * @return True if anything changed since the last commit operation, false otherwise
      */

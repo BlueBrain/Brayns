@@ -35,12 +35,12 @@ public:
 
     std::string getName() const final;
 
-    std::vector<std::unique_ptr<Model>> importFromFile(
+    std::vector<std::shared_ptr<Model>> importFromFile(
         const std::string &path,
         const LoaderProgress &callback,
         const ProteinLoaderParameters &parameters) const final;
 
-    std::vector<std::unique_ptr<Model>> importFromBlob(
+    std::vector<std::shared_ptr<Model>> importFromBlob(
         const Blob &blob,
         const LoaderProgress &callback,
         const ProteinLoaderParameters &parameters) const final;

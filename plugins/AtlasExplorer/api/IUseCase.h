@@ -47,7 +47,7 @@ public:
      * @brief Applies the use case to the given atlas data and returns a new model with the result.
      * @param atlas The atlas to which to apply the use case
      * @param payload Optional parameters to configure the use case behaviour
-     * @return std::unique_ptr<brayns::Model> The result of the use case.
+     * @return std::shared_ptr<brayns::Model> The result of the use case.
      */
-    virtual std::unique_ptr<brayns::Model> run(const Atlas &atlas, const brayns::JsonValue &payload) const = 0;
+    virtual std::shared_ptr<brayns::Model> run(const Atlas &atlas, const brayns::JsonValue &payload) const = 0;
 };

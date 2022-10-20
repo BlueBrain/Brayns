@@ -40,7 +40,7 @@ std::string NRRDLoader::getName() const
     return "NRRD loader";
 }
 
-std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromBlob(
+std::vector<std::shared_ptr<brayns::Model>> NRRDLoader::importFromBlob(
     const brayns::Blob &blob,
     const brayns::LoaderProgress &callback,
     const NRRDLoaderParameters &parameters) const
@@ -51,7 +51,7 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromBlob(
     throw std::runtime_error("Binary load is not allowed for NRRD files");
 }
 
-std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
+std::vector<std::shared_ptr<brayns::Model>> NRRDLoader::importFromFile(
     const std::string &path,
     const brayns::LoaderProgress &callback,
     const NRRDLoaderParameters &parameters) const
@@ -76,7 +76,7 @@ std::vector<std::unique_ptr<brayns::Model>> NRRDLoader::importFromFile(
     components.add<AtlasData>(std::move(atlas));
 
     callback.updateProgress("Done", 1.f);
-    auto result = std::vector<std::unique_ptr<brayns::Model>>();
+    auto result = std::vector<std::shared_ptr<brayns::Model>>();
     result.push_back(std::move(model));
     return result;
 }

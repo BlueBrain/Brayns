@@ -59,7 +59,7 @@ struct ZParallelSliceManager
         const auto planeB = brayns::Vector3f(0.f, 0.f, -1.f);
         const auto planeBDistance = -center.z - sliceThickness * 0.5f;
 
-        auto model = std::make_unique<brayns::Model>("");
+        auto model = std::make_shared<brayns::Model>("");
 
         auto planes = std::vector<brayns::Plane>{
             brayns::Plane{{planeA, planeADistance}},
@@ -72,7 +72,7 @@ struct ZParallelSliceManager
         systems.setInitSystem<brayns::ClipperInitSystem>();
 
         auto &models = scene.getModels();
-        models.addModel(std::move(model));
+        models.add(std::move(model));
     }
 
     static void clear(brayns::Brayns &brayns)

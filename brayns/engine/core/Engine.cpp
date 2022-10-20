@@ -123,9 +123,6 @@ void Engine::commitAndRender()
 
     // The parameters are modified on network update, and processed on engine.preRender and engine.commit
     _params.resetModified();
-
-    // Post render engine
-    postRender();
 }
 
 void Engine::preRender()
@@ -194,15 +191,6 @@ void Engine::render()
 
     FrameRenderer::synchronous(_camera, _frameBuffer, _renderer, _scene);
     _frameBuffer.incrementAccumFrames();
-}
-
-void Engine::postRender()
-{
-    if (!_keepRunning)
-    {
-        return;
-    }
-    _scene.postRender(_params);
 }
 
 Scene &Engine::getScene()

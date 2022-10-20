@@ -24,11 +24,11 @@ state for the simulation in an instance.
 This global state is automatically updated each time we load a model with a
 simulation attached.
 
-The time unit is always milliseconds but a convenience attribute ``time_unit`` is
+The time unit is always milliseconds but a convenience attribute `time_unit` is
 in the simulation to convert it in seconds. All time values in simulation are
-expressed in ``time_unit`` except when it is explicitely stated being in seconds.
+expressed in `time_unit` except when it is explicitely stated being in seconds.
 
-``Simulation`` also provides convenience method to convert frame indices to
+`Simulation` also provides convenience method to convert frame indices to
 timestamp and vice-versa.
 
 Frame indices
@@ -40,7 +40,7 @@ Usually, we just know the start and end frame we want to render, the movie FPS
 (frames per second) and possibly how much slower we want the movie.
 
 To generate frame indices from these informations, We can use a helper class
-named ``MovieFrames``.
+named `MovieFrames`.
 
 .. code-block:: python
 
@@ -71,13 +71,13 @@ View
 ----
 
 As we render multiple frames, we can have one view per frame. This is specified
-using a list ``KeyFrame`` objects, each having a frame index and a camera view.
+using a list `KeyFrame` objects, each having a frame index and a camera view.
 
 Here we will suppose the view is the same for all frames (static camera).
 
 .. code-block:: python
 
-    key_frames = brayns.KeyFrame.from_indices(indices, camera.view)
+    key_frames = brayns.KeyFrame.from_indices(indices, view)
 
 Color ramp
 ----------
@@ -89,13 +89,13 @@ This part is optional as Brayns build a default color ramp for circuits.
 
 .. code-block:: python
 
-    # Get the color ramp of the model.
+    # Get the color ramp.
     ramp = brayns.get_color_ramp(instance, model.id)
 
-    # Choose a range of simulation value (here -80mV to +10mV).
+    # Set the simulation values.
     ramp.value_range = brayns.ValueRange(-80, 10)
 
-    # Choose colors:
+    # Choose colors (could be Color4 for simple cases):
     # Simulation values of -80 and below will be red.
     # Simulation values around -35 (middle of value range) will be green.
     # Simulation values of +10 and above will be blue.
@@ -106,18 +106,17 @@ This part is optional as Brayns build a default color ramp for circuits.
         brayns.Color3.blue,
     ]
 
-    # Optional opacity curve for complex alpha channels based on the value range:
-    # From 0% to 50% alpha is 0 (transparent). 
-    # From 50% to 100% alpha is mixed from 0 to 1.
-    # Mixing is done using a linear interpolation.
-    # Here at 50% alpha is 0 and at 100% it is 1.
+    # Optional opacity curve for complex alpha channels:
+    # Colors from 0% to 50% of the value range will be transparent.
+    # Colors from 50% to 100% of the value range will be interpolated from alpha
+    # = 0 to alpha = 1.
     curve = brayns.OpacityCurve([
         brayns.ControlPoint(0.0, 0.0),
         brayns.ControlPoint(0.5, 0.0),
         brayns.ControlPoint(1.0, 1.0),
     ])
 
-    # Generate the colors with RGB and opacity curve.
+    # Generate the colors with opacity.
     ramp.colors = curve.apply(colors)
 
     # Update the color ramp.
@@ -132,12 +131,12 @@ constructor.
 
 .. code-block:: python
 
-    # Frame export specifications (using some parameters from snapshot).
+    # Frame export specifications.
     exporter = brayns.Exporter(
         frames=key_frames,
         format=brayns.ImageFormat.PNG,
-        resolution=resolution,
-        projection=camera.projection,
+        resolution=brayns.Resolution.full_hd,
+        projection=brayns.PerspectiveProjection(),
         renderer=brayns.InteractiveRenderer(),
     )
 

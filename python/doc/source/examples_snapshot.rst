@@ -6,7 +6,7 @@ Now that we can load models, it is time to render something.
 Target
 ------
 
-First we have to choose which models to render and for that, we need the bounds
+First we have to choose which models to render and for that we need the bounds
 of the area we want to see in the snapshot.
 
 .. code-block:: python
@@ -32,34 +32,20 @@ projection (3D -> 2D transformation).
 As the current camera of a brayns instance is not automatically moved to focus
 on the current scene, a custom camera is needed to see something.
 
-Camera positioning can be complex and depends on the target orientation, camera
-projection and resolution aspect ratio. Therefore, Brayns provides a helper
-function ``look_at`` to create a camera from these parameters.
-
 .. code-block:: python
 
-    # Minimal usage with only target bounds.
+    # Compute camera view and projection to focus on target.
+    # The camera use the front view by default (X right, Y up and Z front).
     camera = brayns.look_at(target)
 
-    # Resolution of the final image
-    resolution = brayns.Resolution.full_hd
-
-    # More advanced / precise usage.
-    camera = brayns.look_at(
-        target,
-        aspect_ratio=resolution.aspect_ratio,
-        rotation=brayns.CameraRotation.left,
-        projection=brayns.OrthographicProjection(),
-    )
-
     # We can also specify the projection manually (Perspective by default).
-    camera.projection = brayns.OrthographicProjection()
+    projection = brayns.OrthographicProjection()
+    camera = brayns.look_at(target, projection)
 
-    # We can also move or rotate the camera manually.
-    camera.position += brayns.Vector3(1, 2 ,3)
-
-This function is just a helper, see ``Camera`` to see how to manipulate the camera
-manually.
+    # The camera can be moved manually.
+    # Here we rotate of -90 degrees around X using the camera target as center.
+    top_view = brayns.Vector3(-90, 0, 0)
+    camera.rotate_around_target(top_view)
 
 Renderer
 --------
@@ -83,7 +69,7 @@ Light
 -----
 
 By default, Brayns scene is empty, that is why we need to add a light to be able
-to see what we render.
+to see the models we want to render.
 
 .. code-block:: python
 
@@ -92,13 +78,13 @@ to see what we render.
         direction=camera.direction,
     )
 
-    model = brayns.add_light(instance, light)
+    light_model = brayns.add_light(instance, light)
 
 Here we add a directional light oriented from the camera to the target. The model
-returned can be used to remove or transform it, but in this example we don't use it.
+returned can be used to remove or tranform it, but in this example we don't use it.
 
-Lights can be selectively removed with ``remove_models``, or cleared using
-``clear_lights``.
+Lights can be selectively removed with `remove_models`, or cleared using
+`clear_lights`.
 
 Snapshot
 --------
@@ -107,19 +93,17 @@ Now we have everything we need to take a snapshot.
 
 .. code-block:: python
 
-    # Snapshot settings.
     snapshot = brayns.Snapshot(
-        resolution=resolution,
+        resolution=brayns.Resolution.full_hd,
         frame=3,
         camera=camera,
         renderer=renderer,
     )
 
-    # Download and save the snapshot on the script host.
     snapshot.save(instance, 'snapshot.png')
 
 We can here specify also a resolution and a simulation frame. If any of the
 parameter is None, then the current object of the instance is taken.
 
 That's it, snapshots can also be saved on the backend machine using
-``save_remotely`` or retreived as raw bytes using ``download``.
+`save_remotely` or retreived as raw bytes using `download`.

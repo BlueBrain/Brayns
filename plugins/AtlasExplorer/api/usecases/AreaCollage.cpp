@@ -31,7 +31,7 @@ bool AreaCollage::isValidAtlas(const Atlas &atlas) const
     return false;
 }
 
-std::unique_ptr<brayns::Model> AreaCollage::run(const Atlas &atlas, const brayns::JsonValue &payload) const
+std::shared_ptr<brayns::Model> AreaCollage::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)atlas;
     (void)payload;

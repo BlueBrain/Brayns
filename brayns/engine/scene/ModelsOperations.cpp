@@ -44,7 +44,7 @@ void ModelsOperations::removeRenderables(ModelManager &models)
     std::vector<uint32_t> ids;
     ids.reserve(instances.size());
 
-    for (auto instance : instances)
+    for (auto &instance : instances)
     {
         auto &model = instance->getModel();
         auto &components = model.getComponents();

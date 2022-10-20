@@ -92,9 +92,9 @@ private:
 class MeshLoadingHelper
 {
 public:
-    static std::unique_ptr<brayns::Model> load(const brayns::TriangleMesh &mesh)
+    static std::shared_ptr<brayns::Model> load(const brayns::TriangleMesh &mesh)
     {
-        auto model = std::make_unique<brayns::Model>("mesh");
+        auto model = std::make_shared<brayns::Model>("mesh");
 
         auto &components = model->getComponents();
         auto &geometries = components.add<brayns::Geometries>();
@@ -126,14 +126,14 @@ public:
 class MeshImporter
 {
 public:
-    static std::vector<std::unique_ptr<brayns::Model>> import(const brayns::TriangleMesh &mesh)
+    static std::vector<std::shared_ptr<brayns::Model>> import(const brayns::TriangleMesh &mesh)
     {
         auto model = MeshLoadingHelper::load(mesh);
 
         auto &components = model->getComponents();
         components.add<brayns::Metadata>(MeshMetadataBuilder::build(mesh));
 
-        std::vector<std::unique_ptr<brayns::Model>> result;
+        auto result = std::vector<std::shared_ptr<brayns::Model>>();
         result.push_back(std::move(model));
         return result;
     }
@@ -200,7 +200,7 @@ std::string MeshLoader::getName() const
     return "mesh";
 }
 
-std::vector<std::unique_ptr<Model>> MeshLoader::importFromFile(
+std::vector<std::shared_ptr<Model>> MeshLoader::importFromFile(
     const std::string &fileName,
     const LoaderProgress &callback) const
 {
@@ -209,7 +209,7 @@ std::vector<std::unique_ptr<Model>> MeshLoader::importFromFile(
     return MeshImporter::import(mesh);
 }
 
-std::vector<std::unique_ptr<Model>> MeshLoader::importFromBlob(const Blob &blob, const LoaderProgress &callback) const
+std::vector<std::shared_ptr<Model>> MeshLoader::importFromBlob(const Blob &blob, const LoaderProgress &callback) const
 {
     (void)callback;
     auto mesh = MeshParsingHelper::parse(_parsers, blob);

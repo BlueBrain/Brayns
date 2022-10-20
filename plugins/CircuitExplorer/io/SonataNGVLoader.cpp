@@ -54,7 +54,7 @@ std::string SonataNGVLoader::getName() const
     return std::string("SONATA NGV loader");
 }
 
-std::vector<std::unique_ptr<brayns::Model>> SonataNGVLoader::importFromBlob(
+std::vector<std::shared_ptr<brayns::Model>> SonataNGVLoader::importFromBlob(
     const brayns::Blob &blob,
     const brayns::LoaderProgress &cb,
     const SonataNGVLoaderParameters &params) const
@@ -65,7 +65,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataNGVLoader::importFromBlob(
     throw std::runtime_error("SonataNGVLoader: Import from blob not supported");
 }
 
-std::vector<std::unique_ptr<brayns::Model>> SonataNGVLoader::importFromFile(
+std::vector<std::shared_ptr<brayns::Model>> SonataNGVLoader::importFromFile(
     const std::string &path,
     const brayns::LoaderProgress &cb,
     const SonataNGVLoaderParameters &props) const
@@ -73,7 +73,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataNGVLoader::importFromFile(
     brayns::Timer timer;
     brayns::Log::info("[CE] {}: loading {}.", getName(), path);
 
-    std::vector<std::unique_ptr<brayns::Model>> result;
+    std::vector<std::shared_ptr<brayns::Model>> result;
 
     for (const auto &population : props.populations)
     {

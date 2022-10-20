@@ -7,21 +7,17 @@ Introduction
 ------------
 
 Brayns architecture allows it to be used for almost any kind of visualization
-purpose. For this reason, the core of Brayns knows nothing about any
+purpose. For this reason, the core of Brayns knows nowthing about any
 science-specific modeling.
 
 To load specific functionality, the Brayns backend service must be launched with
-plugins specified in the command line, which will add extra functionality.
-
+the command to load specifiying plugins, which will add extra functionality.
 Plugins command line arguments can be chained to load multiple plugins. Plugin
 names are the name of the dynamic libraries (.so) implementing it.
 
 .. code-block:: console
 
     $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsDTI
-
-Here we load plugins by linking dynamically against braynsCircuitExplorer.so
-and braynsDTI.so.
 
 Brayns comes with built-in plugins that are always available and can be loaded
 at runtime.
@@ -62,29 +58,6 @@ the following argument in the command line:
 
     --plugin braynsAtlasExplorer
 
-Diffusion Tensor Imaging plugin (DTI)
--------------------------------------
-
-The DTI plugin adds functionality to load streamlines into Brayns, as well as to
-attach a spike report simulation to them to be visualized.
-
-To load the DTI plugin when launching the Brayns backend service, use the
-following argument in the command line:
-
-.. code-block:: console
-
-    --plugin braynsDTI
-
-Cylindric camera plugin
------------------------
-
-This is a simple plugin to add support for cylindric camera. This camera fixes
-the distorsion of curved screen (i.e. OpenDeck).
-
-.. code-block:: console
-
-    --plugin braynsCylindricCamera
-
 Circuit Info plugin
 -------------------
 
@@ -114,3 +87,26 @@ in the command line:
 
     This plugin is deprecated and will be removed soon. Use bluepy to query
     information about circuits.
+
+Diffusion Tensor Imaging plugin (DTI)
+-------------------------------------
+
+The DTI plugin adds functionality to load streamlines into Brayns, as well as to
+attach a spike report simulation to them to be visualized.
+
+To load the DTI plugin when launching the Brayns backend service, use the
+following argument in the command line:
+
+.. code-block:: console
+
+    --plugin braynsDTI
+
+Cylindric camera plugin
+-----------------------
+
+This is a simple plugin to add support for cylindric camera. This camera fixes
+the distorsion of curved screen (i.e. OpenDeck).
+
+.. code-block:: console
+
+    --plugin braynsCylindricCamera

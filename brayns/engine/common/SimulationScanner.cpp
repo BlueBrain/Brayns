@@ -53,9 +53,9 @@ void SimulationScanner::scanAndUpdate(ModelManager &models, SimulationParameters
     bool foundSimulation{false};
 
     auto &instances = models.getAllModelInstances();
-    for (auto instancePtr : instances)
+    for (auto &instance : instances)
     {
-        auto &model = instancePtr->getModel();
+        auto &model = instance->getModel();
         auto &components = model.getComponents();
         auto simulation = components.find<SimulationInfo>();
 

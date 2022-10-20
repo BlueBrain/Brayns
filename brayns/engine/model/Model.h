@@ -110,12 +110,6 @@ public:
      */
     CommitResult commit();
 
-    /**
-     * @brief Called on the post-render stage
-     * @param parameters ParametersManager object to access system config
-     */
-    void onPostRender(const ParametersManager &parameters);
-
 private:
     friend class ModelManager;
 

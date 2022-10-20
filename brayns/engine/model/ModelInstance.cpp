@@ -53,12 +53,17 @@ struct InstanceParameters
 
 namespace brayns
 {
-ModelInstance::ModelInstance(const uint32_t instanceId, Model &model)
+ModelInstance::ModelInstance(uint32_t instanceId, std::shared_ptr<Model> model)
     : _id(instanceId)
-    , _handle(model.getHandle())
-    , _model(model)
+    , _model(std::move(model))
+    , _handle(_model->getHandle())
 {
     computeBounds();
+}
+
+ModelInstance::ModelInstance(uint32_t instanceId, const ModelInstance &other)
+    : ModelInstance(instanceId, other._model)
+{
 }
 
 uint32_t ModelInstance::getID() const noexcept
@@ -73,27 +78,27 @@ const Bounds &ModelInstance::getBounds() const noexcept
 
 void ModelInstance::computeBounds() noexcept
 {
-    _bounds = _model.computeBounds(_getFullTransform());
+    _bounds = _model->computeBounds(_getFullTransform());
 }
 
 Model &ModelInstance::getModel() noexcept
 {
-    return _model;
+    return *_model;
 }
 
 const Model &ModelInstance::getModel() const noexcept
 {
-    return _model;
+    return *_model;
 }
 
 const std::string &ModelInstance::getModelType() const noexcept
 {
-    return _model.getType();
+    return _model->getType();
 }
 
 ModelInfo ModelInstance::getModelData() const noexcept
 {
-    return ModelInfo(_model);
+    return ModelInfo(*_model);
 }
 
 void ModelInstance::setVisible(const bool val) noexcept
@@ -113,7 +118,7 @@ void ModelInstance::setTransform(const Transform &transform) noexcept
         auto matrix = _getFullTransform();
         auto affine = MatrixConverter::glmToOspray(matrix);
         _handle.setParam(InstanceParameters::transform, affine);
-        _bounds = _model.computeBounds(matrix);
+        _bounds = _model->computeBounds(matrix);
     }
 }
 
@@ -142,7 +147,7 @@ Matrix4f ModelInstance::_getFullTransform() const noexcept
 {
     auto matrix = _transform.toMatrix();
 
-    auto &components = _model.getComponents();
+    auto &components = _model->getComponents();
     auto baseTransform = components.find<Transform>();
     if (baseTransform)
     {

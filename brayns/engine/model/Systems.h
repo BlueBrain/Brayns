@@ -53,12 +53,6 @@ public:
     }
 
     template<typename T, typename... Args>
-    void setPostRenderSystem(Args &&...args)
-    {
-        _postRender = std::make_unique<T>(std::forward<Args>(args)...);
-    }
-
-    template<typename T, typename... Args>
     void setInspectSystem(Args &&...args)
     {
         _inspect = std::make_unique<T>(std::forward<Args>(args)...);
@@ -76,7 +70,6 @@ private:
     void init(Components &components);
     CommitResult commit(Components &components);
     void preRender(const ParametersManager &parameters, Components &components);
-    void postRender(const ParametersManager &parameters, Components &components);
     InspectResultData inspect(const InspectContext &context, Components &components);
     Bounds computeBounds(const Matrix4f &matrix, Components &components);
 
@@ -84,7 +77,6 @@ private:
     std::unique_ptr<InitSystem> _init;
     std::unique_ptr<CommitSystem> _commit;
     std::unique_ptr<ParameterSystem> _preRender;
-    std::unique_ptr<ParameterSystem> _postRender;
     std::unique_ptr<InspectSystem> _inspect;
     std::unique_ptr<BoundsSystem> _bounds;
 };

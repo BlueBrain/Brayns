@@ -44,7 +44,7 @@ std::string AddClipPlaneEntrypoint::getDescription() const
 void AddClipPlaneEntrypoint::onRequest(const Request &request)
 {
     auto plane = request.getParams();
-    auto model = std::make_unique<Model>("clipping_geometry");
+    auto model = std::make_shared<Model>("clipping_geometry");
 
     auto &components = model->getComponents();
     auto &geometries = components.add<Geometries>();
@@ -53,7 +53,7 @@ void AddClipPlaneEntrypoint::onRequest(const Request &request)
     auto &systems = model->getSystems();
     systems.setInitSystem<ClipperInitSystem>();
 
-    auto *instance = _models.addModel(std::move(model));
+    auto *instance = _models.add(std::move(model));
     request.reply(*instance);
 }
 } // namespace brayns

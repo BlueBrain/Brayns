@@ -40,7 +40,7 @@ public:
      * @param model
      * @return ModelInstance*
      */
-    ModelInstance *addModel(std::unique_ptr<brayns::Model> model);
+    ModelInstance *add(std::shared_ptr<brayns::Model> model);
 
     /**
      * @brief Adds a list of new model to the scene and creates instances out of them to be rendered.
@@ -48,7 +48,7 @@ public:
      * @param models The model to add to the scene
      * @return std::vector<ModelInstance *>
      */
-    std::vector<ModelInstance *> addModels(std::vector<std::unique_ptr<Model>> models);
+    std::vector<ModelInstance *> add(std::vector<std::shared_ptr<Model>> models);
 
     /**
      * @brief Creates a new instance from the model that is being instantiated by the given instance ID
@@ -56,7 +56,7 @@ public:
      * @returns ModelInstance &
      * @throws std::invalid_argument if modelID does not correspond to any existing model
      */
-    ModelInstance &createInstance(const uint32_t sourceInstanceId);
+    ModelInstance *createInstance(const uint32_t sourceInstanceId);
 
     /**
      * @brief Returns the model instance identified by the given instance ID
@@ -69,7 +69,7 @@ public:
      * @brief Return a list of all model instances in the manager
      * @return std::vector<ModelInstance *> &
      */
-    const std::vector<ModelInstance *> &getAllModelInstances() const noexcept;
+    const std::vector<std::unique_ptr<ModelInstance>> &getAllModelInstances() const noexcept;
 
     /**
      * @brief Removes all model instances from the scene, identified by the given instance IDs.
@@ -101,12 +101,6 @@ private:
     CommitResult commit();
 
     /**
-     * @brief Calls the postRender system on all models
-     * @param parameters
-     */
-    void postRender(const ParametersManager &parameters);
-
-    /**
      * @brief Returns an aggregate of all instance bounds
      * @return Bounds
      */
@@ -119,35 +113,8 @@ private:
     std::vector<ospray::cpp::Instance> getHandles() noexcept;
 
 private:
-    /**
-     * @brief The ModelEntry struct holds all the information related to a model
-     * It allows easy access to the models of the scene without having to account for instancing
-     */
-    struct ModelEntry
-    {
-        std::unique_ptr<Model> model;
-        std::vector<std::unique_ptr<ModelInstance>> instances;
-    };
-
-    /**
-     * @brief Creates a new model entry from the given model object
-     * @param model Model object
-     * @return ModelEntry&
-     */
-    ModelEntry &_createModelEntry(std::unique_ptr<Model> model);
-
-    /**
-     * @brief Creates a new model instance from the given model entry
-     * @param modelEntry ModelEntry &
-     * @return ModelInstance &
-     */
-    ModelInstance &_createModelInstance(ModelEntry &modelEntry);
-
-private:
-    IDFactory<uint32_t> _modelIdFactory;
     IDFactory<uint32_t> _instanceIdFactory;
-    std::vector<ModelEntry> _models;
-    std::vector<ModelInstance *> _instances;
+    std::vector<std::unique_ptr<ModelInstance>> _instances;
     bool _dirty = false;
 };
 }

@@ -35,9 +35,9 @@ void LoaderProgress::updateProgress(const std::string &message, const float frac
         _callback(message, fraction);
 }
 
-bool AbstractLoader::isSupported(const std::string &fileName, const std::string &extension) const
+bool AbstractLoader::isSupported(const std::string &path, const std::string &extension) const
 {
-    (void)fileName;
+    (void)path;
 
     const auto extensions = getSupportedExtensions();
     const auto lcExtension = StringCase::toLower(extension[0] == '.' ? extension.substr(1) : extension);
@@ -66,7 +66,7 @@ void JsonAdapter<EmptyLoaderParameters>::deserialize(const JsonValue &value, Emp
     (void)params;
 }
 
-std::vector<std::unique_ptr<Model>> NoInputLoader::importFromBlob(
+std::vector<std::shared_ptr<Model>> NoInputLoader::importFromBlob(
     const Blob &blob,
     const LoaderProgress &callback,
     const EmptyLoaderParameters &parameters) const
@@ -75,7 +75,7 @@ std::vector<std::unique_ptr<Model>> NoInputLoader::importFromBlob(
     return importFromBlob(blob, callback);
 }
 
-std::vector<std::unique_ptr<Model>> NoInputLoader::importFromFile(
+std::vector<std::shared_ptr<Model>> NoInputLoader::importFromFile(
     const std::string &path,
     const LoaderProgress &callback,
     const EmptyLoaderParameters &parameters) const

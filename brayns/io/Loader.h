@@ -98,49 +98,43 @@ public:
     virtual std::vector<std::string> getSupportedExtensions() const = 0;
 
     /**
-     * @brief Query the loader if it can load the given file. Compares the file
-     * extension to the supported extensions (removing the dot, if any, and
-     * making them lowercase). Can be overriden to perform mor explicit checks
-     * @param const std::string& fileName Path to the file to queried
-     * @param const std::string& extension Extracted file extension from fileName
+     * @brief Query the loader to check if a file can be loaded. Filename and file extension (without the dot)
+     * are checked.
+     * @param path Path to the file.
+     * @param extension Extracted file extension from path (without the dot)
      */
-    virtual bool isSupported(const std::string &fileName, const std::string &extension) const;
+    virtual bool isSupported(const std::string &path, const std::string &extension) const;
 
     /**
-     * @return The loader name
+     * @brief Returns the loader identificative name.
+     * @return std::string.
      */
     virtual std::string getName() const = 0;
 
     /**
-     * @brief returns the loader input parameter schema to be used on loader
-     *        discovery
+     * @brief returns the loader input parameter schema.
+     * @returns a JsonSchema object.
      */
     virtual const JsonSchema &getInputParametersSchema() const = 0;
 
     /**
-     * @brief Loads a model/list of models from a blob of memory
-     * @param blob the memory blob containing the data to be loaded
-     * @param callback a callback to update the progress to the caller
-     * @param params a brayns::JsonValue with the json payload of the input
-     * parameters which will be deserialized into the selected loader's input
-     * parameter type.
-     * @return a std::vector with all the brayns::ModelDescriptor loaded from
-     * the blob
+     * @brief Loads a list of models from a blob of bytes.
+     * @param blob The byte data.
+     * @param callback A callback to update the progress to the caller.
+     * @param params A JSON object with the parameters to configure the load.
+     * @return a list of loaded models.
      */
-    virtual std::vector<std::unique_ptr<Model>>
+    virtual std::vector<std::shared_ptr<Model>>
         loadFromBlob(const Blob &blob, const LoaderProgress &callback, const JsonValue &params) const = 0;
 
     /**
-     * @brief Loads a model/list of models from a path to a file
-     * @param path path to the file on the current filesystem
-     * @param callback a callback to update the progress to the caller
-     * @param params a brayns::JsonValue with the json payload of the input
-     * parameters which will be deserialized into the selected loader's input
-     * parameter type.
-     * @return a std::vector with all the brayns::ModelDescriptor loaded from
-     * the file
+     * @brief Loads a list of models from a file.
+     * @param path Path to the file on the current filesystem.
+     * @param callback A callback to update the progress to the caller.
+     * @param params A JSON object with the parameters to configure the load.
+     * @return a list of loaded models.
      */
-    virtual std::vector<std::unique_ptr<Model>>
+    virtual std::vector<std::shared_ptr<Model>>
         loadFromFile(const std::string &path, const LoaderProgress &callback, const JsonValue &params) const = 0;
 };
 
@@ -164,14 +158,14 @@ public:
         return _parameterSchema;
     }
 
-    virtual std::vector<std::unique_ptr<Model>>
+    virtual std::vector<std::shared_ptr<Model>>
         loadFromBlob(const Blob &blob, const LoaderProgress &callback, const JsonValue &params) const override
     {
         const T inputParams = _parseParameters(params);
         return importFromBlob(blob, callback, inputParams);
     }
 
-    virtual std::vector<std::unique_ptr<Model>>
+    virtual std::vector<std::shared_ptr<Model>>
         loadFromFile(const std::string &path, const LoaderProgress &callback, const JsonValue &params) const override
     {
         const T inputParams = _parseParameters(params);
@@ -179,54 +173,50 @@ public:
     }
 
     /**
-     * Import the data from the blob and return the created model.
+     * @copydoc AbstractLoader::loadFromBlob()
      *
-     * @param blob the blob containing the data to import
-     * @param callback Callback for loader progress
-     * @param properties Properties used for loading
-     * @return the model that has been created by the loader
+     * @param blob The byte data.
+     * @param callback A callback to update the progress to the caller.
+     * @param params Parameters to configure the load.
+     * @return a list of loaded models.
      */
-    virtual std::vector<std::unique_ptr<Model>>
-        importFromBlob(const Blob &blob, const LoaderProgress &callback, const T &properties) const = 0;
+    virtual std::vector<std::shared_ptr<Model>>
+        importFromBlob(const Blob &blob, const LoaderProgress &callback, const T &params) const = 0;
 
     /**
-     * Import the data from the given file and return the created model.
+     * @copydoc AbstractLoader::loadFromFile()
      *
-     * @param filename the file containing the data to import
-     * @param callback Callback for loader progress
-     * @param properties Properties used for loading
-     * @return the model that has been created by the loader
+     * @param path Path to the file on the current filesystem.
+     * @param callback A callback to update the progress to the caller.
+     * @param params Parameters to configure the load.
+     * @return a list of loaded models.
      */
-    virtual std::vector<std::unique_ptr<Model>>
-        importFromFile(const std::string &filename, const LoaderProgress &callback, const T &properties) const = 0;
+    virtual std::vector<std::shared_ptr<Model>>
+        importFromFile(const std::string &path, const LoaderProgress &callback, const T &params) const = 0;
 
 private:
     const JsonSchema _parameterSchema;
 
     T _parseParameters(const JsonValue &input) const
     {
-        T inputParams;
         if (input.isEmpty())
         {
-            Json::deserialize<T>(Json::parse("{}"), inputParams);
+            return Json::deserialize<T>(Json::parse("{}"));
         }
-        else
+
+        auto errors = JsonSchemaValidator::validate(input, _parameterSchema);
+        if (!errors.empty())
         {
-            const auto errors = JsonSchemaValidator::validate(input, _parameterSchema);
-            if (!errors.empty())
-                throw std::invalid_argument(
-                    "Could not parse " + getName() + " parameters: " + StringJoiner::join(errors, ", "));
-
-            Json::deserialize<T>(input, inputParams);
+            auto message = "Cannot parse " + getName() + " parameters: " + StringJoiner::join(errors, ", ");
+            throw std::invalid_argument(message);
         }
 
-        return inputParams;
+        return Json::deserialize<T>(input);
     }
 };
 
 /**
- * @brief The EmptyLoaderParameters struct is a convenience type for loaders
- * that do not have any input parameter
+ * @brief Convenience type for loaders that do not have load parameters.
  */
 struct EmptyLoaderParameters
 {
@@ -241,36 +231,35 @@ struct JsonAdapter<EmptyLoaderParameters>
 };
 
 /**
- * @brief The NoInputLoader class is a convenience class that loaders that do
- * not require any input can extend
+ * @brief Base class for loaders that do not have load parameters.
  */
 class NoInputLoader : public Loader<EmptyLoaderParameters>
 {
 public:
     /**
-     * @brief importFromBlob imports a model from a blob of memory
-     * @param blob the memory blob containing the model data
-     * @param callback a callback to update the load progress to the caller
-     * @return a std::vector with the loaded ModelDescriptorPtr objects
+     * @copydoc AbstractLoader::loadFromBlob()
+     * @param blob The byte data.
+     * @param ccallback A callback to update the progress to the caller.
+     * @return a list of loaded models.
      */
-    virtual std::vector<std::unique_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback)
+    virtual std::vector<std::shared_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback)
         const = 0;
 
     /**
-     * @brief importFromFile imports a model from a file from disk
-     * @param path the path to the file on disk
-     * @param callback a callback to update the load progress to the caller
-     * @return a std::vector with the loaded ModelDescriptorPtr objects
+     * @copydoc AbstractLoader::loadFromFile()
+     * @param path Path to the file on the current filesystem.
+     * @param callback A callback to update the progress to the caller.
+     * @return a list of loaded models.
      */
-    virtual std::vector<std::unique_ptr<Model>> importFromFile(const std::string &path, const LoaderProgress &callback)
+    virtual std::vector<std::shared_ptr<Model>> importFromFile(const std::string &path, const LoaderProgress &callback)
         const = 0;
 
-    std::vector<std::unique_ptr<Model>> importFromBlob(
+    std::vector<std::shared_ptr<Model>> importFromBlob(
         const Blob &blob,
         const LoaderProgress &callback,
         const EmptyLoaderParameters &parameters) const final;
 
-    std::vector<std::unique_ptr<Model>> importFromFile(
+    std::vector<std::shared_ptr<Model>> importFromFile(
         const std::string &path,
         const LoaderProgress &callback,
         const EmptyLoaderParameters &parameters) const final;

@@ -47,7 +47,7 @@ public:
         auto &scene = engine.getScene();
         auto &models = scene.getModels();
 
-        auto model = std::make_unique<brayns::Model>("");
+        auto model = std::make_shared<brayns::Model>("");
 
         auto &components = model->getComponents();
         auto &lights = components.add<brayns::Lights>();
@@ -56,7 +56,7 @@ public:
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Lights>>();
 
-        models.addModel(std::move(model));
+        models.add(std::move(model));
     }
 
     static void addModel(brayns::Brayns &brayns, const std::string &path)
@@ -67,7 +67,7 @@ public:
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
         auto &models = scene.getModels();
-        models.addModels(std::move(loadedModels));
+        models.add(std::move(loadedModels));
     }
 
     static void adjustPerspectiveView(brayns::Brayns &brayns)

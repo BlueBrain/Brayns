@@ -78,11 +78,11 @@ bool OutlineShell::isValidAtlas(const Atlas &atlas) const
     return true;
 }
 
-std::unique_ptr<brayns::Model> OutlineShell::run(const Atlas &atlas, const brayns::JsonValue &payload) const
+std::shared_ptr<brayns::Model> OutlineShell::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
 
-    auto model = std::make_unique<brayns::Model>(ModelType::atlas);
+    auto model = std::make_shared<brayns::Model>(ModelType::atlas);
 
     auto isoVolume = VolumeBuilder::fromAtlas(atlas);
     auto isoValues = std::vector<float>{1.f};

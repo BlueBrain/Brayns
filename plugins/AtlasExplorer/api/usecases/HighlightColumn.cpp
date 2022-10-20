@@ -128,7 +128,7 @@ bool HighlightColumn::isValidAtlas(const Atlas &atlas) const
     return true;
 }
 
-std::unique_ptr<brayns::Model> HighlightColumn::run(const Atlas &atlas, const brayns::JsonValue &payload) const
+std::shared_ptr<brayns::Model> HighlightColumn::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     const auto params = ParamsParser::parse<HighlighColumParams>(payload);
     CoordinatesValidator::validate(params, atlas.getSize());
@@ -152,7 +152,7 @@ std::unique_ptr<brayns::Model> HighlightColumn::run(const Atlas &atlas, const br
         colors.push_back(neighbour.color);
     }
 
-    auto model = std::make_unique<brayns::Model>(ModelType::atlas);
+    auto model = std::make_shared<brayns::Model>(ModelType::atlas);
 
     ModelBuilder builder(*model);
     builder.addComponents(std::move(geometry), colors);

@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,15 +20,40 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/engine/scene/Scene.h>
+#include <brayns/json/JsonAdapterMacro.h>
 
-#include <brayns/engine/json/adapters/BoundsAdapter.h>
-#include <brayns/engine/json/adapters/ModelInstanceAdapter.h>
+#include "BoundsAdapter.h"
+#include "ModelInstanceAdapter.h"
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(SceneMessage)
-BRAYNS_JSON_OBJECT_ENTRY(Bounds, bounds, "Scene bounds")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<ModelInstance *>, models, "Scene models")
-BRAYNS_JSON_OBJECT_END()
-} // namespace brayns
+class SceneProxy
+{
+public:
+    SceneProxy(const Scene *scene = nullptr)
+        : _scene(scene)
+    {
+    }
+
+    Bounds getBounds() const noexcept
+    {
+        assert(_scene);
+        return _scene->getBounds();
+    }
+
+    const std::vector<std::unique_ptr<ModelInstance>> &getAllInstances() const noexcept
+    {
+        assert(_scene);
+        return _scene->getModels().getAllModelInstances();
+    }
+
+private:
+    const Scene *_scene;
+};
+
+BRAYNS_JSON_ADAPTER_BEGIN(SceneProxy)
+BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Scene bounds")
+BRAYNS_JSON_ADAPTER_GET("models", getAllInstances, "Scene models")
+BRAYNS_JSON_ADAPTER_END()
+}

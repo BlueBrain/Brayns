@@ -26,7 +26,7 @@ namespace
 {
 struct MetalParameters
 {
-    inline static const std::string color = "baseColor";
+    inline static const std::string color = "color";
     inline static const std::string roughness = "roughness";
 };
 }

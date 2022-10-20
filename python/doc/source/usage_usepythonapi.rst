@@ -8,26 +8,27 @@ running a websocket server and we can monitor it using the web API. The Python
 package just wraps the websocket client and the JSON-RPC messages into a more
 high-level API with classes and functions.
 
-In the following section, we will assume the backend instance was started like
-this:
+In the following section, we will assume the backend was started with:
 
 .. code-block:: console
 
-    braynsService --uri 0.0.0.0:5000 # other arguments
+    braynsService --uri 0.0.0.0:5000
 
 The port 5000 is used in this documentation but if you want to use another one,
 just make sure it is available on the server machine and that you use this one
 instead of 5000 it in all the following examples.
 
-The IP mentioned here specifies which host can connect to this server. ``0.0.0.0``
-is a wildcard IP address which means the client can connect from any machine.
-Use ``localhost`` if you want to allow only local connections.
+The IP mentioned here is from the **SERVER** point of view and specifies which
+host can connect to this server. 0.0.0.0 is a wildcard IP address which means
+you can connect from any machine as client. Use localhost if you want to allow
+only local connections.
 
 Connection to an instance
 --------------------------
 
-To create a connection to a braynsService instance from the Python API, its URI
-is required. It has the format ``SERVER_IP:PORT``.
+To create a connection to the backend from the Python API, we need the URI of
+the braynsService instance we want to connect to (ip:port). The IP is always the
+machine the instance is running on seen from the Python client.
 
 .. hint::
 
@@ -71,5 +72,5 @@ connection is made as follows from a remote machine:
 Further information
 -------------------
 
-For further information about the Python API, please refer to the API reference
+For further information about, please refer to the API reference
 :ref:`pythonapi-label` and typical use cases examples :ref:`examples-label`.

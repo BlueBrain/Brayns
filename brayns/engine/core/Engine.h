@@ -70,11 +70,6 @@ public:
     void render();
 
     /**
-     * @brief Called after render()
-     */
-    void postRender();
-
-    /**
      * @brief Returns the system's Scene object.
      */
     Scene &getScene();

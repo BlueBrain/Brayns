@@ -137,9 +137,4 @@ CommitResult Model::commit()
 {
     return _systems.commit(_components);
 }
-
-void Model::onPostRender(const ParametersManager &parameters)
-{
-    return _systems.postRender(parameters, _components);
-}
 } // namespace brayns

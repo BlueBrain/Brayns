@@ -25,7 +25,7 @@ On a BB5 node you can use these commands.
 Movie
 -----
 
-The ``Movie`` class in Brayns Python package is only a convenience tools to wrap
+The `Movie` class in Brayns Python package is only a convenience tools to wrap
 an FFMPEG command line. It requires the frames folder, their format and the
 movie FPS. An incoherent FPS from the export will generate an incorrect movie
 duration.
@@ -42,11 +42,11 @@ duration.
 
 The duration of the output movie is simply fps x frame_count. A different
 resolution can be specified but by default the frame size is used. The path to
-FFMPEG executable is ``ffmpeg`` by default but can be modified.
+FFMPEG executable is `ffmpeg` by default but can be modified.
 
 .. attention::
     The frame filenames must have the exporter format with 5 digits specifying
     the frame index and the format extension (.png or .jpg). If the
-    ``Exporter`` was used, they are already at the good format.
+    `Exporter` was used, they are already at the good format.
 
     Example: 00001.png, 00002.png, ...
