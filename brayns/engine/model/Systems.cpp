@@ -39,11 +39,11 @@ CommitResult Systems::commit(Components &components)
     return {};
 }
 
-void Systems::preRender(const ParametersManager &parameters, Components &components)
+void Systems::update(const ParametersManager &parameters, Components &components)
 {
-    if (_preRender)
+    if (_update)
     {
-        _preRender->execute(parameters, components);
+        _update->execute(parameters, components);
     }
 }
 

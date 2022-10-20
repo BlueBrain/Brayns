@@ -18,13 +18,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "SimulationSystem.h"
 
-#include <brayns/engine/model/systemtypes/SimulationSystem.h>
-
-class ReportSystem final : public brayns::SimulationSystem
+namespace
+{
+class SimulationChecks
 {
 public:
-    bool shouldExecute(brayns::Components &components) override;
-    void execute(brayns::Components &components, uint32_t frame) override;
+    static bool shouldExecute(const brayns::SimulationParameters &simulation, uint32_t lastFrame)
+    {
+        return simulation.isModified() && simulation.getFrame() != lastFrame;
+    }
 };
+}
+
+namespace brayns
+{
+void SimulationSystem::execute(const ParametersManager &parameters, Components &components)
+{
+    auto &simulation = parameters.getSimulationParameters();
+    auto simulationChanged = SimulationChecks::shouldExecute(simulation, _lastFrame);
+    auto stateChanged = shouldExecute(components);
+    if (!simulationChanged && !stateChanged)
+    {
+        return;
+    }
+
+    std::exchange(_lastFrame, simulation.getFrame());
+    execute(components, _lastFrame);
+}
+}

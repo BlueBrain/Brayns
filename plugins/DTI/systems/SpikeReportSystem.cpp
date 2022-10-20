@@ -103,27 +103,32 @@ public:
 class SimulationChecks
 {
 public:
-    static bool enabled(const brayns::SimulationInfo &info, dti::SpikeReportData &data, brayns::Components &components)
+    static bool shouldExecute(brayns::Components &components)
     {
+        auto &data = components.get<dti::SpikeReportData>();
+        return _enabled(data, components) && _requiresUpdate(data);
+    }
+
+private:
+    static bool _enabled(dti::SpikeReportData &data, brayns::Components &components)
+    {
+        auto &info = components.get<brayns::SimulationInfo>();
         if (info.enabled)
         {
             return true;
         }
 
         // First onPreRender after disabling simulation - restore default colors
-        if (data.lastEnabledFlag)
+        if (std::exchange(data.lastEnabledFlag, false))
         {
             DefaultColorPainter::paint(components);
         }
-        data.lastEnabledFlag = false;
         return false;
     }
 
-    static bool requiresUpdate(const brayns::SimulationParameters &simulationParams, dti::SpikeReportData &data)
+    static bool _requiresUpdate(dti::SpikeReportData &data)
     {
-        auto forceUpdate = !data.lastEnabledFlag;
-        data.lastEnabledFlag = true;
-        return forceUpdate || simulationParams.isModified();
+        return !std::exchange(data.lastEnabledFlag, true);
     }
 };
 
@@ -193,22 +198,16 @@ public:
 
 namespace dti
 {
-void SpikeReportSystem::execute(const brayns::ParametersManager &parameters, brayns::Components &components)
+bool SpikeReportSystem::shouldExecute(brayns::Components &components)
 {
-    auto &simulationInfo = components.get<brayns::SimulationInfo>();
-    auto &spikeData = components.get<dti::SpikeReportData>();
-    if (!SimulationChecks::enabled(simulationInfo, spikeData, components))
-    {
-        return;
-    }
-    auto &simulationParams = parameters.getSimulationParameters();
-    if (!SimulationChecks::requiresUpdate(simulationParams, spikeData))
-    {
-        return;
-    }
+    return SimulationChecks::shouldExecute(components);
+}
 
-    auto frameIndex = simulationParams.getFrame();
-    auto frameTime = FrameTime::compute(simulationInfo, frameIndex);
+void SpikeReportSystem::execute(brayns::Components &components, uint32_t frame)
+{
+    auto &info = components.get<brayns::SimulationInfo>();
+    auto &spikeData = components.get<dti::SpikeReportData>();
+    auto frameTime = FrameTime::compute(info, frame);
     auto data = SpikeFrameProcessor::process(spikeData, frameTime);
     SimulationColorPainter::paint(components, data);
 }

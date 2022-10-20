@@ -54,5 +54,5 @@ void ReportFactory::create(brayns::Model &model, ReportData reportData)
     components.add<brayns::ColorRamp>(std::move(colorRamp));
 
     auto &systems = model.getSystems();
-    systems.setPreRenderSystem<ReportSystem>();
+    systems.setUpdateSystem<ReportSystem>();
 }

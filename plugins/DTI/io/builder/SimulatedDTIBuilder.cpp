@@ -145,6 +145,6 @@ void SimulatedDTIBuilder::buildSimulation(const std::string &path, float spikeDe
     components.add<brayns::SimulationInfo>(0.f, endTime, 0.01f);
 
     auto &systems = model.getSystems();
-    systems.setPreRenderSystem<SpikeReportSystem>();
+    systems.setUpdateSystem<SpikeReportSystem>();
 }
 }

@@ -20,13 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/model/systemtypes/ParameterSystem.h>
+#include <brayns/engine/model/systemtypes/SimulationSystem.h>
 
 namespace dti
 {
-class SpikeReportSystem final : public brayns::ParameterSystem
+class SpikeReportSystem final : public brayns::SimulationSystem
 {
 public:
-    void execute(const brayns::ParametersManager &parameters, brayns::Components &components) override;
+    bool shouldExecute(brayns::Components &components) override;
+    void execute(brayns::Components &components, uint32_t frame) override;
 };
 }

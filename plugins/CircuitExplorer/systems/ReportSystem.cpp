@@ -32,8 +32,16 @@ namespace
 class SimulationChecks
 {
 public:
-    static bool enabled(brayns::SimulationInfo &info, ReportData &report)
+    static bool shouldExecute(brayns::Components &components)
     {
+        auto &report = components.get<ReportData>();
+        return _enabled(report, components) && _mustUpdate(report, components);
+    }
+
+public:
+    static bool _enabled(ReportData &report, brayns::Components &components)
+    {
+        auto &info = components.get<brayns::SimulationInfo>();
         if (info.enabled)
         {
             return true;
@@ -43,39 +51,30 @@ public:
         return false;
     }
 
-    static bool mustUpdate(ReportData &report, brayns::ColorRamp &colorRamp, const brayns::SimulationParameters &sim)
+    static bool _mustUpdate(ReportData &report, brayns::Components &components)
     {
-        auto flagModified = !report.lastEnabledFlag;
-        report.lastEnabledFlag = true;
+        auto flagModified = !std::exchange(report.lastEnabledFlag, true);
+        auto &colorRamp = components.get<brayns::ColorRamp>();
         auto colorRampModified = colorRamp.isModified();
         colorRamp.resetModified();
-        auto simulationModified = sim.isModified();
-        return flagModified || colorRampModified || simulationModified;
+        return flagModified || colorRampModified;
     }
 };
 }
 
-void ReportSystem::execute(const brayns::ParametersManager &parameters, brayns::Components &components)
+bool ReportSystem::shouldExecute(brayns::Components &components)
 {
-    auto &info = components.get<brayns::SimulationInfo>();
-    auto &report = components.get<ReportData>();
-    if (!SimulationChecks::enabled(info, report))
-    {
-        return;
-    }
+    return SimulationChecks::shouldExecute(components);
+}
 
+void ReportSystem::execute(brayns::Components &components, uint32_t frame)
+{
     auto &colorRamp = components.get<brayns::ColorRamp>();
-    auto &simulation = parameters.getSimulationParameters();
-    if (!SimulationChecks::mustUpdate(report, colorRamp, simulation))
-    {
-        return;
-    }
-
     auto colors = ColorRampUtils::createSampleBuffer(colorRamp);
+    auto &range = colorRamp.getValuesRange();
 
-    const auto frameIndex = simulation.getFrame();
-    const auto frameData = report.data->getFrame(frameIndex);
-    const auto &range = colorRamp.getValuesRange();
+    auto &report = components.get<ReportData>();
+    auto frameData = report.data->getFrame(frame);
     auto indices = report.indexer->generate(frameData, range);
 
     auto &coloring = components.get<Coloring>();

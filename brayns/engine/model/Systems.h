@@ -27,7 +27,7 @@
 #include "systemtypes/CommitSystem.h"
 #include "systemtypes/InitSystem.h"
 #include "systemtypes/InspectSystem.h"
-#include "systemtypes/ParameterSystem.h"
+#include "systemtypes/UpdateSystem.h"
 
 namespace brayns
 {
@@ -47,9 +47,9 @@ public:
     }
 
     template<typename T, typename... Args>
-    void setPreRenderSystem(Args &&...args)
+    void setUpdateSystem(Args &&...args)
     {
-        _preRender = std::make_unique<T>(std::forward<Args>(args)...);
+        _update = std::make_unique<T>(std::forward<Args>(args)...);
     }
 
     template<typename T, typename... Args>
@@ -69,14 +69,14 @@ private:
 
     void init(Components &components);
     CommitResult commit(Components &components);
-    void preRender(const ParametersManager &parameters, Components &components);
+    void update(const ParametersManager &parameters, Components &components);
     InspectResultData inspect(const InspectContext &context, Components &components);
     Bounds computeBounds(const Matrix4f &matrix, Components &components);
 
 private:
     std::unique_ptr<InitSystem> _init;
     std::unique_ptr<CommitSystem> _commit;
-    std::unique_ptr<ParameterSystem> _preRender;
+    std::unique_ptr<UpdateSystem> _update;
     std::unique_ptr<InspectSystem> _inspect;
     std::unique_ptr<BoundsSystem> _bounds;
 };

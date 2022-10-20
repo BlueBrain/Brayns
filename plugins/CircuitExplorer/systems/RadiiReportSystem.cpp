@@ -69,46 +69,42 @@ private:
 class SimulationChecks
 {
 public:
-    static bool enabled(brayns::SimulationInfo &info, RadiiReportData &report, brayns::Components &components)
+    static bool shouldExecute(brayns::Components &components)
     {
+        auto &report = components.get<RadiiReportData>();
+        return _enabled(report, components) && _mustUpdate(report);
+    }
+
+private:
+    static bool _enabled(RadiiReportData &report, brayns::Components &components)
+    {
+        auto &info = components.get<brayns::SimulationInfo>();
         if (info.enabled)
         {
             return true;
         }
-        if (report.lastEnabledFlag)
+        if (std::exchange(report.lastEnabledFlag, false))
         {
             RadiiSetter::fromVector(components, report.originalRadii);
         }
-        report.lastEnabledFlag = false;
         return false;
     }
 
-    static bool mustUpdate(RadiiReportData &report, const brayns::SimulationParameters &sim)
+    static bool _mustUpdate(RadiiReportData &report)
     {
-        auto flagModified = !report.lastEnabledFlag;
-        report.lastEnabledFlag = true;
-        auto simulationModified = sim.isModified();
-        return flagModified || simulationModified;
+        return !std::exchange(report.lastEnabledFlag, true);
     }
 };
 }
 
-void RadiiReportSystem::execute(const brayns::ParametersManager &parameters, brayns::Components &components)
+bool RadiiReportSystem::shouldExecute(brayns::Components &components)
 {
-    auto &info = components.get<brayns::SimulationInfo>();
+    return SimulationChecks::shouldExecute(components);
+}
+
+void RadiiReportSystem::execute(brayns::Components &components, uint32_t frame)
+{
     auto &report = components.get<RadiiReportData>();
-    if (!SimulationChecks::enabled(info, report, components))
-    {
-        return;
-    }
-
-    auto &simulation = parameters.getSimulationParameters();
-    if (!SimulationChecks::mustUpdate(report, simulation))
-    {
-        return;
-    }
-
-    auto frameIndex = simulation.getFrame();
-    auto frameData = report.data->getFrame(frameIndex);
+    auto frameData = report.data->getFrame(frame);
     RadiiSetter::fromFrame(components, report.offsets, frameData);
 }

@@ -89,10 +89,10 @@ private:
     friend class Scene;
 
     /**
-     * @brief Calls the preRender system of all models
+     * @brief Calls the update system of all models
      * @param parameters
      */
-    void preRender(const ParametersManager &parameters);
+    void update(const ParametersManager &parameters);
 
     /**
      * @brief Attempts to commit any unsynced data to Ospray.

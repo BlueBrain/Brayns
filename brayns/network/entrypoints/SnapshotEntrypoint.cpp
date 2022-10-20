@@ -169,7 +169,7 @@ public:
 
         // Scene
         auto &scene = engine.getScene();
-        scene.preRender(paramsManager);
+        scene.update(paramsManager);
         scene.commit();
 
         // Render

@@ -51,9 +51,9 @@ public:
     Bounds getBounds() const noexcept;
 
     /**
-     * @brief Called before a new frame is. Will call onPreRender on all the models of the scene
+     * @brief Called before a new frame is rendered to update all models.
      */
-    void preRender(const ParametersManager &params);
+    void update(const ParametersManager &params);
 
     /**
      * @brief commit implementation.

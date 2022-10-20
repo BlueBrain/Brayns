@@ -20,16 +20,19 @@
 
 #pragma once
 
-#include <brayns/engine/model/Components.h>
-#include <brayns/parameters/ParametersManager.h>
+#include "UpdateSystem.h"
 
 namespace brayns
 {
-class ParameterSystem
+class SimulationSystem : public UpdateSystem
 {
 public:
-    virtual ~ParameterSystem() = default;
+    virtual void execute(const ParametersManager &parameters, Components &components) final;
 
-    virtual void execute(const ParametersManager &parameters, Components &components) = 0;
+    virtual bool shouldExecute(Components &components) = 0;
+    virtual void execute(Components &components, uint32_t frame) = 0;
+
+private:
+    uint32_t _lastFrame = std::numeric_limits<uint32_t>::max();
 };
 }

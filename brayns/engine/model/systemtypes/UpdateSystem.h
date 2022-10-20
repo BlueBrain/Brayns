@@ -20,11 +20,16 @@
 
 #pragma once
 
-#include <brayns/engine/model/systemtypes/SimulationSystem.h>
+#include <brayns/engine/model/Components.h>
+#include <brayns/parameters/ParametersManager.h>
 
-class ReportSystem final : public brayns::SimulationSystem
+namespace brayns
+{
+class UpdateSystem
 {
 public:
-    bool shouldExecute(brayns::Components &components) override;
-    void execute(brayns::Components &components, uint32_t frame) override;
+    virtual ~UpdateSystem() = default;
+
+    virtual void execute(const ParametersManager &parameters, Components &components) = 0;
 };
+}
