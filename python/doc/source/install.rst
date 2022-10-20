@@ -5,35 +5,35 @@ Installation
 
 This section describes how to install brayns Python package. Note that a running
 renderer backend instance (braynsService) is required to be able to perform some
-rendering, the Python package is basically just a websocket client.
+rendering, the Python package is basically just a websocket client to monitor it.
 
-To be able to interact with a running instance of braynsService, websockets can
-be used directly but the easiest way is to use the Python API.
+A Brayns service instance can be monitored using websocket JSON-RPC messages
+either using the Python wrapper (API) or any other websocket client.
 
 To use raw websocket and JSON-RPC to interact with the backend, the API
-reference can be found under :ref:`jsonrpcapi-label` with endpoints
-documentation. In this case, no installation is required and this section can be
-skipped but a custom websocket client has to be written.
+reference can be found under :ref:`jsonrpcapi-label` with a documentation
+of all existing entrypoints. In this case, no installation is required and
+this section can be skipped but a custom websocket client has to be written.
 
 Otherwise the Brayns Python client is distributed as a Python package named
-"brayns" and must be installed.
-
-Currently only Python 3.9+ is supported so for platforms with older system
-version, it can be installed using:
+``brayns`` and must be installed.
 
 Python version
 --------------
+
+``brayns`` package only supports Python 3.9+ so for platforms with an older
+system version, it can be installed on Ubuntu using:
 
 .. code-block:: console
 
     $ sudo apt install python3.9
 
+Python virtual environment (optional)
+-------------------------------------
+
 As for all Python projects, it is recommended (but not required) to use a
 virtual environment. It can be created with the following commands (update the
 paths with the one your environment folder):
-
-Python virtual environment (optional)
--------------------------------------
 
 .. code-block:: console
 
@@ -55,8 +55,8 @@ And deactivated with:
 With the Python environment activated (optional) one of the following methods
 can be used to install brayns Python package.
 
-Package installation
---------------------
+Python package installation
+---------------------------
 
 From Python Pacakge Index (PyPI)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,13 +67,11 @@ The easiest way is to access the latest release is the following:
 
     $ pip install brayns
 
-And that's it, no other steps are required.
-
 From source
 ~~~~~~~~~~~
 
 For development or to get a more recent version than the one released on PyPI,
-the package can also be installed from the github repository sources using:
+the package can also be installed from the sources on the github repository using:
 
 .. code-block:: console
 
@@ -112,4 +110,4 @@ Now brayns package should be available in the Python system version.
 
 The renderer backend (braynsService) should also be available in the current
 path once brayns module is loaded. Otherwise on a local machine, it must be
-compiled from source.
+compiled from source (see :ref:`usepythonapi-label`).

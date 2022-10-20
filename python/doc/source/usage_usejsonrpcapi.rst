@@ -3,6 +3,10 @@
 Using Brayns JSON-RPC API
 =========================
 
+This section is useful only if you plan to use your own websocket client to
+monitor your Brayns instance. The Python API hides the websocket communication
+so if you are using it, you can skip this section.
+
 The available entrypoints depend on the plugins loaded in the instance and are
 hence grouped by plugin. The Core plugin is always loaded as long as the backend
 instance is running a websocket server (--uri provided).
@@ -11,6 +15,18 @@ All entrypoints use a JSON-RPC protocol (see specifications
 `here <https://www.jsonrpc.org/specification>`_).
 
 The schemas of the messages used by Brayns have the following rules.
+
+Websocket
+---------
+
+The JSON-RPC messages are send using websockets.
+
+The connection can be made using the URL ``ws://HOST:PORT`` if the connection is
+not secure or ``wss://HOST:PORT`` with SSL.
+
+.. attention::
+    Brayns doesn't implement ping messages so be careful if your websocket API
+    uses a ping interval, it must be disabled.
 
 Request
 -------
@@ -21,7 +37,7 @@ and optional params.
 - The protocol version must always be 2.0.
 - The Request ID can be ignored if you don't care about the reply.
 - The Request ID must be integer or string if a reply is expected.
-- The method is the name of the entrypoint (for example "get-camera-look-at").
+- The method is the name of the entrypoint (for example "snapshot").
 
 The params can be anything depending on the entrypoint params schema.
 
@@ -39,7 +55,7 @@ The params can be anything depending on the entrypoint params schema.
 Reply
 -----
 
-The reply is sent only if the request ID is set and not null.
+The reply is sent by the instance only if the request has a non-null ID.
 
 - The protocol version must always be 2.0.
 - The ID is the one of the corresponding request it is replying to.
@@ -104,6 +120,14 @@ messages.
             "amount": 0.5
         }}
     }}
+
+.. hint::
+
+    JSON-RPC messages received from an instance are differentiated as follows:
+    - If the message has a "result" field, then it is a reply.
+    - If the message has an "error" field, then it is an error.
+    - If the message has a "params" field, then it is a notification.
+    - Otherwise the message is invalid and should be ignored.
 
 Further information
 -------------------
