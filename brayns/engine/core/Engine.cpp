@@ -87,6 +87,18 @@ public:
         return device;
     }
 };
+
+class ViewporUpdater
+{
+public:
+    static void update(const brayns::ParametersManager &params, brayns::Camera &camera, brayns::Framebuffer &fb)
+    {
+        auto &appParams = params.getApplicationParameters();
+        auto &frameSize = appParams.getWindowSize();
+        fb.setFrameSize(frameSize);
+        camera.setAspectRatio(fb.getAspectRatio());
+    }
+};
 }
 
 namespace brayns
@@ -110,38 +122,9 @@ Engine::Engine(ParametersManager &parameters)
     EngineFactoriesInitializer::init(_factories);
 }
 
-void Engine::commitAndRender()
-{
-    // Pre render engine
-    preRender();
-
-    // Commit any change to the engine (scene, camera, renderer, parameters, ...)
-    commit();
-
-    // Render new frame, if needed
-    render();
-
-    // The parameters are modified on network update, and processed on engine.preRender and engine.commit
-    _params.resetModified();
-}
-
-void Engine::preRender()
-{
-    _scene.preRender(_params);
-}
-
 void Engine::commit()
 {
-    if (!_keepRunning)
-    {
-        return;
-    }
-
-    // Update changes on the viewport
-    auto &appParams = _params.getApplicationParameters();
-    auto &frameSize = appParams.getWindowSize();
-    _frameBuffer.setFrameSize(frameSize);
-    _camera.setAspectRatio(_frameBuffer.getAspectRatio());
+    ViewporUpdater::update(_params, _camera, _frameBuffer);
 
     bool needResetFramebuffer = false;
     if (_frameBuffer.commit())
@@ -174,23 +157,12 @@ void Engine::commit()
     }
 }
 
-void Engine::render()
+void Engine::commitAndRender()
 {
-    if (!_keepRunning)
-    {
-        return;
-    }
-
-    // Check wether we should keep rendering or not
-    auto maxSpp = _renderer.getSamplesPerPixel();
-    auto currentSpp = _frameBuffer.numAccumFrames();
-    if (currentSpp >= maxSpp)
-    {
-        return;
-    }
-
-    FrameRenderer::synchronous(_camera, _frameBuffer, _renderer, _scene);
-    _frameBuffer.incrementAccumFrames();
+    _scene.update(_params);
+    commit();
+    _render();
+    _params.resetModified();
 }
 
 Scene &Engine::getScene()
@@ -231,5 +203,19 @@ bool Engine::isRunning() const noexcept
 const ParametersManager &Engine::getParametersManager() const noexcept
 {
     return _params;
+}
+
+void Engine::_render()
+{
+    // Check wether we should keep rendering or not
+    auto maxSpp = _renderer.getSamplesPerPixel();
+    auto currentSpp = _frameBuffer.numAccumFrames();
+    if (currentSpp >= maxSpp)
+    {
+        return;
+    }
+
+    FrameRenderer::synchronous(_camera, _frameBuffer, _renderer, _scene);
+    _frameBuffer.incrementAccumFrames();
 }
 } // namespace brayns

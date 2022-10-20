@@ -250,7 +250,7 @@ private:
         auto data = _createReportData(context);
         components.add<RadiiReportData>(std::move(data), std::move(offsets), std::move(originalRadii));
         auto &systems = model.getSystems();
-        systems.setPreRenderSystem<RadiiReportSystem>();
+        systems.setUpdateSystem<RadiiReportSystem>();
     }
 
     static void _importReport(sl::NodeLoadContext &context)

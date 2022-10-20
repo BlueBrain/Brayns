@@ -52,9 +52,9 @@ Bounds Scene::getBounds() const noexcept
     return _models.getBounds();
 }
 
-void Scene::preRender(const ParametersManager &params)
+void Scene::update(const ParametersManager &params)
 {
-    _models.preRender(params);
+    _models.update(params);
 }
 
 bool Scene::commit()

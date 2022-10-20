@@ -99,10 +99,10 @@ public:
     void init();
 
     /**
-     * @brief Called on the pre-render stage
+     * @brief Called before rendering a new frame
      * @param parameters ParametersManager object to access system config
      */
-    void onPreRender(const ParametersManager &parameters);
+    void update(const ParametersManager &parameters);
 
     /**
      * @brief Called before rendering a new frame

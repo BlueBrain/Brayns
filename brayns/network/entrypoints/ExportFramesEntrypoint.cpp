@@ -156,7 +156,7 @@ public:
 
             // Update scene
             simulation.setFrame(keyFrame.frame_index);
-            scene.preRender(parametersManager);
+            scene.update(parametersManager);
             scene.commit();
 
             // Update camera

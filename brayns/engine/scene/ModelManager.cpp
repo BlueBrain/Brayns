@@ -121,12 +121,12 @@ void ModelManager::removeAllModelInstances()
     _dirty = true;
 }
 
-void ModelManager::preRender(const ParametersManager &parameters)
+void ModelManager::update(const ParametersManager &parameters)
 {
     for (auto &instance : _instances)
     {
         auto &model = instance->getModel();
-        model.onPreRender(parameters);
+        model.update(parameters);
     }
 }
 

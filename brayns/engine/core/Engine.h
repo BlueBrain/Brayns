@@ -47,27 +47,16 @@ public:
     Engine(ParametersManager &parameters);
 
     /**
-     * @brief Render a new image if needed.
-     *
-     */
-    void commitAndRender();
-
-    /**
-     * @brief Called before commit() and render()
-     */
-    void preRender();
-
-    /**
      * @brief Ensures that all the system data is updated on the Ospray rendered backend to ensure the
      * correct frame rendering. Called before render()
      */
     void commit();
 
     /**
-     * @brief Attempts to render a frame (if accumulation hasnt finish integrating the current frame and/or the
-     * contents of the engine have changed).
+     * @brief Render a new image if needed.
+     *
      */
-    void render();
+    void commitAndRender();
 
     /**
      * @brief Returns the system's Scene object.
@@ -109,6 +98,13 @@ public:
      * @brief Returns the system parameters manager
      */
     const ParametersManager &getParametersManager() const noexcept;
+
+private:
+    /**
+     * @brief Attempts to render a frame (if accumulation hasnt finish integrating the current frame and/or the
+     * contents of the engine have changed).
+     */
+    void _render();
 
 private:
     /**

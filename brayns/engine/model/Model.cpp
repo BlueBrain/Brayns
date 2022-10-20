@@ -128,9 +128,9 @@ void Model::init()
     _handle = GroupBuilder::build(_components);
 }
 
-void Model::onPreRender(const ParametersManager &parameters)
+void Model::update(const ParametersManager &parameters)
 {
-    _systems.preRender(parameters, _components);
+    _systems.update(parameters, _components);
 }
 
 CommitResult Model::commit()
