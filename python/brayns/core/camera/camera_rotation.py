@@ -22,7 +22,7 @@ from brayns.utils import Rotation, euler
 
 
 class CameraRotation:
-    """Helper class to store camera rotations to reach different object views.
+    """Helper class to store camera rotations to reach different views.
 
     All rotations are relative to front view (X-right, Y-up, Z-front).
     """

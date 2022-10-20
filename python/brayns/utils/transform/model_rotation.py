@@ -18,49 +18,42 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
+from .euler import euler
+from .rotation import Rotation
 
-from ..vector import Vector, Vector3
 
+class ModelRotation:
+    """Helper class to store model rotations to reach different views.
 
-class PlaneEquation(Vector[float]):
-    """Plane equation satisfying ax + by + cz + d = 0.
-
-    Normal and direction point to the upper side of the plane.
-
-    :param a: A component.
-    :type a: float
-    :param b: B component.
-    :type b: float
-    :param c: C component.
-    :type c: float
-    :param d: D component.
-    :type d: float
+    All rotations are relative to front view (X-right, Y-up, Z-front).
     """
 
-    def __new__(cls, a: float, b: float, c: float, d: float = 0.0) -> PlaneEquation:
-        return super().__new__(cls, a, b, c, d)
-
+    @classmethod
     @property
-    def a(self) -> float:
-        return self[0]
+    def front(cls) -> Rotation:
+        return Rotation.identity
 
+    @classmethod
     @property
-    def b(self) -> float:
-        return self[1]
+    def back(cls) -> Rotation:
+        return euler(0, 180, 0, degrees=True)
 
+    @classmethod
     @property
-    def c(self) -> float:
-        return self[2]
+    def top(cls) -> Rotation:
+        return euler(90, 0, 0, degrees=True)
 
+    @classmethod
     @property
-    def d(self) -> float:
-        return self[3]
+    def bottom(cls) -> Rotation:
+        return euler(-90, 0, 0, degrees=True)
 
+    @classmethod
     @property
-    def normal(self) -> Vector3:
-        return Vector3(self.a, self.b, self.c)
+    def right(cls) -> Rotation:
+        return euler(0, -90, 0, degrees=True)
 
+    @classmethod
     @property
-    def direction(self) -> Vector3:
-        return self.normal.normalized
+    def left(cls) -> Rotation:
+        return euler(0, 90, 0, degrees=True)
