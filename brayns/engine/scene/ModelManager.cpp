@@ -22,40 +22,11 @@
 
 namespace
 {
-class ModelFinder
+class InstanceFinder
 {
 public:
     template<typename Container>
-    static auto findEntryIterator(Container &models, const uint32_t modelId)
-    {
-        auto begin = models.begin();
-        auto end = models.end();
-        auto it = std::find_if(
-            begin,
-            end,
-            [mId = modelId](auto &modelEntry)
-            {
-                auto &model = *modelEntry.model;
-                return model.getID() == mId;
-            });
-
-        // Shouldn't happen, but...
-        if (it == models.end())
-        {
-            throw std::invalid_argument("No model with id " + std::to_string(modelId) + " was found");
-        }
-
-        return it;
-    }
-
-    template<typename Container>
-    static auto &findEntry(Container &models, const uint32_t modelId)
-    {
-        return *findEntryIterator(models, modelId);
-    }
-
-    template<typename Container>
-    static auto findInstanceIterator(Container &instances, const uint32_t instanceId)
+    static auto findIterator(Container &instances, uint32_t instanceId)
     {
         auto begin = instances.begin();
         auto end = instances.end();
@@ -70,49 +41,53 @@ public:
     }
 
     template<typename Container>
-    static auto &findInstance(Container &instances, const uint32_t instanceId)
+    static auto &find(Container &instances, uint32_t instanceId)
     {
-        return **findInstanceIterator(instances, instanceId);
+        return **findIterator(instances, instanceId);
     }
 };
 }
 
 namespace brayns
 {
-ModelInstance *ModelManager::addModel(std::unique_ptr<Model> model)
+ModelInstance *ModelManager::add(std::shared_ptr<Model> model)
 {
-    auto &entry = _createModelEntry(std::move(model));
-    return &_createModelInstance(entry);
+    model->init();
+    auto instanceId = _instanceIdFactory.generateID();
+    auto instance = std::make_unique<ModelInstance>(instanceId, std::move(model));
+    _instances.push_back(std::move(instance));
+    _dirty = true;
+    return _instances.back().get();
 }
 
-std::vector<ModelInstance *> ModelManager::addModels(std::vector<std::unique_ptr<Model>> models)
+std::vector<ModelInstance *> ModelManager::add(std::vector<std::shared_ptr<Model>> models)
 {
     std::vector<ModelInstance *> result;
     result.reserve(models.size());
 
     for (auto &model : models)
     {
-        result.push_back(addModel(std::move(model)));
+        result.push_back(add(std::move(model)));
     }
 
     return result;
 }
 
-ModelInstance &ModelManager::createInstance(const uint32_t instanceID)
+ModelInstance *ModelManager::createInstance(const uint32_t instanceID)
 {
-    auto &sourceInstance = ModelFinder::findInstance(_instances, instanceID);
-    auto &model = sourceInstance.getModel();
-    auto modelId = model.getID();
-    auto &modelEntry = ModelFinder::findEntry(_models, modelId);
-    return _createModelInstance(modelEntry);
+    auto &sourceInstance = InstanceFinder::find(_instances, instanceID);
+    auto instanceId = _instanceIdFactory.generateID();
+    _instances.push_back(std::make_unique<ModelInstance>(instanceId, sourceInstance));
+    _dirty = true;
+    return _instances.back().get();
 }
 
 ModelInstance &ModelManager::getModelInstance(const uint32_t modelID)
 {
-    return ModelFinder::findInstance(_instances, modelID);
+    return InstanceFinder::find(_instances, modelID);
 }
 
-const std::vector<ModelInstance *> &ModelManager::getAllModelInstances() const noexcept
+const std::vector<std::unique_ptr<ModelInstance>> &ModelManager::getAllModelInstances() const noexcept
 {
     return _instances;
 }
@@ -126,32 +101,14 @@ void ModelManager::removeModelInstances(const std::vector<uint32_t> &instanceIDs
 
     for (auto instanceId : instanceIDs)
     {
-        ModelFinder::findInstanceIterator(_instances, instanceId);
+        InstanceFinder::findIterator(_instances, instanceId);
     }
 
     for (auto instanceID : instanceIDs)
     {
-        auto it = ModelFinder::findInstanceIterator(_instances, instanceID);
-        auto &modelInstance = **it;
-
-        auto &model = modelInstance.getModel();
-        auto modelId = model.getID();
-        auto modelIt = ModelFinder::findEntryIterator(_models, modelId);
-        auto &modelEntry = *modelIt;
-        auto &modelInstanceList = modelEntry.instances;
-        auto instanceIterator = ModelFinder::findInstanceIterator(modelInstanceList, instanceID);
-
-        modelInstanceList.erase(instanceIterator);
+        auto it = InstanceFinder::findIterator(_instances, instanceID);
         _instances.erase(it);
-
         _instanceIdFactory.releaseID(instanceID);
-
-        // If no more instances of the model, get rid of it
-        if (modelInstanceList.empty())
-        {
-            _models.erase(modelIt);
-            _modelIdFactory.releaseID(modelId);
-        }
     }
 
     _dirty = true;
@@ -160,38 +117,30 @@ void ModelManager::removeModelInstances(const std::vector<uint32_t> &instanceIDs
 void ModelManager::removeAllModelInstances()
 {
     _instanceIdFactory.clear();
-    _modelIdFactory.clear();
     _instances.clear();
-    _models.clear();
     _dirty = true;
 }
 
 void ModelManager::preRender(const ParametersManager &parameters)
 {
-    for (auto &entry : _models)
+    for (auto &instance : _instances)
     {
-        auto &model = *entry.model;
+        auto &model = instance->getModel();
         model.onPreRender(parameters);
     }
 }
 
 CommitResult ModelManager::commit()
 {
-    CommitResult result;
+    auto result = CommitResult{std::exchange(_dirty, false)};
 
-    result.needsRebuildBVH = _dirty;
-    _dirty = false;
-
-    for (auto &entry : _models)
+    for (auto &instance : _instances)
     {
-        auto &model = *entry.model;
+        auto &model = instance->getModel();
         auto modelResult = model.commit();
         result.needsRebuildBVH |= modelResult.needsRebuildBVH;
         result.needsRender |= modelResult.needsRender;
-    }
 
-    for (auto instance : _instances)
-    {
         auto instanceResult = instance->commit();
         result.needsRebuildBVH |= instanceResult;
     }
@@ -199,62 +148,32 @@ CommitResult ModelManager::commit()
     return result;
 }
 
-void ModelManager::postRender(const ParametersManager &parameters)
-{
-    for (auto &entry : _models)
-    {
-        auto &model = *entry.model;
-        model.onPostRender(parameters);
-    }
-}
-
 Bounds ModelManager::getBounds() const noexcept
 {
     Bounds result;
-    for (const auto instance : _instances)
+
+    for (auto &instance : _instances)
     {
-        const auto &instanceBounds = instance->getBounds();
-        result.expand(instanceBounds);
+        result.expand(instance->getBounds());
     }
 
     return result;
-}
-
-ModelManager::ModelEntry &ModelManager::_createModelEntry(std::unique_ptr<Model> model)
-{
-    auto &modelEntry = _models.emplace_back();
-    modelEntry.model = std::move(model);
-    modelEntry.model->_id = _modelIdFactory.generateID();
-    modelEntry.model->init();
-    return modelEntry;
-}
-
-ModelInstance &ModelManager::_createModelInstance(ModelEntry &modelEntry)
-{
-    const auto instanceID = _instanceIdFactory.generateID();
-    auto &model = *modelEntry.model;
-    auto &modelInstanceList = modelEntry.instances;
-
-    auto instance = std::make_unique<ModelInstance>(instanceID, model);
-    _instances.push_back(instance.get());
-    modelInstanceList.push_back(std::move(instance));
-
-    return *(_instances.back());
 }
 
 std::vector<ospray::cpp::Instance> ModelManager::getHandles() noexcept
 {
     std::vector<ospray::cpp::Instance> handles;
     handles.reserve(_instances.size());
-    for (auto instance : _instances)
+
+    for (auto &instance : _instances)
     {
         if (!instance->isVisible())
         {
             continue;
         }
-        const auto &osprayInstance = instance->getHandle();
-        handles.push_back(osprayInstance);
+        handles.push_back(instance->getHandle());
     }
+
     return handles;
 }
 }

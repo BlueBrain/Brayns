@@ -41,9 +41,18 @@ class ModelInstance
 {
 public:
     /**
-     * @brief Initializes the instance with the unique ID and the given model
+     * @brief Initializes the instance with the unique ID and the given model.
+     * @param instanceId The ID of the instance.
+     * @param model The model being instantiated.
      */
-    ModelInstance(const uint32_t instanceId, Model &model);
+    ModelInstance(uint32_t instanceId, std::shared_ptr<Model> model);
+
+    /**
+     * @brief Creates a new instance out of the model hold by other.
+     * @param instanceId The ID of the instance.
+     * @param other The instance holding the model.
+     */
+    ModelInstance(uint32_t instanceId, const ModelInstance &other);
 
     ModelInstance(const ModelInstance &) = delete;
     ModelInstance &operator=(const ModelInstance &) = delete;
@@ -132,8 +141,8 @@ private:
     bool _visible = true;
     Transform _transform;
     Bounds _bounds;
+    std::shared_ptr<Model> _model;
     ospray::cpp::Instance _handle;
     ModifiedFlag _flag;
-    Model &_model;
 };
 }

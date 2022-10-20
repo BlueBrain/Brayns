@@ -230,7 +230,7 @@ public:
 
 namespace brayns
 {
-std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
+std::vector<std::shared_ptr<Model>> ProteinLoader::importFromFile(
     const std::string &path,
     const LoaderProgress &callback,
     const ProteinLoaderParameters &parameters) const
@@ -243,7 +243,7 @@ std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
     auto colorIndices = ColormapIndexer::indexAtoms(parameters, atoms);
     auto &colors = ProteinData::colors;
 
-    auto model = std::make_unique<Model>("protein");
+    auto model = std::make_shared<Model>("protein");
 
     auto &components = model->getComponents();
     auto &geometries = components.add<Geometries>();
@@ -257,7 +257,7 @@ std::vector<std::unique_ptr<Model>> ProteinLoader::importFromFile(
     systems.setInitSystem<GeometryInitSystem>();
     systems.setCommitSystem<GeometryCommitSystem>();
 
-    std::vector<std::unique_ptr<Model>> result;
+    std::vector<std::shared_ptr<Model>> result;
     result.push_back(std::move(model));
     return result;
 }
@@ -272,7 +272,7 @@ std::vector<std::string> ProteinLoader::getSupportedExtensions() const
     return {"pdb", "pdb1"};
 }
 
-std::vector<std::unique_ptr<Model>> ProteinLoader::importFromBlob(
+std::vector<std::shared_ptr<Model>> ProteinLoader::importFromBlob(
     const Blob &blob,
     const LoaderProgress &callback,
     const ProteinLoaderParameters &parameters) const

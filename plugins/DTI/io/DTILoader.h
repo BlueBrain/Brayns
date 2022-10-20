@@ -34,12 +34,12 @@ public:
 
     std::vector<std::string> getSupportedExtensions() const final;
 
-    std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
+    std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
         const brayns::Blob &blob,
         const brayns::LoaderProgress &callback,
         const DTILoaderParameters &params) const override;
 
-    std::vector<std::unique_ptr<brayns::Model>> importFromFile(
+    std::vector<std::shared_ptr<brayns::Model>> importFromFile(
         const std::string &filename,
         const brayns::LoaderProgress &callback,
         const DTILoaderParameters &params) const override;

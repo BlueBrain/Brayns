@@ -47,7 +47,7 @@ public:
 
     void onRequest(const Request &request) override
     {
-        auto model = std::make_unique<Model>("geometry");
+        auto model = std::make_shared<Model>("geometry");
 
         auto [primitives, colors] = _unpackRequest(request);
 
@@ -57,7 +57,7 @@ public:
 
         _setUpSystems(*model);
 
-        auto *instance = _models.addModel(std::move(model));
+        auto *instance = _models.add(std::move(model));
         request.reply(*instance);
     }
 

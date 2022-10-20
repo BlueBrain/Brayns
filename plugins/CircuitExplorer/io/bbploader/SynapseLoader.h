@@ -26,6 +26,6 @@ namespace bbploader
 {
 struct SynapseLoader
 {
-    static std::unique_ptr<brayns::Model> load(const LoadContext &context, bool post);
+    static std::shared_ptr<brayns::Model> load(const LoadContext &context, bool post);
 };
 } // namespace bbploader

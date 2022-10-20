@@ -31,12 +31,12 @@ public:
 
     std::string getName() const override;
 
-    std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
+    std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
         const brayns::Blob &blob,
         const brayns::LoaderProgress &callback,
         const NRRDLoaderParameters &parameters) const override;
 
-    std::vector<std::unique_ptr<brayns::Model>> importFromFile(
+    std::vector<std::shared_ptr<brayns::Model>> importFromFile(
         const std::string &path,
         const brayns::LoaderProgress &callback,
         const NRRDLoaderParameters &parameters) const override;

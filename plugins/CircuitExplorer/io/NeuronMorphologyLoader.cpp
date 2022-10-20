@@ -57,7 +57,7 @@ std::string NeuronMorphologyLoader::getName() const
     return "Neuron Morphology loader";
 }
 
-std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromBlob(
+std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::importFromBlob(
     const brayns::Blob &blob,
     const brayns::LoaderProgress &cb,
     const NeuronMorphologyLoaderParameters &params) const
@@ -68,7 +68,7 @@ std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromBl
     throw std::runtime_error("MorphologyLoader: Import from blob not supported");
 }
 
-std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFile(
+std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFile(
     const std::string &path,
     const brayns::LoaderProgress &callback,
     const NeuronMorphologyLoaderParameters &input) const
@@ -97,7 +97,7 @@ std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
     auto neuronGeometry = builder.instantiate({}, {});
     auto &primitives = neuronGeometry.geometry;
 
-    auto model = std::make_unique<brayns::Model>(ModelType::morphology);
+    auto model = std::make_shared<brayns::Model>(ModelType::morphology);
 
     auto &components = model->getComponents();
     auto &geometries = components.add<brayns::Geometries>();
@@ -110,7 +110,7 @@ std::vector<std::unique_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
 
     brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.seconds());
 
-    std::vector<std::unique_ptr<brayns::Model>> result;
+    std::vector<std::shared_ptr<brayns::Model>> result;
     result.push_back(std::move(model));
     return result;
 }

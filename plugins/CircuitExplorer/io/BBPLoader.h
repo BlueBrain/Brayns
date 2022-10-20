@@ -36,12 +36,12 @@ public:
 
     std::string getName() const final;
 
-    std::vector<std::unique_ptr<brayns::Model>> importFromBlob(
+    std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
         const brayns::Blob &blob,
         const brayns::LoaderProgress &callback,
         const BBPLoaderParameters &params) const final;
 
-    std::vector<std::unique_ptr<brayns::Model>> importFromFile(
+    std::vector<std::shared_ptr<brayns::Model>> importFromFile(
         const std::string &path,
         const brayns::LoaderProgress &callback,
         const BBPLoaderParameters &params) const final;
@@ -52,7 +52,7 @@ public:
      * loader for each population.
      *        TODO: Remove once NGV Project has switched to SONATA format...
      */
-    std::vector<std::unique_ptr<brayns::Model>> importFromBlueConfig(
+    std::vector<std::shared_ptr<brayns::Model>> importFromBlueConfig(
         const brayns::LoaderProgress &callback,
         const BBPLoaderParameters &params,
         const brion::BlueConfig &config) const;

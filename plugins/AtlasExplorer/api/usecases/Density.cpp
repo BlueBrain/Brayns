@@ -41,7 +41,7 @@ bool Density::isValidAtlas(const Atlas &atlas) const
     return atlas.getVoxelType() == VoxelType::scalar;
 }
 
-std::unique_ptr<brayns::Model> Density::run(const Atlas &atlas, const brayns::JsonValue &payload) const
+std::shared_ptr<brayns::Model> Density::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
 
@@ -54,7 +54,7 @@ std::unique_ptr<brayns::Model> Density::run(const Atlas &atlas, const brayns::Js
     densityVolume.size = scalarAtlas.getSize();
     densityVolume.spacing = scalarAtlas.getSpacing();
 
-    auto model = std::make_unique<brayns::Model>(ModelType::atlas);
+    auto model = std::make_shared<brayns::Model>(ModelType::atlas);
 
     auto &components = model->getComponents();
 

@@ -76,7 +76,7 @@ std::string SonataLoader::getName() const
     return std::string("SONATA loader");
 }
 
-std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromBlob(
+std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromBlob(
     const brayns::Blob &blob,
     const brayns::LoaderProgress &cb,
     const SonataLoaderParameters &params) const
@@ -87,7 +87,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromBlob(
     throw std::runtime_error("Import from blob not supported");
 }
 
-std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
+std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
     const std::string &path,
     const brayns::LoaderProgress &callback,
     const SonataLoaderParameters &input) const
@@ -98,7 +98,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
     auto network = ConfigReader::read(path, input);
 
     auto progress = ProgressUpdaterFactory::create(callback, input);
-    std::vector<std::unique_ptr<brayns::Model>> result;
+    std::vector<std::shared_ptr<brayns::Model>> result;
 
     for (auto &nodeParams : input.node_population_settings)
     {
@@ -109,7 +109,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
         auto nodes = network.circuitConfig().getNodePopulation(nodeName);
         auto nodeSelection = sl::NodeSelector::select(network, nodeParams);
         auto nodeModelType = sl::SonataModelType::fromNodes(nodes);
-        auto nodeModel = std::make_unique<brayns::Model>(nodeModelType);
+        auto nodeModel = std::make_shared<brayns::Model>(nodeModelType);
         auto nodeContext = sl::NodeLoadContext{network, nodeParams, nodes, nodeSelection, *nodeModel, progress};
         sl::NodeLoader::loadNodes(nodeContext);
         result.push_back(std::move(nodeModel));
@@ -124,7 +124,7 @@ std::vector<std::unique_ptr<brayns::Model>> SonataLoader::importFromFile(
             auto edges = network.circuitConfig().getEdgePopulation(edgeName);
             auto edgeSelection = sl::EdgeSelector::select(network, edgeParams, nodeSelection);
             auto edgeModelType = sl::SonataModelType::fromEdges(edges, edgeParams.load_afferent);
-            auto edgeModel = std::make_unique<brayns::Model>(edgeModelType);
+            auto edgeModel = std::make_shared<brayns::Model>(edgeModelType);
             auto edgeContext = sl::EdgeLoadContext{
                 network,
                 edgeParams,

@@ -57,11 +57,6 @@ void Scene::preRender(const ParametersManager &params)
     _models.preRender(params);
 }
 
-void Scene::postRender(const ParametersManager &params)
-{
-    _models.postRender(params);
-}
-
 bool Scene::commit()
 {
     auto modelCommitResult = _models.commit();

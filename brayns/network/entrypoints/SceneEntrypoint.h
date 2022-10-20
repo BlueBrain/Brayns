@@ -21,14 +21,13 @@
 
 #pragma once
 
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/json/adapters/SceneAdapter.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/SceneMessage.h>
 
 namespace brayns
 {
-class GetSceneEntrypoint : public Entrypoint<EmptyMessage, SceneMessage>
+class GetSceneEntrypoint : public Entrypoint<EmptyMessage, SceneProxy>
 {
 public:
     GetSceneEntrypoint(const Scene &scene);
@@ -39,6 +38,6 @@ public:
     virtual void onRequest(const Request &request) override;
 
 private:
-    const Scene &_scene;
+    SceneProxy _sceneProxy;
 };
 } // namespace brayns

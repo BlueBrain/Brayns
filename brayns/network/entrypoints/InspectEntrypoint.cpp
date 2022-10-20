@@ -78,16 +78,16 @@ private:
         auto instanceIterator = std::find_if(
             begin,
             end,
-            [&](auto instancePtr)
+            [&](auto &instance)
             {
-                auto &osprayInstance = instancePtr->getHandle();
+                auto &osprayInstance = instance->getHandle();
                 auto handle = osprayInstance.handle();
                 return handle == pickedInstanceHandle;
             });
 
         // Shouldn't happen, but..
         assert(instanceIterator != end);
-        return *instanceIterator;
+        return (*instanceIterator).get();
     }
 
     brayns::InspectContext _buildInspectContext(const ospray::cpp::PickResult &osprayPickResult)

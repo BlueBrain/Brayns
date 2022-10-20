@@ -91,7 +91,7 @@ std::vector<std::string> DTILoader::getSupportedExtensions() const
     return {"json"};
 }
 
-std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromBlob(
+std::vector<std::shared_ptr<brayns::Model>> DTILoader::importFromBlob(
     const brayns::Blob &blob,
     const brayns::LoaderProgress &callback,
     const DTILoaderParameters &params) const
@@ -102,13 +102,13 @@ std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromBlob(
     throw std::runtime_error("Loading DTI from blob is not supported");
 }
 
-std::vector<std::unique_ptr<brayns::Model>> DTILoader::importFromFile(
+std::vector<std::shared_ptr<brayns::Model>> DTILoader::importFromFile(
     const std::string &path,
     const brayns::LoaderProgress &callback,
     const DTILoaderParameters &params) const
 {
-    std::vector<std::unique_ptr<brayns::Model>> result;
-    result.push_back(std::make_unique<brayns::Model>(ModelType::dti));
+    std::vector<std::shared_ptr<brayns::Model>> result;
+    result.push_back(std::make_shared<brayns::Model>(ModelType::dti));
     auto &model = *(result.back());
 
     callback.updateProgress("Reading configuration", 0.f);

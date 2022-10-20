@@ -82,6 +82,6 @@ void VisualizeAtlasUseCaseEntrypoint::onRequest(const Request &request)
 
     auto newModel = useCase.run(atlas, useCaseParams);
     AtlasDataCloner::clone(model, *newModel);
-    auto newInstance = _models.addModel(std::move(newModel));
+    auto newInstance = _models.add(std::move(newModel));
     request.reply(*newInstance);
 }

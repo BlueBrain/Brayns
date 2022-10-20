@@ -47,14 +47,6 @@ void Systems::preRender(const ParametersManager &parameters, Components &compone
     }
 }
 
-void Systems::postRender(const ParametersManager &parameters, Components &components)
-{
-    if (_postRender)
-    {
-        _postRender->execute(parameters, components);
-    }
-}
-
 InspectResultData Systems::inspect(const InspectContext &context, Components &components)
 {
     if (_inspect)

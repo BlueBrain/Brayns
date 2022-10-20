@@ -100,7 +100,7 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto &parameters = params.loader_properties;
     auto callback = [&](const auto &operation, auto amount) { progress.notify(operation, amount); };
     auto models = loader.loadFromFile(path, {callback}, parameters);
-    auto instances = _models.addModels(std::move(models));
+    auto instances = _models.add(std::move(models));
 
     auto loadInfo = LoadInfoFactory::create(params);
     AddLoadInfo::toInstances(loadInfo, instances);

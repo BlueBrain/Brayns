@@ -126,9 +126,9 @@ private:
 class ModelBuilder
 {
 public:
-    static std::unique_ptr<brayns::Model> build(std::vector<std::vector<brayns::Box>> primitives)
+    static std::shared_ptr<brayns::Model> build(std::vector<std::vector<brayns::Box>> primitives)
     {
-        auto model = std::make_unique<brayns::Model>(ModelType::atlas);
+        auto model = std::make_shared<brayns::Model>(ModelType::atlas);
 
         auto &components = model->getComponents();
 
@@ -164,7 +164,7 @@ bool FlatmapAreas::isValidAtlas(const Atlas &atlas) const
     return atlas.getVoxelType() == VoxelType::flatmap;
 }
 
-std::unique_ptr<brayns::Model> FlatmapAreas::run(const Atlas &atlas, const brayns::JsonValue &payload) const
+std::shared_ptr<brayns::Model> FlatmapAreas::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
     assert(dynamic_cast<const FlatmapAtlas *>(&atlas));

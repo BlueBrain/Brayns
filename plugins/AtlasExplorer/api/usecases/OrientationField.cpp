@@ -154,7 +154,7 @@ bool OrientationField::isValidAtlas(const Atlas &atlas) const
     return atlas.getVoxelType() == VoxelType::orientation;
 }
 
-std::unique_ptr<brayns::Model> OrientationField::run(const Atlas &atlas, const brayns::JsonValue &payload) const
+std::shared_ptr<brayns::Model> OrientationField::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
     (void)payload;
 
@@ -162,7 +162,7 @@ std::unique_ptr<brayns::Model> OrientationField::run(const Atlas &atlas, const b
     auto orientationAtlas = static_cast<const OrientationAtlas &>(atlas);
     auto gizmo = GizmoBuilder::build(orientationAtlas);
 
-    auto model = std::make_unique<brayns::Model>(ModelType::atlas);
+    auto model = std::make_shared<brayns::Model>(ModelType::atlas);
     auto builder = ModelBuilder(*model);
     builder.addComponents(gizmo);
     builder.addSystems();

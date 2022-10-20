@@ -43,7 +43,7 @@ public:
 
     virtual void onRequest(const Request &request) override
     {
-        auto model = std::make_unique<Model>("light");
+        auto model = std::make_shared<Model>("light");
 
         T data = request.getParams();
 
@@ -54,7 +54,7 @@ public:
         auto &systems = model->getSystems();
         systems.setBoundsSystem<GenericBoundsSystem<Lights>>();
 
-        auto instance = _models.addModel(std::move(model));
+        auto instance = _models.add(std::move(model));
         request.reply(*instance);
     }
 
