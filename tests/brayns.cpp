@@ -59,7 +59,6 @@ TEST_CASE("defaults")
     const auto &pm = brayns.getParametersManager();
     const auto &appParams = pm.getApplicationParameters();
     CHECK_EQ(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
-    CHECK_EQ(appParams.getJpegQuality(), 90);
 
     const auto &simulation = pm.getSimulationParameters();
     CHECK_EQ(simulation.getFrame(), 0);

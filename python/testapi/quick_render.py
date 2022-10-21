@@ -22,11 +22,7 @@ import brayns
 
 
 def prepare_quick_render_image(instance: brayns.Instance, frame: int = 0) -> None:
-    brayns.update_application(
-        instance,
-        resolution=brayns.Resolution.full_hd,
-        jpeg_quality=100,
-    )
+    brayns.set_resolution(instance, brayns.Resolution.full_hd)
     camera = _prepare_camera_and_light(instance)
     brayns.set_camera(instance, camera)
     renderer = brayns.InteractiveRenderer()

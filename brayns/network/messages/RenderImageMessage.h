@@ -28,6 +28,8 @@ namespace brayns
 BRAYNS_JSON_OBJECT_BEGIN(RenderImageParams)
 BRAYNS_JSON_OBJECT_ENTRY(bool, send, "Send image once rendered", Default(true))
 BRAYNS_JSON_OBJECT_ENTRY(bool, force, "Send image even if nothing new was rendered", Default(false))
+BRAYNS_JSON_OBJECT_ENTRY(std::string, format, "Encoding of returned image data (jpg or png)", Default("jpg"))
+BRAYNS_JSON_OBJECT_ENTRY(int, jpeg_quality, "Quality if using JPEG encoding", Minimum(0), Maximum(100), Default(100))
 BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(RenderImageResult)

@@ -119,7 +119,7 @@ Now we can render our frames using either ``render_image`` or ``Snapshot``.
     # With render_image (updating instance context).
 
     # Update instance state.
-    brayns.update_application(instance, resolution)
+    brayns.set_resolution(instance, resolution)
     brayns.set_camera(instance, camera)
     brayns.set_renderer(instance, renderer)
 

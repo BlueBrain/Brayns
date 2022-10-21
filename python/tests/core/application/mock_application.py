@@ -31,7 +31,6 @@ class MockApplication:
         return brayns.Application(
             plugins=['test1', 'test2'],
             resolution=brayns.Resolution.full_hd,
-            jpeg_quality=50,
         )
 
     @classmethod
@@ -40,5 +39,4 @@ class MockApplication:
         return {
             'plugins': ['test1', 'test2'],
             'viewport': [1920, 1080],
-            'jpeg_quality': 50,
         }

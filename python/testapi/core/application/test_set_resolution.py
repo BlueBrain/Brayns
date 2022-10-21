@@ -22,14 +22,9 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestUpdateApplication(SimpleTestCase):
+class TestSetResolution(SimpleTestCase):
 
-    def test_update_application(self) -> None:
-        brayns.update_application(
-            self.instance,
-            resolution=brayns.Resolution.ultra_hd,
-            jpeg_quality=60,
-        )
+    def test_set_resolution(self) -> None:
+        brayns.set_resolution(self.instance, brayns.Resolution.ultra_hd)
         test = brayns.get_application(self.instance)
         self.assertEqual(test.resolution, brayns.Resolution.ultra_hd)
-        self.assertEqual(test.jpeg_quality, 60)

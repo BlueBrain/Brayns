@@ -24,20 +24,13 @@ import brayns
 from tests.mock_instance import MockInstance
 
 
-class TestUpdateApplication(unittest.TestCase):
+class TestSetResolution(unittest.TestCase):
 
-    def test_update_application(self) -> None:
+    def test_set_resolution(self) -> None:
         instance = MockInstance()
-        brayns.update_application(
-            instance,
-            resolution=brayns.Resolution(100, 200),
-            jpeg_quality=50,
-        )
+        brayns.set_resolution(instance, brayns.Resolution(100, 200))
         self.assertEqual(instance.method, 'set-application-parameters')
-        self.assertEqual(instance.params, {
-            'viewport': [100, 200],
-            'jpeg_quality': 50,
-        })
+        self.assertEqual(instance.params, {'viewport': [100, 200]})
 
 
 if __name__ == '__main__':

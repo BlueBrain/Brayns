@@ -62,18 +62,6 @@ public:
     void setWindowSize(const Vector2ui &size) noexcept;
 
     /**
-     * @brief Return the stream JPEG quality.
-     * @return int JPEG quality from 0 (lowest) to 100 (highest).
-     */
-    int getJpegQuality() const noexcept;
-
-    /**
-     * @brief Set the stream JPEG quality.
-     * @param quality int JPEG quality from 0 (lowest) to 100 (highest).
-     */
-    void setJpegQuality(int quality) noexcept;
-
-    /**
      * @brief Register argv properties of the parameter set.
      *
      * @param builder Helper class to register argv properties.
@@ -84,6 +72,5 @@ private:
     std::vector<std::string> _plugins;
     LogLevel _logLevel = LogLevel::Info;
     Vector2ui _windowSize = {800, 600};
-    int _jpegQuality = 90;
 };
 } // namespace brayns
