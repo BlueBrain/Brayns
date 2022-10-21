@@ -16,12 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SonataModelType.h"
+#include "ModelTypeFinder.h"
 
 #include <api/ModelType.h>
-#include <io/sonataloader/data/SonataCells.h>
+#include <io/sonataloader/data/PopulationType.h>
 #include <io/sonataloader/data/SonataNames.h>
-#include <io/sonataloader/data/SonataSynapses.h>
 
 #include <unordered_map>
 
@@ -38,9 +37,9 @@ inline static const std::unordered_map<std::string_view, std::string> nodeToType
 
 namespace sonataloader
 {
-const std::string &SonataModelType::fromNodes(const bbp::sonata::NodePopulation &population)
+const std::string &ModelTypeFinder::fromNodes(const bbp::sonata::NodePopulation &nodes, const Config &config)
 {
-    auto populationType = SonataCells::getPopulationType(population);
+    auto populationType = PopulationType::getNodeType(nodes, config);
     auto it = nodeToType.find(populationType);
     if (it == nodeToType.end())
     {
@@ -50,9 +49,10 @@ const std::string &SonataModelType::fromNodes(const bbp::sonata::NodePopulation 
     return it->second;
 }
 
-const std::string &SonataModelType::fromEdges(const bbp::sonata::EdgePopulation &population, bool afferent)
+const std::string &
+    ModelTypeFinder::fromEdges(const bbp::sonata::EdgePopulation &edges, bool afferent, const Config &config)
 {
-    auto populationType = SonataSynapses::getPopulationType(population);
+    auto populationType = PopulationType::getEdgeType(edges, config);
     if (populationType == SonataEdgeNames::endfoot)
     {
         return ModelType::endfeet;

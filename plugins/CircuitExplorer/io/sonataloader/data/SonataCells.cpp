@@ -20,8 +20,6 @@
 
 #include <bbp/sonata/node_sets.h>
 
-#include <brayns/utils/Log.h>
-
 namespace sonataloader
 {
 namespace
@@ -46,8 +44,8 @@ std::vector<std::string> getEnumValueList(
     const bbp::sonata::Selection &selection,
     const std::string &attribute)
 {
-    const auto enumValues = population.enumerationValues(attribute);
-    const auto enumIndices = population.getEnumeration<size_t>(attribute, selection);
+    auto enumValues = population.enumerationValues(attribute);
+    auto enumIndices = population.getEnumeration<size_t>(attribute, selection);
 
     std::vector<std::string> result(enumIndices.size());
     for (size_t i = 0; i < result.size(); ++i)
@@ -59,7 +57,7 @@ std::vector<std::string> getEnumValueList(
 
 void checkAttributes(const bbp::sonata::NodePopulation &nodes, const std::vector<const char *> &attribs)
 {
-    const auto &attributes = nodes.attributeNames();
+    auto &attributes = nodes.attributeNames();
     for (const auto attrib : attribs)
     {
         if (attributes.find(attrib) == attributes.end())
@@ -76,23 +74,8 @@ void checkAttributes(const bbp::sonata::NodePopulation &nodes, const std::vector
 
 std::string SonataCells::getPopulationType(const Nodes &nodes)
 {
-    // Standard still not stable on this point. Not sure if it will
-    // be an enum on the library group. or a dataset of the population
-    // itself.
-    // Test data has it as dataset of the population
-
-    brayns::Log::warn(
-        "[CE] SonataCells::getPopulationType(): Extracted from population "
-        "dataset.");
-
-    // Library enum
-    // checkEnums(nodes, {enumModelType});
-    // return nodes.enumerationValues(enumModelType)[0];
-
-    // Population dataset
     checkAttributes(nodes, {enumModelType});
-    // Select the first node only
-    const auto selection = bbp::sonata::Selection::fromValues({0});
+    auto selection = bbp::sonata::Selection::fromValues({0});
     return nodes.getAttribute<std::string>(enumModelType, selection)[0];
 }
 
@@ -106,9 +89,9 @@ std::vector<brayns::Vector3f> SonataCells::getPositions(const Nodes &nodes, cons
 {
     checkAttributes(nodes, {attribX, attribY, attribZ});
 
-    const auto xPos = nodes.getAttribute<float>(attribX, selection);
-    const auto yPos = nodes.getAttribute<float>(attribY, selection);
-    const auto zPos = nodes.getAttribute<float>(attribZ, selection);
+    auto xPos = nodes.getAttribute<float>(attribX, selection);
+    auto yPos = nodes.getAttribute<float>(attribY, selection);
+    auto zPos = nodes.getAttribute<float>(attribZ, selection);
 
     std::vector<brayns::Vector3f> result(xPos.size());
     for (size_t i = 0; i < xPos.size(); ++i)
@@ -124,10 +107,10 @@ std::vector<brayns::Quaternion> SonataCells::getRotations(const Nodes &nodes, co
 {
     checkAttributes(nodes, {attribOrientationW, attribOrientationX, attribOrientationY, attribOrientationZ});
 
-    const auto x = nodes.getAttribute<float>(attribOrientationX, selection);
-    const auto y = nodes.getAttribute<float>(attribOrientationY, selection);
-    const auto z = nodes.getAttribute<float>(attribOrientationZ, selection);
-    const auto w = nodes.getAttribute<float>(attribOrientationW, selection);
+    auto x = nodes.getAttribute<float>(attribOrientationX, selection);
+    auto y = nodes.getAttribute<float>(attribOrientationY, selection);
+    auto z = nodes.getAttribute<float>(attribOrientationZ, selection);
+    auto w = nodes.getAttribute<float>(attribOrientationW, selection);
 
     std::vector<brayns::Quaternion> result(x.size());
 #pragma omp parallel for

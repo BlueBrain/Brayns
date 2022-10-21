@@ -18,17 +18,17 @@
 
 #pragma once
 
+#include "Config.h"
+
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/nodes.h>
 
-#include <string_view>
-
 namespace sonataloader
 {
-class SonataModelType
+class PopulationType
 {
 public:
-    static const std::string &fromNodes(const bbp::sonata::NodePopulation &population);
-    static const std::string &fromEdges(const bbp::sonata::EdgePopulation &population, bool afferent);
+    static std::string getNodeType(const bbp::sonata::NodePopulation &nodes, const Config &config);
+    static std::string getEdgeType(const bbp::sonata::EdgePopulation &edges, const Config &config);
 };
 }

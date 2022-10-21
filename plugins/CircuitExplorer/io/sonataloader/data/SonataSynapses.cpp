@@ -51,11 +51,13 @@ constexpr char attribEndFeetSurfPosZ[] = "endfoot_surface_z";
 
 void checkEdgeParameters(const bbp::sonata::EdgePopulation &population, const std::vector<const char *> &inputAttribs)
 {
-    const auto &attribs = population.attributeNames();
-    for (const auto &attribute : inputAttribs)
+    auto &attribs = population.attributeNames();
+    for (auto &attribute : inputAttribs)
     {
         if (attribs.find(attribute) == attribs.end())
+        {
             throw std::runtime_error("Edge population " + population.name() + " is missing attribute " + attribute);
+        }
     }
 }
 
@@ -87,8 +89,7 @@ namespace sonataloader
 std::string SonataSynapses::getPopulationType(const Edges &population)
 {
     checkEdgeParameters(population, {enumModelType});
-    // Select the first node only
-    const auto selection = bbp::sonata::Selection::fromValues({0});
+    auto selection = bbp::sonata::Selection::fromValues({0});
     return population.getAttribute<std::string>(enumModelType, selection)[0];
 }
 

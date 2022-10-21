@@ -23,10 +23,10 @@
 
 #include <io/sonataloader/EdgeLoader.h>
 #include <io/sonataloader/LoadContext.h>
+#include <io/sonataloader/ModelTypeFinder.h>
 #include <io/sonataloader/NodeLoader.h>
 #include <io/sonataloader/ParameterCheck.h>
 #include <io/sonataloader/Selector.h>
-#include <io/sonataloader/SonataModelType.h>
 #include <io/util/ProgressUpdater.h>
 
 namespace
@@ -108,7 +108,7 @@ std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
         progress.beginStage(2);
         auto nodes = config.getNodes(nodeName);
         auto nodeSelection = sl::NodeSelector::select(config, nodeParams);
-        auto nodeModelType = sl::SonataModelType::fromNodes(nodes);
+        auto nodeModelType = sl::ModelTypeFinder::fromNodes(nodes, config);
         auto nodeModel = std::make_shared<brayns::Model>(nodeModelType);
         auto nodeContext = sl::NodeLoadContext{config, nodeParams, nodes, nodeSelection, *nodeModel, progress};
         sl::NodeLoader::loadNodes(nodeContext);
@@ -123,7 +123,7 @@ std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
             progress.beginStage(2);
             auto edges = config.getEdges(edgeName);
             auto edgeSelection = sl::EdgeSelector::select(config, edgeParams, nodeSelection);
-            auto edgeModelType = sl::SonataModelType::fromEdges(edges, edgeParams.load_afferent);
+            auto edgeModelType = sl::ModelTypeFinder::fromEdges(edges, edgeParams.load_afferent, config);
             auto edgeModel = std::make_shared<brayns::Model>(edgeModelType);
             auto edgeContext = sl::EdgeLoadContext{
                 config,

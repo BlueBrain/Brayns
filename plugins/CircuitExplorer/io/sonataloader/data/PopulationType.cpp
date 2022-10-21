@@ -16,18 +16,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NodeLoader.h"
+#include "PopulationType.h"
 
-#include <io/sonataloader/LoaderTable.h>
-#include <io/sonataloader/data/PopulationType.h>
+#include "SonataCells.h"
+#include "SonataSynapses.h"
 
 namespace sonataloader
 {
-void NodeLoader::loadNodes(NodeLoadContext &context)
+std::string PopulationType::getNodeType(const bbp::sonata::NodePopulation &nodes, const Config &config)
 {
-    auto loaderTable = NodeLoaderTable::create();
-    auto populationType = PopulationType::getNodeType(context.population, context.config);
-    auto &loader = loaderTable.getLoader(populationType);
-    loader.load(context);
+    try
+    {
+        return SonataCells::getPopulationType(nodes);
+    }
+    catch (...)
+    {
+    }
+
+    auto properties = config.getNodesProperties(nodes.name());
+    return properties.type;
+}
+
+std::string PopulationType::getEdgeType(const bbp::sonata::EdgePopulation &edges, const Config &config)
+{
+    try
+    {
+        return SonataSynapses::getPopulationType(edges);
+    }
+    catch (...)
+    {
+    }
+
+    auto properties = config.getEdgesProperties(edges.name());
+    return properties.type;
 }
 }
