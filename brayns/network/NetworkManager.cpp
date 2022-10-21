@@ -46,7 +46,6 @@
 #include <brayns/network/entrypoints/ClearModelsEntrypoint.h>
 #include <brayns/network/entrypoints/EnableSimulationEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
-#include <brayns/network/entrypoints/ExportFramesEntrypoint.h>
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
@@ -105,7 +104,6 @@ public:
         builder.add<brayns::ClearModelsEntrypoint>(models, simulation);
         builder.add<brayns::EnableSimulationEntrypoint>(models);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
-        builder.add<brayns::ExportFramesEntrypoint>(engine, parameters, token);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
         builder.add<brayns::GetCameraLookAtEntrypoint>(engine);
         builder.add<brayns::GetCameraOrthographicEntrypoint>(engine);
