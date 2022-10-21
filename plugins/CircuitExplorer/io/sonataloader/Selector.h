@@ -19,7 +19,7 @@
 #pragma once
 
 #include <io/SonataLoaderParameters.h>
-#include <io/sonataloader/data/SonataConfig.h>
+#include <io/sonataloader/data/Config.h>
 
 #include <bbp/sonata/population.h>
 
@@ -27,15 +27,13 @@ namespace sonataloader
 {
 struct NodeSelector
 {
-    static bbp::sonata::Selection select(
-        const SonataNetworkConfig &network,
-        const SonataNodePopulationParameters &params);
+    static bbp::sonata::Selection select(const Config &config, const SonataNodePopulationParameters &params);
 };
 
 struct EdgeSelector
 {
     static bbp::sonata::Selection select(
-        const SonataNetworkConfig &network,
+        const Config &config,
         const SonataEdgePopulationParameters &params,
         const bbp::sonata::Selection &baseNodes);
 };

@@ -29,17 +29,16 @@ struct PopulationTypeResolver
 {
     static std::string resolve(sl::NodeLoadContext &context)
     {
-        const auto &population = context.population;
-        const auto populationName = population.name();
+        auto &population = context.population;
+        auto populationName = population.name();
         try
         {
             return sl::SonataCells::getPopulationType(population);
         }
         catch (...)
         {
-            const auto &network = context.config;
-            const auto &config = network.circuitConfig();
-            const auto populationProperties = config.getNodePopulationProperties(populationName);
+            auto &config = context.config;
+            auto populationProperties = config.getNodesProperties(populationName);
             return populationProperties.type;
         }
     }
@@ -50,9 +49,9 @@ namespace sonataloader
 {
 void NodeLoader::loadNodes(NodeLoadContext &context)
 {
-    const auto loaderTable = NodeLoaderTable::create();
-    const auto populationType = PopulationTypeResolver::resolve(context);
-    const auto &loader = loaderTable.getLoader(populationType);
+    auto loaderTable = NodeLoaderTable::create();
+    auto populationType = PopulationTypeResolver::resolve(context);
+    auto &loader = loaderTable.getLoader(populationType);
     loader.load(context);
 }
 }

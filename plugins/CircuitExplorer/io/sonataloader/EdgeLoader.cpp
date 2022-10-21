@@ -23,23 +23,20 @@
 
 namespace
 {
-namespace sl = sonataloader;
-
 struct PopulationTypeResolver
 {
-    static std::string resolve(sl::EdgeLoadContext &context)
+    static std::string resolve(sonataloader::EdgeLoadContext &context)
     {
-        const auto &population = context.edgePopulation;
-        const auto populationName = population.name();
+        auto &population = context.edgePopulation;
+        auto populationName = population.name();
         try
         {
-            return sl::SonataSynapses::getPopulationType(population);
+            return sonataloader::SonataSynapses::getPopulationType(population);
         }
         catch (...)
         {
-            const auto &network = context.config;
-            const auto &config = network.circuitConfig();
-            const auto populationProperties = config.getEdgePopulationProperties(populationName);
+            auto &config = context.config;
+            auto populationProperties = config.getEdgesProperties(populationName);
             return populationProperties.type;
         }
     }
@@ -50,9 +47,9 @@ namespace sonataloader
 {
 void EdgeLoader::loadEdges(EdgeLoadContext &context)
 {
-    const auto loaderTable = EdgeLoaderTable::create();
-    const auto populationType = PopulationTypeResolver::resolve(context);
-    const auto &loader = loaderTable.getLoader(populationType);
+    auto loaderTable = EdgeLoaderTable::create();
+    auto populationType = PopulationTypeResolver::resolve(context);
+    auto &loader = loaderTable.getLoader(populationType);
     loader.load(context);
 }
 }

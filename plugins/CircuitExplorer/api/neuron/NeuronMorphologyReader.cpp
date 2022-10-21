@@ -28,8 +28,27 @@
 
 namespace
 {
-struct SomaReader
+class MorphIOReader
 {
+public:
+    static morphio::Morphology read(const std::string &path)
+    {
+        if (path.find(".h5") != std::string::npos)
+        {
+            std::lock_guard lock(_h5Mutex);
+            return morphio::Morphology(path);
+        }
+
+        return morphio::Morphology(path);
+    }
+
+private:
+    inline static std::mutex _h5Mutex;
+};
+
+class SomaReader
+{
+public:
     static NeuronMorphology::Soma read(const morphio::Morphology &m)
     {
         const auto somaData = m.soma();
@@ -67,8 +86,9 @@ struct SomaReader
     }
 };
 
-struct NeuriteReader
+class NeuriteReader
 {
+public:
     static std::vector<NeuronMorphology::Section> read(const morphio::Morphology &m, bool axon, bool dendrites)
     {
         const auto &morphSections = m.sections();

@@ -26,7 +26,7 @@
 #include <api/synapse/SynapseCircuitBuilder.h>
 #include <components/ReportData.h>
 #include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
-#include <io/sonataloader/data/SonataConfig.h>
+#include <io/sonataloader/data/Config.h>
 #include <io/sonataloader/data/SonataSimulationMapping.h>
 #include <io/sonataloader/data/SonataSynapses.h>
 #include <io/sonataloader/reports/SonataReportData.h>
@@ -113,9 +113,8 @@ private:
     {
         auto &params = context.params;
         auto &reportName = params.edge_report_name;
-        auto &network = context.config;
-        auto &simConfig = network.simulationConfig();
-        return sl::SonataConfig::resolveReportPath(simConfig, reportName);
+        auto &config = context.config;
+        return config.getReportPath(reportName);
     }
 
     static std::unique_ptr<sl::SonataReportData> _createReportData(sl::EdgeLoadContext &context, std::string &path)
@@ -230,8 +229,7 @@ void SynapseImporter::fromData(
     auto &params = context.params;
     auto radius = params.radius;
     auto afferent = params.load_afferent;
-    auto &network = context.config;
-    auto &config = network.circuitConfig();
+    auto &config = context.config;
     auto &edgePopulation = context.edgePopulation;
     auto targetPopulationName = afferent ? edgePopulation.target() : edgePopulation.source();
     auto &edgeSelection = context.edgeSelection;
@@ -240,7 +238,7 @@ void SynapseImporter::fromData(
     SynapseAppender appender(flatEdgeIds, nodeIds, positions, radius);
 
     auto &synapseGeometry = appender.geometry;
-    auto nodePopulation = config.getNodePopulation(targetPopulationName);
+    auto nodePopulation = config.getNodes(targetPopulationName);
     auto colorData = std::make_unique<CommonEdgeColorData>(std::move(nodePopulation));
     SynapseCircuitBuilder::build(context.model, std::move(synapseGeometry), std::move(colorData));
 

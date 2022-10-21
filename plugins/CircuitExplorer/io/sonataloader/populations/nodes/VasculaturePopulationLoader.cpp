@@ -34,7 +34,7 @@
 #include <components/ReportData.h>
 #include <components/VasculatureSectionList.h>
 #include <io/sonataloader/colordata/node/VasculatureColorData.h>
-#include <io/sonataloader/data/SonataConfig.h>
+#include <io/sonataloader/data/Config.h>
 #include <io/sonataloader/data/SonataNames.h>
 #include <io/sonataloader/data/SonataSimulationMapping.h>
 #include <io/sonataloader/data/SonataVasculature.h>
@@ -187,9 +187,8 @@ private:
     {
         auto &params = context.params;
         auto reportName = params.report_name;
-        auto &network = context.config;
-        auto &simConfig = network.simulationConfig();
-        return sl::SonataConfig::resolveReportPath(simConfig, reportName).string();
+        auto &config = context.config;
+        return config.getReportPath(reportName);
     }
 
     static std::vector<size_t> _getOffsets(sl::NodeLoadContext &context)

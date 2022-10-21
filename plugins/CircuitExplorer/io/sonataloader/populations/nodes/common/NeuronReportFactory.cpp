@@ -98,10 +98,10 @@ public:
 private:
     static std::string resolveCompartmentPath(const sl::NodeLoadContext &context)
     {
-        auto &simConfig = context.config.simulationConfig();
+        auto &config = context.config;
         auto &params = context.params;
         auto &reportName = params.report_name;
-        return sl::SonataConfig::resolveReportPath(simConfig, reportName).string();
+        return config.getReportPath(reportName);
     }
 
     static std::unique_ptr<IReportData> _createData(const sl::NodeLoadContext &context, const std::string &path)
@@ -140,8 +140,8 @@ public:
 private:
     static std::unique_ptr<IReportData> _createData(const sl::NodeLoadContext &context)
     {
-        auto &simConfig = context.config.simulationConfig();
-        auto path = sl::SonataConfig::resolveSpikesPath(simConfig);
+        auto &config = context.config;
+        auto path = config.getSpikesPath();
         auto &params = context.params;
         auto &population = params.node_population;
         auto &selection = context.selection;

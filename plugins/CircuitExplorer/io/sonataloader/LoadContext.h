@@ -21,7 +21,7 @@
 #include <brayns/engine/model/Model.h>
 
 #include <io/SonataLoaderParameters.h>
-#include <io/sonataloader/data/SonataConfig.h>
+#include <io/sonataloader/data/Config.h>
 #include <io/util/ProgressUpdater.h>
 
 #include <bbp/sonata/nodes.h>
@@ -30,7 +30,7 @@ namespace sonataloader
 {
 struct NodeLoadContext
 {
-    const SonataNetworkConfig &config;
+    const Config &config;
     const SonataNodePopulationParameters &params;
     const bbp::sonata::NodePopulation &population;
     const bbp::sonata::Selection &selection;
@@ -40,7 +40,7 @@ struct NodeLoadContext
 
 struct EdgeLoadContext
 {
-    const SonataNetworkConfig &config;
+    const Config &config;
     const SonataEdgePopulationParameters &params;
     const bbp::sonata::Population &nodePopulation;
     const bbp::sonata::EdgePopulation &edgePopulation;

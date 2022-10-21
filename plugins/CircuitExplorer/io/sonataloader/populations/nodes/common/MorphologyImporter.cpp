@@ -31,36 +31,32 @@ void MorphologyImporter::import(
 {
     namespace sl = sonataloader;
 
-    const auto &population = ctxt.population;
-    const auto populationName = population.name();
-    const auto &selection = ctxt.selection;
-    const auto flatSelection = selection.flatten();
+    auto &population = ctxt.population;
+    auto populationName = population.name();
+    auto &selection = ctxt.selection;
+    auto flatSelection = selection.flatten();
 
-    const auto positions = sl::SonataCells::getPositions(population, selection);
-    const auto morphologies = sl::SonataCells::getMorphologies(population, selection);
+    auto positions = sl::SonataCells::getPositions(population, selection);
+    auto morphologies = sl::SonataCells::getMorphologies(population, selection);
 
-    const auto &params = ctxt.params;
-    const auto &neuronParams = params.neuron_morphology_parameters;
+    auto &params = ctxt.params;
+    auto &neuronParams = params.neuron_morphology_parameters;
 
-    const auto &network = ctxt.config;
-    const auto &config = network.circuitConfig();
-    const auto populationProperties = config.getNodePopulationProperties(populationName);
-    const auto morphologyPathBuilder = sl::SonataConfig::resolveMorphologyPath(populationProperties);
+    auto &config = ctxt.config;
+    auto pathBuilder = config.getMorphologyPath(populationName);
 
-    auto morphologyPaths = std::vector<std::string>(morphologies.size());
-    for (size_t i = 0; i < morphologies.size(); ++i)
+    auto morphologyPaths = std::vector<std::string>();
+    morphologyPaths.reserve(morphologies.size());
+    for (auto &morphology : morphologies)
     {
-        const auto &morphology = morphologies[i];
-        morphologyPaths[i] = morphologyPathBuilder.buildPath(morphology);
+        morphologyPaths.push_back(pathBuilder.buildPath(morphology));
     }
 
     auto &model = ctxt.model;
     auto &cb = ctxt.progress;
-
     MorphologyCircuitBuilder::Context context(flatSelection, morphologyPaths, positions, rotations, neuronParams);
 
-    const auto compartments = MorphologyCircuitBuilder::load(context, model, cb, std::move(colorData));
-
+    auto compartments = MorphologyCircuitBuilder::load(context, model, cb, std::move(colorData));
     NeuronReportFactory::create(ctxt, compartments);
 }
 }

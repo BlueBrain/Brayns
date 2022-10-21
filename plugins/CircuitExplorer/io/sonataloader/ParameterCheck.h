@@ -19,7 +19,7 @@
 #pragma once
 
 #include <io/SonataLoaderParameters.h>
-#include <io/sonataloader/data/SonataConfig.h>
+#include <io/sonataloader/data/Config.h>
 
 namespace sonataloader
 {
@@ -30,6 +30,6 @@ public:
      * @brief checks the user input parameters that configures the circuit load
      * @throws std::invalid_argument if any parameter is wrong
      */
-    static void checkInput(const SonataNetworkConfig &network, const SonataLoaderParameters &input);
+    static void checkInput(const Config &config, const SonataLoaderParameters &input);
 };
 } // namespace sonataloader
