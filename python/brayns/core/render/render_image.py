@@ -19,11 +19,18 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.network import Instance
+from brayns.utils import ImageFormat
 
-from .jpeg_image import JpegImage
+from .image import Image
 
 
-def render_image(instance: Instance, send: bool = True, force: bool = False) -> JpegImage:
+def render_image(
+    instance: Instance,
+    send: bool = True,
+    force: bool = False,
+    format: ImageFormat = ImageFormat.JPEG,
+    jpeg_quality: int = 100,
+) -> Image:
     """Render an image using current instance parameters.
 
     If the current framebuffer content is already up-to-date with its max
@@ -35,20 +42,27 @@ def render_image(instance: Instance, send: bool = True, force: bool = False) -> 
 
     :param instance: Instance to use for render.
     :type instance: Instance
-    :param send: Send image in JPEG once render, defaults to True.
+    :param send: Return image once rendered, defaults to True.
     :type send: bool, optional
-    :param force: Force send JPEG, defaults to False.
+    :param force: Force returning image, defaults to False.
     :type force: bool, optional
-    :return: JPEG image if received.
-    :rtype: JpegImage
+    :param format: Returned image format, defaults to JPEG.
+    :type format: ImageFormat, optional
+    :param format: JPEG quality if format is JPEG, defaults to 100%.
+    :type jpeg_quality: int, optional
+    :return: Image received from the instance.
+    :rtype: Image
     """
     params = {
         'send': send,
         'force': force,
+        'format': format.value,
     }
+    if format is ImageFormat.JPEG:
+        params['jpeg_quality'] = jpeg_quality
     reply = instance.execute('render-image', params)
     result, binary = reply.result, reply.binary
-    return JpegImage(
+    return Image(
         accumulation=result['accumulation'],
         max_accumulation=result['max_accumulation'],
         data=binary,

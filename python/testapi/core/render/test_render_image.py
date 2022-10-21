@@ -30,20 +30,37 @@ from testapi.simple_test_case import SimpleTestCase
 class TestRenderImage(SimpleTestCase):
 
     @property
-    def ref(self) -> pathlib.Path:
+    def ref_jpg(self) -> pathlib.Path:
         return self.asset_folder / 'render_image.jpg'
+
+    @property
+    def ref_png(self) -> pathlib.Path:
+        return self.asset_folder / 'render_image.png'
 
     def test_render_image(self) -> None:
         self._prepare_render()
         image = brayns.render_image(self.instance)
         self.assertTrue(image.received)
+        self.assertTrue(image.finished)
         self.assertEqual(image.accumulation, 1)
         self.assertEqual(image.max_accumulation, 1)
         with tempfile.TemporaryDirectory() as directory:
             path = pathlib.Path(directory) / 'test_render_image.jpg'
             image.save(str(path))
             validator = ImageValidator()
-            validator.validate_file(path, self.ref)
+            validator.validate_file(path, self.ref_jpg)
+
+    def test_render_image_png(self) -> None:
+        self._prepare_render()
+        image = brayns.render_image(
+            self.instance,
+            format=brayns.ImageFormat.PNG
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / 'test_render_image.png'
+            image.save(str(path))
+            validator = ImageValidator()
+            validator.validate_file(path, self.ref_png)
 
     def test_render_image_accumulation(self) -> None:
         self._prepare_render()
@@ -51,18 +68,22 @@ class TestRenderImage(SimpleTestCase):
         brayns.set_renderer(self.instance, renderer)
         image = brayns.render_image(self.instance)
         self.assertTrue(image.received)
+        self.assertFalse(image.finished)
         self.assertEqual(image.accumulation, 1)
         self.assertEqual(image.max_accumulation, 3)
         image = brayns.render_image(self.instance)
         self.assertTrue(image.received)
+        self.assertFalse(image.finished)
         self.assertEqual(image.accumulation, 2)
         self.assertEqual(image.max_accumulation, 3)
         image = brayns.render_image(self.instance)
         self.assertTrue(image.received)
+        self.assertTrue(image.finished)
         self.assertEqual(image.accumulation, 3)
         self.assertEqual(image.max_accumulation, 3)
         image = brayns.render_image(self.instance)
         self.assertFalse(image.received)
+        self.assertTrue(image.finished)
         self.assertEqual(image.accumulation, 3)
         self.assertEqual(image.max_accumulation, 3)
 

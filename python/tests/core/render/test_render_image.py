@@ -37,6 +37,8 @@ class TestRenderImage(unittest.TestCase):
         self.assertEqual(instance.params, {
             'send': True,
             'force': False,
+            'format': 'jpg',
+            'jpeg_quality': 100,
         })
         self.assertEqual(test.accumulation, 1)
         self.assertEqual(test.max_accumulation, 2)
@@ -48,12 +50,18 @@ class TestRenderImage(unittest.TestCase):
             'accumulation': 1,
             'max_accumulation': 2,
         }
-        data = b'123'
         instance = MockInstance(result)
-        test = brayns.render_image(instance, send=False, force=False)
+        test = brayns.render_image(
+            instance,
+            send=False,
+            force=False,
+            format=brayns.ImageFormat.PNG,
+            jpeg_quality=60,
+        )
         self.assertEqual(instance.params, {
             'send': False,
             'force': False,
+            'format': 'png',
         })
         self.assertEqual(test.accumulation, 1)
         self.assertEqual(test.max_accumulation, 2)

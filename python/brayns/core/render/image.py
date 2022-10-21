@@ -24,7 +24,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class JpegImage:
+class Image:
     """Image sent by the backend with its current state.
 
     If the backend state doesn't require a render (accumulation =
@@ -35,9 +35,9 @@ class JpegImage:
 
     :param accumulation: Number of frames currently accumulated.
     :type accumulation: int
-    :param max_accumulation: Application samples per pixel.
+    :param max_accumulation: Maximum accumulation frames used by the instance.
     :type max_accumulation: int
-    :param data: Image data encoded in JPEG, can be empty.
+    :param data: Image data encoded in request format, can be empty.
     :type data: bytes
     """
 
@@ -54,10 +54,19 @@ class JpegImage:
         """
         return bool(self.data)
 
-    def save(self, path: str) -> None:
-        """Save the image at given path (in JPEG format).
+    @property
+    def finished(self) -> bool:
+        """Check if the max accumulation has been reached.
 
-        :param path: Output file path (must be JPEG).
+        :return: True if image has been rendered with max_accumulation samples.
+        :rtype: bool
+        """
+        return self.accumulation == self.max_accumulation
+
+    def save(self, path: str) -> None:
+        """Save the image at given path.
+
+        :param path: Output file path (must match render_image format).
         :type path: str
         :raises RuntimeError: Image was not sent by the backend.
         """

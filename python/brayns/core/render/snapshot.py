@@ -48,7 +48,7 @@ class Snapshot:
     :type camera: Camera | None, optional
     :param renderer: Renderer used to render, defaults to None.
     :type renderer: Renderer | None, optional
-    :param jpeg_quality: JPEG quality if format is JPEG, defaults to 100.
+    :param jpeg_quality: JPEG quality if format is JPEG, defaults to 100%.
     :type jpeg_quality: int, optional
     """
 
