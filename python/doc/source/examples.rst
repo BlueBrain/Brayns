@@ -9,6 +9,6 @@ Examples
    examples_connector
    examples_loader
    examples_snapshot
-   examples_exporter
+   examples_export
    examples_movie
    examples_service

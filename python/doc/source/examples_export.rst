@@ -2,9 +2,7 @@ Export frames
 =============
 
 When a model has a simulation attached, we might want to render multiple frames
-to make a movie from them. To avoid recreating a snapshot context in the backend
-for each image, a frame export allows us to create the context once and use it
-to take multiple snapshots more efficiently.
+to make a movie from them.
 
 Simulation
 ----------
@@ -67,18 +65,6 @@ named ``MovieFrames``.
     You need to remember the movie FPS you set if you want to make a movie from
     the exported frames.
 
-View
-----
-
-As we render multiple frames, we can have one view per frame. This is specified
-using a list ``KeyFrame`` objects, each having a frame index and a camera view.
-
-Here we will suppose the view is the same for all frames (static camera).
-
-.. code-block:: python
-
-    key_frames = brayns.KeyFrame.from_indices(indices, camera.view)
-
 Color ramp
 ----------
 
@@ -123,23 +109,39 @@ This part is optional as Brayns build a default color ramp for circuits.
     # Update the color ramp.
     brayns.set_color_ramp(instance, model.id, ramp)
 
-Frame exporter
---------------
+Export
+------
 
-The exporter class can render frames into a given folder. All export parameters
-(resolution, camera, renderer, format, key frames) can be specified in its
-constructor.
+Now we can render our frames using either ``render_image`` or ``Snapshot``.
 
 .. code-block:: python
 
-    # Frame export specifications (using some parameters from snapshot).
-    exporter = brayns.Exporter(
-        frames=key_frames,
-        format=brayns.ImageFormat.PNG,
-        resolution=resolution,
-        projection=camera.projection,
-        renderer=brayns.InteractiveRenderer(),
-    )
+    # With render_image (updating instance context).
 
-    # Export to given folder.
-    exporter.export_frames(instance, 'path/to/frames')
+    # Update instance state.
+    brayns.update_application(instance, resolution)
+    brayns.set_camera(instance, camera)
+    brayns.set_renderer(instance, renderer)
+
+    # Render images using FFMPEG file naming.
+    for index, frame in enumerate(indices):
+        format = brayns.ImageFormat.PNG
+        image = brayns.render_image(instance, format=format, force=True)
+        path = f'{index:05d}.{format.value}'
+        image.save(path)
+    
+    # Or with Snapshot (using different camera, renderer, etc...).
+
+    # Snapshot settings.
+    snapshot = brayns.Snapshot(
+        resolution=resolution,
+        camera=camera,
+        renderer=renderer,
+    )
+    
+    # Render images using FFMPEG file naming.
+    for index, frame in enumerate(indices):
+        format = brayns.ImageFormat.PNG
+        snapshot.frame = frame
+        path = f'{index:05d}.{format.value}'
+        snapshot.save(instance, path)
