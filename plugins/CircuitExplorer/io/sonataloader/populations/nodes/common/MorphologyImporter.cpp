@@ -18,6 +18,8 @@
 
 #include "MorphologyImporter.h"
 
+#include "NeuronMetadataFactory.h"
+
 #include <api/circuit/MorphologyCircuitBuilder.h>
 #include <io/sonataloader/data/Cells.h>
 #include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
@@ -29,6 +31,8 @@ void MorphologyImporter::import(
     const std::vector<brayns::Quaternion> &rotations,
     std::unique_ptr<IColorData> colorData)
 {
+    NeuronMetadataFactory::create(ctxt);
+
     auto &population = ctxt.population;
     auto populationName = population.name();
     auto &selection = ctxt.selection;

@@ -16,32 +16,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SomaImporter.h"
-
 #include "NeuronMetadataFactory.h"
-
-#include <api/circuit/SomaCircuitBuilder.h>
-#include <io/sonataloader/data/Cells.h>
-#include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
 
 namespace sonataloader
 {
-void SomaImporter::import(NodeLoadContext &ctxt, std::unique_ptr<IColorData> colorData)
+void NeuronMetadataFactory::create(NodeLoadContext &context)
 {
-    NeuronMetadataFactory::create(ctxt);
+    auto &model = context.model;
+    auto &metadata = model.getComponents().add<brayns::Metadata>();
 
-    auto &population = ctxt.population;
-    auto &selection = ctxt.selection;
-    auto flatSelection = selection.flatten();
-    auto positions = Cells::getPositions(population, selection);
-    auto &params = ctxt.params;
-    auto &neuronParams = params.neuron_morphology_parameters;
-    auto radius = neuronParams.radius_multiplier;
-    auto &model = ctxt.model;
+    metadata["loaded_neuron_count"] = std::to_string(context.selection.flatSize());
 
-    SomaCircuitBuilder::Context context(flatSelection, positions, radius);
-
-    auto compartments = SomaCircuitBuilder::load(context, model, std::move(colorData));
-    NeuronReportFactory::create(ctxt, compartments);
+    auto &nodeSets = context.params.node_sets;
+    if (!nodeSets.empty())
+    {
+        metadata["node_sets"] = brayns::StringJoiner::join(nodeSets, ",");
+    }
 }
 }
