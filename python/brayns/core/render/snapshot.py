@@ -32,13 +32,12 @@ from ..renderer import Renderer
 
 @dataclass
 class Snapshot:
-    """Snapshot to render a given frame.
+    """Helper class to take a snapshot of an instance with custom settings.
+
+    Snapshots create a temporary context in the instance to avoid changing
+    current instance settings.
 
     For None parameters, the current values of the instance are used.
-
-    Note: snapshots create a temporary context in the instance to avoid
-    overriding current instance settings. Therefore, for multiple snapshots, it
-    is more efficient to use an ``Exporter``.
 
     :param resolution: Image resolution, defaults to None.
     :type resolution: Resolution | None, optional

@@ -61,6 +61,22 @@ public:
 class RenderHelper
 {
 public:
+    static bool render(brayns::Engine &engine, const brayns::RenderImageParams &params)
+    {
+        if (!params.accumulate)
+        {
+            return render(engine);
+        }
+        if (!render(engine))
+        {
+            return false;
+        }
+        while (render(engine))
+        {
+        }
+        return true;
+    }
+
     static bool render(brayns::Engine &engine)
     {
         engine.commitAndRender();
@@ -131,7 +147,7 @@ void RenderImageEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     ParamsValidator::validate(params);
-    auto newFrame = RenderHelper::render(_engine);
+    auto newFrame = RenderHelper::render(_engine, params);
     auto result = ResultFormatter::format(_engine);
     if (!SendingPolicy::mustSendImage(params, newFrame))
     {

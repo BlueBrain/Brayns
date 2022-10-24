@@ -18,12 +18,32 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .image import Image
-from .image_info import ImageInfo
-from .snapshot import Snapshot
+from dataclasses import dataclass
 
-__all__ = [
-    'Image',
-    'ImageInfo',
-    'Snapshot',
-]
+
+@dataclass
+class ImageInfo:
+    """Result of an image rendering with status and encoded data.
+
+    If nothing has been downloaded, data is empty.
+
+    :param accumulation: Current accumulation after render.
+    :type accumulation: int
+    :param max_accumulation: Accumulation limit to stop rendering.
+    :type max_accumulation: int
+    :param data: Encoded image data, can be empty.
+    :type data: bytes
+    """
+
+    accumulation: int
+    max_accumulation: int
+    data: bytes
+
+    @property
+    def full_quality(self) -> bool:
+        """Check if max accumulation has been reached.
+
+        :return: True if image is full quality.
+        :rtype: bool
+        """
+        return self.accumulation == self.max_accumulation

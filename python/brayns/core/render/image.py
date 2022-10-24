@@ -18,59 +18,105 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from dataclasses import dataclass
+from typing import Any
+
+from brayns.network import Instance, JsonRpcReply
+from brayns.utils import ImageFormat, parse_image_format
+
+from .image_info import ImageInfo
 
 
 @dataclass
 class Image:
-    """Image sent by the backend with its current state.
+    """Helper class to take an image of an instance with current settings.
 
-    If the backend state doesn't require a render (accumulation =
-    max_accumulation and no changes since last render), the image
-    has no data and cannot be saved.
+    Note that no render will occur if nothing has changed since last call
+    (same context and max accumulation reached).
 
-    However, accumulation settings are always provided.
+    If accumulate is True, the instance will render images and accumulate them
+    until current renderer ``samples_per_pixel`` is reached. Otherwise only one
+    image will be rendered.
 
-    :param accumulation: Number of frames currently accumulated.
-    :type accumulation: int
-    :param max_accumulation: Maximum accumulation frames used by the instance.
-    :type max_accumulation: int
-    :param data: Image data encoded in request format, can be empty.
-    :type data: bytes
+    If force_download is True, the framebuffer image will always be downloaded.
+    Otherwise it will be downloaded only when something new has been rendered.
+
+    Check ImageInfo.data to see if something has been downloaded.
+
+    :param accumulate: Render all samples at once, defaults to True.
+    :type accumulate: bool, optional
+    :param force_download: Force download, defaults to True.
+    :type force_download: bool, optional
+    :param jpeg_quality: JPEG quality.
+    :type jpeg_quality: int
     """
 
-    accumulation: int
-    max_accumulation: int
-    data: bytes
+    accumulate: bool = True
+    force_download: bool = True
+    jpeg_quality: int = 100
 
-    @property
-    def received(self) -> bool:
-        """Check if the image has been received.
+    def save(self, instance: Instance, path: str) -> ImageInfo:
+        """Try render image and save it under given path (if downloaded).
 
-        :return: True if image has been sent by the backend.
-        :rtype: bool
-        """
-        return bool(self.data)
-
-    @property
-    def finished(self) -> bool:
-        """Check if the max accumulation has been reached.
-
-        :return: True if image has been rendered with max_accumulation samples.
-        :rtype: bool
-        """
-        return self.accumulation == self.max_accumulation
-
-    def save(self, path: str) -> None:
-        """Save the image at given path.
-
-        :param path: Output file path (must match render_image format).
+        :param instance: Instance.
+        :type instance: Instance
+        :param path: Path to save image.
         :type path: str
-        :raises RuntimeError: Image was not sent by the backend.
+        :return: Render status and image data.
+        :rtype: ImageInfo
         """
-        if not self.received:
-            raise RuntimeError('Image was not sent by the renderer')
+        format = parse_image_format(path)
+        image = self.download(instance, format)
+        if not image.data:
+            return image
         with open(path, 'wb') as file:
-            file.write(self.data)
+            file.write(image.data)
+        return image
+
+    def download(self, instance: Instance, format: ImageFormat = ImageFormat.PNG) -> ImageInfo:
+        """Try render image and download it at given format.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param format: Image encoding format, defaults to ImageFormat.PNG
+        :type format: ImageFormat, optional
+        :return: Render status and image data.
+        :rtype: ImageInfo
+        """
+        return _request(instance, self, format, send=True)
+
+    def render(self, instance: Instance) -> ImageInfo:
+        """Try render image without downloading it.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :return: Render status.
+        :rtype: ImageInfo
+        """
+        return _request(instance, self, ImageFormat.PNG, send=False)
+
+
+def _request(instance: Instance, image: Image, format: ImageFormat, send: bool) -> ImageInfo:
+    params = _serialize_image(image, format, send)
+    reply = instance.execute('render-image', params)
+    return _deserialize_image(reply)
+
+
+def _serialize_image(image: Image, format: ImageFormat, send: bool) -> dict[str, Any]:
+    params = {
+        'format': format.value,
+        'send': send,
+        'force': send and image.force_download,
+        'accumulate': image.accumulate,
+    }
+    if format is ImageFormat.JPEG:
+        params['jpeg_quality'] = image.jpeg_quality
+    return params
+
+
+def _deserialize_image(reply: JsonRpcReply) -> ImageInfo:
+    return ImageInfo(
+        accumulation=reply.result['accumulation'],
+        max_accumulation=reply.result['max_accumulation'],
+        data=reply.binary,
+    )
