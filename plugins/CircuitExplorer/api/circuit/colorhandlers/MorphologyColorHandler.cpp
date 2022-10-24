@@ -29,6 +29,7 @@
 #include <api/neuron/NeuronColorMethod.h>
 #include <api/neuron/NeuronSection.h>
 #include <components/CircuitIds.h>
+#include <components/ColorMap.h>
 #include <components/NeuronSectionList.h>
 
 namespace
@@ -65,26 +66,27 @@ public:
 class ColorMapPainter
 {
 public:
-    static void paint(
-        brayns::Components &components,
-        const std::vector<uint8_t> &indices,
-        const std::vector<brayns::Vector4f> &colors)
+    static void paint(brayns::Components &comps, std::vector<uint8_t> indices, std::vector<brayns::Vector4f> colors)
     {
         assert(colors.size() <= 256);
 
-        auto &views = Extractor::extractViews(components);
-        auto &geometries = Extractor::extractGeometries(components);
+        auto &colorMap = comps.getOrAdd<ColorMap>();
+        colorMap.colors = std::move(colors);
+        colorMap.indices = std::move(indices);
 
-        auto colorData = ospray::cpp::CopiedData(colors);
+        auto &views = Extractor::extractViews(comps);
+        auto &geometries = Extractor::extractGeometries(comps);
+
+        auto colorData = ospray::cpp::SharedData(colorMap.colors);
 
         size_t mappingOffset = 0;
         for (size_t i = 0; i < views.size(); ++i)
         {
             auto numGeomtries = geometries[i].numPrimitives();
-            assert(mappingOffset + numGeomtries <= indices.size());
+            assert(mappingOffset + numGeomtries <= colorMap.indices.size());
 
-            auto morphologyMapping = &indices[mappingOffset];
-            auto mappingData = ospray::cpp::CopiedData(morphologyMapping, numGeomtries);
+            auto morphologyMapping = &colorMap.indices[mappingOffset];
+            auto mappingData = ospray::cpp::SharedData(morphologyMapping, numGeomtries);
 
             views[i].setColorMap(mappingData, colorData);
             mappingOffset += numGeomtries;
@@ -176,7 +178,7 @@ std::vector<uint64_t> MorphologyColorHandler::updateColorById(const std::map<uin
         });
 }
 
-void MorphologyColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)
+void MorphologyColorHandler::updateColorById(std::vector<brayns::Vector4f> colors)
 {
     auto &views = Extractor::extractViews(_components);
     assert(views.size() == colors.size());
@@ -201,11 +203,9 @@ void MorphologyColorHandler::updateColorByMethod(
     }
 }
 
-void MorphologyColorHandler::updateIndexedColor(
-    const std::vector<brayns::Vector4f> &color,
-    const std::vector<uint8_t> &indices)
+void MorphologyColorHandler::updateIndexedColor(std::vector<brayns::Vector4f> color, std::vector<uint8_t> indices)
 {
-    ColorMapPainter::paint(_components, indices, color);
+    ColorMapPainter::paint(_components, std::move(indices), std::move(color));
 }
 
 void MorphologyColorHandler::_colorWithInput(

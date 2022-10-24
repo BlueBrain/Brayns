@@ -32,6 +32,7 @@
 #include <api/neuron/NeuronSection.h>
 #include <components/CircuitIds.h>
 #include <components/ColorList.h>
+#include <components/ColorMap.h>
 #include <components/VasculatureSectionList.h>
 
 namespace
@@ -137,12 +138,12 @@ std::vector<uint64_t> VasculatureColorHandler::updateColorById(const std::map<ui
     return nonColoredIds;
 }
 
-void VasculatureColorHandler::updateColorById(const std::vector<brayns::Vector4f> &inputColors)
+void VasculatureColorHandler::updateColorById(std::vector<brayns::Vector4f> inputColors)
 {
     assert(inputColors.size() == Extractor::extractNumPrimitives(_components));
     auto &view = Extractor::extractView(_components);
     auto &colors = Extractor::extractColors(_components);
-    colors = inputColors;
+    colors = std::move(inputColors);
     view.setColorPerPrimitive(ospray::cpp::SharedData(colors));
 }
 
@@ -163,12 +164,13 @@ void VasculatureColorHandler::updateColorByMethod(
     }
 }
 
-void VasculatureColorHandler::updateIndexedColor(
-    const std::vector<brayns::Vector4f> &color,
-    const std::vector<uint8_t> &indices)
+void VasculatureColorHandler::updateIndexedColor(std::vector<brayns::Vector4f> colors, std::vector<uint8_t> indices)
 {
     auto &view = Extractor::extractView(_components);
-    view.setColorMap(ospray::cpp::CopiedData(indices), ospray::cpp::CopiedData(color));
+    auto &colorMap = _components.getOrAdd<ColorMap>();
+    colorMap.colors = std::move(colors);
+    colorMap.indices = std::move(indices);
+    view.setColorMap(ospray::cpp::SharedData(colorMap.indices), ospray::cpp::SharedData(colorMap.colors));
 }
 
 void VasculatureColorHandler::_colorWithInput(const std::string &method, const std::vector<ColoringInformation> &vars)

@@ -25,6 +25,7 @@
 
 #include <api/coloring/ColorByIDAlgorithm.h>
 #include <components/CircuitIds.h>
+#include <components/ColorMap.h>
 
 namespace
 {
@@ -81,7 +82,7 @@ std::vector<uint64_t> SynapseColorHandler::updateColorById(const std::map<uint64
         });
 }
 
-void SynapseColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)
+void SynapseColorHandler::updateColorById(std::vector<brayns::Vector4f> colors)
 {
     auto &views = Extractor::extractViews(_components);
     assert(views.size() == colors.size());
@@ -106,16 +107,18 @@ void SynapseColorHandler::updateColorByMethod(
     }
 }
 
-void SynapseColorHandler::updateIndexedColor(
-    const std::vector<brayns::Vector4f> &color,
-    const std::vector<uint8_t> &indices)
+void SynapseColorHandler::updateIndexedColor(std::vector<brayns::Vector4f> colors, std::vector<uint8_t> indices)
 {
-    assert(color.size() <= 256);
+    assert(colors.size() <= 256);
 
     auto &geometries = Extractor::extractGeometries(_components);
     auto &views = Extractor::extractViews(_components);
 
-    auto colorData = ospray::cpp::CopiedData(color);
+    auto &colorMap = _components.getOrAdd<ColorMap>();
+    colorMap.colors = std::move(colors);
+    colorMap.indices = std::move(indices);
+
+    auto colorData = ospray::cpp::SharedData(colorMap.colors);
 
     size_t mappingOffset = 0;
     for (size_t i = 0; i < views.size(); ++i)
@@ -123,8 +126,8 @@ void SynapseColorHandler::updateIndexedColor(
         auto geometrySize = geometries[i].numPrimitives();
         assert(mappingOffset + geometrySize <= indices.size());
 
-        auto synapseIndices = &indices[mappingOffset];
-        auto mappingData = ospray::cpp::CopiedData(synapseIndices, geometrySize);
+        auto synapseIndices = &colorMap.indices[mappingOffset];
+        auto mappingData = ospray::cpp::SharedData(synapseIndices, geometrySize);
         views[i].setColorMap(mappingData, colorData);
     }
 }

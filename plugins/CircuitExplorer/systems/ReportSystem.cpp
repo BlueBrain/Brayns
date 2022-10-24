@@ -91,6 +91,6 @@ void ReportSystem::execute(brayns::Components &components, uint32_t frame)
     auto &coloring = components.get<Coloring>();
 
     timer.reset();
-    coloring.painter->updateIndexedColor(colors, indices);
+    coloring.painter->updateIndexedColor(std::move(colors), std::move(indices));
     brayns::Log::critical("Coloring {}", timer.millis());
 }
