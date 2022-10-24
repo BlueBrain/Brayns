@@ -132,7 +132,7 @@ from the name (%d C-style printf integer formatting).
     filename = 'image-%d.png'
 
     # Full path pattern.
-    pattern = str(folder / 'image-%d.png')
+    pattern = str(folder / filename)
 
 Now we can render our frames using either ``Image`` or ``Snapshot``. 
 
