@@ -86,7 +86,7 @@ class Image:
         :rtype: ImageInfo
         """
         params = _serialize_image(self, format=format)
-        return self._request(instance, params)
+        return _request(instance, params)
 
     def render(self, instance: Instance) -> ImageInfo:
         """Try render image without downloading it.
@@ -97,11 +97,12 @@ class Image:
         :rtype: ImageInfo
         """
         params = _serialize_image(self, send=False)
-        return self._request(instance, params)
+        return _request(instance, params)
 
-    def _request(self, instance: Instance, params: dict[str, Any]) -> ImageInfo:
-        reply = instance.execute('render-image', params)
-        return _deserialize_image(reply)
+
+def _request(instance: Instance, params: dict[str, Any]) -> ImageInfo:
+    reply = instance.execute('render-image', params)
+    return _deserialize_image(reply)
 
 
 def _serialize_image(image: Image, send: bool = True, format: ImageFormat = ImageFormat.PNG) -> dict[str, Any]:
