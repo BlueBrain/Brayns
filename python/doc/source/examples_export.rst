@@ -132,7 +132,7 @@ from the name (%d C-style printf integer formatting).
     filename = 'image-%d.png'
 
     # Full path pattern.
-    pattern = str(path / 'image-%d.png')
+    pattern = str(folder / 'image-%d.png')
 
 Now we can render our frames using either ``Image`` or ``Snapshot``. 
 
@@ -151,7 +151,7 @@ Now we can render our frames using either ``Image`` or ``Snapshot``.
     # Render images using pattern and updating simulation.
     for index, frame in enumerate(indices):
         brayns.set_simulation_frame(instance, frame)
-        image.save(pattern % index)
+        image.save(instance, pattern % index)
     
     # OR with Snapshot (using different camera, renderer, etc...).
 
