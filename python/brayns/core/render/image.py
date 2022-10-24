@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -83,7 +85,8 @@ class Image:
         :return: Render status and image data.
         :rtype: ImageInfo
         """
-        return _request(instance, self, format, send=True)
+        params = _serialize_image(self, format=format)
+        return self._request(instance, params)
 
     def render(self, instance: Instance) -> ImageInfo:
         """Try render image without downloading it.
@@ -93,23 +96,23 @@ class Image:
         :return: Render status.
         :rtype: ImageInfo
         """
-        return _request(instance, self, ImageFormat.PNG, send=False)
+        params = _serialize_image(self, send=False)
+        return self._request(instance, params)
+
+    def _request(self, instance: Instance, params: dict[str, Any]) -> ImageInfo:
+        reply = instance.execute('render-image', params)
+        return _deserialize_image(reply)
 
 
-def _request(instance: Instance, image: Image, format: ImageFormat, send: bool) -> ImageInfo:
-    params = _serialize_image(image, format, send)
-    reply = instance.execute('render-image', params)
-    return _deserialize_image(reply)
-
-
-def _serialize_image(image: Image, format: ImageFormat, send: bool) -> dict[str, Any]:
-    params = {
-        'format': format.value,
+def _serialize_image(image: Image, send: bool = True, format: ImageFormat = ImageFormat.PNG) -> dict[str, Any]:
+    params: dict[str, Any] = {
         'send': send,
         'force': send and image.force_download,
         'accumulate': image.accumulate,
     }
-    if format is ImageFormat.JPEG:
+    if send:
+        params['format'] = format.value
+    if send and format is ImageFormat.JPEG:
         params['jpeg_quality'] = image.jpeg_quality
     return params
 
