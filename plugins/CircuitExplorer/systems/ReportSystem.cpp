@@ -22,8 +22,6 @@
 
 #include <brayns/engine/components/ColorRamp.h>
 #include <brayns/engine/components/SimulationInfo.h>
-#include <brayns/utils/Log.h>
-#include <brayns/utils/Timer.h>
 
 #include <api/reports/ColorRampUtils.h>
 #include <components/Coloring.h>
@@ -71,26 +69,14 @@ bool ReportSystem::shouldExecute(brayns::Components &components)
 
 void ReportSystem::execute(brayns::Components &components, uint32_t frame)
 {
-    auto timer = brayns::Timer();
-
     auto &colorRamp = components.get<brayns::ColorRamp>();
-    timer.reset();
     auto colors = ColorRampUtils::createSampleBuffer(colorRamp);
     auto &range = colorRamp.getValuesRange();
-    brayns::Log::critical("Color generation {}", timer.millis());
 
-    timer.reset();
     auto &report = components.get<ReportData>();
     auto frameData = report.data->getFrame(frame);
-    brayns::Log::critical("Frame read {}", timer.millis());
-
-    timer.reset();
     auto indices = report.indexer->generate(frameData, range);
-    brayns::Log::critical("Indexing {}", timer.millis());
 
     auto &coloring = components.get<Coloring>();
-
-    timer.reset();
     coloring.painter->updateIndexedColor(std::move(colors), std::move(indices));
-    brayns::Log::critical("Coloring {}", timer.millis());
 }

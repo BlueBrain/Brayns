@@ -49,8 +49,7 @@ class TestSonataLoader(unittest.TestCase):
                     vasculature_radius_multiplier=2,
                 ),
                 brayns.SonataNodePopulation('test2'),
-            ],
-            simulation_config='test'
+            ]
         )
         self.assertEqual(loader.get_properties(), {
             'node_population_settings': [
@@ -100,7 +99,6 @@ class TestSonataLoader(unittest.TestCase):
                     }
                 }
             ],
-            'simulation_config_path': 'test',
         })
 
 
