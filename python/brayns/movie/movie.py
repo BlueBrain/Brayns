@@ -37,13 +37,21 @@ class Movie:
     """Holds all the necessary information to generate a movie.
 
     Movies are generated using FFMPEG executable, this class only generates the
-    command line. Customm FFMPEG executable can be specified if not in PATH.
+    command line and runs it. Customm FFMPEG executable can be specified if it
+    cannot be found in the system PATH.
 
     Encoder settings are chosen by FFMPEG if not specified except for pixel
     format which is chosen for maximum compatibility with players.
 
     The movie frames must be rendered separately and be in the same folder with
     the same extension (other are ignored).
+
+    Frames are selected using their extension and a filename pattern. The frame
+    index is specified in the pattern using the C printf format (~%d). See
+    FFMPEG input command line (-i) for more details.
+
+    The pattern does not include the file extension as it will automatically be
+    added using ``frames_format``.
 
     All the frames selected are used to generate the movie so its duration will
     be frame_count / FPS.
@@ -54,6 +62,8 @@ class Movie:
     :type frames_format: ImageFormat
     :param fps: Movie FPS, should be the same as for export.
     :type fps: float
+    :param frames_pattern: Frames filename pattern, defaults to '%05d'.
+    :type frames_pattern: str, optional
     :param resolution: Movie resolution, defaults to frames resolution.
     :type resolution: Resolution | None, optional
     :param bitrate: Encoding bitrate, defaults to FFMPEG choice.
@@ -69,6 +79,7 @@ class Movie:
     frames_folder: str
     frames_format: ImageFormat
     fps: float
+    frames_pattern: str = '%05d'
     resolution: Resolution | None = None
     bitrate: int | None = None
     encoder: str | None = None
@@ -100,7 +111,7 @@ class Movie:
             self.ffmpeg_executable,
             *_get_global_options(),
             *_get_input_options(self),
-            *_get_input(self.frames_folder, self.frames_format),
+            *_get_input(self),
             *_get_output_options(self),
             path
         ]
@@ -144,17 +155,17 @@ def _get_input_options(movie: Movie) -> list[str]:
     ]
 
 
-def _get_input(folder: str, format: ImageFormat) -> list[str]:
+def _get_input(movie: Movie) -> list[str]:
     return [
         '-i',
-        _get_pattern(folder, format)
+        _get_pattern(movie)
     ]
 
 
-def _get_pattern(folder: str, format: ImageFormat) -> str:
-    path = pathlib.Path(folder)
-    pattern = f'%05d.{format.value}'
-    return str(path / pattern)
+def _get_pattern(movie: Movie) -> str:
+    path = pathlib.Path(movie.frames_folder)
+    name = f'{movie.frames_pattern}.{movie.frames_format.value}'
+    return str(path / name)
 
 
 def _get_output_options(movie: Movie) -> list[str]:
