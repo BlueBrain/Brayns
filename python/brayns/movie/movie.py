@@ -21,13 +21,12 @@
 from __future__ import annotations
 
 import os
-import pathlib
 import subprocess
 from collections import deque
 from dataclasses import dataclass
 from typing import IO, cast
 
-from brayns.utils import ImageFormat, Resolution
+from brayns.utils import Resolution
 
 from .movie_error import MovieError
 
@@ -40,30 +39,20 @@ class Movie:
     command line and runs it. Customm FFMPEG executable can be specified if it
     cannot be found in the system PATH.
 
+    Frames are selected using a filename pattern. This one depends on the naming
+    used for the export. The frame index is specified in the pattern using the C
+    printf format (~%d). See FFMPEG input command line (-i) for more details.
+
     Encoder settings are chosen by FFMPEG if not specified except for pixel
     format which is chosen for maximum compatibility with players.
-
-    The movie frames must be rendered separately and be in the same folder with
-    the same extension (other are ignored).
-
-    Frames are selected using their extension and a filename pattern. The frame
-    index is specified in the pattern using the C printf format (~%d). See
-    FFMPEG input command line (-i) for more details.
-
-    The pattern does not include the file extension as it will automatically be
-    added using ``frames_format``.
 
     All the frames selected are used to generate the movie so its duration will
     be frame_count / FPS.
 
-    :param frames_folder: Path of the folder with movie frames.
-    :type frames_folder: str
-    :param frames_format: Format of the frames in folder.
-    :type frames_format: ImageFormat
+    :param frames_pattern: Frames filename pattern.
+    :type frames_pattern: str
     :param fps: Movie FPS, should be the same as for export.
     :type fps: float
-    :param frames_pattern: Frames filename pattern, defaults to '%05d'.
-    :type frames_pattern: str, optional
     :param resolution: Movie resolution, defaults to frames resolution.
     :type resolution: Resolution | None, optional
     :param bitrate: Encoding bitrate, defaults to FFMPEG choice.
@@ -76,10 +65,8 @@ class Movie:
     :type ffmpeg_executable: str, optional
     """
 
-    frames_folder: str
-    frames_format: ImageFormat
+    frames_pattern: str
     fps: float
-    frames_pattern: str = '%05d'
     resolution: Resolution | None = None
     bitrate: int | None = None
     encoder: str | None = None
@@ -158,14 +145,8 @@ def _get_input_options(movie: Movie) -> list[str]:
 def _get_input(movie: Movie) -> list[str]:
     return [
         '-i',
-        _get_pattern(movie)
+        movie.frames_pattern,
     ]
-
-
-def _get_pattern(movie: Movie) -> str:
-    path = pathlib.Path(movie.frames_folder)
-    name = f'{movie.frames_pattern}.{movie.frames_format.value}'
-    return str(path / name)
 
 
 def _get_output_options(movie: Movie) -> list[str]:

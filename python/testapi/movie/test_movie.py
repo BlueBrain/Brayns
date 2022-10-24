@@ -30,7 +30,7 @@ class TestMovie(SimpleTestCase):
 
     @property
     def input(self) -> pathlib.Path:
-        return self.asset_folder / 'frames'
+        return self.asset_folder / 'frames' / '%05d.png'
 
     @property
     def ref(self) -> pathlib.Path:
@@ -38,8 +38,7 @@ class TestMovie(SimpleTestCase):
 
     def test_save(self) -> None:
         movie = brayns.Movie(
-            frames_folder=str(self.input),
-            frames_format=brayns.ImageFormat.PNG,
+            frames_pattern=str(self.input),
             fps=1,
             ffmpeg_executable=self.ffmpeg,
         )

@@ -42,6 +42,7 @@ named ``MovieFrames``.
 
 .. code-block:: python
 
+    # Movie duration settings.
     frames = brayns.MovieFrames(
         fps=25,
         slowing_factor=1,
@@ -49,6 +50,7 @@ named ``MovieFrames``.
         end_frame=-1,
     )
 
+    # Select frame indices from instance simulation settings.
     indices = frames.get_indices(simulation)
 
 .. attention::
@@ -112,25 +114,46 @@ This part is optional as Brayns build a default color ramp for circuits.
 Export
 ------
 
-Now we can render our frames using either ``render_image`` or ``Snapshot``.
+To make a movie from exported frames (snapshots or images), we will have to name
+the filenames using a pattern which allows FFMPEG to extract the frame index
+from the name (%d C-style printf integer formatting).
 
 .. code-block:: python
 
-    # With render_image (updating instance context).
+    import pathlib
+
+    # Choose a folder to export frames.
+    folder = pathlib.Path('frames')
+
+    # Create it if not exists.
+    folder.mkdir(exist_ok=True)
+
+    # Naming pattern: image-1.png, image-2.png, ...
+    filename = 'image-%d.png'
+
+    # Full path pattern.
+    pattern = str(path / 'image-%d.png')
+
+Now we can render our frames using either ``Image`` or ``Snapshot``. 
+
+.. code-block:: python
+
+    # With Image (updating instance context).
 
     # Update instance state.
     brayns.set_resolution(instance, resolution)
     brayns.set_camera(instance, camera)
     brayns.set_renderer(instance, renderer)
 
-    # Render images using FFMPEG file naming.
+    # Image settings (accumulate by default)
+    image = brayns.Image()
+
+    # Render images using pattern and updating simulation.
     for index, frame in enumerate(indices):
-        format = brayns.ImageFormat.PNG
-        image = brayns.render_image(instance, format=format, force=True)
-        path = f'{index:05d}.{format.value}'
-        image.save(path)
+        brayns.set_simulation_frame(instance, frame)
+        image.save(pattern % index)
     
-    # Or with Snapshot (using different camera, renderer, etc...).
+    # OR with Snapshot (using different camera, renderer, etc...).
 
     # Snapshot settings.
     snapshot = brayns.Snapshot(
@@ -139,9 +162,7 @@ Now we can render our frames using either ``render_image`` or ``Snapshot``.
         renderer=renderer,
     )
     
-    # Render images using FFMPEG file naming.
+    # Render images using pattern and updating snapshot settings.
     for index, frame in enumerate(indices):
-        format = brayns.ImageFormat.PNG
         snapshot.frame = frame
-        path = f'{index:05d}.{format.value}'
-        snapshot.save(instance, path)
+        snapshot.save(instance, pattern % index)

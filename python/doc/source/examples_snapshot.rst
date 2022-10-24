@@ -124,19 +124,20 @@ parameter is None, then the current object of the instance is taken.
 That's it, snapshots can also be saved on the backend machine using
 ``save_remotely`` or retreived as raw bytes using ``download``.
 
-Snapshot vs render_image
-------------------------
+Snapshot vs Image
+-----------------
 
 An image of the current scene can be rendered either using ``Snapshot`` or
-``render_image``.
+``Image``.
 
-The snapshot renders all accumulation frames in one call using a temporary
-context (camera, renderer, framebuffer and simulation frame).
+The ``Snapshot`` renders all accumulation frames in one call using a temporary
+context (camera, renderer, framebuffer and simulation frame) so it can use
+different settings for rendering without modifying the instance.
 
-The ``render_image`` function only renders one accumulation frame and only if
-the current accumulation has not reached the current renderer samples per pixel.
-It also uses the current instance context and doesn't create any object.
+The ``Image`` can render one or all accumulation frame(s) using the current
+state of an instance. It doesn't render anything if the max accumulation has
+been reached and nothing has changed in the scene.
 
-To summarize, use ``render_image`` to make a quick render of the current state
-of a Brayns instance and ``Snapshot`` to make a more complex rendering, possibly
-with different settings (camera, renderer, etc...).
+To summarize, use ``Image`` to make a quick render of the current state of a
+Brayns instance and ``Snapshot`` to make a more complex rendering with different
+settings without changing the instance.
