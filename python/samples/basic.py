@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
-import pathlib
 
 import brayns
 
@@ -27,8 +26,8 @@ URI = 'localhost:5000'
 EXECUTABLE = 'path/to/braynsService'
 OSPRAY = 'path/to/OSPRAY_2_10/install_dir/lib'
 CIRCUIT = '/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/circuitBuilding_1000neurons/BlueConfig'
-SNAPSHOT = 'path/to/snapshot.png'
-FRAMES = 'path/to/frames'
+RESOLUTION = brayns.Resolution.full_hd
+FRAMES = 'path/to/frames/%d.png'
 MOVIE = 'path/to/movie.mp4'
 
 service = brayns.Service(
@@ -56,11 +55,15 @@ with brayns.start(service, connector) as (process, instance):
             geometry_type=brayns.GeometryType.SMOOTH,
         )
     )
-
     models = loader.load_models(instance, CIRCUIT)
     model = models[0]
 
-    camera = brayns.look_at(model.bounds)
+    camera = brayns.look_at(
+        model.bounds,
+        aspect_ratio=RESOLUTION.aspect_ratio,
+        rotation=brayns.CameraRotation.front,
+        projection=brayns.PerspectiveProjection(),
+    )
 
     renderer = brayns.InteractiveRenderer()
 
@@ -68,35 +71,27 @@ with brayns.start(service, connector) as (process, instance):
         intensity=4,
         direction=camera.direction,
     )
-
     brayns.add_light(instance, light)
 
-    snapshot = brayns.Snapshot(
-        resolution=brayns.Resolution.full_hd,
-        camera=camera,
-        renderer=renderer,
-    )
-
-    snapshot.save(instance, SNAPSHOT)
-
     simulation = brayns.get_simulation(instance)
-
     frames = brayns.MovieFrames(
         fps=1,
         slowing_factor=1000,
         start_frame=0,
         end_frame=-1,
     )
-
     indices = frames.get_indices(simulation)
 
-    for frame in pathlib.Path(FRAMES).glob('*.*'):
-        frame.unlink()
+    snapshot = brayns.Snapshot(
+        resolution=RESOLUTION,
+        camera=camera,
+        renderer=renderer,
+    )
+    for index, frame in enumerate(indices):
+        snapshot.save(instance, FRAMES % index)
 
     movie = brayns.Movie(
-        frames_folder=FRAMES,
-        frames_format=brayns.ImageFormat.PNG,
+        frames_pattern=FRAMES,
         fps=frames.fps,
     )
-
     movie.save(MOVIE)
