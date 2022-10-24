@@ -45,7 +45,7 @@ The frame pattern must include the frame index using the C printf integer format
     )
 
     # Save movie, encoding is deduced from the path.
-    movie.save('path/to/movie.mp4')
+    movie.save('movie.mp4')
 
 The duration of the output movie is simply fps x frame_count. A different
 resolution can be specified but by default the frame size is used. The path to
