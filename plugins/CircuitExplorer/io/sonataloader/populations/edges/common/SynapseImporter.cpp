@@ -27,8 +27,8 @@
 #include <components/ReportData.h>
 #include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
 #include <io/sonataloader/data/Config.h>
-#include <io/sonataloader/data/SonataSimulationMapping.h>
-#include <io/sonataloader/data/SonataSynapses.h>
+#include <io/sonataloader/data/SimulationMapping.h>
+#include <io/sonataloader/data/Synapses.h>
 #include <io/sonataloader/reports/SonataReportData.h>
 
 namespace
@@ -70,7 +70,7 @@ struct SynapseReportMapping
         const bbp::sonata::Selection &nodeSelection)
     {
         const auto nodeIds = nodeSelection.flatten();
-        const auto rawMapping = sl::SonataSimulationMapping::getCompartmentMapping(reportPath, population, nodeIds);
+        const auto rawMapping = sl::SimulationMapping::getCompartmentMapping(reportPath, population, nodeIds);
 
         std::unordered_map<uint64_t, size_t> mapping;
         size_t offset = 0;
@@ -198,26 +198,22 @@ namespace sonataloader
 {
 void SynapseImporter::fromContext(EdgeLoadContext &context)
 {
-    const auto &edgeSelection = context.edgeSelection;
-    const auto edgeIds = edgeSelection.flatten();
-    const auto &population = context.edgePopulation;
-    const auto &params = context.params;
-    const auto afferent = params.load_afferent;
-
-    std::vector<uint64_t> srcNodes;
-    std::vector<brayns::Vector3f> surfacePos;
+    auto &edgeSelection = context.edgeSelection;
+    auto edgeIds = edgeSelection.flatten();
+    auto &population = context.edgePopulation;
+    auto &params = context.params;
+    auto afferent = params.load_afferent;
 
     if (afferent)
     {
-        srcNodes = SonataSynapses::getTargetNodes(population, edgeSelection);
-        surfacePos = SonataSynapses::getAfferentSurfacePos(population, edgeSelection);
-    }
-    else
-    {
-        srcNodes = SonataSynapses::getSourceNodes(population, edgeSelection);
-        surfacePos = SonataSynapses::getEfferentSurfacePos(population, edgeSelection);
+        auto srcNodes = Synapses::getTargetNodes(population, edgeSelection);
+        auto surfacePos = Synapses::getAfferentSurfacePos(population, edgeSelection);
+        fromData(context, srcNodes, surfacePos);
+        return;
     }
 
+    auto srcNodes = Synapses::getSourceNodes(population, edgeSelection);
+    auto surfacePos = Synapses::getEfferentSurfacePos(population, edgeSelection);
     fromData(context, srcNodes, surfacePos);
 }
 

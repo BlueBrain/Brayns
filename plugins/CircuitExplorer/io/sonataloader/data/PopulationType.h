@@ -25,10 +25,28 @@
 
 namespace sonataloader
 {
+/**
+ * @brief Finds the type of the sonata populations
+ */
 class PopulationType
 {
 public:
+    /**
+     * @brief Returns the type of the node population.
+     * @param name Name of the node population.
+     * @param config Sonata network configuration.
+     * @return std::string
+     */
+    static std::string getNodeType(const std::string &name, const Config &config);
     static std::string getNodeType(const bbp::sonata::NodePopulation &nodes, const Config &config);
+
+    /**
+     * @brief Returns the type of the edge population.
+     * @param name Name of the edge population.
+     * @param config Sonata network configuration.
+     * @return std::string
+     */
+    static std::string getEdgeType(const std::string &name, const Config &config);
     static std::string getEdgeType(const bbp::sonata::EdgePopulation &edges, const Config &config);
 };
 }

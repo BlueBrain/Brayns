@@ -20,8 +20,8 @@
 
 #include <bbp/sonata/node_sets.h>
 
-#include <io/sonataloader/data/SonataCells.h>
-#include <io/sonataloader/data/SonataNames.h>
+#include <io/sonataloader/data/Names.h>
+#include <io/sonataloader/data/PopulationType.h>
 
 #include <filesystem>
 #include <unordered_set>
@@ -30,176 +30,215 @@ namespace
 {
 namespace sl = sonataloader;
 
-struct PopulationTypeExtractor
+class NodeChecker
 {
-    static std::string extract(const sl::Config &config, const SonataNodePopulationParameters &params)
+public:
+    NodeChecker(const sonataloader::Config &config)
+        : _config(config)
     {
-        auto &populationName = params.node_population;
-        auto populationProperties = config.getNodesProperties(populationName);
-        return populationProperties.type;
     }
-};
 
-void checkNodePopulation(const sl::Config &config, const SonataNodePopulationParameters &params)
-{
-    auto populationType = PopulationTypeExtractor::extract(config, params);
-    auto &nodeSets = params.node_sets;
-    auto &population = params.node_population;
-
-    if (!nodeSets.empty())
+    void check(const SonataNodePopulationParameters &params)
     {
-        auto &nsPath = config.getNodesetsPath();
+        _checkPopulation(params);
+        _checkNodeSets(params);
+        _checkReport(params);
+    }
+
+private:
+    void _checkPopulation(const SonataNodePopulationParameters &params)
+    {
+        auto nodeNames = _config.getAllNodeNames();
+        if (nodeNames.find(params.node_population) == nodeNames.end())
+        {
+            throw std::invalid_argument("Population " + params.node_population + " does not exists");
+        }
+    }
+    void _checkNodeSets(const SonataNodePopulationParameters &params)
+    {
+        auto &nodeSets = params.node_sets;
+        if (nodeSets.empty())
+        {
+            return;
+        }
+
+        auto &nsPath = _config.getNodesetsPath();
         if (!std::filesystem::is_regular_file(nsPath))
         {
-            throw std::invalid_argument("Cannot access nodesets file for node population " + population);
+            throw std::invalid_argument("Cannot access nodesets file at " + nsPath);
         }
     }
 
-    if (params.report_type == sl::ReportType::None)
+    void _checkReport(const SonataNodePopulationParameters &params)
     {
-        return;
-    }
+        if (params.report_type == sl::ReportType::None)
+        {
+            return;
+        }
 
-    switch (params.report_type)
-    {
-    case sl::ReportType::BloodflowPressure:
-    case sl::ReportType::BloodflowRadii:
-    case sl::ReportType::BloodflowSpeed:
-    {
-        if (populationType != sonataloader::SonataNodeNames::vasculature)
+        auto &population = params.node_population;
+        auto populationType = sl::PopulationType::getNodeType(params.node_population, _config);
+
+        switch (params.report_type)
+        {
+        case sl::ReportType::BloodflowPressure:
+        case sl::ReportType::BloodflowRadii:
+        case sl::ReportType::BloodflowSpeed:
+        {
+            if (populationType != sonataloader::NodeNames::vasculature)
+            {
+                throw std::invalid_argument("Invalid report type for node population " + population);
+            }
+            break;
+        }
+        case sl::ReportType::Compartment:
+        case sl::ReportType::Summation:
+        {
+            if (populationType == sonataloader::NodeNames::vasculature)
+            {
+                throw std::invalid_argument("Invalid report type for node population " + population);
+            }
+            break;
+        }
+        case sl::ReportType::Spikes:
+        {
+            if (populationType == sonataloader::NodeNames::vasculature)
+            {
+                throw std::invalid_argument("Invalid report type for node population " + population);
+            }
+            break;
+        }
+        case sl::ReportType::Synapse:
         {
             throw std::invalid_argument("Invalid report type for node population " + population);
+            break;
         }
-        break;
-    }
-    case sl::ReportType::Compartment:
-    case sl::ReportType::Summation:
-    {
-        if (populationType == sonataloader::SonataNodeNames::vasculature)
+        default:
+            break;
+        }
+
+        auto &reportName = params.report_name;
+        auto reportPath = _config.getReportPath(reportName);
+        if (!std::filesystem::is_regular_file(reportPath))
         {
-            throw std::invalid_argument("Invalid report type for node population " + population);
+            throw std::invalid_argument("Cannot access report file for node population " + population);
         }
-        break;
-    }
-    case sl::ReportType::Spikes:
-    {
-        if (populationType == sonataloader::SonataNodeNames::vasculature)
-        {
-            throw std::invalid_argument("Invalid report type for node population " + population);
-        }
-        break;
-    }
-    case sl::ReportType::Synapse:
-    {
-        throw std::invalid_argument("Invalid report type for node population " + population);
-        break;
-    }
-    default:
-        break;
     }
 
-    auto &reportName = params.report_name;
-    auto reportPath = config.getReportPath(reportName);
-    if (!std::filesystem::is_regular_file(reportPath))
-    {
-        throw std::invalid_argument("Cannot access report file for node population " + population);
-    }
-}
+    const sonataloader::Config &_config;
+};
 
-void checkEdges(const sl::Config &config, const SonataNodePopulationParameters &params)
+class EdgeChecker
 {
-    auto allEdges = config.getAllEdgeNames();
-    auto &nodePopulation = params.node_population;
-    for (auto &edge : params.edge_populations)
+public:
+    EdgeChecker(const sonataloader::Config &config)
+        : _config(config)
     {
-        auto &name = edge.edge_population;
-        if (allEdges.find(name) == allEdges.end())
-        {
-            throw std::invalid_argument("Edge population " + name + " does not exist");
-        }
+    }
 
-        auto loadAfferent = edge.load_afferent;
-        auto edgePopulation = config.getEdges(name);
+    void check(const SonataNodePopulationParameters &params)
+    {
+        for (auto &edgeParams : params.edge_populations)
+        {
+            _checkPopulation(params.node_population, edgeParams);
+            _checkSynapseAstrocyte(edgeParams);
+            _checkReport(edgeParams);
+        }
+    }
+
+private:
+    void _checkPopulation(const std::string &nodePopulation, const SonataEdgePopulationParameters &params)
+    {
+        auto loadAfferent = params.load_afferent;
+        auto edgePopulation = _config.getEdges(params.edge_population);
 
         if (loadAfferent && edgePopulation.target() != nodePopulation)
         {
-            throw std::invalid_argument(
-                "Edge population " + name + " requested in afferent mode but node population " + nodePopulation
-                + " is not its target");
+            throw std::invalid_argument("Cannot load " + params.edge_population + " afferent for " + nodePopulation);
         }
 
         if (!loadAfferent && edgePopulation.source() != nodePopulation)
         {
-            throw std::invalid_argument(
-                "Edge population " + name + " requested in efferent mode but node population " + nodePopulation
-                + " is not its source");
+            throw std::invalid_argument("Cannot load " + params.edge_population + " efferent for " + nodePopulation);
         }
+    }
 
-        auto edgeProperties = config.getEdgesProperties(name);
-        if (edgeProperties.type == sonataloader::SonataEdgeNames::synapseAstrocyte && loadAfferent)
+    void _checkSynapseAstrocyte(const SonataEdgePopulationParameters &params)
+    {
+        auto edgeProperties = _config.getEdgesProperties(params.edge_population);
+        if (edgeProperties.type == sonataloader::EdgeNames::synapseAstrocyte && params.load_afferent)
         {
             throw std::invalid_argument("synapse_astrocyte edge populations are not allowed in afferent mode");
         }
+    }
 
-        auto &reportName = edge.edge_report_name;
+    void _checkReport(const SonataEdgePopulationParameters &params)
+    {
+        auto &reportName = params.edge_report_name;
         if (reportName.empty())
         {
             return;
         }
-        auto reportPath = config.getReportPath(reportName);
+        auto reportPath = _config.getReportPath(reportName);
         if (!std::filesystem::is_regular_file(reportPath))
         {
-            throw std::invalid_argument("Cannot access report file for edge population " + name);
+            throw std::invalid_argument("Cannot access report file for edge population " + params.edge_population);
         }
     }
-}
 
-void checkNeuronMorphology(const sl::Config &config, const SonataNodePopulationParameters &params)
+    const sonataloader::Config &_config;
+};
+
+class MorphologyChecker
 {
-    auto populationType = PopulationTypeExtractor::extract(config, params);
-
-    if (populationType == "vasculature")
+public:
+    MorphologyChecker(const sl::Config &config)
+        : _config(config)
     {
-        return;
     }
 
-    auto &neuronParameters = params.neuron_morphology_parameters;
-    if (populationType == "biophysical" || populationType == "astrocyte")
+    void check(const SonataNodePopulationParameters &params)
     {
+        auto populationType = sl::PopulationType::getNodeType(params.node_population, _config);
+        if (populationType != sl::NodeNames::biophysical && populationType != sl::NodeNames::astrocyte)
+        {
+            return;
+        }
+
+        auto &neuronParameters = params.neuron_morphology_parameters;
         auto soma = neuronParameters.load_soma;
         auto axon = neuronParameters.load_axon;
         auto dend = neuronParameters.load_dendrites;
         if (!soma && !axon && !dend)
         {
-            auto &populationName = params.node_population;
-            throw std::invalid_argument("Must enable at least one neuron morphology section for " + populationName);
+            throw std::invalid_argument("No morphology sections enabled for " + params.node_population);
         }
     }
-}
+
+private:
+    const sl::Config &_config;
+};
 } // namespace
 
 namespace sonataloader
 {
 void ParameterCheck::checkInput(const Config &config, const SonataLoaderParameters &input)
 {
-    const auto &populations = input.node_population_settings;
+    auto &populations = input.node_population_settings;
     if (populations.empty())
     {
         throw std::invalid_argument("Input load parameters are empty");
     }
 
+    auto nodeChecker = NodeChecker(config);
+    auto edgeChecker = EdgeChecker(config);
+    auto morphologyChecker = MorphologyChecker(config);
+
     for (auto &population : populations)
     {
-        auto &name = population.node_population;
-        auto allNodes = config.getAllNodeNames();
-        if (allNodes.find(name) == allNodes.end())
-        {
-            throw std::invalid_argument("Node population " + name + " does not exist");
-        }
-
-        checkNodePopulation(config, population);
-        checkEdges(config, population);
-        checkNeuronMorphology(config, population);
+        nodeChecker.check(population);
+        edgeChecker.check(population);
+        morphologyChecker.check(population);
     }
 }
 } // namespace sonataloader

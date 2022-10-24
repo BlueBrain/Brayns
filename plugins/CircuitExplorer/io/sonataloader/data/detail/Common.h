@@ -16,20 +16,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ElectricalSynapsePopulationLoader.h"
+#pragma once
 
-#include <io/sonataloader/data/Names.h>
-#include <io/sonataloader/populations/edges/common/SynapseImporter.h>
+#include <bbp/sonata/population.h>
 
-namespace sonataloader
-{
-std::string_view ElectricalSynapsePopulationLoader::getPopulationType() const noexcept
-{
-    return EdgeNames::electrical;
-}
+#include <string>
+#include <vector>
 
-void ElectricalSynapsePopulationLoader::load(EdgeLoadContext &context) const
+namespace sonataloader::detail
 {
-    SynapseImporter::fromContext(context);
-}
+class EnumExtractor
+{
+public:
+    static std::vector<std::string> extract(
+        const bbp::sonata::Population &population,
+        const bbp::sonata::Selection &selection,
+        const std::string &attribute);
+};
+
+class AttributeValidator
+{
+public:
+    static void validate(const bbp::sonata::Population &population, const std::vector<std::string> &attribs);
+};
 }

@@ -19,20 +19,18 @@
 #include "ModelTypeFinder.h"
 
 #include <api/ModelType.h>
+#include <io/sonataloader/data/Names.h>
 #include <io/sonataloader/data/PopulationType.h>
-#include <io/sonataloader/data/SonataNames.h>
 
 #include <unordered_map>
 
 namespace
 {
-namespace sl = sonataloader;
-
 inline static const std::unordered_map<std::string_view, std::string> nodeToType = {
-    {sl::SonataNodeNames::astrocyte, ModelType::astroctyes},
-    {sl::SonataNodeNames::biophysical, ModelType::neurons},
-    {sl::SonataNodeNames::pointNeuron, ModelType::neurons},
-    {sl::SonataNodeNames::vasculature, ModelType::vasculature}};
+    {sonataloader::NodeNames::astrocyte, ModelType::astroctyes},
+    {sonataloader::NodeNames::biophysical, ModelType::neurons},
+    {sonataloader::NodeNames::pointNeuron, ModelType::neurons},
+    {sonataloader::NodeNames::vasculature, ModelType::vasculature}};
 }
 
 namespace sonataloader
@@ -53,7 +51,7 @@ const std::string &
     ModelTypeFinder::fromEdges(const bbp::sonata::EdgePopulation &edges, bool afferent, const Config &config)
 {
     auto populationType = PopulationType::getEdgeType(edges, config);
-    if (populationType == SonataEdgeNames::endfoot)
+    if (populationType == EdgeNames::endfoot)
     {
         return ModelType::endfeet;
     }

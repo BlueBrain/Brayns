@@ -59,7 +59,7 @@ class ConfigReader
 public:
     static sl::Config read(const std::string &path, const SonataLoaderParameters &parameters)
     {
-        auto config = sl::Config(path, parameters.simulation_config_path);
+        auto config = sl::Config(path);
         sl::ParameterCheck::checkInput(config, parameters);
         return config;
     }

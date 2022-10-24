@@ -18,19 +18,24 @@
 
 #pragma once
 
-#include <brayns/engine/geometry/types/TriangleMesh.h>
-
-#include <vector>
+#include <string_view>
 
 namespace sonataloader
 {
-/**
- * @brief The SonataEndFeetReader class reads SONATA vasculature endfeet
- * conectivity files into 3D meshes
- */
-class SonataEndFeetReader
+struct NodeNames
 {
-public:
-    static std::vector<brayns::TriangleMesh> readEndFeet(const std::string &filePath, const std::vector<uint64_t> &ids);
+    static constexpr std::string_view biophysical = "biophysical";
+    static constexpr std::string_view astrocyte = "astrocyte";
+    static constexpr std::string_view vasculature = "vasculature";
+    static constexpr std::string_view pointNeuron = "point_neuron";
 };
-} // namespace sonataloader
+
+struct EdgeNames
+{
+    static constexpr std::string_view chemical = "chemical";
+    static constexpr std::string_view electrical = "electrical_synapse";
+    static constexpr std::string_view endfoot = "endfoot";
+    static constexpr std::string_view glialglial = "glialglial";
+    static constexpr std::string_view synapseAstrocyte = "synapse_astrocyte";
+};
+}

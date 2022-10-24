@@ -31,7 +31,7 @@ namespace sonataloader
  * @brief The SonataSimulationMapping class provides optimized access to SONATA
  * simulation node list / mapping during the loading process
  */
-class SonataSimulationMapping
+class SimulationMapping
 {
 public:
     /**

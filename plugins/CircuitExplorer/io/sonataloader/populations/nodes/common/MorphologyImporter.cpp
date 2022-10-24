@@ -19,7 +19,7 @@
 #include "MorphologyImporter.h"
 
 #include <api/circuit/MorphologyCircuitBuilder.h>
-#include <io/sonataloader/data/SonataCells.h>
+#include <io/sonataloader/data/Cells.h>
 #include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
 
 namespace sonataloader
@@ -29,15 +29,13 @@ void MorphologyImporter::import(
     const std::vector<brayns::Quaternion> &rotations,
     std::unique_ptr<IColorData> colorData)
 {
-    namespace sl = sonataloader;
-
     auto &population = ctxt.population;
     auto populationName = population.name();
     auto &selection = ctxt.selection;
     auto flatSelection = selection.flatten();
 
-    auto positions = sl::SonataCells::getPositions(population, selection);
-    auto morphologies = sl::SonataCells::getMorphologies(population, selection);
+    auto positions = Cells::getPositions(population, selection);
+    auto morphologies = Cells::getMorphologies(population, selection);
 
     auto &params = ctxt.params;
     auto &neuronParams = params.neuron_morphology_parameters;

@@ -30,9 +30,9 @@
 #include <components/CircuitIds.h>
 #include <components/Coloring.h>
 #include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
-#include <io/sonataloader/data/SonataEndFeetReader.h>
-#include <io/sonataloader/data/SonataNames.h>
-#include <io/sonataloader/data/SonataSynapses.h>
+#include <io/sonataloader/data/EndFeetReader.h>
+#include <io/sonataloader/data/Names.h>
+#include <io/sonataloader/data/Synapses.h>
 
 namespace
 {
@@ -203,7 +203,7 @@ namespace sonataloader
 {
 std::string_view EndFootPopulationLoader::getPopulationType() const noexcept
 {
-    return SonataEdgeNames::endfoot;
+    return EdgeNames::endfoot;
 }
 
 void EndFootPopulationLoader::load(EdgeLoadContext &context) const
@@ -215,10 +215,10 @@ void EndFootPopulationLoader::load(EdgeLoadContext &context) const
     auto &population = context.edgePopulation;
     auto &edgeSelection = context.edgeSelection;
     auto flatEdges = edgeSelection.flatten();
-    auto astrocyteIds = SonataSynapses::getTargetNodes(population, edgeSelection);
-    auto endFeetIds = SonataSynapses::getEndFeetIds(population, edgeSelection);
+    auto astrocyteIds = Synapses::getTargetNodes(population, edgeSelection);
+    auto endFeetIds = Synapses::getEndFeetIds(population, edgeSelection);
 
-    auto meshes = SonataEndFeetReader::readEndFeet(path, endFeetIds);
+    auto meshes = EndFeetReader::read(path, endFeetIds);
 
     std::map<uint64_t, std::vector<brayns::TriangleMesh>> endfeetGeometry;
     for (size_t i = 0; i < astrocyteIds.size(); ++i)

@@ -18,16 +18,21 @@
 
 #include "PopulationType.h"
 
-#include "SonataCells.h"
-#include "SonataSynapses.h"
+#include "Cells.h"
 
 namespace sonataloader
 {
+std::string PopulationType::getNodeType(const std::string &name, const Config &config)
+{
+    auto population = config.getNodes(name);
+    return getNodeType(population, config);
+}
+
 std::string PopulationType::getNodeType(const bbp::sonata::NodePopulation &nodes, const Config &config)
 {
     try
     {
-        return SonataCells::getPopulationType(nodes);
+        return Cells::getPopulationType(nodes);
     }
     catch (...)
     {
@@ -37,17 +42,14 @@ std::string PopulationType::getNodeType(const bbp::sonata::NodePopulation &nodes
     return properties.type;
 }
 
+std::string PopulationType::getEdgeType(const std::string &name, const Config &config)
+{
+    auto properties = config.getEdgesProperties(name);
+    return properties.type;
+}
+
 std::string PopulationType::getEdgeType(const bbp::sonata::EdgePopulation &edges, const Config &config)
 {
-    try
-    {
-        return SonataSynapses::getPopulationType(edges);
-    }
-    catch (...)
-    {
-    }
-
-    auto properties = config.getEdgesProperties(edges.name());
-    return properties.type;
+    return getEdgeType(edges.name(), config);
 }
 }

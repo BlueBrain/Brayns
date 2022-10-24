@@ -45,7 +45,7 @@ private:
 class Config
 {
 public:
-    Config(const std::string &configPath, const std::string &simulationPath);
+    Config(const std::string &path);
 
     /**
      * @brief Returns the configuration file parent path.
@@ -132,7 +132,7 @@ public:
 
 private:
     std::string _circuitConfigDir;
-    bbp::sonata::CircuitConfig _config;
     std::optional<bbp::sonata::SimulationConfig> _simConfig;
+    bbp::sonata::CircuitConfig _config;
 };
 } // namespace sonataloader

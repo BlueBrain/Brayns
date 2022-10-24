@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SonataSimulationMapping.h"
+#include "SimulationMapping.h"
 
 #include <highfive/H5File.hpp>
 
@@ -28,37 +28,42 @@
 namespace
 {
 using Range = std::pair<uint64_t, uint64_t>;
+using Mapping = std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>;
 
-auto computeMapping(
-    const HighFive::Group &reportPop,
-    const std::unordered_map<bbp::sonata::NodeID, Range> &nodePointers,
-    const std::vector<bbp::sonata::NodeID> &nodeIds)
+class MappingComputer
 {
-    std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>> result;
-    auto elementIdsData = reportPop.getGroup("mapping").getDataSet("element_ids");
-    for (const auto nodeId : nodeIds)
+public:
+    static std::vector<Mapping> compute(
+        const HighFive::Group &reportPop,
+        const std::unordered_map<bbp::sonata::NodeID, Range> &nodePointers,
+        const std::vector<bbp::sonata::NodeID> &nodeIds)
     {
-        const auto it = nodePointers.find(nodeId);
-        if (it == nodePointers.end())
+        auto result = std::vector<Mapping>();
+        auto elementIdsData = reportPop.getGroup("mapping").getDataSet("element_ids");
+        for (auto nodeId : nodeIds)
         {
-            continue;
-        }
+            auto it = nodePointers.find(nodeId);
+            if (it == nodePointers.end())
+            {
+                continue;
+            }
 
-        std::vector<bbp::sonata::ElementID> elementIds(it->second.second - it->second.first);
-        elementIdsData.select({it->second.first}, {it->second.second - it->second.first}).read(elementIds.data());
+            auto elementIds = std::vector<bbp::sonata::ElementID>(it->second.second - it->second.first);
+            elementIdsData.select({it->second.first}, {it->second.second - it->second.first}).read(elementIds.data());
 
-        for (const auto elem : elementIds)
-        {
-            result.push_back(std::make_pair(nodeId, elem));
+            for (auto elem : elementIds)
+            {
+                result.push_back(std::make_pair(nodeId, elem));
+            }
         }
+        return result;
     }
-    return result;
-}
+};
 } // namespace
 
 namespace sonataloader
 {
-std::vector<bbp::sonata::NodeID> SonataSimulationMapping::getCompartmentNodes(
+std::vector<bbp::sonata::NodeID> SimulationMapping::getCompartmentNodes(
     const std::string &reportPath,
     const std::string &population)
 {
@@ -73,7 +78,7 @@ std::vector<bbp::sonata::NodeID> SonataSimulationMapping::getCompartmentNodes(
 
 // Extracted and optimized code
 // from https://github.com/BlueBrain/libsonata/blob/master/src/report_reader.cpp
-std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>> SonataSimulationMapping::getCompartmentMapping(
+std::vector<Mapping> SimulationMapping::getCompartmentMapping(
     const std::string &reportPath,
     const std::string &population,
     const std::vector<bbp::sonata::NodeID> &nodeIds)
@@ -103,12 +108,11 @@ std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>> SonataSimula
         nodePointers.emplace(nodeId, std::make_pair(start, end));
     }
 
-    // Compute final list of
     if (!nodeIds.empty())
     {
-        return computeMapping(reportPop, nodePointers, nodeIds);
+        return MappingComputer::compute(reportPop, nodePointers, nodeIds);
     }
 
-    return computeMapping(reportPop, nodePointers, reportNodeIds);
+    return MappingComputer::compute(reportPop, nodePointers, reportNodeIds);
 }
 } // namespace sonataloader

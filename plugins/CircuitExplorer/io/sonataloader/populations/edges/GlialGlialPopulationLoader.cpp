@@ -18,14 +18,14 @@
 
 #include "GlialGlialPopulationLoader.h"
 
-#include <io/sonataloader/data/SonataNames.h>
+#include <io/sonataloader/data/Names.h>
 #include <io/sonataloader/populations/edges/common/SynapseImporter.h>
 
 namespace sonataloader
 {
 std::string_view GlialGlialPopulationLoader::getPopulationType() const noexcept
 {
-    return SonataEdgeNames::glialglial;
+    return EdgeNames::glialglial;
 }
 
 void GlialGlialPopulationLoader::load(EdgeLoadContext &context) const

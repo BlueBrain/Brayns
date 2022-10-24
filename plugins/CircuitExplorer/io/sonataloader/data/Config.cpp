@@ -89,19 +89,17 @@ public:
 class SimulationFactory
 {
 public:
-    static std::optional<bbp::sonata::SimulationConfig> tryToCreate(const std::string &simulationPath)
+    static std::optional<bbp::sonata::SimulationConfig> tryToCreate(const std::string &path)
     {
-        if (simulationPath.empty())
+        try
         {
-            return {};
+            return std::make_optional(bbp::sonata::SimulationConfig::fromFile(path));
+        }
+        catch (const bbp::sonata::SonataError &)
+        {
         }
 
-        if (!std::filesystem::is_regular_file(std::filesystem::path(simulationPath)))
-        {
-            return {};
-        }
-
-        return std::make_optional(bbp::sonata::SimulationConfig::fromFile(simulationPath));
+        return {};
     }
 };
 
@@ -135,10 +133,10 @@ std::string MorphologyPath::buildPath(const std::string &morphologyName) const n
     return _path + "/" + morphologyName + "." + _extension;
 }
 
-Config::Config(const std::string &configPath, const std::string &simulationPath)
-    : _circuitConfigDir(PathResolver::resolveParentPath(configPath))
-    , _config(bbp::sonata::CircuitConfig::fromFile(configPath))
-    , _simConfig(SimulationFactory::tryToCreate(simulationPath))
+Config::Config(const std::string &path)
+    : _circuitConfigDir(PathResolver::resolveParentPath(path))
+    , _simConfig(SimulationFactory::tryToCreate(path))
+    , _config(bbp::sonata::CircuitConfig::fromFile(_simConfig ? _simConfig->getNetwork() : path))
 {
 }
 

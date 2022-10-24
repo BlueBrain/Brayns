@@ -19,7 +19,7 @@
 #include "VasculatureColorData.h"
 
 #include <api/vasculature/VasculatureColorMethod.h>
-#include <io/sonataloader/data/SonataVasculature.h>
+#include <io/sonataloader/data/Vasculature.h>
 
 namespace sonataloader
 {
@@ -57,7 +57,7 @@ std::vector<std::string> VasculatureColorData::getMethodValuesForIDs(
     }
 
     const auto selection = bbp::sonata::Selection::fromValues(ids);
-    const auto sections = SonataVasculature::getSegmentSectionTypes(_nodes, selection);
+    const auto sections = Vasculature::getSegmentSectionTypes(_nodes, selection);
     std::vector<std::string> result;
     result.reserve(sections.size());
     for (const auto section : sections)
