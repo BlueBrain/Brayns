@@ -2,9 +2,7 @@ Export frames
 =============
 
 When a model has a simulation attached, we might want to render multiple frames
-to make a movie from them. To avoid recreating a snapshot context in the backend
-for each image, a frame export allows us to create the context once and use it
-to take multiple snapshots more efficiently.
+to make a movie from them.
 
 Simulation
 ----------
@@ -44,6 +42,7 @@ named ``MovieFrames``.
 
 .. code-block:: python
 
+    # Movie duration settings.
     frames = brayns.MovieFrames(
         fps=25,
         slowing_factor=1,
@@ -51,6 +50,7 @@ named ``MovieFrames``.
         end_frame=-1,
     )
 
+    # Select frame indices from instance simulation settings.
     indices = frames.get_indices(simulation)
 
 .. attention::
@@ -66,18 +66,6 @@ named ``MovieFrames``.
 
     You need to remember the movie FPS you set if you want to make a movie from
     the exported frames.
-
-View
-----
-
-As we render multiple frames, we can have one view per frame. This is specified
-using a list ``KeyFrame`` objects, each having a frame index and a camera view.
-
-Here we will suppose the view is the same for all frames (static camera).
-
-.. code-block:: python
-
-    key_frames = brayns.KeyFrame.from_indices(indices, camera.view)
 
 Color ramp
 ----------
@@ -123,23 +111,58 @@ This part is optional as Brayns build a default color ramp for circuits.
     # Update the color ramp.
     brayns.set_color_ramp(instance, model.id, ramp)
 
-Frame exporter
---------------
+Export
+------
 
-The exporter class can render frames into a given folder. All export parameters
-(resolution, camera, renderer, format, key frames) can be specified in its
-constructor.
+To make a movie from exported frames (snapshots or images), we will have to name
+the filenames using a pattern which allows FFMPEG to extract the frame index
+from the name (%d C-style printf integer formatting).
 
 .. code-block:: python
 
-    # Frame export specifications (using some parameters from snapshot).
-    exporter = brayns.Exporter(
-        frames=key_frames,
-        format=brayns.ImageFormat.PNG,
-        resolution=resolution,
-        projection=camera.projection,
-        renderer=brayns.InteractiveRenderer(),
-    )
+    import pathlib
 
-    # Export to given folder.
-    exporter.export_frames(instance, 'path/to/frames')
+    # Choose a folder to export frames.
+    folder = pathlib.Path('frames')
+
+    # Create it if not exists.
+    folder.mkdir(exist_ok=True)
+
+    # Naming pattern: image-1.png, image-2.png, ...
+    filename = 'image-%d.png'
+
+    # Full path pattern.
+    pattern = str(folder / filename)
+
+Now we can render our frames using either ``Image`` or ``Snapshot``. 
+
+.. code-block:: python
+
+    # With Image (updating instance context).
+
+    # Update instance state.
+    brayns.set_resolution(instance, resolution)
+    brayns.set_camera(instance, camera)
+    brayns.set_renderer(instance, renderer)
+
+    # Image settings (accumulate by default)
+    image = brayns.Image()
+
+    # Render images using pattern and updating simulation.
+    for index, frame in enumerate(indices):
+        brayns.set_simulation_frame(instance, frame)
+        image.save(instance, pattern % index)
+    
+    # OR with Snapshot (using different camera, renderer, etc...).
+
+    # Snapshot settings.
+    snapshot = brayns.Snapshot(
+        resolution=resolution,
+        camera=camera,
+        renderer=renderer,
+    )
+    
+    # Render images using pattern and updating snapshot settings.
+    for index, frame in enumerate(indices):
+        snapshot.frame = frame
+        snapshot.save(instance, pattern % index)

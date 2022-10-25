@@ -40,7 +40,7 @@ public:
 class SendingPolicy
 {
 public:
-    static bool mustSendJpeg(const brayns::RenderImageParams &params, bool newFrame)
+    static bool mustSendImage(const brayns::RenderImageParams &params, bool newFrame)
     {
         if (!params.send)
         {
@@ -61,6 +61,22 @@ public:
 class RenderHelper
 {
 public:
+    static bool render(brayns::Engine &engine, const brayns::RenderImageParams &params)
+    {
+        if (!params.accumulate)
+        {
+            return render(engine);
+        }
+        if (!render(engine))
+        {
+            return false;
+        }
+        while (render(engine))
+        {
+        }
+        return true;
+    }
+
     static bool render(brayns::Engine &engine)
     {
         engine.commitAndRender();
@@ -96,17 +112,16 @@ private:
     }
 };
 
-class JpegSerializer
+class ImageSerializer
 {
 public:
-    static std::string serialize(brayns::Engine &engine)
+    static std::string serialize(brayns::Engine &engine, const brayns::RenderImageEntrypoint::Params &params)
     {
         auto &framebuffer = engine.getFramebuffer();
         auto image = framebuffer.getImage();
-        auto &manager = engine.getParametersManager();
-        auto &parameters = manager.getApplicationParameters();
-        auto quality = parameters.getJpegQuality();
-        return brayns::ImageEncoder::encode(image, "jpg", quality);
+        auto format = params.format;
+        auto quality = params.jpeg_quality;
+        return brayns::ImageEncoder::encode(image, format, quality);
     }
 };
 } // namespace
@@ -125,21 +140,21 @@ std::string RenderImageEntrypoint::getMethod() const
 
 std::string RenderImageEntrypoint::getDescription() const
 {
-    return "Render an image and retreive it in JPEG format if required by params";
+    return "Render an image of the current context and retreive it according to given params";
 }
 
 void RenderImageEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     ParamsValidator::validate(params);
-    auto newFrame = RenderHelper::render(_engine);
+    auto newFrame = RenderHelper::render(_engine, params);
     auto result = ResultFormatter::format(_engine);
-    if (!SendingPolicy::mustSendJpeg(params, newFrame))
+    if (!SendingPolicy::mustSendImage(params, newFrame))
     {
         request.reply(result);
         return;
     }
-    auto jpeg = JpegSerializer::serialize(_engine);
-    request.reply(result, jpeg);
+    auto image = ImageSerializer::serialize(_engine, params);
+    request.reply(result, image);
 }
 } // namespace brayns

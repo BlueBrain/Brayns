@@ -18,38 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
-from dataclasses import dataclass
-
-from brayns.utils import View
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
 
-@dataclass
-class KeyFrame:
-    """Key frame to hold a simulation frame and a camera view.
+class TestSetResolution(SimpleTestCase):
 
-    :param index: Simulation frame index.
-    :type index: int
-    :param view: Camera view, defaults to None.
-    :type view: View | None, optional
-    """
-
-    index: int
-    view: View | None = None
-
-    @staticmethod
-    def from_indices(indices: list[int], view: View | None = None) -> list[KeyFrame]:
-        """Generate key frames with a fixed camera view.
-
-        :param indices: Frame indices.
-        :type indices: list[int]
-        :param view: Camera view, defaults to None
-        :type view: View | None, optional
-        :return: Key frames.
-        :rtype: list[KeyFrame]
-        """
-        return [
-            KeyFrame(index, view)
-            for index in indices
-        ]
+    def test_set_resolution(self) -> None:
+        brayns.set_resolution(self.instance, brayns.Resolution.ultra_hd)
+        test = brayns.get_application(self.instance)
+        self.assertEqual(test.resolution, brayns.Resolution.ultra_hd)

@@ -55,5 +55,5 @@ class TestPick(SimpleTestCase):
         target = models[0].bounds
         resolution = brayns.Resolution.full_hd
         camera = brayns.look_at(target, resolution.aspect_ratio)
-        brayns.update_application(self.instance, resolution)
+        brayns.set_resolution(self.instance, resolution)
         brayns.set_camera(self.instance, camera)

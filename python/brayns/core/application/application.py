@@ -29,12 +29,9 @@ class Application:
 
     :param plugins: List of plugins loaded in the instance.
     :type plugins: list[str]
-    :param resolution: Streaming resolution (main framebuffer).
+    :param resolution: Framebuffer resolution.
     :type resolution: Resolution
-    :param jpeg_quality: JPEG stream quality (0=lowest, 100=highest).
-    :type jpeg_quality: int
     """
 
     plugins: list[str]
     resolution: Resolution
-    jpeg_quality: int

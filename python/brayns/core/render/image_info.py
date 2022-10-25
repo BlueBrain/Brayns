@@ -18,26 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 
 @dataclass
-class JpegImage:
-    """Image sent by the backend with its current state.
+class ImageInfo:
+    """Result of an image rendering with status and encoded data.
 
-    If the backend state doesn't require a render (accumulation =
-    max_accumulation and no changes since last render), the image
-    has no data and cannot be saved.
+    If nothing has been downloaded, data is empty.
 
-    However, accumulation settings are always provided.
-
-    :param accumulation: Number of frames currently accumulated.
+    :param accumulation: Current accumulation after render.
     :type accumulation: int
-    :param max_accumulation: Application samples per pixel.
+    :param max_accumulation: Accumulation limit to stop rendering.
     :type max_accumulation: int
-    :param data: Image data encoded in JPEG, can be empty.
+    :param data: Encoded image data, can be empty.
     :type data: bytes
     """
 
@@ -46,22 +40,10 @@ class JpegImage:
     data: bytes
 
     @property
-    def received(self) -> bool:
-        """Check if the image has been received.
+    def full_quality(self) -> bool:
+        """Check if max accumulation has been reached.
 
-        :return: True if image has been sent by the backend.
+        :return: True if image is full quality.
         :rtype: bool
         """
-        return bool(self.data)
-
-    def save(self, path: str) -> None:
-        """Save the image at given path (in JPEG format).
-
-        :param path: Output file path (must be JPEG).
-        :type path: str
-        :raises RuntimeError: Image was not sent by the backend.
-        """
-        if not self.received:
-            raise RuntimeError('Image was not sent by the renderer')
-        with open(path, 'wb') as file:
-            file.write(self.data)
+        return self.accumulation == self.max_accumulation

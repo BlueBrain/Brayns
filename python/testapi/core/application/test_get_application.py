@@ -28,4 +28,3 @@ class TestGetApplication(SimpleTestCase):
         application = brayns.get_application(self.instance)
         self.assertEqual(application.plugins, brayns.Plugin.all)
         self.assertIsInstance(application.resolution, brayns.Resolution)
-        self.assertIsInstance(application.jpeg_quality, int)

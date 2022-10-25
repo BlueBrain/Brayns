@@ -27,8 +27,7 @@ class TestMovie(unittest.TestCase):
 
     def test_get_command_line(self) -> None:
         movie = brayns.Movie(
-            frames_folder='folder',
-            frames_format=brayns.ImageFormat.PNG,
+            frames_pattern='pattern',
             fps=30,
             resolution=brayns.Resolution.full_hd,
             bitrate=64000,
@@ -43,7 +42,7 @@ class TestMovie(unittest.TestCase):
             '-framerate',
             '30',
             '-i',
-            'folder/%05d.png',
+            'pattern',
             '-vf',
             'fps=30,format=pixel',
             '-s',

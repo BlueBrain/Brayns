@@ -29,5 +29,4 @@ def deserialize_application(message: dict[str, Any]) -> Application:
     return Application(
         plugins=message['plugins'],
         resolution=Resolution(*message['viewport']),
-        jpeg_quality=message['jpeg_quality'],
     )

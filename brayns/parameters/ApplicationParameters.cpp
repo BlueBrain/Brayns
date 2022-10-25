@@ -41,21 +41,10 @@ void ApplicationParameters::setWindowSize(const Vector2ui &size) noexcept
     _windowSize = size;
 }
 
-int ApplicationParameters::getJpegQuality() const noexcept
-{
-    return _jpegQuality;
-}
-
-void ApplicationParameters::setJpegQuality(int quality) noexcept
-{
-    _jpegQuality = quality;
-}
-
 void ApplicationParameters::build(ArgvBuilder &builder)
 {
     builder.add("plugin", _plugins, "Plugins libraries to load").composable();
     builder.add("log-level", _logLevel, "Log level");
     builder.add("window-size", _windowSize, "Viewport size").minimum(64);
-    builder.add("jpeg-quality", _jpegQuality, "JPEG stream quality").between(0, 100);
 }
 } // namespace brayns

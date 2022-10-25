@@ -22,11 +22,7 @@ import brayns
 
 
 def prepare_quick_render_image(instance: brayns.Instance, frame: int = 0) -> None:
-    brayns.update_application(
-        instance,
-        resolution=brayns.Resolution.full_hd,
-        jpeg_quality=100,
-    )
+    brayns.set_resolution(instance, brayns.Resolution.full_hd)
     camera = _prepare_camera_and_light(instance)
     brayns.set_camera(instance, camera)
     renderer = brayns.InteractiveRenderer()
@@ -42,16 +38,6 @@ def quick_snapshot(instance: brayns.Instance, path: str, frame: int = 0) -> None
 def prepare_quick_snapshot(instance: brayns.Instance, frame: int = 0) -> brayns.Snapshot:
     camera = _prepare_camera_and_light(instance)
     return _create_snapshot(camera, frame)
-
-
-def quick_export(instance: brayns.Instance, folder: str, frames: list[int]) -> None:
-    exporter = prepare_quick_export(instance, frames)
-    exporter.export_frames(instance, folder)
-
-
-def prepare_quick_export(instance: brayns.Instance, frames: list[int]) -> brayns.Exporter:
-    camera = _prepare_camera_and_light(instance)
-    return _create_exporter(camera, frames)
 
 
 def _prepare_camera_and_light(instance: brayns.Instance) -> brayns.Camera:
@@ -79,14 +65,5 @@ def _create_snapshot(camera: brayns.Camera, frame: int) -> brayns.Snapshot:
         resolution=brayns.Resolution.full_hd,
         frame=frame,
         camera=camera,
-        renderer=brayns.InteractiveRenderer(),
-    )
-
-
-def _create_exporter(camera: brayns.Camera, frames: list[int]) -> brayns.Exporter:
-    return brayns.Exporter(
-        frames=brayns.KeyFrame.from_indices(frames, camera.view),
-        resolution=brayns.Resolution.full_hd,
-        projection=camera.projection,
         renderer=brayns.InteractiveRenderer(),
     )

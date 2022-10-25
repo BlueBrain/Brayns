@@ -18,33 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
-from typing import Any
-
 from brayns.network import Instance
 from brayns.utils import Resolution
 
 
-def update_application(
-    instance: Instance,
-    resolution: Resolution | None = None,
-    jpeg_quality: int | None = None,
-) -> None:
-    """Update application parameters of the instance.
-
-    None parameters are left to their current value.
+def set_resolution(instance: Instance, resolution: Resolution) -> None:
+    """Update the framebuffer resolution of the given instance.
 
     :param instance: Instance.
     :type instance: Instance
-    :param resolution: Streaming resolution, defaults to None
-    :type resolution: Resolution | None, optional
-    :param jpeg_quality: JPEG stream quality (0-100), defaults to None
-    :type jpeg_quality: int | None, optional
+    :param resolution: Framebuffer resolution.
+    :type resolution: Resolution
     """
-    params = dict[str, Any]()
-    if resolution is not None:
-        params['viewport'] = list(resolution)
-    if jpeg_quality is not None:
-        params['jpeg_quality'] = jpeg_quality
+    params = {'viewport': list(resolution)}
     instance.request('set-application-parameters', params)

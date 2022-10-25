@@ -24,41 +24,50 @@ import brayns
 from tests.mock_instance import MockInstance
 
 
-class TestRenderImage(unittest.TestCase):
+class TestImage(unittest.TestCase):
 
-    def test_render_image(self) -> None:
+    def test_download(self) -> None:
         result = {
             'accumulation': 1,
             'max_accumulation': 2,
         }
         data = b'123'
         instance = MockInstance(result, data)
-        test = brayns.render_image(instance)
+        image = brayns.Image(
+            accumulate=False,
+            force_download=False,
+            jpeg_quality=60,
+        )
+        test = image.download(instance, brayns.ImageFormat.JPEG)
         self.assertEqual(instance.params, {
             'send': True,
             'force': False,
+            'accumulate': False,
+            'format': 'jpg',
+            'jpeg_quality': 60,
         })
         self.assertEqual(test.accumulation, 1)
         self.assertEqual(test.max_accumulation, 2)
         self.assertEqual(test.data, data)
-        self.assertTrue(test.received)
+        self.assertFalse(test.full_quality)
 
-    def test_render_image_params(self) -> None:
+    def test_render(self) -> None:
         result = {
-            'accumulation': 1,
+            'accumulation': 2,
             'max_accumulation': 2,
         }
-        data = b'123'
         instance = MockInstance(result)
-        test = brayns.render_image(instance, send=False, force=False)
+        image = brayns.Image()
+        test = image.render(instance)
         self.assertEqual(instance.params, {
             'send': False,
             'force': False,
+            'accumulate': True,
         })
-        self.assertEqual(test.accumulation, 1)
+        self.assertEqual(test.accumulation, 2)
         self.assertEqual(test.max_accumulation, 2)
         self.assertFalse(test.data)
-        self.assertFalse(test.received)
+        self.assertTrue(test.full_quality)
 
 
 if __name__ == '__main__':

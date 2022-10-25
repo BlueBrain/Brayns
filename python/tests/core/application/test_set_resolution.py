@@ -18,18 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import unittest
+
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+from tests.mock_instance import MockInstance
 
 
-class TestUpdateApplication(SimpleTestCase):
+class TestSetResolution(unittest.TestCase):
 
-    def test_update_application(self) -> None:
-        brayns.update_application(
-            self.instance,
-            resolution=brayns.Resolution.ultra_hd,
-            jpeg_quality=60,
-        )
-        test = brayns.get_application(self.instance)
-        self.assertEqual(test.resolution, brayns.Resolution.ultra_hd)
-        self.assertEqual(test.jpeg_quality, 60)
+    def test_set_resolution(self) -> None:
+        instance = MockInstance()
+        brayns.set_resolution(instance, brayns.Resolution(100, 200))
+        self.assertEqual(instance.method, 'set-application-parameters')
+        self.assertEqual(instance.params, {'viewport': [100, 200]})
+
+
+if __name__ == '__main__':
+    unittest.main()
