@@ -78,5 +78,5 @@ void ReportSystem::execute(brayns::Components &components, uint32_t frame)
     auto indices = report.indexer->generate(frameData, range);
 
     auto &coloring = components.get<Coloring>();
-    coloring.painter->updateIndexedColor(colors, indices);
+    coloring.painter->updateIndexedColor(std::move(colors), std::move(indices));
 }

@@ -19,40 +19,15 @@
 #include "EdgeLoader.h"
 
 #include <io/sonataloader/LoaderTable.h>
-#include <io/sonataloader/data/SonataSynapses.h>
-
-namespace
-{
-namespace sl = sonataloader;
-
-struct PopulationTypeResolver
-{
-    static std::string resolve(sl::EdgeLoadContext &context)
-    {
-        const auto &population = context.edgePopulation;
-        const auto populationName = population.name();
-        try
-        {
-            return sl::SonataSynapses::getPopulationType(population);
-        }
-        catch (...)
-        {
-            const auto &network = context.config;
-            const auto &config = network.circuitConfig();
-            const auto populationProperties = config.getEdgePopulationProperties(populationName);
-            return populationProperties.type;
-        }
-    }
-};
-}
+#include <io/sonataloader/data/PopulationType.h>
 
 namespace sonataloader
 {
 void EdgeLoader::loadEdges(EdgeLoadContext &context)
 {
-    const auto loaderTable = EdgeLoaderTable::create();
-    const auto populationType = PopulationTypeResolver::resolve(context);
-    const auto &loader = loaderTable.getLoader(populationType);
+    auto loaderTable = EdgeLoaderTable::create();
+    auto populationType = PopulationType::getEdgeType(context.edgePopulation, context.config);
+    auto &loader = loaderTable.getLoader(populationType);
     loader.load(context);
 }
 }

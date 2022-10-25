@@ -18,21 +18,20 @@
 
 #include "Selector.h"
 
-#include <io/sonataloader/data/SonataConfig.h>
-#include <io/sonataloader/data/SonataSimulationMapping.h>
+#include <io/sonataloader/data/SimulationMapping.h>
 
 #include <bbp/sonata/node_sets.h>
 
 namespace
 {
-struct PercentageFilter
+class PercentageFilter
 {
+public:
     static bbp::sonata::Selection filter(const bbp::sonata::Selection &selection, const float percentage) noexcept
     {
-        const auto src = selection.flatten();
-
-        const auto size = static_cast<float>(src.size());
-        const auto expectedSize = size * percentage;
+        auto src = selection.flatten();
+        auto size = static_cast<float>(src.size());
+        auto expectedSize = size * percentage;
         auto skipFactor = static_cast<size_t>(size / expectedSize);
         skipFactor = std::max(skipFactor, 1ul);
 
@@ -48,23 +47,23 @@ struct PercentageFilter
     }
 };
 
-struct NodeSetFilter
+class NodeSetFilter
 {
+public:
     static bbp::sonata::Selection filter(
-        const bbp::sonata::CircuitConfig &config,
+        const sonataloader::Config &config,
         const std::string &population,
         const std::vector<std::string> &nodeSets)
     {
-        const auto nodePopulation = config.getNodePopulation(population);
-
+        auto nodePopulation = config.getNodes(population);
         if (!nodeSets.empty())
         {
             bbp::sonata::Selection result({});
-            const auto &nodeSetsPath = config.getNodeSetsPath();
-            const auto nodeSetFile = bbp::sonata::NodeSets::fromFile(nodeSetsPath);
-            for (const auto &nodeSetName : nodeSets)
+            auto &nodeSetsPath = config.getNodesetsPath();
+            auto nodeSetFile = bbp::sonata::NodeSets::fromFile(nodeSetsPath);
+            for (auto &nodeSetName : nodeSets)
             {
-                const auto newSelection = nodeSetFile.materialize(nodeSetName, nodePopulation);
+                auto newSelection = nodeSetFile.materialize(nodeSetName, nodePopulation);
                 result = result & newSelection;
             }
 
@@ -75,89 +74,90 @@ struct NodeSetFilter
     }
 };
 
-struct NodeReportFilter
+class NodeReportFilter
 {
-    static bbp::sonata::Selection filter(
-        const bbp::sonata::SimulationConfig &config,
-        const std::string &reportName,
-        const std::string &population)
+public:
+    static bbp::sonata::Selection
+        filter(const sonataloader::Config &config, const std::string &reportName, const std::string &population)
     {
-        auto reportPath = sonataloader::SonataConfig::resolveReportPath(config, reportName);
-
-        auto nodeIds = sonataloader::SonataSimulationMapping::getCompartmentNodes(reportPath, population);
+        auto reportPath = config.getReportPath(reportName);
+        auto nodeIds = sonataloader::SimulationMapping::getCompartmentNodes(reportPath, population);
         std::sort(nodeIds.begin(), nodeIds.end());
         return bbp::sonata::Selection::fromValues(nodeIds);
+    }
+};
+
+class SelectionChecker
+{
+public:
+    static void check(const bbp::sonata::Selection &selection, const std::string &population)
+    {
+        if (selection.empty())
+        {
+            throw std::runtime_error("Empty node selection for " + population);
+        }
     }
 };
 }
 
 namespace sonataloader
 {
-bbp::sonata::Selection NodeSelector::select(
-    const SonataNetworkConfig &network,
-    const SonataNodePopulationParameters &params)
+bbp::sonata::Selection NodeSelector::select(const Config &config, const SonataNodePopulationParameters &params)
 {
-    const auto &nodePopulation = params.node_population;
-    const auto &nodeSets = params.node_sets;
-    const auto &nodeIds = params.node_ids;
-    const auto reportType = params.report_type;
-    const auto &reportName = params.report_name;
-    const auto percentage = params.node_percentage;
-    const auto &config = network.circuitConfig();
+    auto &nodePopulation = params.node_population;
+    auto &nodeSets = params.node_sets;
+    auto &nodeIds = params.node_ids;
+    auto reportType = params.report_type;
+    auto &reportName = params.report_name;
+    auto percentage = params.node_percentage;
 
     bbp::sonata::Selection reportSelection({});
     if (reportType != ReportType::None && reportType != ReportType::Spikes)
     {
-        const auto &simConfig = network.simulationConfig();
-        reportSelection = NodeReportFilter::filter(simConfig, reportName, nodePopulation);
+        reportSelection = NodeReportFilter::filter(config, reportName, nodePopulation);
     }
 
-    bbp::sonata::Selection result({});
     if (!nodeIds.empty())
     {
-        result = bbp::sonata::Selection::fromValues(nodeIds);
+        auto result = bbp::sonata::Selection::fromValues(nodeIds);
 
         if (!reportSelection.empty())
         {
             result = result & reportSelection;
         }
+        SelectionChecker::check(result, nodePopulation);
+        return result;
     }
-    else
+
+    auto result = NodeSetFilter::filter(config, nodePopulation, nodeSets);
+
+    if (!reportSelection.empty())
     {
-        result = NodeSetFilter::filter(config, nodePopulation, nodeSets);
-
-        if (!reportSelection.empty())
-        {
-            result = result & reportSelection;
-        }
-
-        if (percentage < 1.f)
-        {
-            result = PercentageFilter::filter(result, percentage);
-        }
+        result = result & reportSelection;
     }
 
-    if (result.empty())
+    if (percentage < 1.f)
     {
-        throw std::runtime_error("Empty node selection for " + nodePopulation);
+        result = PercentageFilter::filter(result, percentage);
     }
+
+    SelectionChecker::check(result, nodePopulation);
 
     return result;
 }
 
 bbp::sonata::Selection EdgeSelector::select(
-    const SonataNetworkConfig &network,
+    const Config &config,
     const SonataEdgePopulationParameters &params,
     const bbp::sonata::Selection &baseNodes)
 {
-    const auto &config = network.circuitConfig();
-    const auto &populationName = params.edge_population;
-    const auto population = config.getEdgePopulation(populationName);
+    auto &populationName = params.edge_population;
+    auto population = config.getEdges(populationName);
 
-    const auto flatNodes = baseNodes.flatten();
-    const auto edgeSelection = population.afferentEdges(flatNodes);
+    auto flatNodes = baseNodes.flatten();
+    auto edgeSelection = population.afferentEdges(flatNodes);
 
-    const auto percentage = params.edge_percentage;
+    auto percentage = params.edge_percentage;
     return PercentageFilter::filter(edgeSelection, percentage);
 }
 }

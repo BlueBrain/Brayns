@@ -134,12 +134,6 @@ BRAYNS_JSON_OBJECT_END()
 
 BRAYNS_JSON_OBJECT_BEGIN(SonataLoaderParameters)
 BRAYNS_JSON_OBJECT_ENTRY(
-    std::string,
-    simulation_config_path,
-    "Path to the simulation config file .json "
-    "(By default will be searched in the same directory as the circuit config with name simulation_config.json)",
-    brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<SonataNodePopulationParameters>,
     node_population_settings,
     "List of node populations to load and their load settings")

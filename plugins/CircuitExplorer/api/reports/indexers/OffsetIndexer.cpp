@@ -108,17 +108,18 @@ std::vector<uint8_t> OffsetIndexer::generate(const std::vector<float> &data, con
 {
     std::vector<uint8_t> indices(_offsets.size());
 
-    const auto rangeStart = range.x;
-    const auto rangeEnd = range.y;
-    const auto invFactor = 1.f / std::fabs(rangeEnd - rangeStart);
+    auto rangeStart = range.x;
+    auto rangeEnd = range.y;
+    auto invFactor = 1.f / std::fabs(rangeEnd - rangeStart);
 
+#pragma omp parallel for
     for (size_t i = 0; i < _offsets.size(); ++i)
     {
-        const auto offset = _offsets[i];
+        auto offset = _offsets[i];
         auto value = data[offset];
         value = value > rangeEnd ? rangeEnd : (value < rangeStart ? rangeStart : value);
 
-        const auto normIndex = (value - rangeStart) * invFactor;
+        auto normIndex = (value - rangeStart) * invFactor;
         indices[i] = static_cast<uint8_t>(normIndex * 255.f);
     }
 

@@ -22,7 +22,7 @@
 #include <api/reports/ReportMapping.h>
 #include <api/reports/indexers/OffsetIndexer.h>
 #include <api/reports/indexers/SpikeIndexer.h>
-#include <io/sonataloader/data/SonataSimulationMapping.h>
+#include <io/sonataloader/data/SimulationMapping.h>
 #include <io/sonataloader/reports/SonataReportData.h>
 #include <io/sonataloader/reports/SonataSpikeData.h>
 
@@ -30,12 +30,13 @@ namespace
 {
 namespace sl = sonataloader;
 
-struct SonataCompartmentMapping
+class SonataCompartmentMapping
 {
+public:
     static std::vector<CellReportMapping>
         generate(const std::string &reportPath, const std::string &population, const std::vector<uint64_t> &nodeList)
     {
-        const auto rawMapping = sl::SonataSimulationMapping::getCompartmentMapping(reportPath, population, nodeList);
+        const auto rawMapping = sl::SimulationMapping::getCompartmentMapping(reportPath, population, nodeList);
 
         // Compact mapping
         std::map<uint64_t, std::vector<uint16_t>> sortedCompartmentsSize;
@@ -98,10 +99,10 @@ public:
 private:
     static std::string resolveCompartmentPath(const sl::NodeLoadContext &context)
     {
-        auto &simConfig = context.config.simulationConfig();
+        auto &config = context.config;
         auto &params = context.params;
         auto &reportName = params.report_name;
-        return sl::SonataConfig::resolveReportPath(simConfig, reportName).string();
+        return config.getReportPath(reportName);
     }
 
     static std::unique_ptr<IReportData> _createData(const sl::NodeLoadContext &context, const std::string &path)
@@ -140,8 +141,8 @@ public:
 private:
     static std::unique_ptr<IReportData> _createData(const sl::NodeLoadContext &context)
     {
-        auto &simConfig = context.config.simulationConfig();
-        auto path = sl::SonataConfig::resolveSpikesPath(simConfig);
+        auto &config = context.config;
+        auto path = config.getSpikesPath();
         auto &params = context.params;
         auto &population = params.node_population;
         auto &selection = context.selection;

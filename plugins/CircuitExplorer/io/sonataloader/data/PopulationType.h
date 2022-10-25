@@ -18,35 +18,35 @@
 
 #pragma once
 
-#include <brayns/engine/model/Model.h>
+#include "Config.h"
 
-#include <io/SonataLoaderParameters.h>
-#include <io/sonataloader/data/Config.h>
-#include <io/util/ProgressUpdater.h>
-
+#include <bbp/sonata/edges.h>
 #include <bbp/sonata/nodes.h>
 
 namespace sonataloader
 {
-struct NodeLoadContext
+/**
+ * @brief Finds the type of the sonata populations
+ */
+class PopulationType
 {
-    const Config &config;
-    const SonataNodePopulationParameters &params;
-    const bbp::sonata::NodePopulation &population;
-    const bbp::sonata::Selection &selection;
-    brayns::Model &model;
-    ProgressUpdater &progress;
-};
+public:
+    /**
+     * @brief Returns the type of the node population.
+     * @param name Name of the node population.
+     * @param config Sonata network configuration.
+     * @return std::string
+     */
+    static std::string getNodeType(const std::string &name, const Config &config);
+    static std::string getNodeType(const bbp::sonata::NodePopulation &nodes, const Config &config);
 
-struct EdgeLoadContext
-{
-    const Config &config;
-    const SonataEdgePopulationParameters &params;
-    const bbp::sonata::Population &nodePopulation;
-    const bbp::sonata::EdgePopulation &edgePopulation;
-    const bbp::sonata::Selection &nodeSelection;
-    const bbp::sonata::Selection &edgeSelection;
-    brayns::Model &model;
-    ProgressUpdater &progress;
+    /**
+     * @brief Returns the type of the edge population.
+     * @param name Name of the edge population.
+     * @param config Sonata network configuration.
+     * @return std::string
+     */
+    static std::string getEdgeType(const std::string &name, const Config &config);
+    static std::string getEdgeType(const bbp::sonata::EdgePopulation &edges, const Config &config);
 };
 }

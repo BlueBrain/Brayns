@@ -22,7 +22,7 @@
 
 namespace sonataloader
 {
-struct SonataNodeNames
+struct NodeNames
 {
     static constexpr std::string_view biophysical = "biophysical";
     static constexpr std::string_view astrocyte = "astrocyte";
@@ -30,7 +30,7 @@ struct SonataNodeNames
     static constexpr std::string_view pointNeuron = "point_neuron";
 };
 
-struct SonataEdgeNames
+struct EdgeNames
 {
     static constexpr std::string_view chemical = "chemical";
     static constexpr std::string_view electrical = "electrical_synapse";

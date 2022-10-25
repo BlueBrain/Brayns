@@ -16,18 +16,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NodeLoader.h"
-
-#include <io/sonataloader/LoaderTable.h>
-#include <io/sonataloader/data/PopulationType.h>
+#include "NeuronMetadataFactory.h"
 
 namespace sonataloader
 {
-void NodeLoader::loadNodes(NodeLoadContext &context)
+void NeuronMetadataFactory::create(NodeLoadContext &context)
 {
-    auto loaderTable = NodeLoaderTable::create();
-    auto populationType = PopulationType::getNodeType(context.population, context.config);
-    auto &loader = loaderTable.getLoader(populationType);
-    loader.load(context);
+    auto &model = context.model;
+    auto &metadata = model.getComponents().add<brayns::Metadata>();
+
+    metadata["loaded_neuron_count"] = std::to_string(context.selection.flatSize());
+
+    auto &nodeSets = context.params.node_sets;
+    if (!nodeSets.empty())
+    {
+        metadata["node_sets"] = brayns::StringJoiner::join(nodeSets, ",");
+    }
 }
 }

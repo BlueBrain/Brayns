@@ -38,14 +38,11 @@ class SonataLoader(Loader):
 
     :param node_populations: Nodes to load.
     :type node_populations: list[SonataNodePopulation]
-    :param simulation_config: Override configuration file, defaults to None.
-    :type simulation_config: str | None
     """
 
     JSON: ClassVar[str] = 'json'
 
     node_populations: list[SonataNodePopulation]
-    simulation_config: str | None = None
 
     @classmethod
     @property
@@ -57,15 +54,12 @@ class SonataLoader(Loader):
 
 
 def _serialize_loader(loader: SonataLoader) -> dict[str, Any]:
-    message: dict[str, Any] = {
+    return {
         'node_population_settings': [
             _serialize_node_population(node_population)
             for node_population in loader.node_populations
         ],
     }
-    if loader.simulation_config is not None:
-        message['simulation_config_path'] = loader.simulation_config
-    return message
 
 
 def _serialize_node_population(population: SonataNodePopulation) -> dict[str, Any]:

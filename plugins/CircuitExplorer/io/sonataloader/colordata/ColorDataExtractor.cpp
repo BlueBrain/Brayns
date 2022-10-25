@@ -49,7 +49,7 @@ struct AttributeMethodMapping
 
     static std::string getAttributeForMethod(const std::string &method)
     {
-        const auto enumEntry = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
+        auto enumEntry = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
         return getAttributeForMethod(enumEntry);
     }
 
@@ -72,22 +72,21 @@ struct AttributeMethodMapping
 /**
  * @brief Encapsulates queries for string data to the population object
  */
-struct PopulationQuery
+class PopulationQuery
 {
+public:
+    static bool hasAttribute(const bbp::sonata::NodePopulation &population, const std::string &attribute)
+    {
+        auto &attributes = population.attributeNames();
+        return attributes.find(attribute) != attributes.end();
+    }
+
     static std::vector<std::string> query(
         const bbp::sonata::NodePopulation &population,
         const std::string &attribute,
         const bbp::sonata::Selection &selection)
     {
-        try
-        {
-            return population.getAttribute<std::string>(attribute, selection);
-        }
-        catch (...)
-        {
-        }
-
-        return {};
+        return population.getAttribute<std::string>(attribute, selection);
     }
 
     static std::vector<std::string> query(
@@ -95,7 +94,7 @@ struct PopulationQuery
         const std::string &attribute,
         const std::vector<uint64_t> &ids)
     {
-        const auto selection = bbp::sonata::Selection::fromValues(ids);
+        auto selection = bbp::sonata::Selection::fromValues(ids);
         return query(population, attribute, selection);
     }
 
@@ -120,22 +119,22 @@ namespace sonataloader
 {
 std::vector<std::string> CellNodeColorMethods::get(const bbp::sonata::NodePopulation &population)
 {
-    const auto possibleMethods = AttributeMethodMapping::generate();
+    auto possibleMethods = AttributeMethodMapping::generate();
 
-    std::vector<std::string> result;
+    auto result = std::vector<std::string>();
     result.reserve(possibleMethods.size());
 
-    for (const auto &possible : possibleMethods)
+    for (auto &possible : possibleMethods)
     {
-        const auto &attribute = possible.attribute;
-        const auto method = possible.method;
+        auto &attribute = possible.attribute;
+        auto method = possible.method;
 
-        const auto query = PopulationQuery::queryAny(population, attribute);
-        if (!query.empty())
+        if (!PopulationQuery::hasAttribute(population, attribute))
         {
-            auto methodName = brayns::EnumInfo::getName(method);
-            result.push_back(std::move(methodName));
+            continue;
         }
+        auto methodName = brayns::EnumInfo::getName(method);
+        result.push_back(std::move(methodName));
     }
 
     return result;
@@ -146,7 +145,7 @@ std::vector<std::string> CellNodeColorValues::get(
     const std::string &method,
     const std::vector<uint64_t> &ids)
 {
-    const auto attribute = AttributeMethodMapping::getAttributeForMethod(method);
+    auto attribute = AttributeMethodMapping::getAttributeForMethod(method);
     return PopulationQuery::query(population, attribute, ids);
 }
 
@@ -154,7 +153,13 @@ std::vector<std::string> CellNodeColorValues::getAll(
     const bbp::sonata::NodePopulation &population,
     const std::string &method)
 {
-    const auto attribute = AttributeMethodMapping::getAttributeForMethod(method);
+    auto attribute = AttributeMethodMapping::getAttributeForMethod(method);
+
+    if (!PopulationQuery::hasAttribute(population, attribute))
+    {
+        throw std::invalid_argument("The attribute " + attribute + " is not available");
+    }
+
     return PopulationQuery::queryAll(population, attribute);
 }
 }

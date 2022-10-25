@@ -29,12 +29,10 @@ public:
     template<typename T>
     static std::unique_ptr<IColorData> create(const NodeLoadContext &ctxt)
     {
-        const auto &network = ctxt.config;
-        const auto &config = network.circuitConfig();
-        const auto &nodePopulation = ctxt.population;
-        const auto populationName = nodePopulation.name();
-        // copy is deleted...
-        return std::make_unique<T>(config.getNodePopulation(populationName));
+        auto &config = ctxt.config;
+        auto &nodePopulation = ctxt.population;
+        auto populationName = nodePopulation.name();
+        return std::make_unique<T>(config.getNodes(populationName));
     }
 };
 }

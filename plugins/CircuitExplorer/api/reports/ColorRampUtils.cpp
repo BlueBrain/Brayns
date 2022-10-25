@@ -160,7 +160,7 @@ brayns::ColorRamp ColorRampUtils::createUnipolarColorRamp() noexcept
 
 std::vector<brayns::Vector4f> ColorRampUtils::createSampleBuffer(const brayns::ColorRamp &colorRamp) noexcept
 {
-    std::vector<brayns::Vector4f> colors(256);
+    auto colors = std::vector<brayns::Vector4f>(256);
 
     auto &range = colorRamp.getValuesRange();
     auto chunk = (range.y - range.x) / 256.f;

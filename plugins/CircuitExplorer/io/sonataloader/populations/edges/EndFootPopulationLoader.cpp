@@ -30,9 +30,9 @@
 #include <components/CircuitIds.h>
 #include <components/Coloring.h>
 #include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
-#include <io/sonataloader/data/SonataEndFeetReader.h>
-#include <io/sonataloader/data/SonataNames.h>
-#include <io/sonataloader/data/SonataSynapses.h>
+#include <io/sonataloader/data/EndFeetReader.h>
+#include <io/sonataloader/data/Names.h>
+#include <io/sonataloader/data/Synapses.h>
 
 namespace
 {
@@ -71,16 +71,15 @@ public:
 private:
     Poco::JSON::Object::Ptr _parseConfig(const sonataloader::EdgeLoadContext &context)
     {
-        auto &network = context.config;
-        auto &config = network.circuitConfig();
-        auto parsedJson = brayns::Json::parse(config.getExpandedJSON());
+        auto &config = context.config;
+        auto parsedJson = brayns::Json::parse(config.getConfigAsJson());
         return parsedJson.extract<brayns::JsonObject::Ptr>();
     }
 
     std::filesystem::path _getConfigRootPath(const sonataloader::EdgeLoadContext &context)
     {
-        auto &network = context.config;
-        return std::filesystem::path(network.circuitConfigDir());
+        auto &config = context.config;
+        return std::filesystem::path(config.getBasePath());
     }
 
     std::string _getDefaultPath()
@@ -204,22 +203,22 @@ namespace sonataloader
 {
 std::string_view EndFootPopulationLoader::getPopulationType() const noexcept
 {
-    return SonataEdgeNames::endfoot;
+    return EdgeNames::endfoot;
 }
 
 void EndFootPopulationLoader::load(EdgeLoadContext &context) const
 {
     auto path = EndFeetAreasPath(context).resolve();
 
-    const auto &nodeSelection = context.nodeSelection;
-    const auto nodes = nodeSelection.flatten();
-    const auto &population = context.edgePopulation;
-    const auto &edgeSelection = context.edgeSelection;
-    const auto flatEdges = edgeSelection.flatten();
-    const auto astrocyteIds = SonataSynapses::getTargetNodes(population, edgeSelection);
-    const auto endFeetIds = SonataSynapses::getEndFeetIds(population, edgeSelection);
+    auto &nodeSelection = context.nodeSelection;
+    auto nodes = nodeSelection.flatten();
+    auto &population = context.edgePopulation;
+    auto &edgeSelection = context.edgeSelection;
+    auto flatEdges = edgeSelection.flatten();
+    auto astrocyteIds = Synapses::getTargetNodes(population, edgeSelection);
+    auto endFeetIds = Synapses::getEndFeetIds(population, edgeSelection);
 
-    auto meshes = SonataEndFeetReader::readEndFeet(path, endFeetIds);
+    auto meshes = EndFeetReader::read(path, endFeetIds);
 
     std::map<uint64_t, std::vector<brayns::TriangleMesh>> endfeetGeometry;
     for (size_t i = 0; i < astrocyteIds.size(); ++i)
@@ -232,10 +231,9 @@ void EndFootPopulationLoader::load(EdgeLoadContext &context) const
 
     auto &model = context.model;
 
-    auto &network = context.config;
-    auto &config = network.circuitConfig();
+    auto &config = context.config;
     auto astrocytePopulationName = population.target();
-    auto astrocytePopulation = config.getNodePopulation(astrocytePopulationName);
+    auto astrocytePopulation = config.getNodes(astrocytePopulationName);
     auto colorData = std::make_unique<CommonEdgeColorData>(std::move(astrocytePopulation));
 
     auto builder = ModelBuilder(model);

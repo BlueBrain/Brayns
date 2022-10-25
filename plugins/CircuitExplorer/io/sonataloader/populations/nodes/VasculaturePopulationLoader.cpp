@@ -34,10 +34,10 @@
 #include <components/ReportData.h>
 #include <components/VasculatureSectionList.h>
 #include <io/sonataloader/colordata/node/VasculatureColorData.h>
-#include <io/sonataloader/data/SonataConfig.h>
-#include <io/sonataloader/data/SonataNames.h>
-#include <io/sonataloader/data/SonataSimulationMapping.h>
-#include <io/sonataloader/data/SonataVasculature.h>
+#include <io/sonataloader/data/Config.h>
+#include <io/sonataloader/data/Names.h>
+#include <io/sonataloader/data/SimulationMapping.h>
+#include <io/sonataloader/data/Vasculature.h>
 #include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
 #include <io/sonataloader/reports/SonataReportData.h>
 #include <systems/RadiiReportSystem.h>
@@ -58,10 +58,10 @@ public:
         auto &vasculatureParams = params.vasculature_geometry_parameters;
         auto multiplier = vasculatureParams.radius_multiplier;
 
-        auto startPoints = sl::SonataVasculature::getSegmentStartPoints(population, selection);
-        auto endPoints = sl::SonataVasculature::getSegmentEndPoints(population, selection);
-        auto startRadii = sl::SonataVasculature::getSegmentStartRadii(population, selection);
-        auto endRadii = sl::SonataVasculature::getSegmentEndRadii(population, selection);
+        auto startPoints = sl::Vasculature::getSegmentStartPoints(population, selection);
+        auto endPoints = sl::Vasculature::getSegmentEndPoints(population, selection);
+        auto startRadii = sl::Vasculature::getSegmentStartRadii(population, selection);
+        auto endRadii = sl::Vasculature::getSegmentEndRadii(population, selection);
 
         auto size = startPoints.size();
         auto primitives = std::vector<brayns::Capsule>();
@@ -87,7 +87,7 @@ public:
     {
         auto &population = context.population;
         auto &selection = context.selection;
-        return sl::SonataVasculature::getSegmentSectionTypes(population, selection);
+        return sl::Vasculature::getSegmentSectionTypes(population, selection);
     }
 };
 
@@ -187,9 +187,8 @@ private:
     {
         auto &params = context.params;
         auto reportName = params.report_name;
-        auto &network = context.config;
-        auto &simConfig = network.simulationConfig();
-        return sl::SonataConfig::resolveReportPath(simConfig, reportName).string();
+        auto &config = context.config;
+        return config.getReportPath(reportName);
     }
 
     static std::vector<size_t> _getOffsets(sl::NodeLoadContext &context)
@@ -198,7 +197,7 @@ private:
         auto &population = context.params.node_population;
         auto &selection = context.selection;
         auto flatSelection = selection.flatten();
-        auto rawMapping = sl::SonataSimulationMapping::getCompartmentMapping(path, population, flatSelection);
+        auto rawMapping = sl::SimulationMapping::getCompartmentMapping(path, population, flatSelection);
 
         auto sortedCompartments = std::map<uint64_t, size_t>();
         for (size_t i = 0; i < rawMapping.size(); ++i)
@@ -269,7 +268,7 @@ namespace sonataloader
 {
 std::string_view VasculaturePopulationLoader::getPopulationType() const noexcept
 {
-    return SonataNodeNames::vasculature;
+    return NodeNames::vasculature;
 }
 
 void VasculaturePopulationLoader::load(NodeLoadContext &context) const

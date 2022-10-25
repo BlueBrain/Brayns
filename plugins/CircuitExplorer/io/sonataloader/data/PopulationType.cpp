@@ -16,21 +16,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "PopulationType.h"
 
-#include <brayns/engine/geometry/types/TriangleMesh.h>
-
-#include <vector>
+#include "Cells.h"
 
 namespace sonataloader
 {
-/**
- * @brief The SonataEndFeetReader class reads SONATA vasculature endfeet
- * conectivity files into 3D meshes
- */
-class SonataEndFeetReader
+std::string PopulationType::getNodeType(const std::string &name, const Config &config)
 {
-public:
-    static std::vector<brayns::TriangleMesh> readEndFeet(const std::string &filePath, const std::vector<uint64_t> &ids);
-};
-} // namespace sonataloader
+    auto population = config.getNodes(name);
+    return getNodeType(population, config);
+}
+
+std::string PopulationType::getNodeType(const bbp::sonata::NodePopulation &nodes, const Config &config)
+{
+    try
+    {
+        return Cells::getPopulationType(nodes);
+    }
+    catch (...)
+    {
+    }
+
+    auto properties = config.getNodesProperties(nodes.name());
+    return properties.type;
+}
+
+std::string PopulationType::getEdgeType(const std::string &name, const Config &config)
+{
+    auto properties = config.getEdgesProperties(name);
+    return properties.type;
+}
+
+std::string PopulationType::getEdgeType(const bbp::sonata::EdgePopulation &edges, const Config &config)
+{
+    return getEdgeType(edges.name(), config);
+}
+}

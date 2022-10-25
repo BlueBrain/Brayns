@@ -18,17 +18,18 @@
 
 #pragma once
 
-#include <bbp/sonata/edges.h>
-#include <bbp/sonata/nodes.h>
+#include <brayns/engine/geometry/types/TriangleMesh.h>
 
-#include <string_view>
+#include <vector>
 
 namespace sonataloader
 {
-class SonataModelType
+/**
+ * @brief Reads SONATA vasculature endfeet conectivity files into 3D meshes
+ */
+class EndFeetReader
 {
 public:
-    static const std::string &fromNodes(const bbp::sonata::NodePopulation &population);
-    static const std::string &fromEdges(const bbp::sonata::EdgePopulation &population, bool afferent);
+    static std::vector<brayns::TriangleMesh> read(const std::string &filePath, const std::vector<uint64_t> &ids);
 };
-}
+} // namespace sonataloader

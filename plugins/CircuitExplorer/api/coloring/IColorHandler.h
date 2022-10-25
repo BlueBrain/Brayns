@@ -61,7 +61,7 @@ public:
      * @param colors A list of colors, on for each element. Must be sorted according to the same order as the
      * IDs returned by getHandledIDs()
      */
-    virtual void updateColorById(const std::vector<brayns::Vector4f> &colors) = 0;
+    virtual void updateColorById(std::vector<brayns::Vector4f> colors) = 0;
 
     /**
      * @brief Updates element colors according to the given method. If one or more variables are
@@ -80,7 +80,5 @@ public:
      * @param color the color map
      * @param indices the indices into the color map
      */
-    virtual void updateIndexedColor(
-        const std::vector<brayns::Vector4f> &color,
-        const std::vector<uint8_t> &indices) = 0;
+    virtual void updateIndexedColor(std::vector<brayns::Vector4f> color, std::vector<uint8_t> indices) = 0;
 };

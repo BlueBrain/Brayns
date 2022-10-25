@@ -73,7 +73,7 @@ std::vector<uint64_t> EndfeetColorHandler::updateColorById(const std::map<uint64
         });
 }
 
-void EndfeetColorHandler::updateColorById(const std::vector<brayns::Vector4f> &colors)
+void EndfeetColorHandler::updateColorById(std::vector<brayns::Vector4f> colors)
 {
     auto &views = Extractor::extractViews(_components);
     assert(views.size() == colors.size());
@@ -98,9 +98,7 @@ void EndfeetColorHandler::updateColorByMethod(
     }
 }
 
-void EndfeetColorHandler::updateIndexedColor(
-    const std::vector<brayns::Vector4f> &color,
-    const std::vector<uint8_t> &indices)
+void EndfeetColorHandler::updateIndexedColor(std::vector<brayns::Vector4f> color, std::vector<uint8_t> indices)
 {
     (void)color;
     (void)indices;

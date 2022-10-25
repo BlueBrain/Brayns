@@ -23,10 +23,10 @@
 
 #include <io/sonataloader/EdgeLoader.h>
 #include <io/sonataloader/LoadContext.h>
+#include <io/sonataloader/ModelTypeFinder.h>
 #include <io/sonataloader/NodeLoader.h>
 #include <io/sonataloader/ParameterCheck.h>
 #include <io/sonataloader/Selector.h>
-#include <io/sonataloader/SonataModelType.h>
 #include <io/util/ProgressUpdater.h>
 
 namespace
@@ -57,11 +57,11 @@ private:
 class ConfigReader
 {
 public:
-    static sl::SonataNetworkConfig read(const std::string &path, const SonataLoaderParameters &parameters)
+    static sl::Config read(const std::string &path, const SonataLoaderParameters &parameters)
     {
-        auto network = sl::SonataConfig::readNetwork(path, parameters.simulation_config_path);
-        sl::ParameterCheck::checkInput(network, parameters);
-        return network;
+        auto config = sl::Config(path);
+        sl::ParameterCheck::checkInput(config, parameters);
+        return config;
     }
 };
 }
@@ -95,7 +95,7 @@ std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
     const brayns::Timer timer;
     brayns::Log::info("[CE] {}: loading {}.", getName(), path);
 
-    auto network = ConfigReader::read(path, input);
+    auto config = ConfigReader::read(path, input);
 
     auto progress = ProgressUpdaterFactory::create(callback, input);
     std::vector<std::shared_ptr<brayns::Model>> result;
@@ -106,11 +106,11 @@ std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
         brayns::Log::info("[CE] - Loading {} node population.", nodeName);
 
         progress.beginStage(2);
-        auto nodes = network.circuitConfig().getNodePopulation(nodeName);
-        auto nodeSelection = sl::NodeSelector::select(network, nodeParams);
-        auto nodeModelType = sl::SonataModelType::fromNodes(nodes);
+        auto nodes = config.getNodes(nodeName);
+        auto nodeSelection = sl::NodeSelector::select(config, nodeParams);
+        auto nodeModelType = sl::ModelTypeFinder::fromNodes(nodes, config);
         auto nodeModel = std::make_shared<brayns::Model>(nodeModelType);
-        auto nodeContext = sl::NodeLoadContext{network, nodeParams, nodes, nodeSelection, *nodeModel, progress};
+        auto nodeContext = sl::NodeLoadContext{config, nodeParams, nodes, nodeSelection, *nodeModel, progress};
         sl::NodeLoader::loadNodes(nodeContext);
         result.push_back(std::move(nodeModel));
         progress.endStage();
@@ -121,12 +121,12 @@ std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
             brayns::Log::info("[CE] - Loading {} edge population.", edgeName);
 
             progress.beginStage(2);
-            auto edges = network.circuitConfig().getEdgePopulation(edgeName);
-            auto edgeSelection = sl::EdgeSelector::select(network, edgeParams, nodeSelection);
-            auto edgeModelType = sl::SonataModelType::fromEdges(edges, edgeParams.load_afferent);
+            auto edges = config.getEdges(edgeName);
+            auto edgeSelection = sl::EdgeSelector::select(config, edgeParams, nodeSelection);
+            auto edgeModelType = sl::ModelTypeFinder::fromEdges(edges, edgeParams.load_afferent, config);
             auto edgeModel = std::make_shared<brayns::Model>(edgeModelType);
             auto edgeContext = sl::EdgeLoadContext{
-                network,
+                config,
                 edgeParams,
                 nodes,
                 edges,

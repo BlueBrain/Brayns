@@ -16,18 +16,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NodeLoader.h"
+#pragma once
 
-#include <io/sonataloader/LoaderTable.h>
-#include <io/sonataloader/data/PopulationType.h>
+#include <bbp/sonata/population.h>
 
-namespace sonataloader
+#include <string>
+#include <vector>
+
+namespace sonataloader::detail
 {
-void NodeLoader::loadNodes(NodeLoadContext &context)
+class EnumExtractor
 {
-    auto loaderTable = NodeLoaderTable::create();
-    auto populationType = PopulationType::getNodeType(context.population, context.config);
-    auto &loader = loaderTable.getLoader(populationType);
-    loader.load(context);
-}
+public:
+    static std::vector<std::string> extract(
+        const bbp::sonata::Population &population,
+        const bbp::sonata::Selection &selection,
+        const std::string &attribute);
+};
+
+class AttributeValidator
+{
+public:
+    static void validate(const bbp::sonata::Population &population, const std::vector<std::string> &attribs);
+};
 }

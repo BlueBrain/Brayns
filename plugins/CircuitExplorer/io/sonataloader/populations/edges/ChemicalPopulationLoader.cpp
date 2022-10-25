@@ -18,14 +18,14 @@
 
 #include "ChemicalPopulationLoader.h"
 
-#include <io/sonataloader/data/SonataNames.h>
+#include <io/sonataloader/data/Names.h>
 #include <io/sonataloader/populations/edges/common/SynapseImporter.h>
 
 namespace sonataloader
 {
 std::string_view ChemicalSynapsePopulationLoader::getPopulationType() const noexcept
 {
-    return SonataEdgeNames::chemical;
+    return EdgeNames::chemical;
 }
 
 void ChemicalSynapsePopulationLoader::load(EdgeLoadContext &context) const

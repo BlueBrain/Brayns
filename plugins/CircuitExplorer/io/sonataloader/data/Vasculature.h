@@ -27,10 +27,9 @@
 namespace sonataloader
 {
 /**
- * @brief The SonataVasculature class is in charge of quering vasculature
- * dataset information from the node network files
+ * @brief Wrapper around bbp::sonata::NodePopulation for vasculature.
  */
-class SonataVasculature
+class Vasculature
 {
 public:
     using Nodes = bbp::sonata::NodePopulation;
