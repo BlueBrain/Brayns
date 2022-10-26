@@ -28,13 +28,12 @@
 #include <mvdtool/mvd3.hpp>
 #include <mvdtool/sonata.hpp>
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
 namespace
 {
-// Custom classes to wrap around the different circuit formats with a common
-// interface
 class CircuitAccessor
 {
 public:
@@ -42,8 +41,9 @@ public:
     virtual std::vector<std::string> getLayers(const std::vector<uint64_t> &gids) const = 0;
     virtual std::vector<std::string> getETypes(const std::vector<uint64_t> &gids) const = 0;
     virtual std::vector<std::string> getMTypes(const std::vector<uint64_t> &gids) const = 0;
+    virtual std::vector<std::string> getRegions(const std::vector<uint64_t> &gids) const = 0;
+    virtual std::vector<std::string> getSynapseClasses(const std::vector<uint64_t> &gids) const = 0;
     virtual std::vector<std::string> getMorphologyNames(const std::vector<uint64_t> &gids) const = 0;
-
     virtual std::vector<uint64_t> getAllIds() const noexcept = 0;
 };
 
@@ -57,8 +57,7 @@ public:
 
     std::vector<uint64_t> getAllIds() const noexcept override
     {
-        const auto numNeurons = _circuit.getNumNeurons();
-        std::vector<uint64_t> result(numNeurons);
+        std::vector<uint64_t> result(_circuit.getNumNeurons());
         std::iota(result.begin(), result.end(), 1u);
         return result;
     }
@@ -70,38 +69,24 @@ public:
 
     std::vector<std::string> getETypes(const std::vector<uint64_t> &gids) const final
     {
-        const auto indices = _getAttrib(gids, brion::NeuronAttributes::NEURON_ETYPE);
-        std::vector<std::string> result;
-
-        if (!indices.empty())
-        {
-            const auto allETypes = _circuit.getTypes(brion::NeuronClass::NEURONCLASS_ETYPE);
-            result.resize(gids.size());
-            for (size_t i = 0; i < gids.size(); ++i)
-            {
-                result[i] = allETypes[std::stoull(indices[i])];
-            }
-        }
-
-        return result;
+        return _getIndexedList(gids, brion::NeuronAttributes::NEURON_ETYPE, brion::NeuronClass::NEURONCLASS_ETYPE);
     }
 
     std::vector<std::string> getMTypes(const std::vector<uint64_t> &gids) const final
     {
-        const auto indices = _getAttrib(gids, brion::NeuronAttributes::NEURON_MTYPE);
-        std::vector<std::string> result;
+        return _getIndexedList(gids, brion::NeuronAttributes::NEURON_MTYPE, brion::NeuronClass::NEURONCLASS_MTYPE);
+    }
 
-        if (!indices.empty())
-        {
-            const auto allMTypes = _circuit.getTypes(brion::NeuronClass::NEURONCLASS_MTYPE);
-            result.resize(gids.size());
-            for (size_t i = 0; i < gids.size(); ++i)
-            {
-                result[i] = allMTypes[std::stoull(indices[i])];
-            }
-        }
+    std::vector<std::string> getRegions(const std::vector<uint64_t> &gids) const final
+    {
+        (void)gids;
+        return {};
+    }
 
-        return result;
+    std::vector<std::string> getSynapseClasses(const std::vector<uint64_t> &gids) const final
+    {
+        (void)gids;
+        return {};
     }
 
     std::vector<std::string> getMorphologyNames(const std::vector<uint64_t> &gids) const final
@@ -110,31 +95,63 @@ public:
     }
 
 private:
-    std::vector<std::string> _getAttrib(const std::vector<uint64_t> &gids, const uint32_t attrib) const
+    std::vector<std::string> _getIndexedList(
+        const std::vector<uint64_t> &gids,
+        brion::NeuronAttributes attribute,
+        brion::NeuronClass cls) const
     {
-        const auto gidsSet = brion::GIDSet(gids.begin(), gids.end());
+        auto indices = _getAttrib(gids, attribute);
+        if (indices.empty())
+        {
+            return {};
+        }
+
+        auto allTypes = _circuit.getTypes(cls);
+
+        auto result = std::vector<std::string>();
+        result.reserve(gids.size());
+
+        for (size_t i = 0; i < gids.size(); ++i)
+        {
+            result.push_back(allTypes[std::stoull(indices[i])]);
+        }
+
+        return result;
+    }
+
+    std::vector<std::string> _getAttrib(const std::vector<uint64_t> &gids, uint32_t attribute) const
+    {
+        auto gidsSet = brion::GIDSet(gids.begin(), gids.end());
+        auto matrix = _readMatrix(gidsSet, attribute);
+
+        if (matrix.empty())
+        {
+            return {};
+        }
+
+        auto idx = matrix.shape()[1] > 1 ? 1ul : 0ul;
+        auto data = std::vector<std::string>();
+        data.reserve(gidsSet.size());
+
+        for (size_t i = 0; i < gidsSet.size(); ++i)
+        {
+            data.push_back(matrix[i][idx]);
+        }
+        return data;
+    }
+
+    brion::NeuronMatrix _readMatrix(const brion::GIDSet &gids, uint32_t attribute) const
+    {
         try
         {
-            const auto matrix = _circuit.get(gidsSet, attrib);
-            if (matrix.shape()[0] == 0)
-            {
-                return {};
-            }
-
-            const size_t idx = matrix.shape()[1] > 1 ? 1 : 0;
-            std::vector<std::string> data(gidsSet.size());
-            for (size_t i = 0; i < gidsSet.size(); ++i)
-            {
-                data[i] = matrix[i][idx];
-            }
-            return data;
+            return _circuit.get(gids, attribute);
         }
         catch (...)
         {
         }
-
-        return {};
+        return brion::NeuronMatrix();
     }
+
     brion::Circuit _circuit;
 };
 
@@ -149,70 +166,39 @@ public:
 
     std::vector<uint64_t> getAllIds() const noexcept override
     {
-        const auto numNeurons = _circuit->getNbNeuron();
-        std::vector<uint64_t> result(numNeurons);
+        std::vector<uint64_t> result(_circuit->getNbNeuron());
         std::iota(result.begin(), result.end(), 1u);
         return result;
     }
 
     std::vector<std::string> getLayers(const std::vector<uint64_t> &gids) const final
     {
-        std::vector<std::string> result;
-        try
-        {
-            const auto range = _getRange(gids);
-            result = _arrange(_circuit->getLayers(range), gids);
-        }
-        catch (...)
-        {
-        }
-
-        return result;
+        return _tryGetAttribute(gids, [&](auto &range) { return _circuit->getLayers(range); });
     }
 
     std::vector<std::string> getETypes(const std::vector<uint64_t> &gids) const final
     {
-        std::vector<std::string> result;
-        try
-        {
-            const auto range = _getRange(gids);
-            result = _arrange(_circuit->getEtypes(range), gids);
-        }
-        catch (...)
-        {
-        }
-
-        return result;
+        return _tryGetAttribute(gids, [&](auto &range) { return _circuit->getEtypes(range); });
     }
 
     std::vector<std::string> getMTypes(const std::vector<uint64_t> &gids) const final
     {
-        std::vector<std::string> result;
-        try
-        {
-            const auto range = _getRange(gids);
-            result = _arrange(_circuit->getMtypes(range), gids);
-        }
-        catch (...)
-        {
-        }
+        return _tryGetAttribute(gids, [&](auto &range) { return _circuit->getMtypes(range); });
+    }
 
-        return result;
+    std::vector<std::string> getRegions(const std::vector<uint64_t> &gids) const final
+    {
+        return _tryGetAttribute(gids, [&](auto &range) { return _circuit->getRegions(range); });
+    }
+
+    std::vector<std::string> getSynapseClasses(const std::vector<uint64_t> &gids) const final
+    {
+        return _tryGetAttribute(gids, [&](auto &range) { return _circuit->getSynapseClass(range); });
     }
 
     std::vector<std::string> getMorphologyNames(const std::vector<uint64_t> &gids) const final
     {
-        std::vector<std::string> result;
-        try
-        {
-            const auto range = _getRange(gids);
-            result = _arrange(_circuit->getMorphologies(range), gids);
-        }
-        catch (...)
-        {
-        }
-
-        return result;
+        return _tryGetAttribute(gids, [&](auto &range) { return _circuit->getMorphologies(range); });
     }
 
 private:
@@ -230,88 +216,143 @@ private:
         {
             return {};
         }
+
         std::vector<std::string> result(gids.size());
         auto it = gids.begin();
         auto previousGid = *it;
         size_t sourceIndex = 0;
+
         for (size_t i = 0; i < result.size(); ++i, ++it)
         {
-            const auto offset = *it - previousGid;
+            auto offset = *it - previousGid;
             sourceIndex += offset;
-            if (sourceIndex > source.size())
-            {
-                throw std::runtime_error("Vector overflowed access");
-            }
+            assert(sourceIndex < source.size());
             result[i] = source[sourceIndex];
             previousGid = *it;
         }
         return result;
     }
 
+    template<typename Callable>
+    std::vector<std::string> _tryGetAttribute(const std::vector<uint64_t> &gids, Callable &&callable) const
+    {
+        auto range = _getRange(gids);
+        try
+        {
+            return _arrange(callable(range), gids);
+        }
+        catch (...)
+        {
+        }
+
+        return {};
+    }
+
     std::unique_ptr<CircuitType> _circuit;
 };
 
-// ------------------------------------------------------------------------------------------------
-
-struct CircuitFactory
+class CircuitFactory
 {
-    static std::unique_ptr<CircuitAccessor> instantiate(const std::string &path, const std::string &pop)
+public:
+    static std::unique_ptr<CircuitAccessor> instantiate(const std::string &path, const std::string &population)
     {
-        const auto lowerCasePath = brayns::StringCase::toLower(path);
+        auto lowerCase = brayns::StringCase::toLower(path);
+        auto extension = std::filesystem::path(lowerCase).extension().string();
 
-        if (lowerCasePath.find(".mvd2") != std::string::npos)
+        if (extension == ".mvd2")
         {
             return std::make_unique<MVD2Circuit>(path);
         }
-        else if (lowerCasePath.find(".mvd3") != std::string::npos)
+
+        if (extension == ".mvd3")
         {
             auto mvdCircuit = std::make_unique<MVD3::MVD3File>(path);
             return std::make_unique<GenericCircuit<MVD3::MVD3File>>(std::move(mvdCircuit));
         }
-        else if (lowerCasePath.find(".h5") || lowerCasePath.find(".hdf5"))
+
+        if (extension == ".h5" || extension == ".hdf5")
         {
-            auto mvdCircuit = std::make_unique<MVD::SonataFile>(path, pop);
+            auto mvdCircuit = std::make_unique<MVD::SonataFile>(path, population);
             return std::make_unique<GenericCircuit<MVD::SonataFile>>(std::move(mvdCircuit));
         }
 
-        return {nullptr};
+        throw std::runtime_error("Cannot read circuit file from " + path);
     }
 };
+
+class MethodQuerier
+{
+public:
+    MethodQuerier(const CircuitAccessor &circuit)
+        : _circuit(circuit)
+    {
+    }
+
+    std::vector<std::string> query(NeuronColorMethod method, const std::vector<uint64_t> &ids)
+    {
+        switch (method)
+        {
+        case NeuronColorMethod::ByLayer:
+            return _circuit.getLayers(ids);
+        case NeuronColorMethod::ByEtype:
+            return _circuit.getETypes(ids);
+        case NeuronColorMethod::ByMtype:
+            return _circuit.getMTypes(ids);
+        case NeuronColorMethod::ByMorphology:
+            return _circuit.getMorphologyNames(ids);
+        case NeuronColorMethod::ByRegion:
+            return _circuit.getRegions(ids);
+        case NeuronColorMethod::BySynapseClass:
+            return _circuit.getSynapseClasses(ids);
+        default:
+            throw std::invalid_argument("Color method not handled for BlueConfig/CircuitConfig");
+        }
+    }
+
+private:
+    const CircuitAccessor &_circuit;
+};
+
+class ValidMethodBuilder
+{
+public:
+    inline static const std::vector<NeuronColorMethod> validMethods = {
+        NeuronColorMethod::ByEtype,
+        NeuronColorMethod::ByLayer,
+        NeuronColorMethod::ByMorphology,
+        NeuronColorMethod::ByMtype,
+        NeuronColorMethod::ByRegion,
+        NeuronColorMethod::BySynapseClass};
+
+    static std::vector<std::string> build(const CircuitAccessor &circuit)
+    {
+        auto querier = MethodQuerier(circuit);
+
+        auto validMethodNames = std::vector<std::string>();
+        validMethodNames.reserve(validMethods.size());
+
+        for (auto method : validMethods)
+        {
+            auto data = querier.query(method, {1});
+            if (data.empty() || data.front().empty())
+            {
+                continue;
+            }
+            validMethodNames.push_back(brayns::EnumInfo::getName(method));
+        }
+
+        return validMethodNames;
+    }
+};
+
 } // namespace
 
 namespace bbploader
 {
 std::vector<std::string> BBPColorMethods::get(const std::string &circuitPath, const std::string &population)
 {
-    const auto circuit = CircuitFactory::instantiate(circuitPath, population);
-
-    std::vector<std::string> result;
-
-    const auto layerData = circuit->getLayers({1});
-    if (!layerData.empty() && !layerData[0].empty())
-    {
-        result.push_back(brayns::EnumInfo::getName(NeuronColorMethod::ByLayer));
-    }
-
-    const auto mTypeData = circuit->getMTypes({1});
-    if (!mTypeData.empty() && !mTypeData[0].empty())
-    {
-        result.push_back(brayns::EnumInfo::getName(NeuronColorMethod::ByMtype));
-    }
-
-    const auto eTypeData = circuit->getETypes({1});
-    if (!eTypeData.empty() && !eTypeData[0].empty())
-    {
-        result.push_back(brayns::EnumInfo::getName(NeuronColorMethod::ByEtype));
-    }
-
-    const auto morphData = circuit->getMorphologyNames({1});
-    if (!morphData.empty() && !morphData[0].empty())
-    {
-        result.push_back(brayns::EnumInfo::getName(NeuronColorMethod::ByMorphology));
-    }
-
-    return result;
+    auto circuit = CircuitFactory::instantiate(circuitPath, population);
+    return ValidMethodBuilder::build(*circuit);
 }
 
 std::vector<std::string> BBPColorValues::get(
@@ -320,56 +361,17 @@ std::vector<std::string> BBPColorValues::get(
     const std::string &method,
     const std::vector<uint64_t> &ids)
 {
-    const auto methodEnum = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
-    const auto circuit = CircuitFactory::instantiate(circuitPath, population);
-
-    std::vector<std::string> result;
-
-    switch (methodEnum)
-    {
-    case NeuronColorMethod::ByLayer:
-    {
-        result = circuit->getLayers(ids);
-        break;
-    }
-    case NeuronColorMethod::ByEtype:
-    {
-        result = circuit->getETypes(ids);
-        break;
-    }
-    case NeuronColorMethod::ByMtype:
-    {
-        result = circuit->getMTypes(ids);
-        break;
-    }
-    case NeuronColorMethod::ByMorphology:
-    {
-        result = circuit->getMorphologyNames(ids);
-        break;
-    }
-    default:
-    {
-        throw std::invalid_argument("Cannot gather information for method '" + method + "'");
-    }
-    }
-
-    if (!result.empty() && result.size() != ids.size())
-    {
-        throw std::invalid_argument("Input ids contained duplicated entries");
-    }
-
-    return result;
+    auto methodEnum = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
+    auto circuit = CircuitFactory::instantiate(circuitPath, population);
+    auto querier = MethodQuerier(*circuit);
+    return querier.query(methodEnum, ids);
 }
 
 std::vector<std::string>
     BBPColorValues::getAll(const std::string &circuitPath, const std::string &population, const std::string &method)
 {
-    std::vector<uint64_t> ids;
-    {
-        const auto circuit = CircuitFactory::instantiate(circuitPath, population);
-        ids = circuit->getAllIds();
-    }
-
+    auto circuit = CircuitFactory::instantiate(circuitPath, population);
+    auto ids = circuit->getAllIds();
     return get(circuitPath, population, method, ids);
 }
 }
