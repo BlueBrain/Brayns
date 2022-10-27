@@ -48,6 +48,7 @@ function ``look_at`` to create a camera from these parameters.
     camera = brayns.look_at(
         target,
         aspect_ratio=resolution.aspect_ratio,
+        translation=brayns.Vector3(1, 2, 3),
         rotation=brayns.CameraRotation.left,
         projection=brayns.OrthographicProjection(),
     )
@@ -58,8 +59,7 @@ function ``look_at`` to create a camera from these parameters.
     # We can also move or rotate the camera manually.
     camera.position += brayns.Vector3(1, 2 ,3)
 
-This function is just a helper, see ``Camera`` to see how to manipulate the camera
-manually.
+This function is just a helper, see ``Camera``for available properties.
 
 Renderer
 --------
@@ -141,3 +141,8 @@ been reached and nothing has changed in the scene.
 To summarize, use ``Image`` to make a quick render of the current state of a
 Brayns instance and ``Snapshot`` to make a more complex rendering with different
 settings without changing the instance.
+
+.. attention::
+
+    Image is usually faster to render images with few samples per pixel (1-3)
+    but can be a lot slower with more samples (> 3).
