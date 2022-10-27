@@ -121,7 +121,7 @@ Color a circuit
 Models loaded from a circuit (not regular models) can be colored using special
 methods.
 
-Here is an example to color SSCX circuit by layer.
+Here is an example to color an SSCX circuit by layer.
 
 .. code-block:: python
 

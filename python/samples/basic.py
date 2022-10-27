@@ -61,6 +61,7 @@ with brayns.start(service, connector) as (process, instance):
     camera = brayns.look_at(
         model.bounds,
         aspect_ratio=RESOLUTION.aspect_ratio,
+        translation=brayns.Vector3.zero,
         rotation=brayns.CameraRotation.front,
         projection=brayns.PerspectiveProjection(),
     )
