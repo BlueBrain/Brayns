@@ -59,7 +59,7 @@ function ``look_at`` to create a camera from these parameters.
     # We can also move or rotate the camera manually.
     camera.position += brayns.Vector3(1, 2 ,3)
 
-This function is just a helper, see ``Camera``for available properties.
+This function is just a helper, see ``Camera`` for available properties.
 
 Renderer
 --------
