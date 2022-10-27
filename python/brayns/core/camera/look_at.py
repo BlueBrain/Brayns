@@ -70,8 +70,8 @@ def _get_apparent_target(target: Bounds, rotation: Rotation) -> Bounds:
 
 
 def _get_front_view(target: Bounds, aspect_ratio: float, projection: Projection) -> View:
-    center = target.center
     distance = _get_camera_distance(target.size, aspect_ratio, projection)
+    center = target.center
     return View(
         position=center + distance * Axis.front,
         target=center,
