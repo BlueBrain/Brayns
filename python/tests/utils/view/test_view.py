@@ -42,6 +42,14 @@ class TestView(unittest.TestCase):
         test.distance = 3
         self.assertEqual(test.distance, 3)
 
+    def test_translate(self) -> None:
+        translation = brayns.Vector3(1, 2, 3)
+        ref = brayns.View()
+        test = ref.translate(translation)
+        self.assertEqual(test.position, ref.position + translation)
+        self.assertEqual(test.target, ref.target + translation)
+        self.assertEqual(test.up, ref.up)
+
     def test_rotate_around_target(self) -> None:
         rotation = brayns.euler(0, 180, 0, degrees=True)
         test = brayns.View(

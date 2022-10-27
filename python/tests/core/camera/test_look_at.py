@@ -39,10 +39,10 @@ class TestLookAt(unittest.TestCase):
             projection=projection,
         )
         view = test.view
-        self.assertAlmostEqual(view.position.x, -1.0)
+        self.assertAlmostEqual(view.position.x, 1.0)
         self.assertAlmostEqual(view.position.y, 1.5)
         self.assertAlmostEqual(view.position.z, 2.5)
-        self.assertEqual(view.target, target.center)
+        self.assertEqual(view.target, target.center + brayns.Vector3.one)
         self.assertAlmostEqual(view.up.x, 0)
         self.assertAlmostEqual(view.up.y, 1)
         self.assertAlmostEqual(view.up.z, 0)
