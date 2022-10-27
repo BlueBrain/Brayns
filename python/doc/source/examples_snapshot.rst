@@ -139,10 +139,19 @@ state of an instance. It doesn't render anything if the max accumulation has
 been reached and nothing has changed in the scene.
 
 To summarize, use ``Image`` to make a quick render of the current state of a
-Brayns instance and ``Snapshot`` to make a more complex rendering with different
-settings without changing the instance.
+Brayns instance and ``Snapshot`` to make a more complex rendering with many
+samples per pixel without changing the instance state.
 
 .. attention::
 
-    Image is usually faster to render images with few samples per pixel (1-3)
-    but can be a lot slower with more samples (> 3).
+    ``Image`` is usually faster to render than ``Snapshot`` when using a
+    renderer with few samples per pixel (1-3) but can be a lot slower with more
+    samples (> 3).
+
+    The reason is that image uses the current context so it doesn't have the
+    overhead of the snapshot to create a temporary one, which makes it faster
+    to render one sample.
+    
+    However, images render all samples individually using accumulation to allow
+    retreiving intermediate results which is slower than the technique used by
+    the snapshots.
