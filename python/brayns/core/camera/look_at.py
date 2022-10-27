@@ -60,7 +60,7 @@ def look_at(
         projection = PerspectiveProjection()
     target = _get_apparent_target(target, rotation.inverse)
     view = _get_front_view(target, aspect_ratio, projection)
-    view.position += translation
+    view = view.translate(translation)
     view = view.rotate_around_target(rotation)
     return Camera(view, projection)
 

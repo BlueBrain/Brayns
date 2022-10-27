@@ -80,6 +80,20 @@ class View:
         """
         self.position = self.target - value * self.direction
 
+    def translate(self, translation: Vector3) -> View:
+        """Translate position and target in given direction.
+
+        :param translation: Translation to apply on position and target.
+        :type translation: Vector3
+        :return: New translated view.
+        :rtype: View
+        """
+        return View(
+            position=self.position + translation,
+            target=self.target + translation,
+            up=self.up,
+        )
+
     def rotate_around_target(self, rotation: Rotation) -> View:
         """Rotate observation position around target.
 
