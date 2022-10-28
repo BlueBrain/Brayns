@@ -54,6 +54,7 @@ class TestPick(SimpleTestCase):
         models = loader.load_models(self.instance, self.bbp_circuit)
         target = models[0].bounds
         resolution = brayns.Resolution.full_hd
-        camera = brayns.look_at(target, resolution.aspect_ratio)
+        controller = brayns.CameraController(target, resolution.aspect_ratio)
+        camera = controller.camera
         brayns.set_resolution(self.instance, resolution)
         brayns.set_camera(self.instance, camera)

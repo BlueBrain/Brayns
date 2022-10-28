@@ -31,8 +31,8 @@ class TestDirectionalLight(unittest.TestCase):
     def test_get_properties(self) -> None:
         test = brayns.DirectionalLight(direction=brayns.Axis.up)
         self.assertEqual(test.get_properties(), {
-            'color': [1, 1, 1],
             'intensity': 1,
+            'color': [1, 1, 1],
             'visible': True,
             'direction': [0, 1, 0],
         })

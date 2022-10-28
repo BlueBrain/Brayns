@@ -33,8 +33,8 @@ class TestUpdateModel(unittest.TestCase):
         model = brayns.update_model(
             instance,
             model_id=0,
-            visible=True,
             transform=MockTransform.transform,
+            visible=True,
         )
         self.assertEqual(model, MockModel.model)
         self.assertEqual(instance.method, 'update-model')

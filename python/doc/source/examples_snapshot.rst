@@ -3,6 +3,20 @@ Take a snapshot
 
 Now that we can load models, it is time to render something.
 
+Resolution
+----------
+
+By default a snapshot uses the current framebuffer resolution of brayns instance
+but this one can be relatively low by default and we might need it to position
+the camera (using its aspect ratio).
+
+That is why we will define it in a variable for later use:
+
+.. code-block:: python
+
+    # Snapshot resolution (1920x1080)
+    resolution = brayns.Resolution.full_hd
+
 Target
 ------
 
@@ -33,33 +47,48 @@ As the current camera of a brayns instance is not automatically moved to focus
 on the current scene, a custom camera is needed to see something.
 
 Camera positioning can be complex and depends on the target orientation, camera
-projection and resolution aspect ratio. Therefore, Brayns provides a helper
-function ``look_at`` to create a camera from these parameters.
+projection and resolution aspect ratio.
+
+Therefore, brayns provides a ``CameraController`` class to help building a
+camera focusing on a given target.
 
 .. code-block:: python
 
     # Minimal usage with only target bounds.
-    camera = brayns.look_at(target)
-
-    # Resolution of the final image
-    resolution = brayns.Resolution.full_hd
+    controller = brayns.CameraController(target)
 
     # More advanced / precise usage.
-    camera = brayns.look_at(
-        target,
+    controller = brayns.CameraController(
+        target=target,
         aspect_ratio=resolution.aspect_ratio,
         translation=brayns.Vector3(1, 2, 3),
         rotation=brayns.CameraRotation.left,
-        projection=brayns.OrthographicProjection(),
+        projection=brayns.OrthographicProjection,
     )
 
-    # We can also specify the projection manually (Perspective by default).
-    camera.projection = brayns.OrthographicProjection()
+    # Create a camera using the controller.
+    camera = controller.camera
 
-    # We can also move or rotate the camera manually.
-    camera.position += brayns.Vector3(1, 2 ,3)
+The advantage of passing a translation and a rotation to the controller instead
+of moving the camera manually after its creation is that the camera distance
+computation can take the rotation into account to make sure the entire target
+is visible.
 
-This function is just a helper, see ``Camera`` for available properties.
+The camera translation is also easier to compute before the rotation as it is
+relative to the front view (X right, Y up and Z toward the observer).
+
+.. hint::
+
+    The camera controller is just a dataclass and creates a new camera on each
+    call to the ``camera`` property. You can update its fields selectively
+    without affecting already created cameras.
+
+    .. code-block:: python
+
+        controller = brayns.CameraController(target)
+        front_camera = controller.camera
+        controller.rotation = brayns.CameraRotation.left
+        left_camera = controller.camera
 
 Renderer
 --------
@@ -75,8 +104,8 @@ another one for slow and precise rendering (production).
 
     renderer = brayns.ProductionRenderer()
 
-The renderer can also be used to configure the number of samples per pixel (
-antialiasing) and the ray bounces (reflection of light from a non emissive
+The renderer can also be used to configure the number of samples per pixel
+(antialiasing) and the ray bounces (reflection of light from a non emissive
 surface to another).
 
 Light
@@ -110,16 +139,16 @@ Now we have everything we need to take a snapshot.
     # Snapshot settings.
     snapshot = brayns.Snapshot(
         resolution=resolution,
-        frame=3,
         camera=camera,
         renderer=renderer,
+        frame=3,
     )
 
     # Download and save the snapshot on the script host.
     snapshot.save(instance, 'snapshot.png')
 
 We can here specify also a resolution and a simulation frame. If any of the
-parameter is None, then the current object of the instance is taken.
+parameter is None (the default), the current object of the instance is used.
 
 That's it, snapshots can also be saved on the backend machine using
 ``save_remotely`` or retreived as raw bytes using ``download``.

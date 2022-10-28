@@ -34,7 +34,7 @@ class TestUpdateModel(SimpleTestCase):
         test = brayns.update_model(
             self.instance,
             model.id,
-            visible=model.visible,
             transform=model.transform,
+            visible=model.visible,
         )
         self.assertEqual(test, model)

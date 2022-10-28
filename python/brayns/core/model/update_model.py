@@ -32,29 +32,29 @@ from .model import Model
 def update_model(
     instance: Instance,
     model_id: int,
-    visible: bool | None = None,
     transform: Transform | None = None,
+    visible: bool | None = None,
 ) -> Model:
     """Modify the properties of a given model and return its updated version.
 
-    Parameters left as None will be remain to their current state.
+    Parameters left as None will remain in their current state.
 
     :param instance: Instance.
     :type instance: Instance
     :param model_id: ID of the model to update.
     :type model_id: int
-    :param visible: Model visibility, defaults to None
-    :type visible: bool | None, optional
     :param transform: Model transformation, defaults to None
     :type transform: Transform | None, optional
+    :param visible: Model visibility, defaults to None
+    :type visible: bool | None, optional
     :return: Updated model.
     :rtype: Model
     """
     properties = dict[str, Any]()
-    if visible is not None:
-        properties['is_visible'] = visible
     if transform is not None:
         properties['transform'] = serialize_transform(transform)
+    if visible is not None:
+        properties['is_visible'] = visible
     params = {
         'model_id': model_id,
         'model': properties,

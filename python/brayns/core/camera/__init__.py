@@ -19,12 +19,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .camera import Camera
+from .camera_controller import CameraController
 from .camera_rotation import CameraRotation
 from .get_camera import get_camera
 from .get_camera_name import get_camera_name
 from .get_camera_projection import get_camera_projection
 from .get_camera_view import get_camera_view
-from .look_at import look_at
 from .orthographic_projection import OrthographicProjection
 from .perspective_projection import PerspectiveProjection
 from .projection import Projection
@@ -34,12 +34,12 @@ from .set_camera_view import set_camera_view
 
 __all__ = [
     'Camera',
+    'CameraController',
     'CameraRotation',
     'get_camera_name',
     'get_camera_projection',
     'get_camera_view',
     'get_camera',
-    'look_at',
     'OrthographicProjection',
     'PerspectiveProjection',
     'Projection',
