@@ -38,8 +38,8 @@ class TestQuadLight(unittest.TestCase):
     def test_get_properties(self) -> None:
         test = brayns.QuadLight()
         self.assertEqual(test.get_properties(), {
-            'color': [1, 1, 1],
             'intensity': 1,
+            'color': [1, 1, 1],
             'visible': True,
             'position': [0, 0, 0],
             'edge1': [1, 0, 0],

@@ -27,8 +27,8 @@ class TestDirectionalLight(LightTestCase):
 
     def test_all(self) -> None:
         light = brayns.DirectionalLight(
-            color=brayns.Color3.red,
             intensity=5,
+            color=brayns.Color3.red,
             visible=True,
             direction=brayns.Axis.up
         )

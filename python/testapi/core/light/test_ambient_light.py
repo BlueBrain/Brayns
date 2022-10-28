@@ -27,8 +27,8 @@ class TestAmbientLight(LightTestCase):
 
     def test_all(self) -> None:
         light = brayns.AmbientLight(
-            color=brayns.Color3.red,
             intensity=5,
+            color=brayns.Color3.red,
             visible=True
         )
         self.run_tests(light)
