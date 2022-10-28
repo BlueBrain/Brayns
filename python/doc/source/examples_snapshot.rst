@@ -110,16 +110,16 @@ Now we have everything we need to take a snapshot.
     # Snapshot settings.
     snapshot = brayns.Snapshot(
         resolution=resolution,
-        frame=3,
         camera=camera,
         renderer=renderer,
+        frame=3,
     )
 
     # Download and save the snapshot on the script host.
     snapshot.save(instance, 'snapshot.png')
 
 We can here specify also a resolution and a simulation frame. If any of the
-parameter is None, then the current object of the instance is taken.
+parameter is None (the default), the current object of the instance is used.
 
 That's it, snapshots can also be saved on the backend machine using
 ``save_remotely`` or retreived as raw bytes using ``download``.

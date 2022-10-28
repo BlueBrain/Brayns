@@ -41,20 +41,20 @@ class Snapshot:
 
     :param resolution: Image resolution, defaults to None.
     :type resolution: Resolution | None, optional
-    :param frame: Simulation index, defaults to None.
-    :type frame: int | None, optional
     :param camera: Camera used to render, defaults to None.
     :type camera: Camera | None, optional
     :param renderer: Renderer used to render, defaults to None.
     :type renderer: Renderer | None, optional
+    :param frame: Simulation index, defaults to None.
+    :type frame: int | None, optional
     :param jpeg_quality: JPEG quality if format is JPEG, defaults to 100%.
     :type jpeg_quality: int, optional
     """
 
     resolution: Resolution | None = None
-    frame: int | None = None
     camera: Camera | None = None
     renderer: Renderer | None = None
+    frame: int | None = None
     jpeg_quality: int = 100
 
     def save(self, instance: Instance, path: str) -> None:
@@ -149,14 +149,14 @@ def _serialize_snapshot(snapshot: Snapshot, format: ImageFormat, path: str | Non
     }
     if path is not None:
         message['file_path'] = path
-    if snapshot.frame is not None:
-        message['simulation_frame'] = snapshot.frame
     if snapshot.camera is not None:
         camera = snapshot.camera
         message['camera_view'] = serialize_view(camera.view)
         message['camera'] = camera.projection.get_properties_with_name()
     if snapshot.renderer is not None:
         message['renderer'] = snapshot.renderer.get_properties_with_name()
+    if snapshot.frame is not None:
+        message['simulation_frame'] = snapshot.frame
     return message
 
 

@@ -38,9 +38,9 @@ class TestSnapshot(unittest.TestCase):
     def snapshot(cls) -> brayns.Snapshot:
         return brayns.Snapshot(
             resolution=brayns.Resolution(1920, 1080),
-            frame=12,
             camera=brayns.Camera(view=MockView.view),
             renderer=brayns.ProductionRenderer(),
+            frame=12,
             jpeg_quality=50,
         )
 
@@ -53,10 +53,10 @@ class TestSnapshot(unittest.TestCase):
                 'size': [1920, 1080],
                 'quality': 50,
             },
-            'simulation_frame': 12,
             'camera_view': MockView.message,
             'camera': brayns.PerspectiveProjection().get_properties_with_name(),
             'renderer': brayns.ProductionRenderer().get_properties_with_name(),
+            'simulation_frame': 12,
         }
 
     def test_save_remotely(self) -> None:

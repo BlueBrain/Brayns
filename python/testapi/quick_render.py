@@ -63,7 +63,7 @@ def _add_light(instance: brayns.Instance, direction: brayns.Vector3) -> None:
 def _create_snapshot(camera: brayns.Camera, frame: int) -> brayns.Snapshot:
     return brayns.Snapshot(
         resolution=brayns.Resolution.full_hd,
-        frame=frame,
         camera=camera,
         renderer=brayns.InteractiveRenderer(),
+        frame=frame,
     )
