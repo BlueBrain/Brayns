@@ -58,13 +58,14 @@ with brayns.start(service, connector) as (process, instance):
     models = loader.load_models(instance, CIRCUIT)
     model = models[0]
 
-    camera = brayns.look_at(
+    controller = brayns.CameraController(
         model.bounds,
         aspect_ratio=RESOLUTION.aspect_ratio,
         translation=brayns.Vector3.zero,
         rotation=brayns.CameraRotation.front,
-        projection=brayns.PerspectiveProjection(),
+        projection=brayns.PerspectiveProjection,
     )
+    camera = controller.camera
 
     renderer = brayns.InteractiveRenderer()
 

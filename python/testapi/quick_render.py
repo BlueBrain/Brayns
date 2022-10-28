@@ -48,7 +48,8 @@ def _prepare_camera_and_light(instance: brayns.Instance) -> brayns.Camera:
 
 def _create_camera(instance: brayns.Instance) -> brayns.Camera:
     target = brayns.get_bounds(instance)
-    return brayns.look_at(target)
+    controller = brayns.CameraController(target)
+    return controller.camera
 
 
 def _add_light(instance: brayns.Instance, direction: brayns.Vector3) -> None:

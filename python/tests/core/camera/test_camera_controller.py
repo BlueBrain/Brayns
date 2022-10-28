@@ -19,26 +19,28 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
+from typing import cast
 
 import brayns
 
 
-class TestLookAt(unittest.TestCase):
+class TestCameraController(unittest.TestCase):
 
-    def test_look_at(self) -> None:
+    def test_camera(self) -> None:
         target = brayns.Bounds(
             min=brayns.Vector3.zero,
             max=brayns.Vector3(4, 1, 3),
         )
-        projection = brayns.OrthographicProjection()
-        test = brayns.look_at(
+        test = brayns.CameraController(
             target,
             aspect_ratio=2,
             translation=brayns.Vector3.one,
             rotation=brayns.CameraRotation.left,
-            projection=projection,
+            projection=brayns.OrthographicProjection,
         )
-        view = test.view
+        camera = test.camera
+        view = camera.view
+        projection = camera.projection
         self.assertAlmostEqual(view.position.x, 1.0)
         self.assertAlmostEqual(view.position.y, 1.5)
         self.assertAlmostEqual(view.position.z, 2.5)
@@ -46,15 +48,18 @@ class TestLookAt(unittest.TestCase):
         self.assertAlmostEqual(view.up.x, 0)
         self.assertAlmostEqual(view.up.y, 1)
         self.assertAlmostEqual(view.up.z, 0)
+        self.assertIsInstance(projection, brayns.OrthographicProjection)
+        projection = cast(brayns.OrthographicProjection, projection)
         self.assertAlmostEqual(projection.height, 1.5)
 
-    def test_look_at_default(self) -> None:
+    def test_camera_default(self) -> None:
         target = brayns.Bounds(
             min=-brayns.Vector3.one,
             max=brayns.Vector3.one,
         )
-        test = brayns.look_at(target)
-        view = test.view
+        test = brayns.CameraController(target)
+        camera = test.camera
+        view = camera.view
         projection = brayns.PerspectiveProjection()
         distance = projection.look_at(target.height) + target.depth / 2
         ref = target.center + distance * brayns.Axis.front
@@ -65,7 +70,7 @@ class TestLookAt(unittest.TestCase):
         self.assertAlmostEqual(view.up.x, 0)
         self.assertAlmostEqual(view.up.y, 1)
         self.assertAlmostEqual(view.up.z, 0)
-        self.assertEqual(test.projection, projection)
+        self.assertEqual(camera.projection, projection)
 
 
 if __name__ == '__main__':
