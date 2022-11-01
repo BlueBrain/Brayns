@@ -18,11 +18,6 @@
 
 #pragma once
 
-// libsonata uses nonstd::optional which, if available, becomes std::optional
-// however, libsonata is compiled enforcing c++14, so their type is always nonstd::optional
-// then, symbol lookup errors happen
-#undef optional_CONFIG_SELECT_OPTIONAL
-#define optional_CONFIG_SELECT_OPTIONAL optional_OPTIONAL_NONSTD
 #include <bbp/sonata/report_reader.h>
 
 namespace sonataloader

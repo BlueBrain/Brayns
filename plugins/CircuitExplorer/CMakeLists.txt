@@ -34,6 +34,12 @@ set_target_properties(braynsCircuitExplorer
 
 target_compile_options(braynsCircuitExplorer PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 
+# libsonata uses nonstd::optional which, if available, becomes std::optional
+# however, libsonata is compiled enforcing c++14, so their type is always nonstd::optional
+# then, symbol lookup errors happen
+target_compile_definitions(braynsCircuitExplorer PRIVATE optional_CONFIG_SELECT_OPTIONAL=1)
+target_compile_definitions(braynsCircuitExplorer PRIVATE variant_CONFIG_SELECT_VARIANT=1)
+
 # For Brion uint128_t
 target_compile_options(braynsCircuitExplorer PRIVATE -Wno-deprecated-copy)
 
