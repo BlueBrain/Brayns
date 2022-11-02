@@ -35,4 +35,5 @@ class TestGetColorMethods(SimpleTestCase):
             brayns.ColorMethod.MORPHOLOGY,
             brayns.ColorMethod.MORPHOLOGY_SECTION,
         }
+        self.assertEqual(len(methods), len(ref))
         self.assertSetEqual(set(methods), ref)
