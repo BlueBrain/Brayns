@@ -58,3 +58,19 @@ class Transform:
         :rtype: Transform
         """
         return Transform()
+
+    def rotate(self, rotation: Rotation, center: Vector3 = Vector3.zero) -> Transform:
+        """Create another transform rotated around a given center.
+
+        :param rotation: Rotation to apply.
+        :type rotation: Rotation
+        :param center: Rotation center, defaults to zero.
+        :type center: Vector3, optional
+        :return: Rotated transform.
+        :rtype: Transform
+        """
+        return Transform(
+            translation=self.translation + center - rotation.apply(center),
+            rotation=self.rotation.combine(rotation),
+            scale=self.scale,
+        )

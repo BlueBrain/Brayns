@@ -31,6 +31,27 @@ class TestTransform(unittest.TestCase):
         self.assertEqual(test.rotation, brayns.Rotation.identity)
         self.assertEqual(test.scale, brayns.Vector3.one)
 
+    def test_rotate(self) -> None:
+        rotation = brayns.euler(0, 90, 0, degrees=True)
+        test = brayns.Transform(
+            rotation=rotation,
+        )
+        test = test.rotate(rotation)
+        self.assertEqual(test.translation, brayns.Vector3.zero)
+        self.assertEqual(test.rotation, rotation.combine(rotation))
+        self.assertEqual(test.scale, brayns.Vector3.one)
+
+    def test_rotate_center(self) -> None:
+        test = brayns.Transform.identity
+        rotation = brayns.euler(0, 0, 90, degrees=True)
+        center = brayns.Vector3(0, 1, 0)
+        test = test.rotate(rotation, center)
+        self.assertAlmostEqual(test.translation.x, 1)
+        self.assertAlmostEqual(test.translation.y, 1)
+        self.assertAlmostEqual(test.translation.z, 0)
+        self.assertEqual(test.rotation, rotation)
+        self.assertEqual(test.scale, brayns.Vector3.one)
+
 
 if __name__ == '__main__':
     unittest.main()
