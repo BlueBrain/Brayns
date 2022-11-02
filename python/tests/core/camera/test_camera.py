@@ -63,10 +63,11 @@ class TestCamera(unittest.TestCase):
 
     def test_rotate_around_target(self) -> None:
         rotation = brayns.euler(1, 2, 3, degrees=True)
-        test = brayns.Camera()
-        ref = brayns.Camera().view.rotate_around_target(rotation)
-        test.rotate_around_target(rotation)
-        self.assertEqual(test.view, ref)
+        ref = brayns.Camera()
+        view = ref.view.rotate_around_target(rotation)
+        test = ref.rotate_around_target(rotation)
+        self.assertEqual(test.view, view)
+        self.assertEqual(test.projection, ref.projection)
 
 
 if __name__ == '__main__':

@@ -18,6 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
+import copy
 from dataclasses import dataclass, field
 
 from brayns.utils import Rotation, Vector3, View
@@ -137,12 +140,15 @@ class Camera:
         """
         self.view.distance = value
 
-    def rotate_around_target(self, rotation: Rotation) -> None:
-        """Rotate camera around its target.
+    def rotate_around_target(self, rotation: Rotation) -> Camera:
+        """Rotate camera view around its target.
 
-        Mutate the current camera view.
-
-        :param rotation: Camera rotation.
+        :param rotation: Rotation to apply on camera view.
         :type rotation: Rotation
+        :return: New rotated camera.
+        :rtype: Camera
         """
-        self.view = self.view.rotate_around_target(rotation)
+        return Camera(
+            view=self.view.rotate_around_target(rotation),
+            projection=copy.deepcopy(self.projection),
+        )
