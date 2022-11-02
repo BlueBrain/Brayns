@@ -52,13 +52,25 @@ class Rotation:
 
     @staticmethod
     def from_euler(euler: Vector3, degrees: bool = False) -> Rotation:
-        quaternion = _euler_to_quaternion(euler, degrees)
+        if degrees:
+            euler = Vector3.unpack(math.radians(i) for i in euler)
+        quaternion = _euler_to_quaternion(euler)
         return Rotation(quaternion)
 
     @staticmethod
     def from_axis_angle(axis: Vector3, angle: float, degrees: bool = False) -> Rotation:
-        quaternion = _axis_angle_to_quaternion(axis, angle, degrees)
+        axis = axis.normalized
+        if degrees:
+            angle = math.radians(angle)
+        quaternion = _axis_angle_to_quaternion(axis, angle)
         return Rotation(quaternion)
+
+    @staticmethod
+    def from_vectors(u: Vector3, v: Vector3) -> Rotation:
+        u = u.normalized
+        v = v.normalized
+        quaternion = _get_quaternion_between(u, v)
+        return Rotation.from_quaternion(quaternion)
 
     @classmethod
     @property
@@ -79,11 +91,11 @@ class Rotation:
 
     @property
     def euler_radians(self) -> Vector3:
-        return _quaternion_to_euler(self._quaternion, degrees=False)
+        return _quaternion_to_euler(self._quaternion)
 
     @property
     def euler_degrees(self) -> Vector3:
-        return _quaternion_to_euler(self._quaternion, degrees=True)
+        return Vector3.unpack(math.degrees(i) for i in self.euler_radians)
 
     @property
     def axis(self) -> Vector3:
@@ -114,18 +126,14 @@ class Rotation:
         return center + vector.axis
 
 
-def _axis_angle_to_quaternion(axis: Vector3, angle: float, degrees: bool) -> Quaternion:
-    if degrees:
-        angle = math.radians(angle)
+def _axis_angle_to_quaternion(axis: Vector3, angle: float) -> Quaternion:
     half_angle = angle / 2
-    vector = axis.normalized * math.sin(half_angle)
+    vector = axis * math.sin(half_angle)
     w = math.cos(half_angle)
     return Quaternion(vector.x, vector.y, vector.z, w)
 
 
-def _euler_to_quaternion(euler: Vector3, degrees: bool) -> Quaternion:
-    if degrees:
-        euler = Vector3.unpack(math.radians(i) for i in euler)
+def _euler_to_quaternion(euler: Vector3) -> Quaternion:
     euler /= 2
     cx, cy, cz = Vector3.unpack(math.cos(i) for i in euler)
     sx, sy, sz = Vector3.unpack(math.sin(i) for i in euler)
@@ -137,31 +145,30 @@ def _euler_to_quaternion(euler: Vector3, degrees: bool) -> Quaternion:
     )
 
 
-def _quaternion_to_euler(quaternion: Quaternion, degrees: bool) -> Vector3:
-    q = quaternion.normalized
-    euler = Vector3(_get_x(q), _get_y(q), _get_z(q))
-    if degrees:
-        return Vector3.unpack(math.degrees(i) for i in euler)
-    return euler
+def _quaternion_to_euler(q: Quaternion) -> Vector3:
+    return Vector3(_get_x(q), _get_y(q), _get_z(q))
 
 
-def _get_x(quaternion: Quaternion) -> float:
-    q = quaternion
+def _get_x(q: Quaternion) -> float:
     sx_cy = 2 * (q.w * q.x + q.y * q.z)
     cx_cy = 1 - 2 * (q.x * q.x + q.y * q.y)
     return math.atan2(sx_cy, cx_cy)
 
 
-def _get_y(quaternion: Quaternion) -> float:
-    q = quaternion
+def _get_y(q: Quaternion) -> float:
     sy = 2 * (q.w * q.y - q.z * q.x)
     if abs(sy) >= 1:
         return math.copysign(math.pi / 2, sy)
     return math.asin(sy)
 
 
-def _get_z(quaternion: Quaternion) -> float:
-    q = quaternion
+def _get_z(q: Quaternion) -> float:
     sz_cy = 2 * (q.w * q.z + q.x * q.y)
     cz_cy = 1 - 2 * (q.y * q.y + q.z * q.z)
     return math.atan2(sz_cy, cz_cy)
+
+
+def _get_quaternion_between(u: Vector3, v: Vector3) -> Quaternion:
+    axis = u.cross(v)
+    angle = math.acos(u.dot(v))
+    return _axis_angle_to_quaternion(axis, angle)

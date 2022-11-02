@@ -67,8 +67,16 @@ class Vector3(Vector2):
         return self[2]
 
     @property
-    def vector2(self) -> Vector2:
+    def xy(self) -> Vector2:
         return Vector2(self.x, self.y)
+
+    @property
+    def xz(self) -> Vector2:
+        return Vector2(self.x, self.z)
+
+    @property
+    def yz(self) -> Vector2:
+        return Vector2(self.y, self.z)
 
     def cross(self, other: Vector3) -> Vector3:
         return Vector3(

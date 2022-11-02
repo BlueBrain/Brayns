@@ -159,9 +159,17 @@ class TestVector3(unittest.TestCase):
     def test_norm(self) -> None:
         self.assertEqual(brayns.Vector3(1, 2, 3).norm, math.sqrt(14))
 
-    def test_vector2(self) -> None:
+    def test_xy(self) -> None:
         test = brayns.Vector3(1, 2, 3)
-        self.assertEqual(test.vector2, brayns.Vector2(1, 2))
+        self.assertEqual(test.xy, brayns.Vector2(1, 2))
+
+    def test_xz(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        self.assertEqual(test.xz, brayns.Vector2(1, 3))
+
+    def test_yz(self) -> None:
+        test = brayns.Vector3(1, 2, 3)
+        self.assertEqual(test.yz, brayns.Vector2(2, 3))
 
     def test_normalized(self) -> None:
         value = brayns.Vector3(1, 2, 3)
