@@ -36,6 +36,20 @@ class TestView(unittest.TestCase):
         test = brayns.View()
         self.assertEqual(test.direction, test.vector.normalized)
 
+    def test_right(self) -> None:
+        test = brayns.View(
+            position=brayns.Vector3.zero,
+            target=brayns.Axis.back,
+        )
+        self.assertEqual(test.right, brayns.Axis.right)
+
+    def test_real_up(self) -> None:
+        test = brayns.View(
+            position=brayns.Vector3.zero,
+            target=brayns.Axis.back,
+        )
+        self.assertEqual(test.real_up, brayns.Axis.up)
+
     def test_distance(self) -> None:
         test = brayns.View()
         self.assertEqual(test.distance, test.vector.norm)

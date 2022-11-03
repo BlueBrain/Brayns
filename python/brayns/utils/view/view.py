@@ -61,6 +61,26 @@ class View:
         return self.vector.normalized
 
     @property
+    def right(self) -> Vector3:
+        """Get right direction relative to view (direction x up).
+
+        :return: Right direction normalized.
+        :rtype: Vector3
+        """
+        return self.direction.cross(self.up).normalized
+
+    @property
+    def real_up(self) -> Vector3:
+        """Get up direction perpendicular to direction (right x direction).
+
+        This is useful if up is not perpendicular to direction.
+
+        :return: Perpendicular up direction normalized.
+        :rtype: Vector3
+        """
+        return self.right.cross(self.direction)
+
+    @property
     def distance(self) -> float:
         """Get the distance between the observator and the target.
 
