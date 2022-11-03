@@ -52,14 +52,14 @@ class TestRotation(unittest.TestCase):
         self.assertAlmostEqual(quaternion.z, 0.2075169)
         self.assertAlmostEqual(quaternion.w, 0.96592583)
 
-    def test_from_vectors(self) -> None:
+    def test_between(self) -> None:
         u = brayns.Vector3(1, 0, 0)
-        v = brayns.Vector3(0, 1, 0)
-        rotation = brayns.Rotation.from_vectors(u, v)
+        v = brayns.Vector3(1, 1, 0)
+        rotation = brayns.Rotation.between(u, v)
         test = rotation.euler_degrees
         self.assertAlmostEqual(test.x, 0)
         self.assertAlmostEqual(test.y, 0)
-        self.assertAlmostEqual(test.z, 90)
+        self.assertAlmostEqual(test.z, 45)
 
     def test_identity(self) -> None:
         ref = brayns.Rotation(brayns.Quaternion.identity)

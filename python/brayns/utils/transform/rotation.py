@@ -29,17 +29,17 @@ from .quaternion import Quaternion
 class Rotation:
     """Arbitrary 3D rotation.
 
-    Can be constructed from euler angles, quaternion or axis and angle.
+    Can be constructed from euler angles, quaternion or axis-angle.
 
     Can also be converted to such types.
+
+    When using ``between``, u and v must not be colinear nor zero.
 
     Quaternions are automatically normalized (otherwise it is not a rotation).
 
     Use normalized quaternion internally.
 
     Euler angles only support XYZ order.
-
-    Serialize / deserialize methods are low level JSON API.
 
     Can be combined (a.combine(b) is rotation a and then b).
 
@@ -59,17 +59,14 @@ class Rotation:
 
     @staticmethod
     def from_axis_angle(axis: Vector3, angle: float, degrees: bool = False) -> Rotation:
-        axis = axis.normalized
         if degrees:
             angle = math.radians(angle)
         quaternion = _axis_angle_to_quaternion(axis, angle)
         return Rotation(quaternion)
 
     @staticmethod
-    def from_vectors(u: Vector3, v: Vector3) -> Rotation:
-        u = u.normalized
-        v = v.normalized
-        quaternion = _get_quaternion_between(u, v)
+    def between(source: Vector3, destination: Vector3) -> Rotation:
+        quaternion = _get_quaternion_between(source, destination)
         return Rotation.from_quaternion(quaternion)
 
     @classmethod
@@ -127,6 +124,7 @@ class Rotation:
 
 
 def _axis_angle_to_quaternion(axis: Vector3, angle: float) -> Quaternion:
+    axis = axis.normalized
     half_angle = angle / 2
     vector = axis * math.sin(half_angle)
     w = math.cos(half_angle)
@@ -169,6 +167,8 @@ def _get_z(q: Quaternion) -> float:
 
 
 def _get_quaternion_between(u: Vector3, v: Vector3) -> Quaternion:
-    axis = u.cross(v)
+    u = u.normalized
+    v = v.normalized
     angle = math.acos(u.dot(v))
+    axis = u.cross(v)
     return _axis_angle_to_quaternion(axis, angle)
