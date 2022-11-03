@@ -71,8 +71,8 @@ class Transform:
         value = self.rotation.apply(value)
         return value + self.translation
 
-    def combine(self, other: Transform) -> Transform:
-        """Create another transform combining self and other.
+    def then(self, other: Transform) -> Transform:
+        """Combine transforms to be equivalent to self then other.
 
         :param other: Transform to apply after self.
         :type other: Transform
@@ -81,7 +81,7 @@ class Transform:
         """
         return Transform(
             translation=self.translation + other.translation,
-            rotation=self.rotation.combine(other.rotation),
+            rotation=self.rotation.then(other.rotation),
             scale=self.scale * other.scale,
         )
 
@@ -97,6 +97,6 @@ class Transform:
         """
         return Transform(
             translation=self.translation + center - rotation.apply(center),
-            rotation=self.rotation.combine(rotation),
+            rotation=self.rotation.then(rotation),
             scale=self.scale,
         )

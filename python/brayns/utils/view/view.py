@@ -34,7 +34,7 @@ class View:
     :type position: Vector3
     :param target: Target position.
     :type target: Vector3
-    :param up: Up vector, defaults to +Y (global up).
+    :param up: Up vector, defaults to Axis.up.
     :type up: Vector3, optional
     """
 
@@ -71,11 +71,11 @@ class View:
 
     @property
     def real_up(self) -> Vector3:
-        """Get up direction perpendicular to direction (right x direction).
+        """Get effective up direction (right x direction).
 
-        This is useful if up is not perpendicular to direction.
+        Equal to up if up is perpendicular to direction and normalized.
 
-        :return: Perpendicular up direction normalized.
+        :return: Real up direction normalized.
         :rtype: Vector3
         """
         return self.right.cross(self.direction)

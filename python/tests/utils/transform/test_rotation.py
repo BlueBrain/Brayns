@@ -110,11 +110,11 @@ class TestRotation(unittest.TestCase):
         rotation = brayns.Rotation.from_quaternion(quaternion)
         self.assertEqual(rotation.inverse.quaternion, quaternion.inverse)
 
-    def test_combine(self) -> None:
+    def test_then(self) -> None:
         r1 = brayns.Rotation.from_axis_angle(brayns.Axis.up, 30, degrees=True)
         r2 = brayns.Rotation.from_axis_angle(brayns.Axis.up, 30, degrees=True)
-        ref = r1.quaternion * r2.quaternion
-        test = r1.combine(r2).quaternion
+        ref = r2.quaternion * r1.quaternion
+        test = r1.then(r2).quaternion
         self.assertEqual(test, ref)
 
     def test_apply(self) -> None:
