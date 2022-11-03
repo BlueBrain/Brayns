@@ -121,6 +121,24 @@ class Camera:
         return self.view.direction
 
     @property
+    def right(self) -> Vector3:
+        """Get the camera right direction (direction x up).
+
+        :return: Camera right direction.
+        :rtype: Vector3
+        """
+        return self.view.right
+
+    @property
+    def real_up(self) -> Vector3:
+        """Get the camera effective up direction (right x direction).
+
+        :return: Camera up direction.
+        :rtype: Vector3
+        """
+        return self.view.real_up
+
+    @property
     def distance(self) -> float:
         """Get distance between camera position and target.
 
@@ -139,6 +157,12 @@ class Camera:
         :type value: float
         """
         self.view.distance = value
+
+    def translate(self, translation: Vector3) -> Camera:
+        return Camera(
+            view=self.view.translate(translation),
+            projection=copy.deepcopy(self.projection),
+        )
 
     def rotate_around_target(self, rotation: Rotation) -> Camera:
         """Rotate camera view around its target.
