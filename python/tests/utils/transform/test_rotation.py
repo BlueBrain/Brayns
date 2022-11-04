@@ -61,6 +61,21 @@ class TestRotation(unittest.TestCase):
         self.assertAlmostEqual(test.y, 0)
         self.assertAlmostEqual(test.z, 45)
 
+    def test_between_identity(self) -> None:
+        u = brayns.Vector3(1, 0, 0)
+        v = brayns.Vector3(1, 0, 0)
+        test = brayns.Rotation.between(u, v)
+        self.assertEqual(test, brayns.Rotation.identity)
+
+    def test_between_opposite(self) -> None:
+        u = brayns.Vector3(1, 0, 0)
+        v = brayns.Vector3(-1, 0, 0)
+        test = brayns.Rotation.between(u, v)
+        v2 = test.apply(u)
+        self.assertAlmostEqual(v2.x, v.x)
+        self.assertAlmostEqual(v2.y, v.y)
+        self.assertAlmostEqual(v2.z, v.z)
+
     def test_identity(self) -> None:
         ref = brayns.Rotation(brayns.Quaternion.identity)
         self.assertEqual(brayns.Rotation.identity, ref)

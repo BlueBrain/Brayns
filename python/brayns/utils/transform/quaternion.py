@@ -31,14 +31,14 @@ class Quaternion(Vector[float]):
     Provides vector operations (componentwise) and quaternion special operators
     (multiplication, conjugate, etc).
 
-    :param x: X component.
-    :type x: float
-    :param y: Y component.
-    :type y: float
-    :param z: Z component.
-    :type z: float
-    :param w: W component.
-    :type w: float
+    :param x: X component, defaults to 0.
+    :type x: float, optional
+    :param y: Y component, defaults to 0.
+    :type y: float, optional
+    :param z: Z component, defaults to 0.
+    :type z: float, optional
+    :param w: W component, defaults to 1.
+    :type w: float, optional
     """
 
     @classmethod

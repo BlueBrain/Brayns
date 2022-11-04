@@ -60,6 +60,8 @@ class Rotation:
     def from_axis_angle(axis: Vector3, angle: float, degrees: bool = False) -> Rotation:
         """Construct a rotation of angle around axis.
 
+        Axis must not be zero.
+
         :param axis: Rotation axis (will be normalized).
         :type axis: Vector3
         :param angle: Rotation angle.
@@ -77,6 +79,8 @@ class Rotation:
     @staticmethod
     def between(source: Vector3, destination: Vector3) -> Rotation:
         """Compute the rotation between two vectors.
+
+        Vectors must not be zero.
 
         :param source: Original direction.
         :type source: Vector3
@@ -245,6 +249,11 @@ def _get_z(q: Quaternion) -> float:
 
 def _get_quaternion_between(u: Vector3, v: Vector3) -> Quaternion:
     angle = _get_angle_between(u, v)
+    if angle == 0:
+        return Quaternion.identity
+    if angle == math.pi:
+        axis = _get_orthogonal(u).normalized
+        return Quaternion(axis.x, axis.y, axis.z, 0)
     axis = u.cross(v)
     return _axis_angle_to_quaternion(axis, angle)
 
@@ -253,3 +262,16 @@ def _get_angle_between(u: Vector3, v: Vector3) -> float:
     u = u.normalized
     v = v.normalized
     return math.acos(u.dot(v))
+
+
+def _get_orthogonal(v: Vector3) -> Vector3:
+    if v.x != 0:
+        x = (v.y + v.z) / v.x
+        return Vector3(x, -1, -1)
+    if v.y != 0:
+        y = (v.x + v.z) / v.y
+        return Vector3(-1, y, -1)
+    if v.z != 0:
+        z = (v.x + v.y) / v.z
+        return Vector3(-1, -1, z)
+    raise ValueError(v)
