@@ -18,50 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Systems.h"
+#pragma once
+
+#include <brayns/engine/model/Components.h>
+#include <brayns/utils/MathTypes.h>
+
+#include <unordered_map>
 
 namespace brayns
 {
-void Systems::init(Components &components)
-{
-    if (_init)
-    {
-        _init->execute(components);
-    }
-}
+using ColorMethodInput = std::unordered_map<std::string, brayns::Vector4f>;
 
-CommitResult Systems::commit(Components &components)
+class ColorSystem
 {
-    if (_commit)
-    {
-        return _commit->execute(components);
-    }
-    return {};
-}
-
-void Systems::update(const ParametersManager &parameters, Components &components)
-{
-    if (_update)
-    {
-        _update->execute(parameters, components);
-    }
-}
-
-InspectResultData Systems::inspect(const InspectContext &context, Components &components)
-{
-    if (_inspect)
-    {
-        return _inspect->execute(context, components);
-    }
-    return InspectResultData();
-}
-
-Bounds Systems::computeBounds(const Matrix4f &matrix, Components &components)
-{
-    if (_bounds)
-    {
-        return _bounds->compute(matrix, components);
-    }
-    return {};
-}
+public:
+    virtual ~ColorSystem() = default;
+    virtual std::vector<std::string> getMethods() const = 0;
+    virtual std::vector<std::string> getValues(const std::string &method, Components &components) const = 0;
+    virtual void apply(const std::string &method, const ColorMethodInput &input, Components &components) const = 0;
+};
 }

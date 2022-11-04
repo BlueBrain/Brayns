@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -111,30 +112,23 @@ Systems &Model::getSystems() noexcept
     return _systems;
 }
 
-InspectResultData Model::inspect(const InspectContext &context)
+SystemsView Model::getSystemsView() noexcept
 {
-    return _systems.inspect(context, _components);
-}
-
-Bounds Model::computeBounds(const Matrix4f &matrix)
-{
-    return _systems.computeBounds(matrix, _components);
+    return SystemsView(_systems, _components);
 }
 
 void Model::init()
 {
-    _systems.init(_components);
-    _systems.commit(_components);
+    if (_systems._init)
+    {
+        _systems._init->execute(_components);
+    }
+
+    if (_systems._commit)
+    {
+        _systems._commit->execute(_components);
+    }
+
     _handle = GroupBuilder::build(_components);
-}
-
-void Model::update(const ParametersManager &parameters)
-{
-    _systems.update(parameters, _components);
-}
-
-CommitResult Model::commit()
-{
-    return _systems.commit(_components);
 }
 } // namespace brayns

@@ -126,7 +126,8 @@ void ModelManager::update(const ParametersManager &parameters)
     for (auto &instance : _instances)
     {
         auto &model = instance->getModel();
-        model.update(parameters);
+        auto view = model.getSystemsView();
+        view.update(parameters);
     }
 }
 
@@ -137,7 +138,8 @@ CommitResult ModelManager::commit()
     for (auto &instance : _instances)
     {
         auto &model = instance->getModel();
-        auto modelResult = model.commit();
+        auto view = model.getSystemsView();
+        auto modelResult = view.commit();
         result.needsRebuildBVH |= modelResult.needsRebuildBVH;
         result.needsRender |= modelResult.needsRender;
 

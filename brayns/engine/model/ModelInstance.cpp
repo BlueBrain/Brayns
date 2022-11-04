@@ -78,7 +78,8 @@ const Bounds &ModelInstance::getBounds() const noexcept
 
 void ModelInstance::computeBounds() noexcept
 {
-    _bounds = _model->computeBounds(_getFullTransform());
+    auto view = _model->getSystemsView();
+    _bounds = view.computeBounds(_getFullTransform());
 }
 
 Model &ModelInstance::getModel() noexcept
@@ -118,7 +119,8 @@ void ModelInstance::setTransform(const Transform &transform) noexcept
         auto matrix = _getFullTransform();
         auto affine = MatrixConverter::glmToOspray(matrix);
         _handle.setParam(InstanceParameters::transform, affine);
-        _bounds = _model->computeBounds(matrix);
+        auto view = _model->getSystemsView();
+        _bounds = view.computeBounds(matrix);
     }
 }
 

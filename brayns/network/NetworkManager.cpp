@@ -51,6 +51,7 @@
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
 #include <brayns/network/entrypoints/MaterialEntrypoint.h>
+#include <brayns/network/entrypoints/ModelColoringEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RegistryEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
@@ -102,6 +103,7 @@ public:
         builder.add<brayns::ClearClipPlanesEntrypoint>(models);
         builder.add<brayns::ClearLightsEntrypoint>(models);
         builder.add<brayns::ClearModelsEntrypoint>(models, simulation);
+        builder.add<brayns::ColorModelEntrypoint>(models);
         builder.add<brayns::EnableSimulationEntrypoint>(models);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
@@ -109,7 +111,9 @@ public:
         builder.add<brayns::GetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::GetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::GetCameraTypeEntrypoint>(engine);
+        builder.add<brayns::GetColorMethodsEntrypoint>(models);
         builder.add<brayns::GetColorRampEntrypoint>(models);
+        builder.add<brayns::GetColorValuesEntrypoint>(models);
         builder.add<brayns::GetLoadersEntrypoint>(loaders);
         builder.add<brayns::GetMaterialCarPaint>(models);
         builder.add<brayns::GetMaterialEmissive>(models);
