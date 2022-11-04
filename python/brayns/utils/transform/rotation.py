@@ -143,7 +143,7 @@ class Rotation:
     def axis(self) -> Vector3:
         """Get rotation axis.
 
-        :return: Rotation axis (not normalized).
+        :return: Normalized rotation axis.
         :rtype: Vector3
         """
         return self._quaternion.axis
@@ -201,7 +201,7 @@ class Rotation:
         value -= center
         vector = Quaternion(*value)
         vector = quaternion * vector * quaternion.conjugate
-        return center + vector.axis
+        return center + vector.xyz
 
 
 def _axis_angle_to_quaternion(axis: Vector3, angle: float) -> Quaternion:

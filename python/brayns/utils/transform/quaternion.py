@@ -93,8 +93,12 @@ class Quaternion(Vector[float]):
         return self[3]
 
     @property
-    def axis(self) -> Vector3:
+    def xyz(self) -> Vector3:
         return Vector3(self.x, self.y, self.z)
+
+    @property
+    def axis(self) -> Vector3:
+        return self.xyz.normalized
 
     @property
     def angle_radians(self) -> float:

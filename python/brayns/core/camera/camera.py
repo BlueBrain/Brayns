@@ -160,12 +160,12 @@ class Camera:
 
     @property
     def orientation(self) -> Rotation:
-        """Return the view orientation compared to the front one.
+        """Get camera orientation compared to the front one.
 
         :return: Camera orientation.
         :rtype: Rotation
         """
-        return self.view.get_orientation(View.front)
+        return self.view.orientation
 
     def translate(self, translation: Vector3) -> Camera:
         """Translate both camera position and target.

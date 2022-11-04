@@ -54,9 +54,13 @@ class TestQuaternion(unittest.TestCase):
         test = quaternion / quaternion
         self.assertEqual(test, brayns.Quaternion.identity)
 
+    def test_xyz(self) -> None:
+        test = brayns.Quaternion(1, 2, 3, 4)
+        self.assertEqual(test.xyz, brayns.Vector3(1, 2, 3))
+
     def test_axis(self) -> None:
         test = brayns.Quaternion(1, 2, 3, 4)
-        self.assertEqual(test.axis, brayns.Vector3(1, 2, 3))
+        self.assertEqual(test.axis, test.xyz.normalized)
 
     def test_angle_radians(self) -> None:
         test = brayns.Quaternion(1, 0, 0, 0)
