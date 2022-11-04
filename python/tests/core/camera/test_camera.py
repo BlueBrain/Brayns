@@ -69,6 +69,10 @@ class TestCamera(unittest.TestCase):
         camera.distance = 3
         self.assertEqual(camera.distance, 3)
 
+    def test_orientation(self) -> None:
+        camera = brayns.Camera()
+        self.assertEqual(camera.orientation, camera.view.orientation)
+
     def test_translate(self) -> None:
         translation = brayns.Vector3(1, 2, 3)
         ref = brayns.Camera()

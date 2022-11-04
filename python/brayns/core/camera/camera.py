@@ -36,7 +36,7 @@ class Camera:
     A camera is composed of a ``View`` and a ``Projection``.
     """
 
-    view: View = field(default_factory=View)
+    view: View = field(default_factory=lambda: View.front)
     projection: Projection = field(default_factory=PerspectiveProjection)
 
     @property
@@ -158,7 +158,23 @@ class Camera:
         """
         self.view.distance = value
 
+    @property
+    def orientation(self) -> Rotation:
+        """Return the view orientation compared to the front one.
+
+        :return: Camera orientation.
+        :rtype: Rotation
+        """
+        return self.view.get_orientation(View.front)
+
     def translate(self, translation: Vector3) -> Camera:
+        """Translate both camera position and target.
+
+        :param translation: Translation to apply.
+        :type translation: Vector3
+        :return: New translated camera.
+        :rtype: Camera
+        """
         return Camera(
             view=self.view.translate(translation),
             projection=copy.deepcopy(self.projection),

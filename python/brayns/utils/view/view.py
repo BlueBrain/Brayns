@@ -30,6 +30,9 @@ from ..vector import Axis, Vector3
 class View:
     """Represent a viewpoint with position and target.
 
+    Up and direction doesn't need to be perpendicular. However, having direction
+    equal to zero or colinear with up will make an invalid view.
+
     :param position: Observation position.
     :type position: Vector3
     :param target: Target position.
@@ -38,9 +41,17 @@ class View:
     :type up: Vector3, optional
     """
 
-    position: Vector3 = Vector3.zero
-    target: Vector3 = Axis.front
+    position: Vector3
+    target: Vector3
     up: Vector3 = Axis.up
+
+    @classmethod
+    @property
+    def front(cls) -> View:
+        return View(
+            position=Axis.front,
+            target=Vector3.zero,
+        )
 
     @property
     def vector(self) -> Vector3:
@@ -99,6 +110,29 @@ class View:
         :type value: float
         """
         self.position = self.target - value * self.direction
+
+    @property
+    def orientation(self) -> Rotation:
+        """Get orientation compared to the front view.
+
+        :return: Rotation from front view to self.
+        :rtype: Rotation
+        """
+        return self.get_orientation(View.front)
+
+    def get_orientation(self, reference: View) -> Rotation:
+        """Get orientation from given reference.
+
+        The rotation obtained goes from reference.direction and
+        reference.real_up to self.direction and self.real_up.
+
+        :return: Rotation from given view to self.
+        :rtype: Rotation
+        """
+        first = Rotation.between(reference.direction, self.direction)
+        up = first.apply(reference.real_up)
+        second = Rotation.between(up, self.real_up)
+        return first.then(second)
 
     def translate(self, translation: Vector3) -> View:
         """Translate position and target in given direction.
