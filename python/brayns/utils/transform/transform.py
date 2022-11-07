@@ -49,6 +49,25 @@ class Transform:
     rotation: Rotation = Rotation.identity
     scale: Vector3 = Vector3.one
 
+    @staticmethod
+    def rotate(rotation: Rotation, center: Vector3 = Vector3.zero) -> Transform:
+        """Create a transform to rotate around a given center.
+
+        Rotation around a center is equivalent to a rotation around the origin
+        and a translation of center - rotation.apply(center).
+
+        :param rotation: Rotation to apply.
+        :type rotation: Rotation
+        :param center: Rotation center, defaults to zero.
+        :type center: Vector3, optional
+        :return: Transform.
+        :rtype: Transform
+        """
+        return Transform(
+            translation=center - rotation.apply(center),
+            rotation=rotation,
+        )
+
     @classmethod
     @property
     def identity(cls) -> Transform:
@@ -58,3 +77,15 @@ class Transform:
         :rtype: Transform
         """
         return Transform()
+
+    def apply(self, value: Vector3) -> Vector3:
+        """Apply the transform to the given value.
+
+        :param value: 3D position to transform.
+        :type value: Vector3
+        :return: Transformed value.
+        :rtype: Vector3
+        """
+        value = self.scale * value
+        value = self.rotation.apply(value)
+        return value + self.translation

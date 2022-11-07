@@ -26,5 +26,8 @@ class TestGetCameraView(SimpleTestCase):
 
     def test_get_camera_view(self) -> None:
         test = brayns.get_camera_view(self.instance)
-        ref = brayns.View()
+        ref = brayns.View(
+            position=brayns.Vector3.zero,
+            target=brayns.Axis.front,
+        )
         self.assertEqual(test, ref)

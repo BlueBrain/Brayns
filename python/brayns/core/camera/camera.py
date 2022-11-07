@@ -18,6 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
+import copy
 from dataclasses import dataclass, field
 
 from brayns.utils import Rotation, Vector3, View
@@ -33,7 +36,7 @@ class Camera:
     A camera is composed of a ``View`` and a ``Projection``.
     """
 
-    view: View = field(default_factory=View)
+    view: View = field(default_factory=lambda: View.front)
     projection: Projection = field(default_factory=PerspectiveProjection)
 
     @property
@@ -118,6 +121,24 @@ class Camera:
         return self.view.direction
 
     @property
+    def right(self) -> Vector3:
+        """Get the camera right direction (direction x up).
+
+        :return: Camera right direction.
+        :rtype: Vector3
+        """
+        return self.view.right
+
+    @property
+    def real_up(self) -> Vector3:
+        """Get the camera effective up direction (right x direction).
+
+        :return: Camera up direction.
+        :rtype: Vector3
+        """
+        return self.view.real_up
+
+    @property
     def distance(self) -> float:
         """Get distance between camera position and target.
 
@@ -137,12 +158,37 @@ class Camera:
         """
         self.view.distance = value
 
-    def rotate_around_target(self, rotation: Rotation) -> None:
-        """Rotate camera around its target.
+    @property
+    def orientation(self) -> Rotation:
+        """Get camera orientation compared to the front one.
 
-        Mutate the current camera view.
-
-        :param rotation: Camera rotation.
-        :type rotation: Rotation
+        :return: Camera orientation.
+        :rtype: Rotation
         """
-        self.view = self.view.rotate_around_target(rotation)
+        return self.view.orientation
+
+    def translate(self, translation: Vector3) -> Camera:
+        """Translate both camera position and target.
+
+        :param translation: Translation to apply.
+        :type translation: Vector3
+        :return: New translated camera.
+        :rtype: Camera
+        """
+        return Camera(
+            view=self.view.translate(translation),
+            projection=copy.deepcopy(self.projection),
+        )
+
+    def rotate_around_target(self, rotation: Rotation) -> Camera:
+        """Rotate camera view around its target.
+
+        :param rotation: Rotation to apply on camera view.
+        :type rotation: Rotation
+        :return: New rotated camera.
+        :rtype: Camera
+        """
+        return Camera(
+            view=self.view.rotate_around_target(rotation),
+            projection=copy.deepcopy(self.projection),
+        )

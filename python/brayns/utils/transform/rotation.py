@@ -27,105 +27,192 @@ from .quaternion import Quaternion
 
 
 class Rotation:
-    """Arbitrary 3D rotation.
-
-    Can be constructed from euler angles, quaternion or axis and angle.
-
-    Can also be converted to such types.
-
-    Quaternions are automatically normalized (otherwise it is not a rotation).
-
-    Use normalized quaternion internally.
-
-    Euler angles only support XYZ order.
-
-    Serialize / deserialize methods are low level JSON API.
-
-    Can be combined (a.combine(b) is rotation a and then b).
-
-    Can be applied on a given point around a given center (origin by default).
-    """
+    """Arbitrary 3D rotation using normalized quaternion internally."""
 
     @staticmethod
     def from_quaternion(quaternion: Quaternion) -> Rotation:
+        """Construct a rotation using a quaternion (will be normalized).
+
+        :param quaternion: Quaternion representing rotation.
+        :type quaternion: Quaternion
+        :return: Rotation object.
+        :rtype: Rotation
+        """
         return Rotation(quaternion)
 
     @staticmethod
     def from_euler(euler: Vector3, degrees: bool = False) -> Rotation:
-        quaternion = _euler_to_quaternion(euler, degrees)
+        """Construct a rotation from euler angle in XYZ order.
+
+        :param euler: XYZ euler angles.
+        :type euler: Vector3
+        :param degrees: Euler are provided in degrees, defaults to False.
+        :type degrees: bool, optional
+        :return: Rotation object.
+        :rtype: Rotation
+        """
+        if degrees:
+            euler = Vector3.unpack(math.radians(i) for i in euler)
+        quaternion = _euler_to_quaternion(euler)
         return Rotation(quaternion)
 
     @staticmethod
     def from_axis_angle(axis: Vector3, angle: float, degrees: bool = False) -> Rotation:
-        quaternion = _axis_angle_to_quaternion(axis, angle, degrees)
+        """Construct a rotation of angle around axis.
+
+        Axis must not be zero.
+
+        :param axis: Rotation axis (will be normalized).
+        :type axis: Vector3
+        :param angle: Rotation angle.
+        :type angle: float
+        :param degrees: Angle is provided in degrees, defaults to False.
+        :type degrees: bool, optional
+        :return: Rotation object.
+        :rtype: Rotation
+        """
+        if degrees:
+            angle = math.radians(angle)
+        quaternion = _axis_angle_to_quaternion(axis, angle)
         return Rotation(quaternion)
+
+    @staticmethod
+    def between(source: Vector3, destination: Vector3) -> Rotation:
+        """Compute the minimal arc rotation between two vectors.
+
+        Vectors must not be zero.
+
+        :param source: Original direction.
+        :type source: Vector3
+        :param destination: Final direction.
+        :type destination: Vector3
+        :return: Rotation object.
+        :rtype: Rotation
+        """
+        quaternion = _get_quaternion_between(source, destination)
+        return Rotation.from_quaternion(quaternion)
 
     @classmethod
     @property
     def identity(cls) -> Rotation:
+        """Construct a rotation with no effects.
+
+        :return: Identity rotation.
+        :rtype: Rotation
+        """
         return Rotation(Quaternion.identity)
 
     def __init__(self, quaternion: Quaternion) -> None:
+        """Direct construction, prefer from_quaternion."""
         self._quaternion = quaternion.normalized
 
     def __eq__(self, other: object) -> bool:
+        """Equality check using internal quaternion."""
         if not isinstance(other, Rotation):
             return False
         return self._quaternion == other.quaternion
 
     @property
     def quaternion(self) -> Quaternion:
+        """Get rotation as normalized quaternion.
+
+        :return: Normalized quaternion.
+        :rtype: Quaternion
+        """
         return self._quaternion
 
     @property
     def euler_radians(self) -> Vector3:
-        return _quaternion_to_euler(self._quaternion, degrees=False)
+        """Get rotation as euler angles XYZ in radians.
+
+        :return: Euler angles.
+        :rtype: Vector3
+        """
+        return _quaternion_to_euler(self._quaternion)
 
     @property
     def euler_degrees(self) -> Vector3:
-        return _quaternion_to_euler(self._quaternion, degrees=True)
+        """Get rotation as euler angles XYZ in degrees.
+
+        :return: Euler angles.
+        :rtype: Vector3
+        """
+        return Vector3.unpack(math.degrees(i) for i in self.euler_radians)
 
     @property
     def axis(self) -> Vector3:
+        """Get rotation axis.
+
+        :return: Normalized rotation axis.
+        :rtype: Vector3
+        """
         return self._quaternion.axis
 
     @property
     def angle_radians(self) -> float:
+        """Get rotation angle in radians.
+
+        :return: Rotation angle.
+        :rtype: Vector3
+        """
         return self._quaternion.angle_radians
 
     @property
     def angle_degrees(self) -> float:
+        """Get rotation angle in degrees.
+
+        :return: Rotation angle.
+        :rtype: Vector3
+        """
         return self._quaternion.angle_degrees
 
     @property
     def inverse(self) -> Rotation:
+        """Get rotation such as self * self.inverse == Rotation.identity.
+
+        :return: Inverse rotation.
+        :rtype: Rotation
+        """
         quaternion = self._quaternion.inverse
         return Rotation(quaternion)
 
-    def combine(self, other: Rotation) -> Rotation:
-        quaternion = self._quaternion * other._quaternion
+    def then(self, other: Rotation) -> Rotation:
+        """Combine rotations to be equivalent to self then other.
+
+        :param other: Rotation to apply after self.
+        :type other: Rotation
+        :return: Rotation object.
+        :rtype: Rotation
+        """
+        quaternion = other._quaternion * self._quaternion
         return Rotation(quaternion)
 
     def apply(self, value: Vector3, center: Vector3 = Vector3.zero) -> Vector3:
-        rotation = self._quaternion.normalized
+        """Apply rotation on value around center.
+
+        :param value: Vector to rotate.
+        :type value: Vector3
+        :param center: Rotation center, defaults to Vector3.zero.
+        :type center: Vector3, optional
+        :return: Rotated value.
+        :rtype: Vector3
+        """
+        quaternion = self._quaternion
         value -= center
         vector = Quaternion(*value)
-        vector = rotation * vector * rotation.conjugate
-        return center + vector.axis
+        vector = quaternion * vector * quaternion.conjugate
+        return center + vector.xyz
 
 
-def _axis_angle_to_quaternion(axis: Vector3, angle: float, degrees: bool) -> Quaternion:
-    if degrees:
-        angle = math.radians(angle)
+def _axis_angle_to_quaternion(axis: Vector3, angle: float) -> Quaternion:
+    axis = axis.normalized
     half_angle = angle / 2
-    vector = axis.normalized * math.sin(half_angle)
+    vector = axis * math.sin(half_angle)
     w = math.cos(half_angle)
     return Quaternion(vector.x, vector.y, vector.z, w)
 
 
-def _euler_to_quaternion(euler: Vector3, degrees: bool) -> Quaternion:
-    if degrees:
-        euler = Vector3.unpack(math.radians(i) for i in euler)
+def _euler_to_quaternion(euler: Vector3) -> Quaternion:
     euler /= 2
     cx, cy, cz = Vector3.unpack(math.cos(i) for i in euler)
     sx, sy, sz = Vector3.unpack(math.sin(i) for i in euler)
@@ -137,31 +224,54 @@ def _euler_to_quaternion(euler: Vector3, degrees: bool) -> Quaternion:
     )
 
 
-def _quaternion_to_euler(quaternion: Quaternion, degrees: bool) -> Vector3:
-    q = quaternion.normalized
-    euler = Vector3(_get_x(q), _get_y(q), _get_z(q))
-    if degrees:
-        return Vector3.unpack(math.degrees(i) for i in euler)
-    return euler
+def _quaternion_to_euler(q: Quaternion) -> Vector3:
+    return Vector3(_get_x(q), _get_y(q), _get_z(q))
 
 
-def _get_x(quaternion: Quaternion) -> float:
-    q = quaternion
+def _get_x(q: Quaternion) -> float:
     sx_cy = 2 * (q.w * q.x + q.y * q.z)
     cx_cy = 1 - 2 * (q.x * q.x + q.y * q.y)
     return math.atan2(sx_cy, cx_cy)
 
 
-def _get_y(quaternion: Quaternion) -> float:
-    q = quaternion
+def _get_y(q: Quaternion) -> float:
     sy = 2 * (q.w * q.y - q.z * q.x)
     if abs(sy) >= 1:
         return math.copysign(math.pi / 2, sy)
     return math.asin(sy)
 
 
-def _get_z(quaternion: Quaternion) -> float:
-    q = quaternion
+def _get_z(q: Quaternion) -> float:
     sz_cy = 2 * (q.w * q.z + q.x * q.y)
     cz_cy = 1 - 2 * (q.y * q.y + q.z * q.z)
     return math.atan2(sz_cy, cz_cy)
+
+
+def _get_quaternion_between(u: Vector3, v: Vector3) -> Quaternion:
+    angle = _get_angle_between(u, v)
+    if angle == 0:
+        return Quaternion.identity
+    if angle == math.pi:
+        axis = _get_orthogonal(u).normalized
+        return Quaternion(axis.x, axis.y, axis.z, 0)
+    axis = u.cross(v)
+    return _axis_angle_to_quaternion(axis, angle)
+
+
+def _get_angle_between(u: Vector3, v: Vector3) -> float:
+    u = u.normalized
+    v = v.normalized
+    return math.acos(u.dot(v))
+
+
+def _get_orthogonal(v: Vector3) -> Vector3:
+    if v.x != 0:
+        x = (v.y + v.z) / v.x
+        return Vector3(x, -1, -1)
+    if v.y != 0:
+        y = (v.x + v.z) / v.y
+        return Vector3(-1, y, -1)
+    if v.z != 0:
+        z = (v.x + v.y) / v.z
+        return Vector3(-1, -1, z)
+    raise ValueError(v)

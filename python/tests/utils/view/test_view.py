@@ -25,6 +25,11 @@ import brayns
 
 class TestView(unittest.TestCase):
 
+    def test_front(self) -> None:
+        test = brayns.View.front
+        self.assertEqual(test.direction, brayns.Axis.back)
+        self.assertEqual(test.up, brayns.Axis.up)
+
     def test_vector(self) -> None:
         test = brayns.View(
             position=brayns.Vector3.zero,
@@ -33,18 +38,60 @@ class TestView(unittest.TestCase):
         self.assertEqual(test.vector, brayns.Vector3.one)
 
     def test_direction(self) -> None:
-        test = brayns.View()
-        self.assertEqual(test.direction, test.vector.normalized)
+        test = brayns.View(
+            position=brayns.Vector3.zero,
+            target=brayns.Axis.front,
+        )
+        self.assertEqual(test.direction, brayns.Axis.front)
+
+    def test_right(self) -> None:
+        test = brayns.View(
+            position=brayns.Vector3.zero,
+            target=brayns.Axis.back,
+        )
+        self.assertEqual(test.right, brayns.Axis.right)
+
+    def test_real_up(self) -> None:
+        test = brayns.View(
+            position=brayns.Vector3.zero,
+            target=brayns.Axis.back,
+        )
+        self.assertEqual(test.real_up, brayns.Axis.up)
 
     def test_distance(self) -> None:
-        test = brayns.View()
-        self.assertEqual(test.distance, test.vector.norm)
+        test = brayns.View.front
+        self.assertEqual(test.distance, 1)
         test.distance = 3
         self.assertEqual(test.distance, 3)
 
+    def test_orientation(self) -> None:
+        test = brayns.View.front
+        ref = test.get_orientation(brayns.View.front)
+        self.assertEqual(test.orientation, ref)
+
+    def test_get_orientation(self) -> None:
+        test = brayns.View(
+            position=brayns.Vector3(1, 2, 3),
+            target=brayns.Vector3.zero,
+            up=brayns.Vector3(4, 5, 6),
+        )
+        ref = brayns.View.front
+        orientation = test.get_orientation(ref)
+        direction = orientation.apply(ref.direction)
+        self.assertAlmostEqual(direction.x, test.direction.x)
+        self.assertAlmostEqual(direction.y, test.direction.y)
+        self.assertAlmostEqual(direction.z, test.direction.z)
+        up = orientation.apply(ref.real_up)
+        self.assertAlmostEqual(up.x, test.real_up.x)
+        self.assertAlmostEqual(up.y, test.real_up.y)
+        self.assertAlmostEqual(up.z, test.real_up.z)
+
     def test_translate(self) -> None:
         translation = brayns.Vector3(1, 2, 3)
-        ref = brayns.View()
+        ref = brayns.View(
+            position=brayns.Vector3.zero,
+            target=brayns.Vector3.one,
+        )
         test = ref.translate(translation)
         self.assertEqual(test.position, ref.position + translation)
         self.assertEqual(test.target, ref.target + translation)

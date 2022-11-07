@@ -52,6 +52,30 @@ class TestRotation(unittest.TestCase):
         self.assertAlmostEqual(quaternion.z, 0.2075169)
         self.assertAlmostEqual(quaternion.w, 0.96592583)
 
+    def test_between(self) -> None:
+        u = brayns.Vector3(1, 0, 0)
+        v = brayns.Vector3(1, 1, 0)
+        rotation = brayns.Rotation.between(u, v)
+        test = rotation.euler_degrees
+        self.assertAlmostEqual(test.x, 0)
+        self.assertAlmostEqual(test.y, 0)
+        self.assertAlmostEqual(test.z, 45)
+
+    def test_between_identity(self) -> None:
+        u = brayns.Vector3(1, 0, 0)
+        v = brayns.Vector3(1, 0, 0)
+        test = brayns.Rotation.between(u, v)
+        self.assertEqual(test, brayns.Rotation.identity)
+
+    def test_between_opposite(self) -> None:
+        u = brayns.Vector3(1, 0, 0)
+        v = brayns.Vector3(-1, 0, 0)
+        test = brayns.Rotation.between(u, v)
+        v2 = test.apply(u)
+        self.assertAlmostEqual(v2.x, v.x)
+        self.assertAlmostEqual(v2.y, v.y)
+        self.assertAlmostEqual(v2.z, v.z)
+
     def test_identity(self) -> None:
         ref = brayns.Rotation(brayns.Quaternion.identity)
         self.assertEqual(brayns.Rotation.identity, ref)
@@ -101,11 +125,11 @@ class TestRotation(unittest.TestCase):
         rotation = brayns.Rotation.from_quaternion(quaternion)
         self.assertEqual(rotation.inverse.quaternion, quaternion.inverse)
 
-    def test_combine(self) -> None:
+    def test_then(self) -> None:
         r1 = brayns.Rotation.from_axis_angle(brayns.Axis.up, 30, degrees=True)
         r2 = brayns.Rotation.from_axis_angle(brayns.Axis.up, 30, degrees=True)
-        ref = r1.quaternion * r2.quaternion
-        test = r1.combine(r2).quaternion
+        ref = r2.quaternion * r1.quaternion
+        test = r1.then(r2).quaternion
         self.assertEqual(test, ref)
 
     def test_apply(self) -> None:
