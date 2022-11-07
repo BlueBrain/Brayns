@@ -78,7 +78,7 @@ class Rotation:
 
     @staticmethod
     def between(source: Vector3, destination: Vector3) -> Rotation:
-        """Compute the rotation between two vectors.
+        """Compute the minimal arc rotation between two vectors.
 
         Vectors must not be zero.
 
