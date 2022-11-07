@@ -89,17 +89,3 @@ class Transform:
         value = self.scale * value
         value = self.rotation.apply(value)
         return value + self.translation
-
-    def then(self, other: Transform) -> Transform:
-        """Combine transforms to be equivalent to self then other.
-
-        :param other: Transform to apply after self.
-        :type other: Transform
-        :return: Equivalent transform of self then other.
-        :rtype: Transform
-        """
-        return Transform(
-            translation=self.translation + other.translation,
-            rotation=self.rotation.then(other.rotation),
-            scale=self.scale * other.scale,
-        )

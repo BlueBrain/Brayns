@@ -26,14 +26,15 @@ import brayns
 class TestTransform(unittest.TestCase):
 
     def test_rotate(self) -> None:
-        rotation = brayns.euler(0, 0, 90, degrees=True)
-        center = brayns.Vector3(0, 1, 0)
-        test = brayns.Transform.rotate(rotation, center)
-        self.assertAlmostEqual(test.translation.x, 1)
-        self.assertAlmostEqual(test.translation.y, 1)
-        self.assertAlmostEqual(test.translation.z, 0)
-        self.assertEqual(test.rotation, rotation)
-        self.assertEqual(test.scale, brayns.Vector3.one)
+        rotation = brayns.euler(0.25, 1.5, 2.5)
+        center = brayns.Vector3(1, 2, 3)
+        transform = brayns.Transform.rotate(rotation, center)
+        value = brayns.Vector3(4, 5, 6)
+        test = transform.apply(value)
+        ref = rotation.apply(value, center)
+        self.assertAlmostEqual(test.x, ref.x)
+        self.assertAlmostEqual(test.y, ref.y)
+        self.assertAlmostEqual(test.z, ref.z)
 
     def test_identity(self) -> None:
         test = brayns.Transform.identity
@@ -52,23 +53,6 @@ class TestTransform(unittest.TestCase):
         self.assertAlmostEqual(test.x, -1)
         self.assertAlmostEqual(test.y, 3)
         self.assertAlmostEqual(test.z, 3)
-
-    def test_then(self) -> None:
-        first = brayns.Transform(
-            translation=brayns.Vector3.one,
-            rotation=brayns.euler(0, 0, 90, degrees=True),
-            scale=2 * brayns.Vector3.one,
-        )
-        second = brayns.Transform(
-            translation=2 * brayns.Vector3.one,
-            rotation=brayns.euler(0, 90, 0, degrees=True),
-            scale=3 * brayns.Vector3.one,
-        )
-        rotation = first.rotation.then(second.rotation)
-        test = first.then(second)
-        self.assertEqual(test.translation, 3 * brayns.Vector3.one)
-        self.assertEqual(test.rotation, rotation)
-        self.assertEqual(test.scale, 6 * brayns.Vector3.one)
 
 
 if __name__ == '__main__':

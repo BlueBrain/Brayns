@@ -48,9 +48,14 @@ class View:
     @classmethod
     @property
     def front(cls) -> View:
+        """Front view with X right, Y up and Z front.
+
+        :return: Front view.
+        :rtype: View
+        """
         return View(
-            position=Axis.front,
-            target=Vector3.zero,
+            position=Vector3.zero,
+            target=Axis.back,
         )
 
     @property
