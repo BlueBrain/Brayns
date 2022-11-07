@@ -1,8 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
- *
- * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,20 +16,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "EndfeetColorHandler.h"
 
-#include <api/coloring/IColorData.h>
-#include <api/coloring/IColorHandler.h>
-
-#include <memory>
-
-/**
- * @brief Holds logic on how to color the underlying geometry from a data source (loader specific)
- * using a color handler (geometry specific)
- * TODO: Temporary until coloring system is added to brayns core
- */
-struct Coloring
+void EndfeetColorHandler::colorByElement(const brayns::ColorList &colors, brayns::GeometryViews &views) const
 {
-    std::unique_ptr<IColorData> data;
-    std::unique_ptr<IColorHandler> painter;
-};
+    auto &colorList = colors.elements;
+    auto &viewList = views.elements;
+
+    for (size_t i = 0; i < viewList.size(); ++i)
+    {
+        auto &view = viewList[i];
+        view.setColor(colorList[i]);
+    }
+
+    views.modified = true;
+}
+
+void EndfeetColorHandler::colorByColormap(
+    const brayns::ColorMap &colorMap,
+    const brayns::Geometries &geometries,
+    brayns::GeometryViews &views) const
+{
+    (void)colorMap;
+    (void)geometries;
+    (void)views;
+    assert(false);
+}

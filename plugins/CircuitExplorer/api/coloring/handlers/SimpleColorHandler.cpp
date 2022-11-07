@@ -18,35 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "SimpleColorHandler.h"
 
-#include <brayns/engine/model/systemtypes/ColorSystem.h>
-
-#include <memory>
-#include <vector>
-
-namespace brayns
+void SimpleColorHandler::colorByElement(const brayns::ColorList &colors, brayns::GeometryViews &views) const
 {
-class IColorMethod
+    auto &view = views.elements.front();
+    view.setColorPerPrimitive(ospray::cpp::SharedData(colors.elements));
+    views.modified = true;
+}
+
+void SimpleColorHandler::colorByColormap(
+    const brayns::ColorMap &colorMap,
+    const brayns::Geometries &geometries,
+    brayns::GeometryViews &views) const
 {
-public:
-    virtual std::string getName() const = 0;
-    virtual std::vector<std::string> getValues(Components &components) const = 0;
-    virtual void apply(Components &components, const ColorMethodInput &input) const = 0;
-};
+    (void)geometries;
 
-using ColorMethodList = std::vector<std::unique_ptr<IColorMethod>>;
+    auto &view = views.elements.front();
+    view.setColorMap(ospray::cpp::SharedData(colorMap.indices), ospray::cpp::SharedData(colorMap.colors));
 
-class GenericColorSystem : public ColorSystem
-{
-public:
-    GenericColorSystem(ColorMethodList methods);
-    std::vector<std::string> getMethods() const override;
-    std::vector<std::string> getValues(const std::string &method, Components &components) const override;
-    void apply(const std::string &method, const ColorMethodInput &input, Components &components) const override;
-
-private:
-    ColorMethodList _methods;
-    std::vector<std::string> _methodNames;
-};
+    views.modified = true;
 }

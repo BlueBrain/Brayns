@@ -20,32 +20,22 @@
 
 #pragma once
 
-#include <brayns/engine/model/Components.h>
+#include <brayns/engine/systems/GenericColorSystem.h>
 
-#include <api/coloring/IColorHandler.h>
+#include <api/coloring/BrainColorMethod.h>
 
-class VasculatureColorHandler final : public IColorHandler
+/**
+ * @brief Color circuits based on data available on the circuit/nodes file.
+ */
+class BrainDatasetColorMethod : public brayns::IColorMethod
 {
 public:
-    VasculatureColorHandler(brayns::Components &components);
+    BrainDatasetColorMethod(BrainColorMethod method);
 
-    void updateColor(const brayns::Vector4f &color) override;
-
-    std::vector<uint64_t> updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap) override;
-
-    void updateColorById(std::vector<brayns::Vector4f> colors) override;
-
-    void updateColorByMethod(
-        const IColorData &colorData,
-        const std::string &method,
-        const std::vector<ColoringInformation> &vars) override;
-
-    void updateIndexedColor(std::vector<brayns::Vector4f> color, std::vector<uint8_t> indices) override;
+    std::string getName() const override;
+    std::vector<std::string> getValues(brayns::Components &components) const override;
+    void apply(brayns::Components &components, const brayns::ColorMethodInput &input) const override;
 
 private:
-    void _colorWithInput(const std::string &method, const std::vector<ColoringInformation> &vars);
-    void _colorAll(const std::string &method);
-
-private:
-    brayns::Components &_components;
+    BrainColorMethod _method;
 };

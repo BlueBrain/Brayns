@@ -21,11 +21,34 @@
 #include "GenericColorSystem.h"
 
 #include <algorithm>
+#include <unordered_set>
 
 #include <spdlog/fmt/fmt.h>
 
 namespace
 {
+class MethodNameList
+{
+public:
+    static std::vector<std::string> build(brayns::ColorMethodList &methods)
+    {
+        auto uniqueNames = std::unordered_set<std::string>();
+        for (auto &method : methods)
+        {
+            auto methodName = method->getName();
+            auto inserted = uniqueNames.insert(methodName);
+            if (!inserted.second)
+            {
+                throw std::runtime_error(fmt::format("Duplicate color method name '{}'", methodName));
+            }
+        }
+
+        auto result = std::vector<std::string>(uniqueNames.begin(), uniqueNames.end());
+        std::sort(result.begin(), result.end());
+        return result;
+    }
+};
+
 class MethodFinder
 {
 public:
@@ -47,22 +70,15 @@ public:
 
 namespace brayns
 {
-GenericColorSystem::GenericColorSystem(std::vector<std::unique_ptr<IColorMethod>> methods)
+GenericColorSystem::GenericColorSystem(ColorMethodList methods)
     : _methods(std::move(methods))
+    , _methodNames(MethodNameList::build(_methods))
 {
 }
 
 std::vector<std::string> GenericColorSystem::getMethods() const
 {
-    auto result = std::vector<std::string>();
-    result.reserve(_methods.size());
-
-    for (auto &method : _methods)
-    {
-        result.push_back(method->getName());
-    }
-
-    return result;
+    return _methodNames;
 }
 
 std::vector<std::string> GenericColorSystem::getValues(const std::string &method, Components &components) const
@@ -73,6 +89,11 @@ std::vector<std::string> GenericColorSystem::getValues(const std::string &method
 
 void GenericColorSystem::apply(const std::string &method, const ColorMethodInput &input, Components &components) const
 {
+    if (input.empty())
+    {
+        throw std::invalid_argument("Color input cannot be empty");
+    }
+
     auto &handler = MethodFinder::get(_methods, method);
     handler.apply(components, input);
 }

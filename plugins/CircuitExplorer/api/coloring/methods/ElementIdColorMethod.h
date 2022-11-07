@@ -20,15 +20,12 @@
 
 #pragma once
 
-#include <brayns/utils/MathTypes.h>
+#include <brayns/engine/systems/GenericColorSystem.h>
 
-#include <vector>
-
-/**
- * @brief Holds a list of colors (Used for soma and vasculature circuits)
- */
-struct ColorMap
+class ElementIdColorMethod : public brayns::IColorMethod
 {
-    std::vector<uint8_t> indices;
-    std::vector<brayns::Vector4f> colors;
+public:
+    std::string getName() const override;
+    std::vector<std::string> getValues(brayns::Components &components) const override;
+    void apply(brayns::Components &components, const brayns::ColorMethodInput &input) const override;
 };

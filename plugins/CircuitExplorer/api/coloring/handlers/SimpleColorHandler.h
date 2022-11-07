@@ -20,37 +20,19 @@
 
 #pragma once
 
-#include <brayns/engine/model/Components.h>
-
 #include <api/coloring/IColorHandler.h>
-#include <api/neuron/NeuronColorMethod.h>
 
-class SomaColorHandler final : public IColorHandler
+/**
+ * @brief Handles coloring for circuits in which each element is made up of a single primitive, all of them on a single
+ * Geometry object.
+ */
+class SimpleColorHandler final : public IColorHandler
 {
 public:
-    SomaColorHandler(brayns::Components &components);
+    void colorByElement(const brayns::ColorList &colors, brayns::GeometryViews &views) const override;
 
-    void updateColor(const brayns::Vector4f &color) override;
-
-    std::vector<uint64_t> updateColorById(const std::map<uint64_t, brayns::Vector4f> &colorMap) override;
-
-    void updateColorById(std::vector<brayns::Vector4f> colors) override;
-
-    void updateColorByMethod(
-        const IColorData &colorData,
-        const std::string &method,
-        const std::vector<ColoringInformation> &vars) override;
-
-    void updateIndexedColor(std::vector<brayns::Vector4f> color, std::vector<uint8_t> indices) override;
-
-private:
-    void _colorWithInput(
-        const IColorData &colorData,
-        const std::string &method,
-        const std::vector<ColoringInformation> &vars);
-
-    void _colorAll(const IColorData &colorData, const std::string &method);
-
-private:
-    brayns::Components &_components;
+    void colorByColormap(
+        const brayns::ColorMap &colorMap,
+        const brayns::Geometries &geometries,
+        brayns::GeometryViews &views) const override;
 };

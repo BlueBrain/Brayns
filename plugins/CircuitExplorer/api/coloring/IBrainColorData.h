@@ -21,34 +21,28 @@
 #include <string>
 #include <vector>
 
+#include "BrainColorMethod.h"
+
 /**
- * @brief The IColorData class is the interface to implement coloring method information fetchers
- * for different data formats
+ * @brief Interface to implement coloring method information fetchers for different neuronal circuit formats.
  */
-class IColorData
+class IBrainColorData
 {
 public:
-    virtual ~IColorData() = default;
+    virtual ~IBrainColorData() = default;
 
     /**
-     * @brief getAvailableMethods Return the available methods by which a
-     * circuit can be colored (For example: By ID, By layer, by population, ...)
+     * @brief Returns a list of available methods based on data available on disk.
+     * @return std::vector<std::string>
      */
     virtual std::vector<std::string> getMethods() const noexcept = 0;
 
     /**
-     * @brief getMethodVariables Return the possible variable specofications for
-     * a given method (For example, for layer it will return the list of loaded
-     * layers, for mtypes the list of loaded mtypes, ...)
-     */
-    virtual std::vector<std::string> getMethodVariables(const std::string &method) const = 0;
-
-    /**
-     * @brief Return the values corresponding to the given ids for the given method of coloring
-     * @param method
-     * @param ids
+     * @brief Return the input values corresponding to the given ids for the given method.
+     * @param method Method from which to extract values.
+     * @param ids Ids used to fetch the data.
      * @return std::vector<std::string>
+     * @throws std::invalid_argument if the method is not supported.
      */
-    virtual std::vector<std::string> getMethodValuesForIDs(const std::string &method, const std::vector<uint64_t> &ids)
-        const = 0;
+    virtual std::vector<std::string> getValues(BrainColorMethod method, const std::vector<uint64_t> &ids) const = 0;
 };

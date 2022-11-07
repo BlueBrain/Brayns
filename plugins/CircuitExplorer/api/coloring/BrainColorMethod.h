@@ -23,9 +23,9 @@
 #include <brayns/utils/EnumInfo.h>
 
 /**
- * @brief Methods availables to color a neuron circuit by (if corresponding data is available as well)
+ * @brief Methods availables to color a brain circuit by (if corresponding data is available as well)
  */
-enum class NeuronColorMethod
+enum class BrainColorMethod
 {
     ByEtype,
     ByMtype,
@@ -34,27 +34,25 @@ enum class NeuronColorMethod
     ByHemisphere,
     ByMorphology,
     ByMorphologyClass,
-    ByMorphologySection,
     BySynapseClass
 };
 
 namespace brayns
 {
 template<>
-struct EnumReflector<NeuronColorMethod>
+struct EnumReflector<BrainColorMethod>
 {
-    static EnumMap<NeuronColorMethod> reflect()
+    static EnumMap<BrainColorMethod> reflect()
     {
         return {
-            {"etype", NeuronColorMethod::ByEtype},
-            {"mtype", NeuronColorMethod::ByMtype},
-            {"layer", NeuronColorMethod::ByLayer},
-            {"region", NeuronColorMethod::ByRegion},
-            {"hemisphere", NeuronColorMethod::ByHemisphere},
-            {"morphology", NeuronColorMethod::ByMorphology},
-            {"morphology class", NeuronColorMethod::ByMorphologyClass},
-            {"morphology section", NeuronColorMethod::ByMorphologySection},
-            {"synapse class", NeuronColorMethod::BySynapseClass}};
+            {"etype", BrainColorMethod::ByEtype},
+            {"mtype", BrainColorMethod::ByMtype},
+            {"layer", BrainColorMethod::ByLayer},
+            {"region", BrainColorMethod::ByRegion},
+            {"hemisphere", BrainColorMethod::ByHemisphere},
+            {"morphology", BrainColorMethod::ByMorphology},
+            {"morphology class", BrainColorMethod::ByMorphologyClass},
+            {"synapse class", BrainColorMethod::BySynapseClass}};
     }
 };
 }

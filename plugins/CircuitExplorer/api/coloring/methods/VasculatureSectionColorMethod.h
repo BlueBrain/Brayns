@@ -20,33 +20,12 @@
 
 #pragma once
 
-#include <brayns/engine/model/systemtypes/ColorSystem.h>
+#include <brayns/engine/systems/GenericColorSystem.h>
 
-#include <memory>
-#include <vector>
-
-namespace brayns
-{
-class IColorMethod
+class VasculatureSectionColorMethod : public brayns::IColorMethod
 {
 public:
-    virtual std::string getName() const = 0;
-    virtual std::vector<std::string> getValues(Components &components) const = 0;
-    virtual void apply(Components &components, const ColorMethodInput &input) const = 0;
+    std::string getName() const override;
+    std::vector<std::string> getValues(brayns::Components &components) const override;
+    void apply(brayns::Components &components, const brayns::ColorMethodInput &input) const override;
 };
-
-using ColorMethodList = std::vector<std::unique_ptr<IColorMethod>>;
-
-class GenericColorSystem : public ColorSystem
-{
-public:
-    GenericColorSystem(ColorMethodList methods);
-    std::vector<std::string> getMethods() const override;
-    std::vector<std::string> getValues(const std::string &method, Components &components) const override;
-    void apply(const std::string &method, const ColorMethodInput &input, Components &components) const override;
-
-private:
-    ColorMethodList _methods;
-    std::vector<std::string> _methodNames;
-};
-}

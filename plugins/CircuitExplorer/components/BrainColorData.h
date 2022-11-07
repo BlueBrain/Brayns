@@ -20,33 +20,15 @@
 
 #pragma once
 
-#include <brayns/engine/model/systemtypes/ColorSystem.h>
+#include <api/coloring/IBrainColorData.h>
 
 #include <memory>
-#include <vector>
 
-namespace brayns
+/**
+ * @brief Holds logic on how to color the underlying geometry from a data source (loader specific)
+ * using a color handler (geometry specific)
+ */
+struct BrainColorData
 {
-class IColorMethod
-{
-public:
-    virtual std::string getName() const = 0;
-    virtual std::vector<std::string> getValues(Components &components) const = 0;
-    virtual void apply(Components &components, const ColorMethodInput &input) const = 0;
+    std::unique_ptr<IBrainColorData> data;
 };
-
-using ColorMethodList = std::vector<std::unique_ptr<IColorMethod>>;
-
-class GenericColorSystem : public ColorSystem
-{
-public:
-    GenericColorSystem(ColorMethodList methods);
-    std::vector<std::string> getMethods() const override;
-    std::vector<std::string> getValues(const std::string &method, Components &components) const override;
-    void apply(const std::string &method, const ColorMethodInput &input, Components &components) const override;
-
-private:
-    ColorMethodList _methods;
-    std::vector<std::string> _methodNames;
-};
-}

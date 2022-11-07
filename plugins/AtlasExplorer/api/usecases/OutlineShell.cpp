@@ -20,11 +20,13 @@
 
 #include "OutlineShell.h"
 
+#include <brayns/engine/colormethods/SolidColorMethod.h>
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Isosurface.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GenericColorSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
@@ -99,6 +101,10 @@ std::shared_ptr<brayns::Model> OutlineShell::run(const Atlas &atlas, const brayn
     systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
     systems.setInitSystem<brayns::GeometryInitSystem>();
     systems.setCommitSystem<brayns::GeometryCommitSystem>();
+
+    auto colorMethods = std::vector<std::unique_ptr<brayns::IColorMethod>>();
+    colorMethods.push_back(std::make_unique<brayns::SolidColorMethod>());
+    systems.setColorSystem<brayns::GenericColorSystem>(std::move(colorMethods));
 
     return model;
 }

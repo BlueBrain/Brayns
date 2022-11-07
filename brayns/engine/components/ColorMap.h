@@ -20,24 +20,18 @@
 
 #pragma once
 
-#include <brayns/utils/EnumInfo.h>
+#include <brayns/utils/MathTypes.h>
 
-/**
- * @brief Methods availables to color a vasculature circuit by (if corresponding data is available as well)
- */
-enum class VasculatureColorMethod
-{
-    BySection
-};
+#include <vector>
 
 namespace brayns
 {
-template<>
-struct EnumReflector<VasculatureColorMethod>
+/**
+ * @brief Holds a list of colors (Used for soma and vasculature circuits)
+ */
+struct ColorMap
 {
-    static EnumMap<VasculatureColorMethod> reflect()
-    {
-        return {{"vasculature section", VasculatureColorMethod::BySection}};
-    }
+    std::vector<uint8_t> indices;
+    std::vector<Vector4f> colors;
 };
 }

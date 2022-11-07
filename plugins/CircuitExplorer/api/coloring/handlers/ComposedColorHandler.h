@@ -18,44 +18,19 @@
 
 #pragma once
 
-#include <brayns/utils/MathTypes.h>
-
-#include <unordered_map>
-
-namespace brayns
-{
-/**
- * @brief The ColorDeck allows to associate std::string keys with colors.
- */
-class ColorDeck
-{
-public:
-    /**
-     * @brief Returns the color associated with the given key. If the key does not exists, a new color is associated
-     * with it.
-     * @param key Color key
-     * @return Vector4f The color associated with the given key
-     */
-    Vector4f getColorForKey(const std::string &key) noexcept;
-
-private:
-    std::unordered_map<std::string, size_t> _colorMap;
-    size_t _lastColortListIndex = 0;
-};
+#include <api/coloring/IColorHandler.h>
 
 /**
- * @brief The ColorRoulette returns a different color on each call.
+ * @brief Handles coloring for circuits in which each element is made up of multiple primitives, each on its own
+ * Geometry object.
  */
-class ColorRoulette
+class ComposedColorHandler final : public IColorHandler
 {
 public:
-    /**
-     * @brief Returns a random color.
-     * @return Vector4f The color.
-     */
-    Vector4f getNextColor() noexcept;
+    void colorByElement(const brayns::ColorList &colors, brayns::GeometryViews &views) const override;
 
-private:
-    size_t _lastColortListIndex = 0u;
+    void colorByColormap(
+        const brayns::ColorMap &colorMap,
+        const brayns::Geometries &geometries,
+        brayns::GeometryViews &views) const override;
 };
-}

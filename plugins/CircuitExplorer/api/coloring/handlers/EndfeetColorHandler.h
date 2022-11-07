@@ -18,30 +18,18 @@
 
 #pragma once
 
-#include <brayns/utils/MathTypes.h>
-
-#include <functional>
-#include <map>
-#include <vector>
+#include <api/coloring/IColorHandler.h>
 
 /**
- * @brief Utility to iterate over the elements specified ona color by id request
+ * @brief Handles coloring for endfeet circuits.
  */
-class ColorByIDAlgorithm
+class EndfeetColorHandler final : public IColorHandler
 {
 public:
-    static std::vector<uint64_t> execute(
-        const std::map<uint64_t, brayns::Vector4f> &colorMap,
-        const std::vector<uint64_t> &ids,
-        const std::function<void(uint64_t, size_t, const brayns::Vector4f &)> &elementCallback);
+    void colorByElement(const brayns::ColorList &colors, brayns::GeometryViews &views) const override;
 
-private:
-    static std::vector<uint64_t> _withInput(
-        const std::map<uint64_t, brayns::Vector4f> &colorMap,
-        const std::vector<uint64_t> &ids,
-        const std::function<void(uint64_t, size_t, const brayns::Vector4f &)> &elementCallback);
-
-    static std::vector<uint64_t> _randomly(
-        const std::vector<uint64_t> &ids,
-        const std::function<void(uint64_t, size_t, const brayns::Vector4f &)> &elementCallback);
+    void colorByColormap(
+        const brayns::ColorMap &colorMap,
+        const brayns::Geometries &geometries,
+        brayns::GeometryViews &views) const override;
 };
