@@ -106,6 +106,7 @@ __all__ = [
     'get_simulation',
     'get_version',
     'GlassMaterial',
+    'IdList',
     'Image',
     'ImageFormat',
     'ImageInfo',

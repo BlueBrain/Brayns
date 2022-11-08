@@ -95,6 +95,7 @@ __all__ = [
     'get_simulation',
     'get_version',
     'GlassMaterial',
+    'IdList',
     'Image',
     'ImageInfo',
     'InteractiveRenderer',
