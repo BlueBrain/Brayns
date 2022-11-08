@@ -18,14 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from .color_method import ColorMethod
 from .color_model import color_model
 from .get_color_method_values import get_color_method_values
 from .get_color_methods import get_color_methods
-from .id_list import IdList
 
 __all__ = [
     'color_model',
+    'ColorMethod',
     'get_color_method_values',
     'get_color_methods',
-    'IdList',
 ]
