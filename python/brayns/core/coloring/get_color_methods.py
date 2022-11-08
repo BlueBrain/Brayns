@@ -18,20 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .cell_id import CellId
-from .color_circuit import color_circuit
-from .color_circuit_by_id import color_circuit_by_id
-from .color_circuit_by_method import color_circuit_by_method
-from .color_method import ColorMethod
-from .get_color_method_values import get_color_method_values
-from .get_color_methods import get_color_methods
+from brayns.network import Instance
 
-__all__ = [
-    'CellId',
-    'color_circuit_by_id',
-    'color_circuit_by_method',
-    'color_circuit',
-    'ColorMethod',
-    'get_color_method_values',
-    'get_color_methods',
-]
+
+def get_color_methods(instance: Instance, model_id: int) -> list[str]:
+    """Get the available coloring methods for the given model.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Model ID.
+    :type model_id: int
+    :return: List of available coloring methods.
+    :rtype: list[str]
+    """
+    params = {'id': model_id}
+    return instance.request('get-color-methods', params)

@@ -19,32 +19,33 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.network import Instance
+from brayns.utils import Color4
 
-from .color_method import ColorMethod
 
+def color_model(instance: Instance, model_id: int, method: str, colors: dict[str, Color4]) -> None:
+    """Color a circuit by the given method using given color map.
 
-def get_color_method_values(
-    instance: Instance,
-    model_id: int,
-    method: ColorMethod,
-) -> list[str]:
-    """Get available values for a coloring method on the given circuit.
+    The color map gives the color to apply for a given method value.
 
-    For example get_color_method_values(ColorMethod.BY_LAYER) would give
-    ['1', '2', '3'] if the circuit has 3 layers.
+    Available coloring methods depend on the model type (mesh, circuit, etc).
+
+    See ``get_color_methods`` and ``get_color_method_values`` for more details.
 
     :param instance: Instance.
     :type instance: Instance
-    :param model_id: Model ID.
+    :param model_id: ID of the model to color.
     :type model_id: int
-    :param method: Coloring method.
-    :type method: ColorMethod
-    :return: List of values available for given method.
-    :rtype: list[str]
+    :param method: Coloring method to use.
+    :type method: str
+    :param colors: Color map from method value to color.
+    :type colors: dict[str, Color4]
     """
     params = {
-        'model_id': model_id,
-        'method': method.value,
+        'id': model_id,
+        'method': method,
+        'values': {
+            key: list(value)
+            for key, value in colors.items()
+        },
     }
-    result = instance.request('get-circuit-color-method-variables', params)
-    return result['variables']
+    instance.request('color-model', params)

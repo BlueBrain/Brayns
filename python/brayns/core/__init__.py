@@ -32,6 +32,7 @@ from .application import *
 from .camera import *
 from .clipping import *
 from .color_ramp import *
+from .coloring import *
 from .geometry import *
 from .light import *
 from .loader import *
@@ -62,6 +63,7 @@ __all__ = [
     'clear_models',
     'ClippingGeometry',
     'ClipPlane',
+    'color_model',
     'ColorRamp',
     'ControlPoint',
     'DefaultMaterial',
@@ -76,6 +78,8 @@ __all__ = [
     'get_camera_projection',
     'get_camera_view',
     'get_camera',
+    'get_color_method_values',
+    'get_color_methods',
     'get_color_ramp',
     'get_entrypoint',
     'get_entrypoints',

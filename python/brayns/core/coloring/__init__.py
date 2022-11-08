@@ -18,36 +18,12 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
-from brayns.utils import Color4
+from .color_model import color_model
+from .get_color_method_values import get_color_method_values
+from .get_color_methods import get_color_methods
 
-from .cell_id import CellId
-
-
-def color_circuit_by_id(
-    instance: Instance,
-    model_id: int,
-    colors: dict[CellId, Color4],
-) -> list[int]:
-    """Color a circuit from a mapping cell ID -> Color.
-
-    :param instance: Instance.
-    :type instance: Instance
-    :param model_id: Circuit model ID.
-    :type model_id: int
-    :param colors: Color mappings Cells -> Color.
-    :type colors: dict[CellId, Color4]
-    :return: List of GIDs that were not colored.
-    :rtype: list[int]
-    """
-    params = {
-        'model_id': model_id,
-        'color_info': [
-            {
-                'variable': id.value,
-                'color': list(color),
-            }
-            for id, color in colors.items()
-        ]
-    }
-    return instance.request('color-circuit-by-id', params)
+__all__ = [
+    'color_model',
+    'get_color_method_values',
+    'get_color_methods',
+]

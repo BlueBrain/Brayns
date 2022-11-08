@@ -29,7 +29,6 @@ morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
 
 from .bbp import *
 from .circuit import *
-from .coloring import *
 from .cylindric_camera import *
 from .dti import *
 from .morphology import *
@@ -42,17 +41,10 @@ __all__ = [
     'BbpLoader',
     'BbpReport',
     'BbpReportType',
-    'CellId',
-    'color_circuit_by_id',
-    'color_circuit_by_method',
-    'color_circuit',
-    'ColorMethod',
     'CylindricProjection',
     'DtiLoader',
     'GeometryType',
     'get_circuit_ids',
-    'get_color_method_values',
-    'get_color_methods',
     'Morphology',
     'MorphologyLoader',
     'NeuronalTracer',
