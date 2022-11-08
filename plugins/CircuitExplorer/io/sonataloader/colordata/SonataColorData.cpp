@@ -16,44 +16,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ColorDataExtractor.h"
-
-#include <api/neuron/NeuronColorMethod.h>
+#include "SonataColorData.h"
 
 namespace
 {
-// I dont like std pair
 struct AttributeMethodEntry
 {
-    NeuronColorMethod method;
+    BrainColorMethod method;
     std::string attribute;
 };
 
 /**
  * @brief Mapping between coloring methods and SONATA population attribute names
  */
-struct AttributeMethodMapping
+class AttributeMethodMapping
 {
+public:
     static std::vector<AttributeMethodEntry> generate()
     {
         return {
-            {NeuronColorMethod::ByEtype, "etype"},
-            {NeuronColorMethod::ByHemisphere, "hemisphere"},
-            {NeuronColorMethod::ByLayer, "layer"},
-            {NeuronColorMethod::ByMorphology, "morphology"},
-            {NeuronColorMethod::ByMorphologyClass, "morph_class"},
-            {NeuronColorMethod::ByMtype, "mtype"},
-            {NeuronColorMethod::ByRegion, "region"},
-            {NeuronColorMethod::BySynapseClass, "synapse_class"}};
+            {BrainColorMethod::ByEtype, "etype"},
+            {BrainColorMethod::ByHemisphere, "hemisphere"},
+            {BrainColorMethod::ByLayer, "layer"},
+            {BrainColorMethod::ByMorphology, "morphology"},
+            {BrainColorMethod::ByMorphologyClass, "morph_class"},
+            {BrainColorMethod::ByMtype, "mtype"},
+            {BrainColorMethod::ByRegion, "region"},
+            {BrainColorMethod::BySynapseClass, "synapse_class"}};
     }
 
     static std::string getAttributeForMethod(const std::string &method)
     {
-        auto enumEntry = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
+        auto enumEntry = brayns::EnumInfo::getValue<BrainColorMethod>(method);
         return getAttributeForMethod(enumEntry);
     }
 
-    static std::string getAttributeForMethod(const NeuronColorMethod method)
+    static std::string getAttributeForMethod(const BrainColorMethod method)
     {
         const auto mapping = generate();
         const auto begin = mapping.begin();
@@ -117,49 +115,34 @@ public:
 
 namespace sonataloader
 {
-std::vector<std::string> CellNodeColorMethods::get(const bbp::sonata::NodePopulation &population)
+SonataColorData::SonataColorData(bbp::sonata::NodePopulation population)
+    : _population(std::move(population))
+{
+}
+
+std::vector<BrainColorMethod> SonataColorData::getMethods() const
 {
     auto possibleMethods = AttributeMethodMapping::generate();
 
-    auto result = std::vector<std::string>();
+    auto result = std::vector<BrainColorMethod>();
     result.reserve(possibleMethods.size());
 
     for (auto &possible : possibleMethods)
     {
-        auto &attribute = possible.attribute;
-        auto method = possible.method;
-
-        if (!PopulationQuery::hasAttribute(population, attribute))
+        if (!PopulationQuery::hasAttribute(_population, possible.attribute))
         {
             continue;
         }
-        auto methodName = brayns::EnumInfo::getName(method);
-        result.push_back(std::move(methodName));
+
+        result.push_back(possible.method);
     }
 
     return result;
 }
 
-std::vector<std::string> CellNodeColorValues::get(
-    const bbp::sonata::NodePopulation &population,
-    const std::string &method,
-    const std::vector<uint64_t> &ids)
+std::vector<std::string> SonataColorData::getValues(BrainColorMethod method, const std::vector<uint64_t> &ids) const
 {
     auto attribute = AttributeMethodMapping::getAttributeForMethod(method);
-    return PopulationQuery::query(population, attribute, ids);
-}
-
-std::vector<std::string> CellNodeColorValues::getAll(
-    const bbp::sonata::NodePopulation &population,
-    const std::string &method)
-{
-    auto attribute = AttributeMethodMapping::getAttributeForMethod(method);
-
-    if (!PopulationQuery::hasAttribute(population, attribute))
-    {
-        throw std::invalid_argument("The attribute " + attribute + " is not available");
-    }
-
-    return PopulationQuery::queryAll(population, attribute);
+    return PopulationQuery::query(_population, attribute, ids);
 }
 }

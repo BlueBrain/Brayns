@@ -24,7 +24,7 @@
 
 #include <brayns/engine/model/Model.h>
 
-#include <api/coloring/IColorData.h>
+#include <api/coloring/IBrainColorData.h>
 #include <api/reports/ReportMapping.h>
 #include <io/NeuronMorphologyLoaderParameters.h>
 #include <io/util/ProgressUpdater.h>
@@ -32,8 +32,9 @@
 /**
  * @brief The MorphologyCircuitLoader struct loads a morphology circuit into a MorphologyCircuitComponent
  */
-struct MorphologyCircuitBuilder
+class MorphologyCircuitBuilder
 {
+public:
     struct Context
     {
         Context(
@@ -50,6 +51,9 @@ struct MorphologyCircuitBuilder
         const NeuronMorphologyLoaderParameters &morphologyParams;
     };
 
-    static std::vector<CellCompartments>
-        load(const Context &context, brayns::Model &model, ProgressUpdater &cb, std::unique_ptr<IColorData> colorData);
+    static std::vector<CellCompartments> load(
+        const Context &context,
+        brayns::Model &model,
+        ProgressUpdater &cb,
+        std::unique_ptr<IBrainColorData> colorData);
 };

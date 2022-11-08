@@ -16,36 +16,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PointNeuronColorData.h"
+#pragma once
 
-#include <io/sonataloader/colordata/ColorDataExtractor.h>
+#include <api/coloring/IBrainColorData.h>
 
-#include <set>
+#include <bbp/sonata/nodes.h>
 
 namespace sonataloader
 {
-PointNeuronColorData::PointNeuronColorData(bbp::sonata::NodePopulation nodes)
-    : _nodes(std::move(nodes))
+class SonataColorData final : public IBrainColorData
 {
-}
+public:
+    SonataColorData(bbp::sonata::NodePopulation population);
+    std::vector<BrainColorMethod> getMethods() const override;
+    std::vector<std::string> getValues(BrainColorMethod method, const std::vector<uint64_t> &ids) const override;
 
-std::vector<std::string> PointNeuronColorData::getMethods() const noexcept
-{
-    return CellNodeColorMethods::get(_nodes);
+private:
+    bbp::sonata::NodePopulation _population;
+};
 }
-
-std::vector<std::string> PointNeuronColorData::getMethodVariables(const std::string &method) const
-{
-    auto values = CellNodeColorValues::getAll(_nodes, method);
-    const std::set<std::string> unique(values.begin(), values.end());
-
-    return std::vector<std::string>(unique.begin(), unique.end());
-}
-
-std::vector<std::string> PointNeuronColorData::getMethodValuesForIDs(
-    const std::string &method,
-    const std::vector<uint64_t> &ids) const
-{
-    return CellNodeColorValues::get(_nodes, method, ids);
-}
-} // namespace sonataloader

@@ -23,7 +23,7 @@
 #include <brayns/engine/model/Model.h>
 #include <brayns/utils/MathTypes.h>
 
-#include <api/coloring/IColorData.h>
+#include <api/coloring/IBrainColorData.h>
 #include <api/reports/ReportMapping.h>
 
 /**
@@ -41,5 +41,5 @@ struct SomaCircuitBuilder
     };
 
     static std::vector<CellCompartments>
-        load(const Context &context, brayns::Model &model, std::unique_ptr<IColorData> colorData);
+        load(const Context &context, brayns::Model &model, std::unique_ptr<IBrainColorData> colorData);
 };

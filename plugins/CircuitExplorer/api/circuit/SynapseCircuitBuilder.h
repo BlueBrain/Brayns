@@ -21,7 +21,7 @@
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/model/Model.h>
 
-#include <api/coloring/IColorData.h>
+#include <api/coloring/IBrainColorData.h>
 
 #include <map>
 #include <vector>
@@ -36,5 +36,5 @@ public:
     static void build(
         brayns::Model &model,
         std::map<uint64_t, std::vector<brayns::Sphere>> groupedSynapses,
-        std::unique_ptr<IColorData> colorData);
+        std::unique_ptr<IBrainColorData> colorData);
 };

@@ -18,28 +18,17 @@
 
 #pragma once
 
-#include <api/coloring/IColorData.h>
+#include <io/bbploader/LoadContext.h>
 
-#include <bbp/sonata/nodes.h>
+#include "BBPColorData.h"
 
-namespace sonataloader
+#include <memory>
+
+namespace bbploader
 {
-/**
- * @brief IColorData implementation for astrocyte populations
- */
-class AstrocyteColorData final : public IColorData
+class ColorDataFactory
 {
 public:
-    AstrocyteColorData(bbp::sonata::NodePopulation nodes);
-
-    std::vector<std::string> getMethods() const noexcept override;
-
-    std::vector<std::string> getMethodVariables(const std::string &method) const override;
-
-    std::vector<std::string> getMethodValuesForIDs(const std::string &method, const std::vector<uint64_t> &ids)
-        const override;
-
-private:
-    const bbp::sonata::NodePopulation _nodes;
+    static std::unique_ptr<BBPColorData> create(const LoadContext &context);
 };
-} // namespace sonataloader
+}

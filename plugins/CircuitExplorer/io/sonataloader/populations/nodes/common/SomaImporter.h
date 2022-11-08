@@ -16,20 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <api/coloring/IColorData.h>
-#include <api/reports/ReportMapping.h>
 #include <io/sonataloader/LoadContext.h>
 
 #pragma once
 
 namespace sonataloader
 {
-/**
- * @brief Imports a node population as soma only. Only usable with 'biophysical', 'astrocyte' and 'point_neuron'
- *
- */
 struct SomaImporter
 {
-    static void import(NodeLoadContext &ctxt, std::unique_ptr<IColorData> colorData);
+    static void import(NodeLoadContext &nodeContext);
 };
 }

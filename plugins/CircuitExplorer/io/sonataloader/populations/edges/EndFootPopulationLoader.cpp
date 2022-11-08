@@ -26,10 +26,11 @@
 #include <brayns/engine/systems/GeometryInitSystem.h>
 #include <brayns/json/Json.h>
 
-#include <api/synapse/colorhandlers/EndfeetColorHandler.h>
+#include <api/coloring/handlers/EndfeetColorHandler.h>
+#include <components/BrainColorData.h>
 #include <components/CircuitIds.h>
-#include <components/Coloring.h>
-#include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
+#include <components/ColorHandler.h>
+#include <io/sonataloader/colordata/ColorDataFactory.h>
 #include <io/sonataloader/data/EndFeetReader.h>
 #include <io/sonataloader/data/Names.h>
 #include <io/sonataloader/data/Synapses.h>
@@ -179,11 +180,11 @@ public:
         }
     }
 
-    void addColoring(std::unique_ptr<IColorData> colorData)
+    void addColoring(std::unique_ptr<IBrainColorData> colorData)
     {
         auto &components = _model.getComponents();
-        auto handler = std::make_unique<EndfeetColorHandler>(components);
-        components.add<Coloring>(std::move(colorData), std::move(handler));
+        components.add<ColorHandler>(std::make_unique<EndfeetColorHandler>());
+        components.add<BrainColorData>(std::move(colorData));
     }
 
     void addSystems()
@@ -229,16 +230,9 @@ void EndFootPopulationLoader::load(EdgeLoadContext &context) const
         buffer.push_back(std::move(mesh));
     }
 
-    auto &model = context.model;
-
-    auto &config = context.config;
-    auto astrocytePopulationName = population.target();
-    auto astrocytePopulation = config.getNodes(astrocytePopulationName);
-    auto colorData = std::make_unique<CommonEdgeColorData>(std::move(astrocytePopulation));
-
-    auto builder = ModelBuilder(model);
+    auto builder = ModelBuilder(context.model);
     builder.addGeometry(std::move(endfeetGeometry));
-    builder.addColoring(std::move(colorData));
+    builder.addColoring(ColorDataFactory::create(context));
     builder.addSystems();
 }
 } // namespace sonataloader

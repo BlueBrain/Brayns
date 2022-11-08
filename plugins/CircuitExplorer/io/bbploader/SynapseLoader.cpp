@@ -20,14 +20,13 @@
 
 #include "SynapseLoader.h"
 
-#include "colordata/BBPSynapseColorData.h"
+#include "color/ColorDataFactory.h"
 
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 
 #include <api/ModelType.h>
-#include <api/synapse/SynapseCircuitBuilder.h>
-#include <components/Coloring.h>
+#include <api/circuit/SynapseCircuitBuilder.h>
 
 #include <brain/synapse.h>
 #include <brain/synapses.h>
@@ -96,23 +95,6 @@ public:
         return EfferentGeometryLoader::load(context);
     }
 };
-
-struct SynapseColorComponentFactory
-{
-    static std::unique_ptr<IColorData> create(const bbploader::LoadContext &context)
-    {
-        auto &config = context.config;
-        auto circuitURI = config.getCircuitSource();
-        auto path = circuitURI.getPath();
-        if (!std::filesystem::exists(path))
-        {
-            circuitURI = config.getCellLibrarySource();
-            path = circuitURI.getPath();
-        }
-        auto population = config.getCircuitPopulation();
-        return std::make_unique<bbploader::BBPSynapseColorData>(std::move(path), std::move(population));
-    }
-};
 }
 
 namespace bbploader
@@ -122,7 +104,7 @@ std::shared_ptr<brayns::Model> SynapseLoader::load(const LoadContext &context, b
     auto modelType = post ? ModelType::afferentSynapses : ModelType::efferentSynapses;
     auto model = std::make_shared<brayns::Model>(modelType);
     auto geometryData = GeometryLoader::load(context, post);
-    auto colorData = SynapseColorComponentFactory::create(context);
+    auto colorData = ColorDataFactory::create(context);
     SynapseCircuitBuilder::build(*model, std::move(geometryData), std::move(colorData));
     return model;
 }

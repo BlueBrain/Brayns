@@ -1,9 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
- *
- * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -19,23 +16,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ColorDataFactory.h"
 
-#include <brayns/engine/scene/ModelManager.h>
+#include <filesystem>
 
-#include <brayns/network/entrypoint/Entrypoint.h>
-
-#include <network/messages/TraceAnterogradeMessage.h>
-
-class TraceAnterogradeEntrypoint : public brayns::Entrypoint<TraceAnterogradeMessage, brayns::EmptyMessage>
+namespace bbploader
 {
-public:
-    TraceAnterogradeEntrypoint(brayns::ModelManager &models);
+std::unique_ptr<BBPColorData> ColorDataFactory::create(const LoadContext &context)
+{
+    auto &config = context.config;
+    auto circuitURI = config.getCircuitSource();
+    auto circuitPath = circuitURI.getPath();
 
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual void onRequest(const Request &request) override;
+    if (!std::filesystem::exists(circuitPath))
+    {
+        circuitURI = config.getCellLibrarySource();
+        circuitPath = circuitURI.getPath();
+    }
 
-private:
-    brayns::ModelManager &_models;
-};
+    auto circuitPopulation = config.getCircuitPopulation();
+    return std::make_unique<BBPColorData>(std::move(circuitPath), std::move(circuitPopulation));
+}
+}

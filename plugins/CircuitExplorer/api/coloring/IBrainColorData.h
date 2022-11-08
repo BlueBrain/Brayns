@@ -32,10 +32,10 @@ public:
     virtual ~IBrainColorData() = default;
 
     /**
-     * @brief Returns a list of available methods based on data available on disk.
-     * @return std::vector<std::string>
+     * @brief Return the available color methods supported by the color data implementing it.
+     * @return std::vector<BrainColorMethod>
      */
-    virtual std::vector<std::string> getMethods() const noexcept = 0;
+    virtual std::vector<BrainColorMethod> getMethods() const = 0;
 
     /**
      * @brief Return the input values corresponding to the given ids for the given method.

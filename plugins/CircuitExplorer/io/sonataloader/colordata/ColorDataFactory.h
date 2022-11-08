@@ -18,21 +18,15 @@
 
 #pragma once
 
-#include <api/coloring/IColorData.h>
+#include <api/coloring/IBrainColorData.h>
 #include <io/sonataloader/LoadContext.h>
 
 namespace sonataloader
 {
-class NodeColorDataFactory
+class ColorDataFactory
 {
 public:
-    template<typename T>
-    static std::unique_ptr<IColorData> create(const NodeLoadContext &ctxt)
-    {
-        auto &config = ctxt.config;
-        auto &nodePopulation = ctxt.population;
-        auto populationName = nodePopulation.name();
-        return std::make_unique<T>(config.getNodes(populationName));
-    }
+    static std::unique_ptr<IBrainColorData> create(const EdgeLoadContext &context);
+    static std::unique_ptr<IBrainColorData> create(const NodeLoadContext &ctxt);
 };
 }

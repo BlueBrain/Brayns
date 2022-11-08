@@ -20,18 +20,18 @@
 
 #include "MorphologyCircuitBuilder.h"
 
-#include "colorhandlers/MorphologyColorHandler.h"
-
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
+#include <api/coloring/handlers/ComposedColorHandler.h>
 #include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
 #include <api/neuron/NeuronMorphologyReader.h>
+#include <components/BrainColorData.h>
 #include <components/CircuitIds.h>
-#include <components/Coloring.h>
+#include <components/ColorHandler.h>
 #include <components/NeuronSectionList.h>
 #include <systems/NeuronInspectSystem.h>
 
@@ -154,11 +154,11 @@ public:
         _model.getComponents().add<NeuronSectionList>(std::move(sections));
     }
 
-    void addColoring(std::unique_ptr<IColorData> data)
+    void addColoring(std::unique_ptr<IBrainColorData> data)
     {
         auto &components = _model.getComponents();
-        auto handler = std::make_unique<MorphologyColorHandler>(components);
-        components.add<Coloring>(std::move(data), std::move(handler));
+        components.add<ColorHandler>(std::make_unique<ComposedColorHandler>());
+        components.add<BrainColorData>(std::move(data));
     }
 
     void addSystems()
@@ -193,7 +193,7 @@ std::vector<CellCompartments> MorphologyCircuitBuilder::load(
     const Context &context,
     brayns::Model &model,
     ProgressUpdater &updater,
-    std::unique_ptr<IColorData> colorData)
+    std::unique_ptr<IBrainColorData> colorData)
 {
     auto &morphPaths = context.morphologyPaths;
     auto &ids = context.ids;

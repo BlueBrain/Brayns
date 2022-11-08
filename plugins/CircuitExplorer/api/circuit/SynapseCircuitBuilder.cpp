@@ -18,15 +18,15 @@
 
 #include "SynapseCircuitBuilder.h"
 
-#include "colorhandlers/SynapseColorHandler.h"
-
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
+#include <api/coloring/handlers/ComposedColorHandler.h>
+#include <components/BrainColorData.h>
 #include <components/CircuitIds.h>
-#include <components/Coloring.h>
+#include <components/ColorHandler.h>
 
 namespace
 {
@@ -55,11 +55,11 @@ public:
         }
     }
 
-    void addColoring(std::unique_ptr<IColorData> colorData)
+    void addColoring(std::unique_ptr<IBrainColorData> colorData)
     {
         auto &components = _model.getComponents();
-        auto handler = std::make_unique<SynapseColorHandler>(components);
-        components.add<Coloring>(std::move(colorData), std::move(handler));
+        components.add<ColorHandler>(std::make_unique<ComposedColorHandler>());
+        components.add<BrainColorData>(std::move(colorData));
     }
 
     void addSystems()
@@ -78,7 +78,7 @@ private:
 void SynapseCircuitBuilder::build(
     brayns::Model &model,
     std::map<uint64_t, std::vector<brayns::Sphere>> groupedSynapses,
-    std::unique_ptr<IColorData> colorData)
+    std::unique_ptr<IBrainColorData> colorData)
 {
     auto builder = ModelBuilder(model);
     builder.addGeometry(std::move(groupedSynapses));

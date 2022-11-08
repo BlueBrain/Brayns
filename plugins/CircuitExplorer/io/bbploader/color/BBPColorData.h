@@ -18,29 +18,21 @@
 
 #pragma once
 
-#include <api/coloring/IColorData.h>
-#include <io/bbploader/colordata/BBPNeuronColorData.h>
+#include <api/coloring/IBrainColorData.h>
 
 namespace bbploader
 {
-/**
- * @brief The BBPSynapseColorHandler class handlers element coloring for synapes
- *        that were loaded from BBP format files (CircuitConfig/BlueConfig)
- */
-class BBPSynapseColorData final : public IColorData
+class BBPColorData final : public IBrainColorData
 {
 public:
-    BBPSynapseColorData(std::string circuitPath, std::string circuitPopulation);
+    BBPColorData(std::string circuitPath, std::string circuitPop);
 
-    std::vector<std::string> getMethods() const noexcept override;
+    std::vector<BrainColorMethod> getMethods() const override;
 
-    std::vector<std::string> getMethodVariables(const std::string &method) const override;
-
-    std::vector<std::string> getMethodValuesForIDs(const std::string &method, const std::vector<uint64_t> &ids)
-        const override;
+    std::vector<std::string> getValues(BrainColorMethod method, const std::vector<uint64_t> &ids) const override;
 
 private:
-    const std::string _circuitPath;
-    const std::string _circuitPop;
+    std::string _circuitPath;
+    std::string _circuitPop;
 };
 } // namespace bbploader

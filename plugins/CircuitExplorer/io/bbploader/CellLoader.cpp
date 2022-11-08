@@ -18,56 +18,35 @@
 
 #include "CellLoader.h"
 
+#include "color/ColorDataFactory.h"
+
 #include <brayns/engine/components/Metadata.h>
 #include <brayns/utils/string/StringJoiner.h>
 
 #include <api/circuit/MorphologyCircuitBuilder.h>
 #include <api/circuit/SomaCircuitBuilder.h>
-#include <io/bbploader/colordata/BBPNeuronColorData.h>
 
 #include <brion/blueConfig.h>
 
-#include <filesystem>
-#include <future>
-
 namespace
 {
-class BBPNeuronColorCreator
-{
-public:
-    static std::unique_ptr<bbploader::BBPNeuronColorData> newData(const bbploader::LoadContext &context)
-    {
-        const auto &config = context.config;
-        auto circuitURI = config.getCircuitSource();
-        auto circuitPath = circuitURI.getPath();
-        if (!std::filesystem::exists(circuitPath))
-        {
-            circuitURI = config.getCellLibrarySource();
-            circuitPath = circuitURI.getPath();
-        }
-        auto circuitPopulation = config.getCircuitPopulation();
-        return std::make_unique<bbploader::BBPNeuronColorData>(std::move(circuitPath), std::move(circuitPopulation));
-    }
-};
-
 class SomaImporter
 {
 public:
-    static std::vector<CellCompartments> import(const bbploader::LoadContext &context, brayns::Model &model)
+    static std::vector<CellCompartments>
+        import(const bbploader::LoadContext &context, brayns::Model &model, std::unique_ptr<IBrainColorData> colorData)
     {
-        auto colorData = BBPNeuronColorCreator::newData(context);
+        auto &circuit = context.circuit;
+        auto &gids = context.gids;
 
-        const auto &circuit = context.circuit;
-        const auto &gids = context.gids;
+        auto &params = context.loadParameters;
+        auto &morphParams = params.neuron_morphology_parameters;
+        auto radius = morphParams.radius_multiplier;
 
-        const auto &params = context.loadParameters;
-        const auto &morphParams = params.neuron_morphology_parameters;
-        const auto radius = morphParams.radius_multiplier;
+        auto positions = circuit.getPositions(gids);
+        auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
 
-        const auto positions = circuit.getPositions(gids);
-        const auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
-
-        const SomaCircuitBuilder::Context loadContext(ids, positions, radius);
+        auto loadContext = SomaCircuitBuilder::Context(ids, positions, radius);
 
         return SomaCircuitBuilder::load(loadContext, model, std::move(colorData));
     }
@@ -76,11 +55,39 @@ public:
 class MorphologyPathLoader
 {
 public:
-    static std::vector<std::string> load(const brain::Circuit &circuit, const brain::GIDSet &gids)
+};
+
+class MorphologyImporter
+{
+public:
+    static auto import(
+        const bbploader::LoadContext &context,
+        brayns::Model &model,
+        ProgressUpdater &updater,
+        std::unique_ptr<IBrainColorData> colorData)
+    {
+        auto &circuit = context.circuit;
+        auto &gids = context.gids;
+
+        auto &params = context.loadParameters;
+        auto &morphParams = params.neuron_morphology_parameters;
+
+        auto morphPaths = _getMorphologyPaths(circuit, gids);
+        auto positions = circuit.getPositions(gids);
+        auto rotations = circuit.getRotations(gids);
+        auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
+
+        auto loadContext = MorphologyCircuitBuilder::Context(ids, morphPaths, positions, rotations, morphParams);
+
+        return MorphologyCircuitBuilder::load(loadContext, model, updater, std::move(colorData));
+    }
+
+private:
+    static std::vector<std::string> _getMorphologyPaths(const brain::Circuit &circuit, const brain::GIDSet &gids)
     {
         auto morphPaths = circuit.getMorphologyURIs(gids);
 
-        std::vector<std::string> result;
+        auto result = std::vector<std::string>();
         result.reserve(morphPaths.size());
 
         for (auto &uri : morphPaths)
@@ -92,30 +99,6 @@ public:
     }
 };
 
-class MorphologyImporter
-{
-public:
-    static auto import(const bbploader::LoadContext &context, brayns::Model &model, ProgressUpdater &updater)
-    {
-        auto colorData = BBPNeuronColorCreator::newData(context);
-
-        const auto &circuit = context.circuit;
-        const auto &gids = context.gids;
-
-        const auto &params = context.loadParameters;
-        const auto &morphParams = params.neuron_morphology_parameters;
-
-        const auto morphPaths = MorphologyPathLoader::load(circuit, gids);
-        const auto positions = circuit.getPositions(gids);
-        const auto rotations = circuit.getRotations(gids);
-        const auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
-
-        MorphologyCircuitBuilder::Context loadContext(ids, morphPaths, positions, rotations, morphParams);
-
-        return MorphologyCircuitBuilder::load(loadContext, model, updater, std::move(colorData));
-    }
-};
-
 class MetadataFactory
 {
 public:
@@ -123,14 +106,16 @@ public:
     {
         auto &metadata = dst.getComponents().add<brayns::Metadata>();
 
-        const auto &gids = context.gids;
-        const auto &params = context.loadParameters;
-        const auto &targets = params.targets;
+        auto &gids = context.gids;
+        auto &params = context.loadParameters;
+        auto &targets = params.targets;
+
         if (targets.has_value())
         {
-            const auto targetList = brayns::StringJoiner::join(*targets, ",");
+            auto targetList = brayns::StringJoiner::join(*targets, ",");
             metadata["targets"] = targetList;
         }
+
         metadata["loaded_neuron_count"] = std::to_string(gids.size());
     }
 };
@@ -141,19 +126,21 @@ namespace bbploader
 std::vector<CellCompartments>
     CellLoader::load(const LoadContext &context, ProgressUpdater &updater, brayns::Model &model)
 {
-    const auto &params = context.loadParameters;
-    const auto &morphSettings = params.neuron_morphology_parameters;
-    const auto loadSoma = morphSettings.load_soma;
-    const auto loadAxon = morphSettings.load_axon;
-    const auto loadDend = morphSettings.load_dendrites;
+    auto &params = context.loadParameters;
+    auto &morphSettings = params.neuron_morphology_parameters;
+    auto loadSoma = morphSettings.load_soma;
+    auto loadAxon = morphSettings.load_axon;
+    auto loadDend = morphSettings.load_dendrites;
 
     MetadataFactory::create(context, model);
 
+    auto colorData = ColorDataFactory::create(context);
+
     if (loadSoma && !loadAxon && !loadDend)
     {
-        return SomaImporter::import(context, model);
+        return SomaImporter::import(context, model, std::move(colorData));
     }
 
-    return MorphologyImporter::import(context, model, updater);
+    return MorphologyImporter::import(context, model, updater, std::move(colorData));
 }
 } // namespace bbploader

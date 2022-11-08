@@ -16,33 +16,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ColorDataFactory.h"
 
-#include <bbp/sonata/nodes.h>
-
-#include <string>
-#include <vector>
+#include "SonataColorData.h"
 
 namespace sonataloader
 {
-/**
- * @brief Quieres a cell node population (biophysical, astrocyte, point_neuron) for the available coloring methods
- *
- */
-struct CellNodeColorMethods
+std::unique_ptr<IBrainColorData> ColorDataFactory::create(const EdgeLoadContext &context)
 {
-    static std::vector<std::string> get(const bbp::sonata::NodePopulation &population);
-};
+    auto &params = context.params;
+    auto afferent = params.load_afferent;
+    auto &config = context.config;
+    auto &edgePopulation = context.edgePopulation;
+    auto targetPopulation = afferent ? edgePopulation.target() : edgePopulation.source();
 
-/**
- * @brief Quieres a cell node population (biophysical, astrocyte, point_neuron) for the available coloring values
- *
- */
-struct CellNodeColorValues
+    auto &config = context.config;
+    auto nodePopulation = config.getNodes(targetPopulation);
+
+    return std::make_unique<SonataColorData>(std::move(nodePopulation));
+}
+
+std::unique_ptr<IBrainColorData> ColorDataFactory::create(const NodeLoadContext &ctxt)
 {
-    static std::vector<std::string>
-        get(const bbp::sonata::NodePopulation &population, const std::string &method, const std::vector<uint64_t> &ids);
-
-    static std::vector<std::string> getAll(const bbp::sonata::NodePopulation &population, const std::string &method);
-};
+    auto &config = ctxt.config;
+    auto &nodePopulation = ctxt.population;
+    auto populationName = nodePopulation.name();
+    return std::make_unique<SonataColorData>(config.getNodes(populationName));
+}
 }

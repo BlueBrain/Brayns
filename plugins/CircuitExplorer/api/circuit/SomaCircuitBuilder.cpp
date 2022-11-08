@@ -20,17 +20,16 @@
 
 #include "SomaCircuitBuilder.h"
 
-#include "colorhandlers/SomaColorHandler.h"
-
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
+#include <api/coloring/handlers/SimpleColorHandler.h>
+#include <components/BrainColorData.h>
 #include <components/CircuitIds.h>
-#include <components/ColorList.h>
-#include <components/Coloring.h>
+#include <components/ColorHandler.h>
 #include <systems/NeuronInspectSystem.h>
 
 namespace
@@ -55,18 +54,11 @@ public:
         geometries.elements.emplace_back(std::move(primitives));
     }
 
-    void addColoring(std::unique_ptr<IColorData> data)
+    void addColoring(std::unique_ptr<IBrainColorData> data)
     {
         auto &components = _model.getComponents();
-        auto handler = std::make_unique<SomaColorHandler>(components);
-        components.add<Coloring>(std::move(data), std::move(handler));
-    }
-
-    void addColorList(size_t numElements)
-    {
-        auto &components = _model.getComponents();
-        auto &colorList = components.add<ColorList>();
-        colorList.elements.resize(numElements, brayns::Vector4f(1.f));
+        components.add<ColorHandler>(std::make_unique<SimpleColorHandler>());
+        components.add<BrainColorData>(std::move(data));
     }
 
     void addSystems()
@@ -94,7 +86,7 @@ SomaCircuitBuilder::Context::Context(
 }
 
 std::vector<CellCompartments>
-    SomaCircuitBuilder::load(const Context &context, brayns::Model &model, std::unique_ptr<IColorData> colorData)
+    SomaCircuitBuilder::load(const Context &context, brayns::Model &model, std::unique_ptr<IBrainColorData> colorData)
 {
     const auto &ids = context.ids;
     const auto &positions = context.positions;
@@ -121,7 +113,6 @@ std::vector<CellCompartments>
     builder.addIds(ids);
     builder.addGeometry(std::move(geometry));
     builder.addColoring(std::move(colorData));
-    builder.addColorList(ids.size());
     builder.addSystems();
 
     return result;

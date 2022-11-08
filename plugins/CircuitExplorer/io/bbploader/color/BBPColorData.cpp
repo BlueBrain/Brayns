@@ -16,11 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ColorDataExtractor.h"
+#include "BBPColorData.h"
 
 #include <brayns/utils/string/StringCase.h>
-
-#include <api/neuron/NeuronColorMethod.h>
 
 #include <brain/brain.h>
 #include <brion/brion.h>
@@ -44,7 +42,6 @@ public:
     virtual std::vector<std::string> getRegions(const std::vector<uint64_t> &gids) const = 0;
     virtual std::vector<std::string> getSynapseClasses(const std::vector<uint64_t> &gids) const = 0;
     virtual std::vector<std::string> getMorphologyNames(const std::vector<uint64_t> &gids) const = 0;
-    virtual std::vector<uint64_t> getAllIds() const noexcept = 0;
 };
 
 class MVD2Circuit final : public CircuitAccessor
@@ -53,13 +50,6 @@ public:
     MVD2Circuit(const std::string &path)
         : _circuit(path)
     {
-    }
-
-    std::vector<uint64_t> getAllIds() const noexcept override
-    {
-        std::vector<uint64_t> result(_circuit.getNumNeurons());
-        std::iota(result.begin(), result.end(), 1u);
-        return result;
     }
 
     std::vector<std::string> getLayers(const std::vector<uint64_t> &gids) const final
@@ -162,13 +152,6 @@ public:
     GenericCircuit(std::unique_ptr<CircuitType> &&circuit)
         : _circuit(std::move(circuit))
     {
-    }
-
-    std::vector<uint64_t> getAllIds() const noexcept override
-    {
-        std::vector<uint64_t> result(_circuit->getNbNeuron());
-        std::iota(result.begin(), result.end(), 1u);
-        return result;
     }
 
     std::vector<std::string> getLayers(const std::vector<uint64_t> &gids) const final
@@ -288,21 +271,21 @@ public:
     {
     }
 
-    std::vector<std::string> query(NeuronColorMethod method, const std::vector<uint64_t> &ids)
+    std::vector<std::string> query(BrainColorMethod method, const std::vector<uint64_t> &ids)
     {
         switch (method)
         {
-        case NeuronColorMethod::ByLayer:
+        case BrainColorMethod::ByLayer:
             return _circuit.getLayers(ids);
-        case NeuronColorMethod::ByEtype:
+        case BrainColorMethod::ByEtype:
             return _circuit.getETypes(ids);
-        case NeuronColorMethod::ByMtype:
+        case BrainColorMethod::ByMtype:
             return _circuit.getMTypes(ids);
-        case NeuronColorMethod::ByMorphology:
+        case BrainColorMethod::ByMorphology:
             return _circuit.getMorphologyNames(ids);
-        case NeuronColorMethod::ByRegion:
+        case BrainColorMethod::ByRegion:
             return _circuit.getRegions(ids);
-        case NeuronColorMethod::BySynapseClass:
+        case BrainColorMethod::BySynapseClass:
             return _circuit.getSynapseClasses(ids);
         default:
             throw std::invalid_argument("Color method not handled for BlueConfig/CircuitConfig");
@@ -316,19 +299,19 @@ private:
 class ValidMethodBuilder
 {
 public:
-    inline static const std::vector<NeuronColorMethod> validMethods = {
-        NeuronColorMethod::ByEtype,
-        NeuronColorMethod::ByLayer,
-        NeuronColorMethod::ByMorphology,
-        NeuronColorMethod::ByMtype,
-        NeuronColorMethod::ByRegion,
-        NeuronColorMethod::BySynapseClass};
+    inline static const std::vector<BrainColorMethod> validMethods = {
+        BrainColorMethod::ByEtype,
+        BrainColorMethod::ByLayer,
+        BrainColorMethod::ByMorphology,
+        BrainColorMethod::ByMtype,
+        BrainColorMethod::ByRegion,
+        BrainColorMethod::BySynapseClass};
 
-    static std::vector<std::string> build(const CircuitAccessor &circuit)
+    static std::vector<BrainColorMethod> build(const CircuitAccessor &circuit)
     {
         auto querier = MethodQuerier(circuit);
 
-        auto validMethodNames = std::vector<std::string>();
+        auto validMethodNames = std::vector<BrainColorMethod>();
         validMethodNames.reserve(validMethods.size());
 
         for (auto method : validMethods)
@@ -338,7 +321,7 @@ public:
             {
                 continue;
             }
-            validMethodNames.push_back(brayns::EnumInfo::getName(method));
+            validMethodNames.push_back(method);
         }
 
         return validMethodNames;
@@ -349,29 +332,22 @@ public:
 
 namespace bbploader
 {
-std::vector<std::string> BBPColorMethods::get(const std::string &circuitPath, const std::string &population)
+BBPColorData::BBPColorData(std::string circuitPath, std::string circuitPop)
+    : _circuitPath(std::move(circuitPath))
+    , _circuitPop(std::move(circuitPop))
 {
-    auto circuit = CircuitFactory::instantiate(circuitPath, population);
+}
+
+std::vector<BrainColorMethod> BBPColorData::getMethods() const
+{
+    auto circuit = CircuitFactory::instantiate(_circuitPath, _circuitPop);
     return ValidMethodBuilder::build(*circuit);
 }
 
-std::vector<std::string> BBPColorValues::get(
-    const std::string &circuitPath,
-    const std::string &population,
-    const std::string &method,
-    const std::vector<uint64_t> &ids)
+std::vector<std::string> BBPColorData::getValues(BrainColorMethod method, const std::vector<uint64_t> &ids) const
 {
-    auto methodEnum = brayns::EnumInfo::getValue<NeuronColorMethod>(method);
-    auto circuit = CircuitFactory::instantiate(circuitPath, population);
+    auto circuit = CircuitFactory::instantiate(_circuitPath, _circuitPop);
     auto querier = MethodQuerier(*circuit);
-    return querier.query(methodEnum, ids);
+    return querier.query(method, ids);
 }
-
-std::vector<std::string>
-    BBPColorValues::getAll(const std::string &circuitPath, const std::string &population, const std::string &method)
-{
-    auto circuit = CircuitFactory::instantiate(circuitPath, population);
-    auto ids = circuit->getAllIds();
-    return get(circuitPath, population, method, ids);
-}
-}
+} // namespace bbploader
