@@ -26,7 +26,7 @@ from dataclasses import dataclass
 
 @dataclass
 class IdList:
-    """Compressed list of IDs in a string.
+    """List of IDs compressed into a string.
 
     IDs are comma-separated and consecutive IDs are represented as a range
     with start and end separated by a dash.
@@ -53,6 +53,7 @@ class IdList:
         """Create an ID list from a range of values."""
         return IdList(f'{start}-{end}')
 
-    def __or__(self, other: IdList) -> IdList:
-        """Combine two lists of IDs."""
-        return IdList.from_strings([self.value, other.value])
+    @staticmethod
+    def merge(values: Iterable[IdList]) -> IdList:
+        """Merge ID lists into a single one."""
+        return IdList.from_strings(value.value for value in values)
