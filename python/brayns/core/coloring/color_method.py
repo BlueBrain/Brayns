@@ -54,6 +54,11 @@ class ColorMethod:
         return ColorMethod('solid', {'color': color})
 
     @staticmethod
+    def by_geometry(colors: dict[str, Color4]) -> ColorMethod:
+        """Color model by geometry ID (str)."""
+        return ColorMethod('primitive', colors)
+
+    @staticmethod
     def by_triangle(colors: dict[str, Color4]) -> ColorMethod:
         """Color model by triangle ID (str)."""
         return ColorMethod('triangle', colors)
@@ -62,8 +67,3 @@ class ColorMethod:
     def by_vertex(colors: dict[str, Color4]) -> ColorMethod:
         """Color model by vertex ID (str)."""
         return ColorMethod('vertex', colors)
-
-    @staticmethod
-    def by_geometry(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by geometry ID (str)."""
-        return ColorMethod('primitive', colors)
