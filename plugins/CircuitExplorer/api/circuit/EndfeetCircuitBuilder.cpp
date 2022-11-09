@@ -18,23 +18,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SomaCircuitBuilder.h"
+#include "EndfeetCircuitBuilder.h"
 
 #include <brayns/engine/colormethods/SolidColorMethod.h>
 #include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GenericColorSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
-#include <api/coloring/handlers/SimpleColorHandler.h>
+#include <api/coloring/handlers/EndfeetColorHandler.h>
 #include <api/coloring/methods/BrainDatasetColorMethod.h>
 #include <api/coloring/methods/ElementIdColorMethod.h>
 #include <components/BrainColorData.h>
 #include <components/CircuitIds.h>
 #include <components/ColorHandler.h>
-#include <systems/NeuronInspectSystem.h>
 
 namespace
 {
@@ -47,18 +45,23 @@ public:
     {
     }
 
-    void addIds(std::vector<uint64_t> ids)
+    void addGeometry(std::map<uint64_t, std::vector<brayns::TriangleMesh>> endfeetGeometry)
     {
-        _components.add<CircuitIds>(std::move(ids));
-    }
+        auto &ids = _components.add<CircuitIds>();
+        ids.elements.reserve(endfeetGeometry.size());
 
-    void addGeometry(std::vector<brayns::Sphere> primitives)
-    {
-        _components.add<brayns::Geometries>(std::move(primitives));
+        auto &geometries = _components.add<brayns::Geometries>();
+        geometries.elements.reserve(endfeetGeometry.size());
+
+        for (auto &[id, primitives] : endfeetGeometry)
+        {
+            ids.elements.push_back(id);
+            geometries.elements.emplace_back(std::move(primitives));
+        }
+
         _systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
         _systems.setInitSystem<brayns::GeometryInitSystem>();
         _systems.setCommitSystem<brayns::GeometryCommitSystem>();
-        _systems.setInspectSystem<SomaInspectSystem>();
     }
 
     void addColoring(std::unique_ptr<IBrainColorData> data)
@@ -76,7 +79,7 @@ public:
 
         _systems.setColorSystem<brayns::GenericColorSystem>(std::move(colorMethods));
 
-        _components.add<ColorHandler>(std::make_unique<SimpleColorHandler>());
+        _components.add<ColorHandler>(std::make_unique<EndfeetColorHandler>());
         _components.add<BrainColorData>(std::move(data));
     }
 
@@ -86,33 +89,9 @@ private:
 };
 }
 
-std::vector<CellCompartments> SomaCircuitBuilder::build(brayns::Model &model, Context context)
+void EndfeetCircuitBuilder::build(brayns::Model &model, Context context)
 {
-    const auto &ids = context.ids;
-    const auto &positions = context.positions;
-    const auto radius = context.radius;
-
-    std::vector<CellCompartments> result(ids.size());
-    std::vector<brayns::Sphere> geometry(ids.size());
-
-#pragma omp parallel for
-    for (size_t i = 0; i < ids.size(); ++i)
-    {
-        const auto &pos = positions[i];
-        auto &somaSphere = geometry[i];
-        somaSphere.center = pos;
-        somaSphere.radius = radius;
-
-        auto &compartment = result[i];
-
-        compartment.numItems = 1;
-        compartment.sectionSegments[-1].push_back(0);
-    }
-
     auto builder = ModelBuilder(model);
-    builder.addIds(std::move(context.ids));
-    builder.addGeometry(std::move(geometry));
+    builder.addGeometry(std::move(context.meshes));
     builder.addColoring(std::move(context.colorData));
-
-    return result;
 }

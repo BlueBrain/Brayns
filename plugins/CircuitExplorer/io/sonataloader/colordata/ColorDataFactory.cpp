@@ -26,7 +26,6 @@ std::unique_ptr<IBrainColorData> ColorDataFactory::create(const EdgeLoadContext 
 {
     auto &params = context.params;
     auto afferent = params.load_afferent;
-    auto &config = context.config;
     auto &edgePopulation = context.edgePopulation;
     auto targetPopulation = afferent ? edgePopulation.target() : edgePopulation.source();
 

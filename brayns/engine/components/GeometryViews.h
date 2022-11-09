@@ -27,6 +27,22 @@ namespace brayns
 {
 struct GeometryViews
 {
+    GeometryViews() = default;
+
+    GeometryViews(const Geometry &geometry)
+    {
+        elements.emplace_back(geometry);
+    }
+
+    GeometryViews(const std::vector<Geometry> &geometries)
+    {
+        elements.reserve(geometries.size());
+        for (auto &geometry : geometries)
+        {
+            elements.emplace_back(geometry);
+        }
+    }
+
     ModifiedFlag modified;
     std::vector<GeometryView> elements;
 };

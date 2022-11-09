@@ -224,14 +224,14 @@ void SynapseImporter::fromData(
 {
     auto &params = context.params;
     auto radius = params.radius;
-    auto &config = context.config;
     auto &edgeSelection = context.edgeSelection;
     auto flatEdgeIds = edgeSelection.flatten();
     auto appender = SynapseAppender(flatEdgeIds, nodeIds, positions, radius);
     auto &synapseGeometry = appender.geometry;
     auto colorData = ColorDataFactory::create(context);
 
-    SynapseCircuitBuilder::build(context.model, std::move(synapseGeometry), std::move(colorData));
+    auto buildContext = SynapseCircuitBuilder::Context{std::move(synapseGeometry), std::move(colorData)};
+    SynapseCircuitBuilder::build(context.model, std::move(buildContext));
     SynapseReportImporter::import(context, appender.orderedSynapseIds);
 }
 }

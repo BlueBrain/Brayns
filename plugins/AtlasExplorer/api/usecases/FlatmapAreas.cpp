@@ -21,7 +21,6 @@
 #include "FlatmapAreas.h"
 
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
-#include <brayns/engine/components/ColorTools.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Box.h>
@@ -123,6 +122,28 @@ private:
     }
 };
 
+class ColorRoulette
+{
+public:
+    inline static const std::vector<brayns::Vector4f> colors = {
+        {1.f, 0.f, 0.f, 1.f},
+        {0.f, 1.f, 0.f, 1.f},
+        {0.f, 0.f, 1.f, 1.f},
+        {1.f, 1.f, 0.f, 1.f},
+        {1.f, 0.f, 1.f, 1.f},
+        {0.f, 1.f, 1.f, 1.f}};
+
+    const brayns::Vector4f &getNextColor() noexcept
+    {
+        auto retrive = _index;
+        _index = (_index + 1) % colors.size();
+        return colors[retrive];
+    }
+
+private:
+    size_t _index = 0;
+};
+
 class ModelBuilder
 {
 public:
@@ -136,7 +157,7 @@ public:
         geometries.elements.reserve(primitives.size());
         auto &views = components.add<brayns::GeometryViews>();
         views.elements.reserve(primitives.size());
-        auto roulette = brayns::ColorRoulette();
+        auto roulette = ColorRoulette();
         for (auto &primitiveList : primitives)
         {
             auto &geometry = geometries.elements.emplace_back(std::move(primitiveList));

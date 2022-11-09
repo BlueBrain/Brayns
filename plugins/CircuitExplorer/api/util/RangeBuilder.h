@@ -93,7 +93,7 @@ private:
             auto rangeEnd = input[i - 1];
             rangeList.push_back(_buildRange(rangeStart, rangeEnd));
 
-            start = i
+            start = i;
         }
 
         return rangeList;

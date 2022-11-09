@@ -27,29 +27,27 @@
 
 namespace sonataloader
 {
-void SomaImporter::import(NodeLoadContext &nodeContext)
+void SomaImporter::import(NodeLoadContext &context)
 {
-    NeuronMetadataFactory::create(nodeContext);
+    NeuronMetadataFactory::create(context);
 
-    auto &population = nodeContext.population;
-    auto &selection = nodeContext.selection;
-
+    auto &population = context.population;
+    auto &selection = context.selection;
     auto ids = selection.flatten();
 
     auto positions = Cells::getPositions(population, selection);
 
-    auto &params = nodeContext.params;
+    auto &params = context.params;
     auto &neuronParams = params.neuron_morphology_parameters;
+    auto radiusMultiplier = neuronParams.radius_multiplier;
 
-    auto radius = neuronParams.radius_multiplier;
+    auto buildContext = SomaCircuitBuilder::Context{
+        std::move(ids),
+        std::move(positions),
+        ColorDataFactory::create(context),
+        radiusMultiplier};
 
-    auto &model = nodeContext.model;
-
-    SomaCircuitBuilder::Context context(ids, positions, radius);
-
-    auto colorData = ColorDataFactory::create(nodeContext);
-
-    auto compartments = SomaCircuitBuilder::load(context, model, std::move(colorData));
-    NeuronReportFactory::create(nodeContext, compartments);
+    auto compartments = SomaCircuitBuilder::build(context.model, std::move(buildContext));
+    NeuronReportFactory::create(context, compartments);
 }
 }

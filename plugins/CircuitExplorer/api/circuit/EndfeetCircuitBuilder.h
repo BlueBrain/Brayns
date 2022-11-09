@@ -1,6 +1,8 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -16,20 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PointNeuronPopulationLoader.h"
+#pragma once
 
-#include <io/sonataloader/data/Names.h>
-#include <io/sonataloader/populations/nodes/common/SomaImporter.h>
+#include <brayns/engine/geometry/types/TriangleMesh.h>
+#include <brayns/engine/model/Model.h>
 
-namespace sonataloader
-{
-std::string_view PointNeuronPopulationLoader::getPopulationType() const noexcept
-{
-    return NodeNames::pointNeuron;
-}
+#include <api/coloring/IBrainColorData.h>
 
-void PointNeuronPopulationLoader::load(NodeLoadContext &context) const
+#include <map>
+#include <vector>
+
+class EndfeetCircuitBuilder
 {
-    SomaImporter::import(context);
-}
-} // namespace sonataloader
+public:
+    struct Context
+    {
+        std::map<uint64_t, std::vector<brayns::TriangleMesh>> meshes;
+        std::unique_ptr<IBrainColorData> colorData;
+    };
+
+    static void build(brayns::Model &model, Context context);
+};

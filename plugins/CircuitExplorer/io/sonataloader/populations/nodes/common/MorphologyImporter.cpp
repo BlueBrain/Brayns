@@ -38,7 +38,7 @@ public:
 
     static std::vector<brayns::Vector3f> extractPositions(const sonataloader::NodeLoadContext &context)
     {
-        auto positions = sonataloader::Cells::getPositions(context.population, context.selection);
+        return sonataloader::Cells::getPositions(context.population, context.selection);
     }
 
     static std::vector<std::string> extractMorphologyPaths(const sonataloader::NodeLoadContext &context)
@@ -70,23 +70,23 @@ public:
 
 namespace sonataloader
 {
-void MorphologyImporter::import(NodeLoadContext &nodeContext, const std::vector<brayns::Quaternion> &rotations)
+void MorphologyImporter::import(NodeLoadContext &context, const std::vector<brayns::Quaternion> &rotations)
 {
-    NeuronMetadataFactory::create(nodeContext);
+    NeuronMetadataFactory::create(context);
 
-    auto ids = DataExtractor::extractIds(nodeContext);
-    auto positions = DataExtractor::extractPositions(nodeContext);
-    auto morphologyPaths = DataExtractor::extractMorphologyPaths(nodeContext);
-    auto neuronParams = DataExtractor::extractNeuronParams(nodeContext);
-    auto context = MorphologyCircuitBuilder::Context(ids, morphologyPaths, positions, rotations, neuronParams);
+    auto ids = DataExtractor::extractIds(context);
+    auto positions = DataExtractor::extractPositions(context);
+    auto morphologyPaths = DataExtractor::extractMorphologyPaths(context);
+    auto neuronParams = DataExtractor::extractNeuronParams(context);
+    auto buildContext = MorphologyCircuitBuilder::Context{
+        std::move(ids),
+        std::move(morphologyPaths),
+        std::move(positions),
+        std::move(rotations),
+        neuronParams,
+        ColorDataFactory::create(context)};
 
-    auto &model = nodeContext.model;
-
-    auto &progressCallback = nodeContext.progress;
-
-    auto colorData = ColorDataFactory::create(nodeContext);
-
-    auto compartments = MorphologyCircuitBuilder::load(context, model, progressCallback, std::move(colorData));
-    NeuronReportFactory::create(nodeContext, compartments);
+    auto compartments = MorphologyCircuitBuilder::build(context.model, std::move(buildContext), context.progress);
+    NeuronReportFactory::create(context, compartments);
 }
 }

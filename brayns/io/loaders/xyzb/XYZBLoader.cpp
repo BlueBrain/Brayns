@@ -114,7 +114,7 @@ private:
     }
 };
 
-class ColorMethodList
+class XYZColorMethods
 {
 public:
     static auto build(size_t primitiveCount)
@@ -134,20 +134,18 @@ std::vector<std::shared_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob,
     Log::info("Loading xyz {}.", blob.name);
 
     auto spheres = XYZBReader::fromBytes(callback, std::string(blob.data.begin(), blob.data.end()));
+    auto sphereCount = spheres.size();
 
     auto model = std::make_shared<Model>("xyz");
 
     auto &components = model->getComponents();
-    auto &geometries = components.add<Geometries>();
-    geometries.elements.emplace_back(std::move(spheres));
-
-    auto colorMethods = ColorMethodList::build(geometries.elements.back().numPrimitives());
+    components.add<Geometries>(std::move(spheres));
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
     systems.setInitSystem<GeometryInitSystem>();
     systems.setCommitSystem<GeometryCommitSystem>();
-    systems.setColorSystem<GenericColorSystem>(std::move(colorMethods));
+    systems.setColorSystem<GenericColorSystem>(XYZColorMethods::build(sphereCount));
 
     std::vector<std::shared_ptr<Model>> result;
     result.push_back(std::move(model));

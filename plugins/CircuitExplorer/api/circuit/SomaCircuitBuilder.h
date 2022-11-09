@@ -33,13 +33,11 @@ struct SomaCircuitBuilder
 {
     struct Context
     {
-        Context(const std::vector<uint64_t> &ids, const std::vector<brayns::Vector3f> &positions, float radius);
-
-        const std::vector<uint64_t> &ids;
-        const std::vector<brayns::Vector3f> &positions;
-        const float radius;
+        std::vector<uint64_t> ids;
+        std::vector<brayns::Vector3f> positions;
+        std::unique_ptr<IBrainColorData> colorData;
+        float radius;
     };
 
-    static std::vector<CellCompartments>
-        load(const Context &context, brayns::Model &model, std::unique_ptr<IBrainColorData> colorData);
+    static std::vector<CellCompartments> build(brayns::Model &model, Context context);
 };

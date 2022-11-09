@@ -20,9 +20,8 @@
 
 #pragma once
 
-#include <brayns/utils/MathTypes.h>
-
 #include <brayns/engine/model/Model.h>
+#include <brayns/utils/MathTypes.h>
 
 #include <api/coloring/IBrainColorData.h>
 #include <api/reports/ReportMapping.h>
@@ -37,23 +36,13 @@ class MorphologyCircuitBuilder
 public:
     struct Context
     {
-        Context(
-            const std::vector<uint64_t> &ids,
-            const std::vector<std::string> &morphologyPaths,
-            const std::vector<brayns::Vector3f> &positions,
-            const std::vector<brayns::Quaternion> &rotations,
-            const NeuronMorphologyLoaderParameters &morphologyParams);
-
-        const std::vector<uint64_t> &ids;
-        const std::vector<std::string> &morphologyPaths;
-        const std::vector<brayns::Vector3f> &positions;
-        const std::vector<brayns::Quaternion> &rotations;
-        const NeuronMorphologyLoaderParameters &morphologyParams;
+        std::vector<uint64_t> ids;
+        std::vector<std::string> morphologyPaths;
+        std::vector<brayns::Vector3f> positions;
+        std::vector<brayns::Quaternion> rotations;
+        NeuronMorphologyLoaderParameters morphologyParams;
+        std::unique_ptr<IBrainColorData> colorData;
     };
 
-    static std::vector<CellCompartments> load(
-        const Context &context,
-        brayns::Model &model,
-        ProgressUpdater &cb,
-        std::unique_ptr<IBrainColorData> colorData);
+    static std::vector<CellCompartments> build(brayns::Model &model, Context context, ProgressUpdater &cb);
 };

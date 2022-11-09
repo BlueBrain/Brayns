@@ -20,11 +20,12 @@
 
 #include "ReportSystem.h"
 
+#include <brayns/engine/components/ColorMap.h>
 #include <brayns/engine/components/ColorRamp.h>
 #include <brayns/engine/components/SimulationInfo.h>
 
 #include <api/reports/ColorRampUtils.h>
-#include <components/Coloring.h>
+#include <components/ColorHandler.h>
 #include <components/ReportData.h>
 
 namespace
@@ -70,13 +71,18 @@ bool ReportSystem::shouldExecute(brayns::Components &components)
 void ReportSystem::execute(brayns::Components &components, uint32_t frame)
 {
     auto &colorRamp = components.get<brayns::ColorRamp>();
-    auto colors = ColorRampUtils::createSampleBuffer(colorRamp);
+    auto &colorMap = components.getOrAdd<brayns::ColorMap>();
+
+    colorMap.colors = ColorRampUtils::createSampleBuffer(colorRamp);
     auto &range = colorRamp.getValuesRange();
 
     auto &report = components.get<ReportData>();
     auto frameData = report.data->getFrame(frame);
-    auto indices = report.indexer->generate(frameData, range);
+    colorMap.indices = report.indexer->generate(frameData, range);
 
-    auto &coloring = components.get<Coloring>();
-    coloring.painter->updateIndexedColor(std::move(colors), std::move(indices));
+    auto &painter = *components.get<ColorHandler>().handler;
+    auto &geometries = components.get<brayns::Geometries>();
+    auto &views = components.get<brayns::GeometryViews>();
+
+    painter.colorByColormap(colorMap, geometries, views);
 }

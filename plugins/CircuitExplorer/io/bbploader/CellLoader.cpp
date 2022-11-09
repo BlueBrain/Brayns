@@ -38,17 +38,18 @@ public:
     {
         auto &circuit = context.circuit;
         auto &gids = context.gids;
+        auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
+
+        auto positions = circuit.getPositions(gids);
 
         auto &params = context.loadParameters;
         auto &morphParams = params.neuron_morphology_parameters;
-        auto radius = morphParams.radius_multiplier;
+        auto radiusMultiplier = morphParams.radius_multiplier;
 
-        auto positions = circuit.getPositions(gids);
-        auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
+        auto buildContext =
+            SomaCircuitBuilder::Context{std::move(ids), std::move(positions), std::move(colorData), radiusMultiplier};
 
-        auto loadContext = SomaCircuitBuilder::Context(ids, positions, radius);
-
-        return SomaCircuitBuilder::load(loadContext, model, std::move(colorData));
+        return SomaCircuitBuilder::build(model, std::move(buildContext));
     }
 };
 
@@ -68,18 +69,22 @@ public:
     {
         auto &circuit = context.circuit;
         auto &gids = context.gids;
-
-        auto &params = context.loadParameters;
-        auto &morphParams = params.neuron_morphology_parameters;
-
+        auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
         auto morphPaths = _getMorphologyPaths(circuit, gids);
         auto positions = circuit.getPositions(gids);
         auto rotations = circuit.getRotations(gids);
-        auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
+        auto &params = context.loadParameters;
+        auto &morphParams = params.neuron_morphology_parameters;
 
-        auto loadContext = MorphologyCircuitBuilder::Context(ids, morphPaths, positions, rotations, morphParams);
+        auto buildContext = MorphologyCircuitBuilder::Context{
+            std::move(ids),
+            std::move(morphPaths),
+            std::move(positions),
+            std::move(rotations),
+            morphParams,
+            std::move(colorData)};
 
-        return MorphologyCircuitBuilder::load(loadContext, model, updater, std::move(colorData));
+        return MorphologyCircuitBuilder::build(model, std::move(buildContext), updater);
     }
 
 private:

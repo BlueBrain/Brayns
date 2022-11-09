@@ -18,12 +18,16 @@
 
 #include "SynapseCircuitBuilder.h"
 
+#include <brayns/engine/colormethods/SolidColorMethod.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GenericColorSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
 #include <api/coloring/handlers/ComposedColorHandler.h>
+#include <api/coloring/methods/BrainDatasetColorMethod.h>
+#include <api/coloring/methods/ElementIdColorMethod.h>
 #include <components/BrainColorData.h>
 #include <components/CircuitIds.h>
 #include <components/ColorHandler.h>
@@ -34,54 +38,58 @@ class ModelBuilder
 {
 public:
     ModelBuilder(brayns::Model &model)
-        : _model(model)
+        : _components(model.getComponents())
+        , _systems(model.getSystems())
     {
     }
 
     void addGeometry(std::map<uint64_t, std::vector<brayns::Sphere>> groupedSynapses)
     {
-        auto &components = _model.getComponents();
-
-        auto &ids = components.add<CircuitIds>();
+        auto &ids = _components.add<CircuitIds>();
         ids.elements.reserve(groupedSynapses.size());
 
-        auto &geometries = components.add<brayns::Geometries>();
+        auto &geometries = _components.add<brayns::Geometries>();
         geometries.elements.reserve(groupedSynapses.size());
 
         for (auto &[id, primitives] : groupedSynapses)
         {
             ids.elements.push_back(id);
-            geometries.elements.push_back(std::move(primitives));
+            geometries.elements.emplace_back(std::move(primitives));
         }
+
+        _systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+        _systems.setInitSystem<brayns::GeometryInitSystem>();
+        _systems.setCommitSystem<brayns::GeometryCommitSystem>();
     }
 
-    void addColoring(std::unique_ptr<IBrainColorData> colorData)
+    void addColoring(std::unique_ptr<IBrainColorData> data)
     {
-        auto &components = _model.getComponents();
-        components.add<ColorHandler>(std::make_unique<ComposedColorHandler>());
-        components.add<BrainColorData>(std::move(colorData));
-    }
+        auto availableMethods = data->getMethods();
+        auto colorMethods = brayns::ColorMethodList();
+        colorMethods.reserve(availableMethods.size() + 2);
 
-    void addSystems()
-    {
-        auto &systems = _model.getSystems();
-        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-        systems.setInitSystem<brayns::GeometryInitSystem>();
-        systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        colorMethods.push_back(std::make_unique<brayns::SolidColorMethod>());
+        colorMethods.push_back(std::make_unique<ElementIdColorMethod>());
+        for (auto method : availableMethods)
+        {
+            colorMethods.push_back(std::make_unique<BrainDatasetColorMethod>(method));
+        }
+
+        _systems.setColorSystem<brayns::GenericColorSystem>(std::move(colorMethods));
+
+        _components.add<ColorHandler>(std::make_unique<ComposedColorHandler>());
+        _components.add<BrainColorData>(std::move(data));
     }
 
 private:
-    brayns::Model &_model;
+    brayns::Components &_components;
+    brayns::Systems &_systems;
 };
 }
 
-void SynapseCircuitBuilder::build(
-    brayns::Model &model,
-    std::map<uint64_t, std::vector<brayns::Sphere>> groupedSynapses,
-    std::unique_ptr<IBrainColorData> colorData)
+void SynapseCircuitBuilder::build(brayns::Model &model, Context context)
 {
     auto builder = ModelBuilder(model);
-    builder.addGeometry(std::move(groupedSynapses));
-    builder.addColoring(std::move(colorData));
-    builder.addSystems();
+    builder.addGeometry(std::move(context.groupedSynapses));
+    builder.addColoring(std::move(context.colorData));
 }

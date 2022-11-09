@@ -33,8 +33,11 @@
 class SynapseCircuitBuilder
 {
 public:
-    static void build(
-        brayns::Model &model,
-        std::map<uint64_t, std::vector<brayns::Sphere>> groupedSynapses,
-        std::unique_ptr<IBrainColorData> colorData);
+    struct Context
+    {
+        std::map<uint64_t, std::vector<brayns::Sphere>> groupedSynapses;
+        std::unique_ptr<IBrainColorData> colorData;
+    };
+
+    static void build(brayns::Model &model, Context context);
 };

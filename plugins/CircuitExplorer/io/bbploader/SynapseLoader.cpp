@@ -105,7 +105,10 @@ std::shared_ptr<brayns::Model> SynapseLoader::load(const LoadContext &context, b
     auto model = std::make_shared<brayns::Model>(modelType);
     auto geometryData = GeometryLoader::load(context, post);
     auto colorData = ColorDataFactory::create(context);
-    SynapseCircuitBuilder::build(*model, std::move(geometryData), std::move(colorData));
+
+    auto buildContext = SynapseCircuitBuilder::Context{std::move(geometryData), std::move(colorData)};
+    SynapseCircuitBuilder::build(*model, std::move(buildContext));
+
     return model;
 }
 } // namespace bbploader

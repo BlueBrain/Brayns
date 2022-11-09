@@ -56,6 +56,8 @@ void BrainDatasetColorMethod::apply(brayns::Components &components, const brayns
     auto &ids = components.get<CircuitIds>().elements;
     auto &colors = components.getOrAdd<brayns::ColorList>();
 
+    colors.elements.resize(ids.size(), brayns::Vector4f(1.f));
+
     auto allValues = colorData.getValues(_method, ids);
 
     for (size_t i = 0; i < ids.size(); ++i)

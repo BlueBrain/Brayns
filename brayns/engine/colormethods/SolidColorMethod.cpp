@@ -21,6 +21,8 @@
 #include "SolidColorMethod.h"
 
 #include <brayns/engine/components/ColorList.h>
+#include <brayns/engine/components/ColorMap.h>
+#include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/GeometryViews.h>
 
 namespace
@@ -30,6 +32,42 @@ struct SolidMethodNames
     inline static const std::string name = "solid";
     inline static const std::string value = "color";
 };
+
+class ColorFiller
+{
+public:
+    static void fill(brayns::Components &components, const brayns::Vector4f &color)
+    {
+        _fillColorList(components, color);
+        _fillColorMap(components, color);
+    }
+
+private:
+    static void _fillColorList(brayns::Components &components, const brayns::Vector4f &color)
+    {
+        auto colorList = components.find<brayns::ColorList>();
+        if (!colorList)
+        {
+            return;
+        }
+
+        auto &colors = colorList->elements;
+        std::fill(colors.begin(), colors.end(), color);
+    }
+
+    static void _fillColorMap(brayns::Components &components, const brayns::Vector4f &color)
+    {
+        auto colorMap = components.find<brayns::ColorMap>();
+        if (!colorMap)
+        {
+            return;
+        }
+
+        auto &colors = colorMap->colors;
+        std::fill(colors.begin(), colors.end(), color);
+    }
+};
+
 }
 
 namespace brayns
@@ -47,13 +85,16 @@ std::vector<std::string> SolidColorMethod::getValues(Components &components) con
 
 void SolidColorMethod::apply(Components &components, const ColorMethodInput &input) const
 {
-    auto &color = input.at(SolidMethodNames::value);
+    auto &solidColor = components.getOrAdd<ColorSolid>();
+    solidColor.color = input.at(SolidMethodNames::value);
 
     auto &views = components.get<GeometryViews>();
     for (auto &view : views.elements)
     {
-        view.setColor(color);
+        view.setColor(solidColor.color);
     }
+
+    ColorFiller::fill(components, solidColor.color);
 
     views.modified = true;
 }
