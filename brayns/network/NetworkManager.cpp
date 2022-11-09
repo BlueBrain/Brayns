@@ -44,12 +44,12 @@
 #include <brayns/network/entrypoints/ClearClipPlanesEntrypoint.h>
 #include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
 #include <brayns/network/entrypoints/ClearModelsEntrypoint.h>
+#include <brayns/network/entrypoints/ColorRampEntrypoint.h>
 #include <brayns/network/entrypoints/EnableSimulationEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
-#include <brayns/network/entrypoints/ModelColorRampEntrypoint.h>
 #include <brayns/network/entrypoints/ModelMaterialEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RegistryEntrypoint.h>
@@ -109,6 +109,7 @@ public:
         builder.add<brayns::GetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::GetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::GetCameraTypeEntrypoint>(engine);
+        builder.add<brayns::GetColorRampEntrypoint>(models);
         builder.add<brayns::GetLoadersEntrypoint>(loaders);
         builder.add<brayns::GetMaterialCarPaint>(models);
         builder.add<brayns::GetMaterialEmissive>(models);
@@ -119,7 +120,6 @@ public:
         builder.add<brayns::GetMaterialPlastic>(models);
         builder.add<brayns::GetMaterialType>(models);
         builder.add<brayns::GetModelEntrypoint>(models);
-        builder.add<brayns::GetModelTransferFunctionEntrypoint>(models);
         builder.add<brayns::GetRendererInteractiveEntrypoint>(engine);
         builder.add<brayns::GetRendererProductionEntrypoint>(engine);
         builder.add<brayns::GetRendererTypeEntrypoint>(engine);
@@ -135,6 +135,7 @@ public:
         builder.add<brayns::SetCameraLookAtEntrypoint>(engine);
         builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::SetCameraPerspectiveEntrypoint>(engine);
+        builder.add<brayns::SetColorRampEntrypoint>(models);
         builder.add<brayns::SetMaterialCarPaint>(models);
         builder.add<brayns::SetMaterialEmissive>(models);
         builder.add<brayns::SetMaterialGlass>(models);
@@ -142,7 +143,6 @@ public:
         builder.add<brayns::SetMaterialMetal>(models);
         builder.add<brayns::SetMaterialPhong>(models);
         builder.add<brayns::SetMaterialPlastic>(models);
-        builder.add<brayns::SetModelTransferFunctionEntrypoint>(models);
         builder.add<brayns::SetRendererInteractiveEntrypoint>(engine);
         builder.add<brayns::SetRendererProductionEntrypoint>(engine);
         builder.add<brayns::SetSimulationParametersEntrypoint>(simulation);

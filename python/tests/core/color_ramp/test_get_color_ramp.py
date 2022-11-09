@@ -32,7 +32,7 @@ class TestGetColorRamp(unittest.TestCase):
         instance = MockInstance(MockColorRamp.message)
         test = brayns.get_color_ramp(instance, 0)
         self.assertEqual(test, MockColorRamp.color_ramp)
-        self.assertEqual(instance.method, 'get-model-transfer-function')
+        self.assertEqual(instance.method, 'get-color-ramp')
         self.assertEqual(instance.params, {'id': 0})
 
 

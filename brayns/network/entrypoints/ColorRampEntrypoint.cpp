@@ -19,28 +19,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ModelColorRampEntrypoint.h"
+#include "ColorRampEntrypoint.h"
 
 #include <brayns/network/common/ExtractModel.h>
 
 namespace brayns
 {
-GetModelTransferFunctionEntrypoint::GetModelTransferFunctionEntrypoint(ModelManager &models)
+GetColorRampEntrypoint::GetColorRampEntrypoint(ModelManager &models)
     : _models(models)
 {
 }
 
-std::string GetModelTransferFunctionEntrypoint::getMethod() const
+std::string GetColorRampEntrypoint::getMethod() const
 {
-    return "get-model-transfer-function";
+    return "get-color-ramp";
 }
 
-std::string GetModelTransferFunctionEntrypoint::getDescription() const
+std::string GetColorRampEntrypoint::getDescription() const
 {
-    return "Get the transfer function of the given model";
+    return "Get the color ramp of the given model";
 }
 
-void GetModelTransferFunctionEntrypoint::onRequest(const Request &request)
+void GetColorRampEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.id;
@@ -52,29 +52,29 @@ void GetModelTransferFunctionEntrypoint::onRequest(const Request &request)
         request.reply(*colorRamp);
         return;
     }
-    throw JsonRpcException("The requested model does not have a transfer function");
+    throw JsonRpcException("The requested model does not have a color ramp");
 }
 
-SetModelTransferFunctionEntrypoint::SetModelTransferFunctionEntrypoint(ModelManager &models)
+SetColorRampEntrypoint::SetColorRampEntrypoint(ModelManager &models)
     : _models(models)
 {
 }
 
-std::string SetModelTransferFunctionEntrypoint::getMethod() const
+std::string SetColorRampEntrypoint::getMethod() const
 {
-    return "set-model-transfer-function";
+    return "set-color-ramp";
 }
 
-std::string SetModelTransferFunctionEntrypoint::getDescription() const
+std::string SetColorRampEntrypoint::getDescription() const
 {
-    return "Set the transfer function of the given model";
+    return "Set the color ramp of the given model";
 }
 
-void SetModelTransferFunctionEntrypoint::onRequest(const Request &request)
+void SetColorRampEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     auto modelId = params.id;
-    auto &buffer = params.transfer_function;
+    auto &buffer = params.color_ramp;
     auto &modelInstance = ExtractModel::fromId(_models, modelId);
     auto &model = modelInstance.getModel();
     auto &components = model.getComponents();
@@ -85,6 +85,6 @@ void SetModelTransferFunctionEntrypoint::onRequest(const Request &request)
         return;
     }
 
-    throw InvalidRequestException("The requested model does not have a transfer function");
+    throw InvalidRequestException("The requested model does not have a color ramp");
 }
 } // namespace brayns
