@@ -26,7 +26,19 @@ from .color_method import ColorMethod
 def color_model(instance: Instance, model_id: int, method: ColorMethod) -> None:
     """Color a model by the given method.
 
-    See ``get_color_methods`` and ``get_color_method_values`` for more details.
+    Color method is usually a mapping from method value to color.
+
+    For example to color a circuit by GID the method colors can be {
+        '1': brayns.Color4.red,
+        '2': brayns.Color4.blue,
+    }
+
+    Where 1 and 2 are the method values (here GIDs) mapped to the color that
+    must be applied to them.
+
+    Supported methods depend on the plugins loaded in the service instance and
+    the model type. See ``get_color_methods`` and ``get_color_method_values``
+    for more details.
 
     :param instance: Instance.
     :type instance: Instance

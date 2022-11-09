@@ -33,7 +33,7 @@ def get_color_method_values(instance: Instance, model_id: int, method: str) -> l
     :type model_id: int
     :param method: Coloring method name.
     :type method: str
-    :return: List of values available for given method.
+    :return: Method values.
     :rtype: list[str]
     """
     params = {

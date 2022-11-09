@@ -28,7 +28,7 @@ def get_color_methods(instance: Instance, model_id: int) -> list[str]:
     :type instance: Instance
     :param model_id: Model ID.
     :type model_id: int
-    :return: List of available coloring methods.
+    :return: Color method names.
     :rtype: list[str]
     """
     params = {'id': model_id}
