@@ -19,7 +19,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .car_paint_material import CarPaintMaterial
-from .default_material import DefaultMaterial
 from .emissive_material import EmissiveMaterial
 from .get_material import get_material
 from .get_material_name import get_material_name
@@ -27,12 +26,12 @@ from .glass_material import GlassMaterial
 from .material import Material
 from .matte_material import MatteMaterial
 from .metal_material import MetalMaterial
+from .phong_material import PhongMaterial
 from .plastic_material import PlasticMaterial
 from .set_material import set_material
 
 __all__ = [
     'CarPaintMaterial',
-    'DefaultMaterial',
     'EmissiveMaterial',
     'get_material_name',
     'get_material',
@@ -40,6 +39,7 @@ __all__ = [
     'Material',
     'MatteMaterial',
     'MetalMaterial',
+    'PhongMaterial',
     'PlasticMaterial',
     'set_material',
 ]

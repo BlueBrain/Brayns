@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ModelMaterialEntrypoint.h"
+#include "MaterialEntrypoint.h"
 
 namespace brayns
 {
@@ -64,7 +64,7 @@ std::string SetMaterialCarPaint::getMethod() const
 
 std::string SetMaterialCarPaint::getDescription() const
 {
-    return "Updates the material of the given model to a Car paint material. "
+    return "Updates the material of the given model to a car paint material. "
            "This material is only usable with the production renderer";
 }
 
@@ -75,12 +75,12 @@ SetMaterialPhong::SetMaterialPhong(ModelManager &models)
 
 std::string SetMaterialPhong::getMethod() const
 {
-    return "set-material-default";
+    return "set-material-phong";
 }
 
 std::string SetMaterialPhong::getDescription() const
 {
-    return "Updates the material of the given model to the Default material. This material works with all renderers. "
+    return "Updates the material of the given model to the phong material. This material works with all renderers. "
            "It has a matte appearance.";
 }
 
@@ -96,7 +96,7 @@ std::string SetMaterialEmissive::getMethod() const
 
 std::string SetMaterialEmissive::getDescription() const
 {
-    return "Updates the material of the given model to an Emisive material. "
+    return "Updates the material of the given model to an emisive material. "
            "This material is only usable with the production renderer";
 }
 
@@ -112,7 +112,7 @@ std::string SetMaterialGlass::getMethod() const
 
 std::string SetMaterialGlass::getDescription() const
 {
-    return "Updates the material of the given model to a Glass material. "
+    return "Updates the material of the given model to a glass material. "
            "This material is only usable with the production renderer";
 }
 
@@ -128,7 +128,7 @@ std::string SetMaterialMatte::getMethod() const
 
 std::string SetMaterialMatte::getDescription() const
 {
-    return "Updates the material of the given model to a Matte material. "
+    return "Updates the material of the given model to a matte material. "
            "This material is only usable with the production renderer";
 }
 
@@ -144,7 +144,7 @@ std::string SetMaterialMetal::getMethod() const
 
 std::string SetMaterialMetal::getDescription() const
 {
-    return "Updates the material of the given model to a Metal material. "
+    return "Updates the material of the given model to a metal material. "
            "This material is only usable with the production renderer";
 }
 
@@ -160,7 +160,7 @@ std::string SetMaterialPlastic::getMethod() const
 
 std::string SetMaterialPlastic::getDescription() const
 {
-    return "Updates the material of the given model to a Plastic material. "
+    return "Updates the material of the given model to a plastic material. "
            "This material is only usable with the production renderer";
 }
 
@@ -186,7 +186,7 @@ GetMaterialPhong::GetMaterialPhong(ModelManager &models)
 
 std::string GetMaterialPhong::getMethod() const
 {
-    return "get-material-default";
+    return "get-material-phong";
 }
 
 std::string GetMaterialPhong::getDescription() const
