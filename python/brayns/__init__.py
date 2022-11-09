@@ -55,6 +55,7 @@ __all__ = [
     'Capsule',
     'CarPaintMaterial',
     'check_version',
+    'CircuitColorMethod',
     'clear_clipping_geometries',
     'clear_lights',
     'clear_models',

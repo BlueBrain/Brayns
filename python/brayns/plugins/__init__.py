@@ -41,6 +41,7 @@ __all__ = [
     'BbpLoader',
     'BbpReport',
     'BbpReportType',
+    'CircuitColorMethod',
     'CylindricProjection',
     'DtiLoader',
     'GeometryType',

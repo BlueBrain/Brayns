@@ -25,38 +25,34 @@ import brayns
 
 class TestColorMethod(unittest.TestCase):
 
+    @classmethod
+    @property
+    def colors(cls) -> dict[str, brayns.Color4]:
+        return {
+            '1': brayns.Color4.red,
+            '2': brayns.Color4.blue,
+        }
+
     def test_single_color(self) -> None:
         color = brayns.Color4.red
         test = brayns.ColorMethod.single_color(color)
         self.assertEqual(test.name, 'solid')
         self.assertEqual(test.colors, {'color': color})
 
-    def test_by_geometry(self) -> None:
-        colors = {
-            '1': brayns.Color4.red,
-            '2': brayns.Color4.blue,
-        }
-        test = brayns.ColorMethod.by_geometry(colors)
+    def test_geometry(self) -> None:
+        test = brayns.ColorMethod.geometry(self.colors)
         self.assertEqual(test.name, 'primitive')
-        self.assertEqual(test.colors, colors)
+        self.assertEqual(test.colors, self.colors)
 
-    def test_by_triangle(self) -> None:
-        colors = {
-            '1': brayns.Color4.red,
-            '2': brayns.Color4.blue,
-        }
-        test = brayns.ColorMethod.by_triangle(colors)
+    def test_triangle(self) -> None:
+        test = brayns.ColorMethod.triangle(self.colors)
         self.assertEqual(test.name, 'triangle')
-        self.assertEqual(test.colors, colors)
+        self.assertEqual(test.colors, self.colors)
 
-    def test_by_vertex(self) -> None:
-        colors = {
-            '1': brayns.Color4.red,
-            '2': brayns.Color4.blue,
-        }
-        test = brayns.ColorMethod.by_vertex(colors)
+    def test_vertex(self) -> None:
+        test = brayns.ColorMethod.vertex(self.colors)
         self.assertEqual(test.name, 'vertex')
-        self.assertEqual(test.colors, colors)
+        self.assertEqual(test.colors, self.colors)
 
 
 if __name__ == '__main__':
