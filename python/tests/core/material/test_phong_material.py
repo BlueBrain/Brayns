@@ -26,7 +26,7 @@ import brayns
 class TestPhongMaterial(unittest.TestCase):
 
     def test_name(self) -> None:
-        self.assertEqual(brayns.PhongMaterial.name, 'default')
+        self.assertEqual(brayns.PhongMaterial.name, 'phong')
 
     def test_get_properties(self) -> None:
         test = brayns.PhongMaterial(0.5)
