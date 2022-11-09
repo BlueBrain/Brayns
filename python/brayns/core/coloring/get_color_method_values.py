@@ -24,8 +24,8 @@ from brayns.network import Instance
 def get_color_method_values(instance: Instance, model_id: int, method: str) -> list[str]:
     """Get available values for a coloring method on the given model.
 
-    For example, method 'by_layer' has values ['1', '2', '3'] if the model has
-    3 layers. 
+    For example, color method 'layer' has values ['1', '2', '3'] if the model
+    has 3 layers. 
 
     :param instance: Instance.
     :type instance: Instance

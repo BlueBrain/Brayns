@@ -22,14 +22,10 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestColorCircuitById(SimpleTestCase):
+class TestColorModel(SimpleTestCase):
 
-    def test_color_circuit_by_id(self) -> None:
-        loader = brayns.BbpLoader(
-            cells=brayns.BbpCells.from_gids([1, 2])
-        )
+    def test_color_model(self) -> None:
+        loader = brayns.BbpLoader()
         models = loader.load_models(self.instance, self.bbp_circuit)
-        brayns.color_circuit_by_id(self.instance, models[0].id, {
-            brayns.CellId('1'): brayns.Color4.green,
-            brayns.CellId('2'): brayns.Color4.blue,
-        })
+        method = brayns.ColorMethod.single_color(brayns.Color4.red)
+        brayns.color_model(self.instance, models[0].id, method)

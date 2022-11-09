@@ -22,13 +22,14 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestGetColorMethodValues(SimpleTestCase):
+class TestGetColorMethods(SimpleTestCase):
 
-    def test_get_color_method_values(self) -> None:
+    def test_get_color_methods(self) -> None:
         loader = brayns.BbpLoader()
         models = loader.load_models(self.instance, self.bbp_circuit)
-        id = models[0].id
-        method = brayns.ColorMethod.LAYER
-        values = brayns.get_color_method_values(self.instance, id, method)
-        ref = [str(i) for i in range(6)]
-        self.assertEqual(values, ref)
+        methods = brayns.get_color_methods(self.instance, models[0].id)
+        ref = {
+            brayns.CircuitColorMethod.layer({}).name,
+        }
+        self.assertEqual(len(methods), len(ref))
+        self.assertSetEqual(set(methods), ref)
