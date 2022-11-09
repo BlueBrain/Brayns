@@ -1,5 +1,31 @@
 # Change Log
 
+## [3.0.0](https://github.com/BlueBrain/Brayns/tree/3.0.0)
+
+**Implemented enhancements:**
+
+- Tested SONATA support [\#1092](https://github.com/BlueBrain/Brayns/pull/1092)
+- Frame exporter removed [\#1091](https://github.com/BlueBrain/Brayns/pull/1091)
+- Removed streaming [\#1075](https://github.com/BlueBrain/Brayns/pull/1075)
+- Protobuffer messages [\#1067](https://github.com/BlueBrain/Brayns/pull/1067)
+- Python API documentation automated [\#1059](https://github.com/BlueBrain/Brayns/pull/1059)
+- Loading morphologies support [\#1048](https://github.com/BlueBrain/Brayns/pull/1048)
+- OpenDeck camera [\#1045](https://github.com/BlueBrain/Brayns/pull/1045)
+- DTI plugin refactoring [\#1044](https://github.com/BlueBrain/Brayns/pull/1044)
+- Automated Python client deployment [\#1039](https://github.com/BlueBrain/Brayns/pull/1039)
+- OSPRay 2.10 [\#1037](https://github.com/BlueBrain/Brayns/pull/1037)
+- NRRD support with Atlas Explorer plugin [\#1027](https://github.com/BlueBrain/Brayns/pull/1027)
+- Python viewer [\#1021](https://github.com/BlueBrain/Brayns/pull/1021)
+- High level Python API [\#1007](https://github.com/BlueBrain/Brayns/pull/1007)
+- Engine refactoring [\#1003](https://github.com/BlueBrain/Brayns/pull/1003)
+- Removed auto generated Python API [\#998](https://github.com/BlueBrain/Brayns/pull/998)
+- Network is synchronous with no notifications [\#988](https://github.com/BlueBrain/Brayns/pull/988)
+- Boost + nonstd removed [\#981](https://github.com/BlueBrain/Brayns/pull/981)
+- Async++ removed [\#975](https://github.com/BlueBrain/Brayns/pull/975)
+- Assimp removed [\#967](https://github.com/BlueBrain/Brayns/pull/967)
+- Gitlab CI [\#956](https://github.com/BlueBrain/Brayns/pull/956)
+- C++17 support [\#953](https://github.com/BlueBrain/Brayns/pull/953)
+
 ## [2.0.0](https://github.com/BlueBrain/Brayns/tree/2.0.0)
 
 **Implemented enhancements:**
