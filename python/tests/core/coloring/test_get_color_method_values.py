@@ -24,29 +24,18 @@ import brayns
 from tests.mock_instance import MockInstance
 
 
-class TestColorCircuitByMethod(unittest.TestCase):
+class TestGetColorMethodValues(unittest.TestCase):
 
-    def test_color_circuit_by_method(self) -> None:
-        instance = MockInstance()
-        method = brayns.ColorMethod.HEMISPHERE
-        brayns.color_circuit_by_method(instance, 0, method, {
-            'test1': brayns.Color4.white,
-            'test2': brayns.Color4.red,
-        })
-        self.assertEqual(instance.method, 'color-circuit-by-method')
+    def test_get_color_values(self) -> None:
+        values = ['1', '2', '3']
+        method = 'test'
+        instance = MockInstance(values)
+        test = brayns.get_color_values(instance, 0, method)
+        self.assertEqual(test, values)
+        self.assertEqual(instance.method, 'get-color-values')
         self.assertEqual(instance.params, {
-            'model_id': 0,
-            'method': 'hemisphere',
-            'color_info': [
-                {
-                    'variable': 'test1',
-                    'color': [1, 1, 1, 1],
-                },
-                {
-                    'variable': 'test2',
-                    'color': [1, 0, 0, 1],
-                },
-            ]
+            'id': 0,
+            'method': method,
         })
 
 

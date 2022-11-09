@@ -18,18 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import unittest
+
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+from tests.mock_instance import MockInstance
 
 
-class TestColorCircuitById(SimpleTestCase):
+class TestSetModelColor(unittest.TestCase):
 
-    def test_color_circuit_by_id(self) -> None:
-        loader = brayns.BbpLoader(
-            cells=brayns.BbpCells.from_gids([1, 2])
-        )
-        models = loader.load_models(self.instance, self.bbp_circuit)
-        brayns.color_circuit_by_id(self.instance, models[0].id, {
-            brayns.CellId('1'): brayns.Color4.green,
-            brayns.CellId('2'): brayns.Color4.blue,
+    def test_set_model_color(self) -> None:
+        instance = MockInstance()
+        brayns.set_model_color(instance, 1, brayns.Color4.red)
+        self.assertEqual(instance.method, 'color-model')
+        self.assertEqual(instance.params, {
+            'id': 1,
+            'method': brayns.ColorMethod.SOLID,
+            'values': {
+                'color': [1, 0, 0, 1],
+            }
         })
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -18,22 +18,32 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import unittest
+
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+from tests.mock_instance import MockInstance
 
 
-class TestGetColorMethods(SimpleTestCase):
+class TestColorModel(unittest.TestCase):
 
-    def test_get_color_methods(self) -> None:
-        loader = brayns.BbpLoader()
-        models = loader.load_models(self.instance, self.bbp_circuit)
-        methods = brayns.get_color_methods(self.instance, models[0].id)
-        ref = {
-            brayns.ColorMethod.LAYER,
-            brayns.ColorMethod.MTYPE,
-            brayns.ColorMethod.ETYPE,
-            brayns.ColorMethod.MORPHOLOGY,
-            brayns.ColorMethod.MORPHOLOGY_SECTION,
+    def test_color_model(self) -> None:
+        method = brayns.ColorMethod.VERTEX
+        colors = {
+            '1': brayns.Color4.red,
+            '2': brayns.Color4.blue,
         }
-        self.assertEqual(len(methods), len(ref))
-        self.assertSetEqual(set(methods), ref)
+        instance = MockInstance()
+        brayns.color_model(instance, 1, method, colors)
+        self.assertEqual(instance.method, 'color-model')
+        self.assertEqual(instance.params, {
+            'id': 1,
+            'method': method,
+            'values': {
+                '1': [1, 0, 0, 1],
+                '2': [0, 0, 1, 1],
+            }
+        })
+
+
+if __name__ == '__main__':
+    unittest.main()

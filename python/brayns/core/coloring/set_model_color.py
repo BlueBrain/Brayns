@@ -22,39 +22,17 @@ from brayns.network import Instance
 from brayns.utils import Color4
 
 from .color_method import ColorMethod
+from .color_model import color_model
 
 
-def color_circuit_by_method(
-    instance: Instance,
-    model_id: int,
-    method: ColorMethod,
-    colors: dict[str, Color4],
-) -> None:
-    """Color a circuit using a given coloring method.
-
-    Use a mapping from method value (str) to color.
-
-    Available methods and method values can be queried for a given model using
-    ``get_color_methods`` and ``get_color_method_values``.
+def set_model_color(instance: Instance, model_id: int, color: Color4) -> None:
+    """Shortcut to color a model using a single color.
 
     :param instance: Instance.
     :type instance: Instance
-    :param model_id: Circuit model ID.
+    :param model_id: ID of the model to color.
     :type model_id: int
-    :param method: Coloring method.
-    :type method: ColorMethod
-    :param colors: Mapping method value -> Color.
-    :type colors: dict[str, Color4]
+    :param color: Color to apply on model.
+    :type color: Color4
     """
-    params = {
-        'model_id': model_id,
-        'method': method.value,
-        'color_info': [
-            {
-                'variable': value,
-                'color': list(color),
-            }
-            for value, color in colors.items()
-        ]
-    }
-    instance.request('color-circuit-by-method', params)
+    color_model(instance, model_id, ColorMethod.SOLID, {'color': color})

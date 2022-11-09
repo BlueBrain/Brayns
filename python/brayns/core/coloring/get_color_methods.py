@@ -18,26 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
-import brayns
-from tests.mock_instance import MockInstance
+from brayns.network import Instance
 
 
-class TestGetColorMethodValues(unittest.TestCase):
+def get_color_methods(instance: Instance, model_id: int) -> list[str]:
+    """Get the available coloring methods for the given model.
 
-    def test_get_color_method_values(self) -> None:
-        ref = ['test1', 'test2']
-        instance = MockInstance({'variables': ref})
-        method = brayns.ColorMethod.ETYPE
-        test = brayns.get_color_method_values(instance, 0, method)
-        self.assertEqual(instance.method, 'get-circuit-color-method-variables')
-        self.assertEqual(instance.params, {
-            'model_id': 0,
-            'method': 'etype',
-        })
-        self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Model ID.
+    :type model_id: int
+    :return: Color method names.
+    :rtype: list[str]
+    """
+    params = {'id': model_id}
+    return instance.request('get-color-methods', params)

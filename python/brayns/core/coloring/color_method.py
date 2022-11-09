@@ -18,22 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import unittest
-
-import brayns
-from tests.mock_instance import MockInstance
+from typing import ClassVar
 
 
-class TestGetColorMethods(unittest.TestCase):
+class ColorMethod:
+    """Core coloring methods available without plugins."""
 
-    def test_get_color_methods(self) -> None:
-        methods = [method.value for method in brayns.ColorMethod]
-        instance = MockInstance({'methods': methods})
-        test = brayns.get_color_methods(instance, 0)
-        self.assertEqual(instance.method, 'get-circuit-color-methods')
-        self.assertEqual(instance.params, {'model_id': 0})
-        self.assertEqual(test, list(brayns.ColorMethod))
-
-
-if __name__ == '__main__':
-    unittest.main()
+    SOLID: ClassVar[str] = 'solid'
+    GEOMETRY: ClassVar[str] = 'primitive'
+    TRIANGLE: ClassVar[str] = 'triangle'
+    VERTEX: ClassVar[str] = 'vertex'

@@ -18,36 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
-from brayns.utils import Color4
-
-from .cell_id import CellId
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
 
-def color_circuit_by_id(
-    instance: Instance,
-    model_id: int,
-    colors: dict[CellId, Color4],
-) -> list[int]:
-    """Color a circuit from a mapping cell ID -> Color.
+class TestGetColorMethods(SimpleTestCase):
 
-    :param instance: Instance.
-    :type instance: Instance
-    :param model_id: Circuit model ID.
-    :type model_id: int
-    :param colors: Color mappings Cells -> Color.
-    :type colors: dict[CellId, Color4]
-    :return: List of GIDs that were not colored.
-    :rtype: list[int]
-    """
-    params = {
-        'model_id': model_id,
-        'color_info': [
-            {
-                'variable': id.value,
-                'color': list(color),
-            }
-            for id, color in colors.items()
-        ]
-    }
-    return instance.request('color-circuit-by-id', params)
+    def test_get_color_methods(self) -> None:
+        loader = brayns.BbpLoader()
+        models = loader.load_models(self.instance, self.bbp_circuit)
+        methods = brayns.get_color_methods(self.instance, models[0].id)
+        ref = {
+            brayns.CircuitColorMethod.LAYER,
+        }
+        self.assertEqual(len(methods), len(ref))
+        self.assertSetEqual(set(methods), ref)

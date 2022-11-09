@@ -18,22 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.network import Instance
-from brayns.utils import Color4
+from typing import ClassVar
 
 
-def color_circuit(instance: Instance, model_id: int, color: Color4) -> None:
-    """Color a circuit by the given color.
+class CircuitColorMethod:
+    """Available coloring methods for circuits."""
 
-    :param instance: Instance.
-    :type instance: Instance
-    :param model_id: Circuit model ID.
-    :type model_id: int
-    :param color: Circuit color.
-    :type color: Color4
-    """
-    params = {
-        'model_id': model_id,
-        'color': list(color),
-    }
-    instance.request('color-circuit-by-single-color', params)
+    ETYPE: ClassVar[str] = 'etype'
+    MTYPE: ClassVar[str] = 'mtype'
+    LAYER: ClassVar[str] = 'layer'
+    REGION: ClassVar[str] = 'region'
+    HEMISPHERE: ClassVar[str] = 'hemisphere'
+    MORPHOLOGY: ClassVar[str] = 'morphology'
+    MORPHOLOGY_CLASS: ClassVar[str] = 'morphology class'
+    MORPHOLOGY_SECTION: ClassVar[str] = 'morphology section'
+    SYNAPSE_CLASS: ClassVar[str] = 'synapse class'

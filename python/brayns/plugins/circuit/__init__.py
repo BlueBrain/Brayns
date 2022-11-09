@@ -18,11 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from .circuit_color_method import CircuitColorMethod
 from .get_circuit_ids import get_circuit_ids
 from .neuronal_tracer import NeuronalTracer
 from .set_circuit_thickness import set_circuit_thickness
 
 __all__ = [
+    'CircuitColorMethod',
     'get_circuit_ids',
     'NeuronalTracer',
     'set_circuit_thickness',

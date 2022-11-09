@@ -18,20 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .cell_id import CellId
-from .color_circuit import color_circuit
-from .color_circuit_by_id import color_circuit_by_id
-from .color_circuit_by_method import color_circuit_by_method
-from .color_method import ColorMethod
-from .get_color_method_values import get_color_method_values
-from .get_color_methods import get_color_methods
+from brayns.network import Instance
 
-__all__ = [
-    'CellId',
-    'color_circuit_by_id',
-    'color_circuit_by_method',
-    'color_circuit',
-    'ColorMethod',
-    'get_color_method_values',
-    'get_color_methods',
-]
+
+def get_color_values(instance: Instance, model_id: int, method: str) -> list[str]:
+    """Get available color values for a given method and model.
+
+    Color values are the name of the elements to color. For example, the color
+    method 'layer' has values ['1', '2', '3'] if the model has 3 layers. 
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Model ID.
+    :type model_id: int
+    :param method: Coloring method name.
+    :type method: str
+    :return: Available color values.
+    :rtype: list[str]
+    """
+    params = {
+        'id': model_id,
+        'method': method,
+    }
+    return instance.request('get-color-values', params)
