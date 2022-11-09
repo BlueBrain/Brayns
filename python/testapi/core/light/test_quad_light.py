@@ -29,7 +29,6 @@ class TestQuadLight(LightTestCase):
         light = brayns.QuadLight(
             intensity=5,
             color=brayns.Color3.red,
-            visible=True,
             bottom_left=brayns.Vector3.zero,
             edge1=brayns.Axis.up,
             edge2=brayns.Axis.right

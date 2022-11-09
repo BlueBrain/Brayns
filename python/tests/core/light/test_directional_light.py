@@ -33,7 +33,6 @@ class TestDirectionalLight(unittest.TestCase):
         self.assertEqual(test.get_properties(), {
             'intensity': 1,
             'color': [1, 1, 1],
-            'visible': True,
             'direction': [0, 1, 0],
         })
 

@@ -33,13 +33,10 @@ class Light(ABC):
     :type intensity: float, optional
     :param color: Light color, defaults to white.
     :type color: Color3, optional
-    :param visible: Make the light visible or not, defaults to True.
-    :type visible: bool, optional
     """
 
     intensity: float = 1.0
     color: Color3 = Color3.white
-    visible: bool = True
 
     @classmethod
     @property
@@ -62,6 +59,5 @@ class Light(ABC):
         return {
             'intensity': self.intensity,
             'color': list(self.color),
-            'visible': self.visible,
             **self.get_additional_properties(),
         }

@@ -29,7 +29,7 @@ class TestAddLight(unittest.TestCase):
 
     def test_add_light(self) -> None:
         instance = MockInstance(MockModel.message)
-        light = brayns.AmbientLight(3, brayns.Color3.red, False)
+        light = brayns.AmbientLight(3, brayns.Color3.red)
         model = brayns.add_light(instance, light)
         self.assertEqual(model, MockModel.model)
         self.assertEqual(instance.method, 'add-light-ambient')

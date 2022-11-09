@@ -31,7 +31,6 @@ struct QuadLightParameters
     inline static const std::string position = "position";
     inline static const std::string edge1 = "edge1";
     inline static const std::string edge2 = "edge2";
-    inline static const std::string visible = "visible";
 };
 }
 
@@ -54,6 +53,5 @@ void LightTraits<QuadLight>::updateData(ospray::cpp::Light &handle, QuadLight &d
     handle.setParam(QuadLightParameters::position, data.position);
     handle.setParam(QuadLightParameters::edge1, data.edge1);
     handle.setParam(QuadLightParameters::edge2, data.edge2);
-    handle.setParam(QuadLightParameters::visible, data.visible);
 }
 }

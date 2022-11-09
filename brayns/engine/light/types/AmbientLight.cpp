@@ -28,7 +28,6 @@ struct AmbientLightParameters
 {
     inline static const std::string color = "color";
     inline static const std::string intensity = "intensity";
-    inline static const std::string visible = "visible";
 };
 }
 
@@ -38,6 +37,5 @@ void LightTraits<AmbientLight>::updateData(ospray::cpp::Light &handle, AmbientLi
 {
     handle.setParam(AmbientLightParameters::color, data.color);
     handle.setParam(AmbientLightParameters::intensity, data.intensity);
-    handle.setParam(AmbientLightParameters::visible, data.visible);
 }
 }
