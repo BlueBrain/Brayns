@@ -27,5 +27,4 @@ class TestColorModel(SimpleTestCase):
     def test_color_model(self) -> None:
         loader = brayns.BbpLoader()
         models = loader.load_models(self.instance, self.bbp_circuit)
-        method = brayns.ColorMethod.single_color(brayns.Color4.red)
-        brayns.color_model(self.instance, models[0].id, method)
+        brayns.set_model_color(self.instance, models[0].id, brayns.Color4.red)

@@ -18,16 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .color_method import ColorMethod
-from .color_model import color_model
-from .get_color_methods import get_color_methods
-from .get_color_values import get_color_values
-from .set_model_color import set_model_color
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-__all__ = [
-    'color_model',
-    'ColorMethod',
-    'get_color_methods',
-    'get_color_values',
-    'set_model_color',
-]
+
+class TestGetColorValues(SimpleTestCase):
+
+    def test_get_color_values(self) -> None:
+        loader = brayns.BbpLoader()
+        models = loader.load_models(self.instance, self.bbp_circuit)
+        id = models[0].id
+        method = brayns.CircuitColorMethod.LAYER
+        values = brayns.get_color_values(self.instance, id, method)
+        ref = [str(i) for i in range(6)]
+        self.assertEqual(values, ref)

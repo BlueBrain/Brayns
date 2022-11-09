@@ -26,11 +26,11 @@ from tests.mock_instance import MockInstance
 
 class TestGetColorMethodValues(unittest.TestCase):
 
-    def test_get_color_method_values(self) -> None:
+    def test_get_color_values(self) -> None:
         values = ['1', '2', '3']
         method = 'test'
         instance = MockInstance(values)
-        test = brayns.get_color_method_values(instance, 0, method)
+        test = brayns.get_color_values(instance, 0, method)
         self.assertEqual(test, values)
         self.assertEqual(instance.method, 'get-color-values')
         self.assertEqual(instance.params, {

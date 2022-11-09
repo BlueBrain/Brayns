@@ -18,17 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
-from testapi.simple_test_case import SimpleTestCase
+from brayns.network import Instance
 
 
-class TestGetColorMethodValues(SimpleTestCase):
+def get_color_values(instance: Instance, model_id: int, method: str) -> list[str]:
+    """Get available color values for a given method and model.
 
-    def test_get_color_method_values(self) -> None:
-        loader = brayns.BbpLoader()
-        models = loader.load_models(self.instance, self.bbp_circuit)
-        id = models[0].id
-        method = brayns.CircuitColorMethod.layer({})
-        values = brayns.get_color_method_values(self.instance, id, method.name)
-        ref = [str(i) for i in range(6)]
-        self.assertEqual(values, ref)
+    Color values are the name of the elements to color. For example, the color
+    method 'layer' has values ['1', '2', '3'] if the model has 3 layers. 
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param model_id: Model ID.
+    :type model_id: int
+    :param method: Coloring method name.
+    :type method: str
+    :return: Available color values.
+    :rtype: list[str]
+    """
+    params = {
+        'id': model_id,
+        'method': method,
+    }
+    return instance.request('get-color-values', params)

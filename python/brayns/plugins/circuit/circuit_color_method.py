@@ -18,59 +18,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns.core import ColorMethod
-from brayns.utils import Color4
+from typing import ClassVar
 
 
 class CircuitColorMethod:
     """Available coloring methods for circuits."""
 
-    @staticmethod
-    def id(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by element ID."""
-        return ColorMethod('element id', colors)
-
-    @staticmethod
-    def etype(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by e-type."""
-        return ColorMethod('etype', colors)
-
-    @staticmethod
-    def mtype(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by m-type."""
-        return ColorMethod('mtype', colors)
-
-    @staticmethod
-    def layer(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by layer."""
-        return ColorMethod('layer', colors)
-
-    @staticmethod
-    def region(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by region."""
-        return ColorMethod('region', colors)
-
-    @staticmethod
-    def hemisphere(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by hemisphere."""
-        return ColorMethod('hemisphere', colors)
-
-    @staticmethod
-    def morphology(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by morphology."""
-        return ColorMethod('morphology', colors)
-
-    @staticmethod
-    def morphology_class(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by morphology class."""
-        return ColorMethod('morphology class', colors)
-
-    @staticmethod
-    def morphology_section(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by morphology section."""
-        return ColorMethod('morphology section', colors)
-
-    @staticmethod
-    def synapse_class(colors: dict[str, Color4]) -> ColorMethod:
-        """Color model by synapse class."""
-        return ColorMethod('synapse class', colors)
+    ETYPE: ClassVar[str] = 'etype'
+    MTYPE: ClassVar[str] = 'mtype'
+    LAYER: ClassVar[str] = 'layer'
+    REGION: ClassVar[str] = 'region'
+    HEMISPHERE: ClassVar[str] = 'hemisphere'
+    MORPHOLOGY: ClassVar[str] = 'morphology'
+    MORPHOLOGY_CLASS: ClassVar[str] = 'morphology class'
+    MORPHOLOGY_SECTION: ClassVar[str] = 'morphology section'
+    SYNAPSE_CLASS: ClassVar[str] = 'synapse class'

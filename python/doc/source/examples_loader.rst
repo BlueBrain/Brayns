@@ -115,33 +115,46 @@ Models can be moved and made invisible using the ``update_model`` function.
         visible=False,
     )
 
-Color a circuit
-~~~~~~~~~~~~~~~
+Model coloring
+~~~~~~~~~~~~~~
 
-Models loaded from a circuit (not regular models) can be colored using special
-methods.
+Models loaded in Brayns can be colored using different methods. These methods
+depend on the model type and the plugins loaded and can be queried for a given
+model.
+
+A color method has a name and some available values that can be mapped to
+user-defined colors.
+
+The Python API provides the core coloring method as factory methods in the
+``ColorMethod`` and ``CircuitColorMethod`` (plugin dependent) classes.
 
 Here is an example to color an SSCX circuit by layer.
 
 .. code-block:: python
 
-    # Choose a coloring method.
-    method = brayns.ColorMethod.LAYER
+    # Get available coloring methods on model (optional).
+    # Gives ['solid', 'element id', 'layer', 'etype', ...] for SSCX.
+    methods = brayns.get_color_methods(instance, model.id)
 
-    # Map method value to color.
-    brayns.color_circuit_by_method(instance, model.id, method, {
+    # Pick a coloring method (here by circuit layer).
+    method = brayns.CircuitColorMethod.LAYER
+
+    # Get available coloring values (optional).
+    # Gives ['1', '2', ..., '6'] for SSCX.
+    values = brayns.get_color_values(instance, model.id, method)
+
+    # Map coloring value (here layer) to their color.
+    colors = {
         '1': brayns.Color4(255, 242, 59, 255) / 255,
         '2': brayns.Color4(248, 148, 48, 255) / 255,
         '3': brayns.Color4(225, 45, 97, 255) / 255,
         '4': brayns.Color4(253, 156, 250, 255) / 255,
         '5': brayns.Color4(103, 168, 222, 255) / 255,
         '6': brayns.Color4(106, 230, 109, 255) / 255,
-    })
+    }
 
-Available color methods and method values for a given circuit (model) can be
-retreived using ``get_color_methods`` and ``get_color_method_values``.
-
-Some alternatives exist with ``color_circuit_by_id`` and ``color_circuit``.
+    # Apply color method on given model.
+    brayns.color_model(instance, model.id, method, colors)
 
 Switch between original color and simulation color
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

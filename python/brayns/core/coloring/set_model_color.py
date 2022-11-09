@@ -19,25 +19,20 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.network import Instance
+from brayns.utils import Color4
+
+from .color_method import ColorMethod
+from .color_model import color_model
 
 
-def get_color_method_values(instance: Instance, model_id: int, method: str) -> list[str]:
-    """Get available values for a coloring method on the given model.
-
-    For example, color method 'layer' has values ['1', '2', '3'] if the model
-    has 3 layers. 
+def set_model_color(instance: Instance, model_id: int, color: Color4) -> None:
+    """Shortcut to color a model using a single color.
 
     :param instance: Instance.
     :type instance: Instance
-    :param model_id: Model ID.
+    :param model_id: ID of the model to color.
     :type model_id: int
-    :param method: Coloring method name.
-    :type method: str
-    :return: Method values.
-    :rtype: list[str]
+    :param color: Color to apply on model.
+    :type color: Color4
     """
-    params = {
-        'id': model_id,
-        'method': method,
-    }
-    return instance.request('get-color-values', params)
+    color_model(instance, model_id, ColorMethod.SOLID, {'color': color})

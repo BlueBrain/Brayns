@@ -19,40 +19,47 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.network import Instance
+from brayns.utils import Color4
 
-from .color_method import ColorMethod
 
-
-def color_model(instance: Instance, model_id: int, method: ColorMethod) -> None:
+def color_model(instance: Instance, model_id: int, method: str, colors: dict[str, Color4]) -> None:
     """Color a model by the given method.
 
-    Color method is usually a mapping from method value to color.
+    This function needs a method name and a mapping to get a color from a
+    method value.
 
-    For example to color a circuit by GID the method colors can be {
+    For example to color a circuit by GID the mapping can be {
         '1': brayns.Color4.red,
         '2': brayns.Color4.blue,
-    }
+    }.
 
     Where 1 and 2 are the method values (here GIDs) mapped to the color that
     must be applied to them.
 
-    Supported methods depend on the plugins loaded in the service instance and
-    the model type. See ``get_color_methods`` and ``get_color_method_values``
-    for more details.
+    Supported methods depend on the plugins loaded and the model type. See
+    ``get_color_methods`` and ``get_color_values`` for more details.
+
+    When coloring by ID (GIDs, triangle, geometry, ...) the IDs start at zero
+    and are incremented in the order of the loading. They can be concatenated
+    in a single value using comma and dashes.
+
+    Example: '0,2,4-6,8'.
 
     :param instance: Instance.
     :type instance: Instance
     :param model_id: ID of the model to color.
     :type model_id: int
     :param method: Coloring method to use.
-    :type method: ColorMethod
+    :type method: str
+    :param colors: Color to use per method value.
+    :type colors: dict[str, Color4]
     """
     params = {
         'id': model_id,
-        'method': method.name,
+        'method': method,
         'values': {
             key: list(value)
-            for key, value in method.colors.items()
+            for key, value in colors.items()
         },
     }
     instance.request('color-model', params)

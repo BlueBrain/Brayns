@@ -18,16 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .color_method import ColorMethod
-from .color_model import color_model
-from .get_color_methods import get_color_methods
-from .get_color_values import get_color_values
-from .set_model_color import set_model_color
+import unittest
 
-__all__ = [
-    'color_model',
-    'ColorMethod',
-    'get_color_methods',
-    'get_color_values',
-    'set_model_color',
-]
+import brayns
+from tests.mock_instance import MockInstance
+
+
+class TestSetModelColor(unittest.TestCase):
+
+    def test_set_model_color(self) -> None:
+        instance = MockInstance()
+        brayns.set_model_color(instance, 1, brayns.Color4.red)
+        self.assertEqual(instance.method, 'color-model')
+        self.assertEqual(instance.params, {
+            'id': 1,
+            'method': brayns.ColorMethod.SOLID,
+            'values': {
+                'color': [1, 0, 0, 1],
+            }
+        })
+
+
+if __name__ == '__main__':
+    unittest.main()
