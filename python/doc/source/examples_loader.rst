@@ -156,6 +156,12 @@ Here is an example to color an SSCX circuit by layer.
     # Apply color method on given model.
     brayns.color_model(instance, model.id, method, colors)
 
+A shortcut to apply a uniform (solid) color on a model is also provided.
+
+.. code-block:: python
+
+    brayns.set_model_color(instance, model.id, brayns.Color4.red)
+
 Switch between original color and simulation color
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
