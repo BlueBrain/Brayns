@@ -138,7 +138,6 @@ __all__ = [
     'Movie',
     'MovieError',
     'MovieFrames',
-    'NeuronalTracer',
     'OpacityCurve',
     'OrthographicProjection',
     'parse_hex_color',

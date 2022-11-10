@@ -48,7 +48,6 @@ __all__ = [
     'get_circuit_ids',
     'Morphology',
     'MorphologyLoader',
-    'NeuronalTracer',
     'ProteinColorScheme',
     'ProteinLoader',
     'set_circuit_thickness',

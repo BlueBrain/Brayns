@@ -18,8 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import brayns
 from testapi.simple_test_case import SimpleTestCase
+
+import brayns
 
 
 class TestGetColorMethods(SimpleTestCase):
@@ -29,7 +30,12 @@ class TestGetColorMethods(SimpleTestCase):
         models = loader.load_models(self.instance, self.bbp_circuit)
         methods = brayns.get_color_methods(self.instance, models[0].id)
         ref = {
+            brayns.ColorMethod.SOLID,
+            brayns.CircuitColorMethod.ELEMENT_ID,
+            brayns.CircuitColorMethod.ETYPE,
             brayns.CircuitColorMethod.LAYER,
+            brayns.CircuitColorMethod.MORPHOLOGY,
+            brayns.CircuitColorMethod.MTYPE,
         }
         self.assertEqual(len(methods), len(ref))
         self.assertSetEqual(set(methods), ref)

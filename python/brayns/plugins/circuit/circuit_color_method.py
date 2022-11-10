@@ -24,6 +24,7 @@ from typing import ClassVar
 class CircuitColorMethod:
     """Available coloring methods for circuits."""
 
+    ELEMENT_ID: ClassVar[str] = 'element id'
     ETYPE: ClassVar[str] = 'etype'
     MTYPE: ClassVar[str] = 'mtype'
     LAYER: ClassVar[str] = 'layer'

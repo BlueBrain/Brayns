@@ -21,8 +21,9 @@
 from dataclasses import dataclass
 from typing import Any
 
-from .material import Material
 from brayns.utils import Color3
+
+from .material import Material
 
 
 @dataclass
@@ -58,4 +59,4 @@ class EmissiveMaterial(Material):
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
         self.intensity = message['intensity']
-        self.color = message['color']
+        self.color = Color3.unpack(message['color'])
