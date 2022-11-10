@@ -18,38 +18,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
-from typing import Any
+import unittest
 
-from .material import Material
+import brayns
 
 
-@dataclass
-class DefaultMaterial(Material):
-    """Default material.
+class TestPhongMaterial(unittest.TestCase):
 
-    :param opacity: Opacity (0-1), defaults to fully opaque.
-    :type opacity: float, optional
-    """
+    def test_name(self) -> None:
+        self.assertEqual(brayns.PhongMaterial.name, 'phong')
 
-    opacity: float = 1.0
+    def test_get_properties(self) -> None:
+        test = brayns.PhongMaterial(0.5)
+        self.assertEqual(test.get_properties(), {'opacity': 0.5})
 
-    @classmethod
-    @property
-    def name(cls) -> str:
-        """Get the material name.
+    def test_update_properties(self) -> None:
+        test = brayns.PhongMaterial()
+        test.update_properties({'opacity': 0.5})
+        self.assertEqual(test.opacity, 0.5)
 
-        :return: Material name
-        :rtype: str
-        """
-        return 'default'
 
-    def get_properties(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {
-            'opacity': self.opacity
-        }
-
-    def update_properties(self, message: dict[str, Any]) -> None:
-        """Low level API to deserialize from JSON."""
-        self.opacity = message['opacity']
+if __name__ == '__main__':
+    unittest.main()
