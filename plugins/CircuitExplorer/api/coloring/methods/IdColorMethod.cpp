@@ -18,14 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ElementIdColorMethod.h"
+#include "IdColorMethod.h"
 
 #include <brayns/engine/common/ExtractColor.h>
 #include <brayns/engine/components/GeometryViews.h>
 
 #include <brayns/utils/parsing/Parser.h>
 
-#include <api/util/RangeBuilder.h>
+#include <api/utils/RangeBuilder.h>
 #include <components/CircuitIds.h>
 #include <components/ColorHandler.h>
 
@@ -131,18 +131,18 @@ private:
 };
 }
 
-std::string ElementIdColorMethod::getName() const
+std::string IdColorMethod::getName() const
 {
-    return "element id";
+    return "id";
 }
 
-std::vector<std::string> ElementIdColorMethod::getValues(brayns::Components &components) const
+std::vector<std::string> IdColorMethod::getValues(brayns::Components &components) const
 {
     auto &ids = components.get<CircuitIds>().elements;
     return {RangeBuilder<uint64_t>::build(ids)};
 }
 
-void ElementIdColorMethod::apply(brayns::Components &components, const brayns::ColorMethodInput &input) const
+void IdColorMethod::apply(brayns::Components &components, const brayns::ColorMethodInput &input) const
 {
     auto &ids = components.get<CircuitIds>().elements;
     auto &colors = brayns::ExtractColor::extractList(components, ids.size());

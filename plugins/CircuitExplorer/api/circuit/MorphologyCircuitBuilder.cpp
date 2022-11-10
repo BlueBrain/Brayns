@@ -31,7 +31,7 @@
 #include <api/ModelType.h>
 #include <api/coloring/handlers/ComposedColorHandler.h>
 #include <api/coloring/methods/BrainDatasetColorMethod.h>
-#include <api/coloring/methods/ElementIdColorMethod.h>
+#include <api/coloring/methods/IdColorMethod.h>
 #include <api/coloring/methods/MorphologySectionColorMethod.h>
 #include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
@@ -168,7 +168,7 @@ public:
         colorMethods.reserve(availableMethods.size() + 3);
 
         colorMethods.push_back(std::make_unique<brayns::SolidColorMethod>());
-        colorMethods.push_back(std::make_unique<ElementIdColorMethod>());
+        colorMethods.push_back(std::make_unique<IdColorMethod>());
         colorMethods.push_back(std::make_unique<MorphologySectionColorMethod>());
         for (auto method : availableMethods)
         {

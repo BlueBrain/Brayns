@@ -25,6 +25,8 @@
 #include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/GeometryViews.h>
 
+#include <spdlog/fmt/fmt.h>
+
 namespace
 {
 struct SolidMethodNames
@@ -86,7 +88,12 @@ std::vector<std::string> SolidColorMethod::getValues(Components &components) con
 void SolidColorMethod::apply(Components &components, const ColorMethodInput &input) const
 {
     auto &solidColor = components.getOrAdd<ColorSolid>();
-    solidColor.color = input.at(SolidMethodNames::value);
+    auto it = input.find(SolidMethodNames::value);
+    if (it == input.end())
+    {
+        throw std::invalid_argument(fmt::format("Missing solid method input key '{}'", SolidMethodNames::value));
+    }
+    solidColor.color = it->second;
 
     auto &views = components.get<GeometryViews>();
     for (auto &view : views.elements)

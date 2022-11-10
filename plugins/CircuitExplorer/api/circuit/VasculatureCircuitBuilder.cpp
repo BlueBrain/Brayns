@@ -30,7 +30,7 @@
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
 #include <api/coloring/handlers/SimpleColorHandler.h>
-#include <api/coloring/methods/ElementIdColorMethod.h>
+#include <api/coloring/methods/IdColorMethod.h>
 #include <api/coloring/methods/VasculatureSectionColorMethod.h>
 #include <components/CircuitIds.h>
 #include <components/ColorHandler.h>
@@ -93,7 +93,7 @@ public:
     void addSystems()
     {
         auto colorMethods = brayns::ColorMethodList();
-        colorMethods.push_back(std::make_unique<ElementIdColorMethod>());
+        colorMethods.push_back(std::make_unique<IdColorMethod>());
         colorMethods.push_back(std::make_unique<VasculatureSectionColorMethod>());
 
         _systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();

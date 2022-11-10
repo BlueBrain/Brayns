@@ -46,14 +46,14 @@ void ComposedColorHandler::colorByColormap(
     size_t mappingOffset = 0;
     for (size_t i = 0; i < views.elements.size(); ++i)
     {
-        auto numGeomtries = geometries.elements[i].numPrimitives();
-        assert(mappingOffset + numGeomtries <= colorMap.indices.size());
+        auto numGeometries = geometries.elements[i].numPrimitives();
+        assert(mappingOffset + numGeometries <= colorMap.indices.size());
 
         auto morphologyMapping = &colorMap.indices[mappingOffset];
-        auto mappingData = ospray::cpp::SharedData(morphologyMapping, numGeomtries);
+        auto mappingData = ospray::cpp::SharedData(morphologyMapping, numGeometries);
 
         views.elements[i].setColorMap(mappingData, colorData);
-        mappingOffset += numGeomtries;
+        mappingOffset += numGeometries;
     }
 
     views.modified = true;

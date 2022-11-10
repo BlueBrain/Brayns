@@ -32,7 +32,7 @@
 #include <api/ModelType.h>
 #include <api/coloring/handlers/SimpleColorHandler.h>
 #include <api/coloring/methods/BrainDatasetColorMethod.h>
-#include <api/coloring/methods/ElementIdColorMethod.h>
+#include <api/coloring/methods/IdColorMethod.h>
 #include <components/BrainColorData.h>
 #include <components/CircuitIds.h>
 #include <components/ColorHandler.h>
@@ -71,7 +71,7 @@ public:
         colorMethods.reserve(availableMethods.size() + 2);
 
         colorMethods.push_back(std::make_unique<brayns::SolidColorMethod>());
-        colorMethods.push_back(std::make_unique<ElementIdColorMethod>());
+        colorMethods.push_back(std::make_unique<IdColorMethod>());
         for (auto method : availableMethods)
         {
             colorMethods.push_back(std::make_unique<BrainDatasetColorMethod>(method));

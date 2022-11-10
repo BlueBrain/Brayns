@@ -79,7 +79,7 @@ public:
 namespace brayns
 {
 PrimitiveColorMethod::PrimitiveColorMethod(std::string name, size_t primitiveCount)
-    : _name(name)
+    : _name(std::move(name))
     , _primitiveCount(primitiveCount)
 {
 }

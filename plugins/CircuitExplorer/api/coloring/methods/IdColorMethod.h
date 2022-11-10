@@ -22,7 +22,7 @@
 
 #include <brayns/engine/systems/GenericColorSystem.h>
 
-class ElementIdColorMethod : public brayns::IColorMethod
+class IdColorMethod : public brayns::IColorMethod
 {
 public:
     std::string getName() const override;
