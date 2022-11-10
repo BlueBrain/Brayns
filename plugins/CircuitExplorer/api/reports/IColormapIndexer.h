@@ -23,7 +23,7 @@
 #include <vector>
 
 /**
- * @brief Interface to implement the compuation of indices into the colormap given the transfer function range
+ * @brief Interface to implement the compuation of indices into the colormap given the color ramp range
  * and the report frame data
  */
 class IColormapIndexer

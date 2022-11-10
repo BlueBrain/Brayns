@@ -29,10 +29,10 @@
 
 namespace brayns
 {
-class GetModelTransferFunctionEntrypoint : public Entrypoint<GetModelMessage, ColorRamp>
+class GetColorRampEntrypoint : public Entrypoint<GetModelMessage, ColorRamp>
 {
 public:
-    GetModelTransferFunctionEntrypoint(ModelManager &models);
+    GetColorRampEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -42,10 +42,10 @@ private:
     ModelManager &_models;
 };
 
-class SetModelTransferFunctionEntrypoint : public Entrypoint<SetColorRampMessage, EmptyMessage>
+class SetColorRampEntrypoint : public Entrypoint<SetColorRampMessage, EmptyMessage>
 {
 public:
-    SetModelTransferFunctionEntrypoint(ModelManager &models);
+    SetColorRampEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

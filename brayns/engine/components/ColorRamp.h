@@ -29,7 +29,7 @@
 namespace brayns
 {
 /**
- * @brief The TransferFunction class is an utility object which transform maps a value within a range, and from that
+ * @brief The ColorRamp class is an utility object which transform maps a value within a range, and from that
  * range, maps it into a color map scale.
  */
 class ColorRamp
@@ -41,23 +41,23 @@ public:
     ColorRamp();
 
     /**
-     * @brief Return the list of colors that make up this transfer function color map
+     * @brief Return the list of colors that make up this color ramp color map
      */
     const std::vector<Vector4f> &getColors() const;
 
     /**
-     * @brief Sets the color that make up the color map of this transfer function. Colors must be sorted.
+     * @brief Sets the color that make up the color map of this color ramp. Colors must be sorted.
      */
     void setColors(std::vector<Vector4f> colorMap);
 
     /**
-     * @brief Return the range of values in which this transfer function works. Any value outside the range
+     * @brief Return the range of values in which this color ramp works. Any value outside the range
      * is clamped in order to compute its color/opacity.
      */
     const Vector2f &getValuesRange() const;
 
     /**
-     * @brief Sets the range of values in which this transfer function works. Any value outside the range
+     * @brief Sets the range of values in which this color ramp works. Any value outside the range
      * is clamped in order to compute its color/opacity.
      */
     void setValuesRange(const Vector2f &valuesRange);

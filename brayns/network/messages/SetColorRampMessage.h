@@ -30,6 +30,6 @@ namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(SetColorRampMessage)
 BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Model ID")
-BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<ColorRamp>, transfer_function, "Transfer function")
+BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<ColorRamp>, color_ramp, "Color ramp")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns
