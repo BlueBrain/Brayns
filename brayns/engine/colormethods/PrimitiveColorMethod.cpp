@@ -29,17 +29,6 @@
 
 namespace
 {
-class PrimitiveCount
-{
-public:
-    static size_t fromGeometry(const brayns::Components &components)
-    {
-        auto &geometries = components.get<brayns::Geometries>();
-        auto &geometry = geometries.elements.front();
-        return geometry.numPrimitives();
-    }
-};
-
 class ColorListExtractor
 {
 public:
