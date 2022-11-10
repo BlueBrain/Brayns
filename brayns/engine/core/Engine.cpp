@@ -75,7 +75,7 @@ public:
             [](void *data, const char *message)
             {
                 (void)data;
-                brayns::Log::debug("[OSPRAY] {}", message);
+                brayns::Log::debug("[OSPRAY]\n{}", message);
             });
 
         auto &appParams = parameters.getApplicationParameters();

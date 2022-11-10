@@ -25,6 +25,7 @@
 #include <brayns/utils/string/StringParser.h>
 
 #include "ChunkExtractor.h"
+#include "RangeExtractor.h"
 #include "TokenExtractor.h"
 
 namespace brayns
@@ -86,6 +87,12 @@ public:
     static void extractChunk(std::string_view &data, T &value, ByteOrder order)
     {
         ChunkExtractor<T>::extract(data, value, order);
+    }
+
+    template<typename T>
+    static std::vector<T> extractRanges(std::string_view data)
+    {
+        return RangeExtractor<T>::extract(data);
     }
 };
 } // namespace brayns

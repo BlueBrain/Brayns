@@ -21,27 +21,33 @@
 #include "NeuronMetadataFactory.h"
 
 #include <api/circuit/SomaCircuitBuilder.h>
+#include <io/sonataloader/colordata/ColorDataFactory.h>
 #include <io/sonataloader/data/Cells.h>
 #include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
 
 namespace sonataloader
 {
-void SomaImporter::import(NodeLoadContext &ctxt, std::unique_ptr<IColorData> colorData)
+void SomaImporter::import(NodeLoadContext &context)
 {
-    NeuronMetadataFactory::create(ctxt);
+    NeuronMetadataFactory::create(context);
 
-    auto &population = ctxt.population;
-    auto &selection = ctxt.selection;
-    auto flatSelection = selection.flatten();
+    auto &population = context.population;
+    auto &selection = context.selection;
+    auto ids = selection.flatten();
+
     auto positions = Cells::getPositions(population, selection);
-    auto &params = ctxt.params;
+
+    auto &params = context.params;
     auto &neuronParams = params.neuron_morphology_parameters;
-    auto radius = neuronParams.radius_multiplier;
-    auto &model = ctxt.model;
+    auto radiusMultiplier = neuronParams.radius_multiplier;
 
-    SomaCircuitBuilder::Context context(flatSelection, positions, radius);
+    auto buildContext = SomaCircuitBuilder::Context{
+        std::move(ids),
+        std::move(positions),
+        ColorDataFactory::create(context),
+        radiusMultiplier};
 
-    auto compartments = SomaCircuitBuilder::load(context, model, std::move(colorData));
-    NeuronReportFactory::create(ctxt, compartments);
+    auto compartments = SomaCircuitBuilder::build(context.model, std::move(buildContext));
+    NeuronReportFactory::create(context, compartments);
 }
 }

@@ -35,7 +35,7 @@ namespace brayns
 {
 void MaterialTraits<CarPaint>::updateData(ospray::cpp::Material &handle, CarPaint &data)
 {
-    handle.setParam(CarPaintParameters::baseColor, data.color);
+    handle.setParam(CarPaintParameters::baseColor, Vector3f(1.f));
     handle.setParam(CarPaintParameters::flakeDensity, data.flakeDensity);
 }
 }

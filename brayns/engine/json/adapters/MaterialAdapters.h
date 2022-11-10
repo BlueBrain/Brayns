@@ -33,7 +33,6 @@
 namespace brayns
 {
 BRAYNS_JSON_ADAPTER_BEGIN(CarPaint)
-BRAYNS_JSON_ADAPTER_ENTRY(color, "Base color of the material", Required(false))
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
     "flake_density",
     flakeDensity,
@@ -49,7 +48,6 @@ BRAYNS_JSON_ADAPTER_ENTRY(intensity, "Emitted light intensity", Minimum(0), Requ
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(Glass)
-BRAYNS_JSON_ADAPTER_ENTRY(color, "Base color of the material", Required(false))
 BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
     "index_of_refraction",
     indexOfRefraction,
@@ -58,22 +56,18 @@ BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(Matte)
-BRAYNS_JSON_ADAPTER_ENTRY(color, "Base color of the material", Required(false))
 BRAYNS_JSON_ADAPTER_ENTRY(opacity, "Opacity of the surface", Minimum(0), Maximum(1), Required(false))
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(Metal)
-BRAYNS_JSON_ADAPTER_ENTRY(color, "Base color of the material", Required(false))
 BRAYNS_JSON_ADAPTER_ENTRY(roughness, "Surface roughness", Minimum(0.01), Maximum(1), Required(false))
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(Phong)
-BRAYNS_JSON_ADAPTER_ENTRY(color, "Base color of the material", Required(false))
 BRAYNS_JSON_ADAPTER_ENTRY(opacity, "Opacity of the surface", Minimum(0), Maximum(1), Required(false))
 BRAYNS_JSON_ADAPTER_END()
 
 BRAYNS_JSON_ADAPTER_BEGIN(Plastic)
-BRAYNS_JSON_ADAPTER_ENTRY(color, "Base color of the material", Required(false))
 BRAYNS_JSON_ADAPTER_ENTRY(opacity, "Opacity of the surface", Minimum(0), Maximum(1), Required(false))
 BRAYNS_JSON_ADAPTER_END()
 }

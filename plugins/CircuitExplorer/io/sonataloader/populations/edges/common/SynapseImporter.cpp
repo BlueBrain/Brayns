@@ -20,12 +20,12 @@
 
 #include <brayns/engine/geometry/types/Sphere.h>
 
+#include <api/circuit/SynapseCircuitBuilder.h>
 #include <api/reports/ReportFactory.h>
 #include <api/reports/ReportMapping.h>
 #include <api/reports/indexers/OffsetIndexer.h>
-#include <api/synapse/SynapseCircuitBuilder.h>
 #include <components/ReportData.h>
-#include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
+#include <io/sonataloader/colordata/ColorDataFactory.h>
 #include <io/sonataloader/data/Config.h>
 #include <io/sonataloader/data/SimulationMapping.h>
 #include <io/sonataloader/data/Synapses.h>
@@ -224,20 +224,14 @@ void SynapseImporter::fromData(
 {
     auto &params = context.params;
     auto radius = params.radius;
-    auto afferent = params.load_afferent;
-    auto &config = context.config;
-    auto &edgePopulation = context.edgePopulation;
-    auto targetPopulationName = afferent ? edgePopulation.target() : edgePopulation.source();
     auto &edgeSelection = context.edgeSelection;
     auto flatEdgeIds = edgeSelection.flatten();
-
-    SynapseAppender appender(flatEdgeIds, nodeIds, positions, radius);
-
+    auto appender = SynapseAppender(flatEdgeIds, nodeIds, positions, radius);
     auto &synapseGeometry = appender.geometry;
-    auto nodePopulation = config.getNodes(targetPopulationName);
-    auto colorData = std::make_unique<CommonEdgeColorData>(std::move(nodePopulation));
-    SynapseCircuitBuilder::build(context.model, std::move(synapseGeometry), std::move(colorData));
+    auto colorData = ColorDataFactory::create(context);
 
+    auto buildContext = SynapseCircuitBuilder::Context{std::move(synapseGeometry), std::move(colorData)};
+    SynapseCircuitBuilder::build(context.model, std::move(buildContext));
     SynapseReportImporter::import(context, appender.orderedSynapseIds);
 }
 }

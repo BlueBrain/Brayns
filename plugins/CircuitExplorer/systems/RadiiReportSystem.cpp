@@ -65,41 +65,30 @@ private:
         return geometries.elements.back();
     }
 };
+}
 
-class SimulationChecks
+bool RadiiReportSystem::isEnabled(brayns::Components &components)
 {
-public:
-    static bool shouldExecute(brayns::Components &components)
+    auto &info = components.get<brayns::SimulationInfo>();
+
+    if (info.enabled)
     {
-        auto &report = components.get<RadiiReportData>();
-        return _enabled(report, components) && _mustUpdate(report);
+        return true;
     }
 
-private:
-    static bool _enabled(RadiiReportData &report, brayns::Components &components)
+    auto &report = components.get<RadiiReportData>();
+    if (std::exchange(report.lastEnabledFlag, false))
     {
-        auto &info = components.get<brayns::SimulationInfo>();
-        if (info.enabled)
-        {
-            return true;
-        }
-        if (std::exchange(report.lastEnabledFlag, false))
-        {
-            RadiiSetter::fromVector(components, report.originalRadii);
-        }
-        return false;
+        RadiiSetter::fromVector(components, report.originalRadii);
     }
 
-    static bool _mustUpdate(RadiiReportData &report)
-    {
-        return !std::exchange(report.lastEnabledFlag, true);
-    }
-};
+    return false;
 }
 
 bool RadiiReportSystem::shouldExecute(brayns::Components &components)
 {
-    return SimulationChecks::shouldExecute(components);
+    auto &report = components.get<RadiiReportData>();
+    return !std::exchange(report.lastEnabledFlag, true);
 }
 
 void RadiiReportSystem::execute(brayns::Components &components, uint32_t frame)

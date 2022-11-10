@@ -20,63 +20,55 @@
 
 #include "ReportSystem.h"
 
+#include <brayns/engine/components/ColorMap.h>
 #include <brayns/engine/components/ColorRamp.h>
 #include <brayns/engine/components/SimulationInfo.h>
 
 #include <api/reports/ColorRampUtils.h>
-#include <components/Coloring.h>
+#include <components/ColorHandler.h>
 #include <components/ReportData.h>
 
-namespace
+bool ReportSystem::isEnabled(brayns::Components &components)
 {
-class SimulationChecks
-{
-public:
-    static bool shouldExecute(brayns::Components &components)
+    auto &info = components.get<brayns::SimulationInfo>();
+    if (info.enabled)
     {
-        auto &report = components.get<ReportData>();
-        return _enabled(report, components) && _mustUpdate(report, components);
+        return true;
     }
 
-public:
-    static bool _enabled(ReportData &report, brayns::Components &components)
-    {
-        auto &info = components.get<brayns::SimulationInfo>();
-        if (info.enabled)
-        {
-            return true;
-        }
+    auto &report = components.get<ReportData>();
+    report.lastEnabledFlag = false;
 
-        report.lastEnabledFlag = false;
-        return false;
-    }
-
-    static bool _mustUpdate(ReportData &report, brayns::Components &components)
-    {
-        auto flagModified = !std::exchange(report.lastEnabledFlag, true);
-        auto &colorRamp = components.get<brayns::ColorRamp>();
-        auto colorRampModified = colorRamp.isModified();
-        colorRamp.resetModified();
-        return flagModified || colorRampModified;
-    }
-};
+    return false;
 }
 
 bool ReportSystem::shouldExecute(brayns::Components &components)
 {
-    return SimulationChecks::shouldExecute(components);
+    auto &report = components.get<ReportData>();
+    auto &colorRamp = components.get<brayns::ColorRamp>();
+
+    auto flagModified = !std::exchange(report.lastEnabledFlag, true);
+    auto colorRampModified = colorRamp.isModified();
+    colorRamp.resetModified();
+
+    return flagModified || colorRampModified;
 }
 
 void ReportSystem::execute(brayns::Components &components, uint32_t frame)
 {
     auto &colorRamp = components.get<brayns::ColorRamp>();
-    auto colors = ColorRampUtils::createSampleBuffer(colorRamp);
+    auto &colorMap = components.getOrAdd<brayns::ColorMap>();
+
+    colorMap.colors = ColorRampUtils::createSampleBuffer(colorRamp);
     auto &range = colorRamp.getValuesRange();
 
     auto &report = components.get<ReportData>();
     auto frameData = report.data->getFrame(frame);
-    auto indices = report.indexer->generate(frameData, range);
+    colorMap.indices = report.indexer->generate(frameData, range);
 
-    auto &coloring = components.get<Coloring>();
-    coloring.painter->updateIndexedColor(std::move(colors), std::move(indices));
+    auto &painter = *components.get<ColorHandler>().handler;
+    auto &geometries = components.get<brayns::Geometries>();
+    auto &views = components.get<brayns::GeometryViews>();
+
+    painter.colorByColormap(colorMap, geometries, views);
 }

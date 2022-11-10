@@ -20,9 +20,12 @@
 
 #include <brayns/io/loaders/mesh/MeshLoader.h>
 
+#include <brayns/engine/colormethods/PrimitiveColorMethod.h>
+#include <brayns/engine/colormethods/SolidColorMethod.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/Metadata.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GenericColorSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
@@ -32,7 +35,10 @@
 #include <brayns/io/loaders/mesh/parsers/StlMeshParser.h>
 
 #include <brayns/utils/FileReader.h>
+#include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/parsing/ParsingException.h>
+#include <brayns/utils/string/StringCounter.h>
+#include <brayns/utils/string/StringInfo.h>
 
 #include <filesystem>
 #include <fstream>
@@ -100,10 +106,15 @@ public:
         auto &geometries = components.add<brayns::Geometries>();
         geometries.elements.push_back(brayns::Geometry(mesh));
 
+        auto colorMethods = std::vector<std::unique_ptr<brayns::IColorMethod>>();
+        colorMethods.push_back(std::make_unique<brayns::SolidColorMethod>());
+        colorMethods.push_back(std::make_unique<brayns::PrimitiveColorMethod>("triangle", mesh.indices.size()));
+
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
         systems.setInitSystem<brayns::GeometryInitSystem>();
         systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        systems.setColorSystem<brayns::GenericColorSystem>(std::move(colorMethods));
 
         return model;
     }

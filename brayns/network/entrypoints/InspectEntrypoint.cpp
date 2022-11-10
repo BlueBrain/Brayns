@@ -42,7 +42,8 @@ public:
         auto inspectContext = _buildInspectContext(pickResult);
         auto instance = _findHittedInstance(pickResult.instance);
         auto &model = instance->getModel();
-        auto inspectResult = model.inspect(inspectContext);
+        auto view = model.getSystemsView();
+        auto inspectResult = view.inspect(inspectContext);
         return _buildResult(inspectContext, *instance, std::move(inspectResult));
     }
 

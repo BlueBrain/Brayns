@@ -24,6 +24,7 @@
 
 #include "Components.h"
 #include "systemtypes/BoundsSystem.h"
+#include "systemtypes/ColorSystem.h"
 #include "systemtypes/CommitSystem.h"
 #include "systemtypes/InitSystem.h"
 #include "systemtypes/InspectSystem.h"
@@ -64,20 +65,21 @@ public:
         _bounds = std::make_unique<T>(std::forward<Args>(args)...);
     }
 
+    template<typename T, typename... Args>
+    void setColorSystem(Args &&...args)
+    {
+        _color = std::make_unique<T>(std::forward<Args>(args)...);
+    }
+
 private:
+    friend class SystemsView;
     friend class Model;
 
-    void init(Components &components);
-    CommitResult commit(Components &components);
-    void update(const ParametersManager &parameters, Components &components);
-    InspectResultData inspect(const InspectContext &context, Components &components);
-    Bounds computeBounds(const Matrix4f &matrix, Components &components);
-
-private:
     std::unique_ptr<InitSystem> _init;
     std::unique_ptr<CommitSystem> _commit;
     std::unique_ptr<UpdateSystem> _update;
     std::unique_ptr<InspectSystem> _inspect;
     std::unique_ptr<BoundsSystem> _bounds;
+    std::unique_ptr<ColorSystem> _color;
 };
 }

@@ -25,6 +25,7 @@
 class ReportSystem final : public brayns::SimulationSystem
 {
 public:
+    bool isEnabled(brayns::Components &components) override;
     bool shouldExecute(brayns::Components &components) override;
     void execute(brayns::Components &components, uint32_t frame) override;
 };

@@ -27,6 +27,30 @@ namespace brayns
 {
 struct Geometries
 {
+    Geometries() = default;
+
+    template<typename T>
+    Geometries(T primitive)
+    {
+        elements.emplace_back(std::move(primitive));
+    }
+
+    template<typename T>
+    Geometries(std::vector<T> primitives)
+    {
+        elements.emplace_back(std::move(primitives));
+    }
+
+    template<typename T>
+    Geometries(std::vector<std::vector<T>> primitivesList)
+    {
+        elements.reserve(primitivesList.size());
+        for (auto &primitives : primitivesList)
+        {
+            elements.emplace_back(std::move(primitives));
+        }
+    }
+
     std::vector<Geometry> elements;
     ModifiedFlag modified;
 };

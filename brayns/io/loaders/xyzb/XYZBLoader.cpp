@@ -22,8 +22,12 @@
 
 #include <brayns/utils/Log.h>
 
+#include <brayns/engine/colormethods/PrimitiveColorMethod.h>
+#include <brayns/engine/colormethods/SolidColorMethod.h>
+
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GenericColorSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
@@ -109,6 +113,18 @@ private:
         return {{lineData[0], lineData[1], lineData[2]}, defaultRadius};
     }
 };
+
+class XYZColorMethods
+{
+public:
+    static auto build(size_t primitiveCount)
+    {
+        auto result = std::vector<std::unique_ptr<brayns::IColorMethod>>();
+        result.push_back(std::make_unique<brayns::SolidColorMethod>());
+        result.push_back(std::make_unique<brayns::PrimitiveColorMethod>("vertex", primitiveCount));
+        return result;
+    }
+};
 }
 
 namespace brayns
@@ -118,17 +134,18 @@ std::vector<std::shared_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob,
     Log::info("Loading xyz {}.", blob.name);
 
     auto spheres = XYZBReader::fromBytes(callback, std::string(blob.data.begin(), blob.data.end()));
+    auto sphereCount = spheres.size();
 
     auto model = std::make_shared<Model>("xyz");
 
     auto &components = model->getComponents();
-    auto &geometries = components.add<Geometries>();
-    geometries.elements.emplace_back(std::move(spheres));
+    components.add<Geometries>(std::move(spheres));
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
     systems.setInitSystem<GeometryInitSystem>();
     systems.setCommitSystem<GeometryCommitSystem>();
+    systems.setColorSystem<GenericColorSystem>(XYZColorMethods::build(sphereCount));
 
     std::vector<std::shared_ptr<Model>> result;
     result.push_back(std::move(model));

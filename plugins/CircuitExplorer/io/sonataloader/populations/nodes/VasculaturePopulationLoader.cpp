@@ -20,143 +20,70 @@
 
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Capsule.h>
-#include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
 
+#include <api/circuit/VasculatureCircuitBuilder.h>
 #include <api/reports/ReportFactory.h>
 #include <api/reports/indexers/OffsetIndexer.h>
-#include <api/vasculature/VasculatureColorHandler.h>
-#include <components/CircuitIds.h>
-#include <components/ColorList.h>
-#include <components/Coloring.h>
+
 #include <components/RadiiReportData.h>
 #include <components/ReportData.h>
-#include <components/VasculatureSectionList.h>
-#include <io/sonataloader/colordata/node/VasculatureColorData.h>
+
 #include <io/sonataloader/data/Config.h>
 #include <io/sonataloader/data/Names.h>
 #include <io/sonataloader/data/SimulationMapping.h>
 #include <io/sonataloader/data/Vasculature.h>
-#include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
 #include <io/sonataloader/reports/SonataReportData.h>
+
 #include <systems/RadiiReportSystem.h>
 
 namespace
 {
 namespace sl = sonataloader;
 
-class VasculaturePrimitiveImporter
+class VasculatureFactory
 {
 public:
-    static std::vector<brayns::Capsule> import(sl::NodeLoadContext &context)
+    static void create(sl::NodeLoadContext &context)
     {
-        auto &cb = context.progress;
         auto &population = context.population;
         auto &selection = context.selection;
         auto &params = context.params;
         auto &vasculatureParams = params.vasculature_geometry_parameters;
         auto multiplier = vasculatureParams.radius_multiplier;
 
+        auto ids = selection.flatten();
         auto startPoints = sl::Vasculature::getSegmentStartPoints(population, selection);
         auto endPoints = sl::Vasculature::getSegmentEndPoints(population, selection);
         auto startRadii = sl::Vasculature::getSegmentStartRadii(population, selection);
         auto endRadii = sl::Vasculature::getSegmentEndRadii(population, selection);
+        auto sections = sl::Vasculature::getSegmentSectionTypes(population, selection);
 
-        auto size = startPoints.size();
-        auto primitives = std::vector<brayns::Capsule>();
-        primitives.reserve(size);
+        _premultiplyRadii(multiplier, startRadii, endRadii);
 
-        for (size_t i = 0; i < size; ++i)
-        {
-            cb.update("Loading vasculature geometry");
-            auto &p0 = startPoints[i];
-            auto r0 = startRadii[i] * multiplier;
-            auto &p1 = endPoints[i];
-            auto r1 = endRadii[i] * multiplier;
-            primitives.push_back(brayns::CapsuleFactory::cone(p0, r0, p1, r1));
-        }
-        return primitives;
-    }
-};
-
-class VasculatureSectionImporter
-{
-public:
-    static std::vector<VasculatureSection> import(sl::NodeLoadContext &context)
-    {
-        auto &population = context.population;
-        auto &selection = context.selection;
-        return sl::Vasculature::getSegmentSectionTypes(population, selection);
-    }
-};
-
-class ModelBuilder
-{
-public:
-    ModelBuilder(brayns::Model &model)
-        : _components(model.getComponents())
-        , _systems(model.getSystems())
-    {
-    }
-
-    void addGeometry(std::vector<brayns::Capsule> primitives)
-    {
-        auto &geometries = _components.add<brayns::Geometries>();
-        geometries.elements.emplace_back(std::move(primitives));
-    }
-
-    void addColoring(std::unique_ptr<IColorData> colorData)
-    {
-        auto colorHandler = std::make_unique<VasculatureColorHandler>(_components);
-        _components.add<Coloring>(std::move(colorData), std::move(colorHandler));
-    }
-
-    void addSections(std::vector<VasculatureSection> sections)
-    {
-        _components.add<VasculatureSectionList>(std::move(sections));
-    }
-
-    void addColorList(size_t numItems)
-    {
-        auto &colorList = _components.add<ColorList>();
-        colorList.elements.resize(numItems, brayns::Vector4f(1.f));
-    }
-
-    void addIds(std::vector<uint64_t> ids)
-    {
-        _components.add<CircuitIds>(std::move(ids));
-    }
-
-    void addSystems()
-    {
-        _systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-        _systems.setInitSystem<brayns::GeometryInitSystem>();
-        _systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        auto buildContext = VasculatureCircuitBuilder::Context{
+            std::move(ids),
+            std::move(startPoints),
+            std::move(startRadii),
+            std::move(endPoints),
+            std::move(endRadii),
+            std::move(sections)};
+        VasculatureCircuitBuilder::build(context.model, std::move(buildContext));
     }
 
 private:
-    brayns::Components &_components;
-    brayns::Systems &_systems;
-};
-
-class VasculatureFactory
-{
-public:
-    static void create(sl::NodeLoadContext &context)
+    static void _premultiplyRadii(float multiplier, std::vector<float> &start, std::vector<float> &end)
     {
-        auto primitives = VasculaturePrimitiveImporter::import(context);
-        auto sections = VasculatureSectionImporter::import(context);
-        auto ids = context.selection.flatten();
-        auto colorData = sl::NodeColorDataFactory::create<sl::VasculatureColorData>(context);
+        if (multiplier == 1.f)
+        {
+            return;
+        }
 
-        auto builder = ModelBuilder(context.model);
-        builder.addGeometry(std::move(primitives));
-        builder.addColorList(ids.size());
-        builder.addIds(std::move(ids));
-        builder.addColoring(std::move(colorData));
-        builder.addSections(std::move(sections));
-        builder.addSystems();
+#pragma omp parallel for
+        for (size_t i = 0; i < start.size(); ++i)
+        {
+            start[i] *= multiplier;
+            end[i] *= multiplier;
+        }
     }
 };
 
@@ -221,13 +148,15 @@ private:
         auto &geometry = geometries.elements.front();
         auto &capsules = *geometry.as<brayns::Capsule>();
 
-        std::vector<float> originalRadii;
+        auto originalRadii = std::vector<float>();
         originalRadii.reserve(capsules.size());
+
         for (auto &capsule : capsules)
         {
             originalRadii.push_back(capsule.r0);
             originalRadii.push_back(capsule.r1);
         }
+
         return originalRadii;
     }
 

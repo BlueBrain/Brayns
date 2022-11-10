@@ -18,21 +18,15 @@
 
 #include "EndFootPopulationLoader.h"
 
-#include <filesystem>
-
-#include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
 #include <brayns/json/Json.h>
 
-#include <api/synapse/colorhandlers/EndfeetColorHandler.h>
-#include <components/CircuitIds.h>
-#include <components/Coloring.h>
-#include <io/sonataloader/colordata/edge/CommonEdgeColorData.h>
+#include <api/circuit/EndfeetCircuitBuilder.h>
+#include <io/sonataloader/colordata/ColorDataFactory.h>
 #include <io/sonataloader/data/EndFeetReader.h>
 #include <io/sonataloader/data/Names.h>
 #include <io/sonataloader/data/Synapses.h>
+
+#include <filesystem>
 
 namespace
 {
@@ -154,49 +148,6 @@ private:
     std::string _edgeName;
 };
 
-class ModelBuilder
-{
-public:
-    ModelBuilder(brayns::Model &model)
-        : _model(model)
-    {
-    }
-
-    void addGeometry(std::map<uint64_t, std::vector<brayns::TriangleMesh>> endfeetGeometry)
-    {
-        auto &components = _model.getComponents();
-
-        auto &ids = components.add<CircuitIds>();
-        ids.elements.reserve(endfeetGeometry.size());
-
-        auto &geometries = components.add<brayns::Geometries>();
-        geometries.elements.reserve(endfeetGeometry.size());
-
-        for (auto &[id, primitives] : endfeetGeometry)
-        {
-            ids.elements.push_back(id);
-            geometries.elements.emplace_back(std::move(primitives));
-        }
-    }
-
-    void addColoring(std::unique_ptr<IColorData> colorData)
-    {
-        auto &components = _model.getComponents();
-        auto handler = std::make_unique<EndfeetColorHandler>(components);
-        components.add<Coloring>(std::move(colorData), std::move(handler));
-    }
-
-    void addSystems()
-    {
-        auto &systems = _model.getSystems();
-        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-        systems.setInitSystem<brayns::GeometryInitSystem>();
-        systems.setCommitSystem<brayns::GeometryCommitSystem>();
-    }
-
-private:
-    brayns::Model &_model;
-};
 } // namespace
 
 namespace sonataloader
@@ -229,16 +180,7 @@ void EndFootPopulationLoader::load(EdgeLoadContext &context) const
         buffer.push_back(std::move(mesh));
     }
 
-    auto &model = context.model;
-
-    auto &config = context.config;
-    auto astrocytePopulationName = population.target();
-    auto astrocytePopulation = config.getNodes(astrocytePopulationName);
-    auto colorData = std::make_unique<CommonEdgeColorData>(std::move(astrocytePopulation));
-
-    auto builder = ModelBuilder(model);
-    builder.addGeometry(std::move(endfeetGeometry));
-    builder.addColoring(std::move(colorData));
-    builder.addSystems();
+    auto buildContext = EndfeetCircuitBuilder::Context{std::move(endfeetGeometry), ColorDataFactory::create(context)};
+    EndfeetCircuitBuilder::build(context.model, std::move(buildContext));
 }
 } // namespace sonataloader

@@ -36,7 +36,7 @@ namespace brayns
 {
 void MaterialTraits<Matte>::updateData(ospray::cpp::Material &handle, Matte &data)
 {
-    handle.setParam(MatteParameters::color, data.color);
+    handle.setParam(MatteParameters::color, Vector3f(1.f));
     handle.setParam(MatteParameters::roughness, 1.f);
     handle.setParam(MatteParameters::opacity, data.opacity);
 }

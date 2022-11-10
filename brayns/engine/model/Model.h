@@ -23,6 +23,7 @@
 
 #include "Components.h"
 #include "Systems.h"
+#include "SystemsView.h"
 
 #include <ospray/ospray_cpp/Group.h>
 
@@ -80,35 +81,16 @@ public:
     Systems &getSystems() noexcept;
 
     /**
-     * @brief Process the model if it is the target of the inspect context
-     * @param context Information about the hitted model on the inspection
-     * @return InspectResult the result of checking the inspection context for this model
+     * @brief Returns a view to the systems
+     * @return SystemsView
      */
-    InspectResultData inspect(const InspectContext &context);
+    SystemsView getSystemsView() noexcept;
 
-    /**
-     * @brief Compute the spatial bounds of the model
-     * @param matrix Transformation to apply to the volume or geometries of the model
-     * @return Bounds axis-aligned spatial bounds
-     */
-    Bounds computeBounds(const Matrix4f &matrix);
-
+private:
     /**
      * @brief Called when the model is added to the scene
      */
     void init();
-
-    /**
-     * @brief Called before rendering a new frame
-     * @param parameters ParametersManager object to access system config
-     */
-    void update(const ParametersManager &parameters);
-
-    /**
-     * @brief Called before rendering a new frame
-     * @return CommitResult Required actions given the commits made on the model
-     */
-    CommitResult commit();
 
 private:
     friend class ModelManager;

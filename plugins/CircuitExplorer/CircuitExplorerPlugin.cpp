@@ -28,10 +28,8 @@
 #include <io/NeuronMorphologyLoader.h>
 #include <io/SonataLoader.h>
 #include <io/SonataNGVLoader.h>
-#include <network/entrypoints/ColorCircuitEntrypoint.h>
 #include <network/entrypoints/GetCircuitIdsEntrypoint.h>
 #include <network/entrypoints/SetCircuitThicknessEntrypoint.h>
-#include <network/entrypoints/TraceAnterogradeEntrypoint.h>
 
 CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
 {
@@ -50,14 +48,8 @@ CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
     auto &scene = engine.getScene();
     auto &models = scene.getModels();
     auto builder = brayns::EntrypointBuilder("Circuit Explorer", *interface);
-    builder.add<AvailableColorMethodsEntrypoint>(models);
-    builder.add<AvailableColorMethodVariablesEntrypoint>(models);
-    builder.add<ColorCircuitByIdEntrypoint>(models);
-    builder.add<ColorCircuitByMethodEntrypoint>(models);
-    builder.add<ColorCircuitBySingleColorEntrypoint>(models);
     builder.add<GetCircuitIdsEntrypoint>(models);
     builder.add<SetCircuitThicknessEntrypoint>(models);
-    builder.add<TraceAnterogradeEntrypoint>(models);
 }
 
 extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)

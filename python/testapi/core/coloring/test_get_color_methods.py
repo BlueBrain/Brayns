@@ -29,7 +29,12 @@ class TestGetColorMethods(SimpleTestCase):
         models = loader.load_models(self.instance, self.bbp_circuit)
         methods = brayns.get_color_methods(self.instance, models[0].id)
         ref = {
+            brayns.ColorMethod.SOLID,
+            brayns.CircuitColorMethod.ID,
+            brayns.CircuitColorMethod.ETYPE,
             brayns.CircuitColorMethod.LAYER,
+            brayns.CircuitColorMethod.MORPHOLOGY,
+            brayns.CircuitColorMethod.MTYPE,
         }
         self.assertEqual(len(methods), len(ref))
         self.assertSetEqual(set(methods), ref)

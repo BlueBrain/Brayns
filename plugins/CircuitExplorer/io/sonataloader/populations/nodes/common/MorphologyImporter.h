@@ -20,17 +20,13 @@
 
 #include <brayns/utils/MathTypes.h>
 
-#include <api/coloring/IColorData.h>
-#include <api/reports/ReportMapping.h>
 #include <io/sonataloader/LoadContext.h>
 
 namespace sonataloader
 {
-struct MorphologyImporter
+class MorphologyImporter
 {
-    static void import(
-        NodeLoadContext &ctxt,
-        const std::vector<brayns::Quaternion> &rotations,
-        std::unique_ptr<IColorData> colorData);
+public:
+    static void import(NodeLoadContext &nodeContext, const std::vector<brayns::Quaternion> &rotations);
 };
 }

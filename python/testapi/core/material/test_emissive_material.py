@@ -27,6 +27,7 @@ class TestEmissiveMaterial(MaterialTestCase):
 
     def test_all(self) -> None:
         material = brayns.EmissiveMaterial(
-            intensity=5
+            intensity=5,
+            color=brayns.Color3.red,
         )
         self.run_tests(material)

@@ -20,13 +20,16 @@
 
 #pragma once
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <brayns/engine/colormethods/PrimitiveColorMethod.h>
+#include <brayns/engine/colormethods/SolidColorMethod.h>
+#include <brayns/engine/components/ColorList.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/json/adapters/GeometryAdapters.h>
 #include <brayns/engine/json/adapters/ModelInstanceAdapter.h>
 #include <brayns/engine/scene/ModelManager.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GenericColorSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
@@ -50,12 +53,15 @@ public:
         auto model = std::make_shared<Model>("geometry");
 
         auto [primitives, colors] = _unpackRequest(request);
+        auto primitiveCount = primitives.size();
 
         auto &geometry = _addGeometry(*model, std::move(primitives));
         auto &view = _addView(*model, geometry);
-        view.setColorPerPrimitive(ospray::cpp::CopiedData(colors));
+        auto &colorList = _addColors(*model, std::move(colors));
 
-        _setUpSystems(*model);
+        view.setColorPerPrimitive(ospray::cpp::SharedData(colorList));
+
+        _setUpSystems(*model, primitiveCount);
 
         auto *instance = _models.add(std::move(model));
         request.reply(*instance);
@@ -96,12 +102,24 @@ private:
         return views.elements.emplace_back(geometry);
     }
 
-    void _setUpSystems(Model &model)
+    const std::vector<brayns::Vector4f> &_addColors(Model &model, std::vector<brayns::Vector4f> inputColors)
     {
+        auto &components = model.getComponents();
+        auto &colorList = components.add<ColorList>(std::move(inputColors));
+        return colorList.elements;
+    }
+
+    void _setUpSystems(Model &model, size_t numGeometries)
+    {
+        auto colorMethods = std::vector<std::unique_ptr<IColorMethod>>();
+        colorMethods.push_back(std::make_unique<SolidColorMethod>());
+        colorMethods.push_back(std::make_unique<PrimitiveColorMethod>("primitive", numGeometries));
+
         auto &systems = model.getSystems();
         systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
         systems.setInitSystem<GeometryInitSystem>();
         systems.setCommitSystem<GeometryCommitSystem>();
+        systems.setColorSystem<GenericColorSystem>(std::move(colorMethods));
     }
 
 private:

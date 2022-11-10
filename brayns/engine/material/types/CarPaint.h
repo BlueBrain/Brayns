@@ -28,7 +28,6 @@ namespace brayns
 {
 struct CarPaint
 {
-    Vector3f color = Vector3f(1.f);
     float flakeDensity = 0.f;
 };
 

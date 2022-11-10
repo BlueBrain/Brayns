@@ -18,9 +18,7 @@
 
 #include "PointNeuronPopulationLoader.h"
 
-#include <io/sonataloader/colordata/node/PointNeuronColorData.h>
 #include <io/sonataloader/data/Names.h>
-#include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
 #include <io/sonataloader/populations/nodes/common/SomaImporter.h>
 
 namespace sonataloader
@@ -32,7 +30,6 @@ std::string_view PointNeuronPopulationLoader::getPopulationType() const noexcept
 
 void PointNeuronPopulationLoader::load(NodeLoadContext &context) const
 {
-    auto colorData = NodeColorDataFactory::create<PointNeuronColorData>(context);
-    SomaImporter::import(context, std::move(colorData));
+    SomaImporter::import(context);
 }
 } // namespace sonataloader

@@ -21,22 +21,29 @@
 #include <brayns/utils/Log.h>
 #include <brayns/utils/Timer.h>
 
+#include <brayns/engine/colormethods/SolidColorMethod.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Capsule.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GenericColorSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
 #include <api/ModelType.h>
+#include <api/coloring/handlers/ComposedColorHandler.h>
+#include <api/coloring/methods/MorphologySectionColorMethod.h>
 #include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
 #include <api/neuron/NeuronMorphologyReader.h>
+#include <components/ColorHandler.h>
+#include <components/NeuronSectionList.h>
 #include <io/NeuronMorphologyLoaderParameters.h>
 
 namespace
 {
-struct SectionLoadChecker
+class SectionLoadChecker
 {
+public:
     static void check(const NeuronMorphologyLoaderParameters &input)
     {
         if (!input.load_axon && !input.load_dendrites)
@@ -44,6 +51,43 @@ struct SectionLoadChecker
             throw std::invalid_argument("At least one section of the morphology (axons or dendrites) must be enabled");
         }
     }
+};
+
+class ModelBuilder
+{
+public:
+    ModelBuilder(brayns::Model &model)
+        : _components(model.getComponents())
+        , _systems(model.getSystems())
+    {
+    }
+
+    void addGeometry(std::vector<brayns::Capsule> primitives)
+    {
+        _components.add<brayns::Geometries>(std::move(primitives));
+        _systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+        _systems.setInitSystem<brayns::GeometryInitSystem>();
+        _systems.setCommitSystem<brayns::GeometryCommitSystem>();
+    }
+
+    void addSections(std::vector<NeuronSectionMapping> mapping)
+    {
+        _components.add<NeuronSectionList>(std::move(mapping));
+    }
+
+    void addColoring()
+    {
+        _components.add<ColorHandler>(std::make_unique<ComposedColorHandler>());
+
+        auto methods = brayns::ColorMethodList();
+        methods.push_back(std::make_unique<brayns::SolidColorMethod>());
+        methods.push_back(std::make_unique<MorphologySectionColorMethod>());
+        _systems.setColorSystem<brayns::GenericColorSystem>(std::move(methods));
+    }
+
+private:
+    brayns::Components &_components;
+    brayns::Systems &_systems;
 };
 } // namespace
 
@@ -93,20 +137,16 @@ std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
     const auto pipeline = NeuronMorphologyPipeline::fromParameters(geometryType, radMultiplier);
     pipeline.process(morphology);
 
-    const NeuronGeometryBuilder builder(morphology);
-    auto neuronGeometry = builder.instantiate({}, {});
+    auto neuronBuilder = NeuronGeometryBuilder(morphology);
+    auto neuronGeometry = neuronBuilder.instantiate({}, {});
     auto &primitives = neuronGeometry.geometry;
+    auto &sectionMapping = neuronGeometry.sectionMapping;
 
     auto model = std::make_shared<brayns::Model>(ModelType::morphology);
-
-    auto &components = model->getComponents();
-    auto &geometries = components.add<brayns::Geometries>();
-    geometries.elements.emplace_back(std::move(primitives));
-
-    auto &systems = model->getSystems();
-    systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-    systems.setInitSystem<brayns::GeometryInitSystem>();
-    systems.setCommitSystem<brayns::GeometryCommitSystem>();
+    auto builder = ModelBuilder(*model);
+    builder.addGeometry(std::move(primitives));
+    builder.addSections(std::move(sectionMapping));
+    builder.addColoring();
 
     brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.seconds());
 

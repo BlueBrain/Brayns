@@ -18,9 +18,7 @@
 
 #include "AstrocytePopulationLoader.h"
 
-#include <io/sonataloader/colordata/node/AstrocyteColorData.h>
 #include <io/sonataloader/data/Names.h>
-#include <io/sonataloader/populations/nodes/common/ColorDataFactory.h>
 #include <io/sonataloader/populations/nodes/common/MorphologyImporter.h>
 #include <io/sonataloader/populations/nodes/common/SomaImporter.h>
 
@@ -33,8 +31,6 @@ std::string_view AstrocytePopulationLoader::getPopulationType() const noexcept
 
 void AstrocytePopulationLoader::load(NodeLoadContext &context) const
 {
-    auto colorData = NodeColorDataFactory::create<AstrocyteColorData>(context);
-
     auto &loadParams = context.params;
     auto &morphParams = loadParams.neuron_morphology_parameters;
     auto soma = morphParams.load_soma;
@@ -43,12 +39,12 @@ void AstrocytePopulationLoader::load(NodeLoadContext &context) const
 
     if (soma && !axon && !dend)
     {
-        SomaImporter::import(context, std::move(colorData));
+        SomaImporter::import(context);
         return;
     }
 
     auto &selection = context.selection;
     auto dummyRotations = std::vector<brayns::Quaternion>(selection.flatSize());
-    MorphologyImporter::import(context, dummyRotations, std::move(colorData));
+    MorphologyImporter::import(context, dummyRotations);
 }
 } // namespace sonataloader

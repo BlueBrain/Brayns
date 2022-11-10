@@ -29,6 +29,7 @@ class SimulationSystem : public UpdateSystem
 public:
     virtual void execute(const ParametersManager &parameters, Components &components) final;
 
+    virtual bool isEnabled(Components &components) = 0;
     virtual bool shouldExecute(Components &components) = 0;
     virtual void execute(Components &components, uint32_t frame) = 0;
 

@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/material/Material.h>
 #include <brayns/utils/ModifiedFlag.h>
 

@@ -21,44 +21,72 @@
 #include "NeuronMetadataFactory.h"
 
 #include <api/circuit/MorphologyCircuitBuilder.h>
+#include <io/sonataloader/colordata/ColorDataFactory.h>
 #include <io/sonataloader/data/Cells.h>
 #include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
 
-namespace sonataloader
+namespace
 {
-void MorphologyImporter::import(
-    NodeLoadContext &ctxt,
-    const std::vector<brayns::Quaternion> &rotations,
-    std::unique_ptr<IColorData> colorData)
+class DataExtractor
 {
-    NeuronMetadataFactory::create(ctxt);
-
-    auto &population = ctxt.population;
-    auto populationName = population.name();
-    auto &selection = ctxt.selection;
-    auto flatSelection = selection.flatten();
-
-    auto positions = Cells::getPositions(population, selection);
-    auto morphologies = Cells::getMorphologies(population, selection);
-
-    auto &params = ctxt.params;
-    auto &neuronParams = params.neuron_morphology_parameters;
-
-    auto &config = ctxt.config;
-    auto pathBuilder = config.getMorphologyPath(populationName);
-
-    auto morphologyPaths = std::vector<std::string>();
-    morphologyPaths.reserve(morphologies.size());
-    for (auto &morphology : morphologies)
+public:
+    static std::vector<uint64_t> extractIds(const sonataloader::NodeLoadContext &context)
     {
-        morphologyPaths.push_back(pathBuilder.buildPath(morphology));
+        auto &selection = context.selection;
+        return selection.flatten();
     }
 
-    auto &model = ctxt.model;
-    auto &cb = ctxt.progress;
-    MorphologyCircuitBuilder::Context context(flatSelection, morphologyPaths, positions, rotations, neuronParams);
+    static std::vector<brayns::Vector3f> extractPositions(const sonataloader::NodeLoadContext &context)
+    {
+        return sonataloader::Cells::getPositions(context.population, context.selection);
+    }
 
-    auto compartments = MorphologyCircuitBuilder::load(context, model, cb, std::move(colorData));
-    NeuronReportFactory::create(ctxt, compartments);
+    static std::vector<std::string> extractMorphologyPaths(const sonataloader::NodeLoadContext &context)
+    {
+        auto &population = context.population;
+        auto &selection = context.selection;
+        auto morphologies = sonataloader::Cells::getMorphologies(population, selection);
+
+        auto &config = context.config;
+        auto pathBuilder = config.getMorphologyPath(population.name());
+
+        auto morphologyPaths = std::vector<std::string>();
+        morphologyPaths.reserve(morphologies.size());
+
+        for (auto &morphology : morphologies)
+        {
+            morphologyPaths.push_back(pathBuilder.buildPath(morphology));
+        }
+
+        return morphologyPaths;
+    }
+
+    static NeuronMorphologyLoaderParameters extractNeuronParams(const sonataloader::NodeLoadContext &context)
+    {
+        return context.params.neuron_morphology_parameters;
+    }
+};
+}
+
+namespace sonataloader
+{
+void MorphologyImporter::import(NodeLoadContext &context, const std::vector<brayns::Quaternion> &rotations)
+{
+    NeuronMetadataFactory::create(context);
+
+    auto ids = DataExtractor::extractIds(context);
+    auto positions = DataExtractor::extractPositions(context);
+    auto morphologyPaths = DataExtractor::extractMorphologyPaths(context);
+    auto neuronParams = DataExtractor::extractNeuronParams(context);
+    auto buildContext = MorphologyCircuitBuilder::Context{
+        std::move(ids),
+        std::move(morphologyPaths),
+        std::move(positions),
+        std::move(rotations),
+        neuronParams,
+        ColorDataFactory::create(context)};
+
+    auto compartments = MorphologyCircuitBuilder::build(context.model, std::move(buildContext), context.progress);
+    NeuronReportFactory::create(context, compartments);
 }
 }
