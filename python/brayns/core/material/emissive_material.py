@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .material import Material
+from brayns.utils import Color3
 
 
 @dataclass
@@ -30,9 +31,12 @@ class EmissiveMaterial(Material):
 
     :param intensity: Light emission intensity, defaults to 1.
     :type intensity: float, optional
+    :param color: Light color, defaults to white.
+    :type color: Color3, optional
     """
 
     intensity: float = 1.0
+    color: Color3 = Color3.white
 
     @classmethod
     @property
@@ -47,9 +51,11 @@ class EmissiveMaterial(Material):
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'intensity': self.intensity
+            'intensity': self.intensity,
+            'color': list(self.color),
         }
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
         self.intensity = message['intensity']
+        self.color = message['color']

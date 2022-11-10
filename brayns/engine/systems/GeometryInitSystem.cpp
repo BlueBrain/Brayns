@@ -20,6 +20,7 @@
 
 #include "GeometryInitSystem.h"
 
+#include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/material/Material.h>
@@ -33,6 +34,7 @@ public:
     {
         _initGeometryViews(components);
         _initMaterial(components);
+        _initColor(components);
     }
 
 private:
@@ -44,21 +46,31 @@ private:
         }
 
         auto &geometries = components.get<brayns::Geometries>();
-        auto &views = components.add<brayns::GeometryViews>();
-        views.elements.reserve(geometries.elements.size());
-        for (auto &geometry : geometries.elements)
-        {
-            views.elements.emplace_back(geometry);
-        }
+        components.add<brayns::GeometryViews>(geometries.elements);
     }
 
     static void _initMaterial(brayns::Components &components)
     {
-        auto material = components.getOrAdd<brayns::Material>();
+        auto &material = components.getOrAdd<brayns::Material>();
         auto &views = components.get<brayns::GeometryViews>();
         for (auto &view : views.elements)
         {
             view.setMaterial(material);
+        }
+    }
+
+    static void _initColor(brayns::Components &components)
+    {
+        auto solidColor = components.find<brayns::ColorSolid>();
+        if (!solidColor)
+        {
+            return;
+        }
+
+        auto &views = components.get<brayns::GeometryViews>();
+        for (auto &view : views.elements)
+        {
+            view.setColor(solidColor->color);
         }
     }
 };

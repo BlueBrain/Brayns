@@ -20,7 +20,7 @@
 
 #include "ElementIdColorMethod.h"
 
-#include <brayns/engine/components/ColorList.h>
+#include <brayns/engine/common/ExtractColor.h>
 #include <brayns/engine/components/GeometryViews.h>
 
 #include <brayns/utils/parsing/Parser.h>
@@ -145,9 +145,7 @@ std::vector<std::string> ElementIdColorMethod::getValues(brayns::Components &com
 void ElementIdColorMethod::apply(brayns::Components &components, const brayns::ColorMethodInput &input) const
 {
     auto &ids = components.get<CircuitIds>().elements;
-    auto &colors = components.getOrAdd<brayns::ColorList>();
-
-    colors.elements.resize(ids.size(), brayns::Vector4f(1.f));
+    auto &colors = brayns::ExtractColor::extractList(components, ids.size());
 
     ColorByIDAlgorithm::execute(
         ids,

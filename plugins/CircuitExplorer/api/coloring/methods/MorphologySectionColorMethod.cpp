@@ -20,7 +20,7 @@
 
 #include "MorphologySectionColorMethod.h"
 
-#include <brayns/engine/components/ColorMap.h>
+#include <brayns/engine/common/ExtractColor.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 
@@ -59,7 +59,7 @@ private:
     {
         auto sectionIndices = _indexSectionColors(sectionColors);
 
-        auto &colorMap = components.getOrAdd<brayns::ColorMap>();
+        auto &colorMap = brayns::ExtractColor::extractMap(components);
 
         colorMap.colors = _buildColorBuffer(sectionColors);
 

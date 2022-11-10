@@ -1,7 +1,6 @@
-
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,25 +18,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "ExtractColor.h"
 
-#include <brayns/engine/material/MaterialTraits.h>
-#include <brayns/utils/MathTypes.h>
+#include <cassert>
 
 namespace brayns
 {
-struct CarPaint
+ColorSolid &ExtractColor::extractSolid(brayns::Components &components)
 {
-    float flakeDensity = 0.f;
-};
+    return components.getOrAdd<ColorSolid>();
+}
 
-template<>
-class MaterialTraits<CarPaint>
+ColorList &ExtractColor::extractList(brayns::Components &components, size_t size)
 {
-public:
-    inline static const std::string handleName = "carPaint";
-    inline static const std::string name = "carpaint";
+    auto &colorList = components.getOrAdd<ColorList>();
+    auto &colors = colorList.elements;
 
-    static void updateData(ospray::cpp::Material &material, CarPaint &data);
-};
+    auto colorSolid = components.find<ColorSolid>();
+    if (colorSolid)
+    {
+        colors.resize(size, colorSolid->color);
+        return colorList;
+    }
+
+    colors.resize(size, brayns::Vector4f(1.f));
+    return colorList;
+}
+
+ColorMap &ExtractColor::extractMap(brayns::Components &components)
+{
+    return components.getOrAdd<ColorMap>();
+}
 }

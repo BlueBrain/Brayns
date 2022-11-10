@@ -21,6 +21,7 @@
 #include "EndfeetCircuitBuilder.h"
 
 #include <brayns/engine/colormethods/SolidColorMethod.h>
+#include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GenericColorSystem.h>
@@ -81,6 +82,7 @@ public:
 
         _components.add<ColorHandler>(std::make_unique<EndfeetColorHandler>());
         _components.add<BrainColorData>(std::move(data));
+        _components.add<brayns::ColorSolid>(brayns::Vector4f(1.f));
     }
 
 private:

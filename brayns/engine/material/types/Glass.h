@@ -27,7 +27,6 @@ namespace brayns
 {
 struct Glass
 {
-    Vector3f color = Vector3f(1.f);
     float indexOfRefraction = 1.5f;
 };
 

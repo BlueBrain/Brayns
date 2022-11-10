@@ -20,7 +20,7 @@
 
 #include "VasculatureSectionColorMethod.h"
 
-#include <brayns/engine/components/ColorList.h>
+#include <brayns/engine/common/ExtractColor.h>
 #include <brayns/engine/components/GeometryViews.h>
 
 #include <components/ColorHandler.h>
@@ -54,9 +54,7 @@ std::vector<std::string> VasculatureSectionColorMethod::getValues(brayns::Compon
 void VasculatureSectionColorMethod::apply(brayns::Components &components, const brayns::ColorMethodInput &input) const
 {
     auto &sections = components.get<VasculatureSectionList>().sections;
-
-    auto &colors = components.getOrAdd<brayns::ColorList>();
-    colors.elements.resize(sections.size(), brayns::Vector4f(1.f, 0.f, 0.f, 1.f));
+    auto &colors = brayns::ExtractColor::extractList(components, sections.size());
 
     for (size_t i = 0; i < sections.size(); ++i)
     {

@@ -27,7 +27,6 @@ namespace brayns
 {
 struct Metal
 {
-    Vector3f color = Vector3f(1.f);
     float roughness = 0.1f;
 };
 

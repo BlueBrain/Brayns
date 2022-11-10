@@ -1,7 +1,6 @@
-
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,23 +20,18 @@
 
 #pragma once
 
-#include <brayns/engine/material/MaterialTraits.h>
-#include <brayns/utils/MathTypes.h>
+#include <brayns/engine/components/ColorList.h>
+#include <brayns/engine/components/ColorMap.h>
+#include <brayns/engine/components/ColorSolid.h>
+#include <brayns/engine/model/Components.h>
 
 namespace brayns
 {
-struct CarPaint
-{
-    float flakeDensity = 0.f;
-};
-
-template<>
-class MaterialTraits<CarPaint>
+class ExtractColor
 {
 public:
-    inline static const std::string handleName = "carPaint";
-    inline static const std::string name = "carpaint";
-
-    static void updateData(ospray::cpp::Material &material, CarPaint &data);
+    static ColorSolid &extractSolid(brayns::Components &components);
+    static ColorList &extractList(brayns::Components &components, size_t size);
+    static ColorMap &extractMap(brayns::Components &components);
 };
 }

@@ -21,6 +21,7 @@
 #include "PrimitiveColorMethod.h"
 
 #include <brayns/engine/components/ColorList.h>
+#include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 
@@ -46,6 +47,14 @@ public:
     {
         auto &colorList = components.getOrAdd<brayns::ColorList>();
         auto &colors = colorList.elements;
+
+        auto solidColor = components.find<brayns::ColorSolid>();
+        if (solidColor)
+        {
+            colors.resize(length, solidColor->color);
+            return colors;
+        }
+
         colors.resize(length, brayns::Vector4f(1.f));
         return colors;
     }

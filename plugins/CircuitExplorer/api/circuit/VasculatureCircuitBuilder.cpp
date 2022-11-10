@@ -20,6 +20,7 @@
 
 #include "VasculatureCircuitBuilder.h"
 
+#include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Capsule.h>
 #include <brayns/engine/model/Model.h>
@@ -78,17 +79,12 @@ public:
     void addColoring()
     {
         _components.add<ColorHandler>(std::make_unique<SimpleColorHandler>());
+        _components.add<brayns::ColorSolid>(brayns::Vector4f(1.f, 0.f, 0.f, 1.f));
     }
 
     void addSections(std::vector<VasculatureSection> sections)
     {
         _components.add<VasculatureSectionList>(std::move(sections));
-    }
-
-    void addColorList(size_t numItems)
-    {
-        auto &colorList = _components.add<brayns::ColorList>();
-        colorList.elements.resize(numItems, brayns::Vector4f(1.f, 0.f, 0.f, 1.f));
     }
 
     void addIds(std::vector<uint64_t> ids)
@@ -120,7 +116,6 @@ void VasculatureCircuitBuilder::build(brayns::Model &model, Context context, Pro
 
     auto builder = ModelBuilder(model);
     builder.addGeometry(std::move(primitives));
-    builder.addColorList(context.ids.size());
     builder.addIds(std::move(context.ids));
     builder.addColoring();
     builder.addSections(std::move(context.sections));

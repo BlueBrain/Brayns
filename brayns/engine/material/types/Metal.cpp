@@ -35,7 +35,7 @@ namespace brayns
 {
 void MaterialTraits<Metal>::updateData(ospray::cpp::Material &handle, Metal &data)
 {
-    handle.setParam(MetalParameters::color, data.color);
+    handle.setParam(MetalParameters::color, Vector3f(1.f));
     handle.setParam(MetalParameters::roughness, data.roughness);
 }
 }

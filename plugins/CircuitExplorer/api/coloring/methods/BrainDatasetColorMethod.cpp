@@ -20,7 +20,7 @@
 
 #include "BrainDatasetColorMethod.h"
 
-#include <brayns/engine/components/ColorList.h>
+#include <brayns/engine/common/ExtractColor.h>
 #include <brayns/engine/components/GeometryViews.h>
 
 #include <components/BrainColorData.h>
@@ -54,9 +54,8 @@ void BrainDatasetColorMethod::apply(brayns::Components &components, const brayns
 {
     auto &colorData = *components.get<BrainColorData>().data;
     auto &ids = components.get<CircuitIds>().elements;
-    auto &colors = components.getOrAdd<brayns::ColorList>();
 
-    colors.elements.resize(ids.size(), brayns::Vector4f(1.f));
+    auto &colors = brayns::ExtractColor::extractList(components, ids.size());
 
     auto allValues = colorData.getValues(_method, ids);
 

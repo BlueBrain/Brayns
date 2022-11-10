@@ -21,12 +21,14 @@
 #include "MorphologyCircuitBuilder.h"
 
 #include <brayns/engine/colormethods/SolidColorMethod.h>
+#include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GenericColorSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
 
+#include <api/ModelType.h>
 #include <api/coloring/handlers/ComposedColorHandler.h>
 #include <api/coloring/methods/BrainDatasetColorMethod.h>
 #include <api/coloring/methods/ElementIdColorMethod.h>
@@ -136,6 +138,7 @@ public:
     ModelBuilder(brayns::Model &model)
         : _components(model.getComponents())
         , _systems(model.getSystems())
+        , _modelType(model.getType())
     {
     }
 
@@ -178,9 +181,21 @@ public:
         _components.add<BrainColorData>(std::move(data));
     }
 
+    void addDefaultColor()
+    {
+        if (_modelType == ModelType::neurons)
+        {
+            _components.add<brayns::ColorSolid>(brayns::Vector4f(1.f, 1.f, 0.f, 1.f));
+            return;
+        }
+
+        _components.add<brayns::ColorSolid>(brayns::Vector4f(0.55f, 0.7f, 1.f, 1.f));
+    }
+
 private:
     brayns::Components &_components;
     brayns::Systems &_systems;
+    const std::string &_modelType;
 };
 }
 
@@ -222,6 +237,7 @@ std::vector<CellCompartments>
     builder.addGeometry(std::move(geometries));
     builder.addNeuronSections(std::move(mappings));
     builder.addColoring(std::move(context.colorData));
+    builder.addDefaultColor();
 
     return compartments;
 }
