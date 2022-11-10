@@ -45,7 +45,6 @@ class VasculatureFactory
 public:
     static void create(sl::NodeLoadContext &context)
     {
-        auto &cb = context.progress;
         auto &population = context.population;
         auto &selection = context.selection;
         auto &params = context.params;
@@ -68,12 +67,17 @@ public:
             std::move(endPoints),
             std::move(endRadii),
             std::move(sections)};
-        VasculatureCircuitBuilder::build(context.model, std::move(buildContext), cb);
+        VasculatureCircuitBuilder::build(context.model, std::move(buildContext));
     }
 
 private:
     static void _premultiplyRadii(float multiplier, std::vector<float> &start, std::vector<float> &end)
     {
+        if (multiplier == 1.f)
+        {
+            return;
+        }
+
 #pragma omp parallel for
         for (size_t i = 0; i < start.size(); ++i)
         {

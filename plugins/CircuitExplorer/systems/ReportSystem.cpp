@@ -28,44 +28,30 @@
 #include <components/ColorHandler.h>
 #include <components/ReportData.h>
 
-namespace
+bool ReportSystem::isEnabled(brayns::Components &components)
 {
-class SimulationChecks
-{
-public:
-    static bool shouldExecute(brayns::Components &components)
+    auto &info = components.get<brayns::SimulationInfo>();
+    if (info.enabled)
     {
-        auto &report = components.get<ReportData>();
-        return _enabled(report, components) && _mustUpdate(report, components);
+        return true;
     }
 
-public:
-    static bool _enabled(ReportData &report, brayns::Components &components)
-    {
-        auto &info = components.get<brayns::SimulationInfo>();
-        if (info.enabled)
-        {
-            return true;
-        }
+    auto &report = components.get<ReportData>();
+    report.lastEnabledFlag = false;
 
-        report.lastEnabledFlag = false;
-        return false;
-    }
-
-    static bool _mustUpdate(ReportData &report, brayns::Components &components)
-    {
-        auto flagModified = !std::exchange(report.lastEnabledFlag, true);
-        auto &colorRamp = components.get<brayns::ColorRamp>();
-        auto colorRampModified = colorRamp.isModified();
-        colorRamp.resetModified();
-        return flagModified || colorRampModified;
-    }
-};
+    return false;
 }
 
 bool ReportSystem::shouldExecute(brayns::Components &components)
 {
-    return SimulationChecks::shouldExecute(components);
+    auto &report = components.get<ReportData>();
+    auto &colorRamp = components.get<brayns::ColorRamp>();
+
+    auto flagModified = !std::exchange(report.lastEnabledFlag, true);
+    auto colorRampModified = colorRamp.isModified();
+    colorRamp.resetModified();
+
+    return flagModified || colorRampModified;
 }
 
 void ReportSystem::execute(brayns::Components &components, uint32_t frame)

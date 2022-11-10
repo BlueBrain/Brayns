@@ -35,10 +35,10 @@ namespace
 /**
  * @brief Applies default Streamline colors to the geometry view
  */
-class DefaultColorPainter
+class DefaultColor
 {
 public:
-    static void paint(brayns::Components &components)
+    static void restore(brayns::Components &components)
     {
         auto &geometries = components.get<brayns::Geometries>();
         auto &views = components.get<brayns::GeometryViews>();
@@ -94,41 +94,6 @@ public:
             }
         }
         views.modified = true;
-    }
-};
-
-/**
- * @brief Check the status of the simulation (enabled, disabled, restore defaults, etc.)
- */
-class SimulationChecks
-{
-public:
-    static bool shouldExecute(brayns::Components &components)
-    {
-        auto &data = components.get<dti::SpikeReportData>();
-        return _enabled(data, components) && _requiresUpdate(data);
-    }
-
-private:
-    static bool _enabled(dti::SpikeReportData &data, brayns::Components &components)
-    {
-        auto &info = components.get<brayns::SimulationInfo>();
-        if (info.enabled)
-        {
-            return true;
-        }
-
-        // First onPreRender after disabling simulation - restore default colors
-        if (std::exchange(data.lastEnabledFlag, false))
-        {
-            DefaultColorPainter::paint(components);
-        }
-        return false;
-    }
-
-    static bool _requiresUpdate(dti::SpikeReportData &data)
-    {
-        return !std::exchange(data.lastEnabledFlag, true);
     }
 };
 
@@ -198,9 +163,27 @@ public:
 
 namespace dti
 {
+bool SpikeReportSystem::isEnabled(brayns::Components &components)
+{
+    auto &info = components.get<brayns::SimulationInfo>();
+    if (info.enabled)
+    {
+        return true;
+    }
+
+    auto &data = components.get<SpikeReportData>();
+    if (std::exchange(data.lastEnabledFlag, false))
+    {
+        DefaultColor::restore(components);
+    }
+
+    return false;
+}
+
 bool SpikeReportSystem::shouldExecute(brayns::Components &components)
 {
-    return SimulationChecks::shouldExecute(components);
+    auto &data = components.get<SpikeReportData>();
+    return !std::exchange(data.lastEnabledFlag, true);
 }
 
 void SpikeReportSystem::execute(brayns::Components &components, uint32_t frame)

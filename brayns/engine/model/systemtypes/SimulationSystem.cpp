@@ -20,6 +20,8 @@
 
 #include "SimulationSystem.h"
 
+#include <brayns/engine/components/SimulationInfo.h>
+
 namespace
 {
 class SimulationChecks
@@ -36,6 +38,11 @@ namespace brayns
 {
 void SimulationSystem::execute(const ParametersManager &parameters, Components &components)
 {
+    if (!isEnabled(components))
+    {
+        return;
+    }
+
     auto &simulation = parameters.getSimulationParameters();
     auto simulationChanged = SimulationChecks::shouldExecute(simulation, _lastFrame);
     auto stateChanged = shouldExecute(components);

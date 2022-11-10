@@ -36,7 +36,7 @@ namespace brayns
 {
 void MaterialTraits<Phong>::updateData(ospray::cpp::Material &handle, Phong &data)
 {
-    handle.setParam(DefaultParameters::diffuseColor, data.color);
+    handle.setParam(DefaultParameters::diffuseColor, Vector3f(1.f));
     handle.setParam(DefaultParameters::shininess, 2.f);
     handle.setParam(DefaultParameters::opacity, data.opacity);
 }

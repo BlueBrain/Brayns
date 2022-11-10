@@ -40,5 +40,5 @@ public:
         std::vector<VasculatureSection> sections;
     };
 
-    static void build(brayns::Model &model, Context context, ProgressUpdater &updater);
+    static void build(brayns::Model &model, Context context);
 };

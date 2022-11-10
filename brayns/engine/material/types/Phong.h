@@ -27,7 +27,6 @@ namespace brayns
 {
 struct Phong
 {
-    Vector3f color = Vector3f(1.f);
     float opacity = 1.f;
 };
 

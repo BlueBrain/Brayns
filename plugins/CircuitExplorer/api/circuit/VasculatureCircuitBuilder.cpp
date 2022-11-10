@@ -41,7 +41,7 @@ namespace
 class PrimitiveBuilder
 {
 public:
-    static std::vector<brayns::Capsule> build(const VasculatureCircuitBuilder::Context &context, ProgressUpdater &prog)
+    static std::vector<brayns::Capsule> build(const VasculatureCircuitBuilder::Context &context)
     {
         auto size = context.startPos.size();
         auto primitives = std::vector<brayns::Capsule>();
@@ -49,8 +49,6 @@ public:
 
         for (size_t i = 0; i < size; ++i)
         {
-            prog.update("Loading vasculature geometry");
-
             auto &p0 = context.startPos[i];
             auto r0 = context.startRadii[i];
             auto &p1 = context.endPos[i];
@@ -110,9 +108,9 @@ private:
 };
 }
 
-void VasculatureCircuitBuilder::build(brayns::Model &model, Context context, ProgressUpdater &updater)
+void VasculatureCircuitBuilder::build(brayns::Model &model, Context context)
 {
-    auto primitives = PrimitiveBuilder::build(context, updater);
+    auto primitives = PrimitiveBuilder::build(context);
 
     auto builder = ModelBuilder(model);
     builder.addGeometry(std::move(primitives));
