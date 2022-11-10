@@ -29,5 +29,17 @@
  */
 struct NeuronSectionList
 {
+    NeuronSectionList() = default;
+
+    NeuronSectionList(std::vector<NeuronSectionMapping> mapping)
+    {
+        mappings.push_back(std::move(mapping));
+    }
+
+    NeuronSectionList(std::vector<std::vector<NeuronSectionMapping>> mappings)
+        : mappings(mappings)
+    {
+    }
+
     std::vector<std::vector<NeuronSectionMapping>> mappings;
 };
