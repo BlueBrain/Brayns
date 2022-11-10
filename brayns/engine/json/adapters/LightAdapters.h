@@ -30,8 +30,7 @@ namespace brayns
 {
 #define BRAYNS_LIGHT_PROPERTIES() \
     BRAYNS_JSON_ADAPTER_ENTRY(color, "Light color (Normalized RGB)", Required(false)) \
-    BRAYNS_JSON_ADAPTER_ENTRY(intensity, "Light intensity", Minimum(0.0), Required(false)) \
-    BRAYNS_JSON_ADAPTER_ENTRY(visible, "Light visibility", Required(false))
+    BRAYNS_JSON_ADAPTER_ENTRY(intensity, "Light intensity", Minimum(0.0), Required(false))
 
 BRAYNS_JSON_ADAPTER_BEGIN(AmbientLight)
 BRAYNS_LIGHT_PROPERTIES()

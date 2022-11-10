@@ -28,7 +28,6 @@ struct AmbientLight
 {
     float intensity = 0.1;
     Vector3f color = Vector3f(1.f);
-    bool visible = true;
 };
 
 template<>

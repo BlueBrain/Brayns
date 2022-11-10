@@ -40,7 +40,6 @@ class TestQuadLight(unittest.TestCase):
         self.assertEqual(test.get_properties(), {
             'intensity': 1,
             'color': [1, 1, 1],
-            'visible': True,
             'position': [0, 0, 0],
             'edge1': [1, 0, 0],
             'edge2': [0, 1, 0],

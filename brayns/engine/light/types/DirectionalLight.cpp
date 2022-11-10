@@ -30,7 +30,6 @@ struct DirectionalLightParameters
     inline static const std::string intensity = "intensity";
     inline static const std::string direction = "direction";
     inline static const std::string angularDiameter = "angularDiameter";
-    inline static const std::string visible = "visible";
 };
 }
 
@@ -43,6 +42,5 @@ void LightTraits<DirectionalLight>::updateData(ospray::cpp::Light &handle, Direc
     handle.setParam(DirectionalLightParameters::intensity, data.intensity);
     handle.setParam(DirectionalLightParameters::direction, data.direction);
     handle.setParam(DirectionalLightParameters::angularDiameter, 0.53f);
-    handle.setParam(DirectionalLightParameters::visible, data.visible);
 }
 }

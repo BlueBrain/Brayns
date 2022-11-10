@@ -29,11 +29,10 @@ class TestAmbientLight(unittest.TestCase):
         self.assertEqual(brayns.AmbientLight.name, 'ambient')
 
     def test_get_properties(self) -> None:
-        test = brayns.AmbientLight(12, brayns.Color3.red, False)
+        test = brayns.AmbientLight(12, brayns.Color3.red)
         self.assertEqual(test.get_properties(), {
             'color': [1, 0, 0],
             'intensity': 12,
-            'visible': False,
         })
 
 
