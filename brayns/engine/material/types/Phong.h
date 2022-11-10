@@ -36,7 +36,7 @@ class MaterialTraits<Phong>
 {
 public:
     inline static const std::string handleName = "obj";
-    inline static const std::string name = "default";
+    inline static const std::string name = "phong";
 
     static void updateData(ospray::cpp::Material &handle, Phong &data);
 };

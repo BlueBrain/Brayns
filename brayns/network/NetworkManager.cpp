@@ -49,8 +49,8 @@
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
+#include <brayns/network/entrypoints/MaterialEntrypoint.h>
 #include <brayns/network/entrypoints/ModelColorRampEntrypoint.h>
-#include <brayns/network/entrypoints/ModelMaterialEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
 #include <brayns/network/entrypoints/RegistryEntrypoint.h>
 #include <brayns/network/entrypoints/RemoveModelEntrypoint.h>
