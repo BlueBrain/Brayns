@@ -39,7 +39,7 @@
 #include <brayns/network/entrypoints/AddModelEntrypoint.h>
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
-#include <brayns/network/entrypoints/CameraLookAtEntrypoint.h>
+#include <brayns/network/entrypoints/CameraViewEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
 #include <brayns/network/entrypoints/ClearClipPlanesEntrypoint.h>
 #include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
@@ -105,7 +105,7 @@ public:
         builder.add<brayns::EnableSimulationEntrypoint>(models);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
-        builder.add<brayns::GetCameraLookAtEntrypoint>(engine);
+        builder.add<brayns::GetCameraViewEntrypoint>(engine);
         builder.add<brayns::GetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::GetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::GetCameraTypeEntrypoint>(engine);
@@ -132,7 +132,7 @@ public:
         builder.add<brayns::RenderImageEntrypoint>(engine);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
-        builder.add<brayns::SetCameraLookAtEntrypoint>(engine);
+        builder.add<brayns::SetCameraViewEntrypoint>(engine);
         builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::SetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::SetMaterialCarPaint>(models);

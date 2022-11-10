@@ -31,4 +31,4 @@ def set_camera_view(instance: Instance, view: View) -> None:
     :type view: View
     """
     params = serialize_view(view)
-    instance.request('set-camera-look-at', params)
+    instance.request('set-camera-view', params)

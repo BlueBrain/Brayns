@@ -18,26 +18,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CameraLookAtEntrypoint.h"
+#include "CameraViewEntrypoint.h"
 
 namespace brayns
 {
-SetCameraLookAtEntrypoint::SetCameraLookAtEntrypoint(Engine &engine)
+SetCameraViewEntrypoint::SetCameraViewEntrypoint(Engine &engine)
     : _engine(engine)
 {
 }
 
-std::string SetCameraLookAtEntrypoint::getMethod() const
+std::string SetCameraViewEntrypoint::getMethod() const
 {
-    return "set-camera-look-at";
+    return "set-camera-view";
 }
 
-std::string SetCameraLookAtEntrypoint::getDescription() const
+std::string SetCameraViewEntrypoint::getDescription() const
 {
     return "Sets the camera view settings";
 }
 
-void SetCameraLookAtEntrypoint::onRequest(const Request &request)
+void SetCameraViewEntrypoint::onRequest(const Request &request)
 {
     auto &camera = _engine.getCamera();
     auto view = camera.getView();
@@ -46,22 +46,22 @@ void SetCameraLookAtEntrypoint::onRequest(const Request &request)
     request.reply(EmptyMessage());
 }
 
-GetCameraLookAtEntrypoint::GetCameraLookAtEntrypoint(Engine &engine)
+GetCameraViewEntrypoint::GetCameraViewEntrypoint(Engine &engine)
     : _engine(engine)
 {
 }
 
-std::string GetCameraLookAtEntrypoint::getMethod() const
+std::string GetCameraViewEntrypoint::getMethod() const
 {
-    return "get-camera-look-at";
+    return "get-camera-view";
 }
 
-std::string GetCameraLookAtEntrypoint::getDescription() const
+std::string GetCameraViewEntrypoint::getDescription() const
 {
     return "Returns the camera view settings";
 }
 
-void GetCameraLookAtEntrypoint::onRequest(const Request &request)
+void GetCameraViewEntrypoint::onRequest(const Request &request)
 {
     auto &camera = _engine.getCamera();
     auto &view = camera.getView();
