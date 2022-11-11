@@ -25,6 +25,9 @@
 #include <io/sonataloader/data/Cells.h>
 #include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
 
+#include <brayns/utils/Log.h>
+#include <brayns/utils/Timer.h>
+
 namespace sonataloader
 {
 void SomaImporter::import(NodeLoadContext &context)
@@ -35,7 +38,12 @@ void SomaImporter::import(NodeLoadContext &context)
     auto &selection = context.selection;
     auto ids = selection.flatten();
 
+    brayns::Log::critical("BEGIN LOAD");
+    auto timer = brayns::Timer();
+
+    timer.reset();
     auto positions = Cells::getPositions(population, selection);
+    brayns::Log::critical("POSITION READ {}", timer.seconds());
 
     auto &params = context.params;
     auto &neuronParams = params.neuron_morphology_parameters;
@@ -47,7 +55,9 @@ void SomaImporter::import(NodeLoadContext &context)
         ColorDataFactory::create(context),
         radiusMultiplier};
 
+    timer.reset();
     auto compartments = SomaCircuitBuilder::build(context.model, std::move(buildContext));
+    brayns::Log::critical("SOMA BUILD {}", timer.seconds());
     NeuronReportFactory::create(context, compartments);
 }
 }
