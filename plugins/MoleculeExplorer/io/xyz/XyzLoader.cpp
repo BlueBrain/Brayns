@@ -20,6 +20,7 @@
 
 #include "XyzLoader.h"
 
+#include <brayns/utils/FileReader.h>
 #include <brayns/utils/Log.h>
 
 #include <brayns/engine/colormethods/PrimitiveColorMethod.h>
@@ -166,13 +167,6 @@ std::vector<std::shared_ptr<brayns::Model>> XyzLoader::importFromFile(
     const std::string &filename,
     const brayns::LoaderProgress &callback) const
 {
-    std::ifstream file(filename);
-    if (!file.good())
-    {
-        throw std::runtime_error("XyzLoader: Could not open file " + filename);
-    }
-
-    auto begin = std::istreambuf_iterator<char>(file);
-    auto end = std::istreambuf_iterator<char>();
-    return importFromBlob({"xyz", filename, {begin, end}}, callback);
+    auto data = brayns::FileReader::read(filename);
+    return importFromBlob({"xyz", filename, {data.begin(), data.end()}}, callback);
 }
