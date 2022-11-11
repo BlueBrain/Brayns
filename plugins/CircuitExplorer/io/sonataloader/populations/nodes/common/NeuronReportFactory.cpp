@@ -34,53 +34,81 @@ class SonataCompartmentMapping
 {
 public:
     static std::vector<CellReportMapping>
-        generate(const std::string &reportPath, const std::string &population, const std::vector<uint64_t> &nodeList)
+        generate(const std::string &path, const std::string &population, const std::vector<uint64_t> &nodeList)
     {
-        const auto rawMapping = sl::SimulationMapping::getCompartmentMapping(reportPath, population, nodeList);
+        auto compartmentsSizes = _computeCompartmentsSize(path, population, nodeList);
 
-        // Compact mapping
-        std::map<uint64_t, std::vector<uint16_t>> sortedCompartmentsSize;
-        uint32_t lastSection = std::numeric_limits<uint32_t>::max();
-        uint64_t lastNode = std::numeric_limits<uint64_t>::max();
-        for (const auto &key : rawMapping)
-        {
-            auto &cm = sortedCompartmentsSize[key.first];
-            if (lastSection != key.second || lastNode != key.first)
-            {
-                lastNode = key.first;
-                lastSection = key.second;
-                cm.push_back(0u);
-            }
-            cm[key.second]++;
-        }
+        auto mapping = std::vector<CellReportMapping>();
+        mapping.reserve(compartmentsSizes.size());
 
-        // Returns a node id sorted list of compartment mappings
-        std::vector<CellReportMapping> mapping(sortedCompartmentsSize.size());
-        // Transform into brayns mapping
-        auto it = sortedCompartmentsSize.begin();
-        size_t index = 0;
-        size_t prevOffset = 0;
-        for (; it != sortedCompartmentsSize.end(); ++it)
+        auto prevOffset = 0ul;
+
+        for (auto &compartmentSize : compartmentsSizes)
         {
-            auto &cellMapping = mapping[index];
+            auto &cellMapping = mapping.emplace_back();
+
             cellMapping.globalOffset = prevOffset;
-            cellMapping.compartments.resize(it->second.size());
-            cellMapping.offsets.resize(it->second.size());
+
+            auto &compartments = cellMapping.compartments;
+            compartments.resize(compartmentSize.size());
+
+            auto &offsets = cellMapping.offsets;
+            offsets.resize(compartmentSize.size());
 
             uint16_t localOffset = 0;
-            for (size_t i = 0; i < it->second.size(); ++i)
+            for (size_t i = 0; i < compartmentSize.size(); ++i)
             {
-                const auto sectionCompartments = it->second[i];
-                cellMapping.offsets[i] = localOffset;
-                cellMapping.compartments[i] = sectionCompartments;
-                localOffset += sectionCompartments;
-                prevOffset += sectionCompartments;
+                auto size = compartmentSize[i];
+                compartments[i] = size;
+                offsets[i] = localOffset;
+                localOffset += size;
             }
 
-            ++index;
+            prevOffset += localOffset;
         }
 
         return mapping;
+    }
+
+private:
+    static std::vector<size_t> _createIndexer(const std::vector<uint64_t> &nodeList)
+    {
+        auto indexer = std::vector<size_t>(nodeList.back() + 1, std::numeric_limits<size_t>::max());
+        for (size_t i = 0; i < nodeList.size(); ++i)
+        {
+            indexer[nodeList[i]] = i;
+        }
+        return indexer;
+    }
+
+    static std::vector<std::vector<uint16_t>> _computeCompartmentsSize(
+        const std::string &reportPath,
+        const std::string &population,
+        const std::vector<uint64_t> &nodeList)
+    {
+        auto compartments = sl::SimulationMapping::getCompartmentMapping(reportPath, population, nodeList);
+        auto indexer = _createIndexer(nodeList);
+        auto compartmentsSize = std::vector<std::vector<uint16_t>>(nodeList.size());
+
+        uint32_t lastSection = std::numeric_limits<uint32_t>::max();
+        uint64_t lastNode = std::numeric_limits<uint64_t>::max();
+        for (auto &key : compartments)
+        {
+            auto nodeId = key[0];
+            auto elementId = key[1];
+
+            auto index = indexer[nodeId];
+            auto &cm = compartmentsSize[index];
+            if (lastSection != elementId || lastNode != nodeId)
+            {
+                lastNode = nodeId;
+                lastSection = elementId;
+                cm.push_back(0u);
+            }
+            cm[elementId]++;
+        }
+
+        return compartmentsSize;
     }
 };
 

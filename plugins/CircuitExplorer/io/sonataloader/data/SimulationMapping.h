@@ -46,7 +46,7 @@ public:
      * once, denoting that the given element of the given node has multiple
      * compartments reported.
      */
-    static std::vector<std::pair<bbp::sonata::NodeID, bbp::sonata::ElementID>> getCompartmentMapping(
+    static std::vector<bbp::sonata::CompartmentID> getCompartmentMapping(
         const std::string &reportPath,
         const std::string &population,
         const std::vector<bbp::sonata::NodeID> &nodeIds);
