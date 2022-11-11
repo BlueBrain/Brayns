@@ -61,6 +61,7 @@ __all__ = [
     'clear_clipping_geometries',
     'clear_lights',
     'clear_models',
+    'clear_renderables',
     'ClippingGeometry',
     'ClipPlane',
     'color_model',

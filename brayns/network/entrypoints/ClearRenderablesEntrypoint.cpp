@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,33 +18,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "RemoveModelEntrypoint.h"
+#include "ClearRenderablesEntrypoint.h"
 
-#include <brayns/engine/common/SimulationScanner.h>
+#include <brayns/engine/scene/ModelsOperations.h>
 
 namespace brayns
 {
-RemoveModelEntrypoint::RemoveModelEntrypoint(ModelManager &models, SimulationParameters &simulation)
+ClearRenderablesEntrypoint::ClearRenderablesEntrypoint(ModelManager &models, SimulationParameters &simulation)
     : _models(models)
     , _simulation(simulation)
 {
 }
 
-std::string RemoveModelEntrypoint::getMethod() const
+std::string ClearRenderablesEntrypoint::getMethod() const
 {
-    return "remove-model";
+    return "clear-renderables";
 }
 
-std::string RemoveModelEntrypoint::getDescription() const
+std::string ClearRenderablesEntrypoint::getDescription() const
 {
-    return "Remove the model(s) from the ID list from the scene";
+    return "Clear all renderable models in the scene";
 }
 
-void RemoveModelEntrypoint::onRequest(const Request &request)
+void ClearRenderablesEntrypoint::onRequest(const Request &request)
 {
-    auto params = request.getParams();
-    _models.removeModelInstancesById(params.ids);
-    SimulationScanner::scanAndUpdate(_models, _simulation);
+    ModelsOperations::removeRenderables(_models);
+    _simulation.reset();
     request.reply(EmptyMessage());
 }
-} // namespace brayns
+}

@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,30 +17,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .clear_models import clear_models
-from .clear_renderables import clear_renderables
-from .deserialize_model import deserialize_model
-from .deserialize_scene import deserialize_scene
-from .get_bounds import get_bounds
-from .get_model import get_model
-from .get_models import get_models
-from .get_scene import get_scene
-from .model import Model
-from .remove_models import remove_models
-from .scene import Scene
-from .update_model import update_model
+from brayns.network import Instance
 
-__all__ = [
-    'clear_models',
-    'clear_renderables',
-    'deserialize_model',
-    'deserialize_scene',
-    'get_bounds',
-    'get_model',
-    'get_models',
-    'get_scene',
-    'Model',
-    'remove_models',
-    'Scene',
-    'update_model',
-]
+
+def clear_renderables(instance: Instance) -> None:
+    """Clear all renderables from the given instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    """
+    instance.request('clear-renderables')

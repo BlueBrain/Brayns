@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,33 +18,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "RemoveModelEntrypoint.h"
+#pragma once
 
-#include <brayns/engine/common/SimulationScanner.h>
+#include <brayns/engine/scene/ModelManager.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/parameters/SimulationParameters.h>
 
 namespace brayns
 {
-RemoveModelEntrypoint::RemoveModelEntrypoint(ModelManager &models, SimulationParameters &simulation)
-    : _models(models)
-    , _simulation(simulation)
+class ClearRenderablesEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
 {
-}
+public:
+    ClearRenderablesEntrypoint(ModelManager &models, SimulationParameters &simulation);
 
-std::string RemoveModelEntrypoint::getMethod() const
-{
-    return "remove-model";
-}
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+    virtual void onRequest(const Request &request) override;
 
-std::string RemoveModelEntrypoint::getDescription() const
-{
-    return "Remove the model(s) from the ID list from the scene";
-}
-
-void RemoveModelEntrypoint::onRequest(const Request &request)
-{
-    auto params = request.getParams();
-    _models.removeModelInstancesById(params.ids);
-    SimulationScanner::scanAndUpdate(_models, _simulation);
-    request.reply(EmptyMessage());
-}
+private:
+    ModelManager &_models;
+    SimulationParameters &_simulation;
+};
 } // namespace brayns
