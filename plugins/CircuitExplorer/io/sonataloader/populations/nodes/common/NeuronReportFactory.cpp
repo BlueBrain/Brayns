@@ -165,9 +165,9 @@ private:
 
         timer.reset();
         auto compartmentsSize = std::vector<std::vector<uint16_t>>(nodeList.size());
+        auto lastSection = std::numeric_limits<uint32_t>::max();
+        auto lastNode = std::numeric_limits<uint64_t>::max();
 
-        uint32_t lastSection = std::numeric_limits<uint32_t>::max();
-        uint64_t lastNode = std::numeric_limits<uint64_t>::max();
         for (auto &key : compartments)
         {
             auto nodeId = key[0];

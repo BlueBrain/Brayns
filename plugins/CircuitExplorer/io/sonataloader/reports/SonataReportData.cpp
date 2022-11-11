@@ -60,7 +60,7 @@ std::vector<float> SonataReportData::getFrame(const uint32_t frameIndex) const
 {
     auto [start, end, dt] = _population.getTimes();
     auto startTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    auto endTime = start + dt;
+    auto endTime = startTime + dt;
     auto frame = _population.get(
         nonstd::optional<bbp::sonata::Selection>(_selection),
         nonstd::optional<double>(startTime),
