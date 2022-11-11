@@ -23,8 +23,8 @@
 #include <array>
 #include <string>
 
-namespace brayns
-{
+#include <brayns/utils/MathTypes.h>
+
 /**
  * Structure defining the color of atoms according to the JMol Scheme
  */
@@ -75,7 +75,7 @@ struct ProteinData
          {"Db", 104}, {"Sg", 105}, {"Bh", 106}, {"Hs", 107}, {"Mt", 108}, {"", 109},   {"", 110},   {"", 111},
          {"", 112}}};
 
-    inline static const std::array<Vector4f, 113> colors = {{
+    inline static const std::array<brayns::Vector4f, 113> colors = {{
         {0.87, 0.87, 0.87, 1}, {0.85, 1, 1, 1},       {0.8, 0.5, 1, 1},
         {0.76, 1, 0, 1},       {1, 0.71, 0.71, 1},    {0.56, 0.56, 0.56, 1},
         {0.19, 0.31, 0.97, 1}, {1, 0.051, 0.051, 1},  {0.62, 0.02, 0.0039, 1},
@@ -234,4 +234,3 @@ struct ProteinData
          {"OXT", 25.f, 112},
          {"P", 25.f, 113}}};
 };
-}

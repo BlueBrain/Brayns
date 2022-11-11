@@ -22,18 +22,25 @@
 
 #include <brayns/io/Loader.h>
 
-namespace brayns
-{
-class XYZBLoader : public NoInputLoader
+#include "ProteinLoaderParameters.h"
+
+/**
+ * @brief The ProteinLoader class loads protein from PDB files: http://www.rcsb.org
+ */
+class ProteinLoader : public brayns::Loader<ProteinLoaderParameters>
 {
 public:
     std::vector<std::string> getSupportedExtensions() const final;
 
     std::string getName() const final;
 
-    std::vector<std::shared_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback) const final;
+    std::vector<std::shared_ptr<brayns::Model>> importFromFile(
+        const std::string &path,
+        const brayns::LoaderProgress &callback,
+        const ProteinLoaderParameters &parameters) const final;
 
-    std::vector<std::shared_ptr<Model>> importFromFile(const std::string &filename, const LoaderProgress &callback)
-        const final;
+    std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
+        const brayns::Blob &blob,
+        const brayns::LoaderProgress &callback,
+        const ProteinLoaderParameters &parameters) const final;
 };
-} // namespace brayns

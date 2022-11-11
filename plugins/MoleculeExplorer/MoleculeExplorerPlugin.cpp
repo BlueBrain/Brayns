@@ -25,9 +25,14 @@
 
 #include <memory>
 
+#include "io/protein/ProteinLoader.h"
+#include "io/xyz/XyzLoader.h"
+
 MoleculeExplorerPlugin::MoleculeExplorerPlugin(brayns::PluginAPI &api)
 {
-    (void)api;
+    auto &loaders = api.getLoaderRegistry();
+    loaders.registerLoader(std::make_unique<ProteinLoader>());
+    loaders.registerLoader(std::make_unique<XyzLoader>());
 }
 
 extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)

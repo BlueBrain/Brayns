@@ -29,7 +29,7 @@ class XyzLoader(Loader):
     @classmethod
     @property
     def name(cls) -> str:
-        return 'xyzb'
+        return 'xyz'
 
     def get_properties(self) -> dict[str, Any]:
         return {}

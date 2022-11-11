@@ -20,7 +20,6 @@
  */
 
 #include "ProteinLoader.h"
-#include "ProteinData.h"
 
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
@@ -29,12 +28,16 @@
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
+
 #include <brayns/utils/FileReader.h>
+#include <brayns/utils/Log.h>
 #include <brayns/utils/string/StringCounter.h>
 #include <brayns/utils/string/StringExtractor.h>
 #include <brayns/utils/string/StringSplitter.h>
 
 #include <cassert>
+
+#include "ProteinData.h"
 
 namespace
 {
@@ -148,10 +151,10 @@ private:
 class RadiusGenerator
 {
 public:
-    static std::vector<float> generateForAtoms(const brayns::ProteinLoaderParameters &params, std::vector<Atom> &atoms)
+    static std::vector<float> generateForAtoms(const ProteinLoaderParameters &params, std::vector<Atom> &atoms)
     {
-        auto &atomRadiis = brayns::ProteinData::atomicRadii;
-        auto defaultRadius = brayns::ProteinData::defaultRadius;
+        auto &atomRadiis = ProteinData::atomicRadii;
+        auto defaultRadius = ProteinData::defaultRadius;
 
         std::vector<float> result;
         result.reserve(atoms.size());
@@ -194,12 +197,10 @@ public:
 class ColormapIndexer
 {
 public:
-    static std::vector<uint8_t> indexAtoms(
-        const brayns::ProteinLoaderParameters &params,
-        const std::vector<Atom> &atoms)
+    static std::vector<uint8_t> indexAtoms(const ProteinLoaderParameters &params, const std::vector<Atom> &atoms)
     {
-        auto &colorMap = brayns::ProteinData::colorIndices;
-        auto &colors = brayns::ProteinData::colors;
+        auto &colorMap = ProteinData::colorIndices;
+        auto &colors = ProteinData::colors;
 
         auto result = std::vector<uint8_t>();
         result.reserve(atoms.size());
@@ -208,13 +209,13 @@ public:
         {
             switch (params.color_scheme)
             {
-            case brayns::ProteinLoaderColorScheme::ProteinChains:
+            case ProteinLoaderColorScheme::ProteinChains:
                 result.push_back(static_cast<uint8_t>(atom.chainId));
                 break;
-            case brayns::ProteinLoaderColorScheme::ProteinResidues:
+            case ProteinLoaderColorScheme::ProteinResidues:
                 result.push_back(static_cast<uint8_t>(atom.residue));
                 break;
-            case brayns::ProteinLoaderColorScheme::ById:
+            case ProteinLoaderColorScheme::ById:
                 result.push_back(atom.id % colors.size());
                 break;
             default:
@@ -226,40 +227,11 @@ public:
         return result;
     }
 };
-}
+} // namespace
 
-namespace brayns
+std::vector<std::string> ProteinLoader::getSupportedExtensions() const
 {
-std::vector<std::shared_ptr<Model>> ProteinLoader::importFromFile(
-    const std::string &path,
-    const LoaderProgress &callback,
-    const ProteinLoaderParameters &parameters) const
-{
-    (void)callback;
-
-    auto atoms = PdbReader::readFile(path);
-    auto radii = RadiusGenerator::generateForAtoms(parameters, atoms);
-    auto spheres = SphereGenerator::generate(atoms, radii);
-    auto colorIndices = ColormapIndexer::indexAtoms(parameters, atoms);
-    auto &colors = ProteinData::colors;
-
-    auto model = std::make_shared<Model>("protein");
-
-    auto &components = model->getComponents();
-    auto &geometries = components.add<Geometries>();
-    auto &geometry = geometries.elements.emplace_back(std::move(spheres));
-    auto &views = components.add<GeometryViews>();
-    auto &view = views.elements.emplace_back(geometry);
-    view.setColorMap(ospray::cpp::CopiedData(colorIndices), ospray::cpp::CopiedData(colors));
-
-    auto &systems = model->getSystems();
-    systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
-    systems.setInitSystem<GeometryInitSystem>();
-    systems.setCommitSystem<GeometryCommitSystem>();
-
-    std::vector<std::shared_ptr<Model>> result;
-    result.push_back(std::move(model));
-    return result;
+    return {"pdb", "pdb1"};
 }
 
 std::string ProteinLoader::getName() const
@@ -267,14 +239,43 @@ std::string ProteinLoader::getName() const
     return "protein";
 }
 
-std::vector<std::string> ProteinLoader::getSupportedExtensions() const
+std::vector<std::shared_ptr<brayns::Model>> ProteinLoader::importFromFile(
+    const std::string &path,
+    const brayns::LoaderProgress &callback,
+    const ProteinLoaderParameters &parameters) const
 {
-    return {"pdb", "pdb1"};
+    (void)callback;
+
+    brayns::Log::info("[ME] Loading protein file {}.", path);
+
+    auto atoms = PdbReader::readFile(path);
+    auto radii = RadiusGenerator::generateForAtoms(parameters, atoms);
+    auto spheres = SphereGenerator::generate(atoms, radii);
+    auto colorIndices = ColormapIndexer::indexAtoms(parameters, atoms);
+    auto &colors = ProteinData::colors;
+
+    auto model = std::make_shared<brayns::Model>("protein");
+
+    auto &components = model->getComponents();
+    auto &geometries = components.add<brayns::Geometries>();
+    auto &geometry = geometries.elements.emplace_back(std::move(spheres));
+    auto &views = components.add<brayns::GeometryViews>();
+    auto &view = views.elements.emplace_back(geometry);
+    view.setColorMap(ospray::cpp::CopiedData(colorIndices), ospray::cpp::CopiedData(colors));
+
+    auto &systems = model->getSystems();
+    systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+    systems.setInitSystem<brayns::GeometryInitSystem>();
+    systems.setCommitSystem<brayns::GeometryCommitSystem>();
+
+    std::vector<std::shared_ptr<brayns::Model>> result;
+    result.push_back(std::move(model));
+    return result;
 }
 
-std::vector<std::shared_ptr<Model>> ProteinLoader::importFromBlob(
-    const Blob &blob,
-    const LoaderProgress &callback,
+std::vector<std::shared_ptr<brayns::Model>> ProteinLoader::importFromBlob(
+    const brayns::Blob &blob,
+    const brayns::LoaderProgress &callback,
     const ProteinLoaderParameters &parameters) const
 {
     (void)blob;
@@ -283,4 +284,3 @@ std::vector<std::shared_ptr<Model>> ProteinLoader::importFromBlob(
 
     throw std::runtime_error("Loading from blob not supported");
 }
-} // namespace brayns
