@@ -35,7 +35,6 @@ option(BRAYNS_MOLECULEEXPLORER_ENABLED "Activate MoleculeExplorer plugin" OFF)
 
 # Core dependencies
 find_package(Git REQUIRED)
-find_package(Python3 3.9 REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(ospray 2.10 REQUIRED)
 find_package(Poco QUIET COMPONENTS Foundation JSON Net NetSSL)
@@ -67,6 +66,3 @@ add_subdirectory(plugins)
 if(BRAYNS_TESTS_ENABLED)
     add_subdirectory(tests)
 endif()
-
-# BRAYNS python client
-add_subdirectory(python)
