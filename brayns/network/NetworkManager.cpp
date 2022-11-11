@@ -44,6 +44,7 @@
 #include <brayns/network/entrypoints/ClearClipPlanesEntrypoint.h>
 #include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
 #include <brayns/network/entrypoints/ClearModelsEntrypoint.h>
+#include <brayns/network/entrypoints/ClearRenderablesEntrypoint.h>
 #include <brayns/network/entrypoints/ColorRampEntrypoint.h>
 #include <brayns/network/entrypoints/EnableSimulationEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
@@ -103,6 +104,7 @@ public:
         builder.add<brayns::ClearClipPlanesEntrypoint>(models);
         builder.add<brayns::ClearLightsEntrypoint>(models);
         builder.add<brayns::ClearModelsEntrypoint>(models, simulation);
+        builder.add<brayns::ClearRenderablesEntrypoint>(models, simulation);
         builder.add<brayns::ColorModelEntrypoint>(models);
         builder.add<brayns::EnableSimulationEntrypoint>(models);
         builder.add<brayns::ExitLaterEntrypoint>(engine);

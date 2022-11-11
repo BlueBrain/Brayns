@@ -72,16 +72,38 @@ public:
     const std::vector<std::unique_ptr<ModelInstance>> &getAllModelInstances() const noexcept;
 
     /**
-     * @brief Removes all model instances from the scene, identified by the given instance IDs.
-     * If the model to which the instance refers does not have any other instance, it will be deleted as well.
-     * Will automatically trigger the scene to re-compute the bounds.
-     * @param instanceIDs list of IDs of instances to remove
+     * @brief Removes selected models from the manager.
+     * @tparam Callable bool(const ModelInstance &)
+     * @param callable Callback to decide wether to remove a model or not. If the callback returns true,
+     * the model is removed.
      */
-    void removeModelInstances(const std::vector<uint32_t> &instanceIDs);
+    template<typename Callable>
+    void removeModelInstances(Callable &&callable)
+    {
+        auto ids = std::vector<uint32_t>();
+        ids.reserve(_instances.size());
+
+        for (const auto &instance : _instances)
+        {
+            if (!callable(*instance))
+            {
+                continue;
+            }
+            ids.push_back(instance->getID());
+        }
+
+        _removeModelInstances(ids);
+    }
+
+    /**
+     * @brief Removes selected models from the manager.
+     * @param ids List of model instance Ids to remove.
+     * @throws std::invalid_argument if any of the given ids does not exists, in which case no instance is removed.
+     */
+    void removeModelInstancesById(const std::vector<uint32_t> &ids);
 
     /**
      * @brief Clear all models and instances.
-     *
      */
     void removeAllModelInstances();
 
@@ -111,6 +133,9 @@ private:
      * @return std::vector<ospray::cpp::Instance>
      */
     std::vector<ospray::cpp::Instance> getHandles() noexcept;
+
+private:
+    void _removeModelInstances(const std::vector<uint32_t> &ids);
 
 private:
     IDFactory<uint32_t> _instanceIdFactory;

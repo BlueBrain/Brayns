@@ -18,30 +18,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .clear_models import clear_models
-from .clear_renderables import clear_renderables
-from .deserialize_model import deserialize_model
-from .deserialize_scene import deserialize_scene
-from .get_bounds import get_bounds
-from .get_model import get_model
-from .get_models import get_models
-from .get_scene import get_scene
-from .model import Model
-from .remove_models import remove_models
-from .scene import Scene
-from .update_model import update_model
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-__all__ = [
-    'clear_models',
-    'clear_renderables',
-    'deserialize_model',
-    'deserialize_scene',
-    'get_bounds',
-    'get_model',
-    'get_models',
-    'get_scene',
-    'Model',
-    'remove_models',
-    'Scene',
-    'update_model',
-]
+
+class TestClearRenderables(SimpleTestCase):
+
+    def test_clear_renderables(self) -> None:
+        models = [
+            brayns.add_geometries(self.instance, [brayns.Sphere(i)])
+            for i in range(1, 4)
+        ]
+
+        brayns.add_light(self.instance, brayns.AmbientLight())
+
+        brayns.clear_renderables(self.instance)
+        
+        for model in models:
+            with self.assertRaises(brayns.JsonRpcError):
+                brayns.get_model(self.instance, model.id)
+
+        scene = brayns.get_scene(self.instance)
+        self.assertEqual(len(scene.models), 1)
+        self.assertEqual(scene.models[0].type, 'light')

@@ -29,31 +29,34 @@ namespace brayns
 {
 void ModelsOperations::removeLights(ModelManager &models)
 {
-    removeModelsWithComponent<Lights>(models);
+    models.removeModelInstances(
+        [](const ModelInstance &instance)
+        {
+            auto &model = instance.getModel();
+            auto &components = model.getComponents();
+            return components.has<Lights>();
+        });
 }
 
 void ModelsOperations::removeClippers(ModelManager &models)
 {
-    removeModelsWithComponent<ClipperViews>(models);
+    models.removeModelInstances(
+        [](const ModelInstance &instance)
+        {
+            auto &model = instance.getModel();
+            auto &components = model.getComponents();
+            return components.has<ClipperViews>();
+        });
 }
 
 void ModelsOperations::removeRenderables(ModelManager &models)
 {
-    auto &instances = models.getAllModelInstances();
-
-    std::vector<uint32_t> ids;
-    ids.reserve(instances.size());
-
-    for (auto &instance : instances)
-    {
-        auto &model = instance->getModel();
-        auto &components = model.getComponents();
-        if (components.has<GeometryViews>() || components.has<VolumeViews>())
+    models.removeModelInstances(
+        [](const ModelInstance &instance)
         {
-            ids.push_back(instance->getID());
-        }
-    }
-
-    models.removeModelInstances(ids);
+            auto &model = instance.getModel();
+            auto &components = model.getComponents();
+            return components.has<GeometryViews>() || components.has<VolumeViews>();
+        });
 }
 }

@@ -92,7 +92,7 @@ const std::vector<std::unique_ptr<ModelInstance>> &ModelManager::getAllModelInst
     return _instances;
 }
 
-void ModelManager::removeModelInstances(const std::vector<uint32_t> &instanceIDs)
+void ModelManager::removeModelInstancesById(const std::vector<uint32_t> &instanceIDs)
 {
     if (instanceIDs.empty())
     {
@@ -104,14 +104,7 @@ void ModelManager::removeModelInstances(const std::vector<uint32_t> &instanceIDs
         InstanceFinder::findIterator(_instances, instanceId);
     }
 
-    for (auto instanceID : instanceIDs)
-    {
-        auto it = InstanceFinder::findIterator(_instances, instanceID);
-        _instances.erase(it);
-        _instanceIdFactory.releaseID(instanceID);
-    }
-
-    _dirty = true;
+    _removeModelInstances(instanceIDs);
 }
 
 void ModelManager::removeAllModelInstances()
@@ -177,5 +170,17 @@ std::vector<ospray::cpp::Instance> ModelManager::getHandles() noexcept
     }
 
     return handles;
+}
+
+void ModelManager::_removeModelInstances(const std::vector<uint32_t> &ids)
+{
+    for (auto id : ids)
+    {
+        auto it = InstanceFinder::findIterator(_instances, id);
+        _instances.erase(it);
+        _instanceIdFactory.releaseID(id);
+    }
+
+    _dirty = true;
 }
 }

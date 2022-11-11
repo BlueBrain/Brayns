@@ -27,27 +27,6 @@ namespace brayns
 class ModelsOperations
 {
 public:
-    template<typename Component>
-    static void removeModelsWithComponent(ModelManager &models)
-    {
-        auto &instances = models.getAllModelInstances();
-
-        std::vector<uint32_t> ids;
-        ids.reserve(instances.size());
-
-        for (auto &instance : instances)
-        {
-            auto &model = instance->getModel();
-            auto &components = model.getComponents();
-            if (components.has<Component>())
-            {
-                ids.push_back(instance->getID());
-            }
-        }
-
-        models.removeModelInstances(ids);
-    }
-
     static void removeLights(ModelManager &models);
     static void removeClippers(ModelManager &models);
     static void removeRenderables(ModelManager &models);
