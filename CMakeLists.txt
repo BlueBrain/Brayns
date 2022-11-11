@@ -31,6 +31,7 @@ option(BRAYNS_CIRCUITINFO_ENABLED "Activate CircuitInfo plugin" OFF)
 option(BRAYNS_DTI_ENABLED "Activate Diffusion-Transfer Imaging plugin" OFF)
 option(BRAYNS_ATLASEXPLORER_ENABLED "Activate Atlas explorer plugin" OFF)
 option(BRAYNS_CYLINDRICCAMERA_ENABLED "Activate Cylindric projection camera" OFF)
+option(BRAYNS_MOLECULEEXPLORER_ENABLED "Activate MoleculeExplorer plugin" OFF)
 
 # Core dependencies
 find_package(Git REQUIRED)
