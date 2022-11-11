@@ -27,7 +27,6 @@
 #include <io/BBPLoader.h>
 #include <io/NeuronMorphologyLoader.h>
 #include <io/SonataLoader.h>
-#include <io/SonataNGVLoader.h>
 #include <network/entrypoints/GetCircuitIdsEntrypoint.h>
 #include <network/entrypoints/SetCircuitThicknessEntrypoint.h>
 
@@ -37,7 +36,6 @@ CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
     registry.registerLoader(std::make_unique<BBPLoader>());
     registry.registerLoader(std::make_unique<NeuronMorphologyLoader>());
     registry.registerLoader(std::make_unique<SonataLoader>());
-    registry.registerLoader(std::make_unique<SonataNGVLoader>());
 
     auto interface = api.getNetworkInterface();
     if (!interface)

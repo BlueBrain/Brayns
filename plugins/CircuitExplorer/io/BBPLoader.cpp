@@ -111,17 +111,6 @@ std::vector<std::shared_ptr<brayns::Model>> BBPLoader::importFromFile(
     brayns::Log::info("[CE] {}: loading {}.", getName(), path);
 
     const brion::BlueConfig config(path);
-    auto result = importFromBlueConfig(callback, params, config);
-
-    brayns::Log::info("[CE] {}: Loaded {} model(s) in {} second(s).", getName(), result.size(), timer.seconds());
-    return result;
-}
-
-std::vector<std::shared_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
-    const brayns::LoaderProgress &callback,
-    const BBPLoaderParameters &params,
-    const brion::BlueConfig &config) const
-{
     bbploader::ParameterCheck::checkInput(config, params);
 
     ProgressUpdater updater(callback, 3);
@@ -150,6 +139,8 @@ std::vector<std::shared_ptr<brayns::Model>> BBPLoader::importFromBlueConfig(
     updater.beginStage(2);
     SynapseImporter::import(context, result, updater);
     updater.endStage();
+
+    brayns::Log::info("[CE] {}: Loaded {} model(s) in {} second(s).", getName(), result.size(), timer.seconds());
 
     return result;
 }
