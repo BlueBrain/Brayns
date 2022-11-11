@@ -57,49 +57,6 @@ TEST_CASE("render_two_frames_and_compare_they_are_same")
     CHECK(ImageValidator::validate(oldImage, newImage));
 }
 
-TEST_CASE("render_xyz_and_compare")
-{
-    brayns::Brayns brayns;
-
-    BraynsTestUtils::setRenderResolution(brayns, 300, 300);
-    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_XYZ_PATH);
-    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight()));
-    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{0.05f}));
-    BraynsTestUtils::adjustPerspectiveView(brayns);
-    brayns.commitAndRender();
-
-    auto &engine = brayns.getEngine();
-    CHECK(ImageValidator::validate(engine, "testImagesXYZ.png"));
-
-    auto &scene = engine.getScene();
-    auto &models = scene.getModels();
-    auto &instance = models.getModelInstance(0);
-    auto &model = instance.getModel();
-    auto &components = model.getComponents();
-    auto &geometries = components.get<brayns::Geometries>();
-    auto &geometry = geometries.elements.front();
-    geometry.forEach([](brayns::Sphere &sphere) { sphere.radius *= 0.5f; });
-    geometries.modified = true;
-    brayns.commitAndRender();
-
-    CHECK(ImageValidator::validate(engine, "testImagesXYZSmaller.png"));
-}
-
-TEST_CASE("render_protein_and_compare")
-{
-    brayns::Brayns brayns;
-
-    BraynsTestUtils::setRenderResolution(brayns, 300, 300);
-    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PDB_PATH);
-    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight()));
-    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{0.05f}));
-    BraynsTestUtils::adjustPerspectiveView(brayns);
-    brayns.commitAndRender();
-
-    auto &engine = brayns.getEngine();
-    CHECK(ImageValidator::validate(engine, "testImagesPDB.png"));
-}
-
 TEST_CASE("render_ply_and_compare")
 {
     brayns::Brayns brayns;
