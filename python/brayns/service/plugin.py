@@ -35,6 +35,7 @@ class Plugin(Enum):
     CYLINDRIC_CAMERA = 'braynsCylindricCamera'
     CIRCUIT_INFO = 'braynsCircuitInfo'
     DTI = 'braynsDTI'
+    MOLECULE_EXPLORER = 'braynsMoleculeExplorer'
 
     @classmethod
     @property

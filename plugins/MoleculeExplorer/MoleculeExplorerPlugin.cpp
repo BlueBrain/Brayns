@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,22 +19,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "MoleculeExplorerPlugin.h"
 
-#include <brayns/io/Loader.h>
+#include <brayns/utils/Log.h>
 
-namespace brayns
+#include <memory>
+
+#include "io/protein/ProteinLoader.h"
+#include "io/xyz/XyzLoader.h"
+
+MoleculeExplorerPlugin::MoleculeExplorerPlugin(brayns::PluginAPI &api)
 {
-class XYZBLoader : public NoInputLoader
+    auto &loaders = api.getLoaderRegistry();
+    loaders.registerLoader(std::make_unique<ProteinLoader>());
+    loaders.registerLoader(std::make_unique<XyzLoader>());
+}
+
+extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)
 {
-public:
-    std::vector<std::string> getSupportedExtensions() const final;
-
-    std::string getName() const final;
-
-    std::vector<std::shared_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback) const final;
-
-    std::vector<std::shared_ptr<Model>> importFromFile(const std::string &filename, const LoaderProgress &callback)
-        const final;
-};
-} // namespace brayns
+    brayns::Log::info("[MoleculeExplorer] Loading Molecule Explorer plugin.");
+    return std::make_unique<MoleculeExplorerPlugin>(api);
+}

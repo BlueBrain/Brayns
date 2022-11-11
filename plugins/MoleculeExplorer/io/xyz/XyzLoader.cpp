@@ -18,8 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "XYZBLoader.h"
+#include "XyzLoader.h"
 
+#include <brayns/utils/FileReader.h>
 #include <brayns/utils/Log.h>
 
 #include <brayns/engine/colormethods/PrimitiveColorMethod.h>
@@ -41,7 +42,7 @@
 
 namespace
 {
-class XYZBReader
+class XyzReader
 {
 public:
     inline static constexpr float defaultRadius = 0.15f;
@@ -125,55 +126,47 @@ public:
         return result;
     }
 };
+} // namespace
+
+std::vector<std::string> XyzLoader::getSupportedExtensions() const
+{
+    return {"xyz"};
 }
 
-namespace brayns
+std::string XyzLoader::getName() const
 {
-std::vector<std::shared_ptr<Model>> XYZBLoader::importFromBlob(const Blob &blob, const LoaderProgress &callback) const
-{
-    Log::info("Loading xyz {}.", blob.name);
+    return "xyz";
+}
 
-    auto spheres = XYZBReader::fromBytes(callback, std::string(blob.data.begin(), blob.data.end()));
+std::vector<std::shared_ptr<brayns::Model>> XyzLoader::importFromBlob(
+    const brayns::Blob &blob,
+    const brayns::LoaderProgress &callback) const
+{
+    brayns::Log::info("[ME] Loading xyz {}.", blob.name);
+
+    auto spheres = XyzReader::fromBytes(callback, std::string(blob.data.begin(), blob.data.end()));
     auto sphereCount = spheres.size();
 
-    auto model = std::make_shared<Model>("xyz");
+    auto model = std::make_shared<brayns::Model>("xyz");
 
     auto &components = model->getComponents();
-    components.add<Geometries>(std::move(spheres));
+    components.add<brayns::Geometries>(std::move(spheres));
 
     auto &systems = model->getSystems();
-    systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
-    systems.setInitSystem<GeometryInitSystem>();
-    systems.setCommitSystem<GeometryCommitSystem>();
-    systems.setColorSystem<GenericColorSystem>(XYZColorMethods::build(sphereCount));
+    systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+    systems.setInitSystem<brayns::GeometryInitSystem>();
+    systems.setCommitSystem<brayns::GeometryCommitSystem>();
+    systems.setColorSystem<brayns::GenericColorSystem>(XYZColorMethods::build(sphereCount));
 
-    std::vector<std::shared_ptr<Model>> result;
+    std::vector<std::shared_ptr<brayns::Model>> result;
     result.push_back(std::move(model));
     return result;
 }
 
-std::vector<std::shared_ptr<Model>> XYZBLoader::importFromFile(
+std::vector<std::shared_ptr<brayns::Model>> XyzLoader::importFromFile(
     const std::string &filename,
-    const LoaderProgress &callback) const
+    const brayns::LoaderProgress &callback) const
 {
-    std::ifstream file(filename);
-    if (!file.good())
-    {
-        throw std::runtime_error("XYZBLoader: Could not open file " + filename);
-    }
-
-    auto begin = std::istreambuf_iterator<char>(file);
-    auto end = std::istreambuf_iterator<char>();
-    return importFromBlob({"xyz", filename, {begin, end}}, callback);
+    auto data = brayns::FileReader::read(filename);
+    return importFromBlob({"xyz", filename, {data.begin(), data.end()}}, callback);
 }
-
-std::string XYZBLoader::getName() const
-{
-    return "xyzb";
-}
-
-std::vector<std::string> XYZBLoader::getSupportedExtensions() const
-{
-    return {"xyz"};
-}
-} // namespace brayns

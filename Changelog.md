@@ -4,6 +4,7 @@
 
 **Implemented enhancements:**
 
+- XYZ and PDB support moved to Molecule Explorer plugin [\#1106](https://github.com/BlueBrain/Brayns/pull/1106)
 - Tested SONATA support [\#1092](https://github.com/BlueBrain/Brayns/pull/1092)
 - Frame exporter removed [\#1091](https://github.com/BlueBrain/Brayns/pull/1091)
 - Removed streaming [\#1075](https://github.com/BlueBrain/Brayns/pull/1075)
