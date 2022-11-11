@@ -45,15 +45,4 @@ public:
         const std::string &path,
         const brayns::LoaderProgress &callback,
         const BBPLoaderParameters &params) const final;
-
-    /**
-     * @brief importFromBlueConfig imports a neuronal circuit from a BlueConfig
-     * file. NOTE: Temporary utility function so SonataNGVLoader can call this
-     * loader for each population.
-     *        TODO: Remove once NGV Project has switched to SONATA format...
-     */
-    std::vector<std::shared_ptr<brayns::Model>> importFromBlueConfig(
-        const brayns::LoaderProgress &callback,
-        const BBPLoaderParameters &params,
-        const brion::BlueConfig &config) const;
 };
