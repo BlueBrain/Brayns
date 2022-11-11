@@ -58,13 +58,13 @@ std::string SonataReportData::getTimeUnit() const noexcept
 
 std::vector<float> SonataReportData::getFrame(const uint32_t frameIndex) const
 {
-    const auto [start, end, dt] = _population.getTimes();
-    const auto timestamp = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    const auto frame = _population.get(
+    auto [start, end, dt] = _population.getTimes();
+    auto start = FrameTimeCalculator::compute(frameIndex, start, end, dt);
+    auto end = start + dt;
+    auto frame = _population.get(
         nonstd::optional<bbp::sonata::Selection>(_selection),
-        nonstd::optional<double>(timestamp),
-        nonstd::nullopt,
-        nonstd::nullopt);
+        nonstd::optional<double>(start),
+        nonstd::optional<double>(end));
 
     return frame.data;
 }
