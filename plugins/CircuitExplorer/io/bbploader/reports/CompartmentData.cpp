@@ -54,30 +54,35 @@ std::string CompartmentData::getTimeUnit() const noexcept
 
 std::vector<float> CompartmentData::getFrame(const uint32_t frameIndex) const
 {
-    const auto start = _report->getStartTime();
-    const auto end = _report->getEndTime();
-    const auto dt = _report->getTimestep();
-    const auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
+    auto start = _report->getStartTime();
+    auto end = _report->getEndTime();
+    auto dt = _report->getTimestep();
+    auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
 
     auto frameFuture = _report->loadFrame(frameTime);
     auto frame = frameFuture.get();
     auto &data = frame.data;
+
+    if (!data || data->empty())
+    {
+        throw std::runtime_error("Null report frame read");
+    }
 
     return *data;
 }
 
 std::vector<CellReportMapping> CompartmentData::computeMapping() const noexcept
 {
-    const auto &ccounts = _report->getCompartmentCounts();
-    const auto &offsets = _report->getOffsets();
+    auto &ccounts = _report->getCompartmentCounts();
+    auto &offsets = _report->getOffsets();
 
-    const auto &gids = _report->getGIDs();
+    auto &gids = _report->getGIDs();
     std::vector<CellReportMapping> mapping(gids.size());
 
     for (size_t i = 0; i < gids.size(); ++i)
     {
-        const auto &count = ccounts[i];
-        const auto &offset = offsets[i];
+        auto &count = ccounts[i];
+        auto &offset = offsets[i];
 
         auto &cellMapping = mapping[i];
         cellMapping.globalOffset = offset[0];

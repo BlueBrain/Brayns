@@ -20,12 +20,20 @@
 
 #include <cmath>
 
-float FrameTimeCalculator::compute(const uint32_t frame, const float start, const float end, const float dt) noexcept
+float FrameTimeCalculator::compute(uint32_t frame, float start, float end, float dt) noexcept
 {
-    const auto upRoundedDt = std::nextafter(dt, std::numeric_limits<float>::infinity());
+    auto upRoundedDt = std::nextafter(dt, std::numeric_limits<float>::infinity());
     auto timeStamp = start + frame * upRoundedDt;
 
-    timeStamp = timeStamp < start ? start : (timeStamp > end ? end : timeStamp);
+    if (timeStamp < start)
+    {
+        return start;
+    }
+
+    if (timeStamp >= end)
+    {
+        return end - upRoundedDt;
+    }
 
     return timeStamp;
 }

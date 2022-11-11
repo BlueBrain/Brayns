@@ -26,6 +26,9 @@
 #include <io/sonataloader/reports/SonataReportData.h>
 #include <io/sonataloader/reports/SonataSpikeData.h>
 
+#include <brayns/utils/Log.h>
+#include <brayns/utils/Timer.h>
+
 namespace
 {
 namespace sl = sonataloader;
@@ -34,71 +37,26 @@ class SonataCompartmentMapping
 {
 public:
     static std::vector<CellReportMapping>
-        generate(const std::string &path, const std::string &population, const std::vector<uint64_t> &nodeList)
+        generate(const std::string &reportPath, const std::string &population, const std::vector<uint64_t> &nodeList)
     {
-        auto compartmentsSizes = _computeCompartmentsSize(path, population, nodeList);
+        brayns::Log::critical("BEGIN");
+        auto timer = brayns::Timer();
 
-        auto mapping = std::vector<CellReportMapping>();
-        mapping.reserve(compartmentsSizes.size());
+        timer.reset();
+        auto rawMapping = sl::SimulationMapping::getCompartmentMapping(reportPath, population, nodeList);
+        brayns::Log::critical("READ {}", timer.seconds());
 
-        auto prevOffset = 0ul;
+        // Compact mapping
+        timer.reset();
+        auto sortedCompartmentsSize = std::map<uint64_t, std::vector<uint16_t>>();
+        auto lastSection = std::numeric_limits<uint32_t>::max();
+        auto lastNode = std::numeric_limits<uint64_t>::max();
 
-        for (auto &compartmentSize : compartmentsSizes)
-        {
-            auto &cellMapping = mapping.emplace_back();
-
-            cellMapping.globalOffset = prevOffset;
-
-            auto &compartments = cellMapping.compartments;
-            compartments.resize(compartmentSize.size());
-
-            auto &offsets = cellMapping.offsets;
-            offsets.resize(compartmentSize.size());
-
-            uint16_t localOffset = 0;
-            for (size_t i = 0; i < compartmentSize.size(); ++i)
-            {
-                auto size = compartmentSize[i];
-                compartments[i] = size;
-                offsets[i] = localOffset;
-                localOffset += size;
-            }
-
-            prevOffset += localOffset;
-        }
-
-        return mapping;
-    }
-
-private:
-    static std::vector<size_t> _createIndexer(const std::vector<uint64_t> &nodeList)
-    {
-        auto indexer = std::vector<size_t>(nodeList.back() + 1, std::numeric_limits<size_t>::max());
-        for (size_t i = 0; i < nodeList.size(); ++i)
-        {
-            indexer[nodeList[i]] = i;
-        }
-        return indexer;
-    }
-
-    static std::vector<std::vector<uint16_t>> _computeCompartmentsSize(
-        const std::string &reportPath,
-        const std::string &population,
-        const std::vector<uint64_t> &nodeList)
-    {
-        auto compartments = sl::SimulationMapping::getCompartmentMapping(reportPath, population, nodeList);
-        auto indexer = _createIndexer(nodeList);
-        auto compartmentsSize = std::vector<std::vector<uint16_t>>(nodeList.size());
-
-        uint32_t lastSection = std::numeric_limits<uint32_t>::max();
-        uint64_t lastNode = std::numeric_limits<uint64_t>::max();
-        for (auto &key : compartments)
+        for (auto &key : rawMapping)
         {
             auto nodeId = key[0];
             auto elementId = key[1];
-
-            auto index = indexer[nodeId];
-            auto &cm = compartmentsSize[index];
+            auto &cm = sortedCompartmentsSize[nodeId];
             if (lastSection != elementId || lastNode != nodeId)
             {
                 lastNode = nodeId;
@@ -107,8 +65,37 @@ private:
             }
             cm[elementId]++;
         }
+        brayns::Log::critical("SIZES {}", timer.seconds());
 
-        return compartmentsSize;
+        // Returns a node id sorted list of compartment mappings
+        timer.reset();
+        auto mapping = std::vector<CellReportMapping>(sortedCompartmentsSize.size());
+        // Transform into brayns mapping
+        auto it = sortedCompartmentsSize.begin();
+        auto index = 0ul;
+        auto prevOffset = 0ul;
+        for (; it != sortedCompartmentsSize.end(); ++it)
+        {
+            auto &cellMapping = mapping[index];
+            cellMapping.globalOffset = prevOffset;
+            cellMapping.compartments.resize(it->second.size());
+            cellMapping.offsets.resize(it->second.size());
+
+            uint16_t localOffset = 0;
+            for (size_t i = 0; i < it->second.size(); ++i)
+            {
+                const auto sectionCompartments = it->second[i];
+                cellMapping.offsets[i] = localOffset;
+                cellMapping.compartments[i] = sectionCompartments;
+                localOffset += sectionCompartments;
+                prevOffset += sectionCompartments;
+            }
+
+            ++index;
+        }
+        brayns::Log::critical("MAPPINGS {}", timer.seconds());
+
+        return mapping;
     }
 };
 
