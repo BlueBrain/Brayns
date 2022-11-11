@@ -52,3 +52,7 @@ endif()
 if(BRAYNS_CYLINDRICCAMERA_ENABLED)
     add_subdirectory(CylindricCamera)
 endif()
+
+if(BRAYNS_MOLECULEEXPLORER_ENABLED)
+    add_subdirectory(MoleculeExplorer)
+endif()

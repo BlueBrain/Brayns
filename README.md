@@ -75,6 +75,7 @@ The following cmake options (shown with their default value) can be used during 
 * **BRAYNS_DTI_ENABLED** (Default OFF) - Activate Diffusion-Tensor Imaging plugin
 * **BRAYNS_ATLASEXPLORER_ENABLED** - (Default OFF) Activate AtlasExplorer plugin
 * **BRAYNS_CYLINDIRCCAMERA_ENABLED** - (Default OFF) Activate Cylindric Camera projection plugin
+* **BRAYNS_MOLECULEEXPLORER_ENABLED** (Default ON) - Activate MoleculeExplorer plugin
 
 
 ## Running
