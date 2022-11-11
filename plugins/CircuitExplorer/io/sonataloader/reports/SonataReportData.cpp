@@ -30,17 +30,10 @@ SonataReportData::SonataReportData(
     , _population(_reader.openPopulation(population))
     , _selection(std::move(selection))
 {
-    const auto [start, end, dt] = _population.getTimes();
+    auto [start, end, dt] = _population.getTimes();
     _start = start;
     _end = end;
     _dt = dt;
-    const auto firstFrame = getFrame(0);
-    _frameSize = firstFrame.size();
-}
-
-size_t SonataReportData::getFrameSize() const noexcept
-{
-    return _frameSize;
 }
 
 float SonataReportData::getStartTime() const noexcept

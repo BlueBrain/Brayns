@@ -30,13 +30,6 @@ public:
     virtual ~IReportData() = default;
 
     /**
-     * @brief Returns the size, in bytes, of a single frame
-     *
-     * @return size_t
-     */
-    virtual size_t getFrameSize() const noexcept = 0;
-
-    /**
      * @brief Returns the report start time
      *
      * @return float

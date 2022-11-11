@@ -27,11 +27,6 @@ CompartmentData::CompartmentData(std::unique_ptr<brion::CompartmentReport> repor
 {
 }
 
-size_t CompartmentData::getFrameSize() const noexcept
-{
-    return _report->getFrameSize();
-}
-
 float CompartmentData::getStartTime() const noexcept
 {
     return _report->getStartTime();

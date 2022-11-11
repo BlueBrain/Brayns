@@ -33,11 +33,6 @@ SpikeData::SpikeData(
 {
 }
 
-size_t SpikeData::getFrameSize() const noexcept
-{
-    return _mapping.size();
-}
-
 float SpikeData::getStartTime() const noexcept
 {
     return 0.f;

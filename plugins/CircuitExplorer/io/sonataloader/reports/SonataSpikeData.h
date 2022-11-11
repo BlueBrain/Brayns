@@ -34,8 +34,6 @@ public:
         bbp::sonata::Selection selection,
         float interval);
 
-    size_t getFrameSize() const noexcept override;
-
     float getStartTime() const noexcept override;
 
     float getEndTime() const noexcept override;

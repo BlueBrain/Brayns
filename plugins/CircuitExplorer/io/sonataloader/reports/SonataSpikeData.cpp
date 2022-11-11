@@ -40,11 +40,6 @@ SonataSpikeData::SonataSpikeData(
     _end = end;
 }
 
-size_t SonataSpikeData::getFrameSize() const noexcept
-{
-    return _mapping.size();
-}
-
 float SonataSpikeData::getStartTime() const noexcept
 {
     return _start;
@@ -67,7 +62,7 @@ std::string SonataSpikeData::getTimeUnit() const noexcept
 
 std::vector<float> SonataSpikeData::getFrame(const uint32_t frameIndex) const
 {
-    std::vector<float> data(getFrameSize(), 0.f);
+    std::vector<float> data(_mapping.size(), 0.f);
 
     const auto start = getStartTime();
     const auto end = getEndTime();
