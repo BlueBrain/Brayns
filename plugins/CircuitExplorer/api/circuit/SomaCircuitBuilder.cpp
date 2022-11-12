@@ -103,25 +103,18 @@ private:
 
 std::vector<CellCompartments> SomaCircuitBuilder::build(brayns::Model &model, Context context)
 {
-    auto &ids = context.ids;
     auto &positions = context.positions;
     auto radius = context.radius;
 
-    auto result = std::vector<CellCompartments>();
-    result.reserve(ids.size());
+    auto compartments = std::vector<CellCompartments>();
+    compartments.reserve(positions.size());
     auto geometry = std::vector<brayns::Sphere>();
-    geometry.reserve(ids.size());
+    geometry.reserve(positions.size());
 
-    for (size_t i = 0; i < ids.size(); ++i)
+    for (auto &position : positions)
     {
-        auto &pos = positions[i];
-        auto &somaSphere = geometry.emplace_back();
-        somaSphere.center = pos;
-        somaSphere.radius = radius;
-
-        auto &compartment = result.emplace_back();
-        compartment.numItems = 1;
-        compartment.sectionSegments = {{-1, std::vector<uint64_t>{0ul}}};
+        geometry.push_back({position, radius});
+        compartments.push_back({1, {{-1, std::vector<uint64_t>{0ul}}}});
     }
 
     auto builder = ModelBuilder(model);
@@ -130,5 +123,5 @@ std::vector<CellCompartments> SomaCircuitBuilder::build(brayns::Model &model, Co
     builder.addColoring(std::move(context.colorData));
     builder.addDefaultColor();
 
-    return result;
+    return compartments;
 }
