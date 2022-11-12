@@ -58,7 +58,7 @@ std::vector<float> CompartmentData::getFrame(uint32_t frameIndex) const
     auto frame = frameFuture.get();
     auto &data = frame.data;
 
-    if (!data)
+    if (!data || data->empty())
     {
         throw std::runtime_error("Null report frame read");
     }

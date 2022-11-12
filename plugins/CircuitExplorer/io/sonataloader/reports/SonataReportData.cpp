@@ -68,6 +68,11 @@ std::vector<float> SonataReportData::getFrame(uint32_t frameIndex) const
     auto endTime = startTime + dt;
     auto frame = _population.get(_selection, startTime, endTime);
 
+    if (frame.data.empty())
+    {
+        throw std::runtime_error("Emtpy frame read");
+    }
+
     return frame.data;
 }
 }

@@ -20,11 +20,6 @@
 
 #include "SimulationMapping.h"
 
-#include <highfive/H5File.hpp>
-
-#include <unordered_map>
-#include <vector>
-
 namespace sonataloader
 {
 std::vector<bbp::sonata::NodeID> SimulationMapping::getCompartmentNodes(

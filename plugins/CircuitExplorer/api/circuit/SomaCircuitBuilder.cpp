@@ -112,18 +112,16 @@ std::vector<CellCompartments> SomaCircuitBuilder::build(brayns::Model &model, Co
     auto geometry = std::vector<brayns::Sphere>();
     geometry.reserve(ids.size());
 
-    //#pragma omp parallel for
     for (size_t i = 0; i < ids.size(); ++i)
     {
         auto &pos = positions[i];
-        auto &somaSphere = geometry.emplace_back(); //[i];
+        auto &somaSphere = geometry.emplace_back();
         somaSphere.center = pos;
         somaSphere.radius = radius;
 
-        auto &compartment = result.emplace_back(); //[i];
-
+        auto &compartment = result.emplace_back();
         compartment.numItems = 1;
-        compartment.sectionSegments = {{-1, std::vector<uint64_t>{0ul}}}; //[-1].push_back(0);
+        compartment.sectionSegments = {{-1, std::vector<uint64_t>{0ul}}};
     }
 
     auto builder = ModelBuilder(model);
