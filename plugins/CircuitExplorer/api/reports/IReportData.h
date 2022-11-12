@@ -63,5 +63,5 @@ public:
      * @param frameIndex
      * @return std::vector<float>
      */
-    virtual std::vector<float> getFrame(const uint32_t frameIndex) const = 0;
+    virtual std::vector<float> getFrame(uint32_t frameIndex) const = 0;
 };

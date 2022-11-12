@@ -23,6 +23,7 @@
 float FrameTimeCalculator::compute(uint32_t frame, float start, float end, float dt) noexcept
 {
     auto upRoundedDt = std::nextafter(dt, std::numeric_limits<float>::infinity());
+
     auto timeStamp = start + frame * upRoundedDt;
 
     if (timeStamp < start)
@@ -30,9 +31,9 @@ float FrameTimeCalculator::compute(uint32_t frame, float start, float end, float
         return start;
     }
 
-    if (timeStamp >= end)
+    if (auto upperLimit = end - upRoundedDt; timeStamp >= upperLimit)
     {
-        return end - upRoundedDt;
+        return upperLimit;
     }
 
     return timeStamp;

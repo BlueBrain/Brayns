@@ -35,14 +35,10 @@ public:
         float interval);
 
     float getStartTime() const noexcept override;
-
     float getEndTime() const noexcept override;
-
     float getTimeStep() const noexcept override;
-
     std::string getTimeUnit() const noexcept override;
-
-    std::vector<float> getFrame(const uint32_t frameIndex) const override;
+    std::vector<float> getFrame(uint32_t frameIndex) const override;
 
 private:
     const bbp::sonata::SpikeReader _reader;
@@ -50,7 +46,7 @@ private:
     const bbp::sonata::Selection _selection;
     const std::unordered_map<uint64_t, size_t> _mapping;
     const SpikeCalculator _calculator;
-    const float _interval{};
+    float _interval{};
     float _start{};
     float _end{};
 };

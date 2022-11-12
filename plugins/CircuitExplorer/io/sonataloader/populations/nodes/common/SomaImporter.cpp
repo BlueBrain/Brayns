@@ -25,9 +25,6 @@
 #include <io/sonataloader/data/Cells.h>
 #include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
 
-#include <brayns/utils/Log.h>
-#include <brayns/utils/Timer.h>
-
 namespace sonataloader
 {
 void SomaImporter::import(NodeLoadContext &context)
@@ -38,26 +35,18 @@ void SomaImporter::import(NodeLoadContext &context)
     auto &selection = context.selection;
     auto ids = selection.flatten();
 
-    brayns::Log::critical("BEGIN LOAD");
-    auto timer = brayns::Timer();
+    auto colorData = ColorDataFactory::create(context);
 
-    timer.reset();
     auto positions = Cells::getPositions(population, selection);
-    brayns::Log::critical("POSITION READ {}", timer.seconds());
 
     auto &params = context.params;
     auto &neuronParams = params.neuron_morphology_parameters;
     auto radiusMultiplier = neuronParams.radius_multiplier;
 
-    auto buildContext = SomaCircuitBuilder::Context{
-        std::move(ids),
-        std::move(positions),
-        ColorDataFactory::create(context),
-        radiusMultiplier};
+    auto buildContext =
+        SomaCircuitBuilder::Context{std::move(ids), std::move(positions), std::move(colorData), radiusMultiplier};
 
-    timer.reset();
     auto compartments = SomaCircuitBuilder::build(context.model, std::move(buildContext));
-    brayns::Log::critical("SOMA BUILD {}", timer.seconds());
     NeuronReportFactory::create(context, compartments);
 }
 }

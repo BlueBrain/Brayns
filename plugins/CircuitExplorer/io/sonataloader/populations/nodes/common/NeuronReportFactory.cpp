@@ -26,9 +26,6 @@
 #include <io/sonataloader/reports/SonataReportData.h>
 #include <io/sonataloader/reports/SonataSpikeData.h>
 
-#include <brayns/utils/Log.h>
-#include <brayns/utils/Timer.h>
-
 namespace
 {
 namespace sl = sonataloader;
@@ -36,77 +33,11 @@ namespace sl = sonataloader;
 class SonataCompartmentMapping
 {
 public:
-    /*
-        static std::vector<CellReportMapping>
-            generate(const std::string &path, const std::string &population, const std::vector<uint64_t> &nodeList)
-        {
-            brayns::Log::critical("BEGIN");
-            auto timer = brayns::Timer();
-
-            timer.reset();
-            auto rawMapping = sl::SimulationMapping::getCompartmentMapping(path, population, nodeList);
-            brayns::Log::critical("READ {}", timer.seconds());
-
-            // Compact mapping
-            timer.reset();
-            auto sortedCompartmentsSize = std::map<uint64_t, std::vector<uint16_t>>();
-            auto lastSection = std::numeric_limits<uint32_t>::max();
-            auto lastNode = std::numeric_limits<uint64_t>::max();
-
-            for (auto &key : rawMapping)
-            {
-                auto nodeId = key[0];
-                auto elementId = key[1];
-                auto &cm = sortedCompartmentsSize[nodeId];
-                if (lastSection != elementId || lastNode != nodeId)
-                {
-                    lastNode = nodeId;
-                    lastSection = elementId;
-                    cm.push_back(0u);
-                }
-                cm[elementId]++;
-            }
-            brayns::Log::critical("SIZES {}", timer.seconds());
-
-            // Returns a node id sorted list of compartment mappings
-            timer.reset();
-            auto mapping = std::vector<CellReportMapping>(sortedCompartmentsSize.size());
-            // Transform into brayns mapping
-            auto it = sortedCompartmentsSize.begin();
-            auto index = 0ul;
-            auto prevOffset = 0ul;
-            for (; it != sortedCompartmentsSize.end(); ++it)
-            {
-                auto &cellMapping = mapping[index];
-                cellMapping.globalOffset = prevOffset;
-                cellMapping.compartments.resize(it->second.size());
-                cellMapping.offsets.resize(it->second.size());
-
-                uint16_t localOffset = 0;
-                for (size_t i = 0; i < it->second.size(); ++i)
-                {
-                    const auto sectionCompartments = it->second[i];
-                    cellMapping.offsets[i] = localOffset;
-                    cellMapping.compartments[i] = sectionCompartments;
-                    localOffset += sectionCompartments;
-                    prevOffset += sectionCompartments;
-                }
-
-                ++index;
-            }
-            brayns::Log::critical("MAPPINGS {}", timer.seconds());
-
-            return mapping;
-        }
-    */
     static std::vector<CellReportMapping>
         generate(const std::string &path, const std::string &population, const std::vector<uint64_t> &nodeList)
     {
-        brayns::Log::critical("BEGIN REPORT LOADING");
-
         auto compartmentsSize = _computeCompartmentsSize(path, population, nodeList);
 
-        auto timer = brayns::Timer();
         auto mapping = std::vector<CellReportMapping>();
         mapping.reserve(compartmentsSize.size());
 
@@ -132,7 +63,6 @@ public:
 
             prevOffset += localOffset;
         }
-        brayns::Log::critical("MAPPINGS {}", timer.seconds());
 
         return mapping;
     }
@@ -153,17 +83,9 @@ private:
         const std::string &population,
         const std::vector<uint64_t> &nodeList)
     {
-        auto timer = brayns::Timer();
-
-        timer.reset();
         auto compartments = sl::SimulationMapping::getCompartmentMapping(reportPath, population, nodeList);
-        brayns::Log::critical("READ {}", timer.seconds());
-
-        timer.reset();
         auto indexer = _createIndexer(nodeList);
-        brayns::Log::critical("INDEXER CREATION {}", timer.seconds());
 
-        timer.reset();
         auto compartmentsSize = std::vector<std::vector<uint16_t>>(nodeList.size());
         auto lastSection = std::numeric_limits<uint32_t>::max();
         auto lastNode = std::numeric_limits<uint64_t>::max();
@@ -183,7 +105,6 @@ private:
             }
             cm[elementId]++;
         }
-        brayns::Log::critical("SIZES {}", timer.seconds());
 
         return compartmentsSize;
     }

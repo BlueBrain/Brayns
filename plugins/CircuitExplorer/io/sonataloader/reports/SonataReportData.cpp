@@ -20,6 +20,11 @@
 
 #include <api/reports/common/FrameTimeCalculator.h>
 
+namespace
+{
+inline static constexpr double sonataEspsilon = 1e-6;
+}
+
 namespace sonataloader
 {
 SonataReportData::SonataReportData(
@@ -56,15 +61,12 @@ std::string SonataReportData::getTimeUnit() const noexcept
     return _population.getTimeUnits();
 }
 
-std::vector<float> SonataReportData::getFrame(const uint32_t frameIndex) const
+std::vector<float> SonataReportData::getFrame(uint32_t frameIndex) const
 {
     auto [start, end, dt] = _population.getTimes();
-    auto startTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
+    auto startTime = FrameTimeCalculator::compute(frameIndex, start, end, dt) - sonataEspsilon;
     auto endTime = startTime + dt;
-    auto frame = _population.get(
-        nonstd::optional<bbp::sonata::Selection>(_selection),
-        nonstd::optional<double>(startTime),
-        nonstd::optional<double>(endTime));
+    auto frame = _population.get(_selection, startTime, endTime);
 
     return frame.data;
 }

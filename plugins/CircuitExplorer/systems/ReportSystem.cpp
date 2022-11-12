@@ -28,9 +28,6 @@
 #include <components/ColorHandler.h>
 #include <components/ReportData.h>
 
-#include <brayns/utils/Log.h>
-#include <brayns/utils/Timer.h>
-
 bool ReportSystem::isEnabled(brayns::Components &components)
 {
     auto &info = components.get<brayns::SimulationInfo>();
@@ -59,31 +56,18 @@ bool ReportSystem::shouldExecute(brayns::Components &components)
 
 void ReportSystem::execute(brayns::Components &components, uint32_t frame)
 {
-    auto timer = brayns::Timer();
-
     auto &colorRamp = components.get<brayns::ColorRamp>();
     auto &colorMap = components.getOrAdd<brayns::ColorMap>();
 
-    timer.reset();
     colorMap.colors = ColorRampUtils::createSampleBuffer(colorRamp);
-    brayns::Log::critical("COLOR BUFFER {}", timer.seconds());
-
     auto &range = colorRamp.getValuesRange();
 
     auto &report = components.get<ReportData>();
-    timer.reset();
     auto frameData = report.data->getFrame(frame);
-    brayns::Log::critical("FRAME READ {}", timer.seconds());
-
-    timer.reset();
     colorMap.indices = report.indexer->generate(frameData, range);
-    brayns::Log::critical("INDEXING {}", timer.seconds());
 
     auto &painter = *components.get<ColorHandler>().handler;
     auto &geometries = components.get<brayns::Geometries>();
     auto &views = components.get<brayns::GeometryViews>();
-
-    timer.reset();
     painter.colorByColormap(colorMap, geometries, views);
-    brayns::Log::critical("PAINTING {}", timer.seconds());
 }

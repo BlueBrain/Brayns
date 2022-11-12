@@ -34,7 +34,7 @@ public:
     float getEndTime() const noexcept override;
     float getTimeStep() const noexcept override;
     std::string getTimeUnit() const noexcept override;
-    std::vector<float> getFrame(const uint32_t frameIndex) const override;
+    std::vector<float> getFrame(uint32_t frameIndex) const override;
 
     /**
      * @brief Computes and returns the report mapping
@@ -44,6 +44,6 @@ public:
     std::vector<CellReportMapping> computeMapping() const noexcept;
 
 private:
-    const std::unique_ptr<brion::CompartmentReport> _report;
+    std::unique_ptr<brion::CompartmentReport> _report;
 };
 }
