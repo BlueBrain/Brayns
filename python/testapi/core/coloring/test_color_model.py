@@ -18,8 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pathlib
-
 import brayns
 from testapi.simple_test_case import SimpleTestCase
 
@@ -33,5 +31,5 @@ class TestColorModel(SimpleTestCase):
             '0-500': brayns.Color4.red,
             '501-1000': brayns.Color4.green,
         })
-        ref = pathlib.Path(__file__).parent / 'circuit.png'
+        ref = self.folder / 'circuit.png'
         self.quick_validation(ref)

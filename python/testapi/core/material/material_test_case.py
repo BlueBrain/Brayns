@@ -18,16 +18,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import pathlib
+
 import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
 class MaterialTestCase(SimpleTestCase):
 
+    @property
+    def renderer(self) -> brayns.Renderer:
+        return brayns.ProductionRenderer(32)
+
+    @property
+    def ref(self) -> pathlib.Path:
+        name = self.filename.replace('test_', '')
+        name = name.replace('_material', '')
+        name += '.png'
+        return self.folder / name
+
     def run_tests(self, material: brayns.Material) -> None:
-        model = brayns.add_geometries(self.instance, [brayns.Sphere(1)])
+        model = self.add_sphere()
         brayns.set_material(self.instance, model.id, material)
+        self._check_name(material, model)
+        self._check_get(material, model)
+        self.quick_validation(self.ref)
+
+    def _check_name(self, material: brayns.Material, model: brayns.Model) -> None:
         name = brayns.get_material_name(self.instance, model.id)
         self.assertEqual(name, material.name)
-        test = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(test, material)
+
+    def _check_get(self, material: brayns.Material, model: brayns.Model) -> None:
+        ref = brayns.get_material(self.instance, model.id, type(material))
+        self.assertEqual(material, ref)

@@ -52,7 +52,7 @@ class Simulation:
         :return: Frame count.
         :rtype: int
         """
-        return self.end_frame - self.start_frame
+        return self.end_frame - self.start_frame + 1
 
     @property
     def duration(self) -> float:

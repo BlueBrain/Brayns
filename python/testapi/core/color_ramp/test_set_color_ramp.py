@@ -18,8 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pathlib
-
 import brayns
 from testapi.simple_test_case import SimpleTestCase
 
@@ -42,7 +40,7 @@ class TestSetColorRamp(SimpleTestCase):
         self.assertEqual(test, ramp)
 
     def _check_render(self) -> None:
-        ref = pathlib.Path(__file__).parent / 'frame_0.png'
+        ref = self.folder / 'frame_0.png'
         self.quick_validation(ref, 0)
-        ref = pathlib.Path(__file__).parent / 'frame_99.png'
+        ref = self.folder / 'frame_99.png'
         self.quick_validation(ref, 99)

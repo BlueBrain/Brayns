@@ -46,15 +46,6 @@ class TestPick(SimpleTestCase):
         self.assertIsNone(test)
 
     def _prepare_scene(self) -> None:
-        loader = brayns.BbpLoader(
-            morphology=brayns.Morphology(
-                radius_multiplier=10,
-            ),
-        )
-        models = loader.load_models(self.instance, self.bbp_circuit)
-        target = models[0].bounds
-        resolution = brayns.Resolution.full_hd
-        controller = brayns.CameraController(target, resolution.aspect_ratio)
-        camera = controller.camera
-        brayns.set_resolution(self.instance, resolution)
-        brayns.set_camera(self.instance, camera)
+        self.load_circuit()
+        brayns.set_resolution(self.instance, self.resolution)
+        brayns.set_camera(self.instance, self.get_default_camera())

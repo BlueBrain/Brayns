@@ -26,18 +26,15 @@ class TestClearRenderables(SimpleTestCase):
 
     def test_clear_renderables(self) -> None:
         models = [
-            brayns.add_geometries(self.instance, [brayns.Sphere(i)])
-            for i in range(1, 4)
+            self.add_sphere(),
+            self.add_sphere(),
+            self.add_light(),
+            self.add_clip_plane(),
         ]
-
-        brayns.add_light(self.instance, brayns.AmbientLight())
-
         brayns.clear_renderables(self.instance)
-        
-        for model in models:
-            with self.assertRaises(brayns.JsonRpcError):
-                brayns.get_model(self.instance, model.id)
-
-        scene = brayns.get_scene(self.instance)
-        self.assertEqual(len(scene.models), 1)
-        self.assertEqual(scene.models[0].type, 'light')
+        with self.assertRaises(brayns.JsonRpcError):
+            brayns.get_model(self.instance, models[0].id)
+        with self.assertRaises(brayns.JsonRpcError):
+            brayns.get_model(self.instance, models[1].id)
+        brayns.get_model(self.instance, models[2].id)
+        brayns.get_model(self.instance, models[3].id)

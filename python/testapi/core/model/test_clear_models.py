@@ -26,8 +26,9 @@ class TestClearModels(SimpleTestCase):
 
     def test_clear_models(self) -> None:
         models = [
-            brayns.add_geometries(self.instance, [brayns.Sphere(i)])
-            for i in range(1, 4)
+            self.add_sphere(),
+            self.add_light(),
+            self.add_clip_plane(),
         ]
         brayns.clear_models(self.instance)
         for model in models:
