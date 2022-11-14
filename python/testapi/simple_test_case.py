@@ -69,7 +69,6 @@ class SimpleTestCase(ApiTestCase):
         return controller.camera
 
     def add_light(self) -> brayns.Model:
-        brayns.clear_lights(self.instance)
         light = brayns.AmbientLight(2)
         return brayns.add_light(self.instance, light)
 
