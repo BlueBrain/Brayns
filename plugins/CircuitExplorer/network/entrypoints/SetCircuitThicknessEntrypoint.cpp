@@ -26,7 +26,7 @@
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/network/common/ExtractModel.h>
 
-#include <components/CircuitIds.h>
+#include <components/NeuronSectionList.h>
 
 namespace
 {
@@ -43,11 +43,10 @@ public:
             return;
         }
 
-        // Extract model
         auto &instance = brayns::ExtractModel::fromId(models, modelId);
         auto &model = instance.getModel();
         auto &components = model.getComponents();
-        if (!components.has<CircuitIds>())
+        if (!components.has<NeuronSectionList>())
         {
             throw brayns::JsonRpcException("The model is not a morphological neuron circuit");
         }
