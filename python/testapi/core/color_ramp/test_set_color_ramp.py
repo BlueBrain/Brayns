@@ -25,7 +25,7 @@ from testapi.simple_test_case import SimpleTestCase
 class TestSetColorRamp(SimpleTestCase):
 
     def test_set_color_ramp(self) -> None:
-        model = self.load_circuit()
+        model = self.load_circuit(report=True)
         ramp = brayns.ColorRamp(
             brayns.ValueRange(-100, 0),
             colors=[brayns.Color4.red, brayns.Color4.green],
