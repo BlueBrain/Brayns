@@ -15,7 +15,7 @@ variables:
   SPACK_PACKAGE: brayns
   SPACK_PACKAGE_NAME: brayns
   SPACK_PACKAGE_COMPILER: gcc
-  SPACK_PACKAGE_REF: ''
+  SPACK_PACKAGE_REF: ""
   SPACK_PACKAGE_SPEC: +brion ^ospray@2.10.0%intel ^intel-tbb%intel
 
 
@@ -80,4 +80,23 @@ brayns-python-type-check:
     - pyright --warnings testapi
     - pyright --warnings scripts
     - pyright --warnings samples
+    - deactivate
+
+
+brayns-python-testapi:
+  extends: .spack_test
+  needs: ["brayns-spack-build", "brayns-python-venv"]
+  timeout: 10 minutes
+  script:
+    - cd ${SPACK_SOURCE_DIR}/python
+    - source pythonvenv/bin/activate
+    - export BRAYNS_TEST_LOG_LEVEL=WARN
+    - export BRAYNS_TEST_EXECUTABLE=${SPACK_BUILD_DIR}/bin/braynsService
+    - export BRAYNS_TEST_PORT=5000
+    - export BRAYNS_TEST_BBP_CIRCUIT=/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/circuitBuilding_1000neurons/BlueConfig
+    - export BRAYNS_TEST_DTI_FILE=/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/DTI/dtitest.json
+    - export BRAYNS_TEST_FFMPEG=ffmpeg
+    - module load unstable
+    - module load ffmpeg
+    - python -m unittest discover -v --locals -s testapi -p test_*.py
     - deactivate
