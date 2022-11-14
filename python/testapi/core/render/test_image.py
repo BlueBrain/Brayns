@@ -23,19 +23,10 @@ import tempfile
 
 import brayns
 from testapi.image_validator import ImageValidator
-from testapi.quick_render import prepare_quick_render_image
 from testapi.simple_test_case import SimpleTestCase
 
 
 class TestImage(SimpleTestCase):
-
-    @property
-    def ref_jpg(self) -> pathlib.Path:
-        return self.asset_folder / 'render_image.jpg'
-
-    @property
-    def ref_png(self) -> pathlib.Path:
-        return self.asset_folder / 'render_image.png'
 
     def test_save_jpeg(self) -> None:
         self._prepare_render()
@@ -48,7 +39,8 @@ class TestImage(SimpleTestCase):
             self.assertTrue(test.data)
             self.assertTrue(test.full_quality)
             validator = ImageValidator()
-            validator.validate_file(path, self.ref_jpg)
+            ref = self.folder / 'render_image.jpg'
+            validator.validate_file(path, ref)
 
     def test_download_png(self) -> None:
         self._prepare_render()
@@ -59,7 +51,8 @@ class TestImage(SimpleTestCase):
         self.assertTrue(test.data)
         self.assertTrue(test.full_quality)
         validator = ImageValidator()
-        validator.validate_data(test.data, self.ref_png)
+        ref = self.folder / 'render_image.png'
+        validator.validate_data(test.data, ref)
 
     def test_render(self) -> None:
         self._prepare_render()
@@ -124,10 +117,8 @@ class TestImage(SimpleTestCase):
         self.assertTrue(test.data)
 
     def _prepare_render(self) -> None:
-        self._load_model()
-        prepare_quick_render_image(self.instance)
-
-    def _load_model(self) -> None:
-        path = self.asset_folder / 'cube.ply'
-        loader = brayns.MeshLoader()
-        loader.load_models(self.instance, str(path))
+        self.add_light()
+        self.add_sphere()
+        brayns.set_resolution(self.instance, self.resolution)
+        brayns.set_renderer(self.instance, self.renderer)
+        brayns.set_camera(self.instance, self.get_default_camera())

@@ -25,6 +25,6 @@ from testapi.simple_test_case import SimpleTestCase
 class TestGetModel(SimpleTestCase):
 
     def test_get_model(self) -> None:
-        model = brayns.add_geometries(self.instance, [brayns.Sphere(1)])
+        model = self.add_sphere()
         test = brayns.get_model(self.instance, model.id)
         self.assertEqual(test, model)

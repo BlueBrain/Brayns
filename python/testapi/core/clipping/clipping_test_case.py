@@ -18,7 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import inspect
 import pathlib
 
 import brayns
@@ -29,48 +28,10 @@ class ClippingTestCase(SimpleTestCase):
 
     @property
     def ref(self) -> pathlib.Path:
-        filename = inspect.getfile(type(self))
-        path = pathlib.Path(filename)
-        name = path.stem.replace('test_', '') + '.png'
-        return path.parent / name
+        name = self.filename.replace('test_', '') + '.png'
+        return self.folder / name
 
     def run_tests(self, geometry: brayns.ClippingGeometry) -> None:
-        self._check_get(geometry)
-        self._check_remove(geometry)
-        self._check_clear(geometry)
-        self._check_render(geometry)
-
-    def _add_geometry(self, geometry: brayns.ClippingGeometry) -> brayns.Model:
-        return brayns.add_clipping_geometry(self.instance, geometry)
-
-    def _check_get(self, geometry: brayns.ClippingGeometry) -> None:
-        test = self._add_geometry(geometry)
-        ref = brayns.get_model(self.instance, test.id)
-        self.assertEqual(test, ref)
-        brayns.clear_models(self.instance)
-
-    def _check_remove(self, geometry: brayns.ClippingGeometry) -> None:
-        test = self._add_geometry(geometry)
-        brayns.remove_models(self.instance, [test.id])
-        with self.assertRaises(brayns.JsonRpcError):
-            brayns.get_model(self.instance, test.id)
-        brayns.clear_models(self.instance)
-
-    def _check_clear(self, geometry: brayns.ClippingGeometry) -> None:
-        test = self._add_geometry(geometry)
-        remain = [
-            brayns.add_geometries(self.instance, [brayns.Sphere(1)]),
-            brayns.add_light(self.instance, brayns.AmbientLight(1)),
-        ]
-        brayns.clear_clipping_geometries(self.instance)
-        with self.assertRaises(brayns.JsonRpcError):
-            brayns.get_model(self.instance, test.id)
-        for model in remain:
-            brayns.get_model(self.instance, model.id)
-        brayns.clear_models(self.instance)
-
-    def _check_render(self, geometry: brayns.ClippingGeometry) -> None:
-        self._add_geometry(geometry)
-        brayns.add_geometries(self.instance, [brayns.Sphere(1)])
+        brayns.add_clipping_geometry(self.instance, geometry)
+        self.add_sphere()
         self.quick_validation(self.ref)
-        brayns.clear_models(self.instance)

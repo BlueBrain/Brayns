@@ -24,17 +24,39 @@ from testapi.simple_test_case import SimpleTestCase
 
 class TestUpdateModel(SimpleTestCase):
 
-    def test_update_model(self) -> None:
-        model = brayns.add_geometries(self.instance, [brayns.Sphere(1)])
-        model.visible = False
+    def test_bounds(self) -> None:
+        ref = self.add_sphere()
         translation = brayns.Vector3.one
-        model.transform = brayns.Transform(translation)
-        model.bounds.min += translation
-        model.bounds.max += translation
-        test = brayns.update_model(
-            self.instance,
-            model.id,
-            transform=model.transform,
-            visible=model.visible,
+        transform = brayns.Transform(translation)
+        test = brayns.update_model(self.instance, ref.id, transform)
+        ref.transform = transform
+        ref.bounds.min += translation
+        ref.bounds.max += translation
+        self.assertEqual(test, ref)
+
+    def test_transform(self) -> None:
+        self.add_sphere()
+        model = brayns.add_geometries(self.instance, [brayns.BoundedPlane(
+            equation=brayns.PlaneEquation(0, 0, 1),
+            bounds=brayns.Bounds(
+                min=brayns.Vector3.zero,
+                max=brayns.Vector3.one,
+            ),
+        ).with_color(brayns.Color4.blue)])
+        transform = brayns.Transform(
+            translation=brayns.Vector3.one,
+            rotation=brayns.euler(0, 0, 90, degrees=True),
+            scale=brayns.Vector3(1, 2, 3),
         )
-        self.assertEqual(test, model)
+        brayns.update_model(self.instance, model.id, transform)
+        ref = self.folder / 'transform.png'
+        self.quick_validation(ref)
+
+    def test_visible(self) -> None:
+        model = self.add_sphere()
+        brayns.update_model(self.instance, model.id, visible=False)
+        ref = self.folder / 'invisible.png'
+        self.quick_validation(ref)
+        brayns.update_model(self.instance, model.id, visible=True)
+        ref = self.folder / 'visible.png'
+        self.quick_validation(ref)

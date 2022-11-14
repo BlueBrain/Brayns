@@ -18,25 +18,14 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pathlib
-
 import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class LightTestCase(SimpleTestCase):
+class TestSetSimulationFrame(SimpleTestCase):
 
-    def add_light(self) -> None:
-        pass
-
-    @property
-    def ref(self) -> pathlib.Path:
-        name = self.filename.replace('test_', '') + '.png'
-        return self.folder / name
-
-    def run_tests(self, light: brayns.Light) -> None:
-        model = brayns.add_light(self.instance, light)
-        self.assertTrue(model.visible)
-        self.assertEqual(model.transform, brayns.Transform.identity)
-        self.add_sphere()
-        self.quick_validation(self.ref)
+    def test_set_simulation_frame(self) -> None:
+        self.load_circuit(report=True)
+        brayns.set_simulation_frame(self.instance, 12)
+        simulation = brayns.get_simulation(self.instance)
+        self.assertEqual(simulation.current_frame, 12)

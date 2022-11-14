@@ -22,9 +22,19 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestUpdateSimulation(SimpleTestCase):
+class TestClearLights(SimpleTestCase):
 
-    def test_update_simulation(self) -> None:
-        brayns.set_simulation_frame(self.instance, 0)
-        simulation = brayns.get_simulation(self.instance)
-        self.assertEqual(simulation.current_frame, 0)
+    def test_clear_lights(self) -> None:
+        models = [
+            self.add_sphere(),
+            self.add_clip_plane(),
+            self.add_light(),
+            self.add_light(),
+        ]
+        brayns.clear_lights(self.instance)
+        brayns.get_model(self.instance, models[0].id)
+        brayns.get_model(self.instance, models[1].id)
+        with self.assertRaises(brayns.JsonRpcError):
+            brayns.get_model(self.instance, models[2].id)
+        with self.assertRaises(brayns.JsonRpcError):
+            brayns.get_model(self.instance, models[3].id)

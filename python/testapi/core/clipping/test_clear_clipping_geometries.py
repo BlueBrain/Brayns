@@ -19,15 +19,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-from .simple_test_case import SimpleTestCase
 
+class TestClearClippingGeometries(SimpleTestCase):
 
-class ProjectionTestCase(SimpleTestCase):
-
-    def run_tests(self, projection: brayns.Projection) -> None:
-        brayns.set_camera_projection(self.instance, projection)
-        name = brayns.get_camera_name(self.instance)
-        self.assertEqual(name, projection.name)
-        test = brayns.get_camera_projection(self.instance, type(projection))
-        self.assertEqual(test, projection)
+    def test_clear_clipping_geometries(self) -> None:
+        models = [
+            self.add_sphere(),
+            self.add_light(),
+            self.add_clip_plane(),
+            self.add_clip_plane(),
+        ]
+        brayns.clear_clipping_geometries(self.instance)
+        brayns.get_model(self.instance, models[0].id)
+        brayns.get_model(self.instance, models[1].id)
+        with self.assertRaises(brayns.JsonRpcError):
+            brayns.get_model(self.instance, models[2].id)
+        with self.assertRaises(brayns.JsonRpcError):
+            brayns.get_model(self.instance, models[3].id)

@@ -31,6 +31,6 @@ class TestInteractiveRenderer(RendererTestCase):
             max_ray_bounces=4,
             background_color=brayns.Color4.red,
             enable_shadows=False,
-            ambient_occlusion_samples=3
+            ambient_occlusion_samples=3,
         )
         self.run_tests(renderer)

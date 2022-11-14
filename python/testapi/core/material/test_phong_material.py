@@ -27,6 +27,6 @@ class TestPhongMaterial(MaterialTestCase):
 
     def test_all(self) -> None:
         material = brayns.PhongMaterial(
-            opacity=0.5
+            opacity=0.9,
         )
         self.run_tests(material)

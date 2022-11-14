@@ -68,10 +68,10 @@ class SimpleTestCase(ApiTestCase):
         )
         return controller.camera
 
-    def add_light(self) -> None:
+    def add_light(self) -> brayns.Model:
         brayns.clear_lights(self.instance)
         light = brayns.AmbientLight(2)
-        brayns.add_light(self.instance, light)
+        return brayns.add_light(self.instance, light)
 
     def snapshot(self, frame: int = 0) -> brayns.Snapshot:
         return brayns.Snapshot(
@@ -96,6 +96,15 @@ class SimpleTestCase(ApiTestCase):
         self.add_light()
         snapshot = self.snapshot(frame)
         self.validate(snapshot, ref)
+
+    def add_sphere(self, color: brayns.Color4 = brayns.Color4.red) -> brayns.Model:
+        return brayns.add_geometries(self.instance, [
+            brayns.Sphere(1).with_color(color),
+        ])
+
+    def add_clip_plane(self) -> brayns.Model:
+        plane = brayns.ClipPlane(brayns.PlaneEquation(1, 2, 3))
+        return brayns.add_clipping_geometry(self.instance, plane)
 
     def load_circuit(self, dendrites: bool = False, report: bool = False) -> brayns.Model:
         loader = brayns.BbpLoader(
