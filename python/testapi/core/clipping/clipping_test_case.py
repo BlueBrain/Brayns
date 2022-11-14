@@ -25,7 +25,7 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class LightTestCase(SimpleTestCase):
+class ClippingTestCase(SimpleTestCase):
 
     @property
     def ref(self) -> pathlib.Path:
@@ -34,44 +34,43 @@ class LightTestCase(SimpleTestCase):
         name = path.stem.replace('test_', '') + '.png'
         return path.parent / name
 
-    def run_tests(self, light: brayns.Light) -> None:
-        self._check_get(light)
-        self._check_remove(light)
-        self._check_clear(light)
-        self._check_render(light)
+    def run_tests(self, geometry: brayns.ClippingGeometry) -> None:
+        self._check_get(geometry)
+        self._check_remove(geometry)
+        self._check_clear(geometry)
+        self._check_render(geometry)
 
-    def _add_light(self, light: brayns.Light) -> brayns.Model:
-        return brayns.add_light(self.instance, light)
+    def _add_geometry(self, geometry: brayns.ClippingGeometry) -> brayns.Model:
+        return brayns.add_clipping_geometry(self.instance, geometry)
 
-    def _check_get(self, light: brayns.Light) -> None:
-        test = self._add_light(light)
+    def _check_get(self, geometry: brayns.ClippingGeometry) -> None:
+        test = self._add_geometry(geometry)
         ref = brayns.get_model(self.instance, test.id)
         self.assertEqual(test, ref)
         brayns.clear_models(self.instance)
 
-    def _check_remove(self, light: brayns.Light) -> None:
-        test = self._add_light(light)
+    def _check_remove(self, geometry: brayns.ClippingGeometry) -> None:
+        test = self._add_geometry(geometry)
         brayns.remove_models(self.instance, [test.id])
         with self.assertRaises(brayns.JsonRpcError):
             brayns.get_model(self.instance, test.id)
         brayns.clear_models(self.instance)
 
-    def _check_clear(self, light: brayns.Light) -> None:
-        test = self._add_light(light)
-        plane = brayns.ClipPlane(brayns.PlaneEquation(1, 2, 3))
+    def _check_clear(self, geometry: brayns.ClippingGeometry) -> None:
+        test = self._add_geometry(geometry)
         remain = [
-            brayns.add_clipping_geometry(self.instance, plane),
             brayns.add_geometries(self.instance, [brayns.Sphere(1)]),
+            brayns.add_light(self.instance, brayns.AmbientLight(1)),
         ]
-        brayns.clear_lights(self.instance)
+        brayns.clear_clipping_geometries(self.instance)
         with self.assertRaises(brayns.JsonRpcError):
             brayns.get_model(self.instance, test.id)
         for model in remain:
             brayns.get_model(self.instance, model.id)
         brayns.clear_models(self.instance)
 
-    def _check_render(self, light: brayns.Light) -> None:
-        self._add_light(light)
+    def _check_render(self, geometry: brayns.ClippingGeometry) -> None:
+        self._add_geometry(geometry)
         brayns.add_geometries(self.instance, [brayns.Sphere(1)])
         self.quick_validation(self.ref)
         brayns.clear_models(self.instance)
