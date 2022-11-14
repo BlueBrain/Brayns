@@ -25,10 +25,7 @@ from testapi.simple_test_case import SimpleTestCase
 class TestSetCircuitThickness(SimpleTestCase):
 
     def test_set_circuit_thickness(self) -> None:
-        id = self._load_model()
-        brayns.set_circuit_thickness(self.instance, id, 3)
-
-    def _load_model(self) -> int:
-        loader = brayns.BbpLoader()
-        models = loader.load_models(self.instance, self.bbp_circuit)
-        return models[0].id
+        model = self.load_circuit(dendrites=True)
+        brayns.set_circuit_thickness(self.instance, model.id, 3)
+        ref = self.folder / 'thickness.png'
+        self.quick_validation(ref)

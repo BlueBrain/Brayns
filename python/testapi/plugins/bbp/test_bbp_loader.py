@@ -18,20 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pathlib
-import tempfile
-
 import brayns
-from testapi.image_validator import ImageValidator
-from testapi.quick_render import quick_snapshot
 from testapi.simple_test_case import SimpleTestCase
 
 
 class TestBbpLoader(SimpleTestCase):
-
-    @property
-    def ref(self) -> pathlib.Path:
-        return self.asset_folder / 'bbp.png'
 
     def test_load_models(self) -> None:
         loader = brayns.BbpLoader(
@@ -44,8 +35,5 @@ class TestBbpLoader(SimpleTestCase):
 
     def _validate_result(self, models: list[brayns.Model]) -> None:
         self.assertEqual(len(models), 1)
-        with tempfile.TemporaryDirectory() as directory:
-            path = pathlib.Path(directory) / 'test_bbp_loader.png'
-            quick_snapshot(self.instance, str(path), 50)
-            validator = ImageValidator()
-            validator.validate_file(path, self.ref)
+        ref = self.folder / 'circuit.png'
+        self.quick_validation(ref, 50)
