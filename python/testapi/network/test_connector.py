@@ -61,9 +61,16 @@ class TestConnector(ApiTestCase):
                 with self._connect(secure=True):
                     pass
 
+    def test_multiple_clients(self) -> None:
+        with self._start_service():
+            instances = [self._connect() for _ in range(3)]
+            for instance in instances:
+                instance.disconnect()
+
     def _start_service(self, secure: bool = False) -> brayns.Process:
         service = brayns.Service(
             uri=self.uri,
+            max_clients=3,
             ssl_context=brayns.SslServerContext(
                 private_key_file=str(self.key),
                 private_key_passphrase='test',
@@ -86,7 +93,6 @@ class TestConnector(ApiTestCase):
             ssl_context=brayns.SslClientContext(
                 cafile=cafile
             ) if secure else None,
-            logger=brayns.Logger(logging.CRITICAL),
             max_attempts=max_attempts,
         )
         return connector.connect()
