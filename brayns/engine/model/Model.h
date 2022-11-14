@@ -92,6 +92,12 @@ private:
      */
     void init();
 
+    /**
+     * @brief Commits the model data to OSPRay
+     * @return CommitResult Required actions after model commit.
+     */
+    CommitResult commit();
+
 private:
     friend class ModelManager;
 

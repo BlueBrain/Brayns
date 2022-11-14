@@ -131,4 +131,19 @@ void Model::init()
 
     _handle = GroupBuilder::build(_components);
 }
+
+CommitResult Model::commit()
+{
+    if (!_systems._commit)
+    {
+        return {};
+    }
+
+    auto result = _systems._commit->execute(_components);
+    if (result.needsRebuildBVH)
+    {
+        _handle.commit();
+    }
+    return result;
+}
 } // namespace brayns
