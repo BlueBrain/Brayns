@@ -34,6 +34,7 @@ class TestService(unittest.TestCase):
                 certificate_file='certificate',
                 ca_location='ca',
             ),
+            max_clients=2,
             log_level=brayns.LogLevel.CRITICAL,
             plugins=[
                 brayns.Plugin.ATLAS_EXPLORER.value,
@@ -46,6 +47,8 @@ class TestService(unittest.TestCase):
             'service',
             '--uri',
             'uri',
+            '--max-clients',
+            '2',
             '--log-level',
             'critical',
             '--plugin',
