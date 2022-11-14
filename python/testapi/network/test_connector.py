@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 
 import brayns
 from testapi.api_test_case import ApiTestCase
@@ -32,10 +33,13 @@ class TestConnector(ApiTestCase):
     def uri(self) -> str:
         return f'localhost:{self.port}'
 
-    def setUp(self) -> None:
-        ssl_folder = self.asset_folder / 'ssl'
-        self._key = str(ssl_folder / 'key.pem')
-        self._certificate = str(ssl_folder / 'certificate.pem')
+    @property
+    def key(self) -> pathlib.Path:
+        return self.folder / 'ssl' / 'key.pem'
+
+    @property
+    def certificate(self) -> pathlib.Path:
+        return self.folder / 'ssl' / 'certificate.pem'
 
     def test_connect(self) -> None:
         with self._start_service():
@@ -44,7 +48,7 @@ class TestConnector(ApiTestCase):
 
     def test_connect_secure(self) -> None:
         with self._start_service(secure=True):
-            with self._connect(secure=True, cafile=self._certificate):
+            with self._connect(secure=True, cafile=str(self.certificate)):
                 pass
 
     def test_connect_no_instance(self) -> None:
@@ -61,10 +65,10 @@ class TestConnector(ApiTestCase):
         service = brayns.Service(
             uri=self.uri,
             ssl_context=brayns.SslServerContext(
-                private_key_file=self._key,
+                private_key_file=str(self.key),
                 private_key_passphrase='test',
-                certificate_file=self._certificate,
-                ca_location=self._certificate,
+                certificate_file=str(self.certificate),
+                ca_location=str(self.certificate),
             ) if secure else None,
             executable=self.executable,
             env=self.env,
