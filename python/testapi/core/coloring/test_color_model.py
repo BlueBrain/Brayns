@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import pathlib
+
 import brayns
 from testapi.simple_test_case import SimpleTestCase
 
@@ -25,6 +27,11 @@ from testapi.simple_test_case import SimpleTestCase
 class TestColorModel(SimpleTestCase):
 
     def test_color_model(self) -> None:
-        loader = brayns.BbpLoader()
-        models = loader.load_models(self.instance, self.bbp_circuit)
-        brayns.set_model_color(self.instance, models[0].id, brayns.Color4.red)
+        model = self.load_circuit()
+        method = brayns.CircuitColorMethod.ID
+        brayns.color_model(self.instance, model.id, method, {
+            '0-500': brayns.Color4.red,
+            '501-1000': brayns.Color4.green,
+        })
+        ref = pathlib.Path(__file__).parent / 'circuit.png'
+        self.quick_validation(ref)

@@ -19,14 +19,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+
+from .clipping_test_case import ClippingTestCase
 
 
-class TestAddClippingGeometry(SimpleTestCase):
+class TestClipPlane(ClippingTestCase):
 
-    def test_add_clipping_geometry(self) -> None:
-        equation = brayns.PlaneEquation(1, 2, 3, 4)
-        plane = brayns.ClipPlane(equation)
-        test = brayns.add_clipping_geometry(self.instance, plane)
-        ref = brayns.get_model(self.instance, test.id)
-        self.assertEqual(test, ref)
+    def test_all(self) -> None:
+        plane = brayns.PlaneEquation(0, 1, 0)
+        self.run_tests(brayns.ClipPlane(plane))

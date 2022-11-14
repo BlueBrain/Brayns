@@ -19,28 +19,31 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+
+from .geometry_test_case import GeometryTestCase
 
 
-class TestAddBoxes(SimpleTestCase):
+class TestAddBoxes(GeometryTestCase):
 
-    def test_add_boxes(self) -> None:
-        test = brayns.add_geometries(self.instance, [
+    @property
+    def geometries(self) -> list[brayns.Geometry]:
+        return [
             brayns.Box(
                 min=-brayns.Vector3.one,
-                max=brayns.Vector3.one
+                max=brayns.Vector3(1, 1, 2),
             ).with_color(brayns.Color4.red),
             brayns.Box(
                 min=-2 * brayns.Vector3.one,
-                max=brayns.Vector3.one
+                max=brayns.Vector3.one,
             ).with_color(brayns.Color4.blue),
-        ])
-        ref = brayns.get_model(self.instance, test.id)
-        self.assertEqual(test, ref)
-        self.assertEqual(test.bounds, brayns.Bounds(
+        ]
+
+    @property
+    def bounds(self) -> brayns.Bounds:
+        return brayns.Bounds(
             -2 * brayns.Vector3.one,
-            brayns.Vector3.one
-        ))
-        self.assertEqual(test.info, {})
-        self.assertEqual(test.visible, True)
-        self.assertEqual(test.transform, brayns.Transform.identity)
+            brayns.Vector3(1, 1, 2),
+        )
+
+    def test_all(self) -> None:
+        self.run_tests(self.geometries, self.bounds)

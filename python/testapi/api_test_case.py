@@ -26,6 +26,10 @@ import unittest
 class ApiTestCase(unittest.TestCase):
 
     @property
+    def log_level(self) -> str:
+        return os.environ.get('BRAYNS_TEST_LOG_LEVEL', 'WARN')
+
+    @property
     def executable(self) -> str:
         return os.environ['BRAYNS_TEST_EXECUTABLE']
 

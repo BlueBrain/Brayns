@@ -18,12 +18,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import pathlib
+
 import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestGetMethods(SimpleTestCase):
+class TestSetModelColor(SimpleTestCase):
 
-    def test_get_methods(self) -> None:
-        methods = brayns.get_methods(self.instance)
-        self.assertTrue(methods)
+    def test_set_model_color(self) -> None:
+        model = brayns.add_geometries(self.instance, [brayns.Sphere(1)])
+        brayns.set_model_color(self.instance, model.id, brayns.Color4.red)
+        ref = pathlib.Path(__file__).parent / 'sphere.png'
+        self.quick_validation(ref)
