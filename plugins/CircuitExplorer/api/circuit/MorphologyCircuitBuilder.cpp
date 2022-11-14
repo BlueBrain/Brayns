@@ -72,9 +72,12 @@ public:
         return result;
     }
 };
+
 class ParallelMorphologyLoader
 {
 public:
+    inline static constexpr size_t maxThreads = 800;
+
     static std::vector<NeuronGeometry> load(
         const MorphologyMap &morphologyMap,
         const NeuronMorphologyLoaderParameters &morphologyParameters,
@@ -82,34 +85,35 @@ public:
         const std::vector<brayns::Quaternion> &rotations,
         ProgressUpdater &progressUpdater)
     {
-        const auto cellCount = morphologyMap.cellCount;
+        auto cellCount = morphologyMap.cellCount;
+        auto morphologies = std::vector<NeuronGeometry>(cellCount);
 
-        std::vector<NeuronGeometry> morphologies(cellCount);
+        auto soma = morphologyParameters.load_soma;
+        auto axon = morphologyParameters.load_axon;
+        auto dendrites = morphologyParameters.load_dendrites;
+        auto radiusMultiplier = morphologyParameters.radius_multiplier;
+        auto geometryType = morphologyParameters.geometry_type;
+        auto pipeline = NeuronMorphologyPipeline::fromParameters(geometryType, radiusMultiplier);
 
-        const auto soma = morphologyParameters.load_soma;
-        const auto axon = morphologyParameters.load_axon;
-        const auto dendrites = morphologyParameters.load_dendrites;
-        const auto radiusMultiplier = morphologyParameters.radius_multiplier;
-        const auto geometryType = morphologyParameters.geometry_type;
-        const auto pipeline = NeuronMorphologyPipeline::fromParameters(geometryType, radiusMultiplier);
-
-        const auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
+        auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
         {
             auto morphology = NeuronMorphologyReader::read(path, soma, axon, dendrites);
             pipeline.process(morphology);
-            const NeuronGeometryBuilder builder(morphology);
-            for (const auto idx : indices)
+
+            auto builder = NeuronGeometryBuilder(morphology);
+
+            for (auto idx : indices)
             {
                 morphologies[idx] = builder.instantiate(positions[idx], rotations[idx]);
             }
         };
 
-        const auto updateMessage = std::string("Loading neurons");
-        const auto &pathToCellIndexMap = morphologyMap.pathToCellIndices;
-        constexpr size_t maxThreads = 800;
+        auto updateMessage = std::string("Loading neurons");
+        auto &pathToCellIndexMap = morphologyMap.pathToCellIndices;
 
-        std::deque<std::future<void>> loadTasks;
-        for (const auto &[path, cellIndices] : pathToCellIndexMap)
+        auto loadTasks = std::deque<std::future<void>>();
+
+        for (auto &[path, cellIndices] : pathToCellIndexMap)
         {
             if (loadTasks.size() == maxThreads)
             {
@@ -203,7 +207,6 @@ std::vector<CellCompartments>
     MorphologyCircuitBuilder::build(brayns::Model &model, Context context, ProgressUpdater &updater)
 {
     auto &morphPaths = context.morphologyPaths;
-    auto &ids = context.ids;
     auto &morphParams = context.morphologyParams;
     auto &positions = context.positions;
     auto &rotations = context.rotations;
@@ -211,29 +214,28 @@ std::vector<CellCompartments>
     auto morphologyPathMap = MorphologyMapBuilder::build(morphPaths);
     auto morphologies = ParallelMorphologyLoader::load(morphologyPathMap, morphParams, positions, rotations, updater);
 
-    std::vector<CellCompartments> compartments(ids.size());
-    std::vector<std::vector<brayns::Capsule>> geometries(ids.size());
-    std::vector<std::vector<NeuronSectionMapping>> mappings(ids.size());
+    auto mappings = std::vector<std::vector<NeuronSectionMapping>>();
+    mappings.reserve(morphologies.size());
 
-#pragma omp parallel for
-    for (size_t i = 0; i < ids.size(); ++i)
+    auto compartments = std::vector<CellCompartments>();
+    compartments.reserve(morphologies.size());
+
+    auto geometries = std::vector<std::vector<brayns::Capsule>>();
+    geometries.reserve(morphologies.size());
+
+    for (auto &morphology : morphologies)
     {
-        auto &morphology = morphologies[i];
         auto &sectionMapping = morphology.sectionMapping;
         auto &compartmentMapping = morphology.sectionSegmentMapping;
         auto &geometry = morphology.geometry;
 
-        mappings[i] = std::move(sectionMapping);
-
-        auto &compartment = compartments[i];
-        compartment.numItems = geometry.size();
-        compartment.sectionSegments = std::move(compartmentMapping);
-
-        geometries[i] = std::move(geometry);
+        mappings.push_back(std::move(sectionMapping));
+        compartments.push_back({geometry.size(), std::move(compartmentMapping)});
+        geometries.push_back(std::move(geometry));
     }
 
     auto builder = ModelBuilder(model);
-    builder.addIds(std::move(ids));
+    builder.addIds(std::move(context.ids));
     builder.addGeometry(std::move(geometries));
     builder.addNeuronSections(std::move(mappings));
     builder.addColoring(std::move(context.colorData));

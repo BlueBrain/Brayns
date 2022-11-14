@@ -33,11 +33,6 @@ SpikeData::SpikeData(
 {
 }
 
-size_t SpikeData::getFrameSize() const noexcept
-{
-    return _mapping.size();
-}
-
 float SpikeData::getStartTime() const noexcept
 {
     return 0.f;
@@ -58,31 +53,32 @@ std::string SpikeData::getTimeUnit() const noexcept
     return "";
 }
 
-std::vector<float> SpikeData::getFrame(const uint32_t frameIndex) const
+std::vector<float> SpikeData::getFrame(uint32_t frameIndex) const
 {
-    std::vector<float> values(_mapping.size(), 0.f);
+    auto values = std::vector<float>(_mapping.size(), 0.f);
 
-    const auto start = getStartTime();
-    const auto end = getEndTime();
-    const auto dt = getTimeStep();
-    const auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    const auto frameStart = frameTime - _interval;
-    const auto frameEnd = frameTime + _interval;
+    auto start = getStartTime();
+    auto end = getEndTime();
+    auto dt = getTimeStep();
+    auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
+    auto frameStart = frameTime - _interval;
+    auto frameEnd = frameTime + _interval;
 
-    const auto spikes = _report->getSpikes(frameStart, frameEnd);
+    auto spikes = _report->getSpikes(frameStart, frameEnd);
 
     for (size_t i = 0; i < spikes.size(); ++i)
     {
-        const auto &spike = spikes[i];
-        const auto gid = spike.second;
-        const auto it = _mapping.find(gid);
+        auto &spike = spikes[i];
+        auto gid = spike.second;
+
+        auto it = _mapping.find(gid);
         if (it == _mapping.end())
         {
             continue;
         }
 
-        const auto index = it->second;
-        const auto spikeTime = spike.first;
+        auto index = it->second;
+        auto spikeTime = spike.first;
 
         values[index] = _spikeCalculator.compute(spikeTime, frameTime);
     }

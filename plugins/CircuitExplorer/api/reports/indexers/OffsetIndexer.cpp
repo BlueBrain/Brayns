@@ -57,16 +57,16 @@ private:
         const CellCompartments &cellStructure,
         const CellReportMapping &cellReportMapping)
     {
-        const auto size = cellStructure.numItems;
-        const auto &compartmentMap = cellStructure.sectionSegments;
+        auto size = cellStructure.numItems;
+        auto &compartmentMap = cellStructure.sectionSegments;
 
-        const auto offset = cellReportMapping.globalOffset;
-        const auto &localOffsets = cellReportMapping.offsets;
-        const auto &compartments = cellReportMapping.compartments;
+        auto offset = cellReportMapping.globalOffset;
+        auto &localOffsets = cellReportMapping.offsets;
+        auto &compartments = cellReportMapping.compartments;
 
         std::vector<uint64_t> localResult(size, offset);
 
-        for (const auto &[sectionId, segments] : compartmentMap)
+        for (auto &[sectionId, segments] : compartmentMap)
         {
             // No section level information (soma report, spike simulation, etc.) or dealing with soma
             if (sectionId < 0 || localOffsets.empty() || static_cast<size_t>(sectionId) >= localOffsets.size())
@@ -74,15 +74,16 @@ private:
                 continue;
             }
 
-            const auto numSegments = segments.size();
-            const auto numCompartments = compartments[sectionId];
-            const auto step = float(numCompartments) / float(numSegments);
-            const size_t sectionOffset = localOffsets[sectionId];
+            auto numSegments = segments.size();
+            auto numCompartments = compartments[sectionId];
+            auto step = static_cast<float>(numCompartments) / static_cast<float>(numSegments);
+            auto sectionOffset = localOffsets[sectionId];
+
             for (size_t i = 0; i < segments.size(); ++i)
             {
-                const auto compartment = static_cast<size_t>(step * i);
-                const auto finalOffset = offset + sectionOffset + compartment;
-                const auto segmentIndex = segments[i];
+                auto compartment = static_cast<size_t>(step * i);
+                auto finalOffset = offset + sectionOffset + compartment;
+                auto segmentIndex = segments[i];
                 localResult[segmentIndex] = finalOffset;
             }
         }

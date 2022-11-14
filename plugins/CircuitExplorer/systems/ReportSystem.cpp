@@ -69,6 +69,5 @@ void ReportSystem::execute(brayns::Components &components, uint32_t frame)
     auto &painter = *components.get<ColorHandler>().handler;
     auto &geometries = components.get<brayns::Geometries>();
     auto &views = components.get<brayns::GeometryViews>();
-
     painter.colorByColormap(colorMap, geometries, views);
 }

@@ -35,14 +35,9 @@ SonataSpikeData::SonataSpikeData(
     , _calculator(interval)
     , _interval(interval)
 {
-    const auto [start, end] = _population.getTimes();
+    auto [start, end] = _population.getTimes();
     _start = start;
     _end = end;
-}
-
-size_t SonataSpikeData::getFrameSize() const noexcept
-{
-    return _mapping.size();
 }
 
 float SonataSpikeData::getStartTime() const noexcept
@@ -65,34 +60,32 @@ std::string SonataSpikeData::getTimeUnit() const noexcept
     return "";
 }
 
-std::vector<float> SonataSpikeData::getFrame(const uint32_t frameIndex) const
+std::vector<float> SonataSpikeData::getFrame(uint32_t frameIndex) const
 {
-    std::vector<float> data(getFrameSize(), 0.f);
+    auto data = std::vector<float>(_mapping.size(), 0.f);
 
-    const auto start = getStartTime();
-    const auto end = getEndTime();
-    const auto dt = getTimeStep();
-    const auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    const auto frameStart = frameTime - _interval;
-    const auto frameEnd = frameTime + _interval;
+    auto start = getStartTime();
+    auto end = getEndTime();
+    auto dt = getTimeStep();
+    auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
+    auto frameStart = frameTime - _interval;
+    auto frameEnd = frameTime + _interval;
 
-    const auto spikes = _population.get(
-        nonstd::optional<bbp::sonata::Selection>(_selection),
-        nonstd::optional<double>(frameStart),
-        nonstd::optional<double>(frameEnd));
+    auto spikes = _population.get(_selection, frameStart, frameEnd);
 
     for (size_t i = 0; i < spikes.size(); ++i)
     {
-        const auto &spike = spikes[i];
-        const auto nodeId = spike.first;
-        const auto spikeTime = spike.second;
-        const auto it = _mapping.find(nodeId);
+        auto &spike = spikes[i];
+        auto nodeId = spike.first;
+        auto spikeTime = spike.second;
+        auto it = _mapping.find(nodeId);
+
         if (it == _mapping.end())
         {
             continue;
         }
-        const auto index = it->second;
 
+        auto index = it->second;
         data[index] = _calculator.compute(spikeTime, frameTime);
     }
 

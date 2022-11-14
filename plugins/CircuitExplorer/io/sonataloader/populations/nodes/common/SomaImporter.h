@@ -16,14 +16,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <io/sonataloader/LoadContext.h>
-
 #pragma once
+
+#include <io/sonataloader/LoadContext.h>
 
 namespace sonataloader
 {
-struct SomaImporter
+class SomaImporter
 {
+public:
     static void import(NodeLoadContext &nodeContext);
 };
 }

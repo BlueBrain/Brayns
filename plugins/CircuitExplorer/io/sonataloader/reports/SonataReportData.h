@@ -29,17 +29,11 @@ class SonataReportData final : public IReportData
 public:
     SonataReportData(const std::string &reportPath, const std::string &population, bbp::sonata::Selection selection);
 
-    size_t getFrameSize() const noexcept override;
-
     float getStartTime() const noexcept override;
-
     float getEndTime() const noexcept override;
-
     float getTimeStep() const noexcept override;
-
     std::string getTimeUnit() const noexcept override;
-
-    std::vector<float> getFrame(const uint32_t frameIndex) const override;
+    std::vector<float> getFrame(uint32_t frameIndex) const override;
 
 private:
     const bbp::sonata::ElementReportReader _reader;
@@ -48,6 +42,5 @@ private:
     float _start{};
     float _end{};
     float _dt{};
-    size_t _frameSize{};
 };
 }

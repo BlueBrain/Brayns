@@ -23,7 +23,8 @@
 /**
  * @brief Transforms a frame integer index into its timestamp based on the report start, end and timestep values
  */
-struct FrameTimeCalculator
+class FrameTimeCalculator
 {
-    static float compute(const uint32_t frame, const float start, const float end, const float dt) noexcept;
+public:
+    static float compute(uint32_t frame, float start, float end, float dt) noexcept;
 };

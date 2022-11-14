@@ -20,6 +20,11 @@
 
 #include <api/reports/common/FrameTimeCalculator.h>
 
+namespace
+{
+inline static constexpr double sonataEspsilon = 1e-6;
+}
+
 namespace sonataloader
 {
 SonataReportData::SonataReportData(
@@ -30,17 +35,10 @@ SonataReportData::SonataReportData(
     , _population(_reader.openPopulation(population))
     , _selection(std::move(selection))
 {
-    const auto [start, end, dt] = _population.getTimes();
+    auto [start, end, dt] = _population.getTimes();
     _start = start;
     _end = end;
     _dt = dt;
-    const auto firstFrame = getFrame(0);
-    _frameSize = firstFrame.size();
-}
-
-size_t SonataReportData::getFrameSize() const noexcept
-{
-    return _frameSize;
 }
 
 float SonataReportData::getStartTime() const noexcept
@@ -63,15 +61,17 @@ std::string SonataReportData::getTimeUnit() const noexcept
     return _population.getTimeUnits();
 }
 
-std::vector<float> SonataReportData::getFrame(const uint32_t frameIndex) const
+std::vector<float> SonataReportData::getFrame(uint32_t frameIndex) const
 {
-    const auto [start, end, dt] = _population.getTimes();
-    const auto timestamp = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    const auto frame = _population.get(
-        nonstd::optional<bbp::sonata::Selection>(_selection),
-        nonstd::optional<double>(timestamp),
-        nonstd::nullopt,
-        nonstd::nullopt);
+    auto [start, end, dt] = _population.getTimes();
+    auto startTime = FrameTimeCalculator::compute(frameIndex, start, end, dt) - sonataEspsilon;
+    auto endTime = startTime + dt;
+    auto frame = _population.get(_selection, startTime, endTime);
+
+    if (frame.data.empty())
+    {
+        throw std::runtime_error("Emtpy frame read");
+    }
 
     return frame.data;
 }

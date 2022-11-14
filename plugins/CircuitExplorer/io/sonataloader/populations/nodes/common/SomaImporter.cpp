@@ -35,17 +35,16 @@ void SomaImporter::import(NodeLoadContext &context)
     auto &selection = context.selection;
     auto ids = selection.flatten();
 
+    auto colorData = ColorDataFactory::create(context);
+
     auto positions = Cells::getPositions(population, selection);
 
     auto &params = context.params;
     auto &neuronParams = params.neuron_morphology_parameters;
     auto radiusMultiplier = neuronParams.radius_multiplier;
 
-    auto buildContext = SomaCircuitBuilder::Context{
-        std::move(ids),
-        std::move(positions),
-        ColorDataFactory::create(context),
-        radiusMultiplier};
+    auto buildContext =
+        SomaCircuitBuilder::Context{std::move(ids), std::move(positions), std::move(colorData), radiusMultiplier};
 
     auto compartments = SomaCircuitBuilder::build(context.model, std::move(buildContext));
     NeuronReportFactory::create(context, compartments);

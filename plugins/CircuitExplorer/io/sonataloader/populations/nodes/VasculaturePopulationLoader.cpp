@@ -129,7 +129,7 @@ private:
         auto sortedCompartments = std::map<uint64_t, size_t>();
         for (size_t i = 0; i < rawMapping.size(); ++i)
         {
-            sortedCompartments[rawMapping[i].first] = i;
+            sortedCompartments[rawMapping[i][0]] = i;
         }
 
         auto offsets = std::vector<size_t>(sortedCompartments.size());
