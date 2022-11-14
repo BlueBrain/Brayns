@@ -30,7 +30,6 @@ class SystemsView
 public:
     SystemsView(Systems &systems, Components &components);
 
-    CommitResult commit();
     void update(const ParametersManager &parameters);
     InspectResultData inspect(const InspectContext &context);
     Bounds computeBounds(const Matrix4f &matrix);

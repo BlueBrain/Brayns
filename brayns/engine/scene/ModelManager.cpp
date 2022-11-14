@@ -131,8 +131,7 @@ CommitResult ModelManager::commit()
     for (auto &instance : _instances)
     {
         auto &model = instance->getModel();
-        auto view = model.getSystemsView();
-        auto modelResult = view.commit();
+        auto modelResult = model.commit();
         result.needsRebuildBVH |= modelResult.needsRebuildBVH;
         result.needsRender |= modelResult.needsRender;
 

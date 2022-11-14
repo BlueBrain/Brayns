@@ -28,11 +28,6 @@ SystemsView::SystemsView(Systems &systems, Components &components)
 {
 }
 
-CommitResult SystemsView::commit()
-{
-    return _systems->_commit ? _systems->_commit->execute(*_components) : CommitResult();
-}
-
 void SystemsView::update(const ParametersManager &parameters)
 {
     _systems->_update ? _systems->_update->execute(parameters, *_components) : void();
