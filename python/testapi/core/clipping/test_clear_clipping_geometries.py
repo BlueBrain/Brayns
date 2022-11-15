@@ -25,20 +25,16 @@ from testapi.simple_test_case import SimpleTestCase
 class TestClearClippingGeometries(SimpleTestCase):
 
     def test_clear_clipping_geometries(self) -> None:
-        planes = [
-            brayns.ClipPlane(brayns.PlaneEquation(1, 2, 3, 4)),
-            brayns.ClipPlane(brayns.PlaneEquation(1, 1, 1, 1)),
+        models = [
+            self.add_sphere(),
+            self.add_light(),
+            self.add_clip_plane(),
+            self.add_clip_plane(),
         ]
-        tests = [
-            brayns.add_clipping_geometry(self.instance, plane)
-            for plane in planes
-        ]
-        refs = [
-            brayns.get_model(self.instance, model.id)
-            for model in tests
-        ]
-        self.assertEqual(tests, refs)
         brayns.clear_clipping_geometries(self.instance)
-        for model in tests:
-            with self.assertRaises(brayns.JsonRpcError):
-                brayns.get_model(self.instance, model.id)
+        brayns.get_model(self.instance, models[0].id)
+        brayns.get_model(self.instance, models[1].id)
+        with self.assertRaises(brayns.JsonRpcError):
+            brayns.get_model(self.instance, models[2].id)
+        with self.assertRaises(brayns.JsonRpcError):
+            brayns.get_model(self.instance, models[3].id)

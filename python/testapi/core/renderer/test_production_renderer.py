@@ -29,6 +29,6 @@ class TestProductionRenderer(RendererTestCase):
         renderer = brayns.ProductionRenderer(
             samples_per_pixel=2,
             max_ray_bounces=4,
-            background_color=brayns.Color4.red
+            background_color=brayns.Color4.red,
         )
         self.run_tests(renderer)

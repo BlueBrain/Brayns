@@ -23,15 +23,18 @@ import tempfile
 
 import brayns
 from testapi.image_validator import ImageValidator
-from testapi.quick_render import prepare_quick_snapshot
 from testapi.simple_test_case import SimpleTestCase
 
 
 class TestSnapshot(SimpleTestCase):
 
     @property
-    def ref(self) -> pathlib.Path:
-        return self.asset_folder / 'snapshot.png'
+    def ref_png(self) -> pathlib.Path:
+        return self.folder / 'snapshot.png'
+
+    @property
+    def ref_jpg(self) -> pathlib.Path:
+        return self.folder / 'snapshot.jpg'
 
     def test_save(self) -> None:
         snapshot = self._prepare_snapshot()
@@ -39,17 +42,17 @@ class TestSnapshot(SimpleTestCase):
             path = pathlib.Path(directory) / 'test_save.png'
             snapshot.save(self.instance, str(path))
             validator = ImageValidator()
-            validator.validate_file(path, self.ref)
+            validator.validate_file(path, self.ref_png)
 
     def test_save_task(self) -> None:
         snapshot = self._prepare_snapshot()
         with tempfile.TemporaryDirectory() as directory:
-            path = pathlib.Path(directory) / 'test_save_task.png'
+            path = pathlib.Path(directory) / 'test_save_task.jpg'
             task = snapshot.save_task(self.instance, str(path))
             self.assertTrue(list(task))
             task.wait_for_result()
             validator = ImageValidator()
-            validator.validate_file(path, self.ref)
+            validator.validate_file(path, self.ref_jpg)
 
     def test_save_remotely(self) -> None:
         snapshot = self._prepare_snapshot()
@@ -57,23 +60,23 @@ class TestSnapshot(SimpleTestCase):
             path = pathlib.Path(directory) / 'test_save_remotely.png'
             snapshot.save_remotely(self.instance, str(path))
             validator = ImageValidator()
-            validator.validate_file(path, self.ref)
+            validator.validate_file(path, self.ref_png)
 
     def test_save_remotely_task(self) -> None:
         snapshot = self._prepare_snapshot()
         with tempfile.TemporaryDirectory() as directory:
-            path = pathlib.Path(directory) / 'test_save_remotely_task.png'
+            path = pathlib.Path(directory) / 'test_save_remotely_task.jpg'
             task = snapshot.save_remotely_task(self.instance, str(path))
             self.assertTrue(list(task))
             task.wait_for_result()
             validator = ImageValidator()
-            validator.validate_file(path, self.ref)
+            validator.validate_file(path, self.ref_jpg)
 
     def test_download(self) -> None:
         snapshot = self._prepare_snapshot()
         test = snapshot.download(self.instance)
         validator = ImageValidator()
-        validator.validate_data(test, self.ref)
+        validator.validate_data(test, self.ref_png)
 
     def test_download_task(self) -> None:
         snapshot = self._prepare_snapshot()
@@ -81,21 +84,17 @@ class TestSnapshot(SimpleTestCase):
         self.assertTrue(list(task))
         test = task.wait_for_result()
         validator = ImageValidator()
-        validator.validate_data(test, self.ref)
+        validator.validate_data(test, self.ref_png)
 
     def test_cancel(self) -> None:
-        loader = brayns.BbpLoader()
-        loader.load_models(self.instance, self.bbp_circuit)
-        snapshot = brayns.Snapshot(
-            renderer=brayns.InteractiveRenderer(2000),
-        )
+        snapshot = self._prepare_snapshot()
+        snapshot.renderer = brayns.InteractiveRenderer(1000)
         task = snapshot.download_task(self.instance)
         task.cancel()
         with self.assertRaises(brayns.JsonRpcError):
             task.wait_for_result()
 
     def _prepare_snapshot(self) -> brayns.Snapshot:
-        path = self.asset_folder / 'cube.ply'
-        loader = brayns.MeshLoader()
-        loader.load_models(self.instance, str(path))
-        return prepare_quick_snapshot(self.instance)
+        self.add_light()
+        self.add_sphere()
+        return self.snapshot()

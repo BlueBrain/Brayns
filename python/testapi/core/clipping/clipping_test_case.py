@@ -18,15 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import pathlib
+
 import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestAddClippingGeometry(SimpleTestCase):
+class ClippingTestCase(SimpleTestCase):
 
-    def test_add_clipping_geometry(self) -> None:
-        equation = brayns.PlaneEquation(1, 2, 3, 4)
-        plane = brayns.ClipPlane(equation)
-        test = brayns.add_clipping_geometry(self.instance, plane)
-        ref = brayns.get_model(self.instance, test.id)
-        self.assertEqual(test, ref)
+    @property
+    def ref(self) -> pathlib.Path:
+        name = self.filename.replace('test_', '') + '.png'
+        return self.folder / name
+
+    def run_tests(self, geometry: brayns.ClippingGeometry) -> None:
+        brayns.add_clipping_geometry(self.instance, geometry)
+        self.add_sphere()
+        self.quick_validation(self.ref)

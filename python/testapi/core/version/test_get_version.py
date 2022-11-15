@@ -26,6 +26,4 @@ class TestGetVersion(SimpleTestCase):
 
     def test_get_version(self) -> None:
         version = brayns.get_version(self.instance)
-        test = version.tag
-        ref = brayns.__version__
-        self.assertEqual(test, ref)
+        self.assertEqual(version.tag, brayns.__version__)

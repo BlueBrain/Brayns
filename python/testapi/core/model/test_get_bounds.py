@@ -25,8 +25,6 @@ from testapi.simple_test_case import SimpleTestCase
 class TestGetBounds(SimpleTestCase):
 
     def test_get_bounds(self) -> None:
-        model = brayns.add_geometries(self.instance, [
-            brayns.Sphere(1)
-        ])
+        model = self.add_sphere()
         test = brayns.get_bounds(self.instance)
         self.assertEqual(test, model.bounds)

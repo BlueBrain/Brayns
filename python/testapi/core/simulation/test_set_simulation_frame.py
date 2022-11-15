@@ -22,9 +22,10 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestUpdateSimulation(SimpleTestCase):
+class TestSetSimulationFrame(SimpleTestCase):
 
-    def test_update_simulation(self) -> None:
-        brayns.set_simulation_frame(self.instance, 0)
+    def test_set_simulation_frame(self) -> None:
+        self.load_circuit(report=True)
+        brayns.set_simulation_frame(self.instance, 12)
         simulation = brayns.get_simulation(self.instance)
-        self.assertEqual(simulation.current_frame, 0)
+        self.assertEqual(simulation.current_frame, 12)

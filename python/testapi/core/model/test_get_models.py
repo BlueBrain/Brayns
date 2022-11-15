@@ -26,8 +26,9 @@ class TestGetModels(SimpleTestCase):
 
     def test_get_models(self) -> None:
         models = [
-            brayns.add_geometries(self.instance, [brayns.Sphere(i)])
-            for i in range(1, 4)
+            self.add_sphere(),
+            self.add_light(),
+            self.add_clip_plane(),
         ]
         test = brayns.get_models(self.instance)
         self.assertEqual(test, models)

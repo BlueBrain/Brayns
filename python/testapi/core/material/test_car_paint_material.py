@@ -27,6 +27,6 @@ class TestCarPaintMaterial(MaterialTestCase):
 
     def test_all(self) -> None:
         material = brayns.CarPaintMaterial(
-            flake_density=0.5
+            flake_density=0.5,
         )
         self.run_tests(material)

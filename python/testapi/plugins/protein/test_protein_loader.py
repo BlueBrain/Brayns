@@ -24,14 +24,13 @@ from testapi.simple_test_case import SimpleTestCase
 
 class TestProteinLoader(SimpleTestCase):
 
-    @property
-    def protein_file(self) -> str:
-        return str(self.asset_folder / '1bna.pdb')
-
     def test_load_models(self) -> None:
+        path = self.folder / '1bna.pdb'
         loader = brayns.ProteinLoader(
             color_scheme=brayns.ProteinColorScheme.BY_ID,
-            radius_multiplier=10,
+            radius_multiplier=1,
         )
-        models = loader.load_models(self.instance, self.protein_file)
+        models = loader.load_models(self.instance, str(path))
         self.assertEqual(len(models), 1)
+        ref = self.folder / 'protein.png'
+        self.quick_validation(ref)

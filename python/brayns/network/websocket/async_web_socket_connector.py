@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import ssl
 from dataclasses import dataclass
 
@@ -56,6 +57,8 @@ class AsyncWebSocketConnector:
         except ssl.SSLError as e:
             raise InvalidServerCertificateError(str(e))
         except OSError as e:
+            raise ServiceUnavailableError(str(e))
+        except asyncio.TimeoutError as e:
             raise ServiceUnavailableError(str(e))
 
 

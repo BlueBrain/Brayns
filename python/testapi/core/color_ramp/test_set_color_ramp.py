@@ -25,22 +25,22 @@ from testapi.simple_test_case import SimpleTestCase
 class TestSetColorRamp(SimpleTestCase):
 
     def test_set_color_ramp(self) -> None:
-        model = self._load_circuit()
+        model = self.load_circuit(report=True)
         ramp = brayns.ColorRamp(
-            brayns.ValueRange(20, 30),
-            colors=[
-                brayns.Color4.red,
-                brayns.Color4.green,
-                brayns.Color4.blue
-            ],
+            brayns.ValueRange(-100, 0),
+            colors=[brayns.Color4.red, brayns.Color4.green],
         )
         brayns.set_color_ramp(self.instance, model.id, ramp)
+        self._check_get(model, ramp)
+        brayns.enable_simulation(self.instance, model.id, True)
+        self._check_render()
+
+    def _check_get(self, model: brayns.Model, ramp: brayns.ColorRamp) -> None:
         test = brayns.get_color_ramp(self.instance, model.id)
         self.assertEqual(test, ramp)
 
-    def _load_circuit(self) -> brayns.Model:
-        loader = brayns.BbpLoader(
-            report=brayns.BbpReport.compartment('somas')
-        )
-        models = loader.load_models(self.instance, self.bbp_circuit)
-        return models[0]
+    def _check_render(self) -> None:
+        ref = self.folder / 'frame_0.png'
+        self.quick_validation(ref, 0)
+        ref = self.folder / 'frame_99.png'
+        self.quick_validation(ref, 99)

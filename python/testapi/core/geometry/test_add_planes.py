@@ -19,20 +19,30 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+
+from .geometry_test_case import GeometryTestCase
 
 
-class TestAddPlanes(SimpleTestCase):
+class TestAddPlanes(GeometryTestCase):
 
-    def test_add_planes(self) -> None:
-        test = brayns.add_geometries(self.instance, [
+    @property
+    def geometries(self) -> list[brayns.Geometry]:
+        return [
             brayns.Plane(
-                brayns.PlaneEquation(1, 2, 3)
+                brayns.PlaneEquation(1, 1, 1, 0),
             ).with_color(brayns.Color4.red),
-            brayns.Plane(brayns.PlaneEquation(4, 5, 6, 7))
-        ])
-        ref = brayns.get_model(self.instance, test.id)
-        self.assertEqual(test, ref)
-        self.assertEqual(test.info, {})
-        self.assertEqual(test.visible, True)
-        self.assertEqual(test.transform, brayns.Transform.identity)
+            brayns.Plane(
+                brayns.PlaneEquation(0, 0, 1, 0.25),
+            ).with_color(brayns.Color4.blue),
+        ]
+
+    def get_default_camera(self) -> brayns.Camera:
+        return brayns.Camera(
+            view=brayns.View(
+                position=brayns.Axis.z,
+                target=brayns.Vector3.zero,
+            )
+        )
+
+    def test_all(self) -> None:
+        self.run_tests(self.geometries)
