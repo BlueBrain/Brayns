@@ -23,7 +23,7 @@ import brayns
 from .geometry_test_case import GeometryTestCase
 
 
-class TestAddPlanes(GeometryTestCase):
+class TestAddSpheres(GeometryTestCase):
 
     @property
     def geometries(self) -> list[brayns.Geometry]:

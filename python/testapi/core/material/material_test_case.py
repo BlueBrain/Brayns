@@ -30,6 +30,9 @@ class MaterialTestCase(SimpleTestCase):
     def renderer(self) -> brayns.Renderer:
         return brayns.ProductionRenderer(32)
 
+    def add_light(self) -> None:
+        pass
+
     @property
     def ref(self) -> pathlib.Path:
         name = self.filename.replace('test_', '')
@@ -42,7 +45,7 @@ class MaterialTestCase(SimpleTestCase):
         brayns.set_material(self.instance, model.id, material)
         self._check_name(material, model)
         self._check_get(material, model)
-        self.quick_validation(self.ref)
+        self._check_render()
 
     def _check_name(self, material: brayns.Material, model: brayns.Model) -> None:
         name = brayns.get_material_name(self.instance, model.id)
@@ -51,3 +54,13 @@ class MaterialTestCase(SimpleTestCase):
     def _check_get(self, material: brayns.Material, model: brayns.Model) -> None:
         ref = brayns.get_material(self.instance, model.id, type(material))
         self.assertEqual(material, ref)
+
+    def _check_render(self) -> None:
+        ambient = brayns.AmbientLight(0.1)
+        brayns.add_light(self.instance, ambient)
+        directional = brayns.DirectionalLight(
+            intensity=10,
+            direction=brayns.Vector3(0, -1, -1).normalized,
+        )
+        brayns.add_light(self.instance, directional)
+        self.quick_validation(self.ref)
