@@ -20,7 +20,6 @@
 
 from __future__ import annotations
 
-import logging
 import pathlib
 
 import brayns
@@ -64,6 +63,8 @@ class TestConnector(ApiTestCase):
     def test_multiple_clients(self) -> None:
         with self._start_service():
             instances = [self._connect() for _ in range(3)]
+            with self.assertRaises(brayns.ServiceUnavailableError):
+                self._connect(max_attempts=1)
             for instance in instances:
                 instance.disconnect()
 
