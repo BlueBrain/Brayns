@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import time
+
 from brayns.network import Connector
 
 from .manager import Manager
@@ -37,6 +39,8 @@ def start(service: Service, connector: Connector) -> Manager:
     :rtype: Manager
     """
     process = service.start()
+    time.sleep(10)
+    print(process.logs)
     try:
         instance = connector.connect()
     except:
