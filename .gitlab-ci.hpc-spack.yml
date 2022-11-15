@@ -98,5 +98,7 @@ brayns-python-testapi:
     - export BRAYNS_TEST_FFMPEG=ffmpeg
     - module load unstable
     - module load ffmpeg
+    - ${SPACK_BUILD_DIR}/bin/braynsService -h
+    - ${SPACK_BUILD_DIR}/bin/braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer
     - python -m unittest discover -v --locals -s testapi -p test_*.py
     - deactivate
