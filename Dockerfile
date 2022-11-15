@@ -165,7 +165,6 @@ RUN cd ${BRAYNS_SRC} \
    && CMAKE_PREFIX_PATH=${DIST_PATH}:${DIST_PATH}/lib/cmake/libwebsockets \
    cmake ..  \
    -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
-   -DBRAYNS_CIRCUITINFO_ENABLED=ON \
    -DBRAYNS_DTI_ENABLED=ON \
    -DBRAYNS_ATLASEXPLORER_ENABLED=ON \
    -DBRAYNS_CYLINDRICCAMERA_ENABLED=ON \
@@ -218,4 +217,4 @@ EXPOSE 8200
 # See https://docs.docker.com/engine/reference/run/#entrypoint-default-command-to-execute-at-runtime
 # for more docs
 ENTRYPOINT ["braynsService"]
-CMD ["--uri", "0.0.0.0:8200", "--plugin", "braynsCircuitExplorer", "--plugin", "braynsCircuitInfo"]
+CMD ["--uri", "0.0.0.0:8200", "--plugin", "braynsCircuitExplorer"]

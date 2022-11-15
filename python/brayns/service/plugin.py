@@ -33,7 +33,6 @@ class Plugin(Enum):
     CIRCUIT_EXPLORER = 'braynsCircuitExplorer'
     ATLAS_EXPLORER = 'braynsAtlasExplorer'
     CYLINDRIC_CAMERA = 'braynsCylindricCamera'
-    CIRCUIT_INFO = 'braynsCircuitInfo'
     DTI = 'braynsDTI'
     MOLECULE_EXPLORER = 'braynsMoleculeExplorer'
 

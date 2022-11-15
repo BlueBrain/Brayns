@@ -7,7 +7,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 # Brion is needed for 3 plugin
-if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED OR BRAYNS_DTI_ENABLED)
+if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED)
     find_package(HDF5 REQUIRED)
     find_package(Brion QUIET)
 endif()
@@ -39,10 +39,6 @@ endif()
 
 if(BRAYNS_DTI_ENABLED)
     add_subdirectory(DTI)
-endif()
-
-if(BRAYNS_CIRCUITINFO_ENABLED)
-    add_subdirectory(CircuitInfo)
 endif()
 
 if(BRAYNS_ATLASEXPLORER_ENABLED)

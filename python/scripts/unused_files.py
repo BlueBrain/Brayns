@@ -6,8 +6,8 @@ INCLUDE = re.compile(r'\s*#\s*include\s*[<"](.*?)[>"]')
 DYNAMIC_PLUGINS = {
     'AtlasExplorerPlugin',
     'CircuitExplorerPlugin',
-    'CircuitInfoPlugin',
-    'DTIPlugin'
+    'DTIPlugin',
+    'MoleculeExplorerPlugin',
 }
 
 CURRENT = pathlib.Path(__file__).parent

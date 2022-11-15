@@ -13,7 +13,6 @@ Brayns counts with a main application for its usage:
 Brayns also comes with some already-made plugins:
 
 * **CircuitExplorer**: The main plugin used at BBP. Allows for neuronal circuit visualization and simulation rendering.
-* **CircuitInfo (Deprecated)**: A plugin which accepts queries to extract information from neuronal circuits.
 * **DTI**: A diffuse-tensor imaging visualization plugin.
 * **AtlasExplorer**: A plugin capable of interpreting and render NRRD volumes.
 * **CylindricCamera**: A plugin that adds a cylindric camera projection for inmersive environments.
@@ -71,7 +70,6 @@ The following cmake options (shown with their default value) can be used during 
 * **BRAYNS_TESTS_ENABLED** (Default ON) - Activate unit tests
 * **BRAYNS_SERVICE_ENABLED** (Default ON) - Activate braynsService app
 * **BRAYNS_CIRCUITEXPLORER_ENABLED** (Default ON) - Activate CircuitExplorer plugin
-* **BRAYNS_CIRCUITINFO_ENABLED** (Default OFF) - Activate CircuitInfo plugin
 * **BRAYNS_DTI_ENABLED** (Default OFF) - Activate Diffusion-Tensor Imaging plugin
 * **BRAYNS_ATLASEXPLORER_ENABLED** - (Default OFF) Activate AtlasExplorer plugin
 * **BRAYNS_CYLINDIRCCAMERA_ENABLED** - (Default OFF) Activate Cylindric Camera projection plugin
@@ -92,7 +90,7 @@ The ***--uri*** parameter allows to specify an address and a port to bind to. In
 
 This command will launch the braynsService app with only core functionality. To also add the functionality of any plugin, the ***--plugin*** option can be used to load plugins:
 
-    $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsCircuitInfo
+    $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsMoleculeExplorer
 
 The name that must be used when specifying a plugin will depend on the name of the library of the plugin (stripping the extension **.so** from it)
 

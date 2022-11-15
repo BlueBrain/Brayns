@@ -107,7 +107,7 @@ endif()
 # =============================================================================
 # Brion
 # =============================================================================
-if((BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_CIRCUITINFO_ENABLED OR BRAYNS_DTI_ENABLED) AND NOT Brion_FOUND)
+if((BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED) AND NOT Brion_FOUND)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Brion")
         message(STATUS "Downloading Brion from submodules")
         FetchContent_Declare(
