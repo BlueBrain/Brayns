@@ -26,8 +26,6 @@
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/network/common/ExtractModel.h>
 
-#include <components/NeuronSectionList.h>
-
 namespace
 {
 class CircuitThicknessModifier
@@ -46,10 +44,6 @@ public:
         auto &instance = brayns::ExtractModel::fromId(models, modelId);
         auto &model = instance.getModel();
         auto &components = model.getComponents();
-        if (!components.has<NeuronSectionList>())
-        {
-            throw brayns::JsonRpcException("The model is not a morphological neuron circuit");
-        }
 
         if (_setThickness(components.get<brayns::Geometries>(), radiusMultiplier))
         {
