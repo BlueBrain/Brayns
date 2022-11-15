@@ -118,3 +118,14 @@ class SimpleTestCase(ApiTestCase):
         models = loader.load_models(self.instance, self.bbp_circuit)
         self.assertEqual(len(models), 1)
         return models[0]
+
+    def load_neurons(self, gids: list[int]) -> brayns.Model:
+        loader = brayns.BbpLoader(
+            cells=brayns.BbpCells.from_gids(gids),
+            morphology=brayns.Morphology(
+                load_dendrites=True,
+            ),
+        )
+        models = loader.load_models(self.instance, self.bbp_circuit)
+        self.assertEqual(len(models), 1)
+        return models[0]
