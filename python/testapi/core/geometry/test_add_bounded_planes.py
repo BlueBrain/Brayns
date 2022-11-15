@@ -19,34 +19,37 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+
+from .geometry_test_case import GeometryTestCase
 
 
-class TestAddBoundedPlanes(SimpleTestCase):
+class TestAddBoundedPlanes(GeometryTestCase):
 
-    def test_add_bounded_planes(self) -> None:
-        test = brayns.add_geometries(self.instance, [
-            brayns.BoundedPlane(
-                brayns.PlaneEquation(0, 0, 1, 0),
-                bounds=brayns.Bounds(
-                    min=-brayns.Vector3.one,
-                    max=brayns.Vector3.one
-                )
-            ).with_color(brayns.Color4.red),
+    @property
+    def geometries(self) -> list[brayns.Geometry]:
+        return [
             brayns.BoundedPlane(
                 brayns.PlaneEquation(0, 0, 1, 0.5),
                 bounds=brayns.Bounds(
+                    min=-brayns.Vector3.one,
+                    max=brayns.Vector3.one,
+                )
+            ).with_color(brayns.Color4.red),
+            brayns.BoundedPlane(
+                brayns.PlaneEquation(0, 0, 1, 0.0),
+                bounds=brayns.Bounds(
                     min=-2 * brayns.Vector3.one,
-                    max=brayns.Vector3.one
+                    max=brayns.Vector3.one,
                 )
             ).with_color(brayns.Color4.blue),
-        ])
-        ref = brayns.get_model(self.instance, test.id)
-        self.assertEqual(test, ref)
-        self.assertEqual(test.bounds, brayns.Bounds(
+        ]
+
+    @property
+    def bounds(self) -> brayns.Bounds:
+        return brayns.Bounds(
             -2 * brayns.Vector3.one,
-            brayns.Vector3.one
-        ))
-        self.assertEqual(test.info, {})
-        self.assertEqual(test.visible, True)
-        self.assertEqual(test.transform, brayns.Transform.identity)
+            brayns.Vector3.one,
+        )
+
+    def test_all(self) -> None:
+        self.run_tests(self.geometries, self.bounds)

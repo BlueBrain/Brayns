@@ -50,6 +50,8 @@ class Service:
     :type uri: str
     :param ssl_context: SSL context if secure, defaults to None.
     :type ssl_context: SslServerContext | None, optional
+    :param max_clients: Max simultaneous connections authorized, defaults to 1.
+    :type max_clients: int, optional
     :param log_level: Process log level, defaults to LogLevel.WARN.
     :type log_level: LogLevel, optional
     :param plugins: Plugins to load, defaults to all built-in plugins.
@@ -62,6 +64,7 @@ class Service:
 
     uri: str
     ssl_context: SslServerContext | None = None
+    max_clients: int = 1
     log_level: LogLevel = LogLevel.WARN
     plugins: list[str] = field(default_factory=lambda: Plugin.all)
     executable: str = 'braynsService'
@@ -77,6 +80,8 @@ class Service:
             self.executable,
             '--uri',
             self.uri,
+            '--max-clients',
+            str(self.max_clients),
             '--log-level',
             self.log_level.value,
             *_get_plugins_args(self.plugins),

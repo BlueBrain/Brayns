@@ -25,12 +25,20 @@ from testapi.simple_test_case import SimpleTestCase
 class TestRemoveModels(SimpleTestCase):
 
     def test_remove_models(self) -> None:
-        model1 = brayns.add_geometries(self.instance, [brayns.Sphere(1)])
-        model2 = brayns.add_geometries(self.instance, [brayns.Sphere(2)])
-        model3 = brayns.add_geometries(self.instance, [brayns.Sphere(2)])
-        brayns.remove_models(self.instance, [model2.id, model3.id])
-        brayns.get_model(self.instance, model1.id)
-        with self.assertRaises(brayns.JsonRpcError):
-            brayns.get_model(self.instance, model2.id)
-        with self.assertRaises(brayns.JsonRpcError):
-            brayns.get_model(self.instance, model3.id)
+        models = [
+            self.add_sphere(),
+            self.add_sphere(),
+            self.add_light(),
+            self.add_light(),
+            self.add_clip_plane(),
+            self.add_clip_plane(),
+        ]
+        brayns.remove_models(self.instance, [
+            model.id
+            for model in models[::2]
+        ])
+        for model in models[::2]:
+            with self.assertRaises(brayns.JsonRpcError):
+                brayns.get_model(self.instance, model.id)
+        for model in models[1::2]:
+            brayns.get_model(self.instance, model.id)

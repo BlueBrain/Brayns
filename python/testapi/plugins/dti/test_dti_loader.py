@@ -31,3 +31,5 @@ class TestDtiLoader(SimpleTestCase):
         )
         models = loader.load_models(self.instance, self.dti_file)
         self.assertEqual(len(models), 1)
+        ref = self.folder / 'dti.png'
+        self.quick_validation(ref)

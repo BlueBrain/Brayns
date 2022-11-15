@@ -25,5 +25,9 @@ from testapi.simple_test_case import SimpleTestCase
 class TestGetEntrypoints(SimpleTestCase):
 
     def test_get_entrypoints(self) -> None:
+        methods = brayns.get_methods(self.instance)
         entrypoints = brayns.get_entrypoints(self.instance)
-        self.assertTrue(entrypoints)
+        self.assertEqual(methods, [
+            entrypoint.method
+            for entrypoint in entrypoints
+        ])

@@ -26,7 +26,7 @@ from .mock_simulation import MockSimulation
 class TestSimulation(unittest.TestCase):
 
     def test_frame_count(self) -> None:
-        self.assertEqual(MockSimulation.simulation.frame_count, 10)
+        self.assertEqual(MockSimulation.simulation.frame_count, 11)
 
     def test_duration(self) -> None:
         self.assertEqual(MockSimulation.simulation.duration, 1)

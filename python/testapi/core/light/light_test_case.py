@@ -18,29 +18,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import pathlib
+
 import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
 class LightTestCase(SimpleTestCase):
 
+    def add_light(self) -> None:
+        pass
+
+    @property
+    def ref(self) -> pathlib.Path:
+        name = self.filename.replace('test_', '') + '.png'
+        return self.folder / name
+
     def run_tests(self, light: brayns.Light) -> None:
-        tests = [
-            brayns.add_light(self.instance, light)
-            for _ in range(3)
-        ]
-        refs = [
-            brayns.get_model(self.instance, model.id)
-            for model in tests
-        ]
-        self.assertEqual(tests, refs)
-        remaining = tests[0].id
-        removed = [model.id for model in tests[1:]]
-        brayns.remove_models(self.instance, removed)
-        for id in removed:
-            with self.assertRaises(brayns.JsonRpcError):
-                brayns.get_model(self.instance, id)
-        brayns.get_model(self.instance, remaining)
-        brayns.clear_lights(self.instance)
-        with self.assertRaises(brayns.JsonRpcError):
-            brayns.get_model(self.instance, remaining)
+        model = brayns.add_light(self.instance, light)
+        self.assertTrue(model.visible)
+        self.assertEqual(model.transform, brayns.Transform.identity)
+        self.add_sphere()
+        self.quick_validation(self.ref)

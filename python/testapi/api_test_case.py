@@ -18,12 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import inspect
 import os
 import pathlib
 import unittest
 
 
 class ApiTestCase(unittest.TestCase):
+
+    @property
+    def log_level(self) -> str:
+        return os.environ.get('BRAYNS_TEST_LOG_LEVEL', 'WARN')
 
     @property
     def executable(self) -> str:
@@ -55,6 +60,14 @@ class ApiTestCase(unittest.TestCase):
         return os.environ.get('BRAYNS_TEST_FFMPEG', 'ffmpeg')
 
     @property
-    def asset_folder(self) -> pathlib.Path:
-        testapi = pathlib.Path(__file__).parent
-        return testapi / 'assets'
+    def path(self) -> pathlib.Path:
+        filename = inspect.getfile(type(self))
+        return pathlib.Path(filename)
+
+    @property
+    def folder(self) -> pathlib.Path:
+        return self.path.parent
+
+    @property
+    def filename(self) -> str:
+        return self.path.stem

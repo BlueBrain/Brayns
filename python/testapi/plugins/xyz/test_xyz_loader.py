@@ -24,11 +24,11 @@ from testapi.simple_test_case import SimpleTestCase
 
 class TestXyzLoader(SimpleTestCase):
 
-    @property
-    def xyz_file(self) -> str:
-        return str(self.asset_folder / 'monkey.xyz')
-
     def test_load_models(self) -> None:
+        path = self.folder / 'monkey.xyz'
         loader = brayns.XyzLoader()
-        models = loader.load_models(self.instance, self.xyz_file)
+        models = loader.load_models(self.instance, str(path))
         self.assertEqual(len(models), 1)
+        brayns.set_model_color(self.instance, models[0].id, brayns.Color4.red)
+        ref = self.folder / 'xyz.png'
+        self.quick_validation(ref)

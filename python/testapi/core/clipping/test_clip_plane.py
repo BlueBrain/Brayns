@@ -19,11 +19,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.simple_test_case import SimpleTestCase
+
+from .clipping_test_case import ClippingTestCase
 
 
-class TestGetMethods(SimpleTestCase):
+class TestClipPlane(ClippingTestCase):
 
-    def test_get_methods(self) -> None:
-        methods = brayns.get_methods(self.instance)
-        self.assertTrue(methods)
+    def test_all(self) -> None:
+        plane = brayns.PlaneEquation(0, 1, 0)
+        self.run_tests(brayns.ClipPlane(plane))

@@ -25,11 +25,6 @@ from testapi.simple_test_case import SimpleTestCase
 class TestGetCircuitIds(SimpleTestCase):
 
     def test_get_circuit_ids(self) -> None:
-        id = self._load_model()
-        ids = brayns.get_circuit_ids(self.instance, id)
+        model = self.load_circuit()
+        ids = brayns.get_circuit_ids(self.instance, model.id)
         self.assertEqual(ids, list(range(1, 1001)))
-
-    def _load_model(self) -> int:
-        loader = brayns.BbpLoader()
-        models = loader.load_models(self.instance, self.bbp_circuit)
-        return models[0].id
