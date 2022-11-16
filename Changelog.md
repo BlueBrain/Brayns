@@ -4,6 +4,7 @@
 
 **Implemented enhancements:**
 
+- CircuitInfo plugin removed [\#1116](https://github.com/BlueBrain/Brayns/pull/1116)
 - XYZ and PDB support moved to Molecule Explorer plugin [\#1106](https://github.com/BlueBrain/Brayns/pull/1106)
 - Global model coloring system [\#1105](https://github.com/BlueBrain/Brayns/pull/1105)
 - Tested SONATA support [\#1092](https://github.com/BlueBrain/Brayns/pull/1092)
