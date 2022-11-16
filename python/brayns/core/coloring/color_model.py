@@ -28,10 +28,14 @@ def color_model(instance: Instance, model_id: int, method: str, colors: dict[str
     This function needs a method name and a mapping to get a color from a
     method value.
 
-    For example to color a circuit by GID the mapping can be {
-        '1': brayns.Color4.red,
-        '2': brayns.Color4.blue,
-    }.
+    For example to color a circuit by GID the mapping can be:
+
+    .. code-block:: python
+
+        colors = {
+            '1': brayns.Color4.red,
+            '2': brayns.Color4.blue,
+        }
 
     Where 1 and 2 are the method values (here GIDs) mapped to the color that
     must be applied to them.

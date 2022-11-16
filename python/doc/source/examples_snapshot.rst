@@ -142,7 +142,7 @@ Here we add a directional light oriented from the camera to the target. The mode
 returned can be used to remove or transform it, but in this example we don't use it.
 
 Lights can be selectively removed with ``remove_models``, or cleared using
-``clear_lights``. They can also be updated with ``update_model`.`
+``clear_lights``. They can also be updated with ``update_model``.
 
 Snapshot
 --------
