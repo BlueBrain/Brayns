@@ -98,7 +98,7 @@ This part is optional as Brayns build a default color ramp for circuits.
     # From 0% to 50% alpha is 0 (transparent). 
     # From 50% to 100% alpha is mixed from 0 to 1.
     # Mixing is done using a linear interpolation.
-    # Here at 50% alpha is 0 and at 100% it is 1.
+    # Here at 50%, alpha is 0 and at 100%, it is 1.
     curve = brayns.OpacityCurve([
         brayns.ControlPoint(0.0, 0.0),
         brayns.ControlPoint(0.5, 0.0),
@@ -126,7 +126,7 @@ from the name (%d C-style printf integer formatting).
     folder = pathlib.Path('frames')
 
     # Create it if not exists.
-    folder.mkdir(exist_ok=True)
+    folder.mkdir(parents=True, exist_ok=True)
 
     # Naming pattern: image-1.png, image-2.png, ...
     filename = 'image-%d.png'

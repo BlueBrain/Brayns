@@ -4,16 +4,19 @@ Brayns API
 Introduction
 ------------
 
-Brayns provides a JSON-RPC API accessible through a websocket to interact with a
-running instance of braynsService (renderer backend).
+Brayns is a ray tracing based renderer written in C++ that can be configured to
+run a websocket server. This binary executable is called ``braynsService`` and
+can perform various renderings.
 
-For convenience, it also provides a Python package to wrap the websocket
-communication with classes and functions to hide low level JSON-RPC messages.
+This instance can be monitored by a websocket client using a JSON-RPC API.
+
+For convenience, a Python package is provided to wrap the websocket
+communication with classes and functions and hide low level JSON-RPC messages.
 
 This API (websocket or Python) has the following features:
 
 - Load models into brayns (circuits, DTIs, meshes, volumes, ...).
-- Load and/or attach simulations (compartment and spike reports).
+- Load and/or attach simulations to models (compartment and spike reports).
 - Modify their visual appearance (color, simulation color ramp, ...).
 - Tune the renderers to achieve different visual results.
 - Render images and simulation videos and save it to disk.

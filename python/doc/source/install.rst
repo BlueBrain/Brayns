@@ -40,7 +40,7 @@ paths with the one your environment folder):
     # Use python3.9 instead of python if system version is older
     $ python -m venv mypythonvenv
 
-Now it can be activated with:
+Now the environment can be activated with:
 
 .. code-block:: console
 
@@ -61,14 +61,14 @@ Python package installation
 From Python Pacakge Index (PyPI)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The easiest way is to access the latest release is the following:
+The easiest way to access the latest release is the following:
 
 .. code-block:: console
 
     $ pip install brayns
 
-From source
-~~~~~~~~~~~
+From source (github repository)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For development or to get a more recent version than the one released on PyPI,
 the package can also be installed from the sources on the github repository using:
@@ -93,20 +93,30 @@ On BB5
 ~~~~~~
 
 On BB5 the Python package can be installed like on a local machine with a
-virtual environment but it is also available on spack without any installation.
-It can be activated as follows:
+virtual environment (mandatory this time) but the python spack module is
+required.
 
 .. code-block:: console
 
     # Allocate a node, can also be done with sbatch
     $ salloc --account=<projXXX> -p interactive -t 8:00:00 --exclusive --constraint=cpu -c 72 --mem 0
 
-    # Load brayns module with Python
+    # Load latest available python module
     $ module load unstable
     $ module load python
+
+    # Setup Python venv (like before)
+    $ python -m venv mypythonvenv
+    $ source mypythonvenv/bin/activate
+    $ pip install brayns
+
+    # You can access braynsService by loading this module
     $ module load brayns/latest
 
-Now brayns package should be available in the Python system version.
+    # Check braynsService is available.
+    $ braynsService -h
+
+Now brayns package should be available with the Python venv activated.
 
 The renderer backend (braynsService) should also be available in the current
 path once brayns module is loaded. Otherwise on a local machine, it must be

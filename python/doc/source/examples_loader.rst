@@ -64,10 +64,11 @@ always create one single model per function call.
         brayns.Sphere(0.2, center=brayns.Vector3.one),
     ])
 
-Models
-------
+Circuits
+--------
 
-Now we can use the loader to load models from a file and retreive them.
+Now we can use the loader to load models (here circuits) from a file and
+retreive them.
 
 .. code-block:: python
 

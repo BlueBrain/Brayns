@@ -51,7 +51,9 @@ Here is how to start brayns with the CircuitExplorer plugin:
    Brayns, by default, does not understand science-specific models. These
    specific functionalities are loaded using plugins. The ``CircuitExplorer``
    plugin is the main plugin for neuroscientific visualization that you will
-   want to load. For further information on plugins, check :ref:`plugins-label`.
+   want to load.
+
+For further information on plugins, check :ref:`plugins-label`.
 
 Log level
 ---------

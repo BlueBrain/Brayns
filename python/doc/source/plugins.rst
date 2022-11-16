@@ -10,8 +10,8 @@ Brayns architecture allows it to be used for almost any kind of visualization
 purpose. For this reason, the core of Brayns knows nothing about any
 science-specific modeling.
 
-To load specific functionality, the Brayns backend service must be launched with
-plugins specified in the command line, which will add extra functionality.
+To load specific functionalities, the Brayns backend service must be launched with
+plugins (using the command line), which will add extra features.
 
 Plugins command line arguments can be chained to load multiple plugins. Plugin
 names are the name of the dynamic libraries (.so) implementing it.
@@ -21,7 +21,7 @@ names are the name of the dynamic libraries (.so) implementing it.
     $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsDTI
 
 Here we load plugins by linking dynamically against braynsCircuitExplorer.so
-and braynsDTI.so.
+and braynsDTI.so (always available).
 
 Brayns comes with built-in plugins that are always available and can be loaded
 at runtime.
@@ -84,3 +84,13 @@ the distorsion of curved screen (i.e. OpenDeck).
 .. code-block:: console
 
     --plugin braynsCylindricCamera
+
+Molecule Explorer plugin
+------------------------
+
+This is a plugin to add support for loading XYZ (point clouds) and PDB
+(protein) files.
+
+.. code-block:: console
+
+    --plugin braynsMoleculeExplorer
