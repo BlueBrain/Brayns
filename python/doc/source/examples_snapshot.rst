@@ -69,6 +69,9 @@ camera focusing on a given target.
     # Create a camera using the controller.
     camera = controller.camera
 
+Here we use the resolution aspect ratio to make sure the viewport takes
+also the model width into account.
+
 The advantage of passing a translation and a rotation to the controller instead
 of moving the camera manually after its creation is that the camera distance
 computation can take the rotation into account to make sure the entire target
@@ -85,9 +88,16 @@ relative to the front view (X right, Y up and Z toward the observer).
 
     .. code-block:: python
 
+        # Create controller.
         controller = brayns.CameraController(target)
+
+        # Compute the camera settings.
         front_camera = controller.camera
+
+        # Rotate the camera.
         controller.rotation = brayns.CameraRotation.left
+
+        # Compute different camera settings.
         left_camera = controller.camera
 
 Renderer
@@ -104,9 +114,8 @@ another one for slow and precise rendering (production).
 
     renderer = brayns.ProductionRenderer()
 
-The renderer can also be used to configure the number of samples per pixel
-(antialiasing) and the ray bounces (reflection of light from a non emissive
-surface to another).
+The renderer can also be used to configure the number of samples per pixel and
+the max ray bounces (reflection of light from a non emissive surface to another).
 
 Light
 -----
@@ -116,18 +125,24 @@ to see what we render.
 
 .. code-block:: python
 
-    light = brayns.DirectionalLight(
-        intensity=4,
+    # Some directional light for shadows.
+    directional = brayns.DirectionalLight(
+        intensity=10,
         direction=camera.direction,
     )
 
-    model = brayns.add_light(instance, light)
+    # Lights are models.
+    light_model = brayns.add_light(instance, directional)
+
+    # Some ambient light so the shadows are not completely black.
+    ambient = brayns.AmbientLight(0.5)
+    brayns.add_light(instance, ambient)
 
 Here we add a directional light oriented from the camera to the target. The model
 returned can be used to remove or transform it, but in this example we don't use it.
 
 Lights can be selectively removed with ``remove_models``, or cleared using
-``clear_lights``.
+``clear_lights``. They can also be updated with ``update_model``.
 
 Snapshot
 --------

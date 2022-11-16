@@ -4,16 +4,17 @@ Using Brayns Python API
 =======================
 
 After launching the Brayns backend service, we have a renderer backend instance
-running a websocket server and we can monitor it using the web API. The Python
-package just wraps the websocket client and the JSON-RPC messages into a more
-high-level API with classes and functions.
+running a websocket server and we can monitor it using the web API.
+
+The Python package just wraps the websocket client and the JSON-RPC messages
+into a more high-level API with classes and functions.
 
 In the following section, we will assume the backend instance was started like
 this:
 
 .. code-block:: console
 
-    braynsService --uri 0.0.0.0:5000 # other arguments
+    braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer
 
 The port 5000 is used in this documentation but if you want to use another one,
 just make sure it is available on the server machine and that you use this one

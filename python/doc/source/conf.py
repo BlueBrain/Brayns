@@ -11,7 +11,14 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import brayns
+import pathlib
+import sys
+
+SOURCE = pathlib.Path(__file__).parent
+DOC = SOURCE.parent
+PYTHON = DOC.parent
+
+sys.path.insert(0, str(PYTHON))
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -28,9 +35,8 @@ needs_sphinx = '2.0'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx-jsonschema',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.autosummary',
 ]
-
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = []
@@ -52,7 +58,7 @@ project = u'Brayns'
 # built documents.
 #
 # The short X.Y version.
-version = brayns.__version__
+version = '2.0.0'
 # The full version, including alpha/beta/rc tags.
 release = version
 

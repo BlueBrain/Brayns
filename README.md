@@ -16,6 +16,7 @@ Brayns also comes with some already-made plugins:
 * **DTI**: A diffuse-tensor imaging visualization plugin.
 * **AtlasExplorer**: A plugin capable of interpreting and render NRRD volumes.
 * **CylindricCamera**: A plugin that adds a cylindric camera projection for inmersive environments.
+* **MoleculeExplorer**: A plugin that adds support for XYZ and PDB files.
 
 ## Building
 
@@ -109,6 +110,12 @@ To run it, simply execute the following command:
     $ docker run -ti --rm -p 5000:5000 bluebrain/brayns --uri 0.0.0.0:5000
 
 Additional parameters, such as ***--plugin***, can be specified in a similar fashion as in the **braynsService** application.
+
+## Python and JSON-RPC API
+
+A running instance of braynsService can be monitored using ***brayns*** Python package or a websocket client and the JSON-RPC API.
+
+For more details about the client APIs, see the [python client doc](python/README.md).
 
 ## Known Bugs
 

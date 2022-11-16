@@ -12,8 +12,8 @@ remote control on a running braynsService instance.
     * [API](#api)
 * [Documentation](#documentation)
 
-### Installation
-----------------
+## Installation
+---------------
 
 You can install this package from [PyPI](https://pypi.org/):
 
@@ -30,10 +30,10 @@ python setup.py sdist
 pip install dist/* # Output in dist folder
 ```
 
-### Usage
----------
+## Usage
+--------
 
-#### Connection
+### Connection
 
 Connect to a renderer backend instance:
 
@@ -46,7 +46,7 @@ with connector.connect() as instance:
     print(brayns.get_version(instance))
 ```
 
-#### Raw requests
+### Raw requests
 
 Raw JSON-RPC requests can be sent using the instance:
 
@@ -56,7 +56,7 @@ result = instance.request('schema', {'endpoint': 'get-version'})
 
 It will throw a brayns.RequestError if an error occurs.
 
-#### API
+### API
 
 As raw requests can be tedious, a higher level API is also provided.
 
@@ -64,7 +64,7 @@ As raw requests can be tedious, a higher level API is also provided.
 models = brayns.get_models(instance)
 ```
 
-### Documentation
+## Documentation
 -----------------
 
 A more complete documentation is available

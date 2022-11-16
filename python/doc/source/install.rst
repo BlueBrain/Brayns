@@ -37,10 +37,10 @@ paths with the one your environment folder):
 
 .. code-block:: console
 
-    # Use python3.9 instead of python if system version is older
+    # Use python3.9 instead of python if system version is older.
     $ python -m venv mypythonvenv
 
-Now it can be activated with:
+Now the environment can be activated with:
 
 .. code-block:: console
 
@@ -61,30 +61,30 @@ Python package installation
 From Python Pacakge Index (PyPI)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The easiest way is to access the latest release is the following:
+The easiest way to access the latest release is the following:
 
 .. code-block:: console
 
     $ pip install brayns
 
-From source
-~~~~~~~~~~~
+From source (github repository)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For development or to get a more recent version than the one released on PyPI,
 the package can also be installed from the sources on the github repository using:
 
 .. code-block:: console
 
-    # Clone Brayns repo
+    # Clone Brayns repo.
     $ git clone https://github.com/BlueBrain/Brayns.git
 
-    # Go inside the Python package source folder
+    # Go inside the Python package source folder.
     $ cd Brayns/python
 
-    # Build a source distribution (tar.gz)
+    # Build a source distribution (tar.gz).
     $ python setup.py sdist
 
-    # Install the distribution with pip (output in dist folder)
+    # Install the distribution with pip (output in dist folder).
     $ pip install dist/*
 
 Now brayns installation is complete.
@@ -92,22 +92,47 @@ Now brayns installation is complete.
 On BB5
 ~~~~~~
 
-On BB5 the Python package can be installed like on a local machine with a
-virtual environment but it is also available on spack without any installation.
-It can be activated as follows:
+First allocate a BB5 node:
 
 .. code-block:: console
 
-    # Allocate a node, can also be done with sbatch
+    # Allocate a node, can also be done with sbatch.
     $ salloc --account=<projXXX> -p interactive -t 8:00:00 --exclusive --constraint=cpu -c 72 --mem 0
 
-    # Load brayns module with Python
+Both the renderer backend (braynsService) and the Python package are available
+through spack modules ``brayns`` and ``py-brayns``.
+
+.. code-block:: console
+
+    # Load latest spack version.
+    $ module load unstable
+
+    # Make braynsService available in the system PATH.
+    $ module load brayns
+
+    # Check braynsService is available.
+    $ braynsService -h
+
+    # Make the python package available in the system Python.
+    $ module load py-brayns
+
+The Python package can aslo be installed like on a local machine with a
+virtual environment (mandatory this time) but the python spack module is
+required.
+
+.. code-block:: console
+
+    # Load latest available python module.
     $ module load unstable
     $ module load python
-    $ module load brayns/latest
 
-Now brayns package should be available in the Python system version.
+    # Setup Python venv (like before).
+    $ python -m venv mypythonvenv
+    $ source mypythonvenv/bin/activate
+    $ pip install brayns
+
+Now brayns package should be available with the Python venv activated.
 
 The renderer backend (braynsService) should also be available in the current
 path once brayns module is loaded. Otherwise on a local machine, it must be
-compiled from source (see :ref:`usepythonapi-label`).
+compiled from source by cloning the `repository <https://github.com/BlueBrain/Brayns>`_.
