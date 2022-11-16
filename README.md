@@ -119,8 +119,6 @@ For more details about the client APIs, see the [python client doc](python/READM
 
 ## Known Bugs
 
-* Production renderer crashes if used with empty scene, there is an issue on OSPRAY [here](https://github.com/ospray/ospray/issues/530).
-
 Please file a [Bug Report](https://github.com/BlueBrain/Brayns/issues) if you
 find new issues which have not been reported already. If you find an
 already reported problem, please update the corresponding issue with your inputs
