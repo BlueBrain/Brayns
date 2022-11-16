@@ -115,7 +115,7 @@ Additional parameters, such as ***--plugin***, can be specified in a similar fas
 
 A running instance of braynsService can be monitored using ***brayns*** Python package or a websocket client and the JSON-RPC API.
 
-For more details about the client APIs, see the [doc](https://github.com/BlueBrain/Brayns/python/README.md).
+For more details about the client APIs, see the [python client doc](python/README.md).
 
 ## Known Bugs
 
