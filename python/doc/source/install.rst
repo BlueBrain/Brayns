@@ -135,4 +135,4 @@ Now brayns package should be available with the Python venv activated.
 
 The renderer backend (braynsService) should also be available in the current
 path once brayns module is loaded. Otherwise on a local machine, it must be
-compiled from source by cloning the [repository](https://github.com/BlueBrain/Brayns).
+compiled from source by cloning the `repository <https://github.com/BlueBrain/Brayns>`_.
