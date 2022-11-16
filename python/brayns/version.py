@@ -18,19 +18,5 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pkg_resources
-
-DEV_VERSION = 'dev'
-"""Dev version tag compatible with all instance versions."""
-
-
-def _get_version() -> str:
-    try:
-        distribution = pkg_resources.get_distribution('brayns')
-    except pkg_resources.DistributionNotFound:
-        return DEV_VERSION
-    return distribution.version
-
-
-__version__ = _get_version()
+__version__ = '3.0.0'
 """Version tag of brayns Python package (major.minor.patch)."""
