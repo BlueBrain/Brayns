@@ -11,6 +11,15 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import pathlib
+import sys
+
+SOURCE = pathlib.Path(__file__).parent
+DOC = SOURCE.parent
+PYTHON = DOC.parent
+
+sys.path.insert(0, str(PYTHON))
+
 import brayns
 
 # If extensions (or modules to document with autodoc) are in another directory,
