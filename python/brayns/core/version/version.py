@@ -20,7 +20,7 @@
 
 from dataclasses import dataclass
 
-from brayns.version import DEV_VERSION, __version__
+from brayns.version import __version__
 
 from .version_error import VersionError
 
@@ -72,7 +72,5 @@ class Version:
         :raises VersionError: Version mismatch.
         """
         remote = self.tag
-        if local == DEV_VERSION:
-            return
         if remote != local:
             raise VersionError(local, remote)

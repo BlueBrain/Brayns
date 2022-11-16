@@ -21,7 +21,6 @@
 import unittest
 
 import brayns
-from brayns.version import DEV_VERSION
 
 from .mock_version import MockVersion
 
@@ -41,7 +40,6 @@ class TestVersion(unittest.TestCase):
     def test_check(self) -> None:
         test = MockVersion.version
         test.check(test.tag)
-        test.check(DEV_VERSION)
         with self.assertRaises(brayns.VersionError):
             test.check('5.6.7')
 
