@@ -26,9 +26,6 @@
 #include <io/sonataloader/reports/SonataReportData.h>
 #include <io/sonataloader/reports/SonataSpikeData.h>
 
-#include <brayns/utils/Log.h>
-#include <brayns/utils/Timer.h>
-
 namespace
 {
 namespace sl = sonataloader;
@@ -39,52 +36,11 @@ public:
     static std::vector<CellReportMapping>
         generate(const std::string &path, const std::string &population, const std::vector<uint64_t> &nodeList)
     {
-        auto timer = brayns::Timer();
-
         auto compartmentsSize = _computeCompartmentsSize(path, population, nodeList);
-
-        auto mapping = std::vector<CellReportMapping>();
-        mapping.reserve(compartmentsSize.size());
-
-        auto prevOffset = 0ul;
-
-        for (auto &sizes : compartmentsSize)
-        {
-            auto &cellMapping = mapping.emplace_back();
-            cellMapping.globalOffset = prevOffset;
-            cellMapping.compartments.reserve(sizes.size());
-            cellMapping.offsets.reserve(sizes.size());
-
-            uint16_t localOffset = 0;
-            for (size_t i = 0; i < sizes.size(); ++i)
-            {
-                cellMapping.offsets.push_back(localOffset);
-
-                auto size = sizes[i];
-                localOffset += size;
-
-                cellMapping.compartments.push_back(size);
-            }
-
-            prevOffset += localOffset;
-        }
-
-        brayns::Log::critical(fmt::format("MAPPING TIME: {} seconds", timer.seconds()));
-
-        return mapping;
+        return _computeMapping(compartmentsSize);
     }
 
 private:
-    static std::vector<size_t> _createIndexer(const std::vector<uint64_t> &nodeList)
-    {
-        auto indexer = std::vector<size_t>(nodeList.back() + 1, std::numeric_limits<size_t>::max());
-        for (size_t i = 0; i < nodeList.size(); ++i)
-        {
-            indexer[nodeList[i]] = i;
-        }
-        return indexer;
-    }
-
     static std::vector<std::vector<uint16_t>> _computeCompartmentsSize(
         const std::string &reportPath,
         const std::string &population,
@@ -92,7 +48,7 @@ private:
     {
         auto compartments = sl::SimulationMapping::getCompartmentMapping(reportPath, population, nodeList);
         auto indexer = _createIndexer(nodeList);
-        auto compartmentsSize = _allocateCompartmentsSize(compartments, indexer);
+        auto compartmentsSize = _allocateCompartmentsSize(nodeList.size(), compartments, indexer);
 
         auto lastSection = std::numeric_limits<uint32_t>::max();
         auto lastNode = std::numeric_limits<uint64_t>::max();
@@ -117,21 +73,27 @@ private:
         return compartmentsSize;
     }
 
+    static std::vector<size_t> _createIndexer(const std::vector<uint64_t> &nodeList)
+    {
+        auto indexer = std::vector<size_t>(nodeList.back() + 1, std::numeric_limits<size_t>::max());
+        for (size_t i = 0; i < nodeList.size(); ++i)
+        {
+            indexer[nodeList[i]] = i;
+        }
+        return indexer;
+    }
+
     static std::vector<std::vector<uint16_t>> _allocateCompartmentsSize(
+        size_t numNodes,
         const std::vector<bbp::sonata::CompartmentID> &compartments,
         const std::vector<size_t> &indexer)
     {
-        auto highestSections = _perNodeHighestSection(compartments, indexer);
+        auto highestSections = _perNodeHighestSection(numNodes, compartments, indexer);
         auto compartmentsSize = std::vector<std::vector<uint16_t>>(highestSections.size());
 
         for (size_t i = 0; i < compartmentsSize.size(); ++i)
         {
             auto highestSection = highestSections[i];
-            if (highestSection == 0)
-            {
-                continue;
-            }
-
             compartmentsSize[i].resize(highestSection + 1);
         }
 
@@ -139,10 +101,11 @@ private:
     };
 
     static std::vector<size_t> _perNodeHighestSection(
+        size_t numNodes,
         const std::vector<bbp::sonata::CompartmentID> &comparments,
         const std::vector<size_t> &indexer)
     {
-        auto result = std::vector<size_t>(indexer.size(), 0ul);
+        auto result = std::vector<size_t>(numNodes, 0ul);
 
         for (auto &compartment : comparments)
         {
@@ -153,6 +116,37 @@ private:
         }
 
         return result;
+    }
+
+    static std::vector<CellReportMapping> _computeMapping(const std::vector<std::vector<uint16_t>> &compartmentSizes)
+    {
+        auto mapping = std::vector<CellReportMapping>();
+        mapping.reserve(compartmentSizes.size());
+
+        auto prevOffset = 0ul;
+
+        for (auto &sizes : compartmentSizes)
+        {
+            auto &cellMapping = mapping.emplace_back();
+            cellMapping.globalOffset = prevOffset;
+            cellMapping.compartments.reserve(sizes.size());
+            cellMapping.offsets.reserve(sizes.size());
+
+            uint16_t localOffset = 0;
+            for (size_t i = 0; i < sizes.size(); ++i)
+            {
+                cellMapping.offsets.push_back(localOffset);
+
+                auto size = sizes[i];
+                localOffset += size;
+
+                cellMapping.compartments.push_back(size);
+            }
+
+            prevOffset += localOffset;
+        }
+
+        return mapping;
     }
 };
 
