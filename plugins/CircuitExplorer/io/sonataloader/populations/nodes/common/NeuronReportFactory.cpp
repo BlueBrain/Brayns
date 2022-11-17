@@ -69,7 +69,7 @@ public:
             prevOffset += localOffset;
         }
 
-        brayns::Log::critical(fmt::format("MAPPING TIME: {} seconds", timer.seconds());
+        brayns::Log::critical(fmt::format("MAPPING TIME: {} seconds", timer.seconds()));
 
         return mapping;
     }
@@ -151,6 +151,8 @@ private:
             auto &highest = result[indexer[nodeId]];
             highest = std::max(highest, sectionId);
         }
+
+        return result;
     }
 };
 
