@@ -26,6 +26,9 @@
 #include <io/sonataloader/reports/SonataReportData.h>
 #include <io/sonataloader/reports/SonataSpikeData.h>
 
+#include <brayns/utils/Log.h>
+#include <brayns/utils/Timer.h>
+
 namespace
 {
 namespace sl = sonataloader;
@@ -36,6 +39,8 @@ public:
     static std::vector<CellReportMapping>
         generate(const std::string &path, const std::string &population, const std::vector<uint64_t> &nodeList)
     {
+        auto timer = brayns::Timer();
+
         auto compartmentsSize = _computeCompartmentsSize(path, population, nodeList);
 
         auto mapping = std::vector<CellReportMapping>();
@@ -64,6 +69,8 @@ public:
             prevOffset += localOffset;
         }
 
+        brayns::Log::critical(fmt::format("MAPPING TIME: {} seconds", timer.seconds());
+
         return mapping;
     }
 
@@ -85,8 +92,8 @@ private:
     {
         auto compartments = sl::SimulationMapping::getCompartmentMapping(reportPath, population, nodeList);
         auto indexer = _createIndexer(nodeList);
+        auto compartmentsSize = _allocateCompartmentsSize(compartments, indexer);
 
-        auto compartmentsSize = std::vector<std::vector<uint16_t>>(nodeList.size());
         auto lastSection = std::numeric_limits<uint32_t>::max();
         auto lastNode = std::numeric_limits<uint64_t>::max();
 
@@ -94,19 +101,56 @@ private:
         {
             auto nodeId = key[0];
             auto elementId = key[1];
-
             auto index = indexer[nodeId];
+
             auto &cm = compartmentsSize[index];
+
             if (lastSection != elementId || lastNode != nodeId)
             {
                 lastNode = nodeId;
                 lastSection = elementId;
-                cm.push_back(0u);
             }
+
             cm[elementId]++;
         }
 
         return compartmentsSize;
+    }
+
+    static std::vector<std::vector<uint16_t>> _allocateCompartmentsSize(
+        const std::vector<bbp::sonata::CompartmentID> &compartments,
+        const std::vector<size_t> &indexer)
+    {
+        auto highestSections = _perNodeHighestSection(compartments, indexer);
+        auto compartmentsSize = std::vector<std::vector<uint16_t>>(highestSections.size());
+
+        for (size_t i = 0; i < compartmentsSize.size(); ++i)
+        {
+            auto highestSection = highestSections[i];
+            if (highestSection == 0)
+            {
+                continue;
+            }
+
+            compartmentsSize[i].resize(highestSection + 1);
+        }
+
+        return compartmentsSize;
+    };
+
+    static std::vector<size_t> _perNodeHighestSection(
+        const std::vector<bbp::sonata::CompartmentID> &comparments,
+        const std::vector<size_t> &indexer)
+    {
+        auto result = std::vector<size_t>(indexer.size(), 0ul);
+
+        for (auto &compartment : comparments)
+        {
+            auto nodeId = compartment[0];
+            auto sectionId = compartment[1];
+            auto &highest = result[indexer[nodeId]];
+            highest = std::max(highest, sectionId);
+        }
     }
 };
 
