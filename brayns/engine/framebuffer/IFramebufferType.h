@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,91 +19,128 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "IFramebufferType.h"
+#pragma once
 
-#include <memory>
+#include <brayns/utils/image/Image.h>
+
+#include <ospray/ospray_cpp/FrameBuffer.h>
 
 namespace brayns
 {
-class Framebuffer
+/**
+ * @brief Pixel storage format in framebuffer.
+ *
+ */
+enum class PixelFormat
+{
+    /**
+     * @brief 4 channels of 8 bits each with lineal color curve.
+     *
+     */
+    RgbaI8,
+
+    /**
+     * @brief 4 channels of 8 bits each with non-lineal color curve.
+     *
+     */
+    StandardRgbaI8,
+
+    /**
+     * @brief 4 channels of 32 bits each.
+     *
+     */
+    RgbaF32
+};
+
+class IFramebufferType
 {
 public:
+    IFramebufferType() = default;
+
+    IFramebufferType(const IFramebufferType &) = delete;
+    IFramebufferType &operator=(const IFramebufferType &) = delete;
+
+    IFramebufferType(IFramebufferType &&) = delete;
+    IFramebufferType &operator=(IFramebufferType &&) = delete;
+
+    virtual ~IFramebufferType() = default;
+
     /**
      * @brief Maps Ospray backend framebuffer to an accessible system buffer
      */
-    void map();
+    virtual void map() = 0;
 
     /**
      * @brief Removes Ospray backend framebuffer mapping to system buffer
      */
-    void unmap();
+    virtual void unmap() = 0;
 
     /**
      * @brief Returns the Ospray mapped framebuffer as a system buffer. To be valid, a call to map() must be
      * made before calling this method. After calling unmap() the pointer returned by this method is invalidated
      */
-    const uint8_t *getColorBuffer() const;
+    virtual const uint8_t *getColorBuffer() const = 0;
 
     /**
      * @brief Syncs this object data to the Ospray backend framebuffer
      * @returns true if there was anything to commit
      */
-    bool commit();
+    virtual bool commit() = 0;
 
     /**
      * @brief Sets the frame dimensions (width x height)
      */
-    void setFrameSize(const Vector2ui &frameSize);
+    virtual void setFrameSize(const Vector2ui &frameSize) = 0;
 
     /**
      * @brief Returns the current frame dimensions (width x height)
      */
-    const Vector2ui &getFrameSize() const noexcept;
+    virtual const Vector2ui &getFrameSize() const noexcept = 0;
 
     /**
      * @brief Returns the frame aspect ratio (width / height)
      * @return float
      */
-    float getAspectRatio() const noexcept;
+    virtual float getAspectRatio() const noexcept = 0;
 
     /**
      * @brief Enables or disables accumulation. Accumulation is a proccess in which a frame is integrated
      * over multiple calls render calls, rendering 1 sample per pixel on each call (It allows for more
      * interactivity as it does not block the main thread).
      */
-    void setAccumulation(const bool accumulation) noexcept;
+    virtual void setAccumulation(const bool accumulation) noexcept = 0;
 
     /**
      * @brief Returns wether this framebuffer is integrating on accumulation mode or not
      */
-    bool isAccumulating() const noexcept;
+    virtual bool isAccumulating() const noexcept = 0;
 
     /**
      * @brief Sets the framebuffer pixel format
      */
-    void setFormat(PixelFormat frameBufferFormat) noexcept;
+    virtual void setFormat(PixelFormat frameBufferFormat) noexcept = 0;
 
     /**
      * @brief Returns the framebuffer current pixel format
      */
-    PixelFormat getFrameBufferFormat() const noexcept;
+    virtual PixelFormat getFrameBufferFormat() const noexcept = 0;
 
     /**
      * @brief If on accumulation mode, it resets the accumulation to 0
      */
-    void clear() noexcept;
+    virtual void clear() noexcept = 0;
 
     /**
      * @brief Increments the number of accumulation frames currently integrated into this framebuffer.
      * If not in accumulation mode, the action has no effect.
      */
-    void incrementAccumFrames() noexcept;
+    virtual void incrementAccumFrames() noexcept = 0;
 
     /**
      * @brief Returns the number of accumulation frames currently integrated into this framebuffer. If
      * not in accumulation mode, the result has not value.
      */
-    int32_t numAccumFrames() const noexcept;
+    virtual int32_t numAccumFrames() const noexcept = 0;
 
     /**
      * @brief Return true if a new frame was rendered since the last reset
@@ -110,23 +148,21 @@ public:
      * @return true A new frame was rendred into the framebuffer since the last reset
      * @return false No new frames was rendered
      */
-    bool hasNewAccumulationFrame() const noexcept;
+    virtual bool hasNewAccumulationFrame() const noexcept = 0;
 
     /**
      * @brief Sets the new accumulation frame flag to false
      */
-    void resetNewAccumulationFrame() noexcept;
+    virtual void resetNewAccumulationFrame() noexcept = 0;
 
     /**
      * @brief Returns an Image object with the current contents of the framebuffer
      */
-    Image getImage();
+    virtual Image getImage() = 0;
 
     /**
      * @brief Returns the Ospray backend framebuffer handle object
      */
-    const ospray::cpp::FrameBuffer &getHandle() const noexcept;
-
-private:
+    virtual const ospray::cpp::FrameBuffer &getHandle() const noexcept = 0;
 };
-}
+} // namespace brayns
