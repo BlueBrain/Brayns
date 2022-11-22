@@ -74,8 +74,13 @@ private:
                 continue;
             }
 
-            auto numSegments = segments.size();
             auto numCompartments = compartments[sectionId];
+            if (numCompartments == 0)
+            {
+                continue;
+            }
+
+            auto numSegments = segments.size();
             auto step = static_cast<float>(numCompartments) / static_cast<float>(numSegments);
             auto sectionOffset = localOffsets[sectionId];
 
