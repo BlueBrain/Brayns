@@ -21,39 +21,43 @@
 
 #pragma once
 
-#include <brayns/engine/framebuffer/IFramebufferType.h>
+#include <brayns/engine/framebuffer/IFrameType.h>
 
-#include "StaticFramebuffer.h"
+#include "StaticFrameType.h"
 
 namespace brayns
 {
-class ProgressiveFramebuffer : public IFramebufferType
+class ProgressiveFrameType : public IFrameType
 {
 public:
-    ProgressiveFramebuffer(uint32_t scale = 4);
+    ProgressiveFrameType(uint32_t scale = 4);
 
-    void map() override;
-    void unmap() override;
-    const uint8_t *getColorBuffer() const override;
     bool commit() override;
+
     void setFrameSize(const Vector2ui &frameSize) override;
     const Vector2ui &getFrameSize() const noexcept override;
     float getAspectRatio() const noexcept override;
+
     void setAccumulation(const bool accumulation) noexcept override;
     bool isAccumulating() const noexcept override;
+
     void setFormat(PixelFormat frameBufferFormat) noexcept override;
-    PixelFormat getFrameBufferFormat() const noexcept override;
+    PixelFormat getFormat() const noexcept override;
+
     void clear() noexcept override;
+
     void incrementAccumFrames() noexcept override;
-    int32_t numAccumFrames() const noexcept override;
+    size_t getAccumulationFrameCount() const noexcept override;
     bool hasNewAccumulationFrame() const noexcept override;
     void resetNewAccumulationFrame() noexcept override;
+
     Image getImage() override;
+
     const ospray::cpp::FrameBuffer &getHandle() const noexcept override;
 
 private:
     uint32_t _scale;
-    StaticFramebuffer _lowRes;
-    StaticFramebuffer _highRes;
+    StaticFrameType _lowRes;
+    StaticFrameType _highRes;
 };
 }

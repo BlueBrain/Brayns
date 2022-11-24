@@ -124,6 +124,7 @@ public:
 private:
     void _updateView();
     void _updateAspectRatio();
+    void _updateImageOrientation();
 
 private:
     std::string _projectionName;

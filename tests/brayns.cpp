@@ -46,9 +46,7 @@ TEST_CASE("defaults")
     CHECK_EQ(view.up, brayns::Vector3f(0.f, 1.f, 0.f));
 
     auto &fb = engine.getFramebuffer();
-    CHECK(!fb.getColorBuffer());
-    CHECK_EQ(fb.getFrameBufferFormat(), brayns::PixelFormat::StandardRgbaI8);
-    CHECK_EQ(fb.getFrameSize(), brayns::Vector2ui(800, 600));
+    CHECK_EQ(fb.getFormat(), brayns::PixelFormat::StandardRgbaI8);
 
     auto &renderer = engine.getRenderer();
     CHECK_EQ(renderer.getName(), "interactive");

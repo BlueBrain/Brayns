@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ProgressiveFramebuffer.h"
+#include "ProgressiveFrameType.h"
 
 namespace
 {
@@ -29,7 +29,7 @@ public:
     template<typename FramebufferType>
     static FramebufferType &select(FramebufferType &low, FramebufferType &high)
     {
-        if (low.numAccumFrames() == 0)
+        if (low.getAccumulationFrameCount() == 0)
         {
             return low;
         }
@@ -41,103 +41,88 @@ public:
 
 namespace brayns
 {
-ProgressiveFramebuffer::ProgressiveFramebuffer(uint32_t scale)
+ProgressiveFrameType::ProgressiveFrameType(uint32_t scale)
     : _scale(scale)
 {
     setFrameSize(_highRes.getFrameSize());
 }
 
-void ProgressiveFramebuffer::map()
-{
-    FramebufferSelector::select(_lowRes, _highRes).map();
-}
-
-void ProgressiveFramebuffer::unmap()
-{
-    FramebufferSelector::select(_lowRes, _highRes).unmap();
-}
-
-const uint8_t *ProgressiveFramebuffer::getColorBuffer() const
-{
-    FramebufferSelector::select(_lowRes, _highRes).getColorBuffer();
-}
-
-bool ProgressiveFramebuffer::commit()
+bool ProgressiveFrameType::commit()
 {
     _lowRes.commit();
-    _highRes.commit();
+    return _highRes.commit();
 }
 
-void ProgressiveFramebuffer::setFrameSize(const Vector2ui &frameSize)
+void ProgressiveFrameType::setFrameSize(const Vector2ui &frameSize)
 {
     auto lowResolution = frameSize / _scale;
     _lowRes.setFrameSize(lowResolution);
     _highRes.setFrameSize(frameSize);
 }
 
-const Vector2ui &ProgressiveFramebuffer::getFrameSize() const noexcept
+const Vector2ui &ProgressiveFrameType::getFrameSize() const noexcept
 {
-    FramebufferSelector::select(_lowRes, _highRes).getFrameSize();
+    return FramebufferSelector::select(_lowRes, _highRes).getFrameSize();
 }
 
-float ProgressiveFramebuffer::getAspectRatio() const noexcept
+float ProgressiveFrameType::getAspectRatio() const noexcept
 {
     return _highRes.getAspectRatio();
 }
 
-void ProgressiveFramebuffer::setAccumulation(const bool accumulation) noexcept
+void ProgressiveFrameType::setAccumulation(const bool accumulation) noexcept
 {
     (void)accumulation;
 }
 
-bool ProgressiveFramebuffer::isAccumulating() const noexcept
+bool ProgressiveFrameType::isAccumulating() const noexcept
 {
     return true;
 }
 
-void ProgressiveFramebuffer::setFormat(PixelFormat frameBufferFormat) noexcept
+void ProgressiveFrameType::setFormat(PixelFormat frameBufferFormat) noexcept
 {
     _lowRes.setFormat(frameBufferFormat);
     _highRes.setFormat(frameBufferFormat);
 }
 
-PixelFormat ProgressiveFramebuffer::getFrameBufferFormat() const noexcept
+PixelFormat ProgressiveFrameType::getFormat() const noexcept
 {
-    return _highRes.getFrameBufferFormat();
+    return _highRes.getFormat();
 }
 
-void ProgressiveFramebuffer::clear() noexcept
+void ProgressiveFrameType::clear() noexcept
 {
     _lowRes.clear();
     _highRes.clear();
 }
 
-void ProgressiveFramebuffer::incrementAccumFrames() noexcept
+void ProgressiveFrameType::incrementAccumFrames() noexcept
 {
     FramebufferSelector::select(_lowRes, _highRes).incrementAccumFrames();
 }
 
-int32_t ProgressiveFramebuffer::numAccumFrames() const noexcept
+size_t ProgressiveFrameType::getAccumulationFrameCount() const noexcept
 {
-    return FramebufferSelector::select(_lowRes, _highRes).numAccumFrames();
+    return FramebufferSelector::select(_lowRes, _highRes).getAccumulationFrameCount();
 }
 
-bool ProgressiveFramebuffer::hasNewAccumulationFrame() const noexcept
+bool ProgressiveFrameType::hasNewAccumulationFrame() const noexcept
 {
     return FramebufferSelector::select(_lowRes, _highRes).hasNewAccumulationFrame();
 }
 
-void ProgressiveFramebuffer::resetNewAccumulationFrame() noexcept
+void ProgressiveFrameType::resetNewAccumulationFrame() noexcept
 {
     FramebufferSelector::select(_lowRes, _highRes).resetNewAccumulationFrame();
 }
 
-Image ProgressiveFramebuffer::getImage()
+Image ProgressiveFrameType::getImage()
 {
     return FramebufferSelector::select(_lowRes, _highRes).getImage();
 }
 
-const ospray::cpp::FrameBuffer &ProgressiveFramebuffer::getHandle() const noexcept
+const ospray::cpp::FrameBuffer &ProgressiveFrameType::getHandle() const noexcept
 {
     return FramebufferSelector::select(_lowRes, _highRes).getHandle();
 }

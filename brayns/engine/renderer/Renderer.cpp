@@ -65,9 +65,9 @@ bool Renderer::commit()
     return true;
 }
 
-int32_t Renderer::getSamplesPerPixel() const noexcept
+size_t Renderer::getSamplesPerPixel() const noexcept
 {
-    return _data->getSamplesPerPixel();
+    return static_cast<size_t>(_data->getSamplesPerPixel());
 }
 
 const std::string &Renderer::getName() const noexcept

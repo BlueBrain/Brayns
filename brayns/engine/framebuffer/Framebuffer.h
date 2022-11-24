@@ -18,7 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "IFramebufferType.h"
+#pragma once
+
+#include "IFrameType.h"
+#include "PixelFormat.h"
+
+#include <brayns/utils/MathTypes.h>
 
 #include <memory>
 
@@ -28,67 +33,59 @@ class Framebuffer
 {
 public:
     /**
-     * @brief Maps Ospray backend framebuffer to an accessible system buffer
+     * @brief Construct a new Framebuffer object
+     *
+     * @param frame
      */
-    void map();
+    Framebuffer(std::unique_ptr<IFrameType> frame);
 
     /**
-     * @brief Removes Ospray backend framebuffer mapping to system buffer
+     * @brief Sets the type of frame which this framebuffer will integrate.
+     * @param frame Frame type object.
      */
-    void unmap();
+    void setFrameType(std::unique_ptr<IFrameType> frame);
 
     /**
-     * @brief Returns the Ospray mapped framebuffer as a system buffer. To be valid, a call to map() must be
-     * made before calling this method. After calling unmap() the pointer returned by this method is invalidated
-     */
-    const uint8_t *getColorBuffer() const;
-
-    /**
-     * @brief Syncs this object data to the Ospray backend framebuffer
-     * @returns true if there was anything to commit
+     * @brief Syncs this object data to the Ospray backend framebuffer.
+     * @returns true if there was anything to commit.
      */
     bool commit();
 
     /**
-     * @brief Sets the frame dimensions (width x height)
+     * @brief Sets the frame dimensions (width x height).
      */
     void setFrameSize(const Vector2ui &frameSize);
 
     /**
-     * @brief Returns the current frame dimensions (width x height)
-     */
-    const Vector2ui &getFrameSize() const noexcept;
-
-    /**
-     * @brief Returns the frame aspect ratio (width / height)
+     * @brief Returns the frame aspect ratio (width / height).
      * @return float
      */
     float getAspectRatio() const noexcept;
 
     /**
-     * @brief Enables or disables accumulation. Accumulation is a proccess in which a frame is integrated
-     * over multiple calls render calls, rendering 1 sample per pixel on each call (It allows for more
-     * interactivity as it does not block the main thread).
+     * @brief Enables or disables rendering accumulation.
+     * @param accumulation True to enable it, false to disable it.
      */
-    void setAccumulation(const bool accumulation) noexcept;
+    void setAccumulation(bool accumulation) noexcept;
 
     /**
-     * @brief Returns wether this framebuffer is integrating on accumulation mode or not
+     * @brief Returns wether this framebuffer has accumulating rendering enabled or not.
      */
     bool isAccumulating() const noexcept;
 
     /**
-     * @brief Sets the framebuffer pixel format
+     * @brief Sets the framebuffer pixel format.
+     * @param frameBufferFormat Format to set.
      */
     void setFormat(PixelFormat frameBufferFormat) noexcept;
 
     /**
-     * @brief Returns the framebuffer current pixel format
+     * @brief Returns the framebuffer pixel format.
      */
-    PixelFormat getFrameBufferFormat() const noexcept;
+    PixelFormat getFormat() const noexcept;
 
     /**
-     * @brief If on accumulation mode, it resets the accumulation to 0
+     * @brief Resets the accumulation frames to 0.
      */
     void clear() noexcept;
 
@@ -99,34 +96,37 @@ public:
     void incrementAccumFrames() noexcept;
 
     /**
-     * @brief Returns the number of accumulation frames currently integrated into this framebuffer. If
-     * not in accumulation mode, the result has not value.
+     * @brief Returns the number of accumulation frames integrated into this framebuffer. If
+     * not in accumulation mode, the result has no meaning.
      */
-    int32_t numAccumFrames() const noexcept;
+    size_t getAccumulationFrameCount() const noexcept;
 
     /**
-     * @brief Return true if a new frame was rendered since the last reset
+     * @brief Return true if a new frame was rendered since the last reset.
      *
      * @return true A new frame was rendred into the framebuffer since the last reset
-     * @return false No new frames was rendered
+     * @return false No new frames were rendered
      */
     bool hasNewAccumulationFrame() const noexcept;
 
     /**
-     * @brief Sets the new accumulation frame flag to false
+     * @brief Sets the new accumulation frame flag to false.
      */
     void resetNewAccumulationFrame() noexcept;
 
     /**
-     * @brief Returns an Image object with the current contents of the framebuffer
+     * @brief Returns an Image object with the current contents of the framebuffer.
+     * @return Image The image object.
      */
     Image getImage();
 
     /**
-     * @brief Returns the Ospray backend framebuffer handle object
+     * @brief Returns the Ospray backend framebuffer handle object.
+     * @returns const ospray::cpp::FrameBuffer
      */
     const ospray::cpp::FrameBuffer &getHandle() const noexcept;
 
 private:
+    std::unique_ptr<IFrameType> _frame;
 };
 }

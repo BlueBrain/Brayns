@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,22 +20,30 @@
 
 #pragma once
 
-#include "Image.h"
-
 namespace brayns
 {
 /**
- * @brief Helper class to flip an image.
+ * @brief Pixel storage format in framebuffer.
  *
  */
-class ImageFlipper
+enum class PixelFormat
 {
-public:
     /**
-     * @brief Flip the given image vertically (first row becomes last row).
+     * @brief 4 channels of 8 bits each with lineal color curve.
      *
-     * @param image Image to flip.
      */
-    static void flipVertically(Image &image);
+    RgbaI8,
+
+    /**
+     * @brief 4 channels of 8 bits each with non-lineal color curve.
+     *
+     */
+    StandardRgbaI8,
+
+    /**
+     * @brief 4 channels of 32 bits each.
+     *
+     */
+    RgbaF32
 };
-} // namespace brayns
+}

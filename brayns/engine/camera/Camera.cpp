@@ -30,6 +30,8 @@ struct CameraParameters
     inline static const std::string direction = "direction";
     inline static const std::string up = "up";
     inline static const std::string aspect = "aspect";
+    inline static const std::string imageStart = "imageStart";
+    inline static const std::string imageEnd = "imageEnd";
 };
 }
 
@@ -97,6 +99,7 @@ bool Camera::commit()
     _data->pushTo(_handle);
     _updateView();
     _updateAspectRatio();
+    _updateImageOrientation();
     _handle.commit();
     _flag = false;
     return true;
@@ -124,5 +127,11 @@ void Camera::_updateView()
 void Camera::_updateAspectRatio()
 {
     _handle.setParam(CameraParameters::aspect, _aspectRatio);
+}
+
+void Camera::_updateImageOrientation()
+{
+    _handle.setParam(CameraParameters::imageStart, Vector2f(0, 1));
+    _handle.setParam(CameraParameters::imageEnd, Vector2f(1, 0));
 }
 }

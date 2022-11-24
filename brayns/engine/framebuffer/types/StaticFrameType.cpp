@@ -19,10 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "StaticFramebuffer.h"
+#include "StaticFrameType.h"
 
 #include <brayns/engine/framebuffer/ToneMapping.h>
-#include <brayns/utils/image/ImageFlipper.h>
 #include <ospray/ospray_cpp/Data.h>
 
 namespace
@@ -69,47 +68,59 @@ public:
         return OSP_FB_NONE;
     }
 };
+
+class FrameStream
+{
+public:
+    FrameStream(ospray::cpp::FrameBuffer &handle)
+        : _handle(handle)
+    {
+    }
+
+    ~FrameStream()
+    {
+        close();
+    }
+
+    template<typename Type>
+    Type *openAs(OSPFrameBufferChannel channel)
+    {
+        if (!_channelHandle)
+        {
+            _channelHandle = _handle.map(channel);
+        }
+        return static_cast<Type *>(_channelHandle);
+    }
+
+    void close()
+    {
+        if (!_channelHandle)
+        {
+            return;
+        }
+        _handle.unmap(_channelHandle);
+        _channelHandle = nullptr;
+    }
+
+private:
+    ospray::cpp::FrameBuffer &_handle;
+    void *_channelHandle = nullptr;
+};
 }
 
 namespace brayns
 {
-void StaticFramebuffer::map()
-{
-    _colorBuffer = static_cast<uint8_t *>(_handle.map(OSP_FB_COLOR));
-}
-
-void StaticFramebuffer::unmap()
-{
-    if (_colorBuffer)
-    {
-        _handle.unmap(_colorBuffer);
-        _colorBuffer = nullptr;
-    }
-}
-
-const uint8_t *StaticFramebuffer::getColorBuffer() const
-{
-    return _colorBuffer;
-}
-
-bool StaticFramebuffer::commit()
+bool StaticFrameType::commit()
 {
     if (!_flag)
     {
         return false;
     }
 
-    unmap();
-
-    const auto width = static_cast<int>(_frameSize.x);
-    const auto height = static_cast<int>(_frameSize.y);
-    const auto format = OsprayFrameBufferFormat::fromPixelFormat(_frameBufferFormat);
-    size_t channels = OSP_FB_COLOR;
-    if (_accumulation)
-    {
-        channels |= OSP_FB_ACCUM;
-    }
-
+    auto width = static_cast<int>(_frameSize.x);
+    auto height = static_cast<int>(_frameSize.y);
+    auto format = OsprayFrameBufferFormat::fromPixelFormat(_format);
+    auto channels = _accumulation ? OSP_FB_COLOR | OSP_FB_ACCUM : OSP_FB_COLOR;
     _handle = ospray::cpp::FrameBuffer(width, height, format, channels);
 
     auto toneMapping = ToneMappingFactory::create();
@@ -122,9 +133,9 @@ bool StaticFramebuffer::commit()
     return true;
 }
 
-void StaticFramebuffer::setFrameSize(const Vector2ui &frameSize)
+void StaticFrameType::setFrameSize(const Vector2ui &frameSize)
 {
-    if (glm::compMul(frameSize) == 0 || frameSize.x < 64 || frameSize.y < 64)
+    if (glm::compMul(frameSize) == 0 || glm::compMin(frameSize) < 64)
     {
         throw std::invalid_argument("Frame size must be greather than or equal to 64x64");
     }
@@ -132,88 +143,83 @@ void StaticFramebuffer::setFrameSize(const Vector2ui &frameSize)
     _flag.update(_frameSize, frameSize);
 }
 
-const Vector2ui &StaticFramebuffer::getFrameSize() const noexcept
+const Vector2ui &StaticFrameType::getFrameSize() const noexcept
 {
     return _frameSize;
 }
 
-float StaticFramebuffer::getAspectRatio() const noexcept
+float StaticFrameType::getAspectRatio() const noexcept
 {
     return static_cast<float>(_frameSize.x) / static_cast<float>(_frameSize.y);
 }
 
-void StaticFramebuffer::setAccumulation(const bool accumulation) noexcept
+void StaticFrameType::setAccumulation(const bool accumulation) noexcept
 {
     _flag.update(_accumulation, accumulation);
 }
 
-bool StaticFramebuffer::isAccumulating() const noexcept
+bool StaticFrameType::isAccumulating() const noexcept
 {
     return _accumulation;
 }
 
-void StaticFramebuffer::setFormat(PixelFormat frameBufferFormat) noexcept
+void StaticFrameType::setFormat(PixelFormat frameBufferFormat) noexcept
 {
-    _flag.update(_frameBufferFormat, frameBufferFormat);
+    _flag.update(_format, frameBufferFormat);
 }
 
-PixelFormat StaticFramebuffer::getFrameBufferFormat() const noexcept
+PixelFormat StaticFrameType::getFormat() const noexcept
 {
-    return _frameBufferFormat;
+    return _format;
 }
 
-void StaticFramebuffer::clear() noexcept
+void StaticFrameType::clear() noexcept
 {
     _accumFrames = 0;
     _handle.clear();
 }
 
-void StaticFramebuffer::incrementAccumFrames() noexcept
+void StaticFrameType::incrementAccumFrames() noexcept
 {
     ++_accumFrames;
     _newAccumulationFrame = true;
 }
 
-int32_t StaticFramebuffer::numAccumFrames() const noexcept
+size_t StaticFrameType::getAccumulationFrameCount() const noexcept
 {
     return _accumFrames;
 }
 
-bool StaticFramebuffer::hasNewAccumulationFrame() const noexcept
+bool StaticFrameType::hasNewAccumulationFrame() const noexcept
 {
     return _newAccumulationFrame;
 }
 
-void StaticFramebuffer::resetNewAccumulationFrame() noexcept
+void StaticFrameType::resetNewAccumulationFrame() noexcept
 {
     _newAccumulationFrame = false;
 }
 
-Image StaticFramebuffer::getImage()
+Image StaticFrameType::getImage()
 {
-    map();
+    auto colorStream = FrameStream(_handle);
+    auto colorBuffer = colorStream.openAs<uint8_t>(OSP_FB_COLOR);
 
-    const auto colorBuffer = getColorBuffer();
-    const auto &size = getFrameSize();
+    auto &size = getFrameSize();
 
     ImageInfo info;
 
     info.width = size.x;
     info.height = size.y;
     info.channelCount = 4;
-    info.channelSize = PixelFormatChannelByteSize::get(_frameBufferFormat);
+    info.channelSize = PixelFormatChannelByteSize::get(_format);
 
     auto data = reinterpret_cast<const char *>(colorBuffer);
     auto length = info.getSize();
-    Image image(info, {data, length});
-    ImageFlipper::flipVertically(image);
-
-    unmap();
-
-    return image;
+    return Image(info, {data, length});
 }
 
-const ospray::cpp::FrameBuffer &StaticFramebuffer::getHandle() const noexcept
+const ospray::cpp::FrameBuffer &StaticFrameType::getHandle() const noexcept
 {
     return _handle;
 }

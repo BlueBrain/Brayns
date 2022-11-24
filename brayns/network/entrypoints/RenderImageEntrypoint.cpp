@@ -102,7 +102,7 @@ private:
     static size_t _getAccumulation(brayns::Engine &engine)
     {
         auto &framebuffer = engine.getFramebuffer();
-        return framebuffer.numAccumFrames();
+        return framebuffer.getAccumulationFrameCount();
     }
 
     static size_t _getMaxAccumulation(brayns::Engine &engine)
