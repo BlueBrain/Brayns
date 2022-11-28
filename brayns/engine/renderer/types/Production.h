@@ -27,8 +27,8 @@ namespace brayns
 {
 struct Production
 {
-    int32_t samplesPerPixel = 5;
-    int32_t maxRayBounces = 3;
+    size_t samplesPerPixel = 5;
+    size_t maxRayBounces = 3;
     Vector4f backgroundColor = Vector4f(0.f, 0.f, 0.f, 1.f);
 };
 

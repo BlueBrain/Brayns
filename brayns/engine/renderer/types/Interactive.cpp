@@ -38,10 +38,10 @@ namespace brayns
 {
 void RendererTraits<Interactive>::updateData(ospray::cpp::Renderer &handle, Interactive &data)
 {
-    handle.setParam(InteractiveParameters::spp, data.samplesPerPixel);
-    handle.setParam(InteractiveParameters::pathLength, data.maxRayBounces);
+    handle.setParam(InteractiveParameters::spp, static_cast<int>(data.samplesPerPixel));
+    handle.setParam(InteractiveParameters::pathLength, static_cast<int>(data.maxRayBounces));
     handle.setParam(InteractiveParameters::background, data.backgroundColor);
     handle.setParam(InteractiveParameters::shadow, data.shadowsEnabled);
-    handle.setParam(InteractiveParameters::aoSamples, data.aoSamples);
+    handle.setParam(InteractiveParameters::aoSamples, static_cast<int>(data.aoSamples));
 }
 }
