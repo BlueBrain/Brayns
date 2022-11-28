@@ -26,7 +26,7 @@ from typing import Any
 class Framebuffer(ABC):
     """Base class for all framebuffer types.
 
-    Framebuffers define how the rendere image is stored and processed.
+    Framebuffers define how the rendered image is stored and processed.
     """
 
     @classmethod
