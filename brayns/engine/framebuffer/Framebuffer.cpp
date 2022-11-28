@@ -22,12 +22,12 @@
 
 namespace brayns
 {
-Framebuffer::Framebuffer(std::unique_ptr<IFrameType> frame)
+Framebuffer::Framebuffer(std::unique_ptr<IFrameHandler> frame)
 {
-    setFrameType(std::move(frame));
+    setFrameHandler(std::move(frame));
 }
 
-void Framebuffer::setFrameType(std::unique_ptr<IFrameType> frame)
+void Framebuffer::setFrameHandler(std::unique_ptr<IFrameHandler> frame)
 {
     assert(frame);
     _frame = std::move(frame);
@@ -38,14 +38,9 @@ bool Framebuffer::commit()
     return _frame->commit();
 }
 
-void Framebuffer::setFrameSize(const Vector2ui &frameSize)
+void Framebuffer::setFrameSize(const Vector2ui &frameSize) noexcept
 {
     _frame->setFrameSize(frameSize);
-}
-
-float Framebuffer::getAspectRatio() const noexcept
-{
-    return _frame->getAspectRatio();
 }
 
 void Framebuffer::setAccumulation(bool accumulation) noexcept
@@ -53,19 +48,9 @@ void Framebuffer::setAccumulation(bool accumulation) noexcept
     _frame->setAccumulation(accumulation);
 }
 
-bool Framebuffer::isAccumulating() const noexcept
+void Framebuffer::setFormat(PixelFormat format) noexcept
 {
-    return _frame->isAccumulating();
-}
-
-void Framebuffer::setFormat(PixelFormat frameBufferFormat) noexcept
-{
-    _frame->setFormat(frameBufferFormat);
-}
-
-PixelFormat Framebuffer::getFormat() const noexcept
-{
-    return _frame->getFormat();
+    _frame->setFormat(format);
 }
 
 void Framebuffer::clear() noexcept

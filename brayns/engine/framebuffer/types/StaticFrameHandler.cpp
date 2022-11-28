@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "StaticFrameType.h"
+#include "StaticFrameHandler.h"
 
 #include <brayns/engine/framebuffer/ToneMapping.h>
 #include <ospray/ospray_cpp/Data.h>
@@ -74,6 +74,7 @@ class FrameStream
 public:
     FrameStream(ospray::cpp::FrameBuffer &handle)
         : _handle(handle)
+        , _channelHandle(nullptr)
     {
     }
 
@@ -104,13 +105,13 @@ public:
 
 private:
     ospray::cpp::FrameBuffer &_handle;
-    void *_channelHandle = nullptr;
+    void *_channelHandle;
 };
 }
 
 namespace brayns
 {
-bool StaticFrameType::commit()
+bool StaticFrameHandler::commit()
 {
     if (!_flag)
     {
@@ -133,7 +134,7 @@ bool StaticFrameType::commit()
     return true;
 }
 
-void StaticFrameType::setFrameSize(const Vector2ui &frameSize)
+void StaticFrameHandler::setFrameSize(const Vector2ui &frameSize)
 {
     if (glm::compMul(frameSize) == 0 || glm::compMin(frameSize) < 64)
     {
@@ -143,74 +144,52 @@ void StaticFrameType::setFrameSize(const Vector2ui &frameSize)
     _flag.update(_frameSize, frameSize);
 }
 
-const Vector2ui &StaticFrameType::getFrameSize() const noexcept
-{
-    return _frameSize;
-}
-
-float StaticFrameType::getAspectRatio() const noexcept
-{
-    return static_cast<float>(_frameSize.x) / static_cast<float>(_frameSize.y);
-}
-
-void StaticFrameType::setAccumulation(const bool accumulation) noexcept
+void StaticFrameHandler::setAccumulation(bool accumulation) noexcept
 {
     _flag.update(_accumulation, accumulation);
 }
 
-bool StaticFrameType::isAccumulating() const noexcept
-{
-    return _accumulation;
-}
-
-void StaticFrameType::setFormat(PixelFormat frameBufferFormat) noexcept
+void StaticFrameHandler::setFormat(PixelFormat frameBufferFormat) noexcept
 {
     _flag.update(_format, frameBufferFormat);
 }
 
-PixelFormat StaticFrameType::getFormat() const noexcept
-{
-    return _format;
-}
-
-void StaticFrameType::clear() noexcept
+void StaticFrameHandler::clear() noexcept
 {
     _accumFrames = 0;
     _handle.clear();
 }
 
-void StaticFrameType::incrementAccumFrames() noexcept
+void StaticFrameHandler::incrementAccumFrames() noexcept
 {
     ++_accumFrames;
     _newAccumulationFrame = true;
 }
 
-size_t StaticFrameType::getAccumulationFrameCount() const noexcept
+size_t StaticFrameHandler::getAccumulationFrameCount() const noexcept
 {
     return _accumFrames;
 }
 
-bool StaticFrameType::hasNewAccumulationFrame() const noexcept
+bool StaticFrameHandler::hasNewAccumulationFrame() const noexcept
 {
     return _newAccumulationFrame;
 }
 
-void StaticFrameType::resetNewAccumulationFrame() noexcept
+void StaticFrameHandler::resetNewAccumulationFrame() noexcept
 {
     _newAccumulationFrame = false;
 }
 
-Image StaticFrameType::getImage()
+Image StaticFrameHandler::getImage()
 {
     auto colorStream = FrameStream(_handle);
     auto colorBuffer = colorStream.openAs<uint8_t>(OSP_FB_COLOR);
 
-    auto &size = getFrameSize();
-
     ImageInfo info;
 
-    info.width = size.x;
-    info.height = size.y;
+    info.width = _frameSize.x;
+    info.height = _frameSize.y;
     info.channelCount = 4;
     info.channelSize = PixelFormatChannelByteSize::get(_format);
 
@@ -219,7 +198,7 @@ Image StaticFrameType::getImage()
     return Image(info, {data, length});
 }
 
-const ospray::cpp::FrameBuffer &StaticFrameType::getHandle() const noexcept
+const ospray::cpp::FrameBuffer &StaticFrameHandler::getHandle() const noexcept
 {
     return _handle;
 }

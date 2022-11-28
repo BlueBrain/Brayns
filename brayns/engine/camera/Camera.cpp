@@ -64,8 +64,8 @@ Camera &Camera::operator=(const Camera &other)
     _handle = ospray::cpp::Camera(_projectionName);
     _data = other._data->clone();
     _data->pushTo(_handle);
-    setView(other._view);
-    setAspectRatio(other._aspectRatio);
+    _view = other._view;
+    _aspectRatio = other._aspectRatio;
     _flag.setModified(true);
     return *this;
 }
@@ -85,9 +85,9 @@ const View &Camera::getView() const noexcept
     return _view;
 }
 
-void Camera::setAspectRatio(float aspectRatio)
+void Camera::setAspectRatioFromFrameSize(const Vector2ui &frameSize)
 {
-    _flag.update(_aspectRatio, aspectRatio);
+    _flag.update(_aspectRatio, static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y));
 }
 
 bool Camera::commit()

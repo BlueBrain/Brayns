@@ -48,6 +48,7 @@
 #include <brayns/network/entrypoints/ColorRampEntrypoint.h>
 #include <brayns/network/entrypoints/EnableSimulationEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
+#include <brayns/network/entrypoints/FramebufferEntrypoint.h>
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
@@ -142,6 +143,8 @@ public:
         builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::SetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::SetColorRampEntrypoint>(models);
+        builder.add<brayns::SetProgressiveFramebufferEntrypoint>(engine);
+        builder.add<brayns::SetStaticFramebufferEntrypoint>(engine);
         builder.add<brayns::SetMaterialCarPaint>(models);
         builder.add<brayns::SetMaterialEmissive>(models);
         builder.add<brayns::SetMaterialGlass>(models);

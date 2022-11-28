@@ -23,7 +23,7 @@
 #include <brayns/utils/Log.h>
 
 #include <brayns/engine/core/FrameRenderer.h>
-#include <brayns/engine/framebuffer/types/StaticFrameType.h>
+#include <brayns/engine/framebuffer/types/StaticFrameHandler.h>
 
 #include <brayns/network/common/ProgressHandler.h>
 
@@ -155,7 +155,7 @@ public:
         // Framebuffer
         auto &imageSettings = params.image_settings;
         auto &imageSize = imageSettings.getSize();
-        auto framebuffer = brayns::Framebuffer(std::make_unique<brayns::StaticFrameType>());
+        auto framebuffer = brayns::Framebuffer(std::make_unique<brayns::StaticFrameHandler>());
         framebuffer.setAccumulation(false);
         framebuffer.setFormat(brayns::PixelFormat::StandardRgbaI8);
         framebuffer.setFrameSize(imageSize);
@@ -165,7 +165,7 @@ public:
         auto &cameraData = params.camera;
         auto &cameraFactory = factories.cameras;
         auto camera = cameraFactory.createOr(cameraData, engine.getCamera());
-        camera.setAspectRatio(framebuffer.getAspectRatio());
+        camera.setAspectRatioFromFrameSize(imageSize);
         camera.setView(params.camera_view);
         camera.commit();
 

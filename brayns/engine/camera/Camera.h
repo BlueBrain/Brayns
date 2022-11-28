@@ -105,7 +105,7 @@ public:
      * @brief Sets the render plane aspect ratio.
      * @param aspectRatio (width/height).
      */
-    void setAspectRatio(float aspectRatio);
+    void setAspectRatioFromFrameSize(const Vector2ui &frameSize);
 
     /**
      * @brief Calls the underlying OSPRay commit function, if any parameter has been modified, and resets the modified

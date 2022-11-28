@@ -29,18 +29,18 @@
 
 namespace brayns
 {
-class IFrameType
+class IFrameHandler
 {
 public:
-    IFrameType() = default;
+    IFrameHandler() = default;
 
-    IFrameType(const IFrameType &) = delete;
-    IFrameType &operator=(const IFrameType &) = delete;
+    IFrameHandler(const IFrameHandler &) = delete;
+    IFrameHandler &operator=(const IFrameHandler &) = delete;
 
-    IFrameType(IFrameType &&) = delete;
-    IFrameType &operator=(IFrameType &&) = delete;
+    IFrameHandler(IFrameHandler &&) = delete;
+    IFrameHandler &operator=(IFrameHandler &&) = delete;
 
-    virtual ~IFrameType() = default;
+    virtual ~IFrameHandler() = default;
 
     /**
      * @copydoc Framebuffer::commit()
@@ -53,34 +53,14 @@ public:
     virtual void setFrameSize(const Vector2ui &frameSize) = 0;
 
     /**
-     * @copydoc Framebuffer::getFrameSize()
-     */
-    virtual const Vector2ui &getFrameSize() const noexcept = 0;
-
-    /**
-     * @copydoc Framebuffer::getAspectRatio()
-     */
-    virtual float getAspectRatio() const noexcept = 0;
-
-    /**
      * @copydoc Framebuffer::setAccumulation(bool)
      */
     virtual void setAccumulation(bool accumulation) noexcept = 0;
 
     /**
-     * @copydoc Framebuffer::isAccumulating()
-     */
-    virtual bool isAccumulating() const noexcept = 0;
-
-    /**
      * @copydoc Framebuffer::setFormat(PixelFormat)
      */
     virtual void setFormat(PixelFormat frameBufferFormat) noexcept = 0;
-
-    /**
-     * @copydoc Framebuffer::getFormat()
-     */
-    virtual PixelFormat getFormat() const noexcept = 0;
 
     /**
      * @copydoc Framebuffer::clear()

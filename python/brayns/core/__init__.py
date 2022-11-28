@@ -33,6 +33,7 @@ from .camera import *
 from .clipping import *
 from .color_ramp import *
 from .coloring import *
+from .framebuffer import *
 from .geometry import *
 from .light import *
 from .loader import *
@@ -72,6 +73,7 @@ __all__ = [
     'EmissiveMaterial',
     'enable_simulation',
     'Entrypoint',
+    'Framebuffer',
     'Geometry',
     'get_application',
     'get_bounds',
@@ -118,6 +120,7 @@ __all__ = [
     'Plane',
     'PlasticMaterial',
     'ProductionRenderer',
+    'ProgressiveFramebuffer',
     'Projection',
     'QuadLight',
     'remove_models',
@@ -127,6 +130,7 @@ __all__ = [
     'set_camera_view',
     'set_camera',
     'set_color_ramp',
+    'set_framebuffer',
     'set_material',
     'set_model_color',
     'set_renderer',
@@ -135,6 +139,7 @@ __all__ = [
     'Simulation',
     'Snapshot',
     'Sphere',
+    'StaticFramebuffer',
     'stop',
     'TimeUnit',
     'update_model',

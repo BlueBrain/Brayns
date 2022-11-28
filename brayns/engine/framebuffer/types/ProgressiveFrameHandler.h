@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,25 +21,22 @@
 
 #pragma once
 
-#include <brayns/engine/framebuffer/IFrameType.h>
-#include <brayns/utils/ModifiedFlag.h>
+#include <brayns/engine/framebuffer/IFrameHandler.h>
+
+#include "StaticFrameHandler.h"
 
 namespace brayns
 {
-class StaticFrameType final : public IFrameType
+class ProgressiveFrameHandler final : public IFrameHandler
 {
 public:
+    ProgressiveFrameHandler(uint32_t scale = 4);
+
     bool commit() override;
 
     void setFrameSize(const Vector2ui &frameSize) override;
-    const Vector2ui &getFrameSize() const noexcept override;
-    float getAspectRatio() const noexcept override;
-
     void setAccumulation(bool accumulation) noexcept override;
-    bool isAccumulating() const noexcept override;
-
     void setFormat(PixelFormat frameBufferFormat) noexcept override;
-    PixelFormat getFormat() const noexcept override;
 
     void clear() noexcept override;
 
@@ -52,12 +50,9 @@ public:
     const ospray::cpp::FrameBuffer &getHandle() const noexcept override;
 
 private:
-    Vector2ui _frameSize = Vector2ui(800u, 600u);
-    PixelFormat _format = PixelFormat::StandardRgbaI8;
-    size_t _accumFrames = 0;
-    bool _accumulation = true;
-    bool _newAccumulationFrame = false;
-    ospray::cpp::FrameBuffer _handle;
-    ModifiedFlag _flag;
+    bool _lowResFrame = true;
+    uint32_t _scale;
+    StaticFrameHandler _lowRes;
+    StaticFrameHandler _highRes;
 };
 }

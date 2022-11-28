@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "IFrameType.h"
+#include "IFrameHandler.h"
 #include "PixelFormat.h"
 
 #include <brayns/utils/MathTypes.h>
@@ -37,13 +37,13 @@ public:
      *
      * @param frame
      */
-    Framebuffer(std::unique_ptr<IFrameType> frame);
+    Framebuffer(std::unique_ptr<IFrameHandler> frame);
 
     /**
      * @brief Sets the type of frame which this framebuffer will integrate.
      * @param frame Frame type object.
      */
-    void setFrameType(std::unique_ptr<IFrameType> frame);
+    void setFrameHandler(std::unique_ptr<IFrameHandler> frame);
 
     /**
      * @brief Syncs this object data to the Ospray backend framebuffer.
@@ -54,13 +54,7 @@ public:
     /**
      * @brief Sets the frame dimensions (width x height).
      */
-    void setFrameSize(const Vector2ui &frameSize);
-
-    /**
-     * @brief Returns the frame aspect ratio (width / height).
-     * @return float
-     */
-    float getAspectRatio() const noexcept;
+    void setFrameSize(const Vector2ui &frameSize) noexcept;
 
     /**
      * @brief Enables or disables rendering accumulation.
@@ -69,20 +63,10 @@ public:
     void setAccumulation(bool accumulation) noexcept;
 
     /**
-     * @brief Returns wether this framebuffer has accumulating rendering enabled or not.
-     */
-    bool isAccumulating() const noexcept;
-
-    /**
      * @brief Sets the framebuffer pixel format.
      * @param frameBufferFormat Format to set.
      */
     void setFormat(PixelFormat frameBufferFormat) noexcept;
-
-    /**
-     * @brief Returns the framebuffer pixel format.
-     */
-    PixelFormat getFormat() const noexcept;
 
     /**
      * @brief Resets the accumulation frames to 0.
@@ -127,6 +111,6 @@ public:
     const ospray::cpp::FrameBuffer &getHandle() const noexcept;
 
 private:
-    std::unique_ptr<IFrameType> _frame;
+    std::unique_ptr<IFrameHandler> _frame;
 };
 }
