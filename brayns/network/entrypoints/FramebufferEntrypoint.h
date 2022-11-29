@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2022 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,22 +20,36 @@
 
 #pragma once
 
-#include "Image.h"
+#include <brayns/engine/core/Engine.h>
+
+#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/ProgressiveFrameMessage.h>
 
 namespace brayns
 {
-/**
- * @brief Helper class to flip an image.
- *
- */
-class ImageFlipper
+class SetStaticFramebufferEntrypoint final : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
-    /**
-     * @brief Flip the given image vertically (first row becomes last row).
-     *
-     * @param image Image to flip.
-     */
-    static void flipVertically(Image &image);
+    SetStaticFramebufferEntrypoint(Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+    void onRequest(const Request &request) override;
+
+private:
+    Engine &_engine;
 };
-} // namespace brayns
+
+class SetProgressiveFramebufferEntrypoint final : public Entrypoint<ProgressiveFrameMessage, EmptyMessage>
+{
+public:
+    SetProgressiveFramebufferEntrypoint(Engine &engine);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+    void onRequest(const Request &request) override;
+
+private:
+    Engine &_engine;
+};
+}

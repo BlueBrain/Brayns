@@ -36,8 +36,8 @@ namespace brayns
 {
 void RendererTraits<Production>::updateData(ospray::cpp::Renderer &handle, Production &data)
 {
-    handle.setParam(ProductionParameters::spp, data.samplesPerPixel);
-    handle.setParam(ProductionParameters::pathLength, data.maxRayBounces);
+    handle.setParam(ProductionParameters::spp, static_cast<int>(data.samplesPerPixel));
+    handle.setParam(ProductionParameters::pathLength, static_cast<int>(data.maxRayBounces));
     handle.setParam(ProductionParameters::background, data.backgroundColor);
 }
 }

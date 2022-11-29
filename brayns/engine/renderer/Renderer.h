@@ -90,9 +90,9 @@ public:
 
     /**
      * @brief Returns the number of pixels to be sent by this renderer.
-     * @return int32_t
+     * @return size_t
      */
-    int32_t getSamplesPerPixel() const noexcept;
+    size_t getSamplesPerPixel() const noexcept;
 
     /**
      * @brief Returns the renderer name.

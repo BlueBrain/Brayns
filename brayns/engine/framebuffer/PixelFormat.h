@@ -20,25 +20,30 @@
 
 #pragma once
 
-#include <brayns/engine/renderer/RendererTraits.h>
-#include <brayns/utils/MathTypes.h>
-
 namespace brayns
 {
-struct Production
+/**
+ * @brief Pixel storage format in framebuffer.
+ *
+ */
+enum class PixelFormat
 {
-    size_t samplesPerPixel = 5;
-    size_t maxRayBounces = 3;
-    Vector4f backgroundColor = Vector4f(0.f, 0.f, 0.f, 1.f);
-};
+    /**
+     * @brief 4 channels of 8 bits each with lineal color curve.
+     *
+     */
+    RgbaI8,
 
-template<>
-class RendererTraits<Production>
-{
-public:
-    inline static const std::string handleName = "pathtracer";
-    inline static const std::string name = "production";
+    /**
+     * @brief 4 channels of 8 bits each with non-lineal color curve.
+     *
+     */
+    StandardRgbaI8,
 
-    static void updateData(ospray::cpp::Renderer &handle, Production &data);
+    /**
+     * @brief 4 channels of 32 bits each.
+     *
+     */
+    RgbaF32
 };
 }

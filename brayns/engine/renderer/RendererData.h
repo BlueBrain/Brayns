@@ -33,7 +33,7 @@ class IRendererData
 public:
     virtual ~IRendererData() = default;
     virtual void pushTo(ospray::cpp::Renderer &handle) = 0;
-    virtual int32_t getSamplesPerPixel() const noexcept = 0;
+    virtual size_t getSamplesPerPixel() const noexcept = 0;
     virtual std::unique_ptr<IRendererData> clone() const noexcept = 0;
 };
 
@@ -53,7 +53,7 @@ public:
         RendererTraits<Type>::updateData(handle, data);
     }
 
-    int32_t getSamplesPerPixel() const noexcept override
+    size_t getSamplesPerPixel() const noexcept override
     {
         return data.samplesPerPixel;
     }

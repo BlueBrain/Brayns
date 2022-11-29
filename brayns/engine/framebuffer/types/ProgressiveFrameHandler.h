@@ -20,25 +20,38 @@
 
 #pragma once
 
-#include <brayns/engine/renderer/RendererTraits.h>
-#include <brayns/utils/MathTypes.h>
+#include <brayns/engine/framebuffer/IFrameHandler.h>
+
+#include "StaticFrameHandler.h"
 
 namespace brayns
 {
-struct Production
-{
-    size_t samplesPerPixel = 5;
-    size_t maxRayBounces = 3;
-    Vector4f backgroundColor = Vector4f(0.f, 0.f, 0.f, 1.f);
-};
-
-template<>
-class RendererTraits<Production>
+class ProgressiveFrameHandler final : public IFrameHandler
 {
 public:
-    inline static const std::string handleName = "pathtracer";
-    inline static const std::string name = "production";
+    ProgressiveFrameHandler(uint32_t scale = 4);
 
-    static void updateData(ospray::cpp::Renderer &handle, Production &data);
+    bool commit() override;
+
+    void setFrameSize(const Vector2ui &frameSize) override;
+    void setAccumulation(bool accumulation) noexcept override;
+    void setFormat(PixelFormat frameBufferFormat) noexcept override;
+
+    void clear() noexcept override;
+
+    void incrementAccumFrames() noexcept override;
+    size_t getAccumulationFrameCount() const noexcept override;
+    bool hasNewAccumulationFrame() const noexcept override;
+    void resetNewAccumulationFrame() noexcept override;
+
+    Image getImage() override;
+
+    const ospray::cpp::FrameBuffer &getHandle() const noexcept override;
+
+private:
+    bool _lowResFrame = true;
+    uint32_t _scale;
+    StaticFrameHandler _lowRes;
+    StaticFrameHandler _highRes;
 };
 }

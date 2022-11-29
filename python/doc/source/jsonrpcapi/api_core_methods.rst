@@ -4380,6 +4380,51 @@ null.
 
 ----
 
+set-framebuffer-progressive
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Stablishes a progressive-resolution frame rendering on the engine.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "scale": {
+                "description": "Frame size reduction factor",
+                "type": "integer",
+                "default": 4,
+                "minimum": 0
+            }
+        },
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always
+null.
+
+----
+
+set-framebuffer-static
+~~~~~~~~~~~~~~~~~~~~~~
+
+Stablishes a static frame rendering on the engine.
+
+**Params**:
+
+This entrypoint has no params, the "params" field can hence be omitted or null.
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always
+null.
+
+----
+
 set-material-carpaint
 ~~~~~~~~~~~~~~~~~~~~~
 

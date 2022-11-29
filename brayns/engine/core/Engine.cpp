@@ -22,6 +22,7 @@
 
 #include <brayns/engine/camera/projections/Perspective.h>
 #include <brayns/engine/core/FrameRenderer.h>
+#include <brayns/engine/framebuffer/types/StaticFrameHandler.h>
 #include <brayns/engine/renderer/types/Interactive.h>
 #include <brayns/utils/Log.h>
 
@@ -96,7 +97,7 @@ public:
         auto &appParams = params.getApplicationParameters();
         auto &frameSize = appParams.getWindowSize();
         fb.setFrameSize(frameSize);
-        camera.setAspectRatio(fb.getAspectRatio());
+        camera.setAspectRatioFromFrameSize(frameSize);
     }
 };
 }
@@ -116,6 +117,7 @@ Engine::OsprayModuleHandler::~OsprayModuleHandler()
 Engine::Engine(ParametersManager &parameters)
     : _params(parameters)
     , _osprayDevice(OsprayDeviceInitializer::init(parameters))
+    , _frameBuffer(std::make_unique<StaticFrameHandler>())
     , _camera(Perspective())
     , _renderer(Interactive())
 {
@@ -209,7 +211,7 @@ void Engine::_render()
 {
     // Check wether we should keep rendering or not
     auto maxSpp = _renderer.getSamplesPerPixel();
-    auto currentSpp = _frameBuffer.numAccumFrames();
+    auto currentSpp = _frameBuffer.getAccumulationFrameCount();
     if (currentSpp >= maxSpp)
     {
         return;

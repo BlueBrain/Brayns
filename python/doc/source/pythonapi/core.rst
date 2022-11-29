@@ -142,6 +142,14 @@ Entrypoint
     :undoc-members:
     :show-inheritance:
 
+Framebuffer
+~~~~~~~~~~~
+
+.. automodule:: brayns.core.framebuffer.framebuffer
+    :members: Framebuffer
+    :undoc-members:
+    :show-inheritance:
+
 Geometry
 ~~~~~~~~
 
@@ -326,6 +334,14 @@ ProductionRenderer
     :undoc-members:
     :show-inheritance:
 
+ProgressiveFramebuffer
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: brayns.core.framebuffer.progressive_framebuffer
+    :members: ProgressiveFramebuffer
+    :undoc-members:
+    :show-inheritance:
+
 Projection
 ~~~~~~~~~~
 
@@ -379,6 +395,14 @@ Sphere
 
 .. automodule:: brayns.core.geometry.sphere
     :members: Sphere
+    :undoc-members:
+    :show-inheritance:
+
+StaticFramebuffer
+~~~~~~~~~~~~~~~~~
+
+.. automodule:: brayns.core.framebuffer.static_framebuffer
+    :members: StaticFramebuffer
     :undoc-members:
     :show-inheritance:
 
@@ -470,6 +494,14 @@ clear_models
 
 .. automodule:: brayns.core.model.clear_models
     :members: clear_models
+    :undoc-members:
+    :show-inheritance:
+
+clear_renderables
+~~~~~~~~~~~~~~~~~
+
+.. automodule:: brayns.core.model.clear_renderables
+    :members: clear_renderables
     :undoc-members:
     :show-inheritance:
 
@@ -710,6 +742,14 @@ set_color_ramp
 
 .. automodule:: brayns.core.color_ramp.set_color_ramp
     :members: set_color_ramp
+    :undoc-members:
+    :show-inheritance:
+
+set_framebuffer
+~~~~~~~~~~~~~~~
+
+.. automodule:: brayns.core.framebuffer.set_framebuffer
+    :members: set_framebuffer
     :undoc-members:
     :show-inheritance:
 

@@ -27,11 +27,11 @@ namespace brayns
 {
 struct Interactive
 {
-    int32_t samplesPerPixel = 1;
-    int32_t maxRayBounces = 3;
+    size_t samplesPerPixel = 1;
+    size_t maxRayBounces = 3;
     Vector4f backgroundColor = Vector4f(.004f, .016f, .102f, 0.f);
     bool shadowsEnabled = true;
-    int32_t aoSamples = 0;
+    size_t aoSamples = 0;
 };
 
 template<>
