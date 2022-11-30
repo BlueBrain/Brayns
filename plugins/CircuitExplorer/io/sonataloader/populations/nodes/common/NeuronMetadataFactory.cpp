@@ -18,6 +18,8 @@
 
 #include "NeuronMetadataFactory.h"
 
+#include <brayns/engine/components/Metadata.h>
+
 namespace sonataloader
 {
 void NeuronMetadataFactory::create(NodeLoadContext &context)
@@ -25,6 +27,8 @@ void NeuronMetadataFactory::create(NodeLoadContext &context)
     auto &model = context.model;
     auto &metadata = model.getComponents().add<brayns::Metadata>();
 
+    metadata["population_type"] = "node";
+    metadata["population_name"] = context.population.name();
     metadata["loaded_neuron_count"] = std::to_string(context.selection.flatSize());
 
     auto &nodeSets = context.params.node_sets;

@@ -36,6 +36,10 @@ class Morphology:
     :type load_dendrites: bool, optional
     :param geometry_type: How to load geometries, defaults to smooth.
     :type geometry_type: GeometryType, optional
+    :param resampling: Min cos of angle between segments to merge them.
+    :type resampling: float
+    :param subsampling: Step factor to skip morphology samples.
+    :type subsmapling int
     """
 
     radius_multiplier: float = 1.0
@@ -43,3 +47,5 @@ class Morphology:
     load_axon: bool = False
     load_dendrites: bool = False
     geometry_type: GeometryType = GeometryType.SMOOTH
+    resampling: float = 2
+    subsampling: int = 1

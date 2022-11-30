@@ -37,7 +37,7 @@ class TestMorphologyLoader(unittest.TestCase):
                 load_soma=True,
                 load_axon=True,
                 load_dendrites=True,
-                geometry_type=brayns.GeometryType.ORIGINAL
+                geometry_type=brayns.GeometryType.ORIGINAL,
             ))
         properties = {
             'radius_multiplier': 3.0,
@@ -45,6 +45,8 @@ class TestMorphologyLoader(unittest.TestCase):
             'load_axon': True,
             'load_dendrites': True,
             'geometry_type': 'original',
+            'resampling': 2.0,
+            'subsampling': 1,
         }
         self.assertEqual(loader.get_properties(), properties)
 

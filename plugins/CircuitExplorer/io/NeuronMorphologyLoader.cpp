@@ -126,15 +126,12 @@ std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
 
     SectionLoadChecker::check(input);
 
-    auto radMultiplier = input.radius_multiplier;
     auto soma = input.load_soma;
     auto axon = input.load_axon;
     auto dend = input.load_dendrites;
-    auto geometryType = input.geometry_type;
-
     NeuronMorphology morphology = NeuronMorphologyReader::read(path, soma, axon, dend);
 
-    const auto pipeline = NeuronMorphologyPipeline::fromParameters(geometryType, radMultiplier);
+    auto pipeline = NeuronMorphologyPipeline::fromParameters(input);
     pipeline.process(morphology);
 
     auto neuronBuilder = NeuronGeometryBuilder(morphology);

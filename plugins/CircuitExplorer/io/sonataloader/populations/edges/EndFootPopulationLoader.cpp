@@ -18,6 +18,8 @@
 
 #include "EndFootPopulationLoader.h"
 
+#include "common/EdgeMetadataFactory.h"
+
 #include <brayns/json/Json.h>
 
 #include <api/circuit/EndfeetCircuitBuilder.h>
@@ -182,5 +184,7 @@ void EndFootPopulationLoader::load(EdgeLoadContext &context) const
 
     auto buildContext = EndfeetCircuitBuilder::Context{std::move(endfeetGeometry), ColorDataFactory::create(context)};
     EndfeetCircuitBuilder::build(context.model, std::move(buildContext));
+
+    EdgeMetadataFactory::create(context);
 }
 } // namespace sonataloader

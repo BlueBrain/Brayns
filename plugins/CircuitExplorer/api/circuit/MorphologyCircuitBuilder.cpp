@@ -91,9 +91,7 @@ public:
         auto soma = morphologyParameters.load_soma;
         auto axon = morphologyParameters.load_axon;
         auto dendrites = morphologyParameters.load_dendrites;
-        auto radiusMultiplier = morphologyParameters.radius_multiplier;
-        auto geometryType = morphologyParameters.geometry_type;
-        auto pipeline = NeuronMorphologyPipeline::fromParameters(geometryType, radiusMultiplier);
+        auto pipeline = NeuronMorphologyPipeline::fromParameters(morphologyParameters);
 
         auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
         {

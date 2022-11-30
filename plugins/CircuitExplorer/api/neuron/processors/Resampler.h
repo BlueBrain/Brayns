@@ -18,13 +18,17 @@
 
 #pragma once
 
-#include <io/sonataloader/LoadContext.h>
+#include <api/neuron/INeuronMorphologyProcessor.h>
 
-namespace sonataloader
-{
-class NeuronMetadataFactory
+/**
+ * @brief Optimizes morphology samples
+ */
+class Resampler final : public INeuronMorphologyProcessor
 {
 public:
-    static void create(NodeLoadContext &context);
+    Resampler(float treshold);
+    void process(NeuronMorphology &morphology) const override;
+
+private:
+    float _treshold;
 };
-}

@@ -39,7 +39,8 @@ BRAYNS_JSON_OBJECT_ENTRY(uint32_t, simulation_frame, "Simulation frame to render
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     file_path,
-    "Snapshot will be saved at this path if specified, otherwise it will be returned as binary data with format from image_settings",
+    "Snapshot will be saved at this path if specified, otherwise it will be returned as binary data with format from "
+    "image_settings",
     Required(false))
 BRAYNS_JSON_OBJECT_END()
 

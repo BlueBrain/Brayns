@@ -49,4 +49,16 @@ BRAYNS_JSON_OBJECT_ENTRY(
     geometry_type,
     "Geometry generation configuration",
     brayns::Default("smooth"))
+BRAYNS_JSON_OBJECT_ENTRY(
+    float,
+    resampling,
+    "Minimum cosine of the angle between 2 segments to consider them aligned, and thus remove the middle sample. "
+    "Resampling can be disabled with any value higher than 1",
+    brayns::Default(0.9f),
+    brayns::Minimum(0.f))
+BRAYNS_JSON_OBJECT_ENTRY(
+    uint32_t,
+    subsampling,
+    "Skip factor when converting samples into geometry. A value of 1 or less will disable subsampling",
+    brayns::Default(1))
 BRAYNS_JSON_OBJECT_END()
