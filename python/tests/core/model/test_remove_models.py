@@ -32,7 +32,3 @@ class TestRemoveModels(unittest.TestCase):
         brayns.remove_models(instance, ids)
         self.assertEqual(instance.method, 'remove-model')
         self.assertEqual(instance.params, {'ids': ids})
-
-
-if __name__ == '__main__':
-    unittest.main()

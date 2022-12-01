@@ -43,7 +43,3 @@ class TestOpacityCurve(unittest.TestCase):
         ]
         test = curve.apply(colors)
         self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()

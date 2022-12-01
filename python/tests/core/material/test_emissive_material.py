@@ -40,7 +40,3 @@ class TestEmissiveMaterial(unittest.TestCase):
         test.update_properties({'intensity': 2, 'color': [1, 0, 0]})
         self.assertEqual(test.intensity, 2)
         self.assertEqual(test.color, brayns.Color3.red)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -52,7 +52,3 @@ class TestGetCircuitIds(unittest.TestCase):
         self.assertEqual(test, ids)
         self.assertEqual(instance.method, 'get-circuit-ids')
         self.assertEqual(instance.params, {'model_id': 1})
-
-
-if __name__ == '__main__':
-    unittest.main()

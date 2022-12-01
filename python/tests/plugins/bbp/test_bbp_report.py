@@ -50,7 +50,3 @@ class TestBbpReport(unittest.TestCase):
         self.assertEqual(report.type, brayns.BbpReportType.COMPARTMENT)
         self.assertEqual(report.name, name)
         self.assertIsNone(report.spike_transition_time)
-
-
-if __name__ == '__main__':
-    unittest.main()

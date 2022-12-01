@@ -32,7 +32,3 @@ class TestSetCameraView(unittest.TestCase):
         brayns.set_camera_view(instance, MockView.view)
         self.assertEqual(instance.method, 'set-camera-view')
         self.assertEqual(instance.params, MockView.message)
-
-
-if __name__ == '__main__':
-    unittest.main()

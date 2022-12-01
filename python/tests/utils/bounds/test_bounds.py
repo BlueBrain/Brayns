@@ -107,7 +107,3 @@ class TestBounds(unittest.TestCase):
         test = bounds.rescale(scale)
         self.assertEqual(test.size, scale)
         self.assertEqual(test.center, bounds.center)
-
-
-if __name__ == '__main__':
-    unittest.main()

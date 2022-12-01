@@ -29,7 +29,3 @@ class TestSerializeSchema(unittest.TestCase):
     def test_serialize_schema(self) -> None:
         test = serialize_schema(MockSchema.schema)
         self.assertEqual(test, MockSchema.message)
-
-
-if __name__ == '__main__':
-    unittest.main()

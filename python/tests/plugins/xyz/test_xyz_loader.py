@@ -30,7 +30,3 @@ class TestXyzLoader(unittest.TestCase):
 
     def test_properties(self) -> None:
         self.assertEqual(brayns.XyzLoader().get_properties(), {})
-
-
-if __name__ == '__main__':
-    unittest.main()

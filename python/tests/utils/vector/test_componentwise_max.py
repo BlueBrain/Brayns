@@ -38,7 +38,3 @@ class TestComponentwiseMax(unittest.TestCase):
         test = brayns.componentwise_max([])
         ref = brayns.Vector3.zero
         self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()

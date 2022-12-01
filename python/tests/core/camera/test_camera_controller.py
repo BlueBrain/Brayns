@@ -71,7 +71,3 @@ class TestCameraController(unittest.TestCase):
         self.assertAlmostEqual(view.up.y, 1)
         self.assertAlmostEqual(view.up.z, 0)
         self.assertEqual(camera.projection, projection)
-
-
-if __name__ == '__main__':
-    unittest.main()

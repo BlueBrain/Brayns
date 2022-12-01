@@ -34,7 +34,3 @@ class TestGetCameraProjection(unittest.TestCase):
         self.assertEqual(test, ref)
         self.assertEqual(instance.method, 'get-camera-orthographic')
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()

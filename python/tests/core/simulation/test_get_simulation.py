@@ -34,7 +34,3 @@ class TestGetSimulation(unittest.TestCase):
         self.assertEqual(test, MockSimulation.simulation)
         self.assertEqual(instance.method, 'get-simulation-parameters')
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()

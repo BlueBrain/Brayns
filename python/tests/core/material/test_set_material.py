@@ -35,7 +35,3 @@ class TestSetMaterial(unittest.TestCase):
             'model_id': 0,
             'material': material.get_properties()
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -33,7 +33,3 @@ class TestGetMethods(unittest.TestCase):
         self.assertEqual(instance.method, 'registry')
         self.assertIsNone(instance.params)
         self.assertEqual(tests, methods)
-
-
-if __name__ == '__main__':
-    unittest.main()

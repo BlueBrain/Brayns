@@ -32,7 +32,3 @@ class TestSetCameraProjection(unittest.TestCase):
         brayns.set_camera_projection(instance, test)
         self.assertEqual(instance.method, 'set-camera-orthographic')
         self.assertEqual(instance.params, test.get_properties())
-
-
-if __name__ == '__main__':
-    unittest.main()

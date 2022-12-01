@@ -34,7 +34,3 @@ class TestGetMaterial(unittest.TestCase):
         self.assertEqual(test, material)
         self.assertEqual(instance.method, 'get-material-phong')
         self.assertEqual(instance.params, {'id': 0})
-
-
-if __name__ == '__main__':
-    unittest.main()

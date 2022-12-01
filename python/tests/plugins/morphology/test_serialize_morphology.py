@@ -44,7 +44,3 @@ class TestSerializeMorphology(unittest.TestCase):
             'resampling': 0.5,
             'subsampling': 5,
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

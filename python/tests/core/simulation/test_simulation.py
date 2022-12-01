@@ -50,7 +50,3 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(MockSimulation.simulation.get_time(0), 0)
         self.assertEqual(MockSimulation.simulation.get_time(1), 0.1)
         self.assertEqual(MockSimulation.simulation.get_time(5), 0.5)
-
-
-if __name__ == '__main__':
-    unittest.main()

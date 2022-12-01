@@ -30,7 +30,3 @@ class TestDeserializeApplication(unittest.TestCase):
     def test_deserialize_application(self) -> None:
         test = deserialize_application(MockApplication.message)
         self.assertEqual(test, MockApplication.application)
-
-
-if __name__ == '__main__':
-    unittest.main()

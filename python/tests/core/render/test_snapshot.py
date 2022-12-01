@@ -102,7 +102,3 @@ class TestSnapshot(unittest.TestCase):
                 'size': size,
             }
         }
-
-
-if __name__ == '__main__':
-    unittest.main()

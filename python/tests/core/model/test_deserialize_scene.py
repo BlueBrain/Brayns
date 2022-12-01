@@ -30,7 +30,3 @@ class TestDeserializeScene(unittest.TestCase):
     def test_deserialize_scene(self) -> None:
         test = deserialize_scene(MockScene.message)
         self.assertEqual(test, MockScene.scene)
-
-
-if __name__ == '__main__':
-    unittest.main()

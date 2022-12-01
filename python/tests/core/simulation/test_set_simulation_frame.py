@@ -31,7 +31,3 @@ class TestSetSimulationFrame(unittest.TestCase):
         brayns.set_simulation_frame(instance, 5)
         self.assertEqual(instance.method, 'set-simulation-parameters')
         self.assertEqual(instance.params, {'current': 5})
-
-
-if __name__ == '__main__':
-    unittest.main()

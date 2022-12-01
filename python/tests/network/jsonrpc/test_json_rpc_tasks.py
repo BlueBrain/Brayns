@@ -98,7 +98,3 @@ class TestJsonRpcTasks(unittest.TestCase):
         tasks.add_progress(progress)
         self.assertTrue(task.has_progress())
         self.assertEqual(task.get_progress(), progress)
-
-
-if __name__ == '__main__':
-    unittest.main()

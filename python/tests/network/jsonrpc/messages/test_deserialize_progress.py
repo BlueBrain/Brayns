@@ -30,7 +30,3 @@ class TestDeserializeProgress(unittest.TestCase):
     def test_deserialize_progress(self) -> None:
         test = deserialize_progress(MockProgress.message)
         self.assertEqual(test, MockProgress.progress)
-
-
-if __name__ == '__main__':
-    unittest.main()

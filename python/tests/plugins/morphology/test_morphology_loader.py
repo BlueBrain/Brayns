@@ -49,7 +49,3 @@ class TestMorphologyLoader(unittest.TestCase):
             'subsampling': 1,
         }
         self.assertEqual(loader.get_properties(), properties)
-
-
-if __name__ == '__main__':
-    unittest.main()

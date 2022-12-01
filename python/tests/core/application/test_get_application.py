@@ -32,7 +32,3 @@ class TestGetApplication(unittest.TestCase):
         instance = MockInstance(MockApplication.message)
         test = brayns.get_application(instance)
         self.assertEqual(test, MockApplication.application)
-
-
-if __name__ == '__main__':
-    unittest.main()

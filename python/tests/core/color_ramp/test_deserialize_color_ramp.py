@@ -30,7 +30,3 @@ class TestDeserializeColorRamp(unittest.TestCase):
     def test_deserialize_color_ramp(self) -> None:
         test = deserialize_color_ramp(MockColorRamp.message)
         self.assertEqual(test, MockColorRamp.color_ramp)
-
-
-if __name__ == '__main__':
-    unittest.main()

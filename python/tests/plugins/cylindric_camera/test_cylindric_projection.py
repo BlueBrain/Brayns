@@ -49,7 +49,3 @@ class TestCylindricProjection(unittest.TestCase):
         test = brayns.CylindricProjection()
         test.update_properties({'fovy': 30})
         self.assertAlmostEqual(test.fovy.degrees, 30)
-
-
-if __name__ == '__main__':
-    unittest.main()

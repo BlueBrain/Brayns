@@ -35,7 +35,3 @@ class TestDirectionalLight(unittest.TestCase):
             'color': [1, 1, 1],
             'direction': [0, 1, 0],
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

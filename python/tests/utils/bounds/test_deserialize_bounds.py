@@ -29,7 +29,3 @@ class TestDeserializeBounds(unittest.TestCase):
     def test_from_dict(self) -> None:
         test = deserialize_bounds(MockBounds.message)
         self.assertEqual(test, MockBounds.bounds)
-
-
-if __name__ == '__main__':
-    unittest.main()

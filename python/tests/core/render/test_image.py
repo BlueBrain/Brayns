@@ -68,7 +68,3 @@ class TestImage(unittest.TestCase):
         self.assertEqual(test.max_accumulation, 2)
         self.assertFalse(test.data)
         self.assertTrue(test.full_quality)
-
-
-if __name__ == '__main__':
-    unittest.main()

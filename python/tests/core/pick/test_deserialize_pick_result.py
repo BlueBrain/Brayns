@@ -36,7 +36,3 @@ class TestDeserializePickResult(unittest.TestCase):
         message = MockPickResult.create_message(hit=False)
         test = deserialize_pick_result(message)
         self.assertIsNone(test)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -39,7 +39,3 @@ class TestParseHexColor(unittest.TestCase):
         test = brayns.parse_hex_color('0x2ca02c')
         ref = brayns.Color3(44, 160, 44) / 255
         self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()

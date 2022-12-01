@@ -36,7 +36,3 @@ class TestMetalMaterial(unittest.TestCase):
         test = brayns.MetalMaterial()
         test.update_properties({'roughness': 0.5})
         self.assertEqual(test.roughness, 0.5)
-
-
-if __name__ == '__main__':
-    unittest.main()

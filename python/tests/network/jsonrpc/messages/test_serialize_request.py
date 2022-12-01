@@ -38,7 +38,3 @@ class TestSerializeRequest(unittest.TestCase):
         ref = MockRequest.message
         del ref['id']
         self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()

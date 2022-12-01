@@ -31,8 +31,3 @@ class TestClearRenderables(unittest.TestCase):
         brayns.clear_renderables(instance)
         self.assertEqual(instance.method, 'clear-renderables')
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()
-

@@ -60,7 +60,3 @@ class TestPerspectiveProjection(unittest.TestCase):
         self.assertAlmostEqual(test.fovy.degrees, 30)
         self.assertEqual(test.aperture_radius, 1)
         self.assertEqual(test.focus_distance, 2)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -34,7 +34,3 @@ class TestAmbientLight(unittest.TestCase):
             'color': [1, 0, 0],
             'intensity': 12,
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

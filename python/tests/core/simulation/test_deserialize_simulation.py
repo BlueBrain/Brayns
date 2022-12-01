@@ -30,7 +30,3 @@ class TestDeserializeSimulation(unittest.TestCase):
     def test_deserialize_simulation(self) -> None:
         test = deserialize_simulation(MockSimulation.message)
         self.assertEqual(test, MockSimulation.simulation)
-
-
-if __name__ == '__main__':
-    unittest.main()

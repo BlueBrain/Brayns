@@ -54,7 +54,3 @@ class TestMovie(unittest.TestCase):
             'path',
         ]
         self.assertEqual(args, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()

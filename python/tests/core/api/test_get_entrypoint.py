@@ -34,7 +34,3 @@ class TestGetEntrypoint(unittest.TestCase):
         self.assertEqual(test, MockEntrypoint.entrypoint)
         self.assertEqual(instance.method, 'schema')
         self.assertEqual(instance.params, {'endpoint': 'test'})
-
-
-if __name__ == '__main__':
-    unittest.main()

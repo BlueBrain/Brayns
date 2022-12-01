@@ -42,7 +42,3 @@ class TestCapsule(unittest.TestCase):
             'p1': [1, 1, 1],
             'r1': 1,
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

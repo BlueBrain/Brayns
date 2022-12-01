@@ -90,7 +90,3 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(test.view, view)
         self.assertEqual(test.projection, ref.projection)
         self.assertIsNot(test.projection, ref.projection)
-
-
-if __name__ == '__main__':
-    unittest.main()

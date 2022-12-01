@@ -56,7 +56,3 @@ class TestProductionRenderer(unittest.TestCase):
         test = brayns.ProductionRenderer()
         test.update_properties(self.message)
         self.assertEqual(test, self.renderer)
-
-
-if __name__ == '__main__':
-    unittest.main()

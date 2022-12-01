@@ -33,7 +33,3 @@ class TestGetMaterialName(unittest.TestCase):
         self.assertEqual(test, name)
         self.assertEqual(instance.method, 'get-material-type')
         self.assertEqual(instance.params, {'id': 0})
-
-
-if __name__ == '__main__':
-    unittest.main()

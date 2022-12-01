@@ -46,7 +46,3 @@ class TestOrthographicProjection(unittest.TestCase):
         test = brayns.OrthographicProjection()
         test.update_properties({'height': 3})
         self.assertEqual(test.height, 3)
-
-
-if __name__ == '__main__':
-    unittest.main()

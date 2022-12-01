@@ -30,7 +30,3 @@ class TestProgressiveFramebuffer(unittest.TestCase):
     def test_get_properties(self) -> None:
         test = brayns.ProgressiveFramebuffer(10)
         self.assertEqual(test.get_properties(), {'scale': 10})
-
-
-if __name__ == '__main__':
-    unittest.main()

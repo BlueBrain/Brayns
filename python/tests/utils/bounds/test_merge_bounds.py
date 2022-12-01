@@ -41,7 +41,3 @@ class TestMergeBounds(unittest.TestCase):
         test = brayns.merge_bounds([])
         ref = brayns.Bounds.empty
         self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()

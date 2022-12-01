@@ -34,7 +34,3 @@ class TestGetModels(unittest.TestCase):
         self.assertEqual(test, MockScene.scene.models)
         self.assertEqual(instance.method, 'get-scene')
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()

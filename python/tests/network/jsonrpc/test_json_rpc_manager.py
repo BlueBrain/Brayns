@@ -72,7 +72,3 @@ class TestJsonRpcManager(unittest.TestCase):
     def _create_manager(self) -> JsonRpcManager:
         logger = logging.Logger('test')
         return JsonRpcManager(logger)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -31,7 +31,3 @@ class TestClearLight(unittest.TestCase):
         brayns.clear_lights(instance)
         self.assertEqual(instance.method, 'clear-lights')
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()

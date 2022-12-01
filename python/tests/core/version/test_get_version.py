@@ -32,7 +32,3 @@ class TestGetVersion(unittest.TestCase):
         instance = MockInstance(MockVersion.message)
         test = brayns.get_version(instance)
         self.assertEqual(test, MockVersion.version)
-
-
-if __name__ == '__main__':
-    unittest.main()

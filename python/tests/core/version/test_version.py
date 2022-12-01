@@ -42,7 +42,3 @@ class TestVersion(unittest.TestCase):
         test.check(test.tag)
         with self.assertRaises(brayns.VersionError):
             test.check('5.6.7')
-
-
-if __name__ == '__main__':
-    unittest.main()

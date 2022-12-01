@@ -26,7 +26,3 @@ class TestStaticFramebuffer(unittest.TestCase):
 
     def test_name(self) -> None:
         self.assertEqual(brayns.StaticFramebuffer.name, 'static')
-
-
-if __name__ == '__main__':
-    unittest.main()
