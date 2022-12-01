@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
+from testapi.image_validator import ImageValidator
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -28,3 +29,12 @@ class TestSetResolution(SimpleTestCase):
         brayns.set_resolution(self.instance, brayns.Resolution.ultra_hd)
         test = brayns.get_application(self.instance)
         self.assertEqual(test.resolution, brayns.Resolution.ultra_hd)
+
+    def test_render(self) -> None:
+        brayns.set_resolution(self.instance, brayns.Resolution.full_hd)
+        self.add_sphere()
+        ref = self.folder / 'full_hd.png'
+        snapshot = brayns.Snapshot()
+        data = snapshot.download(self.instance)
+        validator = ImageValidator()
+        validator.validate_data(data, ref)
