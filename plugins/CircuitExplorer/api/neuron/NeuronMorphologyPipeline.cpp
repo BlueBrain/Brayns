@@ -82,9 +82,9 @@ public:
 NeuronMorphologyPipeline NeuronMorphologyPipeline::fromParameters(const NeuronMorphologyLoaderParameters &parameters)
 {
     auto stageBuilder = StageBuilder();
+    stageBuilder.addGeometryStage(parameters.geometry_type);
     stageBuilder.addSubsamplingStage(parameters.subsampling);
     stageBuilder.addResamplingStage(parameters.resampling);
-    stageBuilder.addGeometryStage(parameters.geometry_type);
     stageBuilder.addRadiusStage(parameters.radius_multiplier);
     return NeuronMorphologyPipeline(std::move(stageBuilder.stages));
 }
