@@ -189,7 +189,3 @@ class TestVector3(unittest.TestCase):
         left = brayns.Vector3(1, 2, 3)
         right = brayns.Vector3(4, 5, 6)
         self.assertEqual(left.cross(right), brayns.Vector3(-3, 6, -3))
-
-
-if __name__ == '__main__':
-    unittest.main()

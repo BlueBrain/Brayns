@@ -148,7 +148,3 @@ class TestRotation(unittest.TestCase):
         self.assertAlmostEqual(test.x, 3.77731325)
         self.assertAlmostEqual(test.y, 0.02357039)
         self.assertAlmostEqual(test.z, 4.52163639)
-
-
-if __name__ == '__main__':
-    unittest.main()

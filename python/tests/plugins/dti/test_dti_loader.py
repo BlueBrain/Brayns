@@ -37,7 +37,3 @@ class TestDtiLoader(unittest.TestCase):
             'radius': 3,
             'spike_decay_time': 2,
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

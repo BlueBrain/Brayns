@@ -46,7 +46,3 @@ class TestDeserializeReply(unittest.TestCase):
     def test_deserialize_reply(self) -> None:
         test = deserialize_reply(self.message)
         self.assertEqual(test, self.reply)
-
-
-if __name__ == '__main__':
-    unittest.main()

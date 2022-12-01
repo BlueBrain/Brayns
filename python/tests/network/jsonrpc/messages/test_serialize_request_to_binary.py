@@ -37,7 +37,3 @@ class TestSerializeRequestToBinary(unittest.TestCase):
         ref = serialize_request_to_text(MockRequest.request)
         self.assertEqual(test, ref)
         self.assertEqual(test, MockRequest.text)
-
-
-if __name__ == '__main__':
-    unittest.main()

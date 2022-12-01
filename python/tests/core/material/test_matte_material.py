@@ -36,7 +36,3 @@ class TestMatteMaterial(unittest.TestCase):
         test = brayns.MatteMaterial()
         test.update_properties({'opacity': 0.5})
         self.assertEqual(test.opacity, 0.5)
-
-
-if __name__ == '__main__':
-    unittest.main()

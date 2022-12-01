@@ -67,7 +67,3 @@ class TestService(unittest.TestCase):
             'ca',
         ]
         self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()

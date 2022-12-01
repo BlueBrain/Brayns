@@ -61,7 +61,3 @@ class TestMovieFrames(unittest.TestCase):
         self.assertEqual(test[0], 0)
         self.assertEqual(test[-1], 100)
         self.assertEqual(len(test), 101)
-
-
-if __name__ == '__main__':
-    unittest.main()

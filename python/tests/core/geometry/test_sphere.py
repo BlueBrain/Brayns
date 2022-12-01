@@ -35,7 +35,3 @@ class TestSphere(unittest.TestCase):
             'center': [1, 1, 1],
             'radius': 1,
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

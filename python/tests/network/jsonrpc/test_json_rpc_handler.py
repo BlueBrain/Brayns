@@ -73,7 +73,3 @@ class TestJsonRpcHandler(unittest.TestCase):
         with self.assertLogs(self._logger, logging.ERROR) as context:
             self._handler.on_invalid_message(Exception())
         self.assertEqual(len(context.output), 1)
-
-
-if __name__ == '__main__':
-    unittest.main()

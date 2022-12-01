@@ -29,7 +29,3 @@ class TestDeserializeModel(unittest.TestCase):
     def test_deserialize_model(self) -> None:
         test = deserialize_model(MockModel.message)
         self.assertEqual(test, MockModel.model)
-
-
-if __name__ == '__main__':
-    unittest.main()

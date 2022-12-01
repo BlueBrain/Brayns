@@ -33,7 +33,3 @@ class TestGetRenderer(unittest.TestCase):
         self.assertEqual(test, ref)
         self.assertEqual(instance.method, 'get-renderer-production')
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()

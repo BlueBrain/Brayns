@@ -31,7 +31,3 @@ class TestSetResolution(unittest.TestCase):
         brayns.set_resolution(instance, brayns.Resolution(100, 200))
         self.assertEqual(instance.method, 'set-application-parameters')
         self.assertEqual(instance.params, {'viewport': [100, 200]})
-
-
-if __name__ == '__main__':
-    unittest.main()

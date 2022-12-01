@@ -36,7 +36,3 @@ class TestPhongMaterial(unittest.TestCase):
         test = brayns.PhongMaterial()
         test.update_properties({'opacity': 0.5})
         self.assertEqual(test.opacity, 0.5)
-
-
-if __name__ == '__main__':
-    unittest.main()

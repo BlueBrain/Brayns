@@ -51,7 +51,3 @@ class TestColor4(unittest.TestCase):
         ref = brayns.Color3(1, 2, 3)
         test = color.without_alpha
         self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()

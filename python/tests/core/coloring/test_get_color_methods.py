@@ -33,7 +33,3 @@ class TestGetColorMethods(unittest.TestCase):
         self.assertEqual(test, methods)
         self.assertEqual(instance.method, 'get-color-methods')
         self.assertEqual(instance.params, {'id': 0})
-
-
-if __name__ == '__main__':
-    unittest.main()

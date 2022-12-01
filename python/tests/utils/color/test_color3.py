@@ -29,7 +29,3 @@ class TestColor3(unittest.TestCase):
         test = list(brayns.Color3(1, 2, 3))
         ref = [1, 2, 3]
         self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()

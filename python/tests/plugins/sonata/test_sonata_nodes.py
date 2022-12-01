@@ -57,7 +57,3 @@ class TestSonataNodes(unittest.TestCase):
         self.assertIsNone(test.density)
         self.assertIsNone(test.names)
         self.assertEqual(test.ids, ids)
-
-
-if __name__ == '__main__':
-    unittest.main()

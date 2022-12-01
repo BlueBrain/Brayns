@@ -36,7 +36,3 @@ class TestGlassMaterial(unittest.TestCase):
         test = brayns.GlassMaterial()
         test.update_properties({'index_of_refraction': 2.5})
         self.assertEqual(test.refraction_index, 2.5)
-
-
-if __name__ == '__main__':
-    unittest.main()

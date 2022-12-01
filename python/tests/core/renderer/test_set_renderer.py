@@ -32,7 +32,3 @@ class TestSetRenderer(unittest.TestCase):
         brayns.set_renderer(instance, renderer)
         self.assertEqual(instance.method, 'set-renderer-production')
         self.assertEqual(instance.params, renderer.get_properties())
-
-
-if __name__ == '__main__':
-    unittest.main()

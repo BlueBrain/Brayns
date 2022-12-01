@@ -37,7 +37,3 @@ class TestGetColorMethodValues(unittest.TestCase):
             'id': 0,
             'method': method,
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

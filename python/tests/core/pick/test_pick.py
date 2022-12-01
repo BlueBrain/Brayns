@@ -35,7 +35,3 @@ class TestPick(unittest.TestCase):
         test = brayns.pick(instance, position)
         self.assertEqual(test, MockPickResult.result)
         self.assertEqual(instance.params, {'position': [0.5, 0.6]})
-
-
-if __name__ == '__main__':
-    unittest.main()

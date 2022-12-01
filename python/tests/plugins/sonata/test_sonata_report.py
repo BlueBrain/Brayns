@@ -72,7 +72,3 @@ class TestSonataNodes(unittest.TestCase):
         self.assertEqual(test.type, brayns.SonataReportType.BLOODFLOW_RADII)
         self.assertEqual(test.name, 'test')
         self.assertIsNone(test.spike_transition_time)
-
-
-if __name__ == '__main__':
-    unittest.main()

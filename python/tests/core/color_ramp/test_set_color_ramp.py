@@ -36,7 +36,3 @@ class TestSetColorRamp(unittest.TestCase):
             'id': 0,
             'color_ramp': MockColorRamp.message,
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

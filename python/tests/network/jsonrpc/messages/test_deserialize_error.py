@@ -30,7 +30,3 @@ class TestDeserializeError(unittest.TestCase):
     def test_deserialize_error(self) -> None:
         test = deserialize_error(MockError.message)
         self.assertEqual(test, MockError.error)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -91,7 +91,3 @@ class TestMeshLoader(unittest.TestCase):
             'loader_properties': loader.get_properties(),
         })
         self.assertEqual(instance.binary, data)
-
-
-if __name__ == '__main__':
-    unittest.main()

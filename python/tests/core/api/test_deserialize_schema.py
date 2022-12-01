@@ -29,7 +29,3 @@ class TestDeserializeSchema(unittest.TestCase):
     def test_deserialize_schema(self) -> None:
         test = deserialize_schema(MockSchema.message)
         self.assertEqual(test, MockSchema.schema)
-
-
-if __name__ == '__main__':
-    unittest.main()

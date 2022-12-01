@@ -30,7 +30,3 @@ class TestDeserializeVersion(unittest.TestCase):
     def test_deserialize_version(self) -> None:
         test = deserialize_version(MockVersion.message)
         self.assertEqual(test, MockVersion.version)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -53,7 +53,3 @@ class TestSetCircuitThickness(unittest.TestCase):
             'model_id': 1,
             'radius_multiplier': 3,
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -78,7 +78,3 @@ class TestQuaternion(unittest.TestCase):
     def test_inverse(self) -> None:
         test = brayns.Quaternion(1, 2, 3, 4)
         self.assertEqual(test * test.inverse, brayns.Quaternion.identity)
-
-
-if __name__ == '__main__':
-    unittest.main()

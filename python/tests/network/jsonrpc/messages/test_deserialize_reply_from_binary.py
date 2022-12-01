@@ -39,7 +39,3 @@ class TestDeserializeReplyFromBinary(unittest.TestCase):
         self.assertEqual(test.id, ref.id)
         self.assertEqual(test.result, ref.result)
         self.assertEqual(test.binary, binary)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -114,7 +114,3 @@ class TestView(unittest.TestCase):
         self.assertAlmostEqual(test.up.x, ref.x)
         self.assertAlmostEqual(test.up.y, ref.y)
         self.assertAlmostEqual(test.up.z, ref.z)
-
-
-if __name__ == '__main__':
-    unittest.main()

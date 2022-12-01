@@ -31,7 +31,3 @@ class TestClearModel(unittest.TestCase):
         brayns.clear_models(instance)
         self.assertEqual(instance.method, 'clear-models')
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()

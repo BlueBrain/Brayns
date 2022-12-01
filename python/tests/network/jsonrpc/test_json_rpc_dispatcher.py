@@ -63,7 +63,3 @@ class TestJsonRpcDispatcher(unittest.TestCase):
         self._dispatcher.dispatch_text(data)
         e = self._listener.get_data()
         self.assertIsInstance(e, Exception)
-
-
-if __name__ == '__main__':
-    unittest.main()

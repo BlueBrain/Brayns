@@ -29,7 +29,3 @@ class TestDeserializeTransform(unittest.TestCase):
     def test_deserialize_transform(self) -> None:
         test = deserialize_transform(MockTransform.message)
         self.assertEqual(test, MockTransform.transform)
-
-
-if __name__ == '__main__':
-    unittest.main()

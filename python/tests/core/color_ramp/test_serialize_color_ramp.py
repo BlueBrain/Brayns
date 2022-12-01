@@ -30,7 +30,3 @@ class TestSerializeColorRamp(unittest.TestCase):
     def test_serialize_color_ramp(self) -> None:
         test = serialize_color_ramp(MockColorRamp.color_ramp)
         self.assertEqual(test, MockColorRamp.message)
-
-
-if __name__ == '__main__':
-    unittest.main()

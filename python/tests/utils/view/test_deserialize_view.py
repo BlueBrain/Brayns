@@ -29,7 +29,3 @@ class TestDeserializeView(unittest.TestCase):
     def test_deserialize_view(self) -> None:
         test = deserialize_view(MockView.message)
         self.assertEqual(test, MockView.view)
-
-
-if __name__ == '__main__':
-    unittest.main()

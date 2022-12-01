@@ -45,7 +45,3 @@ class TestParseImageFormat(unittest.TestCase):
         path = pathlib.Path('test/stuff/image.png')
         test = brayns.parse_image_format(path)
         self.assertIs(test, brayns.ImageFormat.PNG)
-
-
-if __name__ == '__main__':
-    unittest.main()

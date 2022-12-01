@@ -47,7 +47,3 @@ class TestFovy(unittest.TestCase):
         fovy = brayns.Fovy(90, degrees=True)
         test = fovy.get_distance(2)
         self.assertAlmostEqual(test, 1)
-
-
-if __name__ == '__main__':
-    unittest.main()

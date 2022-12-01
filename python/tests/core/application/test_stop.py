@@ -31,7 +31,3 @@ class TestStop(unittest.TestCase):
         brayns.stop(instance)
         self.assertEqual(instance.method, 'quit')
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()

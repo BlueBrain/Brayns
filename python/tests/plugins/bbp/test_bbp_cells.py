@@ -57,7 +57,3 @@ class TestBbpCells(unittest.TestCase):
         self.assertIsNone(cells.density)
         self.assertIsNone(cells.targets)
         self.assertEqual(cells.gids, gids)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -35,7 +35,3 @@ class TestAddClippingGeometries(unittest.TestCase):
         self.assertEqual(test, MockModel.model)
         self.assertEqual(instance.method, brayns.ClipPlane.method)
         self.assertEqual(instance.params, plane.get_properties())
-
-
-if __name__ == '__main__':
-    unittest.main()

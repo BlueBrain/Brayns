@@ -33,7 +33,3 @@ class TestGetCameraView(unittest.TestCase):
         self.assertEqual(test, MockView.view)
         self.assertEqual(instance.method, 'get-camera-view')
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()

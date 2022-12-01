@@ -38,7 +38,3 @@ class TestBox(unittest.TestCase):
             'min': [0, 0, 0],
             'max': [1, 1, 1],
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

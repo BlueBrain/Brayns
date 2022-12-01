@@ -34,7 +34,3 @@ class TestGetColorRamp(unittest.TestCase):
         self.assertEqual(test, MockColorRamp.color_ramp)
         self.assertEqual(instance.method, 'get-color-ramp')
         self.assertEqual(instance.params, {'id': 0})
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -31,7 +31,3 @@ class TestClearClippingGeometries(unittest.TestCase):
         brayns.clear_clipping_geometries(instance)
         self.assertEqual(instance.method, 'clear-clip-planes')
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -34,7 +34,3 @@ class TestAddLight(unittest.TestCase):
         self.assertEqual(model, MockModel.model)
         self.assertEqual(instance.method, 'add-light-ambient')
         self.assertEqual(instance.params, light.get_properties())
-
-
-if __name__ == '__main__':
-    unittest.main()

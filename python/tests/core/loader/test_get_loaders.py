@@ -40,7 +40,3 @@ class TestGetLoaders(unittest.TestCase):
             dataclasses.replace(MockLoader.loader, name='test2'),
         ])
         self.assertIsNone(instance.params)
-
-
-if __name__ == '__main__':
-    unittest.main()

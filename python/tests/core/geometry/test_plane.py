@@ -33,7 +33,3 @@ class TestPlane(unittest.TestCase):
         plane = brayns.Plane(equation)
         test = plane.get_additional_properties()
         self.assertEqual(test, {'coefficients': [1, 2, 3, 4]})
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -33,7 +33,3 @@ class TestSetFramebuffer(unittest.TestCase):
         self.assertEqual(instance.params, {
             'scale': 10,
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

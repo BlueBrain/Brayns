@@ -44,7 +44,3 @@ class TestQuadLight(unittest.TestCase):
             'edge1': [1, 0, 0],
             'edge2': [0, 1, 0],
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

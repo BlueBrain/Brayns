@@ -34,7 +34,3 @@ class TestEnableSimulation(unittest.TestCase):
             'model_id': 0,
             'enabled': True
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

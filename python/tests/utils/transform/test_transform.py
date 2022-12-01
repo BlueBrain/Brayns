@@ -53,7 +53,3 @@ class TestTransform(unittest.TestCase):
         self.assertAlmostEqual(test.x, -1)
         self.assertAlmostEqual(test.y, 3)
         self.assertAlmostEqual(test.z, 3)
-
-
-if __name__ == '__main__':
-    unittest.main()

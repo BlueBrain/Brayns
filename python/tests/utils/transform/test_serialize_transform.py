@@ -29,7 +29,3 @@ class TestSerializeTransform(unittest.TestCase):
     def test_serialize_transform(self) -> None:
         test = serialize_transform(MockTransform.transform)
         self.assertEqual(test, MockTransform.message)
-
-
-if __name__ == '__main__':
-    unittest.main()

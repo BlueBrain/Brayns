@@ -34,7 +34,3 @@ class TestClipPlane(unittest.TestCase):
         test = plane.get_properties()
         ref = {'coefficients': [1, 2, 3, 4]}
         self.assertEqual(test, ref)
-
-
-if __name__ == '__main__':
-    unittest.main()

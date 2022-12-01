@@ -37,7 +37,3 @@ class TestProteinLoader(unittest.TestCase):
             'color_scheme': 'protein_atoms',
             'radius_multiplier': 10,
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

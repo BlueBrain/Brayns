@@ -151,7 +151,3 @@ class TestClient(unittest.TestCase):
 
     def _connect(self, websocket: MockWebSocket) -> Client:
         return Client(websocket, self._logger, self._manager)
-
-
-if __name__ == '__main__':
-    unittest.main()

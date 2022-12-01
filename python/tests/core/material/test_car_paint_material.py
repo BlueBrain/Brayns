@@ -36,7 +36,3 @@ class TestCarPaintMaterial(unittest.TestCase):
         test = brayns.CarPaintMaterial()
         test.update_properties({'flake_density': 3})
         self.assertEqual(test.flake_density, 3)
-
-
-if __name__ == '__main__':
-    unittest.main()
