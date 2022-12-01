@@ -32,7 +32,7 @@ BreakBeforeBraces: Allman
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
-BreakStringLiterals: false
+BreakStringLiterals: true
 ColumnLimit: 120
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false # Deprecated

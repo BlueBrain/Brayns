@@ -18,6 +18,8 @@
 
 #include "SynapseImporter.h"
 
+#include "EdgeMetadataFactory.h"
+
 #include <brayns/engine/geometry/types/Sphere.h>
 
 #include <api/circuit/SynapseCircuitBuilder.h>
@@ -233,5 +235,7 @@ void SynapseImporter::fromData(
     auto buildContext = SynapseCircuitBuilder::Context{std::move(synapseGeometry), std::move(colorData)};
     SynapseCircuitBuilder::build(context.model, std::move(buildContext));
     SynapseReportImporter::import(context, appender.orderedSynapseIds);
+
+    EdgeMetadataFactory::create(context);
 }
 }

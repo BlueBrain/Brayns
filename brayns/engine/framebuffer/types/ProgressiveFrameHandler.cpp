@@ -25,6 +25,11 @@ namespace brayns
 ProgressiveFrameHandler::ProgressiveFrameHandler(uint32_t scale)
     : _scale(scale)
 {
+    if (_scale == 0)
+    {
+        throw std::invalid_argument("Cannot set a 0 scale on progressive framebuffer");
+    }
+
     setFrameSize({800, 600});
 }
 

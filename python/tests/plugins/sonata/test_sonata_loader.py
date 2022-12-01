@@ -79,6 +79,8 @@ class TestSonataLoader(unittest.TestCase):
                         'load_axon': False,
                         'load_dendrites': False,
                         'geometry_type': 'smooth',
+                        'resampling': 2.0,
+                        'subsampling': 1,
                     },
                     'vasculature_geometry_parameters': {
                         'radius_multiplier': 2,
@@ -92,7 +94,9 @@ class TestSonataLoader(unittest.TestCase):
                         'load_soma': True,
                         'load_axon': False,
                         'load_dendrites': False,
-                        'geometry_type': 'smooth'
+                        'geometry_type': 'smooth',
+                        'resampling': 2.0,
+                        'subsampling': 1,
                     },
                     'vasculature_geometry_parameters': {
                         'radius_multiplier': 1,

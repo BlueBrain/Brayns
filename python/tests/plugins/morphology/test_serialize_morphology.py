@@ -32,6 +32,8 @@ class TestSerializeMorphology(unittest.TestCase):
             load_axon=True,
             load_dendrites=True,
             geometry_type=brayns.GeometryType.CONSTANT_RADII,
+            resampling=0.5,
+            subsampling=5,
         )
         self.assertEqual(serialize_morphology(test), {
             'radius_multiplier': 3,
@@ -39,6 +41,8 @@ class TestSerializeMorphology(unittest.TestCase):
             'load_axon': True,
             'load_dendrites': True,
             'geometry_type': brayns.GeometryType.CONSTANT_RADII.value,
+            'resampling': 0.5,
+            'subsampling': 5,
         })
 
 

@@ -29,4 +29,6 @@ def serialize_morphology(morphology: Morphology) -> dict[str, Any]:
         'load_axon': morphology.load_axon,
         'load_dendrites': morphology.load_dendrites,
         'geometry_type': morphology.geometry_type.value,
+        'resampling': morphology.resampling,
+        'subsampling': morphology.subsampling,
     }

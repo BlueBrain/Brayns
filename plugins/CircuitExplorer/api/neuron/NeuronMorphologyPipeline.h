@@ -20,7 +20,7 @@
 
 #include "INeuronMorphologyProcessor.h"
 
-#include "NeuronGeometryType.h"
+#include <io/NeuronMorphologyLoaderParameters.h>
 
 #include <memory>
 #include <vector>
@@ -31,7 +31,7 @@ public:
     using Stages = std::vector<std::unique_ptr<INeuronMorphologyProcessor>>;
 
 public:
-    static NeuronMorphologyPipeline fromParameters(NeuronGeometryType type, float radiusMultiplier);
+    static NeuronMorphologyPipeline fromParameters(const NeuronMorphologyLoaderParameters &parameters);
 
 public:
     NeuronMorphologyPipeline(Stages stages);

@@ -55,6 +55,8 @@ class TestBbpLoader(unittest.TestCase):
                 'load_axon': True,
                 'load_dendrites': True,
                 'geometry_type': 'original',
+                'resampling': 2.0,
+                'subsampling': 1,
             },
         })
 

@@ -26,6 +26,6 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(ProgressiveFrameMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, scale, "Frame size reduction factor", brayns::Default(4))
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, scale, "Frame size reduction factor", brayns::Default(4), brayns::Minimum(1))
 BRAYNS_JSON_OBJECT_END()
 }

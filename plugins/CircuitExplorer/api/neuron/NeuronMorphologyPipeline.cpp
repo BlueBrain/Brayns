@@ -20,18 +20,18 @@
 
 #include "processors/ConstantRadius.h"
 #include "processors/RadiusMultiplier.h"
+#include "processors/Resampler.h"
 #include "processors/SectionSmoother.h"
 #include "processors/Smoother.h"
+#include "processors/Subsampler.h"
 
 namespace
 {
-class ParametersStage
+class StageBuilder
 {
 public:
-    static NeuronMorphologyPipeline::Stages generate(NeuronGeometryType type, float radiusMultiplier)
+    void addGeometryStage(NeuronGeometryType type)
     {
-        NeuronMorphologyPipeline::Stages stages;
-
         switch (type)
         {
         case NeuronGeometryType::ConstantRadii:
@@ -46,20 +46,47 @@ public:
         default:
             break;
         }
-
-        if (radiusMultiplier != 1.f)
-        {
-            stages.push_back(std::make_unique<RadiusMultiplier>(radiusMultiplier));
-        }
-
-        return stages;
     }
+
+    void addRadiusStage(float radiusMultiplier)
+    {
+        if (radiusMultiplier == 1.f)
+        {
+            return;
+        }
+        stages.push_back(std::make_unique<RadiusMultiplier>(radiusMultiplier));
+    }
+
+    void addResamplingStage(float resampling)
+    {
+        if (resampling > 1.f)
+        {
+            return;
+        }
+        stages.push_back(std::make_unique<Resampler>(resampling));
+    }
+
+    void addSubsamplingStage(uint32_t samplingFactor)
+    {
+        if (samplingFactor <= 1)
+        {
+            return;
+        }
+        stages.push_back(std::make_unique<Subsampler>(samplingFactor));
+    }
+
+    NeuronMorphologyPipeline::Stages stages;
 };
 }
 
-NeuronMorphologyPipeline NeuronMorphologyPipeline::fromParameters(NeuronGeometryType type, float radiusMultiplier)
+NeuronMorphologyPipeline NeuronMorphologyPipeline::fromParameters(const NeuronMorphologyLoaderParameters &parameters)
 {
-    return NeuronMorphologyPipeline(ParametersStage::generate(type, radiusMultiplier));
+    auto stageBuilder = StageBuilder();
+    stageBuilder.addGeometryStage(parameters.geometry_type);
+    stageBuilder.addSubsamplingStage(parameters.subsampling);
+    stageBuilder.addResamplingStage(parameters.resampling);
+    stageBuilder.addRadiusStage(parameters.radius_multiplier);
+    return NeuronMorphologyPipeline(std::move(stageBuilder.stages));
 }
 
 NeuronMorphologyPipeline::NeuronMorphologyPipeline(Stages stages)

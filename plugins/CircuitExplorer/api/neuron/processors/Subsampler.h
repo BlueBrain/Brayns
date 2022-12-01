@@ -18,13 +18,14 @@
 
 #pragma once
 
-#include <io/sonataloader/LoadContext.h>
+#include <api/neuron/INeuronMorphologyProcessor.h>
 
-namespace sonataloader
-{
-class NeuronMetadataFactory
+class Subsampler : public INeuronMorphologyProcessor
 {
 public:
-    static void create(NodeLoadContext &context);
+    Subsampler(uint32_t samplingFactor);
+    void process(NeuronMorphology &morphology) const override;
+
+private:
+    uint32_t _samplingFactor;
 };
-}

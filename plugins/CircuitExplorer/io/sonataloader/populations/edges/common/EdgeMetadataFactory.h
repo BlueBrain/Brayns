@@ -22,9 +22,9 @@
 
 namespace sonataloader
 {
-class NeuronMetadataFactory
+class EdgeMetadataFactory
 {
 public:
-    static void create(NodeLoadContext &context);
+    static void create(const EdgeLoadContext &context);
 };
 }

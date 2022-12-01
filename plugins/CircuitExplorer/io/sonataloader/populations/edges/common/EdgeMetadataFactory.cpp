@@ -16,15 +16,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "EdgeMetadataFactory.h"
 
-#include <io/sonataloader/LoadContext.h>
+#include <brayns/engine/components/Metadata.h>
 
 namespace sonataloader
 {
-class NeuronMetadataFactory
+void EdgeMetadataFactory::create(const EdgeLoadContext &context)
 {
-public:
-    static void create(NodeLoadContext &context);
-};
+    auto &model = context.model;
+    auto &metadata = model.getComponents().add<brayns::Metadata>();
+    metadata["population_type"] = "edge";
+    metadata["population_name"] = context.edgePopulation.name();
+}
 }
