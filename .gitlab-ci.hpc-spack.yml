@@ -75,9 +75,11 @@ brayns-python-type-check:
     - deactivate
 
 brayns-python-testapi:
+  tags:
+    - bb5_map
   extends: .spack_test
   needs: ["brayns-spack-build", "brayns-python-venv"]
-  timeout: 10 minutes
+  timeout: 1h
   script:
     - module load unstable ffmpeg
     - cd ${SPACK_SOURCE_DIR}/python
