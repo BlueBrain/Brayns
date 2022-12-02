@@ -68,7 +68,6 @@ ModelInstance::ModelInstance(uint32_t instanceId, const ModelInstance &other)
     , _model(other._model)
     , _handle(_model->getHandle())
 {
-    _flag.setModified(true);
 }
 
 uint32_t ModelInstance::getID() const noexcept
