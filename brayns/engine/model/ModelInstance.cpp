@@ -62,8 +62,13 @@ ModelInstance::ModelInstance(uint32_t instanceId, std::shared_ptr<Model> model)
 }
 
 ModelInstance::ModelInstance(uint32_t instanceId, const ModelInstance &other)
-    : ModelInstance(instanceId, other._model)
+    : _id(instanceId)
+    , _transform(other._transform)
+    , _bounds(other._bounds)
+    , _model(other._model)
+    , _handle(_model->getHandle())
 {
+    _flag.setModified(true);
 }
 
 uint32_t ModelInstance::getID() const noexcept

@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,32 +17,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .clear_models import clear_models
-from .clear_renderables import clear_renderables
-from .deserialize_model import deserialize_model
-from .deserialize_scene import deserialize_scene
-from .get_bounds import get_bounds
-from .get_model import get_model
-from .get_models import get_models
-from .get_scene import get_scene
-from .instantiate_model import instantiate_model
-from .model import Model
-from .remove_models import remove_models
-from .scene import Scene
-from .update_model import update_model
+import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-__all__ = [
-    'clear_models',
-    'clear_renderables',
-    'deserialize_model',
-    'deserialize_scene',
-    'get_bounds',
-    'get_model',
-    'get_models',
-    'get_scene',
-    'instantiate_model',
-    'Model',
-    'remove_models',
-    'Scene',
-    'update_model',
-]
+
+class TestInstantiateModel(SimpleTestCase):
+
+    def test_instantiate(self) -> None:
+        sphere = brayns.Sphere(20).with_color(brayns.Color4.red)
+        model = brayns.add_geometries(self.instance, [sphere])
+
+        ref_position = brayns.Vector3(0, -30, 0)
+        ref = brayns.Sphere(5, ref_position).with_color(brayns.Color4.blue)
+        brayns.add_geometries(self.instance, [ref])
+
+        instance_transform = brayns.Transform(brayns.Vector3(50, 0, 0))
+        brayns.instantiate_model(self.instance, model.id, instance_transform)
+
+        ref = self.folder / 'instantiate.png'
+        self.quick_validation(ref)

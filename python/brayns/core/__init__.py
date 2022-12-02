@@ -100,6 +100,7 @@ __all__ = [
     'GlassMaterial',
     'Image',
     'ImageInfo',
+    'instantiate_model',
     'InteractiveRenderer',
     'JsonSchema',
     'JsonType',

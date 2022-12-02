@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,32 +17,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .clear_models import clear_models
-from .clear_renderables import clear_renderables
-from .deserialize_model import deserialize_model
-from .deserialize_scene import deserialize_scene
-from .get_bounds import get_bounds
-from .get_model import get_model
-from .get_models import get_models
-from .get_scene import get_scene
-from .instantiate_model import instantiate_model
-from .model import Model
-from .remove_models import remove_models
-from .scene import Scene
-from .update_model import update_model
+import unittest
 
-__all__ = [
-    'clear_models',
-    'clear_renderables',
-    'deserialize_model',
-    'deserialize_scene',
-    'get_bounds',
-    'get_model',
-    'get_models',
-    'get_scene',
-    'instantiate_model',
-    'Model',
-    'remove_models',
-    'Scene',
-    'update_model',
-]
+import brayns
+from tests.mock_instance import MockInstance
+from tests.mock_model import MockModel
+from tests.mock_transform import MockTransform
+
+
+class TestInstantiateModel(unittest.TestCase):
+
+    def test_instantiate_model(self) -> None:
+        instance = MockInstance(MockModel.message)
+        model = brayns.instantiate_model(
+            instance,
+            model_id=0,
+            transform=MockTransform.transform
+        )
+        self.assertEqual(model, MockModel.model)
+        self.assertEqual(instance.method, 'instantiate-model')
+        self.assertEqual(instance.params, {
+            'model_id': 0,
+            'transform':  MockTransform.message,
+        })
