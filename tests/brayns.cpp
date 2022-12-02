@@ -23,8 +23,7 @@
 
 #include <brayns/engine/renderer/types/Interactive.h>
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include <doctest/doctest.h>
 
 TEST_CASE("simple_construction")
 {

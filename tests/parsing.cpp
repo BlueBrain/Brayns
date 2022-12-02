@@ -22,8 +22,7 @@
 #include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/parsing/TokenExtractor.h>
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include <doctest/doctest.h>
 
 TEST_CASE("chunk_extractor")
 {

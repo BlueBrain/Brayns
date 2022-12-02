@@ -32,11 +32,10 @@
 
 #include <tests/paths.h>
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
-
 #include "helpers/BraynsTestUtils.h"
 #include "helpers/ImageValidator.h"
+
+#include <doctest/doctest.h>
 
 namespace
 {

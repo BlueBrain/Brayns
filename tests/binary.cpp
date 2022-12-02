@@ -21,8 +21,7 @@
 #include <brayns/utils/binary/ByteOrder.h>
 #include <brayns/utils/binary/ByteParser.h>
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include <doctest/doctest.h>
 
 TEST_CASE("byte_converter")
 {

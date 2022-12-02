@@ -23,11 +23,10 @@
 #include <brayns/engine/light/types/DirectionalLight.h>
 #include <brayns/engine/light/types/QuadLight.h>
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
-
 #include "helpers/BraynsTestUtils.h"
 #include "helpers/ImageValidator.h"
+
+#include <doctest/doctest.h>
 
 TEST_CASE("render_ambient_light")
 {
