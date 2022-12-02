@@ -32,7 +32,7 @@ class TestInstantiateModel(unittest.TestCase):
         model = brayns.instantiate_model(
             instance,
             model_id=0,
-            transform=MockTransform.transform
+            transform=MockTransform.transform,
         )
         self.assertEqual(model, MockModel.model)
         self.assertEqual(instance.method, 'instantiate-model')

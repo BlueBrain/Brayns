@@ -16,9 +16,8 @@ RUN apt-get update \
    cmake \
    git \
    ninja-build \
-   libarchive-dev \
+   libboost1.74-all-dev \
    libhdf5-serial-dev \
-   libtbb-dev \
    pkg-config \
    wget \
    ca-certificates \
@@ -110,45 +109,6 @@ RUN mkdir -p ${OSPRAY_SRC} \
    -DISPC_EXECUTABLE=${ISPC_PATH}/bin/ispc \
    && ninja -j4 install
 
-# Install libwebsockets (2.0 from Debian is not reliable)
-# https://github.com/warmcat/libwebsockets/releases
-ARG LWS_VERSION=2.3.0
-ARG LWS_SRC=/app/libwebsockets
-ARG LWS_FILE=v${LWS_VERSION}.tar.gz
-
-RUN mkdir -p ${LWS_SRC} \
-   && wget https://github.com/warmcat/libwebsockets/archive/${LWS_FILE} \
-   && tar zxvf ${LWS_FILE} -C ${LWS_SRC} --strip-components=1 \
-   && cd ${LWS_SRC} \
-   && mkdir -p build \
-   && cd build \
-   && cmake .. -GNinja \
-   -DCMAKE_BUILD_TYPE=Release \
-   -DLWS_STATIC_PIC=ON \
-   -DLWS_WITH_SSL=OFF \
-   -DLWS_WITH_ZLIB=OFF \
-   -DLWS_WITH_ZIP_FOPS=OFF \
-   -DLWS_WITHOUT_EXTENSIONS=ON \
-   -DLWS_WITHOUT_TESTAPPS=ON \
-   -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   && ninja -j4 install
-
-ARG BOOST_SRC=/app/boost
-
-RUN mkdir ${BOOST_SRC} \
-   && cd ${BOOST_SRC}  \
-   && wget https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/boost_1_70_0.tar.gz \
-   && tar -xzf boost_1_70_0.tar.gz  \
-   && cd ./boost_1_70_0  \
-   &&  ./bootstrap.sh  \
-   && ./b2 install -j 10
-
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.5/cmake-3.18.5.tar.gz \
-   && tar xf cmake-3.18.5.tar.gz \
-   && cd cmake-3.18.5 \
-   && ./configure \
-   && make -j 10 install
-
 # Set working dir and copy Brayns assets
 ARG BRAYNS_SRC=/app/brayns
 WORKDIR /app
@@ -162,14 +122,13 @@ ADD . ${BRAYNS_SRC}
 RUN cd ${BRAYNS_SRC} \
    && mkdir -p build \
    && cd build \
-   && CMAKE_PREFIX_PATH=${DIST_PATH}:${DIST_PATH}/lib/cmake/libwebsockets \
+   && CMAKE_PREFIX_PATH=${DIST_PATH} \
    cmake ..  \
    -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
    -DBRAYNS_DTI_ENABLED=ON \
    -DBRAYNS_ATLASEXPLORER_ENABLED=ON \
    -DBRAYNS_CYLINDRICCAMERA_ENABLED=ON \
    -DBRAYNS_MOLECULEEXPLORER_ENABLED=ON \
-   -DPython3_EXECUTABLE=/usr/bin/python3.9 \
    -DISPC_EXECUTABLE=${ISPC_PATH}/bin/ispc \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
@@ -183,7 +142,13 @@ ARG DIST_PATH=/app/dist
 
 RUN apt-get update \
    && apt-get -y --no-install-recommends install \
-   libarchive13 \
+   libboost-filesystem1.74.0 \
+   libboost-date-time1.74.0 \ 
+   libboost-iostreams1.74.0 \
+   libboost-program-options1.74.0 \
+   libboost-regex1.74.0 \
+   libboost-system1.74.0 \
+   libboost-serialization1.74.0 \
    libgomp1 \
    libhdf5-103 \
    libssl-dev \
