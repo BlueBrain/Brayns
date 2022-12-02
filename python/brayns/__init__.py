@@ -113,6 +113,7 @@ __all__ = [
     'ImageFormat',
     'ImageInfo',
     'Instance',
+    'instantiate_model',
     'InteractiveRenderer',
     'InvalidServerCertificateError',
     'JsonRpcError',

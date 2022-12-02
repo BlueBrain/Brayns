@@ -52,6 +52,7 @@
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
 #include <brayns/network/entrypoints/InspectEntrypoint.h>
+#include <brayns/network/entrypoints/InstantiateModelEntrypoint.h>
 #include <brayns/network/entrypoints/MaterialEntrypoint.h>
 #include <brayns/network/entrypoints/ModelColoringEntrypoint.h>
 #include <brayns/network/entrypoints/QuitEntrypoint.h>
@@ -133,6 +134,7 @@ public:
         builder.add<brayns::GetSceneEntrypoint>(scene);
         builder.add<brayns::GetSimulationParametersEntrypoint>(simulation);
         builder.add<brayns::InspectEntrypoint>(engine);
+        builder.add<brayns::InstantiateModelEntrypoint>(models);
         builder.add<brayns::QuitEntrypoint>(engine);
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
         builder.add<brayns::RemoveModelEntrypoint>(models, simulation);
