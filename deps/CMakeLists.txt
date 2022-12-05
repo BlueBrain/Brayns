@@ -18,7 +18,7 @@ if(NOT Poco_FOUND)
         FetchContent_Declare(
             poco
             GIT_REPOSITORY https://github.com/pocoproject/poco.git
-            GIT_TAG        poco-1.11.1-release
+            GIT_TAG poco-1.11.1-release
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/poco
@@ -63,19 +63,19 @@ if(NOT glm_FOUND AND NOT TARGET glm)
         FetchContent_Declare(
             glm
             GIT_REPOSITORY https://github.com/g-truc/glm.git
-            GIT_TAG        0.9.9.8
+            GIT_TAG 0.9.9.8
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE OFF
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glm
         )
         FetchContent_Populate(glm)
     endif()
-    
+
     add_library(glm INTERFACE)
     target_include_directories(glm SYSTEM INTERFACE
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/glm>
-            $<INSTALL_INTERFACE:include>)
-            
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/glm>
+        $<INSTALL_INTERFACE:include>)
+
     install(TARGETS glm
         EXPORT Brayns-targets
         LIBRARY DESTINATION lib
@@ -84,7 +84,7 @@ if(NOT glm_FOUND AND NOT TARGET glm)
     )
 
     install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/glm/glm
-            DESTINATION include)
+        DESTINATION include)
 endif()
 
 # =============================================================================
@@ -95,13 +95,14 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/spdlog")
     FetchContent_Declare(
         spdlog
         GIT_REPOSITORY https://github.com/gabime/spdlog.git
-        GIT_TAG        v1.9.2
+        GIT_TAG v1.9.2
         GIT_SHALLOW ON
         GIT_SUBMODULES_RECURSE ON
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spdlog
     )
     FetchContent_Populate(spdlog)
 endif()
+
 set(SPDLOG_BUILD_SHARED ON CACHE BOOL "" FORCE)
 set(SPDLOG_MASTER_PROJECT ON)
 add_subdirectory(spdlog)
@@ -124,3 +125,27 @@ add_library(stb INTERFACE)
 target_include_directories(stb SYSTEM INTERFACE
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/stb>"
     "$<INSTALL_INTERFACE:include>")
+
+# =============================================================================
+# doctest
+# =============================================================================
+if(BRAYNS_TESTS_ENABLED)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/doctest")
+        message(STATUS "Downloading doctest from submodules")
+        FetchContent_Declare(
+            doctest
+            GIT_REPOSITORY https://github.com/doctest/doctest
+            GIT_TAG v2.4.9
+            GIT_SHALLOW ON
+            GIT_SUBMODULES_RECURSE OFF
+            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/doctest
+        )
+        FetchContent_Populate(doctest)
+    endif()
+
+    add_library(doctest INTERFACE)
+    target_include_directories(doctest SYSTEM INTERFACE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/doctest>"
+        "$<INSTALL_INTERFACE:include>")
+    target_compile_definitions(doctest INTERFACE DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN)
+endif()

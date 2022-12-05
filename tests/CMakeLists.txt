@@ -27,19 +27,13 @@ foreach(TEST ${TEST_LIST})
     set(TEST_NAME "braynstest_${TEST_NAME}")
 
     add_executable(${TEST_NAME} ${TEST})
-
     target_compile_options(${TEST_NAME} PRIVATE ${BRAYNS_COMPILE_OPTIONS})
-
-    # no trivial copy error from doctest.h
-    target_compile_options(${TEST_NAME} PRIVATE -Wno-class-memaccess)
-
-    set(TEST_TARGET_LIST ${TEST_TARGET_LIST} ${TEST_NAME})
+    target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${PROJECT_BINARY_DIR})
+    target_link_libraries(${TEST_NAME} PRIVATE brayns doctest)
 
     set_target_properties(${TEST_NAME} PROPERTIES FOLDER tests OUTPUT_NAME ${TEST_NAME})
 
-    target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${PROJECT_BINARY_DIR})
-
-    target_link_libraries(${TEST_NAME} PRIVATE brayns)
+    set(TEST_TARGET_LIST ${TEST_TARGET_LIST} ${TEST_NAME})
 
     add_test(NAME ${TEST_NAME}
         COMMAND $<TARGET_FILE:${TEST_NAME}> -l test_suite
