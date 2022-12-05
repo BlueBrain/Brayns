@@ -83,7 +83,7 @@ brayns-python-testapi:
     bb5_cpus_per_task: 72
   extends: .spack_test
   needs: ["brayns-spack-build", "brayns-python-venv"]
-  timeout: 1h
+  timeout: 30 minutes
   script:
     - module load unstable ffmpeg
     - cd ${SPACK_SOURCE_DIR}/python
