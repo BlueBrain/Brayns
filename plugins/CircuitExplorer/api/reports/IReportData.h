@@ -60,8 +60,8 @@ public:
     /**
      * @brief Returns a frame from the report
      *
-     * @param frameIndex
+     * @param timestamp Timestamp of the frame to load
      * @return std::vector<float>
      */
-    virtual std::vector<float> getFrame(uint32_t frameIndex) const = 0;
+    virtual std::vector<float> getFrame(double timestamp) const = 0;
 };

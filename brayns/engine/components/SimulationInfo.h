@@ -26,9 +26,9 @@ namespace brayns
 {
 struct SimulationInfo
 {
-    float startTime = 0.f;
-    float endTime = 0.f;
-    float dt = 0.f;
+    double startTime = 0.0;
+    double endTime = 0.0;
+    double dt = 0.0;
     std::string timeUnit;
     bool enabled = true;
 };

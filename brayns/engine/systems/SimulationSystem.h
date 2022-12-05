@@ -1,6 +1,8 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,13 +20,20 @@
 
 #pragma once
 
-#include <cstdint>
+#include <brayns/engine/model/systemtypes/UpdateSystem.h>
 
-/**
- * @brief Transforms a frame integer index into its timestamp based on the report start, end and timestep values
- */
-class FrameTimeCalculator
+namespace brayns
+{
+class SimulationSystem : public UpdateSystem
 {
 public:
-    static float compute(uint32_t frame, float start, float end, float dt) noexcept;
+    virtual void execute(const ParametersManager &parameters, Components &components) final;
+
+    virtual bool isEnabled(Components &components) = 0;
+    virtual bool shouldExecute(Components &components) = 0;
+    virtual void execute(Components &components, uint32_t frameIndex, double frameTimestamp) = 0;
+
+private:
+    uint32_t _lastFrame = std::numeric_limits<uint32_t>::max();
 };
+}

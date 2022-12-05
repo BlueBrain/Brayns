@@ -19,7 +19,7 @@
  */
 
 #include <api/reports/IReportData.h>
-#include <api/reports/common/SpikeUtils.h>
+#include <api/reports/SpikeUtils.h>
 
 #include <brain/spikeReportReader.h>
 
@@ -34,7 +34,7 @@ public:
     float getEndTime() const noexcept override;
     float getTimeStep() const noexcept override;
     std::string getTimeUnit() const noexcept override;
-    std::vector<float> getFrame(uint32_t frameIndex) const override;
+    std::vector<float> getFrame(double timestamp) const override;
 
 private:
     std::unique_ptr<brain::SpikeReportReader> _report;

@@ -83,7 +83,7 @@ private:
 
     static bool _isSavePngEnabled()
     {
-        return std::getenv("BRAYNS_TEST_SAVE_PNG");
+        return true; // std::getenv("BRAYNS_TEST_SAVE_PNG");
     }
 
     static bool _isSaveRawEnabled()

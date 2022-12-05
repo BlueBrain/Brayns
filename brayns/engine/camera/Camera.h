@@ -80,7 +80,7 @@ public:
         _projectionName = ProjectionTraits<ProjectionType>::name;
         _handle = ospray::cpp::Camera(_projectionName);
         _data = std::make_unique<Data<ProjectionType>>(std::move(data));
-        _flag = true;
+        _flag.setModified(true);
     }
 
     /**

@@ -97,15 +97,6 @@ public:
     }
 };
 
-class FrameTime
-{
-public:
-    static float compute(const brayns::SimulationInfo &info, uint32_t frameIndex)
-    {
-        return std::clamp(frameIndex * info.dt, 0.f, info.endTime);
-    }
-};
-
 /**
  * @brief Uses the spike value to generate a normalized index that will be used to know
  * which primitive of each streamline to update
@@ -186,12 +177,12 @@ bool SpikeReportSystem::shouldExecute(brayns::Components &components)
     return !std::exchange(data.lastEnabledFlag, true);
 }
 
-void SpikeReportSystem::execute(brayns::Components &components, uint32_t frame)
+void SpikeReportSystem::execute(brayns::Components &components, uint32_t frameIndex, double frameTimestamp)
 {
+    (void)frameIndex;
     auto &info = components.get<brayns::SimulationInfo>();
     auto &spikeData = components.get<dti::SpikeReportData>();
-    auto frameTime = FrameTime::compute(info, frame);
-    auto data = SpikeFrameProcessor::process(spikeData, frameTime);
+    auto data = SpikeFrameProcessor::process(spikeData, frameTimestamp);
     SimulationColorPainter::paint(components, data);
 }
 }

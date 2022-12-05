@@ -18,8 +18,6 @@
 
 #include "SpikeData.h"
 
-#include <api/reports/common/FrameTimeCalculator.h>
-
 namespace bbploader
 {
 SpikeData::SpikeData(
@@ -53,16 +51,12 @@ std::string SpikeData::getTimeUnit() const noexcept
     return "";
 }
 
-std::vector<float> SpikeData::getFrame(uint32_t frameIndex) const
+std::vector<float> SpikeData::getFrame(double timestamp) const
 {
     auto values = std::vector<float>(_mapping.size(), 0.f);
 
-    auto start = getStartTime();
-    auto end = getEndTime();
-    auto dt = getTimeStep();
-    auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    auto frameStart = frameTime - _interval;
-    auto frameEnd = frameTime + _interval;
+    auto frameStart = timestamp - _interval;
+    auto frameEnd = timestamp + _interval;
 
     auto spikes = _report->getSpikes(frameStart, frameEnd);
 
@@ -80,7 +74,7 @@ std::vector<float> SpikeData::getFrame(uint32_t frameIndex) const
         auto index = it->second;
         auto spikeTime = spike.first;
 
-        values[index] = _spikeCalculator.compute(spikeTime, frameTime);
+        values[index] = _spikeCalculator.compute(spikeTime, timestamp);
     }
 
     return values;

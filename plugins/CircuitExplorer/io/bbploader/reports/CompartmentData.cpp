@@ -18,8 +18,6 @@
 
 #include "CompartmentData.h"
 
-#include <api/reports/common/FrameTimeCalculator.h>
-
 namespace bbploader
 {
 CompartmentData::CompartmentData(std::unique_ptr<brion::CompartmentReport> report)
@@ -47,14 +45,18 @@ std::string CompartmentData::getTimeUnit() const noexcept
     return _report->getTimeUnit();
 }
 
-std::vector<float> CompartmentData::getFrame(uint32_t frameIndex) const
+std::vector<float> CompartmentData::getFrame(double timestamp) const
 {
+<<<<<<< HEAD
     auto start = getStartTime();
     auto end = getEndTime();
     auto dt = getTimeStep();
     auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
 
     auto frameFuture = _report->loadFrame(frameTime);
+=======
+    auto frameFuture = _report->loadFrame(timestamp);
+>>>>>>> Checkpoint
     auto frame = frameFuture.get();
     auto &data = frame.data;
 

@@ -18,8 +18,6 @@
 
 #include "SonataReportData.h"
 
-#include <api/reports/common/FrameTimeCalculator.h>
-
 namespace
 {
 inline static constexpr double sonataEpsilon = 1e-6;
@@ -61,17 +59,11 @@ std::string SonataReportData::getTimeUnit() const noexcept
     return _population.getTimeUnits();
 }
 
-std::vector<float> SonataReportData::getFrame(uint32_t frameIndex) const
+std::vector<float> SonataReportData::getFrame(double timestamp) const
 {
-    auto times = _population.getTimes();
-    auto start = static_cast<float>(std::get<0>(times));
-    auto end = static_cast<float>(std::get<1>(times));
-    auto dt = static_cast<float>(std::get<2>(times));
-
-    auto time = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    auto startTime = time - sonataEpsilon;
-    auto endTime = startTime + dt;
-    auto frame = _population.get(_selection, startTime, endTime);
+    auto [start, end, dt] = _population.getTimes();
+    auto endTime = timestamp + dt;
+    auto frame = _population.get(_selection, timestamp, endTime);
 
     if (frame.data.empty())
     {

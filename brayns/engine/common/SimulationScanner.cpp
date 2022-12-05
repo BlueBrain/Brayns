@@ -26,11 +26,11 @@ namespace
 {
 struct SimulationUpdater
 {
-    static void update(brayns::SimulationParameters &simulation, float start, float end, float dt)
+    static void update(brayns::SimulationParameters &simulation, double start, double end, double dt)
     {
-        dt = std::nextafter(dt, std::numeric_limits<float>::infinity());
-        const auto startFrame = uint32_t(start / dt);
-        const auto endFrame = uint32_t(end / dt);
+        dt = std::nextafter(dt, std::numeric_limits<double>::infinity());
+        auto startFrame = static_cast<uint32_t>(start / dt);
+        auto endFrame = static_cast<uint32_t>(end / dt);
 
         simulation.setStartFrame(startFrame);
         simulation.setEndFrame(endFrame);
@@ -47,9 +47,9 @@ namespace brayns
 {
 void SimulationScanner::scanAndUpdate(ModelManager &models, SimulationParameters &globalSimulation)
 {
-    float earlierStart = std::numeric_limits<float>::max();
-    float latestEnd = std::numeric_limits<float>::lowest();
-    float smallestDt = std::numeric_limits<float>::max();
+    auto earlierStart = std::numeric_limits<double>::max();
+    auto latestEnd = std::numeric_limits<double>::lowest();
+    auto smallestDt = std::numeric_limits<double>::max();
     bool foundSimulation{false};
 
     auto &instances = models.getAllModelInstances();

@@ -27,6 +27,8 @@
 
 #include <brayns/utils/parsing/Parser.h>
 
+#include <cassert>
+
 namespace
 {
 class ColorListExtractor
@@ -68,7 +70,7 @@ class Painter
 public:
     static void apply(const std::vector<brayns::Vector4f> &colors, brayns::Components &components)
     {
-        auto &views = components.get<brayns::GeometryViews>();
+        auto views = components.get<brayns::GeometryViews>();
         auto &view = views.elements.front();
         view.setColorPerPrimitive(ospray::cpp::SharedData(colors));
         views.modified = true;
@@ -82,6 +84,7 @@ PrimitiveColorMethod::PrimitiveColorMethod(std::string name, size_t primitiveCou
     : _name(std::move(name))
     , _primitiveCount(primitiveCount)
 {
+    assert(_primitiveCount > 0);
 }
 
 std::string PrimitiveColorMethod::getName() const

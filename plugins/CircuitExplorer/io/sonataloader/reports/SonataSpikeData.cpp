@@ -18,9 +18,6 @@
 
 #include "SonataSpikeData.h"
 
-#include <api/reports/common/FrameTimeCalculator.h>
-#include <api/reports/common/SpikeUtils.h>
-
 namespace sonataloader
 {
 SonataSpikeData::SonataSpikeData(
@@ -60,16 +57,13 @@ std::string SonataSpikeData::getTimeUnit() const noexcept
     return "";
 }
 
-std::vector<float> SonataSpikeData::getFrame(uint32_t frameIndex) const
+std::vector<float> SonataSpikeData::getFrame(double timestamp) const
 {
     auto data = std::vector<float>(_mapping.size(), 0.f);
 
-    auto start = getStartTime();
-    auto end = getEndTime();
-    auto dt = getTimeStep();
-    auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    auto frameStart = frameTime - _interval;
-    auto frameEnd = frameTime + _interval;
+    auto frame = static_cast<float>(timestamp);
+    auto frameStart = frame - _interval;
+    auto frameEnd = frame + _interval;
 
     auto spikes = _population.get(_selection, frameStart, frameEnd);
 
@@ -86,7 +80,7 @@ std::vector<float> SonataSpikeData::getFrame(uint32_t frameIndex) const
         }
 
         auto index = it->second;
-        data[index] = _calculator.compute(spikeTime, frameTime);
+        data[index] = _calculator.compute(spikeTime, frame);
     }
 
     return data;

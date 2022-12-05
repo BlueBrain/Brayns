@@ -34,6 +34,11 @@ namespace brayns
 {
 void ProjectionTraits<Perspective>::updateData(ospray::cpp::Camera &handle, Perspective &data)
 {
+    if (data.fovy <= 0.f)
+    {
+        throw std::invalid_argument("Perspective fovy must be greater than 0");
+    }
+
     handle.setParam(PerspectiveParameters::fovy, data.fovy);
     handle.setParam(PerspectiveParameters::aperture, data.apertureRadius);
     handle.setParam(PerspectiveParameters::focus, data.focusDistance);

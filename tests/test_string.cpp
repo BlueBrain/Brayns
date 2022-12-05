@@ -28,6 +28,8 @@
 
 #include <doctest/doctest.h>
 
+#include <stdexcept>
+
 TEST_CASE("string_case")
 {
     auto toLowerChar = brayns::StringCase::toLower('A');

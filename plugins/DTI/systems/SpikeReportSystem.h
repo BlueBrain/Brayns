@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/engine/model/systemtypes/SimulationSystem.h>
+#include <brayns/engine/systems/SimulationSystem.h>
 
 namespace dti
 {
@@ -29,6 +29,6 @@ class SpikeReportSystem final : public brayns::SimulationSystem
 public:
     bool isEnabled(brayns::Components &components) override;
     bool shouldExecute(brayns::Components &components) override;
-    void execute(brayns::Components &components, uint32_t frame) override;
+    void execute(brayns::Components &components, uint32_t frameIndex, double frameTimestamp) override;
 };
 }

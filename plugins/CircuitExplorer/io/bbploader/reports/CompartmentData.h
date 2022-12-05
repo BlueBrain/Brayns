@@ -34,7 +34,7 @@ public:
     float getEndTime() const noexcept override;
     float getTimeStep() const noexcept override;
     std::string getTimeUnit() const noexcept override;
-    std::vector<float> getFrame(uint32_t frameIndex) const override;
+    std::vector<float> getFrame(double timestamp) const override;
 
     /**
      * @brief Computes and returns the report mapping
