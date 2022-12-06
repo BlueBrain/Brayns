@@ -78,9 +78,12 @@ brayns-python-testapi:
   tags:
     - bb5_user
   variables:
-    bb5_account: proj3
     bb5_memory: 0
+    bb5_duration: "0:30"
     bb5_cpus_per_task: 72
+    bb5_constraint: cpu
+    bb5_account: proj3
+    bb5_build_dir: job
   extends: .spack_test
   needs: ["brayns-spack-build", "brayns-python-venv"]
   timeout: 30 minutes
