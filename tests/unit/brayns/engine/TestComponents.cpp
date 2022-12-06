@@ -18,34 +18,44 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include <doctest/doctest.h>
 
-#include <ospray/ospray_cpp/Camera.h>
+#include <brayns/engine/model/Components.h>
 
-#include <string>
-
-namespace brayns
+TEST_CASE("Components")
 {
-template<typename T>
-constexpr bool cameraSpecialized = false;
-
-template<typename T>
-class ProjectionTraits
-{
-public:
-    inline static const std::string name;
-
-    static void checkParameters(const T &data)
+    SUBCASE("Add component")
     {
-        static_assert(cameraSpecialized<T>, "ProjectionTraits not specialized");
-        (void)data;
-    }
+        auto components = brayns::Components();
+        CHECK(!components.has<int>());
 
-    static void updateData(ospray::cpp::Camera &handle, T &data)
-    {
-        static_assert(cameraSpecialized<T>, "ProjectionTraits not specialized");
-        (void)handle;
-        (void)data;
+        components.add<int>(58);
+        CHECK(components.has<int>());
+        CHECK(components.get<int>() == 58);
+
+        components.add<int>(78);
+        CHECK(components.get<int>() == 78);
     }
-};
+    SUBCASE("Get or add component")
+    {
+        auto components = brayns::Components();
+        CHECK(!components.has<int>());
+
+        components.add<int>(58);
+        CHECK(components.has<int>());
+        CHECK(components.get<int>() == 58);
+
+        components.getOrAdd<int>(78);
+        CHECK(components.get<int>() == 58);
+    }
+    SUBCASE("Find")
+    {
+        auto components = brayns::Components();
+        CHECK(!components.has<int>());
+
+        components.add<int>(58);
+        CHECK(components.find<int>());
+
+        CHECK(!components.find<float>());
+    }
 }

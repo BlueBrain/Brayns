@@ -91,9 +91,8 @@ bool RadiiReportSystem::shouldExecute(brayns::Components &components)
     return !std::exchange(report.lastEnabledFlag, true);
 }
 
-void RadiiReportSystem::execute(brayns::Components &components, uint32_t frameIndex, double frameTimestamp)
+void RadiiReportSystem::execute(brayns::Components &components, double frameTimestamp)
 {
-    (void)frameIndex;
     auto &report = components.get<RadiiReportData>();
     auto frameData = report.data->getFrame(frameTimestamp);
     RadiiSetter::fromFrame(components, report.offsets, frameData);

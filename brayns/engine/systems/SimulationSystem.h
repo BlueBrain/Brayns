@@ -31,7 +31,7 @@ public:
 
     virtual bool isEnabled(Components &components) = 0;
     virtual bool shouldExecute(Components &components) = 0;
-    virtual void execute(Components &components, uint32_t frameIndex, double frameTimestamp) = 0;
+    virtual void execute(Components &components, double frameTimestamp) = 0;
 
 private:
     uint32_t _lastFrame = std::numeric_limits<uint32_t>::max();

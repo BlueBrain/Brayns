@@ -24,34 +24,60 @@
 #include <cassert>
 #include <memory>
 #include <typeindex>
-#include <vector>
+#include <unordered_map>
 
 namespace brayns
 {
 class Components
 {
 public:
+    /**
+     * @brief Adds a component to this container. If the component already exists, it is replaced.
+     *
+     * @tparam T Type of the component to add.
+     * @tparam Args Constructor variadic args.
+     * @param args Optional variadic args to build of the component.
+     * @return T& The newly added component.
+     */
     template<typename T, typename... Args>
     T &add(Args &&...args)
     {
         static_assert(std::is_same_v<std::decay_t<T>, T>, "Only decayed components allowed");
 
-        auto &entry = _components.emplace_back(typeid(T), std::make_unique<Component<T>>());
-        auto &component = static_cast<Component<T> &>(*entry.component);
-        component.data = T{std::forward<Args>(args)...};
-        return component.data;
+        auto component = std::make_unique<Component<T>>();
+        auto &data = component->data;
+        data = T{std::forward<Args>(args)...};
+
+        _components[typeid(T)] = std::move(component);
+
+        return data;
     }
 
-    template<typename T>
-    T &getOrAdd()
+    /**
+     * @brief Attempts to retrieve the component type from the container. If not present, a new one will be added.
+     *
+     * @tparam T Type of the component to retrieve or add.
+     * @tparam Args Constructor variadic args.
+     * @param args Optional variadic args to build the component if needed.
+     * @return T& The retrieved or added component.
+     */
+    template<typename T, typename... Args>
+    T &getOrAdd(Args &&...args)
     {
         if (auto component = find<T>())
         {
             return *component;
         }
-        return add<T>();
+        return add<T>(std::forward<Args>(args)...);
     }
 
+    /**
+     * @brief Retrieves a component type from the container. Attempting to get a component that is not present results
+     * in undefined behaviour.
+     *
+     * @tparam T Type of the component to get.
+     * @return T& The retrieved component.
+     */
     template<typename T>
     T &get()
     {
@@ -60,6 +86,9 @@ public:
         return *component;
     }
 
+    /**
+     * @copydoc Components::get()
+     */
     template<typename T>
     const T &get() const
     {
@@ -68,18 +97,33 @@ public:
         return *component;
     }
 
+    /**
+     * @brief Searches the container for a type of component.
+     *
+     * @tparam T Type of component to search.
+     * @return T* Pointer to the found component, or nullptr if not present.
+     */
     template<typename T>
     T *find()
     {
         return _find<T>();
     }
 
+    /**
+     * @copydoc Components::find()
+     */
     template<typename T>
     const T *find() const
     {
         return _find<T>();
     }
 
+    /**
+     * @brief Test if a component type is present in the container.
+     *
+     * @tparam T Type of component to check for.
+     * @return true if the component is present, false otherwise.
+     */
     template<typename T>
     bool has() const
     {
@@ -90,13 +134,12 @@ private:
     template<typename T>
     T *_find() const
     {
-        auto it = std::find(_components.begin(), _components.end(), std::type_index(typeid(T)));
+        auto it = _components.find(typeid(T));
         if (it == _components.end())
         {
             return nullptr;
         }
-        auto &entry = *it;
-        auto &component = entry.component;
+        auto &component = it->second;
         auto &cast = static_cast<Component<T> &>(*component);
         return &cast.data;
     }
@@ -112,23 +155,6 @@ private:
         T data;
     };
 
-    struct Entry
-    {
-        std::type_index type;
-        std::unique_ptr<IComponent> component;
-
-        Entry(std::type_index type, std::unique_ptr<IComponent> component)
-            : type(type)
-            , component(std::move(component))
-        {
-        }
-
-        bool operator==(std::type_index typeTest) const noexcept
-        {
-            return type == typeTest;
-        }
-    };
-
-    std::vector<Entry> _components;
+    std::unordered_map<std::type_index, std::unique_ptr<IComponent>> _components;
 };
 }

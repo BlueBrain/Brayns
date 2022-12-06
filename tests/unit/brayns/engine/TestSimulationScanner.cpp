@@ -30,7 +30,7 @@ namespace
 class AddSimulatedModels
 {
 public:
-    static void add(brayns::ModelManager &models, float start, float end, float dt, bool enabled)
+    static void add(brayns::ModelManager &models, double start, double end, double dt, bool enabled)
     {
         auto model = std::make_shared<brayns::Model>("test");
         auto &components = model->getComponents();
@@ -77,7 +77,7 @@ TEST_CASE("simulation_scanner")
 
     SUBCASE("simulated_models")
     {
-        AddSimulatedModels::add(models, 1.f, 10.f, 0.1f, true);
+        AddSimulatedModels::add(models, 1., 10., 0.1, true);
         brayns::SimulationScanner::scanAndUpdate(models, simulation);
         CHECK(simulation.getDt() == doctest::Approx(0.1));
         CHECK(simulation.getEndFrame() == 99);
@@ -87,28 +87,19 @@ TEST_CASE("simulation_scanner")
 
         simulation.resetModified();
 
-        AddSimulatedModels::add(models, 0.f, 1000.f, 0.01f, false);
-        brayns::SimulationScanner::scanAndUpdate(models, simulation);
-        CHECK(simulation.getDt() == doctest::Approx(0.1));
-        CHECK(simulation.getEndFrame() == 99);
-        CHECK(simulation.getFrame() == 9);
-        CHECK(simulation.getStartFrame() == 9);
-        CHECK(!simulation.isModified());
-
-        AddSimulatedModels::add(models, 0.f, 5.f, 0.1f, true);
-        brayns::SimulationScanner::scanAndUpdate(models, simulation);
-        CHECK(simulation.getDt() == doctest::Approx(0.1));
-        CHECK(simulation.getEndFrame() == 99);
-        CHECK(simulation.getFrame() == 9);
-        CHECK(simulation.getStartFrame() == 0);
-        CHECK(simulation.isModified());
-
-        simulation.resetModified();
-        AddSimulatedModels::add(models, 0.f, 2.f, 0.01f, true);
+        AddSimulatedModels::add(models, 1., 10., 0.01, false);
         brayns::SimulationScanner::scanAndUpdate(models, simulation);
         CHECK(simulation.getDt() == doctest::Approx(0.01));
-        CHECK(simulation.getEndFrame() == 199);
-        CHECK(simulation.getFrame() == 9);
+        CHECK(simulation.getEndFrame() == 999);
+        CHECK(simulation.getFrame() == 99);
+        CHECK(simulation.getStartFrame() == 99);
+        CHECK(simulation.isModified());
+
+        AddSimulatedModels::add(models, 0., 5., 0.1, true);
+        brayns::SimulationScanner::scanAndUpdate(models, simulation);
+        CHECK(simulation.getDt() == doctest::Approx(0.01));
+        CHECK(simulation.getEndFrame() == 999);
+        CHECK(simulation.getFrame() == 99);
         CHECK(simulation.getStartFrame() == 0);
         CHECK(simulation.isModified());
     }

@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,26 +18,4 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <brayns/engine/camera/ProjectionTraits.h>
-
-namespace brayns
-{
-struct Perspective
-{
-    float fovy = 45.f;
-    float apertureRadius = 0.f;
-    float focusDistance = 1.f;
-};
-
-template<>
-class ProjectionTraits<Perspective>
-{
-public:
-    static inline const std::string name = "perspective";
-
-    static void checkParameters(const Perspective &data);
-    static void updateData(ospray::cpp::Camera &handle, Perspective &data);
-};
-}
+#include <doctest/doctest.h>

@@ -27,7 +27,7 @@
 
 #include <stdexcept>
 
-TEST_CASE("perspective_parameters")
+TEST_CASE("Perspective parameters")
 {
     auto params = brayns::ParametersManager(0, nullptr);
     auto engine = brayns::Engine(params);
@@ -36,32 +36,28 @@ TEST_CASE("perspective_parameters")
     SUBCASE("Correct parameters constructor")
     {
         auto projection = brayns::Perspective();
-        auto camera = brayns::Camera(std::move(projection));
-        CHECK_NOTHROW(camera.commit());
+        CHECK_NOTHROW(brayns::Camera(std::move(projection)));
     }
     SUBCASE("Incorrect fovy constructor")
     {
         auto projection = brayns::Perspective{0.f};
-        auto camera = brayns::Camera(std::move(projection));
-        CHECK_THROWS(camera.commit());
+        CHECK_THROWS_AS(brayns::Camera(std::move(projection)), std::invalid_argument);
     }
     SUBCASE("Correct parameters set()")
     {
         auto camera = brayns::Camera(brayns::Perspective());
         auto projection = brayns::Perspective();
-        camera.set(projection);
-        CHECK_NOTHROW(camera.commit());
+        CHECK_NOTHROW(camera.set(projection));
     }
     SUBCASE("Incorrect fovy set()")
     {
         auto camera = brayns::Camera(brayns::Perspective());
         auto projection = brayns::Perspective{-10.f};
-        camera.set(projection);
-        CHECK_THROWS(camera.commit());
+        CHECK_THROWS_AS(camera.set(projection), std::invalid_argument);
     }
 }
 
-TEST_CASE("orthographic_parameters")
+TEST_CASE("Orthographic parameters")
 {
     auto params = brayns::ParametersManager(0, nullptr);
     auto engine = brayns::Engine(params);
@@ -70,32 +66,28 @@ TEST_CASE("orthographic_parameters")
     SUBCASE("Correct parameters constructor")
     {
         auto projection = brayns::Orthographic();
-        auto camera = brayns::Camera(std::move(projection));
-        CHECK_NOTHROW(camera.commit());
+        CHECK_NOTHROW(brayns::Camera(std::move(projection)));
     }
     SUBCASE("Incorrect height constructor")
     {
         auto projection = brayns::Orthographic{0.f};
-        auto camera = brayns::Camera(std::move(projection));
-        CHECK_THROWS_AS(camera.commit(), std::invalid_argument);
+        CHECK_THROWS_AS(brayns::Camera(std::move(projection)), std::invalid_argument);
     }
     SUBCASE("Correct parameters set()")
     {
         auto camera = brayns::Camera(brayns::Orthographic());
         auto projection = brayns::Orthographic();
-        camera.set(projection);
-        CHECK_NOTHROW(camera.commit());
+        CHECK_NOTHROW(camera.set(projection));
     }
     SUBCASE("Incorrect height set()")
     {
         auto camera = brayns::Camera(brayns::Orthographic());
         auto projection = brayns::Orthographic{-10.f};
-        camera.set(projection);
-        CHECK_THROWS_AS(camera.commit(), std::invalid_argument);
+        CHECK_THROWS_AS(camera.set(projection), std::invalid_argument);
     }
 }
 
-TEST_CASE("camera")
+TEST_CASE("Camera")
 {
     auto params = brayns::ParametersManager(0, nullptr);
     auto engine = brayns::Engine(params);
@@ -131,7 +123,7 @@ TEST_CASE("camera")
             brayns::View{brayns::Vector3f(0.f), brayns::Vector3f(0.f, 1.f, 0.f), brayns::Vector3f(0.f, 1.f, 0.f)};
         CHECK_THROWS_AS(camera.setView(viewAndUpAligned), std::invalid_argument);
     }
-    SUBCASE("AspectRatio")
+    SUBCASE("Aspect ratio")
     {
         auto camera = brayns::Camera(brayns::Orthographic());
 

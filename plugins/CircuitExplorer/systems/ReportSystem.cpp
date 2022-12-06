@@ -54,10 +54,8 @@ bool ReportSystem::shouldExecute(brayns::Components &components)
     return flagModified || colorRampModified;
 }
 
-void ReportSystem::execute(brayns::Components &components, uint32_t frameIndex, double frameTimestamp)
+void ReportSystem::execute(brayns::Components &components, double frameTimestamp)
 {
-    (void)frameIndex;
-
     auto &colorRamp = components.get<brayns::ColorRamp>();
     auto &colorMap = components.getOrAdd<brayns::ColorMap>();
 

@@ -28,6 +28,14 @@ struct CylindricParameters
 };
 }
 
+void brayns::ProjectionTraits<Cylindric>::checkParameters(const Cylindric &data)
+{
+    if (data.fovy <= 0.f)
+    {
+        throw std::invalid_argument("Fovy must be greater than 0");
+    }
+}
+
 void brayns::ProjectionTraits<Cylindric>::updateData(ospray::cpp::Camera &handle, Cylindric &data)
 {
     handle.setParam(CylindricParameters::fovy, data.fovy);

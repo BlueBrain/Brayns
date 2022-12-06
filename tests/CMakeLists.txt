@@ -10,7 +10,7 @@ enable_testing()
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 
-file(GLOB_RECURSE TEST_LIST RELATIVE ${CMAKE_CURRENT_LIST_DIR} test_*.cpp)
+file(GLOB_RECURSE TEST_LIST RELATIVE ${CMAKE_CURRENT_LIST_DIR} Test*.cpp)
 
 set(TEST_TARGET_LIST)
 

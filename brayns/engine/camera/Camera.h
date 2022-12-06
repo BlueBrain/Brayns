@@ -71,12 +71,14 @@ public:
 
     /**
      * @brief Sets the camera projection and recreates the OSPRay handle to accomodate it.
-     * @tparam ProjectionType Type of projection to set
-     * @param projection Projection data
+     * @tparam ProjectionType Type of projection to set.
+     * @param projection Projection data.
+     * @throws std::invalid_argument if any of the projection arguments is wrong.
      */
     template<typename ProjectionType>
-    void set(ProjectionType data) noexcept
+    void set(ProjectionType data)
     {
+        ProjectionTraits<ProjectionType>::checkParameters(data);
         _projectionName = ProjectionTraits<ProjectionType>::name;
         _handle = ospray::cpp::Camera(_projectionName);
         _data = std::make_unique<Data<ProjectionType>>(std::move(data));

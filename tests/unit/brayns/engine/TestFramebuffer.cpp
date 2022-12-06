@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,26 +18,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include <doctest/doctest.h>
 
-#include <brayns/engine/camera/ProjectionTraits.h>
+#include <brayns/engine/core/Engine.h>
+#include <brayns/engine/framebuffer/Framebuffer.h>
+#include <brayns/engine/framebuffer/types/ProgressiveFrameHandler.h>
+#include <brayns/engine/framebuffer/types/StaticFrameHandler.h>
 
-namespace brayns
+TEST_CASE("Progressive framebuffer")
 {
-struct Perspective
-{
-    float fovy = 45.f;
-    float apertureRadius = 0.f;
-    float focusDistance = 1.f;
-};
+    auto params = brayns::ParametersManager(0, nullptr);
+    auto engine = brayns::Engine(params);
+    (void)engine;
 
-template<>
-class ProjectionTraits<Perspective>
-{
-public:
-    static inline const std::string name = "perspective";
+    SUBCASE("Constructor")
+    {
+        auto goodHandler = std::make_unique<brayns::ProgressiveFrameHandler>(10);
+        CHECK_NOTHROW(brayns::Framebuffer(std::move(goodHandler)));
 
-    static void checkParameters(const Perspective &data);
-    static void updateData(ospray::cpp::Camera &handle, Perspective &data);
-};
+        auto badHandler = std::make_unique<brayns::ProgressiveFrameHandler>(0);
+        CHECK_THROWS_AS(brayns::Framebuffer(std::move(badHandler)), std::invalid_argument);
+    }
 }

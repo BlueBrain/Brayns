@@ -76,6 +76,6 @@ void SimulationSystem::execute(const ParametersManager &parameters, Components &
     auto &info = components.get<brayns::SimulationInfo>();
     auto timestamp = FrameTimestamp::compute(simulation, info);
     std::exchange(_lastFrame, simulation.getFrame());
-    execute(components, _lastFrame, timestamp);
+    execute(components, timestamp);
 }
 }

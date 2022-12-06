@@ -177,9 +177,8 @@ bool SpikeReportSystem::shouldExecute(brayns::Components &components)
     return !std::exchange(data.lastEnabledFlag, true);
 }
 
-void SpikeReportSystem::execute(brayns::Components &components, uint32_t frameIndex, double frameTimestamp)
+void SpikeReportSystem::execute(brayns::Components &components, double frameTimestamp)
 {
-    (void)frameIndex;
     auto &info = components.get<brayns::SimulationInfo>();
     auto &spikeData = components.get<dti::SpikeReportData>();
     auto data = SpikeFrameProcessor::process(spikeData, frameTimestamp);
