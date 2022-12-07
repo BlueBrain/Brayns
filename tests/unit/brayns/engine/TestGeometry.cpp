@@ -19,3 +19,16 @@
  */
 
 #include <doctest/doctest.h>
+
+#include <brayns/engine/geometry/Geometry.h>
+#include <brayns/engine/geometry/types/BoundedPlane.h>
+#include <brayns/engine/geometry/types/Box.h>
+#include <brayns/engine/geometry/types/Capsule.h>
+#include <brayns/engine/geometry/types/Isosurface.h>
+#include <brayns/engine/geometry/types/Plane.h>
+#include <brayns/engine/geometry/types/Sphere.h>
+#include <brayns/engine/geometry/types/TriangleMesh.h>
+
+TEST_CASE("Geometry")
+{
+}

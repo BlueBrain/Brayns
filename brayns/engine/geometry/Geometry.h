@@ -77,12 +77,17 @@ public:
     }
 
     /**
-     * @copydoc Geometry::forEach<Callable>(Callable&&) const
+     * @brief Iterates over the primitives applying the provided callback. The primitives will be casted to the same
+     * type as the callback parameters. Providing a wrong primitive type in the callback will result in undefined
+     * behaviour.
+     *
+     * @tparam Callable The callback type
+     * @param callback Callback to apply to each primitive, with the signature void(<primitive type>&)
      */
     template<typename Callable>
     void forEach(Callable &&callback) noexcept
     {
-        using ArgType = DecayFirstArgType<Callable>; // typename ArgumentInferer<Callable>::argType;
+        using ArgType = DecayFirstArgType<Callable>;
         assert(dynamic_cast<GeometryData<ArgType> *>(_data.get()));
         auto &cast = static_cast<GeometryData<ArgType> &>(*_data);
         for (auto &element : cast.primitives)

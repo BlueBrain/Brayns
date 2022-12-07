@@ -25,7 +25,7 @@
 #include <brayns/engine/framebuffer/types/ProgressiveFrameHandler.h>
 #include <brayns/engine/framebuffer/types/StaticFrameHandler.h>
 
-TEST_CASE("Progressive framebuffer")
+TEST_CASE("Progressive frame handler")
 {
     auto params = brayns::ParametersManager(0, nullptr);
     auto engine = brayns::Engine(params);
@@ -33,10 +33,102 @@ TEST_CASE("Progressive framebuffer")
 
     SUBCASE("Constructor")
     {
-        auto goodHandler = std::make_unique<brayns::ProgressiveFrameHandler>(10);
-        CHECK_NOTHROW(brayns::Framebuffer(std::move(goodHandler)));
+        CHECK_NOTHROW(brayns::ProgressiveFrameHandler(4));
+        CHECK_THROWS_AS(brayns::ProgressiveFrameHandler(0), std::invalid_argument);
+    }
+    SUBCASE("Commit")
+    {
+        auto handler = brayns::ProgressiveFrameHandler();
+        CHECK(handler.commit());
+        CHECK(!handler.commit());
+    }
+    SUBCASE("Frame size")
+    {
+        auto handler = brayns::ProgressiveFrameHandler();
+        auto frameSize = brayns::Vector2ui(400, 400);
+        handler.setFrameSize(frameSize);
+        CHECK(handler.commit());
 
-        auto badHandler = std::make_unique<brayns::ProgressiveFrameHandler>(0);
-        CHECK_THROWS_AS(brayns::Framebuffer(std::move(badHandler)), std::invalid_argument);
+        handler.incrementAccumFrames();
+        auto image = handler.getImage();
+        CHECK(image.getWidth() == 100);
+        CHECK(image.getHeight() == 100);
+
+        handler.incrementAccumFrames();
+        image = handler.getImage();
+        CHECK(image.getWidth() == 400);
+        CHECK(image.getHeight() == 400);
+    }
+    SUBCASE("Accumulation")
+    {
+        auto handler = brayns::ProgressiveFrameHandler();
+        handler.commit();
+        CHECK(handler.getAccumulationFrameCount() == 0);
+        CHECK(!handler.hasNewAccumulationFrame());
+
+        handler.incrementAccumFrames();
+        handler.incrementAccumFrames();
+        CHECK(handler.getAccumulationFrameCount() == 2);
+        CHECK(handler.hasNewAccumulationFrame());
+
+        handler.clear();
+        CHECK(handler.getAccumulationFrameCount() == 0);
+        CHECK(handler.hasNewAccumulationFrame());
+
+        handler.resetNewAccumulationFrame();
+        CHECK(handler.getAccumulationFrameCount() == 0);
+        CHECK(!handler.hasNewAccumulationFrame());
+    }
+}
+
+TEST_CASE("Static frame handler")
+{
+    auto params = brayns::ParametersManager(0, nullptr);
+    auto engine = brayns::Engine(params);
+    (void)engine;
+
+    SUBCASE("Frame size")
+    {
+        auto handler = brayns::StaticFrameHandler();
+        auto frameSize = brayns::Vector2ui(15, 15);
+        CHECK_THROWS_AS(handler.setFrameSize(frameSize), std::invalid_argument);
+
+        frameSize = brayns::Vector2ui(150, 0);
+        CHECK_THROWS_AS(handler.setFrameSize(frameSize), std::invalid_argument);
+
+        frameSize = brayns::Vector2ui(400, 400);
+        CHECK_NOTHROW(handler.setFrameSize(frameSize));
+        CHECK(handler.commit());
+
+        auto image = handler.getImage();
+        CHECK(image.getWidth() == 400);
+        CHECK(image.getHeight() == 400);
+
+        frameSize = brayns::Vector2ui(800, 100);
+        handler.setFrameSize(frameSize);
+        handler.commit();
+        image = handler.getImage();
+        CHECK(image.getWidth() == 800);
+        CHECK(image.getHeight() == 100);
+    }
+    SUBCASE("Accumulation")
+    {
+        auto handler = brayns::StaticFrameHandler();
+        handler.commit();
+        CHECK(handler.getAccumulationFrameCount() == 0);
+        CHECK(!handler.hasNewAccumulationFrame());
+
+        handler.incrementAccumFrames();
+        handler.incrementAccumFrames();
+        CHECK(handler.getAccumulationFrameCount() == 2);
+        CHECK(handler.hasNewAccumulationFrame());
+
+        handler.clear();
+        CHECK(handler.getAccumulationFrameCount() == 0);
+        CHECK(handler.hasNewAccumulationFrame());
+
+        handler.resetNewAccumulationFrame();
+        CHECK(handler.getAccumulationFrameCount() == 0);
+        CHECK(!handler.hasNewAccumulationFrame());
     }
 }

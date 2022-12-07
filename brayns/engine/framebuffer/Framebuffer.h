@@ -33,15 +33,16 @@ class Framebuffer
 {
 public:
     /**
-     * @brief Construct a new Framebuffer object
-     *
-     * @param frame
+     * @brief Construct a new Framebuffer object with the given frame handler. Passing a null frame handler will lead
+     * to undefined behaviour.
+     * @param frame The frame handler to use.
      */
     Framebuffer(std::unique_ptr<IFrameHandler> frame);
 
     /**
-     * @brief Sets the type of frame which this framebuffer will integrate.
-     * @param frame Frame type object.
+     * @brief Sets the frame handler the framebuffer will use. Passing a null frame handler will lead to undefined
+     * behaviour.
+     * @param frame The frame handler to user.
      */
     void setFrameHandler(std::unique_ptr<IFrameHandler> frame);
 
