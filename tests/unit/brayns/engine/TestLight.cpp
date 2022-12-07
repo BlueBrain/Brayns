@@ -19,3 +19,14 @@
  */
 
 #include <doctest/doctest.h>
+
+#include <brayns/engine/core/Engine.h>
+#include <brayns/engine/light/Light.h>
+#include <brayns/engine/light/types/AmbientLight.h>
+//#include <brayns/engine/light/types/
+
+TEST_CASE("Test")
+{
+    int size = size_t();
+    (void)size;
+}

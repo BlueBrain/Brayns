@@ -28,7 +28,73 @@
 #include <brayns/engine/geometry/types/Plane.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/geometry/types/TriangleMesh.h>
+#include <brayns/engine/core/Engine.h>
 
 TEST_CASE("Geometry")
 {
+    auto parameters = brayns::ParametersManager(0, nullptr);
+    auto engine = brayns::Engine(parameters);
+    (void)engine;
+
+    SUBCASE("Constructor")
+    {
+        auto sphere = brayns::Sphere();
+        auto geometry = brayns::Geometry(sphere);
+        CHECK(geometry.numPrimitives() == 1);
+
+        auto spheres = std::vector<brayns::Sphere>
+        {
+            brayns::Sphere(),
+            brayns::Sphere(),
+            brayns::Sphere(),
+        };
+        geometry = brayns::Geometry(std::move(spheres));
+        CHECK(geometry.numPrimitives() == 3);
+    }
+    SUBCASE("Casting")
+    {
+        auto geometry = brayns::Geometry(brayns::Sphere());
+        CHECK(geometry.as<brayns::Sphere>());
+        CHECK(!geometry.as<brayns::Box>());
+    }
+    SUBCASE("Iteration")
+    {
+        auto spheres = std::vector<brayns::Sphere>
+        {
+            brayns::Sphere(),
+            brayns::Sphere(),
+            brayns::Sphere(),
+        };
+        auto geometry = brayns::Geometry(std::move(spheres));
+        geometry.commit();
+
+        CHECK(!geometry.commit());
+
+        auto counter = 0ul;
+        geometry.forEach([&](brayns::Sphere &sphere)
+        {
+            (void)sphere;
+            ++counter;
+        });
+        CHECK(counter == 3);
+        CHECK(geometry.commit());
+    }
+    SUBCASE("Compute bounds")
+    {
+        auto sphere = brayns::Sphere{brayns::Vector3f(0.f), 10.f};
+        auto geometry = brayns::Geometry(sphere);
+
+        auto bounds = geometry.computeBounds(brayns::Matrix4f(1.f));
+        auto min = bounds.getMin();
+        auto max = bounds.getMax();
+        CHECK(min == brayns::Vector3f(-10.f));
+        CHECK(max == brayns::Vector3f(10.f));
+
+        auto transform = glm::translate(brayns::Vector3f(100.f, 0.f, 0.f));
+        bounds = geometry.computeBounds(transform);
+        min = bounds.getMin();
+        max = bounds.getMax();
+        CHECK(min == brayns::Vector3f(90.f, -10.f, -10.f));
+        CHECK(max == brayns::Vector3f(110.f, 10.f, 10.f));
+    }
 }
