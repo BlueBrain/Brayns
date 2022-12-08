@@ -41,6 +41,7 @@ public:
     inline static const std::string handleName = "scivis";
     inline static const std::string name = "interactive";
 
+    static void checkParameters(const Interactive &data);
     static void updateData(ospray::cpp::Renderer &handle, Interactive &data);
 };
 }

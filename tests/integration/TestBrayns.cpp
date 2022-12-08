@@ -25,13 +25,13 @@
 
 #include <doctest/doctest.h>
 
-TEST_CASE("simple_construction")
+TEST_CASE("Simple construction")
 {
     std::vector<const char *> argv = {"brayns"};
     CHECK_NOTHROW(brayns::Brayns(static_cast<int>(argv.size()), argv.data()));
 }
 
-TEST_CASE("defaults")
+TEST_CASE("Defaults")
 {
     brayns::Brayns brayns(0, nullptr);
 

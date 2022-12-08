@@ -20,16 +20,15 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/core/Engine.h>
 #include <brayns/engine/framebuffer/Framebuffer.h>
 #include <brayns/engine/framebuffer/types/ProgressiveFrameHandler.h>
 #include <brayns/engine/framebuffer/types/StaticFrameHandler.h>
 
+#include <tests/unit/PlaceholderEngine.h>
+
 TEST_CASE("Progressive frame handler")
 {
-    auto params = brayns::ParametersManager(0, nullptr);
-    auto engine = brayns::Engine(params);
-    (void)engine;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
 
     SUBCASE("Constructor")
     {
@@ -83,9 +82,7 @@ TEST_CASE("Progressive frame handler")
 
 TEST_CASE("Static frame handler")
 {
-    auto params = brayns::ParametersManager(0, nullptr);
-    auto engine = brayns::Engine(params);
-    (void)engine;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
 
     SUBCASE("Frame size")
     {

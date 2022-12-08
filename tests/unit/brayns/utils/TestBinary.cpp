@@ -23,7 +23,7 @@
 
 #include <doctest/doctest.h>
 
-TEST_CASE("byte_converter")
+TEST_CASE("Byte converter")
 {
     const int32_t zero = 0;
     auto bytes = brayns::ByteConverter::getBytes(zero);
@@ -43,7 +43,7 @@ TEST_CASE("byte_converter")
     CHECK_EQ(test, 0x01000000);
 }
 
-TEST_CASE("byte_order")
+TEST_CASE("Byte order")
 {
     int32_t test = 1;
     auto bytes = brayns::ByteConverter::getBytes(test);
@@ -70,7 +70,7 @@ TEST_CASE("byte_order")
     CHECK_EQ(test, 1);
 }
 
-TEST_CASE("byte_parser")
+TEST_CASE("Byte parser")
 {
     std::string_view data;
     auto order = brayns::ByteOrderHelper::getSystemByteOrder();

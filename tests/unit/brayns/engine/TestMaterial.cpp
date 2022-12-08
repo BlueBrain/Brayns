@@ -19,3 +19,27 @@
  */
 
 #include <doctest/doctest.h>
+
+#include <brayns/engine/material/Material.h>
+#include <brayns/engine/material/types/CarPaint.h>
+#include <brayns/engine/material/types/Phong.h>
+
+#include <tests/unit/PlaceholderEngine.h>
+
+TEST_CASE("Material")
+{
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
+
+    SUBCASE("Casting")
+    {
+        auto material = brayns::Material(brayns::Phong());
+        CHECK(material.as<brayns::Phong>());
+        CHECK(!material.as<brayns::CarPaint>());
+    }
+    SUBCASE("Commit")
+    {
+        auto material = brayns::Material(brayns::Phong());
+        CHECK(material.commit());
+        CHECK(!material.commit());
+    }
+}

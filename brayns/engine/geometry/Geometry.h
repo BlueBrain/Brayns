@@ -78,7 +78,7 @@ public:
 
     /**
      * @brief Iterates over the primitives applying the provided callback. The primitives will be casted to the same
-     * type as the callback parameters. Providing a wrong primitive type in the callback will result in undefined
+     * type as the callback parameter. Providing a wrong primitive type in the callback will result in undefined
      * behaviour.
      *
      * @tparam Callable The callback type

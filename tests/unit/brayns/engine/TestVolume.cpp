@@ -19,3 +19,60 @@
  */
 
 #include <doctest/doctest.h>
+
+#include <brayns/engine/volume/Volume.h>
+#include <brayns/engine/volume/types/RegularVolume.h>
+
+#include <tests/unit/PlaceholderEngine.h>
+
+TEST_CASE("Volume")
+{
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
+
+    SUBCASE("Casting")
+    {
+        auto volume = brayns::Volume(brayns::RegularVolume());
+        CHECK(volume.as<brayns::RegularVolume>());
+        CHECK(!volume.as<int>());
+    }
+    SUBCASE("Iteration")
+    {
+        auto grid = brayns::RegularVolume();
+        grid.dataType = brayns::VolumeDataType::UnsignedChar;
+        grid.perVertexData = true;
+        grid.size = brayns::Vector3ui(5);
+        grid.spacing = brayns::Vector3f(1.f);
+        grid.voxels = std::vector<uint8_t>(glm::compMul(grid.size), 0);
+
+        auto volume = brayns::Volume(std::move(grid));
+        volume.commit();
+
+        CHECK(!volume.commit());
+        volume.manipulate([&](brayns::RegularVolume &data) { (void)data; });
+        CHECK(volume.commit());
+    }
+    SUBCASE("Compute bounds")
+    {
+        auto grid = brayns::RegularVolume();
+        grid.dataType = brayns::VolumeDataType::UnsignedChar;
+        grid.perVertexData = true;
+        grid.size = brayns::Vector3ui(5);
+        grid.spacing = brayns::Vector3f(1.f);
+        grid.voxels = std::vector<uint8_t>(glm::compMul(grid.size), 0);
+
+        auto volume = brayns::Volume(std::move(grid));
+
+        auto bounds = volume.computeBounds(brayns::Matrix4f(1.f));
+        auto min = bounds.getMin();
+        auto max = bounds.getMax();
+        CHECK(min == brayns::Vector3f(0.f));
+        CHECK(max == brayns::Vector3f(5.f));
+
+        auto transform = glm::translate(brayns::Vector3f(100.f, 0.f, 0.f));
+        bounds = volume.computeBounds(transform);
+        min = bounds.getMin();
+        max = bounds.getMax();
+        CHECK(min == brayns::Vector3f(100.f, 0.f, 0.f));
+        CHECK(max == brayns::Vector3f(105.f, 5.f, 5.f));
+    }
+}

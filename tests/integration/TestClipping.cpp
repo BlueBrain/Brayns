@@ -124,12 +124,12 @@ void testClipping(bool orthographic)
     ZParallelSliceManager::clear(brayns);
 }
 
-TEST_CASE("perspective_clipping")
+TEST_CASE("Perspective clipping")
 {
     testClipping(false);
 }
 
-TEST_CASE("orthographic_clipping")
+TEST_CASE("Orthographic clipping")
 {
     testClipping(true);
 }

@@ -21,20 +21,14 @@
 #include <doctest/doctest.h>
 
 #include <brayns/engine/geometry/Geometry.h>
-#include <brayns/engine/geometry/types/BoundedPlane.h>
 #include <brayns/engine/geometry/types/Box.h>
-#include <brayns/engine/geometry/types/Capsule.h>
-#include <brayns/engine/geometry/types/Isosurface.h>
-#include <brayns/engine/geometry/types/Plane.h>
 #include <brayns/engine/geometry/types/Sphere.h>
-#include <brayns/engine/geometry/types/TriangleMesh.h>
-#include <brayns/engine/core/Engine.h>
+
+#include <tests/unit/PlaceholderEngine.h>
 
 TEST_CASE("Geometry")
 {
-    auto parameters = brayns::ParametersManager(0, nullptr);
-    auto engine = brayns::Engine(parameters);
-    (void)engine;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
 
     SUBCASE("Constructor")
     {
@@ -42,8 +36,7 @@ TEST_CASE("Geometry")
         auto geometry = brayns::Geometry(sphere);
         CHECK(geometry.numPrimitives() == 1);
 
-        auto spheres = std::vector<brayns::Sphere>
-        {
+        auto spheres = std::vector<brayns::Sphere>{
             brayns::Sphere(),
             brayns::Sphere(),
             brayns::Sphere(),
@@ -59,8 +52,7 @@ TEST_CASE("Geometry")
     }
     SUBCASE("Iteration")
     {
-        auto spheres = std::vector<brayns::Sphere>
-        {
+        auto spheres = std::vector<brayns::Sphere>{
             brayns::Sphere(),
             brayns::Sphere(),
             brayns::Sphere(),
@@ -71,11 +63,12 @@ TEST_CASE("Geometry")
         CHECK(!geometry.commit());
 
         auto counter = 0ul;
-        geometry.forEach([&](brayns::Sphere &sphere)
-        {
-            (void)sphere;
-            ++counter;
-        });
+        geometry.forEach(
+            [&](brayns::Sphere &sphere)
+            {
+                (void)sphere;
+                ++counter;
+            });
         CHECK(counter == 3);
         CHECK(geometry.commit());
     }

@@ -21,7 +21,8 @@
 #include <brayns/engine/camera/Camera.h>
 #include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
-#include <brayns/engine/core/Engine.h>
+
+#include <tests/unit/PlaceholderEngine.h>
 
 #include <doctest/doctest.h>
 
@@ -29,9 +30,7 @@
 
 TEST_CASE("Perspective parameters")
 {
-    auto params = brayns::ParametersManager(0, nullptr);
-    auto engine = brayns::Engine(params);
-    (void)engine;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     SUBCASE("Correct parameters constructor")
     {
@@ -59,9 +58,7 @@ TEST_CASE("Perspective parameters")
 
 TEST_CASE("Orthographic parameters")
 {
-    auto params = brayns::ParametersManager(0, nullptr);
-    auto engine = brayns::Engine(params);
-    (void)engine;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     SUBCASE("Correct parameters constructor")
     {
@@ -89,8 +86,7 @@ TEST_CASE("Orthographic parameters")
 
 TEST_CASE("Camera")
 {
-    auto params = brayns::ParametersManager(0, nullptr);
-    auto engine = brayns::Engine(params);
+    auto engine = PlaceholderEngine();
     (void)engine;
 
     SUBCASE("Projection cast")

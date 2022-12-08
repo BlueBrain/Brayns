@@ -18,4 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <doctest/doctest.h>
+#include <brayns/engine/core/Engine.h>
+
+class PlaceholderEngine
+{
+public:
+    PlaceholderEngine()
+        : _parameters(0, nullptr)
+        , _engine(_parameters)
+    {
+    }
+
+private:
+    brayns::ParametersManager _parameters;
+    brayns::Engine _engine;
+};
+
+#define BRAYNS_TESTS_PLACEHOLDER_ENGINE \
+    auto engine = PlaceholderEngine(); \
+    (void)engine;

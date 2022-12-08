@@ -20,17 +20,16 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/core/Engine.h>
 #include <brayns/engine/light/Light.h>
 #include <brayns/engine/light/types/AmbientLight.h>
 #include <brayns/engine/light/types/DirectionalLight.h>
 #include <brayns/engine/light/types/QuadLight.h>
 
+#include <tests/unit/PlaceholderEngine.h>
+
 TEST_CASE("Light Casting")
 {
-    auto parameters = brayns::ParametersManager(0, nullptr);
-    auto engine = brayns::Engine(parameters);
-    (void)engine;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
 
     auto light = brayns::Light(brayns::AmbientLight());
     CHECK(light.as<brayns::AmbientLight>());
@@ -39,9 +38,7 @@ TEST_CASE("Light Casting")
 
 TEST_CASE("Light bounds")
 {
-    auto parameters = brayns::ParametersManager(0, nullptr);
-    auto engine = brayns::Engine(parameters);
-    (void)engine;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
 
     auto noTransform = brayns::Matrix4f(1.f);
     auto transform = glm::translate(brayns::Vector3f(100.f, 0.f, 0.f));

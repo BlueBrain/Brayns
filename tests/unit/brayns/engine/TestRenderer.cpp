@@ -19,3 +19,88 @@
  */
 
 #include <doctest/doctest.h>
+
+#include <brayns/engine/renderer/Renderer.h>
+#include <brayns/engine/renderer/types/Interactive.h>
+#include <brayns/engine/renderer/types/Production.h>
+
+#include <tests/unit/PlaceholderEngine.h>
+
+TEST_CASE("Renderer")
+{
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
+
+    SUBCASE("Interactive constructor")
+    {
+        CHECK_NOTHROW(brayns::Renderer(brayns::Interactive()));
+
+        auto badAoSamples = brayns::Interactive();
+        badAoSamples.aoSamples = static_cast<size_t>(std::numeric_limits<int>::max()) + 1;
+        CHECK_THROWS_AS(brayns::Renderer(std::move(badAoSamples)), std::invalid_argument);
+
+        auto badBounces = brayns::Interactive();
+        badBounces.maxRayBounces = static_cast<size_t>(std::numeric_limits<int>::max()) + 1;
+        CHECK_THROWS_AS(brayns::Renderer(std::move(badBounces)), std::invalid_argument);
+
+        auto badSamplesPerPixel = brayns::Interactive();
+        badSamplesPerPixel.samplesPerPixel = static_cast<size_t>(std::numeric_limits<int>::max()) + 1;
+        CHECK_THROWS_AS(brayns::Renderer(std::move(badSamplesPerPixel)), std::invalid_argument);
+    }
+    SUBCASE("Interactive set")
+    {
+        auto renderer = brayns::Renderer(brayns::Interactive());
+
+        CHECK_NOTHROW(renderer.set(brayns::Interactive()));
+
+        auto badAoSamples = brayns::Interactive();
+        badAoSamples.aoSamples = static_cast<size_t>(std::numeric_limits<int>::max()) + 1;
+        CHECK_THROWS_AS(renderer.set(badAoSamples), std::invalid_argument);
+
+        auto badBounces = brayns::Interactive();
+        badBounces.maxRayBounces = static_cast<size_t>(std::numeric_limits<int>::max()) + 1;
+        CHECK_THROWS_AS(renderer.set(badBounces), std::invalid_argument);
+
+        auto badSamplesPerPixel = brayns::Interactive();
+        badSamplesPerPixel.samplesPerPixel = static_cast<size_t>(std::numeric_limits<int>::max()) + 1;
+        CHECK_THROWS_AS(renderer.set(badSamplesPerPixel), std::invalid_argument);
+    }
+    SUBCASE("Production constructor")
+    {
+        CHECK_NOTHROW(brayns::Renderer(brayns::Production()));
+
+        auto badBounces = brayns::Production();
+        badBounces.maxRayBounces = static_cast<size_t>(std::numeric_limits<int>::max()) + 1;
+        CHECK_THROWS_AS(brayns::Renderer(std::move(badBounces)), std::invalid_argument);
+
+        auto badSamplesPerPixel = brayns::Production();
+        badSamplesPerPixel.samplesPerPixel = static_cast<size_t>(std::numeric_limits<int>::max()) + 1;
+        CHECK_THROWS_AS(brayns::Renderer(std::move(badSamplesPerPixel)), std::invalid_argument);
+    }
+    SUBCASE("Production set")
+    {
+        auto renderer = brayns::Renderer(brayns::Production());
+
+        CHECK_NOTHROW(renderer.set(brayns::Production()));
+
+        auto badBounces = brayns::Production();
+        badBounces.maxRayBounces = static_cast<size_t>(std::numeric_limits<int>::max()) + 1;
+        CHECK_THROWS_AS(renderer.set(badBounces), std::invalid_argument);
+
+        auto badSamplesPerPixel = brayns::Production();
+        badSamplesPerPixel.samplesPerPixel = static_cast<size_t>(std::numeric_limits<int>::max()) + 1;
+        CHECK_THROWS_AS(renderer.set(badSamplesPerPixel), std::invalid_argument);
+    }
+    SUBCASE("Commit")
+    {
+        auto renderer = brayns::Renderer(brayns::Production());
+        CHECK(renderer.commit());
+        CHECK(!renderer.commit());
+    }
+    SUBCASE("Samples per pixel")
+    {
+        auto interactive = brayns::Interactive();
+        interactive.samplesPerPixel = 456;
+        auto renderer = brayns::Renderer(interactive);
+        CHECK(renderer.getSamplesPerPixel() == 456);
+    }
+}

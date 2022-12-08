@@ -19,3 +19,138 @@
  */
 
 #include <doctest/doctest.h>
+
+#include <brayns/engine/model/SystemsView.h>
+
+namespace
+{
+class MockBoundsSystem : public brayns::BoundsSystem
+{
+public:
+    brayns::Bounds compute(const brayns::Matrix4f &matrix, brayns::Components &components) override
+    {
+        auto &vector = components.add<brayns::Vector4f>(0.f, 0.f, 0.f, 1.f);
+        vector = matrix * vector;
+        return brayns::Bounds();
+    }
+};
+
+class MockColorSystem : public brayns::ColorSystem
+{
+public:
+    std::vector<std::string> getMethods() const override
+    {
+        return {"method1", "method2"};
+    }
+
+    std::vector<std::string> getValues(const std::string &method, brayns::Components &components) const override
+    {
+        (void)components;
+
+        if (method == "method1")
+        {
+            return {"a", "b"};
+        }
+
+        return {"c", "d"};
+    }
+
+    void apply(const std::string &method, const brayns::ColorMethodInput &input, brayns::Components &components)
+        const override
+    {
+        auto &color = components.add<brayns::Vector4f>();
+
+        if (method == "method1")
+        {
+            color = input.at("a");
+            return;
+        }
+
+        color = input.at("c");
+    }
+};
+
+class MockInspectSystem : public brayns::InspectSystem
+{
+public:
+    brayns::InspectResultData execute(const brayns::InspectContext &context, brayns::Components &components) override
+    {
+        (void)context;
+        (void)components;
+        auto result = brayns::InspectResultData();
+        result.set("key", "a_value");
+        return result;
+    }
+};
+
+class MockUpdateSystem : public brayns::UpdateSystem
+{
+public:
+    void execute(const brayns::ParametersManager &parameters, brayns::Components &components) override
+    {
+        auto &simulation = parameters.getSimulationParameters();
+        components.add<uint32_t>(simulation.getFrame());
+    }
+};
+}
+
+TEST_CASE("Systems")
+{
+    SUBCASE("Bounds system")
+    {
+        auto components = brayns::Components();
+        auto systems = brayns::Systems();
+        systems.setBoundsSystem<MockBoundsSystem>();
+        auto view = brayns::SystemsView(systems, components);
+        auto matrix = glm::translate(brayns::Vector3f(0.f, 0.f, 100.f));
+
+        CHECK(!components.has<brayns::Vector4f>());
+
+        view.computeBounds(matrix);
+
+        CHECK(components.has<brayns::Vector4f>());
+        CHECK(components.get<brayns::Vector4f>() == brayns::Vector4f(0.f, 0.f, 100.f, 1.f));
+    }
+    SUBCASE("Color system")
+    {
+        auto components = brayns::Components();
+        auto systems = brayns::Systems();
+        systems.setColorSystem<MockColorSystem>();
+        auto view = brayns::SystemsView(systems, components);
+
+        CHECK(view.getColorMethods() == std::vector<std::string>{"method1", "method2"});
+        CHECK(view.getColorValues("method1") == std::vector<std::string>{"a", "b"});
+        CHECK(view.getColorValues("method2") == std::vector<std::string>{"c", "d"});
+
+        CHECK(!components.has<brayns::Vector4f>());
+        view.applyColor("method2", {{"c", brayns::Vector4f(1.f, 2.f, 3.f, 4.f)}});
+
+        CHECK(components.has<brayns::Vector4f>());
+        CHECK(components.get<brayns::Vector4f>() == brayns::Vector4f(1.f, 2.f, 3.f, 4.f));
+    }
+    SUBCASE("Inspect system")
+    {
+        auto components = brayns::Components();
+        auto systems = brayns::Systems();
+        systems.setInspectSystem<MockInspectSystem>();
+        auto view = brayns::SystemsView(systems, components);
+        auto result = view.inspect(brayns::InspectContext());
+        CHECK(result.has("key"));
+    }
+    SUBCASE("Update system")
+    {
+        auto components = brayns::Components();
+        auto systems = brayns::Systems();
+        systems.setUpdateSystem<MockUpdateSystem>();
+        auto view = brayns::SystemsView(systems, components);
+
+        auto parameters = brayns::ParametersManager(0, nullptr);
+        auto &simulation = parameters.getSimulationParameters();
+        simulation.setFrame(101);
+
+        CHECK(!components.has<uint32_t>());
+        view.update(parameters);
+        CHECK(components.has<uint32_t>());
+        CHECK(components.get<uint32_t>() == simulation.getFrame());
+    }
+}

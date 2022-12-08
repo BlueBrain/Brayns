@@ -36,6 +36,22 @@ struct InteractiveParameters
 
 namespace brayns
 {
+void RendererTraits<Interactive>::checkParameters(const Interactive &data)
+{
+    if (data.aoSamples > static_cast<size_t>(std::numeric_limits<int>::max()))
+    {
+        throw std::invalid_argument("ao samples cannot be higher than 2^31");
+    }
+    if (data.maxRayBounces > static_cast<size_t>(std::numeric_limits<int>::max()))
+    {
+        throw std::invalid_argument("ray bounces cannot be higher than 2^31");
+    }
+    if (data.samplesPerPixel > static_cast<size_t>(std::numeric_limits<int>::max()))
+    {
+        throw std::invalid_argument("samples per pixel cannot be higher than 2^31");
+    }
+}
+
 void RendererTraits<Interactive>::updateData(ospray::cpp::Renderer &handle, Interactive &data)
 {
     handle.setParam(InteractiveParameters::spp, static_cast<int>(data.samplesPerPixel));

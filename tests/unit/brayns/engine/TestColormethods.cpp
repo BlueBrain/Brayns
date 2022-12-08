@@ -24,25 +24,25 @@
 #include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
-#include <brayns/engine/core/Engine.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/model/Components.h>
 
+#include <tests/unit/PlaceholderEngine.h>
+
 #include <doctest/doctest.h>
 
-TEST_CASE("primitive_color_method")
+TEST_CASE("Primitive color method")
 {
-    SUBCASE("constructor")
+    SUBCASE("Constructor")
     {
         auto colorMethod = brayns::PrimitiveColorMethod("test", 10);
         auto components = brayns::Components();
         CHECK(colorMethod.getName() == "test");
         CHECK(colorMethod.getValues(components) == std::vector<std::string>{"0-9"});
     }
-    SUBCASE("apply")
+    SUBCASE("Apply")
     {
-        auto params = brayns::ParametersManager(0, nullptr);
-        auto engine = brayns::Engine(params);
+        BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
         auto colorMethod = brayns::PrimitiveColorMethod("test", 10);
 
@@ -59,10 +59,9 @@ TEST_CASE("primitive_color_method")
     }
 }
 
-TEST_CASE("solid_color_method")
+TEST_CASE("Solid color method")
 {
-    auto params = brayns::ParametersManager(0, nullptr);
-    auto engine = brayns::Engine(params);
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
 
     auto colorMethod = brayns::SolidColorMethod();
 

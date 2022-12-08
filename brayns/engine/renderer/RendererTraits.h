@@ -36,6 +36,12 @@ public:
     inline static const std::string handleName;
     inline static const std::string name;
 
+    static void checkParameters(const T &data)
+    {
+        static_assert(rendererSpecialized<T>, "RendererTraits not specialized");
+        (void)data;
+    }
+
     static void updateData(ospray::cpp::Renderer &handle, T &data)
     {
         static_assert(rendererSpecialized<T>, "RendererTraits not specialized");

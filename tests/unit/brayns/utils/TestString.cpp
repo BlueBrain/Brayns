@@ -30,7 +30,7 @@
 
 #include <stdexcept>
 
-TEST_CASE("string_case")
+TEST_CASE("String case")
 {
     auto toLowerChar = brayns::StringCase::toLower('A');
     CHECK_EQ(toLowerChar, 'a');
@@ -53,7 +53,7 @@ TEST_CASE("string_case")
     CHECK_EQ(upper, "AB CDEF ");
 }
 
-TEST_CASE("string_counter")
+TEST_CASE("String counter")
 {
     auto countChar = brayns::StringCounter::count("test this please", 'e');
     CHECK_EQ(countChar, 3);
@@ -71,7 +71,7 @@ TEST_CASE("string_counter")
     CHECK_EQ(countLines, 4);
 }
 
-TEST_CASE("string_extractor")
+TEST_CASE("String extractor")
 {
     auto data = std::string_view();
     auto extracted = std::string_view();
@@ -151,7 +151,7 @@ TEST_CASE("string_extractor")
     CHECK_EQ(extracted, "");
 }
 
-TEST_CASE("string_info")
+TEST_CASE("String info")
 {
     CHECK_FALSE(brayns::StringInfo::isSpace('c'));
     CHECK(brayns::StringInfo::isSpace(' '));
@@ -196,7 +196,7 @@ TEST_CASE("string_info")
     CHECK((brayns::StringInfo::containsOneOf(" test1  test2 fyxdg", "test2")));
 }
 
-TEST_CASE("string_joiner")
+TEST_CASE("String joiner")
 {
     auto joinEmpty = brayns::StringJoiner::join({}, '.');
     CHECK_EQ(joinEmpty, "");
@@ -208,7 +208,7 @@ TEST_CASE("string_joiner")
     CHECK_EQ(joinString, "1--2--3");
 }
 
-TEST_CASE("string_parser")
+TEST_CASE("String parser")
 {
     std::string_view data;
 
@@ -240,7 +240,7 @@ TEST_CASE("string_parser")
     CHECK_THROWS_AS((brayns::StringParser<uint8_t>::parse(data, ui8)), std::out_of_range);
 }
 
-TEST_CASE("string_splitter")
+TEST_CASE("String splitter")
 {
     std::vector<std::string> ref = {"", "test1", "", "test2", ""};
 
@@ -253,7 +253,7 @@ TEST_CASE("string_splitter")
     CHECK_EQ(brayns::StringSplitter::splitTokens(" test1 \n test2   "), ref);
 }
 
-TEST_CASE("string_trimmer")
+TEST_CASE("String trimmer")
 {
     CHECK_EQ(brayns::StringTrimmer::trimLeft("  \ttest\n "), "test\n ");
     CHECK_EQ(brayns::StringTrimmer::trimRight("  \ttest\n "), "  \ttest");

@@ -76,19 +76,20 @@ public:
     }
 
     /**
-     * @brief Allows to pass a callback to manipulate the underlying volume data. The type of
-     * data is inferer from the callback argument
-     * @tparam Callable
-     * @param callback callback to manipulate the volume data. The argument must be a reference to the volume type.
+     * @brief Manipulates the volume data by applying the provided callback. The data will be casted to the same
+     * type as the callback parameter. Providing a wrong data type in the callback will result in undefined
+     * behaviour.
+     * @tparam Callable The callback type.
+     * @param callback callback to manipulate the data, with the signature void(<data type>&).
      */
     template<typename Callable>
-    void manipulate(Callable &&callback) const noexcept
+    void manipulate(Callable &&callback) noexcept
     {
         using ArgType = DecayFirstArgType<Callable>;
-        assert(dynamic_cast<const Data<ArgType> *>(_data.get()));
-        auto &cast = static_cast<const Data<ArgType> &>(*_data);
-        callback(cast->data);
-        _flag = true;
+        assert(dynamic_cast<Data<ArgType> *>(_data.get()));
+        auto &cast = static_cast<Data<ArgType> &>(*_data);
+        callback(cast.data);
+        _flag.setModified(true);
     }
 
     /**
