@@ -23,10 +23,59 @@
 #include <brayns/engine/core/Engine.h>
 #include <brayns/engine/light/Light.h>
 #include <brayns/engine/light/types/AmbientLight.h>
-//#include <brayns/engine/light/types/
+#include <brayns/engine/light/types/DirectionalLight.h>
+#include <brayns/engine/light/types/QuadLight.h>
 
-TEST_CASE("Test")
+TEST_CASE("Light Casting")
 {
-    int size = size_t();
-    (void)size;
+    auto parameters = brayns::ParametersManager(0, nullptr);
+    auto engine = brayns::Engine(parameters);
+    (void)engine;
+
+    auto light = brayns::Light(brayns::AmbientLight());
+    CHECK(light.as<brayns::AmbientLight>());
+    CHECK(!light.as<brayns::DirectionalLight>());
+}
+
+TEST_CASE("Light bounds")
+{
+    auto parameters = brayns::ParametersManager(0, nullptr);
+    auto engine = brayns::Engine(parameters);
+    (void)engine;
+
+    auto noTransform = brayns::Matrix4f(1.f);
+    auto transform = glm::translate(brayns::Vector3f(100.f, 0.f, 0.f));
+
+    auto emptyBounds = brayns::Bounds();
+
+    SUBCASE("Ambient light")
+    {
+        auto ambientLight = brayns::Light(brayns::AmbientLight());
+        auto ambientBounds = ambientLight.computeBounds(noTransform);
+        CHECK(ambientBounds.getMax() == emptyBounds.getMax());
+        CHECK(ambientBounds.getMin() == emptyBounds.getMin());
+        ambientBounds = ambientLight.computeBounds(transform);
+        CHECK(ambientBounds.getMax() == emptyBounds.getMax());
+        CHECK(ambientBounds.getMin() == emptyBounds.getMin());
+    }
+    SUBCASE("Directional light")
+    {
+        auto directionalLight = brayns::Light(brayns::DirectionalLight());
+        auto directionalBounds = directionalLight.computeBounds(noTransform);
+        CHECK(directionalBounds.getMax() == emptyBounds.getMax());
+        CHECK(directionalBounds.getMin() == emptyBounds.getMin());
+        directionalBounds = directionalLight.computeBounds(transform);
+        CHECK(directionalBounds.getMax() == emptyBounds.getMax());
+        CHECK(directionalBounds.getMin() == emptyBounds.getMin());
+    }
+    SUBCASE("Quad light")
+    {
+        auto quadLight = brayns::Light(brayns::QuadLight());
+        auto quadBounds = quadLight.computeBounds(noTransform);
+        CHECK(quadBounds.getMin() == brayns::Vector3f(0.f));
+        CHECK(quadBounds.getMax() == brayns::Vector3f(1.f, 0.f, 1.f));
+        quadBounds = quadLight.computeBounds(transform);
+        CHECK(quadBounds.getMin() == brayns::Vector3f(100.f, 0.f, 0.f));
+        CHECK(quadBounds.getMax() == brayns::Vector3f(101.f, 0.f, 1.f));
+    }
 }
