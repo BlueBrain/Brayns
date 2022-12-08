@@ -122,4 +122,9 @@ if((BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED) AND NOT Brion_FOUND)
     endif()
 
     add_subdirectory(Brion)
+
+    # Remove Brion warnings
+    set_target_properties(Brion PROPERTIES
+        INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:Brion,INTERFACE_INCLUDE_DIRECTORIES>
+    )
 endif()

@@ -50,9 +50,12 @@ install(TARGETS brayns
 
 install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    FILES_MATCHING PATTERN "*.h")
+    FILES_MATCHING PATTERN "*.h"
+)
+
 install(FILES ${CMAKE_BINARY_DIR}/include/brayns/Version.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brayns)
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brayns
+)
 
 install(FILES Brayns-config.cmake
     DESTINATION share/brayns/CMake
