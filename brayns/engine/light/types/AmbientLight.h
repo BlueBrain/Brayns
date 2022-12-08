@@ -26,7 +26,7 @@ namespace brayns
 {
 struct AmbientLight
 {
-    float intensity = 0.1;
+    float intensity = 0.1f;
     Vector3f color = Vector3f(1.f);
 };
 

@@ -26,6 +26,6 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(GetModelMessage)
-BRAYNS_JSON_OBJECT_ENTRY(size_t, id, "Model ID")
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Model ID")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

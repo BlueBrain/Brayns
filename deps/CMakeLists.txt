@@ -43,9 +43,9 @@ if(NOT Poco_FOUND)
     add_subdirectory(poco)
 
     # Remove Poco warnings
-    if(NOT CMAKE_BUILD_TYPE MATCHES DEBUG)
-        target_compile_options(Foundation PUBLIC -Wno-sign-compare)
-    endif()
+    set_target_properties(Foundation PROPERTIES
+        INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:Foundation,INTERFACE_INCLUDE_DIRECTORIES>
+    )
 
     # Remove Poco postfix d in debug
     set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Set Debug library postfix" FORCE)

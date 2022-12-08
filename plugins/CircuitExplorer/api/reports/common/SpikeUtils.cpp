@@ -38,14 +38,14 @@ float SpikeCalculator::compute(float spikeTime, float currentTime) const noexcep
     {
         auto alpha = (spikeTime - currentTime) * _invInterval;
         alpha = alpha < 0.f ? 0.f : (alpha > 1.f ? 1.f : alpha);
-        value = SPIKE_REST_VALUE * alpha + SPIKE_EXCITED_VALUE * (1.0 - alpha);
+        value = SPIKE_REST_VALUE * alpha + SPIKE_EXCITED_VALUE * (1.0f - alpha);
     }
     // Spike in the past - start fading
     else if (spikeTime < currentTime)
     {
         auto alpha = (currentTime - spikeTime) * _invInterval;
         alpha = alpha < 0.f ? 0.f : (alpha > 1.f ? 1.f : alpha);
-        value = SPIKE_REST_VALUE * alpha + SPIKE_EXCITED_VALUE * (1.0 - alpha);
+        value = SPIKE_REST_VALUE * alpha + SPIKE_EXCITED_VALUE * (1.0f - alpha);
     }
     // Spiking neuron
     else

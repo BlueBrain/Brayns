@@ -24,7 +24,7 @@ float FrameTimeCalculator::compute(uint32_t frame, float start, float end, float
 {
     auto upRoundedDt = std::nextafter(dt, std::numeric_limits<float>::infinity());
 
-    auto timeStamp = start + frame * upRoundedDt;
+    auto timeStamp = start + static_cast<float>(frame) * upRoundedDt;
 
     if (timeStamp < start)
     {

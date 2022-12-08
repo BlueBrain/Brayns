@@ -86,7 +86,8 @@ private:
 
             for (size_t i = 0; i < segments.size(); ++i)
             {
-                auto compartment = static_cast<size_t>(step * i);
+                auto index = static_cast<float>(i);
+                auto compartment = static_cast<size_t>(step * index);
                 auto finalOffset = offset + sectionOffset + compartment;
                 auto segmentIndex = segments[i];
                 localResult[segmentIndex] = finalOffset;

@@ -22,7 +22,7 @@
 
 namespace
 {
-inline static constexpr double sonataEspsilon = 1e-6;
+inline static constexpr double sonataEpsilon = 1e-6;
 }
 
 namespace sonataloader
@@ -36,9 +36,9 @@ SonataReportData::SonataReportData(
     , _selection(std::move(selection))
 {
     auto [start, end, dt] = _population.getTimes();
-    _start = start;
-    _end = end;
-    _dt = dt;
+    _start = static_cast<float>(start);
+    _end = static_cast<float>(end);
+    _dt = static_cast<float>(dt);
 }
 
 float SonataReportData::getStartTime() const noexcept
@@ -63,8 +63,13 @@ std::string SonataReportData::getTimeUnit() const noexcept
 
 std::vector<float> SonataReportData::getFrame(uint32_t frameIndex) const
 {
-    auto [start, end, dt] = _population.getTimes();
-    auto startTime = FrameTimeCalculator::compute(frameIndex, start, end, dt) - sonataEspsilon;
+    auto times = _population.getTimes();
+    auto start = static_cast<float>(std::get<0>(times));
+    auto end = static_cast<float>(std::get<1>(times));
+    auto dt = static_cast<float>(std::get<2>(times));
+
+    auto time = FrameTimeCalculator::compute(frameIndex, start, end, dt);
+    auto startTime = time - sonataEpsilon;
     auto endTime = startTime + dt;
     auto frame = _population.get(_selection, startTime, endTime);
 

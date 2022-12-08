@@ -99,7 +99,7 @@ private:
         auto result = std::array<GizmoAxis, 3>();
         for (size_t i = 0; i < 3; ++i)
         {
-            result[i].axis[i] = 1.f;
+            result[i].axis[static_cast<glm::length_t>(i)] = 1.f;
             result[i].geometry.resize(validQuaternionCount);
         }
         return result;

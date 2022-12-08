@@ -29,7 +29,7 @@
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(UpdateModelMessage)
-BRAYNS_JSON_OBJECT_ENTRY(size_t, model_id, "Model ID")
+BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "Model ID")
 BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<ModelInstance>, model, "Model data to update")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns

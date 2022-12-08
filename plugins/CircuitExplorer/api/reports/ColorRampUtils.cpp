@@ -167,7 +167,7 @@ std::vector<brayns::Vector4f> ColorRampUtils::createSampleBuffer(const brayns::C
 
     for (size_t i = 0; i < 256; ++i)
     {
-        auto value = range.x + chunk * i;
+        auto value = range.x + chunk * static_cast<float>(i);
         colors[i] = colorRamp.getColorForValue(value);
     }
 
