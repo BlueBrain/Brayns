@@ -2,9 +2,6 @@ include:
   - project: hpc/gitlab-pipelines
     file: spack-build-components.gitlab-ci.yml
 
-tags:
-    - bb5_user
-
 variables:
   BRAYNS_COMMIT: ${CI_COMMIT_SHA}
   bb5_account: proj3
