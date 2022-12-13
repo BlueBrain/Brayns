@@ -61,7 +61,7 @@ TEST_CASE("Primitive color method")
 
 TEST_CASE("Solid color method")
 {
-    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     auto colorMethod = brayns::SolidColorMethod();
 

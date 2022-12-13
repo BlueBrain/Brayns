@@ -20,8 +20,9 @@
 
 #include <brayns/engine/common/SimulationScanner.h>
 #include <brayns/engine/components/SimulationInfo.h>
-#include <brayns/engine/core/Engine.h>
 #include <brayns/engine/scene/ModelManager.h>
+
+#include <tests/unit/PlaceholderEngine.h>
 
 #include <doctest/doctest.h>
 
@@ -46,9 +47,7 @@ public:
 
 TEST_CASE("simulation_scanner")
 {
-    auto params = brayns::ParametersManager(0, nullptr);
-    auto engine = brayns::Engine(params);
-    (void)engine;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     auto simulation = brayns::SimulationParameters();
     auto models = brayns::ModelManager();

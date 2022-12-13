@@ -28,7 +28,7 @@
 
 TEST_CASE("Progressive frame handler")
 {
-    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     SUBCASE("Constructor")
     {
@@ -82,7 +82,7 @@ TEST_CASE("Progressive frame handler")
 
 TEST_CASE("Static frame handler")
 {
-    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     SUBCASE("Frame size")
     {

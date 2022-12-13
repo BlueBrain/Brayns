@@ -29,7 +29,7 @@
 
 TEST_CASE("Light Casting")
 {
-    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     auto light = brayns::Light(brayns::AmbientLight());
     CHECK(light.as<brayns::AmbientLight>());
@@ -38,7 +38,7 @@ TEST_CASE("Light Casting")
 
 TEST_CASE("Light bounds")
 {
-    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     auto noTransform = brayns::Matrix4f(1.f);
     auto transform = glm::translate(brayns::Vector3f(100.f, 0.f, 0.f));

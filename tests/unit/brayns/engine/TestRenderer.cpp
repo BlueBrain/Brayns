@@ -28,7 +28,7 @@
 
 TEST_CASE("Renderer")
 {
-    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     SUBCASE("Interactive constructor")
     {

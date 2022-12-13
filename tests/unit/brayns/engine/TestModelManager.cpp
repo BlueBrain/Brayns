@@ -26,7 +26,7 @@
 
 TEST_CASE("ModelManager")
 {
-    BRAYNS_TESTS_PLACEHOLDER_ENGINE;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     SUBCASE("Add models")
     {

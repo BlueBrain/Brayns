@@ -86,8 +86,7 @@ TEST_CASE("Orthographic parameters")
 
 TEST_CASE("Camera")
 {
-    auto engine = PlaceholderEngine();
-    (void)engine;
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     SUBCASE("Projection cast")
     {
