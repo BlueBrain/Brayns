@@ -36,7 +36,7 @@ public:
 class FrameTimestamp
 {
 public:
-    static float compute(const brayns::SimulationParameters &simulation, const brayns::SimulationInfo &info)
+    static double compute(const brayns::SimulationParameters &simulation, const brayns::SimulationInfo &info)
     {
         auto upRoundedDt = std::nextafter(simulation.getDt(), std::numeric_limits<double>::infinity());
         auto timestamp = simulation.getFrame() * upRoundedDt;

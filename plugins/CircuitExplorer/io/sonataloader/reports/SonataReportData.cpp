@@ -18,6 +18,8 @@
 
 #include "SonataReportData.h"
 
+#include <brayns/utils/MathTypes.h>
+
 namespace
 {
 inline static constexpr double sonataEpsilon = 1e-6;
@@ -34,22 +36,22 @@ SonataReportData::SonataReportData(
     , _selection(std::move(selection))
 {
     auto [start, end, dt] = _population.getTimes();
-    _start = static_cast<float>(start);
-    _end = static_cast<float>(end);
-    _dt = static_cast<float>(dt);
+    _start = start;
+    _end = end;
+    _dt = dt;
 }
 
-float SonataReportData::getStartTime() const noexcept
+double SonataReportData::getStartTime() const noexcept
 {
     return _start;
 }
 
-float SonataReportData::getEndTime() const noexcept
+double SonataReportData::getEndTime() const noexcept
 {
     return _end;
 }
 
-float SonataReportData::getTimeStep() const noexcept
+double SonataReportData::getTimeStep() const noexcept
 {
     return _dt;
 }
@@ -62,6 +64,7 @@ std::string SonataReportData::getTimeUnit() const noexcept
 std::vector<float> SonataReportData::getFrame(double timestamp) const
 {
     auto [start, end, dt] = _population.getTimes();
+    timestamp = glm::clamp(timestamp, start, end - dt);
     auto endTime = timestamp + dt;
     auto frame = _population.get(_selection, timestamp, endTime);
 

@@ -25,19 +25,19 @@ CompartmentData::CompartmentData(std::unique_ptr<brion::CompartmentReport> repor
 {
 }
 
-float CompartmentData::getStartTime() const noexcept
+double CompartmentData::getStartTime() const noexcept
 {
-    return static_cast<float>(_report->getStartTime());
+    return _report->getStartTime();
 }
 
-float CompartmentData::getEndTime() const noexcept
+double CompartmentData::getEndTime() const noexcept
 {
-    return static_cast<float>(_report->getEndTime());
+    return _report->getEndTime();
 }
 
-float CompartmentData::getTimeStep() const noexcept
+double CompartmentData::getTimeStep() const noexcept
 {
-    return static_cast<float>(_report->getTimestep());
+    return _report->getTimestep();
 }
 
 std::string CompartmentData::getTimeUnit() const noexcept
@@ -47,6 +47,7 @@ std::string CompartmentData::getTimeUnit() const noexcept
 
 std::vector<float> CompartmentData::getFrame(double timestamp) const
 {
+    timestamp = glm::clamp(timestamp, getStartTime(), getEndTime() - getTimeStep());
     auto frameFuture = _report->loadFrame(timestamp);
     auto frame = frameFuture.get();
     auto &data = frame.data;

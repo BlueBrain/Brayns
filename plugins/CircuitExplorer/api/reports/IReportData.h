@@ -34,21 +34,21 @@ public:
      *
      * @return float
      */
-    virtual float getStartTime() const noexcept = 0;
+    virtual double getStartTime() const noexcept = 0;
 
     /**
      * @brief Returns the report end time
      *
      * @return float
      */
-    virtual float getEndTime() const noexcept = 0;
+    virtual double getEndTime() const noexcept = 0;
 
     /**
      * @brief Returns the report time step
      *
      * @return float
      */
-    virtual float getTimeStep() const noexcept = 0;
+    virtual double getTimeStep() const noexcept = 0;
 
     /**
      * @brief Return the reports time unit

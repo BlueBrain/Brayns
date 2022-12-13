@@ -30,9 +30,9 @@ class SpikeData : public IReportData
 public:
     SpikeData(std::unique_ptr<brain::SpikeReportReader> report, const std::vector<uint64_t> &gids, float spikeInterval);
 
-    float getStartTime() const noexcept override;
-    float getEndTime() const noexcept override;
-    float getTimeStep() const noexcept override;
+    double getStartTime() const noexcept override;
+    double getEndTime() const noexcept override;
+    double getTimeStep() const noexcept override;
     std::string getTimeUnit() const noexcept override;
     std::vector<float> getFrame(double timestamp) const override;
 
