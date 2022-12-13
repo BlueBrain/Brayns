@@ -47,16 +47,7 @@ std::string CompartmentData::getTimeUnit() const noexcept
 
 std::vector<float> CompartmentData::getFrame(double timestamp) const
 {
-<<<<<<< HEAD
-    auto start = getStartTime();
-    auto end = getEndTime();
-    auto dt = getTimeStep();
-    auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-
-    auto frameFuture = _report->loadFrame(frameTime);
-=======
     auto frameFuture = _report->loadFrame(timestamp);
->>>>>>> Checkpoint
     auto frame = frameFuture.get();
     auto &data = frame.data;
 
