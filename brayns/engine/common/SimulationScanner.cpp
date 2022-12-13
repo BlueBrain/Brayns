@@ -24,11 +24,15 @@
 
 namespace
 {
-struct SimulationUpdater
+class SimulationUpdater
 {
+public:
     static void update(brayns::SimulationParameters &simulation, double start, double end, double dt)
     {
         dt = std::nextafter(dt, std::numeric_limits<double>::infinity());
+
+        _checkFrameLimits(start, end, dt);
+
         auto startFrame = static_cast<uint32_t>(start / dt);
         auto endFrame = static_cast<uint32_t>(end / dt);
 
@@ -39,6 +43,19 @@ struct SimulationUpdater
         auto currentFrame = simulation.getFrame();
         currentFrame = std::min(endFrame, std::max(startFrame, currentFrame));
         simulation.setFrame(currentFrame);
+    }
+
+private:
+    static void _checkFrameLimits(double start, double end, double dt)
+    {
+        if (start / dt > static_cast<double>(std::numeric_limits<uint32_t>::max()))
+        {
+            throw std::runtime_error("Start frame is greater than 2^32");
+        }
+        if (end / dt > static_cast<double>(std::numeric_limits<uint32_t>::max()))
+        {
+            throw std::runtime_error("End frame is greater than 2^32");
+        }
     }
 };
 }
