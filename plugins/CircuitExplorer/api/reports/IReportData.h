@@ -34,21 +34,21 @@ public:
      *
      * @return float
      */
-    virtual float getStartTime() const noexcept = 0;
+    virtual double getStartTime() const noexcept = 0;
 
     /**
      * @brief Returns the report end time
      *
      * @return float
      */
-    virtual float getEndTime() const noexcept = 0;
+    virtual double getEndTime() const noexcept = 0;
 
     /**
      * @brief Returns the report time step
      *
      * @return float
      */
-    virtual float getTimeStep() const noexcept = 0;
+    virtual double getTimeStep() const noexcept = 0;
 
     /**
      * @brief Return the reports time unit
@@ -60,8 +60,8 @@ public:
     /**
      * @brief Returns a frame from the report
      *
-     * @param frameIndex
+     * @param timestamp Timestamp of the frame to load
      * @return std::vector<float>
      */
-    virtual std::vector<float> getFrame(uint32_t frameIndex) const = 0;
+    virtual std::vector<float> getFrame(double timestamp) const = 0;
 };

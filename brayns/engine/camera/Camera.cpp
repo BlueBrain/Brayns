@@ -33,6 +33,43 @@ struct CameraParameters
     inline static const std::string imageStart = "imageStart";
     inline static const std::string imageEnd = "imageEnd";
 };
+
+class ViewIntegrity
+{
+public:
+    static void check(const brayns::View &view)
+    {
+        if (view.position == view.target)
+        {
+            throw std::invalid_argument("View position cannot be equal to view target");
+        }
+
+        if (glm::length2(view.up) == 0)
+        {
+            throw std::invalid_argument("View up cannot be zero length");
+        }
+
+        auto direction = glm::normalize(view.target - view.position);
+        auto up = glm::normalize(view.up);
+        auto dot = glm::dot(direction, up);
+        if (glm::abs(dot) == 1.f)
+        {
+            throw std::invalid_argument("View direction and up cannot be aligned");
+        }
+    }
+};
+
+class FrameSizeIntegrity
+{
+public:
+    static void check(const brayns::Vector2ui &frameSize)
+    {
+        if (frameSize.x == 0 || frameSize.y == 0)
+        {
+            throw std::invalid_argument("Frame size cannot have a zero dimension");
+        }
+    }
+};
 }
 
 namespace brayns
@@ -77,6 +114,7 @@ const std::string &Camera::getName() const noexcept
 
 void Camera::setView(const View &view)
 {
+    ViewIntegrity::check(view);
     _flag.update(_view, view);
 }
 
@@ -87,6 +125,7 @@ const View &Camera::getView() const noexcept
 
 void Camera::setAspectRatioFromFrameSize(const Vector2ui &frameSize)
 {
+    FrameSizeIntegrity::check(frameSize);
     _flag.update(_aspectRatio, static_cast<float>(frameSize.x) / static_cast<float>(frameSize.y));
 }
 

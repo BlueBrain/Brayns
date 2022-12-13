@@ -24,7 +24,7 @@
 
 #include <doctest/doctest.h>
 
-TEST_CASE("chunk_extractor")
+TEST_CASE("Chunk extractor")
 {
     std::string_view data;
     auto order = brayns::ByteOrderHelper::getSystemByteOrder();
@@ -53,7 +53,7 @@ TEST_CASE("chunk_extractor")
     CHECK_EQ(v, refv);
 }
 
-TEST_CASE("file_stream")
+TEST_CASE("File stream")
 {
     auto test = "test1\ntest2\n";
     auto stream = brayns::FileStream(test);
@@ -73,7 +73,7 @@ TEST_CASE("file_stream")
     CHECK_EQ(stream.getLine(), "");
 }
 
-TEST_CASE("parser")
+TEST_CASE("Parser")
 {
     std::string_view data;
 
@@ -105,7 +105,7 @@ TEST_CASE("parser")
     CHECK_EQ(brayns::Parser::extractChunk<brayns::Vector3f>(data, order), ref);
 }
 
-TEST_CASE("token_extractor")
+TEST_CASE("Token extractor")
 {
     std::string_view data;
 

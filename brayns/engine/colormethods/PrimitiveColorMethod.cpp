@@ -27,6 +27,8 @@
 
 #include <brayns/utils/parsing/Parser.h>
 
+#include <cassert>
+
 namespace
 {
 class ColorListExtractor
@@ -82,6 +84,7 @@ PrimitiveColorMethod::PrimitiveColorMethod(std::string name, size_t primitiveCou
     : _name(std::move(name))
     , _primitiveCount(primitiveCount)
 {
+    assert(_primitiveCount > 0);
 }
 
 std::string PrimitiveColorMethod::getName() const

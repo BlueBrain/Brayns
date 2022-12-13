@@ -18,7 +18,7 @@
 
 #include "SonataReportData.h"
 
-#include <api/reports/common/FrameTimeCalculator.h>
+#include <brayns/utils/MathTypes.h>
 
 namespace
 {
@@ -36,22 +36,22 @@ SonataReportData::SonataReportData(
     , _selection(std::move(selection))
 {
     auto [start, end, dt] = _population.getTimes();
-    _start = static_cast<float>(start);
-    _end = static_cast<float>(end);
-    _dt = static_cast<float>(dt);
+    _start = start;
+    _end = end;
+    _dt = dt;
 }
 
-float SonataReportData::getStartTime() const noexcept
+double SonataReportData::getStartTime() const noexcept
 {
     return _start;
 }
 
-float SonataReportData::getEndTime() const noexcept
+double SonataReportData::getEndTime() const noexcept
 {
     return _end;
 }
 
-float SonataReportData::getTimeStep() const noexcept
+double SonataReportData::getTimeStep() const noexcept
 {
     return _dt;
 }
@@ -61,17 +61,12 @@ std::string SonataReportData::getTimeUnit() const noexcept
     return _population.getTimeUnits();
 }
 
-std::vector<float> SonataReportData::getFrame(uint32_t frameIndex) const
+std::vector<float> SonataReportData::getFrame(double timestamp) const
 {
-    auto times = _population.getTimes();
-    auto start = static_cast<float>(std::get<0>(times));
-    auto end = static_cast<float>(std::get<1>(times));
-    auto dt = static_cast<float>(std::get<2>(times));
-
-    auto time = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    auto startTime = time - sonataEpsilon;
-    auto endTime = startTime + dt;
-    auto frame = _population.get(_selection, startTime, endTime);
+    auto [start, end, dt] = _population.getTimes();
+    timestamp = glm::clamp(timestamp, start, end - dt);
+    auto endTime = timestamp + dt;
+    auto frame = _population.get(_selection, timestamp, endTime);
 
     if (frame.data.empty())
     {

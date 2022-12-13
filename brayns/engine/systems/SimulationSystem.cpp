@@ -32,6 +32,28 @@ public:
         return simulation.isModified() && simulation.getFrame() != lastFrame;
     }
 };
+
+class FrameTimestamp
+{
+public:
+    static double compute(const brayns::SimulationParameters &simulation, const brayns::SimulationInfo &info)
+    {
+        auto upRoundedDt = std::nextafter(simulation.getDt(), std::numeric_limits<double>::infinity());
+        auto timestamp = simulation.getFrame() * upRoundedDt;
+
+        if (timestamp < info.startTime)
+        {
+            return info.startTime;
+        }
+
+        if (auto upperLimit = info.endTime - upRoundedDt; timestamp >= upperLimit)
+        {
+            return upperLimit;
+        }
+
+        return timestamp;
+    }
+};
 }
 
 namespace brayns
@@ -51,7 +73,9 @@ void SimulationSystem::execute(const ParametersManager &parameters, Components &
         return;
     }
 
+    auto &info = components.get<brayns::SimulationInfo>();
+    auto timestamp = FrameTimestamp::compute(simulation, info);
     std::exchange(_lastFrame, simulation.getFrame());
-    execute(components, _lastFrame);
+    execute(components, timestamp);
 }
 }

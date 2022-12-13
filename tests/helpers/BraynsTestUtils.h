@@ -28,12 +28,58 @@
 #include <brayns/engine/components/Lights.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/components/GeometryViews.h>
+#include <brayns/engine/geometry/types/Box.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/GeometryCommitSystem.h>
+#include <brayns/engine/systems/GeometryInitSystem.h>
+
 /**
  * @brief Encapsulates some utilities used across all the tests
  */
 class BraynsTestUtils
 {
 public:
+    static brayns::ModelInstance *addCube(
+        brayns::Brayns &brayns,
+        const brayns::Vector3f &position = brayns::Vector3f(0.f),
+        const brayns::Vector3f &size = brayns::Vector3f(1.f),
+        const brayns::Vector4f &color = brayns::Vector4f(1.f, 0.f, 0.f, 1.f))
+    {
+        auto cube = brayns::Box{position, position + size};
+
+        auto model = std::make_shared<brayns::Model>("");
+
+        auto &components = model->getComponents();
+        auto &geometries = components.add<brayns::Geometries>(cube);
+        auto &views = components.add<brayns::GeometryViews>(geometries.elements);
+        auto &view = views.elements.front();
+        view.setColor(color);
+
+        auto &systems = model->getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
+        systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        systems.setInitSystem<brayns::GeometryInitSystem>();
+
+        auto &engine = brayns.getEngine();
+        auto &scene = engine.getScene();
+        auto &models = scene.getModels();
+        return models.add(std::move(model));
+    }
+
+    static void adjustPerspective(brayns::Camera &camera, const brayns::Bounds &bounds)
+    {
+        auto &projection = *camera.as<brayns::Perspective>();
+        auto center = bounds.center();
+        auto size = bounds.dimensions();
+        auto distance = size.y * 0.5 / glm::tan(glm::radians(projection.fovy * 0.5));
+        auto position = center + brayns::Vector3f(0.f, 0.f, distance + size.z * 0.5f);
+        auto view = brayns::View{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
+        camera.setView(view);
+        camera.commit();
+    }
+
     static void setRenderResolution(brayns::Brayns &brayns, uint32_t width, uint32_t height)
     {
         auto &params = brayns.getParametersManager();

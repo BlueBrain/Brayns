@@ -24,13 +24,17 @@
 
 namespace
 {
-struct SimulationUpdater
+class SimulationUpdater
 {
-    static void update(brayns::SimulationParameters &simulation, float start, float end, float dt)
+public:
+    static void update(brayns::SimulationParameters &simulation, double start, double end, double dt)
     {
-        dt = std::nextafter(dt, std::numeric_limits<float>::infinity());
-        const auto startFrame = uint32_t(start / dt);
-        const auto endFrame = uint32_t(end / dt);
+        dt = std::nextafter(dt, std::numeric_limits<double>::infinity());
+
+        _checkFrameLimits(start, end, dt);
+
+        auto startFrame = static_cast<uint32_t>(start / dt);
+        auto endFrame = static_cast<uint32_t>(end / dt);
 
         simulation.setStartFrame(startFrame);
         simulation.setEndFrame(endFrame);
@@ -40,6 +44,19 @@ struct SimulationUpdater
         currentFrame = std::min(endFrame, std::max(startFrame, currentFrame));
         simulation.setFrame(currentFrame);
     }
+
+private:
+    static void _checkFrameLimits(double start, double end, double dt)
+    {
+        if (start / dt > static_cast<double>(std::numeric_limits<uint32_t>::max()))
+        {
+            throw std::runtime_error("Start frame is greater than 2^32");
+        }
+        if (end / dt > static_cast<double>(std::numeric_limits<uint32_t>::max()))
+        {
+            throw std::runtime_error("End frame is greater than 2^32");
+        }
+    }
 };
 }
 
@@ -47,9 +64,9 @@ namespace brayns
 {
 void SimulationScanner::scanAndUpdate(ModelManager &models, SimulationParameters &globalSimulation)
 {
-    float earlierStart = std::numeric_limits<float>::max();
-    float latestEnd = std::numeric_limits<float>::lowest();
-    float smallestDt = std::numeric_limits<float>::max();
+    auto earlierStart = std::numeric_limits<double>::max();
+    auto latestEnd = std::numeric_limits<double>::lowest();
+    auto smallestDt = std::numeric_limits<double>::max();
     bool foundSimulation{false};
 
     auto &instances = models.getAllModelInstances();

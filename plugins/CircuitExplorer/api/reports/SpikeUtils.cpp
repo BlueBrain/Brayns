@@ -18,42 +18,40 @@
 
 #include "SpikeUtils.h"
 
+#include <brayns/utils/MathTypes.h>
+
 namespace
 {
-constexpr float SPIKE_REST_VALUE = 0.f;
-constexpr float SPIKE_EXCITED_VALUE = 1.f;
+struct SpikeConstants
+{
+    inline static constexpr float restValue = 0.f;
+    inline static constexpr float excitedValue = 1.f;
+};
 }
 
-SpikeCalculator::SpikeCalculator(const float interval)
+SpikeCalculator::SpikeCalculator(float interval)
     : _invInterval(interval > 0.f ? 1.f / interval : 0.f)
 {
 }
 
 float SpikeCalculator::compute(float spikeTime, float currentTime) const noexcept
 {
-    float value{};
-
     // Spike in the future - start growth
     if (spikeTime > currentTime)
     {
-        auto alpha = (spikeTime - currentTime) * _invInterval;
-        alpha = alpha < 0.f ? 0.f : (alpha > 1.f ? 1.f : alpha);
-        value = SPIKE_REST_VALUE * alpha + SPIKE_EXCITED_VALUE * (1.0f - alpha);
-    }
-    // Spike in the past - start fading
-    else if (spikeTime < currentTime)
-    {
-        auto alpha = (currentTime - spikeTime) * _invInterval;
-        alpha = alpha < 0.f ? 0.f : (alpha > 1.f ? 1.f : alpha);
-        value = SPIKE_REST_VALUE * alpha + SPIKE_EXCITED_VALUE * (1.0f - alpha);
-    }
-    // Spiking neuron
-    else
-    {
-        value = SPIKE_EXCITED_VALUE;
+        auto alpha = glm::clamp((spikeTime - currentTime) * _invInterval, 0.f, 1.f);
+        return SpikeConstants::restValue * alpha + SpikeConstants::excitedValue * (1.0f - alpha);
     }
 
-    return value;
+    // Spike in the past - start fading
+    if (spikeTime < currentTime)
+    {
+        auto alpha = glm::clamp((currentTime - spikeTime) * _invInterval, 0.f, 1.f);
+        return SpikeConstants::restValue * alpha + SpikeConstants::excitedValue * (1.0f - alpha);
+    }
+
+    // Spiking neuron
+    return SpikeConstants::excitedValue;
 }
 
 std::unordered_map<uint64_t, size_t> SpikeMappingGenerator::generate(const std::vector<uint64_t> &ids) noexcept

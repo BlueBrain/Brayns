@@ -35,6 +35,12 @@ class ProjectionTraits
 public:
     inline static const std::string name;
 
+    static void checkParameters(const T &data)
+    {
+        static_assert(cameraSpecialized<T>, "ProjectionTraits not specialized");
+        (void)data;
+    }
+
     static void updateData(ospray::cpp::Camera &handle, T &data)
     {
         static_assert(cameraSpecialized<T>, "ProjectionTraits not specialized");

@@ -29,8 +29,8 @@ struct QuadLight
     float intensity = 1.f;
     Vector3f color = Vector3f(1.f);
     Vector3f position = Vector3f(0.f);
-    Vector3f edge1 = Vector3f(0.f, 1.f, 0.f);
-    Vector3f edge2 = Vector3f(1.f, 0.f, 1.f);
+    Vector3f edge1 = Vector3f(1.f, 0.f, 0.f);
+    Vector3f edge2 = Vector3f(0.f, 0.f, 1.f);
 };
 
 template<>

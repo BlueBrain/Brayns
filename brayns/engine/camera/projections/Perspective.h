@@ -37,6 +37,7 @@ class ProjectionTraits<Perspective>
 public:
     static inline const std::string name = "perspective";
 
+    static void checkParameters(const Perspective &data);
     static void updateData(ospray::cpp::Camera &handle, Perspective &data);
 };
 }

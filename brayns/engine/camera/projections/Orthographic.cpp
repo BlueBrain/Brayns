@@ -30,6 +30,14 @@ struct OrhtographicParameters
 
 namespace brayns
 {
+void ProjectionTraits<Orthographic>::checkParameters(const Orthographic &data)
+{
+    if (data.height <= 0.f)
+    {
+        throw std::invalid_argument("Orthographic height must be greater than 0");
+    }
+}
+
 void ProjectionTraits<Orthographic>::updateData(ospray::cpp::Camera &handle, Orthographic &data)
 {
     handle.setParam(OrhtographicParameters::height, data.height);

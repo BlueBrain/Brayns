@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,22 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include <brayns/engine/core/Engine.h>
 
-#include "UpdateSystem.h"
-
-namespace brayns
-{
-class SimulationSystem : public UpdateSystem
+class PlaceholderEngine
 {
 public:
-    virtual void execute(const ParametersManager &parameters, Components &components) final;
-
-    virtual bool isEnabled(Components &components) = 0;
-    virtual bool shouldExecute(Components &components) = 0;
-    virtual void execute(Components &components, uint32_t frame) = 0;
+    PlaceholderEngine()
+        : _parameters(0, nullptr)
+        , _engine(_parameters)
+    {
+    }
 
 private:
-    uint32_t _lastFrame = std::numeric_limits<uint32_t>::max();
+    brayns::ParametersManager _parameters;
+    brayns::Engine _engine;
 };
-}
+
+#define BRAYNS_TESTS_PLACEHOLDER_ENGINE \
+    auto engine = PlaceholderEngine(); \
+    (void)engine;

@@ -34,6 +34,18 @@ struct ProductionParameters
 
 namespace brayns
 {
+void RendererTraits<Production>::checkParameters(const Production &data)
+{
+    if (data.maxRayBounces > static_cast<size_t>(std::numeric_limits<int>::max()))
+    {
+        throw std::invalid_argument("ray bounces cannot be higher than 2^31");
+    }
+    if (data.samplesPerPixel > static_cast<size_t>(std::numeric_limits<int>::max()))
+    {
+        throw std::invalid_argument("samples per pixel cannot be higher than 2^31");
+    }
+}
+
 void RendererTraits<Production>::updateData(ospray::cpp::Renderer &handle, Production &data)
 {
     handle.setParam(ProductionParameters::spp, static_cast<int>(data.samplesPerPixel));

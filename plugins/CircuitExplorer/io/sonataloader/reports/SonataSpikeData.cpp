@@ -18,8 +18,7 @@
 
 #include "SonataSpikeData.h"
 
-#include <api/reports/common/FrameTimeCalculator.h>
-#include <api/reports/common/SpikeUtils.h>
+#include <brayns/utils/MathTypes.h>
 
 namespace sonataloader
 {
@@ -36,23 +35,23 @@ SonataSpikeData::SonataSpikeData(
     , _interval(interval)
 {
     auto [start, end] = _population.getTimes();
-    _start = static_cast<float>(start);
-    _end = static_cast<float>(end);
+    _start = start;
+    _end = end;
 }
 
-float SonataSpikeData::getStartTime() const noexcept
+double SonataSpikeData::getStartTime() const noexcept
 {
     return _start;
 }
 
-float SonataSpikeData::getEndTime() const noexcept
+double SonataSpikeData::getEndTime() const noexcept
 {
     return _end;
 }
 
-float SonataSpikeData::getTimeStep() const noexcept
+double SonataSpikeData::getTimeStep() const noexcept
 {
-    return 0.01f;
+    return 0.01;
 }
 
 std::string SonataSpikeData::getTimeUnit() const noexcept
@@ -60,18 +59,16 @@ std::string SonataSpikeData::getTimeUnit() const noexcept
     return "";
 }
 
-std::vector<float> SonataSpikeData::getFrame(uint32_t frameIndex) const
+std::vector<float> SonataSpikeData::getFrame(double timestamp) const
 {
-    auto data = std::vector<float>(_mapping.size(), 0.f);
-
-    auto start = getStartTime();
-    auto end = getEndTime();
-    auto dt = getTimeStep();
-    auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    auto frameStart = frameTime - _interval;
-    auto frameEnd = frameTime + _interval;
+    auto limit = static_cast<float>(getEndTime()) - 0.01f;
+    auto frame = glm::clamp(static_cast<float>(timestamp), 0.f, limit);
+    auto frameStart = frame - _interval;
+    auto frameEnd = frame + _interval;
 
     auto spikes = _population.get(_selection, frameStart, frameEnd);
+
+    auto data = std::vector<float>(_mapping.size(), 0.f);
 
     for (size_t i = 0; i < spikes.size(); ++i)
     {
@@ -86,7 +83,7 @@ std::vector<float> SonataSpikeData::getFrame(uint32_t frameIndex) const
         }
 
         auto index = it->second;
-        data[index] = _calculator.compute(spikeTime, frameTime);
+        data[index] = _calculator.compute(spikeTime, frame);
     }
 
     return data;

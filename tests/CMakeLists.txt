@@ -10,21 +10,12 @@ enable_testing()
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 
-set(TEST_LIST
-    binary.cpp
-    brayns.cpp
-    clipping.cpp
-    lights.cpp
-    images.cpp
-    parsing.cpp
-    string.cpp
-)
+file(GLOB_RECURSE TEST_LIST RELATIVE ${CMAKE_CURRENT_LIST_DIR} Test*.cpp)
 
 set(TEST_TARGET_LIST)
 
 foreach(TEST ${TEST_LIST})
     get_filename_component(TEST_NAME ${TEST} NAME_WLE)
-    set(TEST_NAME "braynstest_${TEST_NAME}")
 
     add_executable(${TEST_NAME} ${TEST})
     target_compile_options(${TEST_NAME} PRIVATE ${BRAYNS_COMPILE_OPTIONS})

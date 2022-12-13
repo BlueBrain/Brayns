@@ -19,7 +19,7 @@
 #pragma once
 
 #include <api/reports/IReportData.h>
-#include <api/reports/common/SpikeUtils.h>
+#include <api/reports/SpikeUtils.h>
 
 #include <bbp/sonata/report_reader.h>
 
@@ -34,11 +34,11 @@ public:
         bbp::sonata::Selection selection,
         float interval);
 
-    float getStartTime() const noexcept override;
-    float getEndTime() const noexcept override;
-    float getTimeStep() const noexcept override;
+    double getStartTime() const noexcept override;
+    double getEndTime() const noexcept override;
+    double getTimeStep() const noexcept override;
     std::string getTimeUnit() const noexcept override;
-    std::vector<float> getFrame(uint32_t frameIndex) const override;
+    std::vector<float> getFrame(double timestamp) const override;
 
 private:
     const bbp::sonata::SpikeReader _reader;
@@ -47,7 +47,7 @@ private:
     const std::unordered_map<uint64_t, size_t> _mapping;
     const SpikeCalculator _calculator;
     float _interval{};
-    float _start{};
-    float _end{};
+    double _start{};
+    double _end{};
 };
 }

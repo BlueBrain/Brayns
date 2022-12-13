@@ -54,7 +54,7 @@ bool ReportSystem::shouldExecute(brayns::Components &components)
     return flagModified || colorRampModified;
 }
 
-void ReportSystem::execute(brayns::Components &components, uint32_t frame)
+void ReportSystem::execute(brayns::Components &components, double frameTimestamp)
 {
     auto &colorRamp = components.get<brayns::ColorRamp>();
     auto &colorMap = components.getOrAdd<brayns::ColorMap>();
@@ -63,7 +63,7 @@ void ReportSystem::execute(brayns::Components &components, uint32_t frame)
     auto &range = colorRamp.getValuesRange();
 
     auto &report = components.get<ReportData>();
-    auto frameData = report.data->getFrame(frame);
+    auto frameData = report.data->getFrame(frameTimestamp);
     colorMap.indices = report.indexer->generate(frameData, range);
 
     auto &painter = *components.get<ColorHandler>().handler;

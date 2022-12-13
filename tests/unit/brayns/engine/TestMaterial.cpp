@@ -1,6 +1,8 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -16,15 +18,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include <doctest/doctest.h>
 
-#include <cstdint>
+#include <brayns/engine/material/Material.h>
+#include <brayns/engine/material/types/CarPaint.h>
+#include <brayns/engine/material/types/Phong.h>
 
-/**
- * @brief Transforms a frame integer index into its timestamp based on the report start, end and timestep values
- */
-class FrameTimeCalculator
+#include <tests/unit/PlaceholderEngine.h>
+
+TEST_CASE("Material")
 {
-public:
-    static float compute(uint32_t frame, float start, float end, float dt) noexcept;
-};
+    BRAYNS_TESTS_PLACEHOLDER_ENGINE
+
+    SUBCASE("Casting")
+    {
+        auto material = brayns::Material(brayns::Phong());
+        CHECK(material.as<brayns::Phong>());
+        CHECK(!material.as<brayns::CarPaint>());
+    }
+    SUBCASE("Commit")
+    {
+        auto material = brayns::Material(brayns::Phong());
+        CHECK(material.commit());
+        CHECK(!material.commit());
+    }
+}

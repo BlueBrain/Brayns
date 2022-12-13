@@ -18,8 +18,6 @@
 
 #include "SpikeData.h"
 
-#include <api/reports/common/FrameTimeCalculator.h>
-
 namespace bbploader
 {
 SpikeData::SpikeData(
@@ -33,19 +31,19 @@ SpikeData::SpikeData(
 {
 }
 
-float SpikeData::getStartTime() const noexcept
+double SpikeData::getStartTime() const noexcept
 {
-    return 0.f;
+    return 0.;
 }
 
-float SpikeData::getEndTime() const noexcept
+double SpikeData::getEndTime() const noexcept
 {
     return _report->getEndTime();
 }
 
-float SpikeData::getTimeStep() const noexcept
+double SpikeData::getTimeStep() const noexcept
 {
-    return 0.01f;
+    return 0.01;
 }
 
 std::string SpikeData::getTimeUnit() const noexcept
@@ -53,18 +51,17 @@ std::string SpikeData::getTimeUnit() const noexcept
     return "";
 }
 
-std::vector<float> SpikeData::getFrame(uint32_t frameIndex) const
+std::vector<float> SpikeData::getFrame(double timestamp) const
 {
-    auto values = std::vector<float>(_mapping.size(), 0.f);
+    auto fTimestamp = static_cast<float>(glm::clamp(timestamp, 0., getEndTime()));
 
-    auto start = getStartTime();
-    auto end = getEndTime();
-    auto dt = getTimeStep();
-    auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
-    auto frameStart = frameTime - _interval;
-    auto frameEnd = frameTime + _interval;
+    auto limitTimestamp = _report->getEndTime() - 0.01f;
+    auto frameStart = glm::clamp(fTimestamp - _interval, 0.f, limitTimestamp);
+    auto frameEnd = glm::clamp(fTimestamp + _interval, 0.f, limitTimestamp);
 
     auto spikes = _report->getSpikes(frameStart, frameEnd);
+
+    auto values = std::vector<float>(_mapping.size(), 0.f);
 
     for (size_t i = 0; i < spikes.size(); ++i)
     {
@@ -80,7 +77,7 @@ std::vector<float> SpikeData::getFrame(uint32_t frameIndex) const
         auto index = it->second;
         auto spikeTime = spike.first;
 
-        values[index] = _spikeCalculator.compute(spikeTime, frameTime);
+        values[index] = _spikeCalculator.compute(spikeTime, fTimestamp);
     }
 
     return values;

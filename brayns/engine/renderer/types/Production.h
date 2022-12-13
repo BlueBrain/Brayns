@@ -39,6 +39,7 @@ public:
     inline static const std::string handleName = "pathtracer";
     inline static const std::string name = "production";
 
+    static void checkParameters(const Production &data);
     static void updateData(ospray::cpp::Renderer &handle, Production &data);
 };
 }

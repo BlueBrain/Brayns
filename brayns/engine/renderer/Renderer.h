@@ -70,8 +70,9 @@ public:
      * @param data Renderer parameters
      */
     template<typename RendererType>
-    void set(RendererType data) noexcept
+    void set(RendererType data)
     {
+        RendererTraits<RendererType>::checkParameters(data);
         _handleName = RendererTraits<RendererType>::handleName;
         _rendererName = RendererTraits<RendererType>::name;
         _handle = ospray::cpp::Renderer(_handleName);

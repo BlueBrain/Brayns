@@ -30,7 +30,7 @@
 class SpikeCalculator
 {
 public:
-    SpikeCalculator(const float interval);
+    SpikeCalculator(float interval);
 
     /**
      * @brief Computes the normalized spike value based on the current time and the spike time
@@ -42,7 +42,7 @@ public:
     float compute(float spikeTime, float currentTime) const noexcept;
 
 private:
-    const float _invInterval;
+    float _invInterval;
 };
 
 /**

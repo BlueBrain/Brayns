@@ -1,6 +1,5 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,53 +19,70 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/light/types/AmbientLight.h>
 #include <brayns/engine/light/types/DirectionalLight.h>
-
-#include <tests/paths.h>
+#include <brayns/engine/light/types/QuadLight.h>
 
 #include "helpers/BraynsTestUtils.h"
 #include "helpers/ImageValidator.h"
 
 #include <doctest/doctest.h>
 
-TEST_CASE("render_two_frames_and_compare_they_are_same")
+TEST_CASE("Render ambient light")
 {
     brayns::Brayns brayns;
 
-    BraynsTestUtils::setRenderResolution(brayns, 300, 300);
     BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
-    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight()));
-    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{0.05f}));
     BraynsTestUtils::adjustPerspectiveView(brayns);
 
-    auto &engine = brayns.getEngine();
-    auto &framebuffer = engine.getFramebuffer();
+    auto intensity = 0.5f;
+    auto color = brayns::Vector3f(1.f);
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{intensity, color}));
 
     brayns.commitAndRender();
-    auto oldImage = framebuffer.getImage();
 
-    framebuffer.clear();
-
-    brayns.commitAndRender();
-    auto newImage = framebuffer.getImage();
-
-    CHECK(ImageValidator::validate(oldImage, newImage));
+    CHECK(ImageValidator::validate(brayns.getEngine(), "testLightAmbient.png"));
 }
 
-TEST_CASE("render_ply_and_compare")
+TEST_CASE("Render directional light")
 {
     brayns::Brayns brayns;
 
-    BraynsTestUtils::setRenderResolution(brayns, 300, 300);
     BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
-    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight()));
-    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{0.05f}));
     BraynsTestUtils::adjustPerspectiveView(brayns);
+
+    auto intensity = 5.5f;
+    auto color = brayns::Vector3f(1.f);
+    auto direction = glm::normalize(brayns::Vector3f(1.f, 1.f, 0.f));
+    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight{intensity, color, direction}));
+
     brayns.commitAndRender();
 
+    CHECK(ImageValidator::validate(brayns.getEngine(), "testLightDirectional.png"));
+}
+
+TEST_CASE("Render quad light")
+{
+    brayns::Brayns brayns;
+
+    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
+    BraynsTestUtils::adjustPerspectiveView(brayns);
+
     auto &engine = brayns.getEngine();
-    CHECK(ImageValidator::validate(engine, "testImagesPLY.png"));
+    auto &scene = engine.getScene();
+    const auto &bounds = scene.getBounds();
+
+    auto dimensions = bounds.dimensions();
+
+    auto intensity = 5.5f;
+    auto color = brayns::Vector3f(1.f);
+    auto position = bounds.getMax() + brayns::Vector3f(0.f, dimensions.y * 0.25f, 0.f);
+    auto edge1 = brayns::Vector3f(-dimensions.x, 0.f, 0.f);
+    auto edge2 = brayns::Vector3f(0.f, 0.f, -dimensions.z);
+    auto quad = brayns::QuadLight{intensity, color, position, edge1, edge2};
+    BraynsTestUtils::addLight(brayns, brayns::Light(quad));
+
+    brayns.commitAndRender();
+
+    CHECK(ImageValidator::validate(engine, "testLightQuad.png"));
 }
