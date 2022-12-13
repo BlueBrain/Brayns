@@ -29,7 +29,8 @@ brayns::Vector3ui HeaderUtils::get3DSize(const NRRDHeader &header)
     const auto start = sizes.size() - 3;
     for (size_t i = start; i < sizes.size(); ++i)
     {
-        result[i - start] = sizes[i];
+        auto index = static_cast<glm::length_t>(i - start);
+        result[index] = sizes[i];
     }
     return result;
 }
@@ -53,10 +54,10 @@ brayns::Vector3f HeaderUtils::get3DDimensions(const NRRDHeader &header)
         brayns::Vector3f vector;
         for (size_t j = 0; j < 3; ++j)
         {
-            vector[j] = direction[j];
+            vector[static_cast<glm::length_t>(j)] = direction[j];
         }
 
-        result[i] = glm::length(vector);
+        result[static_cast<glm::length_t>(i)] = glm::length(vector);
     }
     return result;
 }

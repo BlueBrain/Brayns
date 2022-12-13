@@ -27,7 +27,7 @@
 std::string BZip2Decompressor::decompress(std::string input) const
 {
     const auto inputData = input.data();
-    const auto inputSize = input.size();
+    const auto inputSize = static_cast<unsigned int>(input.size());
 
     std::string result;
     result.resize(inputSize * 2);

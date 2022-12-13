@@ -117,7 +117,7 @@ private:
 
     static size_t _countElementsFromRanges(const std::vector<Range> &ranges)
     {
-        auto elementCount = 0;
+        size_t elementCount = 0;
         for (auto &range : ranges)
         {
             elementCount += range.end + 1 - range.start;

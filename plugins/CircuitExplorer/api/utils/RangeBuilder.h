@@ -81,7 +81,7 @@ private:
         auto rangeList = std::vector<std::string>();
         rangeList.reserve(numRanges);
 
-        auto start = 0;
+        size_t start = 0;
         for (size_t i = 1; i < input.size(); ++i)
         {
             if (input[i] == input[i - 1] + 1)

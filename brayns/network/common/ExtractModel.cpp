@@ -25,11 +25,6 @@
 
 namespace brayns
 {
-ModelInstance &ExtractModel::fromId(Scene &scene, uint32_t id)
-{
-    return fromId(scene.getModels(), id);
-}
-
 ModelInstance &ExtractModel::fromId(ModelManager &models, uint32_t id)
 {
     try

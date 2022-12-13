@@ -20,6 +20,8 @@
 
 #include "TriangleMesh.h"
 
+#include <limits>
+
 #include <brayns/engine/common/MathTypesOsprayTraits.h>
 
 #include <ospray/ospray_cpp/Data.h>
@@ -40,6 +42,12 @@ public:
         if (indices.empty() || positions.empty())
         {
             throw std::invalid_argument("TriangleMeshes must provide at least indices and vertices");
+        }
+
+        auto max = std::numeric_limits<glm::uint>::max();
+        if (positions.size() > static_cast<size_t>(max))
+        {
+            throw std::invalid_argument("TriangleMeshes cannot have more that 2**32 vertices");
         }
 
         auto &normals = mesh.normals;
@@ -92,7 +100,7 @@ void TriangleMeshUtils::merge(const TriangleMesh &src, TriangleMesh &dst)
     auto &uvs = dst.uvs;
     auto &colors = dst.colors;
 
-    const auto numVertices = positions.size();
+    const auto numVertices = static_cast<glm::uint>(positions.size());
 
     const auto &srcIndices = src.indices;
     const auto &srcPositions = src.vertices;
@@ -107,7 +115,7 @@ void TriangleMeshUtils::merge(const TriangleMesh &src, TriangleMesh &dst)
 
     const auto srcIndicesSize = srcIndices.size();
     const auto indicesSize = indices.size();
-    const Vector3ui indexOffset(numVertices);
+    const auto indexOffset = Vector3ui(numVertices);
     indices.reserve(indicesSize + srcIndicesSize);
     for (const auto &srcIndex : srcIndices)
     {

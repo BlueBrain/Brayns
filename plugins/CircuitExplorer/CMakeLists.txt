@@ -40,9 +40,6 @@ target_compile_options(braynsCircuitExplorer PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 target_compile_definitions(braynsCircuitExplorer PRIVATE optional_CONFIG_SELECT_OPTIONAL=1)
 target_compile_definitions(braynsCircuitExplorer PRIVATE variant_CONFIG_SELECT_VARIANT=1)
 
-# For Brion uint128_t
-target_compile_options(braynsCircuitExplorer PRIVATE -Wno-deprecated-copy)
-
 install(TARGETS braynsCircuitExplorer
     EXPORT braynsCircuitExplorer-targets
     LIBRARY DESTINATION lib

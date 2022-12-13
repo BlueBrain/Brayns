@@ -64,7 +64,7 @@ private:
             if (lastSection != elementId || lastNode != nodeId)
             {
                 lastNode = nodeId;
-                lastSection = elementId;
+                lastSection = static_cast<uint32_t>(elementId);
             }
 
             cm[elementId]++;
@@ -133,13 +133,10 @@ private:
             cellMapping.offsets.reserve(sizes.size());
 
             uint16_t localOffset = 0;
-            for (size_t i = 0; i < sizes.size(); ++i)
+            for (auto size : sizes)
             {
                 cellMapping.offsets.push_back(localOffset);
-
-                auto size = sizes[i];
-                localOffset += size;
-
+                localOffset = static_cast<uint16_t>(localOffset + size);
                 cellMapping.compartments.push_back(size);
             }
 

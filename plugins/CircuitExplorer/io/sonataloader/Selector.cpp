@@ -36,7 +36,7 @@ public:
         skipFactor = std::max(skipFactor, 1ul);
 
         std::vector<uint64_t> finalList;
-        finalList.reserve(expectedSize);
+        finalList.reserve(static_cast<size_t>(expectedSize));
 
         for (size_t i = 0; i < src.size(); i = i + skipFactor)
         {

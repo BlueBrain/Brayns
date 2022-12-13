@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/scene/Scene.h>
+#include <brayns/engine/scene/ModelManager.h>
 
 namespace brayns
 {
@@ -32,16 +32,6 @@ namespace brayns
 class ExtractModel
 {
 public:
-    /**
-     * @brief Extract a model from a scene using its ID.
-     *
-     * @param scene The scene object.
-     * @param id Model ID.
-     * @return ModelInstance& Model instance.
-     * @throw JsonRpcException Model not found.
-     */
-    static ModelInstance &fromId(Scene &scene, uint32_t id);
-
     /**
      * @brief Extract a model from a model manager using its ID.
      *

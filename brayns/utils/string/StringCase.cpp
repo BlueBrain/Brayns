@@ -27,12 +27,14 @@ namespace brayns
 {
 char StringCase::toLower(char c)
 {
-    return std::tolower(static_cast<unsigned char>(c));
+    auto lower = std::tolower(static_cast<unsigned char>(c));
+    return static_cast<char>(lower);
 }
 
 char StringCase::toUpper(char c)
 {
-    return std::toupper(static_cast<unsigned char>(c));
+    auto upper = std::toupper(static_cast<unsigned char>(c));
+    return static_cast<char>(upper);
 }
 
 std::string StringCase::toLower(std::string_view data)

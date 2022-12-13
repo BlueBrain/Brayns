@@ -29,17 +29,17 @@ CompartmentData::CompartmentData(std::unique_ptr<brion::CompartmentReport> repor
 
 float CompartmentData::getStartTime() const noexcept
 {
-    return _report->getStartTime();
+    return static_cast<float>(_report->getStartTime());
 }
 
 float CompartmentData::getEndTime() const noexcept
 {
-    return _report->getEndTime();
+    return static_cast<float>(_report->getEndTime());
 }
 
 float CompartmentData::getTimeStep() const noexcept
 {
-    return _report->getTimestep();
+    return static_cast<float>(_report->getTimestep());
 }
 
 std::string CompartmentData::getTimeUnit() const noexcept
@@ -49,9 +49,9 @@ std::string CompartmentData::getTimeUnit() const noexcept
 
 std::vector<float> CompartmentData::getFrame(uint32_t frameIndex) const
 {
-    auto start = _report->getStartTime();
-    auto end = _report->getEndTime();
-    auto dt = _report->getTimestep();
+    auto start = getStartTime();
+    auto end = getEndTime();
+    auto dt = getTimeStep();
     auto frameTime = FrameTimeCalculator::compute(frameIndex, start, end, dt);
 
     auto frameFuture = _report->loadFrame(frameTime);
@@ -83,12 +83,13 @@ std::vector<CellReportMapping> CompartmentData::computeMapping() const noexcept
         auto &cellMapping = mapping.emplace_back();
 
         cellMapping.globalOffset = offset[0];
-        cellMapping.compartments = std::vector<uint16_t>(count.begin(), count.end());
+        cellMapping.compartments = count;
         cellMapping.offsets.reserve(offset.size());
 
         for (size_t j = 0; j < offset.size(); ++j)
         {
-            cellMapping.offsets.push_back(offset[j] - cellMapping.globalOffset);
+            auto total = offset[j] - cellMapping.globalOffset;
+            cellMapping.offsets.push_back(static_cast<uint16_t>(total));
         }
     }
 

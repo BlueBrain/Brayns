@@ -22,6 +22,7 @@
 #include "ColorRamp.h"
 
 #include <algorithm>
+#include <cassert>
 
 namespace brayns
 {
@@ -38,6 +39,15 @@ const std::vector<brayns::Vector4f> &ColorRamp::getColors() const
 
 void ColorRamp::setColors(std::vector<Vector4f> colors)
 {
+    auto size = colors.size();
+    if (size == 0)
+    {
+        throw std::invalid_argument("A color ramp must have at least one color");
+    }
+    if (size > 256)
+    {
+        throw std::invalid_argument("A color ramp cannot have more than 256 colors");
+    }
     _flag.update(_colors, std::move(colors));
 }
 
@@ -56,25 +66,29 @@ void ColorRamp::setValuesRange(const Vector2f &valuesRange)
     _flag.update(_valuesRange, valuesRange);
 }
 
-Vector4f ColorRamp::getColorForValue(const float v) const
+Vector4f ColorRamp::getColorForValue(const float value) const
 {
-    if (v <= _valuesRange.x)
+    if (value <= _valuesRange.x)
     {
         return _colors.front();
     }
 
-    if (v >= _valuesRange.y)
+    if (value >= _valuesRange.y)
     {
         return _colors.back();
     }
 
-    const auto normValue = (v - _valuesRange.x) / (_valuesRange.y - _valuesRange.x);
+    const auto normalizedValue = (value - _valuesRange.x) / (_valuesRange.y - _valuesRange.x);
 
-    const auto numColors = _colors.size();
-    const size_t colorIndex = static_cast<size_t>(floor(normValue * numColors));
-    const size_t nextColorIndex = std::min(colorIndex + 1, numColors - 1);
+    const auto colorCount = _colors.size();
+    assert(colorCount <= 256);
 
-    const float remainder = normValue - floor(normValue);
+    const auto position = normalizedValue * static_cast<float>(colorCount);
+    const auto colorIndex = static_cast<size_t>(position);
+
+    const auto nextColorIndex = std::min(colorIndex + 1, colorCount - 1);
+
+    const auto remainder = normalizedValue - std::floor(normalizedValue);
 
     const auto &color1 = _colors[colorIndex];
     const auto &color2 = _colors[nextColorIndex];

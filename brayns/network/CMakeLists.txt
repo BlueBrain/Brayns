@@ -12,7 +12,8 @@ add_library(braynsNetwork SHARED ${BRAYNSNETWORK_SOURCES} ${BRAYNSNETWORK_HEADER
 
 target_include_directories(braynsNetwork PUBLIC
     $<BUILD_INTERFACE:${BRAYNSNETWORK_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include>)
+    $<INSTALL_INTERFACE:include>
+)
 
 target_link_libraries(braynsNetwork PRIVATE
     braynsPluginAPI

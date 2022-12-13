@@ -214,6 +214,8 @@ public:
     }
 
 private:
+    JsonValidatorContext _context;
+
     void _validate(const JsonValue &json, const JsonSchema &schema)
     {
         if (JsonSchemaHelper::isWildcard(schema))
@@ -369,18 +371,8 @@ private:
             return;
         }
         auto &array = *json.extract<JsonArray::Ptr>();
-        _validateItems(array, schema);
         _validateItemLimits(array.size(), schema);
-    }
-
-    void _validateItems(const JsonArray &array, const JsonSchema &schema)
-    {
-        for (size_t i = 0; i < array.size(); ++i)
-        {
-            _context.push(i);
-            _validate(array.get(i), schema.items[0]);
-            _context.pop();
-        }
+        _validateItems(array, schema);
     }
 
     void _validateItemLimits(size_t size, const JsonSchema &schema)
@@ -390,13 +382,28 @@ private:
             _context.addNotEnoughItems(size, *schema.minItems);
             return;
         }
+        size_t max = std::numeric_limits<unsigned int>::max();
+        if (size > max)
+        {
+            _context.addTooManyItems(size, max);
+        }
         if (schema.maxItems && size > *schema.maxItems)
         {
             _context.addTooManyItems(size, *schema.maxItems);
         }
     }
 
-    JsonValidatorContext _context;
+    void _validateItems(const JsonArray &array, const JsonSchema &schema)
+    {
+        size_t i = 0;
+        for (const auto &item : array)
+        {
+            _context.push(i);
+            _validate(item, schema.items[0]);
+            _context.pop();
+            ++i;
+        }
+    }
 };
 } // namespace
 

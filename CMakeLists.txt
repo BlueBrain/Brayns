@@ -47,7 +47,7 @@ set(BRAYNS_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 
 # Brayns targets compile options
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-set(BRAYNS_COMPILE_OPTIONS -Wall -Wextra -pedantic -Werror)
+set(BRAYNS_COMPILE_OPTIONS -Wall -Wextra -Wconversion -pedantic-errors -Werror)
 
 # Downloadable dependencies
 add_subdirectory(deps)

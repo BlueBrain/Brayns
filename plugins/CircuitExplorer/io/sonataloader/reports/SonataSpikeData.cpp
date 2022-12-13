@@ -36,8 +36,8 @@ SonataSpikeData::SonataSpikeData(
     , _interval(interval)
 {
     auto [start, end] = _population.getTimes();
-    _start = start;
-    _end = end;
+    _start = static_cast<float>(start);
+    _end = static_cast<float>(end);
 }
 
 float SonataSpikeData::getStartTime() const noexcept
@@ -77,7 +77,7 @@ std::vector<float> SonataSpikeData::getFrame(uint32_t frameIndex) const
     {
         auto &spike = spikes[i];
         auto nodeId = spike.first;
-        auto spikeTime = spike.second;
+        auto spikeTime = static_cast<float>(spike.second);
         auto it = _mapping.find(nodeId);
 
         if (it == _mapping.end())

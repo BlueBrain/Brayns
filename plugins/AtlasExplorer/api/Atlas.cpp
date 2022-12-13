@@ -47,9 +47,9 @@ class VoxelBounds
 public:
     static brayns::Bounds compute(const brayns::Vector3ui &coordinates, const brayns::Vector3f &spacing)
     {
-        auto worldX = coordinates.x * spacing.x;
-        auto worldY = coordinates.y * spacing.y;
-        auto worldZ = coordinates.z * spacing.z;
+        auto worldX = static_cast<float>(coordinates.x) * spacing.x;
+        auto worldY = static_cast<float>(coordinates.y) * spacing.y;
+        auto worldZ = static_cast<float>(coordinates.z) * spacing.z;
         auto minCorner = brayns::Vector3f(worldX, worldY, worldZ - spacing.z);
         auto maxCorner = brayns::Vector3f(worldX + spacing.x, worldY + spacing.y, worldZ);
         return brayns::Bounds(minCorner, maxCorner);

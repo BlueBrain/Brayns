@@ -128,9 +128,15 @@ public:
     static Poco::Net::HTTPServerParams::Ptr create(const brayns::NetworkParameters &parameters)
     {
         auto maxClients = parameters.getMaxClients();
+        size_t max = std::numeric_limits<int>::max();
+        if (maxClients > max)
+        {
+            throw std::invalid_argument("Max client cannot be above 2**31");
+        }
+        auto handlerCount = static_cast<int>(maxClients);
         auto settings = Poco::makeAuto<Poco::Net::HTTPServerParams>();
-        settings->setMaxThreads(maxClients);
-        settings->setMaxQueued(maxClients);
+        settings->setMaxThreads(handlerCount);
+        settings->setMaxQueued(handlerCount);
         return settings;
     }
 };
