@@ -1,6 +1,8 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,14 +20,9 @@
 
 #pragma once
 
-#include <io/sonataloader/LoadContext.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-namespace sonataloader
-{
-class NeuronMetadataFactory
-{
-public:
-    static void create(NodeLoadContext &context);
-    static void create(brayns::Model &model, const std::string &populationName);
-};
-}
+BRAYNS_JSON_OBJECT_BEGIN(CellPlacementLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, morphology_folder, "Path to morphology folder")
+BRAYNS_JSON_OBJECT_ENTRY(std::optional<std::string>, extension, "Morphology file extension", brayns::Required(false))
+BRAYNS_JSON_OBJECT_END()

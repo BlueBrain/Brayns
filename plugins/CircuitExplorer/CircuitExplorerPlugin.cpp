@@ -25,6 +25,7 @@
 #include <brayns/utils/Log.h>
 
 #include <io/BBPLoader.h>
+#include <io/CellPlacementLoader.h>
 #include <io/NeuronMorphologyLoader.h>
 #include <io/SonataLoader.h>
 #include <network/entrypoints/GetCircuitIdsEntrypoint.h>
@@ -34,6 +35,7 @@ CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
 {
     auto &registry = api.getLoaderRegistry();
     registry.registerLoader(std::make_unique<BBPLoader>());
+    registry.registerLoader(std::make_unique<CellPlacementLoader>());
     registry.registerLoader(std::make_unique<NeuronMorphologyLoader>());
     registry.registerLoader(std::make_unique<SonataLoader>());
 

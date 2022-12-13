@@ -54,20 +54,31 @@ const std::vector<LoaderInfo> &LoaderRegistry::getLoaderInfos() const
 bool LoaderRegistry::isSupportedFile(const std::string &filename) const
 {
     if (std::filesystem::is_directory(filename))
+    {
         return false;
+    }
 
-    const auto extension = std::filesystem::path(filename).extension().lexically_normal().string();
-    for (const auto &loader : _loaders)
+    auto extension = std::filesystem::path(filename).extension().lexically_normal().string();
+    for (auto &loader : _loaders)
+    {
         if (loader->isSupported(filename, extension))
+        {
             return true;
+        }
+    }
     return false;
 }
 
 bool LoaderRegistry::isSupportedType(const std::string &type) const
 {
-    for (const auto &loader : _loaders)
+    for (auto &loader : _loaders)
+    {
         if (loader->isSupported("", type))
+        {
             return true;
+        }
+    }
+
     return false;
 }
 
@@ -77,24 +88,34 @@ const AbstractLoader &LoaderRegistry::getSuitableLoader(
     const std::string &loaderName) const
 {
     if (std::filesystem::is_directory(filename))
+    {
         throw std::runtime_error("'" + filename + "' is a directory");
+    }
 
-    const auto extension =
+    auto extension =
         filetype.empty() ? std::filesystem::path(filename).extension().lexically_normal().string() : filetype;
 
     // Find specific loader
     if (!loaderName.empty())
     {
-        for (const auto &loader : _loaders)
+        for (auto &loader : _loaders)
+        {
             if (loader->getName() == loaderName)
+            {
                 return *loader.get();
+            }
+        }
 
         throw std::runtime_error("No loader found with name '" + loaderName + "'");
     }
 
-    for (const auto &loader : _loaders)
+    for (auto &loader : _loaders)
+    {
         if (loader->isSupported(filename, extension))
+        {
             return *loader;
+        }
+    }
 
     throw std::runtime_error("No loader found for filename '" + filename + "' and filetype '" + filetype + "'");
 }
