@@ -24,6 +24,7 @@
 #include <brayns/utils/MathTypes.h>
 
 #include <unordered_map>
+#include <vector>
 
 namespace brayns
 {
