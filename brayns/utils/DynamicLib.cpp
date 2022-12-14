@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <utility> // std::exchange
 
 #include <dlfcn.h>
 #include <sys/times.h>
