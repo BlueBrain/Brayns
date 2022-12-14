@@ -21,7 +21,7 @@
 from typing import Any
 
 import brayns
-from brayns.network import JsonRpcListener
+from brayns.network.jsonrpc import JsonRpcListener
 
 
 class MockJsonRpcListener(JsonRpcListener):

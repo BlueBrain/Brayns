@@ -20,7 +20,7 @@
 import unittest
 
 import brayns
-from brayns.plugins import serialize_morphology
+from brayns.plugins.morphology import serialize_morphology
 
 
 class TestSerializeMorphology(unittest.TestCase):

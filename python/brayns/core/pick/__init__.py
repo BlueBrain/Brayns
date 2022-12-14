@@ -18,12 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .deserialize_pick_result import deserialize_pick_result
 from .pick import pick
 from .pick_result import PickResult
 
 __all__ = [
-    "deserialize_pick_result",
     "pick",
     "PickResult",
 ]

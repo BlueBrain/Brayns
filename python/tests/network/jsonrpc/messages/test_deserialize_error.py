@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.network import deserialize_error
+from brayns.network.jsonrpc import deserialize_error
 
 from .mock_error import MockError
 

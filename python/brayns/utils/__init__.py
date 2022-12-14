@@ -27,14 +27,22 @@ outside the main package and are not directly related to the Web API.
 It includes helpers for algebra, imaging or coloring and the base exception.
 """
 
-from .bounds import *
-from .color import *
-from .exceptions import *
-from .image import *
-from .plane import *
-from .transform import *
-from .vector import *
-from .view import *
+from .bounds import Bounds, deserialize_bounds, merge_bounds, serialize_bounds
+from .color import Color3, Color4, parse_hex_color
+from .exceptions import Error
+from .image import ImageFormat, Resolution, parse_image_format
+from .plane import PlaneEquation
+from .transform import (
+    ModelRotation,
+    Quaternion,
+    Rotation,
+    Transform,
+    deserialize_transform,
+    euler,
+    serialize_transform,
+)
+from .vector import Axis, Vector, Vector2, Vector3, componentwise_max, componentwise_min
+from .view import Fovy, View, deserialize_view, serialize_view
 
 __all__ = [
     "Axis",
@@ -43,6 +51,9 @@ __all__ = [
     "Color4",
     "componentwise_max",
     "componentwise_min",
+    "deserialize_bounds",
+    "deserialize_transform",
+    "deserialize_view",
     "Error",
     "euler",
     "Fovy",
@@ -55,7 +66,11 @@ __all__ = [
     "Quaternion",
     "Resolution",
     "Rotation",
+    "serialize_bounds",
+    "serialize_transform",
+    "serialize_view",
     "Transform",
+    "Vector",
     "Vector2",
     "Vector3",
     "View",

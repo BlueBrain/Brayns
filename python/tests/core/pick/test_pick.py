@@ -34,3 +34,11 @@ class TestPick(unittest.TestCase):
         test = brayns.pick(instance, position)
         self.assertEqual(test, MockPickResult.result)
         self.assertEqual(instance.params, {"position": [0.5, 0.6]})
+
+    def test_pick_not_hit(self) -> None:
+        result = MockPickResult.create_message(hit=False)
+        instance = MockInstance(result)
+        position = brayns.Vector2(0.5, 0.6)
+        test = brayns.pick(instance, position)
+        self.assertIsNone(test)
+        self.assertEqual(instance.params, {"position": [0.5, 0.6]})

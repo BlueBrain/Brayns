@@ -21,7 +21,7 @@
 import unittest
 
 import brayns
-from brayns.network import JsonRpcTask
+from brayns.network.jsonrpc import JsonRpcTask
 
 from .messages.mock_error import MockError
 from .messages.mock_progress import MockProgress

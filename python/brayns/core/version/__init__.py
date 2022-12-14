@@ -19,14 +19,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .check_version import check_version
-from .deserialize_version import deserialize_version
 from .get_version import get_version
 from .version import Version
 from .version_error import VersionError
 
 __all__ = [
     "check_version",
-    "deserialize_version",
     "get_version",
     "Version",
     "VersionError",

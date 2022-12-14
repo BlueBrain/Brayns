@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.network import serialize_request
+from brayns.network.jsonrpc import serialize_request
 
 from .mock_request import MockRequest
 

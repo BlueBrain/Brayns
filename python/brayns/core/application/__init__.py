@@ -19,14 +19,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from .application import Application
-from .deserialize_application import deserialize_application
 from .get_application import get_application
 from .set_resolution import set_resolution
 from .stop import stop
 
 __all__ = [
     "Application",
-    "deserialize_application",
     "get_application",
     "set_resolution",
     "stop",

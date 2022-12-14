@@ -18,7 +18,13 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .exceptions import *
+from .exceptions import (
+    ConnectionClosedError,
+    InvalidServerCertificateError,
+    ProtocolError,
+    ServiceUnavailableError,
+    WebSocketError,
+)
 from .ssl_client_context import SslClientContext
 from .web_socket import WebSocket
 from .web_socket_client import WebSocketClient

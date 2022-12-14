@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.network import deserialize_progress
+from brayns.network.jsonrpc import deserialize_progress
 
 from .mock_progress import MockProgress
 
