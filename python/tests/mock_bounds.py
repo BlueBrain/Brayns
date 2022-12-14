@@ -24,7 +24,6 @@ import brayns
 
 
 class MockBounds:
-
     @classmethod
     @property
     def bounds(cls) -> brayns.Bounds:
@@ -37,6 +36,6 @@ class MockBounds:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'min': [0, 1, 2],
-            'max': [3, 4, 5],
+            "min": [0, 1, 2],
+            "max": [3, 4, 5],
         }

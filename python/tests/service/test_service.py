@@ -24,15 +24,14 @@ import brayns
 
 
 class TestService(unittest.TestCase):
-
     def test_get_command_line(self) -> None:
         service = brayns.Service(
-            uri='uri',
+            uri="uri",
             ssl_context=brayns.SslServerContext(
-                private_key_file='private',
-                private_key_passphrase='passphrase',
-                certificate_file='certificate',
-                ca_location='ca',
+                private_key_file="private",
+                private_key_passphrase="passphrase",
+                certificate_file="certificate",
+                ca_location="ca",
             ),
             max_clients=2,
             log_level=brayns.LogLevel.CRITICAL,
@@ -40,30 +39,30 @@ class TestService(unittest.TestCase):
                 brayns.Plugin.ATLAS_EXPLORER.value,
                 brayns.Plugin.CIRCUIT_EXPLORER.value,
             ],
-            executable='service',
+            executable="service",
         )
         test = service.get_command_line()
         ref = [
-            'service',
-            '--uri',
-            'uri',
-            '--max-clients',
-            '2',
-            '--log-level',
-            'critical',
-            '--plugin',
+            "service",
+            "--uri",
+            "uri",
+            "--max-clients",
+            "2",
+            "--log-level",
+            "critical",
+            "--plugin",
             brayns.Plugin.ATLAS_EXPLORER.value,
-            '--plugin',
+            "--plugin",
             brayns.Plugin.CIRCUIT_EXPLORER.value,
-            '--secure',
-            'true',
-            '--private-key-file',
-            'private',
-            '--private-key-passphrase',
-            'passphrase',
-            '--certificate-file',
-            'certificate',
-            '--ca-location',
-            'ca',
+            "--secure",
+            "true",
+            "--private-key-file",
+            "private",
+            "--private-key-passphrase",
+            "passphrase",
+            "--certificate-file",
+            "certificate",
+            "--ca-location",
+            "ca",
         ]
         self.assertEqual(test, ref)

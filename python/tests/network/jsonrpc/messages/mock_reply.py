@@ -25,7 +25,6 @@ import brayns
 
 
 class MockReply:
-
     @classmethod
     @property
     def reply(cls) -> brayns.JsonRpcReply:
@@ -38,16 +37,16 @@ class MockReply:
     @property
     def binary_reply(cls) -> brayns.JsonRpcReply:
         reply = cls.reply
-        reply.binary = b'123'
+        reply.binary = b"123"
         return reply
 
     @classmethod
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'jsonrpc': '2.0',
-            'id': 0,
-            'result': 123,
+            "jsonrpc": "2.0",
+            "id": 0,
+            "result": 123,
         }
 
     @classmethod
@@ -58,7 +57,7 @@ class MockReply:
     @classmethod
     @property
     def binary(cls) -> bytes:
-        text = cls.text.encode('utf-8')
-        size = len(text).to_bytes(4, byteorder='little', signed=False)
+        text = cls.text.encode("utf-8")
+        size = len(text).to_bytes(4, byteorder="little", signed=False)
         binary = cls.binary_reply.binary
-        return b''.join([size, text, binary])
+        return b"".join([size, text, binary])

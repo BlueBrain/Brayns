@@ -24,18 +24,17 @@ import brayns
 
 
 class TestParseHexColor(unittest.TestCase):
-
     def test_parse_numbers(self) -> None:
-        test = brayns.parse_hex_color('2ca02c')
+        test = brayns.parse_hex_color("2ca02c")
         ref = brayns.Color3(44, 160, 44) / 255
         self.assertEqual(test, ref)
 
     def test_parse_hash(self) -> None:
-        test = brayns.parse_hex_color('#2ca02c')
+        test = brayns.parse_hex_color("#2ca02c")
         ref = brayns.Color3(44, 160, 44) / 255
         self.assertEqual(test, ref)
 
     def test_parse_0x(self) -> None:
-        test = brayns.parse_hex_color('0x2ca02c')
+        test = brayns.parse_hex_color("0x2ca02c")
         ref = brayns.Color3(44, 160, 44) / 255
         self.assertEqual(test, ref)

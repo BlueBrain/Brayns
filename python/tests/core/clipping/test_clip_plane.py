@@ -24,13 +24,12 @@ import brayns
 
 
 class TestClipPlane(unittest.TestCase):
-
     def test_method(self) -> None:
-        self.assertEqual(brayns.ClipPlane.method, 'add-clip-plane')
+        self.assertEqual(brayns.ClipPlane.method, "add-clip-plane")
 
     def test_get_properties(self) -> None:
         equation = brayns.PlaneEquation(1, 2, 3, 4)
         plane = brayns.ClipPlane(equation)
         test = plane.get_properties()
-        ref = {'coefficients': [1, 2, 3, 4]}
+        ref = {"coefficients": [1, 2, 3, 4]}
         self.assertEqual(test, ref)

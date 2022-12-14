@@ -26,28 +26,33 @@ from tests.mock_model import MockModel
 
 
 class TestAddGeometries(unittest.TestCase):
-
     def test_add_geometries(self) -> None:
         instance = MockInstance(MockModel.message)
-        model = brayns.add_geometries(instance, [
-            brayns.Plane(brayns.PlaneEquation(1, 2, 3, 4)),
-            brayns.Plane(
-                brayns.PlaneEquation(5, 6, 7, 8)
-            ).with_color(brayns.Color4.red),
-        ])
+        model = brayns.add_geometries(
+            instance,
+            [
+                brayns.Plane(brayns.PlaneEquation(1, 2, 3, 4)),
+                brayns.Plane(brayns.PlaneEquation(5, 6, 7, 8)).with_color(
+                    brayns.Color4.red
+                ),
+            ],
+        )
         self.assertEqual(model, MockModel.model)
-        self.assertEqual(instance.method, 'add-planes')
-        self.assertEqual(instance.params, [
-            {
-                'geometry': {
-                    'coefficients': [1, 2, 3, 4],
+        self.assertEqual(instance.method, "add-planes")
+        self.assertEqual(
+            instance.params,
+            [
+                {
+                    "geometry": {
+                        "coefficients": [1, 2, 3, 4],
+                    },
+                    "color": [1, 1, 1, 1],
                 },
-                'color': [1, 1, 1, 1],
-            },
-            {
-                'geometry': {
-                    'coefficients': [5, 6, 7, 8],
+                {
+                    "geometry": {
+                        "coefficients": [5, 6, 7, 8],
+                    },
+                    "color": [1, 0, 0, 1],
                 },
-                'color': [1, 0, 0, 1],
-            },
-        ])
+            ],
+        )

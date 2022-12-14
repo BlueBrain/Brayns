@@ -30,9 +30,8 @@ from .mock_web_socket import MockWebSocket
 
 
 class TestClient(unittest.TestCase):
-
     def setUp(self) -> None:
-        self._logger = logging.Logger('test')
+        self._logger = logging.Logger("test")
         self._manager = JsonRpcManager(self._logger)
         self._listener = Listener(self._logger, self._manager)
 
@@ -139,7 +138,7 @@ class TestClient(unittest.TestCase):
 
     def test_cancel(self) -> None:
         websocket = self._create_websocket()
-        request = brayns.JsonRpcRequest(0, 'cancel', {'id': 123})
+        request = brayns.JsonRpcRequest(0, "cancel", {"id": 123})
         ref = serialize_request_to_text(request)
         websocket.text_reply = MockReply.text
         with self._connect(websocket) as client:

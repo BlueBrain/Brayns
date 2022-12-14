@@ -27,7 +27,6 @@ from tests.mock_transform import MockTransform
 
 
 class TestUpdateModel(unittest.TestCase):
-
     def test_update_model(self) -> None:
         instance = MockInstance(MockModel.message)
         model = brayns.update_model(
@@ -37,11 +36,14 @@ class TestUpdateModel(unittest.TestCase):
             visible=True,
         )
         self.assertEqual(model, MockModel.model)
-        self.assertEqual(instance.method, 'update-model')
-        self.assertEqual(instance.params, {
-            'model_id': 0,
-            'model': {
-                'is_visible': True,
-                'transform': MockTransform.message,
+        self.assertEqual(instance.method, "update-model")
+        self.assertEqual(
+            instance.params,
+            {
+                "model_id": 0,
+                "model": {
+                    "is_visible": True,
+                    "transform": MockTransform.message,
+                },
             },
-        })
+        )

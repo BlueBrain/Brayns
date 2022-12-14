@@ -24,7 +24,6 @@ import brayns
 
 
 class TestColor4(unittest.TestCase):
-
     def test_from_color3(self) -> None:
         ref = brayns.Color4(1, 2, 3, 4)
         color = brayns.Color3(1, 2, 3)

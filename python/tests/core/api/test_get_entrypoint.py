@@ -27,10 +27,9 @@ from .mock_entrypoint import MockEntrypoint
 
 
 class TestGetEntrypoint(unittest.TestCase):
-
     def test_get_entrypoint(self) -> None:
         instance = MockInstance(MockEntrypoint.message)
-        test = brayns.get_entrypoint(instance, 'test')
+        test = brayns.get_entrypoint(instance, "test")
         self.assertEqual(test, MockEntrypoint.entrypoint)
-        self.assertEqual(instance.method, 'schema')
-        self.assertEqual(instance.params, {'endpoint': 'test'})
+        self.assertEqual(instance.method, "schema")
+        self.assertEqual(instance.params, {"endpoint": "test"})

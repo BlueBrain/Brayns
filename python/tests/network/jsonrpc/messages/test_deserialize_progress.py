@@ -26,7 +26,6 @@ from .mock_progress import MockProgress
 
 
 class TestDeserializeProgress(unittest.TestCase):
-
     def test_deserialize_progress(self) -> None:
         test = deserialize_progress(MockProgress.message)
         self.assertEqual(test, MockProgress.progress)

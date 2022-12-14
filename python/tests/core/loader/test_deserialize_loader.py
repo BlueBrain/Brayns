@@ -26,7 +26,6 @@ from .mock_loader import MockLoader
 
 
 class TestDeserializeLoader(unittest.TestCase):
-
     def test_deserialize_loader(self) -> None:
         test = deserialize_loader(MockLoader.message)
         self.assertEqual(test, MockLoader.loader)

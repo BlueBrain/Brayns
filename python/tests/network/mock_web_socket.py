@@ -22,12 +22,11 @@ from brayns.network import WebSocket, WebSocketListener
 
 
 class MockWebSocket(WebSocket):
-
     def __init__(self, listener: WebSocketListener) -> None:
-        self.binary_request = b''
-        self.binary_reply = b''
-        self.text_request = ''
-        self.text_reply = ''
+        self.binary_request = b""
+        self.binary_reply = b""
+        self.text_request = ""
+        self.text_reply = ""
         self._listener = listener
         self._closed = False
 

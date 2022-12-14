@@ -25,7 +25,6 @@ from tests.mock_view import MockView
 
 
 class TestSerializeView(unittest.TestCase):
-
     def test_serialize_view(self) -> None:
         test = serialize_view(MockView.view)
         self.assertEqual(test, MockView.message)

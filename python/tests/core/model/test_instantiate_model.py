@@ -26,7 +26,6 @@ from tests.mock_transform import MockTransform
 
 
 class TestInstantiateModel(unittest.TestCase):
-
     def test_instantiate_model(self) -> None:
         instance = MockInstance(MockModel.message)
         model = brayns.instantiate_model(
@@ -35,8 +34,11 @@ class TestInstantiateModel(unittest.TestCase):
             transform=MockTransform.transform,
         )
         self.assertEqual(model, MockModel.model)
-        self.assertEqual(instance.method, 'instantiate-model')
-        self.assertEqual(instance.params, {
-            'model_id': 0,
-            'transform':  MockTransform.message,
-        })
+        self.assertEqual(instance.method, "instantiate-model")
+        self.assertEqual(
+            instance.params,
+            {
+                "model_id": 0,
+                "transform": MockTransform.message,
+            },
+        )

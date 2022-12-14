@@ -24,16 +24,18 @@ import brayns
 
 
 class TestDtiLoader(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.DtiLoader.name, 'DTI loader')
+        self.assertEqual(brayns.DtiLoader.name, "DTI loader")
 
     def test_properties(self) -> None:
         test = brayns.DtiLoader(
             streamline_radius=3,
             spike_decay_time=2,
         )
-        self.assertEqual(test.get_properties(), {
-            'radius': 3,
-            'spike_decay_time': 2,
-        })
+        self.assertEqual(
+            test.get_properties(),
+            {
+                "radius": 3,
+                "spike_decay_time": 2,
+            },
+        )

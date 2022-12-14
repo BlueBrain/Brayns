@@ -25,23 +25,22 @@ import brayns
 
 
 class TestParseImageFormat(unittest.TestCase):
-
     def test_jpeg(self) -> None:
-        path = 'test/stuff/image.jpg'
+        path = "test/stuff/image.jpg"
         test = brayns.parse_image_format(path)
         self.assertIs(test, brayns.ImageFormat.JPEG)
 
     def test_png(self) -> None:
-        path = 'test/stuff/image.png'
+        path = "test/stuff/image.png"
         test = brayns.parse_image_format(path)
         self.assertIs(test, brayns.ImageFormat.PNG)
 
     def test_upper(self) -> None:
-        path = 'test/stuff/image.PNG'
+        path = "test/stuff/image.PNG"
         test = brayns.parse_image_format(path)
         self.assertIs(test, brayns.ImageFormat.PNG)
 
     def test_path(self) -> None:
-        path = pathlib.Path('test/stuff/image.png')
+        path = pathlib.Path("test/stuff/image.png")
         test = brayns.parse_image_format(path)
         self.assertIs(test, brayns.ImageFormat.PNG)

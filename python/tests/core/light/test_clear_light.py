@@ -25,9 +25,8 @@ from tests.mock_instance import MockInstance
 
 
 class TestClearLight(unittest.TestCase):
-
     def test_clear_lights(self) -> None:
         instance = MockInstance()
         brayns.clear_lights(instance)
-        self.assertEqual(instance.method, 'clear-lights')
+        self.assertEqual(instance.method, "clear-lights")
         self.assertIsNone(instance.params)

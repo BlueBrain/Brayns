@@ -24,12 +24,11 @@ import brayns
 
 
 class MockApplication:
-
     @classmethod
     @property
     def application(cls) -> brayns.Application:
         return brayns.Application(
-            plugins=['test1', 'test2'],
+            plugins=["test1", "test2"],
             resolution=brayns.Resolution.full_hd,
         )
 
@@ -37,6 +36,6 @@ class MockApplication:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'plugins': ['test1', 'test2'],
-            'viewport': [1920, 1080],
+            "plugins": ["test1", "test2"],
+            "viewport": [1920, 1080],
         }

@@ -26,7 +26,6 @@ from .mock_version import MockVersion
 
 
 class TestVersion(unittest.TestCase):
-
     def test_release(self) -> None:
         test = MockVersion.version.release
         ref = (0, 1, 2)
@@ -34,11 +33,11 @@ class TestVersion(unittest.TestCase):
 
     def test_tag(self) -> None:
         test = MockVersion.version.tag
-        ref = '0.1.2'
+        ref = "0.1.2"
         self.assertEqual(test, ref)
 
     def test_check(self) -> None:
         test = MockVersion.version
         test.check(test.tag)
         with self.assertRaises(brayns.VersionError):
-            test.check('5.6.7')
+            test.check("5.6.7")

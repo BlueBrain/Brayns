@@ -24,14 +24,16 @@ import brayns
 
 
 class TestSphere(unittest.TestCase):
-
     def test_method(self) -> None:
-        self.assertEqual(brayns.Sphere.method, 'add-spheres')
+        self.assertEqual(brayns.Sphere.method, "add-spheres")
 
     def test_get_properties(self) -> None:
         sphere = brayns.Sphere(1, brayns.Vector3.one)
         test = sphere.get_additional_properties()
-        self.assertEqual(test, {
-            'center': [1, 1, 1],
-            'radius': 1,
-        })
+        self.assertEqual(
+            test,
+            {
+                "center": [1, 1, 1],
+                "radius": 1,
+            },
+        )

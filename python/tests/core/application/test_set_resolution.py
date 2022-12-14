@@ -25,9 +25,8 @@ from tests.mock_instance import MockInstance
 
 
 class TestSetResolution(unittest.TestCase):
-
     def test_set_resolution(self) -> None:
         instance = MockInstance()
         brayns.set_resolution(instance, brayns.Resolution(100, 200))
-        self.assertEqual(instance.method, 'set-application-parameters')
-        self.assertEqual(instance.params, {'viewport': [100, 200]})
+        self.assertEqual(instance.method, "set-application-parameters")
+        self.assertEqual(instance.params, {"viewport": [100, 200]})

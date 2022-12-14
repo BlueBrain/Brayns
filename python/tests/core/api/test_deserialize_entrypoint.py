@@ -26,7 +26,6 @@ from .mock_entrypoint import MockEntrypoint
 
 
 class TestDeserializeEntrypoint(unittest.TestCase):
-
     def test_deserialize_entrypoint(self) -> None:
         test = deserialize_entrypoint(MockEntrypoint.message)
         self.assertEqual(test, MockEntrypoint.entrypoint)

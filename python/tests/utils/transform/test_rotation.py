@@ -25,7 +25,6 @@ import brayns
 
 
 class TestRotation(unittest.TestCase):
-
     def test_from_quaternion(self) -> None:
         quaternion = brayns.Quaternion(1, 2, 3, 4)
         test = brayns.Rotation.from_quaternion(quaternion)
@@ -103,21 +102,18 @@ class TestRotation(unittest.TestCase):
 
     def test_axis(self) -> None:
         ref = brayns.Axis.up
-        rotation = brayns.Rotation.from_axis_angle(
-            brayns.Axis.up, 30, degrees=True)
+        rotation = brayns.Rotation.from_axis_angle(brayns.Axis.up, 30, degrees=True)
         test = rotation.axis.normalized
         self.assertAlmostEqual(test.x, ref.x)
         self.assertAlmostEqual(test.y, ref.y)
         self.assertAlmostEqual(test.z, ref.z)
 
     def test_angle_radians(self) -> None:
-        rotation = brayns.Rotation.from_axis_angle(
-            brayns.Axis.up, 30, degrees=True)
+        rotation = brayns.Rotation.from_axis_angle(brayns.Axis.up, 30, degrees=True)
         self.assertAlmostEqual(rotation.angle_radians, math.radians(30))
 
     def test_angle_degrees(self) -> None:
-        rotation = brayns.Rotation.from_axis_angle(
-            brayns.Axis.up, 30, degrees=True)
+        rotation = brayns.Rotation.from_axis_angle(brayns.Axis.up, 30, degrees=True)
         self.assertAlmostEqual(rotation.angle_degrees, 30)
 
     def test_inverse(self) -> None:

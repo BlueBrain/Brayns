@@ -26,7 +26,6 @@ from .mock_pick_result import MockPickResult
 
 
 class TestDeserializePickResult(unittest.TestCase):
-
     def test_deserialize_pick_result(self) -> None:
         message = MockPickResult.create_message(hit=True)
         test = deserialize_pick_result(message)

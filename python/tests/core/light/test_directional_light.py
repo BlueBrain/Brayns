@@ -24,14 +24,16 @@ import brayns
 
 
 class TestDirectionalLight(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.DirectionalLight.name, 'directional')
+        self.assertEqual(brayns.DirectionalLight.name, "directional")
 
     def test_get_properties(self) -> None:
         test = brayns.DirectionalLight(direction=brayns.Axis.up)
-        self.assertEqual(test.get_properties(), {
-            'intensity': 1,
-            'color': [1, 1, 1],
-            'direction': [0, 1, 0],
-        })
+        self.assertEqual(
+            test.get_properties(),
+            {
+                "intensity": 1,
+                "color": [1, 1, 1],
+                "direction": [0, 1, 0],
+            },
+        )

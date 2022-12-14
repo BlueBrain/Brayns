@@ -26,7 +26,6 @@ from .mock_version import MockVersion
 
 
 class TestDeserializeVersion(unittest.TestCase):
-
     def test_deserialize_version(self) -> None:
         test = deserialize_version(MockVersion.message)
         self.assertEqual(test, MockVersion.version)

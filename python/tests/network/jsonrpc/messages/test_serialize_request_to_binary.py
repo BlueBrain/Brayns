@@ -26,14 +26,13 @@ from .mock_request import MockRequest
 
 
 class TestSerializeRequestToBinary(unittest.TestCase):
-
     def test_serialize_request_to_binary(self) -> None:
         test = serialize_request_to_binary(MockRequest.binary_request)
         self.assertEqual(test, MockRequest.binary)
 
     def test_serialize_request_to_binary_no_binary(self) -> None:
         data = serialize_request_to_binary(MockRequest.request)
-        test = data[4:].decode('utf-8')
+        test = data[4:].decode("utf-8")
         ref = serialize_request_to_text(MockRequest.request)
         self.assertEqual(test, ref)
         self.assertEqual(test, MockRequest.text)

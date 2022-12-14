@@ -25,9 +25,8 @@ from tests.mock_instance import MockInstance
 
 
 class TestClearRenderables(unittest.TestCase):
-
     def test_clear_renderables(self) -> None:
         instance = MockInstance()
         brayns.clear_renderables(instance)
-        self.assertEqual(instance.method, 'clear-renderables')
+        self.assertEqual(instance.method, "clear-renderables")
         self.assertIsNone(instance.params)

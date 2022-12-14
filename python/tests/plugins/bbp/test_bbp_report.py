@@ -24,7 +24,6 @@ import brayns
 
 
 class TestBbpReport(unittest.TestCase):
-
     def test_none(self) -> None:
         report = brayns.BbpReport.none()
         self.assertEqual(report.type, brayns.BbpReportType.NONE)
@@ -45,7 +44,7 @@ class TestBbpReport(unittest.TestCase):
         self.assertEqual(report.spike_transition_time, spike_transition_time)
 
     def test_compartment(self) -> None:
-        name = 'test'
+        name = "test"
         report = brayns.BbpReport.compartment(name)
         self.assertEqual(report.type, brayns.BbpReportType.COMPARTMENT)
         self.assertEqual(report.name, name)

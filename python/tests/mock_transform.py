@@ -24,7 +24,6 @@ import brayns
 
 
 class MockTransform:
-
     @classmethod
     @property
     def rotation(cls) -> brayns.Rotation:
@@ -44,7 +43,7 @@ class MockTransform:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'translation': [0, 1, 2],
-            'rotation': list(cls.rotation.quaternion),
-            'scale': [7, 8, 9],
+            "translation": [0, 1, 2],
+            "rotation": list(cls.rotation.quaternion),
+            "scale": [7, 8, 9],
         }

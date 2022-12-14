@@ -27,11 +27,10 @@ from tests.mock_view import MockView
 
 
 class TestSnapshot(unittest.TestCase):
-
     @classmethod
     @property
     def path(cls) -> str:
-        return 'test.jpg'
+        return "test.jpg"
 
     @classmethod
     @property
@@ -48,23 +47,23 @@ class TestSnapshot(unittest.TestCase):
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'image_settings': {
-                'format': 'jpg',
-                'size': [1920, 1080],
-                'quality': 50,
+            "image_settings": {
+                "format": "jpg",
+                "size": [1920, 1080],
+                "quality": 50,
             },
-            'camera_view': MockView.message,
-            'camera': brayns.PerspectiveProjection().get_properties_with_name(),
-            'renderer': brayns.ProductionRenderer().get_properties_with_name(),
-            'simulation_frame': 12,
+            "camera_view": MockView.message,
+            "camera": brayns.PerspectiveProjection().get_properties_with_name(),
+            "renderer": brayns.ProductionRenderer().get_properties_with_name(),
+            "simulation_frame": 12,
         }
 
     def test_save_remotely(self) -> None:
         reply = self._reply(0)
         instance = MockInstance(reply)
         self.snapshot.save_remotely(instance, self.path)
-        self.assertEqual(instance.method, 'snapshot')
-        ref = self.message | {'file_path': self.path}
+        self.assertEqual(instance.method, "snapshot")
+        ref = self.message | {"file_path": self.path}
         self.assertEqual(instance.params, ref)
 
     def test_save_remotely_task(self) -> None:
@@ -72,33 +71,33 @@ class TestSnapshot(unittest.TestCase):
         instance = MockInstance(reply)
         task = self.snapshot.save_remotely_task(instance, self.path)
         task.wait_for_result()
-        self.assertEqual(instance.method, 'snapshot')
-        ref = self.message | {'file_path': self.path}
+        self.assertEqual(instance.method, "snapshot")
+        ref = self.message | {"file_path": self.path}
         self.assertEqual(instance.params, ref)
 
     def test_download(self) -> None:
-        data = b'test'
+        data = b"test"
         reply = self._reply(len(data))
         instance = MockInstance(reply, data)
         test = self.snapshot.download(instance, brayns.ImageFormat.JPEG)
         self.assertEqual(test, data)
-        self.assertEqual(instance.method, 'snapshot')
+        self.assertEqual(instance.method, "snapshot")
         self.assertEqual(instance.params, self.message)
 
     def test_download_task(self) -> None:
-        data = b'test'
+        data = b"test"
         reply = self._reply(len(data))
         instance = MockInstance(reply, data)
         task = self.snapshot.download_task(instance, brayns.ImageFormat.JPEG)
         test = task.wait_for_result()
         self.assertEqual(test, data)
-        self.assertEqual(instance.method, 'snapshot')
+        self.assertEqual(instance.method, "snapshot")
         self.assertEqual(instance.params, self.message)
 
     def _reply(self, size: int) -> dict[str, Any]:
         return {
-            'color_buffer': {
-                'offset': 0,
-                'size': size,
+            "color_buffer": {
+                "offset": 0,
+                "size": size,
             }
         }

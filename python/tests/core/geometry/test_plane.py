@@ -24,12 +24,11 @@ import brayns
 
 
 class TestPlane(unittest.TestCase):
-
     def test_method(self) -> None:
-        self.assertEqual(brayns.Plane.method, 'add-planes')
+        self.assertEqual(brayns.Plane.method, "add-planes")
 
     def test_get_properties(self) -> None:
         equation = brayns.PlaneEquation(1, 2, 3, 4)
         plane = brayns.Plane(equation)
         test = plane.get_additional_properties()
-        self.assertEqual(test, {'coefficients': [1, 2, 3, 4]})
+        self.assertEqual(test, {"coefficients": [1, 2, 3, 4]})

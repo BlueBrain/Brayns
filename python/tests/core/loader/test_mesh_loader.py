@@ -26,9 +26,8 @@ from tests.mock_model import MockModel
 
 
 class TestMeshLoader(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.MeshLoader.name, 'mesh')
+        self.assertEqual(brayns.MeshLoader.name, "mesh")
 
     def test_get_properties(self) -> None:
         loader = brayns.MeshLoader()
@@ -37,57 +36,69 @@ class TestMeshLoader(unittest.TestCase):
     def test_load_models(self) -> None:
         instance = MockInstance([MockModel.message, MockModel.message])
         loader = brayns.MeshLoader()
-        path = 'path'
+        path = "path"
         test = loader.load_models(instance, path)
         self.assertEqual(test, [MockModel.model, MockModel.model])
-        self.assertEqual(instance.method, 'add-model')
-        self.assertEqual(instance.params, {
-            'path': path,
-            'loader_name': brayns.MeshLoader.name,
-            'loader_properties': loader.get_properties(),
-        })
+        self.assertEqual(instance.method, "add-model")
+        self.assertEqual(
+            instance.params,
+            {
+                "path": path,
+                "loader_name": brayns.MeshLoader.name,
+                "loader_properties": loader.get_properties(),
+            },
+        )
 
     def test_load_models_task(self) -> None:
         instance = MockInstance([MockModel.message, MockModel.message])
         loader = brayns.MeshLoader()
-        path = 'path'
+        path = "path"
         task = loader.load_models_task(instance, path)
         models = task.wait_for_result()
         self.assertEqual(models, [MockModel.model, MockModel.model])
-        self.assertEqual(instance.method, 'add-model')
-        self.assertEqual(instance.params, {
-            'path': path,
-            'loader_name': brayns.MeshLoader.name,
-            'loader_properties': loader.get_properties(),
-        })
+        self.assertEqual(instance.method, "add-model")
+        self.assertEqual(
+            instance.params,
+            {
+                "path": path,
+                "loader_name": brayns.MeshLoader.name,
+                "loader_properties": loader.get_properties(),
+            },
+        )
 
     def test_upload_models(self) -> None:
         instance = MockInstance([MockModel.message, MockModel.message])
         loader = brayns.MeshLoader()
         format = loader.PLY
-        data = b'123'
+        data = b"123"
         test = loader.upload_models(instance, format, data)
         self.assertEqual(test, [MockModel.model, MockModel.model])
-        self.assertEqual(instance.method, 'upload-model')
-        self.assertEqual(instance.params, {
-            'type': format,
-            'loader_name': loader.name,
-            'loader_properties': loader.get_properties(),
-        })
+        self.assertEqual(instance.method, "upload-model")
+        self.assertEqual(
+            instance.params,
+            {
+                "type": format,
+                "loader_name": loader.name,
+                "loader_properties": loader.get_properties(),
+            },
+        )
         self.assertEqual(instance.binary, data)
 
     def test_upload_models_task(self) -> None:
         instance = MockInstance([MockModel.message, MockModel.message])
         loader = brayns.MeshLoader()
         format = loader.PLY
-        data = b'123'
+        data = b"123"
         task = loader.upload_models_task(instance, format, data)
         models = task.wait_for_result()
         self.assertEqual(models, [MockModel.model, MockModel.model])
-        self.assertEqual(instance.method, 'upload-model')
-        self.assertEqual(instance.params, {
-            'type': format,
-            'loader_name': loader.name,
-            'loader_properties': loader.get_properties(),
-        })
+        self.assertEqual(instance.method, "upload-model")
+        self.assertEqual(
+            instance.params,
+            {
+                "type": format,
+                "loader_name": loader.name,
+                "loader_properties": loader.get_properties(),
+            },
+        )
         self.assertEqual(instance.binary, data)

@@ -44,11 +44,10 @@ from tests.mock_instance import MockInstance
 
 
 class TestGetCircuitIds(unittest.TestCase):
-
     def test_get_circuit_ids(self) -> None:
         ids = [1, 2, 3]
         instance = MockInstance(ids)
         test = brayns.get_circuit_ids(instance, 1)
         self.assertEqual(test, ids)
-        self.assertEqual(instance.method, 'get-circuit-ids')
-        self.assertEqual(instance.params, {'model_id': 1})
+        self.assertEqual(instance.method, "get-circuit-ids")
+        self.assertEqual(instance.params, {"model_id": 1})

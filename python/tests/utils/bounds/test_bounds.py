@@ -24,7 +24,6 @@ import brayns
 
 
 class TestBounds(unittest.TestCase):
-
     @classmethod
     @property
     def bounds(cls) -> brayns.Bounds:

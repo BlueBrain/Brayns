@@ -24,12 +24,14 @@ from tests.mock_instance import MockInstance
 
 
 class TestSetFramebuffer(unittest.TestCase):
-
     def test_set_framebuffer(self) -> None:
         instance = MockInstance()
         framebuffer = brayns.ProgressiveFramebuffer(10)
         brayns.set_framebuffer(instance, framebuffer)
-        self.assertEqual(instance.method, 'set-framebuffer-progressive')
-        self.assertEqual(instance.params, {
-            'scale': 10,
-        })
+        self.assertEqual(instance.method, "set-framebuffer-progressive")
+        self.assertEqual(
+            instance.params,
+            {
+                "scale": 10,
+            },
+        )

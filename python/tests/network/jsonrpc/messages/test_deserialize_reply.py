@@ -26,7 +26,6 @@ from brayns.network import deserialize_reply
 
 
 class TestDeserializeReply(unittest.TestCase):
-
     @classmethod
     @property
     def reply(cls) -> brayns.JsonRpcReply:
@@ -39,8 +38,8 @@ class TestDeserializeReply(unittest.TestCase):
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'id': 1,
-            'result': 12,
+            "id": 1,
+            "result": 12,
         }
 
     def test_deserialize_reply(self) -> None:

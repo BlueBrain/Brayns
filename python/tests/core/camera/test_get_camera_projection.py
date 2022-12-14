@@ -25,12 +25,11 @@ from tests.mock_instance import MockInstance
 
 
 class TestGetCameraProjection(unittest.TestCase):
-
     def test_get_camera_projection(self) -> None:
         ref = brayns.OrthographicProjection(3)
         message = ref.get_properties()
         instance = MockInstance(message)
         test = brayns.get_camera_projection(instance, type(ref))
         self.assertEqual(test, ref)
-        self.assertEqual(instance.method, 'get-camera-orthographic')
+        self.assertEqual(instance.method, "get-camera-orthographic")
         self.assertIsNone(instance.params)

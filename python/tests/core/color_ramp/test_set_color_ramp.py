@@ -27,12 +27,14 @@ from .mock_color_ramp import MockColorRamp
 
 
 class TestSetColorRamp(unittest.TestCase):
-
     def test_set_color_ramp(self) -> None:
         instance = MockInstance()
         brayns.set_color_ramp(instance, 0, MockColorRamp.color_ramp)
-        self.assertEqual(instance.method, 'set-color-ramp')
-        self.assertEqual(instance.params, {
-            'id': 0,
-            'color_ramp': MockColorRamp.message,
-        })
+        self.assertEqual(instance.method, "set-color-ramp")
+        self.assertEqual(
+            instance.params,
+            {
+                "id": 0,
+                "color_ramp": MockColorRamp.message,
+            },
+        )

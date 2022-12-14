@@ -24,13 +24,14 @@ import brayns
 
 
 class TestComponentwiseMax(unittest.TestCase):
-
     def test_componentwise_max(self) -> None:
-        test = brayns.componentwise_max([
-            brayns.Vector3(-3, -2, 1),
-            brayns.Vector3(1, 4, 2),
-            brayns.Vector3(-2, 1, 3),
-        ])
+        test = brayns.componentwise_max(
+            [
+                brayns.Vector3(-3, -2, 1),
+                brayns.Vector3(1, 4, 2),
+                brayns.Vector3(-2, 1, 3),
+            ]
+        )
         ref = brayns.Vector3(1, 4, 3)
         self.assertEqual(test, ref)
 

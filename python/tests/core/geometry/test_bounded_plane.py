@@ -24,9 +24,8 @@ import brayns
 
 
 class TestBoundedPlane(unittest.TestCase):
-
     def test_method(self) -> None:
-        self.assertEqual(brayns.BoundedPlane.method, 'add-bounded-planes')
+        self.assertEqual(brayns.BoundedPlane.method, "add-bounded-planes")
 
     def test_get_properties(self) -> None:
         bounded_plane = brayns.BoundedPlane(
@@ -34,13 +33,16 @@ class TestBoundedPlane(unittest.TestCase):
             bounds=brayns.Bounds(
                 min=brayns.Vector3.zero,
                 max=brayns.Vector3.one,
-            )
+            ),
         )
         test = bounded_plane.get_additional_properties()
-        self.assertEqual(test, {
-            'coefficients': [0, 0, 1, 0],
-            'bounds': {
-                'min': [0, 0, 0],
-                'max': [1, 1, 1],
-            }
-        })
+        self.assertEqual(
+            test,
+            {
+                "coefficients": [0, 0, 1, 0],
+                "bounds": {
+                    "min": [0, 0, 0],
+                    "max": [1, 1, 1],
+                },
+            },
+        )

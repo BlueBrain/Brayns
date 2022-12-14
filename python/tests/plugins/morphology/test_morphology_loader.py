@@ -23,12 +23,8 @@ import brayns
 
 
 class TestMorphologyLoader(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(
-            brayns.MorphologyLoader.name,
-            'Neuron Morphology loader'
-        )
+        self.assertEqual(brayns.MorphologyLoader.name, "Neuron Morphology loader")
 
     def test_properties(self) -> None:
         loader = brayns.MorphologyLoader(
@@ -38,14 +34,15 @@ class TestMorphologyLoader(unittest.TestCase):
                 load_axon=True,
                 load_dendrites=True,
                 geometry_type=brayns.GeometryType.ORIGINAL,
-            ))
+            )
+        )
         properties = {
-            'radius_multiplier': 3.0,
-            'load_soma': True,
-            'load_axon': True,
-            'load_dendrites': True,
-            'geometry_type': 'original',
-            'resampling': 2.0,
-            'subsampling': 1,
+            "radius_multiplier": 3.0,
+            "load_soma": True,
+            "load_axon": True,
+            "load_dendrites": True,
+            "geometry_type": "original",
+            "resampling": 2.0,
+            "subsampling": 1,
         }
         self.assertEqual(loader.get_properties(), properties)

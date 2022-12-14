@@ -25,14 +25,13 @@ import brayns
 
 
 class MockError:
-
     @classmethod
     @property
     def error(cls) -> brayns.JsonRpcError:
         return brayns.JsonRpcError(
             id=0,
             code=1,
-            message='test',
+            message="test",
             data=[1, 2, 3],
         )
 
@@ -40,13 +39,13 @@ class MockError:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'jsonrpc': '2.0',
-            'id': 0,
-            'error': {
-                'code': 1,
-                'message': 'test',
-                'data': [1, 2, 3],
-            }
+            "jsonrpc": "2.0",
+            "id": 0,
+            "error": {
+                "code": 1,
+                "message": "test",
+                "data": [1, 2, 3],
+            },
         }
 
     @classmethod

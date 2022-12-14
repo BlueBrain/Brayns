@@ -27,7 +27,6 @@ from tests.mock_model import MockModel
 
 
 class MockScene:
-
     @classmethod
     @property
     def scene(cls) -> brayns.Scene:
@@ -43,9 +42,9 @@ class MockScene:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'bounds': MockBounds.message,
-            'models': [
+            "bounds": MockBounds.message,
+            "models": [
                 MockModel.message,
-                MockModel.message | {'model_id': 1},
+                MockModel.message | {"model_id": 1},
             ],
         }

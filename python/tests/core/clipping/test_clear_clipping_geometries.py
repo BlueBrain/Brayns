@@ -25,9 +25,8 @@ from tests.mock_instance import MockInstance
 
 
 class TestClearClippingGeometries(unittest.TestCase):
-
     def test_clear_clipping_geometries(self) -> None:
         instance = MockInstance()
         brayns.clear_clipping_geometries(instance)
-        self.assertEqual(instance.method, 'clear-clip-planes')
+        self.assertEqual(instance.method, "clear-clip-planes")
         self.assertIsNone(instance.params)

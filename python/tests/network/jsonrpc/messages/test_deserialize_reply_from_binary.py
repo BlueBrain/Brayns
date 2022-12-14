@@ -25,15 +25,16 @@ from brayns.network import deserialize_reply_from_binary, deserialize_reply_from
 
 
 class TestDeserializeReplyFromBinary(unittest.TestCase):
-
     def test_deserialize_reply_from_binary(self) -> None:
-        text = json.dumps({
-            'id': 1,
-            'result': 123,
-        })
-        size = len(text).to_bytes(4, byteorder='little', signed=False)
-        binary = b'123'
-        data = b''.join([size, text.encode('utf-8'), binary])
+        text = json.dumps(
+            {
+                "id": 1,
+                "result": 123,
+            }
+        )
+        size = len(text).to_bytes(4, byteorder="little", signed=False)
+        binary = b"123"
+        data = b"".join([size, text.encode("utf-8"), binary])
         test = deserialize_reply_from_binary(data)
         ref = deserialize_reply_from_text(text)
         self.assertEqual(test.id, ref.id)

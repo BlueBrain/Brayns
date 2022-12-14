@@ -24,14 +24,13 @@ import brayns
 
 
 class MockEntrypoint:
-
     @classmethod
     @property
     def entrypoint(cls) -> brayns.Entrypoint:
         return brayns.Entrypoint(
-            method='test1',
-            description='test2',
-            plugin='test3',
+            method="test1",
+            description="test2",
+            plugin="test3",
             asynchronous=True,
             params=brayns.JsonSchema(type=brayns.JsonType.OBJECT),
             result=brayns.JsonSchema(type=brayns.JsonType.ARRAY),
@@ -41,10 +40,10 @@ class MockEntrypoint:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'title': 'test1',
-            'description': 'test2',
-            'plugin': 'test3',
-            'async': True,
-            'params': {'type': 'object'},
-            'returns': {'type': 'array'},
+            "title": "test1",
+            "description": "test2",
+            "plugin": "test3",
+            "async": True,
+            "params": {"type": "object"},
+            "returns": {"type": "array"},
         }

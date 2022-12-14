@@ -25,7 +25,6 @@ from tests.mock_schema import MockSchema
 
 
 class TestSerializeSchema(unittest.TestCase):
-
     def test_serialize_schema(self) -> None:
         test = serialize_schema(MockSchema.schema)
         self.assertEqual(test, MockSchema.message)

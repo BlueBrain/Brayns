@@ -25,21 +25,23 @@ from tests.mock_instance import MockInstance
 
 
 class TestColorModel(unittest.TestCase):
-
     def test_color_model(self) -> None:
         method = brayns.ColorMethod.VERTEX
         colors = {
-            '1': brayns.Color4.red,
-            '2': brayns.Color4.blue,
+            "1": brayns.Color4.red,
+            "2": brayns.Color4.blue,
         }
         instance = MockInstance()
         brayns.color_model(instance, 1, method, colors)
-        self.assertEqual(instance.method, 'color-model')
-        self.assertEqual(instance.params, {
-            'id': 1,
-            'method': method,
-            'values': {
-                '1': [1, 0, 0, 1],
-                '2': [0, 0, 1, 1],
-            }
-        })
+        self.assertEqual(instance.method, "color-model")
+        self.assertEqual(
+            instance.params,
+            {
+                "id": 1,
+                "method": method,
+                "values": {
+                    "1": [1, 0, 0, 1],
+                    "2": [0, 0, 1, 1],
+                },
+            },
+        )

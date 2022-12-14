@@ -24,7 +24,6 @@ import brayns
 
 
 class MockColorRamp:
-
     @classmethod
     @property
     def color_ramp(cls) -> brayns.ColorRamp:
@@ -40,8 +39,8 @@ class MockColorRamp:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'range': [0, 1],
-            'colors': [
+            "range": [0, 1],
+            "colors": [
                 [1, 0, 0, 1],
                 [0, 0, 1, 1],
             ],

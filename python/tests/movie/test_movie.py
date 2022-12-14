@@ -24,33 +24,32 @@ import brayns
 
 
 class TestMovie(unittest.TestCase):
-
     def test_get_command_line(self) -> None:
         movie = brayns.Movie(
-            frames_pattern='pattern',
+            frames_pattern="pattern",
             fps=30,
             resolution=brayns.Resolution.full_hd,
             bitrate=64000,
-            encoder='encoder',
-            pixel_format='pixel',
-            ffmpeg_executable='test',
+            encoder="encoder",
+            pixel_format="pixel",
+            ffmpeg_executable="test",
         )
-        args = movie.get_command_line('path')
+        args = movie.get_command_line("path")
         ref = [
-            'test',
-            '-y',
-            '-framerate',
-            '30',
-            '-i',
-            'pattern',
-            '-vf',
-            'fps=30,format=pixel',
-            '-s',
-            '1920x1080',
-            '-b:v',
-            '64000',
-            '-c',
-            'encoder',
-            'path',
+            "test",
+            "-y",
+            "-framerate",
+            "30",
+            "-i",
+            "pattern",
+            "-vf",
+            "fps=30,format=pixel",
+            "-s",
+            "1920x1080",
+            "-b:v",
+            "64000",
+            "-c",
+            "encoder",
+            "path",
         ]
         self.assertEqual(args, ref)

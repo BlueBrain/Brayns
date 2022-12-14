@@ -26,7 +26,6 @@ from tests.mock_model import MockModel
 
 
 class TestAddClippingGeometries(unittest.TestCase):
-
     def test_add_clipping_geometry(self) -> None:
         instance = MockInstance(MockModel.message)
         equation = brayns.PlaneEquation(1, 2, 3, 4)

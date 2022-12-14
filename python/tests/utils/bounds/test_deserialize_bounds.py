@@ -25,7 +25,6 @@ from tests.mock_bounds import MockBounds
 
 
 class TestDeserializeBounds(unittest.TestCase):
-
     def test_from_dict(self) -> None:
         test = deserialize_bounds(MockBounds.message)
         self.assertEqual(test, MockBounds.bounds)

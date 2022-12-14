@@ -25,11 +25,10 @@ from tests.mock_instance import MockInstance
 
 
 class TestGetRendererName(unittest.TestCase):
-
     def test_get_renderer_name(self) -> None:
-        name = 'test'
+        name = "test"
         instance = MockInstance(name)
         test = brayns.get_renderer_name(instance)
         self.assertEqual(test, name)
-        self.assertEqual(instance.method, 'get-renderer-type')
+        self.assertEqual(instance.method, "get-renderer-type")
         self.assertIsNone(instance.params)

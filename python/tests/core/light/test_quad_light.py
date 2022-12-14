@@ -24,23 +24,22 @@ import brayns
 
 
 class TestQuadLight(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.QuadLight.name, 'quad')
+        self.assertEqual(brayns.QuadLight.name, "quad")
 
     def test_emission_direction(self) -> None:
-        light = brayns.QuadLight(
-            edge1=brayns.Axis.up,
-            edge2=brayns.Axis.left
-        )
+        light = brayns.QuadLight(edge1=brayns.Axis.up, edge2=brayns.Axis.left)
         self.assertEqual(light.emission_direction, brayns.Axis.front)
 
     def test_get_properties(self) -> None:
         test = brayns.QuadLight()
-        self.assertEqual(test.get_properties(), {
-            'intensity': 1,
-            'color': [1, 1, 1],
-            'position': [0, 0, 0],
-            'edge1': [1, 0, 0],
-            'edge2': [0, 1, 0],
-        })
+        self.assertEqual(
+            test.get_properties(),
+            {
+                "intensity": 1,
+                "color": [1, 1, 1],
+                "position": [0, 0, 0],
+                "edge1": [1, 0, 0],
+                "edge2": [0, 1, 0],
+            },
+        )

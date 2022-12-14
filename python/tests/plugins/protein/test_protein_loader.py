@@ -24,16 +24,18 @@ import brayns
 
 
 class TestProteinLoader(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.ProteinLoader.name, 'protein')
+        self.assertEqual(brayns.ProteinLoader.name, "protein")
 
     def test_get_properties(self) -> None:
         loader = brayns.ProteinLoader(
             color_scheme=brayns.ProteinColorScheme.PROTEIN_ATOMS,
             radius_multiplier=10,
         )
-        self.assertEqual(loader.get_properties(), {
-            'color_scheme': 'protein_atoms',
-            'radius_multiplier': 10,
-        })
+        self.assertEqual(
+            loader.get_properties(),
+            {
+                "color_scheme": "protein_atoms",
+                "radius_multiplier": 10,
+            },
+        )

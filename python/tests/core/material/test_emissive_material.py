@@ -24,19 +24,21 @@ import brayns
 
 
 class TestEmissiveMaterial(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.EmissiveMaterial.name, 'emissive')
+        self.assertEqual(brayns.EmissiveMaterial.name, "emissive")
 
     def test_get_properties(self) -> None:
         test = brayns.EmissiveMaterial(2, brayns.Color3.red)
-        self.assertEqual(test.get_properties(), {
-            'intensity': 2,
-            'color': [1, 0, 0],
-        })
+        self.assertEqual(
+            test.get_properties(),
+            {
+                "intensity": 2,
+                "color": [1, 0, 0],
+            },
+        )
 
     def test_update_properties(self) -> None:
         test = brayns.EmissiveMaterial()
-        test.update_properties({'intensity': 2, 'color': [1, 0, 0]})
+        test.update_properties({"intensity": 2, "color": [1, 0, 0]})
         self.assertEqual(test.intensity, 2)
         self.assertEqual(test.color, brayns.Color3.red)
