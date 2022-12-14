@@ -27,10 +27,9 @@ from .mock_scene import MockScene
 
 
 class TestGetScene(unittest.TestCase):
-
     def test_get_scene(self) -> None:
         instance = MockInstance(MockScene.message)
         test = brayns.get_scene(instance)
         self.assertEqual(test, MockScene.scene)
-        self.assertEqual(instance.method, 'get-scene')
+        self.assertEqual(instance.method, "get-scene")
         self.assertIsNone(instance.params)

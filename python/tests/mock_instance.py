@@ -24,13 +24,12 @@ import brayns
 
 
 class MockInstance(brayns.Instance):
-
-    def __init__(self, result: Any = None, binary: bytes = b'') -> None:
+    def __init__(self, result: Any = None, binary: bytes = b"") -> None:
         self._result = result
         self._binary = binary
-        self.method = ''
+        self.method = ""
         self.params: Any = None
-        self.binary = b''
+        self.binary = b""
 
     def send(self, request: brayns.JsonRpcRequest) -> brayns.JsonRpcFuture:
         self.method = request.method

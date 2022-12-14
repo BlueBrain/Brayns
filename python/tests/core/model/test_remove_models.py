@@ -25,10 +25,9 @@ from tests.mock_instance import MockInstance
 
 
 class TestRemoveModels(unittest.TestCase):
-
     def test_remove_models(self) -> None:
         instance = MockInstance()
         ids = [1, 2, 3]
         brayns.remove_models(instance, ids)
-        self.assertEqual(instance.method, 'remove-model')
-        self.assertEqual(instance.params, {'ids': ids})
+        self.assertEqual(instance.method, "remove-model")
+        self.assertEqual(instance.params, {"ids": ids})

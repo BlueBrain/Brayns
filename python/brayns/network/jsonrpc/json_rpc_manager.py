@@ -30,7 +30,6 @@ from .messages import JsonRpcError
 
 
 class JsonRpcManager:
-
     def __init__(self, logger: logging.Logger) -> None:
         self._logger = logger
         self._tasks = JsonRpcTasks()
@@ -41,18 +40,18 @@ class JsonRpcManager:
         return id in self._tasks
 
     def clear(self) -> None:
-        self._logger.debug('Clear all JSON-RPC tasks.')
-        error = JsonRpcError.general('Disconnection from client side')
+        self._logger.debug("Clear all JSON-RPC tasks.")
+        error = JsonRpcError.general("Disconnection from client side")
         self._tasks.add_error(error)
 
     def create_task(self, id: int | str) -> JsonRpcTask:
-        self._logger.debug('Create JSON-RPC task with ID %s.', id)
+        self._logger.debug("Create JSON-RPC task with ID %s.", id)
         return self._tasks.create_task(id)
 
     def process_binary(self, data: bytes) -> None:
-        self._logger.debug('Processing JSON-RPC binary message: %s.', data)
+        self._logger.debug("Processing JSON-RPC binary message: %s.", data)
         self._dispatcher.dispatch_binary(data)
 
     def process_text(self, data: str) -> None:
-        self._logger.debug('Processing JSON-RPC text message: %s.', data)
+        self._logger.debug("Processing JSON-RPC text message: %s.", data)
         self._dispatcher.dispatch_text(data)

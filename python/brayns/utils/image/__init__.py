@@ -23,7 +23,7 @@ from .parse_image_format import parse_image_format
 from .resolution import Resolution
 
 __all__ = [
-    'ImageFormat',
-    'parse_image_format',
-    'Resolution',
+    "ImageFormat",
+    "parse_image_format",
+    "Resolution",
 ]

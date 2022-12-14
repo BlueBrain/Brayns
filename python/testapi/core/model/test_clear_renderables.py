@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestClearRenderables(SimpleTestCase):
-
     def test_clear_renderables(self) -> None:
         models = [
             self.add_sphere(),

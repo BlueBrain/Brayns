@@ -25,13 +25,12 @@ from tests.mock_instance import MockInstance
 
 
 class TestImage(unittest.TestCase):
-
     def test_download(self) -> None:
         result = {
-            'accumulation': 1,
-            'max_accumulation': 2,
+            "accumulation": 1,
+            "max_accumulation": 2,
         }
-        data = b'123'
+        data = b"123"
         instance = MockInstance(result, data)
         image = brayns.Image(
             accumulate=False,
@@ -39,13 +38,16 @@ class TestImage(unittest.TestCase):
             jpeg_quality=60,
         )
         test = image.download(instance, brayns.ImageFormat.JPEG)
-        self.assertEqual(instance.params, {
-            'send': True,
-            'force': False,
-            'accumulate': False,
-            'format': 'jpg',
-            'jpeg_quality': 60,
-        })
+        self.assertEqual(
+            instance.params,
+            {
+                "send": True,
+                "force": False,
+                "accumulate": False,
+                "format": "jpg",
+                "jpeg_quality": 60,
+            },
+        )
         self.assertEqual(test.accumulation, 1)
         self.assertEqual(test.max_accumulation, 2)
         self.assertEqual(test.data, data)
@@ -53,17 +55,20 @@ class TestImage(unittest.TestCase):
 
     def test_render(self) -> None:
         result = {
-            'accumulation': 2,
-            'max_accumulation': 2,
+            "accumulation": 2,
+            "max_accumulation": 2,
         }
         instance = MockInstance(result)
         image = brayns.Image()
         test = image.render(instance)
-        self.assertEqual(instance.params, {
-            'send': False,
-            'force': False,
-            'accumulate': True,
-        })
+        self.assertEqual(
+            instance.params,
+            {
+                "send": False,
+                "force": False,
+                "accumulate": True,
+            },
+        )
         self.assertEqual(test.accumulation, 2)
         self.assertEqual(test.max_accumulation, 2)
         self.assertFalse(test.data)

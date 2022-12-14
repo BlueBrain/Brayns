@@ -24,15 +24,14 @@ import brayns
 
 
 class TestMatteMaterial(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.MatteMaterial.name, 'matte')
+        self.assertEqual(brayns.MatteMaterial.name, "matte")
 
     def test_get_properties(self) -> None:
         test = brayns.MatteMaterial(0.5)
-        self.assertEqual(test.get_properties(), {'opacity': 0.5})
+        self.assertEqual(test.get_properties(), {"opacity": 0.5})
 
     def test_update_properties(self) -> None:
         test = brayns.MatteMaterial()
-        test.update_properties({'opacity': 0.5})
+        test.update_properties({"opacity": 0.5})
         self.assertEqual(test.opacity, 0.5)

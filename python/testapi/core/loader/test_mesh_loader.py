@@ -23,9 +23,8 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestMeshLoader(SimpleTestCase):
-
     def test_load_models_obj(self) -> None:
-        path = self.folder / 'cube.obj'
+        path = self.folder / "cube.obj"
         loader = brayns.MeshLoader()
         models = loader.load_models(self.instance, str(path))
         self.assertEqual(len(models), 1)
@@ -34,7 +33,7 @@ class TestMeshLoader(SimpleTestCase):
         self.assertEqual(model.bounds, ref)
 
     def test_load_models_off(self) -> None:
-        path = self.folder / 'cube.off'
+        path = self.folder / "cube.off"
         loader = brayns.MeshLoader()
         models = loader.load_models(self.instance, str(path))
         self.assertEqual(len(models), 1)
@@ -43,7 +42,7 @@ class TestMeshLoader(SimpleTestCase):
         self.assertEqual(model.bounds, ref)
 
     def test_load_models_ply(self) -> None:
-        path = self.folder / 'cube.ply'
+        path = self.folder / "cube.ply"
         loader = brayns.MeshLoader()
         models = loader.load_models(self.instance, str(path))
         self.assertEqual(len(models), 1)
@@ -52,19 +51,19 @@ class TestMeshLoader(SimpleTestCase):
         self.assertEqual(model.bounds, ref)
 
     def test_load_models_stl(self) -> None:
-        path = self.folder / 'cube.stl'
+        path = self.folder / "cube.stl"
         loader = brayns.MeshLoader()
         models = loader.load_models(self.instance, str(path))
         self._check_stl(models)
 
     def test_load_models_stl_binary(self) -> None:
-        path = self.folder / 'cube_binary.stl'
+        path = self.folder / "cube_binary.stl"
         loader = brayns.MeshLoader()
         models = loader.load_models(self.instance, str(path))
         self._check_stl_binary(models)
 
     def test_load_models_task(self) -> None:
-        path = self.folder / 'cube.stl'
+        path = self.folder / "cube.stl"
         loader = brayns.MeshLoader()
         task = loader.load_models_task(self.instance, str(path))
         self.assertFalse(list(task))
@@ -72,25 +71,25 @@ class TestMeshLoader(SimpleTestCase):
         self._check_stl(models)
 
     def test_upload_models_stl(self) -> None:
-        path = self.folder / 'cube.stl'
+        path = self.folder / "cube.stl"
         loader = brayns.MeshLoader()
-        with path.open('rb') as file:
+        with path.open("rb") as file:
             data = file.read()
         models = loader.upload_models(self.instance, loader.STL, data)
         self._check_stl(models)
 
     def test_upload_models_stl_binary(self) -> None:
-        path = self.folder / 'cube_binary.stl'
+        path = self.folder / "cube_binary.stl"
         loader = brayns.MeshLoader()
-        with path.open('rb') as file:
+        with path.open("rb") as file:
             data = file.read()
         models = loader.upload_models(self.instance, loader.STL, data)
         self._check_stl_binary(models)
 
     def test_upload_models_task(self) -> None:
-        path = self.folder / 'cube.stl'
+        path = self.folder / "cube.stl"
         loader = brayns.MeshLoader()
-        with path.open('rb') as file:
+        with path.open("rb") as file:
             data = file.read()
         task = loader.upload_models_task(self.instance, loader.STL, data)
         self.assertEqual(len(list(task)), 1)

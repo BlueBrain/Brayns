@@ -24,7 +24,6 @@ from .renderer_test_case import RendererTestCase
 
 
 class TestInteractiveRenderer(RendererTestCase):
-
     def test_all(self) -> None:
         renderer = brayns.InteractiveRenderer(
             samples_per_pixel=2,

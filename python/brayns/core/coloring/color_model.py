@@ -22,7 +22,9 @@ from brayns.network import Instance
 from brayns.utils import Color4
 
 
-def color_model(instance: Instance, model_id: int, method: str, colors: dict[str, Color4]) -> None:
+def color_model(
+    instance: Instance, model_id: int, method: str, colors: dict[str, Color4]
+) -> None:
     """Color a model by the given method.
 
     This function needs a method name and a mapping to get a color from a
@@ -59,11 +61,8 @@ def color_model(instance: Instance, model_id: int, method: str, colors: dict[str
     :type colors: dict[str, Color4]
     """
     params = {
-        'id': model_id,
-        'method': method,
-        'values': {
-            key: list(value)
-            for key, value in colors.items()
-        },
+        "id": model_id,
+        "method": method,
+        "values": {key: list(value) for key, value in colors.items()},
     }
-    instance.request('color-model', params)
+    instance.request("color-model", params)

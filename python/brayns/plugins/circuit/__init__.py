@@ -23,7 +23,7 @@ from .get_circuit_ids import get_circuit_ids
 from .set_circuit_thickness import set_circuit_thickness
 
 __all__ = [
-    'CircuitColorMethod',
-    'get_circuit_ids',
-    'set_circuit_thickness',
+    "CircuitColorMethod",
+    "get_circuit_ids",
+    "set_circuit_thickness",
 ]

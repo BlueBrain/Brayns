@@ -23,7 +23,7 @@ from .image_info import ImageInfo
 from .snapshot import Snapshot
 
 __all__ = [
-    'Image',
-    'ImageInfo',
-    'Snapshot',
+    "Image",
+    "ImageInfo",
+    "Snapshot",
 ]

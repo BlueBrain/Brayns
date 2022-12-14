@@ -29,7 +29,6 @@ from .messages.mock_reply import MockReply
 
 
 class TestJsonRpcTask(unittest.TestCase):
-
     def test_from_reply(self) -> None:
         reply = MockReply.reply
         task = JsonRpcTask.from_reply(reply)

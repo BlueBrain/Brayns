@@ -22,7 +22,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestInstantiateModel(SimpleTestCase):
-
     def test_instantiate(self) -> None:
         sphere = brayns.Sphere(20).with_color(brayns.Color4.red)
         model = brayns.add_geometries(self.instance, [sphere])
@@ -34,5 +33,5 @@ class TestInstantiateModel(SimpleTestCase):
         instance_transform = brayns.Transform(brayns.Vector3(50, 0, 0))
         brayns.instantiate_model(self.instance, model.id, instance_transform)
 
-        ref = self.folder / 'instantiate.png'
+        ref = self.folder / "instantiate.png"
         self.quick_validation(ref)

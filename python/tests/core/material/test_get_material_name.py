@@ -25,11 +25,10 @@ from tests.mock_instance import MockInstance
 
 
 class TestGetMaterialName(unittest.TestCase):
-
     def test_get_material_name(self) -> None:
-        name = 'test'
+        name = "test"
         instance = MockInstance(name)
         test = brayns.get_material_name(instance, 0)
         self.assertEqual(test, name)
-        self.assertEqual(instance.method, 'get-material-type')
-        self.assertEqual(instance.params, {'id': 0})
+        self.assertEqual(instance.method, "get-material-type")
+        self.assertEqual(instance.params, {"id": 0})

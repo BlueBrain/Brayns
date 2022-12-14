@@ -25,9 +25,8 @@ from tests.mock_instance import MockInstance
 
 
 class TestClearModel(unittest.TestCase):
-
     def test_clear_models(self) -> None:
         instance = MockInstance()
         brayns.clear_models(instance)
-        self.assertEqual(instance.method, 'clear-models')
+        self.assertEqual(instance.method, "clear-models")
         self.assertIsNone(instance.params)

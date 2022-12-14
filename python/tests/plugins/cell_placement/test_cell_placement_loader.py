@@ -23,19 +23,20 @@ import brayns
 
 
 class TestCellPlacementLoader(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.CellPlacementLoader.name,
-                         'Cell placement loader')
+        self.assertEqual(brayns.CellPlacementLoader.name, "Cell placement loader")
 
     def test_get_properties(self) -> None:
         loader = brayns.CellPlacementLoader(
-            morphology_folder='/a/random/folder',
+            morphology_folder="/a/random/folder",
             percentage=0.7,
-            extension='ext',
+            extension="ext",
         )
-        self.assertEqual(loader.get_properties(), {
-            'morphology_folder': '/a/random/folder',
-            'percentage': 0.7,
-            'extension': 'ext',
-        })
+        self.assertEqual(
+            loader.get_properties(),
+            {
+                "morphology_folder": "/a/random/folder",
+                "percentage": 0.7,
+                "extension": "ext",
+            },
+        )

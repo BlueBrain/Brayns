@@ -24,9 +24,8 @@ import brayns
 
 
 class TestBox(unittest.TestCase):
-
     def test_method(self) -> None:
-        self.assertEqual(brayns.Box.method, 'add-boxes')
+        self.assertEqual(brayns.Box.method, "add-boxes")
 
     def test_get_properties(self) -> None:
         box = brayns.Box(
@@ -34,7 +33,10 @@ class TestBox(unittest.TestCase):
             max=brayns.Vector3.one,
         )
         test = box.get_additional_properties()
-        self.assertEqual(test, {
-            'min': [0, 0, 0],
-            'max': [1, 1, 1],
-        })
+        self.assertEqual(
+            test,
+            {
+                "min": [0, 0, 0],
+                "max": [1, 1, 1],
+            },
+        )

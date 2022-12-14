@@ -25,6 +25,6 @@ from .json_rpc_reply import JsonRpcReply
 
 def deserialize_reply(message: dict[str, Any]) -> JsonRpcReply:
     return JsonRpcReply(
-        id=message['id'],
-        result=message['result'],
+        id=message["id"],
+        result=message["result"],
     )

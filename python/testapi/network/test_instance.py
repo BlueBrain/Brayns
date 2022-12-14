@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestInstance(SimpleTestCase):
-
     def test_context(self) -> None:
         with self.instance as instance:
             instance.poll(block=False)
@@ -38,23 +37,23 @@ class TestInstance(SimpleTestCase):
         self.instance.disconnect()
         self.assertFalse(self.instance.connected)
         with self.assertRaises(brayns.WebSocketError):
-            self.instance.request('test', 123)
+            self.instance.request("test", 123)
 
     def test_request(self) -> None:
-        test = self.instance.request('schema', {'endpoint': 'get-version'})
+        test = self.instance.request("schema", {"endpoint": "get-version"})
         self.assertIsInstance(test, dict)
         self.assertTrue(test)
         with self.assertRaises(brayns.JsonRpcError):
-            self.instance.request('invalid')
+            self.instance.request("invalid")
 
     def test_execute(self) -> None:
-        reply = self.instance.execute('snapshot', {})
+        reply = self.instance.execute("snapshot", {})
         self.assertIsInstance(reply.result, dict)
         self.assertTrue(reply.result)
         self.assertTrue(reply.binary)
 
     def test_task(self) -> None:
-        task = self.instance.task('snapshot', {})
+        task = self.instance.task("snapshot", {})
         progresses = list(task)
         reply = task.wait_for_reply()
         self.assertTrue(progresses)
@@ -63,24 +62,24 @@ class TestInstance(SimpleTestCase):
         self.assertTrue(reply.binary)
 
     def test_is_running(self) -> None:
-        request = brayns.JsonRpcRequest(0, 'registry')
+        request = brayns.JsonRpcRequest(0, "registry")
         task = self.instance.send(request)
         self.assertTrue(self.instance.is_running(0))
         task.wait_for_reply()
 
     def test_send(self) -> None:
-        string = brayns.JsonRpcRequest('test', 'registry')
+        string = brayns.JsonRpcRequest("test", "registry")
         task = self.instance.send(string)
         task.wait_for_reply()
-        integer = brayns.JsonRpcRequest(0, 'registry')
+        integer = brayns.JsonRpcRequest(0, "registry")
         task = self.instance.send(integer)
         task.wait_for_reply()
-        notification = brayns.JsonRpcRequest(None, 'registry')
+        notification = brayns.JsonRpcRequest(None, "registry")
         task = self.instance.send(notification)
         task.wait_for_reply()
 
     def test_poll(self) -> None:
-        task = self.instance.task('registry')
+        task = self.instance.task("registry")
         self.instance.poll(block=True)
         self.assertTrue(task.is_ready())
         task.wait_for_reply()

@@ -21,6 +21,6 @@ from .protein_color_scheme import ProteinColorScheme
 from .protein_loader import ProteinLoader
 
 __all__ = [
-    'ProteinColorScheme',
-    'ProteinLoader',
+    "ProteinColorScheme",
+    "ProteinLoader",
 ]

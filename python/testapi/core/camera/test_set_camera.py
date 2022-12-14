@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestSetCamera(SimpleTestCase):
-
     def test_set_camera(self) -> None:
         ref = brayns.Camera()
         brayns.set_camera(self.instance, ref)

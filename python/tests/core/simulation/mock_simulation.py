@@ -24,7 +24,6 @@ import brayns
 
 
 class MockSimulation:
-
     @classmethod
     @property
     def simulation(cls) -> brayns.Simulation:
@@ -40,9 +39,9 @@ class MockSimulation:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'start_frame': 0,
-            'end_frame': 10,
-            'current': 5,
-            'dt': 0.1,
-            'unit': 'ms',
+            "start_frame": 0,
+            "end_frame": 10,
+            "current": 5,
+            "dt": 0.1,
+            "unit": "ms",
         }

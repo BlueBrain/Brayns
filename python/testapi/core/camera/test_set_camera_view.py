@@ -23,12 +23,11 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestSetCameraView(SimpleTestCase):
-
     def test_set_camera_view(self) -> None:
         view = brayns.View(
             position=brayns.Vector3(1, 2, 3),
             target=brayns.Vector3(4, 5, 6),
-            up=brayns.Vector3(7, 8, 9)
+            up=brayns.Vector3(7, 8, 9),
         )
         brayns.set_camera_view(self.instance, view)
         ref = brayns.get_camera_view(self.instance)

@@ -47,8 +47,7 @@ class SonataReport:
     def spikes(spike_transition_time: float = 1.0) -> SonataReport:
         """Spike report with transition time (units from report)."""
         return SonataReport(
-            type=SonataReportType.SPIKES,
-            spike_transition_time=spike_transition_time
+            type=SonataReportType.SPIKES, spike_transition_time=spike_transition_time
         )
 
     @staticmethod

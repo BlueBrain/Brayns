@@ -24,8 +24,8 @@ from .bbp_report import BbpReport
 from .bbp_report_type import BbpReportType
 
 __all__ = [
-    'BbpCells',
-    'BbpLoader',
-    'BbpReport',
-    'BbpReportType',
+    "BbpCells",
+    "BbpLoader",
+    "BbpReport",
+    "BbpReportType",
 ]

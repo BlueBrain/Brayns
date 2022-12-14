@@ -24,12 +24,12 @@ from brayns.core import Loader
 
 class XyzLoader(Loader):
 
-    XYZ: ClassVar[str] = 'xyz'
+    XYZ: ClassVar[str] = "xyz"
 
     @classmethod
     @property
     def name(cls) -> str:
-        return 'xyz'
+        return "xyz"
 
     def get_properties(self) -> dict[str, Any]:
         return {}

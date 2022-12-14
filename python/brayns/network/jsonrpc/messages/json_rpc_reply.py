@@ -38,7 +38,7 @@ class JsonRpcReply:
 
     id: int | str | None
     result: Any = field(default=None, repr=False)
-    binary: bytes = field(default=b'', repr=False)
+    binary: bytes = field(default=b"", repr=False)
 
     @staticmethod
     def for_notifications() -> JsonRpcReply:

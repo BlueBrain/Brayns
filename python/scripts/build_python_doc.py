@@ -25,9 +25,9 @@ from types import ModuleType
 
 import brayns
 
-API_FILENAME = 'api.rst'
+API_FILENAME = "api.rst"
 
-API = '''
+API = """
 .. _pythonapi-label:
 
 Python API reference
@@ -37,11 +37,11 @@ Python API reference
     :maxdepth: 4
 
 {subpackages}
-'''.strip()
+""".strip()
 
-SUBPACKAGE_FILENAME = '{name}.rst'
+SUBPACKAGE_FILENAME = "{name}.rst"
 
-SUBPACKAGE = '''
+SUBPACKAGE = """
 {name}
 {underline}
 
@@ -56,10 +56,10 @@ Functions
 ---------
 
 {functions}
-'''.strip()
+""".strip()
 
 
-AUTOMODULE = '''
+AUTOMODULE = """
 {name}
 {underline}
 
@@ -67,12 +67,12 @@ AUTOMODULE = '''
     :members: {member}
     :undoc-members:
     :show-inheritance:
-'''.strip()
+""".strip()
 
 
 def build_from_argv() -> None:
     python = pathlib.Path(__file__).parent.parent
-    directory = python / 'doc' / 'source' / 'pythonapi'
+    directory = python / "doc" / "source" / "pythonapi"
     argv = sys.argv
     if len(argv) > 1:
         directory = pathlib.Path(argv[1])
@@ -89,12 +89,12 @@ def build(directory: pathlib.Path) -> None:
 
 def get_subpackages() -> list[str]:
     python = pathlib.Path(__file__).parent.parent
-    directory = python / 'brayns'
+    directory = python / "brayns"
     return sorted(
         child.name
-        for child in directory.glob('*')
+        for child in directory.glob("*")
         if child.is_dir()
-        if not child.name.startswith('__')
+        if not child.name.startswith("__")
     )
 
 
@@ -102,27 +102,24 @@ def build_summary(directory: pathlib.Path, subpackages: list[str]) -> None:
     path = directory / API_FILENAME
     summary = format_subpackages_summary(subpackages)
     data = API.format(subpackages=summary)
-    with path.open('wt') as file:
+    with path.open("wt") as file:
         file.write(data)
 
 
 def format_subpackages_summary(subpackages: list[str]) -> str:
-    return '\n'.join(
-        f'    {subpackage}'
-        for subpackage in subpackages
-    )
+    return "\n".join(f"    {subpackage}" for subpackage in subpackages)
 
 
 def build_subpackage(directory: pathlib.Path, subpackage: str) -> None:
-    path = directory / f'{subpackage}.rst'
+    path = directory / f"{subpackage}.rst"
     data = format_subpackage(subpackage)
-    with path.open('wt') as file:
+    with path.open("wt") as file:
         file.write(data)
 
 
 def format_subpackage(subpackage: str) -> str:
-    underline = len(subpackage) * '='
-    module = f'brayns.{subpackage}'
+    underline = len(subpackage) * "="
+    module = f"brayns.{subpackage}"
     obj = getattr(brayns, subpackage)
     items = get_subpackage_items(obj)
     classes = get_classes(items)
@@ -138,11 +135,8 @@ def format_subpackage(subpackage: str) -> str:
 
 def format_items(items: list[str]) -> str:
     if not items:
-        return 'None'
-    return '\n\n'.join(
-        format_item(item)
-        for item in items
-    )
+        return "None"
+    return "\n\n".join(format_item(item) for item in items)
 
 
 def format_item(item: str) -> str:
@@ -150,26 +144,18 @@ def format_item(item: str) -> str:
     module = obj.__module__
     return AUTOMODULE.format(
         name=item,
-        underline=len(item) * '~',
+        underline=len(item) * "~",
         module=module,
         member=item,
     )
 
 
 def get_subpackage_items(module: ModuleType) -> list[str]:
-    return [
-        item
-        for item in module.__all__
-        if item in brayns.__all__
-    ]
+    return [item for item in module.__all__ if item in brayns.__all__]
 
 
 def get_classes(items: list[str]) -> list[str]:
-    return sorted(
-        item
-        for item in items
-        if is_class(item)
-    )
+    return sorted(item for item in items if is_class(item))
 
 
 def is_class(item: str) -> bool:
@@ -178,11 +164,7 @@ def is_class(item: str) -> bool:
 
 
 def get_functions(items: list[str]) -> list[str]:
-    return sorted(
-        item
-        for item in items
-        if is_function(item)
-    )
+    return sorted(item for item in items if is_function(item))
 
 
 def is_function(item: str) -> bool:
@@ -190,5 +172,5 @@ def is_function(item: str) -> bool:
     return inspect.isfunction(obj)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     build_from_argv()

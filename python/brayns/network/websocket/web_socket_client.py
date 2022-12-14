@@ -28,19 +28,13 @@ from .web_socket_listener import WebSocketListener
 
 
 class WebSocketClient(WebSocket):
-
     def __init__(
-        self,
-        websocket: AsyncWebSocket,
-        loop: EventLoop,
-        listener: WebSocketListener
+        self, websocket: AsyncWebSocket, loop: EventLoop, listener: WebSocketListener
     ) -> None:
         self._websocket = websocket
         self._loop = loop
         self._listener = listener
-        self._task = self._loop.run(
-            self._websocket.run()
-        )
+        self._task = self._loop.run(self._websocket.run())
 
     @property
     def closed(self) -> bool:
@@ -49,9 +43,7 @@ class WebSocketClient(WebSocket):
     def close(self) -> None:
         if self.closed:
             return
-        self._loop.run(
-            self._websocket.close()
-        ).result()
+        self._loop.run(self._websocket.close()).result()
         self._task.result()
         self._loop.close()
 
@@ -66,7 +58,7 @@ class WebSocketClient(WebSocket):
         if isinstance(data, str):
             self._listener.on_text(data)
             return
-        raise TypeError(f'Invalid packet type {type(data)}')
+        raise TypeError(f"Invalid packet type {type(data)}")
 
     def send_binary(self, data: bytes) -> None:
         self._send(data)
@@ -76,10 +68,8 @@ class WebSocketClient(WebSocket):
 
     def _send(self, data: bytes | str) -> None:
         self._check_closed()
-        self._loop.run(
-            self._websocket.send(data)
-        ).result()
+        self._loop.run(self._websocket.send(data)).result()
 
     def _check_closed(self) -> None:
         if self.closed:
-            raise ConnectionClosedError('Connection closed')
+            raise ConnectionClosedError("Connection closed")

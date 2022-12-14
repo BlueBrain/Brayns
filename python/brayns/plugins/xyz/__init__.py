@@ -20,5 +20,5 @@
 from .xyz_loader import XyzLoader
 
 __all__ = [
-    'XyzLoader',
+    "XyzLoader",
 ]

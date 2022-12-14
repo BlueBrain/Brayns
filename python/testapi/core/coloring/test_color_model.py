@@ -23,13 +23,17 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestColorModel(SimpleTestCase):
-
     def test_color_model(self) -> None:
         model = self.load_circuit()
         method = brayns.CircuitColorMethod.ID
-        brayns.color_model(self.instance, model.id, method, {
-            '0-500': brayns.Color4.red,
-            '501-1000': brayns.Color4.green,
-        })
-        ref = self.folder / 'circuit.png'
+        brayns.color_model(
+            self.instance,
+            model.id,
+            method,
+            {
+                "0-500": brayns.Color4.red,
+                "501-1000": brayns.Color4.green,
+            },
+        )
+        ref = self.folder / "circuit.png"
         self.quick_validation(ref)

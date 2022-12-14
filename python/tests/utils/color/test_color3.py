@@ -24,7 +24,6 @@ import brayns
 
 
 class TestColor3(unittest.TestCase):
-
     def test_iter(self) -> None:
         test = list(brayns.Color3(1, 2, 3))
         ref = [1, 2, 3]

@@ -27,4 +27,4 @@ def stop(instance: Instance) -> None:
     :param instance: Instance.
     :type instance: Instance
     """
-    instance.request('quit')
+    instance.request("quit")

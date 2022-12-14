@@ -24,7 +24,6 @@ import brayns
 
 
 class TestView(unittest.TestCase):
-
     def test_front(self) -> None:
         test = brayns.View.front
         self.assertEqual(test.direction, brayns.Axis.back)

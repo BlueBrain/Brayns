@@ -24,15 +24,14 @@ import brayns
 
 
 class TestPhongMaterial(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.PhongMaterial.name, 'phong')
+        self.assertEqual(brayns.PhongMaterial.name, "phong")
 
     def test_get_properties(self) -> None:
         test = brayns.PhongMaterial(0.5)
-        self.assertEqual(test.get_properties(), {'opacity': 0.5})
+        self.assertEqual(test.get_properties(), {"opacity": 0.5})
 
     def test_update_properties(self) -> None:
         test = brayns.PhongMaterial()
-        test.update_properties({'opacity': 0.5})
+        test.update_properties({"opacity": 0.5})
         self.assertEqual(test.opacity, 0.5)

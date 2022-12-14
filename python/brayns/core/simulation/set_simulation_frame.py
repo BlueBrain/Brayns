@@ -29,5 +29,5 @@ def set_simulation_frame(instance: Instance, index: int) -> None:
     :param index: Index of the current frame.
     :type index: int
     """
-    params = {'current': index}
-    instance.request('set-simulation-parameters', params)
+    params = {"current": index}
+    instance.request("set-simulation-parameters", params)

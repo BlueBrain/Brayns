@@ -27,15 +27,14 @@ from .mock_transform import MockTransform
 
 
 class MockModel:
-
     @classmethod
     @property
     def model(cls) -> brayns.Model:
         return brayns.Model(
             id=0,
-            type='test',
+            type="test",
             bounds=MockBounds.bounds,
-            info={'test': '1'},
+            info={"test": "1"},
             visible=True,
             transform=MockTransform.transform,
         )
@@ -44,10 +43,10 @@ class MockModel:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'model_id': 0,
-            'model_type': 'test',
-            'bounds': MockBounds.message,
-            'info': {'test': '1'},
-            'is_visible': True,
-            'transform': MockTransform.message,
+            "model_id": 0,
+            "model_type": "test",
+            "bounds": MockBounds.message,
+            "info": {"test": "1"},
+            "is_visible": True,
+            "transform": MockTransform.message,
         }

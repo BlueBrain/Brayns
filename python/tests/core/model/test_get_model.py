@@ -26,10 +26,9 @@ from tests.mock_model import MockModel
 
 
 class TestGetModel(unittest.TestCase):
-
     def test_get_model(self) -> None:
         instance = MockInstance(MockModel.message)
         test = brayns.get_model(instance, 0)
         self.assertEqual(test, MockModel.model)
-        self.assertEqual(instance.method, 'get-model')
-        self.assertEqual(instance.params, {'id': 0})
+        self.assertEqual(instance.method, "get-model")
+        self.assertEqual(instance.params, {"id": 0})

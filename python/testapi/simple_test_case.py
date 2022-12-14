@@ -28,7 +28,6 @@ from .image_validator import ImageValidator
 
 
 class SimpleTestCase(ApiTestCase):
-
     @property
     def resolution(self) -> brayns.Resolution:
         return brayns.Resolution.full_hd
@@ -47,7 +46,7 @@ class SimpleTestCase(ApiTestCase):
 
     def setUp(self) -> None:
         service = brayns.Service(
-            uri=f'localhost:{self.port}',
+            uri=f"localhost:{self.port}",
             executable=self.executable,
             env=self.env,
         )
@@ -97,18 +96,23 @@ class SimpleTestCase(ApiTestCase):
         self.validate(snapshot, ref)
 
     def add_sphere(self, color: brayns.Color4 = brayns.Color4.red) -> brayns.Model:
-        return brayns.add_geometries(self.instance, [
-            brayns.Sphere(1).with_color(color),
-        ])
+        return brayns.add_geometries(
+            self.instance,
+            [
+                brayns.Sphere(1).with_color(color),
+            ],
+        )
 
     def add_clip_plane(self) -> brayns.Model:
         plane = brayns.ClipPlane(brayns.PlaneEquation(1, 2, 3))
         return brayns.add_clipping_geometry(self.instance, plane)
 
-    def load_circuit(self, dendrites: bool = False, report: bool = False) -> brayns.Model:
+    def load_circuit(
+        self, dendrites: bool = False, report: bool = False
+    ) -> brayns.Model:
         loader = brayns.BbpLoader(
             cells=brayns.BbpCells.all(),
-            report=brayns.BbpReport.compartment('somas') if report else None,
+            report=brayns.BbpReport.compartment("somas") if report else None,
             morphology=brayns.Morphology(
                 radius_multiplier=10,
                 load_soma=True,

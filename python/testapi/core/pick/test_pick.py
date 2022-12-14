@@ -25,7 +25,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestPick(SimpleTestCase):
-
     def test_pick(self) -> None:
         self._prepare_scene()
         test = brayns.pick(self.instance, brayns.Vector2(0.5, 0.5))
@@ -34,7 +33,7 @@ class TestPick(SimpleTestCase):
         position = brayns.Vector3(x=38.38946, y=999.41394, z=56.914795)
         self.assertEqual(test.position, position)
         self.assertEqual(test.model_id, 0)
-        self.assertEqual(test.metadata, {'neuron_id': 559})
+        self.assertEqual(test.metadata, {"neuron_id": 559})
 
     def test_pick_missed(self) -> None:
         self._prepare_scene()

@@ -32,5 +32,5 @@ def get_scene(instance: Instance) -> Scene:
     :return: Models and global bounds.
     :rtype: Scene
     """
-    result = instance.request('get-scene')
+    result = instance.request("get-scene")
     return deserialize_scene(result)

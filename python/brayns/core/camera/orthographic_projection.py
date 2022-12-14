@@ -48,7 +48,7 @@ class OrthographicProjection(Projection):
         :return: Projection name.
         :rtype: str
         """
-        return 'orthographic'
+        return "orthographic"
 
     def look_at(self, height: float) -> float:
         """Update viewport height to given one.
@@ -65,10 +65,8 @@ class OrthographicProjection(Projection):
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        return {
-            'height': self.height,
-        }
+        return {"height": self.height}
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.height = message['height']
+        self.height = message["height"]

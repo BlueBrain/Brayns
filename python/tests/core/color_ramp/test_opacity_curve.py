@@ -24,13 +24,14 @@ import brayns
 
 
 class TestOpacityCurve(unittest.TestCase):
-
     def test_apply(self) -> None:
-        curve = brayns.OpacityCurve([
-            brayns.ControlPoint(0, 0.1),
-            brayns.ControlPoint(0.5, 0.2),
-            brayns.ControlPoint(1, 0.3),
-        ])
+        curve = brayns.OpacityCurve(
+            [
+                brayns.ControlPoint(0, 0.1),
+                brayns.ControlPoint(0.5, 0.2),
+                brayns.ControlPoint(1, 0.3),
+            ]
+        )
         colors = [
             brayns.Color3(1, 0, 0),
             brayns.Color3(0, 1, 0),

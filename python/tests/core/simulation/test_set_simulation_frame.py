@@ -25,9 +25,8 @@ from tests.mock_instance import MockInstance
 
 
 class TestSetSimulationFrame(unittest.TestCase):
-
     def test_set_simulation_frame(self) -> None:
         instance = MockInstance()
         brayns.set_simulation_frame(instance, 5)
-        self.assertEqual(instance.method, 'set-simulation-parameters')
-        self.assertEqual(instance.params, {'current': 5})
+        self.assertEqual(instance.method, "set-simulation-parameters")
+        self.assertEqual(instance.params, {"current": 5})

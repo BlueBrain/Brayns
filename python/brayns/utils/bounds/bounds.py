@@ -159,10 +159,7 @@ class Bounds:
         :return: New axis aligned bounds after rotation.
         :rtype: Bounds
         """
-        return Bounds.of([
-            rotation.apply(corner, center)
-            for corner in self.corners
-        ])
+        return Bounds.of([rotation.apply(corner, center) for corner in self.corners])
 
     def rescale(self, scale: Vector3) -> Bounds:
         """Multiply limits by given scale componentwise.

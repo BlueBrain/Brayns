@@ -25,7 +25,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestProgressiveFramebuffer(SimpleTestCase):
-
     def test_progressive_framebuffer(self) -> None:
         self.add_light()
         model = self.add_sphere()
@@ -40,12 +39,12 @@ class TestProgressiveFramebuffer(SimpleTestCase):
     def _check_frame(self, frame_index: int):
         image = brayns.Image(False)
         frame = image.download(self.instance)
-        ref = self.folder / f'progressive_frame_{frame_index}.png'
+        ref = self.folder / f"progressive_frame_{frame_index}.png"
         self._check_dimensions(frame.data, ref)
         validator = ImageValidator()
         validator.validate_data(frame.data, ref)
 
     def _check_dimensions(self, render_data: bytes, ref: pathlib.Path):
-        with ref.open('rb') as file:
+        with ref.open("rb") as file:
             data = file.read()
             self.assertEqual(len(render_data), len(data))

@@ -24,7 +24,7 @@ from typing import Any, TypeVar
 
 from brayns.utils import Color4
 
-T = TypeVar('T', bound='Renderer')
+T = TypeVar("T", bound="Renderer")
 
 
 @dataclass
@@ -36,7 +36,7 @@ class Renderer(ABC):
     Ray bounces allow non-emissive objects to light other objects.
 
     :param samples_per_pixel: Accumulation, defaults to 1.
-    :type samples_per_pixel: int, optional. 
+    :type samples_per_pixel: int, optional.
     :param max_ray_bounces: Ray bounces, defaults to 3.
     :type max_ray_bounces: int, optional.
     :param background_color: Background color, defaults to BBP transparent.
@@ -71,9 +71,9 @@ class Renderer(ABC):
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'samples_per_pixel': self.samples_per_pixel,
-            'max_ray_bounces': self.max_ray_bounces,
-            'background_color': list(self.background_color),
+            "samples_per_pixel": self.samples_per_pixel,
+            "max_ray_bounces": self.max_ray_bounces,
+            "background_color": list(self.background_color),
             **self.get_additional_properties(),
         }
 
@@ -87,13 +87,13 @@ class Renderer(ABC):
     def get_properties_with_name(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'name': self.name,
-            'params': self.get_properties(),
+            "name": self.name,
+            "params": self.get_properties(),
         }
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.samples_per_pixel = message['samples_per_pixel']
-        self.max_ray_bounces = message['max_ray_bounces']
-        self.background_color = Color4(*message['background_color'])
+        self.samples_per_pixel = message["samples_per_pixel"]
+        self.max_ray_bounces = message["max_ray_bounces"]
+        self.background_color = Color4(*message["background_color"])
         self.update_additional_properties(message)

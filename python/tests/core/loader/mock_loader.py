@@ -25,13 +25,12 @@ from tests.mock_schema import MockSchema
 
 
 class MockLoader:
-
     @classmethod
     @property
     def loader(cls) -> brayns.LoaderInfo:
         return brayns.LoaderInfo(
-            name='test',
-            extensions=['test1', 'test2'],
+            name="test",
+            extensions=["test1", "test2"],
             schema=MockSchema.schema,
         )
 
@@ -39,7 +38,7 @@ class MockLoader:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'name': 'test',
-            'extensions': ['test1', 'test2'],
-            'input_parameters_schema': MockSchema.message,
+            "name": "test",
+            "extensions": ["test1", "test2"],
+            "input_parameters_schema": MockSchema.message,
         }

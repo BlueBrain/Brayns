@@ -45,16 +45,16 @@ class InteractiveRenderer(Renderer):
         :return: Renderer name.
         :rtype: str
         """
-        return 'interactive'
+        return "interactive"
 
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'enable_shadows': self.enable_shadows,
-            'ao_samples': self.ambient_occlusion_samples,
+            "enable_shadows": self.enable_shadows,
+            "ao_samples": self.ambient_occlusion_samples,
         }
 
     def update_additional_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.enable_shadows = message['enable_shadows']
-        self.ambient_occlusion_samples = message['ao_samples']
+        self.enable_shadows = message["enable_shadows"]
+        self.ambient_occlusion_samples = message["ao_samples"]

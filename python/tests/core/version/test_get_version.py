@@ -27,7 +27,6 @@ from .mock_version import MockVersion
 
 
 class TestGetVersion(unittest.TestCase):
-
     def test_get_version(self) -> None:
         instance = MockInstance(MockVersion.message)
         test = brayns.get_version(instance)

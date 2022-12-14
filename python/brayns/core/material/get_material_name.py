@@ -33,5 +33,5 @@ def get_material_name(instance: Instance, model_id: int) -> str:
     :return: Material name.
     :rtype: str
     """
-    params = {'id': model_id}
-    return instance.request('get-material-type', params)
+    params = {"id": model_id}
+    return instance.request("get-material-type", params)

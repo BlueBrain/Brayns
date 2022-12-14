@@ -31,15 +31,15 @@ from .plastic_material import PlasticMaterial
 from .set_material import set_material
 
 __all__ = [
-    'CarPaintMaterial',
-    'EmissiveMaterial',
-    'get_material_name',
-    'get_material',
-    'GlassMaterial',
-    'Material',
-    'MatteMaterial',
-    'MetalMaterial',
-    'PhongMaterial',
-    'PlasticMaterial',
-    'set_material',
+    "CarPaintMaterial",
+    "EmissiveMaterial",
+    "get_material_name",
+    "get_material",
+    "GlassMaterial",
+    "Material",
+    "MatteMaterial",
+    "MetalMaterial",
+    "PhongMaterial",
+    "PlasticMaterial",
+    "set_material",
 ]

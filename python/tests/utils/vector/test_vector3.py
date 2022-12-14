@@ -25,7 +25,6 @@ import brayns
 
 
 class TestVector3(unittest.TestCase):
-
     def test_from_vector2(self) -> None:
         vector2 = brayns.Vector2(1, 2)
         test = brayns.Vector3.from_vector2(vector2, 3)
@@ -43,7 +42,7 @@ class TestVector3(unittest.TestCase):
 
     def test_str(self) -> None:
         test = brayns.Vector3(1, 2, 3)
-        self.assertEqual(str(test), 'Vector3(1, 2, 3)')
+        self.assertEqual(str(test), "Vector3(1, 2, 3)")
         self.assertEqual(repr(test), str(test))
 
     def test_iter(self) -> None:
@@ -114,7 +113,7 @@ class TestVector3(unittest.TestCase):
 
     def test_truediv_other(self) -> None:
         test = brayns.Vector3(1, 2, 3) / brayns.Vector3(4, 5, 6)
-        ref = brayns.Vector3(1/4, 2/5, 3/6)
+        ref = brayns.Vector3(1 / 4, 2 / 5, 3 / 6)
         self.assertEqual(test, ref)
 
     def test_floordiv_scalar(self) -> None:
@@ -143,10 +142,10 @@ class TestVector3(unittest.TestCase):
 
     def test_pow_scalar(self) -> None:
         test = brayns.Vector3(1, 2, 3)
-        ref = brayns.Vector3.unpack(i ** 3 for i in test)
-        self.assertEqual(test ** 3, ref)
-        ref = brayns.Vector3.unpack(3 ** i for i in test)
-        self.assertEqual(3 ** test, ref)
+        ref = brayns.Vector3.unpack(i**3 for i in test)
+        self.assertEqual(test**3, ref)
+        ref = brayns.Vector3.unpack(3**i for i in test)
+        self.assertEqual(3**test, ref)
 
     def test_pow_other(self) -> None:
         test = brayns.Vector3(1, 2, 3) ** brayns.Vector3(4, 5, 6)

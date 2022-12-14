@@ -22,8 +22,8 @@ from enum import Enum
 
 class ProteinColorScheme(Enum):
 
-    NONE = 'none'
-    BY_ID = 'by_id'
-    PROTEIN_ATOMS = 'protein_atoms'
-    PROTEIN_CHAINS = 'protein_chains'
-    PROTEIN_RESIDUES = 'protein_residues'
+    NONE = "none"
+    BY_ID = "by_id"
+    PROTEIN_ATOMS = "protein_atoms"
+    PROTEIN_CHAINS = "protein_chains"
+    PROTEIN_RESIDUES = "protein_residues"

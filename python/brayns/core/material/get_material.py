@@ -24,7 +24,7 @@ from brayns.network import Instance
 
 from .material import Material
 
-T = TypeVar('T', bound=Material)
+T = TypeVar("T", bound=Material)
 
 
 def get_material(instance: Instance, model_id: int, material_type: type[T]) -> T:
@@ -42,6 +42,6 @@ def get_material(instance: Instance, model_id: int, material_type: type[T]) -> T
     :rtype: T
     """
     name = material_type.name
-    params = {'id': model_id}
-    result = instance.request(f'get-material-{name}', params)
+    params = {"id": model_id}
+    result = instance.request(f"get-material-{name}", params)
     return material_type.from_properties(result)

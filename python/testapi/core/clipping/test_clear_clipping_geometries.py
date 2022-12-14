@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestClearClippingGeometries(SimpleTestCase):
-
     def test_clear_clipping_geometries(self) -> None:
         models = [
             self.add_sphere(),

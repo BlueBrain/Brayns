@@ -29,4 +29,4 @@ def get_renderer_name(instance: Instance) -> str:
     :return: Renderer name.
     :rtype: str
     """
-    return instance.request('get-renderer-type')
+    return instance.request("get-renderer-type")

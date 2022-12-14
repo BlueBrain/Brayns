@@ -56,11 +56,11 @@ class BoundedPlane(Geometry):
         :return: JSON-RPC method.
         :rtype: str
         """
-        return 'add-bounded-planes'
+        return "add-bounded-planes"
 
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'coefficients': list(self.equation),
-            'bounds': serialize_bounds(self.bounds),
+            "coefficients": list(self.equation),
+            "bounds": serialize_bounds(self.bounds),
         }

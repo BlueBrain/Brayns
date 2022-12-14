@@ -23,7 +23,7 @@ from .color4 import Color4
 from .parse_hex_color import parse_hex_color
 
 __all__ = [
-    'Color3',
-    'Color4',
-    'parse_hex_color',
+    "Color3",
+    "Color4",
+    "parse_hex_color",
 ]

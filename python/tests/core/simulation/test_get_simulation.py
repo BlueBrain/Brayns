@@ -27,10 +27,9 @@ from .mock_simulation import MockSimulation
 
 
 class TestGetSimulation(unittest.TestCase):
-
     def test_get_simulation(self) -> None:
         instance = MockInstance(MockSimulation.message)
         test = brayns.get_simulation(instance)
         self.assertEqual(test, MockSimulation.simulation)
-        self.assertEqual(instance.method, 'get-simulation-parameters')
+        self.assertEqual(instance.method, "get-simulation-parameters")
         self.assertIsNone(instance.params)

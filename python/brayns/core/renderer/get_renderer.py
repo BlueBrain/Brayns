@@ -24,7 +24,7 @@ from brayns.network import Instance
 
 from .renderer import Renderer
 
-T = TypeVar('T', bound=Renderer)
+T = TypeVar("T", bound=Renderer)
 
 
 def get_renderer(instance: Instance, renderer_type: type[T]) -> T:
@@ -42,5 +42,5 @@ def get_renderer(instance: Instance, renderer_type: type[T]) -> T:
     :rtype: T
     """
     name = renderer_type.name
-    result = instance.request(f'get-renderer-{name}')
+    result = instance.request(f"get-renderer-{name}")
     return renderer_type.from_properties(result)

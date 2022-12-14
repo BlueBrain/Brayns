@@ -21,7 +21,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, TypeVar
 
-T = TypeVar('T', bound='Projection')
+T = TypeVar("T", bound="Projection")
 
 
 class Projection(ABC):
@@ -77,6 +77,6 @@ class Projection(ABC):
     def get_properties_with_name(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'name': self.name,
-            'params': self.get_properties(),
+            "name": self.name,
+            "params": self.get_properties(),
         }

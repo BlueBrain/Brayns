@@ -56,7 +56,7 @@ class PerspectiveProjection(Projection):
         :return: Camera name.
         :rtype: str
         """
-        return 'perspective'
+        return "perspective"
 
     def look_at(self, height: float) -> float:
         """Compute camera distance using field of view.
@@ -71,13 +71,13 @@ class PerspectiveProjection(Projection):
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'fovy': self.fovy.degrees,
-            'aperture_radius': self.aperture_radius,
-            'focus_distance': self.focus_distance,
+            "fovy": self.fovy.degrees,
+            "aperture_radius": self.aperture_radius,
+            "focus_distance": self.focus_distance,
         }
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.fovy = Fovy(message['fovy'], degrees=True)
-        self.aperture_radius = message['aperture_radius']
-        self.focus_distance = message['focus_distance']
+        self.fovy = Fovy(message["fovy"], degrees=True)
+        self.aperture_radius = message["aperture_radius"]
+        self.focus_distance = message["focus_distance"]

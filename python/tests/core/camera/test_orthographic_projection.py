@@ -24,10 +24,9 @@ import brayns
 
 
 class TestOrthographicProjection(unittest.TestCase):
-
     def test_name(self) -> None:
         test = brayns.OrthographicProjection.name
-        ref = 'orthographic'
+        ref = "orthographic"
         self.assertEqual(test, ref)
 
     def test_look_at(self) -> None:
@@ -40,9 +39,9 @@ class TestOrthographicProjection(unittest.TestCase):
     def test_get_properties(self) -> None:
         projection = brayns.OrthographicProjection(3)
         test = projection.get_properties()
-        self.assertEqual(test, {'height': 3})
+        self.assertEqual(test, {"height": 3})
 
     def test_update_properties(self) -> None:
         test = brayns.OrthographicProjection()
-        test.update_properties({'height': 3})
+        test.update_properties({"height": 3})
         self.assertEqual(test.height, 3)

@@ -25,7 +25,6 @@ import brayns
 
 
 class TestProductionRenderer(unittest.TestCase):
-
     @classmethod
     @property
     def renderer(cls) -> brayns.ProductionRenderer:
@@ -39,14 +38,14 @@ class TestProductionRenderer(unittest.TestCase):
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'samples_per_pixel': 3,
-            'max_ray_bounces': 2,
-            'background_color': [0, 0, 1, 1],
+            "samples_per_pixel": 3,
+            "max_ray_bounces": 2,
+            "background_color": [0, 0, 1, 1],
         }
 
     def test_name(self) -> None:
         test = brayns.ProductionRenderer.name
-        ref = 'production'
+        ref = "production"
         self.assertEqual(test, ref)
 
     def test_get_properties(self) -> None:

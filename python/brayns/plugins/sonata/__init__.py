@@ -26,10 +26,10 @@ from .sonata_report import SonataReport
 from .sonata_report_type import SonataReportType
 
 __all__ = [
-    'SonataEdgePopulation',
-    'SonataLoader',
-    'SonataNodePopulation',
-    'SonataNodes',
-    'SonataReport',
-    'SonataReportType',
+    "SonataEdgePopulation",
+    "SonataLoader",
+    "SonataNodePopulation",
+    "SonataNodes",
+    "SonataReport",
+    "SonataReportType",
 ]

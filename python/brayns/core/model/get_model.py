@@ -34,5 +34,5 @@ def get_model(instance: Instance, id: int) -> Model:
     :return: Model object.
     :rtype: Model
     """
-    result = instance.request('get-model', {'id': id})
+    result = instance.request("get-model", {"id": id})
     return deserialize_model(result)

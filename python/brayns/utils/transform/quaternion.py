@@ -46,7 +46,9 @@ class Quaternion(Vector[float]):
     def identity(cls) -> Quaternion:
         return Quaternion()
 
-    def __new__(cls, x: float = 0.0, y: float = 0.0, z: float = 0.0, w: float = 1.0) -> Quaternion:
+    def __new__(
+        cls, x: float = 0.0, y: float = 0.0, z: float = 0.0, w: float = 1.0
+    ) -> Quaternion:
         return super().__new__(cls, x, y, z, w)
 
     def __mul__(self, value: int | float | Quaternion) -> Quaternion:

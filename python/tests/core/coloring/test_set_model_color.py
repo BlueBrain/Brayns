@@ -25,15 +25,17 @@ from tests.mock_instance import MockInstance
 
 
 class TestSetModelColor(unittest.TestCase):
-
     def test_set_model_color(self) -> None:
         instance = MockInstance()
         brayns.set_model_color(instance, 1, brayns.Color4.red)
-        self.assertEqual(instance.method, 'color-model')
-        self.assertEqual(instance.params, {
-            'id': 1,
-            'method': brayns.ColorMethod.SOLID,
-            'values': {
-                'color': [1, 0, 0, 1],
-            }
-        })
+        self.assertEqual(instance.method, "color-model")
+        self.assertEqual(
+            instance.params,
+            {
+                "id": 1,
+                "method": brayns.ColorMethod.SOLID,
+                "values": {
+                    "color": [1, 0, 0, 1],
+                },
+            },
+        )

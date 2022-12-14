@@ -24,8 +24,8 @@ from .serialize_request_to_text import serialize_request_to_text
 
 def serialize_request_to_binary(request: JsonRpcRequest) -> bytes:
     json = serialize_request_to_text(request)
-    text = json.encode('utf-8')
+    text = json.encode("utf-8")
     json_size = len(text)
-    header = json_size.to_bytes(4, byteorder='little', signed=False)
+    header = json_size.to_bytes(4, byteorder="little", signed=False)
     binary = request.binary
-    return b''.join([header, text, binary])
+    return b"".join([header, text, binary])

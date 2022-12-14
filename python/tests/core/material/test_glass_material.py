@@ -24,15 +24,14 @@ import brayns
 
 
 class TestGlassMaterial(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.GlassMaterial.name, 'glass')
+        self.assertEqual(brayns.GlassMaterial.name, "glass")
 
     def test_get_properties(self) -> None:
         test = brayns.GlassMaterial(2.5)
-        self.assertEqual(test.get_properties(), {'index_of_refraction': 2.5})
+        self.assertEqual(test.get_properties(), {"index_of_refraction": 2.5})
 
     def test_update_properties(self) -> None:
         test = brayns.GlassMaterial()
-        test.update_properties({'index_of_refraction': 2.5})
+        test.update_properties({"index_of_refraction": 2.5})
         self.assertEqual(test.refraction_index, 2.5)

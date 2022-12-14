@@ -50,7 +50,9 @@ class Color4(Color3):
         """
         return Color4(color.r, color.g, color.b, alpha)
 
-    def __new__(cls, r: float = 0.0, g: float = 0.0, b: float = 0.0, a: float = 1.0) -> Color4:
+    def __new__(
+        cls, r: float = 0.0, g: float = 0.0, b: float = 0.0, a: float = 1.0
+    ) -> Color4:
         return Vector[float].__new__(cls, r, g, b, a)
 
     @property

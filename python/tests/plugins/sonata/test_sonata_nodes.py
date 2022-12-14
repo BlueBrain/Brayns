@@ -24,7 +24,6 @@ import brayns
 
 
 class TestSonataNodes(unittest.TestCase):
-
     def test_all(self) -> None:
         test = brayns.SonataNodes.all()
         self.assertEqual(test.density, 1)
@@ -44,7 +43,7 @@ class TestSonataNodes(unittest.TestCase):
         self.assertIsNone(test.ids)
 
     def test_from_names(self) -> None:
-        names = ['test1', 'test2']
+        names = ["test1", "test2"]
         density = 0.3
         test = brayns.SonataNodes.from_names(names, density)
         self.assertEqual(test.density, density)

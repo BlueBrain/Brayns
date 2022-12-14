@@ -25,9 +25,6 @@ from .color_ramp import ColorRamp
 
 def serialize_color_ramp(ramp: ColorRamp) -> dict[str, Any]:
     return {
-        'range': list(ramp.value_range),
-        'colors': [
-            list(color)
-            for color in ramp.colors
-        ],
+        "range": list(ramp.value_range),
+        "colors": [list(color) for color in ramp.colors],
     }

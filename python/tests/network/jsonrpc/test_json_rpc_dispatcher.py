@@ -29,7 +29,6 @@ from .mock_json_rpc_listener import MockJsonRpcListener
 
 
 class TestJsonRpcDispatcher(unittest.TestCase):
-
     def setUp(self) -> None:
         self._listener = MockJsonRpcListener()
         self._dispatcher = JsonRpcDispatcher(self._listener)
@@ -59,7 +58,7 @@ class TestJsonRpcDispatcher(unittest.TestCase):
         self.assertEqual(test, MockProgress.progress)
 
     def test_dispatch_text_invalid_frame(self) -> None:
-        data = 'sdfbxcbxbcv'
+        data = "sdfbxcbxbcv"
         self._dispatcher.dispatch_text(data)
         e = self._listener.get_data()
         self.assertIsInstance(e, Exception)

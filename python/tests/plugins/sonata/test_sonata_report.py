@@ -24,7 +24,6 @@ import brayns
 
 
 class TestSonataNodes(unittest.TestCase):
-
     def test_none(self) -> None:
         test = brayns.SonataReport.none()
         self.assertEqual(test.type, brayns.SonataReportType.NONE)
@@ -38,37 +37,37 @@ class TestSonataNodes(unittest.TestCase):
         self.assertEqual(test.spike_transition_time, 0.5)
 
     def test_compartment(self) -> None:
-        test = brayns.SonataReport.compartment('test')
+        test = brayns.SonataReport.compartment("test")
         self.assertEqual(test.type, brayns.SonataReportType.COMPARTMENT)
-        self.assertEqual(test.name, 'test')
+        self.assertEqual(test.name, "test")
         self.assertIsNone(test.spike_transition_time)
 
     def test_summation(self) -> None:
-        test = brayns.SonataReport.summation('test')
+        test = brayns.SonataReport.summation("test")
         self.assertEqual(test.type, brayns.SonataReportType.SUMMATION)
-        self.assertEqual(test.name, 'test')
+        self.assertEqual(test.name, "test")
         self.assertIsNone(test.spike_transition_time)
 
     def test_synapse(self) -> None:
-        test = brayns.SonataReport.synapse('test')
+        test = brayns.SonataReport.synapse("test")
         self.assertEqual(test.type, brayns.SonataReportType.SYNAPSE)
-        self.assertEqual(test.name, 'test')
+        self.assertEqual(test.name, "test")
         self.assertIsNone(test.spike_transition_time)
 
     def test_bloodflow_pressure(self) -> None:
-        test = brayns.SonataReport.bloodflow_pressure('test')
+        test = brayns.SonataReport.bloodflow_pressure("test")
         self.assertEqual(test.type, brayns.SonataReportType.BLOODFLOW_PRESSURE)
-        self.assertEqual(test.name, 'test')
+        self.assertEqual(test.name, "test")
         self.assertIsNone(test.spike_transition_time)
 
     def test_bloodflow_speed(self) -> None:
-        test = brayns.SonataReport.bloodflow_speed('test')
+        test = brayns.SonataReport.bloodflow_speed("test")
         self.assertEqual(test.type, brayns.SonataReportType.BLOODFLOW_SPEED)
-        self.assertEqual(test.name, 'test')
+        self.assertEqual(test.name, "test")
         self.assertIsNone(test.spike_transition_time)
 
     def test_bloodflow_radii(self) -> None:
-        test = brayns.SonataReport.bloodflow_radii('test')
+        test = brayns.SonataReport.bloodflow_radii("test")
         self.assertEqual(test.type, brayns.SonataReportType.BLOODFLOW_RADII)
-        self.assertEqual(test.name, 'test')
+        self.assertEqual(test.name, "test")
         self.assertIsNone(test.spike_transition_time)

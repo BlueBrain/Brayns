@@ -36,6 +36,6 @@ def get_color_ramp(instance: Instance, model_id: int) -> ColorRamp:
     :return: Color ramp.
     :rtype: ColorRamp
     """
-    params = {'id': model_id}
-    result = instance.request('get-color-ramp', params)
+    params = {"id": model_id}
+    result = instance.request("get-color-ramp", params)
     return deserialize_color_ramp(result)

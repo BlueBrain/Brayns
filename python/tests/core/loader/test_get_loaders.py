@@ -28,15 +28,19 @@ from .mock_loader import MockLoader
 
 
 class TestGetLoaders(unittest.TestCase):
-
     def test_get_loaders(self) -> None:
-        instance = MockInstance([
-            MockLoader.message,
-            MockLoader.message | {'name': 'test2'},
-        ])
+        instance = MockInstance(
+            [
+                MockLoader.message,
+                MockLoader.message | {"name": "test2"},
+            ]
+        )
         test = brayns.get_loaders(instance)
-        self.assertEqual(test, [
-            MockLoader.loader,
-            dataclasses.replace(MockLoader.loader, name='test2'),
-        ])
+        self.assertEqual(
+            test,
+            [
+                MockLoader.loader,
+                dataclasses.replace(MockLoader.loader, name="test2"),
+            ],
+        )
         self.assertIsNone(instance.params)

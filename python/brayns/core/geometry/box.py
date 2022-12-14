@@ -47,7 +47,7 @@ class Box(Geometry):
         :return: JSON-RPC method.
         :rtype: str
         """
-        return 'add-boxes'
+        return "add-boxes"
 
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

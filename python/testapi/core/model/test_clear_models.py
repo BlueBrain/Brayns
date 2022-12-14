@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestClearModels(SimpleTestCase):
-
     def test_clear_models(self) -> None:
         models = [
             self.add_sphere(),

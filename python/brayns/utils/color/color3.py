@@ -22,7 +22,7 @@ from typing import TypeVar
 
 from ..vector import Vector
 
-T = TypeVar('T', bound='Color3')
+T = TypeVar("T", bound="Color3")
 
 
 class Color3(Vector[float]):

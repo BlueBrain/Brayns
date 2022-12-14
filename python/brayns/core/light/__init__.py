@@ -26,10 +26,10 @@ from .light import Light
 from .quad_light import QuadLight
 
 __all__ = [
-    'add_light',
-    'AmbientLight',
-    'clear_lights',
-    'DirectionalLight',
-    'Light',
-    'QuadLight',
+    "add_light",
+    "AmbientLight",
+    "clear_lights",
+    "DirectionalLight",
+    "Light",
+    "QuadLight",
 ]

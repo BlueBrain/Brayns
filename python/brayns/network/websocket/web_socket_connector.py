@@ -40,9 +40,7 @@ class WebSocketConnector:
         loop = EventLoop()
         connector = AsyncWebSocketConnector(self.uri, self.ssl_context)
         try:
-            websocket = loop.run(
-                connector.connect()
-            ).result()
+            websocket = loop.run(connector.connect()).result()
         except:
             loop.close()
             raise

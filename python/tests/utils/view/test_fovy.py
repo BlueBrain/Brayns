@@ -25,7 +25,6 @@ import brayns
 
 
 class TestFovy(unittest.TestCase):
-
     def test_eq(self) -> None:
         self.assertEqual(brayns.Fovy(30), brayns.Fovy(30.0))
         self.assertNotEqual(brayns.Fovy(31), brayns.Fovy(30.0))

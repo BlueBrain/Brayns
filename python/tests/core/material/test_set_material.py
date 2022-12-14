@@ -25,13 +25,11 @@ from tests.mock_instance import MockInstance
 
 
 class TestSetMaterial(unittest.TestCase):
-
     def test_get_material(self) -> None:
         instance = MockInstance()
         material = brayns.PhongMaterial()
         brayns.set_material(instance, 0, material)
-        self.assertEqual(instance.method, 'set-material-phong')
-        self.assertEqual(instance.params, {
-            'model_id': 0,
-            'material': material.get_properties()
-        })
+        self.assertEqual(instance.method, "set-material-phong")
+        self.assertEqual(
+            instance.params, {"model_id": 0, "material": material.get_properties()}
+        )

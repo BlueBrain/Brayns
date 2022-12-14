@@ -65,7 +65,7 @@ class View:
         :return: View vector.
         :rtype: Vector3
         """
-        return (self.target - self.position)
+        return self.target - self.position
 
     @property
     def direction(self) -> Vector3:

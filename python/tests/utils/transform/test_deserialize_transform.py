@@ -25,7 +25,6 @@ from tests.mock_transform import MockTransform
 
 
 class TestDeserializeTransform(unittest.TestCase):
-
     def test_deserialize_transform(self) -> None:
         test = deserialize_transform(MockTransform.message)
         self.assertEqual(test, MockTransform.transform)

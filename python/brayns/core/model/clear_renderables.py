@@ -26,4 +26,4 @@ def clear_renderables(instance: Instance) -> None:
     :param instance: Instance.
     :type instance: Instance
     """
-    instance.request('clear-renderables')
+    instance.request("clear-renderables")

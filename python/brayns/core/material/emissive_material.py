@@ -47,16 +47,16 @@ class EmissiveMaterial(Material):
         :return: Material name
         :rtype: str
         """
-        return 'emissive'
+        return "emissive"
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'intensity': self.intensity,
-            'color': list(self.color),
+            "intensity": self.intensity,
+            "color": list(self.color),
         }
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.intensity = message['intensity']
-        self.color = Color3.unpack(message['color'])
+        self.intensity = message["intensity"]
+        self.color = Color3.unpack(message["color"])

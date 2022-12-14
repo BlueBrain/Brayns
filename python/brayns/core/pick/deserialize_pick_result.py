@@ -28,11 +28,11 @@ from .pick_result import PickResult
 
 
 def deserialize_pick_result(message: dict[str, Any]) -> PickResult | None:
-    hit = message['hit']
+    hit = message["hit"]
     if not hit:
         return None
     return PickResult(
-        position=Vector3(*message['position']),
-        model_id=message['model_id'],
-        metadata=message['metadata'],
+        position=Vector3(*message["position"]),
+        model_id=message["model_id"],
+        metadata=message["metadata"],
     )

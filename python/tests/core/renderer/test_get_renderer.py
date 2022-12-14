@@ -25,11 +25,10 @@ from tests.mock_instance import MockInstance
 
 
 class TestGetRenderer(unittest.TestCase):
-
     def test_get_renderer(self) -> None:
         ref = brayns.ProductionRenderer()
         instance = MockInstance(ref.get_properties())
         test = brayns.get_renderer(instance, brayns.ProductionRenderer)
         self.assertEqual(test, ref)
-        self.assertEqual(instance.method, 'get-renderer-production')
+        self.assertEqual(instance.method, "get-renderer-production")
         self.assertIsNone(instance.params)

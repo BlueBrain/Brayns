@@ -22,19 +22,19 @@ import logging
 
 import brayns
 
-URI = 'localhost:5000'
-EXECUTABLE = 'path/to/braynsService'
-OSPRAY = 'path/to/OSPRAY_2_10/install_dir/lib'
-CIRCUIT = '/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/circuitBuilding_1000neurons/BlueConfig'
+URI = "localhost:5000"
+EXECUTABLE = "path/to/braynsService"
+OSPRAY = "path/to/OSPRAY_2_10/install_dir/lib"
+CIRCUIT = "/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/circuitBuilding_1000neurons/BlueConfig"
 RESOLUTION = brayns.Resolution.full_hd
-FRAMES = 'path/to/frames/%d.png'
-MOVIE = 'path/to/movie.mp4'
+FRAMES = "path/to/frames/%d.png"
+MOVIE = "path/to/movie.mp4"
 
 service = brayns.Service(
     uri=URI,
     log_level=brayns.LogLevel.INFO,
     executable=EXECUTABLE,
-    env={'LD_LIBRARY_PATH': OSPRAY},
+    env={"LD_LIBRARY_PATH": OSPRAY},
 )
 
 connector = brayns.Connector(
@@ -47,13 +47,13 @@ with brayns.start(service, connector) as (process, instance):
 
     loader = brayns.BbpLoader(
         cells=brayns.BbpCells.from_density(1),
-        report=brayns.BbpReport.compartment('somas'),
+        report=brayns.BbpReport.compartment("somas"),
         morphology=brayns.Morphology(
             radius_multiplier=10,
             load_soma=True,
             load_dendrites=False,
             geometry_type=brayns.GeometryType.SMOOTH,
-        )
+        ),
     )
     models = loader.load_models(instance, CIRCUIT)
     model = models[0]

@@ -24,7 +24,7 @@ from brayns.network import Instance
 
 from .projection import Projection
 
-T = TypeVar('T', bound=Projection)
+T = TypeVar("T", bound=Projection)
 
 
 def get_camera_projection(instance: Instance, projection_type: type[T]) -> T:
@@ -42,5 +42,5 @@ def get_camera_projection(instance: Instance, projection_type: type[T]) -> T:
     :rtype: T
     """
     name = projection_type.name
-    result = instance.request(f'get-camera-{name}')
+    result = instance.request(f"get-camera-{name}")
     return projection_type.from_properties(result)

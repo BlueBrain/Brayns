@@ -24,7 +24,6 @@ from .clipping_test_case import ClippingTestCase
 
 
 class TestClipPlane(ClippingTestCase):
-
     def test_all(self) -> None:
         plane = brayns.PlaneEquation(0, 1, 0)
         self.run_tests(brayns.ClipPlane(plane))

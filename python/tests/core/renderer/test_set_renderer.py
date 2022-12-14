@@ -25,10 +25,9 @@ from tests.mock_instance import MockInstance
 
 
 class TestSetRenderer(unittest.TestCase):
-
     def test_set_renderer(self) -> None:
         instance = MockInstance()
         renderer = brayns.ProductionRenderer()
         brayns.set_renderer(instance, renderer)
-        self.assertEqual(instance.method, 'set-renderer-production')
+        self.assertEqual(instance.method, "set-renderer-production")
         self.assertEqual(instance.params, renderer.get_properties())

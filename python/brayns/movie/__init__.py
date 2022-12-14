@@ -35,7 +35,7 @@ from .movie_error import MovieError
 from .movie_frames import MovieFrames
 
 __all__ = [
-    'Movie',
-    'MovieError',
-    'MovieFrames',
+    "Movie",
+    "MovieError",
+    "MovieFrames",
 ]

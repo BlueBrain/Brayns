@@ -24,7 +24,6 @@ import brayns
 
 
 class TestMovieFrames(unittest.TestCase):
-
     def test_get_indices(self) -> None:
         frames = brayns.MovieFrames(
             fps=10,

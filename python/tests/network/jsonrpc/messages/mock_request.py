@@ -25,13 +25,12 @@ import brayns
 
 
 class MockRequest:
-
     @classmethod
     @property
     def request(cls) -> brayns.JsonRpcRequest:
         return brayns.JsonRpcRequest(
             id=0,
-            method='test',
+            method="test",
             params=123,
         )
 
@@ -39,17 +38,17 @@ class MockRequest:
     @property
     def binary_request(cls) -> brayns.JsonRpcRequest:
         request = cls.request
-        request.binary = b'123'
+        request.binary = b"123"
         return request
 
     @classmethod
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'jsonrpc': '2.0',
-            'id': 0,
-            'method': 'test',
-            'params': 123,
+            "jsonrpc": "2.0",
+            "id": 0,
+            "method": "test",
+            "params": 123,
         }
 
     @classmethod
@@ -60,7 +59,7 @@ class MockRequest:
     @classmethod
     @property
     def binary(cls) -> bytes:
-        text = cls.text.encode('utf-8')
-        size = len(text).to_bytes(4, byteorder='little', signed=False)
+        text = cls.text.encode("utf-8")
+        size = len(text).to_bytes(4, byteorder="little", signed=False)
         binary = cls.binary_request.binary
-        return b''.join([size, text, binary])
+        return b"".join([size, text, binary])

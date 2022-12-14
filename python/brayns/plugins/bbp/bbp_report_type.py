@@ -24,6 +24,6 @@ from enum import Enum
 class BbpReportType(Enum):
     """All available BBP report types."""
 
-    NONE = 'none'
-    SPIKES = 'spikes'
-    COMPARTMENT = 'compartment'
+    NONE = "none"
+    SPIKES = "spikes"
+    COMPARTMENT = "compartment"

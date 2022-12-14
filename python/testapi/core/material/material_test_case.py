@@ -25,7 +25,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class MaterialTestCase(SimpleTestCase):
-
     @property
     def renderer(self) -> brayns.Renderer:
         return brayns.ProductionRenderer(32)
@@ -35,9 +34,9 @@ class MaterialTestCase(SimpleTestCase):
 
     @property
     def ref(self) -> pathlib.Path:
-        name = self.filename.replace('test_', '')
-        name = name.replace('_material', '')
-        name += '.png'
+        name = self.filename.replace("test_", "")
+        name = name.replace("_material", "")
+        name += ".png"
         return self.folder / name
 
     def run_tests(self, material: brayns.Material) -> None:

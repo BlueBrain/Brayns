@@ -30,5 +30,5 @@ def get_camera_view(instance: Instance) -> View:
     :return: Camera view.
     :rtype: View
     """
-    result = instance.request('get-camera-view')
+    result = instance.request("get-camera-view")
     return deserialize_view(result)

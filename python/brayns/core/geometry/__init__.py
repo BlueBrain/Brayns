@@ -27,11 +27,11 @@ from .plane import Plane
 from .sphere import Sphere
 
 __all__ = [
-    'add_geometries',
-    'BoundedPlane',
-    'Box',
-    'Capsule',
-    'Geometry',
-    'Plane',
-    'Sphere',
+    "add_geometries",
+    "BoundedPlane",
+    "Box",
+    "Capsule",
+    "Geometry",
+    "Plane",
+    "Sphere",
 ]

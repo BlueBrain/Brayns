@@ -81,10 +81,12 @@ class Loader(ABC):
         :rtype: Future[list[Model]]
         """
         params = _get_params(self, path=path)
-        task = instance.task('add-model', params)
+        task = instance.task("add-model", params)
         return Future(task, _get_models)
 
-    def upload_models(self, instance: Instance, format: str, data: bytes) -> list[Model]:
+    def upload_models(
+        self, instance: Instance, format: str, data: bytes
+    ) -> list[Model]:
         """Load models from binary data.
 
         As the model format cannot be deduced from a path, it must be specified.
@@ -104,7 +106,9 @@ class Loader(ABC):
         task = self.upload_models_task(instance, format, data)
         return task.wait_for_result()
 
-    def upload_models_task(self, instance: Instance, format: str, data: bytes) -> Future[list[Model]]:
+    def upload_models_task(
+        self, instance: Instance, format: str, data: bytes
+    ) -> Future[list[Model]]:
         """Asynchronous version of ``upload_models``.
 
         :param instance: Instance.
@@ -117,24 +121,23 @@ class Loader(ABC):
         :rtype: Future[list[Model]]
         """
         params = _get_params(self, format=format)
-        task = instance.task('upload-model', params, data)
+        task = instance.task("upload-model", params, data)
         return Future(task, _get_models)
 
 
-def _get_params(loader: Loader, path: str | None = None, format: str | None = None) -> dict[str, Any]:
+def _get_params(
+    loader: Loader, path: str | None = None, format: str | None = None
+) -> dict[str, Any]:
     params = {
-        'loader_name': loader.name,
-        'loader_properties': loader.get_properties(),
+        "loader_name": loader.name,
+        "loader_properties": loader.get_properties(),
     }
     if path is not None:
-        params['path'] = path
+        params["path"] = path
     if format is not None:
-        params['type'] = format
+        params["type"] = format
     return params
 
 
 def _get_models(reply: JsonRpcReply) -> list[Model]:
-    return [
-        deserialize_model(model)
-        for model in reply.result
-    ]
+    return [deserialize_model(model) for model in reply.result]

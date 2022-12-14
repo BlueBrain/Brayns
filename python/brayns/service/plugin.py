@@ -30,11 +30,11 @@ class Plugin(Enum):
     The value is the name of the plugin dynamic library (.so).
     """
 
-    CIRCUIT_EXPLORER = 'braynsCircuitExplorer'
-    ATLAS_EXPLORER = 'braynsAtlasExplorer'
-    CYLINDRIC_CAMERA = 'braynsCylindricCamera'
-    DTI = 'braynsDTI'
-    MOLECULE_EXPLORER = 'braynsMoleculeExplorer'
+    CIRCUIT_EXPLORER = "braynsCircuitExplorer"
+    ATLAS_EXPLORER = "braynsAtlasExplorer"
+    CYLINDRIC_CAMERA = "braynsCylindricCamera"
+    DTI = "braynsDTI"
+    MOLECULE_EXPLORER = "braynsMoleculeExplorer"
 
     @classmethod
     @property

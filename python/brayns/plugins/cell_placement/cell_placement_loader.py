@@ -44,14 +44,14 @@ class CellPlacementLoader(Loader):
     @classmethod
     @property
     def name(cls) -> str:
-        return 'Cell placement loader'
+        return "Cell placement loader"
 
     def get_properties(self) -> dict[str, Any]:
         message: dict[str, Any] = {
-            'morphology_folder': self.morphology_folder,
-            'percentage': self.percentage,
+            "morphology_folder": self.morphology_folder,
+            "percentage": self.percentage,
         }
         if self.extension is not None:
-            message['extension'] = self.extension
+            message["extension"] = self.extension
 
         return message

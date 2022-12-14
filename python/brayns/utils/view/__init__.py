@@ -24,8 +24,8 @@ from .serialize_view import serialize_view
 from .view import View
 
 __all__ = [
-    'deserialize_view',
-    'Fovy',
-    'serialize_view',
-    'View',
+    "deserialize_view",
+    "Fovy",
+    "serialize_view",
+    "View",
 ]

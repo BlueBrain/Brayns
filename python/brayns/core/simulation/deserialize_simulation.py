@@ -26,9 +26,9 @@ from .time_unit import TimeUnit
 
 def deserialize_simulation(message: dict[str, Any]) -> Simulation:
     return Simulation(
-        start_frame=message['start_frame'],
-        end_frame=message['end_frame'],
-        current_frame=message['current'],
-        delta_time=message['dt'],
-        time_unit=TimeUnit(message['unit']),
+        start_frame=message["start_frame"],
+        end_frame=message["end_frame"],
+        current_frame=message["current"],
+        delta_time=message["dt"],
+        time_unit=TimeUnit(message["unit"]),
     )

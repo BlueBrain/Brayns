@@ -25,14 +25,13 @@ from brayns.network import JsonRpcListener
 
 
 class MockJsonRpcListener(JsonRpcListener):
-
     def __init__(self) -> None:
         self._called = False
         self._data = None
 
     def get_data(self) -> Any:
         if not self._called:
-            raise RuntimeError('Data not received')
+            raise RuntimeError("Data not received")
         return self._data
 
     def on_reply(self, reply: brayns.JsonRpcReply) -> None:
@@ -49,6 +48,6 @@ class MockJsonRpcListener(JsonRpcListener):
 
     def _set_data(self, data: Any) -> None:
         if self._called:
-            raise RuntimeError('Data received twice')
+            raise RuntimeError("Data received twice")
         self._called = True
         self._data = data

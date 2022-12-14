@@ -36,11 +36,11 @@ class JsonType(Enum):
     :param OBJECT: Object.
     """
 
-    UNDEFINED = 'undefined'
-    NULL = 'null'
-    BOOLEAN = 'boolean'
-    INTEGER = 'integer'
-    NUMBER = 'number'
-    STRING = 'string'
-    ARRAY = 'array'
-    OBJECT = 'object'
+    UNDEFINED = "undefined"
+    NULL = "null"
+    BOOLEAN = "boolean"
+    INTEGER = "integer"
+    NUMBER = "number"
+    STRING = "string"
+    ARRAY = "array"
+    OBJECT = "object"

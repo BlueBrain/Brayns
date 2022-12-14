@@ -24,7 +24,7 @@ from typing import ClassVar
 class ColorMethod:
     """Core coloring methods available without plugins."""
 
-    SOLID: ClassVar[str] = 'solid'
-    GEOMETRY: ClassVar[str] = 'primitive'
-    TRIANGLE: ClassVar[str] = 'triangle'
-    VERTEX: ClassVar[str] = 'vertex'
+    SOLID: ClassVar[str] = "solid"
+    GEOMETRY: ClassVar[str] = "primitive"
+    TRIANGLE: ClassVar[str] = "triangle"
+    VERTEX: ClassVar[str] = "vertex"

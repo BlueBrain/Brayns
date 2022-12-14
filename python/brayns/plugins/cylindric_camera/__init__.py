@@ -20,5 +20,5 @@
 from .cylindric_projection import CylindricProjection
 
 __all__ = [
-    'CylindricProjection',
+    "CylindricProjection",
 ]

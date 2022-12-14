@@ -71,11 +71,13 @@ class Image:
         image = self.download(instance, format)
         if not image.data:
             return image
-        with open(path, 'wb') as file:
+        with open(path, "wb") as file:
             file.write(image.data)
         return image
 
-    def download(self, instance: Instance, format: ImageFormat = ImageFormat.PNG) -> ImageInfo:
+    def download(
+        self, instance: Instance, format: ImageFormat = ImageFormat.PNG
+    ) -> ImageInfo:
         """Try render image and download it at given format.
 
         :param instance: Instance.
@@ -101,26 +103,28 @@ class Image:
 
 
 def _request(instance: Instance, params: dict[str, Any]) -> ImageInfo:
-    reply = instance.execute('render-image', params)
+    reply = instance.execute("render-image", params)
     return _deserialize_image(reply)
 
 
-def _serialize_image(image: Image, send: bool = True, format: ImageFormat = ImageFormat.PNG) -> dict[str, Any]:
+def _serialize_image(
+    image: Image, send: bool = True, format: ImageFormat = ImageFormat.PNG
+) -> dict[str, Any]:
     params: dict[str, Any] = {
-        'send': send,
-        'force': send and image.force_download,
-        'accumulate': image.accumulate,
+        "send": send,
+        "force": send and image.force_download,
+        "accumulate": image.accumulate,
     }
     if send:
-        params['format'] = format.value
+        params["format"] = format.value
     if send and format is ImageFormat.JPEG:
-        params['jpeg_quality'] = image.jpeg_quality
+        params["jpeg_quality"] = image.jpeg_quality
     return params
 
 
 def _deserialize_image(reply: JsonRpcReply) -> ImageInfo:
     return ImageInfo(
-        accumulation=reply.result['accumulation'],
-        max_accumulation=reply.result['max_accumulation'],
+        accumulation=reply.result["accumulation"],
+        max_accumulation=reply.result["max_accumulation"],
         data=reply.binary,
     )

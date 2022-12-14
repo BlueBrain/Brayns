@@ -25,13 +25,12 @@ import brayns
 
 
 class MockProgress:
-
     @classmethod
     @property
     def progress(cls) -> brayns.JsonRpcProgress:
         return brayns.JsonRpcProgress(
             id=0,
-            operation='test',
+            operation="test",
             amount=0.5,
         )
 
@@ -39,12 +38,12 @@ class MockProgress:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'jsonrpc': '2.0',
-            'params': {
-                'id': 0,
-                'operation': 'test',
-                'amount': 0.5,
-            }
+            "jsonrpc": "2.0",
+            "params": {
+                "id": 0,
+                "operation": "test",
+                "amount": 0.5,
+            },
         }
 
     @classmethod

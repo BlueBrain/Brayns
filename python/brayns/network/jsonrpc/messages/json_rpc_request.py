@@ -42,4 +42,4 @@ class JsonRpcRequest:
     id: int | str | None
     method: str
     params: Any = field(default=None, repr=False)
-    binary: bytes = field(default=b'', repr=False)
+    binary: bytes = field(default=b"", repr=False)

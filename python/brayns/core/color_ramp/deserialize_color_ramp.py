@@ -28,9 +28,6 @@ from .value_range import ValueRange
 
 def deserialize_color_ramp(message: dict[str, Any]) -> ColorRamp:
     return ColorRamp(
-        value_range=ValueRange(*message['range']),
-        colors=[
-            Color4(*color)
-            for color in message['colors']
-        ],
+        value_range=ValueRange(*message["range"]),
+        colors=[Color4(*color) for color in message["colors"]],
     )

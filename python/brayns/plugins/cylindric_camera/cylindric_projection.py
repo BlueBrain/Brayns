@@ -45,7 +45,7 @@ class CylindricProjection(Projection):
         :return: Projection name.
         :rtype: str
         """
-        return 'cylindric'
+        return "cylindric"
 
     def look_at(self, height: float) -> float:
         """Compute camera distance using field of view.
@@ -60,9 +60,9 @@ class CylindricProjection(Projection):
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'fovy': self.fovy.degrees,
+            "fovy": self.fovy.degrees,
         }
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.fovy = Fovy(message['fovy'], degrees=True)
+        self.fovy = Fovy(message["fovy"], degrees=True)

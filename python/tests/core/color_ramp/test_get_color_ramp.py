@@ -27,10 +27,9 @@ from .mock_color_ramp import MockColorRamp
 
 
 class TestGetColorRamp(unittest.TestCase):
-
     def test_get_color_ramp(self) -> None:
         instance = MockInstance(MockColorRamp.message)
         test = brayns.get_color_ramp(instance, 0)
         self.assertEqual(test, MockColorRamp.color_ramp)
-        self.assertEqual(instance.method, 'get-color-ramp')
-        self.assertEqual(instance.params, {'id': 0})
+        self.assertEqual(instance.method, "get-color-ramp")
+        self.assertEqual(instance.params, {"id": 0})

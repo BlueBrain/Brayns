@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestSetColorRamp(SimpleTestCase):
-
     def test_set_color_ramp(self) -> None:
         model = self.load_circuit(report=True)
         ramp = brayns.ColorRamp(
@@ -40,7 +39,7 @@ class TestSetColorRamp(SimpleTestCase):
         self.assertEqual(test, ramp)
 
     def _check_render(self) -> None:
-        ref = self.folder / 'frame_0.png'
+        ref = self.folder / "frame_0.png"
         self.quick_validation(ref, 0)
-        ref = self.folder / 'frame_99.png'
+        ref = self.folder / "frame_99.png"
         self.quick_validation(ref, 99)

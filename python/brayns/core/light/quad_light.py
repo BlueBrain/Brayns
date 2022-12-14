@@ -52,7 +52,7 @@ class QuadLight(Light):
         :return: Light name.
         :rtype: str
         """
-        return 'quad'
+        return "quad"
 
     @property
     def emission_direction(self) -> Vector3:
@@ -68,7 +68,7 @@ class QuadLight(Light):
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'position': list(self.bottom_left),
-            'edge1': list(self.edge1),
-            'edge2': list(self.edge2),
+            "position": list(self.bottom_left),
+            "edge1": list(self.edge1),
+            "edge2": list(self.edge2),
         }

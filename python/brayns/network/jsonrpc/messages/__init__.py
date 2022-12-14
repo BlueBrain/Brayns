@@ -32,16 +32,16 @@ from .serialize_request_to_binary import serialize_request_to_binary
 from .serialize_request_to_text import serialize_request_to_text
 
 __all__ = [
-    'deserialize_error',
-    'deserialize_progress',
-    'deserialize_reply_from_binary',
-    'deserialize_reply_from_text',
-    'deserialize_reply',
-    'JsonRpcError',
-    'JsonRpcProgress',
-    'JsonRpcReply',
-    'JsonRpcRequest',
-    'serialize_request_to_binary',
-    'serialize_request_to_text',
-    'serialize_request',
+    "deserialize_error",
+    "deserialize_progress",
+    "deserialize_reply_from_binary",
+    "deserialize_reply_from_text",
+    "deserialize_reply",
+    "JsonRpcError",
+    "JsonRpcProgress",
+    "JsonRpcReply",
+    "JsonRpcRequest",
+    "serialize_request_to_binary",
+    "serialize_request_to_text",
+    "serialize_request",
 ]

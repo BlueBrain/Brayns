@@ -24,13 +24,12 @@ import brayns
 
 
 class MockView:
-
     @classmethod
     @property
     def view(cls) -> brayns.View:
         return brayns.View(
             position=brayns.Vector3(0, 1, 2),
-            target=brayns.Vector3(3, 4 ,5),
+            target=brayns.Vector3(3, 4, 5),
             up=brayns.Vector3(6, 7, 8),
         )
 
@@ -38,7 +37,7 @@ class MockView:
     @property
     def message(cls) -> dict[str, Any]:
         return {
-            'position': [0, 1, 2],
-            'target': [3, 4, 5],
-            'up': [6, 7, 8],
+            "position": [0, 1, 2],
+            "target": [3, 4, 5],
+            "up": [6, 7, 8],
         }

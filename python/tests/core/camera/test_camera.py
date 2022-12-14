@@ -24,7 +24,6 @@ import brayns
 
 
 class TestCamera(unittest.TestCase):
-
     def test_name(self) -> None:
         camera = brayns.Camera()
         self.assertEqual(camera.name, brayns.PerspectiveProjection.name)

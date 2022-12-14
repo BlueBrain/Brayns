@@ -24,23 +24,12 @@ import brayns
 
 
 class MockVersion:
-
     @classmethod
     @property
     def version(cls) -> brayns.Version:
-        return brayns.Version(
-            major=0,
-            minor=1,
-            patch=2,
-            revision='3'
-        )
+        return brayns.Version(major=0, minor=1, patch=2, revision="3")
 
     @classmethod
     @property
     def message(cls) -> dict[str, Any]:
-        return {
-            'major': 0,
-            'minor': 1,
-            'patch': 2,
-            'revision': '3'
-        }
+        return {"major": 0, "minor": 1, "patch": 2, "revision": "3"}

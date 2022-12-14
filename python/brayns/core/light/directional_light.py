@@ -44,10 +44,10 @@ class DirectionalLight(Light):
         :return: Light name.
         :rtype: str
         """
-        return 'directional'
+        return "directional"
 
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'direction': list(self.direction),
+            "direction": list(self.direction),
         }

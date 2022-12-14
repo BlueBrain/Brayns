@@ -25,10 +25,9 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class ClippingTestCase(SimpleTestCase):
-
     @property
     def ref(self) -> pathlib.Path:
-        name = self.filename.replace('test_', '') + '.png'
+        name = self.filename.replace("test_", "") + ".png"
         return self.folder / name
 
     def run_tests(self, geometry: brayns.ClippingGeometry) -> None:

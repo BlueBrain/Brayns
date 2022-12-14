@@ -30,5 +30,5 @@ class ImageFormat(Enum):
     :param PNG: PNG format, bigger but lossless.
     """
 
-    JPEG = 'jpg'
-    PNG = 'png'
+    JPEG = "jpg"
+    PNG = "png"

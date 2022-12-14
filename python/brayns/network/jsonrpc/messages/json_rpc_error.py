@@ -29,7 +29,7 @@ class JsonRpcError(Exception):
     """Error raised by an instance when a request fails.
 
     :param id: ID of the request sending the error.
-        None for global errors with no requests attached (like invalid JSON). 
+        None for global errors with no requests attached (like invalid JSON).
     :type id: int | str | None
     :param code: Error code.
     :type code: int
@@ -54,10 +54,10 @@ class JsonRpcError(Exception):
 
     def __str__(self) -> str:
         description = self.message
-        details = [f'code={self.code}']
+        details = [f"code={self.code}"]
         if self.id is not None:
-            details.append(f'request ID={self.id})')
+            details.append(f"request ID={self.id})")
         if self.data is not None:
-            details.append(f'data={self.data})')
-        detail = ', '.join(details)
-        return f'{description} ({detail})'
+            details.append(f"data={self.data})")
+        detail = ", ".join(details)
+        return f"{description} ({detail})"

@@ -24,14 +24,13 @@ import brayns
 
 
 class TestBbpLoader(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.BbpLoader.name, 'BBP loader')
+        self.assertEqual(brayns.BbpLoader.name, "BBP loader")
 
     def test_get_properties(self) -> None:
         loader = brayns.BbpLoader(
-            cells=brayns.BbpCells.from_targets(['1', '2'], 0.5),
-            report=brayns.BbpReport.compartment('test'),
+            cells=brayns.BbpCells.from_targets(["1", "2"], 0.5),
+            report=brayns.BbpReport.compartment("test"),
             morphology=brayns.Morphology(
                 radius_multiplier=3,
                 load_soma=True,
@@ -42,20 +41,23 @@ class TestBbpLoader(unittest.TestCase):
             load_afferent_synapses=True,
             load_efferent_synapses=True,
         )
-        self.assertEqual(loader.get_properties(), {
-            'percentage': 0.5,
-            'targets': ['1', '2'],
-            'report_type': 'compartment',
-            'report_name': 'test',
-            'load_afferent_synapses': True,
-            'load_efferent_synapses': True,
-            'neuron_morphology_parameters': {
-                'radius_multiplier': 3.0,
-                'load_soma': True,
-                'load_axon': True,
-                'load_dendrites': True,
-                'geometry_type': 'original',
-                'resampling': 2.0,
-                'subsampling': 1,
+        self.assertEqual(
+            loader.get_properties(),
+            {
+                "percentage": 0.5,
+                "targets": ["1", "2"],
+                "report_type": "compartment",
+                "report_name": "test",
+                "load_afferent_synapses": True,
+                "load_efferent_synapses": True,
+                "neuron_morphology_parameters": {
+                    "radius_multiplier": 3.0,
+                    "load_soma": True,
+                    "load_axon": True,
+                    "load_dendrites": True,
+                    "geometry_type": "original",
+                    "resampling": 2.0,
+                    "subsampling": 1,
+                },
             },
-        })
+        )

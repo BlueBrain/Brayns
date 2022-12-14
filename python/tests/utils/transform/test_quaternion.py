@@ -25,7 +25,6 @@ import brayns
 
 
 class TestQuaternion(unittest.TestCase):
-
     def test_identity(self) -> None:
         test = brayns.Quaternion.identity
         ref = brayns.Quaternion(0, 0, 0, 1)

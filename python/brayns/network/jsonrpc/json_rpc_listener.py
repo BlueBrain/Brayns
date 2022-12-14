@@ -24,7 +24,6 @@ from .messages import JsonRpcError, JsonRpcProgress, JsonRpcReply
 
 
 class JsonRpcListener(Protocol):
-
     def on_reply(self, reply: JsonRpcReply) -> None:
         pass
 

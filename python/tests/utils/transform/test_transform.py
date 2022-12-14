@@ -24,7 +24,6 @@ import brayns
 
 
 class TestTransform(unittest.TestCase):
-
     def test_rotate(self) -> None:
         rotation = brayns.euler(0.25, 1.5, 2.5)
         center = brayns.Vector3(1, 2, 3)

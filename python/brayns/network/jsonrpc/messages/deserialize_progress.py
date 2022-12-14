@@ -24,9 +24,9 @@ from .json_rpc_progress import JsonRpcProgress
 
 
 def deserialize_progress(message: dict[str, Any]) -> JsonRpcProgress:
-    params = message['params']
+    params = message["params"]
     return JsonRpcProgress(
-        id=params['id'],
-        operation=params['operation'],
-        amount=params['amount'],
+        id=params["id"],
+        operation=params["operation"],
+        amount=params["amount"],
     )

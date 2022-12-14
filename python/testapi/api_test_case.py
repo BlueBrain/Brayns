@@ -25,43 +25,42 @@ import unittest
 
 
 class ApiTestCase(unittest.TestCase):
-
     @property
     def log_level(self) -> str:
-        return os.environ.get('BRAYNS_TEST_LOG_LEVEL', 'WARN')
+        return os.environ.get("BRAYNS_TEST_LOG_LEVEL", "WARN")
 
     @property
     def executable(self) -> str:
-        return os.environ['BRAYNS_TEST_EXECUTABLE']
+        return os.environ["BRAYNS_TEST_EXECUTABLE"]
 
     @property
     def port(self) -> int:
-        value = os.environ.get('BRAYNS_TEST_PORT', '5000')
+        value = os.environ.get("BRAYNS_TEST_PORT", "5000")
         return int(value)
 
     @property
     def env(self) -> dict[str, str]:
         result = dict[str, str]()
-        path = os.environ.get('BRAYNS_TEST_LIBRARY_PATH')
+        path = os.environ.get("BRAYNS_TEST_LIBRARY_PATH")
         if path is not None:
-            result['LD_LIBRARY_PATH'] = path
+            result["LD_LIBRARY_PATH"] = path
         return result
 
     @property
     def bbp_circuit(self) -> str:
-        return os.environ['BRAYNS_TEST_BBP_CIRCUIT']
+        return os.environ["BRAYNS_TEST_BBP_CIRCUIT"]
 
     @property
     def morphology_file(self) -> str:
-        return os.environ['BRAYNS_TEST_MORPHOLOGY']
+        return os.environ["BRAYNS_TEST_MORPHOLOGY"]
 
     @property
     def dti_file(self) -> str:
-        return os.environ['BRAYNS_TEST_DTI_FILE']
+        return os.environ["BRAYNS_TEST_DTI_FILE"]
 
     @property
     def ffmpeg(self) -> str:
-        return os.environ.get('BRAYNS_TEST_FFMPEG', 'ffmpeg')
+        return os.environ.get("BRAYNS_TEST_FFMPEG", "ffmpeg")
 
     @property
     def path(self) -> pathlib.Path:

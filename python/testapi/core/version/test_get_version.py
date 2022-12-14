@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetVersion(SimpleTestCase):
-
     def test_get_version(self) -> None:
         version = brayns.get_version(self.instance)
         self.assertEqual(version.tag, brayns.__version__)

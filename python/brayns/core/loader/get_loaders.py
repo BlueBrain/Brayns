@@ -32,8 +32,5 @@ def get_loaders(instance: Instance) -> list[LoaderInfo]:
     :return: List of loader descriptions.
     :rtype: list[LoaderInfo]
     """
-    result = instance.request('get-loaders')
-    return [
-        deserialize_loader(loader)
-        for loader in result
-    ]
+    result = instance.request("get-loaders")
+    return [deserialize_loader(loader) for loader in result]

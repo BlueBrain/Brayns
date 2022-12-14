@@ -25,10 +25,9 @@ from tests.mock_instance import MockInstance
 
 
 class TestSetCameraProjection(unittest.TestCase):
-
     def test_set_camera_projection(self) -> None:
         instance = MockInstance()
         test = brayns.OrthographicProjection(3)
         brayns.set_camera_projection(instance, test)
-        self.assertEqual(instance.method, 'set-camera-orthographic')
+        self.assertEqual(instance.method, "set-camera-orthographic")
         self.assertEqual(instance.params, test.get_properties())

@@ -26,7 +26,6 @@ from .messages import JsonRpcError, JsonRpcProgress, JsonRpcReply
 
 
 class JsonRpcTask:
-
     @staticmethod
     def from_reply(reply: JsonRpcReply) -> JsonRpcTask:
         task = JsonRpcTask()
@@ -48,25 +47,25 @@ class JsonRpcTask:
         if self._error is not None:
             raise self._error
         if self._reply is None:
-            raise RuntimeError('Task is still running')
+            raise RuntimeError("Task is still running")
         return self._reply
 
     def set_reply(self, reply: JsonRpcReply) -> None:
         if self.is_ready():
-            raise RuntimeError('Task already finished')
+            raise RuntimeError("Task already finished")
         self._reply = reply
 
     def set_error(self, error: JsonRpcError) -> None:
         if self.is_ready():
-            raise RuntimeError('Task already finished')
+            raise RuntimeError("Task already finished")
         self._error = error
 
     def get_progress(self) -> JsonRpcProgress:
         if not self._progresses:
-            raise RuntimeError('No progress received')
+            raise RuntimeError("No progress received")
         return self._progresses.popleft()
 
     def add_progress(self, progress: JsonRpcProgress) -> None:
         if self.is_ready():
-            raise RuntimeError('Task already finished')
+            raise RuntimeError("Task already finished")
         self._progresses.append(progress)

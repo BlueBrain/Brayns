@@ -26,7 +26,6 @@ from .mock_request import MockRequest
 
 
 class TestSerializeRequest(unittest.TestCase):
-
     def test_serialize_request(self) -> None:
         test = serialize_request(MockRequest.request)
         self.assertEqual(test, MockRequest.message)
@@ -36,5 +35,5 @@ class TestSerializeRequest(unittest.TestCase):
         notification.id = None
         test = serialize_request(notification)
         ref = MockRequest.message
-        del ref['id']
+        del ref["id"]
         self.assertEqual(test, ref)

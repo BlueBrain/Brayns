@@ -25,9 +25,8 @@ from tests.mock_instance import MockInstance
 
 
 class TestStop(unittest.TestCase):
-
     def test_stop(self) -> None:
         instance = MockInstance()
         brayns.stop(instance)
-        self.assertEqual(instance.method, 'quit')
+        self.assertEqual(instance.method, "quit")
         self.assertIsNone(instance.params)

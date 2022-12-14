@@ -24,14 +24,13 @@ import brayns
 
 
 class MockPickResult:
-
     @staticmethod
     def create_message(hit: bool) -> dict[str, Any]:
         return {
-            'hit': hit,
-            'position': [1, 2, 3],
-            'model_id': 3,
-            'metadata': {'test': 1},
+            "hit": hit,
+            "position": [1, 2, 3],
+            "model_id": 3,
+            "metadata": {"test": 1},
         }
 
     @classmethod
@@ -40,5 +39,5 @@ class MockPickResult:
         return brayns.PickResult(
             position=brayns.Vector3(1, 2, 3),
             model_id=3,
-            metadata={'test': 1},
+            metadata={"test": 1},
         )

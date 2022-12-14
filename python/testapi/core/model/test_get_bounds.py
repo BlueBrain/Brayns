@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetBounds(SimpleTestCase):
-
     def test_get_bounds(self) -> None:
         model = self.add_sphere()
         test = brayns.get_bounds(self.instance)

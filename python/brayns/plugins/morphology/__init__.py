@@ -23,8 +23,8 @@ from .morphology_loader import MorphologyLoader
 from .serialize_morphology import serialize_morphology
 
 __all__ = [
-    'GeometryType',
-    'Morphology',
-    'MorphologyLoader',
-    'serialize_morphology',
+    "GeometryType",
+    "Morphology",
+    "MorphologyLoader",
+    "serialize_morphology",
 ]

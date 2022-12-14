@@ -25,7 +25,7 @@ from .transform import Transform
 
 def serialize_transform(transform: Transform) -> dict[str, Any]:
     return {
-        'translation': list(transform.translation),
-        'rotation': list(transform.rotation.quaternion),
-        'scale': list(transform.scale),
+        "translation": list(transform.translation),
+        "rotation": list(transform.rotation.quaternion),
+        "scale": list(transform.scale),
     }

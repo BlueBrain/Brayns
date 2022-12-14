@@ -29,7 +29,6 @@ from .messages.mock_reply import MockReply
 
 
 class TestJsonRpcManager(unittest.TestCase):
-
     def test_is_running(self) -> None:
         manager = self._create_manager()
         manager.create_task(0)
@@ -70,5 +69,5 @@ class TestJsonRpcManager(unittest.TestCase):
         self.assertFalse(manager.is_running(0))
 
     def _create_manager(self) -> JsonRpcManager:
-        logger = logging.Logger('test')
+        logger = logging.Logger("test")
         return JsonRpcManager(logger)

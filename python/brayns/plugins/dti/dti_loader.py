@@ -26,7 +26,7 @@ from brayns.core import Loader
 @dataclass
 class DtiLoader(Loader):
 
-    JSON: ClassVar[str] = 'json'
+    JSON: ClassVar[str] = "json"
 
     streamline_radius: float = 1.0
     spike_decay_time: float = 1.0
@@ -34,10 +34,10 @@ class DtiLoader(Loader):
     @classmethod
     @property
     def name(cls) -> str:
-        return 'DTI loader'
+        return "DTI loader"
 
     def get_properties(self) -> dict[str, Any]:
         return {
-            'radius': self.streamline_radius,
-            'spike_decay_time': self.spike_decay_time,
+            "radius": self.streamline_radius,
+            "spike_decay_time": self.spike_decay_time,
         }

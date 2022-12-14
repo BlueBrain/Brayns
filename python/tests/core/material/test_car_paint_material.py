@@ -24,15 +24,14 @@ import brayns
 
 
 class TestCarPaintMaterial(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.CarPaintMaterial.name, 'carpaint')
+        self.assertEqual(brayns.CarPaintMaterial.name, "carpaint")
 
     def test_get_properties(self) -> None:
         test = brayns.CarPaintMaterial(3)
-        self.assertEqual(test.get_properties(), {'flake_density': 3})
+        self.assertEqual(test.get_properties(), {"flake_density": 3})
 
     def test_update_properties(self) -> None:
         test = brayns.CarPaintMaterial()
-        test.update_properties({'flake_density': 3})
+        test.update_properties({"flake_density": 3})
         self.assertEqual(test.flake_density, 3)

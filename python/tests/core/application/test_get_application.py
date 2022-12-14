@@ -27,7 +27,6 @@ from .mock_application import MockApplication
 
 
 class TestGetApplication(unittest.TestCase):
-
     def test_get_application(self) -> None:
         instance = MockInstance(MockApplication.message)
         test = brayns.get_application(instance)

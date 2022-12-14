@@ -24,10 +24,9 @@ import brayns
 
 
 class TestPerspectiveProjection(unittest.TestCase):
-
     def test_get_name(self) -> None:
         test = brayns.PerspectiveProjection.name
-        ref = 'perspective'
+        ref = "perspective"
         self.assertEqual(test, ref)
 
     def test_look_at(self) -> None:
@@ -46,17 +45,19 @@ class TestPerspectiveProjection(unittest.TestCase):
         )
         test = projection.get_properties()
         self.assertEqual(len(test), 3)
-        self.assertAlmostEqual(test['fovy'], 30)
-        self.assertEqual(test['aperture_radius'], 1)
-        self.assertEqual(test['focus_distance'], 2)
+        self.assertAlmostEqual(test["fovy"], 30)
+        self.assertEqual(test["aperture_radius"], 1)
+        self.assertEqual(test["focus_distance"], 2)
 
     def test_update_properties(self) -> None:
         test = brayns.PerspectiveProjection()
-        test.update_properties({
-            'fovy': 30,
-            'aperture_radius': 1,
-            'focus_distance': 2,
-        })
+        test.update_properties(
+            {
+                "fovy": 30,
+                "aperture_radius": 1,
+                "focus_distance": 2,
+            }
+        )
         self.assertAlmostEqual(test.fovy.degrees, 30)
         self.assertEqual(test.aperture_radius, 1)
         self.assertEqual(test.focus_distance, 2)

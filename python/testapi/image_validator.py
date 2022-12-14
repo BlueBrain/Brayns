@@ -28,22 +28,19 @@ class ImageValidator:
     threshold: float = 1.0
 
     def validate_file(self, test: pathlib.Path, ref: pathlib.Path) -> None:
-        with test.open('rb') as file:
+        with test.open("rb") as file:
             data = file.read()
         self.validate_data(data, ref)
 
     def validate_data(self, test: bytes, ref: pathlib.Path) -> None:
-        with ref.open('rb') as file:
+        with ref.open("rb") as file:
             data = file.read()
         self.validate(test, data)
 
     def validate(self, test: bytes, ref: bytes) -> None:
         mse = self._get_mse(test, ref)
         if mse > self.threshold:
-            raise RuntimeError(f'Image difference {mse} > {self.threshold}')
+            raise RuntimeError(f"Image difference {mse} > {self.threshold}")
 
     def _get_mse(self, data1: bytes, data2: bytes) -> float:
-        return sum(
-            (i - j) ** 2
-            for i, j in zip(data1, data2)
-        ) / len(data1) / len(data2)
+        return sum((i - j) ** 2 for i, j in zip(data1, data2)) / len(data1) / len(data2)

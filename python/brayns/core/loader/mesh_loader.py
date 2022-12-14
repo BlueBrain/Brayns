@@ -31,10 +31,10 @@ class MeshLoader(Loader):
     Format support can be queried using ``get_loaders(instance)``.
     """
 
-    OBJ: ClassVar[str] = 'obj'
-    PLY: ClassVar[str] = 'ply'
-    STL: ClassVar[str] = 'stl'
-    OFF: ClassVar[str] = 'off'
+    OBJ: ClassVar[str] = "obj"
+    PLY: ClassVar[str] = "ply"
+    STL: ClassVar[str] = "stl"
+    OFF: ClassVar[str] = "off"
 
     @classmethod
     @property
@@ -44,7 +44,7 @@ class MeshLoader(Loader):
         :return: Loader name.
         :rtype: str
         """
-        return 'mesh'
+        return "mesh"
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

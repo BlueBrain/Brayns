@@ -25,11 +25,10 @@ from tests.mock_instance import MockInstance
 
 
 class TestGetMethods(unittest.TestCase):
-
     def test_get_methods(self) -> None:
-        methods = ['test1', 'test2']
+        methods = ["test1", "test2"]
         instance = MockInstance(methods)
         tests = brayns.get_methods(instance)
-        self.assertEqual(instance.method, 'registry')
+        self.assertEqual(instance.method, "registry")
         self.assertIsNone(instance.params)
         self.assertEqual(tests, methods)

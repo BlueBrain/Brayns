@@ -26,7 +26,6 @@ from .mock_scene import MockScene
 
 
 class TestDeserializeScene(unittest.TestCase):
-
     def test_deserialize_scene(self) -> None:
         test = deserialize_scene(MockScene.message)
         self.assertEqual(test, MockScene.scene)

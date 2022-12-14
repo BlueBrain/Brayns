@@ -24,9 +24,8 @@ import brayns
 
 
 class TestXyzLoader(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.XyzLoader.name, 'xyz')
+        self.assertEqual(brayns.XyzLoader.name, "xyz")
 
     def test_properties(self) -> None:
         self.assertEqual(brayns.XyzLoader().get_properties(), {})

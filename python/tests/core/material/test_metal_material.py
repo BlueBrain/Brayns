@@ -24,15 +24,14 @@ import brayns
 
 
 class TestMetalMaterial(unittest.TestCase):
-
     def test_name(self) -> None:
-        self.assertEqual(brayns.MetalMaterial.name, 'metal')
+        self.assertEqual(brayns.MetalMaterial.name, "metal")
 
     def test_get_properties(self) -> None:
         test = brayns.MetalMaterial(0.5)
-        self.assertEqual(test.get_properties(), {'roughness': 0.5})
+        self.assertEqual(test.get_properties(), {"roughness": 0.5})
 
     def test_update_properties(self) -> None:
         test = brayns.MetalMaterial()
-        test.update_properties({'roughness': 0.5})
+        test.update_properties({"roughness": 0.5})
         self.assertEqual(test.roughness, 0.5)

@@ -25,7 +25,6 @@ import brayns
 
 
 class TestCameraController(unittest.TestCase):
-
     def test_camera(self) -> None:
         target = brayns.Bounds(
             min=brayns.Vector3.zero,

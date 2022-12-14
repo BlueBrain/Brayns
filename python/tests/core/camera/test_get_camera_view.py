@@ -26,10 +26,9 @@ from tests.mock_view import MockView
 
 
 class TestGetCameraView(unittest.TestCase):
-
     def test_get_camera_view(self) -> None:
         instance = MockInstance(MockView.message)
         test = brayns.get_camera_view(instance)
         self.assertEqual(test, MockView.view)
-        self.assertEqual(instance.method, 'get-camera-view')
+        self.assertEqual(instance.method, "get-camera-view")
         self.assertIsNone(instance.params)

@@ -32,4 +32,4 @@ def get_camera_name(instance: Instance) -> str:
     :return: Current camera name.
     :rtype: str
     """
-    return instance.request('get-camera-type')
+    return instance.request("get-camera-type")

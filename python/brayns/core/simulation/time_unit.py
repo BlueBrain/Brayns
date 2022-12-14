@@ -30,7 +30,7 @@ class TimeUnit(Enum):
     :param MILLISECOND: milliseconds ('ms').
     """
 
-    MILLISECOND = 'ms'
+    MILLISECOND = "ms"
 
     @property
     def seconds(self) -> float:

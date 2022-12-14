@@ -30,7 +30,6 @@ from .messages.mock_reply import MockReply
 
 
 class TestJsonRpcTasks(unittest.TestCase):
-
     def test_len(self) -> None:
         tasks = JsonRpcTasks()
         for i in range(10):

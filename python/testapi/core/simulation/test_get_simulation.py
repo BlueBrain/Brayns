@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetSimulation(SimpleTestCase):
-
     def test_get_simulation(self) -> None:
         self.load_circuit(report=True)
         test = brayns.get_simulation(self.instance)

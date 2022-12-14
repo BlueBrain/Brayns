@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestSetSimulationFrame(SimpleTestCase):
-
     def test_set_simulation_frame(self) -> None:
         self.load_circuit(report=True)
         brayns.set_simulation_frame(self.instance, 12)

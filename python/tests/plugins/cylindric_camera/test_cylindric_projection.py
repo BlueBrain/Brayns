@@ -24,10 +24,9 @@ import brayns
 
 
 class TestCylindricProjection(unittest.TestCase):
-
     def test_get_name(self) -> None:
         test = brayns.CylindricProjection.name
-        ref = 'cylindric'
+        ref = "cylindric"
         self.assertEqual(test, ref)
 
     def test_look_at(self) -> None:
@@ -43,9 +42,9 @@ class TestCylindricProjection(unittest.TestCase):
             fovy=brayns.Fovy(30, degrees=True),
         )
         test = projection.get_properties()
-        self.assertAlmostEqual(test['fovy'], 30)
+        self.assertAlmostEqual(test["fovy"], 30)
 
     def test_update_properties(self) -> None:
         test = brayns.CylindricProjection()
-        test.update_properties({'fovy': 30})
+        test.update_properties({"fovy": 30})
         self.assertAlmostEqual(test.fovy.degrees, 30)

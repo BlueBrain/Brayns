@@ -27,14 +27,13 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestMovie(SimpleTestCase):
-
     @property
     def input(self) -> pathlib.Path:
-        return self.folder / 'frames' / '%05d.png'
+        return self.folder / "frames" / "%05d.png"
 
     @property
     def ref(self) -> pathlib.Path:
-        return self.folder / 'movie.mp4'
+        return self.folder / "movie.mp4"
 
     def test_save(self) -> None:
         movie = brayns.Movie(
@@ -43,7 +42,7 @@ class TestMovie(SimpleTestCase):
             ffmpeg_executable=self.ffmpeg,
         )
         with tempfile.TemporaryDirectory() as directory:
-            path = pathlib.Path(directory) / 'movie.mp4'
+            path = pathlib.Path(directory) / "movie.mp4"
             movie.save(str(path))
             validator = ImageValidator()
             validator.validate_file(path, self.ref)

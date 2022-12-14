@@ -82,7 +82,9 @@ def _get_apparent_target(target: Bounds, rotation: Rotation) -> Bounds:
     return target.rotate(rotation, target.center)
 
 
-def _get_front_view(target: Bounds, aspect_ratio: float, projection: Projection) -> View:
+def _get_front_view(
+    target: Bounds, aspect_ratio: float, projection: Projection
+) -> View:
     distance = _get_camera_distance(target.size, aspect_ratio, projection)
     center = target.center
     return View(
@@ -92,7 +94,9 @@ def _get_front_view(target: Bounds, aspect_ratio: float, projection: Projection)
     )
 
 
-def _get_camera_distance(target_size: Vector3, aspect_ratio: float, projection: Projection) -> float:
+def _get_camera_distance(
+    target_size: Vector3, aspect_ratio: float, projection: Projection
+) -> float:
     width, height, depth = target_size
     height = max(height, width / aspect_ratio)
     return projection.look_at(height) + depth / 2

@@ -35,8 +35,9 @@ from .websocket import WebSocket
 
 
 class Client(Instance):
-
-    def __init__(self, websocket: WebSocket, logger: logging.Logger, manager: JsonRpcManager) -> None:
+    def __init__(
+        self, websocket: WebSocket, logger: logging.Logger, manager: JsonRpcManager
+    ) -> None:
         self._websocket = websocket
         self._logger = logger
         self._manager = manager
@@ -46,7 +47,7 @@ class Client(Instance):
         return not self._websocket.closed
 
     def disconnect(self) -> None:
-        self._logger.info('Disconnection from Brayns instance.')
+        self._logger.info("Disconnection from Brayns instance.")
         self._websocket.close()
         self._manager.clear()
 
@@ -54,19 +55,19 @@ class Client(Instance):
         return self._manager.is_running(id)
 
     def send(self, request: JsonRpcRequest) -> JsonRpcFuture:
-        self._logger.info('Send request: %s.', request)
-        self._logger.debug('Request params: %s.', request.params)
-        self._logger.info('Request binary: %d bytes.', len(request.binary))
+        self._logger.info("Send request: %s.", request)
+        self._logger.debug("Request params: %s.", request.params)
+        self._logger.info("Request binary: %d bytes.", len(request.binary))
         self._send(request)
         return self._create_future(request.id)
 
     def poll(self, block: bool) -> None:
-        self._logger.debug('Polling messages from Brayns instance.')
+        self._logger.debug("Polling messages from Brayns instance.")
         self._websocket.poll(block)
 
     def cancel(self, id: int | str) -> None:
-        self._logger.info('Cancel request with ID %s.', id)
-        self.request('cancel', {'id': id})
+        self._logger.info("Cancel request with ID %s.", id)
+        self.request("cancel", {"id": id})
 
     def _send(self, request: JsonRpcRequest) -> None:
         if request.binary:

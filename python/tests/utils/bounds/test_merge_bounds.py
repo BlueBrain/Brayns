@@ -24,13 +24,14 @@ import brayns
 
 
 class TestMergeBounds(unittest.TestCase):
-
     def test_merge_bounds(self) -> None:
-        test = brayns.merge_bounds([
-            brayns.Bounds(brayns.Vector3(-1, 2, 3), brayns.Vector3(6, 5, 4)),
-            brayns.Bounds(brayns.Vector3(1, -2, 3), brayns.Vector3(5, 4, 6)),
-            brayns.Bounds(brayns.Vector3(1, 2, -3), brayns.Vector3(4, 6, 5)),
-        ])
+        test = brayns.merge_bounds(
+            [
+                brayns.Bounds(brayns.Vector3(-1, 2, 3), brayns.Vector3(6, 5, 4)),
+                brayns.Bounds(brayns.Vector3(1, -2, 3), brayns.Vector3(5, 4, 6)),
+                brayns.Bounds(brayns.Vector3(1, 2, -3), brayns.Vector3(4, 6, 5)),
+            ]
+        )
         ref = brayns.Bounds(
             brayns.Vector3(-1, -2, -3),
             brayns.Vector3(6, 6, 6),

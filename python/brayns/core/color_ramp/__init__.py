@@ -28,12 +28,12 @@ from .set_color_ramp import set_color_ramp
 from .value_range import ValueRange
 
 __all__ = [
-    'ColorRamp',
-    'ControlPoint',
-    'deserialize_color_ramp',
-    'get_color_ramp',
-    'OpacityCurve',
-    'serialize_color_ramp',
-    'set_color_ramp',
-    'ValueRange',
+    "ColorRamp",
+    "ControlPoint",
+    "deserialize_color_ramp",
+    "get_color_ramp",
+    "OpacityCurve",
+    "serialize_color_ramp",
+    "set_color_ramp",
+    "ValueRange",
 ]

@@ -29,45 +29,42 @@ from .json_type import JsonType
 def serialize_schema(schema: JsonSchema) -> dict[str, Any]:
     message = dict[str, Any]()
     if schema.title:
-        message['title'] = schema.title
+        message["title"] = schema.title
     if schema.description:
-        message['description'] = schema.description
+        message["description"] = schema.description
     if schema.type is not JsonType.UNDEFINED:
-        message['type'] = schema.type.value
+        message["type"] = schema.type.value
     if schema.read_only:
-        message['readOnly'] = schema.read_only
+        message["readOnly"] = schema.read_only
     if schema.write_only:
-        message['writeOnly'] = schema.write_only
+        message["writeOnly"] = schema.write_only
     if schema.default is not None:
-        message['default'] = schema.default
+        message["default"] = schema.default
     if schema.minimum is not None:
-        message['minimum'] = schema.minimum
+        message["minimum"] = schema.minimum
     if schema.maximum is not None:
-        message['maximum'] = schema.maximum
+        message["maximum"] = schema.maximum
     if schema.items is not None:
-        message['items'] = serialize_schema(schema.items)
+        message["items"] = serialize_schema(schema.items)
     if schema.min_items is not None:
-        message['minItems'] = schema.min_items
+        message["minItems"] = schema.min_items
     if schema.max_items is not None:
-        message['maxItems'] = schema.max_items
+        message["maxItems"] = schema.max_items
     if schema.properties:
-        message['properties'] = _serialize_properties(schema)
+        message["properties"] = _serialize_properties(schema)
     if schema.required:
-        message['required'] = schema.required
+        message["required"] = schema.required
     if schema.additional_properties is not None:
-        message['additionalProperties'] = _serialize_additional(schema)
+        message["additionalProperties"] = _serialize_additional(schema)
     if schema.one_of:
-        message['oneOf'] = _serialize_one_of(schema)
+        message["oneOf"] = _serialize_one_of(schema)
     if schema.enum:
-        message['enum'] = schema.enum
+        message["enum"] = schema.enum
     return message
 
 
 def _serialize_properties(schema: JsonSchema) -> dict[str, Any]:
-    return {
-        key: serialize_schema(value)
-        for key, value in schema.properties.items()
-    }
+    return {key: serialize_schema(value) for key, value in schema.properties.items()}
 
 
 def _serialize_additional(schema: JsonSchema) -> bool | dict[str, Any] | None:
@@ -80,7 +77,4 @@ def _serialize_additional(schema: JsonSchema) -> bool | dict[str, Any] | None:
 
 
 def _serialize_one_of(schema: JsonSchema) -> list[dict[str, Any]]:
-    return [
-        serialize_schema(one_of)
-        for one_of in schema.one_of
-    ]
+    return [serialize_schema(one_of) for one_of in schema.one_of]

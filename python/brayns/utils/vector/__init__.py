@@ -26,10 +26,10 @@ from .vector2 import Vector2
 from .vector3 import Vector3
 
 __all__ = [
-    'Axis',
-    'componentwise_max',
-    'componentwise_min',
-    'Vector',
-    'Vector2',
-    'Vector3',
+    "Axis",
+    "componentwise_max",
+    "componentwise_min",
+    "Vector",
+    "Vector2",
+    "Vector3",
 ]

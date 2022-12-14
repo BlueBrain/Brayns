@@ -24,7 +24,6 @@ import brayns
 
 
 class TestBbpCells(unittest.TestCase):
-
     def test_all(self) -> None:
         cells = brayns.BbpCells.all()
         self.assertEqual(cells, brayns.BbpCells.from_density(1))
@@ -37,14 +36,14 @@ class TestBbpCells(unittest.TestCase):
         self.assertIsNone(cells.gids)
 
     def test_from_targets(self) -> None:
-        targets = ['1', '2', '3']
+        targets = ["1", "2", "3"]
         cells = brayns.BbpCells.from_targets(targets)
         self.assertEqual(cells.density, 1.0)
         self.assertEqual(cells.targets, targets)
         self.assertIsNone(cells.gids)
 
     def test_from_targets_and_density(self) -> None:
-        targets = ['1', '2', '3']
+        targets = ["1", "2", "3"]
         density = 0.5
         cells = brayns.BbpCells.from_targets(targets, density)
         self.assertEqual(cells.density, density)
