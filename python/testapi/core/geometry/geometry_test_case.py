@@ -27,13 +27,14 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class GeometryTestCase(SimpleTestCase):
-
     @property
     def ref(self) -> pathlib.Path:
-        name = self.filename.replace('test_add_', '') + '.png'
+        name = self.filename.replace("test_add_", "") + ".png"
         return self.folder / name
 
-    def run_tests(self, geometries: list[brayns.Geometry], bounds: brayns.Bounds | None = None) -> None:
+    def run_tests(
+        self, geometries: list[brayns.Geometry], bounds: brayns.Bounds | None = None
+    ) -> None:
         model = brayns.add_geometries(self.instance, geometries)
         self._check_model(model, bounds)
         self.quick_validation(self.ref)

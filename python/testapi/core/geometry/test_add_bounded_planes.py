@@ -24,7 +24,6 @@ from .geometry_test_case import GeometryTestCase
 
 
 class TestAddBoundedPlanes(GeometryTestCase):
-
     @property
     def geometries(self) -> list[brayns.Geometry]:
         return [
@@ -33,14 +32,14 @@ class TestAddBoundedPlanes(GeometryTestCase):
                 bounds=brayns.Bounds(
                     min=-brayns.Vector3.one,
                     max=brayns.Vector3.one,
-                )
+                ),
             ).with_color(brayns.Color4.red),
             brayns.BoundedPlane(
                 brayns.PlaneEquation(0, 0, 1, 0.0),
                 bounds=brayns.Bounds(
                     min=-2 * brayns.Vector3.one,
                     max=brayns.Vector3.one,
-                )
+                ),
             ).with_color(brayns.Color4.blue),
         ]
 

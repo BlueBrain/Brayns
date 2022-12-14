@@ -27,18 +27,17 @@ from testapi.api_test_case import ApiTestCase
 
 
 class TestConnector(ApiTestCase):
-
     @property
     def uri(self) -> str:
-        return f'localhost:{self.port}'
+        return f"localhost:{self.port}"
 
     @property
     def key(self) -> pathlib.Path:
-        return self.folder / 'ssl' / 'key.pem'
+        return self.folder / "ssl" / "key.pem"
 
     @property
     def certificate(self) -> pathlib.Path:
-        return self.folder / 'ssl' / 'certificate.pem'
+        return self.folder / "ssl" / "certificate.pem"
 
     def test_connect(self) -> None:
         with self._start_service():
@@ -74,10 +73,12 @@ class TestConnector(ApiTestCase):
             max_clients=3,
             ssl_context=brayns.SslServerContext(
                 private_key_file=str(self.key),
-                private_key_passphrase='test',
+                private_key_passphrase="test",
                 certificate_file=str(self.certificate),
                 ca_location=str(self.certificate),
-            ) if secure else None,
+            )
+            if secure
+            else None,
             executable=self.executable,
             env=self.env,
         )
@@ -87,13 +88,11 @@ class TestConnector(ApiTestCase):
         self,
         secure: bool = False,
         max_attempts: int | None = None,
-        cafile: str | None = None
+        cafile: str | None = None,
     ) -> brayns.Instance:
         connector = brayns.Connector(
             uri=self.uri,
-            ssl_context=brayns.SslClientContext(
-                cafile=cafile
-            ) if secure else None,
+            ssl_context=brayns.SslClientContext(cafile=cafile) if secure else None,
             max_attempts=max_attempts,
         )
         return connector.connect()

@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestStaticFramebuffer(SimpleTestCase):
-
     def test_static_framebuffer(self) -> None:
         self.add_light()
         model = self.add_sphere()
@@ -38,5 +37,5 @@ class TestStaticFramebuffer(SimpleTestCase):
         image = brayns.Image(False)
 
         frame = image.download(self.instance)
-        ref = self.folder / 'static_frame.png'
+        ref = self.folder / "static_frame.png"
         validator.validate_data(frame.data, ref)

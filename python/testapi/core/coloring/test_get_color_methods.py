@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetColorMethods(SimpleTestCase):
-
     def test_get_color_methods(self) -> None:
         loader = brayns.BbpLoader()
         models = loader.load_models(self.instance, self.bbp_circuit)

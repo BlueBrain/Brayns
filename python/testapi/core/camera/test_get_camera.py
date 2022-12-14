@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetCamera(SimpleTestCase):
-
     def test_get_camera(self) -> None:
         test = brayns.get_camera(self.instance, brayns.PerspectiveProjection)
         self.assertIsInstance(test.projection, brayns.PerspectiveProjection)

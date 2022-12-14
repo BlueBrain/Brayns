@@ -24,7 +24,6 @@ from .projection_test_case import ProjectionTestCase
 
 
 class TestPerspectiveProjection(ProjectionTestCase):
-
     def test_all(self) -> None:
         projection = brayns.PerspectiveProjection(
             fovy=brayns.Fovy(30, degrees=True),

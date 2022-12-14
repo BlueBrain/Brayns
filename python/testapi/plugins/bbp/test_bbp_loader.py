@@ -23,11 +23,10 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestBbpLoader(SimpleTestCase):
-
     def test_load_models(self) -> None:
         loader = brayns.BbpLoader(
             cells=brayns.BbpCells.from_density(0.5),
-            report=brayns.BbpReport.compartment('somas'),
+            report=brayns.BbpReport.compartment("somas"),
             morphology=brayns.Morphology(load_dendrites=True),
         )
         models = loader.load_models(self.instance, self.bbp_circuit)
@@ -35,5 +34,5 @@ class TestBbpLoader(SimpleTestCase):
 
     def _validate_result(self, models: list[brayns.Model]) -> None:
         self.assertEqual(len(models), 1)
-        ref = self.folder / 'circuit.png'
+        ref = self.folder / "circuit.png"
         self.quick_validation(ref, 50)

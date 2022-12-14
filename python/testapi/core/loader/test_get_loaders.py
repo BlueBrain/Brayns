@@ -25,7 +25,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetLoaders(SimpleTestCase):
-
     def test_get_loaders(self) -> None:
         refs = self._get_api_loaders()
         tests = brayns.get_loaders(self.instance)

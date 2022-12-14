@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetModel(SimpleTestCase):
-
     def test_get_model(self) -> None:
         model = self.add_sphere()
         test = brayns.get_model(self.instance, model.id)

@@ -23,9 +23,8 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestSetModelColor(SimpleTestCase):
-
     def test_set_model_color(self) -> None:
         model = self.add_sphere(brayns.Color4.blue)
         brayns.set_model_color(self.instance, model.id, brayns.Color4.red)
-        ref = self.folder / 'sphere.png'
+        ref = self.folder / "sphere.png"
         self.quick_validation(ref)

@@ -24,7 +24,6 @@ from .geometry_test_case import GeometryTestCase
 
 
 class TestAddPlanes(GeometryTestCase):
-
     @property
     def geometries(self) -> list[brayns.Geometry]:
         return [

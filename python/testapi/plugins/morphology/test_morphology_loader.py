@@ -25,7 +25,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestMorphologyLoader(SimpleTestCase):
-
     def test_original(self) -> None:
         self._load_and_render(
             morphology=brayns.Morphology(
@@ -33,7 +32,7 @@ class TestMorphologyLoader(SimpleTestCase):
                 load_axon=True,
                 geometry_type=brayns.GeometryType.ORIGINAL,
             ),
-            ref=self.folder / 'original.png',
+            ref=self.folder / "original.png",
         )
 
     def test_smooth(self) -> None:
@@ -41,7 +40,7 @@ class TestMorphologyLoader(SimpleTestCase):
             morphology=brayns.Morphology(
                 load_dendrites=True,
             ),
-            ref=self.folder / 'smooth.png',
+            ref=self.folder / "smooth.png",
         )
 
     def test_radius_multiplier(self) -> None:
@@ -50,7 +49,7 @@ class TestMorphologyLoader(SimpleTestCase):
                 radius_multiplier=3,
                 load_dendrites=True,
             ),
-            ref=self.folder / 'radius_multiplier.png',
+            ref=self.folder / "radius_multiplier.png",
         )
 
     def test_constant_radius(self) -> None:
@@ -59,7 +58,7 @@ class TestMorphologyLoader(SimpleTestCase):
                 load_dendrites=True,
                 geometry_type=brayns.GeometryType.CONSTANT_RADII,
             ),
-            ref=self.folder / 'constant_radius.png',
+            ref=self.folder / "constant_radius.png",
         )
 
     def test_resampling(self) -> None:
@@ -68,7 +67,7 @@ class TestMorphologyLoader(SimpleTestCase):
                 load_dendrites=True,
                 resampling=0.99,
             ),
-            ref=self.folder / 'resampling.png',
+            ref=self.folder / "resampling.png",
         )
 
     def test_subsampling(self) -> None:
@@ -77,10 +76,12 @@ class TestMorphologyLoader(SimpleTestCase):
                 load_dendrites=True,
                 subsampling=10,
             ),
-            ref=self.folder / 'subsampling.png',
+            ref=self.folder / "subsampling.png",
         )
 
-    def _load_and_render(self, morphology: brayns.Morphology, ref: pathlib.Path) -> None:
+    def _load_and_render(
+        self, morphology: brayns.Morphology, ref: pathlib.Path
+    ) -> None:
         loader = brayns.MorphologyLoader(morphology)
         models = loader.load_models(self.instance, self.morphology_file)
         self.assertEqual(len(models), 1)

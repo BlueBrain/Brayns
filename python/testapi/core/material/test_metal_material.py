@@ -24,7 +24,6 @@ from .material_test_case import MaterialTestCase
 
 
 class TestMetalMaterial(MaterialTestCase):
-
     def test_all(self) -> None:
         material = brayns.MetalMaterial(
             roughness=0.1,

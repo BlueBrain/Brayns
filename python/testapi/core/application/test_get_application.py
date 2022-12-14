@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetApplication(SimpleTestCase):
-
     def test_get_application(self) -> None:
         application = brayns.get_application(self.instance)
         self.assertEqual(application.plugins, brayns.Plugin.all)

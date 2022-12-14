@@ -24,7 +24,6 @@ from .light_test_case import LightTestCase
 
 
 class TestAmbientLight(LightTestCase):
-
     def test_all(self) -> None:
         light = brayns.AmbientLight(
             intensity=5,

@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetModels(SimpleTestCase):
-
     def test_get_models(self) -> None:
         models = [
             self.add_sphere(),

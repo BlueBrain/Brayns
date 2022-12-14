@@ -25,13 +25,12 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class LightTestCase(SimpleTestCase):
-
     def add_light(self) -> None:
         pass
 
     @property
     def ref(self) -> pathlib.Path:
-        name = self.filename.replace('test_', '') + '.png'
+        name = self.filename.replace("test_", "") + ".png"
         return self.folder / name
 
     def run_tests(self, light: brayns.Light) -> None:

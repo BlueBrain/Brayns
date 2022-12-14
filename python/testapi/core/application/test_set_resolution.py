@@ -24,7 +24,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestSetResolution(SimpleTestCase):
-
     def test_set_resolution(self) -> None:
         brayns.set_resolution(self.instance, brayns.Resolution.ultra_hd)
         test = brayns.get_application(self.instance)
@@ -33,7 +32,7 @@ class TestSetResolution(SimpleTestCase):
     def test_render(self) -> None:
         brayns.set_resolution(self.instance, brayns.Resolution.full_hd)
         self.add_sphere()
-        ref = self.folder / 'full_hd.png'
+        ref = self.folder / "full_hd.png"
         snapshot = brayns.Snapshot()
         data = snapshot.download(self.instance)
         validator = ImageValidator()

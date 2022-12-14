@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestStop(SimpleTestCase):
-
     def test_stop(self) -> None:
         brayns.stop(self.instance)
         with self.assertRaises(brayns.ConnectionClosedError):

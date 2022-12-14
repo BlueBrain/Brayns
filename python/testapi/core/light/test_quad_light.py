@@ -24,7 +24,6 @@ from .light_test_case import LightTestCase
 
 
 class TestQuadLight(LightTestCase):
-
     def test_all(self) -> None:
         light = brayns.QuadLight(
             intensity=10,

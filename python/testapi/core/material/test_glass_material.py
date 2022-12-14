@@ -24,7 +24,6 @@ from .material_test_case import MaterialTestCase
 
 
 class TestGlassMaterial(MaterialTestCase):
-
     def test_all(self) -> None:
         material = brayns.GlassMaterial(
             refraction_index=2,

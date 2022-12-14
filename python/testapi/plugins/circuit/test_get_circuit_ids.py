@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetCircuitIds(SimpleTestCase):
-
     def test_get_circuit_ids(self) -> None:
         model = self.load_circuit()
         ids = brayns.get_circuit_ids(self.instance, model.id)

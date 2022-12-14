@@ -24,7 +24,6 @@ from .projection_test_case import ProjectionTestCase
 
 
 class TestOrthographicProjection(ProjectionTestCase):
-
     def test_all(self) -> None:
         projection = brayns.OrthographicProjection(height=10)
         self.run_tests(projection)

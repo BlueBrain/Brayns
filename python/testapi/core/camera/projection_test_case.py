@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class ProjectionTestCase(SimpleTestCase):
-
     def run_tests(self, projection: brayns.Projection) -> None:
         brayns.set_camera_projection(self.instance, projection)
         name = brayns.get_camera_name(self.instance)

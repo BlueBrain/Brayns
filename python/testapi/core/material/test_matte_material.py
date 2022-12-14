@@ -24,7 +24,6 @@ from .material_test_case import MaterialTestCase
 
 
 class TestMatteMaterial(MaterialTestCase):
-
     def test_all(self) -> None:
         material = brayns.MatteMaterial(
             opacity=0.9,

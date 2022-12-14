@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestDtiLoader(SimpleTestCase):
-
     def test_load_models(self) -> None:
         loader = brayns.DtiLoader(
             streamline_radius=2,
@@ -31,5 +30,5 @@ class TestDtiLoader(SimpleTestCase):
         )
         models = loader.load_models(self.instance, self.dti_file)
         self.assertEqual(len(models), 1)
-        ref = self.folder / 'dti.png'
+        ref = self.folder / "dti.png"
         self.quick_validation(ref)

@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetColorRamp(SimpleTestCase):
-
     def test_get_color_ramp(self) -> None:
         model = self.load_circuit(report=True)
         function = brayns.get_color_ramp(self.instance, model.id)

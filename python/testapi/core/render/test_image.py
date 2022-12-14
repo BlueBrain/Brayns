@@ -27,19 +27,18 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestImage(SimpleTestCase):
-
     def test_save_jpeg(self) -> None:
         self._prepare_render()
         image = brayns.Image()
         with tempfile.TemporaryDirectory() as directory:
-            path = pathlib.Path(directory) / 'test_render_image.jpg'
+            path = pathlib.Path(directory) / "test_render_image.jpg"
             test = image.save(self.instance, str(path))
             self.assertEqual(test.accumulation, 1)
             self.assertEqual(test.max_accumulation, 1)
             self.assertTrue(test.data)
             self.assertTrue(test.full_quality)
             validator = ImageValidator()
-            ref = self.folder / 'render_image.jpg'
+            ref = self.folder / "render_image.jpg"
             validator.validate_file(path, ref)
 
     def test_download_png(self) -> None:
@@ -51,7 +50,7 @@ class TestImage(SimpleTestCase):
         self.assertTrue(test.data)
         self.assertTrue(test.full_quality)
         validator = ImageValidator()
-        ref = self.folder / 'render_image.png'
+        ref = self.folder / "render_image.png"
         validator.validate_data(test.data, ref)
 
     def test_render(self) -> None:

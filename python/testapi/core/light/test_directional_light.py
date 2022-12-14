@@ -24,7 +24,6 @@ from .light_test_case import LightTestCase
 
 
 class TestDirectionalLight(LightTestCase):
-
     def test_all(self) -> None:
         light = brayns.DirectionalLight(
             intensity=10,

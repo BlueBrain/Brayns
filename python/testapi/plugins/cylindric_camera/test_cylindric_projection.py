@@ -23,7 +23,6 @@ from testapi.core.camera.projection_test_case import ProjectionTestCase
 
 
 class TestCylindricProjection(ProjectionTestCase):
-
     def test_all(self) -> None:
         projection = brayns.CylindricProjection(
             fovy=brayns.Fovy(45, degrees=True),

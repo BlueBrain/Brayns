@@ -23,7 +23,6 @@ from testapi.simple_test_case import SimpleTestCase
 
 
 class TestRemoveModels(SimpleTestCase):
-
     def test_remove_models(self) -> None:
         models = [
             self.add_sphere(),
@@ -33,10 +32,7 @@ class TestRemoveModels(SimpleTestCase):
             self.add_clip_plane(),
             self.add_clip_plane(),
         ]
-        brayns.remove_models(self.instance, [
-            model.id
-            for model in models[::2]
-        ])
+        brayns.remove_models(self.instance, [model.id for model in models[::2]])
         for model in models[::2]:
             with self.assertRaises(brayns.JsonRpcError):
                 brayns.get_model(self.instance, model.id)
