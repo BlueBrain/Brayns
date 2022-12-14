@@ -28,6 +28,7 @@ morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
 """
 
 from .bbp import *
+from .cell_placement import *
 from .circuit import *
 from .cylindric_camera import *
 from .dti import *
@@ -41,6 +42,7 @@ __all__ = [
     'BbpLoader',
     'BbpReport',
     'BbpReportType',
+    'CellPlacementLoader',
     'CircuitColorMethod',
     'CylindricProjection',
     'DtiLoader',

@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,12 +20,12 @@
 
 #include <brayns/io/Loader.h>
 
-#include <io/BBPLoaderParameters.h>
+#include <io/CellPlacementLoaderParameters.h>
 
 /**
- * @brief Imports a circuit from a BBP's BlueConfig/CircuitConfig file
+ * @brief Imports a morphology collection from a circuit.morphologies.h5 file
  */
-class BBPLoader final : public brayns::Loader<BBPLoaderParameters>
+class CellPlacementLoader final : public brayns::Loader<CellPlacementLoaderParameters>
 {
 public:
     std::vector<std::string> getSupportedExtensions() const final;
@@ -37,10 +37,10 @@ public:
     std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
         const brayns::Blob &blob,
         const brayns::LoaderProgress &callback,
-        const BBPLoaderParameters &params) const final;
+        const CellPlacementLoaderParameters &params) const final;
 
     std::vector<std::shared_ptr<brayns::Model>> importFromFile(
         const std::string &path,
         const brayns::LoaderProgress &callback,
-        const BBPLoaderParameters &params) const final;
+        const CellPlacementLoaderParameters &params) const final;
 };

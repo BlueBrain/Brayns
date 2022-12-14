@@ -20,6 +20,17 @@
 
 #include <brayns/engine/components/Metadata.h>
 
+namespace
+{
+struct SonataNeuronMetadataKey
+{
+    inline static const std::string type = "population_type";
+    inline static const std::string name = "population_name";
+    inline static const std::string neuronCount = "loaded_neuron_count";
+    inline static const std::string nodeSets = "node_sets";
+};
+}
+
 namespace sonataloader
 {
 void NeuronMetadataFactory::create(NodeLoadContext &context)
@@ -27,14 +38,21 @@ void NeuronMetadataFactory::create(NodeLoadContext &context)
     auto &model = context.model;
     auto &metadata = model.getComponents().add<brayns::Metadata>();
 
-    metadata["population_type"] = "node";
-    metadata["population_name"] = context.population.name();
-    metadata["loaded_neuron_count"] = std::to_string(context.selection.flatSize());
+    metadata[SonataNeuronMetadataKey::type] = "node";
+    metadata[SonataNeuronMetadataKey::name] = context.population.name();
+    metadata[SonataNeuronMetadataKey::neuronCount] = std::to_string(context.selection.flatSize());
 
     auto &nodeSets = context.params.node_sets;
     if (!nodeSets.empty())
     {
-        metadata["node_sets"] = brayns::StringJoiner::join(nodeSets, ",");
+        metadata[SonataNeuronMetadataKey::nodeSets] = brayns::StringJoiner::join(nodeSets, ",");
     }
+}
+
+void NeuronMetadataFactory::create(brayns::Model &model, const std::string &populationName)
+{
+    auto &metadata = model.getComponents().add<brayns::Metadata>();
+    metadata[SonataNeuronMetadataKey::type] = "node";
+    metadata[SonataNeuronMetadataKey::name] = populationName;
 }
 }

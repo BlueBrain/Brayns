@@ -26,5 +26,6 @@ class NeuronMetadataFactory
 {
 public:
     static void create(NodeLoadContext &context);
+    static void create(brayns::Model &model, const std::string &populationName);
 };
 }

@@ -1,6 +1,8 @@
 /* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,31 +20,10 @@
 
 #pragma once
 
-#include <io/SonataLoaderParameters.h>
-#include <io/sonataloader/data/Config.h>
+#include <brayns/json/JsonObjectMacro.h>
 
-#include <bbp/sonata/population.h>
-
-namespace sonataloader
-{
-class PercentageFilter
-{
-public:
-    static bbp::sonata::Selection filter(const bbp::sonata::Selection &selection, float percentage) noexcept;
-};
-
-class NodeSelector
-{
-public:
-    static bbp::sonata::Selection select(const Config &config, const SonataNodePopulationParameters &params);
-};
-
-class EdgeSelector
-{
-public:
-    static bbp::sonata::Selection select(
-        const Config &config,
-        const SonataEdgePopulationParameters &params,
-        const bbp::sonata::Selection &baseNodes);
-};
-}
+BRAYNS_JSON_OBJECT_BEGIN(CellPlacementLoaderParameters)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, morphology_folder, "Path to morphology folder")
+BRAYNS_JSON_OBJECT_ENTRY(float, percentage, "Percentage of cells to load", brayns::Default(1.f))
+BRAYNS_JSON_OBJECT_ENTRY(std::optional<std::string>, extension, "Morphology file extension", brayns::Required(false))
+BRAYNS_JSON_OBJECT_END()

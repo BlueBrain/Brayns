@@ -54,6 +54,7 @@ __all__ = [
     'CameraRotation',
     'Capsule',
     'CarPaintMaterial',
+    'CellPlacementLoader',
     'check_version',
     'CircuitColorMethod',
     'clear_clipping_geometries',
