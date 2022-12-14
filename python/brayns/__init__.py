@@ -36,6 +36,7 @@ from .utils import *
 from .version import __version__
 
 __all__ = [
+    "__version__",
     "add_clipping_geometry",
     "add_geometries",
     "add_light",

@@ -111,7 +111,7 @@ def _run_process(args: list[str]) -> str:
         code = process.wait()
     logs = "".join(lines)
     if code != 0:
-        raise MovieError(f"ffmpeg call failed (see logs)", code, logs)
+        raise MovieError("ffmpeg call failed (see logs)", code, logs)
     return logs
 
 

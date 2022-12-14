@@ -41,7 +41,7 @@ class WebSocketConnector:
         connector = AsyncWebSocketConnector(self.uri, self.ssl_context)
         try:
             websocket = loop.run(connector.connect()).result()
-        except:
+        except BaseException:
             loop.close()
             raise
         return WebSocketClient(websocket, loop, self.listener)
