@@ -28,9 +28,9 @@ from collections import defaultdict
 import brayns
 from brayns.core import serialize_schema
 
-SUMMARY_FILENAME = 'api.rst'
+SUMMARY_FILENAME = "api.rst"
 
-SUMMARY = '''
+SUMMARY = """
 .. _jsonrpcapi-label:
 
 JSON-RPC API reference
@@ -38,22 +38,22 @@ JSON-RPC API reference
 
 .. toctree::
     :maxdepth: 4{items}
-'''.strip()
+""".strip()
 
-FILENAME = 'api_{plugin}_methods.rst'
+FILENAME = "api_{plugin}_methods.rst"
 
-TITLE = '{plugin} API methods'
+TITLE = "{plugin} API methods"
 
-HEADER = '''
+HEADER = """
 .. _api{label}-label:
 
 {title}
 {underline}
 
 This page references the entrypoints of the {plugin} plugin.
-'''.strip()
+""".strip()
 
-ENTRYPOINT = '''
+ENTRYPOINT = """
 {name}
 {underline}
 
@@ -66,35 +66,35 @@ ENTRYPOINT = '''
 **Result**:
 
 {result}{separator}
-'''.strip()
+""".strip()
 
-ASYNCHRONOUS = '''
+ASYNCHRONOUS = """
 This entrypoint is asynchronous, it means that it can take a long time and send
 progress notifications.
-'''.strip()
+""".strip()
 
-NO_PARAMS = '''
+NO_PARAMS = """
 This entrypoint has no params, the "params" field can hence be omitted or null.
-'''.strip()
+""".strip()
 
-NO_RESULT = '''
+NO_RESULT = """
 This entrypoint has no result, the "result" field is still present but is always
 null.
-'''.strip()
+""".strip()
 
-SCHEMA = '''
+SCHEMA = """
 .. jsonschema::
 
     {data}
-'''.strip()
+""".strip()
 
-SEPARATOR = '\n\n----'
+SEPARATOR = "\n\n----"
 
 
 def build_from_argv() -> None:
     python = pathlib.Path(__file__).parent.parent
-    directory = python / 'doc' / 'source' / 'jsonrpcapi'
-    uri = 'localhost:5000'
+    directory = python / "doc" / "source" / "jsonrpcapi"
+    uri = "localhost:5000"
     argv = sys.argv
     if len(argv) > 1:
         directory = pathlib.Path(argv[1])
@@ -114,7 +114,9 @@ def build_from_instance(instance: brayns.Instance, directory: pathlib.Path) -> N
     return build_from_entrypoints(entrypoints, directory)
 
 
-def build_from_entrypoints(entrypoints: list[brayns.Entrypoint], directory: pathlib.Path) -> None:
+def build_from_entrypoints(
+    entrypoints: list[brayns.Entrypoint], directory: pathlib.Path
+) -> None:
     plugins = defaultdict[str, list[brayns.Entrypoint]](list)
     for entrypoint in entrypoints:
         plugins[entrypoint.plugin].append(entrypoint)
@@ -123,20 +125,22 @@ def build_from_entrypoints(entrypoints: list[brayns.Entrypoint], directory: path
     build_from_plugins(plugins, directory)
 
 
-def build_from_plugins(plugins: dict[str, list[brayns.Entrypoint]], directory: pathlib.Path) -> None:
+def build_from_plugins(
+    plugins: dict[str, list[brayns.Entrypoint]], directory: pathlib.Path
+) -> None:
     directory.mkdir(exist_ok=True)
     filenames = list[str]()
     for plugin, entrypoints in plugins.items():
-        filename = FILENAME.format(plugin=plugin.lower().replace(' ', ''))
+        filename = FILENAME.format(plugin=plugin.lower().replace(" ", ""))
         filenames.append(filename)
         build_plugin(plugin, entrypoints, directory, filename)
     build_summary(directory, filenames)
 
 
 def build_summary(directory: pathlib.Path, filenames: list[str]) -> None:
-    summary = format_summary(filenames) + '\n'
+    summary = format_summary(filenames) + "\n"
     path = directory / SUMMARY_FILENAME
-    with path.open('w') as file:
+    with path.open("w") as file:
         file.write(summary)
 
 
@@ -147,31 +151,37 @@ def format_summary(filenames: list[str]) -> str:
 
 def format_summary_items(filenames: list[str]) -> str:
     if not filenames:
-        return ''
-    separator = '\n    '
-    return '\n' + separator + separator.join(
-        filename.replace('.rst', '')
-        for filename in filenames
+        return ""
+    separator = "\n    "
+    return (
+        "\n"
+        + separator
+        + separator.join(filename.replace(".rst", "") for filename in filenames)
     )
 
 
-def build_plugin(plugin: str, entrypoints: list[brayns.Entrypoint], directory: pathlib.Path, filename: str) -> None:
-    data = format_plugin(plugin, entrypoints) + '\n'
+def build_plugin(
+    plugin: str,
+    entrypoints: list[brayns.Entrypoint],
+    directory: pathlib.Path,
+    filename: str,
+) -> None:
+    data = format_plugin(plugin, entrypoints) + "\n"
     path = directory / filename
-    with path.open('w') as file:
+    with path.open("w") as file:
         file.write(data)
 
 
 def format_plugin(plugin: str, entrypoints: list[brayns.Entrypoint]) -> str:
     title = TITLE.format(plugin=plugin)
     header = HEADER.format(
-        label=plugin.lower().replace(' ', ''),
+        label=plugin.lower().replace(" ", ""),
         title=title,
-        underline=len(title) * '-',
+        underline=len(title) * "-",
         plugin=plugin,
     )
     api = format_entrypoints(entrypoints)
-    return f'{header}\n\n{api}'
+    return f"{header}\n\n{api}"
 
 
 def format_entrypoints(entrypoints: list[brayns.Entrypoint]) -> str:
@@ -181,18 +191,18 @@ def format_entrypoints(entrypoints: list[brayns.Entrypoint]) -> str:
         docs.append(doc)
     last = format_entrypoint(entrypoints[-1], separator=False)
     docs.append(last)
-    return '\n\n'.join(docs)
+    return "\n\n".join(docs)
 
 
 def format_entrypoint(entrypoint: brayns.Entrypoint, separator: bool = True) -> str:
     return ENTRYPOINT.format(
         name=entrypoint.method,
-        underline=len(entrypoint.method) * '~',
+        underline=len(entrypoint.method) * "~",
         description=entrypoint.description,
-        asynchronous=f'\n\n{ASYNCHRONOUS}' if entrypoint.asynchronous else '',
+        asynchronous=f"\n\n{ASYNCHRONOUS}" if entrypoint.asynchronous else "",
         params=format_params(entrypoint.params),
         result=format_result(entrypoint.result),
-        separator=SEPARATOR if separator else '',
+        separator=SEPARATOR if separator else "",
     )
 
 
@@ -210,11 +220,11 @@ def format_result(schema: brayns.JsonSchema | None) -> str:
 
 def format_schema(schema: brayns.JsonSchema) -> str:
     message = serialize_schema(schema)
-    message.pop('title', None)
+    message.pop("title", None)
     data = json.dumps(message, indent=4)
-    data = data.replace('\n', '\n    ')
+    data = data.replace("\n", "\n    ")
     return SCHEMA.format(data=data)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     build_from_argv()

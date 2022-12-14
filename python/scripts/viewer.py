@@ -30,57 +30,53 @@ import brayns
 import PySimpleGUI as sg
 from PIL import Image
 
-IMAGE = '-IMAGE-'
-METHOD = '-METHOD-'
-PARAMS = '-PARAMS-'
-SEND = '-SEND-'
-RESULT = '-RESULT-'
+IMAGE = "-IMAGE-"
+METHOD = "-METHOD-"
+PARAMS = "-PARAMS-"
+SEND = "-SEND-"
+RESULT = "-RESULT-"
 
-POSITION_X = '-POSITION_X-'
-POSITION_Y = '-POSITION_Y-'
-POSITION_Z = '-POSITION_Z-'
+POSITION_X = "-POSITION_X-"
+POSITION_Y = "-POSITION_Y-"
+POSITION_Z = "-POSITION_Z-"
 
-TARGET_X = '-TARGET_X-'
-TARGET_Y = '-TARGET_Y-'
-TARGET_Z = '-TARGET_Z-'
+TARGET_X = "-TARGET_X-"
+TARGET_Y = "-TARGET_Y-"
+TARGET_Z = "-TARGET_Z-"
 
-UP_X = '-UP_X-'
-UP_Y = '-UP_Y-'
-UP_Z = '-UP_Z-'
+UP_X = "-UP_X-"
+UP_Y = "-UP_Y-"
+UP_Z = "-UP_Z-"
 
 
 def create_image_column() -> sg.Column:
-    layout = [
-        [sg.Image(key=IMAGE, size=(600, 400))]
-    ]
-    return sg.Column(layout, vertical_alignment='top')
+    layout = [[sg.Image(key=IMAGE, size=(600, 400))]]
+    return sg.Column(layout, vertical_alignment="top")
 
 
 def create_control_column() -> sg.Column:
     layout = [
-        [sg.Text('Method')],
+        [sg.Text("Method")],
         [sg.Input(key=METHOD)],
-        [sg.Text('Params')],
+        [sg.Text("Params")],
         [sg.Multiline(key=PARAMS, size=(None, 20))],
-        [sg.Button('Send', key=SEND)],
-        [sg.Text('Result')],
-        [sg.Multiline(key=RESULT, size=(None, 20), disabled=True)]
+        [sg.Button("Send", key=SEND)],
+        [sg.Text("Result")],
+        [sg.Multiline(key=RESULT, size=(None, 20), disabled=True)],
     ]
-    return sg.Column(layout, vertical_alignment='top')
+    return sg.Column(layout, vertical_alignment="top")
 
 
 def create_window() -> sg.Window:
-    layout = [
-        [create_image_column(), create_control_column()]
-    ]
-    return sg.Window('Brayns Viewer', layout, resizable=True)
+    layout = [[create_image_column(), create_control_column()]]
+    return sg.Window("Brayns Viewer", layout, resizable=True)
 
 
 def convert_to_png(jpeg: bytes) -> bytes:
     jpeg_io = io.BytesIO(jpeg)
     image = Image.open(jpeg_io)
     png_io = io.BytesIO()
-    image.save(png_io, 'png')
+    image.save(png_io, "png")
     return png_io.getvalue()
 
 
@@ -97,7 +93,9 @@ def get_params(values: dict[str, Any]) -> str | None:
     return json.loads(data)
 
 
-def send_request(instance: brayns.Instance, window: sg.Window, values: dict[str, Any]) -> None:
+def send_request(
+    instance: brayns.Instance, window: sg.Window, values: dict[str, Any]
+) -> None:
     method: str = values[METHOD]
     params = get_params(values)
     result = instance.request(method, params)
@@ -106,11 +104,13 @@ def send_request(instance: brayns.Instance, window: sg.Window, values: dict[str,
     element.update(value=text)
 
 
-def try_send_request(instance: brayns.Instance, window: sg.Window, values: dict[str, Any]) -> None:
+def try_send_request(
+    instance: brayns.Instance, window: sg.Window, values: dict[str, Any]
+) -> None:
     try:
         send_request(instance, window, values)
     except Exception as e:
-        sg.PopupError(str(e), title='Request failed')
+        sg.PopupError(str(e), title="Request failed")
 
 
 def process_events(instance: brayns.Instance, window: sg.Window) -> None:
@@ -130,10 +130,7 @@ def process_events(instance: brayns.Instance, window: sg.Window) -> None:
 
 def run(uri: str) -> None:
     window = create_window()
-    connector = brayns.Connector(
-        uri=uri,
-        logger=brayns.Logger(logging.INFO)
-    )
+    connector = brayns.Connector(uri=uri, logger=brayns.Logger(logging.INFO))
     with connector.connect() as instance:
         process_events(instance, window)
     window.close()
@@ -143,12 +140,12 @@ def main(uri: str) -> None:
     try:
         run(uri)
     except Exception as e:
-        sg.PopupError(str(e), title='Connection failed')
+        sg.PopupError(str(e), title="Connection failed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     argv = sys.argv
-    uri = 'localhost:5000'
+    uri = "localhost:5000"
     if len(argv) > 1:
         uri = argv[1]
     main(uri)
