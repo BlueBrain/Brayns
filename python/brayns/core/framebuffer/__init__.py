@@ -23,8 +23,8 @@ from .set_framebuffer import set_framebuffer
 from .static_framebuffer import StaticFramebuffer
 
 __all__ = [
-    'Framebuffer',
-    'ProgressiveFramebuffer',
-    'set_framebuffer',
-    'StaticFramebuffer',
+    "Framebuffer",
+    "ProgressiveFramebuffer",
+    "set_framebuffer",
+    "StaticFramebuffer",
 ]

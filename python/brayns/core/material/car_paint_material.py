@@ -42,14 +42,12 @@ class CarPaintMaterial(Material):
         :return: Material name
         :rtype: str
         """
-        return 'carpaint'
+        return "carpaint"
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        return {
-            'flake_density': self.flake_density
-        }
+        return {"flake_density": self.flake_density}
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.flake_density = message['flake_density']
+        self.flake_density = message["flake_density"]

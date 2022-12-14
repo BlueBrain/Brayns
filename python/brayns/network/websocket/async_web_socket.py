@@ -30,7 +30,6 @@ from .exceptions import ConnectionClosedError, ProtocolError
 
 
 class AsyncWebSocket:
-
     def __init__(self, websocket: WebSocketClientProtocol) -> None:
         self._websocket = websocket
         self._queue: deque[bytes | str] = deque(maxlen=100)

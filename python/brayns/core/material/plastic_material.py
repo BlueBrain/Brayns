@@ -42,14 +42,12 @@ class PlasticMaterial(Material):
         :return: Material name
         :rtype: str
         """
-        return 'plastic'
+        return "plastic"
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        return {
-            'opacity': self.opacity
-        }
+        return {"opacity": self.opacity}
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.opacity = message['opacity']
+        self.opacity = message["opacity"]

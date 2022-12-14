@@ -41,10 +41,8 @@ class ProgressiveFramebuffer(Framebuffer):
         :return: Framebuffer name
         :rtype: str
         """
-        return 'progressive'
+        return "progressive"
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        return {
-            'scale': self.scale
-        }
+        return {"scale": self.scale}

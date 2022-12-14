@@ -25,11 +25,11 @@ from .json_rpc_request import JsonRpcRequest
 
 def serialize_request(request: JsonRpcRequest) -> dict[str, Any]:
     message: dict[str, Any] = {
-        'jsonrpc': '2.0',
-        'method': request.method,
+        "jsonrpc": "2.0",
+        "method": request.method,
     }
     if request.id is not None:
-        message['id'] = request.id
+        message["id"] = request.id
     if request.params is not None:
-        message['params'] = request.params
+        message["params"] = request.params
     return message

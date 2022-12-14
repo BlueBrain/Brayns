@@ -67,7 +67,7 @@ class Service:
     max_clients: int = 1
     log_level: LogLevel = LogLevel.WARN
     plugins: list[str] = field(default_factory=lambda: Plugin.all)
-    executable: str = 'braynsService'
+    executable: str = "braynsService"
     env: dict[str, str] = field(default_factory=dict)
 
     def get_command_line(self) -> list[str]:
@@ -78,17 +78,17 @@ class Service:
         """
         args = [
             self.executable,
-            '--uri',
+            "--uri",
             self.uri,
-            '--max-clients',
+            "--max-clients",
             str(self.max_clients),
-            '--log-level',
+            "--log-level",
             self.log_level.value,
             *_get_plugins_args(self.plugins),
         ]
         if self.ssl_context is not None:
-            args.append('--secure')
-            args.append('true')
+            args.append("--secure")
+            args.append("true")
             ssl_args = _get_ssl_args(self.ssl_context)
             args.extend(ssl_args)
         return args
@@ -106,25 +106,21 @@ class Service:
 
 
 def _get_plugins_args(plugins: list[str]) -> list[str]:
-    return [
-        arg
-        for plugin in plugins
-        for arg in ('--plugin', plugin)
-    ]
+    return [arg for plugin in plugins for arg in ("--plugin", plugin)]
 
 
 def _get_ssl_args(context: SslServerContext) -> list[str]:
     args = list[str]()
     if context.private_key_file is not None:
-        args.append('--private-key-file')
+        args.append("--private-key-file")
         args.append(context.private_key_file)
     if context.private_key_passphrase is not None:
-        args.append('--private-key-passphrase')
+        args.append("--private-key-passphrase")
         args.append(context.private_key_passphrase)
     if context.certificate_file is not None:
-        args.append('--certificate-file')
+        args.append("--certificate-file")
         args.append(context.certificate_file)
     if context.ca_location is not None:
-        args.append('--ca-location')
+        args.append("--ca-location")
         args.append(context.ca_location)
     return args

@@ -20,5 +20,5 @@
 from .dti_loader import DtiLoader
 
 __all__ = [
-    'DtiLoader',
+    "DtiLoader",
 ]

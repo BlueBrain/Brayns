@@ -53,13 +53,13 @@ class Capsule(Geometry):
         :return: JSON-RPC method.
         :rtype: str
         """
-        return 'add-capsules'
+        return "add-capsules"
 
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'p0': list(self.start_point),
-            'r0': self.start_radius,
-            'p1': list(self.end_point),
-            'r1': self.end_radius,
+            "p0": list(self.start_point),
+            "r0": self.start_radius,
+            "p1": list(self.end_point),
+            "r1": self.end_radius,
         }

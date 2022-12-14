@@ -31,6 +31,6 @@ class BoundsLike(Protocol):
 
 def serialize_bounds(bounds: BoundsLike) -> dict[str, Any]:
     return {
-        'min': list(bounds.min),
-        'max': list(bounds.max),
+        "min": list(bounds.min),
+        "max": list(bounds.max),
     }

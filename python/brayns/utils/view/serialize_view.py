@@ -25,7 +25,7 @@ from .view import View
 
 def serialize_view(view: View) -> dict[str, Any]:
     return {
-        'position': list(view.position),
-        'target': list(view.target),
-        'up': list(view.up),
+        "position": list(view.position),
+        "target": list(view.target),
+        "up": list(view.up),
     }

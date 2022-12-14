@@ -24,17 +24,13 @@ from collections.abc import Coroutine
 from concurrent.futures import Future
 from typing import Any, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class EventLoop:
-
     def __init__(self) -> None:
         self._loop = asyncio.new_event_loop()
-        self._thread = threading.Thread(
-            target=self._loop.run_forever,
-            daemon=True
-        )
+        self._thread = threading.Thread(target=self._loop.run_forever, daemon=True)
         self._thread.start()
 
     @property

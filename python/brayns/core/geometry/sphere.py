@@ -47,11 +47,11 @@ class Sphere(Geometry):
         :return: JSON-RPC method.
         :rtype: str
         """
-        return 'add-spheres'
+        return "add-spheres"
 
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'center': list(self.center),
-            'radius': self.radius,
+            "center": list(self.center),
+            "radius": self.radius,
         }

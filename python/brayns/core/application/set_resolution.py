@@ -30,5 +30,5 @@ def set_resolution(instance: Instance, resolution: Resolution) -> None:
     :param resolution: Framebuffer resolution.
     :type resolution: Resolution
     """
-    params = {'viewport': list(resolution)}
-    instance.request('set-application-parameters', params)
+    params = {"viewport": list(resolution)}
+    instance.request("set-application-parameters", params)

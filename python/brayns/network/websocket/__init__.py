@@ -26,14 +26,14 @@ from .web_socket_connector import WebSocketConnector
 from .web_socket_listener import WebSocketListener
 
 __all__ = [
-    'ConnectionClosedError',
-    'InvalidServerCertificateError',
-    'ProtocolError',
-    'ServiceUnavailableError',
-    'SslClientContext',
-    'WebSocket',
-    'WebSocketClient',
-    'WebSocketConnector',
-    'WebSocketError',
-    'WebSocketListener',
+    "ConnectionClosedError",
+    "InvalidServerCertificateError",
+    "ProtocolError",
+    "ServiceUnavailableError",
+    "SslClientContext",
+    "WebSocket",
+    "WebSocketClient",
+    "WebSocketConnector",
+    "WebSocketError",
+    "WebSocketListener",
 ]

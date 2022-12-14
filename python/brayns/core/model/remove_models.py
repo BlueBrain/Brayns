@@ -29,5 +29,5 @@ def remove_models(instance: Instance, ids: list[int]) -> None:
     :param ids: ID(s) of the models to remove.
     :type ids: list[int]
     """
-    params = {'ids': ids}
-    instance.request('remove-model', params)
+    params = {"ids": ids}
+    instance.request("remove-model", params)

@@ -48,8 +48,8 @@ class BbpLoader(Loader):
     :type load_efferent_synapses: bool, optional
     """
 
-    BLUE_CONFIG: ClassVar[str] = 'BlueConfig'
-    CIRCUIT_CONFIG: ClassVar[str] = 'CircuitConfig'
+    BLUE_CONFIG: ClassVar[str] = "BlueConfig"
+    CIRCUIT_CONFIG: ClassVar[str] = "CircuitConfig"
 
     cells: BbpCells = field(default_factory=BbpCells.all)
     report: BbpReport | None = None
@@ -60,7 +60,7 @@ class BbpLoader(Loader):
     @classmethod
     @property
     def name(cls) -> str:
-        return 'BBP loader'
+        return "BBP loader"
 
     def get_properties(self) -> dict[str, Any]:
         return _serialize_loader(self)
@@ -68,10 +68,10 @@ class BbpLoader(Loader):
 
 def _serialize_loader(loader: BbpLoader) -> dict[str, Any]:
     message: dict[str, Any] = {
-        'load_afferent_synapses': loader.load_afferent_synapses,
-        'load_efferent_synapses': loader.load_efferent_synapses,
+        "load_afferent_synapses": loader.load_afferent_synapses,
+        "load_efferent_synapses": loader.load_efferent_synapses,
         **_serialize_cells(loader.cells),
-        'neuron_morphology_parameters': serialize_morphology(loader.morphology),
+        "neuron_morphology_parameters": serialize_morphology(loader.morphology),
     }
     if loader.report is not None:
         report = _serialize_report(loader.report)
@@ -82,20 +82,20 @@ def _serialize_loader(loader: BbpLoader) -> dict[str, Any]:
 def _serialize_cells(cells: BbpCells) -> dict[str, Any]:
     message = dict[str, Any]()
     if cells.density is not None:
-        message['percentage'] = cells.density
+        message["percentage"] = cells.density
     if cells.targets is not None:
-        message['targets'] = cells.targets
+        message["targets"] = cells.targets
     if cells.gids is not None:
-        message['gids'] = cells.gids
+        message["gids"] = cells.gids
     return message
 
 
 def _serialize_report(report: BbpReport) -> dict[str, Any]:
     message: dict[str, Any] = {
-        'report_type': report.type.value,
+        "report_type": report.type.value,
     }
     if report.name is not None:
-        message['report_name'] = report.name
+        message["report_name"] = report.name
     if report.spike_transition_time is not None:
-        message['spike_transition_time'] = report.spike_transition_time
+        message["spike_transition_time"] = report.spike_transition_time
     return message

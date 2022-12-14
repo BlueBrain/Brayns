@@ -24,11 +24,11 @@ from .morphology import Morphology
 
 def serialize_morphology(morphology: Morphology) -> dict[str, Any]:
     return {
-        'radius_multiplier': morphology.radius_multiplier,
-        'load_soma': morphology.load_soma,
-        'load_axon': morphology.load_axon,
-        'load_dendrites': morphology.load_dendrites,
-        'geometry_type': morphology.geometry_type.value,
-        'resampling': morphology.resampling,
-        'subsampling': morphology.subsampling,
+        "radius_multiplier": morphology.radius_multiplier,
+        "load_soma": morphology.load_soma,
+        "load_axon": morphology.load_axon,
+        "load_dendrites": morphology.load_dendrites,
+        "geometry_type": morphology.geometry_type.value,
+        "resampling": morphology.resampling,
+        "subsampling": morphology.subsampling,
     }

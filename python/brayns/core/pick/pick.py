@@ -45,6 +45,6 @@ def pick(instance: Instance, position: Vector2) -> PickResult | None:
     :return: Information about model in given XY if any, otherwise None.
     :rtype: PickResult | None
     """
-    params = {'position': list(position)}
-    result = instance.request('inspect', params)
+    params = {"position": list(position)}
+    result = instance.request("inspect", params)
     return deserialize_pick_result(result)

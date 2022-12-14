@@ -20,11 +20,10 @@
 
 from typing import Protocol, TypeVar
 
-T = TypeVar('T', bound='WebSocket')
+T = TypeVar("T", bound="WebSocket")
 
 
 class WebSocket(Protocol):
-
     def __enter__(self: T) -> T:
         return self
 

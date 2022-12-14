@@ -27,4 +27,4 @@ def clear_models(instance: Instance) -> None:
     :param instance: Instance.
     :type instance: Instance
     """
-    instance.request('clear-models')
+    instance.request("clear-models")

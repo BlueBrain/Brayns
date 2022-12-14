@@ -33,4 +33,4 @@ def set_camera_projection(instance: Instance, camera: Projection) -> None:
     """
     name = camera.name
     params = camera.get_properties()
-    instance.request(f'set-camera-{name}', params)
+    instance.request(f"set-camera-{name}", params)

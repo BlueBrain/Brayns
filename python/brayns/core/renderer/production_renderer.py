@@ -31,9 +31,9 @@ class ProductionRenderer(Renderer):
     Overrides default parameters for higher quality.
 
     :param samples_per_pixel: Accumulation, defaults to 128.
-    :type samples_per_pixel: int, optional. 
+    :type samples_per_pixel: int, optional.
     :param max_ray_bounces: Ray bounces, defaults to 7.
-    :type max_ray_bounces: int, optional. 
+    :type max_ray_bounces: int, optional.
     """
 
     samples_per_pixel: int = 128
@@ -47,7 +47,7 @@ class ProductionRenderer(Renderer):
         :return: Renderer name.
         :rtype: str
         """
-        return 'production'
+        return "production"
 
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

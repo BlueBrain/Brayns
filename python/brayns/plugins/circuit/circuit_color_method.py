@@ -24,13 +24,13 @@ from typing import ClassVar
 class CircuitColorMethod:
     """Available coloring methods for circuits."""
 
-    ID: ClassVar[str] = 'id'
-    ETYPE: ClassVar[str] = 'etype'
-    MTYPE: ClassVar[str] = 'mtype'
-    LAYER: ClassVar[str] = 'layer'
-    REGION: ClassVar[str] = 'region'
-    HEMISPHERE: ClassVar[str] = 'hemisphere'
-    MORPHOLOGY: ClassVar[str] = 'morphology'
-    MORPHOLOGY_CLASS: ClassVar[str] = 'morphology class'
-    MORPHOLOGY_SECTION: ClassVar[str] = 'morphology section'
-    SYNAPSE_CLASS: ClassVar[str] = 'synapse class'
+    ID: ClassVar[str] = "id"
+    ETYPE: ClassVar[str] = "etype"
+    MTYPE: ClassVar[str] = "mtype"
+    LAYER: ClassVar[str] = "layer"
+    REGION: ClassVar[str] = "region"
+    HEMISPHERE: ClassVar[str] = "hemisphere"
+    MORPHOLOGY: ClassVar[str] = "morphology"
+    MORPHOLOGY_CLASS: ClassVar[str] = "morphology class"
+    MORPHOLOGY_SECTION: ClassVar[str] = "morphology section"
+    SYNAPSE_CLASS: ClassVar[str] = "synapse class"

@@ -34,6 +34,6 @@ def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
     :return: Deserialized entrypoint.
     :rtype: Entrypoint
     """
-    params = {'endpoint': method}
-    result = instance.request('schema', params)
+    params = {"endpoint": method}
+    result = instance.request("schema", params)
     return deserialize_entrypoint(result)

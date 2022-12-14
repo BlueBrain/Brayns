@@ -27,7 +27,6 @@ from .messages import JsonRpcError, JsonRpcProgress, JsonRpcReply
 
 
 class JsonRpcTasks:
-
     def __init__(self) -> None:
         self._tasks: dict[int | str, JsonRpcTask] = {}
 
@@ -45,14 +44,14 @@ class JsonRpcTasks:
 
     def create_task(self, id: int | str) -> JsonRpcTask:
         if id in self._tasks:
-            raise ValueError('Request with same ID already running')
+            raise ValueError("Request with same ID already running")
         task = JsonRpcTask()
         self._tasks[id] = task
         return task
 
     def add_reply(self, reply: JsonRpcReply) -> None:
         if reply.id is None:
-            raise ValueError('No request ID in reply')
+            raise ValueError("No request ID in reply")
         task = self.find(reply.id)
         if task is None:
             return

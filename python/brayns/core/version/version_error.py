@@ -43,4 +43,4 @@ class VersionError(Error):
         :rtype: str
         """
         local, remote = self.local, self.remote
-        return f'Version mismatch with server {local=}, {remote=}'
+        return f"Version mismatch with server {local=}, {remote=}"

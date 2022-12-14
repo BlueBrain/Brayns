@@ -24,8 +24,8 @@ from .merge_bounds import merge_bounds
 from .serialize_bounds import serialize_bounds
 
 __all__ = [
-    'Bounds',
-    'deserialize_bounds',
-    'merge_bounds',
-    'serialize_bounds',
+    "Bounds",
+    "deserialize_bounds",
+    "merge_bounds",
+    "serialize_bounds",
 ]

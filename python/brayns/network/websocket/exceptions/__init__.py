@@ -25,9 +25,9 @@ from .service_unavailable_error import ServiceUnavailableError
 from .web_socket_error import WebSocketError
 
 __all__ = [
-    'ConnectionClosedError',
-    'InvalidServerCertificateError',
-    'ProtocolError',
-    'ServiceUnavailableError',
-    'WebSocketError',
+    "ConnectionClosedError",
+    "InvalidServerCertificateError",
+    "ProtocolError",
+    "ServiceUnavailableError",
+    "WebSocketError",
 ]

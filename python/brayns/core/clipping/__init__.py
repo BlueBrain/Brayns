@@ -24,8 +24,8 @@ from .clip_plane import ClipPlane
 from .clipping_geometry import ClippingGeometry
 
 __all__ = [
-    'add_clipping_geometry',
-    'clear_clipping_geometries',
-    'ClipPlane',
-    'ClippingGeometry',
+    "add_clipping_geometry",
+    "clear_clipping_geometries",
+    "ClipPlane",
+    "ClippingGeometry",
 ]

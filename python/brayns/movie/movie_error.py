@@ -37,7 +37,7 @@ class MovieError(Error):
 
     reason: str
     code: int = 0
-    logs: str = ''
+    logs: str = ""
 
     def __str__(self) -> str:
         return self.reason

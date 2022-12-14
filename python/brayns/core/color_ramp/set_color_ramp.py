@@ -35,7 +35,7 @@ def set_color_ramp(instance: Instance, model_id: int, ramp: ColorRamp) -> None:
     :type color_ramp: ColorRamp
     """
     params = {
-        'id': model_id,
-        'color_ramp': serialize_color_ramp(ramp),
+        "id": model_id,
+        "color_ramp": serialize_color_ramp(ramp),
     }
-    instance.request('set-color-ramp', params)
+    instance.request("set-color-ramp", params)

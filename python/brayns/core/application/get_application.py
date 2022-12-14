@@ -32,5 +32,5 @@ def get_application(instance: Instance) -> Application:
     :return: Current application parameters.
     :rtype: Application
     """
-    result = instance.request('get-application-parameters')
+    result = instance.request("get-application-parameters")
     return deserialize_application(result)

@@ -32,5 +32,5 @@ def get_simulation(instance: Instance) -> Simulation:
     :return: Current simulation state.
     :rtype: Simulation
     """
-    result = instance.request('get-simulation-parameters')
+    result = instance.request("get-simulation-parameters")
     return deserialize_simulation(result)

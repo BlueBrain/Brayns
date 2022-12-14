@@ -27,9 +27,9 @@ from .transform import Transform
 
 
 def deserialize_transform(obj: dict[str, Any]) -> Transform:
-    quaternion = Quaternion(*obj['rotation'])
+    quaternion = Quaternion(*obj["rotation"])
     return Transform(
-        translation=Vector3(*obj['translation']),
+        translation=Vector3(*obj["translation"]),
         rotation=Rotation.from_quaternion(quaternion),
-        scale=Vector3(*obj['scale']),
+        scale=Vector3(*obj["scale"]),
     )

@@ -42,14 +42,12 @@ class GlassMaterial(Material):
         :return: Material name
         :rtype: str
         """
-        return 'glass'
+        return "glass"
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        return {
-            'index_of_refraction': self.refraction_index
-        }
+        return {"index_of_refraction": self.refraction_index}
 
     def update_properties(self, message: dict[str, Any]) -> None:
         """Low level API to deserialize from JSON."""
-        self.refraction_index = message['index_of_refraction']
+        self.refraction_index = message["index_of_refraction"]

@@ -24,11 +24,11 @@ from enum import Enum
 class SonataReportType(Enum):
     """All available SONATA report types."""
 
-    NONE = 'none'
-    SPIKES = 'spikes'
-    COMPARTMENT = 'compartment'
-    SUMMATION = 'summation'
-    SYNAPSE = 'synapse'
-    BLOODFLOW_PRESSURE = 'bloodflow_pressure'
-    BLOODFLOW_SPEED = 'bloodflow_speed'
-    BLOODFLOW_RADII = 'bloodflow_radii'
+    NONE = "none"
+    SPIKES = "spikes"
+    COMPARTMENT = "compartment"
+    SUMMATION = "summation"
+    SYNAPSE = "synapse"
+    BLOODFLOW_PRESSURE = "bloodflow_pressure"
+    BLOODFLOW_SPEED = "bloodflow_speed"
+    BLOODFLOW_RADII = "bloodflow_radii"

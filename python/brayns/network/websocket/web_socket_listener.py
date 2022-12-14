@@ -22,7 +22,6 @@ from typing import Protocol
 
 
 class WebSocketListener(Protocol):
-
     def on_binary(self, data: bytes) -> None:
         pass
 

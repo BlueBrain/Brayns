@@ -24,7 +24,7 @@ from typing import Any, Protocol, TypeVar
 
 from .jsonrpc import JsonRpcFuture, JsonRpcReply, JsonRpcRequest
 
-T = TypeVar('T', bound='Instance')
+T = TypeVar("T", bound="Instance")
 
 
 class Instance(Protocol):
@@ -88,7 +88,9 @@ class Instance(Protocol):
         reply = self.execute(method, params)
         return reply.result
 
-    def execute(self, method: str, params: Any = None, binary: bytes = b'') -> JsonRpcReply:
+    def execute(
+        self, method: str, params: Any = None, binary: bytes = b""
+    ) -> JsonRpcReply:
         """Extended version of request to accept and return binary data.
 
         :param method: JSON-RPC method.
@@ -103,7 +105,9 @@ class Instance(Protocol):
         task = self.task(method, params, binary)
         return task.wait_for_reply()
 
-    def task(self, method: str, params: Any = None, binary: bytes = b'') -> JsonRpcFuture:
+    def task(
+        self, method: str, params: Any = None, binary: bytes = b""
+    ) -> JsonRpcFuture:
         """Send a request to the instance in a non-blocking way.
 
         Generate automatically the JSON-RPC ID using integers.

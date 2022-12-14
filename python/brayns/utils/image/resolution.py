@@ -66,7 +66,7 @@ class Resolution(Vector[int]):
 
     def __new__(cls, width: int, height: int) -> Resolution:
         if width <= 0 or height <= 0:
-            raise ValueError(f'Invalid resolution: {width}x{height}')
+            raise ValueError(f"Invalid resolution: {width}x{height}")
         return super().__new__(cls, width, height)
 
     @property

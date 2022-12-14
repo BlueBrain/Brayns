@@ -62,7 +62,7 @@ class Version:
         :return: Version tag.
         :rtype: str
         """
-        return '.'.join(str(i) for i in self.release)
+        return ".".join(str(i) for i in self.release)
 
     def check(self, local: str = __version__) -> None:
         """Check that self is compatible with local version.

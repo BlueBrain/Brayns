@@ -25,8 +25,7 @@ from .framebuffer import Framebuffer
 
 @dataclass
 class StaticFramebuffer(Framebuffer):
-    """Static resolution framebuffer.
-    """
+    """Static resolution framebuffer."""
 
     @classmethod
     @property
@@ -36,7 +35,7 @@ class StaticFramebuffer(Framebuffer):
         :return: Framebuffer name
         :rtype: str
         """
-        return 'static'
+        return "static"
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

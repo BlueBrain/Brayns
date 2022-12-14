@@ -48,7 +48,12 @@ class JsonRpcFuture:
             poll=lambda _: None,
         )
 
-    def __init__(self, task: JsonRpcTask, cancel: Callable[[], None], poll: Callable[[bool], None]) -> None:
+    def __init__(
+        self,
+        task: JsonRpcTask,
+        cancel: Callable[[], None],
+        poll: Callable[[bool], None],
+    ) -> None:
         self._task = task
         self._cancel = cancel
         self._poll = poll

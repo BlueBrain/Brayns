@@ -101,7 +101,7 @@ class Connector:
         except Exception as e:
             self.logger.info('Connection failed: "%s".', e)
             raise
-        self.logger.info('Successfully connected.')
+        self.logger.info("Successfully connected.")
         return websocket
 
     def _try_connect(self, connector: WebSocketConnector) -> WebSocketClient:
@@ -111,22 +111,24 @@ class Connector:
 
     def _try_connect_forever(self, connector: WebSocketConnector) -> WebSocketClient:
         while True:
-            self.logger.debug('Connection attempt.')
+            self.logger.debug("Connection attempt.")
             try:
                 return connector.connect()
             except ServiceUnavailableError:
                 time.sleep(self.attempt_period)
 
-    def _try_connect_with_max_attempts(self, connector: WebSocketConnector) -> WebSocketClient:
+    def _try_connect_with_max_attempts(
+        self, connector: WebSocketConnector
+    ) -> WebSocketClient:
         max_attempts = cast(int, self.max_attempts)
         count = 1
         while True:
-            self.logger.debug('Connection attempt %d/%d.', count, max_attempts)
+            self.logger.debug("Connection attempt %d/%d.", count, max_attempts)
             try:
                 return connector.connect()
             except ServiceUnavailableError:
                 if count == max_attempts:
-                    self.logger.info('Max attempts reached.')
+                    self.logger.info("Max attempts reached.")
                     raise
                 time.sleep(self.attempt_period)
             count += 1

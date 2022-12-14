@@ -36,7 +36,7 @@ class AmbientLight(Light):
         :return: Light name.
         :rtype: str
         """
-        return 'ambient'
+        return "ambient"
 
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""

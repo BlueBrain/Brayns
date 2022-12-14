@@ -25,17 +25,16 @@ from .websocket import WebSocketListener
 
 
 class Listener(WebSocketListener):
-
     def __init__(self, logger: logging.Logger, manager: JsonRpcManager) -> None:
         self._logger = logger
         self._manager = manager
 
     def on_binary(self, data: bytes) -> None:
-        self._logger.info('Binary frame received of %d bytes.', len(data))
+        self._logger.info("Binary frame received of %d bytes.", len(data))
         self._logger.debug('Reply binary frame data: "%s".', data)
         self._manager.process_binary(data)
 
     def on_text(self, data: str) -> None:
-        self._logger.info('Text frame received of %d chars.', len(data))
+        self._logger.info("Text frame received of %d chars.", len(data))
         self._logger.debug('Reply text frame data: "%s".', data)
         self._manager.process_text(data)

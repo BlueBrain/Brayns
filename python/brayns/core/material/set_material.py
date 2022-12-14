@@ -35,7 +35,7 @@ def set_material(instance: Instance, model_id: int, material: Material) -> None:
     """
     name = material.name
     params = {
-        'model_id': model_id,
-        'material': material.get_properties(),
+        "model_id": model_id,
+        "material": material.get_properties(),
     }
-    instance.request(f'set-material-{name}', params)
+    instance.request(f"set-material-{name}", params)

@@ -29,13 +29,13 @@ from .json_type import JsonType
 from .serialize_schema import serialize_schema
 
 __all__ = [
-    'deserialize_entrypoint',
-    'deserialize_schema',
-    'Entrypoint',
-    'get_entrypoint',
-    'get_entrypoints',
-    'get_methods',
-    'JsonSchema',
-    'JsonType',
-    'serialize_schema',
+    "deserialize_entrypoint",
+    "deserialize_schema",
+    "Entrypoint",
+    "get_entrypoint",
+    "get_entrypoints",
+    "get_methods",
+    "JsonSchema",
+    "JsonType",
+    "serialize_schema",
 ]

@@ -25,9 +25,9 @@ from .version import Version
 from .version_error import VersionError
 
 __all__ = [
-    'check_version',
-    'deserialize_version',
-    'get_version',
-    'Version',
-    'VersionError',
+    "check_version",
+    "deserialize_version",
+    "get_version",
+    "Version",
+    "VersionError",
 ]

@@ -25,9 +25,9 @@ from .set_resolution import set_resolution
 from .stop import stop
 
 __all__ = [
-    'Application',
-    'deserialize_application',
-    'get_application',
-    'set_resolution',
-    'stop',
+    "Application",
+    "deserialize_application",
+    "get_application",
+    "set_resolution",
+    "stop",
 ]

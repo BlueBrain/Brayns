@@ -70,8 +70,8 @@ class Movie:
     resolution: Resolution | None = None
     bitrate: int | None = None
     encoder: str | None = None
-    pixel_format: str | None = 'yuv420p'
-    ffmpeg_executable: str = 'ffmpeg'
+    pixel_format: str | None = "yuv420p"
+    ffmpeg_executable: str = "ffmpeg"
 
     def save(self, path: str) -> str:
         """Save the movie under the given path.
@@ -100,7 +100,7 @@ class Movie:
             *_get_input_options(self),
             *_get_input(self),
             *_get_output_options(self),
-            path
+            path,
         ]
 
 
@@ -109,9 +109,9 @@ def _run_process(args: list[str]) -> str:
         stream = cast(IO[str], process.stdout)
         lines = deque[str](stream, maxlen=1000)
         code = process.wait()
-    logs = ''.join(lines)
+    logs = "".join(lines)
     if code != 0:
-        raise MovieError(f'ffmpeg call failed (see logs)', code, logs)
+        raise MovieError(f"ffmpeg call failed (see logs)", code, logs)
     return logs
 
 
@@ -123,54 +123,44 @@ def _create_process(args: list[str]) -> subprocess.Popen[str]:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            env=os.environ | {'AV_LOG_FORCE_NOCOLOR': '1'},
+            env=os.environ | {"AV_LOG_FORCE_NOCOLOR": "1"},
         )
     except OSError as e:
-        raise MovieError(f'Failed to start ffmpeg process {str(e)}')
+        raise MovieError(f"Failed to start ffmpeg process {str(e)}")
 
 
 def _get_global_options() -> list[str]:
-    return [
-        '-y'
-    ]
+    return ["-y"]
 
 
 def _get_input_options(movie: Movie) -> list[str]:
-    return [
-        '-framerate',
-        str(movie.fps)
-    ]
+    return ["-framerate", str(movie.fps)]
 
 
 def _get_input(movie: Movie) -> list[str]:
     return [
-        '-i',
+        "-i",
         movie.frames_pattern,
     ]
 
 
 def _get_output_options(movie: Movie) -> list[str]:
-    args = [
-        '-vf',
-        _get_video_filters(movie)
-    ]
+    args = ["-vf", _get_video_filters(movie)]
     if movie.resolution is not None:
         width, height = movie.resolution
-        args.append('-s')
-        args.append(f'{width:d}x{height:d}')
+        args.append("-s")
+        args.append(f"{width:d}x{height:d}")
     if movie.bitrate is not None:
-        args.append('-b:v')
+        args.append("-b:v")
         args.append(str(movie.bitrate))
     if movie.encoder is not None:
-        args.append('-c')
+        args.append("-c")
         args.append(movie.encoder)
     return args
 
 
 def _get_video_filters(movie: Movie) -> str:
-    filters = [
-        f'fps={movie.fps}'
-    ]
+    filters = [f"fps={movie.fps}"]
     if movie.pixel_format is not None:
-        filters.append(f'format={movie.pixel_format}')
-    return ','.join(filters)
+        filters.append(f"format={movie.pixel_format}")
+    return ",".join(filters)

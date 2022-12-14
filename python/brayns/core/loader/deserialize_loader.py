@@ -26,7 +26,7 @@ from .loader_info import LoaderInfo
 
 def deserialize_loader(message: dict[str, Any]) -> LoaderInfo:
     return LoaderInfo(
-        name=message['name'],
-        extensions=message['extensions'],
-        schema=deserialize_schema(message['input_parameters_schema']),
+        name=message["name"],
+        extensions=message["extensions"],
+        schema=deserialize_schema(message["input_parameters_schema"]),
     )

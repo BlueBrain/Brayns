@@ -25,17 +25,19 @@ from typing import Generic, TypeVar
 
 from .jsonrpc import JsonRpcFuture, JsonRpcProgress, JsonRpcReply
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class Future(Generic[T]):
     """JSON-RPC future wrapper to include the reply processing.
-    
+
     Add a new method ``wait_for_result`` to retreive the result of the reply
     processing.
     """
 
-    def __init__(self, future: JsonRpcFuture, reply_handler: Callable[[JsonRpcReply], T]) -> None:
+    def __init__(
+        self, future: JsonRpcFuture, reply_handler: Callable[[JsonRpcReply], T]
+    ) -> None:
         self._future = future
         self._reply_handler = reply_handler
 

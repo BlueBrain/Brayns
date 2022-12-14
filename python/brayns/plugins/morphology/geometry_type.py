@@ -29,7 +29,7 @@ class GeometryType(Enum):
     :param CONSTANT_RADII: Apply the same radius to all geometries.
     """
 
-    ORIGINAL = 'original'
-    SMOOTH = 'smooth'
-    SECTION_SMOOTH = 'section_smooth'
-    CONSTANT_RADII = 'constant_radii'
+    ORIGINAL = "original"
+    SMOOTH = "smooth"
+    SECTION_SMOOTH = "section_smooth"
+    CONSTANT_RADII = "constant_radii"

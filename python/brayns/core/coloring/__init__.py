@@ -25,9 +25,9 @@ from .get_color_values import get_color_values
 from .set_model_color import set_model_color
 
 __all__ = [
-    'color_model',
-    'ColorMethod',
-    'get_color_methods',
-    'get_color_values',
-    'set_model_color',
+    "color_model",
+    "ColorMethod",
+    "get_color_methods",
+    "get_color_values",
+    "set_model_color",
 ]

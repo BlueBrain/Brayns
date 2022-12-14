@@ -29,12 +29,12 @@ from .json_schema import JsonSchema
 
 def deserialize_entrypoint(message: dict[str, Any]) -> Entrypoint:
     return Entrypoint(
-        method=message['title'],
-        description=message['description'],
-        plugin=message['plugin'],
-        asynchronous=message['async'],
-        params=_deserialize_schema(message, 'params'),
-        result=_deserialize_schema(message, 'returns'),
+        method=message["title"],
+        description=message["description"],
+        plugin=message["plugin"],
+        asynchronous=message["async"],
+        params=_deserialize_schema(message, "params"),
+        result=_deserialize_schema(message, "returns"),
     )
 
 

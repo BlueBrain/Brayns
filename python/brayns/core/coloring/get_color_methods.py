@@ -31,5 +31,5 @@ def get_color_methods(instance: Instance, model_id: int) -> list[str]:
     :return: Color method names.
     :rtype: list[str]
     """
-    params = {'id': model_id}
-    return instance.request('get-color-methods', params)
+    params = {"id": model_id}
+    return instance.request("get-color-methods", params)

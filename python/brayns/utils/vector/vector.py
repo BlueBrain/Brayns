@@ -24,8 +24,8 @@ import math
 from collections.abc import Callable, Iterable
 from typing import TypeVar
 
-T = TypeVar('T', bound='Vector')
-U = TypeVar('U', int, float)
+T = TypeVar("T", bound="Vector")
+U = TypeVar("U", int, float)
 
 
 class Vector(tuple[U, ...]):
@@ -57,8 +57,8 @@ class Vector(tuple[U, ...]):
 
     def __str__(self) -> str:
         name = type(self).__name__
-        values = ', '.join(str(i) for i in self)
-        return f'{name}({values})'
+        values = ", ".join(str(i) for i in self)
+        return f"{name}({values})"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -103,10 +103,10 @@ class Vector(tuple[U, ...]):
         return self.__unpack(value, lambda x, y: y % x)
 
     def __pow__(self: T, value: int | float | T) -> T:
-        return self.__unpack(value, lambda x, y: x ** y)
+        return self.__unpack(value, lambda x, y: x**y)
 
     def __rpow__(self: T, value: int | float | T) -> T:
-        return self.__unpack(value, lambda x, y: y ** x)
+        return self.__unpack(value, lambda x, y: y**x)
 
     @property
     def square_norm(self) -> float:
@@ -123,7 +123,9 @@ class Vector(tuple[U, ...]):
     def dot(self: T, other: T) -> float:
         return sum(i * j for i, j in zip(self, other))
 
-    def __unpack(self: T, value: int | float | T, operation: Callable[[float, float], float]) -> T:
+    def __unpack(
+        self: T, value: int | float | T, operation: Callable[[float, float], float]
+    ) -> T:
         if isinstance(value, (int, float)):
             return self.unpack(operation(i, value) for i in self)
         return self.unpack(operation(i, j) for i, j in zip(self, value))

@@ -23,7 +23,7 @@ from .pick import pick
 from .pick_result import PickResult
 
 __all__ = [
-    'deserialize_pick_result',
-    'pick',
-    'PickResult',
+    "deserialize_pick_result",
+    "pick",
+    "PickResult",
 ]

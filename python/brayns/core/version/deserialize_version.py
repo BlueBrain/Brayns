@@ -25,8 +25,8 @@ from .version import Version
 
 def deserialize_version(message: dict[str, Any]) -> Version:
     return Version(
-        major=message['major'],
-        minor=message['minor'],
-        patch=message['patch'],
-        revision=message['revision'],
+        major=message["major"],
+        minor=message["minor"],
+        patch=message["patch"],
+        revision=message["revision"],
     )

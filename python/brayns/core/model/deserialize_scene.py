@@ -28,9 +28,6 @@ from .scene import Scene
 
 def deserialize_scene(message: dict[str, Any]) -> Scene:
     return Scene(
-        bounds=deserialize_bounds(message['bounds']),
-        models=[
-            deserialize_model(model)
-            for model in message['models']
-        ],
+        bounds=deserialize_bounds(message["bounds"]),
+        models=[deserialize_model(model) for model in message["models"]],
     )

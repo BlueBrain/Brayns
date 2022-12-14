@@ -63,7 +63,7 @@ class AsyncWebSocketConnector:
 
 
 def _format_uri(uri: str, context: SslClientContext | None) -> str:
-    protocol = 'ws://' if context is None else 'wss://'
+    protocol = "ws://" if context is None else "wss://"
     return protocol + uri
 
 
@@ -75,7 +75,5 @@ def _try_create_ssl_context(context: SslClientContext | None) -> ssl.SSLContext 
 
 def _create_ssl_context(context: SslClientContext) -> ssl.SSLContext:
     return ssl.create_default_context(
-        cafile=context.cafile,
-        capath=context.capath,
-        cadata=context.cadata
+        cafile=context.cafile, capath=context.capath, cadata=context.cadata
     )

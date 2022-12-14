@@ -27,4 +27,4 @@ def clear_lights(instance: Instance) -> None:
     :param instance: Instance.
     :type instance: Instance
     """
-    instance.request('clear-lights')
+    instance.request("clear-lights")

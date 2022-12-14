@@ -23,8 +23,8 @@ from .json_rpc_reply import JsonRpcReply
 
 
 def deserialize_reply_from_binary(data: bytes) -> JsonRpcReply:
-    json_size = int.from_bytes(data[0:4], byteorder='little', signed=False)
-    text = data[4:4+json_size].decode('utf-8')
+    json_size = int.from_bytes(data[0:4], byteorder="little", signed=False)
+    text = data[4 : 4 + json_size].decode("utf-8")
     reply = deserialize_reply_from_text(text)
-    reply.binary = data[4+json_size:]
+    reply.binary = data[4 + json_size :]
     return reply

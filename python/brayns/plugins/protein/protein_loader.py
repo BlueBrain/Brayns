@@ -28,8 +28,8 @@ from .protein_color_scheme import ProteinColorScheme
 @dataclass
 class ProteinLoader(Loader):
 
-    PDB: ClassVar[str] = 'pdb'
-    PDB1: ClassVar[str] = 'pdb1'
+    PDB: ClassVar[str] = "pdb"
+    PDB1: ClassVar[str] = "pdb1"
 
     color_scheme: ProteinColorScheme = ProteinColorScheme.NONE
     radius_multiplier: float = 1.0
@@ -37,10 +37,10 @@ class ProteinLoader(Loader):
     @classmethod
     @property
     def name(cls) -> str:
-        return 'protein'
+        return "protein"
 
     def get_properties(self) -> dict[str, Any]:
         return {
-            'color_scheme': self.color_scheme.value,
-            'radius_multiplier': self.radius_multiplier,
+            "color_scheme": self.color_scheme.value,
+            "radius_multiplier": self.radius_multiplier,
         }

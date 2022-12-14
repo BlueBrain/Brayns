@@ -25,9 +25,9 @@ from .loader_info import LoaderInfo
 from .mesh_loader import MeshLoader
 
 __all__ = [
-    'deserialize_loader',
-    'get_loaders',
-    'Loader',
-    'LoaderInfo',
-    'MeshLoader',
+    "deserialize_loader",
+    "get_loaders",
+    "Loader",
+    "LoaderInfo",
+    "MeshLoader",
 ]

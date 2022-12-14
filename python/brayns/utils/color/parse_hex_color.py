@@ -34,9 +34,7 @@ def parse_hex_color(value: str) -> Color3:
     """
     value = _sanitize(value)
     return Color3(
-        _normalize(value[0:2]),
-        _normalize(value[2:4]),
-        _normalize(value[4:6])
+        _normalize(value[0:2]), _normalize(value[2:4]), _normalize(value[4:6])
     )
 
 
@@ -44,11 +42,11 @@ def _sanitize(value: str) -> str:
     size = len(value)
     if size == 6:
         return value
-    if size == 7 and value[0] == '#':
+    if size == 7 and value[0] == "#":
         return value[1:]
-    if size == 8 and value[:2].lower() == '0x':
+    if size == 8 and value[:2].lower() == "0x":
         return value[2:]
-    raise ValueError(f'Not an hex color {value}')
+    raise ValueError(f"Not an hex color {value}")
 
 
 def _normalize(value: str) -> float:

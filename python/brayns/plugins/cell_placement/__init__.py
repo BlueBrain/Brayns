@@ -20,5 +20,5 @@
 from .cell_placement_loader import CellPlacementLoader
 
 __all__ = [
-    'CellPlacementLoader',
+    "CellPlacementLoader",
 ]

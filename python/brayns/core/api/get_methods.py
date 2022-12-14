@@ -29,4 +29,4 @@ def get_methods(instance: Instance) -> list[str]:
     :return: List of available methods (depends on plugins loaded).
     :rtype: list[str]
     """
-    return instance.request('registry')
+    return instance.request("registry")

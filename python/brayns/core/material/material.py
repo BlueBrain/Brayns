@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-T = TypeVar('T', bound='Material')
+T = TypeVar("T", bound="Material")
 
 
 @dataclass

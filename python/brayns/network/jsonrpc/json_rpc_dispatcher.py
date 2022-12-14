@@ -31,7 +31,6 @@ from .messages import (
 
 
 class JsonRpcDispatcher:
-
     def __init__(self, listener: JsonRpcListener) -> None:
         self._listener = listener
 
@@ -56,30 +55,30 @@ class JsonRpcDispatcher:
             return
         if self._dispatch_progress(message):
             return
-        raise ValueError('Unsupported JSON-RPC message')
+        raise ValueError("Unsupported JSON-RPC message")
 
     def _parse(self, data: str) -> dict[str, Any]:
         message = json.loads(data)
         if not isinstance(message, dict):
-            raise ValueError('Message is not a JSON object')
+            raise ValueError("Message is not a JSON object")
         return message
 
     def _dispatch_error(self, message: dict[str, Any]) -> bool:
-        if 'error' not in message:
+        if "error" not in message:
             return False
         error = deserialize_error(message)
         self._listener.on_error(error)
         return True
 
     def _dispatch_reply(self, message: dict[str, Any]) -> bool:
-        if 'result' not in message:
+        if "result" not in message:
             return False
         reply = deserialize_reply(message)
         self._listener.on_reply(reply)
         return True
 
     def _dispatch_progress(self, message: dict[str, Any]) -> bool:
-        if 'id' in message:
+        if "id" in message:
             return False
         progress = deserialize_progress(message)
         self._listener.on_progress(progress)

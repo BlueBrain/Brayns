@@ -79,7 +79,9 @@ def _get_opacity(control_points: list[ControlPoint], normalized_value: float) ->
     return lower_opacity * lower_ratio + upper_opacity * upper_ratio
 
 
-def _find_lower_index(control_points: list[ControlPoint], normalized_value: float) -> int:
+def _find_lower_index(
+    control_points: list[ControlPoint], normalized_value: float
+) -> int:
     for i, control_point in enumerate(control_points):
         if control_point.normalized_value >= normalized_value:
             return i - 1

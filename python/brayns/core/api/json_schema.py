@@ -66,8 +66,8 @@ class JsonSchema:
     :type enum: list[Any]
     """
 
-    title: str = ''
-    description: str = ''
+    title: str = ""
+    description: str = ""
     type: JsonType = JsonType.UNDEFINED
     read_only: bool = False
     write_only: bool = False

@@ -33,4 +33,4 @@ def set_renderer(instance: Instance, renderer: Renderer) -> None:
     """
     name = renderer.name
     params = renderer.get_properties()
-    instance.request(f'set-renderer-{name}', params)
+    instance.request(f"set-renderer-{name}", params)

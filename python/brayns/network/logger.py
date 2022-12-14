@@ -34,9 +34,9 @@ class Logger(logging.Logger):
     """
 
     def __init__(self, level: int = logging.WARN) -> None:
-        super().__init__('Brayns', level)
+        super().__init__("Brayns", level)
         handler = logging.StreamHandler(sys.stdout)
-        format = '[%(name)s][%(levelname)s] %(message)s'
+        format = "[%(name)s][%(levelname)s] %(message)s"
         formatter = logging.Formatter(format)
         handler.setFormatter(formatter)
         self.addHandler(handler)

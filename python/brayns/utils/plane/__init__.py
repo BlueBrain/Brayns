@@ -21,5 +21,5 @@
 from .plane_equation import PlaneEquation
 
 __all__ = [
-    'PlaneEquation',
+    "PlaneEquation",
 ]

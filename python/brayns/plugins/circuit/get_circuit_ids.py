@@ -31,5 +31,5 @@ def get_circuit_ids(instance: Instance, model_id: int) -> list[int]:
     :return: ID list of the element loaded in given circuit.
     :rtype: list[int]
     """
-    params = {'model_id': model_id}
-    return instance.request('get-circuit-ids', params)
+    params = {"model_id": model_id}
+    return instance.request("get-circuit-ids", params)

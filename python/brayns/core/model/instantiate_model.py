@@ -29,9 +29,7 @@ from .model import Model
 
 
 def instantiate_model(
-    instance: Instance,
-    model_id: int,
-    transform: Transform | None = None
+    instance: Instance, model_id: int, transform: Transform | None = None
 ) -> Model:
     """Creates an instance of the given model and returns it.
 
@@ -46,11 +44,11 @@ def instantiate_model(
     """
 
     params: dict[str, Any] = {
-        'model_id': model_id,
+        "model_id": model_id,
     }
 
     if transform is not None:
-        params['transform'] = serialize_transform(transform)
+        params["transform"] = serialize_transform(transform)
 
-    result = instance.request('instantiate-model', params)
+    result = instance.request("instantiate-model", params)
     return deserialize_model(result)

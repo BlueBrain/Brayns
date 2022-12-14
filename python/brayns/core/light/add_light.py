@@ -36,5 +36,5 @@ def add_light(instance: Instance, light: Light) -> Model:
     """
     name = light.name
     params = light.get_properties()
-    result = instance.request(f'add-light-{name}', params)
+    result = instance.request(f"add-light-{name}", params)
     return deserialize_model(result)

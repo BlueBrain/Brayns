@@ -24,7 +24,7 @@ from typing import Any, TypeVar
 
 from brayns.utils import Color4
 
-T = TypeVar('T', bound='Geometry')
+T = TypeVar("T", bound="Geometry")
 
 
 @dataclass
@@ -72,6 +72,6 @@ class Geometry(ABC):
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'geometry': self.get_additional_properties(),
-            'color': list(self.color),
+            "geometry": self.get_additional_properties(),
+            "color": list(self.color),
         }

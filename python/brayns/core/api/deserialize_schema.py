@@ -28,63 +28,57 @@ from .json_type import JsonType
 
 def deserialize_schema(message: dict[str, Any]) -> JsonSchema:
     return JsonSchema(
-        title=message.get('title', ''),
-        description=message.get('description', ''),
+        title=message.get("title", ""),
+        description=message.get("description", ""),
         type=_deserialize_type(message),
-        read_only=message.get('readOnly', False),
-        write_only=message.get('writeOnly', False),
-        default=message.get('default'),
-        minimum=message.get('minimum'),
-        maximum=message.get('maximum'),
+        read_only=message.get("readOnly", False),
+        write_only=message.get("writeOnly", False),
+        default=message.get("default"),
+        minimum=message.get("minimum"),
+        maximum=message.get("maximum"),
         items=_deserialize_items(message),
-        min_items=message.get('minItems'),
-        max_items=message.get('maxItems'),
+        min_items=message.get("minItems"),
+        max_items=message.get("maxItems"),
         properties=_deserialize_properties(message),
-        required=message.get('required', []),
+        required=message.get("required", []),
         additional_properties=_deserialize_additional(message),
         one_of=_deserialize_one_of(message),
-        enum=message.get('enum', []),
+        enum=message.get("enum", []),
     )
 
 
 def _deserialize_type(obj: dict[str, Any]) -> JsonType:
-    value = obj.get('type')
+    value = obj.get("type")
     if value is None:
         return JsonType.UNDEFINED
     return JsonType(value)
 
 
 def _deserialize_items(obj: dict[str, Any]) -> JsonSchema | None:
-    value = obj.get('items')
+    value = obj.get("items")
     if value is None:
         return None
     if isinstance(value, dict):
         return deserialize_schema(value)
-    raise TypeError(f'JSON API type error {value}')
+    raise TypeError(f"JSON API type error {value}")
 
 
 def _deserialize_properties(obj: dict[str, Any]) -> dict[str, JsonSchema]:
-    value = obj.get('properties', dict[str, Any]())
-    return {
-        key: deserialize_schema(schema)
-        for key, schema in value.items()
-    }
+    value = obj.get("properties", dict[str, Any]())
+    return {key: deserialize_schema(schema) for key, schema in value.items()}
 
 
 def _deserialize_additional(obj: dict[str, Any]) -> bool | JsonSchema | None:
-    value = obj.get('additionalProperties')
+    value = obj.get("additionalProperties")
     if value is None:
         return None
     if value is False:
         return value
     if isinstance(value, dict):
         return deserialize_schema(value)
-    raise TypeError(f'JSON API type error {value}')
+    raise TypeError(f"JSON API type error {value}")
 
 
 def _deserialize_one_of(obj: dict[str, Any]) -> list[JsonSchema]:
-    value = obj.get('oneOf', list[JsonSchema]())
-    return [
-        deserialize_schema(one_of)
-        for one_of in value
-    ]
+    value = obj.get("oneOf", list[JsonSchema]())
+    return [deserialize_schema(one_of) for one_of in value]

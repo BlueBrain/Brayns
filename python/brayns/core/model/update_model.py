@@ -52,12 +52,12 @@ def update_model(
     """
     properties = dict[str, Any]()
     if transform is not None:
-        properties['transform'] = serialize_transform(transform)
+        properties["transform"] = serialize_transform(transform)
     if visible is not None:
-        properties['is_visible'] = visible
+        properties["is_visible"] = visible
     params = {
-        'model_id': model_id,
-        'model': properties,
+        "model_id": model_id,
+        "model": properties,
     }
-    result = instance.request('update-model', params)
+    result = instance.request("update-model", params)
     return deserialize_model(result)

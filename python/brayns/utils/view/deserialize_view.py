@@ -26,7 +26,7 @@ from .view import View
 
 def deserialize_view(obj: dict[str, Any]) -> View:
     return View(
-        position=Vector3(*obj['position']),
-        target=Vector3(*obj['target']),
-        up=Vector3(*obj['up']),
+        position=Vector3(*obj["position"]),
+        target=Vector3(*obj["target"]),
+        up=Vector3(*obj["up"]),
     )

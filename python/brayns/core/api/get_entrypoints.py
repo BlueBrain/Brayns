@@ -33,7 +33,4 @@ def get_entrypoints(instance: Instance) -> list[Entrypoint]:
     :return: List of available entrypoints (depends on plugins loaded).
     :rtype: list[Entrypoint]
     """
-    return [
-        get_entrypoint(instance, method)
-        for method in get_methods(instance)
-    ]
+    return [get_entrypoint(instance, method) for method in get_methods(instance)]

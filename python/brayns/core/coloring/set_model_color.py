@@ -35,4 +35,4 @@ def set_model_color(instance: Instance, model_id: int, color: Color4) -> None:
     :param color: Color to apply on model.
     :type color: Color4
     """
-    color_model(instance, model_id, ColorMethod.SOLID, {'color': color})
+    color_model(instance, model_id, ColorMethod.SOLID, {"color": color})

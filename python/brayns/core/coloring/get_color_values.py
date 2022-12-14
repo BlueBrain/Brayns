@@ -25,7 +25,7 @@ def get_color_values(instance: Instance, model_id: int, method: str) -> list[str
     """Get available color values for a given method and model.
 
     Color values are the name of the elements to color. For example, the color
-    method 'layer' has values ['1', '2', '3'] if the model has 3 layers. 
+    method 'layer' has values ['1', '2', '3'] if the model has 3 layers.
 
     :param instance: Instance.
     :type instance: Instance
@@ -37,7 +37,7 @@ def get_color_values(instance: Instance, model_id: int, method: str) -> list[str
     :rtype: list[str]
     """
     params = {
-        'id': model_id,
-        'method': method,
+        "id": model_id,
+        "method": method,
     }
-    return instance.request('get-color-values', params)
+    return instance.request("get-color-values", params)

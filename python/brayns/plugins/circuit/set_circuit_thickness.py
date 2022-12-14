@@ -21,7 +21,9 @@
 from brayns.network import Instance
 
 
-def set_circuit_thickness(instance: Instance, model_id: int, radius_multiplier: float) -> None:
+def set_circuit_thickness(
+    instance: Instance, model_id: int, radius_multiplier: float
+) -> None:
     """Multiply the radius of all primitives of a circuit by given factor.
 
     :param instance: Instance.
@@ -32,7 +34,7 @@ def set_circuit_thickness(instance: Instance, model_id: int, radius_multiplier: 
     :type radius_multiplier: float
     """
     params = {
-        'model_id': model_id,
-        'radius_multiplier': radius_multiplier,
+        "model_id": model_id,
+        "radius_multiplier": radius_multiplier,
     }
-    instance.request('set-circuit-thickness', params)
+    instance.request("set-circuit-thickness", params)

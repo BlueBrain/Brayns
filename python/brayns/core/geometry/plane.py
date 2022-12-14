@@ -44,10 +44,10 @@ class Plane(Geometry):
         :return: JSON-RPC method.
         :rtype: str
         """
-        return 'add-planes'
+        return "add-planes"
 
     def get_additional_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'coefficients': list(self.equation),
+            "coefficients": list(self.equation),
         }

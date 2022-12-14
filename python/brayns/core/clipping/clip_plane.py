@@ -48,10 +48,10 @@ class ClipPlane(ClippingGeometry):
         :return: JSON-RPC method.
         :rtype: str
         """
-        return 'add-clip-plane'
+        return "add-clip-plane"
 
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
-            'coefficients': list(self.equation),
+            "coefficients": list(self.equation),
         }

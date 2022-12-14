@@ -26,6 +26,6 @@ from .bounds import Bounds
 
 def deserialize_bounds(obj: dict[str, Any]) -> Bounds:
     return Bounds(
-        min=Vector3(*obj['min']),
-        max=Vector3(*obj['max']),
+        min=Vector3(*obj["min"]),
+        max=Vector3(*obj["max"]),
     )

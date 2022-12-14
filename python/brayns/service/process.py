@@ -68,7 +68,7 @@ class Process:
     def logs(self) -> str:
         """Get the last logs (stdout + stderr) from the process."""
         with self._lock:
-            return ''.join(self._logs)
+            return "".join(self._logs)
 
     def stop(self) -> None:
         """Stop the backend service by terminating the process.

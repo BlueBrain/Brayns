@@ -34,16 +34,16 @@ class MorphologyLoader(Loader):
     :type morphology: Morphology, optional
     """
 
-    SWC: ClassVar[str] = 'swc'
-    H5: ClassVar[str] = 'h5'
-    ASC: ClassVar[str] = 'asc'
+    SWC: ClassVar[str] = "swc"
+    H5: ClassVar[str] = "h5"
+    ASC: ClassVar[str] = "asc"
 
     morphology: Morphology = field(default_factory=Morphology)
 
     @classmethod
     @property
     def name(cls) -> str:
-        return 'Neuron Morphology loader'
+        return "Neuron Morphology loader"
 
     def get_properties(self) -> dict[str, Any]:
         return serialize_morphology(self.morphology)

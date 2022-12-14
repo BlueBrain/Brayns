@@ -40,4 +40,4 @@ class JsonRpcProgress:
     amount: float
 
     def __str__(self) -> str:
-        return f'[{self.id}] {self.operation}: {100 * self.amount}%'
+        return f"[{self.id}] {self.operation}: {100 * self.amount}%"

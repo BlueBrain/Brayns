@@ -32,5 +32,5 @@ def get_version(instance: Instance) -> Version:
     :return: Version info.
     :rtype: Version
     """
-    result = instance.request('get-version')
+    result = instance.request("get-version")
     return deserialize_version(result)
