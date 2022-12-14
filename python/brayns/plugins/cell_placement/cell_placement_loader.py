@@ -38,6 +38,7 @@ class CellPlacementLoader(Loader):
     """
 
     morphology_folder: str
+    percentage: float = 1.0
     extension: str | None = None
 
     @classmethod
@@ -48,6 +49,7 @@ class CellPlacementLoader(Loader):
     def get_properties(self) -> dict[str, Any]:
         message: dict[str, Any] = {
             'morphology_folder': self.morphology_folder,
+            'percentage': self.percentage,
         }
         if self.extension is not None:
             message['extension'] = self.extension

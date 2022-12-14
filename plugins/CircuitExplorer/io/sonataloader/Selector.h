@@ -25,13 +25,21 @@
 
 namespace sonataloader
 {
-struct NodeSelector
+class PercentageFilter
 {
+public:
+    static bbp::sonata::Selection filter(const bbp::sonata::Selection &selection, float percentage) noexcept;
+};
+
+class NodeSelector
+{
+public:
     static bbp::sonata::Selection select(const Config &config, const SonataNodePopulationParameters &params);
 };
 
-struct EdgeSelector
+class EdgeSelector
 {
+public:
     static bbp::sonata::Selection select(
         const Config &config,
         const SonataEdgePopulationParameters &params,

@@ -24,29 +24,6 @@
 
 namespace
 {
-class PercentageFilter
-{
-public:
-    static bbp::sonata::Selection filter(const bbp::sonata::Selection &selection, const float percentage) noexcept
-    {
-        auto src = selection.flatten();
-        auto size = static_cast<float>(src.size());
-        auto expectedSize = size * percentage;
-        auto skipFactor = static_cast<size_t>(size / expectedSize);
-        skipFactor = std::max(skipFactor, 1ul);
-
-        std::vector<uint64_t> finalList;
-        finalList.reserve(static_cast<size_t>(expectedSize));
-
-        for (size_t i = 0; i < src.size(); i = i + skipFactor)
-        {
-            finalList.push_back(src[i]);
-        }
-
-        return bbp::sonata::Selection::fromValues(finalList);
-    }
-};
-
 class NodeSetFilter
 {
 public:
@@ -102,6 +79,30 @@ public:
 
 namespace sonataloader
 {
+bbp::sonata::Selection PercentageFilter::filter(const bbp::sonata::Selection &selection, float percentage) noexcept
+{
+    if (percentage >= 1.f)
+    {
+        return selection;
+    }
+
+    auto src = selection.flatten();
+    auto size = static_cast<float>(src.size());
+    auto expectedSize = size * percentage;
+    auto skipFactor = static_cast<size_t>(size / expectedSize);
+    skipFactor = std::max(skipFactor, 1ul);
+
+    std::vector<uint64_t> finalList;
+    finalList.reserve(static_cast<size_t>(expectedSize));
+
+    for (size_t i = 0; i < src.size(); i = i + skipFactor)
+    {
+        finalList.push_back(src[i]);
+    }
+
+    return bbp::sonata::Selection::fromValues(finalList);
+}
+
 bbp::sonata::Selection NodeSelector::select(const Config &config, const SonataNodePopulationParameters &params)
 {
     auto &nodePopulation = params.node_population;
@@ -136,11 +137,7 @@ bbp::sonata::Selection NodeSelector::select(const Config &config, const SonataNo
         result = result & reportSelection;
     }
 
-    if (percentage < 1.f)
-    {
-        result = PercentageFilter::filter(result, percentage);
-    }
-
+    result = PercentageFilter::filter(result, percentage);
     SelectionChecker::check(result, nodePopulation);
 
     return result;

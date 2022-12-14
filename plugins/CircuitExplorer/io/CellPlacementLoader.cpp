@@ -18,6 +18,7 @@
 
 #include "CellPlacementLoader.h"
 
+#include "sonataloader/Selector.h"
 #include "sonataloader/colordata/SonataColorData.h"
 #include "sonataloader/data/Cells.h"
 #include "sonataloader/data/Config.h"
@@ -94,7 +95,7 @@ public:
         load(const PopulationInfo &info, const CellPlacementLoaderParameters &parameters, ProgressUpdater &updater)
     {
         auto nodes = bbp::sonata::NodePopulation(info.path, "", info.name);
-        auto selection = nodes.selectAll();
+        auto selection = sonataloader::PercentageFilter::filter(nodes.selectAll(), parameters.percentage);
 
         auto positions = sonataloader::Cells::getPositions(nodes, selection);
         auto rotations = sonataloader::Cells::getRotations(nodes, selection);
