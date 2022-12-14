@@ -23,6 +23,9 @@
 #include <api/Atlas.h>
 #include <api/DataMangler.h>
 
+/**
+ * @brief Represents a scalar value atlas volume of any kind.
+ */
 class ScalarAtlas final : public Atlas
 {
 public:
@@ -31,13 +34,45 @@ public:
 public:
     ScalarAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
 
-    double getMinValue() const noexcept;
-    double getMaxValue() const noexcept;
-    bool isValidVoxel(size_t linealIndex) const override;
-    double operator[](size_t index) const noexcept;
-    double at(size_t index) const;
-    const std::vector<double> &getValues() const noexcept;
+    /**
+     * @copydoc Atlas::isValidVoxel(size_t)
+     */
+    bool isValidVoxel(size_t linealIndex) const noexcept override;
+
+    /**
+     * @copydoc Atlas::getVoxelType()
+     */
     VoxelType getVoxelType() const noexcept override;
+
+    /**
+     * @brief Returns the lowest scalar value in the volume.
+     *
+     * @return double
+     */
+    double getMinValue() const noexcept;
+
+    /**
+     * @brief Returns the highest scalar value in the volume.
+     *
+     * @return double
+     */
+    double getMaxValue() const noexcept;
+
+    /**
+     * @brief Access the volume data using a lineal index. Passing an out of bounds index results in undefined
+     * behaviour.
+     *
+     * @param index
+     * @return double
+     */
+    double operator[](size_t index) const noexcept;
+
+    /**
+     * @brief Returns the volume voxels.
+     *
+     * @return const std::vector<double>&
+     */
+    const std::vector<double> &getValues() const noexcept;
 
 private:
     std::vector<double> _data;

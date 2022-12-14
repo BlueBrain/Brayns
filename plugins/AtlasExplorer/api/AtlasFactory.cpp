@@ -21,6 +21,7 @@
 #include "AtlasFactory.h"
 
 #include "atlases/FlatmapAtlas.h"
+#include "atlases/LayerDistanceAtlas.h"
 #include "atlases/OrientationAtlas.h"
 #include "atlases/ScalarAtlas.h"
 
@@ -54,6 +55,7 @@ AtlasFactory AtlasFactory::createDefault()
 {
     auto builder = FactoryBuilder();
     builder.registerType<FlatmapAtlas>();
+    builder.registerType<LayerDistanceAtlas>();
     builder.registerType<OrientationAtlas>();
     builder.registerType<ScalarAtlas>();
     return AtlasFactory(std::move(builder.factories));

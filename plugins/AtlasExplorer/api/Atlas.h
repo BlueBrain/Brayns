@@ -51,32 +51,35 @@ public:
     size_t getVoxelCount() const noexcept;
 
     /**
-     * @brief Computes a voxel bounds.
+     * @brief Computes a voxel bounds. Passing out of bounds coordinates results in undefined behaviour.
      * @param coordinates Cartesian coordinates of the voxel.
      * @return Bounds The bounds of the voxel.
      */
-    brayns::Bounds getVoxelBounds(const brayns::Vector3ui &coordinates) const;
+    brayns::Bounds getVoxelBounds(const brayns::Vector3ui &coordinates) const noexcept;
 
     /**
-     * @brief Computes a voxel bounds from a lineal index.
+     * @brief Computes a voxel bounds from a lineal index. Passing an out of bounds index results in undefined
+     * behaviour.
      * @param linealIndex Lineal index of the voxel.
      * @return Bounds The bounds of the voxel.
      */
-    brayns::Bounds getVoxelBounds(size_t linealIndex) const;
+    brayns::Bounds getVoxelBounds(size_t linealIndex) const noexcept;
 
     /**
-     * @brief Returns wether the pointed voxel contains a valid value.
+     * @brief Returns wether the pointed voxel contains a valid value. Passing out of bounds coordinates results in
+     * undefined behaviour.
      * @param coordinates Cartesian coordinates of the voxel.
      * @return true if the voxel value is not empty and the value is usable.
      */
-    bool isValidVoxel(const brayns::Vector3ui &coordinates) const;
+    bool isValidVoxel(const brayns::Vector3ui &coordinates) const noexcept;
 
     /**
-     * @brief Returns wether the pointed voxel contains a valid value.
+     * @brief Returns wether the pointed voxel contains a valid value. Passing an out of bounds index results in
+     * undefined behaviour.
      * @param linealIndex flattened voxels index.
      * @return true if the voxel value is not empty and the value is usable.
      */
-    virtual bool isValidVoxel(size_t linealIndex) const = 0;
+    virtual bool isValidVoxel(size_t linealIndex) const noexcept = 0;
 
     /**
      * @brief Returns the type of voxel of this Atlas volume.
@@ -86,10 +89,13 @@ public:
 
 protected:
     /**
-     * @brief Checks if the given lineal index is within the volume bounds.
-     * @param linealIndex
+     * @brief Returns true if a given index is within the volume bounds.
+     *
+     * @param index
+     * @return true
+     * @return false
      */
-    void _checkIndex(size_t linealIndex) const;
+    bool _isValidIndex(size_t index) const noexcept;
 
 private:
     brayns::Vector3ui _size;

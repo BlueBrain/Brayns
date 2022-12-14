@@ -23,13 +23,13 @@
 #include <api/Atlas.h>
 #include <api/DataMangler.h>
 
-class OrientationAtlas final : public Atlas
+class LayerDistanceAtlas final : public Atlas
 {
 public:
-    inline static const VoxelType type = VoxelType::orientation;
+    inline static const VoxelType type = VoxelType::layerDistance;
 
 public:
-    OrientationAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
+    LayerDistanceAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
 
     /**
      * @copydoc Atlas::isValidVoxel(size_t)
@@ -37,19 +37,34 @@ public:
     bool isValidVoxel(size_t linealIndex) const noexcept override;
 
     /**
-     * @copydoc Atlas::getVoxelType()
+     * @brief Atlas::getVoxelType()
      */
     VoxelType getVoxelType() const noexcept override;
 
     /**
-     * @brief Access the volume quaternions using a lineal index. Passing an out of bounds index results in undefined
-     * behaviour.
+     * @brief Returns a voxel value. Passing an out of bounds index will result in undefined behaviour.
      *
      * @param index
-     * @return const brayns::Quaternion&
+     * @return const Vector2f&
      */
-    const brayns::Quaternion &operator[](size_t index) const noexcept;
+    const brayns::Vector2f &operator[](size_t index) const noexcept;
+
+    /**
+     * @brief Returns the lowest valid values.
+     *
+     * @return const brayns::Vector2f&
+     */
+    const brayns::Vector2f &getLowerLimits() const noexcept;
+
+    /**
+     * @brief Returns the highest valid values.
+     *
+     * @return const brayns::Vector2f&
+     */
+    const brayns::Vector2f &getHigherLimits() const noexcept;
 
 private:
-    std::vector<brayns::Quaternion> _voxels;
+    std::vector<brayns::Vector2f> _bounds;
+    brayns::Vector2f _lowerLimits;
+    brayns::Vector2f _higherLimits;
 };

@@ -20,6 +20,45 @@
 
 #include "LayerDistance.h"
 
+#include "common/ParamsParser.h"
+
+#include <api/atlases/LayerDistanceAtlas.h>
+
+namespace
+{
+class LayerDistanceModelFactory
+{
+public:
+    static std::shared_ptr<brayns::Model> create(const LayerDistanceAtlas &atlas, const LayerDistanceParameters &param)
+    {
+        auto type = param.type;
+        if (type == LayerDistanceType::lower)
+        {
+            return _create(atlas, 0);
+        }
+
+        return _create(atlas, 1);
+    }
+
+private:
+    static std::shared_ptr<brayns::Model> _create(const LayerDistanceAtlas &atlas, size_t index)
+    {
+        auto size = atlas.getVoxelCount();
+
+        for (size_t i = 0; i < size; ++i)
+        {
+            if (!atlas.isValidVoxel(i))
+            {
+                continue;
+            }
+
+            auto bounds = atlas.getVoxelBounds(i);
+            auto value = atlas[i];
+        }
+    }
+};
+}
+
 std::string LayerDistance::getName() const
 {
     return "Layer distance";
@@ -27,14 +66,12 @@ std::string LayerDistance::getName() const
 
 bool LayerDistance::isValidAtlas(const Atlas &atlas) const
 {
-    (void)atlas;
-    return false;
+    return atlas.getVoxelType() == VoxelType::layerDistance;
 }
 
 std::shared_ptr<brayns::Model> LayerDistance::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
-    (void)atlas;
-    (void)payload;
-
-    throw std::runtime_error("Layer distance use case not implemented");
+    auto &layerAtlas = static_cast<const LayerDistanceAtlas &>(atlas);
+    auto params = ParamsParser::parse<LayerDistanceParameters>(payload);
+    return LayerDistanceModelFactory::create(layerAtlas, params);
 }

@@ -78,32 +78,24 @@ size_t Atlas::getVoxelCount() const noexcept
     return glm::compMul(_size);
 }
 
-brayns::Bounds Atlas::getVoxelBounds(const brayns::Vector3ui &coordinates) const
+brayns::Bounds Atlas::getVoxelBounds(const brayns::Vector3ui &coordinates) const noexcept
 {
-    if (glm::max(coordinates, _size) != _size)
-    {
-        throw std::invalid_argument("Coordinates out of bounds");
-    }
     return VoxelBounds::compute(coordinates, _spacing);
 }
 
-brayns::Bounds Atlas::getVoxelBounds(size_t linealIndex) const
+brayns::Bounds Atlas::getVoxelBounds(size_t linealIndex) const noexcept
 {
-    _checkIndex(linealIndex);
     auto coordinates = VoxelCoordinates::linealToCartesian(_size, linealIndex);
     return VoxelBounds::compute(coordinates, _spacing);
 }
 
-bool Atlas::isValidVoxel(const brayns::Vector3ui &coordinates) const
+bool Atlas::isValidVoxel(const brayns::Vector3ui &coordinates) const noexcept
 {
     auto linealIndex = VoxelCoordinates::cartesianToLineal(_size, coordinates);
     return isValidVoxel(linealIndex);
 }
 
-void Atlas::_checkIndex(size_t linealIndex) const
+bool Atlas::_isValidIndex(size_t index) const noexcept
 {
-    if (!(linealIndex < getVoxelCount()))
-    {
-        throw std::invalid_argument("Lineal index out of bounds");
-    }
+    return index < static_cast<size_t>(glm::compMul(_size));
 }
