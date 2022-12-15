@@ -22,7 +22,6 @@
 
 #include <api/IUseCase.h>
 
-#include <brayns/engine/json/adapters/ColorRampAdapter.h>
 #include <brayns/json/JsonObjectMacro.h>
 
 enum class LayerDistanceType
@@ -38,11 +37,6 @@ BRAYNS_JSON_ADAPTER_ENUM(LayerDistanceType, {"lower", LayerDistanceType::lower},
 
 BRAYNS_JSON_OBJECT_BEGIN(LayerDistanceParameters)
 BRAYNS_JSON_OBJECT_ENTRY(LayerDistanceType, type, "Type of distance to show")
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::optional<brayns::ColorRamp>,
-    color_ramp,
-    "Color ramp to color distances",
-    brayns::Required(false))
 BRAYNS_JSON_OBJECT_END()
 
 class LayerDistance final : public IUseCase

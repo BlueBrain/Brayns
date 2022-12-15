@@ -55,7 +55,7 @@ private:
     {
         if (!std::isfinite(value))
         {
-            return std::numeric_limits<float>::infinity();
+            return std::numeric_limits<float>::quiet_NaN();
         }
 
         if (value < static_cast<double>(std::numeric_limits<float>::lowest()))

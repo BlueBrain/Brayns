@@ -22,16 +22,23 @@
 
 #include "common/ParamsParser.h"
 
+#include <api/ModelType.h>
 #include <api/atlases/LayerDistanceAtlas.h>
+
+#include <brayns/engine/components/ColorRamp.h>
+#include <brayns/engine/components/Volumes.h>
+#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/engine/systems/VolumeCommitSystem.h>
+#include <brayns/engine/systems/VolumeInitSystem.h>
+#include <brayns/engine/volume/types/RegularVolume.h>
 
 namespace
 {
 class LayerDistanceModelFactory
 {
 public:
-    static std::shared_ptr<brayns::Model> create(const LayerDistanceAtlas &atlas, const LayerDistanceParameters &param)
+    static std::shared_ptr<brayns::Model> create(const LayerDistanceAtlas &atlas, LayerDistanceType type)
     {
-        auto type = param.type;
         if (type == LayerDistanceType::lower)
         {
             return _create(atlas, 0);
@@ -41,19 +48,72 @@ public:
     }
 
 private:
-    static std::shared_ptr<brayns::Model> _create(const LayerDistanceAtlas &atlas, size_t index)
+    static std::shared_ptr<brayns::Model> _create(const LayerDistanceAtlas &atlas, glm::length_t index)
+    {
+        _checkValidData(atlas, index);
+
+        auto model = std::make_shared<brayns::Model>(ModelType::atlas);
+
+        auto volume = brayns::RegularVolume();
+        volume.dataType = brayns::VolumeDataType::Float;
+        volume.size = atlas.getSize();
+        volume.spacing = atlas.getSpacing();
+        volume.voxels = _createVoxels(atlas, index);
+
+        auto colorRamp = _createColorRamp(atlas, index);
+
+        auto &components = model->getComponents();
+        components.add<brayns::Volumes>(std::move(volume));
+        components.add<brayns::ColorRamp>(std::move(colorRamp));
+
+        auto &systems = model->getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Volumes>>();
+        systems.setCommitSystem<brayns::VolumeCommitSystem>();
+        systems.setInitSystem<brayns::VolumeInitSystem>();
+
+        return model;
+    }
+
+    static std::vector<uint8_t> _createVoxels(const LayerDistanceAtlas &atlas, glm::length_t index)
     {
         auto size = atlas.getVoxelCount();
+        auto values = std::vector<uint8_t>(size * sizeof(float));
 
         for (size_t i = 0; i < size; ++i)
         {
-            if (!atlas.isValidVoxel(i))
-            {
-                continue;
-            }
+            auto value = atlas[i][index];
+            auto pos = i * sizeof(float);
+            std::memcpy(&values[pos], &value, sizeof(float));
+        }
 
-            auto bounds = atlas.getVoxelBounds(i);
-            auto value = atlas[i];
+        return values;
+    }
+
+    static brayns::ColorRamp _createColorRamp(const LayerDistanceAtlas &atlas, glm::length_t index)
+    {
+        auto colors = std::vector<brayns::Vector4f>{
+            brayns::Vector4f(1.f, 0.f, 0.f, 1.f),
+            brayns::Vector4f(1.f, 0.5f, 0.f, 1.f),
+            brayns::Vector4f(1.f, 1.f, 0.f, 1.f),
+            brayns::Vector4f(0.8f, 0.8f, 0.8f, 1.f)};
+
+        auto min = atlas.getLowerLimits()[index];
+        auto max = atlas.getHigherLimits()[index];
+
+        auto colorRamp = brayns::ColorRamp();
+        colorRamp.setColors(std::move(colors));
+        colorRamp.setValuesRange({min, max});
+        return colorRamp;
+    }
+
+    static void _checkValidData(const LayerDistanceAtlas &atlas, glm::length_t index)
+    {
+        auto min = atlas.getLowerLimits()[index];
+        auto max = atlas.getHigherLimits()[index];
+
+        if (min > max || min == max)
+        {
+            throw std::runtime_error("Cannot visualize layer distance. Data is not valid");
         }
     }
 };
@@ -73,5 +133,5 @@ std::shared_ptr<brayns::Model> LayerDistance::run(const Atlas &atlas, const bray
 {
     auto &layerAtlas = static_cast<const LayerDistanceAtlas &>(atlas);
     auto params = ParamsParser::parse<LayerDistanceParameters>(payload);
-    return LayerDistanceModelFactory::create(layerAtlas, params);
+    return LayerDistanceModelFactory::create(layerAtlas, params.type);
 }
