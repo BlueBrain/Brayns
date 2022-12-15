@@ -20,7 +20,7 @@
 
 from dataclasses import dataclass
 
-from brayns.version import __version__
+from brayns.version import VERSION
 
 from .version_error import VersionError
 
@@ -64,10 +64,10 @@ class Version:
         """
         return ".".join(str(i) for i in self.release)
 
-    def check(self, local: str = __version__) -> None:
+    def check(self, local: str = VERSION) -> None:
         """Check that self is compatible with local version.
 
-        :param local: API version, defaults to __version__
+        :param local: API version, defaults to VERSION.
         :type local: str, optional
         :raises VersionError: Version mismatch.
         """

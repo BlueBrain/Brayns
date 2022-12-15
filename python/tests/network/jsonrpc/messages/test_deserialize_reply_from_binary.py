@@ -21,7 +21,10 @@
 import json
 import unittest
 
-from brayns.network import deserialize_reply_from_binary, deserialize_reply_from_text
+from brayns.network.jsonrpc import (
+    deserialize_reply_from_binary,
+    deserialize_reply_from_text,
+)
 
 
 class TestDeserializeReplyFromBinary(unittest.TestCase):

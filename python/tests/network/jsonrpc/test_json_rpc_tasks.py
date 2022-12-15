@@ -22,7 +22,7 @@ import unittest
 from typing import cast
 
 import brayns
-from brayns.network import JsonRpcTask, JsonRpcTasks
+from brayns.network.jsonrpc import JsonRpcTask, JsonRpcTasks
 
 from .messages.mock_error import MockError
 from .messages.mock_progress import MockProgress

@@ -39,7 +39,7 @@ def start(service: Service, connector: Connector) -> Manager:
     process = service.start()
     try:
         instance = connector.connect()
-    except:
+    except BaseException:
         process.stop()
         raise
     return Manager(process, instance)

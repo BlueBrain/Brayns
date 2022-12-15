@@ -20,10 +20,11 @@
 
 from __future__ import annotations
 
-from brayns.network import Instance
-from brayns.utils import Vector2
+from typing import Any
 
-from .deserialize_pick_result import deserialize_pick_result
+from brayns.network import Instance
+from brayns.utils import Vector2, Vector3
+
 from .pick_result import PickResult
 
 
@@ -47,4 +48,15 @@ def pick(instance: Instance, position: Vector2) -> PickResult | None:
     """
     params = {"position": list(position)}
     result = instance.request("inspect", params)
-    return deserialize_pick_result(result)
+    return _deserialize_pick_result(result)
+
+
+def _deserialize_pick_result(message: dict[str, Any]) -> PickResult | None:
+    hit = message["hit"]
+    if not hit:
+        return None
+    return PickResult(
+        position=Vector3(*message["position"]),
+        model_id=message["model_id"],
+        metadata=message["metadata"],
+    )

@@ -23,7 +23,7 @@ import sys
 import unittest
 
 import brayns
-from brayns.network import JsonRpcHandler, JsonRpcTasks
+from brayns.network.jsonrpc import JsonRpcHandler, JsonRpcTasks
 
 
 class TestJsonRpcHandler(unittest.TestCase):

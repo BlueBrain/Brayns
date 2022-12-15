@@ -28,8 +28,8 @@ class TestCellPlacementLoader(unittest.TestCase):
 
     def test_get_properties(self) -> None:
         loader = brayns.CellPlacementLoader(
-            morphology_folder="/a/random/folder",
-            percentage=0.7,
+            morphologies_folder="/a/random/folder",
+            density=0.7,
             extension="ext",
         )
         self.assertEqual(

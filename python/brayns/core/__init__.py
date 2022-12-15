@@ -27,23 +27,122 @@ with an instance of Brayns service.
 Include access to camera, renderer, models, materials, snapshots, etc...
 """
 
-from .api import *
-from .application import *
-from .camera import *
-from .clipping import *
-from .color_ramp import *
-from .coloring import *
-from .framebuffer import *
-from .geometry import *
-from .light import *
-from .loader import *
-from .material import *
-from .model import *
-from .pick import *
-from .render import *
-from .renderer import *
-from .simulation import *
-from .version import *
+from .api import (
+    Entrypoint,
+    JsonSchema,
+    JsonType,
+    deserialize_schema,
+    get_entrypoint,
+    get_entrypoints,
+    get_methods,
+    serialize_schema,
+)
+from .application import Application, get_application, set_resolution, stop
+from .camera import (
+    Camera,
+    CameraController,
+    CameraRotation,
+    OrthographicProjection,
+    PerspectiveProjection,
+    Projection,
+    get_camera,
+    get_camera_name,
+    get_camera_projection,
+    get_camera_view,
+    set_camera,
+    set_camera_projection,
+    set_camera_view,
+)
+from .clipping import (
+    ClippingGeometry,
+    ClipPlane,
+    add_clipping_geometry,
+    clear_clipping_geometries,
+)
+from .color_ramp import (
+    ColorRamp,
+    ControlPoint,
+    OpacityCurve,
+    ValueRange,
+    get_color_ramp,
+    set_color_ramp,
+)
+from .coloring import (
+    ColorMethod,
+    color_model,
+    get_color_methods,
+    get_color_values,
+    set_model_color,
+)
+from .framebuffer import (
+    Framebuffer,
+    ProgressiveFramebuffer,
+    StaticFramebuffer,
+    set_framebuffer,
+)
+from .geometry import (
+    BoundedPlane,
+    Box,
+    Capsule,
+    Geometry,
+    Plane,
+    Sphere,
+    add_geometries,
+)
+from .light import (
+    AmbientLight,
+    DirectionalLight,
+    Light,
+    QuadLight,
+    add_light,
+    clear_lights,
+)
+from .loader import Loader, LoaderInfo, MeshLoader, get_loaders
+from .material import (
+    CarPaintMaterial,
+    EmissiveMaterial,
+    GlassMaterial,
+    Material,
+    MatteMaterial,
+    MetalMaterial,
+    PhongMaterial,
+    PlasticMaterial,
+    get_material,
+    get_material_name,
+    set_material,
+)
+from .model import (
+    Model,
+    Scene,
+    clear_models,
+    clear_renderables,
+    deserialize_model,
+    get_bounds,
+    get_model,
+    get_models,
+    get_scene,
+    instantiate_model,
+    remove_models,
+    update_model,
+)
+from .pick import PickResult, pick
+from .render import Image, ImageInfo, Snapshot
+from .renderer import (
+    InteractiveRenderer,
+    ProductionRenderer,
+    Renderer,
+    get_renderer,
+    get_renderer_name,
+    set_renderer,
+)
+from .simulation import (
+    Simulation,
+    TimeUnit,
+    enable_simulation,
+    get_simulation,
+    set_simulation_frame,
+)
+from .version import Version, VersionError, check_version, get_version
 
 __all__ = [
     "add_clipping_geometry",
@@ -69,6 +168,8 @@ __all__ = [
     "ColorMethod",
     "ColorRamp",
     "ControlPoint",
+    "deserialize_model",
+    "deserialize_schema",
     "DirectionalLight",
     "EmissiveMaterial",
     "enable_simulation",
@@ -127,6 +228,7 @@ __all__ = [
     "remove_models",
     "Renderer",
     "Scene",
+    "serialize_schema",
     "set_camera_projection",
     "set_camera_view",
     "set_camera",

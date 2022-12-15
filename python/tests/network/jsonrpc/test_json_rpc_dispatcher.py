@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.network import JsonRpcDispatcher
+from brayns.network.jsonrpc import JsonRpcDispatcher
 
 from .messages.mock_error import MockError
 from .messages.mock_progress import MockProgress

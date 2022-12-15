@@ -23,7 +23,7 @@ import unittest
 from typing import cast
 
 import brayns
-from brayns.network import JsonRpcManager
+from brayns.network.jsonrpc import JsonRpcManager
 
 from .messages.mock_reply import MockReply
 

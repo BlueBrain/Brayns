@@ -22,7 +22,9 @@ import logging
 import unittest
 
 import brayns
-from brayns.network import Client, JsonRpcManager, Listener, serialize_request_to_text
+from brayns.network.client import Client
+from brayns.network.jsonrpc import JsonRpcManager, serialize_request_to_text
+from brayns.network.listener import Listener
 
 from .jsonrpc.messages.mock_reply import MockReply
 from .jsonrpc.messages.mock_request import MockRequest

@@ -18,10 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
+from typing import Any
+
 from brayns.network import Instance
 
-from .deserialize_entrypoint import deserialize_entrypoint
+from .deserialize_schema import deserialize_schema
 from .entrypoint import Entrypoint
+from .json_schema import JsonSchema
 
 
 def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
@@ -36,4 +41,22 @@ def get_entrypoint(instance: Instance, method: str) -> Entrypoint:
     """
     params = {"endpoint": method}
     result = instance.request("schema", params)
-    return deserialize_entrypoint(result)
+    return _deserialize_entrypoint(result)
+
+
+def _deserialize_entrypoint(message: dict[str, Any]) -> Entrypoint:
+    return Entrypoint(
+        method=message["title"],
+        description=message["description"],
+        plugin=message["plugin"],
+        asynchronous=message["async"],
+        params=_deserialize_schema(message, "params"),
+        result=_deserialize_schema(message, "returns"),
+    )
+
+
+def _deserialize_schema(message: dict[str, Any], key: str) -> JsonSchema | None:
+    value = message.get(key)
+    if value is None:
+        return None
+    return deserialize_schema(value)

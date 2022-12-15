@@ -22,7 +22,7 @@ import unittest
 from typing import Any
 
 import brayns
-from brayns.network import deserialize_reply
+from brayns.network.jsonrpc import deserialize_reply
 
 
 class TestDeserializeReply(unittest.TestCase):
