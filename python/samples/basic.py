@@ -25,7 +25,7 @@ import brayns
 URI = "localhost:5000"
 EXECUTABLE = "path/to/braynsService"
 OSPRAY = "path/to/OSPRAY_2_10/install_dir/lib"
-CIRCUIT = "/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/circuitBuilding_1000neurons/BlueConfig"
+CIRCUIT = "path/to/BlueConfig"
 RESOLUTION = brayns.Resolution.full_hd
 FRAMES = "path/to/frames/%d.png"
 MOVIE = "path/to/movie.mp4"
