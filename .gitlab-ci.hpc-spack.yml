@@ -67,11 +67,7 @@ brayns-python-type-check:
   script:
     - cd ${SPACK_SOURCE_DIR}/python
     - source pythonvenv/bin/activate
-    - pyright --warnings brayns
-    - pyright --warnings tests
-    - pyright --warnings testapi
-    - pyright --warnings scripts
-    - pyright --warnings samples
+    - pyright --warnings .
     - deactivate
 
 brayns-python-testapi:
