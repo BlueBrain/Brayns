@@ -32,8 +32,8 @@ class TestPick(SimpleTestCase):
         self.assertIsNotNone(test)
         test = cast(brayns.PickResult, test)
         self.assertAlmostEqual(test.position.x, 38.38946, delta=0.001)
-        self.assertAlmostEqual(test.position.x, 999.41394, delta=0.001)
-        self.assertAlmostEqual(test.position.x, 56.914795, delta=0.001)
+        self.assertAlmostEqual(test.position.y, 999.41394, delta=0.001)
+        self.assertAlmostEqual(test.position.z, 56.914795, delta=0.001)
         self.assertEqual(test.model_id, 0)
         self.assertEqual(test.metadata, {'neuron_id': 559})
 
