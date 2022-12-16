@@ -29,9 +29,10 @@ namespace brayns
 {
 BRAYNS_JSON_ADAPTER_ENUM(
     VoxelType,
-    {"scalar", VoxelType::scalar},
-    {"orientation", VoxelType::orientation},
-    {"flatmap", VoxelType::flatmap})
+    {"scalar", VoxelType::Scalar},
+    {"orientation", VoxelType::Orientation},
+    {"flatmap", VoxelType::Flatmap},
+    {"layer_distance", VoxelType::LayerDistance})
 }
 
 BRAYNS_JSON_OBJECT_BEGIN(NRRDLoaderParameters)

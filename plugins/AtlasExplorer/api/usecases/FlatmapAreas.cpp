@@ -182,7 +182,7 @@ std::string FlatmapAreas::getName() const
 
 bool FlatmapAreas::isValidAtlas(const Atlas &atlas) const
 {
-    return atlas.getVoxelType() == VoxelType::flatmap;
+    return atlas.getVoxelType() == VoxelType::Flatmap;
 }
 
 std::shared_ptr<brayns::Model> FlatmapAreas::run(const Atlas &atlas, const brayns::JsonValue &payload) const

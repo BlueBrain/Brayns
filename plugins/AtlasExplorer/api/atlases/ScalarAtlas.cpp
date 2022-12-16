@@ -34,6 +34,18 @@ ScalarAtlas::ScalarAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &
     _max = minMax.second;
 }
 
+bool ScalarAtlas::isValidVoxel(size_t index) const noexcept
+{
+    assert(_isValidIndex(index));
+    auto value = _data[index];
+    return value > _min && std::isfinite(value);
+}
+
+VoxelType ScalarAtlas::getVoxelType() const noexcept
+{
+    return type;
+}
+
 double ScalarAtlas::getMinValue() const noexcept
 {
     return _min;
@@ -44,30 +56,13 @@ double ScalarAtlas::getMaxValue() const noexcept
     return _max;
 }
 
-bool ScalarAtlas::isValidVoxel(size_t linealIndex) const
-{
-    _checkIndex(linealIndex);
-    auto value = _data[linealIndex];
-    return value > _min && std::isfinite(value);
-}
-
 double ScalarAtlas::operator[](size_t index) const noexcept
 {
-    return _data[index];
-}
-
-double ScalarAtlas::at(size_t index) const
-{
-    _checkIndex(index);
+    assert(_isValidIndex(index));
     return _data[index];
 }
 
 const std::vector<double> &ScalarAtlas::getValues() const noexcept
 {
     return _data;
-}
-
-VoxelType ScalarAtlas::getVoxelType() const noexcept
-{
-    return type;
 }

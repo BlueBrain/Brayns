@@ -22,6 +22,23 @@
 
 #include <api/IUseCase.h>
 
+#include <brayns/json/JsonObjectMacro.h>
+
+enum class LayerDistanceType
+{
+    lower,
+    upper
+};
+
+namespace brayns
+{
+BRAYNS_JSON_ADAPTER_ENUM(LayerDistanceType, {"lower", LayerDistanceType::lower}, {"upper", LayerDistanceType::upper})
+}
+
+BRAYNS_JSON_OBJECT_BEGIN(LayerDistanceParameters)
+BRAYNS_JSON_OBJECT_ENTRY(LayerDistanceType, type, "Type of distance to show")
+BRAYNS_JSON_OBJECT_END()
+
 class LayerDistance final : public IUseCase
 {
 public:

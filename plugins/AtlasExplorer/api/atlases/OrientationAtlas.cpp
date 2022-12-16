@@ -20,6 +20,8 @@
 
 #include "OrientationAtlas.h"
 
+#include <cassert>
+
 namespace
 {
 class QuaternionExtractor
@@ -67,24 +69,19 @@ OrientationAtlas::OrientationAtlas(
 {
 }
 
-bool OrientationAtlas::isValidVoxel(size_t linealIndex) const
+bool OrientationAtlas::isValidVoxel(size_t index) const noexcept
 {
-    _checkIndex(linealIndex);
-    return glm::length2(_voxels[linealIndex]) > 0.f;
-}
-
-const brayns::Quaternion &OrientationAtlas::operator[](size_t index) const noexcept
-{
-    return _voxels[index];
-}
-
-const brayns::Quaternion &OrientationAtlas::at(size_t index) const
-{
-    _checkIndex(index);
-    return _voxels[index];
+    assert(_isValidIndex(index));
+    return glm::length2(_voxels[index]) > 0.f;
 }
 
 VoxelType OrientationAtlas::getVoxelType() const noexcept
 {
     return type;
+}
+
+const brayns::Quaternion &OrientationAtlas::operator[](size_t index) const noexcept
+{
+    assert(_isValidIndex(index));
+    return _voxels[index];
 }

@@ -27,6 +27,14 @@ namespace brayns
 {
 struct Volumes
 {
+    Volumes() = default;
+
+    template<typename VolumeType>
+    Volumes(VolumeType volume)
+    {
+        elements.emplace_back(std::move(volume));
+    }
+
     std::vector<Volume> elements;
     ModifiedFlag modified;
 };

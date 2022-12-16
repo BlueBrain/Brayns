@@ -22,6 +22,8 @@
 
 #include <api/utils/DataUtils.h>
 
+#include <cassert>
+
 namespace
 {
 class Extractor
@@ -67,25 +69,20 @@ FlatmapAtlas::FlatmapAtlas(const brayns::Vector3ui &size, const brayns::Vector3f
     _min = minMax.first;
 }
 
-bool FlatmapAtlas::isValidVoxel(size_t linealIndex) const
+bool FlatmapAtlas::isValidVoxel(size_t index) const noexcept
 {
-    _checkIndex(linealIndex);
-    auto &element = _voxels[linealIndex];
+    assert(_isValidIndex(index));
+    auto &element = _voxels[index];
     return element.x > _min && element.y > _min;
-}
-
-const brayns::Vector2l &FlatmapAtlas::operator[](size_t index) const noexcept
-{
-    return _voxels[index];
-}
-
-const brayns::Vector2l &FlatmapAtlas::at(size_t index) const
-{
-    _checkIndex(index);
-    return _voxels[index];
 }
 
 VoxelType FlatmapAtlas::getVoxelType() const noexcept
 {
     return type;
+}
+
+const brayns::Vector2l &FlatmapAtlas::operator[](size_t index) const noexcept
+{
+    assert(_isValidIndex(index));
+    return _voxels[index];
 }

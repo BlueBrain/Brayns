@@ -151,7 +151,7 @@ std::string OrientationField::getName() const
 
 bool OrientationField::isValidAtlas(const Atlas &atlas) const
 {
-    return atlas.getVoxelType() == VoxelType::orientation;
+    return atlas.getVoxelType() == VoxelType::Orientation;
 }
 
 std::shared_ptr<brayns::Model> OrientationField::run(const Atlas &atlas, const brayns::JsonValue &payload) const

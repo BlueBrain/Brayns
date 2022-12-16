@@ -26,14 +26,29 @@
 class FlatmapAtlas final : public Atlas
 {
 public:
-    inline static const VoxelType type = VoxelType::flatmap;
+    inline static const VoxelType type = VoxelType::Flatmap;
 
 public:
     FlatmapAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
-    bool isValidVoxel(size_t linealIndex) const override;
-    const brayns::Vector2l &operator[](size_t index) const noexcept;
-    const brayns::Vector2l &at(size_t index) const;
+
+    /**
+     * @copydoc Atlas::isValidVoxel(size_t)
+     */
+    bool isValidVoxel(size_t linealIndex) const noexcept override;
+
+    /**
+     * @copydoc Atlas::getVoxelType()
+     */
     VoxelType getVoxelType() const noexcept override;
+
+    /**
+     * @brief Access the flatmap coordinates of the volume using a lineal index. Passing an out of bounds index results
+     * in undefined behaviour.
+     *
+     * @param index
+     * @return const brayns::Vector2l&
+     */
+    const brayns::Vector2l &operator[](size_t index) const noexcept;
 
 private:
     std::vector<brayns::Vector2l> _voxels;

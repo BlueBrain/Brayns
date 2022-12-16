@@ -23,16 +23,13 @@
 #include <api/Atlas.h>
 #include <api/DataMangler.h>
 
-/**
- * @brief Represents a scalar value atlas volume of any kind.
- */
-class ScalarAtlas final : public Atlas
+class LayerDistanceAtlas final : public Atlas
 {
 public:
-    inline static const VoxelType type = VoxelType::Scalar;
+    inline static const VoxelType type = VoxelType::LayerDistance;
 
 public:
-    ScalarAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
+    LayerDistanceAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
 
     /**
      * @copydoc Atlas::isValidVoxel(size_t)
@@ -40,42 +37,34 @@ public:
     bool isValidVoxel(size_t linealIndex) const noexcept override;
 
     /**
-     * @copydoc Atlas::getVoxelType()
+     * @brief Atlas::getVoxelType()
      */
     VoxelType getVoxelType() const noexcept override;
 
     /**
-     * @brief Returns the lowest scalar value in the volume.
-     *
-     * @return double
-     */
-    double getMinValue() const noexcept;
-
-    /**
-     * @brief Returns the highest scalar value in the volume.
-     *
-     * @return double
-     */
-    double getMaxValue() const noexcept;
-
-    /**
-     * @brief Access the volume data using a lineal index. Passing an out of bounds index results in undefined
-     * behaviour.
+     * @brief Returns a voxel value. Passing an out of bounds index will result in undefined behaviour.
      *
      * @param index
-     * @return double
+     * @return const Vector2f&
      */
-    double operator[](size_t index) const noexcept;
+    const brayns::Vector2f &operator[](size_t index) const noexcept;
 
     /**
-     * @brief Returns the volume voxels.
+     * @brief Returns the lowest valid values.
      *
-     * @return const std::vector<double>&
+     * @return const brayns::Vector2f&
      */
-    const std::vector<double> &getValues() const noexcept;
+    const brayns::Vector2f &getLowerLimits() const noexcept;
+
+    /**
+     * @brief Returns the highest valid values.
+     *
+     * @return const brayns::Vector2f&
+     */
+    const brayns::Vector2f &getHigherLimits() const noexcept;
 
 private:
-    std::vector<double> _data;
-    double _min = 0.;
-    double _max = 0.;
+    std::vector<brayns::Vector2f> _bounds;
+    brayns::Vector2f _lowerLimits;
+    brayns::Vector2f _higherLimits;
 };

@@ -26,14 +26,29 @@
 class OrientationAtlas final : public Atlas
 {
 public:
-    inline static const VoxelType type = VoxelType::orientation;
+    inline static const VoxelType type = VoxelType::Orientation;
 
 public:
     OrientationAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
-    bool isValidVoxel(size_t linealIndex) const override;
-    const brayns::Quaternion &operator[](size_t index) const noexcept;
-    const brayns::Quaternion &at(size_t index) const;
+
+    /**
+     * @copydoc Atlas::isValidVoxel(size_t)
+     */
+    bool isValidVoxel(size_t linealIndex) const noexcept override;
+
+    /**
+     * @copydoc Atlas::getVoxelType()
+     */
     VoxelType getVoxelType() const noexcept override;
+
+    /**
+     * @brief Access the volume quaternions using a lineal index. Passing an out of bounds index results in undefined
+     * behaviour.
+     *
+     * @param index
+     * @return const brayns::Quaternion&
+     */
+    const brayns::Quaternion &operator[](size_t index) const noexcept;
 
 private:
     std::vector<brayns::Quaternion> _voxels;
