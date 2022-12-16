@@ -38,7 +38,7 @@ std::string Density::getName() const
 
 bool Density::isValidAtlas(const Atlas &atlas) const
 {
-    return atlas.getVoxelType() == VoxelType::scalar;
+    return atlas.getVoxelType() == VoxelType::Scalar;
 }
 
 std::shared_ptr<brayns::Model> Density::run(const Atlas &atlas, const brayns::JsonValue &payload) const

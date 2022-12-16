@@ -126,7 +126,7 @@ std::string LayerDistance::getName() const
 
 bool LayerDistance::isValidAtlas(const Atlas &atlas) const
 {
-    return atlas.getVoxelType() == VoxelType::layerDistance;
+    return atlas.getVoxelType() == VoxelType::LayerDistance;
 }
 
 std::shared_ptr<brayns::Model> LayerDistance::run(const Atlas &atlas, const brayns::JsonValue &payload) const

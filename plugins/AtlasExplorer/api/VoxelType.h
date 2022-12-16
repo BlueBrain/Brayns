@@ -22,8 +22,8 @@
 
 enum class VoxelType
 {
-    scalar,
-    orientation,
-    flatmap,
-    layerDistance
+    Scalar,
+    Orientation,
+    Flatmap,
+    LayerDistance
 };

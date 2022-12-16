@@ -26,7 +26,7 @@
 class OrientationAtlas final : public Atlas
 {
 public:
-    inline static const VoxelType type = VoxelType::orientation;
+    inline static const VoxelType type = VoxelType::Orientation;
 
 public:
     OrientationAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
