@@ -69,9 +69,10 @@ brayns-python-format-check:
   script:
     - cd ${SPACK_SOURCE_DIR}/python
     - source pythonvenv/bin/activate
-    - pyright --warnings .
-    - flake8 .
-    - black --check .
+    - TARGETS="brayns doc samples scripts testapi tests setup.py"
+    - pyright --warnings $TARGETS
+    - flake8 $TARGETS
+    - black --check $TARGETS
     - deactivate
 
 brayns-python-testapi:
