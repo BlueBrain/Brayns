@@ -45,9 +45,11 @@ brayns-python-venv:
     - source pythonvenv/bin/activate
     - python setup.py sdist
     - pip install dist/*
-    - pip install pyright
     - pip install PySimpleGUI
     - pip install Pillow
+    - pip install pyright
+    - pip install flake8
+    - pip install black
     - deactivate
 
 brayns-python-test:
@@ -60,14 +62,17 @@ brayns-python-test:
     - python -m unittest discover -v --locals -s tests -p test_*.py
     - deactivate
 
-brayns-python-type-check:
+brayns-python-format-check:
   extends: .spack_test
   needs: ["brayns-spack-build", "brayns-python-venv"]
   timeout: 10 minutes
   script:
     - cd ${SPACK_SOURCE_DIR}/python
     - source pythonvenv/bin/activate
-    - pyright --warnings .
+    - TARGETS="brayns doc samples scripts testapi tests setup.py"
+    - pyright --warnings $TARGETS
+    - flake8 $TARGETS
+    - black --check $TARGETS
     - deactivate
 
 brayns-python-testapi:

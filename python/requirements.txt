@@ -23,6 +23,9 @@
 websockets~=10.3
 Pillow~=9.3.0
 PySimpleGUI~=4.60.0
+pyright~=1.1.284
+black~=22.12.0
+flake8~=6.0.0
 Sphinx~=2.0.0
 nbsphinx~=0.7.1
 sphinx-bluebrain-theme~=0.2.2
