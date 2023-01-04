@@ -40,7 +40,7 @@ namespace brayns
 class Brayns : public PluginAPI
 {
 public:
-    Brayns(int argc = 0, const char **argv = nullptr);
+    explicit Brayns(int argc = 0, const char **argv = nullptr);
 
     Brayns(const Brayns &) = delete;
     Brayns &operator=(const Brayns &) = delete;

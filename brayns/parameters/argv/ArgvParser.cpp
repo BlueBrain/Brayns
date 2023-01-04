@@ -105,7 +105,7 @@ public:
 private:
     static bool _isKey(const char *token)
     {
-        return token[0] && token[0] == '-' && token[1] == '-';
+        return token[0] == '-' && token[1] == '-';
     }
 
     static std::string _extractKey(const char *value)

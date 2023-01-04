@@ -45,11 +45,12 @@ public:
     {
         assert(codec);
         auto format = codec->getFormat();
-        auto pair = _codecs.emplace(std::move(format), std::move(codec));
-        if (!pair.second)
+        auto old = find(format);
+        if (old)
         {
             throw std::runtime_error("Too many codecs for '" + format + "'");
         }
+        _codecs.emplace(std::move(format), std::move(codec));
     }
 
     template<typename T, typename... Args>

@@ -111,7 +111,6 @@ private:
         case sl::ReportType::Synapse:
         {
             throw std::invalid_argument("Invalid report type for node population " + population);
-            break;
         }
         default:
             break;

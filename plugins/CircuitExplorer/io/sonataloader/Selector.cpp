@@ -109,12 +109,12 @@ bbp::sonata::Selection NodeSelector::select(const Config &config, const SonataNo
     auto &nodeSets = params.node_sets;
     auto &nodeIds = params.node_ids;
     auto reportType = params.report_type;
-    auto &reportName = params.report_name;
     auto percentage = params.node_percentage;
 
     bbp::sonata::Selection reportSelection({});
     if (reportType != ReportType::None && reportType != ReportType::Spikes)
     {
+        auto &reportName = params.report_name;
         reportSelection = NodeReportFilter::filter(config, reportName, nodePopulation);
     }
 
