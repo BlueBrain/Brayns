@@ -27,5 +27,5 @@
 class MoleculeExplorerPlugin : public brayns::IPlugin
 {
 public:
-    MoleculeExplorerPlugin(brayns::PluginAPI &api);
+    explicit MoleculeExplorerPlugin(brayns::PluginAPI &api);
 };

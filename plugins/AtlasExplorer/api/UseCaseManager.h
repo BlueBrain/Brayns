@@ -38,7 +38,7 @@ public:
      * @brief Construct a new UseCaseManager object with the given use-cases to handle
      * @param useCases List of use-cases to handle.
      */
-    UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases);
+    explicit UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases);
 
     /**
      * @brief Return the names of the valid use-cases for a specific atlas object.

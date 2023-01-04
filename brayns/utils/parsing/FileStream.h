@@ -30,7 +30,7 @@ namespace brayns
 class FileStream
 {
 public:
-    FileStream(std::string_view data);
+    explicit FileStream(std::string_view data);
 
     std::string_view getData() const;
     size_t getLineNumber() const;

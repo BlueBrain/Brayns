@@ -29,7 +29,7 @@ namespace brayns
 class GetSimulationParametersEntrypoint : public GetEntrypoint<SimulationParameters>
 {
 public:
-    GetSimulationParametersEntrypoint(const SimulationParameters &parameters);
+    explicit GetSimulationParametersEntrypoint(const SimulationParameters &parameters);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -38,7 +38,7 @@ public:
 class SetSimulationParametersEntrypoint : public SetEntrypoint<SimulationParameters>
 {
 public:
-    SetSimulationParametersEntrypoint(SimulationParameters &parameters);
+    explicit SetSimulationParametersEntrypoint(SimulationParameters &parameters);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

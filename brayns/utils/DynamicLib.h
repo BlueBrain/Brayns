@@ -27,7 +27,7 @@ namespace brayns
 class DynamicLib
 {
 public:
-    DynamicLib(std::string_view name);
+    explicit DynamicLib(std::string_view name);
     ~DynamicLib();
 
     DynamicLib(DynamicLib &&other);

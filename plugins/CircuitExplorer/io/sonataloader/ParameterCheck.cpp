@@ -33,7 +33,7 @@ namespace sl = sonataloader;
 class NodeChecker
 {
 public:
-    NodeChecker(const sonataloader::Config &config)
+    explicit NodeChecker(const sonataloader::Config &config)
         : _config(config)
     {
     }
@@ -131,7 +131,7 @@ private:
 class EdgeChecker
 {
 public:
-    EdgeChecker(const sonataloader::Config &config)
+    explicit EdgeChecker(const sonataloader::Config &config)
         : _config(config)
     {
     }
@@ -192,7 +192,7 @@ private:
 class MorphologyChecker
 {
 public:
-    MorphologyChecker(const sl::Config &config)
+    explicit MorphologyChecker(const sl::Config &config)
         : _config(config)
     {
     }

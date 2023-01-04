@@ -26,8 +26,9 @@
 class OffsetIndexer : public IColormapIndexer
 {
 public:
-    OffsetIndexer(std::vector<size_t> offsets);
+    explicit OffsetIndexer(std::vector<size_t> offsets);
     OffsetIndexer(const std::vector<CellCompartments> &structure, const std::vector<CellReportMapping> &mapping);
+
     std::vector<uint8_t> generate(const std::vector<float> &data, const brayns::Vector2f &range) noexcept override;
 
 private:

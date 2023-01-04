@@ -30,7 +30,7 @@ namespace brayns
 class GetSceneEntrypoint : public Entrypoint<EmptyMessage, SceneProxy>
 {
 public:
-    GetSceneEntrypoint(const Scene &scene);
+    explicit GetSceneEntrypoint(const Scene &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

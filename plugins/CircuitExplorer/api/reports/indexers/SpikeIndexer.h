@@ -22,7 +22,8 @@
 class SpikeIndexer : public IColormapIndexer
 {
 public:
-    SpikeIndexer(const std::vector<CellCompartments> &cellCompartments);
+    explicit SpikeIndexer(const std::vector<CellCompartments> &cellCompartments);
+
     std::vector<uint8_t> generate(const std::vector<float> &data, const brayns::Vector2f &range) noexcept override;
 
 private:

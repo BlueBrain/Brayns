@@ -33,7 +33,7 @@ namespace brayns
 class ArgvBuilder
 {
 public:
-    ArgvBuilder(std::vector<ArgvProperty> &properties);
+    explicit ArgvBuilder(std::vector<ArgvProperty> &properties);
 
     ArgvBuilder &multitoken(bool value = true);
     ArgvBuilder &composable(bool value = true);

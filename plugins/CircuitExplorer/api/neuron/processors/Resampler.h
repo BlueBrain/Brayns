@@ -26,7 +26,8 @@
 class Resampler final : public INeuronMorphologyProcessor
 {
 public:
-    Resampler(float treshold);
+    explicit Resampler(float treshold);
+
     void process(NeuronMorphology &morphology) const override;
 
 private:

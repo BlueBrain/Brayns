@@ -45,8 +45,8 @@ public:
     Brayns(const Brayns &) = delete;
     Brayns &operator=(const Brayns &) = delete;
 
-    Brayns(Brayns &&) = default;
-    Brayns &operator=(Brayns &&) = default;
+    Brayns(Brayns &&) = delete;
+    Brayns &operator=(Brayns &&) = delete;
 
     ~Brayns();
 

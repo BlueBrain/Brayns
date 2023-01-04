@@ -31,7 +31,7 @@ namespace brayns
 class GetCameraTypeEntrypoint : public Entrypoint<EmptyMessage, std::string>
 {
 public:
-    GetCameraTypeEntrypoint(Engine &engine);
+    explicit GetCameraTypeEntrypoint(Engine &engine);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -47,7 +47,7 @@ class SetCameraEntrypoint : public Entrypoint<T, EmptyMessage>
 public:
     using Request = typename Entrypoint<T, EmptyMessage>::Request;
 
-    SetCameraEntrypoint(Engine &engine)
+    explicit SetCameraEntrypoint(Engine &engine)
         : _engine(engine)
     {
     }
@@ -73,7 +73,7 @@ private:
 class SetCameraPerspectiveEntrypoint final : public SetCameraEntrypoint<Perspective>
 {
 public:
-    SetCameraPerspectiveEntrypoint(Engine &engine);
+    explicit SetCameraPerspectiveEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -82,7 +82,7 @@ public:
 class SetCameraOrthographicEntrypoint final : public SetCameraEntrypoint<Orthographic>
 {
 public:
-    SetCameraOrthographicEntrypoint(Engine &engine);
+    explicit SetCameraOrthographicEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -94,7 +94,7 @@ class GetCameraEntrypoint : public Entrypoint<EmptyMessage, T>
 public:
     using Request = typename Entrypoint<EmptyMessage, T>::Request;
 
-    GetCameraEntrypoint(Engine &engine)
+    explicit GetCameraEntrypoint(Engine &engine)
         : _engine(engine)
     {
     }
@@ -118,7 +118,7 @@ private:
 class GetCameraPerspectiveEntrypoint final : public GetCameraEntrypoint<Perspective>
 {
 public:
-    GetCameraPerspectiveEntrypoint(Engine &engine);
+    explicit GetCameraPerspectiveEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -127,7 +127,7 @@ public:
 class GetCameraOrthographicEntrypoint final : public GetCameraEntrypoint<Orthographic>
 {
 public:
-    GetCameraOrthographicEntrypoint(Engine &engine);
+    explicit GetCameraOrthographicEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;

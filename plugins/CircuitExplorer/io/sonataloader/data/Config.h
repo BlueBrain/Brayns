@@ -43,7 +43,7 @@ private:
 class Config
 {
 public:
-    Config(const std::string &path);
+    explicit Config(const std::string &path);
 
     /**
      * @brief Returns the configuration file parent path.

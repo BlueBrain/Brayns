@@ -29,7 +29,7 @@ namespace brayns
 class ClearClipPlanesEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
-    ClearClipPlanesEntrypoint(ModelManager &models);
+    explicit ClearClipPlanesEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

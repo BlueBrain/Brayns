@@ -30,19 +30,19 @@ struct Geometries
     Geometries() = default;
 
     template<typename T>
-    Geometries(T primitive)
+    explicit Geometries(T primitive)
     {
         elements.emplace_back(std::move(primitive));
     }
 
     template<typename T>
-    Geometries(std::vector<T> primitives)
+    explicit Geometries(std::vector<T> primitives)
     {
         elements.emplace_back(std::move(primitives));
     }
 
     template<typename T>
-    Geometries(std::vector<std::vector<T>> primitivesList)
+    explicit Geometries(std::vector<std::vector<T>> primitivesList)
     {
         elements.reserve(primitivesList.size());
         for (auto &primitives : primitivesList)

@@ -31,7 +31,7 @@ namespace brayns
 class GetColorMethodsEntrypoint : public Entrypoint<GetModelMessage, std::vector<std::string>>
 {
 public:
-    GetColorMethodsEntrypoint(ModelManager &models);
+    explicit GetColorMethodsEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -44,7 +44,7 @@ private:
 class GetColorValuesEntrypoint : public Entrypoint<ColorMethodValuesMessage, std::vector<std::string>>
 {
 public:
-    GetColorValuesEntrypoint(ModelManager &models);
+    explicit GetColorValuesEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -57,7 +57,7 @@ private:
 class ColorModelEntrypoint : public Entrypoint<ColorModelMessage, EmptyMessage>
 {
 public:
-    ColorModelEntrypoint(ModelManager &models);
+    explicit ColorModelEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

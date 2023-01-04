@@ -47,7 +47,7 @@ public:
 class MVD2Circuit final : public CircuitAccessor
 {
 public:
-    MVD2Circuit(const std::string &path)
+    explicit MVD2Circuit(const std::string &path)
         : _circuit(path)
     {
     }
@@ -149,7 +149,7 @@ template<class CircuitType>
 class GenericCircuit : public CircuitAccessor
 {
 public:
-    GenericCircuit(std::unique_ptr<CircuitType> &&circuit)
+    explicit GenericCircuit(std::unique_ptr<CircuitType> &&circuit)
         : _circuit(std::move(circuit))
     {
     }
@@ -266,7 +266,7 @@ public:
 class MethodQuerier
 {
 public:
-    MethodQuerier(const CircuitAccessor &circuit)
+    explicit MethodQuerier(const CircuitAccessor &circuit)
         : _circuit(circuit)
     {
     }

@@ -32,7 +32,7 @@ namespace brayns
 class ModelInfo
 {
 public:
-    ModelInfo(const Model &model);
+    explicit ModelInfo(const Model &model);
 
     const LoadInfo *getLoadInfo() const noexcept;
     const Metadata *getMetadata() const noexcept;

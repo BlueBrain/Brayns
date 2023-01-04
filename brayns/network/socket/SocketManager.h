@@ -40,7 +40,7 @@ public:
      *
      * @param listener Listener to call on network events.
      */
-    SocketManager(std::unique_ptr<ISocketListener> listener);
+    explicit SocketManager(std::unique_ptr<ISocketListener> listener);
 
     /**
      * @brief Receive and send messages until connection is closed.

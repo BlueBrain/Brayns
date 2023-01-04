@@ -31,7 +31,7 @@ namespace brayns
 class InspectEntrypoint : public Entrypoint<InspectMessage, InspectResult>
 {
 public:
-    InspectEntrypoint(Engine &engine);
+    explicit InspectEntrypoint(Engine &engine);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

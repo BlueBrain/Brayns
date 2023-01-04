@@ -32,6 +32,6 @@ namespace dti
 class DTIPlugin : public brayns::IPlugin
 {
 public:
-    DTIPlugin(brayns::PluginAPI &api);
+    explicit DTIPlugin(brayns::PluginAPI &api);
 };
 } // namespace dti

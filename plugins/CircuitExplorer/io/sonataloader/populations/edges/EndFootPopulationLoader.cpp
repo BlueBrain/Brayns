@@ -35,7 +35,7 @@ namespace
 class EndFeetAreasPath
 {
 public:
-    EndFeetAreasPath(const sonataloader::EdgeLoadContext &context)
+    explicit EndFeetAreasPath(const sonataloader::EdgeLoadContext &context)
         : _json(_parseConfig(context))
         , _rootPath(_getConfigRootPath(context))
         , _edgeName(context.edgePopulation.name())

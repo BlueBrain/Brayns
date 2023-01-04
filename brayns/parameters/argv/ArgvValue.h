@@ -31,10 +31,10 @@ class ArgvValue
 {
 public:
     ArgvValue() = default;
-    ArgvValue(bool boolean);
-    ArgvValue(int64_t integer);
-    ArgvValue(double number);
-    ArgvValue(std::string string);
+    explicit ArgvValue(bool boolean);
+    explicit ArgvValue(int64_t integer);
+    explicit ArgvValue(double number);
+    explicit ArgvValue(std::string string);
 
     ArgvType getType() const;
     bool toBoolean() const;

@@ -29,7 +29,7 @@ namespace brayns
 class EnableSimulationEntrypoint final : public Entrypoint<EnableSimulationMessage, EmptyMessage>
 {
 public:
-    EnableSimulationEntrypoint(ModelManager &models);
+    explicit EnableSimulationEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
 

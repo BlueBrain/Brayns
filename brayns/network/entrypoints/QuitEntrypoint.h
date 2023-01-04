@@ -30,7 +30,7 @@ namespace brayns
 class QuitEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
-    QuitEntrypoint(Engine &engine);
+    explicit QuitEntrypoint(Engine &engine);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

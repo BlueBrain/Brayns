@@ -37,7 +37,7 @@ public:
      *
      * @param interface Used to poll requests to receive cancellation.
      */
-    CancellationToken(INetworkInterface &interface);
+    explicit CancellationToken(INetworkInterface &interface);
 
     /**
      * @brief Poll requests and check if the cancel flag is set.

@@ -68,7 +68,7 @@ private: \
     { \
         brayns::JsonObjectProperty _property; \
         _property.name = #NAME; \
-        _property.options = {__VA_ARGS__}; \
+        _property.options = brayns::JsonOptions{__VA_ARGS__}; \
         _property.getSchema = [] \
         { \
             using T = std::decay_t<decltype(_MyType::NAME)>; \

@@ -69,7 +69,7 @@ public:
      */
     using CallbackFn = std::function<void(const std::string &, float)>;
 
-    LoaderProgress(CallbackFn callback);
+    explicit LoaderProgress(CallbackFn callback);
 
     LoaderProgress() = default;
     ~LoaderProgress() = default;

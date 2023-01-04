@@ -32,7 +32,7 @@ namespace brayns
 class GetColorRampEntrypoint : public Entrypoint<GetModelMessage, ColorRamp>
 {
 public:
-    GetColorRampEntrypoint(ModelManager &models);
+    explicit GetColorRampEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -45,7 +45,7 @@ private:
 class SetColorRampEntrypoint : public Entrypoint<SetColorRampMessage, EmptyMessage>
 {
 public:
-    SetColorRampEntrypoint(ModelManager &models);
+    explicit SetColorRampEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

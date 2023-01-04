@@ -31,12 +31,12 @@ struct NeuronSectionList
 {
     NeuronSectionList() = default;
 
-    NeuronSectionList(std::vector<NeuronSectionMapping> mapping)
+    explicit NeuronSectionList(std::vector<NeuronSectionMapping> mapping)
     {
         mappings.push_back(std::move(mapping));
     }
 
-    NeuronSectionList(std::vector<std::vector<NeuronSectionMapping>> mappings)
+    explicit NeuronSectionList(std::vector<std::vector<NeuronSectionMapping>> mappings)
         : mappings(std::move(mappings))
     {
     }

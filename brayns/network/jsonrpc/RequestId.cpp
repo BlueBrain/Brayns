@@ -125,12 +125,14 @@ void JsonAdapter<RequestId>::deserialize(const JsonValue &json, RequestId &value
     }
     if (json.isInteger() && !json.isBoolean())
     {
-        value = json.convert<int64_t>();
+        auto integer = json.convert<int64_t>();
+        value = RequestId(integer);
         return;
     }
     if (json.isString())
     {
-        value = json.extract<std::string>();
+        auto string = json.extract<std::string>();
+        value = RequestId(string);
         return;
     }
 }

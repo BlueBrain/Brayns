@@ -73,7 +73,7 @@ public:
      *
      * @param value Value to store in JSON format.
      */
-    JsonBuffer(const T &value)
+    explicit JsonBuffer(const T &value)
         : _json(Json::serialize(value))
     {
     }

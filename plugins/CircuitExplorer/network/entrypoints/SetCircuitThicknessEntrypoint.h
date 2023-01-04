@@ -30,7 +30,7 @@
 class SetCircuitThicknessEntrypoint : public brayns::Entrypoint<SetCircuitThicknessMessage, brayns::EmptyMessage>
 {
 public:
-    SetCircuitThicknessEntrypoint(brayns::ModelManager &models);
+    explicit SetCircuitThicknessEntrypoint(brayns::ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

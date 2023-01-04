@@ -150,7 +150,7 @@ struct JsonOptions
      * @param args Option values.
      */
     template<typename... Args>
-    JsonOptions(Args &&...args)
+    explicit JsonOptions(Args &&...args)
     {
         build(*this, std::forward<Args>(args)...);
     }
@@ -178,7 +178,7 @@ public:
  */
 struct Title
 {
-    Title(std::string title);
+    explicit Title(std::string title);
 
     void add(JsonOptions &options) const;
 
@@ -191,7 +191,7 @@ struct Title
  */
 struct Description
 {
-    Description(std::string description);
+    explicit Description(std::string description);
 
     void add(JsonOptions &options) const;
 
@@ -205,7 +205,7 @@ struct Description
 struct Required
 {
     Required() = default;
-    Required(bool required);
+    explicit Required(bool required);
 
     void add(JsonOptions &options) const;
 
@@ -219,7 +219,7 @@ struct Required
 struct ReadOnly
 {
     ReadOnly() = default;
-    ReadOnly(bool readOnly);
+    explicit ReadOnly(bool readOnly);
 
     void add(JsonOptions &options) const;
 
@@ -233,7 +233,7 @@ struct ReadOnly
 struct WriteOnly
 {
     WriteOnly() = default;
-    WriteOnly(bool writeOnly);
+    explicit WriteOnly(bool writeOnly);
 
     void add(JsonOptions &options) const;
 
@@ -246,7 +246,7 @@ struct WriteOnly
  */
 struct Minimum
 {
-    Minimum(double minimum);
+    explicit Minimum(double minimum);
 
     void add(JsonOptions &options) const;
 
@@ -259,7 +259,7 @@ struct Minimum
  */
 struct Maximum
 {
-    Maximum(double maximum);
+    explicit Maximum(double maximum);
 
     void add(JsonOptions &options) const;
 
@@ -272,7 +272,7 @@ struct Maximum
  */
 struct MinItems
 {
-    MinItems(size_t minItems);
+    explicit MinItems(size_t minItems);
 
     void add(JsonOptions &options) const;
 
@@ -285,7 +285,7 @@ struct MinItems
  */
 struct MaxItems
 {
-    MaxItems(size_t maxItems);
+    explicit MaxItems(size_t maxItems);
 
     void add(JsonOptions &options) const;
 
@@ -298,7 +298,7 @@ struct MaxItems
  */
 struct Default
 {
-    Default(const JsonValue &defaultValue);
+    explicit Default(const JsonValue &defaultValue);
 
     void add(JsonOptions &options) const;
 

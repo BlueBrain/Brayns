@@ -26,7 +26,7 @@ public:
     using Section = NeuronMorphology::Section;
     using Sample = NeuronMorphology::SectionSample;
 
-    SectionResampler(float treshold)
+    explicit SectionResampler(float treshold)
         : _treshold(treshold)
     {
     }

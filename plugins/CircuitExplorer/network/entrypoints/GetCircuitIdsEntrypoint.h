@@ -28,7 +28,7 @@
 class GetCircuitIdsEntrypoint : public brayns::Entrypoint<LoadedIdsModelMessage, std::vector<uint64_t>>
 {
 public:
-    GetCircuitIdsEntrypoint(brayns::ModelManager &models);
+    explicit GetCircuitIdsEntrypoint(brayns::ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

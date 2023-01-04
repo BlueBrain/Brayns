@@ -29,7 +29,7 @@ namespace brayns
 class ProgressiveFrameHandler final : public IFrameHandler
 {
 public:
-    ProgressiveFrameHandler(uint32_t scale = 4);
+    explicit ProgressiveFrameHandler(uint32_t scale = 4);
 
     bool commit() override;
 

@@ -29,12 +29,12 @@ struct GeometryViews
 {
     GeometryViews() = default;
 
-    GeometryViews(const Geometry &geometry)
+    explicit GeometryViews(const Geometry &geometry)
     {
         elements.emplace_back(geometry);
     }
 
-    GeometryViews(const std::vector<Geometry> &geometries)
+    explicit GeometryViews(const std::vector<Geometry> &geometries)
     {
         elements.reserve(geometries.size());
         for (auto &geometry : geometries)

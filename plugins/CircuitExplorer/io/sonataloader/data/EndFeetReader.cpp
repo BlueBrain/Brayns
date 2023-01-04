@@ -33,7 +33,7 @@ struct Hierarchy
 class DatasetExtractor
 {
 public:
-    DatasetExtractor(const std::string &filePath)
+    explicit DatasetExtractor(const std::string &filePath)
         : _file(filePath)
         , _data(_file.getGroup(std::string(Hierarchy::dataGroup)))
         , _offsets(_file.getGroup(std::string(Hierarchy::offsetGroup)))

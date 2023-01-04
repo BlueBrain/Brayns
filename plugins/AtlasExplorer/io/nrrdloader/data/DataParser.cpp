@@ -42,8 +42,8 @@ public:
 
         for (auto &file : fileList)
         {
-            const auto filePath = basePath / std::filesystem::path(file);
-            file = filePath.string();
+            const auto fullPath = basePath / std::filesystem::path(file);
+            file = fullPath.string();
         }
 
         return fileList;

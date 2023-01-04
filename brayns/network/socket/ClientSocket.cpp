@@ -84,7 +84,8 @@ public:
         Poco::Net::HTTPResponse response;
         auto socket = std::make_shared<brayns::WebSocket>(*session, request, response);
         brayns::Log::info("Client socket connected.");
-        manager.run(socket);
+        auto client = brayns::ClientRef(std::move(socket));
+        manager.run(client);
     }
 };
 } // namespace

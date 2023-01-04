@@ -32,7 +32,7 @@ namespace brayns
 class GetModelEntrypoint : public Entrypoint<GetModelMessage, ModelInstance>
 {
 public:
-    GetModelEntrypoint(ModelManager &models);
+    explicit GetModelEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

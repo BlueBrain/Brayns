@@ -31,7 +31,7 @@ namespace brayns
 class ArgvParser
 {
 public:
-    ArgvParser(const std::vector<ArgvProperty> &properties);
+    explicit ArgvParser(const std::vector<ArgvProperty> &properties);
 
     void parse(int argc, const char **argv);
 

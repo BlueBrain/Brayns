@@ -31,7 +31,7 @@
 class VisualizeAtlasUseCaseEntrypoint : public brayns::Entrypoint<VisualizeUseCaseMessage, brayns::ModelInstance>
 {
 public:
-    VisualizeAtlasUseCaseEntrypoint(brayns::ModelManager &models);
+    explicit VisualizeAtlasUseCaseEntrypoint(brayns::ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

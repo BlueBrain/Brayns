@@ -43,7 +43,7 @@ class AddGeometryEntrypoint : public Entrypoint<std::vector<GeometryWithColor<T>
 public:
     using Request = typename Entrypoint<std::vector<GeometryWithColor<T>>, ModelInstance>::Request;
 
-    AddGeometryEntrypoint(ModelManager &models)
+    explicit AddGeometryEntrypoint(ModelManager &models)
         : _models(models)
     {
     }
@@ -129,7 +129,7 @@ private:
 class AddBoundedPlanesEntrypoint final : public AddGeometryEntrypoint<BoundedPlane>
 {
 public:
-    AddBoundedPlanesEntrypoint(ModelManager &models);
+    explicit AddBoundedPlanesEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -138,7 +138,7 @@ public:
 class AddBoxesEntrypoint final : public AddGeometryEntrypoint<Box>
 {
 public:
-    AddBoxesEntrypoint(ModelManager &models);
+    explicit AddBoxesEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -147,7 +147,7 @@ public:
 class AddPlanesEntrypoint final : public AddGeometryEntrypoint<Plane>
 {
 public:
-    AddPlanesEntrypoint(ModelManager &models);
+    explicit AddPlanesEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -156,7 +156,7 @@ public:
 class AddCapsulesEntrypoint final : public AddGeometryEntrypoint<Capsule>
 {
 public:
-    AddCapsulesEntrypoint(ModelManager &models);
+    explicit AddCapsulesEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -165,7 +165,7 @@ public:
 class AddSpheresEntrypoint final : public AddGeometryEntrypoint<Sphere>
 {
 public:
-    AddSpheresEntrypoint(ModelManager &models);
+    explicit AddSpheresEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
     std::string getDescription() const override;

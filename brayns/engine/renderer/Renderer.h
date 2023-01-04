@@ -38,7 +38,7 @@ public:
     using Traits = RendererTraits<T>;
 
     template<typename RendererType>
-    Renderer(RendererType data)
+    explicit Renderer(RendererType data)
     {
         set(std::move(data));
     }

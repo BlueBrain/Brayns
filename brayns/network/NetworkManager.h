@@ -45,7 +45,7 @@ public:
      * @brief Construct the network manager.
      *
      */
-    NetworkManager(PluginAPI &api);
+    explicit NetworkManager(PluginAPI &api);
 
     /**
      * @brief Start network server / client to accept incoming requests.

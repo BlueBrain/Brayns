@@ -33,7 +33,7 @@ class GetAvailableAtlasUseCasesEntrypoint
     : public brayns::Entrypoint<AvailableUseCasesMessage, std::vector<std::string>>
 {
 public:
-    GetAvailableAtlasUseCasesEntrypoint(brayns::ModelManager &models);
+    explicit GetAvailableAtlasUseCasesEntrypoint(brayns::ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

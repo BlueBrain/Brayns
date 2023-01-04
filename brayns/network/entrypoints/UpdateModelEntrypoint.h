@@ -31,7 +31,7 @@ namespace brayns
 class UpdateModelEntrypoint : public Entrypoint<UpdateModelMessage, ModelInstance>
 {
 public:
-    UpdateModelEntrypoint(ModelManager &models);
+    explicit UpdateModelEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

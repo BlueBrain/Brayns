@@ -71,7 +71,7 @@ public:
 class FrameStream
 {
 public:
-    FrameStream(ospray::cpp::FrameBuffer &handle)
+    explicit FrameStream(ospray::cpp::FrameBuffer &handle)
         : _handle(handle)
         , _channelHandle(nullptr)
     {

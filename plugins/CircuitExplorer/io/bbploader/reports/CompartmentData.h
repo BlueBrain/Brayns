@@ -28,7 +28,7 @@ namespace bbploader
 class CompartmentData : public IReportData
 {
 public:
-    CompartmentData(std::unique_ptr<brion::CompartmentReport> report);
+    explicit CompartmentData(std::unique_ptr<brion::CompartmentReport> report);
 
     double getStartTime() const noexcept override;
     double getEndTime() const noexcept override;

@@ -26,7 +26,7 @@
 class SetCylindricCameraEntrypoint : public brayns::SetCameraEntrypoint<Cylindric>
 {
 public:
-    SetCylindricCameraEntrypoint(brayns::Engine &engine);
+    explicit SetCylindricCameraEntrypoint(brayns::Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -35,7 +35,7 @@ public:
 class GetCylindricCameraEntrypoint : public brayns::GetCameraEntrypoint<Cylindric>
 {
 public:
-    GetCylindricCameraEntrypoint(brayns::Engine &engine);
+    explicit GetCylindricCameraEntrypoint(brayns::Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;

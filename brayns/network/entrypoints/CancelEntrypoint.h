@@ -29,7 +29,7 @@ namespace brayns
 class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
 {
 public:
-    CancelEntrypoint(TaskManager &tasks);
+    explicit CancelEntrypoint(TaskManager &tasks);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

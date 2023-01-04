@@ -117,7 +117,7 @@ private:
 class ArgvItemCountValidator
 {
 public:
-    ArgvItemCountValidator(const brayns::ArgvProperty &property)
+    explicit ArgvItemCountValidator(const brayns::ArgvProperty &property)
         : _property(property)
     {
     }
@@ -160,7 +160,7 @@ private:
 class ArgvNumberExtractor
 {
 public:
-    ArgvNumberExtractor(const brayns::ArgvProperty &property)
+    explicit ArgvNumberExtractor(const brayns::ArgvProperty &property)
         : _property(property)
     {
     }
@@ -223,7 +223,7 @@ private:
 class ArgvEnumParser
 {
 public:
-    ArgvEnumParser(const brayns::ArgvProperty &property)
+    explicit ArgvEnumParser(const brayns::ArgvProperty &property)
         : _property(property)
     {
     }
@@ -236,7 +236,7 @@ public:
     brayns::ArgvValue parse(const std::string &token)
     {
         _validate(token);
-        return token;
+        return brayns::ArgvValue(token);
     }
 
 private:
@@ -276,7 +276,7 @@ private:
 class ArgvBooleanParser
 {
 public:
-    ArgvBooleanParser(const brayns::ArgvProperty &property)
+    explicit ArgvBooleanParser(const brayns::ArgvProperty &property)
         : _property(property)
     {
     }
@@ -290,11 +290,11 @@ public:
     {
         if (token == "true" || token == "1")
         {
-            return true;
+            return brayns::ArgvValue(true);
         }
         if (token == "false" || token == "0")
         {
-            return false;
+            return brayns::ArgvValue(false);
         }
         throw std::runtime_error(_invalidBoolean(token));
     }
@@ -314,7 +314,7 @@ private:
 class ArgvIntegerParser
 {
 public:
-    ArgvIntegerParser(const brayns::ArgvProperty &property)
+    explicit ArgvIntegerParser(const brayns::ArgvProperty &property)
         : _property(property)
     {
     }
@@ -329,7 +329,7 @@ public:
         auto extractor = ArgvNumberExtractor(_property);
         auto value = extractor.extract(token);
         _checkIsInteger(value);
-        return static_cast<int64_t>(value);
+        return brayns::ArgvValue(static_cast<int64_t>(value));
     }
 
 private:
@@ -355,7 +355,7 @@ private:
 class ArgvNumberParser
 {
 public:
-    ArgvNumberParser(const brayns::ArgvProperty &property)
+    explicit ArgvNumberParser(const brayns::ArgvProperty &property)
         : _property(property)
     {
     }
@@ -368,7 +368,8 @@ public:
     brayns::ArgvValue parse(const std::string &token)
     {
         auto extractor = ArgvNumberExtractor(_property);
-        return extractor.extract(token);
+        auto number = extractor.extract(token);
+        return brayns::ArgvValue(number);
     }
 
 private:
@@ -378,7 +379,7 @@ private:
 class ArgvStringParser
 {
 public:
-    ArgvStringParser(const brayns::ArgvProperty &property)
+    explicit ArgvStringParser(const brayns::ArgvProperty &property)
         : _property(property)
     {
     }
@@ -390,7 +391,7 @@ public:
 
     brayns::ArgvValue parse(const std::string &token)
     {
-        return token;
+        return brayns::ArgvValue(token);
     }
 
 private:
@@ -400,7 +401,7 @@ private:
 class ArgvValueParser
 {
 public:
-    ArgvValueParser(const brayns::ArgvProperty &property)
+    explicit ArgvValueParser(const brayns::ArgvProperty &property)
         : _property(property)
     {
     }
@@ -464,7 +465,7 @@ private:
 class ArgvParserHelper
 {
 public:
-    ArgvParserHelper(const std::vector<brayns::ArgvProperty> &properties)
+    explicit ArgvParserHelper(const std::vector<brayns::ArgvProperty> &properties)
         : _properties(properties)
     {
     }
@@ -508,7 +509,7 @@ private:
 class ArgvLoader
 {
 public:
-    ArgvLoader(const std::vector<brayns::ArgvProperty> &properties)
+    explicit ArgvLoader(const std::vector<brayns::ArgvProperty> &properties)
         : _properties(properties)
     {
     }

@@ -40,7 +40,8 @@ using ColorMethodList = std::vector<std::unique_ptr<IColorMethod>>;
 class GenericColorSystem : public ColorSystem
 {
 public:
-    GenericColorSystem(ColorMethodList methods);
+    explicit GenericColorSystem(ColorMethodList methods);
+
     std::vector<std::string> getMethods() const override;
     std::vector<std::string> getValues(const std::string &method, Components &components) const override;
     void apply(const std::string &method, const ColorMethodInput &input, Components &components) const override;

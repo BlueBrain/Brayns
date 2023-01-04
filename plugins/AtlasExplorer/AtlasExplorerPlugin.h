@@ -30,5 +30,5 @@
 class AtlasExplorerPlugin final : public brayns::IPlugin
 {
 public:
-    AtlasExplorerPlugin(brayns::PluginAPI &api);
+    explicit AtlasExplorerPlugin(brayns::PluginAPI &api);
 };

@@ -30,7 +30,7 @@ struct Volumes
     Volumes() = default;
 
     template<typename VolumeType>
-    Volumes(VolumeType volume)
+    explicit Volumes(VolumeType volume)
     {
         elements.emplace_back(std::move(volume));
     }
