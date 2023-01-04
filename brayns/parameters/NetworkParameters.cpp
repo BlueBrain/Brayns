@@ -28,19 +28,9 @@ bool NetworkParameters::isClient() const noexcept
     return _client;
 }
 
-void NetworkParameters::setClient(bool client) noexcept
-{
-    _client = client;
-}
-
 bool NetworkParameters::isSecure() const noexcept
 {
     return _secure;
-}
-
-void NetworkParameters::setSecure(bool secure) noexcept
-{
-    _secure = secure;
 }
 
 size_t NetworkParameters::getMaxClients() const noexcept
@@ -48,19 +38,9 @@ size_t NetworkParameters::getMaxClients() const noexcept
     return _maxClients;
 }
 
-void NetworkParameters::setMaxClients(size_t maxClients) noexcept
-{
-    _maxClients = maxClients;
-}
-
 const std::string &NetworkParameters::getUri() const noexcept
 {
     return _uri;
-}
-
-void NetworkParameters::setUri(std::string uri) noexcept
-{
-    _uri = std::move(uri);
 }
 
 std::chrono::milliseconds NetworkParameters::getReconnectionPeriod() const noexcept
@@ -68,19 +48,9 @@ std::chrono::milliseconds NetworkParameters::getReconnectionPeriod() const noexc
     return std::chrono::milliseconds(_reconnectionPeriod);
 }
 
-void NetworkParameters::setReconnectionPeriod(std::chrono::milliseconds reconnectionPeriod) noexcept
-{
-    _reconnectionPeriod = reconnectionPeriod.count();
-}
-
 const std::string &NetworkParameters::getPrivateKeyFile() const noexcept
 {
     return _privateKeyFile;
-}
-
-void NetworkParameters::setPrivateKeyFile(std::string privateKeyFile) noexcept
-{
-    _privateKeyFile = std::move(privateKeyFile);
 }
 
 const std::string &NetworkParameters::getPrivateKeyPassphrase() const noexcept
@@ -88,29 +58,14 @@ const std::string &NetworkParameters::getPrivateKeyPassphrase() const noexcept
     return _privateKeyPassphrase;
 }
 
-void NetworkParameters::setPrivateKeyPassphrase(std::string privateKeyPassphrase) noexcept
-{
-    _privateKeyPassphrase = std::move(privateKeyPassphrase);
-}
-
 const std::string &NetworkParameters::getCertificateFile() const noexcept
 {
     return _certificateFile;
 }
 
-void NetworkParameters::setCertificateFile(std::string certificateFile) noexcept
-{
-    _certificateFile = std::move(certificateFile);
-}
-
 const std::string &NetworkParameters::getCALocation() const noexcept
 {
     return _caLocation;
-}
-
-void NetworkParameters::setCALocation(std::string caLocation) noexcept
-{
-    _caLocation = std::move(caLocation);
 }
 
 void NetworkParameters::build(ArgvBuilder &builder)

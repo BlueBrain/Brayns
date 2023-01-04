@@ -99,12 +99,6 @@ public:
     bbp::sonata::PopulationProperties getEdgesProperties(const std::string &name) const;
 
     /**
-     * @brief Returns the name of all edge populations in the network.
-     * @return std::set<std::string>
-     */
-    std::set<std::string> getAllEdgeNames() const noexcept;
-
-    /**
      * @brief Returns any available path to the directory containing the population morphologies.
      * @param populationName Name of the node population.
      * @return MorphologyPath the morphology path resolver object.

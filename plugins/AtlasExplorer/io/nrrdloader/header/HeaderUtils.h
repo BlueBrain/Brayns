@@ -30,6 +30,4 @@ public:
     static brayns::Vector3ui get3DSize(const NRRDHeader &header);
 
     static brayns::Vector3f get3DDimensions(const NRRDHeader &header);
-
-    static size_t getVoxelDimension(const NRRDHeader &header);
 };

@@ -74,13 +74,6 @@ public:
     bool isEmpty() const;
 
     /**
-     * @brief Get the image info.
-     *
-     * @return const ImageInfo& Image info.
-     */
-    const ImageInfo &getInfo() const;
-
-    /**
      * @brief Get the image width in pixels.
      *
      * @return size_t Image width.

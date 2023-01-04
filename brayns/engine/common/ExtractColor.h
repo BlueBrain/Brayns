@@ -30,7 +30,6 @@ namespace brayns
 class ExtractColor
 {
 public:
-    static ColorSolid &extractSolid(brayns::Components &components);
     static ColorList &extractList(brayns::Components &components, size_t size);
     static ColorMap &extractMap(brayns::Components &components);
 };

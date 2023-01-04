@@ -39,7 +39,6 @@ public:
     ArgvBuilder &composable(bool value = true);
     ArgvBuilder &minimum(std::optional<double> value);
     ArgvBuilder &maximum(std::optional<double> value);
-    ArgvBuilder &between(double minValue, double maxValue);
     ArgvBuilder &minItems(std::optional<size_t> value);
     ArgvBuilder &maxItems(std::optional<size_t> value);
     ArgvBuilder &itemCount(std::optional<size_t> value);

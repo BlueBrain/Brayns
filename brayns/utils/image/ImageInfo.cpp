@@ -28,19 +28,9 @@ size_t ImageInfo::getSize() const
     return getPixelCount() * getPixelSize();
 }
 
-size_t ImageInfo::getRowCount() const
-{
-    return height;
-}
-
 size_t ImageInfo::getRowSize() const
 {
     return width * getPixelSize();
-}
-
-size_t ImageInfo::getRowOffset(size_t index) const
-{
-    return index * getRowSize();
 }
 
 size_t ImageInfo::getPixelCount() const

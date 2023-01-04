@@ -59,12 +59,6 @@ public:
         return _argv[_index];
     }
 
-    const char *getNext() const
-    {
-        assert(hasNext());
-        return _argv[_index + 1];
-    }
-
     void next()
     {
         ++_index;

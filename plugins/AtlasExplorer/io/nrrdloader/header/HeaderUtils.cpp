@@ -61,13 +61,3 @@ brayns::Vector3f HeaderUtils::get3DDimensions(const NRRDHeader &header)
     }
     return result;
 }
-
-size_t HeaderUtils::getVoxelDimension(const NRRDHeader &header)
-{
-    if (header.dimensions <= 3)
-    {
-        return 1;
-    }
-
-    return header.sizes.front();
-}

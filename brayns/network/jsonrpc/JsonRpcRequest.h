@@ -56,13 +56,6 @@ public:
     const ClientRef &getClient() const;
 
     /**
-     * @brief Get the entire JSON-RPC message.
-     *
-     * @return const RequestMessage& The message sent by the client.
-     */
-    const RequestMessage &getMessage() const;
-
-    /**
      * @brief Get the ID of the request from the message.
      *
      * @return const RequestId& Request ID.

@@ -40,11 +40,6 @@ const ClientRef &JsonRpcRequest::getClient() const
     return _client;
 }
 
-const RequestMessage &JsonRpcRequest::getMessage() const
-{
-    return _message;
-}
-
 const RequestId &JsonRpcRequest::getId() const
 {
     return _message.id;

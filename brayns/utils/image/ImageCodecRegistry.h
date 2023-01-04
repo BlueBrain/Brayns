@@ -36,15 +36,6 @@ class ImageCodecRegistry
 {
 public:
     /**
-     * @brief Check if a format is supported.
-     *
-     * @param format Image format.
-     * @return true Supported.
-     * @return false Not supported.
-     */
-    static bool isSupported(const std::string &format);
-
-    /**
      * @brief Get codec to handle the given format.
      *
      * @param format Image format.

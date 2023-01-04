@@ -85,12 +85,6 @@ private:
 
 namespace brayns
 {
-bool ImageCodecRegistry::isSupported(const std::string &format)
-{
-    auto &codecs = ImageCodecStorage::getCodecs();
-    return codecs.find(format);
-}
-
 const ImageCodec &ImageCodecRegistry::getCodec(const std::string &format)
 {
     auto &codecs = ImageCodecStorage::getCodecs();

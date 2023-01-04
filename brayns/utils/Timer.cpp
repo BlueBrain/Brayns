@@ -45,16 +45,6 @@ void Timer::reset() noexcept
     _startTime = clock::now();
 }
 
-int64_t Timer::micros() const noexcept
-{
-    return getDuration<std::micro>(_startTime);
-}
-
-int64_t Timer::millis() const noexcept
-{
-    return getDuration<std::milli>(_startTime);
-}
-
 int64_t Timer::seconds() const noexcept
 {
     return getDuration<std::ratio<1, 1>>(_startTime);
