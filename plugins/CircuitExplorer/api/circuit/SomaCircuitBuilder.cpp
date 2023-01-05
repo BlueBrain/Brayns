@@ -43,7 +43,7 @@ namespace
 class ModelBuilder
 {
 public:
-    ModelBuilder(brayns::Model &model)
+    explicit ModelBuilder(brayns::Model &model)
         : _components(model.getComponents())
         , _systems(model.getSystems())
         , _modelType(model.getType())

@@ -43,7 +43,7 @@ public:
     using Traits = ProjectionTraits<T>;
 
     template<typename ProjectionType>
-    Camera(ProjectionType data)
+    explicit Camera(ProjectionType data)
     {
         set(std::move(data));
     }

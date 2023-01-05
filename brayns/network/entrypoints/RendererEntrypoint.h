@@ -31,7 +31,7 @@ namespace brayns
 class GetRendererTypeEntrypoint final : public Entrypoint<EmptyMessage, std::string>
 {
 public:
-    GetRendererTypeEntrypoint(Engine &engine);
+    explicit GetRendererTypeEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -48,7 +48,7 @@ class SetRendererEntrypoint : public Entrypoint<T, EmptyMessage>
 public:
     using Request = typename Entrypoint<T, EmptyMessage>::Request;
 
-    SetRendererEntrypoint(Engine &engine)
+    explicit SetRendererEntrypoint(Engine &engine)
         : _engine(engine)
     {
     }
@@ -73,7 +73,7 @@ private:
 class SetRendererInteractiveEntrypoint final : public SetRendererEntrypoint<Interactive>
 {
 public:
-    SetRendererInteractiveEntrypoint(Engine &engine);
+    explicit SetRendererInteractiveEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -82,7 +82,7 @@ public:
 class SetRendererProductionEntrypoint final : public SetRendererEntrypoint<Production>
 {
 public:
-    SetRendererProductionEntrypoint(Engine &engine);
+    explicit SetRendererProductionEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -94,7 +94,7 @@ class GetRendererEntrypoint : public Entrypoint<EmptyMessage, T>
 public:
     using Request = typename Entrypoint<EmptyMessage, T>::Request;
 
-    GetRendererEntrypoint(Engine &engine)
+    explicit GetRendererEntrypoint(Engine &engine)
         : _engine(engine)
     {
     }
@@ -118,7 +118,7 @@ private:
 class GetRendererInteractiveEntrypoint final : public GetRendererEntrypoint<Interactive>
 {
 public:
-    GetRendererInteractiveEntrypoint(Engine &engine);
+    explicit GetRendererInteractiveEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -127,7 +127,7 @@ public:
 class GetRendererProductionEntrypoint final : public GetRendererEntrypoint<Production>
 {
 public:
-    GetRendererProductionEntrypoint(Engine &engine);
+    explicit GetRendererProductionEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;

@@ -32,7 +32,7 @@ namespace brayns
 class AddClipPlaneEntrypoint : public Entrypoint<Plane, ModelInstance>
 {
 public:
-    AddClipPlaneEntrypoint(ModelManager &models);
+    explicit AddClipPlaneEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

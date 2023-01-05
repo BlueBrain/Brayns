@@ -29,5 +29,5 @@
 class CylindricCameraPlugin : public brayns::IPlugin
 {
 public:
-    CylindricCameraPlugin(brayns::PluginAPI &api);
+    explicit CylindricCameraPlugin(brayns::PluginAPI &api);
 };

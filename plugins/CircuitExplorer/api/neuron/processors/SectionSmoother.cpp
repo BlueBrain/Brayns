@@ -110,14 +110,6 @@ private:
         return section;
     }
 
-    float _getSectionRadius(const NeuronMorphology &morphology, size_t sectionIndex)
-    {
-        auto &sections = morphology.sections();
-        auto &section = sections[sectionIndex];
-        auto &samples = section.samples;
-        return samples.front().radius;
-    }
-
 private:
     float _somaRadiusMultiplier;
     float _sectionRadiusChange;

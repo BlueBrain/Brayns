@@ -66,12 +66,6 @@ ArgvBuilder &ArgvBuilder::maximum(std::optional<double> value)
     return *this;
 }
 
-ArgvBuilder &ArgvBuilder::between(double minValue, double maxValue)
-{
-    minimum(minValue);
-    return maximum(maxValue);
-}
-
 ArgvBuilder &ArgvBuilder::minItems(std::optional<size_t> value)
 {
     assert(!_properties.empty());

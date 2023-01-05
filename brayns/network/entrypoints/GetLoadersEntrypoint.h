@@ -31,7 +31,7 @@ namespace brayns
 class GetLoadersEntrypoint : public Entrypoint<EmptyMessage, std::vector<LoaderInfo>>
 {
 public:
-    GetLoadersEntrypoint(const LoaderRegistry &loaders);
+    explicit GetLoadersEntrypoint(const LoaderRegistry &loaders);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

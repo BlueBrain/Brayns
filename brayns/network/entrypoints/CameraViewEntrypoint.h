@@ -29,7 +29,7 @@ namespace brayns
 class SetCameraViewEntrypoint final : public Entrypoint<View, EmptyMessage>
 {
 public:
-    SetCameraViewEntrypoint(Engine &engine);
+    explicit SetCameraViewEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -42,7 +42,7 @@ private:
 class GetCameraViewEntrypoint final : public Entrypoint<EmptyMessage, View>
 {
 public:
-    GetCameraViewEntrypoint(Engine &engine);
+    explicit GetCameraViewEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;

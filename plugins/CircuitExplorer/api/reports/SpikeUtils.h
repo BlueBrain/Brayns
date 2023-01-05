@@ -30,7 +30,7 @@
 class SpikeCalculator
 {
 public:
-    SpikeCalculator(float interval);
+    explicit SpikeCalculator(float interval);
 
     /**
      * @brief Computes the normalized spike value based on the current time and the spike time

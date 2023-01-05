@@ -34,7 +34,8 @@ public:
     static NeuronMorphologyPipeline fromParameters(const NeuronMorphologyLoaderParameters &parameters);
 
 public:
-    NeuronMorphologyPipeline(Stages stages);
+    explicit NeuronMorphologyPipeline(Stages stages);
+
     void process(NeuronMorphology &morphology) const;
 
 private:

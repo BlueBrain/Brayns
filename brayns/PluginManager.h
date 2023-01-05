@@ -47,7 +47,7 @@ public:
      *
      * @param api Brayns API for plugins.
      */
-    PluginManager(PluginAPI &api);
+    explicit PluginManager(PluginAPI &api);
 
     /**
      * @brief Load all plugins using API.

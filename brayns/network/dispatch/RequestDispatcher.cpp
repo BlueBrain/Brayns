@@ -54,12 +54,12 @@ public:
         catch (const std::exception &e)
         {
             brayns::Log::error("Unexpected error in dispatch of request {} to entrypoints: '{}'.", request, e.what());
-            request.error({e.what()});
+            request.error(brayns::InternalErrorException(e.what()));
         }
         catch (...)
         {
             brayns::Log::error("Unknown error in dispatch of request {} to entrypoints.", request);
-            request.error({"Unknown error"});
+            request.error(brayns::InternalErrorException("Unknown error"));
         }
     }
 };
@@ -87,12 +87,12 @@ public:
         catch (const std::exception &e)
         {
             brayns::Log::error("Unexpected error in parsing of request {}: '{}'.", request, e.what());
-            request.error({e.what()});
+            request.error(brayns::InternalErrorException(e.what()));
         }
         catch (...)
         {
             brayns::Log::error("Unknown error in parsing of request {}.", request);
-            request.error({"Unknown error"});
+            request.error(brayns::InternalErrorException("Unknown error"));
         }
     }
 };

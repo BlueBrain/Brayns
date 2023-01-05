@@ -23,7 +23,7 @@
 class Subsampler : public INeuronMorphologyProcessor
 {
 public:
-    Subsampler(uint32_t samplingFactor);
+    explicit Subsampler(uint32_t samplingFactor);
     void process(NeuronMorphology &morphology) const override;
 
 private:

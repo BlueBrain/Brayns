@@ -44,7 +44,7 @@ public:
      * @brief Initializes Ospray and register core engine objects available for use (cameras, renderers, materials
      * and lights)
      */
-    Engine(ParametersManager &parameters);
+    explicit Engine(ParametersManager &parameters);
 
     /**
      * @brief Ensures that all the system data is updated on the Ospray rendered backend to ensure the

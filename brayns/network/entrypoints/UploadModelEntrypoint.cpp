@@ -132,7 +132,7 @@ public:
         auto &loader = LoaderFinder::find(params, _loaders);
         auto parameters = params.loader_properties;
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
-        auto models = loader.loadFromBlob(blob, {callback}, parameters);
+        auto models = loader.loadFromBlob(blob, brayns::LoaderProgress(callback), parameters);
         auto result = _models.add(std::move(models));
 
         auto loadInfo = LoadInfoFactory::create(params);

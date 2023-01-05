@@ -45,7 +45,7 @@ public:
      *
      * @param message Error description.
      */
-    JsonRpcException(const std::string &message);
+    explicit JsonRpcException(const std::string &message);
 
     /**
      * @brief Construct an exception with a code and a description.
@@ -82,7 +82,7 @@ private:
 class ParsingErrorException : public JsonRpcException
 {
 public:
-    ParsingErrorException(const std::string &message);
+    explicit ParsingErrorException(const std::string &message);
 };
 
 /**
@@ -92,7 +92,7 @@ public:
 class InvalidRequestException : public JsonRpcException
 {
 public:
-    InvalidRequestException(const std::string &message);
+    explicit InvalidRequestException(const std::string &message);
 
     InvalidRequestException(const std::string &message, const std::vector<std::string> &errors);
 };
@@ -104,7 +104,7 @@ public:
 class MethodNotFoundException : public JsonRpcException
 {
 public:
-    MethodNotFoundException(const std::string &method);
+    explicit MethodNotFoundException(const std::string &method);
 };
 
 /**
@@ -114,7 +114,7 @@ public:
 class InvalidParamsException : public JsonRpcException
 {
 public:
-    InvalidParamsException(const std::string &message);
+    explicit InvalidParamsException(const std::string &message);
 
     InvalidParamsException(const std::string &message, const std::vector<std::string> &errors);
 };
@@ -126,7 +126,7 @@ public:
 class InternalErrorException : public JsonRpcException
 {
 public:
-    InternalErrorException(const std::string &message);
+    explicit InternalErrorException(const std::string &message);
 };
 
 /**

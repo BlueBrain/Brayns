@@ -100,11 +100,6 @@ public:
         _errors.push_back(std::move(error));
     }
 
-    void addErrors(const std::vector<std::string> &errors)
-    {
-        _errors.insert(_errors.end(), errors.begin(), errors.end());
-    }
-
     void addInvalidOneOf()
     {
         std::ostringstream stream;

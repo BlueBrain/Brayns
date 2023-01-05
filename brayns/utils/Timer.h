@@ -48,18 +48,6 @@ public:
     void reset() noexcept;
 
     /**
-     * @brief micros return the time passed, in microseconds, since the start time point and now (rounded down)
-     * @return microseconds
-     */
-    int64_t micros() const noexcept;
-
-    /**
-     * @brief millis returns the time passed, in milliseconds, since the start time point and now (rounded down)
-     * @return milliseconds
-     */
-    int64_t millis() const noexcept;
-
-    /**
      * @brief seconds returns the time passed, in seconds, since the start time point and now (rounded down)
      * @return seconds
      */

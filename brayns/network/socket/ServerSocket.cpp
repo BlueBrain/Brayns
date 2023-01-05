@@ -37,7 +37,7 @@ namespace
 class RequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
-    RequestHandler(brayns::SocketManager &manager)
+    explicit RequestHandler(brayns::SocketManager &manager)
         : _manager(manager)
     {
     }
@@ -47,7 +47,8 @@ public:
         try
         {
             auto socket = std::make_shared<brayns::WebSocket>(request, response);
-            _manager.run(socket);
+            auto client = brayns::ClientRef(std::move(socket));
+            _manager.run(client);
         }
         catch (const Poco::Exception &e)
         {
@@ -70,7 +71,7 @@ private:
 class RequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
-    RequestHandlerFactory(brayns::SocketManager &manager)
+    explicit RequestHandlerFactory(brayns::SocketManager &manager)
         : _manager(manager)
     {
     }

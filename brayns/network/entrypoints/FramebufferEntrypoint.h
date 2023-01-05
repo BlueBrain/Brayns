@@ -30,7 +30,7 @@ namespace brayns
 class SetStaticFramebufferEntrypoint final : public Entrypoint<EmptyMessage, EmptyMessage>
 {
 public:
-    SetStaticFramebufferEntrypoint(Engine &engine);
+    explicit SetStaticFramebufferEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;
@@ -43,7 +43,7 @@ private:
 class SetProgressiveFramebufferEntrypoint final : public Entrypoint<ProgressiveFrameMessage, EmptyMessage>
 {
 public:
-    SetProgressiveFramebufferEntrypoint(Engine &engine);
+    explicit SetProgressiveFramebufferEntrypoint(Engine &engine);
 
     std::string getMethod() const override;
     std::string getDescription() const override;

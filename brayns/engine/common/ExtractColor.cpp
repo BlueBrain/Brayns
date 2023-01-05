@@ -24,11 +24,6 @@
 
 namespace brayns
 {
-ColorSolid &ExtractColor::extractSolid(brayns::Components &components)
-{
-    return components.getOrAdd<ColorSolid>();
-}
-
 ColorList &ExtractColor::extractList(brayns::Components &components, size_t size)
 {
     auto &colorList = components.getOrAdd<ColorList>();

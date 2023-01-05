@@ -63,7 +63,7 @@ public:
      * @param info Image info.
      * @param fillWith Fill image with this byte.
      */
-    Image(const ImageInfo &info, char fillWith = '\0');
+    explicit Image(const ImageInfo &info, char fillWith = '\0');
 
     /**
      * @brief Check wether the image is empty (width = height = 0).
@@ -72,13 +72,6 @@ public:
      * @return false Valid image.
      */
     bool isEmpty() const;
-
-    /**
-     * @brief Get the image info.
-     *
-     * @return const ImageInfo& Image info.
-     */
-    const ImageInfo &getInfo() const;
 
     /**
      * @brief Get the image width in pixels.

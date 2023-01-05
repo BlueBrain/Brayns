@@ -29,7 +29,7 @@ namespace
 class Extractor
 {
 public:
-    Extractor(const IDataMangler &mangler)
+    explicit Extractor(const IDataMangler &mangler)
         : _values(mangler.asLongs())
     {
     }

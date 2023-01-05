@@ -90,7 +90,7 @@
     { \
         JsonObjectProperty _property; \
         _property.name = NAME; \
-        _property.options = {__VA_ARGS__}; \
+        _property.options = JsonOptions{__VA_ARGS__}; \
         _property.getSchema = SCHEMA; \
         _property.serialize = [](const void *data, JsonValue &json) \
         { \

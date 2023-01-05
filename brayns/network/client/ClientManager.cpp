@@ -45,14 +45,6 @@ void ClientManager::remove(const ClientRef &client)
     _clients.erase(client);
 }
 
-void ClientManager::broadcast(const OutputPacket &packet) const
-{
-    for (const auto &client : _clients)
-    {
-        ClientSender::send(packet, client);
-    }
-}
-
 void ClientManager::closeAll() const
 {
     for (const auto &client : _clients)

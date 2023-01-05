@@ -73,11 +73,8 @@ TEST_CASE("String counter")
 
 TEST_CASE("String extractor")
 {
-    auto data = std::string_view();
-    auto extracted = std::string_view();
-
-    data = " test1 test2 ";
-    extracted = brayns::StringExtractor::extractUntil(data, ' ');
+    auto data = std::string_view(" test1 test2 ");
+    auto extracted = brayns::StringExtractor::extractUntil(data, ' ');
     CHECK_EQ(extracted, "");
     brayns::StringExtractor::extract(data, 1);
     extracted = brayns::StringExtractor::extractUntil(data, ' ');

@@ -26,7 +26,7 @@ public:
     using Section = NeuronMorphology::Section;
     using Sample = NeuronMorphology::SectionSample;
 
-    SectionSubsampler(uint32_t samplingFactor)
+    explicit SectionSubsampler(uint32_t samplingFactor)
         : _samplingFactor(samplingFactor)
     {
     }

@@ -26,7 +26,7 @@ namespace
 class SceneInspector
 {
 public:
-    SceneInspector(brayns::Engine &engine)
+    explicit SceneInspector(brayns::Engine &engine)
         : _engine(engine)
     {
     }

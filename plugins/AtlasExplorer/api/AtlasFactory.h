@@ -38,7 +38,7 @@ public:
     static AtlasFactory createDefault();
 
 public:
-    AtlasFactory(Factories factories);
+    explicit AtlasFactory(Factories factories);
 
     std::shared_ptr<Atlas> create(
         VoxelType type,

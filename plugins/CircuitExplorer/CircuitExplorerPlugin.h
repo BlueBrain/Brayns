@@ -31,5 +31,5 @@
 class CircuitExplorerPlugin : public brayns::IPlugin
 {
 public:
-    CircuitExplorerPlugin(brayns::PluginAPI &api);
+    explicit CircuitExplorerPlugin(brayns::PluginAPI &api);
 };

@@ -33,13 +33,12 @@ namespace brayns
 class ArgvBuilder
 {
 public:
-    ArgvBuilder(std::vector<ArgvProperty> &properties);
+    explicit ArgvBuilder(std::vector<ArgvProperty> &properties);
 
     ArgvBuilder &multitoken(bool value = true);
     ArgvBuilder &composable(bool value = true);
     ArgvBuilder &minimum(std::optional<double> value);
     ArgvBuilder &maximum(std::optional<double> value);
-    ArgvBuilder &between(double minValue, double maxValue);
     ArgvBuilder &minItems(std::optional<size_t> value);
     ArgvBuilder &maxItems(std::optional<size_t> value);
     ArgvBuilder &itemCount(std::optional<size_t> value);

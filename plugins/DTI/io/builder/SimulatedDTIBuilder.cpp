@@ -63,7 +63,7 @@ public:
 class SpikeReader
 {
 public:
-    SpikeReader(const std::string &blueConfigPath)
+    explicit SpikeReader(const std::string &blueConfigPath)
         : _reader(brion::BlueConfig(blueConfigPath).getSpikeSource())
     {
     }

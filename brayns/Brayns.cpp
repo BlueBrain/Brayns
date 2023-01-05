@@ -87,7 +87,7 @@ public:
 class RateLimiter
 {
 public:
-    RateLimiter(brayns::Duration period)
+    explicit RateLimiter(brayns::Duration period)
         : _period(period)
     {
     }

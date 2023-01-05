@@ -36,7 +36,7 @@ class AddLightEntrypoint : public Entrypoint<T, ModelInstance>
 public:
     using Request = typename Entrypoint<T, ModelInstance>::Request;
 
-    AddLightEntrypoint(ModelManager &models)
+    explicit AddLightEntrypoint(ModelManager &models)
         : _models(models)
     {
     }
@@ -65,7 +65,7 @@ private:
 class AddLightAmbientEntrypoint : public AddLightEntrypoint<AmbientLight>
 {
 public:
-    AddLightAmbientEntrypoint(ModelManager &models);
+    explicit AddLightAmbientEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -74,7 +74,7 @@ public:
 class AddLightDirectionalEntrypoint : public AddLightEntrypoint<DirectionalLight>
 {
 public:
-    AddLightDirectionalEntrypoint(ModelManager &models);
+    explicit AddLightDirectionalEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -83,7 +83,7 @@ public:
 class AddLightQuadEntrypoint : public AddLightEntrypoint<QuadLight>
 {
 public:
-    AddLightQuadEntrypoint(ModelManager &models);
+    explicit AddLightQuadEntrypoint(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

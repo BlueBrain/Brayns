@@ -27,7 +27,8 @@ namespace sonataloader
 class SonataColorData final : public IBrainColorData
 {
 public:
-    SonataColorData(bbp::sonata::NodePopulation population);
+    explicit SonataColorData(bbp::sonata::NodePopulation population);
+
     std::vector<BrainColorMethod> getMethods() const override;
     std::vector<std::string> getValues(BrainColorMethod method, const std::vector<uint64_t> &ids) const override;
 

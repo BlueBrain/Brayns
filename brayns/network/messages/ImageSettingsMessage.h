@@ -32,7 +32,8 @@ class ImageSettings
 {
 public:
     ImageSettings() = default;
-    ImageSettings(const Vector2ui &baseSize)
+
+    explicit ImageSettings(const Vector2ui &baseSize)
         : _size(baseSize)
     {
     }

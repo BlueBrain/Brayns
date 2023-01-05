@@ -41,16 +41,16 @@ public:
     using Traits = GeometryTraits<T>;
 
     template<typename Type>
-    Geometry(std::vector<Type> primitives)
+    explicit Geometry(std::vector<Type> primitives)
+        : _handleName(GeometryTraits<Type>::handleName)
+        , _geometryName(GeometryTraits<Type>::name)
+        , _handle(ospray::cpp::Geometry(_handleName))
+        , _data(std::make_unique<GeometryData<Type>>(std::move(primitives)))
     {
-        _handleName = GeometryTraits<Type>::handleName;
-        _geometryName = GeometryTraits<Type>::name;
-        _handle = ospray::cpp::Geometry(_handleName);
-        _data = std::make_unique<GeometryData<Type>>(std::move(primitives));
     }
 
     template<typename Type>
-    Geometry(Type primitive)
+    explicit Geometry(Type primitive)
         : Geometry(std::vector<Type>{std::move(primitive)})
     {
     }

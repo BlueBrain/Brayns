@@ -99,7 +99,7 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto &loader = _loaders.getSuitableLoader(path, "", name);
     auto &parameters = params.loader_properties;
     auto callback = [&](const auto &operation, auto amount) { progress.notify(operation, amount); };
-    auto models = loader.loadFromFile(path, {callback}, parameters);
+    auto models = loader.loadFromFile(path, brayns::LoaderProgress(callback), parameters);
     auto instances = _models.add(std::move(models));
 
     auto loadInfo = LoadInfoFactory::create(params);

@@ -28,7 +28,7 @@ namespace
 class LayerDistanceParser
 {
 public:
-    LayerDistanceParser(const IDataMangler &data)
+    explicit LayerDistanceParser(const IDataMangler &data)
     {
         auto doubles = data.asDoubles();
 

@@ -30,7 +30,7 @@
 class BrainDatasetColorMethod : public brayns::IColorMethod
 {
 public:
-    BrainDatasetColorMethod(BrainColorMethod method);
+    explicit BrainDatasetColorMethod(BrainColorMethod method);
 
     std::string getName() const override;
     std::vector<std::string> getValues(brayns::Components &components) const override;

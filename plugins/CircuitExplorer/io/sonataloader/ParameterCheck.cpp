@@ -33,7 +33,7 @@ namespace sl = sonataloader;
 class NodeChecker
 {
 public:
-    NodeChecker(const sonataloader::Config &config)
+    explicit NodeChecker(const sonataloader::Config &config)
         : _config(config)
     {
     }
@@ -111,7 +111,6 @@ private:
         case sl::ReportType::Synapse:
         {
             throw std::invalid_argument("Invalid report type for node population " + population);
-            break;
         }
         default:
             break;
@@ -131,7 +130,7 @@ private:
 class EdgeChecker
 {
 public:
-    EdgeChecker(const sonataloader::Config &config)
+    explicit EdgeChecker(const sonataloader::Config &config)
         : _config(config)
     {
     }
@@ -192,7 +191,7 @@ private:
 class MorphologyChecker
 {
 public:
-    MorphologyChecker(const sl::Config &config)
+    explicit MorphologyChecker(const sl::Config &config)
         : _config(config)
     {
     }

@@ -95,21 +95,6 @@ public:
         auto selection = bbp::sonata::Selection::fromValues(ids);
         return query(population, attribute, selection);
     }
-
-    static std::vector<std::string> queryAny(
-        const bbp::sonata::NodePopulation &population,
-        const std::string &attribute)
-    {
-        return query(population, attribute, std::vector<uint64_t>{0});
-    }
-
-    static std::vector<std::string> queryAll(
-        const bbp::sonata::NodePopulation &population,
-        const std::string &attribute)
-    {
-        const auto selection = population.selectAll();
-        return query(population, attribute, selection);
-    }
 };
 }
 

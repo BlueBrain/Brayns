@@ -32,7 +32,7 @@ namespace brayns
 class GetMaterialType : public Entrypoint<GetModelMessage, std::string>
 {
 public:
-    GetMaterialType(ModelManager &models);
+    explicit GetMaterialType(ModelManager &models);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
@@ -48,7 +48,7 @@ class SetMaterialEntrypoint : public Entrypoint<SetMaterialMessage<MaterialType>
 public:
     using Request = typename Entrypoint<SetMaterialMessage<MaterialType>, EmptyMessage>::Request;
 
-    SetMaterialEntrypoint(ModelManager &models)
+    explicit SetMaterialEntrypoint(ModelManager &models)
         : _models(models)
     {
     }
@@ -82,7 +82,8 @@ private:
 class SetMaterialCarPaint : public SetMaterialEntrypoint<CarPaint>
 {
 public:
-    SetMaterialCarPaint(ModelManager &ModelManager);
+    explicit SetMaterialCarPaint(ModelManager &ModelManager);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -90,7 +91,8 @@ public:
 class SetMaterialPhong : public SetMaterialEntrypoint<Phong>
 {
 public:
-    SetMaterialPhong(ModelManager &ModelManager);
+    explicit SetMaterialPhong(ModelManager &ModelManager);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -98,7 +100,8 @@ public:
 class SetMaterialEmissive : public SetMaterialEntrypoint<Emissive>
 {
 public:
-    SetMaterialEmissive(ModelManager &ModelManager);
+    explicit SetMaterialEmissive(ModelManager &ModelManager);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -106,7 +109,8 @@ public:
 class SetMaterialGlass : public SetMaterialEntrypoint<Glass>
 {
 public:
-    SetMaterialGlass(ModelManager &ModelManager);
+    explicit SetMaterialGlass(ModelManager &ModelManager);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -114,7 +118,8 @@ public:
 class SetMaterialMatte : public SetMaterialEntrypoint<Matte>
 {
 public:
-    SetMaterialMatte(ModelManager &ModelManager);
+    explicit SetMaterialMatte(ModelManager &ModelManager);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -122,7 +127,8 @@ public:
 class SetMaterialMetal : public SetMaterialEntrypoint<Metal>
 {
 public:
-    SetMaterialMetal(ModelManager &ModelManager);
+    explicit SetMaterialMetal(ModelManager &ModelManager);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -130,7 +136,8 @@ public:
 class SetMaterialPlastic : public SetMaterialEntrypoint<Plastic>
 {
 public:
-    SetMaterialPlastic(ModelManager &ModelManager);
+    explicit SetMaterialPlastic(ModelManager &ModelManager);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -141,7 +148,7 @@ class GetMaterialEntrypoint : public Entrypoint<GetModelMessage, MaterialType>
 public:
     using Request = typename Entrypoint<GetModelMessage, MaterialType>::Request;
 
-    GetMaterialEntrypoint(ModelManager &models)
+    explicit GetMaterialEntrypoint(ModelManager &models)
         : _models(models)
     {
     }
@@ -175,7 +182,8 @@ private:
 class GetMaterialCarPaint : public GetMaterialEntrypoint<CarPaint>
 {
 public:
-    GetMaterialCarPaint(ModelManager &scene);
+    explicit GetMaterialCarPaint(ModelManager &scene);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -183,7 +191,8 @@ public:
 class GetMaterialPhong : public GetMaterialEntrypoint<Phong>
 {
 public:
-    GetMaterialPhong(ModelManager &scene);
+    explicit GetMaterialPhong(ModelManager &scene);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -191,7 +200,8 @@ public:
 class GetMaterialEmissive : public GetMaterialEntrypoint<Emissive>
 {
 public:
-    GetMaterialEmissive(ModelManager &scene);
+    explicit GetMaterialEmissive(ModelManager &scene);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -199,7 +209,8 @@ public:
 class GetMaterialGlass : public GetMaterialEntrypoint<Glass>
 {
 public:
-    GetMaterialGlass(ModelManager &scene);
+    explicit GetMaterialGlass(ModelManager &scene);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -207,7 +218,8 @@ public:
 class GetMaterialMatte : public GetMaterialEntrypoint<Matte>
 {
 public:
-    GetMaterialMatte(ModelManager &scene);
+    explicit GetMaterialMatte(ModelManager &scene);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -215,7 +227,8 @@ public:
 class GetMaterialMetal : public GetMaterialEntrypoint<Metal>
 {
 public:
-    GetMaterialMetal(ModelManager &scene);
+    explicit GetMaterialMetal(ModelManager &scene);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
@@ -223,7 +236,8 @@ public:
 class GetMaterialPlastic : public GetMaterialEntrypoint<Plastic>
 {
 public:
-    GetMaterialPlastic(ModelManager &scene);
+    explicit GetMaterialPlastic(ModelManager &scene);
+
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };

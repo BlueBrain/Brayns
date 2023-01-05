@@ -34,7 +34,7 @@ namespace brayns
 class ExitLaterEntrypoint : public Entrypoint<ExitLaterMessage, EmptyMessage>
 {
 public:
-    ExitLaterEntrypoint(Engine &engine);
+    explicit ExitLaterEntrypoint(Engine &engine);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

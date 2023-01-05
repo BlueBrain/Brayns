@@ -69,26 +69,11 @@ struct ImageInfo
     size_t getSize() const;
 
     /**
-     * @brief Return height.
-     *
-     * @return size_t Number of rows in an image.
-     */
-    size_t getRowCount() const;
-
-    /**
      * @brief Compute the size in bytes of a row.
      *
      * @return size_t Row size.
      */
     size_t getRowSize() const;
-
-    /**
-     * @brief Compute the offset in bytes of a row in a contiguous array.
-     *
-     * @param index Row index (0 is top-left).
-     * @return size_t Row offset.
-     */
-    size_t getRowOffset(size_t index) const;
 
     /**
      * @brief Compute the number of pixels in the image.

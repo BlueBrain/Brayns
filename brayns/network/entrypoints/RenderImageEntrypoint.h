@@ -31,7 +31,7 @@ namespace brayns
 class RenderImageEntrypoint : public Entrypoint<RenderImageParams, RenderImageResult>
 {
 public:
-    RenderImageEntrypoint(Engine &engine);
+    explicit RenderImageEntrypoint(Engine &engine);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

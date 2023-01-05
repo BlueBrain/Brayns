@@ -109,7 +109,7 @@ private:
 class ModelBuilder
 {
 public:
-    ModelBuilder(brayns::Model &model)
+    explicit ModelBuilder(brayns::Model &model)
         : _model(model)
     {
     }

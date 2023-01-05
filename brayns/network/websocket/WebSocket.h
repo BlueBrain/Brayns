@@ -45,7 +45,7 @@ public:
      *
      * @param message Description of the reason why the connection was closed.
      */
-    ConnectionClosedException(const std::string &message);
+    explicit ConnectionClosedException(const std::string &message);
 };
 
 /**

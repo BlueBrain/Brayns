@@ -31,7 +31,7 @@ namespace brayns
 class SceneProxy
 {
 public:
-    SceneProxy(const Scene *scene = nullptr)
+    explicit SceneProxy(const Scene *scene = nullptr)
         : _scene(scene)
     {
     }

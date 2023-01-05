@@ -42,7 +42,7 @@ public:
     using Traits = LightTraits<T>;
 
     template<typename Type>
-    Light(Type data)
+    explicit Light(Type data)
         : _handleName(LightTraits<Type>::handleName)
         , _lightName(LightTraits<Type>::name)
         , _handle(_handleName)

@@ -46,13 +46,6 @@ public:
     bool isClient() const noexcept;
 
     /**
-     * @brief Set client mode.
-     *
-     * @param client True if client mode.
-     */
-    void setClient(bool client) noexcept;
-
-    /**
      * @brief Check if SSL is enabled.
      *
      * Default: false.
@@ -61,13 +54,6 @@ public:
      * @return false SSL off.
      */
     bool isSecure() const noexcept;
-
-    /**
-     * @brief Enable or disable SSL.
-     *
-     * @param secure True if SSL enabled.
-     */
-    void setSecure(bool secure) noexcept;
 
     /**
      * @brief Get the maximum number of simultaneous connections allowed.
@@ -79,25 +65,11 @@ public:
     size_t getMaxClients() const noexcept;
 
     /**
-     * @brief Set the maximum number of simultaneous connections.
-     *
-     * @param maxClients Max connection count.
-     */
-    void setMaxClients(size_t maxClients) noexcept;
-
-    /**
      * @brief Get the URI of the client or server in format host:port.
      *
      * @return const std::string& URI.
      */
     const std::string &getUri() const noexcept;
-
-    /**
-     * @brief Set the URI of the client or server.
-     *
-     * @param uri URI.
-     */
-    void setUri(std::string uri) noexcept;
 
     /**
      * @brief Get the delay between two connections attempts in client mode.
@@ -109,25 +81,11 @@ public:
     std::chrono::milliseconds getReconnectionPeriod() const noexcept;
 
     /**
-     * @brief Set the reconnection period.
-     *
-     * @param reconnectionPeriod Connection attempt period.
-     */
-    void setReconnectionPeriod(std::chrono::milliseconds reconnectionPeriod) noexcept;
-
-    /**
      * @brief Get the path of the server private key (server + SSL).
      *
      * @return const std::string& Private key server file.
      */
     const std::string &getPrivateKeyFile() const noexcept;
-
-    /**
-     * @brief Set the server private key.
-     *
-     * @param privateKeyFile File path.
-     */
-    void setPrivateKeyFile(std::string privateKeyFile) noexcept;
 
     /**
      * @brief Get the private key passphrase if any.
@@ -137,25 +95,11 @@ public:
     const std::string &getPrivateKeyPassphrase() const noexcept;
 
     /**
-     * @brief Set the private key passphrase.
-     *
-     * @param privateKeyPassphrase Passphrase.
-     */
-    void setPrivateKeyPassphrase(std::string privateKeyPassphrase) noexcept;
-
-    /**
      * @brief Get the certificate of the server if any.
      *
      * @return const std::string& Certificate file.
      */
     const std::string &getCertificateFile() const noexcept;
-
-    /**
-     * @brief Set the server certificate.
-     *
-     * @param certificateFile Certificate file.
-     */
-    void setCertificateFile(std::string certificateFile) noexcept;
 
     /**
      * @brief Get CA location, if empty, default SLL ones will be used.
@@ -165,13 +109,6 @@ public:
      * @return const std::string& CA file or directory.
      */
     const std::string &getCALocation() const noexcept;
-
-    /**
-     * @brief Set CA location.
-     *
-     * @param caLocation CA file or directory.
-     */
-    void setCALocation(std::string caLocation) noexcept;
 
     /**
      * @brief Register argv properties of the parameter set.

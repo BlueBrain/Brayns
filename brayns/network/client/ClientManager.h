@@ -63,13 +63,6 @@ public:
     void remove(const ClientRef &client);
 
     /**
-     * @brief Send a packet to all clients except the source if specified.
-     *
-     * @param packet Data packet.
-     */
-    void broadcast(const OutputPacket &packet) const;
-
-    /**
      * @brief Close all sockets.
      *
      */

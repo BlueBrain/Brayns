@@ -59,7 +59,7 @@ class JsonObjectInfo
 {
 public:
     JsonObjectInfo() = default;
-    JsonObjectInfo(std::string title);
+    explicit JsonObjectInfo(std::string title);
 
     JsonSchema getSchema() const;
     void serialize(const void *message, JsonValue &json) const;

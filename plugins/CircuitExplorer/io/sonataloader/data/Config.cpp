@@ -180,11 +180,6 @@ bbp::sonata::PopulationProperties Config::getEdgesProperties(const std::string &
     return _config.getEdgePopulationProperties(name);
 }
 
-std::set<std::string> Config::getAllEdgeNames() const noexcept
-{
-    return _config.listEdgePopulations();
-}
-
 MorphologyPath Config::getMorphologyPath(const std::string &populationName) const
 {
     auto properties = _config.getNodePopulationProperties(populationName);

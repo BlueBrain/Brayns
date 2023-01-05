@@ -31,7 +31,7 @@ namespace brayns
 class InstantiateModelEntrypoint final : public Entrypoint<InstantiateMessage, ModelInstance>
 {
 public:
-    InstantiateModelEntrypoint(ModelManager &models);
+    explicit InstantiateModelEntrypoint(ModelManager &models);
 
     std::string getMethod() const override;
     std::string getDescription() const override;

@@ -37,7 +37,7 @@ public:
      * to undefined behaviour.
      * @param frame The frame handler to use.
      */
-    Framebuffer(std::unique_ptr<IFrameHandler> frame);
+    explicit Framebuffer(std::unique_ptr<IFrameHandler> frame);
 
     /**
      * @brief Sets the frame handler the framebuffer will use. Passing a null frame handler will lead to undefined

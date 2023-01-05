@@ -44,11 +44,6 @@ bool Image::isEmpty() const
     return getData() == nullptr;
 }
 
-const ImageInfo &Image::getInfo() const
-{
-    return _info;
-}
-
 size_t Image::getWidth() const
 {
     return _info.width;

@@ -43,7 +43,7 @@ private:
 class Config
 {
 public:
-    Config(const std::string &path);
+    explicit Config(const std::string &path);
 
     /**
      * @brief Returns the configuration file parent path.
@@ -97,12 +97,6 @@ public:
      * @return bbp::sonata::PopulationProperties
      */
     bbp::sonata::PopulationProperties getEdgesProperties(const std::string &name) const;
-
-    /**
-     * @brief Returns the name of all edge populations in the network.
-     * @return std::set<std::string>
-     */
-    std::set<std::string> getAllEdgeNames() const noexcept;
 
     /**
      * @brief Returns any available path to the directory containing the population morphologies.

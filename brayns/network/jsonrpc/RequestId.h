@@ -40,8 +40,8 @@ class RequestId
 {
 public:
     RequestId() = default;
-    RequestId(int64_t value);
-    RequestId(std::string value);
+    explicit RequestId(int64_t value);
+    explicit RequestId(std::string value);
 
     bool isEmpty() const;
     bool isInt() const;

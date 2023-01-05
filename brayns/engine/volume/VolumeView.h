@@ -32,7 +32,8 @@ namespace brayns
 class VolumeView
 {
 public:
-    VolumeView(const Volume &volume);
+    explicit VolumeView(const Volume &volume);
+
     void setColorRamp(const ColorRamp &colorRamp);
     bool commit();
     const ospray::cpp::VolumetricModel &getHandle() const noexcept;

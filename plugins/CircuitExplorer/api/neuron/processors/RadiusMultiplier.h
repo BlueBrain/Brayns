@@ -26,7 +26,7 @@
 class RadiusMultiplier final : public INeuronMorphologyProcessor
 {
 public:
-    RadiusMultiplier(float radiusMultiplier);
+    explicit RadiusMultiplier(float radiusMultiplier);
 
     void process(NeuronMorphology &morphology) const override;
 

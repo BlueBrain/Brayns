@@ -34,7 +34,7 @@ namespace brayns
 class GeometryView
 {
 public:
-    GeometryView(const Geometry &geometry);
+    explicit GeometryView(const Geometry &geometry);
 
     void setMaterial(const Material &material);
 

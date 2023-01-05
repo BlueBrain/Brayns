@@ -29,7 +29,7 @@ namespace brayns
 class RegistryEntrypoint : public Entrypoint<EmptyMessage, std::vector<std::string>>
 {
 public:
-    RegistryEntrypoint(const EntrypointRegistry &entrypoints);
+    explicit RegistryEntrypoint(const EntrypointRegistry &entrypoints);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

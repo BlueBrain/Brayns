@@ -37,7 +37,7 @@ namespace brayns
 class Model
 {
 public:
-    Model(std::string type);
+    explicit Model(std::string type);
 
     Model(const Model &) = delete;
     Model &operator=(const Model &) = delete;

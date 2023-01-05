@@ -31,7 +31,7 @@ public:
      * @brief Builds and stores the geometry from the given morphology
      * @param morphology
      */
-    NeuronGeometryBuilder(const NeuronMorphology &morphology);
+    explicit NeuronGeometryBuilder(const NeuronMorphology &morphology);
 
     /**
      * @brief Instantiates the built geometry with the given transform

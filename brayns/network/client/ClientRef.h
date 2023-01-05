@@ -42,7 +42,7 @@ public:
      *
      * @param socket Client socket.
      */
-    ClientRef(std::shared_ptr<WebSocket> socket);
+    explicit ClientRef(std::shared_ptr<WebSocket> socket);
 
     /**
      * @brief Get client socket (must be connected).
