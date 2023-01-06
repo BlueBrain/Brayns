@@ -62,6 +62,7 @@ std::vector<std::shared_ptr<brayns::Model>> NRRDLoader::importFromFile(
     auto header = HeaderParser::parse(path, contentView);
     auto size = HeaderUtils::get3DSize(header);
     auto spacing = HeaderUtils::get3DDimensions(header);
+    auto transform = HeaderUtils::getTransform(header);
 
     callback.updateProgress("Parsing NRRD data", 0.4f);
     auto data = DataParser::parse(header, contentView);
@@ -74,6 +75,7 @@ std::vector<std::shared_ptr<brayns::Model>> NRRDLoader::importFromFile(
     auto model = OutlineShell().run(*atlas, {});
     auto &components = model->getComponents();
     components.add<AtlasData>(std::move(atlas));
+    components.add<brayns::Transform>(transform);
 
     callback.updateProgress("Done", 1.f);
     auto result = std::vector<std::shared_ptr<brayns::Model>>();

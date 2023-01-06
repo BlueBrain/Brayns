@@ -136,6 +136,11 @@ private:
      */
     Matrix4f _getFullTransform() const noexcept;
 
+    /**
+     * @brief Updates the transformation of this instance on the Ospray side.
+     */
+    void _updateTransform();
+
 private:
     uint32_t _id;
     bool _visible = true;

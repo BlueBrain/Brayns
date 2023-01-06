@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/engine/components/Transform.h>
 #include <brayns/utils/MathTypes.h>
 
 #include <io/nrrdloader/NRRDHeader.h>
@@ -28,6 +29,6 @@ class HeaderUtils
 {
 public:
     static brayns::Vector3ui get3DSize(const NRRDHeader &header);
-
     static brayns::Vector3f get3DDimensions(const NRRDHeader &header);
+    static brayns::Transform getTransform(const NRRDHeader &header);
 };
