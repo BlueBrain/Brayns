@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2022 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,20 +17,27 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .get_loaders import get_loaders
-from .loader import Loader
-from .loader_info import LoaderInfo
-from .mesh_loader import MeshLoader
-from .mhd_volume_loader import MhdVolumeLoader
-from .raw_volume_loader import RawVolumeLoader
-from .volume_data_type import VolumeDataType
+from typing import Any
 
-__all__ = [
-    "get_loaders",
-    "Loader",
-    "LoaderInfo",
-    "MeshLoader",
-    "MhdVolumeLoader",
-    "RawVolumeLoader",
-    "VolumeDataType"
-]
+from .loader import Loader
+
+
+class MhdVolumeLoader(Loader):
+    """MDH volume loader.
+
+    Supports .mhd file format.
+    """
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        """Get the loader name.
+
+        :return: Loader name.
+        :rtype: str
+        """
+        return "mhd-volume"
+
+    def get_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        return {}
