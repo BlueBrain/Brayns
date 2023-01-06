@@ -121,8 +121,6 @@ void ModelInstance::setTransform(const Transform &transform) noexcept
     if (_flag.update(_transform, transform))
     {
         auto matrix = _getFullTransform();
-        auto affine = MatrixConverter::glmToOspray(matrix);
-        _handle.setParam(InstanceParameters::transform, affine);
         auto view = _model->getSystemsView();
         _bounds = view.computeBounds(matrix);
     }
@@ -144,6 +142,7 @@ bool ModelInstance::commit()
     {
         return false;
     }
+    _updateTransform();
     _handle.commit();
     _flag.setModified(false);
     return true;
@@ -161,5 +160,12 @@ Matrix4f ModelInstance::_getFullTransform() const noexcept
     }
 
     return matrix;
+}
+
+void ModelInstance::_updateTransform()
+{
+    auto matrix = _getFullTransform();
+    auto affine = MatrixConverter::glmToOspray(matrix);
+    _handle.setParam(InstanceParameters::transform, affine);
 }
 }

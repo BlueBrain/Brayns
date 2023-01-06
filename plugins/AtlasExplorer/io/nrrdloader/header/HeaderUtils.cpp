@@ -61,3 +61,35 @@ brayns::Vector3f HeaderUtils::get3DDimensions(const NRRDHeader &header)
     }
     return result;
 }
+
+brayns::Transform HeaderUtils::getTransform(const NRRDHeader &header)
+{
+    auto &spaceDimension = header.spaceDimensions;
+    if (!spaceDimension || (*spaceDimension) != 3)
+    {
+        return brayns::Transform();
+    }
+
+    auto transform = brayns::Transform();
+
+    auto &spaceOrigin = header.spaceOrigin;
+    if (spaceOrigin)
+    {
+        auto &origin = *spaceOrigin;
+        transform.translation = brayns::Vector3f(origin[0], origin[1], origin[2]);
+    }
+
+    auto &spaceDirection = header.spaceDirections;
+    if (spaceDirection)
+    {
+        auto &vectors = *spaceDirection;
+        auto matrix = brayns::Matrix3f();
+        for (glm::length_t i = 0; i < 3; ++i)
+        {
+            matrix[i] = glm::normalize(brayns::Vector3f(vectors[i][0], vectors[i][1], vectors[i][2]));
+        }
+        transform.rotation = glm::quat_cast(matrix);
+    }
+
+    return transform;
+}
