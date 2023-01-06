@@ -19,128 +19,196 @@
 
 #include "VolumeLoader.h"
 
-#include <brayns/engine/Model.h>
-#include <brayns/engine/Scene.h>
-#include <brayns/engine/Volume.h>
-#include <brayns/utils/StringUtils.h>
+#include <brayns/engine/volume/types/RegularVolume.h>
+#include <brayns/utils/FileReader.h>
+#include <brayns/utils/string/StringExtractor.h>
+#include <brayns/utils/string/StringSplitter.h>
+#include <brayns/utils/string/StringTrimmer.h>
 
-#include <filesystem>
-#include <fstream>
-#include <map>
-#include <sstream>
-#include <string>
+#include <unordered_map>
+
+namespace
+{
+class MhdParser
+{
+public:
+    static std::unordered_map<std::string, std::string> parse(const std::string &filename)
+    {
+        // Sample MHD File:
+        //
+        // ObjectType = Image
+        // DimSize = 1 2 3
+        // ElementSpacing = 0.1 0.2 0.3
+        // ElementType = MET_USHORT
+        // ElementDataFile = BS39.raw
+
+        auto content = brayns::FileReader::read(filename);
+        auto view = std::string_view(content);
+
+        auto result = std::unordered_map<std::string, std::string>();
+
+        auto ctr = 1ul;
+        while (!view.empty())
+        {
+            auto line = brayns::StringExtractor::extractLine(view);
+            brayns::StringExtractor::extract(view, 1);
+
+            auto keyAndValue = brayns::StringSplitter::split(line, "=");
+            if (keyAndValue.size() != 2)
+            {
+                throw std::runtime_error("Could not parse line " + std::to_string(ctr));
+            }
+
+            keyAndValue[0] = std::string(brayns::StringTrimmer::trim(keyAndValue[0]));
+            keyAndValue[1] = std::string(brayns::StringTrimmer::trim(keyAndValue[1]));
+            result[keyAndValue[0]] = keyAndValue[1];
+        }
+
+        return result;
+    }
+};
+
+class VolumeDataTypeConverter
+{
+public:
+    inline static const std::unordered_map<std::string_view, brayns::VolumeDataType> converter = {
+        {"MET_FLOAT", brayns::VolumeDataType::Float},
+        {"MET_DOUBLE", brayns::VolumeDataType::Double},
+        {"MET_UCHAR", brayns::VolumeDataType::UnsignedChar},
+        {"MET_USHORT", brayns::VolumeDataType::UnsignedShort},
+        {"MET_UINT", brayns::VolumeDataType::Double},
+        {"MET_CHAR", brayns::VolumeDataType::Short},
+        {"MET_SHORT", brayns::VolumeDataType::Short},
+        {"MET_INT", brayns::VolumeDataType::Double}};
+
+    static brayns::VolumeDataType fromMET(const std::string &type)
+    {
+        auto it = converter.find(type);
+
+        if (it == converter.end())
+        {
+            throw std::runtime_error("Unknown data type " + type);
+        }
+
+        return it->second;
+    }
+};
+
+class VoxelReader
+{
+public:
+    static brayns::RegularVolume fromFile(const std::string &filename, const brayns::RawVolumeLoaderParameters &params)
+    {
+        auto fileData = brayns::FileReader::read(filename);
+        _checkDataSize(fileData.size(), params);
+    }
+
+    static brayns::RegularVolume fromBlob(const brayns::Blob &blob, const brayns::RawVolumeLoaderParameters &params)
+    {
+        _checkDataSize(blob.data.size(), params);
+
+        auto volume = brayns::RegularVolume();
+        volume.dataType = params.type;
+        volume.size = params.dimensions;
+        volume.spacing = params.spacing;
+        volume.voxels = blob.data;
+        return volume;
+    }
+
+private:
+    static void _checkDataSize(size_t dataSize, const brayns::RawVolumeLoaderParameters &params)
+    {
+        auto expectedSize = glm::compMul(params.dimensions) * _getTypeByteSize(params.type);
+        if (expectedSize != dataSize)
+        {
+            throw std::invalid_argument("Data size and exptected size mismatch");
+        }
+    }
+
+    static size_t _getTypeByteSize(brayns::VolumeDataType type)
+    {
+        switch (type)
+        {
+        case brayns::VolumeDataType::UnsignedChar:
+            return 1;
+        case brayns::VolumeDataType::HalfFloat:
+        case brayns::VolumeDataType::Short:
+        case brayns::VolumeDataType::UnsignedShort:
+            return 2;
+        case brayns::VolumeDataType::Float:
+            return 4;
+        default:
+            return 8;
+        }
+    }
+};
+
+class ModelBuilder
+{
+public:
+    ModelBuilder(brayns::Model &model)
+        : _components(model.getComponents())
+        , _systems(model.getSystems())
+    {
+    }
+
+private:
+    brayns::Components &_components;
+    brayns::Systems &_systems;
+};
+
+class RawVolumeReader
+{
+public:
+    static std::shared_ptr<brayns::Model> read(
+        const std::string &filename,
+        const brayns::LoaderProgress &callback,
+        const brayns::RawVolumeLoaderParameters &params)
+    {
+        _checkParameters(params);
+
+        callback.updateProgress("Parsing volume file ...", 0.f);
+
+        auto model = std::make_shared<brayns::Model>();
+        auto volume = model->createSharedDataVolume(params.dimensions, params.spacing, params.type);
+        volume->setDataRange(dataRange);
+
+        callback.updateProgress("Loading voxels ...", 0.5f);
+        mapData(volume);
+
+        callback.updateProgress("Adding model ...", 1.f);
+        model->addVolume(volume);
+
+        Transformation transformation;
+        transformation.setRotationCenter(model->getBounds().getCenter());
+        auto modelDescriptor = std::make_shared<ModelDescriptor>(
+            std::move(model),
+            filename,
+            ModelMetadata{
+                {"dimensions", to_string(params.dimensions)},
+                {"element-spacing", to_string(params.spacing)}});
+        modelDescriptor->setTransformation(transformation);
+        return modelDescriptor;
+    }
+
+private:
+    static void _checkParameters(const brayns::RawVolumeLoaderParameters &params)
+    {
+        if (glm::compMul(params.dimensions) == 0)
+        {
+            throw std::runtime_error("Volume dimensions are empty");
+        }
+    }
+};
+
+} // namespace
 
 namespace brayns
 {
-namespace
-{
-template<size_t M, typename T>
-std::string to_string(const glm::vec<M, T> &vec)
-{
-    std::stringstream stream;
-    stream << vec;
-    return stream.str();
-}
-
-template<typename T>
-glm::vec<3, T> parseVec3(const std::string &str, std::function<T(std::string)> conv)
-{
-    const auto v = brayns::string_utils::split(str, ' ');
-    if (v.size() != 3)
-        throw std::runtime_error("Not exactly 3 values for mhd array");
-    return {conv(v[0]), conv(v[1]), conv(v[2])};
-}
-
-std::map<std::string, std::string> parseMHD(const std::string &filename)
-{
-    std::ifstream infile(filename);
-    if (!infile.good())
-        throw std::runtime_error("Could not open file " + filename);
-
-    // Sample MHD File:
-    //
-    // ObjectType = Image
-    // DimSize = 1 2 3
-    // ElementSpacing = 0.1 0.2 0.3
-    // ElementType = MET_USHORT
-    // ElementDataFile = BS39.raw
-
-    std::map<std::string, std::string> result;
-    std::string line;
-    size_t ctr = 1;
-    while (std::getline(infile, line))
-    {
-        const auto v = string_utils::split(line, '=');
-        if (v.size() != 2)
-            throw std::runtime_error("Could not parse line " + std::to_string(ctr));
-        auto key = v[0];
-        auto value = v[1];
-        string_utils::trim(key);
-        string_utils::trim(value);
-
-        result[key] = value;
-        ++ctr;
-    }
-
-    return result;
-}
-
-VolumeDataType dataTypeFromMET(const std::string &type)
-{
-    if (type == "MET_FLOAT")
-        return VolumeDataType::FLOAT;
-    else if (type == "MET_DOUBLE")
-        return VolumeDataType::DOUBLE;
-    else if (type == "MET_UCHAR")
-        return VolumeDataType::UINT8;
-    else if (type == "MET_USHORT")
-        return VolumeDataType::UINT16;
-    else if (type == "MET_UINT")
-        return VolumeDataType::UINT32;
-    else if (type == "MET_CHAR")
-        return VolumeDataType::INT8;
-    else if (type == "MET_SHORT")
-        return VolumeDataType::INT16;
-    else if (type == "MET_INT")
-        return VolumeDataType::INT32;
-    else
-        throw std::runtime_error("Unknown data type " + type);
-}
-
-Vector2f dataRangeFromType(VolumeDataType type)
-{
-    switch (type)
-    {
-    case VolumeDataType::UINT8:
-        return {std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max()};
-    case VolumeDataType::UINT16:
-        return {std::numeric_limits<uint16_t>::min(), std::numeric_limits<uint16_t>::max()};
-    case VolumeDataType::UINT32:
-        return {std::numeric_limits<uint32_t>::min() / 100, std::numeric_limits<uint32_t>::max() / 100};
-    case VolumeDataType::INT8:
-        return {std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()};
-    case VolumeDataType::INT16:
-        return {std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()};
-    case VolumeDataType::INT32:
-        return {std::numeric_limits<int32_t>::min() / 100, std::numeric_limits<int32_t>::max() / 100};
-    case VolumeDataType::FLOAT:
-    case VolumeDataType::DOUBLE:
-    default:
-        return {0, 1};
-    }
-}
-} // namespace
-
-bool RawVolumeLoader::isSupported(const std::string &, const std::string &extension) const
-{
-    return extension == "raw";
-}
-
-std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromBlob(
+std::vector<std::shared_ptr<Model>> RawVolumeLoader::importFromBlob(
     const Blob &blob,
     const LoaderProgress &callback,
-    const RawVolumeLoaderParameters &properties,
-    Scene &scene) const
+    const RawVolumeLoaderParameters &properties) const
 {
     return {_loadVolume(
         blob.name,
@@ -150,11 +218,10 @@ std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromBlob(
         scene)};
 }
 
-std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromFile(
+std::vector<std::shared_ptr<Model>> RawVolumeLoader::importFromFile(
     const std::string &filename,
     const LoaderProgress &callback,
-    const RawVolumeLoaderParameters &properties,
-    Scene &scene) const
+    const RawVolumeLoaderParameters &properties) const
 {
     return {_loadVolume(
         filename,
@@ -162,39 +229,6 @@ std::vector<ModelDescriptorPtr> RawVolumeLoader::importFromFile(
         properties,
         [filename](auto volume) { volume->mapData(filename); },
         scene)};
-}
-
-ModelDescriptorPtr RawVolumeLoader::_loadVolume(
-    const std::string &filename,
-    const LoaderProgress &callback,
-    const RawVolumeLoaderParameters &params,
-    const std::function<void(SharedDataVolumePtr)> &mapData,
-    Scene &scene) const
-{
-    callback.updateProgress("Parsing volume file ...", 0.f);
-
-    if (glm::compMul(params.dimensions) == 0)
-        throw std::runtime_error("Volume dimensions are empty");
-
-    const auto dataRange = dataRangeFromType(params.type);
-    auto model = scene.createModel();
-    auto volume = model->createSharedDataVolume(params.dimensions, params.spacing, params.type);
-    volume->setDataRange(dataRange);
-
-    callback.updateProgress("Loading voxels ...", 0.5f);
-    mapData(volume);
-
-    callback.updateProgress("Adding model ...", 1.f);
-    model->addVolume(volume);
-
-    Transformation transformation;
-    transformation.setRotationCenter(model->getBounds().getCenter());
-    auto modelDescriptor = std::make_shared<ModelDescriptor>(
-        std::move(model),
-        filename,
-        ModelMetadata{{"dimensions", to_string(params.dimensions)}, {"element-spacing", to_string(params.spacing)}});
-    modelDescriptor->setTransformation(transformation);
-    return modelDescriptor;
 }
 
 std::string RawVolumeLoader::getName() const
@@ -205,13 +239,6 @@ std::string RawVolumeLoader::getName() const
 std::vector<std::string> RawVolumeLoader::getSupportedExtensions() const
 {
     return {"raw"};
-}
-
-////////////////////////////////////////////////////////////////////////////
-
-bool MHDVolumeLoader::isSupported(const std::string &, const std::string &extension) const
-{
-    return extension == "mhd";
 }
 
 std::vector<ModelDescriptorPtr> MHDVolumeLoader::importFromBlob(const Blob &, const LoaderProgress &, Scene &) const

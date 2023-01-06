@@ -20,55 +20,39 @@
 #pragma once
 
 #include <brayns/io/Loader.h>
-#include <brayns/io/loaders/RawVolumeLoaderParameters.h>
+#include <brayns/io/loaders/volume/RawVolumeLoaderParameters.h>
 
 namespace brayns
 {
-/** A volume loader for mhd volumes.
+/**
+ * A volume loader for mhd volumes.
  */
 class MHDVolumeLoader : public NoInputLoader
 {
 public:
     std::vector<std::string> getSupportedExtensions() const final;
-
     std::string getName() const final;
-
-    bool isSupported(const std::string &filename, const std::string &extension) const final;
-    std::vector<ModelDescriptorPtr> importFromBlob(const Blob &blob, const LoaderProgress &callback, Scene &scene)
+    std::vector<std::shared_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback) const final;
+    std::vector<std::shared_ptr<Model>> importFromFile(const std::string &filename, const LoaderProgress &callback)
         const final;
-
-    std::vector<ModelDescriptorPtr>
-        importFromFile(const std::string &filename, const LoaderProgress &callback, Scene &scene) const final;
 };
 
-/** A volume loader for raw volumes with params for dimensions.
+/**
+ * A volume loader for raw volumes with params for dimensions.
  */
 class RawVolumeLoader : public Loader<RawVolumeLoaderParameters>
 {
 public:
     std::vector<std::string> getSupportedExtensions() const final;
-
     std::string getName() const final;
-
-    bool isSupported(const std::string &filename, const std::string &extension) const final;
-    std::vector<ModelDescriptorPtr> importFromBlob(
+    std::vector<std::shared_ptr<Model>> importFromBlob(
         const Blob &blob,
         const LoaderProgress &callback,
-        const RawVolumeLoaderParameters &properties,
-        Scene &scene) const final;
+        const RawVolumeLoaderParameters &properties) const final;
 
-    std::vector<ModelDescriptorPtr> importFromFile(
+    std::vector<std::shared_ptr<Model>> importFromFile(
         const std::string &filename,
         const LoaderProgress &callback,
-        const RawVolumeLoaderParameters &properties,
-        Scene &scene) const final;
-
-private:
-    ModelDescriptorPtr _loadVolume(
-        const std::string &filename,
-        const LoaderProgress &callback,
-        const RawVolumeLoaderParameters &properties,
-        const std::function<void(SharedDataVolumePtr)> &mapData,
-        Scene &scene) const;
+        const RawVolumeLoaderParameters &properties) const final;
 };
 } // namespace brayns

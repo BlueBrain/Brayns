@@ -20,14 +20,14 @@
 
 #pragma once
 
-#include <brayns/common/adapters/VolumeDataTypeAdapter.h>
+#include <brayns/engine/json/adapters/VolumeAdapter.h>
 #include <brayns/json/JsonObjectMacro.h>
 
 namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(RawVolumeLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(Vector3i, dimensions, "Volume grid size (x,y,z)")
-BRAYNS_JSON_OBJECT_ENTRY(Vector3d, spacing, "Volume grid cell spacing")
+BRAYNS_JSON_OBJECT_ENTRY(Vector3ui, dimensions, "Volume grid size (x,y,z)")
+BRAYNS_JSON_OBJECT_ENTRY(Vector3f, spacing, "Volume grid cell spacing")
 BRAYNS_JSON_OBJECT_ENTRY(VolumeDataType, type, "Volume byte data type")
 BRAYNS_JSON_OBJECT_END()
 } // namespace brayns
