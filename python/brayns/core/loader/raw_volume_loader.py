@@ -17,13 +17,16 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from dataclasses import dataclass
 from typing import Any
 
 from brayns.utils import Vector3
 
-from .loader import Loader, VolumeDataType
+from .loader import Loader
+from .volume_data_type import VolumeDataType
 
 
+@dataclass
 class RawVolumeLoader(Loader):
     """Raw volume loader.
 
@@ -56,5 +59,5 @@ class RawVolumeLoader(Loader):
         return {
             "dimensions": list(self.dimensions),
             "spacing": list(self.spacing),
-            "type": self.data_type,
+            "data_type": self.data_type,
         }
