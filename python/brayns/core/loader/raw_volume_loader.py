@@ -23,7 +23,6 @@ from typing import Any
 from brayns.utils import Vector3
 
 from .loader import Loader
-from .volume_data_type import VolumeDataType
 
 
 @dataclass
