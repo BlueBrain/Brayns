@@ -58,9 +58,9 @@ public:
                 throw std::runtime_error("Could not parse line " + std::to_string(ctr));
             }
 
-            keyAndValue[0] = std::string(brayns::StringTrimmer::trim(keyAndValue[0]));
-            keyAndValue[1] = std::string(brayns::StringTrimmer::trim(keyAndValue[1]));
-            result[keyAndValue[0]] = keyAndValue[1];
+            auto key = std::string(brayns::StringTrimmer::trim(keyAndValue[0]));
+            auto value = std::string(brayns::StringTrimmer::trim(keyAndValue[1]));
+            result[key] = value;
         }
 
         return result;
