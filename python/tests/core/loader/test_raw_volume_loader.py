@@ -32,8 +32,11 @@ class TestRawVolumeLoader(unittest.TestCase):
         data_type = brayns.VolumeDataType.DOUBLE
         loader = brayns.RawVolumeLoader(dimensions, spacing, data_type)
 
-        self.assertEqual(loader.get_properties(), {
-            "dimensions": list(dimensions),
-            "spacing": list(spacing),
-            "data_type": data_type,
-        })
+        self.assertEqual(
+            loader.get_properties(),
+            {
+                "dimensions": list(dimensions),
+                "spacing": list(spacing),
+                "data_type": data_type,
+            },
+        )

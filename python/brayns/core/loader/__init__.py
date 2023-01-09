@@ -33,5 +33,5 @@ __all__ = [
     "MeshLoader",
     "MhdVolumeLoader",
     "RawVolumeLoader",
-    "VolumeDataType"
+    "VolumeDataType",
 ]
