@@ -24,16 +24,17 @@
 
 #include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
-
-#include <brayns/engine/components/Lights.h>
-#include <brayns/engine/systems/GenericBoundsSystem.h>
-
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
+#include <brayns/engine/components/Lights.h>
 #include <brayns/engine/geometry/types/Box.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
+
+#include <brayns/utils/FileReader.h>
+
+#include <filesystem>
 
 /**
  * @brief Encapsulates some utilities used across all the tests
@@ -150,5 +151,18 @@ public:
         auto &camera = engine.getCamera();
         camera.set(projection);
         camera.setView(view);
+    }
+
+    static brayns::Blob fileToBlob(const std::string path)
+    {
+        auto content = brayns::FileReader::read(path);
+        auto contentSize = content.size();
+        auto contentBytes = reinterpret_cast<const uint8_t *>(content.data());
+
+        auto blob = brayns::Blob();
+        blob.data = std::vector<uint8_t>(contentBytes, contentBytes + contentSize);
+        blob.name = path;
+        blob.type = std::filesystem::path(path).extension().string().substr(1);
+        return blob;
     }
 };

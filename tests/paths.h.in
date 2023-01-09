@@ -36,4 +36,19 @@ constexpr auto BRAYNS_TESTDATA_MODEL_PDB_PATH = BRAYNS_TESTDATA_MODELS_PATH "1bn
 constexpr auto BRAYNS_TESTDATA_MODEL_BROKEN_PATH = BRAYNS_TESTDATA_INVALID_MODELS_PATH "broken.xyz";
 constexpr auto BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH = BRAYNS_TESTDATA_INVALID_MODELS_PATH "unsupported.abc";
 
-// Reference images
+namespace TestPaths
+{
+struct Meshes
+{
+    static constexpr auto obj = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/cube.obj";
+    static constexpr auto ply = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/cube.ply";
+    static constexpr auto off = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/cube.off";
+    static constexpr auto stl = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/cube.stl";
+};
+
+struct Volumes
+{
+    static constexpr auto mhd = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/chest_ct_scan.mhd";
+    static constexpr auto raw = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/chest_ct_scan.raw";
+};
+}
