@@ -22,10 +22,16 @@ from .get_loaders import get_loaders
 from .loader import Loader
 from .loader_info import LoaderInfo
 from .mesh_loader import MeshLoader
+from .mhd_volume_loader import MhdVolumeLoader
+from .raw_volume_loader import RawVolumeLoader
+from .volume_data_type import VolumeDataType
 
 __all__ = [
     "get_loaders",
     "Loader",
     "LoaderInfo",
     "MeshLoader",
+    "MhdVolumeLoader",
+    "RawVolumeLoader",
+    "VolumeDataType",
 ]

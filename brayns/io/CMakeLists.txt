@@ -6,10 +6,6 @@
 file(GLOB_RECURSE BRAYNSIO_SOURCES RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.cpp)
 file(GLOB_RECURSE BRAYNSIO_HEADERS RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.h)
 
-list(REMOVE_ITEM BRAYNSIO_SOURCES loaders/volume/VolumeLoader.cpp)
-list(REMOVE_ITEM BRAYNSIO_HEADERS loaders/volume/VolumeLoader.h)
-list(REMOVE_ITEM BRAYNSIO_HEADERS loaders/volume/RawVolumeLoaderParameters.h)
-
 add_library(braynsIO SHARED ${BRAYNSIO_SOURCES} ${BRAYNSIO_HEADERS})
 
 target_include_directories(braynsIO PUBLIC

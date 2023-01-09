@@ -23,17 +23,17 @@
 #include <filesystem>
 
 #include <brayns/io/loaders/mesh/MeshLoader.h>
+#include <brayns/io/loaders/volume/VolumeLoader.h>
 #include <brayns/utils/Log.h>
-//#include <brayns/io/loaders/VolumeLoader.h>
 
 namespace brayns
 {
 LoaderRegistry LoaderRegistry::createWithCoreLoaders()
 {
     LoaderRegistry registry;
-    // registry.registerLoader(std::make_unique<RawVolumeLoader>());
-    // registry.registerLoader(std::make_unique<MHDVolumeLoader>());
     registry.registerLoader(std::make_unique<MeshLoader>());
+    registry.registerLoader(std::make_unique<MHDVolumeLoader>());
+    registry.registerLoader(std::make_unique<RawVolumeLoader>());
     return registry;
 }
 

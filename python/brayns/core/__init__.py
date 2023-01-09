@@ -97,7 +97,15 @@ from .light import (
     add_light,
     clear_lights,
 )
-from .loader import Loader, LoaderInfo, MeshLoader, get_loaders
+from .loader import (
+    Loader,
+    LoaderInfo,
+    MeshLoader,
+    MhdVolumeLoader,
+    RawVolumeLoader,
+    VolumeDataType,
+    get_loaders,
+)
 from .material import (
     CarPaintMaterial,
     EmissiveMaterial,
@@ -212,6 +220,7 @@ __all__ = [
     "MatteMaterial",
     "MeshLoader",
     "MetalMaterial",
+    "MhdVolumeLoader",
     "Model",
     "OpacityCurve",
     "OrthographicProjection",
@@ -225,6 +234,7 @@ __all__ = [
     "ProgressiveFramebuffer",
     "Projection",
     "QuadLight",
+    "RawVolumeLoader",
     "remove_models",
     "Renderer",
     "Scene",
@@ -249,4 +259,5 @@ __all__ = [
     "ValueRange",
     "Version",
     "VersionError",
+    "VolumeDataType",
 ]
