@@ -17,7 +17,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any
+from typing import Any, ClassVar
 
 from .loader import Loader
 
@@ -27,6 +27,8 @@ class MhdVolumeLoader(Loader):
 
     Supports .mhd file format.
     """
+
+    MHD: ClassVar[str] = "mhd"
 
     @classmethod
     @property

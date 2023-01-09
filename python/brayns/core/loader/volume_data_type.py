@@ -17,15 +17,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import ClassVar
+from enum import Enum
 
 
-class VolumeDataType:
+class VolumeDataType(Enum):
     """Supported volume voxel data types."""
 
-    UNSIGNED_CHAR: ClassVar[str] = "unsigned_char"
-    SHORT: ClassVar[str] = "short"
-    UNSIGNED_SHORT: ClassVar[str] = "unsigned_short"
-    HALF_FLOAT: ClassVar[str] = "half_float"
-    FLOAT: ClassVar[str] = "float"
-    DOUBLE: ClassVar[str] = "double"
+    UNSIGNED_CHAR = "unsigned_char"
+    SHORT = "short"
+    UNSIGNED_SHORT = "unsigned_short"
+    HALF_FLOAT = "half_float"
+    FLOAT = "float"
+    DOUBLE = "double"

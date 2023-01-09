@@ -26,6 +26,7 @@
 #include <brayns/engine/volume/types/RegularVolume.h>
 
 #include <brayns/utils/FileReader.h>
+#include <brayns/utils/parsing/FileStream.h>
 #include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/string/StringExtractor.h>
 #include <brayns/utils/string/StringSplitter.h>
@@ -36,37 +37,6 @@
 
 namespace
 {
-class MhdParser
-{
-public:
-    static std::unordered_map<std::string, std::string> parse(const std::string &filename)
-    {
-        auto content = brayns::FileReader::read(filename);
-        auto view = std::string_view(content);
-
-        auto result = std::unordered_map<std::string, std::string>();
-
-        auto ctr = 1ul;
-        while (!view.empty())
-        {
-            auto line = brayns::StringExtractor::extractLine(view);
-            brayns::StringExtractor::extract(view, 1);
-
-            auto keyAndValue = brayns::StringSplitter::split(line, "=");
-            if (keyAndValue.size() != 2)
-            {
-                throw std::runtime_error("Could not parse line " + std::to_string(ctr));
-            }
-
-            auto key = brayns::StringTrimmer::trim(keyAndValue[0]);
-            auto value = brayns::StringTrimmer::trim(keyAndValue[1]);
-            result.emplace(key, value);
-        }
-
-        return result;
-    }
-};
-
 class MhdRequiredKeys
 {
 public:
@@ -82,6 +52,41 @@ public:
                 throw std::runtime_error("Incomplete MHD file. Missing " + key);
             }
         }
+    }
+};
+
+class MhdParser
+{
+public:
+    static std::unordered_map<std::string, std::string> parse(const std::string &filename)
+    {
+        auto content = brayns::FileReader::read(filename);
+        auto stream = brayns::FileStream(content);
+
+        auto result = std::unordered_map<std::string, std::string>();
+
+        while (stream.nextLine())
+        {
+            auto line = stream.getLine();
+            if (line.empty())
+            {
+                break;
+            }
+
+            auto keyAndValue = brayns::StringSplitter::split(line, "=");
+            if (keyAndValue.size() != 2)
+            {
+                throw std::runtime_error("Could not parse line " + std::to_string(stream.getLineNumber()));
+            }
+
+            auto key = brayns::StringTrimmer::trim(keyAndValue[0]);
+            auto value = brayns::StringTrimmer::trim(keyAndValue[1]);
+            result.emplace(key, value);
+        }
+
+        MhdRequiredKeys::check(result);
+
+        return result;
     }
 };
 
@@ -260,7 +265,6 @@ std::vector<std::shared_ptr<Model>> MHDVolumeLoader::importFromFile(
     const LoaderProgress &callback) const
 {
     auto mhd = MhdParser::parse(filename);
-    MhdRequiredKeys::check(mhd);
 
     auto &objectType = mhd["ObjectType"];
     if (objectType != "Image")

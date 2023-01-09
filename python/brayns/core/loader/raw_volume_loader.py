@@ -18,11 +18,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, ClassVar
 
 from brayns.utils import Vector3
 
 from .loader import Loader
+from .volume_data_type import VolumeDataType
 
 
 @dataclass
@@ -39,9 +40,11 @@ class RawVolumeLoader(Loader):
     :type data_type: str.
     """
 
+    RAW: ClassVar[str] = "raw"
+
     dimensions: Vector3
     spacing: Vector3
-    data_type: str
+    data_type: VolumeDataType
 
     @classmethod
     @property
@@ -58,5 +61,5 @@ class RawVolumeLoader(Loader):
         return {
             "dimensions": list(self.dimensions),
             "spacing": list(self.spacing),
-            "data_type": self.data_type,
+            "data_type": self.data_type.value,
         }

@@ -37,6 +37,6 @@ class TestRawVolumeLoader(unittest.TestCase):
             {
                 "dimensions": list(dimensions),
                 "spacing": list(spacing),
-                "data_type": data_type,
+                "data_type": data_type.value,
             },
         )

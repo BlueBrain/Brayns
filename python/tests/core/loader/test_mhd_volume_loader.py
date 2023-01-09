@@ -25,3 +25,7 @@ import brayns
 class TestMhdVolumeLoader(unittest.TestCase):
     def test_name(self) -> None:
         self.assertEqual(brayns.MhdVolumeLoader.name, "mhd-volume")
+
+    def test_get_properties(self) -> None:
+        loader = brayns.MhdVolumeLoader()
+        self.assertEqual(loader.get_properties(), {})
