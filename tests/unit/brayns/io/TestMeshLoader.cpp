@@ -21,22 +21,58 @@
 #include <doctest/doctest.h>
 
 #include <brayns/io/loaders/mesh/MeshLoader.h>
+#include <brayns/utils/FileReader.h>
 
 #include <tests/helpers/BraynsTestUtils.h>
 #include <tests/paths.h>
 #include <tests/unit/PlaceholderEngine.h>
 
+#include <filesystem>
+
 namespace
 {
+class MeshLoader
+{
+public:
+    static std::vector<std::shared_ptr<brayns::Model>> loadFile(const std::string &path)
+    {
+        auto loader = brayns::MeshLoader();
+        return loader.importFromFile(path, {});
+    }
+
+    static std::vector<std::shared_ptr<brayns::Model>> loadBlob(const std::string &path)
+    {
+        auto loader = brayns::MeshLoader();
+        auto blob = _fileToBlob(path);
+        return loader.importFromBlob(blob, {});
+    }
+
+private:
+    static brayns::Blob _fileToBlob(const std::string path)
+    {
+        auto content = brayns::FileReader::read(path);
+        auto contentSize = content.size();
+        auto contentBytes = reinterpret_cast<const uint8_t *>(content.data());
+
+        auto blob = brayns::Blob();
+        blob.data = std::vector<uint8_t>(contentBytes, contentBytes + contentSize);
+        blob.name = path;
+        blob.type = std::filesystem::path(path).extension().string().substr(1);
+        return blob;
+    }
+};
+
 class MeshExtractor
 {
 public:
     static const brayns::TriangleMesh &extract(const brayns::Model &model)
     {
         auto &components = model.getComponents();
-        auto &geometries = components.get<brayns::Geometries>();
-        auto &geometry = geometries.elements.front();
+        auto geometries = components.find<brayns::Geometries>();
+        CHECK(geometries);
+        auto &geometry = geometries->elements.front();
         auto cast = geometry.as<brayns::TriangleMesh>();
+        CHECK(cast);
         return cast->front();
     }
 };
@@ -51,136 +87,119 @@ TEST_CASE("Mesh loader")
         auto loader = brayns::MeshLoader();
         CHECK(loader.getName() == "mesh");
     }
-    SUBCASE("OBJ loading from blob")
+    SUBCASE("Invalid mesh load")
     {
-        auto loader = brayns::MeshLoader();
-        auto blob = BraynsTestUtils::fileToBlob(TestPaths::Meshes::obj);
-        auto result = loader.importFromBlob(blob, {});
-        CHECK(result.size() == 1);
+        auto invalidFormatMessage = "Mesh format extension not supported: 'fbx'";
+        CHECK_THROWS_MESSAGE(MeshLoader::loadFile("/a/fake/file.fbx"), invalidFormatMessage);
 
-        auto &model = *result.front();
-        CHECK(model.getType() == "mesh");
-
-        auto &mesh = MeshExtractor::extract(model);
-        CHECK(mesh.indices.size() == 24);
-        CHECK(mesh.vertices.size() == 72);
-        CHECK(mesh.uvs.size() == 72);
-        CHECK(mesh.normals.size() == 72);
-        CHECK(mesh.colors.size() == 0);
+        auto corruptedMeshMessage = "No meshes found";
+        CHECK_THROWS_MESSAGE(MeshLoader::loadFile(TestPaths::Meshes::emptyObj), corruptedMeshMessage);
     }
-    SUBCASE("OBJ loading from file")
+    SUBCASE("Loaded model properties")
     {
-        auto loader = brayns::MeshLoader();
-        auto result = loader.importFromFile(TestPaths::Meshes::obj, {});
-        CHECK(result.size() == 1);
-
-        auto &model = *result.front();
+        auto loadedModels = MeshLoader::loadFile(TestPaths::Meshes::obj);
+        auto &model = *loadedModels.front();
         CHECK(model.getType() == "mesh");
-
-        auto &mesh = MeshExtractor::extract(model);
-        CHECK(mesh.indices.size() == 24);
-        CHECK(mesh.vertices.size() == 72);
-        CHECK(mesh.uvs.size() == 72);
-        CHECK(mesh.normals.size() == 72);
-        CHECK(mesh.colors.size() == 0);
+        MeshExtractor::extract(model);
     }
-    SUBCASE("PLY loading from blob")
+    SUBCASE("OBJ loading")
     {
-        auto loader = brayns::MeshLoader();
-        auto blob = BraynsTestUtils::fileToBlob(TestPaths::Meshes::ply);
-        auto result = loader.importFromBlob(blob, {});
-        CHECK(result.size() == 1);
+        auto blobList = MeshLoader::loadBlob(TestPaths::Meshes::obj);
+        auto fileList = MeshLoader::loadFile(TestPaths::Meshes::obj);
 
-        auto &model = *result.front();
-        CHECK(model.getType() == "mesh");
+        CHECK(blobList.size() == 1);
+        CHECK(fileList.size() == 1);
 
-        auto &mesh = MeshExtractor::extract(model);
-        CHECK(mesh.indices.size() == 12);
-        CHECK(mesh.vertices.size() == 36);
-        CHECK(mesh.uvs.size() == 0);
-        CHECK(mesh.normals.size() == 0);
-        CHECK(mesh.colors.size() == 36);
+        auto &blob = *blobList.front();
+        auto &file = *fileList.front();
+        auto &blobMesh = MeshExtractor::extract(blob);
+        auto &fileMesh = MeshExtractor::extract(file);
+
+        CHECK(blobMesh.indices.size() == 24);
+        CHECK(blobMesh.vertices.size() == 72);
+        CHECK(blobMesh.uvs.size() == 72);
+        CHECK(blobMesh.normals.size() == 72);
+        CHECK(blobMesh.colors.size() == 0);
+
+        CHECK(blobMesh.indices == fileMesh.indices);
+        CHECK(blobMesh.vertices == fileMesh.vertices);
+        CHECK(blobMesh.normals == fileMesh.normals);
+        CHECK(blobMesh.uvs == fileMesh.uvs);
+        CHECK(blobMesh.colors == fileMesh.colors);
     }
-    SUBCASE("PLY loading from file")
+    SUBCASE("PLY loading")
     {
-        auto loader = brayns::MeshLoader();
-        auto result = loader.importFromFile(TestPaths::Meshes::ply, {});
-        CHECK(result.size() == 1);
+        auto blobList = MeshLoader::loadBlob(TestPaths::Meshes::ply);
+        auto fileList = MeshLoader::loadFile(TestPaths::Meshes::ply);
 
-        auto &model = *result.front();
-        CHECK(model.getType() == "mesh");
+        CHECK(blobList.size() == 1);
+        CHECK(fileList.size() == 1);
 
-        auto &mesh = MeshExtractor::extract(model);
-        CHECK(mesh.indices.size() == 12);
-        CHECK(mesh.vertices.size() == 36);
-        CHECK(mesh.uvs.size() == 0);
-        CHECK(mesh.normals.size() == 0);
-        CHECK(mesh.colors.size() == 36);
+        auto &blob = *blobList.front();
+        auto &file = *fileList.front();
+        auto &blobMesh = MeshExtractor::extract(blob);
+        auto &fileMesh = MeshExtractor::extract(file);
+
+        CHECK(blobMesh.indices.size() == 12);
+        CHECK(blobMesh.vertices.size() == 36);
+        CHECK(blobMesh.uvs.size() == 0);
+        CHECK(blobMesh.normals.size() == 0);
+        CHECK(blobMesh.colors.size() == 36);
+
+        CHECK(blobMesh.indices == fileMesh.indices);
+        CHECK(blobMesh.vertices == fileMesh.vertices);
+        CHECK(blobMesh.normals == fileMesh.normals);
+        CHECK(blobMesh.uvs == fileMesh.uvs);
+        CHECK(blobMesh.colors == fileMesh.colors);
     }
-    SUBCASE("OFF loading from blob")
+    SUBCASE("OFF loading")
     {
-        auto loader = brayns::MeshLoader();
-        auto blob = BraynsTestUtils::fileToBlob(TestPaths::Meshes::off);
-        auto result = loader.importFromBlob(blob, {});
-        CHECK(result.size() == 1);
+        auto blobList = MeshLoader::loadBlob(TestPaths::Meshes::off);
+        auto fileList = MeshLoader::loadFile(TestPaths::Meshes::off);
 
-        auto &model = *result.front();
-        CHECK(model.getType() == "mesh");
+        CHECK(blobList.size() == 1);
+        CHECK(fileList.size() == 1);
 
-        auto &mesh = MeshExtractor::extract(model);
-        CHECK(mesh.indices.size() == 12);
-        CHECK(mesh.vertices.size() == 36);
-        CHECK(mesh.uvs.size() == 0);
-        CHECK(mesh.normals.size() == 0);
-        CHECK(mesh.colors.size() == 0);
+        auto &blob = *blobList.front();
+        auto &file = *fileList.front();
+        auto &blobMesh = MeshExtractor::extract(blob);
+        auto &fileMesh = MeshExtractor::extract(file);
+
+        CHECK(blobMesh.indices.size() == 12);
+        CHECK(blobMesh.vertices.size() == 36);
+        CHECK(blobMesh.uvs.size() == 0);
+        CHECK(blobMesh.normals.size() == 0);
+        CHECK(blobMesh.colors.size() == 0);
+
+        CHECK(blobMesh.indices == fileMesh.indices);
+        CHECK(blobMesh.vertices == fileMesh.vertices);
+        CHECK(blobMesh.normals == fileMesh.normals);
+        CHECK(blobMesh.uvs == fileMesh.uvs);
+        CHECK(blobMesh.colors == fileMesh.colors);
     }
-    SUBCASE("OFF loading from file")
+    SUBCASE("STL loading")
     {
-        auto loader = brayns::MeshLoader();
-        auto result = loader.importFromFile(TestPaths::Meshes::off, {});
-        CHECK(result.size() == 1);
+        auto blobList = MeshLoader::loadBlob(TestPaths::Meshes::stl);
+        auto fileList = MeshLoader::loadFile(TestPaths::Meshes::stl);
 
-        auto &model = *result.front();
-        CHECK(model.getType() == "mesh");
+        CHECK(blobList.size() == 1);
+        CHECK(fileList.size() == 1);
 
-        auto &mesh = MeshExtractor::extract(model);
-        CHECK(mesh.indices.size() == 12);
-        CHECK(mesh.vertices.size() == 36);
-        CHECK(mesh.uvs.size() == 0);
-        CHECK(mesh.normals.size() == 0);
-        CHECK(mesh.colors.size() == 0);
-    }
-    SUBCASE("STL loading from blob")
-    {
-        auto loader = brayns::MeshLoader();
-        auto blob = BraynsTestUtils::fileToBlob(TestPaths::Meshes::stl);
-        auto result = loader.importFromBlob(blob, {});
-        CHECK(result.size() == 1);
+        auto &blob = *blobList.front();
+        auto &file = *fileList.front();
+        auto &blobMesh = MeshExtractor::extract(blob);
+        auto &fileMesh = MeshExtractor::extract(file);
 
-        auto &model = *result.front();
-        CHECK(model.getType() == "mesh");
+        CHECK(blobMesh.indices.size() == 12);
+        CHECK(blobMesh.vertices.size() == 36);
+        CHECK(blobMesh.uvs.size() == 0);
+        CHECK(blobMesh.normals.size() == 36);
+        CHECK(blobMesh.colors.size() == 0);
 
-        auto &mesh = MeshExtractor::extract(model);
-        CHECK(mesh.indices.size() == 12);
-        CHECK(mesh.vertices.size() == 36);
-        CHECK(mesh.uvs.size() == 0);
-        CHECK(mesh.normals.size() == 36);
-        CHECK(mesh.colors.size() == 0);
-    }
-    SUBCASE("STL loading from file")
-    {
-        auto loader = brayns::MeshLoader();
-        auto result = loader.importFromFile(TestPaths::Meshes::stl, {});
-        CHECK(result.size() == 1);
-
-        auto &model = *result.front();
-        CHECK(model.getType() == "mesh");
-
-        auto &mesh = MeshExtractor::extract(model);
-        CHECK(mesh.indices.size() == 12);
-        CHECK(mesh.vertices.size() == 36);
-        CHECK(mesh.uvs.size() == 0);
-        CHECK(mesh.normals.size() == 36);
-        CHECK(mesh.colors.size() == 0);
+        CHECK(blobMesh.indices == fileMesh.indices);
+        CHECK(blobMesh.vertices == fileMesh.vertices);
+        CHECK(blobMesh.normals == fileMesh.normals);
+        CHECK(blobMesh.uvs == fileMesh.uvs);
+        CHECK(blobMesh.colors == fileMesh.colors);
     }
 }

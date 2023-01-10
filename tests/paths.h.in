@@ -44,11 +44,17 @@ struct Meshes
     static constexpr auto ply = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/cube.ply";
     static constexpr auto off = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/cube.off";
     static constexpr auto stl = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/cube.stl";
+    static constexpr auto emptyObj = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/empty.obj";
 };
 
 struct Volumes
 {
     static constexpr auto mhd = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/chest_ct_scan.mhd";
     static constexpr auto raw = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/chest_ct_scan.raw";
+    static constexpr auto emptyMhd = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/empty.mhd";
+    static constexpr auto emptyRaw = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/empty.raw";
+    static constexpr auto invalidMhd = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/invalid.mhd";
+    static constexpr auto badFormatMhd = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/bad_format.mhd";
+    static constexpr auto badObjectTypeMhd = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/bad_object_type.mhd";
 };
 }
