@@ -33,16 +33,6 @@ bool JsonTypeHelper::isNumeric(JsonType type)
     return type == JsonType::Integer || type == JsonType::Number;
 }
 
-bool JsonTypeHelper::isPrimitive(JsonType type)
-{
-    return type > JsonType::Undefined && type <= JsonType::String;
-}
-
-bool JsonTypeHelper::isPrimitive(const JsonValue &json)
-{
-    return json.isNumeric() || json.isString();
-}
-
 JsonType GetJsonType::fromJson(const JsonValue &json)
 {
     if (json.isEmpty())
