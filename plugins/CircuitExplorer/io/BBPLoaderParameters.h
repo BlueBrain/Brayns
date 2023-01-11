@@ -42,7 +42,7 @@ BRAYNS_JSON_OBJECT_ENTRY(
     float,
     percentage,
     "Percentage of neurons to load (Ignored if a list of gids is specified)",
-    brayns::Minimum(0.001f),
+    brayns::Minimum(0.0f),
     brayns::Maximum(1.f),
     brayns::Default(0.1f))
 BRAYNS_JSON_OBJECT_ENTRY(
