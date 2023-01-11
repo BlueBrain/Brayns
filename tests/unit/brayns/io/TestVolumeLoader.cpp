@@ -65,7 +65,7 @@ TEST_CASE("Raw Volume loader")
         invalidDimensions.data_type = brayns::VolumeDataType::Float;
         invalidDimensions.dimensions = brayns::Vector3ui(0);
         invalidDimensions.spacing = brayns::Vector3f(1.f);
-        CHECK_THROWS_MESSAGE(
+        CHECK_THROWS_WITH(
             loader.importFromFile(TestPaths::Volumes::raw, {}, invalidDimensions),
             "Volume dimensions are empty");
 
@@ -73,15 +73,15 @@ TEST_CASE("Raw Volume loader")
         invalidDataType.data_type = brayns::VolumeDataType::Short;
         invalidDataType.dimensions = brayns::Vector3ui(256, 256, 112);
         invalidDataType.spacing = brayns::Vector3f(1.f);
-        CHECK_THROWS_MESSAGE(
-            loader.importFromFile(TestPaths::Volumes::raw, {}, invalidDimensions),
+        CHECK_THROWS_WITH(
+            loader.importFromFile(TestPaths::Volumes::raw, {}, invalidDataType),
             "Data size and exptected size mismatch");
 
         auto params = brayns::RawVolumeLoaderParameters();
         params.data_type = brayns::VolumeDataType::Float;
         params.dimensions = brayns::Vector3ui(256, 256, 112);
         params.spacing = brayns::Vector3f(1.f);
-        CHECK_THROWS_MESSAGE(
+        CHECK_THROWS_WITH(
             loader.importFromFile(TestPaths::Volumes::emptyRaw, {}, params),
             "Data size and exptected size mismatch");
     }
@@ -117,19 +117,19 @@ TEST_CASE("Mhd Volume loader")
     {
         auto loader = brayns::MHDVolumeLoader();
 
-        CHECK_THROWS_MESSAGE(
+        CHECK_THROWS_WITH(
             loader.importFromFile(TestPaths::Volumes::emptyMhd, {}),
             "Incomplete MHD file. Missing ObjectType");
 
-        CHECK_THROWS_MESSAGE(
+        CHECK_THROWS_WITH(
             loader.importFromFile(TestPaths::Volumes::invalidMhd, {}),
             "Incomplete MHD file. Missing ElementType");
 
-        CHECK_THROWS_MESSAGE(
+        CHECK_THROWS_WITH(
             loader.importFromFile(TestPaths::Volumes::badFormatMhd, {}),
             "Unsupported data type: MET_INT");
 
-        CHECK_THROWS_MESSAGE(
+        CHECK_THROWS_WITH(
             loader.importFromFile(TestPaths::Volumes::badObjectTypeMhd, {}),
             "Wrong object type for mhd file");
     }

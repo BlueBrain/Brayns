@@ -23,9 +23,9 @@ target_link_libraries(braynsUtils PUBLIC
     spdlog::spdlog
 )
 
-target_link_libraries(braynsUtils PRIVATE stb)
+target_link_libraries(braynsUtils PRIVATE stb ${CMAKE_DL_LIBS})
 
-# Needed to allow DynamicLib class to find the engine and plugins libraries
+# Needed to allow DynamicLib class to find the plugins libraries
 set_target_properties(braynsUtils PROPERTIES BUILD_RPATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 target_compile_options(braynsUtils PRIVATE ${BRAYNS_COMPILE_OPTIONS})

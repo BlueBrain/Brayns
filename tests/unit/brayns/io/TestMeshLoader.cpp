@@ -90,10 +90,10 @@ TEST_CASE("Mesh loader")
     SUBCASE("Invalid mesh load")
     {
         auto invalidFormatMessage = "Mesh format extension not supported: 'fbx'";
-        CHECK_THROWS_MESSAGE(MeshLoader::loadFile("/a/fake/file.fbx"), invalidFormatMessage);
+        CHECK_THROWS_WITH(MeshLoader::loadFile(TestPaths::Meshes::fbx), invalidFormatMessage);
 
         auto corruptedMeshMessage = "No meshes found";
-        CHECK_THROWS_MESSAGE(MeshLoader::loadFile(TestPaths::Meshes::emptyObj), corruptedMeshMessage);
+        CHECK_THROWS_WITH(MeshLoader::loadFile(TestPaths::Meshes::empty), corruptedMeshMessage);
     }
     SUBCASE("Loaded model properties")
     {

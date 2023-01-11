@@ -25,11 +25,10 @@ namespace brayns
 {
 void SimulationParameters::reset()
 {
-    _current = 0u;
-    _dt = 0.;
-    _startFrame = 0u;
-    _endFrame = 0u;
-    resetModified();
+    setFrame(0);
+    setDt(0.);
+    setStartFrame(0);
+    setEndFrame(0);
 }
 
 void SimulationParameters::setStartFrame(const uint32_t startFrame) noexcept
@@ -84,7 +83,7 @@ void SimulationParameters::build(ArgvBuilder &builder)
 
 void SimulationParameters::resetModified()
 {
-    _flag = false;
+    _flag.setModified(false);
 }
 
 bool SimulationParameters::isModified() const noexcept
