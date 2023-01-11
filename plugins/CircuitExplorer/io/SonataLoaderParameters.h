@@ -58,7 +58,7 @@ BRAYNS_JSON_OBJECT_ENTRY(
     float,
     edge_percentage,
     "Percentage of edges to load from all available",
-    brayns::Minimum(0.001f),
+    brayns::Minimum(0.0f),
     brayns::Maximum(1.f),
     brayns::Default(1.f))
 BRAYNS_JSON_OBJECT_ENTRY(
@@ -89,7 +89,7 @@ BRAYNS_JSON_OBJECT_ENTRY(
     "Percentage of nodes to load after filter them by whichever node sets have "
     "been specified. Ignored if a lsit of node ids is provided",
     brayns::Default(0.01f),
-    brayns::Minimum(0.001f),
+    brayns::Minimum(0.0f),
     brayns::Maximum(1.f))
 BRAYNS_JSON_OBJECT_ENTRY(
     std::vector<uint64_t>,

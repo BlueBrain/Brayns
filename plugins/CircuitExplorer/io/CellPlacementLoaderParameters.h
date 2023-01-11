@@ -24,6 +24,12 @@
 
 BRAYNS_JSON_OBJECT_BEGIN(CellPlacementLoaderParameters)
 BRAYNS_JSON_OBJECT_ENTRY(std::string, morphology_folder, "Path to morphology folder")
-BRAYNS_JSON_OBJECT_ENTRY(float, percentage, "Percentage of cells to load", brayns::Default(1.f))
+BRAYNS_JSON_OBJECT_ENTRY(
+    float,
+    percentage,
+    "Percentage of cells to load",
+    brayns::Default(1.f),
+    brayns::Minimum(0.f),
+    brayns::Maximum(1.f))
 BRAYNS_JSON_OBJECT_ENTRY(std::optional<std::string>, extension, "Morphology file extension", brayns::Required(false))
 BRAYNS_JSON_OBJECT_END()
