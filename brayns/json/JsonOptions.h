@@ -173,19 +173,6 @@ public:
 };
 
 /**
- * @brief Add a title to a JSON option set.
- *
- */
-struct Title
-{
-    explicit Title(std::string title);
-
-    void add(JsonOptions &options) const;
-
-    std::string value;
-};
-
-/**
  * @brief Add a description to a JSON option set.
  *
  */

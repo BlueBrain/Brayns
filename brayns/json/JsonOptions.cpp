@@ -47,7 +47,6 @@ void JsonOptions::build(JsonOptions &options)
 
 void JsonSchemaOptions::add(JsonSchema &schema, const JsonOptions &options)
 {
-    OptionalHelper::trySet(schema.title, options.title);
     OptionalHelper::trySet(schema.description, options.description);
     OptionalHelper::trySet(schema.readOnly, options.readOnly);
     OptionalHelper::trySet(schema.writeOnly, options.writeOnly);
@@ -56,16 +55,6 @@ void JsonSchemaOptions::add(JsonSchema &schema, const JsonOptions &options)
     OptionalHelper::trySet(schema.minItems, options.minItems);
     OptionalHelper::trySet(schema.maxItems, options.maxItems);
     schema.defaultValue = options.defaultValue;
-}
-
-Title::Title(std::string title)
-    : value(std::move(title))
-{
-}
-
-void Title::add(JsonOptions &options) const
-{
-    options.title = value;
 }
 
 Description::Description(std::string description)
