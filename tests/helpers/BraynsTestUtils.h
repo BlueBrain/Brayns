@@ -24,12 +24,9 @@
 
 #include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
-
-#include <brayns/engine/components/Lights.h>
-#include <brayns/engine/systems/GenericBoundsSystem.h>
-
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
+#include <brayns/engine/components/Lights.h>
 #include <brayns/engine/geometry/types/Box.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
