@@ -78,12 +78,6 @@ struct JsonOptions
     static void build(JsonOptions &options);
 
     /**
-     * @brief Property name.
-     *
-     */
-    std::optional<std::string> title;
-
-    /**
      * @brief Property description.
      *
      */
@@ -170,19 +164,6 @@ public:
      * @param options Options to set.
      */
     static void add(JsonSchema &schema, const JsonOptions &options);
-};
-
-/**
- * @brief Add a title to a JSON option set.
- *
- */
-struct Title
-{
-    explicit Title(std::string title);
-
-    void add(JsonOptions &options) const;
-
-    std::string value;
 };
 
 /**

@@ -124,37 +124,6 @@ struct JsonTypeHelper
      * @return false Type is not numeric.
      */
     static bool isNumeric(JsonType type);
-
-    /**
-     * @brief Check if the type is primitive (not object nor array).
-     *
-     * @param type Type to check.
-     * @return true Type is primitive.
-     * @return false Type is object or array.
-     */
-    static bool isPrimitive(JsonType type);
-
-    /**
-     * @brief Check if the given JSON is a primitive.
-     *
-     * @param json JSON to check.
-     * @return true JSON is primitive.
-     * @return false JSON is not primitive.
-     */
-    static bool isPrimitive(const JsonValue &json);
-
-    /**
-     * @brief Check if the type is primitive.
-     *
-     * @tparam T Type to check.
-     * @return true Type is primitive.
-     * @return false Type is object or array.
-     */
-    template<typename T>
-    static constexpr bool isPrimitive()
-    {
-        return std::is_arithmetic<T>() || std::is_same<T, std::string>();
-    }
 };
 
 /**

@@ -32,6 +32,11 @@ using namespace brayns;
 class JsonPath
 {
 public:
+    bool isEmpty() const
+    {
+        return _path.empty();
+    }
+
     void clear()
     {
         _path.clear();
@@ -59,7 +64,7 @@ public:
 
     std::string toString() const
     {
-        return StringJoiner::join(_path, {});
+        return StringJoiner::join(_path, std::string_view());
     }
 
 private:
@@ -104,12 +109,8 @@ public:
     {
         std::ostringstream stream;
         stream << "Cannot find a schema in oneOf";
-        auto path = _path.toString();
-        if (!path.empty())
-        {
-            stream << " at '" << path << "'";
-        }
-        stream << " that match the given input.";
+        _addPath(stream);
+        stream << " that matches the given input";
         addError(stream.str());
     }
 
@@ -124,12 +125,8 @@ public:
     {
         std::ostringstream stream;
         stream << "Invalid type";
-        auto path = _path.toString();
-        if (!path.empty())
-        {
-            stream << " at '" << path << "'";
-        }
-        stream << ": expected '" << schemaType << "' got '" << type << "'";
+        _addPath(stream);
+        stream << ": expected '" << schemaType << "', got '" << type << "'";
         addError(stream.str());
     }
 
@@ -137,11 +134,7 @@ public:
     {
         std::ostringstream stream;
         stream << "Invalid enum";
-        auto path = _path.toString();
-        if (!path.empty())
-        {
-            stream << " at '" << path << "'";
-        }
+        _addPath(stream);
         stream << ": '" << json.toString() << "' not in [";
         if (!enums.empty())
         {
@@ -158,14 +151,18 @@ public:
     void addBelowMinimum(double value, double minimum)
     {
         std::ostringstream stream;
-        stream << "'" << _path.toString() << "' " << value << " is below minimum value '" << minimum << "'";
+        stream << "Value below minimum";
+        _addPath(stream);
+        stream << ": expected >= " << minimum << ", got " << value;
         addError(stream.str());
     }
 
     void addAboveMaximum(double value, double maximum)
     {
         std::ostringstream stream;
-        stream << "'" << _path.toString() << "' " << value << " is above maximum value '" << maximum << "'";
+        stream << "Value above maximum";
+        _addPath(stream);
+        stream << ": expected <= " << maximum << ", got " << value;
         addError(stream.str());
     }
 
@@ -182,20 +179,33 @@ public:
     void addNotEnoughItems(size_t size, size_t minItems)
     {
         std::ostringstream stream;
-        stream << "Not enough items in '" << _path.toString() << "': min '" << minItems << "' got '" << size << "'";
+        stream << "Not enough items";
+        _addPath(stream);
+        stream << ": expected at least " << minItems << " item(s), got " << size;
         addError(stream.str());
     }
 
     void addTooManyItems(size_t size, size_t maxItems)
     {
         std::ostringstream stream;
-        stream << "Too many items in '" << _path.toString() << "': max '" << maxItems << "' got '" << size << "'";
+        stream << "Too many items";
+        _addPath(stream);
+        stream << ": expected at most " << maxItems << " item(s), got " << size;
         addError(stream.str());
     }
 
 private:
     JsonPath _path;
     std::vector<std::string> _errors;
+
+    void _addPath(std::ostream &stream) const
+    {
+        if (_path.isEmpty())
+        {
+            return;
+        }
+        stream << " for " << _path.toString();
+    }
 };
 
 class JsonValidator
