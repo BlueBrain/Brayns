@@ -49,12 +49,14 @@ TEST_CASE("simulation_scanner")
 {
     BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
-    auto simulation = brayns::SimulationParameters();
     auto models = brayns::ModelManager();
     auto referenceSimulation = brayns::SimulationParameters();
 
     SUBCASE("empty_model_list")
     {
+        auto simulation = brayns::SimulationParameters();
+        simulation.resetModified();
+
         brayns::SimulationScanner::scanAndUpdate(models, simulation);
         CHECK(simulation.getDt() == referenceSimulation.getDt());
         CHECK(simulation.getEndFrame() == referenceSimulation.getEndFrame());
@@ -65,6 +67,9 @@ TEST_CASE("simulation_scanner")
 
     SUBCASE("no_simulated_models")
     {
+        auto simulation = brayns::SimulationParameters();
+        simulation.resetModified();
+
         models.add(std::make_shared<brayns::Model>("test"));
         brayns::SimulationScanner::scanAndUpdate(models, simulation);
         CHECK(simulation.getDt() == referenceSimulation.getDt());
@@ -76,6 +81,9 @@ TEST_CASE("simulation_scanner")
 
     SUBCASE("simulated_models")
     {
+        auto simulation = brayns::SimulationParameters();
+        simulation.resetModified();
+
         AddSimulatedModels::add(models, 1., 10., 0.1, true);
         brayns::SimulationScanner::scanAndUpdate(models, simulation);
         CHECK(simulation.getDt() == doctest::Approx(0.1));
