@@ -24,10 +24,6 @@
 #include <brayns/utils/Log.h>
 
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/network/jsonrpc/JsonRpcException.h>
-#include <brayns/network/jsonrpc/JsonRpcFactory.h>
-#include <brayns/network/jsonrpc/JsonRpcParser.h>
-#include <brayns/network/jsonrpc/JsonRpcSender.h>
 #include <brayns/network/socket/ClientSocket.h>
 #include <brayns/network/socket/ServerSocket.h>
 #include <brayns/network/socket/SocketListener.h>

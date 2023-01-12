@@ -64,7 +64,7 @@ private:
     {
         if (size > std::numeric_limits<uint32_t>::max())
         {
-            throw brayns::InternalErrorException("Reply JSON too big: " + std::to_string(size));
+            throw brayns::InternalErrorException("JSON reply is too big: " + std::to_string(size));
         }
         auto jsonSize = static_cast<uint32_t>(size);
         return _formatJsonSize(jsonSize);

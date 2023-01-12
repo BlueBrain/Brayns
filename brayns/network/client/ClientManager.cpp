@@ -21,8 +21,6 @@
 
 #include "ClientManager.h"
 
-#include "ClientSender.h"
-
 namespace brayns
 {
 ClientManager::~ClientManager()

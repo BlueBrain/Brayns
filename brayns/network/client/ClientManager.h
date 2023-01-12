@@ -41,7 +41,7 @@ public:
     ~ClientManager();
 
     /**
-     * @brief Shorcut to check if at least one client is connected.
+     * @brief Check if at least one client is connected.
      *
      * @return true Has clients.
      * @return false No clients.
