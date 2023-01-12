@@ -65,7 +65,7 @@ public:
         }
         catch (...)
         {
-            brayns::Log::error("Unexpected error during websocket server connection.");
+            brayns::Log::error("Unknown error during websocket server connection.");
         }
     }
 
