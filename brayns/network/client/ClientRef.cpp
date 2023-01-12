@@ -33,7 +33,7 @@ ClientRef::ClientRef(std::shared_ptr<IWebSocket> socket)
 
 size_t ClientRef::getId() const
 {
-    return reinterpret_cast<size_t>(_socket.get());
+    return _socket->getId();
 }
 
 void ClientRef::disconnect() const

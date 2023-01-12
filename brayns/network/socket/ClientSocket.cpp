@@ -28,6 +28,7 @@
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/WebSocket.h>
 
 #include <brayns/utils/Log.h>
 
@@ -84,7 +85,9 @@ public:
         brayns::Log::info("Client session established with '{}:{}'.", session->getHost(), session->getPort());
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_1_1);
         Poco::Net::HTTPResponse response;
-        auto socket = std::make_shared<brayns::WebSocket>(*session, request, response);
+        auto poco = Poco::Net::WebSocket(*session, request, response);
+        auto id = 0;
+        auto socket = std::make_shared<brayns::WebSocket>(poco, id);
         brayns::Log::info("Client socket connected.");
         auto client = brayns::ClientRef(std::move(socket));
         manager.run(client);

@@ -21,25 +21,71 @@
 
 #pragma once
 
-#include <brayns/network/websocket/WebSocket.h>
+#include <string_view>
 
-#include "ClientRef.h"
+#include <brayns/network/client/ClientRef.h>
+
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
 /**
- * @brief Helper class to send a frame to a client and handle errors.
+ * @brief Helper class to send messages and handle connection errors.
+ *
+ * Log a message if the connection close during the process but do not throw.
  *
  */
 class ClientSender
 {
 public:
     /**
-     * @brief Send packet to client and log errors.
+     * @brief Send a binary frame with both text and binary data.
      *
-     * @param packet Data packet.
-     * @param client Client ref.
+     * @param text Text part of the message.
+     * @param binary Binary part of the message.
+     * @param client Client receiveing the frame.
      */
-    static void send(const OutputPacket &packet, const ClientRef &client);
+    static void sendRawBinary(std::string_view text, std::string_view binary, const ClientRef &client);
+
+    /**
+     * @brief Send a text frame with text only.
+     *
+     * @param text Message content.
+     * @param client Client receiveing the frame.
+     */
+    static void sendRawText(std::string_view text, const ClientRef &client);
+
+    /**
+     * @brief Send a binary frame with both text and binary data.
+     *
+     * Message must be serializable to JSON.
+     *
+     * @tparam T Message type.
+     * @param message Message that will be converted to text.
+     * @param binary Binary part of the data frame.
+     * @param client Client receiveing the frame.
+     */
+    template<typename T>
+    static void sendBinary(const T &message, std::string_view binary, const ClientRef &client)
+    {
+        auto text = Json::stringify(message);
+        sendRawBinary(text, binary, client);
+    }
+
+    /**
+     * @brief Send a JSON message in a text frame.
+     *
+     * Message must be serializable to JSON.
+     *
+     * @tparam T Message type.
+     * @param message Message that will be converted to text.
+     * @param client Client receiveing the frame.
+     */
+    template<typename T>
+    static void sendText(const T &message, const ClientRef &client)
+    {
+        auto text = Json::stringify(message);
+        sendRawText(text, client);
+    }
 };
 } // namespace brayns

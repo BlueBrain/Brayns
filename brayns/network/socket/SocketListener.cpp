@@ -23,8 +23,10 @@
 
 #include <brayns/utils/Log.h>
 
+#include <brayns/network/client/ClientSender.h>
 #include <brayns/network/entrypoint/EntrypointFinder.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
+#include <brayns/network/jsonrpc/JsonRpcFactory.h>
 #include <brayns/network/jsonrpc/JsonRpcParser.h>
 #include <brayns/network/task/JsonRpcTask.h>
 
@@ -82,18 +84,26 @@ public:
         catch (const brayns::JsonRpcException &e)
         {
             brayns::Log::info("Failed to parse request {}: {}.", request, e);
-            request.error(e);
+            _error(request, e);
         }
         catch (const std::exception &e)
         {
             brayns::Log::error("Unexpected error in parsing of request {}: '{}'.", request, e.what());
-            request.error(brayns::InternalErrorException(e.what()));
+            _error(request, brayns::InternalErrorException(e.what()));
         }
         catch (...)
         {
             brayns::Log::error("Unknown error in parsing of request {}.", request);
-            request.error(brayns::InternalErrorException("Unknown error"));
+            _error(request, brayns::InternalErrorException("Unknown error"));
         }
+    }
+
+private:
+    static void _error(const brayns::ClientRequest &request, const brayns::JsonRpcException &e)
+    {
+        auto error = brayns::JsonRpcFactory::error(e);
+        auto &client = request.getClient();
+        brayns::ClientSender::sendText(error, client);
     }
 };
 }

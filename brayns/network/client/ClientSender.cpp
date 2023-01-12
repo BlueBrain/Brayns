@@ -21,64 +21,52 @@
 
 #include "ClientSender.h"
 
-#include <brayns/utils/Log.h>
+#include <brayns/utils/binary/ByteConverter.h>
+#include <brayns/utils/binary/ByteOrder.h>
 
 namespace
 {
-class MessageLogger
+class BinaryFormatter
 {
 public:
-    static void log(const brayns::OutputPacket &packet, const brayns::ClientRef &client)
+    static std::string format(std::string_view text, std::string_view binary)
     {
-        if (packet.isBinary())
-        {
-            _logBinary(packet, client);
-            return;
-        }
-        if (packet.isText())
-        {
-            _logText(packet, client);
-            return;
-        }
-        brayns::Log::error("Trying to send invalid packet.");
+        auto size = text.size();
+        auto result = _formatHeader(size);
+        result.append(text);
+        result.append(binary);
+        return result;
     }
 
 private:
-    static void _logBinary(const brayns::OutputPacket &packet, const brayns::ClientRef &client)
+    static std::string _formatHeader(size_t size)
     {
-        auto data = packet.getData();
-        auto size = data.size();
-        brayns::Log::debug("Send binary frame of {} bytes to client {}.", size, client);
+        auto jsonSize = static_cast<uint32_t>(size);
+        return _formatJsonSize(jsonSize);
     }
 
-    static void _logText(const brayns::OutputPacket &packet, const brayns::ClientRef &client)
+    static std::string _formatJsonSize(uint32_t size)
     {
-        auto data = packet.getData();
-        brayns::Log::debug("Send text frame to client {}: '{}'.", client, data);
+        auto bytes = brayns::ByteConverter::getBytes(size);
+        auto stride = sizeof(size);
+        brayns::ByteOrderHelper::convertFromSystemByteOrder(bytes, brayns::ByteOrder::LittleEndian);
+        return {bytes, stride};
     }
 };
 } // namespace
 
 namespace brayns
 {
-void ClientSender::send(const OutputPacket &packet, const ClientRef &client)
+void ClientSender::sendRawBinary(std::string_view text, std::string_view binary, const ClientRef &client)
 {
-    MessageLogger::log(packet, client);
-    try
-    {
-        client.send(packet);
-    }
-    catch (const brayns::ConnectionClosedException &e)
-    {
-        brayns::Log::debug("Connection closed while sending data: '{}'.", e.what());
-    }
-    catch (const std::exception &e)
-    {
-        brayns::Log::error("Unexpected error while sending data: '{}'.", e.what());
-    }
-    catch (...)
-    {
-        brayns::Log::error("Unknown error while sending data.");
-    }
+    auto data = BinaryFormatter::format(text, binary);
+    auto packet = brayns::OutputPacket::fromBinary(data);
+    client.send(packet);
+}
+
+void ClientSender::sendRawText(std::string_view text, const ClientRef &client)
+{
+    auto packet = brayns::OutputPacket::fromText(text);
+    client.send(packet);
 }
 } // namespace brayns

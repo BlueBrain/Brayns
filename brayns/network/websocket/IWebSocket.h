@@ -57,6 +57,13 @@ public:
     virtual ~IWebSocket() = default;
 
     /**
+     * @brief Get a unique ID for the socket.
+     *
+     * @return size_t An ID that is unique among all connected sockets.
+     */
+    virtual size_t getId() const = 0;
+
+    /**
      * @brief Close the socket.
      *
      */
@@ -67,7 +74,7 @@ public:
      *
      * Block until data is received.
      *
-     * @return InputPacket Data packet received from the client (always valid).
+     * @return InputPacket Data packet received from the client.
      * @throw ConnectionClosedException The client closed the connection.
      */
     virtual InputPacket receive() = 0;

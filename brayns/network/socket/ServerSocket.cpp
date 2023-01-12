@@ -29,6 +29,7 @@
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/SecureServerSocket.h>
+#include <Poco/Net/WebSocket.h>
 
 #include <brayns/utils/Log.h>
 
@@ -48,7 +49,9 @@ public:
     {
         try
         {
-            auto socket = std::make_shared<brayns::WebSocket>(request, response);
+            auto poco = Poco::Net::WebSocket(request, response);
+            auto id = reinterpret_cast<size_t>(this);
+            auto socket = std::make_shared<brayns::WebSocket>(poco, id);
             auto client = brayns::ClientRef(std::move(socket));
             _manager.run(client);
         }

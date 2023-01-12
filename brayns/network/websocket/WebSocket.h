@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <Poco/Net/HTTPServerRequest.h>
-#include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/WebSocket.h>
 
 #include "IWebSocket.h"
@@ -33,24 +31,19 @@ class WebSocket : public IWebSocket
 {
 public:
     /**
-     * @brief Construct a client side websocket from client session.
+     * @brief Construct a websocket by injecting internal implementation.
      *
-     * @param session Client session.
-     * @param request Client request.
-     * @param response Server response.
+     * @param socket Connected websocket implementation.
+     * @param id Unique ID for this socket to identify the client using it.
      */
-    WebSocket(
-        Poco::Net::HTTPClientSession &session,
-        Poco::Net::HTTPRequest &request,
-        Poco::Net::HTTPResponse &response);
+    WebSocket(const Poco::Net::WebSocket &socket, size_t id);
 
     /**
-     * @brief Construct a server side websocket from client HTTP request.
+     * @brief Get a unique ID for the socket.
      *
-     * @param request Client request.
-     * @param response Server response.
+     * @return size_t Unique ID stored in the instance.
      */
-    WebSocket(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response);
+    virtual size_t getId() const override;
 
     /**
      * @brief Close the socket.
@@ -77,5 +70,6 @@ public:
 
 private:
     Poco::Net::WebSocket _socket;
+    size_t _id;
 };
 } // namespace brayns

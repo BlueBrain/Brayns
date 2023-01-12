@@ -24,18 +24,10 @@
 #include <limits>
 #include <stdexcept>
 
+#include <brayns/utils/Log.h>
+
 namespace
 {
-class WebSocketBuilder
-{
-public:
-    static void build(Poco::Net::WebSocket &socket)
-    {
-        socket.setReceiveTimeout(Poco::Timespan());
-        socket.setSendTimeout(Poco::Timespan());
-    }
-};
-
 class WebSocketReceiver
 {
 public:
@@ -64,6 +56,39 @@ public:
     }
 };
 
+class ReceiveLogger
+{
+public:
+    static void log(const brayns::InputPacket &packet, size_t id)
+    {
+        if (packet.isBinary())
+        {
+            _logBinary(packet, id);
+            return;
+        }
+        if (packet.isText())
+        {
+            _logText(packet, id);
+            return;
+        }
+        brayns::Log::error("Received invalid packet (neither text nor binary).");
+    }
+
+private:
+    static void _logBinary(const brayns::InputPacket &packet, size_t id)
+    {
+        auto data = packet.getData();
+        auto size = data.size();
+        brayns::Log::debug("Received binary frame of {} bytes from client {}.", size, id);
+    }
+
+    static void _logText(const brayns::InputPacket &packet, size_t id)
+    {
+        auto data = packet.getData();
+        brayns::Log::debug("Received text frame from client {}: '{}'.", id, data);
+    }
+};
+
 class WebSocketSender
 {
 public:
@@ -80,7 +105,7 @@ public:
         auto flags = packet.getFlags();
         try
         {
-            socket.sendFrame(buffer, int(size), flags);
+            socket.sendFrame(buffer, static_cast<int>(size), flags);
         }
         catch (const Poco::Exception &e)
         {
@@ -88,23 +113,54 @@ public:
         }
     }
 };
+
+class SendLogger
+{
+public:
+    static void log(const brayns::OutputPacket &packet, size_t id)
+    {
+        if (packet.isBinary())
+        {
+            _logBinary(packet, id);
+            return;
+        }
+        if (packet.isText())
+        {
+            _logText(packet, id);
+            return;
+        }
+        brayns::Log::error("Trying to send invalid packet (neither text nor binary).");
+    }
+
+private:
+    static void _logBinary(const brayns::OutputPacket &packet, size_t id)
+    {
+        auto data = packet.getData();
+        auto size = data.size();
+        brayns::Log::debug("Sending binary frame of {} bytes to client {}.", size, id);
+    }
+
+    static void _logText(const brayns::OutputPacket &packet, size_t id)
+    {
+        auto data = packet.getData();
+        brayns::Log::debug("Sending text frame to client {}: '{}'.", id, data);
+    }
+};
 } // namespace
 
 namespace brayns
 {
-WebSocket::WebSocket(
-    Poco::Net::HTTPClientSession &session,
-    Poco::Net::HTTPRequest &request,
-    Poco::Net::HTTPResponse &response)
-    : _socket(session, request, response)
+WebSocket::WebSocket(const Poco::Net::WebSocket &socket, size_t id)
+    : _socket(socket)
+    , _id(id)
 {
-    WebSocketBuilder::build(_socket);
+    _socket.setReceiveTimeout(Poco::Timespan());
+    _socket.setSendTimeout(Poco::Timespan());
 }
 
-WebSocket::WebSocket(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response)
-    : _socket(request, response)
+size_t WebSocket::getId() const
 {
-    WebSocketBuilder::build(_socket);
+    return _id;
 }
 
 void WebSocket::close()
@@ -114,11 +170,49 @@ void WebSocket::close()
 
 InputPacket WebSocket::receive()
 {
-    return WebSocketReceiver::receive(_socket);
+    auto id = getId();
+    try
+    {
+        auto packet = WebSocketReceiver::receive(_socket);
+        ReceiveLogger::log(packet, id);
+        return packet;
+    }
+    catch (const brayns::ConnectionClosedException &e)
+    {
+        brayns::Log::debug("Connection closed while receiving data from client {}: '{}'.", id, e.what());
+        throw;
+    }
+    catch (const std::exception &e)
+    {
+        brayns::Log::error("Unexpected error while receiving data from client {}: '{}'.", id, e.what());
+        throw;
+    }
+    catch (...)
+    {
+        brayns::Log::error("Unknown error while receiving data from client {}.", id);
+        throw;
+    }
 }
 
 void WebSocket::send(const OutputPacket &packet)
 {
-    WebSocketSender::send(_socket, packet);
+    auto id = getId();
+    SendLogger::log(packet, id);
+    try
+    {
+        WebSocketSender::send(_socket, packet);
+    }
+    catch (const brayns::ConnectionClosedException &e)
+    {
+        brayns::Log::debug("Connection closed while sending data to client {}: '{}'.", id, e.what());
+    }
+    catch (const std::exception &e)
+    {
+        brayns::Log::error("Unexpected error while sending data to client {}: '{}'.", id, e.what());
+    }
+    catch (...)
+    {
+        brayns::Log::error("Unknown error while sending data client {}.", id);
+    }
 }
 } // namespace brayns
