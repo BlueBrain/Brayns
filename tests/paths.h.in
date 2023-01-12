@@ -58,4 +58,22 @@ struct Volumes
     static constexpr auto badFormatMhd = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/bad_format.mhd";
     static constexpr auto badObjectTypeMhd = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/volumes/bad_object_type.mhd";
 };
+
+struct Libraries
+{
+    static constexpr auto badLibrary = "ItDoesNotExists";
+    static constexpr auto braynsLibrary = "brayns";
+    static constexpr auto testLibrary = "DynamicLibTest";
+};
+
+struct Folders
+{
+    static constexpr auto testFiles = "${CMAKE_CURRENT_SOURCE_DIR}/files";
+};
+
+struct Images
+{
+    static constexpr auto jpg = "${CMAKE_CURRENT_SOURCE_DIR}/files/images/image.jpg";
+    static constexpr auto png = "${CMAKE_CURRENT_SOURCE_DIR}/files/images/image.png";
+};
 }

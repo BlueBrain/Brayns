@@ -21,6 +21,9 @@
 
 #include "ImageCodecRegistry.h"
 
+#include <brayns/utils/string/StringCase.h>
+
+#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <unordered_map>
@@ -87,8 +90,11 @@ namespace brayns
 {
 const ImageCodec &ImageCodecRegistry::getCodec(const std::string &format)
 {
+    auto formatLower = format;
+    StringCase::lower(formatLower);
+
     auto &codecs = ImageCodecStorage::getCodecs();
-    auto codec = codecs.find(format);
+    auto codec = codecs.find(formatLower);
     if (!codec)
     {
         throw std::runtime_error("Format not supported: '" + format + "'");

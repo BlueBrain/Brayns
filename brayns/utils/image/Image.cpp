@@ -23,6 +23,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <stdexcept>
 
 namespace brayns
 {
@@ -41,7 +42,7 @@ Image::Image(const ImageInfo &info, char fillWith)
 
 bool Image::isEmpty() const
 {
-    return getData() == nullptr;
+    return _data.empty();
 }
 
 size_t Image::getWidth() const
@@ -81,6 +82,10 @@ size_t Image::getPixelSize() const
 
 void Image::write(const Image &image, size_t x, size_t y)
 {
+    if (image.getWidth() + x > getWidth() || image.getHeight() + y > getHeight())
+    {
+        throw std::out_of_range("Image write overflow");
+    }
     write(image.getData(), image.getSize(), x, y);
 }
 
