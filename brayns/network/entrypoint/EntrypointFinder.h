@@ -28,23 +28,21 @@
 namespace brayns
 {
 /**
- * @brief Helper class to get an entrypoint from a JSON-RPC request.
+ * @brief Helper class to match a request with its entrypoint and validate it.
  *
  */
 class EntrypointFinder
 {
 public:
     /**
-     * @brief Find entrypoint matching request in entrypoints.
+     * @brief Find entrypoint corresponding to request.
      *
-     * Check that request method is valid (contained in entrypoints).
+     * Check also that the request is valid based on the entrypoint schema.
      *
-     * Request params are also validated using target entrypoint (if found).
-     *
-     * @param request JSON-RPC request.
-     * @param entrypoints Supported entrypoints.
-     * @return const EntrypointRef& Corresponding entrypoint.
-     * @throw JsonRpcException Method not found or invalid params schema.
+     * @param request JSON RPC client request.
+     * @param entrypoints Entrypoint registry.
+     * @return const EntrypointRef & Entrypoint to process request.
+     * @throw JsonRpcException No entrypoint found or invalid params.
      */
     static const EntrypointRef &find(const JsonRpcRequest &request, const EntrypointRegistry &entrypoints);
 };

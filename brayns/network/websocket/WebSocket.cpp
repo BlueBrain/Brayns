@@ -92,11 +92,6 @@ public:
 
 namespace brayns
 {
-ConnectionClosedException::ConnectionClosedException(const std::string &message)
-    : std::runtime_error(message)
-{
-}
-
 WebSocket::WebSocket(
     Poco::Net::HTTPClientSession &session,
     Poco::Net::HTTPRequest &request,

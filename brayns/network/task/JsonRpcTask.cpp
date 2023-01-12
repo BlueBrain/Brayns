@@ -21,9 +21,9 @@
 
 #include "JsonRpcTask.h"
 
-#include <brayns/utils/Log.h>
-
 #include <cassert>
+
+#include <brayns/utils/Log.h>
 
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 

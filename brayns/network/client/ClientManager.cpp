@@ -27,7 +27,7 @@ namespace brayns
 {
 ClientManager::~ClientManager()
 {
-    closeAll();
+    disconnectAll();
 }
 
 bool ClientManager::isEmpty() const
@@ -45,12 +45,11 @@ void ClientManager::remove(const ClientRef &client)
     _clients.erase(client);
 }
 
-void ClientManager::closeAll() const
+void ClientManager::disconnectAll() const
 {
     for (const auto &client : _clients)
     {
-        auto &socket = client.getSocket();
-        socket.close();
+        client.disconnect();
     }
 }
 } // namespace brayns

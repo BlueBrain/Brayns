@@ -21,42 +21,46 @@
 
 #pragma once
 
-#include <Poco/Net/HTTPServerRequest.h>
-#include <Poco/Net/HTTPServerResponse.h>
-#include <Poco/Net/WebSocket.h>
+#include <stdexcept>
 
-#include "IWebSocket.h"
+#include "InputPacket.h"
+#include "OutputPacket.h"
 
 namespace brayns
 {
-class WebSocket : public IWebSocket
+/**
+ * @brief Exception thrown by the socket when an operation cannot be achieved
+ * because the connection is closed.
+ *
+ */
+class ConnectionClosedException : public std::runtime_error
 {
 public:
     /**
-     * @brief Construct a client side websocket from client session.
+     * @brief Construct an exception instance.
      *
-     * @param session Client session.
-     * @param request Client request.
-     * @param response Server response.
+     * @param message Description of the reason why the connection was closed.
      */
-    WebSocket(
-        Poco::Net::HTTPClientSession &session,
-        Poco::Net::HTTPRequest &request,
-        Poco::Net::HTTPResponse &response);
+    explicit ConnectionClosedException(const std::string &message)
+        : std::runtime_error(message)
+    {
+    }
+};
 
-    /**
-     * @brief Construct a server side websocket from client HTTP request.
-     *
-     * @param request Client request.
-     * @param response Server response.
-     */
-    WebSocket(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response);
+/**
+ * @brief WebSocket interface used to send an receive data with a client.
+ *
+ */
+class IWebSocket
+{
+public:
+    virtual ~IWebSocket() = default;
 
     /**
      * @brief Close the socket.
      *
      */
-    virtual void close() override;
+    virtual void close() = 0;
 
     /**
      * @brief Receive an input packet from the connected client.
@@ -66,16 +70,13 @@ public:
      * @return InputPacket Data packet received from the client (always valid).
      * @throw ConnectionClosedException The client closed the connection.
      */
-    virtual InputPacket receive() override;
+    virtual InputPacket receive() = 0;
 
     /**
      * @brief Send an output packet to the connected client.
      *
      * @param packet Packet containing the data to send to the client.
      */
-    virtual void send(const OutputPacket &packet) override;
-
-private:
-    Poco::Net::WebSocket _socket;
+    virtual void send(const OutputPacket &packet) = 0;
 };
 } // namespace brayns

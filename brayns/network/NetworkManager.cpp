@@ -23,7 +23,6 @@
 
 #include <brayns/utils/Log.h>
 
-#include <brayns/network/dispatch/RequestDispatcher.h>
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/network/jsonrpc/JsonRpcFactory.h>

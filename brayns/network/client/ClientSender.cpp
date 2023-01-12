@@ -23,8 +23,6 @@
 
 #include <brayns/utils/Log.h>
 
-#include <brayns/network/websocket/WebSocket.h>
-
 namespace
 {
 class MessageLogger
@@ -68,8 +66,7 @@ void ClientSender::send(const OutputPacket &packet, const ClientRef &client)
     MessageLogger::log(packet, client);
     try
     {
-        auto &socket = client.getSocket();
-        socket.send(packet);
+        client.send(packet);
     }
     catch (const brayns::ConnectionClosedException &e)
     {

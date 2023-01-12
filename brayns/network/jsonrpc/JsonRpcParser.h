@@ -39,7 +39,7 @@ public:
      *
      * @param request Client request.
      * @return JsonRpcRequest Parsed request.
-     * @throw JsonRpcException If any errors occur that must be reported.
+     * @throw JsonRpcException Invalid JSON or JSON-RPC.
      */
     static JsonRpcRequest parse(const ClientRequest &request);
 };

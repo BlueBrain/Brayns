@@ -23,7 +23,80 @@
 
 #include <brayns/utils/Log.h>
 
-#include <brayns/network/dispatch/RequestDispatcher.h>
+#include <brayns/network/entrypoint/EntrypointFinder.h>
+#include <brayns/network/jsonrpc/JsonRpcException.h>
+#include <brayns/network/jsonrpc/JsonRpcParser.h>
+#include <brayns/network/task/JsonRpcTask.h>
+
+namespace
+{
+class JsonRpcDispatcher
+{
+public:
+    static void dispatch(
+        brayns::JsonRpcRequest request,
+        const brayns::EntrypointRegistry &entrypoints,
+        brayns::TaskManager &tasks)
+    {
+        try
+        {
+            brayns::Log::debug("Dispatch JSON-RPC request {} to entrypoints.", request);
+            auto &entrypoint = brayns::EntrypointFinder::find(request, entrypoints);
+            brayns::Log::debug("Entrypoint found to process request: '{}'.", entrypoint.getMethod());
+            auto task = std::make_unique<brayns::JsonRpcTask>(std::move(request), entrypoint);
+            tasks.add(std::move(task));
+        }
+        catch (const brayns::JsonRpcException &e)
+        {
+            brayns::Log::info("Failed to dispatch request {} to entrypoints: {}.", request, e);
+            request.error(e);
+        }
+        catch (const std::exception &e)
+        {
+            brayns::Log::error("Unexpected error in dispatch of request {} to entrypoints: '{}'.", request, e.what());
+            request.error(brayns::InternalErrorException(e.what()));
+        }
+        catch (...)
+        {
+            brayns::Log::error("Unknown error in dispatch of request {} to entrypoints.", request);
+            request.error(brayns::InternalErrorException("Unknown error"));
+        }
+    }
+};
+
+class RawRequestDispatcher
+{
+public:
+    static void dispatch(
+        const brayns::ClientRequest &request,
+        const brayns::EntrypointRegistry &entrypoints,
+        brayns::TaskManager &tasks)
+    {
+        try
+        {
+            brayns::Log::debug("Parse JSON-RPC request.");
+            auto jsonrpc = brayns::JsonRpcParser::parse(request);
+            brayns::Log::info("Successfully parsed JSON-RPC request {}.", jsonrpc);
+            JsonRpcDispatcher::dispatch(std::move(jsonrpc), entrypoints, tasks);
+        }
+        catch (const brayns::JsonRpcException &e)
+        {
+            brayns::Log::info("Failed to parse request {}: {}.", request, e);
+            request.error(e);
+        }
+        catch (const std::exception &e)
+        {
+            brayns::Log::error("Unexpected error in parsing of request {}: '{}'.", request, e.what());
+            request.error(brayns::InternalErrorException(e.what()));
+        }
+        catch (...)
+        {
+            brayns::Log::error("Unknown error in parsing of request {}.", request);
+            request.error(brayns::InternalErrorException("Unknown error"));
+        }
+    }
+};
+}
 
 namespace brayns
 {
@@ -49,12 +122,13 @@ void SocketListener::onDisconnect(const ClientRef &client)
 
 void SocketListener::onRequest(ClientRequest request)
 {
-    RequestDispatcher dispatcher(_entrypoints, _tasks);
     Log::info("Received request {}.", request);
     if (request.isText())
     {
-        brayns::Log::debug("Request content: '{}'.", request.getData());
+        Log::debug("Request content: '{}'.", request.getData());
     }
-    dispatcher.dispatch(std::move(request));
+    Log::debug("Dispatch request {}.", request);
+    RawRequestDispatcher::dispatch(request, _entrypoints, _tasks);
+    Log::debug("Request dispatched {}.", request);
 }
 } // namespace brayns

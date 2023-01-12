@@ -31,6 +31,8 @@
 
 #include <brayns/utils/Log.h>
 
+#include <brayns/network/websocket/WebSocket.h>
+
 namespace
 {
 class SslClientContextFactory

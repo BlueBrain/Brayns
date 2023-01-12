@@ -32,6 +32,8 @@
 
 #include <brayns/utils/Log.h>
 
+#include <brayns/network/websocket/WebSocket.h>
+
 namespace
 {
 class RequestHandler : public Poco::Net::HTTPRequestHandler

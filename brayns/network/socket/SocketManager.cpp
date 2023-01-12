@@ -35,8 +35,7 @@ public:
     {
         try
         {
-            auto &socket = client.getSocket();
-            return socket.receive();
+            return client.receive();
         }
         catch (const brayns::ConnectionClosedException &e)
         {

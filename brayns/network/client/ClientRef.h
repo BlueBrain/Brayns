@@ -26,7 +26,7 @@
 
 #include <spdlog/fmt/ostr.h>
 
-#include <brayns/network/websocket/WebSocket.h>
+#include <brayns/network/websocket/IWebSocket.h>
 
 namespace brayns
 {
@@ -40,16 +40,9 @@ public:
     /**
      * @brief Construct a connected client.
      *
-     * @param socket Client socket.
+     * @param socket Client socket (cannot be null).
      */
-    explicit ClientRef(std::shared_ptr<WebSocket> socket);
-
-    /**
-     * @brief Get client socket (must be connected).
-     *
-     * @return WebSocket& Client socket.
-     */
-    WebSocket &getSocket() const;
+    explicit ClientRef(std::shared_ptr<IWebSocket> socket);
 
     /**
      * @brief Get a unique id for the client determined by the socket.
@@ -59,9 +52,29 @@ public:
     size_t getId() const;
 
     /**
+     * @brief Close the client socket.
+     *
+     */
+    void disconnect() const;
+
+    /**
+     * @brief Block until a data packet is received and return it.
+     *
+     * @return InputPacket Packet received from the client.
+     */
+    InputPacket receive() const;
+
+    /**
+     * @brief Send data packet to client.
+     *
+     * @param packet Packet to send to the client.
+     */
+    void send(const OutputPacket &packet) const;
+
+    /**
      * @brief Comparison using underlying socket.
      *
-     * @param other LHS.
+     * @param other RHS.
      * @return true Same client.
      * @return false Different client.
      */
@@ -70,14 +83,14 @@ public:
     /**
      * @brief Comparison using underlying socket.
      *
-     * @param other LHS.
+     * @param other RHS.
      * @return true Different client.
      * @return false Same client.
      */
     bool operator!=(const ClientRef &other) const;
 
 private:
-    std::shared_ptr<WebSocket> _socket;
+    std::shared_ptr<IWebSocket> _socket;
 };
 } // namespace brayns
 
