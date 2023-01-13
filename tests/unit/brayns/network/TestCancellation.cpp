@@ -25,32 +25,7 @@
 #include <brayns/network/common/CancellationToken.h>
 #include <brayns/network/common/ProgressHandler.h>
 
-class MockInterface : public brayns::INetworkInterface
-{
-public:
-    bool hasBeenPolled() const
-    {
-        return _polled;
-    }
-
-    void reset()
-    {
-        _polled = false;
-    }
-
-    virtual void registerEntrypoint(brayns::EntrypointRef entrypoint) override
-    {
-        (void)entrypoint;
-    }
-
-    virtual void poll() override
-    {
-        _polled = true;
-    }
-
-private:
-    bool _polled = false;
-};
+#include "MockInterface.h"
 
 class MockRequest
 {
