@@ -76,9 +76,9 @@ public:
     {
         try
         {
-            brayns::Log::debug("Parse JSON-RPC request.");
+            brayns::Log::debug("Parsing request {}.", request);
             auto jsonrpc = brayns::JsonRpcParser::parse(request);
-            brayns::Log::info("Successfully parsed JSON-RPC request {}.", jsonrpc);
+            brayns::Log::info("Successfully parsed request {} as {}.", request, jsonrpc);
             JsonRpcDispatcher::dispatch(std::move(jsonrpc), entrypoints, tasks);
         }
         catch (const brayns::JsonRpcException &e)
@@ -139,6 +139,6 @@ void SocketListener::onRequest(ClientRequest request)
     }
     Log::debug("Dispatch request {}.", request);
     RawRequestDispatcher::dispatch(request, _entrypoints, _tasks);
-    Log::debug("Request dispatched {}.", request);
+    Log::debug("Request {} dispatched.", request);
 }
 } // namespace brayns
