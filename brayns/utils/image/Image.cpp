@@ -82,11 +82,22 @@ size_t Image::getPixelSize() const
 
 void Image::write(const Image &image, size_t x, size_t y)
 {
+    if (image.getChannelCount() != getChannelCount() || image.getChannelSize() != getChannelSize())
+    {
+        throw std::invalid_argument("Images have different shape");
+    }
+
     if (image.getWidth() + x > getWidth() || image.getHeight() + y > getHeight())
     {
         throw std::out_of_range("Image write overflow");
     }
-    write(image.getData(), image.getSize(), x, y);
+
+    auto rowSize = image.getRowSize();
+    for (size_t i = 0; i < image.getHeight(); ++i)
+    {
+        auto src = static_cast<const char *>(image.getData()) + rowSize * i;
+        write(static_cast<const void *>(src), rowSize, x, y + i);
+    }
 }
 
 void Image::write(const void *data, size_t size, size_t x, size_t y)

@@ -22,72 +22,14 @@
 
 #include <doctest/doctest.h>
 
+#include <tests/helpers/TemporaryFilename.h>
 #include <tests/paths.h>
-
-#include <filesystem>
-#include <random>
-
-namespace
-{
-class FileNameGenerator
-{
-public:
-    static std::string generateFake(size_t len = 10)
-    {
-        std::string result;
-        do
-        {
-            result = _generate(len);
-        } while (_exists(result));
-
-        return "/" + result + "/fake_file";
-    }
-
-    static std::string generateValid(size_t len = 10)
-    {
-        std::string result;
-        do
-        {
-            result = "/tmp/" + _generate(len);
-        } while (_exists(result));
-
-        return result;
-    }
-
-private:
-    inline static const std::string source = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-    static bool _exists(const std::string &filename)
-    {
-        auto path = std::filesystem::path(filename);
-        return std::filesystem::exists(path);
-    }
-
-    static std::string _generate(size_t len)
-    {
-        std::random_device seed;
-        std::mt19937 engine(seed());
-        std::uniform_int_distribution<> random(0, static_cast<int>(source.length()));
-
-        auto result = std::string();
-        result.reserve(len);
-
-        for (size_t i = 0; i < len; ++i)
-        {
-            auto index = random(engine);
-            result.push_back(source[index]);
-        }
-
-        return result;
-    }
-};
-}
 
 TEST_CASE("File writer")
 {
-    CHECK_THROWS(brayns::FileWriter::write("random", FileNameGenerator::generateFake()));
+    CHECK_THROWS(brayns::FileWriter::write("random", TemporaryFilename::generateFake()));
 
-    auto file = FileNameGenerator::generateValid();
+    auto file = TemporaryFilename::generateValid();
     auto content = std::string("this goes/ninside the file/n");
     CHECK_NOTHROW(brayns::FileWriter::write(content, file));
 

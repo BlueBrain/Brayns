@@ -32,6 +32,7 @@ std::string JpegCodec::getFormat() const
 
 std::string JpegCodec::encode(const Image &image, int quality) const
 {
+    quality = std::max(100 - std::max(quality, 0), 0);
     return StbiHelper::encodeJpeg(image, quality);
 }
 

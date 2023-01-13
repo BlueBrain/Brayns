@@ -19,9 +19,15 @@
 
 #include <brayns/utils/image/Image.h>
 #include <brayns/utils/image/ImageCodecRegistry.h>
+#include <brayns/utils/image/ImageDecoder.h>
+#include <brayns/utils/image/ImageEncoder.h>
 #include <brayns/utils/image/ImageFormat.h>
 
 #include <doctest/doctest.h>
+
+#include <tests/helpers/ImageValidator.h>
+#include <tests/helpers/TemporaryFilename.h>
+#include <tests/paths.h>
 
 namespace
 {
@@ -116,14 +122,24 @@ TEST_CASE("Image")
         CHECK(*static_cast<char *>(image.getData(2, 1)) == 'b');
         CHECK_THROWS_WITH(image.write(&b, sizeof(char), 0, 5), "Image coordinates out of bounds");
         CHECK_THROWS_WITH(image.write(&b, sizeof(char), 5, 0), "Image coordinates out of bounds");
+    }
+    SUBCASE("Write image")
+    {
+        auto image = ImageFactory::createImage(5, 5, "aaaaaaaaaaaaaaaaaaaaaaaaa");
+        auto subImage = ImageFactory::createImage(3, 2, "cccccc");
+        CHECK_NOTHROW(image.write(subImage, 1, 3));
 
-        auto subImage = ImageFactory::createImage(5, 1, "ccccc");
-        CHECK_NOTHROW(image.write(subImage, 0, 3));
-        for (size_t i = 0; i < 5; ++i)
-        {
-            CHECK(*static_cast<char *>(image.getData(i, 3)) == *static_cast<char *>(subImage.getData(i, 0)));
-        }
+        auto expectedImage = ImageFactory::createImage(5, 5, "aaaaaaaaaaaaaaaacccaaccca");
+        CHECK(image == expectedImage);
         CHECK_THROWS_WITH(image.write(subImage, 3, 1), "Image write overflow");
+
+        auto info = brayns::ImageInfo();
+        info.width = 5;
+        info.height = 5;
+        info.channelCount = 2;
+        info.channelSize = 1;
+        auto differentShapeImage = brayns::Image(info, std::string(info.getSize(), 'a'));
+        CHECK_THROWS_WITH(image.write(differentShapeImage, 0, 0), "Images have different shape");
     }
     SUBCASE("Comparsion")
     {
@@ -169,4 +185,48 @@ TEST_CASE("Image format")
 
 TEST_CASE("Image decoder")
 {
+    SUBCASE("JPG")
+    {
+        auto jpg = brayns::Image();
+        CHECK_NOTHROW(jpg = brayns::ImageDecoder::load(TestPaths::Images::jpg));
+        CHECK(jpg.getChannelCount() == 3);
+        CHECK(jpg.getChannelSize() == 1);
+        CHECK(jpg.getHeight() == 551);
+        CHECK(jpg.getWidth() == 800);
+    }
+    SUBCASE("PNG")
+    {
+        auto png = brayns::Image();
+        CHECK_NOTHROW(png = brayns::ImageDecoder::load(TestPaths::Images::png));
+        CHECK(png.getChannelCount() == 3);
+        CHECK(png.getChannelSize() == 1);
+        CHECK(png.getHeight() == 551);
+        CHECK(png.getWidth() == 800);
+    }
+}
+
+TEST_CASE("Image encoder")
+{
+    SUBCASE("JPG")
+    {
+        auto image = brayns::ImageDecoder::load(TestPaths::Images::jpg);
+
+        auto dst = TemporaryFilename::generateValid() + ".jpg";
+        CHECK_NOTHROW(brayns::ImageEncoder::save(image, dst));
+
+        auto readImage = brayns::Image();
+        CHECK_NOTHROW(readImage = brayns::ImageDecoder::load(dst));
+        CHECK(ImageValidator::validate(readImage, image));
+    }
+    SUBCASE("PNG")
+    {
+        auto image = brayns::ImageDecoder::load(TestPaths::Images::png);
+
+        auto dst = TemporaryFilename::generateValid() + ".png";
+        CHECK_NOTHROW(brayns::ImageEncoder::save(image, dst));
+
+        auto readImage = brayns::Image();
+        CHECK_NOTHROW(readImage = brayns::ImageDecoder::load(dst));
+        CHECK(ImageValidator::validate(readImage, image));
+    }
 }
