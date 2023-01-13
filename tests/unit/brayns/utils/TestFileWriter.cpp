@@ -1,7 +1,5 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,25 +17,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "JpegCodec.h"
+#include <brayns/utils/FileReader.h>
+#include <brayns/utils/FileWriter.h>
 
-#include "StbiHelper.h"
+#include <doctest/doctest.h>
 
-namespace brayns
+#include <tests/helpers/TemporaryFilename.h>
+#include <tests/paths.h>
+
+TEST_CASE("File writer")
 {
-std::string JpegCodec::getFormat() const
-{
-    return "jpg";
+    CHECK_THROWS(brayns::FileWriter::write("random", TemporaryFilename::generateFake()));
+
+    auto file = TemporaryFilename::generateValid();
+    auto content = std::string("this goes/ninside the file/n");
+    CHECK_NOTHROW(brayns::FileWriter::write(content, file));
+
+    std::string readContent;
+    CHECK_NOTHROW(readContent = brayns::FileReader::read(file));
+    CHECK(readContent == content);
 }
-
-std::string JpegCodec::encode(const Image &image, int quality) const
-{
-    quality = std::max(100 - std::max(quality, 0), 0);
-    return StbiHelper::encodeJpeg(image, quality);
-}
-
-Image JpegCodec::decode(const void *data, size_t size) const
-{
-    return StbiHelper::decode(data, size);
-}
-} // namespace brayns

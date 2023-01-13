@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,25 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "JpegCodec.h"
-
-#include "StbiHelper.h"
-
-namespace brayns
+extern "C" int validExportedFunction()
 {
-std::string JpegCodec::getFormat() const
-{
-    return "jpg";
+    return 0;
 }
 
-std::string JpegCodec::encode(const Image &image, int quality) const
+int nonExportedFunction()
 {
-    quality = std::max(100 - std::max(quality, 0), 0);
-    return StbiHelper::encodeJpeg(image, quality);
+    return 0;
 }
-
-Image JpegCodec::decode(const void *data, size_t size) const
-{
-    return StbiHelper::decode(data, size);
-}
-} // namespace brayns

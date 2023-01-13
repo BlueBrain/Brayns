@@ -1,7 +1,5 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,25 +17,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "JpegCodec.h"
+#include <brayns/utils/ModifiedFlag.h>
 
-#include "StbiHelper.h"
+#include <doctest/doctest.h>
 
-namespace brayns
+TEST_CASE("Modified flag")
 {
-std::string JpegCodec::getFormat() const
-{
-    return "jpg";
+    auto flag = brayns::ModifiedFlag();
+
+    CHECK(flag);
+    flag.setModified(false);
+    CHECK(!flag);
+
+    int variable = 0;
+    CHECK(flag.update(variable, 10));
+    CHECK(flag);
+
+    flag.setModified(false);
+    CHECK(!flag.update(variable, 10));
+    CHECK(!flag);
+
+    flag = true;
+    CHECK(flag);
 }
-
-std::string JpegCodec::encode(const Image &image, int quality) const
-{
-    quality = std::max(100 - std::max(quality, 0), 0);
-    return StbiHelper::encodeJpeg(image, quality);
-}
-
-Image JpegCodec::decode(const void *data, size_t size) const
-{
-    return StbiHelper::decode(data, size);
-}
-} // namespace brayns

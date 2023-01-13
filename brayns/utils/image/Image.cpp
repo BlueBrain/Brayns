@@ -23,6 +23,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <stdexcept>
 
 namespace brayns
 {
@@ -41,7 +42,7 @@ Image::Image(const ImageInfo &info, char fillWith)
 
 bool Image::isEmpty() const
 {
-    return getData() == nullptr;
+    return _data.empty();
 }
 
 size_t Image::getWidth() const
@@ -81,7 +82,22 @@ size_t Image::getPixelSize() const
 
 void Image::write(const Image &image, size_t x, size_t y)
 {
-    write(image.getData(), image.getSize(), x, y);
+    if (image.getChannelCount() != getChannelCount() || image.getChannelSize() != getChannelSize())
+    {
+        throw std::invalid_argument("Images have different shape");
+    }
+
+    if (image.getWidth() + x > getWidth() || image.getHeight() + y > getHeight())
+    {
+        throw std::out_of_range("Image write overflow");
+    }
+
+    auto rowSize = image.getRowSize();
+    for (size_t i = 0; i < image.getHeight(); ++i)
+    {
+        auto src = static_cast<const char *>(image.getData()) + rowSize * i;
+        write(src, rowSize, x, y + i);
+    }
 }
 
 void Image::write(const void *data, size_t size, size_t x, size_t y)

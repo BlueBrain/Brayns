@@ -21,6 +21,8 @@
 
 #include "ImageInfo.h"
 
+#include <stdexcept>
+
 namespace brayns
 {
 size_t ImageInfo::getSize() const
@@ -45,6 +47,11 @@ size_t ImageInfo::getPixelSize() const
 
 size_t ImageInfo::getPixelIndex(size_t x, size_t y) const
 {
+    if (x >= width || y >= height)
+    {
+        throw std::out_of_range("Image coordinates out of bounds");
+    }
+
     return x + y * width;
 }
 

@@ -1,7 +1,5 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,25 +17,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "JpegCodec.h"
+#include <brayns/utils/IDFactory.h>
 
-#include "StbiHelper.h"
+#include <doctest/doctest.h>
 
-namespace brayns
+TEST_CASE("ID factory")
 {
-std::string JpegCodec::getFormat() const
-{
-    return "jpg";
+    auto factory = brayns::IDFactory<uint8_t>();
+
+    CHECK(factory.generateID() == 0);
+    CHECK(factory.generateID() == 1);
+
+    factory.releaseID(0);
+    CHECK(factory.generateID() == 0);
+    CHECK(factory.generateID() == 2);
+
+    factory.releaseID(2);
+    factory.clear();
+    CHECK(factory.generateID() == 0);
+    CHECK(factory.generateID() == 1);
+
+    factory.clear();
+
+    for (uint8_t i = 0; i < std::numeric_limits<uint8_t>::max(); ++i)
+    {
+        CHECK(factory.generateID() == i);
+    }
+    CHECK_THROWS_WITH(factory.generateID(), "ID factory exhausted");
 }
-
-std::string JpegCodec::encode(const Image &image, int quality) const
-{
-    quality = std::max(100 - std::max(quality, 0), 0);
-    return StbiHelper::encodeJpeg(image, quality);
-}
-
-Image JpegCodec::decode(const void *data, size_t size) const
-{
-    return StbiHelper::decode(data, size);
-}
-} // namespace brayns

@@ -1,7 +1,5 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,25 +17,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "JpegCodec.h"
+#include <brayns/utils/DynamicLib.h>
 
-#include "StbiHelper.h"
+#include <doctest/doctest.h>
 
-namespace brayns
+#include <tests/paths.h>
+
+TEST_CASE("Dynamic library")
 {
-std::string JpegCodec::getFormat() const
-{
-    return "jpg";
+    SUBCASE("Library loading")
+    {
+        CHECK_THROWS_WITH(
+            brayns::DynamicLib(TestPaths::Libraries::badLibrary),
+            doctest::Contains("Error opening dynamic library"));
+
+        CHECK_NOTHROW(brayns::DynamicLib(TestPaths::Libraries::braynsLibrary));
+    }
+    SUBCASE("Symbol address fetching")
+    {
+        auto lib = brayns::DynamicLib(TestPaths::Libraries::testLibrary);
+
+        CHECK(lib.getSymbolAddress("validExportedFunction"));
+        CHECK_FALSE(lib.getSymbolAddress("nonExportedFunction"));
+        CHECK_FALSE(lib.getSymbolAddress("nonExistingFunction"));
+    }
 }
-
-std::string JpegCodec::encode(const Image &image, int quality) const
-{
-    quality = std::max(100 - std::max(quality, 0), 0);
-    return StbiHelper::encodeJpeg(image, quality);
-}
-
-Image JpegCodec::decode(const void *data, size_t size) const
-{
-    return StbiHelper::decode(data, size);
-}
-} // namespace brayns

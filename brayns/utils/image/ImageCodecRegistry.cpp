@@ -21,6 +21,8 @@
 
 #include "ImageCodecRegistry.h"
 
+#include <brayns/utils/string/StringCase.h>
+
 #include <cassert>
 #include <memory>
 #include <unordered_map>
@@ -85,8 +87,10 @@ private:
 
 namespace brayns
 {
-const ImageCodec &ImageCodecRegistry::getCodec(const std::string &format)
+const ImageCodec &ImageCodecRegistry::getCodec(std::string format)
 {
+    StringCase::lower(format);
+
     auto &codecs = ImageCodecStorage::getCodecs();
     auto codec = codecs.find(format);
     if (!codec)
