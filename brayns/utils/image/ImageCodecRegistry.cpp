@@ -88,13 +88,12 @@ private:
 
 namespace brayns
 {
-const ImageCodec &ImageCodecRegistry::getCodec(const std::string &format)
+const ImageCodec &ImageCodecRegistry::getCodec(std::string format)
 {
-    auto formatLower = format;
-    StringCase::lower(formatLower);
+    StringCase::lower(format);
 
     auto &codecs = ImageCodecStorage::getCodecs();
-    auto codec = codecs.find(formatLower);
+    auto codec = codecs.find(format);
     if (!codec)
     {
         throw std::runtime_error("Format not supported: '" + format + "'");
