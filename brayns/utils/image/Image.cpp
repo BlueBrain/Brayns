@@ -96,7 +96,7 @@ void Image::write(const Image &image, size_t x, size_t y)
     for (size_t i = 0; i < image.getHeight(); ++i)
     {
         auto src = static_cast<const char *>(image.getData()) + rowSize * i;
-        write(static_cast<const void *>(src), rowSize, x, y + i);
+        write(src, rowSize, x, y + i);
     }
 }
 
