@@ -23,7 +23,6 @@
 
 #include <brayns/utils/string/StringCase.h>
 
-#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <unordered_map>
