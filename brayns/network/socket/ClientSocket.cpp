@@ -86,8 +86,7 @@ public:
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_1_1);
         Poco::Net::HTTPResponse response;
         auto poco = Poco::Net::WebSocket(*session, request, response);
-        auto id = 0;
-        auto socket = std::make_shared<brayns::WebSocket>(poco, id);
+        auto socket = std::make_shared<brayns::WebSocket>(poco);
         brayns::Log::info("Client socket connected.");
         auto client = brayns::ClientRef(std::move(socket));
         manager.run(client);

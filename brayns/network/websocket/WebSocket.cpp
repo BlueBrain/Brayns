@@ -150,9 +150,8 @@ private:
 
 namespace brayns
 {
-WebSocket::WebSocket(const Poco::Net::WebSocket &socket, size_t id)
+WebSocket::WebSocket(const Poco::Net::WebSocket &socket)
     : _socket(socket)
-    , _id(id)
 {
     _socket.setReceiveTimeout(Poco::Timespan());
     _socket.setSendTimeout(Poco::Timespan());
@@ -160,7 +159,7 @@ WebSocket::WebSocket(const Poco::Net::WebSocket &socket, size_t id)
 
 size_t WebSocket::getId() const
 {
-    return _id;
+    return reinterpret_cast<size_t>(this);
 }
 
 void WebSocket::close()

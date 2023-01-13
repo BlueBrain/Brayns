@@ -36,12 +36,21 @@ public:
      * @param socket Connected websocket implementation.
      * @param id Unique ID for this socket to identify the client using it.
      */
-    WebSocket(const Poco::Net::WebSocket &socket, size_t id);
+    WebSocket(const Poco::Net::WebSocket &socket);
+
+    /**
+     * @brief Make sure each socket has a unique address.
+     *
+     */
+    WebSocket(const WebSocket &) = delete;
+    WebSocket(WebSocket &&) = delete;
+    WebSocket &operator=(const WebSocket &) = delete;
+    WebSocket &operator=(WebSocket &&) = delete;
 
     /**
      * @brief Get a unique ID for the socket.
      *
-     * @return size_t Unique ID stored in the instance.
+     * @return size_t Use the object address to identify the socket.
      */
     virtual size_t getId() const override;
 
@@ -70,6 +79,5 @@ public:
 
 private:
     Poco::Net::WebSocket _socket;
-    size_t _id;
 };
 } // namespace brayns

@@ -50,8 +50,7 @@ public:
         try
         {
             auto poco = Poco::Net::WebSocket(request, response);
-            auto id = reinterpret_cast<size_t>(this);
-            auto socket = std::make_shared<brayns::WebSocket>(poco, id);
+            auto socket = std::make_shared<brayns::WebSocket>(poco);
             auto client = brayns::ClientRef(std::move(socket));
             _manager.run(client);
         }
