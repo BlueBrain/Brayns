@@ -22,6 +22,7 @@
 #include <doctest/doctest.h>
 
 #include <brayns/network/client/ClientRef.h>
+#include <brayns/network/client/ClientRequest.h>
 #include <brayns/network/client/ClientSender.h>
 #include <brayns/network/websocket/IWebSocket.h>
 
@@ -53,4 +54,17 @@ TEST_CASE("ClientSender")
         CHECK_FALSE(packet.binary);
         CHECK_EQ(packet.data, data);
     }
+}
+
+TEST_CASE("ClientRequest")
+{
+    auto socket = std::make_shared<MockWebSocket>(3);
+    auto client = brayns::ClientRef(socket);
+    auto packet = brayns::InputPacket::fromText("test");
+    auto request = brayns::ClientRequest(client, packet);
+    auto stream = std::ostringstream();
+    stream << request;
+    auto test = stream.str();
+    auto ref = "{client = 3, size = 4, binary = false}";
+    CHECK_EQ(test, ref);
 }

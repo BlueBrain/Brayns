@@ -32,9 +32,9 @@ struct OutputPacket
 class MockWebSocket : public brayns::IWebSocket
 {
 public:
-    MockWebSocket(std::vector<brayns::InputPacket> send = {}, size_t id = 0)
-        : _send(std::move(send))
-        , _id(id)
+    MockWebSocket(size_t id = 0, std::vector<brayns::InputPacket> send = {})
+        : _id(id)
+        , _send(std::move(send))
     {
     }
 
@@ -62,7 +62,7 @@ public:
     {
         if (_send.empty())
         {
-            throw std::runtime_error("Out of packets to send");
+            throw brayns::ConnectionClosedException("Out of packets to send");
         }
         auto packet = std::move(_send.back());
         _send.pop_back();
@@ -75,8 +75,8 @@ public:
     }
 
 private:
-    std::vector<brayns::InputPacket> _send;
     size_t _id;
+    std::vector<brayns::InputPacket> _send;
     std::vector<OutputPacket> _received;
     bool _closed = false;
 };

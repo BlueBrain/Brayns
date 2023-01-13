@@ -110,7 +110,7 @@ TEST_CASE("JsonRpcParser")
 TEST_CASE("JsonRpcRequest")
 {
     auto id = 3;
-    auto socket = std::make_shared<MockWebSocket>(std::vector<brayns::InputPacket>(), id);
+    auto socket = std::make_shared<MockWebSocket>(id);
     auto client = brayns::ClientRef(socket);
     auto message = brayns::RequestMessage();
     message.id = brayns::RequestId(1);
