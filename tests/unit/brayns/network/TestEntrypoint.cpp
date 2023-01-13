@@ -26,15 +26,19 @@
 #include "MockInterface.h"
 #include "MockWebSocket.h"
 
-brayns::RequestMessage mockMessage()
+class MockMessageFactory
 {
-    auto message = brayns::RequestMessage();
-    message.jsonrpc = "2.0";
-    message.id = brayns::RequestId(0);
-    message.method = "test";
-    message.params = 123;
-    return message;
-}
+public:
+    static brayns::RequestMessage createMessage()
+    {
+        auto message = brayns::RequestMessage();
+        message.jsonrpc = "2.0";
+        message.id = brayns::RequestId(0);
+        message.method = "test";
+        message.params = 123;
+        return message;
+    }
+};
 
 TEST_CASE("EntrypointBuilder")
 {
@@ -59,21 +63,21 @@ TEST_CASE("EntrypointFinder")
 
     SUBCASE("Valid request")
     {
-        auto message = mockMessage();
+        auto message = MockMessageFactory::createMessage();
         auto request = brayns::JsonRpcRequest(client, message);
         auto &entrypoint = find(request);
         CHECK_EQ(entrypoint.getMethod(), message.method);
     }
     SUBCASE("Invalid method")
     {
-        auto message = mockMessage();
+        auto message = MockMessageFactory::createMessage();
         message.method = "invalid";
         auto request = brayns::JsonRpcRequest(client, message);
         CHECK_THROWS_AS(find(request), brayns::MethodNotFoundException);
     }
     SUBCASE("Invalid params")
     {
-        auto message = mockMessage();
+        auto message = MockMessageFactory::createMessage();
         message.params = "invalid";
         auto request = brayns::JsonRpcRequest(client, message);
         CHECK_THROWS_AS(find(request), brayns::InvalidParamsException);

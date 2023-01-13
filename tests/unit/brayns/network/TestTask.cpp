@@ -90,24 +90,28 @@ private:
     TaskController &_controller;
 };
 
-void add(TaskSettings settings, TaskController &controller, brayns::TaskManager &manager)
+class TaskHelper
 {
-    auto task = std::make_unique<MockTask>(std::move(settings), controller);
-    manager.add(std::move(task));
-}
+public:
+    static void registerTask(TaskSettings settings, TaskController &controller, brayns::TaskManager &manager)
+    {
+        auto task = std::make_unique<MockTask>(std::move(settings), controller);
+        manager.add(std::move(task));
+    }
 
-brayns::ClientRef newClient(size_t id)
-{
-    auto socket = std::make_shared<MockWebSocket>(id);
-    return brayns::ClientRef(std::move(socket));
-}
+    static brayns::ClientRef newClient(size_t id)
+    {
+        auto socket = std::make_shared<MockWebSocket>(id);
+        return brayns::ClientRef(std::move(socket));
+    }
+};
 
 TEST_CASE("TaskManager")
 {
-    auto client = newClient(0);
+    auto client = TaskHelper::newClient(0);
     auto id = brayns::RequestId(0);
     auto method = std::string("test");
-    auto otherClient = newClient(1);
+    auto otherClient = TaskHelper::newClient(1);
     auto otherId = brayns::RequestId(1);
 
     SUBCASE("Running tasks normally")
@@ -116,10 +120,10 @@ TEST_CASE("TaskManager")
         auto manager = brayns::TaskManager();
 
         auto first = TaskController();
-        add(settings, first, manager);
+        TaskHelper::registerTask(settings, first, manager);
 
         auto second = TaskController();
-        add(settings, second, manager);
+        TaskHelper::registerTask(settings, second, manager);
 
         CHECK_FALSE(first.executed);
         CHECK_FALSE(second.executed);
@@ -135,11 +139,11 @@ TEST_CASE("TaskManager")
         auto manager = brayns::TaskManager();
 
         auto first = TaskController();
-        add(settings, first, manager);
+        TaskHelper::registerTask(settings, first, manager);
 
         auto priority = TaskController();
         settings.priority = true;
-        add(settings, priority, manager);
+        TaskHelper::registerTask(settings, priority, manager);
 
         CHECK_FALSE(first.executed);
         CHECK(priority.executed);
@@ -154,16 +158,16 @@ TEST_CASE("TaskManager")
         auto manager = brayns::TaskManager();
 
         auto match = TaskController();
-        add(settings, match, manager);
+        TaskHelper::registerTask(settings, match, manager);
 
         auto differentClient = TaskController();
         settings.client = otherClient;
-        add(settings, differentClient, manager);
+        TaskHelper::registerTask(settings, differentClient, manager);
 
         auto differentId = TaskController();
         settings.client = client;
         settings.id = otherId;
-        add(settings, differentId, manager);
+        TaskHelper::registerTask(settings, differentId, manager);
 
         manager.disconnect(client);
 
@@ -183,16 +187,16 @@ TEST_CASE("TaskManager")
         auto manager = brayns::TaskManager();
 
         auto match = TaskController();
-        add(settings, match, manager);
+        TaskHelper::registerTask(settings, match, manager);
 
         auto differentClient = TaskController();
         settings.client = otherClient;
-        add(settings, differentClient, manager);
+        TaskHelper::registerTask(settings, differentClient, manager);
 
         auto differentId = TaskController();
         settings.client = client;
         settings.id = otherId;
-        add(settings, differentId, manager);
+        TaskHelper::registerTask(settings, differentId, manager);
 
         manager.cancel(client, id);
 
@@ -219,7 +223,7 @@ TEST_CASE("TaskManager")
         auto manager = brayns::TaskManager();
 
         auto controller = TaskController();
-        add(settings, controller, manager);
+        TaskHelper::registerTask(settings, controller, manager);
 
         auto cancel = [&] { manager.cancel(client, brayns::RequestId()); };
         CHECK_THROWS_AS(cancel(), brayns::InvalidParamsException);
