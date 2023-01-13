@@ -1,0 +1,140 @@
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <memory>
+#include <string>
+
+#include <doctest/doctest.h>
+
+#include <brayns/network/common/CancellationToken.h>
+#include <brayns/network/common/ProgressHandler.h>
+
+class MockInterface : public brayns::INetworkInterface
+{
+public:
+    bool hasBeenPolled() const
+    {
+        return _polled;
+    }
+
+    void reset()
+    {
+        _polled = false;
+    }
+
+    virtual void registerEntrypoint(brayns::EntrypointRef entrypoint) override
+    {
+        (void)entrypoint;
+    }
+
+    virtual void poll() override
+    {
+        _polled = true;
+    }
+
+private:
+    bool _polled = false;
+};
+
+class MockRequest
+{
+public:
+    MockRequest(std::string &operation, double &progress)
+        : _operation(operation)
+        , _progress(progress)
+    {
+    }
+
+    void progress(const std::string &operation, double progress) const
+    {
+        _operation = operation;
+        _progress = progress;
+    }
+
+private:
+    std::string &_operation;
+    double &_progress;
+};
+
+TEST_CASE("CancellationToken")
+{
+    SUBCASE("Poll")
+    {
+        auto interface = MockInterface();
+        auto token = brayns::CancellationToken(interface);
+        token.poll();
+        CHECK(interface.hasBeenPolled());
+    }
+    SUBCASE("Cancel")
+    {
+        auto interface = MockInterface();
+        auto token = brayns::CancellationToken(interface);
+        token.cancel();
+        CHECK_THROWS_AS(token.poll(), brayns::TaskCancelledException);
+        CHECK(interface.hasBeenPolled());
+    }
+    SUBCASE("Reset")
+    {
+        auto interface = MockInterface();
+        auto token = brayns::CancellationToken(interface);
+        token.cancel();
+        token.reset();
+        token.poll();
+        CHECK(interface.hasBeenPolled());
+    }
+}
+
+TEST_CASE("ProgressHandler")
+{
+    SUBCASE("Token reset by construction")
+    {
+        auto operation = std::string();
+        auto amount = 0.0;
+        auto request = MockRequest(operation, amount);
+        auto interface = MockInterface();
+        auto token = brayns::CancellationToken(interface);
+        token.cancel();
+        brayns::ProgressHandler(token, request);
+        token.poll();
+    }
+    SUBCASE("Notify")
+    {
+        auto operation = std::string();
+        auto amount = 0.0;
+        auto request = MockRequest(operation, amount);
+        auto interface = MockInterface();
+        auto token = brayns::CancellationToken(interface);
+        auto progress = brayns::ProgressHandler(token, request);
+        progress.notify("test", 0.5);
+        CHECK(interface.hasBeenPolled());
+        CHECK_EQ(operation, "test");
+        CHECK_EQ(amount, 0.5);
+    }
+    SUBCASE("Poll")
+    {
+        auto operation = std::string();
+        auto amount = 0.0;
+        auto request = MockRequest(operation, amount);
+        auto interface = MockInterface();
+        auto token = brayns::CancellationToken(interface);
+        auto progress = brayns::ProgressHandler(token, request);
+        progress.poll();
+        CHECK(interface.hasBeenPolled());
+    }
+}

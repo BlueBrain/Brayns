@@ -17,11 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <memory>
+
+#include <doctest/doctest.h>
+
 #include <brayns/network/client/ClientRef.h>
 #include <brayns/network/client/ClientSender.h>
 #include <brayns/network/websocket/IWebSocket.h>
-
-#include <doctest/doctest.h>
 
 #include "MockWebSocket.h"
 
