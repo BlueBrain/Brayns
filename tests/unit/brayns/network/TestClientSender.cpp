@@ -38,7 +38,7 @@ TEST_CASE("ClientSender")
         CHECK_EQ(received.size(), 1);
         auto &packet = received.front();
         CHECK(packet.binary);
-        auto data = std::string_view("\004\000\000\000textbinary", 14);
+        auto data = std::string_view("\x04\x00\x00\x00textbinary", 14);
         CHECK_EQ(packet.data, data);
     }
     SUBCASE("text")
