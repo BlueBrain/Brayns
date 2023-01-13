@@ -38,7 +38,7 @@ TEST_CASE("Dynamic library")
         auto lib = brayns::DynamicLib(TestPaths::Libraries::testLibrary);
 
         CHECK(lib.getSymbolAddress("validExportedFunction"));
-        CHECK(!lib.getSymbolAddress("nonExportedFunction"));
-        CHECK(!lib.getSymbolAddress("nonExistingFunction"));
+        CHECK_FALSE(lib.getSymbolAddress("nonExportedFunction"));
+        CHECK_FALSE(lib.getSymbolAddress("nonExistingFunction"));
     }
 }
