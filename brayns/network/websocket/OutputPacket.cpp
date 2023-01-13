@@ -25,14 +25,14 @@
 
 namespace brayns
 {
-OutputPacket OutputPacket::fromText(std::string_view data)
-{
-    return {data, Poco::Net::WebSocket::FRAME_TEXT};
-}
-
 OutputPacket OutputPacket::fromBinary(std::string_view data)
 {
     return {data, Poco::Net::WebSocket::FRAME_BINARY};
+}
+
+OutputPacket OutputPacket::fromText(std::string_view data)
+{
+    return {data, Poco::Net::WebSocket::FRAME_TEXT};
 }
 
 OutputPacket::OutputPacket(std::string_view data, int flags)

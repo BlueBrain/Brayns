@@ -35,18 +35,18 @@ class OutputPacket
 {
 public:
     /**
-     * @brief Construct a text packet.
-     *
-     * @param data The text content of the packet.
-     */
-    static OutputPacket fromText(std::string_view data);
-
-    /**
      * @brief Construct a binary packet.
      *
      * @param data The binary content of the packet.
      */
     static OutputPacket fromBinary(std::string_view data);
+
+    /**
+     * @brief Construct a text packet.
+     *
+     * @param data The text content of the packet.
+     */
+    static OutputPacket fromText(std::string_view data);
 
     /**
      * @brief Construct a packet with data and flags.

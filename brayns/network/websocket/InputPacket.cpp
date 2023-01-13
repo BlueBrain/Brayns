@@ -25,6 +25,16 @@
 
 namespace brayns
 {
+InputPacket InputPacket::fromBinary(std::string_view data)
+{
+    return {{data.data(), data.size()}, Poco::Net::WebSocket::FRAME_OP_BINARY};
+}
+
+InputPacket InputPacket::fromText(std::string_view data)
+{
+    return {{data.data(), data.size()}, Poco::Net::WebSocket::FRAME_OP_TEXT};
+}
+
 InputPacket::InputPacket(Poco::Buffer<char> data, int flags)
     : _data(std::move(data))
     , _flags(flags)
