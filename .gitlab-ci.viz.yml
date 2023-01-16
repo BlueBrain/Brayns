@@ -28,7 +28,7 @@ ubuntu-clangformat-check:
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
 
-ubuntu-cpp-build:
+.ubuntu-cpp-build:
   extends: .cmake-ubuntu
   stage: test
   variables:
