@@ -47,6 +47,7 @@ public:
         virtual ~IFactoryEntry() = default;
         virtual T deserialize(const JsonValue &payload) const = 0;
         virtual JsonValue serialize(const T &object) const = 0;
+        virtual JsonSchema getSchema() const = 0;
         virtual std::string_view getName() const noexcept = 0;
     };
 
@@ -81,6 +82,13 @@ public:
             }
 
             return Json::serialize(casted);
+        }
+
+        JsonSchema getSchema() const override
+        {
+            auto schema = Json::getSchema<SubT>();
+            schema.title = _name;
+            return schema;
         }
 
         std::string_view getName() const noexcept override
@@ -120,9 +128,16 @@ public:
     {
         using Traits = typename T::template Traits<SubT>;
         _items.push_back(std::make_unique<FactoryEntry<SubT>>(Traits::name));
+        _schemas.push_back(_items.back()->getSchema());
+    }
+
+    const std::vector<JsonSchema> &getSchemas() const noexcept
+    {
+        return _schemas;
     }
 
 private:
     std::vector<std::unique_ptr<IFactoryEntry>> _items;
+    std::vector<JsonSchema> _schemas;
 };
 }
