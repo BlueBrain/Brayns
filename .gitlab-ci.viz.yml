@@ -28,7 +28,7 @@ ubuntu-clangformat-check:
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
 
-ubuntu-cpp-build:
+.ubuntu-cpp-build:
   extends: .cmake-ubuntu
   stage: test
   variables:
@@ -113,6 +113,18 @@ ubuntu-cpp-build:
     - cd $CI_PROJECT_DIR
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
+
+ubuntu-cpp-release-build:
+  extends: .ubuntu-cpp-build
+  stage: test
+  variables:
+    CMAKE_BUILD_TYPE: Release
+    
+ubuntu-cpp-debug-build:
+  extends: .ubuntu-cpp-build
+  stage: test
+  variables:
+    CMAKE_BUILD_TYPE: Debug
 
 docker-build:
   variables:
