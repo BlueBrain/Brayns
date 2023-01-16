@@ -22,38 +22,6 @@
 #include "SocketManager.h"
 
 #include <cassert>
-#include <optional>
-
-#include <brayns/utils/Log.h>
-
-namespace
-{
-class MessageReceiver
-{
-public:
-    static std::optional<brayns::InputPacket> tryReceive(const brayns::ClientRef &client)
-    {
-        try
-        {
-            auto &socket = client.getSocket();
-            return socket.receive();
-        }
-        catch (const brayns::ConnectionClosedException &e)
-        {
-            brayns::Log::debug("Connection closed during reception from client {}: '{}'.", client, e.what());
-        }
-        catch (const std::exception &e)
-        {
-            brayns::Log::error("Unexpected error during reception from client {}: '{}'.", client, e.what());
-        }
-        catch (...)
-        {
-            brayns::Log::error("Unexpected error during reception from client {}.", client);
-        }
-        return std::nullopt;
-    }
-};
-} // namespace
 
 namespace brayns
 {
@@ -68,12 +36,15 @@ void SocketManager::run(const ClientRef &client)
     _newClients.add(client);
     while (true)
     {
-        auto packet = MessageReceiver::tryReceive(client);
-        if (!packet)
+        try
+        {
+            auto packet = client.receive();
+            _requests.add({client, std::move(packet)});
+        }
+        catch (...)
         {
             break;
         }
-        _requests.add({client, std::move(*packet)});
     }
     _removedClients.add(client);
 }

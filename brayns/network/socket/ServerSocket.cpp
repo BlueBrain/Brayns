@@ -29,8 +29,11 @@
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/SecureServerSocket.h>
+#include <Poco/Net/WebSocket.h>
 
 #include <brayns/utils/Log.h>
+
+#include <brayns/network/websocket/WebSocket.h>
 
 namespace
 {
@@ -46,7 +49,8 @@ public:
     {
         try
         {
-            auto socket = std::make_shared<brayns::WebSocket>(request, response);
+            auto poco = Poco::Net::WebSocket(request, response);
+            auto socket = std::make_shared<brayns::WebSocket>(poco);
             auto client = brayns::ClientRef(std::move(socket));
             _manager.run(client);
         }
@@ -60,7 +64,7 @@ public:
         }
         catch (...)
         {
-            brayns::Log::error("Unexpected error during websocket server connection.");
+            brayns::Log::error("Unknown error during websocket server connection.");
         }
     }
 

@@ -41,7 +41,7 @@ public:
     ~ClientManager();
 
     /**
-     * @brief Shorcut to check if at least one client is connected.
+     * @brief Check if at least one client is connected.
      *
      * @return true Has clients.
      * @return false No clients.
@@ -63,10 +63,10 @@ public:
     void remove(const ClientRef &client);
 
     /**
-     * @brief Close all sockets.
+     * @brief Disconnect all clients.
      *
      */
-    void closeAll() const;
+    void disconnectAll() const;
 
 private:
     std::unordered_set<ClientRef> _clients;

@@ -1,7 +1,5 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,35 +17,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientManager.h"
+#include <brayns/network/entrypoint/Entrypoint.h>
 
-namespace brayns
+class MockEntrypoint : public brayns::Entrypoint<int, int>
 {
-ClientManager::~ClientManager()
-{
-    disconnectAll();
-}
-
-bool ClientManager::isEmpty() const
-{
-    return _clients.empty();
-}
-
-void ClientManager::add(ClientRef client)
-{
-    _clients.insert(std::move(client));
-}
-
-void ClientManager::remove(const ClientRef &client)
-{
-    _clients.erase(client);
-}
-
-void ClientManager::disconnectAll() const
-{
-    for (const auto &client : _clients)
+public:
+    MockEntrypoint(std::string method = "test", int reply = 0)
+        : _method(std::move(method))
+        , _reply(reply)
     {
-        client.disconnect();
     }
-}
-} // namespace brayns
+
+    bool hasBeenCalled() const
+    {
+        return _called;
+    }
+
+    virtual std::string getMethod() const override
+    {
+        return _method;
+    }
+
+    virtual std::string getDescription() const override
+    {
+        return "description";
+    }
+
+    virtual void onRequest(const Request &request) override
+    {
+        _called = true;
+        request.reply(_reply);
+    }
+
+private:
+    std::string _method;
+    int _reply;
+    bool _called = false;
+};

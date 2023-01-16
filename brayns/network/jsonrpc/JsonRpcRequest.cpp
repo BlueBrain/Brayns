@@ -23,8 +23,8 @@
 
 #include <brayns/json/Json.h>
 
+#include <brayns/network/client/ClientSender.h>
 #include <brayns/network/jsonrpc/JsonRpcFactory.h>
-#include <brayns/network/jsonrpc/JsonRpcSender.h>
 
 namespace brayns
 {
@@ -62,26 +62,42 @@ const std::string &JsonRpcRequest::getBinary() const
 
 void JsonRpcRequest::reply(const JsonValue &result) const
 {
+    if (_message.id.isEmpty())
+    {
+        return;
+    }
     auto message = JsonRpcFactory::reply(_message, result);
-    JsonRpcSender::reply(message, _client);
+    ClientSender::sendText(message, _client);
 }
 
 void JsonRpcRequest::reply(const JsonValue &result, std::string_view binary) const
 {
+    if (_message.id.isEmpty())
+    {
+        return;
+    }
     auto message = JsonRpcFactory::reply(_message, result);
-    JsonRpcSender::reply(message, binary, _client);
+    ClientSender::sendBinary(message, binary, _client);
 }
 
 void JsonRpcRequest::error(const JsonRpcException &e) const
 {
+    if (_message.id.isEmpty())
+    {
+        return;
+    }
     auto message = brayns::JsonRpcFactory::error(_message, e);
-    brayns::JsonRpcSender::error(message, _client);
+    brayns::ClientSender::sendText(message, _client);
 }
 
 void JsonRpcRequest::progress(const std::string &operation, double amount) const
 {
+    if (_message.id.isEmpty())
+    {
+        return;
+    }
     auto message = JsonRpcFactory::progress(_message, operation, amount);
-    JsonRpcSender::progress(message, _client);
+    ClientSender::sendText(message, _client);
 }
 } // namespace brayns
 

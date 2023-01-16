@@ -21,9 +21,6 @@
 
 #include "ClientRequest.h"
 
-#include <brayns/network/jsonrpc/JsonRpcFactory.h>
-#include <brayns/network/jsonrpc/JsonRpcSender.h>
-
 namespace brayns
 {
 ClientRequest::ClientRequest(ClientRef client, InputPacket packet)
@@ -50,12 +47,6 @@ bool ClientRequest::isText() const
 std::string_view ClientRequest::getData() const
 {
     return _packet.getData();
-}
-
-void ClientRequest::error(const JsonRpcException &e) const
-{
-    auto message = JsonRpcFactory::error(e);
-    JsonRpcSender::error(message, _client);
 }
 } // namespace brayns
 

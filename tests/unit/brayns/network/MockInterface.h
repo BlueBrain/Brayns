@@ -1,7 +1,5 @@
-/* Copyright (c) 2015-2022 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2022, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,35 +17,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClientManager.h"
+#include <brayns/network/INetworkInterface.h>
 
-namespace brayns
+class MockInterface : public brayns::INetworkInterface
 {
-ClientManager::~ClientManager()
-{
-    disconnectAll();
-}
-
-bool ClientManager::isEmpty() const
-{
-    return _clients.empty();
-}
-
-void ClientManager::add(ClientRef client)
-{
-    _clients.insert(std::move(client));
-}
-
-void ClientManager::remove(const ClientRef &client)
-{
-    _clients.erase(client);
-}
-
-void ClientManager::disconnectAll() const
-{
-    for (const auto &client : _clients)
+public:
+    const std::vector<brayns::EntrypointRef> &getEntrypoints() const
     {
-        client.disconnect();
+        return _entrypoints;
     }
-}
-} // namespace brayns
+
+    bool hasBeenPolled() const
+    {
+        return _polled;
+    }
+
+    virtual void registerEntrypoint(brayns::EntrypointRef entrypoint) override
+    {
+        _entrypoints.push_back(std::move(entrypoint));
+    }
+
+    virtual void poll() override
+    {
+        _polled = true;
+    }
+
+private:
+    std::vector<brayns::EntrypointRef> _entrypoints;
+    bool _polled = false;
+};

@@ -27,13 +27,25 @@
 
 namespace
 {
+class MethodFinder
+{
+public:
+    static const brayns::EntrypointRef &find(const std::string &method, const brayns::EntrypointRegistry &entrypoints)
+    {
+        auto entrypoint = entrypoints.find(method);
+        if (!entrypoint)
+        {
+            throw brayns::MethodNotFoundException(method);
+        }
+        return *entrypoint;
+    }
+};
+
 class SchemaValidator
 {
 public:
-    static void validate(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
+    static void validate(const brayns::JsonValue &params, const std::optional<brayns::JsonSchema> &schema)
     {
-        auto &schema = entrypoint.getParamsSchema();
-        auto &params = request.getParams();
         if (!schema)
         {
             _checkParamsIsEmpty(params);
@@ -60,31 +72,17 @@ private:
         }
     }
 };
-
-class MethodFinder
-{
-public:
-    static const brayns::EntrypointRef &find(
-        const brayns::JsonRpcRequest &request,
-        const brayns::EntrypointRegistry &entrypoints)
-    {
-        auto &method = request.getMethod();
-        auto entrypoint = entrypoints.find(method);
-        if (!entrypoint)
-        {
-            throw brayns::MethodNotFoundException(method);
-        }
-        return *entrypoint;
-    }
-};
 } // namespace
 
 namespace brayns
 {
 const EntrypointRef &EntrypointFinder::find(const JsonRpcRequest &request, const EntrypointRegistry &entrypoints)
 {
-    auto &entrypoint = MethodFinder::find(request, entrypoints);
-    SchemaValidator::validate(request, entrypoint);
+    auto &method = request.getMethod();
+    auto &entrypoint = MethodFinder::find(method, entrypoints);
+    auto &params = request.getParams();
+    auto &schema = entrypoint.getParamsSchema();
+    SchemaValidator::validate(params, schema);
     return entrypoint;
 }
 } // namespace brayns

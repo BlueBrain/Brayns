@@ -35,6 +35,22 @@ class InputPacket
 {
 public:
     /**
+     * @brief Create a binary frame.
+     *
+     * @param data Packet binary data.
+     * @return InputPacket Binary frame.
+     */
+    static InputPacket fromBinary(std::string_view data);
+
+    /**
+     * @brief Create a text frame.
+     *
+     * @param data Packet text data.
+     * @return InputPacket Text frame.
+     */
+    static InputPacket fromText(std::string_view data);
+
+    /**
      * @brief Construct a packet using the buffer data and the flags.
      *
      * @param data Raw data of the packet.

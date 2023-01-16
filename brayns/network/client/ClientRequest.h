@@ -23,7 +23,6 @@
 
 #include <spdlog/fmt/ostr.h>
 
-#include <brayns/network/jsonrpc/JsonRpcException.h>
 #include <brayns/network/websocket/InputPacket.h>
 
 #include "ClientRef.h"
@@ -74,15 +73,6 @@ public:
      * @return std::string_view Request data.
      */
     std::string_view getData() const;
-
-    /**
-     * @brief Send an error message to the client.
-     *
-     * Used when the request is not valid JSON-RPC (no ID to reply properly).
-     *
-     * @param e Error thrown during request parsing.
-     */
-    void error(const JsonRpcException &e) const;
 
 private:
     ClientRef _client;
