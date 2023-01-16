@@ -114,6 +114,18 @@ ubuntu-cpp-build:
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
 
+ubuntu-cpp-release-build:
+  extends: .ubuntu-cpp-build
+  stage: test
+  variables:
+    CMAKE_BUILD_TYPE: Release
+    
+ubuntu-cpp-debug-build:
+  extends: .ubuntu-cpp-build
+  stage: test
+  variables:
+    CMAKE_BUILD_TYPE: Debug
+
 docker-build:
   variables:
     KUBERNETES_CPU_LIMIT: 4
