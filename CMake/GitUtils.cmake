@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2022, EPFL/Blue Brain Project
+# Copyright (c) 2015-2023, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
@@ -6,7 +6,7 @@
 
 # FROM https://jonathanhamberg.com/post/cmake-embedding-git-hash/
 # Get the latest abbreviated commit hash of the working branch
-function (get_commit_hash OUTPUT_VAR)
+function(get_commit_hash OUTPUT_VAR)
     execute_process(
         COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
