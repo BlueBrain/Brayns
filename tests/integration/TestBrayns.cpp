@@ -21,39 +21,113 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/engine/renderer/types/Interactive.h>
-
 #include <doctest/doctest.h>
 
-TEST_CASE("Simple construction")
+#include <Poco/Net/ServerSocket.h>
+
+namespace
 {
-    std::vector<const char *> argv = {"brayns"};
-    CHECK_NOTHROW(brayns::Brayns(static_cast<int>(argv.size()), argv.data()));
+class BraynsLauncher
+{
+public:
+    static void launchValid(std::vector<const char *> args)
+    {
+        CHECK_NOTHROW(_launch(args));
+    }
+
+    static void launchInvalid(std::vector<const char *> args, std::string_view message)
+    {
+        auto messagePtr = message.data();
+        auto messageSize = static_cast<doctest::String::size_type>(message.length());
+        CHECK_THROWS_WITH(_launch(args), doctest::Contains(doctest::String(messagePtr, messageSize)));
+    }
+
+private:
+    static void _launch(std::vector<const char *> args)
+    {
+        auto argc = static_cast<int>(args.size());
+        auto argv = args.data();
+        auto brayns = brayns::Brayns(argc, argv);
+        (void)brayns;
+    }
+};
+
+class Server
+{
+public:
+    Server(const std::string &uri)
+    {
+        _thread = std::thread(
+            [&]
+            {
+                auto address = Poco::Net::SocketAddress(uri);
+                auto server = Poco::Net::ServerSocket(address);
+                while (_running)
+                {
+                    auto client = server.acceptConnection();
+                    (void)client;
+                }
+            });
+    }
+
+    ~Server()
+    {
+        close();
+    }
+
+    void close()
+    {
+        if (!std::exchange(_running, false))
+        {
+            return;
+        }
+
+        try
+        {
+            _thread.join();
+        }
+        catch (...)
+        {
+        }
+    }
+
+private:
+    std::thread _thread;
+    bool _running = true;
+};
 }
 
-TEST_CASE("Defaults")
+TEST_CASE("Construction")
 {
-    brayns::Brayns brayns(0, nullptr);
+    SUBCASE("Valid constructions")
+    {
+        BraynsLauncher::launchValid({"brayns"});
+        BraynsLauncher::launchValid(
+            {"brayns",
+             "--uri",
+             "0.0.0.0:5000",
+             "--max-clients",
+             "5",
+             "--log-level",
+             "debug",
+             "--window-size",
+             "100 100"});
+    }
+    SUBCASE("Client mode")
+    {
+        auto server = Server("0.0.0.0:5000");
 
-    auto &engine = brayns.getEngine();
+        BraynsLauncher::launchValid(
+            {"brayns",
+             "--uri",
+             "0.0.0.0:5000",
+             "--client",
+             "true",
+             "--log-level",
+             "debug",
+             "--window-size",
+             "100 100"});
 
-    auto &camera = engine.getCamera();
-    const auto &view = camera.getView();
-    CHECK_EQ(camera.getName(), "perspective");
-    CHECK_EQ(view.position, brayns::Vector3f(0.f));
-    CHECK_EQ(view.target, brayns::Vector3f(0.f, 0.f, 1.f));
-    CHECK_EQ(view.up, brayns::Vector3f(0.f, 1.f, 0.f));
-
-    auto &renderer = engine.getRenderer();
-    CHECK_EQ(renderer.getName(), "interactive");
-    CHECK_EQ(renderer.getSamplesPerPixel(), 1);
-    auto interactive = renderer.as<brayns::Interactive>();
-    CHECK_EQ(interactive->backgroundColor, brayns::Vector4f(0.004f, 0.016f, 0.102f, 0.f));
-
-    const auto &pm = brayns.getParametersManager();
-    const auto &appParams = pm.getApplicationParameters();
-    CHECK_EQ(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
-
-    const auto &simulation = pm.getSimulationParameters();
-    CHECK_EQ(simulation.getFrame(), 0);
+        server.close();
+    }
 }
