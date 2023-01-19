@@ -34,7 +34,7 @@ std::string AddClippingBoundedPlanesEntrypoint::getMethod() const
 
 std::string AddClippingBoundedPlanesEntrypoint::getDescription() const
 {
-    return "AddClippings a list of axis-aligned bound limited planes";
+    return "Add a list of axis-aligned bound limited clipping planes";
 }
 
 AddClippingBoxesEntrypoint::AddClippingBoxesEntrypoint(ModelManager &models)
@@ -49,7 +49,7 @@ std::string AddClippingBoxesEntrypoint::getMethod() const
 
 std::string AddClippingBoxesEntrypoint::getDescription() const
 {
-    return "AddClippings a list of boxes to the scene";
+    return "Add a list of clipping boxes to the scene";
 }
 
 AddClippingPlanesEntrypoint::AddClippingPlanesEntrypoint(ModelManager &models)
@@ -64,7 +64,7 @@ std::string AddClippingPlanesEntrypoint::getMethod() const
 
 std::string AddClippingPlanesEntrypoint::getDescription() const
 {
-    return "AddClippings a list of planes to the scene";
+    return "Add a list of clipping planes to the scene";
 }
 
 AddClippingCapsulesEntrypoint::AddClippingCapsulesEntrypoint(ModelManager &models)
@@ -79,7 +79,7 @@ std::string AddClippingCapsulesEntrypoint::getMethod() const
 
 std::string AddClippingCapsulesEntrypoint::getDescription() const
 {
-    return "AddClippings a list of capsules to the scene";
+    return "Add a list of clipping capsules to the scene";
 }
 
 AddClippingSpheresEntrypoint::AddClippingSpheresEntrypoint(ModelManager &models)
@@ -94,6 +94,6 @@ std::string AddClippingSpheresEntrypoint::getMethod() const
 
 std::string AddClippingSpheresEntrypoint::getDescription() const
 {
-    return "AddClippings a list of spheres to the scene";
+    return "Add a list of clipping spheres to the scene";
 }
 }
