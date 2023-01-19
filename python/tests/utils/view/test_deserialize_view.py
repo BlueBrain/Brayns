@@ -20,7 +20,7 @@
 
 import unittest
 
-from brayns.utils import deserialize_view
+from brayns.core import deserialize_view
 from tests.mock_view import MockView
 
 

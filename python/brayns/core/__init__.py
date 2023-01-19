@@ -27,32 +27,9 @@ with an instance of Brayns service.
 Include access to camera, renderer, models, materials, snapshots, etc...
 """
 
-from .api import (
-    Entrypoint,
-    JsonSchema,
-    JsonType,
-    deserialize_schema,
-    get_entrypoint,
-    get_entrypoints,
-    get_methods,
-    serialize_schema,
-)
 from .application import Application, get_application, set_resolution, stop
-from .camera import (
-    Camera,
-    CameraController,
-    CameraRotation,
-    OrthographicProjection,
-    PerspectiveProjection,
-    Projection,
-    get_camera,
-    get_camera_name,
-    get_camera_projection,
-    get_camera_view,
-    set_camera,
-    set_camera_projection,
-    set_camera_view,
-)
+from .camera import Camera, get_camera, set_camera
+from .camera_controller import CameraController, CameraRotation
 from .clipping import (
     ClippingBoundedPlane,
     ClippingBox,
@@ -65,14 +42,7 @@ from .clipping import (
     add_clipping_geometry,
     clear_clipping_geometries,
 )
-from .color_ramp import (
-    ColorRamp,
-    ControlPoint,
-    OpacityCurve,
-    ValueRange,
-    get_color_ramp,
-    set_color_ramp,
-)
+from .color_ramp import ColorRamp, ValueRange, get_color_ramp, set_color_ramp
 from .coloring import (
     ColorMethod,
     color_model,
@@ -80,6 +50,7 @@ from .coloring import (
     get_color_values,
     set_model_color,
 )
+from .entrypoint import Entrypoint, get_entrypoint, get_entrypoints, get_methods
 from .framebuffer import (
     Framebuffer,
     ProgressiveFramebuffer,
@@ -95,6 +66,8 @@ from .geometry import (
     Sphere,
     add_geometries,
 )
+from .image import Image, ImageInfo
+from .json_schema import JsonSchema, JsonType, deserialize_schema, serialize_schema
 from .light import (
     AmbientLight,
     DirectionalLight,
@@ -139,8 +112,17 @@ from .model import (
     remove_models,
     update_model,
 )
+from .opacity_curve import ControlPoint, OpacityCurve
 from .pick import PickResult, pick
-from .render import Image, ImageInfo, Snapshot
+from .projection import (
+    Fovy,
+    OrthographicProjection,
+    PerspectiveProjection,
+    Projection,
+    get_camera_name,
+    get_camera_projection,
+    set_camera_projection,
+)
 from .renderer import (
     InteractiveRenderer,
     ProductionRenderer,
@@ -156,7 +138,15 @@ from .simulation import (
     get_simulation,
     set_simulation_frame,
 )
+from .snapshot import Snapshot
 from .version import Version, VersionError, check_version, get_version
+from .view import (
+    View,
+    deserialize_view,
+    get_camera_view,
+    serialize_view,
+    set_camera_view,
+)
 
 __all__ = [
     "add_clipping_geometries",
@@ -190,10 +180,12 @@ __all__ = [
     "ControlPoint",
     "deserialize_model",
     "deserialize_schema",
+    "deserialize_view",
     "DirectionalLight",
     "EmissiveMaterial",
     "enable_simulation",
     "Entrypoint",
+    "Fovy",
     "Framebuffer",
     "Geometry",
     "get_application",
@@ -251,6 +243,7 @@ __all__ = [
     "Renderer",
     "Scene",
     "serialize_schema",
+    "serialize_view",
     "set_camera_projection",
     "set_camera_view",
     "set_camera",
@@ -271,5 +264,6 @@ __all__ = [
     "ValueRange",
     "Version",
     "VersionError",
+    "View",
     "VolumeDataType",
 ]

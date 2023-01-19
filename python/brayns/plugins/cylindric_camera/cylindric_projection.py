@@ -21,8 +21,7 @@
 from dataclasses import dataclass
 from typing import Any, ClassVar
 
-from brayns.core import Projection
-from brayns.utils import Fovy
+from brayns.core import Fovy, Projection
 
 
 @dataclass

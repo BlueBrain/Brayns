@@ -42,7 +42,6 @@ from .transform import (
     serialize_transform,
 )
 from .vector import Axis, Vector, Vector2, Vector3, componentwise_max, componentwise_min
-from .view import Fovy, View, deserialize_view, serialize_view
 
 __all__ = [
     "Axis",
@@ -53,10 +52,8 @@ __all__ = [
     "componentwise_min",
     "deserialize_bounds",
     "deserialize_transform",
-    "deserialize_view",
     "Error",
     "euler",
-    "Fovy",
     "ImageFormat",
     "merge_bounds",
     "ModelRotation",
@@ -68,10 +65,8 @@ __all__ = [
     "Rotation",
     "serialize_bounds",
     "serialize_transform",
-    "serialize_view",
     "Transform",
     "Vector",
     "Vector2",
     "Vector3",
-    "View",
 ]
