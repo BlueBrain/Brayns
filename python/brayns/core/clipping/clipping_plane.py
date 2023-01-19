@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2023 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,26 +17,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .add_clipping_geometries import add_clipping_geometries
-from .add_clipping_geometry import add_clipping_geometry
-from .clear_clipping_geometries import clear_clipping_geometries
-from .clip_plane import ClipPlane
-from .clipping_bounded_plane import ClippingBoundedPlane
-from .clipping_box import ClippingBox
-from .clipping_capsule import ClippingCapsule
-from .clipping_geometry import ClippingGeometry
-from .clipping_plane import ClippingPlane
-from .clipping_sphere import ClippingSphere
+from dataclasses import dataclass
+from typing import Any
 
-__all__ = [
-    "add_clipping_geometries",
-    "add_clipping_geometry",
-    "clear_clipping_geometries",
-    "ClipPlane",
-    "ClippingBoundedPlane",
-    "ClippingBox",
-    "ClippingCapsule",
-    "ClippingGeometry",
-    "ClippingPlane",
-    "ClippingSphere",
-]
+from brayns.utils import PlaneEquation
+
+from .clipping_geometry import ClippingGeometry
+
+
+@dataclass
+class ClippingPlane(ClippingGeometry):
+    """Infinite clipping plane.
+
+    :param equation: Plane equation coefficients.
+    :type equation: PlaneEquation
+    """
+
+    equation: PlaneEquation
+
+    @classmethod
+    @property
+    def method(cls) -> str:
+        """JSON-RPC method to add clipping planes.
+
+        :return: JSON-RPC method.
+        :rtype: str
+        """
+        return "add-clipping-planes"
+
+    def get_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        return {
+            "coefficients": list(self.equation),
+        }

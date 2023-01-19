@@ -29,6 +29,7 @@
 #include <brayns/network/socket/SocketListener.h>
 
 #include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
+#include <brayns/network/entrypoints/AddClippingGeometryEntrypoint.h>
 #include <brayns/network/entrypoints/AddGeometryEntrypoint.h>
 #include <brayns/network/entrypoints/AddLightEntrypoint.h>
 #include <brayns/network/entrypoints/AddModelEntrypoint.h>
@@ -90,6 +91,11 @@ public:
         builder.add<brayns::AddBoundedPlanesEntrypoint>(models);
         builder.add<brayns::AddBoxesEntrypoint>(models);
         builder.add<brayns::AddCapsulesEntrypoint>(models);
+        builder.add<brayns::AddClippingBoundedPlanesEntrypoint>(models);
+        builder.add<brayns::AddClippingBoxesEntrypoint>(models);
+        builder.add<brayns::AddClippingCapsulesEntrypoint>(models);
+        builder.add<brayns::AddClippingPlanesEntrypoint>(models);
+        builder.add<brayns::AddClippingSpheresEntrypoint>(models);
         builder.add<brayns::AddClipPlaneEntrypoint>(models);
         builder.add<brayns::AddLightAmbientEntrypoint>(models);
         builder.add<brayns::AddLightDirectionalEntrypoint>(models);

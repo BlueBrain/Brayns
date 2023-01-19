@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2023 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,26 +17,18 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .add_clipping_geometries import add_clipping_geometries
-from .add_clipping_geometry import add_clipping_geometry
-from .clear_clipping_geometries import clear_clipping_geometries
-from .clip_plane import ClipPlane
-from .clipping_bounded_plane import ClippingBoundedPlane
-from .clipping_box import ClippingBox
-from .clipping_capsule import ClippingCapsule
-from .clipping_geometry import ClippingGeometry
-from .clipping_plane import ClippingPlane
-from .clipping_sphere import ClippingSphere
+import unittest
 
-__all__ = [
-    "add_clipping_geometries",
-    "add_clipping_geometry",
-    "clear_clipping_geometries",
-    "ClipPlane",
-    "ClippingBoundedPlane",
-    "ClippingBox",
-    "ClippingCapsule",
-    "ClippingGeometry",
-    "ClippingPlane",
-    "ClippingSphere",
-]
+import brayns
+
+
+class TestClippingPlane(unittest.TestCase):
+    def test_method(self) -> None:
+        self.assertEqual(brayns.ClippingPlane.method, "add-clipping-planes")
+
+    def test_get_properties(self) -> None:
+        equation = brayns.PlaneEquation(1, 2, 3, 4)
+        plane = brayns.ClippingPlane(equation)
+        test = plane.get_properties()
+        ref = {"coefficients": [1, 2, 3, 4]}
+        self.assertEqual(test, ref)

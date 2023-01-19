@@ -54,8 +54,14 @@ from .camera import (
     set_camera_view,
 )
 from .clipping import (
+    ClippingBoundedPlane,
+    ClippingBox,
+    ClippingCapsule,
     ClippingGeometry,
+    ClippingPlane,
+    ClippingSphere,
     ClipPlane,
+    add_clipping_geometries,
     add_clipping_geometry,
     clear_clipping_geometries,
 )
@@ -153,6 +159,7 @@ from .simulation import (
 from .version import Version, VersionError, check_version, get_version
 
 __all__ = [
+    "add_clipping_geometries",
     "add_clipping_geometry",
     "add_geometries",
     "add_light",
@@ -170,7 +177,12 @@ __all__ = [
     "clear_lights",
     "clear_models",
     "clear_renderables",
+    "ClippingBoundedPlane",
+    "ClippingBox",
+    "ClippingCapsule",
     "ClippingGeometry",
+    "ClippingPlane",
+    "ClippingSphere",
     "ClipPlane",
     "color_model",
     "ColorMethod",

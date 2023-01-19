@@ -1,7 +1,6 @@
 # Copyright (c) 2015-2023 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-#
-# Responsible Author: adrien.fleury@epfl.ch
+# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -18,26 +17,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .add_clipping_geometries import add_clipping_geometries
-from .add_clipping_geometry import add_clipping_geometry
-from .clear_clipping_geometries import clear_clipping_geometries
-from .clip_plane import ClipPlane
-from .clipping_bounded_plane import ClippingBoundedPlane
-from .clipping_box import ClippingBox
-from .clipping_capsule import ClippingCapsule
-from .clipping_geometry import ClippingGeometry
-from .clipping_plane import ClippingPlane
-from .clipping_sphere import ClippingSphere
+import brayns
 
-__all__ = [
-    "add_clipping_geometries",
-    "add_clipping_geometry",
-    "clear_clipping_geometries",
-    "ClipPlane",
-    "ClippingBoundedPlane",
-    "ClippingBox",
-    "ClippingCapsule",
-    "ClippingGeometry",
-    "ClippingPlane",
-    "ClippingSphere",
-]
+from .clipping_test_case import ClippingTestCase
+
+
+class TestClippingCapsule(ClippingTestCase):
+    def test_all(self) -> None:
+        rotation = brayns.Rotation.from_euler(brayns.Vector3(0, 45, 0), True)
+        start = rotation.apply(brayns.Vector3(0, 0, 9))
+        end = rotation.apply(brayns.Vector3(0, 10, 9))
+        capsule = brayns.ClippingCapsule(start, 7, end, 3)
+        self.run_list_tests(capsule)
