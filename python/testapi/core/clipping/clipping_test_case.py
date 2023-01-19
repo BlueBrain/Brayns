@@ -34,3 +34,25 @@ class ClippingTestCase(SimpleTestCase):
         brayns.add_clipping_geometry(self.instance, geometry)
         self.add_sphere()
         self.quick_validation(self.ref)
+
+    def run_list_tests(self, geometry: brayns.ClippingGeometry) -> None:
+        brayns.add_clipping_geometries(self.instance, [geometry])
+
+        sphere_model = brayns.Sphere(10)
+        brayns.add_geometries(self.instance, [sphere_model])
+
+        brayns.add_light(self.instance, brayns.AmbientLight(0.2))
+        brayns.add_light(
+            self.instance,
+            brayns.DirectionalLight(
+                intensity=10, direction=brayns.Vector3(1, -1, -1).normalized
+            ),
+        )
+
+        renderer = brayns.InteractiveRenderer(enable_shadows=False)
+        snapshot = brayns.Snapshot(
+            resolution=self.resolution,
+            camera=self.get_default_camera(),
+            renderer=renderer,
+        )
+        self.validate(snapshot, self.ref)

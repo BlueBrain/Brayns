@@ -64,9 +64,7 @@ private:
     {
         auto &systems = model.getSystems();
         systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
-        systems.setInitSystem<GeometryInitSystem>();
-        systems.setCommitSystem<GeometryCommitSystem>();
-        systems.setColorSystem<GenericColorSystem>(std::move(colorMethods));
+        systems.setInitSystem<ClipperInitSystem>();
     }
 
 private:
