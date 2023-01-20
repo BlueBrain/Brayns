@@ -36,3 +36,33 @@ class WebSocketError(Error):
     def __str__(self) -> str:
         """Display the reason when printed."""
         return self.reason
+
+
+class ConnectionClosedError(WebSocketError):
+    """Raised when doing operation on a disconnected instance.
+
+    Happens after the connection to an instance.
+    """
+
+
+class InvalidServerCertificateError(WebSocketError):
+    """Raised when the server certificate is rejected by the client.
+
+    SSL specific error happening during the connection to an instance.
+    """
+
+
+class ProtocolError(WebSocketError):
+    """Raised when a websocket protocol error occurs.
+
+    Usually happens during the connection to an instance.
+    """
+
+
+class ServiceUnavailableError(WebSocketError):
+    """Raised when braynsService instance is not available at given URI.
+
+    Occurs when the backend instance is not ready or started.
+
+    Can be used to try multiple connections to wait for an instance to be ready.
+    """

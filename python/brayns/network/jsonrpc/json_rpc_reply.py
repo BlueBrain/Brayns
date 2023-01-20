@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -43,3 +44,23 @@ class JsonRpcReply:
     @staticmethod
     def for_notifications() -> JsonRpcReply:
         return JsonRpcReply(id=None)
+
+
+def deserialize_reply(message: dict[str, Any]) -> JsonRpcReply:
+    return JsonRpcReply(
+        id=message["id"],
+        result=message["result"],
+    )
+
+
+def deserialize_reply_from_text(data: str) -> JsonRpcReply:
+    message = json.loads(data)
+    return deserialize_reply(message)
+
+
+def deserialize_reply_from_binary(data: bytes) -> JsonRpcReply:
+    json_size = int.from_bytes(data[0:4], byteorder="little", signed=False)
+    text = data[4 : 4 + json_size].decode("utf-8")
+    reply = deserialize_reply_from_text(text)
+    reply.binary = data[4 + json_size :]
+    return reply

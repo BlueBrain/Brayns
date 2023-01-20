@@ -18,12 +18,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json
+from __future__ import annotations
 
-from .deserialize_reply import deserialize_reply
-from .json_rpc_reply import JsonRpcReply
+from dataclasses import dataclass
+from typing import Any
 
 
-def deserialize_reply_from_text(data: str) -> JsonRpcReply:
-    message = json.loads(data)
-    return deserialize_reply(message)
+@dataclass
+class JsonRpcProgress:
+    """Request progress info.
+
+    :param id: Request ID.
+    :type id: int | str
+    :param operation: Description of the current task.
+    :type operation: str
+    :param amount: Progress amount [0-1].
+    :type amount: float
+    """
+
+    id: int | str
+    operation: str
+    amount: float
+
+    def __str__(self) -> str:
+        return f"[{self.id}] {self.operation}: {100 * self.amount}%"
+
+
+def deserialize_progress(message: dict[str, Any]) -> JsonRpcProgress:
+    params = message["params"]
+    return JsonRpcProgress(
+        id=params["id"],
+        operation=params["operation"],
+        amount=params["amount"],
+    )

@@ -21,8 +21,8 @@
 from __future__ import annotations
 
 from .async_web_socket import AsyncWebSocket
+from .errors import ConnectionClosedError
 from .event_loop import EventLoop
-from .exceptions import ConnectionClosedError
 from .web_socket import WebSocket
 from .web_socket_listener import WebSocketListener
 
