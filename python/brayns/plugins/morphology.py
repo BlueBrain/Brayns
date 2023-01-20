@@ -17,9 +17,26 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, ClassVar
 
-from .geometry_type import GeometryType
+from brayns.core import Loader
+
+
+class GeometryType(Enum):
+    """Type of geometry to use when loading a morphology.
+
+    :param ORIGINAL: Use raw geometries dimensions.
+    :param SMOOTH: Smooth radius changes between geometries for better visual.
+    :param SECTION_SMOOTH: Smooth radius change between whole sections.
+    :param CONSTANT_RADII: Apply the same radius to all geometries.
+    """
+
+    ORIGINAL = "original"
+    SMOOTH = "smooth"
+    SECTION_SMOOTH = "section_smooth"
+    CONSTANT_RADII = "constant_radii"
 
 
 @dataclass
@@ -49,3 +66,38 @@ class Morphology:
     geometry_type: GeometryType = GeometryType.SMOOTH
     resampling: float = 2
     subsampling: int = 1
+
+
+def serialize_morphology(morphology: Morphology) -> dict[str, Any]:
+    return {
+        "radius_multiplier": morphology.radius_multiplier,
+        "load_soma": morphology.load_soma,
+        "load_axon": morphology.load_axon,
+        "load_dendrites": morphology.load_dendrites,
+        "geometry_type": morphology.geometry_type.value,
+        "resampling": morphology.resampling,
+        "subsampling": morphology.subsampling,
+    }
+
+
+@dataclass
+class MorphologyLoader(Loader):
+    """Loader for morphology files.
+
+    :param morphology: How to load the morphologies, default constructed.
+    :type morphology: Morphology, optional
+    """
+
+    SWC: ClassVar[str] = "swc"
+    H5: ClassVar[str] = "h5"
+    ASC: ClassVar[str] = "asc"
+
+    morphology: Morphology = field(default_factory=Morphology)
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        return "Neuron Morphology loader"
+
+    def get_properties(self) -> dict[str, Any]:
+        return serialize_morphology(self.morphology)

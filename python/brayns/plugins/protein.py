@@ -17,41 +17,38 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any
+from enum import Enum
+from typing import Any, ClassVar
 
 from brayns.core import Loader
 
 
+class ProteinColorScheme(Enum):
+
+    NONE = "none"
+    BY_ID = "by_id"
+    PROTEIN_ATOMS = "protein_atoms"
+    PROTEIN_CHAINS = "protein_chains"
+    PROTEIN_RESIDUES = "protein_residues"
+
+
 @dataclass
-class CellPlacementLoader(Loader):
-    """circuit.morhpologies.h5 file loader.
+class ProteinLoader(Loader):
 
-    Loads morphology circuits from the circuit builder intermediate files.
+    PDB: ClassVar[str] = "pdb"
+    PDB1: ClassVar[str] = "pdb1"
 
-    :param morphology_folder: Path to the folder containing the morphologies.
-    :type morphology_folder: str
-    :param extension: Optional morphology file extension to load.
-    :type extension: str | None, optional
-    """
-
-    morphologies_folder: str
-    density: float = 1.0
-    extension: str | None = None
+    color_scheme: ProteinColorScheme = ProteinColorScheme.NONE
+    radius_multiplier: float = 1.0
 
     @classmethod
     @property
     def name(cls) -> str:
-        return "Cell placement loader"
+        return "protein"
 
     def get_properties(self) -> dict[str, Any]:
-        message: dict[str, Any] = {
-            "morphology_folder": self.morphologies_folder,
-            "percentage": self.density,
+        return {
+            "color_scheme": self.color_scheme.value,
+            "radius_multiplier": self.radius_multiplier,
         }
-        if self.extension is not None:
-            message["extension"] = self.extension
-
-        return message

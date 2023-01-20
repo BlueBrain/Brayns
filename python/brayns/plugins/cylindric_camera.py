@@ -28,7 +28,7 @@ from brayns.core import Fovy, Projection
 class CylindricProjection(Projection):
     """Cylindric camera projection used to correct curved screen distorsion.
 
-    :param fovy: Field of view, defaults to OpenDeck one.
+    :param fovy: Field of view, defaults to OpenDeck's.
     :type fovy: Fovy, optional
     """
 

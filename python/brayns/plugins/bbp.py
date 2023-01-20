@@ -21,13 +21,94 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, ClassVar
 
 from brayns.core import Loader
 
-from ..morphology import Morphology, serialize_morphology
-from .bbp_cells import BbpCells
-from .bbp_report import BbpReport
+from .morphology import Morphology, serialize_morphology
+
+
+@dataclass
+class BbpCells:
+    """BlueConfig cells selection.
+
+    Use one of the factory methods to create this object.
+    """
+
+    density: float | None = None
+    targets: list[str] | None = None
+    gids: list[int] | None = None
+
+    @staticmethod
+    def all() -> BbpCells:
+        """Select all cells from a circuit."""
+        return BbpCells.from_density(1.0)
+
+    @staticmethod
+    def from_density(density: float) -> BbpCells:
+        """Select only a proportion of cells (0 = None, 1 = all)."""
+        return BbpCells(density=density)
+
+    @staticmethod
+    def from_targets(targets: list[str], density: float = 1.0) -> BbpCells:
+        """Select only the cells from a given target.
+
+        The density of cells to load per target can also be specified.
+        """
+        return BbpCells(density=density, targets=targets)
+
+    @staticmethod
+    def from_gids(gids: list[int]) -> BbpCells:
+        """Select cells using their GIDs."""
+        return BbpCells(gids=gids)
+
+
+class BbpReportType(Enum):
+    """All available BBP report types."""
+
+    NONE = "none"
+    SPIKES = "spikes"
+    COMPARTMENT = "compartment"
+
+
+@dataclass
+class BbpReport:
+    """BlueConfig report selection.
+
+    Use one of the factory methods to create this object.
+    """
+
+    type: BbpReportType
+    name: str | None = None
+    spike_transition_time: float | None = None
+
+    @staticmethod
+    def none() -> BbpReport:
+        """No reports to load."""
+        return BbpReport(
+            type=BbpReportType.NONE,
+        )
+
+    @staticmethod
+    def spikes(spike_transition_time: float = 1.0) -> BbpReport:
+        """Spike report with optional transition time.
+
+        time unit of transition depends on the report but it can be used to make
+        this transition faster or slower (ie 2 = twice slower).
+        """
+        return BbpReport(
+            type=BbpReportType.SPIKES,
+            spike_transition_time=spike_transition_time,
+        )
+
+    @staticmethod
+    def compartment(name: str) -> BbpReport:
+        """Compartment report with given name."""
+        return BbpReport(
+            type=BbpReportType.COMPARTMENT,
+            name=name,
+        )
 
 
 @dataclass

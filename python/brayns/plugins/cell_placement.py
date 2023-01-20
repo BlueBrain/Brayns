@@ -17,33 +17,42 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass, field
-from typing import Any, ClassVar
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any
 
 from brayns.core import Loader
 
-from .morphology import Morphology
-from .serialize_morphology import serialize_morphology
-
 
 @dataclass
-class MorphologyLoader(Loader):
-    """Loader for morphology files.
+class CellPlacementLoader(Loader):
+    """circuit.morhpologies.h5 file loader.
 
-    :param morphology: How to load the morphologies, default constructed.
-    :type morphology: Morphology, optional
+    Loads morphology circuits from the circuit builder intermediate files.
+
+    :param morphologies_folder: Path to the folder containing the morphologies.
+    :type morphologies_folder: str
+    :param density: Density of morphologies to load [0-1].
+    :type density: float
+    :param extension: Optional morphology file extension to load.
+    :type extension: str | None, optional
     """
 
-    SWC: ClassVar[str] = "swc"
-    H5: ClassVar[str] = "h5"
-    ASC: ClassVar[str] = "asc"
-
-    morphology: Morphology = field(default_factory=Morphology)
+    morphologies_folder: str
+    density: float = 1.0
+    extension: str | None = None
 
     @classmethod
     @property
     def name(cls) -> str:
-        return "Neuron Morphology loader"
+        return "Cell placement loader"
 
     def get_properties(self) -> dict[str, Any]:
-        return serialize_morphology(self.morphology)
+        message: dict[str, Any] = {
+            "morphology_folder": self.morphologies_folder,
+            "percentage": self.density,
+        }
+        if self.extension is not None:
+            message["extension"] = self.extension
+        return message
