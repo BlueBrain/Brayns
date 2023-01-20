@@ -21,9 +21,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any, Protocol
 
-from ..transform import Rotation
-from ..vector import Vector3, componentwise_max, componentwise_min
+from .transform import Rotation
+from .vector import Vector3, componentwise_max, componentwise_min
 
 
 @dataclass
@@ -173,3 +174,41 @@ class Bounds:
             min=scale * self.min,
             max=scale * self.max,
         )
+
+
+def merge_bounds(values: list[Bounds]) -> Bounds:
+    """Compute the union of all given bounds.
+
+    Returns Bounds.empty if values are empty.
+
+    Assume that all bounds are valid (ie min <= max for each component).
+
+    :param values: Bounds to merge.
+    :type values: list[Bounds]
+    :return: Union of all bounds in values.
+    :rtype: Bounds
+    """
+    return Bounds(
+        min=componentwise_min([value.min for value in values]),
+        max=componentwise_max([value.max for value in values]),
+    )
+
+
+def deserialize_bounds(obj: dict[str, Any]) -> Bounds:
+    return Bounds(
+        min=Vector3(*obj["min"]),
+        max=Vector3(*obj["max"]),
+    )
+
+
+class BoundsLike(Protocol):
+
+    min: Vector3
+    max: Vector3
+
+
+def serialize_bounds(bounds: BoundsLike) -> dict[str, Any]:
+    return {
+        "min": list(bounds.min),
+        "max": list(bounds.max),
+    }

@@ -22,8 +22,8 @@ from __future__ import annotations
 
 import math
 
-from ..vector import Vector3
 from .quaternion import Quaternion
+from .vector import Vector3
 
 
 class Rotation:
@@ -202,6 +202,98 @@ class Rotation:
         vector = Quaternion(*value)
         vector = quaternion * vector * quaternion.conjugate
         return center + vector.xyz
+
+
+def euler(x: float, y: float, z: float, degrees: bool = False) -> Rotation:
+    """Shortcut to build a rotation from euler angles.
+
+    :param x: X rotation.
+    :type x: float
+    :param y:  Y rotation.
+    :type y: float
+    :param z:  Z rotation.
+    :type z: float
+    :param degrees: Wether given angles are in degrees, defaults to False
+    :type degrees: bool, optional
+    :return: Rotation corresponding to angles.
+    :rtype: Rotation
+    """
+    angles = Vector3(x, y, z)
+    return Rotation.from_euler(angles, degrees)
+
+
+class ModelRotation:
+    """Helper class to store model rotations to reach different views.
+
+    All rotations are relative to front view (X-right, Y-up, Z-front).
+    """
+
+    @classmethod
+    @property
+    def front(cls) -> Rotation:
+        return Rotation.identity
+
+    @classmethod
+    @property
+    def back(cls) -> Rotation:
+        return euler(0, 180, 0, degrees=True)
+
+    @classmethod
+    @property
+    def top(cls) -> Rotation:
+        return euler(90, 0, 0, degrees=True)
+
+    @classmethod
+    @property
+    def bottom(cls) -> Rotation:
+        return euler(-90, 0, 0, degrees=True)
+
+    @classmethod
+    @property
+    def right(cls) -> Rotation:
+        return euler(0, -90, 0, degrees=True)
+
+    @classmethod
+    @property
+    def left(cls) -> Rotation:
+        return euler(0, 90, 0, degrees=True)
+
+
+class CameraRotation:
+    """Helper class to store camera rotations to reach different views.
+
+    All rotations are relative to front view (X-right, Y-up, Z-front).
+    """
+
+    @classmethod
+    @property
+    def front(cls) -> Rotation:
+        return Rotation.identity
+
+    @classmethod
+    @property
+    def back(cls) -> Rotation:
+        return euler(0, 180, 0, degrees=True)
+
+    @classmethod
+    @property
+    def top(cls) -> Rotation:
+        return euler(-90, 0, 0, degrees=True)
+
+    @classmethod
+    @property
+    def bottom(cls) -> Rotation:
+        return euler(90, 0, 0, degrees=True)
+
+    @classmethod
+    @property
+    def right(cls) -> Rotation:
+        return euler(0, 90, 0, degrees=True)
+
+    @classmethod
+    @property
+    def left(cls) -> Rotation:
+        return euler(0, -90, 0, degrees=True)
 
 
 def _axis_angle_to_quaternion(axis: Vector3, angle: float) -> Quaternion:

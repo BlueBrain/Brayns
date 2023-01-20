@@ -21,48 +21,11 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from brayns.utils import Axis, Bounds, Rotation, Vector3, euler
+from brayns.utils import Axis, Bounds, CameraRotation, Rotation, Vector3
 
 from .camera import Camera
 from .projection import PerspectiveProjection, Projection
 from .view import View
-
-
-class CameraRotation:
-    """Helper class to store camera rotations to reach different views.
-
-    All rotations are relative to front view (X-right, Y-up, Z-front).
-    """
-
-    @classmethod
-    @property
-    def front(cls) -> Rotation:
-        return Rotation.identity
-
-    @classmethod
-    @property
-    def back(cls) -> Rotation:
-        return euler(0, 180, 0, degrees=True)
-
-    @classmethod
-    @property
-    def top(cls) -> Rotation:
-        return euler(-90, 0, 0, degrees=True)
-
-    @classmethod
-    @property
-    def bottom(cls) -> Rotation:
-        return euler(90, 0, 0, degrees=True)
-
-    @classmethod
-    @property
-    def right(cls) -> Rotation:
-        return euler(0, 90, 0, degrees=True)
-
-    @classmethod
-    @property
-    def left(cls) -> Rotation:
-        return euler(0, -90, 0, degrees=True)
 
 
 @dataclass

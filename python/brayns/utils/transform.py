@@ -21,9 +21,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
-from ..vector import Vector3
+from .quaternion import Quaternion
 from .rotation import Rotation
+from .vector import Vector3
 
 
 @dataclass
@@ -89,3 +91,19 @@ class Transform:
         value = self.scale * value
         value = self.rotation.apply(value)
         return value + self.translation
+
+
+def deserialize_transform(obj: dict[str, Any]) -> Transform:
+    return Transform(
+        translation=Vector3(*obj["translation"]),
+        rotation=Rotation.from_quaternion(Quaternion(*obj["rotation"])),
+        scale=Vector3(*obj["scale"]),
+    )
+
+
+def serialize_transform(transform: Transform) -> dict[str, Any]:
+    return {
+        "translation": list(transform.translation),
+        "rotation": list(transform.rotation.quaternion),
+        "scale": list(transform.scale),
+    }

@@ -98,7 +98,7 @@ class BoundedPlane(Geometry):
     def __new__(cls, equation: PlaneEquation, bounds: Bounds) -> BoundedPlane:
         if min(bounds.size) <= 0:
             raise ValueError("All bound dimensions must be greater than 0")
-        return object.__new__(cls)
+        return super().__new__(cls)
 
     @classmethod
     @property

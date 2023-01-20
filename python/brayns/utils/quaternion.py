@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import math
 
-from ..vector import Vector, Vector3
+from .vector import Vector, Vector3
 
 
 class Quaternion(Vector[float]):

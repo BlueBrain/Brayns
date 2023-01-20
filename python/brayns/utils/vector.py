@@ -129,3 +129,175 @@ class Vector(tuple[U, ...]):
         if isinstance(value, (int, float)):
             return self.unpack(operation(i, value) for i in self)
         return self.unpack(operation(i, j) for i, j in zip(self, value))
+
+
+class Vector2(Vector[float]):
+    """2D vector with XY components.
+
+    Provides dot product in addition to Vector operators.
+
+    :param x: X component.
+    :type x: float
+    :param y: Y component.
+    :type y: float
+    """
+
+    def __new__(cls, x: float = 0.0, y: float = 0.0) -> Vector2:
+        return super().__new__(cls, x, y)
+
+    @property
+    def x(self) -> float:
+        return self[0]
+
+    @property
+    def y(self) -> float:
+        return self[1]
+
+
+class Vector3(Vector2):
+    """3D vector with XYZ components.
+
+    Provides dot and cross product in addition to Vector operators.
+
+    :param x: X component.
+    :type x: float
+    :param y: Y component.
+    :type y: float
+    :param z: Z component.
+    :type z: float
+    """
+
+    @staticmethod
+    def from_vector2(value: Vector2, z: float = 0.0) -> Vector3:
+        return Vector3(value.x, value.y, z)
+
+    @classmethod
+    @property
+    def zero(cls) -> Vector3:
+        return Vector3(0.0, 0.0, 0.0)
+
+    @classmethod
+    @property
+    def one(cls) -> Vector3:
+        return Vector3(1.0, 1.0, 1.0)
+
+    def __new__(cls, x: float = 0.0, y: float = 0.0, z: float = 0.0) -> Vector3:
+        return Vector[float].__new__(cls, x, y, z)
+
+    @property
+    def x(self) -> float:
+        return self[0]
+
+    @property
+    def y(self) -> float:
+        return self[1]
+
+    @property
+    def z(self) -> float:
+        return self[2]
+
+    @property
+    def xy(self) -> Vector2:
+        return Vector2(self.x, self.y)
+
+    @property
+    def xz(self) -> Vector2:
+        return Vector2(self.x, self.z)
+
+    @property
+    def yz(self) -> Vector2:
+        return Vector2(self.y, self.z)
+
+    def cross(self, other: Vector3) -> Vector3:
+        return Vector3(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
+
+
+def componentwise_min(values: list[Vector3]) -> Vector3:
+    """Return minimum of each component among values.
+
+    If values is empty, zero is returned.
+
+    :param values: List of vectors.
+    :type values: list[Vector3]
+    :return: Min value for each component.
+    :rtype: Vector3
+    """
+    if not values:
+        return Vector3.zero
+    return Vector3(
+        min(value.x for value in values),
+        min(value.y for value in values),
+        min(value.z for value in values),
+    )
+
+
+def componentwise_max(values: list[Vector3]) -> Vector3:
+    """Return maximum of each component among values.
+
+    If values is empty, zero is returned.
+
+    :param values: List of vectors.
+    :type values: list[Vector3]
+    :return: Max value for each component.
+    :rtype: Vector3
+    """
+    if not values:
+        return Vector3.zero
+    return Vector3(
+        max(value.x for value in values),
+        max(value.y for value in values),
+        max(value.z for value in values),
+    )
+
+
+class Axis:
+    """Helper class to store the principal axes of Brayns coordinate system."""
+
+    @classmethod
+    @property
+    def x(cls) -> Vector3:
+        return Vector3(1.0, 0.0, 0.0)
+
+    @classmethod
+    @property
+    def right(cls) -> Vector3:
+        return cls.x
+
+    @classmethod
+    @property
+    def left(cls) -> Vector3:
+        return -cls.right
+
+    @classmethod
+    @property
+    def y(cls) -> Vector3:
+        return Vector3(0.0, 1.0, 0.0)
+
+    @classmethod
+    @property
+    def up(cls) -> Vector3:
+        return cls.y
+
+    @classmethod
+    @property
+    def down(cls) -> Vector3:
+        return -cls.up
+
+    @classmethod
+    @property
+    def z(cls) -> Vector3:
+        return Vector3(0.0, 0.0, 1.0)
+
+    @classmethod
+    @property
+    def front(cls) -> Vector3:
+        return cls.z
+
+    @classmethod
+    @property
+    def back(cls) -> Vector3:
+        return -cls.front

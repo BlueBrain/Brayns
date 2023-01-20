@@ -18,53 +18,49 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from .vector3 import Vector3
+from __future__ import annotations
+
+from .vector import Vector, Vector3
 
 
-class Axis:
-    """Helper class to store the principal axes of Brayns coordinate system."""
+class PlaneEquation(Vector[float]):
+    """Plane equation satisfying ax + by + cz + d = 0.
 
-    @classmethod
+    Normal and direction point to the upper side of the plane.
+
+    :param a: A component.
+    :type a: float
+    :param b: B component.
+    :type b: float
+    :param c: C component.
+    :type c: float
+    :param d: D component.
+    :type d: float
+    """
+
+    def __new__(cls, a: float, b: float, c: float, d: float = 0.0) -> PlaneEquation:
+        return super().__new__(cls, a, b, c, d)
+
     @property
-    def x(cls) -> Vector3:
-        return Vector3(1.0, 0.0, 0.0)
+    def a(self) -> float:
+        return self[0]
 
-    @classmethod
     @property
-    def right(cls) -> Vector3:
-        return cls.x
+    def b(self) -> float:
+        return self[1]
 
-    @classmethod
     @property
-    def left(cls) -> Vector3:
-        return -cls.right
+    def c(self) -> float:
+        return self[2]
 
-    @classmethod
     @property
-    def y(cls) -> Vector3:
-        return Vector3(0.0, 1.0, 0.0)
+    def d(self) -> float:
+        return self[3]
 
-    @classmethod
     @property
-    def up(cls) -> Vector3:
-        return cls.y
+    def normal(self) -> Vector3:
+        return Vector3(self.a, self.b, self.c)
 
-    @classmethod
     @property
-    def down(cls) -> Vector3:
-        return -cls.up
-
-    @classmethod
-    @property
-    def z(cls) -> Vector3:
-        return Vector3(0.0, 0.0, 1.0)
-
-    @classmethod
-    @property
-    def front(cls) -> Vector3:
-        return cls.z
-
-    @classmethod
-    @property
-    def back(cls) -> Vector3:
-        return -cls.front
+    def direction(self) -> Vector3:
+        return self.normal.normalized

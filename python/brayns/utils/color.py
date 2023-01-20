@@ -18,9 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from typing import TypeVar
 
-from ..vector import Vector
+from .vector import Vector
 
 T = TypeVar("T", bound="Color3")
 
@@ -112,3 +114,98 @@ class Color3(Vector[float]):
     @property
     def b(self) -> float:
         return self[2]
+
+
+class Color4(Color3):
+    """Color with RGBA normalized components.
+
+    Color4 are Color3 and can be manipulated as such but with alpha channel.
+
+    Opaque is alpha = 1 and fully transparent is alpha = 0.
+
+    Color3 standard colors, if used from Color4, will have an alpha of 1.
+
+    :param a: Alpha component, defaults to 1.0.
+    :type a: float, optional
+    """
+
+    @staticmethod
+    def from_color3(color: Color3, alpha: float = 1.0) -> Color4:
+        """Helper to build a Color4 from a Color3.
+
+        :param color: Color3 to convert.
+        :type color: Color3
+        :param alpha: Alpha channel, defaults to 1.0
+        :type alpha: float, optional
+        :return: Color4 converted.
+        :rtype: Color4
+        """
+        return Color4(color.r, color.g, color.b, alpha)
+
+    def __new__(
+        cls, r: float = 0.0, g: float = 0.0, b: float = 0.0, a: float = 1.0
+    ) -> Color4:
+        return Vector[float].__new__(cls, r, g, b, a)
+
+    @property
+    def a(self) -> float:
+        return self[3]
+
+    @property
+    def transparent(self) -> Color4:
+        """Create an identical color but with alpha = 0.
+
+        :return: Color but fully transparent.
+        :rtype: Color4
+        """
+        return Color4(self.r, self.g, self.b, a=0.0)
+
+    @property
+    def opaque(self) -> Color4:
+        """Create an identical color but with alpha = 1.
+
+        :return: Color but fully opaque.
+        :rtype: Color4
+        """
+        return Color4(self.r, self.g, self.b, a=1.0)
+
+    @property
+    def without_alpha(self) -> Color3:
+        """Helper class to create a Color3 from a Color4.
+
+        :return: Color3 converted.
+        :rtype: Color3
+        """
+        return Color3(self.r, self.g, self.b)
+
+
+def parse_hex_color(value: str) -> Color3:
+    """Parse an hexadecimal color string to Color3.
+
+    The string can be just digits (0a12f5), prefixed with a hash (#0a12f5) or
+    with 0x (0x0a12f5).
+
+    :param value: Color code.
+    :type value: str
+    :return: Color parsed.
+    :rtype: Color3
+    """
+    value = _sanitize(value)
+    return Color3(
+        _normalize(value[0:2]), _normalize(value[2:4]), _normalize(value[4:6])
+    )
+
+
+def _sanitize(value: str) -> str:
+    size = len(value)
+    if size == 6:
+        return value
+    if size == 7 and value[0] == "#":
+        return value[1:]
+    if size == 8 and value[:2].lower() == "0x":
+        return value[2:]
+    raise ValueError(f"Not an hex color {value}")
+
+
+def _normalize(value: str) -> float:
+    return int(value, base=16) / 255

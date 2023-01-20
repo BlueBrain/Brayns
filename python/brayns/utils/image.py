@@ -20,7 +20,40 @@
 
 from __future__ import annotations
 
-from ..vector import Vector
+from enum import Enum
+from pathlib import Path
+
+from .vector import Vector
+
+
+class ImageFormat(Enum):
+    """Enumeration of all supported image format.
+
+    Values are the image format file extension without the dot.
+
+    :param JPEG: JPEG format, smaller but lose quality.
+    :param PNG: PNG format, bigger but lossless.
+    """
+
+    JPEG = "jpg"
+    PNG = "png"
+
+
+def parse_image_format(filename: str | Path) -> ImageFormat:
+    """Parse the image format from a file path using its extension.
+
+    Supports both string and pathlib.Path input.
+
+    :param filename: Image file path.
+    :type filename: str | pathlib.Path
+    :return: Image format.
+    :rtype: ImageFormat
+    """
+    path = Path(filename) if isinstance(filename, str) else filename
+    extension = path.suffix[1:]
+    extension = extension.lower()
+    extension = extension.strip()
+    return ImageFormat(extension)
 
 
 class Resolution(Vector[int]):
