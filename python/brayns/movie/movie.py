@@ -26,9 +26,27 @@ from collections import deque
 from dataclasses import dataclass
 from typing import IO, cast
 
-from brayns.utils import Resolution
+from brayns.utils import Error, Resolution
 
-from .movie_error import MovieError
+
+@dataclass
+class MovieError(Error):
+    """Exception raised if an error occurs when making a movie.
+
+    :param reason: Description of what happened.
+    :type reason: str
+    :param code: Error code (FFMPEG output code).
+    :type code: int
+    :param logs: FFMPEG logs if any.
+    :type logs: str
+    """
+
+    reason: str
+    code: int = 0
+    logs: str = ""
+
+    def __str__(self) -> str:
+        return self.reason
 
 
 @dataclass

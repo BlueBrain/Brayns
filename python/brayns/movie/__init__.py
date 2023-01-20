@@ -30,8 +30,7 @@ To make a movie, frames must be rendered separately. This subpackage includes
 helpers to select the frames to render based on movie specifications.
 """
 
-from .movie import Movie
-from .movie_error import MovieError
+from .movie import Movie, MovieError
 from .movie_frames import MovieFrames
 
 __all__ = [
