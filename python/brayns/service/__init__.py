@@ -24,13 +24,9 @@ Subpackage start braynsService as a subprocess from Python.
 Provides mainly helpers to generate the command line.
 """
 
-from .log_level import LogLevel
-from .manager import Manager
-from .plugin import Plugin
+from .manager import Manager, start
 from .process import Process
-from .service import Service
-from .ssl_server_context import SslServerContext
-from .start import start
+from .service import LogLevel, Plugin, Service, SslServerContext
 
 __all__ = [
     "LogLevel",

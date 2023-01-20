@@ -34,9 +34,16 @@ from .errors import (
     ServiceUnavailableError,
 )
 from .event_loop import EventLoop
-from .ssl_client_context import SslClientContext
 from .web_socket_client import WebSocketClient
 from .web_socket_listener import WebSocketListener
+
+
+@dataclass
+class SslClientContext:
+
+    cafile: str | None = None
+    capath: str | None = None
+    cadata: str | None = None
 
 
 @dataclass

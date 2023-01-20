@@ -25,10 +25,9 @@ from .errors import (
     ServiceUnavailableError,
     WebSocketError,
 )
-from .ssl_client_context import SslClientContext
 from .web_socket import WebSocket
 from .web_socket_client import WebSocketClient
-from .web_socket_connector import WebSocketConnector
+from .web_socket_connector import SslClientContext, WebSocketConnector
 from .web_socket_listener import WebSocketListener
 
 __all__ = [

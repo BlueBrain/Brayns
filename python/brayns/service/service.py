@@ -21,11 +21,58 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import Enum
 
-from .log_level import LogLevel
-from .plugin import Plugin
 from .process import Process
-from .ssl_server_context import SslServerContext
+
+
+@dataclass
+class SslServerContext:
+    """Server SSL context.
+
+    Can be used to start a braynsService instance with SSL enabled. Optional
+    parameters such as the server private key, certificate and trusted CAs can
+    be specified here.
+    """
+
+    private_key_file: str | None = None
+    private_key_passphrase: str | None = None
+    certificate_file: str | None = None
+    ca_location: str | None = None
+
+
+class LogLevel(Enum):
+    """Server (braynsService backend) log level."""
+
+    TRACE = "trace"
+    DEBUG = "debug"
+    INFO = "info"
+    WARN = "warn"
+    ERROR = "error"
+    CRITICAL = "critical"
+    OFF = "off"
+
+
+class Plugin(Enum):
+    """All built-in plugins for braynsService.
+
+    Plugins are loaded when the backend instance is started and cannot be
+    changed afterward.
+
+    The value is the name of the plugin dynamic library (.so).
+    """
+
+    CIRCUIT_EXPLORER = "braynsCircuitExplorer"
+    ATLAS_EXPLORER = "braynsAtlasExplorer"
+    CYLINDRIC_CAMERA = "braynsCylindricCamera"
+    DTI = "braynsDTI"
+    MOLECULE_EXPLORER = "braynsMoleculeExplorer"
+
+    @classmethod
+    @property
+    def all(cls) -> list[str]:
+        """Shortcut to get all the plugin names."""
+        return [plugin.value for plugin in Plugin]
 
 
 @dataclass
