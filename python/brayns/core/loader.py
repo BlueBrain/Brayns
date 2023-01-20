@@ -26,9 +26,8 @@ from enum import Enum
 from typing import Any, ClassVar
 
 from brayns.network import Future, Instance, JsonRpcReply
-from brayns.utils import Vector3
+from brayns.utils import JsonSchema, Vector3, deserialize_schema
 
-from .json_schema import JsonSchema, deserialize_schema
 from .model import Model, deserialize_model
 
 

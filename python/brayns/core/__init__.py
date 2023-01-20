@@ -67,7 +67,6 @@ from .geometry import (
     add_geometries,
 )
 from .image import Image, ImageInfo
-from .json_schema import JsonSchema, JsonType, deserialize_schema, serialize_schema
 from .light import (
     AmbientLight,
     DirectionalLight,
@@ -179,7 +178,6 @@ __all__ = [
     "ColorRamp",
     "ControlPoint",
     "deserialize_model",
-    "deserialize_schema",
     "deserialize_view",
     "DirectionalLight",
     "EmissiveMaterial",
@@ -215,8 +213,6 @@ __all__ = [
     "ImageInfo",
     "instantiate_model",
     "InteractiveRenderer",
-    "JsonSchema",
-    "JsonType",
     "Light",
     "Loader",
     "LoaderInfo",
@@ -242,7 +238,6 @@ __all__ = [
     "remove_models",
     "Renderer",
     "Scene",
-    "serialize_schema",
     "serialize_view",
     "set_camera_projection",
     "set_camera_view",

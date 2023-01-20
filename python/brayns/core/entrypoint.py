@@ -24,8 +24,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.network import Instance
-
-from .json_schema import JsonSchema, deserialize_schema
+from brayns.utils import JsonSchema, deserialize_schema
 
 
 @dataclass
