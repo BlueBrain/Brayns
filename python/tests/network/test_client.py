@@ -25,10 +25,45 @@ import brayns
 from brayns.network.client import Client
 from brayns.network.jsonrpc import JsonRpcManager, serialize_request_to_text
 from brayns.network.listener import Listener
+from brayns.network.websocket import WebSocket, WebSocketListener
 
-from .jsonrpc.messages.mock_reply import MockReply
-from .jsonrpc.messages.mock_request import MockRequest
-from .mock_web_socket import MockWebSocket
+from .jsonrpc.mock_messages import (
+    mock_reply,
+    mock_reply_binary,
+    mock_reply_text,
+    mock_request,
+    mock_request_binary,
+    mock_request_text,
+)
+
+
+class MockWebSocket(WebSocket):
+    def __init__(self, listener: WebSocketListener) -> None:
+        self.binary_request = b""
+        self.binary_reply = b""
+        self.text_request = ""
+        self.text_reply = ""
+        self._listener = listener
+        self._closed = False
+
+    @property
+    def closed(self) -> bool:
+        return self._closed
+
+    def close(self) -> None:
+        self._closed = True
+
+    def poll(self, *_) -> None:
+        if self.binary_reply:
+            self._listener.on_binary(self.binary_reply)
+        if self.text_reply:
+            self._listener.on_text(self.text_reply)
+
+    def send_binary(self, data: bytes) -> None:
+        self.binary_request = data
+
+    def send_text(self, data: str) -> None:
+        self.text_request = data
 
 
 class TestClient(unittest.TestCase):
@@ -52,19 +87,19 @@ class TestClient(unittest.TestCase):
 
     def test_request(self) -> None:
         websocket = self._create_websocket()
-        request = MockRequest.request
-        reply = MockReply.reply
-        websocket.text_reply = MockReply.text
+        request = mock_request()
+        reply = mock_reply()
+        websocket.text_reply = mock_reply_text()
         with self._connect(websocket) as client:
             result = client.request(request.method, request.params)
             self.assertEqual(result, reply.result)
-        self.assertEqual(websocket.text_request, MockRequest.text)
+        self.assertEqual(websocket.text_request, mock_request_text())
 
     def test_request_with_binary(self) -> None:
         websocket = self._create_websocket()
-        request = MockRequest.binary_request
-        ref = MockReply.binary_reply
-        websocket.binary_reply = MockReply.binary
+        request = mock_request(binary=True)
+        ref = mock_reply(binary=True)
+        websocket.binary_reply = mock_reply_binary()
         with self._connect(websocket) as client:
             reply = client.execute(
                 request.method,
@@ -73,13 +108,13 @@ class TestClient(unittest.TestCase):
             )
             self.assertEqual(reply.result, ref.result)
             self.assertEqual(reply.binary, ref.binary)
-        self.assertEqual(websocket.binary_request, MockRequest.binary)
+        self.assertEqual(websocket.binary_request, mock_request_binary())
 
     def test_task(self) -> None:
         websocket = self._create_websocket()
-        request = MockRequest.binary_request
-        reply = MockReply.binary_reply
-        websocket.binary_reply = MockReply.binary
+        request = mock_request(binary=True)
+        reply = mock_reply(binary=True)
+        websocket.binary_reply = mock_reply_binary()
         with self._connect(websocket) as client:
             future = client.task(
                 request.method,
@@ -87,12 +122,12 @@ class TestClient(unittest.TestCase):
                 request.binary,
             )
             self.assertEqual(future.wait_for_reply(), reply)
-        self.assertEqual(websocket.binary_request, MockRequest.binary)
+        self.assertEqual(websocket.binary_request, mock_request_binary())
 
     def test_is_running(self) -> None:
         websocket = self._create_websocket()
-        request = MockRequest.request
-        websocket.text_reply = MockReply.text
+        request = mock_request()
+        websocket.text_reply = mock_reply_text()
         with self._connect(websocket) as client:
             future = client.send(request)
             self.assertTrue(client.is_running(0))
@@ -102,47 +137,47 @@ class TestClient(unittest.TestCase):
 
     def test_send(self) -> None:
         websocket = self._create_websocket()
-        request = MockRequest.request
-        websocket.text_reply = MockReply.text
+        request = mock_request()
+        websocket.text_reply = mock_reply_text()
         with self._connect(websocket) as client:
             future = client.send(request)
-            self.assertEqual(websocket.text_request, MockRequest.text)
-            self.assertEqual(future.wait_for_reply(), MockReply.reply)
+            self.assertEqual(websocket.text_request, mock_request_text())
+            self.assertEqual(future.wait_for_reply(), mock_reply())
 
     def test_send_binary(self) -> None:
         websocket = self._create_websocket()
-        request = MockRequest.binary_request
-        websocket.binary_reply = MockReply.binary
+        request = mock_request(binary=True)
+        websocket.binary_reply = mock_reply_binary()
         with self._connect(websocket) as client:
             future = client.send(request)
-            self.assertEqual(websocket.binary_request, MockRequest.binary)
-            self.assertEqual(future.wait_for_reply(), MockReply.binary_reply)
+            self.assertEqual(websocket.binary_request, mock_request_binary())
+            self.assertEqual(future.wait_for_reply(), mock_reply(binary=True))
 
     def test_send_mixed(self) -> None:
         websocket = self._create_websocket()
-        request = MockRequest.binary_request
-        websocket.text_reply = MockReply.text
+        request = mock_request(binary=True)
+        websocket.text_reply = mock_reply_text()
         with self._connect(websocket) as client:
             future = client.send(request)
-            self.assertEqual(websocket.binary_request, MockRequest.binary)
-            self.assertEqual(future.wait_for_reply(), MockReply.reply)
+            self.assertEqual(websocket.binary_request, mock_request_binary())
+            self.assertEqual(future.wait_for_reply(), mock_reply())
 
     def test_poll(self) -> None:
         websocket = self._create_websocket()
-        request = MockRequest.request
-        websocket.text_reply = MockReply.text
+        request = mock_request()
+        websocket.text_reply = mock_reply_text()
         with self._connect(websocket) as client:
             future = client.send(request)
             self.assertFalse(future.is_ready())
             client.poll(block=True)
             self.assertTrue(future.is_ready())
-            self.assertEqual(future.wait_for_reply(), MockReply.reply)
+            self.assertEqual(future.wait_for_reply(), mock_reply())
 
     def test_cancel(self) -> None:
         websocket = self._create_websocket()
         request = brayns.JsonRpcRequest(0, "cancel", {"id": 123})
         ref = serialize_request_to_text(request)
-        websocket.text_reply = MockReply.text
+        websocket.text_reply = mock_reply_text()
         with self._connect(websocket) as client:
             client.cancel(123)
             self.assertEqual(websocket.text_request, ref)

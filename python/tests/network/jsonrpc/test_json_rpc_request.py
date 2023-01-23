@@ -21,21 +21,41 @@
 import unittest
 
 from brayns.network.jsonrpc import (
+    serialize_request,
     serialize_request_to_binary,
     serialize_request_to_text,
 )
 
-from .mock_request import MockRequest
+from .mock_messages import (
+    mock_request,
+    mock_request_binary,
+    mock_request_message,
+    mock_request_text,
+)
 
 
-class TestSerializeRequestToBinary(unittest.TestCase):
+class TestJsonRpcRequest(unittest.TestCase):
+    def test_serialize_request(self) -> None:
+        test = serialize_request(mock_request())
+        self.assertEqual(test, mock_request_message())
+
+    def test_serialize_request_notification(self) -> None:
+        notification = mock_request()
+        notification.id = None
+        test = serialize_request(notification)
+        ref = mock_request_message()
+        del ref["id"]
+        self.assertEqual(test, ref)
+
+    def test_serialize_request_to_text(self) -> None:
+        test = serialize_request_to_text(mock_request())
+        self.assertEqual(test, mock_request_text())
+
     def test_serialize_request_to_binary(self) -> None:
-        test = serialize_request_to_binary(MockRequest.binary_request)
-        self.assertEqual(test, MockRequest.binary)
+        test = serialize_request_to_binary(mock_request(binary=True))
+        self.assertEqual(test, mock_request_binary())
 
     def test_serialize_request_to_binary_no_binary(self) -> None:
-        data = serialize_request_to_binary(MockRequest.request)
-        test = data[4:].decode("utf-8")
-        ref = serialize_request_to_text(MockRequest.request)
-        self.assertEqual(test, ref)
-        self.assertEqual(test, MockRequest.text)
+        request = mock_request(binary=True)
+        test = serialize_request_to_binary(request)
+        self.assertEqual(test, mock_request_binary())

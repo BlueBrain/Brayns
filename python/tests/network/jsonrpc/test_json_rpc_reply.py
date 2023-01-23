@@ -19,29 +19,30 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
-from typing import Any
 
-import brayns
-from brayns.network.jsonrpc import deserialize_reply
+from brayns.network.jsonrpc import (
+    deserialize_reply,
+    deserialize_reply_from_binary,
+    deserialize_reply_from_text,
+)
+
+from .mock_messages import (
+    mock_reply,
+    mock_reply_binary,
+    mock_reply_message,
+    mock_reply_text,
+)
 
 
-class TestDeserializeReply(unittest.TestCase):
-    @classmethod
-    @property
-    def reply(cls) -> brayns.JsonRpcReply:
-        return brayns.JsonRpcReply(
-            id=1,
-            result=12,
-        )
-
-    @classmethod
-    @property
-    def message(cls) -> dict[str, Any]:
-        return {
-            "id": 1,
-            "result": 12,
-        }
-
+class TestJsonRpcReply(unittest.TestCase):
     def test_deserialize_reply(self) -> None:
-        test = deserialize_reply(self.message)
-        self.assertEqual(test, self.reply)
+        test = deserialize_reply(mock_reply_message())
+        self.assertEqual(test, mock_reply())
+
+    def test_deserialize_reply_from_text(self) -> None:
+        test = deserialize_reply_from_text(mock_reply_text())
+        self.assertEqual(test, mock_reply())
+
+    def test_deserialize_reply_from_binary(self) -> None:
+        test = deserialize_reply_from_binary(mock_reply_binary())
+        self.assertEqual(test, mock_reply(binary=True))

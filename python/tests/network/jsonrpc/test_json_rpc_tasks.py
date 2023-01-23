@@ -24,9 +24,7 @@ from typing import cast
 import brayns
 from brayns.network.jsonrpc import JsonRpcTask, JsonRpcTasks
 
-from .messages.mock_error import MockError
-from .messages.mock_progress import MockProgress
-from .messages.mock_reply import MockReply
+from .mock_messages import mock_error, mock_progress, mock_reply
 
 
 class TestJsonRpcTasks(unittest.TestCase):
@@ -63,7 +61,7 @@ class TestJsonRpcTasks(unittest.TestCase):
 
     def test_add_result(self) -> None:
         tasks = JsonRpcTasks()
-        reply = MockReply.reply
+        reply = mock_reply()
         id = cast(int, reply.id)
         task = tasks.create_task(id)
         tasks.add_reply(reply)
@@ -71,7 +69,7 @@ class TestJsonRpcTasks(unittest.TestCase):
 
     def test_add_error(self) -> None:
         tasks = JsonRpcTasks()
-        error = MockError.error
+        error = mock_error()
         id = cast(int, error.id)
         task = tasks.create_task(id)
         tasks.add_error(error)
@@ -81,7 +79,7 @@ class TestJsonRpcTasks(unittest.TestCase):
 
     def test_add_general_error(self) -> None:
         tasks = JsonRpcTasks()
-        error = MockError.error
+        error = mock_error()
         ref = [tasks.create_task(i) for i in range(10)]
         tasks._add_general_error(error)
         self.assertEqual(len(tasks), 0)
@@ -92,7 +90,7 @@ class TestJsonRpcTasks(unittest.TestCase):
 
     def test_add_progress(self) -> None:
         tasks = JsonRpcTasks()
-        progress = MockProgress.progress
+        progress = mock_progress()
         task = tasks.create_task(progress.id)
         tasks.add_progress(progress)
         self.assertTrue(task.has_progress())
