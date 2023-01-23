@@ -21,6 +21,8 @@
 import unittest
 
 import brayns
+from brayns.utils import deserialize_transform, serialize_transform
+from tests.mock_messages import mock_transform, mock_transform_message
 
 
 class TestTransform(unittest.TestCase):
@@ -52,3 +54,11 @@ class TestTransform(unittest.TestCase):
         self.assertAlmostEqual(test.x, -1)
         self.assertAlmostEqual(test.y, 3)
         self.assertAlmostEqual(test.z, 3)
+
+    def test_deserialize_transform(self) -> None:
+        test = deserialize_transform(mock_transform_message())
+        self.assertEqual(test, mock_transform())
+
+    def test_serialize_transform(self) -> None:
+        test = serialize_transform(mock_transform())
+        self.assertEqual(test, mock_transform_message())

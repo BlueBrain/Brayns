@@ -24,7 +24,7 @@ import unittest
 import brayns
 
 
-class TestVector3(unittest.TestCase):
+class TestVector(unittest.TestCase):
     def test_from_vector2(self) -> None:
         vector2 = brayns.Vector2(1, 2)
         test = brayns.Vector3.from_vector2(vector2, 3)
@@ -188,3 +188,35 @@ class TestVector3(unittest.TestCase):
         left = brayns.Vector3(1, 2, 3)
         right = brayns.Vector3(4, 5, 6)
         self.assertEqual(left.cross(right), brayns.Vector3(-3, 6, -3))
+
+    def test_componentwise_min(self) -> None:
+        test = brayns.componentwise_min(
+            [
+                brayns.Vector3(-3, 2, 1),
+                brayns.Vector3(-1, -4, 2),
+                brayns.Vector3(-2, 1, 3),
+            ]
+        )
+        ref = brayns.Vector3(-3, -4, 1)
+        self.assertEqual(test, ref)
+
+    def test_componentwise_min_empty(self) -> None:
+        test = brayns.componentwise_min([])
+        ref = brayns.Vector3.zero
+        self.assertEqual(test, ref)
+
+    def test_componentwise_max(self) -> None:
+        test = brayns.componentwise_max(
+            [
+                brayns.Vector3(-3, -2, 1),
+                brayns.Vector3(1, 4, 2),
+                brayns.Vector3(-2, 1, 3),
+            ]
+        )
+        ref = brayns.Vector3(1, 4, 3)
+        self.assertEqual(test, ref)
+
+    def test_componentwise_max_empty(self) -> None:
+        test = brayns.componentwise_max([])
+        ref = brayns.Vector3.zero
+        self.assertEqual(test, ref)

@@ -23,7 +23,12 @@ import unittest
 import brayns
 
 
-class TestParseHexColor(unittest.TestCase):
+class TestColor3(unittest.TestCase):
+    def test_iter(self) -> None:
+        test = list(brayns.Color3(1, 2, 3))
+        ref = [1, 2, 3]
+        self.assertEqual(test, ref)
+
     def test_parse_numbers(self) -> None:
         test = brayns.parse_hex_color("2ca02c")
         ref = brayns.Color3(44, 160, 44) / 255
@@ -37,4 +42,33 @@ class TestParseHexColor(unittest.TestCase):
     def test_parse_0x(self) -> None:
         test = brayns.parse_hex_color("0x2ca02c")
         ref = brayns.Color3(44, 160, 44) / 255
+        self.assertEqual(test, ref)
+
+
+class TestColor4(unittest.TestCase):
+    def test_from_color3(self) -> None:
+        ref = brayns.Color4(1, 2, 3, 4)
+        color = brayns.Color3(1, 2, 3)
+        test = brayns.Color4.from_color3(color, 4)
+        self.assertEqual(test, ref)
+
+    def test_iter(self) -> None:
+        test = list(brayns.Color4(1, 2, 3, 4))
+        ref = [1, 2, 3, 4]
+        self.assertEqual(test, ref)
+
+    def test_transparent(self) -> None:
+        test = brayns.Color4(1, 2, 3, 4).transparent
+        ref = brayns.Color4(1, 2, 3, 0)
+        self.assertEqual(test, ref)
+
+    def test_opaque(self) -> None:
+        test = brayns.Color4(1, 2, 3, 0).opaque
+        ref = brayns.Color4(1, 2, 3, 1)
+        self.assertEqual(test, ref)
+
+    def test_without_alpha(self) -> None:
+        color = brayns.Color4(1, 2, 3, 4)
+        ref = brayns.Color3(1, 2, 3)
+        test = color.without_alpha
         self.assertEqual(test, ref)

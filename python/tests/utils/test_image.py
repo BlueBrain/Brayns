@@ -18,24 +18,29 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import pathlib
 import unittest
 
 import brayns
 
 
-class TestComponentwiseMin(unittest.TestCase):
-    def test_componentwise_min(self) -> None:
-        test = brayns.componentwise_min(
-            [
-                brayns.Vector3(-3, 2, 1),
-                brayns.Vector3(-1, -4, 2),
-                brayns.Vector3(-2, 1, 3),
-            ]
-        )
-        ref = brayns.Vector3(-3, -4, 1)
-        self.assertEqual(test, ref)
+class TestImage(unittest.TestCase):
+    def test_jpeg(self) -> None:
+        path = "test/stuff/image.jpg"
+        test = brayns.parse_image_format(path)
+        self.assertIs(test, brayns.ImageFormat.JPEG)
 
-    def test_componentwise_min_empty(self) -> None:
-        test = brayns.componentwise_min([])
-        ref = brayns.Vector3.zero
-        self.assertEqual(test, ref)
+    def test_png(self) -> None:
+        path = "test/stuff/image.png"
+        test = brayns.parse_image_format(path)
+        self.assertIs(test, brayns.ImageFormat.PNG)
+
+    def test_upper(self) -> None:
+        path = "test/stuff/image.PNG"
+        test = brayns.parse_image_format(path)
+        self.assertIs(test, brayns.ImageFormat.PNG)
+
+    def test_path(self) -> None:
+        path = pathlib.Path("test/stuff/image.png")
+        test = brayns.parse_image_format(path)
+        self.assertIs(test, brayns.ImageFormat.PNG)

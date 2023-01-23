@@ -106,3 +106,22 @@ class TestBounds(unittest.TestCase):
         test = bounds.rescale(scale)
         self.assertEqual(test.size, scale)
         self.assertEqual(test.center, bounds.center)
+
+    def test_merge_bounds(self) -> None:
+        test = brayns.merge_bounds(
+            [
+                brayns.Bounds(brayns.Vector3(-1, 2, 3), brayns.Vector3(6, 5, 4)),
+                brayns.Bounds(brayns.Vector3(1, -2, 3), brayns.Vector3(5, 4, 6)),
+                brayns.Bounds(brayns.Vector3(1, 2, -3), brayns.Vector3(4, 6, 5)),
+            ]
+        )
+        ref = brayns.Bounds(
+            brayns.Vector3(-1, -2, -3),
+            brayns.Vector3(6, 6, 6),
+        )
+        self.assertEqual(test, ref)
+
+    def test_merge_bounds_empty(self) -> None:
+        test = brayns.merge_bounds([])
+        ref = brayns.Bounds.empty
+        self.assertEqual(test, ref)
