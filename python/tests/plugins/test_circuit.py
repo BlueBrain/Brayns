@@ -43,7 +43,7 @@ import brayns
 from tests.mock_instance import MockInstance
 
 
-class TestGetCircuitIds(unittest.TestCase):
+class TestCircuit(unittest.TestCase):
     def test_get_circuit_ids(self) -> None:
         ids = [1, 2, 3]
         instance = MockInstance(ids)
@@ -51,3 +51,15 @@ class TestGetCircuitIds(unittest.TestCase):
         self.assertEqual(test, ids)
         self.assertEqual(instance.method, "get-circuit-ids")
         self.assertEqual(instance.params, {"model_id": 1})
+
+    def test_set_circuit_thickness(self) -> None:
+        instance = MockInstance()
+        brayns.set_circuit_thickness(instance, 1, 3)
+        self.assertEqual(instance.method, "set-circuit-thickness")
+        self.assertEqual(
+            instance.params,
+            {
+                "model_id": 1,
+                "radius_multiplier": 3,
+            },
+        )
