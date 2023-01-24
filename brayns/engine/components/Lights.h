@@ -28,6 +28,18 @@ namespace brayns
 {
 struct Lights
 {
+    Lights() = default;
+
+    explicit Lights(Light light)
+    {
+        elements.push_back(std::move(light));
+    }
+
+    explicit Lights(std::vector<Light> lights)
+    {
+        elements = std::move(lights);
+    }
+
     std::vector<Light> elements;
 };
 }

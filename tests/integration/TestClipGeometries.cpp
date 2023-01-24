@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2023, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,63 +18,53 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/Brayns.h>
-#include <brayns/engine/camera/projections/Orthographic.h>
-#include <brayns/engine/camera/projections/Perspective.h>
-#include <brayns/engine/components/ClipperViews.h>
-#include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/core/Engine.h>
+#include <brayns/engine/geometry/types/BoundedPlane.h>
+#include <brayns/engine/geometry/types/Box.h>
+#include <brayns/engine/geometry/types/Capsule.h>
 #include <brayns/engine/geometry/types/Plane.h>
-#include <brayns/engine/light/types/AmbientLight.h>
-#include <brayns/engine/light/types/DirectionalLight.h>
+#include <brayns/engine/geometry/types/Sphere.h>
+#include <brayns/engine/geometry/types/TriangleMesh.h>
+#include <brayns/engine/renderer/types/Interactive.h>
 #include <brayns/engine/scene/ModelsOperations.h>
 #include <brayns/engine/systems/ClipperInitSystem.h>
+#include <brayns/io/loaders/mesh/parsers/PlyMeshParser.h>
+#include <brayns/utils/FileReader.h>
 
+#include <tests/helpers/BraynsTestUtils.h>
+#include <tests/helpers/ImageValidator.h>
 #include <tests/paths.h>
-
-#include "helpers/BraynsTestUtils.h"
-#include "helpers/ImageValidator.h"
 
 #include <doctest/doctest.h>
 
 namespace
 {
-struct ZParallelSliceManager
+class ClipGeometryBuilder
 {
-    static void generate(brayns::Brayns &brayns)
+public:
+    template<typename T>
+    static void build(brayns::Brayns &brayns, T geometry, const brayns::Transform transform = {})
     {
-        auto &engine = brayns.getEngine();
-        auto &scene = engine.getScene();
-        const auto &bounds = scene.getBounds();
-        const auto center = bounds.center();
-        const auto dimensions = bounds.dimensions();
-        const auto sliceThickness = dimensions.z * 0.1f;
+        auto model = std::make_shared<brayns::Model>("clip_geometry");
 
-        // Clip every point that dot(planeA, point) + planeADistance < 0.0
-        const auto planeA = brayns::Vector3f(0.f, 0.f, 1.f);
-        const auto planeADistance = center.z - sliceThickness * 0.5f;
-
-        // Clip every point that dot(planeB, point) + planeBDistance < 0.0
-        const auto planeB = brayns::Vector3f(0.f, 0.f, -1.f);
-        const auto planeBDistance = -center.z - sliceThickness * 0.5f;
-
-        auto model = std::make_shared<brayns::Model>("");
-
-        auto planes = std::vector<brayns::Plane>{
-            brayns::Plane{{planeA, planeADistance}},
-            brayns::Plane{{planeB, planeBDistance}}};
         auto &components = model->getComponents();
-        auto &clippers = components.add<brayns::Geometries>();
-        clippers.elements.emplace_back(std::move(planes));
+        components.add<brayns::Geometries>(std::move(geometry));
 
         auto &systems = model->getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
         systems.setInitSystem<brayns::ClipperInitSystem>();
 
+        auto &engine = brayns.getEngine();
+        auto &scene = engine.getScene();
         auto &models = scene.getModels();
-        models.add(std::move(model));
+        auto instance = models.add(std::move(model));
+        instance->setTransform(transform);
     }
+};
 
-    static void clear(brayns::Brayns &brayns)
+class ClipGeometryRemover
+{
+public:
+    static void remove(brayns::Brayns &brayns)
     {
         auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
@@ -82,54 +72,116 @@ struct ZParallelSliceManager
         brayns::ModelsOperations::removeClippers(models);
     }
 };
-} // namespace
 
-void testClipping(bool orthographic)
+class ClipGeometryTypeTester
 {
-    const auto original = orthographic ? "testClipBaseOrtho.png" : "testClipBasePerspective.png";
-    const auto clipped = orthographic ? "testClipClippedOrtho.png" : "testClipClippedPerspective.png";
-
-    brayns::Brayns brayns;
-
-    BraynsTestUtils::setRenderResolution(brayns, 300, 300);
-    BraynsTestUtils::addModel(brayns, BRAYNS_TESTDATA_MODEL_PLY_PATH);
-
-    if (orthographic)
+public:
+    template<typename T>
+    static void testType(T geometry, const std::string &filename, const brayns::Transform &transform = {})
     {
-        BraynsTestUtils::adjustOrthographicView(brayns);
+        auto args = "brayns";
+        auto brayns = brayns::Brayns(1, &args);
+
+        auto utils = BraynsTestUtils(brayns);
+        utils.addDefaultLights();
+        utils.addGeometry(brayns::Sphere{brayns::Vector3f(0.f), 10.f});
+        utils.adjustPerspectiveView();
+
+        ClipGeometryBuilder::build(brayns, geometry, transform);
+
+        auto &engine = brayns.getEngine();
+
+        auto &renderer = engine.getRenderer();
+        auto interactive = brayns::Interactive();
+        interactive.shadowsEnabled = false;
+        renderer.set(interactive);
+
+        engine.commitAndRender();
+        CHECK(ImageValidator::validate(engine, filename));
     }
-    else
-    {
-        BraynsTestUtils::adjustPerspectiveView(brayns);
-    }
-
-    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::DirectionalLight()));
-    BraynsTestUtils::addLight(brayns, brayns::Light(brayns::AmbientLight{0.05f}));
-
-    auto &engine = brayns.getEngine();
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(engine, original));
-
-    ZParallelSliceManager::generate(brayns);
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(engine, clipped));
-    ZParallelSliceManager::clear(brayns);
-
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(engine, original));
-
-    ZParallelSliceManager::generate(brayns);
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(engine, clipped));
-    ZParallelSliceManager::clear(brayns);
+};
 }
 
-TEST_CASE("Perspective clipping")
+TEST_CASE("Clip geometry add/removal")
 {
-    testClipping(false);
+    auto args = "brayns";
+    auto brayns = brayns::Brayns(1, &args);
+
+    auto utils = BraynsTestUtils(brayns);
+
+    utils.addDefaultLights();
+    utils.addGeometry(brayns::Sphere{brayns::Vector3f(0.f), 10.f}, {});
+    utils.adjustPerspectiveView();
+
+    ClipGeometryBuilder::build(brayns, brayns::Plane{{1.f, 0.f, 0.f, 0.f}});
+
+    brayns.commitAndRender();
+    CHECK(ImageValidator::validate(brayns.getEngine(), "test_clip_geometry_add.png"));
+
+    ClipGeometryRemover::remove(brayns);
+
+    brayns.commitAndRender();
+    CHECK(ImageValidator::validate(brayns.getEngine(), "test_clip_geometry_remove.png"));
+
+    ClipGeometryBuilder::build(brayns, brayns::Plane{{-1.f, 0.f, 0.f, 0.f}});
+
+    brayns.commitAndRender();
+    CHECK(ImageValidator::validate(brayns.getEngine(), "test_clip_geometry_re_add.png"));
 }
 
-TEST_CASE("Orthographic clipping")
+TEST_CASE("Clip geometry types")
 {
-    testClipping(true);
+    SUBCASE("Bounded plane")
+    {
+        auto min = brayns::Vector3f(0.f);
+        auto max = brayns::Vector3f(11.f);
+        auto equation = brayns::Vector4f{0.f, 0.f, 1.f, 0.f};
+        ClipGeometryTypeTester::testType(
+            brayns::BoundedPlane{equation, {min, max}},
+            "test_clip_geometry_bounded_plane.png");
+    }
+    SUBCASE("Box")
+    {
+        auto min = brayns::Vector3f(-2.5f, -2.5f, -11.f);
+        auto max = brayns::Vector3f(2.5f, 2.5f, 11.f);
+        auto transform = brayns::Transform();
+        transform.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+        ClipGeometryTypeTester::testType(brayns::Box{min, max}, "test_clip_geometry_box.png", transform);
+    }
+    SUBCASE("Capsule")
+    {
+        auto p0 = brayns::Vector3f(0.f, -10.f, 7.5f);
+        auto r0 = 6.f;
+        auto p1 = brayns::Vector3f(0.f, 10.f, 7.5f);
+        auto r1 = 3.f;
+        ClipGeometryTypeTester::testType(brayns::Capsule{p0, r0, p1, r1}, "test_clip_geometry_capsule.png");
+    }
+    SUBCASE("Plane")
+    {
+        auto equation = brayns::Vector4f(0.f, 0.f, 1.f, 0.f);
+        auto transform = brayns::Transform();
+        transform.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+        ClipGeometryTypeTester::testType(brayns::Plane{equation}, "test_clip_geometry_plane.png", transform);
+    }
+    SUBCASE("Sphere")
+    {
+        auto center = brayns::Vector3f(0.f, 0.f, 6.f);
+        auto radius = 7.f;
+        ClipGeometryTypeTester::testType(brayns::Sphere{center, radius}, "test_clip_geometry_sphere.png");
+    }
+    SUBCASE("Triangle mesh")
+    {
+        auto content = brayns::FileReader::read(TestPaths::Meshes::lucy);
+        auto parser = brayns::PlyMeshParser();
+        auto mesh = parser.parse(content);
+        auto bounds = brayns::GeometryTraits<brayns::TriangleMesh>::computeBounds({}, mesh);
+
+        auto dimensions = bounds.dimensions();
+        auto scale = brayns::Vector3f(20.f / dimensions.y);
+        auto position = brayns::Vector3f(0.f) - bounds.center();
+        position.z += 10.f - dimensions.z * 0.5f;
+        auto transform = brayns::Transform{position, {}, scale};
+
+        ClipGeometryTypeTester::testType(mesh, "test_clip_geometry_mesh.png", transform);
+    }
 }

@@ -19,3 +19,44 @@
  */
 
 #include <doctest/doctest.h>
+
+#include <tests/helpers/BraynsTestUtils.h>
+#include <tests/helpers/ImageValidator.h>
+
+TEST_CASE("Perspective camera")
+{
+    auto args = "brayns";
+    auto brayns = brayns::Brayns(1, &args);
+
+    auto utils = BraynsTestUtils(brayns);
+    utils.createDefaultScene();
+    utils.adjustPerspectiveView();
+
+    brayns.commitAndRender();
+
+    CHECK(ImageValidator::validate(brayns.getEngine(), "test_perspective_camera.png"));
+
+    auto &engine = brayns.getEngine();
+    auto &camera = engine.getCamera();
+    auto perspective = *camera.as<brayns::Perspective>();
+
+    auto higherFovy = perspective;
+    higherFovy.fovy *= 1.5f;
+    camera.set(higherFovy);
+    brayns.commitAndRender();
+    CHECK(ImageValidator::validate(brayns.getEngine(), "test_perspective_camera_fovy.png"));
+}
+
+TEST_CASE("Orthographic camera")
+{
+    auto args = "brayns";
+    auto brayns = brayns::Brayns(1, &args);
+
+    auto utils = BraynsTestUtils(brayns);
+    utils.createDefaultScene();
+    utils.adjustOrthographicView();
+
+    brayns.commitAndRender();
+
+    CHECK(ImageValidator::validate(brayns.getEngine(), "test_orthographic_camera.png"));
+}

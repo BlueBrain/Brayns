@@ -25,9 +25,10 @@
 #include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
 #include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/components/Lights.h>
 #include <brayns/engine/geometry/types/Box.h>
+#include <brayns/engine/light/types/AmbientLight.h>
+#include <brayns/engine/light/types/DirectionalLight.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
@@ -38,114 +39,135 @@
 class BraynsTestUtils
 {
 public:
-    static brayns::ModelInstance *addCube(
-        brayns::Brayns &brayns,
-        const brayns::Vector3f &position = brayns::Vector3f(0.f),
-        const brayns::Vector3f &size = brayns::Vector3f(1.f),
-        const brayns::Vector4f &color = brayns::Vector4f(1.f, 0.f, 0.f, 1.f))
+    explicit BraynsTestUtils(brayns::Brayns &brayns)
+        : _brayns(brayns)
     {
-        auto cube = brayns::Box{position, position + size};
+    }
 
-        auto model = std::make_shared<brayns::Model>("");
+    template<typename T>
+    void addGeometry(T geometry, const brayns::Transform &transform = {})
+    {
+        auto model = std::make_shared<brayns::Model>("geometry");
 
         auto &components = model->getComponents();
-        auto &geometries = components.add<brayns::Geometries>(cube);
-        auto &views = components.add<brayns::GeometryViews>(geometries.elements);
-        auto &view = views.elements.front();
-        view.setColor(color);
+        components.add<brayns::Geometries>(std::move(geometry));
 
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
         systems.setCommitSystem<brayns::GeometryCommitSystem>();
         systems.setInitSystem<brayns::GeometryInitSystem>();
 
-        auto &engine = brayns.getEngine();
-        auto &scene = engine.getScene();
-        auto &models = scene.getModels();
-        return models.add(std::move(model));
+        addModel(std::move(model), transform);
     }
 
-    static void adjustPerspective(brayns::Camera &camera, const brayns::Bounds &bounds)
+    void addLight(brayns::Light light)
     {
-        auto &projection = *camera.as<brayns::Perspective>();
-        auto center = bounds.center();
-        auto size = bounds.dimensions();
-        auto distance = size.y * 0.5 / glm::tan(glm::radians(projection.fovy * 0.5));
-        auto position = center + brayns::Vector3f(0.f, 0.f, distance + size.z * 0.5f);
-        auto view = brayns::View{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
-        camera.setView(view);
-        camera.commit();
-    }
-
-    static void setRenderResolution(brayns::Brayns &brayns, uint32_t width, uint32_t height)
-    {
-        auto &params = brayns.getParametersManager();
-        auto &appParams = params.getApplicationParameters();
-        appParams.setWindowSize(brayns::Vector2ui(width, height));
-    }
-
-    static void addLight(brayns::Brayns &brayns, brayns::Light light)
-    {
-        auto &engine = brayns.getEngine();
-        auto &scene = engine.getScene();
-        auto &models = scene.getModels();
-
-        auto model = std::make_shared<brayns::Model>("");
+        auto model = std::make_shared<brayns::Model>("light");
 
         auto &components = model->getComponents();
-        auto &lights = components.add<brayns::Lights>();
-        lights.elements.push_back(std::move(light));
+        components.add<brayns::Lights>(std::move(light));
 
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Lights>>();
 
-        models.add(std::move(model));
+        addModel(std::move(model), {});
     }
 
-    static void addModel(brayns::Brayns &brayns, const std::string &path)
+    void addModel(std::shared_ptr<brayns::Model> model, const brayns::Transform &transform)
     {
-        const auto &loadRegistry = brayns.getLoaderRegistry();
-        const auto &loader = loadRegistry.getSuitableLoader(path, "", "");
+        auto &engine = _brayns.getEngine();
+        auto &scene = engine.getScene();
+        auto &models = scene.getModels();
+        auto instance = models.add(std::move(model));
+        instance->setTransform(transform);
+    }
+
+    void loadModels(const std::string &path)
+    {
+        auto &loadRegistry = _brayns.getLoaderRegistry();
+        auto &loader = loadRegistry.getSuitableLoader(path, "", "");
         auto loadedModels = loader.loadFromFile(path, {}, {});
-        auto &engine = brayns.getEngine();
+
+        auto &engine = _brayns.getEngine();
         auto &scene = engine.getScene();
         auto &models = scene.getModels();
         models.add(std::move(loadedModels));
     }
 
-    static void adjustPerspectiveView(brayns::Brayns &brayns)
+    void addDefaultGeometry()
     {
-        brayns::Perspective projection{45.f};
-
-        auto &engine = brayns.getEngine();
-        auto &scene = engine.getScene();
-        const auto &bounds = scene.getBounds();
-        auto center = bounds.center();
-        auto dimensions = bounds.dimensions();
-        auto distance = dimensions.y * 0.5 / glm::tan(glm::radians(projection.fovy * 0.5));
-        const auto position = center + brayns::Vector3f(0.f, 0.f, distance + dimensions.z * 0.5f);
-        auto view = brayns::View{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
-
-        auto &camera = engine.getCamera();
-        camera.set(projection);
-        camera.setView(view);
+        addGeometry(brayns::Box{brayns::Vector3f(-5.f), brayns::Vector3f(-2.f)});
+        addGeometry(brayns::Box{brayns::Vector3f(2.f), brayns::Vector3f(5.f)});
     }
 
-    static void adjustOrthographicView(brayns::Brayns &brayns)
+    void addDefaultLights()
     {
-        auto &engine = brayns.getEngine();
+        auto directional =
+            brayns::DirectionalLight{10.f, brayns::Vector3f(1.f), glm::normalize(brayns::Vector3f(1.f, -1.f, -1.f))};
+        addLight(brayns::Light(directional));
+        auto ambient = brayns::AmbientLight{0.2f};
+        addLight(brayns::Light(ambient));
+    }
+
+    void createDefaultScene()
+    {
+        addDefaultGeometry();
+        addDefaultLights();
+    }
+
+    brayns::Bounds getSceneBounds()
+    {
+        auto &engine = _brayns.getEngine();
         auto &scene = engine.getScene();
-        const auto &bounds = scene.getBounds();
+        return scene.getBounds();
+    }
+
+    void adjustPerspectiveView()
+    {
+        auto bounds = getSceneBounds();
+
+        auto projection = brayns::Perspective();
+
+        auto center = bounds.center();
+        auto size = bounds.dimensions();
+        auto distance = size.y * 0.5 / glm::tan(glm::radians(projection.fovy * 0.5));
+        auto position = center + brayns::Vector3f(0.f, 0.f, distance + size.z * 0.5f);
+        auto view = brayns::View{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
+
+        adjustCamera(projection, view);
+    }
+
+    void adjustOrthographicView()
+    {
+        auto bounds = getSceneBounds();
+
         auto center = bounds.center();
         auto dimensions = bounds.dimensions();
-
-        const auto distance = dimensions.z * 0.6; // A bit more than just half to avoid any artifact
-        const auto position = center + brayns::Vector3f(0.f, 0.f, distance);
+        auto distance = dimensions.z * 0.6f; // A bit more than just half to avoid any artifact
+        auto position = center + brayns::Vector3f(0.f, 0.f, distance);
         auto view = brayns::View{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
+
         auto projection = brayns::Orthographic{dimensions.y};
 
+        adjustCamera(projection, view);
+    }
+
+    template<typename T>
+    void adjustCamera(T projection, const brayns::View &view)
+    {
+        auto &engine = _brayns.getEngine();
         auto &camera = engine.getCamera();
         camera.set(projection);
         camera.setView(view);
     }
+
+    void setRenderResolution(uint32_t width, uint32_t height)
+    {
+        auto &params = _brayns.getParametersManager();
+        auto &appParams = params.getApplicationParameters();
+        appParams.setWindowSize(brayns::Vector2ui(width, height));
+    }
+
+private:
+    brayns::Brayns &_brayns;
 };
