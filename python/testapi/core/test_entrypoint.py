@@ -18,34 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import logging
-
 import brayns
+from testapi.simple_test_case import SimpleTestCase
 
-from .api_test_case import ApiTestCase
 
+class TestEntrypoint(SimpleTestCase):
+    def test_get_entrypoint(self) -> None:
+        method = "snapshot"
+        entrypoint = brayns.get_entrypoint(self.instance, method)
+        self.assertEqual(entrypoint.method, method)
 
-class SimpleTestCase(ApiTestCase):
-    @property
-    def instance(self) -> brayns.Instance:
-        return self.__manager.instance
-
-    @property
-    def process(self) -> brayns.Process:
-        return self.__manager.process
-
-    def setUp(self) -> None:
-        service = brayns.Service(
-            uri=f"localhost:{self.port}",
-            executable=self.executable,
-            env=self.env,
-        )
-        connector = brayns.Connector(
-            uri=service.uri,
-            logger=brayns.Logger(logging.getLevelName(self.log_level)),
-            max_attempts=None,
-        )
-        self.__manager = brayns.start(service, connector)
-
-    def tearDown(self) -> None:
-        self.__manager.stop()
+    def test_get_entrypoints(self) -> None:
+        methods = brayns.get_methods(self.instance)
+        entrypoints = brayns.get_entrypoints(self.instance)
+        self.assertEqual(methods, [entrypoint.method for entrypoint in entrypoints])

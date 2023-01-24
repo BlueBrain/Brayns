@@ -18,34 +18,17 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import logging
-
 import brayns
+from testapi.render import render_and_validate
+from testapi.simple_test_case import SimpleTestCase
 
-from .api_test_case import ApiTestCase
 
-
-class SimpleTestCase(ApiTestCase):
-    @property
-    def instance(self) -> brayns.Instance:
-        return self.__manager.instance
-
-    @property
-    def process(self) -> brayns.Process:
-        return self.__manager.process
-
-    def setUp(self) -> None:
-        service = brayns.Service(
-            uri=f"localhost:{self.port}",
-            executable=self.executable,
-            env=self.env,
+class TestDti(SimpleTestCase):
+    def test_load_models(self) -> None:
+        loader = brayns.DtiLoader(
+            streamline_radius=2,
+            spike_decay_time=3,
         )
-        connector = brayns.Connector(
-            uri=service.uri,
-            logger=brayns.Logger(logging.getLevelName(self.log_level)),
-            max_attempts=None,
-        )
-        self.__manager = brayns.start(service, connector)
-
-    def tearDown(self) -> None:
-        self.__manager.stop()
+        models = loader.load_models(self.instance, self.dti_file)
+        self.assertEqual(len(models), 1)
+        render_and_validate(self, "dti")

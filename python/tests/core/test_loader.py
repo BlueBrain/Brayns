@@ -66,7 +66,6 @@ class TestLoader(unittest.TestCase):
         spacing = brayns.Vector3.one
         data_type = brayns.VolumeDataType.DOUBLE
         loader = brayns.RawVolumeLoader(dimensions, spacing, data_type)
-
         self.assertEqual(
             loader.get_properties(),
             {

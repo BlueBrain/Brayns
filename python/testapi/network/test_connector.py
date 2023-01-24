@@ -33,11 +33,11 @@ class TestConnector(ApiTestCase):
 
     @property
     def key(self) -> pathlib.Path:
-        return self.folder / "ssl" / "key.pem"
+        return self.asset_folder / "ssl" / "key.pem"
 
     @property
     def certificate(self) -> pathlib.Path:
-        return self.folder / "ssl" / "certificate.pem"
+        return self.asset_folder / "ssl" / "certificate.pem"
 
     def test_connect(self) -> None:
         with self._start_service():

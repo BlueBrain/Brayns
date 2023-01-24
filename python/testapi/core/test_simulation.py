@@ -18,34 +18,23 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import logging
-
 import brayns
+from testapi.loading import load_circuit
+from testapi.simple_test_case import SimpleTestCase
 
-from .api_test_case import ApiTestCase
 
+class TestSimulation(SimpleTestCase):
+    def test_get_simulation(self) -> None:
+        load_circuit(self, report=True)
+        test = brayns.get_simulation(self.instance)
+        self.assertEqual(test.start_frame, 0)
+        self.assertEqual(test.end_frame, 99)
+        self.assertEqual(test.current_frame, 0)
+        self.assertAlmostEqual(test.delta_time, 0.1)
+        self.assertEqual(test.time_unit, brayns.TimeUnit.MILLISECOND)
 
-class SimpleTestCase(ApiTestCase):
-    @property
-    def instance(self) -> brayns.Instance:
-        return self.__manager.instance
-
-    @property
-    def process(self) -> brayns.Process:
-        return self.__manager.process
-
-    def setUp(self) -> None:
-        service = brayns.Service(
-            uri=f"localhost:{self.port}",
-            executable=self.executable,
-            env=self.env,
-        )
-        connector = brayns.Connector(
-            uri=service.uri,
-            logger=brayns.Logger(logging.getLevelName(self.log_level)),
-            max_attempts=None,
-        )
-        self.__manager = brayns.start(service, connector)
-
-    def tearDown(self) -> None:
-        self.__manager.stop()
+    def test_set_simulation_frame(self) -> None:
+        load_circuit(self, report=True)
+        brayns.set_simulation_frame(self.instance, 12)
+        simulation = brayns.get_simulation(self.instance)
+        self.assertEqual(simulation.current_frame, 12)
