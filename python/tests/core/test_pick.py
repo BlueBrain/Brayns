@@ -50,7 +50,6 @@ class TestPick(unittest.TestCase):
             "metadata": {"test": 1},
         }
 
-
     def mock_result(self) -> brayns.PickResult:
         return brayns.PickResult(
             position=brayns.Vector3(1, 2, 3),

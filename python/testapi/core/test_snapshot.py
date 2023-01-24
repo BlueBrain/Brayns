@@ -22,7 +22,7 @@ import pathlib
 import tempfile
 
 import brayns
-from testapi.loading import add_light, add_sphere
+from testapi.loading import add_sphere
 from testapi.render import (
     prepare_lights,
     prepare_snapshot,

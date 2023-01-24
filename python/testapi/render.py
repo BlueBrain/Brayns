@@ -20,8 +20,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from pathlib import Path
 
 import brayns
@@ -110,10 +109,9 @@ def get_camera(
     aspect_ratio = 1
     if settings.resolution is not None:
         aspect_ratio = settings.resolution.aspect_ratio
-    projection: Callable[[], brayns.Projection] = brayns.PerspectiveProjection
+    projection: type[brayns.Projection] = brayns.PerspectiveProjection
     if settings.camera is not None:
-        current = settings.camera.projection
-        projection = lambda: replace(current)
+        projection = type(settings.camera.projection)
     controller = brayns.CameraController(
         target=brayns.get_bounds(instance),
         aspect_ratio=aspect_ratio,

@@ -54,7 +54,7 @@ class TestModel(unittest.TestCase):
         brayns.clear_models(instance)
         self.assertEqual(instance.method, "clear-models")
         self.assertIsNone(instance.params)
-    
+
     def test_clear_renderables(self) -> None:
         instance = MockInstance()
         brayns.clear_renderables(instance)
