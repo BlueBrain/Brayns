@@ -25,9 +25,8 @@
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/geometry/types/TriangleMesh.h>
 #include <brayns/engine/renderer/types/Interactive.h>
-#include <brayns/engine/scene/ModelsOperations.h>
 #include <brayns/engine/systems/ClipperInitSystem.h>
-#include <brayns/io/loaders/mesh/parsers/PlyMeshParser.h>
+#include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
 #include <brayns/utils/FileReader.h>
 
 #include <tests/helpers/BraynsTestUtils.h>
@@ -61,18 +60,6 @@ public:
     }
 };
 
-class ClipGeometryRemover
-{
-public:
-    static void remove(brayns::Brayns &brayns)
-    {
-        auto &engine = brayns.getEngine();
-        auto &scene = engine.getScene();
-        auto &models = scene.getModels();
-        brayns::ModelsOperations::removeClippers(models);
-    }
-};
-
 class ClipGeometryTypeTester
 {
 public:
@@ -89,15 +76,11 @@ public:
 
         ClipGeometryBuilder::build(brayns, geometry, transform);
 
-        auto &engine = brayns.getEngine();
-
-        auto &renderer = engine.getRenderer();
         auto interactive = brayns::Interactive();
         interactive.shadowsEnabled = false;
-        renderer.set(interactive);
+        utils.setRenderer(interactive);
 
-        engine.commitAndRender();
-        CHECK(ImageValidator::validate(engine, filename));
+        CHECK(ImageValidator::validate(utils.render(), filename));
     }
 };
 }
@@ -115,18 +98,15 @@ TEST_CASE("Clip geometry add/removal")
 
     ClipGeometryBuilder::build(brayns, brayns::Plane{{1.f, 0.f, 0.f, 0.f}});
 
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(brayns.getEngine(), "test_clip_geometry_add.png"));
+    CHECK(ImageValidator::validate(utils.render(), "test_clip_geometry_add.png"));
 
-    ClipGeometryRemover::remove(brayns);
+    utils.removeClipping();
 
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(brayns.getEngine(), "test_clip_geometry_remove.png"));
+    CHECK(ImageValidator::validate(utils.render(), "test_clip_geometry_remove.png"));
 
     ClipGeometryBuilder::build(brayns, brayns::Plane{{-1.f, 0.f, 0.f, 0.f}});
 
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(brayns.getEngine(), "test_clip_geometry_re_add.png"));
+    CHECK(ImageValidator::validate(utils.render(), "test_clip_geometry_re_add.png"));
 }
 
 TEST_CASE("Clip geometry types")
@@ -171,14 +151,14 @@ TEST_CASE("Clip geometry types")
     }
     SUBCASE("Triangle mesh")
     {
-        auto content = brayns::FileReader::read(TestPaths::Meshes::lucy);
-        auto parser = brayns::PlyMeshParser();
+        auto content = brayns::FileReader::read(TestPaths::Meshes::suzanne);
+        auto parser = brayns::ObjMeshParser();
         auto mesh = parser.parse(content);
         auto bounds = brayns::GeometryTraits<brayns::TriangleMesh>::computeBounds({}, mesh);
 
         auto dimensions = bounds.dimensions();
-        auto scale = brayns::Vector3f(20.f / dimensions.y);
-        auto position = brayns::Vector3f(0.f) - bounds.center();
+        auto scale = brayns::Vector3f(5.f);
+        auto position = -bounds.center();
         position.z += 10.f - dimensions.z * 0.5f;
         auto transform = brayns::Transform{position, {}, scale};
 

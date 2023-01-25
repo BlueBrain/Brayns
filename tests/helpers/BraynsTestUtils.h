@@ -29,6 +29,7 @@
 #include <brayns/engine/geometry/types/Box.h>
 #include <brayns/engine/light/types/AmbientLight.h>
 #include <brayns/engine/light/types/DirectionalLight.h>
+#include <brayns/engine/scene/ModelsOperations.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
@@ -115,6 +116,22 @@ public:
         addDefaultLights();
     }
 
+    void removeClipping()
+    {
+        auto &engine = _brayns.getEngine();
+        auto &scene = engine.getScene();
+        auto &models = scene.getModels();
+        brayns::ModelsOperations::removeClippers(models);
+    }
+
+    void removeLights()
+    {
+        auto &engine = _brayns.getEngine();
+        auto &scene = engine.getScene();
+        auto &models = scene.getModels();
+        brayns::ModelsOperations::removeLights(models);
+    }
+
     brayns::Bounds getSceneBounds()
     {
         auto &engine = _brayns.getEngine();
@@ -166,6 +183,23 @@ public:
         auto &params = _brayns.getParametersManager();
         auto &appParams = params.getApplicationParameters();
         appParams.setWindowSize(brayns::Vector2ui(width, height));
+    }
+
+    template<typename T>
+    void setRenderer(T rendererType)
+    {
+        auto &engine = _brayns.getEngine();
+        auto &renderer = engine.getRenderer();
+        renderer.set(std::move(rendererType));
+    }
+
+    brayns::Image render()
+    {
+        auto &engine = _brayns.getEngine();
+        engine.commitAndRender();
+
+        auto &frameBuffer = engine.getFramebuffer();
+        return frameBuffer.getImage();
     }
 
 private:

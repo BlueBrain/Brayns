@@ -35,18 +35,12 @@ TEST_CASE("Static framebuffer")
     auto utils = BraynsTestUtils(brayns);
     utils.createDefaultScene();
     utils.adjustPerspectiveView();
+    utils.setRenderer(brayns::Interactive{3});
 
-    auto &engine = brayns.getEngine();
-
-    auto &renderer = engine.getRenderer();
-    renderer.set(brayns::Interactive{3});
-
-    auto &framebuffer = engine.getFramebuffer();
+    auto &framebuffer = brayns.getEngine().getFramebuffer();
     framebuffer.setFrameHandler(std::make_unique<brayns::StaticFrameHandler>());
 
-    brayns.commitAndRender();
-
-    CHECK(ImageValidator::validate(brayns.getEngine(), "test_static_framebuffer.png"));
+    CHECK(ImageValidator::validate(utils.render(), "test_static_framebuffer.png"));
 }
 
 TEST_CASE("Progressive framebuffer")
@@ -57,18 +51,11 @@ TEST_CASE("Progressive framebuffer")
     auto utils = BraynsTestUtils(brayns);
     utils.createDefaultScene();
     utils.adjustPerspectiveView();
+    utils.setRenderer(brayns::Interactive{3});
 
-    auto &engine = brayns.getEngine();
-
-    auto &renderer = engine.getRenderer();
-    renderer.set(brayns::Interactive{3});
-
-    auto &framebuffer = engine.getFramebuffer();
+    auto &framebuffer = brayns.getEngine().getFramebuffer();
     framebuffer.setFrameHandler(std::make_unique<brayns::ProgressiveFrameHandler>());
 
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(brayns.getEngine(), "test_progressive_framebuffer_lowres.png"));
-
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(brayns.getEngine(), "test_progressive_framebuffer_highres.png"));
+    CHECK(ImageValidator::validate(utils.render(), "test_progressive_framebuffer_lowres.png"));
+    CHECK(ImageValidator::validate(utils.render(), "test_progressive_framebuffer_highres.png"));
 }

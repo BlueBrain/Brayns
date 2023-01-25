@@ -32,9 +32,7 @@ TEST_CASE("Perspective camera")
     utils.createDefaultScene();
     utils.adjustPerspectiveView();
 
-    brayns.commitAndRender();
-
-    CHECK(ImageValidator::validate(brayns.getEngine(), "test_perspective_camera.png"));
+    CHECK(ImageValidator::validate(utils.render(), "test_perspective_camera.png"));
 
     auto &engine = brayns.getEngine();
     auto &camera = engine.getCamera();
@@ -43,8 +41,8 @@ TEST_CASE("Perspective camera")
     auto higherFovy = perspective;
     higherFovy.fovy *= 1.5f;
     camera.set(higherFovy);
-    brayns.commitAndRender();
-    CHECK(ImageValidator::validate(brayns.getEngine(), "test_perspective_camera_fovy.png"));
+
+    CHECK(ImageValidator::validate(utils.render(), "test_perspective_camera_fovy.png"));
 }
 
 TEST_CASE("Orthographic camera")
@@ -56,7 +54,5 @@ TEST_CASE("Orthographic camera")
     utils.createDefaultScene();
     utils.adjustOrthographicView();
 
-    brayns.commitAndRender();
-
-    CHECK(ImageValidator::validate(brayns.getEngine(), "test_orthographic_camera.png"));
+    CHECK(ImageValidator::validate(utils.render(), "test_orthographic_camera.png"));
 }
