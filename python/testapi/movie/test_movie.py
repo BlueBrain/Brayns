@@ -22,27 +22,20 @@ import pathlib
 import tempfile
 
 import brayns
-from testapi.image_validator import ImageValidator
+from testapi.render import validate_file
 from testapi.simple_test_case import SimpleTestCase
 
 
 class TestMovie(SimpleTestCase):
-    @property
-    def input(self) -> pathlib.Path:
-        return self.folder / "frames" / "%05d.png"
-
-    @property
-    def ref(self) -> pathlib.Path:
-        return self.folder / "movie.mp4"
-
     def test_save(self) -> None:
+        frames = self.asset_folder / "frames" / "%05d.png"
         movie = brayns.Movie(
-            frames_pattern=str(self.input),
+            frames_pattern=str(frames),
             fps=1,
             ffmpeg_executable=self.ffmpeg,
         )
         with tempfile.TemporaryDirectory() as directory:
             path = pathlib.Path(directory) / "movie.mp4"
             movie.save(str(path))
-            validator = ImageValidator()
-            validator.validate_file(path, self.ref)
+            ref = self.asset_folder / "movie.mp4"
+            validate_file(path, ref)

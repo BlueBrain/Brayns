@@ -25,7 +25,7 @@ from typing import cast
 import brayns
 from brayns.network.jsonrpc import JsonRpcManager
 
-from .messages.mock_reply import MockReply
+from .mock_messages import mock_reply, mock_reply_binary, mock_reply_text
 
 
 class TestJsonRpcManager(unittest.TestCase):
@@ -50,20 +50,20 @@ class TestJsonRpcManager(unittest.TestCase):
 
     def test_process_binary(self) -> None:
         manager = self._create_manager()
-        reply = MockReply.binary_reply
+        reply = mock_reply(binary=True)
         id = cast(int, reply.id)
         task = manager.create_task(id)
-        data = MockReply.binary
+        data = mock_reply_binary()
         manager.process_binary(data)
         self.assertEqual(task.get_reply(), reply)
         self.assertFalse(manager.is_running(0))
 
     def test_process_text(self) -> None:
         manager = self._create_manager()
-        reply = MockReply.reply
+        reply = mock_reply()
         id = cast(int, reply.id)
         task = manager.create_task(id)
-        data = MockReply.text
+        data = mock_reply_text()
         manager.process_text(data)
         self.assertEqual(task.get_reply(), reply)
         self.assertFalse(manager.is_running(0))

@@ -22,8 +22,9 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator
 
+from .json_rpc_progress import JsonRpcProgress
+from .json_rpc_reply import JsonRpcReply
 from .json_rpc_task import JsonRpcTask
-from .messages import JsonRpcProgress, JsonRpcReply
 
 
 class JsonRpcFuture:

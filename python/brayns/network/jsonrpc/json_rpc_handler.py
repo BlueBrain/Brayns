@@ -20,9 +20,11 @@
 
 import logging
 
+from .json_rpc_error import JsonRpcError
 from .json_rpc_listener import JsonRpcListener
+from .json_rpc_progress import JsonRpcProgress
+from .json_rpc_reply import JsonRpcReply
 from .json_rpc_tasks import JsonRpcTasks
-from .messages import JsonRpcError, JsonRpcProgress, JsonRpcReply
 
 
 class JsonRpcHandler(JsonRpcListener):

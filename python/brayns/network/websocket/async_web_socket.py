@@ -26,7 +26,7 @@ from collections import deque
 from websockets.client import WebSocketClientProtocol
 from websockets.exceptions import ConnectionClosed
 
-from .exceptions import ConnectionClosedError, ProtocolError
+from .errors import ConnectionClosedError, ProtocolError
 
 
 class AsyncWebSocket:

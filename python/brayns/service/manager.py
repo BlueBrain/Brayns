@@ -22,9 +22,10 @@ from __future__ import annotations
 
 from typing import NamedTuple
 
-from brayns.network import Instance
+from brayns.network import Connector, Instance
 
 from .process import Process
+from .service import Service
 
 
 class Manager(NamedTuple):
@@ -56,3 +57,24 @@ class Manager(NamedTuple):
         """Disconnect the instance and kill the process."""
         self.instance.disconnect()
         self.process.stop()
+
+
+def start(service: Service, connector: Connector) -> Manager:
+    """Start a braynsService instance and connect to it.
+
+    Return the service process and the connected instance (see ``Manager``).
+
+    :param service: Service specifications.
+    :type service: Service
+    :param connector: Connection specifications.
+    :type connector: Connector
+    :return: Running process and connected instance.
+    :rtype: Manager
+    """
+    process = service.start()
+    try:
+        instance = connector.connect()
+    except BaseException:
+        process.stop()
+        raise
+    return Manager(process, instance)

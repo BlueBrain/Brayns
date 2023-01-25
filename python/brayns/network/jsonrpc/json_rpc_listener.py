@@ -20,7 +20,9 @@
 
 from typing import Protocol
 
-from .messages import JsonRpcError, JsonRpcProgress, JsonRpcReply
+from .json_rpc_error import JsonRpcError
+from .json_rpc_progress import JsonRpcProgress
+from .json_rpc_reply import JsonRpcReply
 
 
 class JsonRpcListener(Protocol):

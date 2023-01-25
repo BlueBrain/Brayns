@@ -21,13 +21,10 @@
 import json
 from typing import Any
 
+from .json_rpc_error import deserialize_error
 from .json_rpc_listener import JsonRpcListener
-from .messages import (
-    deserialize_error,
-    deserialize_progress,
-    deserialize_reply,
-    deserialize_reply_from_binary,
-)
+from .json_rpc_progress import deserialize_progress
+from .json_rpc_reply import deserialize_reply, deserialize_reply_from_binary
 
 
 class JsonRpcDispatcher:

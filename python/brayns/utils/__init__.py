@@ -29,35 +29,31 @@ It includes helpers for algebra, imaging or coloring and the base exception.
 
 from .bounds import Bounds, deserialize_bounds, merge_bounds, serialize_bounds
 from .color import Color3, Color4, parse_hex_color
-from .exceptions import Error
+from .error import Error
 from .image import ImageFormat, Resolution, parse_image_format
-from .plane import PlaneEquation
-from .transform import (
-    ModelRotation,
-    Quaternion,
-    Rotation,
-    Transform,
-    deserialize_transform,
-    euler,
-    serialize_transform,
-)
+from .json_schema import JsonSchema, JsonType, deserialize_schema, serialize_schema
+from .plane_equation import PlaneEquation
+from .quaternion import Quaternion
+from .rotation import CameraRotation, ModelRotation, Rotation, euler
+from .transform import Transform, deserialize_transform, serialize_transform
 from .vector import Axis, Vector, Vector2, Vector3, componentwise_max, componentwise_min
-from .view import Fovy, View, deserialize_view, serialize_view
 
 __all__ = [
     "Axis",
     "Bounds",
+    "CameraRotation",
     "Color3",
     "Color4",
     "componentwise_max",
     "componentwise_min",
     "deserialize_bounds",
+    "deserialize_schema",
     "deserialize_transform",
-    "deserialize_view",
     "Error",
     "euler",
-    "Fovy",
     "ImageFormat",
+    "JsonSchema",
+    "JsonType",
     "merge_bounds",
     "ModelRotation",
     "parse_hex_color",
@@ -67,11 +63,10 @@ __all__ = [
     "Resolution",
     "Rotation",
     "serialize_bounds",
+    "serialize_schema",
     "serialize_transform",
-    "serialize_view",
     "Transform",
     "Vector",
     "Vector2",
     "Vector3",
-    "View",
 ]

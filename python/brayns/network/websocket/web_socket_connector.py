@@ -20,13 +20,30 @@
 
 from __future__ import annotations
 
+import asyncio
+import ssl
 from dataclasses import dataclass
 
-from .async_web_socket_connector import AsyncWebSocketConnector
+from websockets.client import connect
+from websockets.exceptions import WebSocketException
+
+from .async_web_socket import AsyncWebSocket
+from .errors import (
+    InvalidServerCertificateError,
+    ProtocolError,
+    ServiceUnavailableError,
+)
 from .event_loop import EventLoop
-from .ssl_client_context import SslClientContext
 from .web_socket_client import WebSocketClient
 from .web_socket_listener import WebSocketListener
+
+
+@dataclass
+class SslClientContext:
+
+    cafile: str | None = None
+    capath: str | None = None
+    cadata: str | None = None
 
 
 @dataclass
@@ -38,10 +55,42 @@ class WebSocketConnector:
 
     def connect(self) -> WebSocketClient:
         loop = EventLoop()
-        connector = AsyncWebSocketConnector(self.uri, self.ssl_context)
         try:
-            websocket = loop.run(connector.connect()).result()
+            websocket = loop.run(_connect(self.uri, self.ssl_context)).result()
         except BaseException:
             loop.close()
             raise
         return WebSocketClient(websocket, loop, self.listener)
+
+
+async def _connect(uri: str, context: SslClientContext | None) -> AsyncWebSocket:
+    try:
+        websocket = await connect(
+            uri=_format_uri(uri, context),
+            ssl=_try_create_ssl_context(context),
+            ping_interval=None,
+            close_timeout=0,
+            max_size=int(2e9),
+        )
+        return AsyncWebSocket(websocket)
+    except WebSocketException as e:
+        raise ProtocolError(str(e))
+    except ssl.SSLError as e:
+        raise InvalidServerCertificateError(str(e))
+    except OSError as e:
+        raise ServiceUnavailableError(str(e))
+    except asyncio.TimeoutError as e:
+        raise ServiceUnavailableError(str(e))
+
+
+def _format_uri(uri: str, context: SslClientContext | None) -> str:
+    protocol = "ws://" if context is None else "wss://"
+    return protocol + uri
+
+
+def _try_create_ssl_context(context: SslClientContext | None) -> ssl.SSLContext | None:
+    if context is None:
+        return None
+    return ssl.create_default_context(
+        cafile=context.cafile, capath=context.capath, cadata=context.cadata
+    )

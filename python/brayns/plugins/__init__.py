@@ -22,9 +22,6 @@
 Plugins subpackage.
 
 It includes all science related features and optional components.
-
-Main functionalities are BBP circuit loading support, circuit coloring, raw
-morphologies loading, SONATA circuits and OpenDeck cylindrical camera.
 """
 
 from .bbp import BbpCells, BbpLoader, BbpReport, BbpReportType

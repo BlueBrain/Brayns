@@ -20,8 +20,8 @@
 
 import inspect
 import os
-import pathlib
 import unittest
+from pathlib import Path
 
 
 class ApiTestCase(unittest.TestCase):
@@ -63,13 +63,17 @@ class ApiTestCase(unittest.TestCase):
         return os.environ.get("BRAYNS_TEST_FFMPEG", "ffmpeg")
 
     @property
-    def path(self) -> pathlib.Path:
+    def path(self) -> Path:
         filename = inspect.getfile(type(self))
-        return pathlib.Path(filename)
+        return Path(filename)
 
     @property
-    def folder(self) -> pathlib.Path:
+    def folder(self) -> Path:
         return self.path.parent
+
+    @property
+    def asset_folder(self) -> Path:
+        return self.folder / "assets"
 
     @property
     def filename(self) -> str:
