@@ -24,6 +24,14 @@ import brayns
 from testapi.simple_test_case import SimpleTestCase
 
 
+def raw_volumne_loader() -> brayns.RawVolumeLoader:
+    return brayns.RawVolumeLoader(
+        dimensions=brayns.Vector3(256, 256, 112),
+        spacing=brayns.Vector3(1.16, 1.16, 2.5),
+        data_type=brayns.VolumeDataType.FLOAT,
+    )
+
+
 class TestLoader(SimpleTestCase):
     def test_get_loaders(self) -> None:
         refs = self._get_api_loaders()
@@ -44,8 +52,8 @@ class TestLoader(SimpleTestCase):
 
 class TestLoadAndUpload(SimpleTestCase):
     def test_load_models_task(self) -> None:
-        path = self.asset_folder / "chest_ct_scan.mhd"
-        loader = brayns.MhdVolumeLoader()
+        path = self.asset_folder / "chest_ct_scan.raw"
+        loader = raw_volumne_loader()
         task = loader.load_models_task(self.instance, str(path))
         progresses = list(task)
         self.assertEqual(len(progresses), 3)
@@ -53,21 +61,21 @@ class TestLoadAndUpload(SimpleTestCase):
         self.assertEqual(len(models), 1)
 
     def test_upload_models(self) -> None:
-        path = self.asset_folder / "chest_ct_scan.mhd"
-        loader = brayns.MhdVolumeLoader()
+        path = self.asset_folder / "chest_ct_scan.raw"
+        loader = raw_volumne_loader()
         with path.open("rb") as file:
             data = file.read()
-        models = loader.upload_models(self.instance, loader.MHD, data)
+        models = loader.upload_models(self.instance, loader.RAW, data)
         self.assertEqual(len(models), 1)
 
     def test_upload_models_task(self) -> None:
-        path = self.asset_folder / "chest_ct_scan.mhd"
-        loader = brayns.MhdVolumeLoader()
+        path = self.asset_folder / "chest_ct_scan.raw"
+        loader = raw_volumne_loader()
         with path.open("rb") as file:
             data = file.read()
-        task = loader.upload_models_task(self.instance, loader.MHD, data)
+        task = loader.upload_models_task(self.instance, loader.RAW, data)
         progresses = list(task)
-        self.assertEqual(len(progresses), 3)
+        self.assertEqual(len(progresses), 4)
         models = task.wait_for_result()
         self.assertEqual(len(models), 1)
 
@@ -137,10 +145,7 @@ class TestMhdVolumeLoader(SimpleTestCase):
 class TestRawVolumeLoader(SimpleTestCase):
     def test_load_model(self) -> None:
         path = self.asset_folder / "chest_ct_scan.raw"
-        dimensions = brayns.Vector3(256, 256, 112)
-        spacing = brayns.Vector3(1.16, 1.16, 2.5)
-        data_type = brayns.VolumeDataType.FLOAT
-        loader = brayns.RawVolumeLoader(dimensions, spacing, data_type)
+        loader = raw_volumne_loader()
         models = loader.load_models(self.instance, str(path))
         self.assertEqual(len(models), 1)
         model = models[0]

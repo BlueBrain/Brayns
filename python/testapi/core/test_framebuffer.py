@@ -28,17 +28,18 @@ class TestFramebuffer(SimpleTestCase):
         framebuffer = brayns.ProgressiveFramebuffer(scale=4)
         brayns.set_framebuffer(self.instance, framebuffer)
         add_sphere(self)
-        self.render_and_check("progressive_framebuffer_0")
-        self.render_and_check("progressive_framebuffer_1")
+        self.render_and_validate("progressive_framebuffer_0")
+        settings = RenderSettings.raw()
+        render_and_validate(self, "progressive_framebuffer_1", settings)
 
     def test_static_framebuffer(self) -> None:
         framebuffer = brayns.StaticFramebuffer()
         brayns.set_framebuffer(self.instance, framebuffer)
         add_sphere(self)
-        self.render_and_check("static_framebuffer")
+        self.render_and_validate("static_framebuffer")
 
-    def render_and_check(self, ref: str) -> None:
+    def render_and_validate(self, ref: str) -> None:
         settings = RenderSettings(
-            resolution=None, use_snapshot=False, renderer=brayns.InteractiveRenderer(3)
+            renderer=brayns.InteractiveRenderer(2), use_snapshot=False
         )
         render_and_validate(self, ref, settings)

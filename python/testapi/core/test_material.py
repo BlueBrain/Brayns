@@ -20,7 +20,7 @@
 
 import brayns
 from testapi.loading import add_sphere
-from testapi.render import render_and_validate
+from testapi.render import RenderSettings, render_and_validate
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -76,4 +76,5 @@ class TestMaterial(SimpleTestCase):
         retreived = brayns.get_material(self.instance, model.id, type(material))
         self.assertEqual(material, retreived)
         filename = f"{material.name}_material"
-        render_and_validate(self, filename)
+        settings = RenderSettings(renderer=brayns.ProductionRenderer(16, 3))
+        render_and_validate(self, filename, settings)

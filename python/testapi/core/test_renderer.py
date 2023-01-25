@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
+from testapi.loading import add_sphere
 from testapi.render import RenderSettings, render_and_validate
 from testapi.simple_test_case import SimpleTestCase
 
@@ -43,6 +44,7 @@ class TestRenderer(SimpleTestCase):
         self.run_tests(renderer)
 
     def run_tests(self, renderer: brayns.Renderer) -> None:
+        add_sphere(self)
         brayns.set_renderer(self.instance, renderer)
         name = brayns.get_renderer_name(self.instance)
         self.assertEqual(name, renderer.name)

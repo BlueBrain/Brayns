@@ -21,7 +21,7 @@
 
 import brayns
 from testapi.loading import add_clip_plane, add_light, add_sphere
-from testapi.render import render_and_validate
+from testapi.render import RenderSettings, render_and_validate
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -49,23 +49,23 @@ class TestClipping(SimpleTestCase):
 
     def test_clipping_bounded_plane(self) -> None:
         equation = brayns.PlaneEquation(0, 0, 1, 0)
-        bound_min = brayns.Vector3(-1.1, 0, 0)
-        bound_max = brayns.Vector3(0, 1.1, 0.1)
+        bound_min = brayns.Vector3(-11, 0, 0)
+        bound_max = brayns.Vector3(0, 11, 0.1)
         bounds = brayns.Bounds(bound_min, bound_max)
         plane = brayns.ClippingBoundedPlane(equation, bounds)
         self.run_tests(plane, "bounded_plane")
 
     def test_clipping_box(self) -> None:
-        box_min = brayns.Vector3(0, -0.5, 0)
-        box_max = brayns.Vector3(1, 1, 1)
+        box_min = brayns.Vector3(0, -5, 0)
+        box_max = brayns.Vector3(10, 10, 10)
         box = brayns.ClippingBox(box_min, box_max)
         self.run_tests(box, "box")
 
     def test_clipping_capsule(self) -> None:
         rotation = brayns.euler(0, 45, 0, degrees=True)
-        start = rotation.apply(brayns.Vector3(0, 0, 0.9))
-        end = rotation.apply(brayns.Vector3(0, 1, 0.9))
-        capsule = brayns.ClippingCapsule(start, 0.7, end, 0.3)
+        start = rotation.apply(brayns.Vector3(0, 0, 9))
+        end = rotation.apply(brayns.Vector3(0, 10, 9))
+        capsule = brayns.ClippingCapsule(start, 7, end, 3)
         self.run_tests(capsule, "capsule")
 
     def test_clipping_plane(self) -> None:
@@ -83,5 +83,8 @@ class TestClipping(SimpleTestCase):
 
     def run_tests(self, geometry: brayns.ClippingGeometry, ref: str) -> None:
         brayns.add_clipping_geometries(self.instance, [geometry])
-        add_sphere(self)
-        render_and_validate(self, "clip_plane")
+        sphere = brayns.Sphere(10).with_color(brayns.Color4.red)
+        brayns.add_geometries(self.instance, [sphere])
+        renderer = brayns.InteractiveRenderer(enable_shadows=False)
+        settings = RenderSettings(renderer=renderer)
+        render_and_validate(self, f"clipping_{ref}", settings)

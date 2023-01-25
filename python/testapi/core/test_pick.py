@@ -22,9 +22,8 @@ from typing import cast
 
 import brayns
 from testapi.loading import load_circuit
+from testapi.render import prepare_image
 from testapi.simple_test_case import SimpleTestCase
-
-from ..render import prepare_image
 
 
 class TestPick(SimpleTestCase):

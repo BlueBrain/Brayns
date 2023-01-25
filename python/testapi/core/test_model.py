@@ -128,6 +128,6 @@ class TestModel(SimpleTestCase):
     def test_update_visibility(self) -> None:
         model = add_sphere(self)
         brayns.update_model(self.instance, model.id, visible=False)
-        render_and_validate(self, "invisible")
+        render_and_validate(self, "update_invisible")
         brayns.update_model(self.instance, model.id, visible=True)
-        render_and_validate(self, "visible")
+        render_and_validate(self, "update_visible")

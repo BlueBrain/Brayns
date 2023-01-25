@@ -102,4 +102,6 @@ def set_framebuffer(instance: Instance, framebuffer: Framebuffer) -> None:
     """
     name = framebuffer.name
     params = framebuffer.get_properties()
+    if not params:
+        params = None
     instance.request(f"set-framebuffer-{name}", params)

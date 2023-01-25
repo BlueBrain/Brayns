@@ -48,6 +48,15 @@ class RenderSettings:
     accumulate: bool = False
     threshold: float = DEFAULT_THRESHOLD
 
+    @staticmethod
+    def raw() -> RenderSettings:
+        return RenderSettings(
+            resolution=None,
+            center_camera=False,
+            add_lights=False,
+            use_snapshot=False,
+        )
+
 
 def render_and_save(
     context: SimpleTestCase, filename: str, settings: RenderSettings = RenderSettings()
@@ -140,10 +149,10 @@ def validate_from_file(
 ) -> None:
     with ref.open("rb") as file:
         ref_data = file.read()
-    validate_data(test, ref_data, threshold)
+    _validate_data(test, ref_data, threshold)
 
 
-def validate_data(
+def _validate_data(
     test: bytes, ref: bytes, threshold: float = DEFAULT_THRESHOLD
 ) -> None:
     l1, l2 = len(test), len(ref)

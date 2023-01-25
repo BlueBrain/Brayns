@@ -39,7 +39,7 @@ class TestApplication(SimpleTestCase):
         brayns.set_resolution(self.instance, brayns.Resolution.full_hd)
         add_sphere(self)
         settings = RenderSettings(resolution=None, use_snapshot=False)
-        render_and_validate(self, "full_hd", settings)
+        render_and_validate(self, "set_resolution", settings)
 
     def test_stop(self) -> None:
         brayns.stop(self.instance)
