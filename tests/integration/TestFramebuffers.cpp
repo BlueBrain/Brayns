@@ -22,6 +22,7 @@
 
 #include <brayns/engine/framebuffer/types/ProgressiveFrameHandler.h>
 #include <brayns/engine/framebuffer/types/StaticFrameHandler.h>
+#include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/renderer/types/Interactive.h>
 
 #include <tests/helpers/BraynsTestUtils.h>
@@ -58,4 +59,12 @@ TEST_CASE("Progressive framebuffer")
 
     CHECK(ImageValidator::validate(utils.render(), "test_progressive_framebuffer_lowres.png"));
     CHECK(ImageValidator::validate(utils.render(), "test_progressive_framebuffer_highres.png"));
+
+    utils.addGeometry(brayns::Sphere{brayns::Vector3f(0.f), 1.f});
+    CHECK(ImageValidator::validate(utils.render(), "test_progressive_framebuffer_trigger_lowres_1.png"));
+
+    utils.addGeometry(brayns::Sphere{brayns::Vector3f(0.f, 7.f, 0.f), 1.f});
+    CHECK(ImageValidator::validate(utils.render(), "test_progressive_framebuffer_trigger_lowres_2.png"));
+
+    CHECK(ImageValidator::validate(utils.render(), "test_progressive_framebuffer_trigger_highres.png"));
 }
