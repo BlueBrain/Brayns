@@ -156,7 +156,10 @@ def _validate_data(
     test: bytes, ref: bytes, threshold: float = DEFAULT_THRESHOLD
 ) -> None:
     l1, l2 = len(test), len(ref)
-    se = sum((i - j) ** 2 for i, j in zip(test, ref))
+    common = min(l1, l2)
+    extra = abs(l1 - l2)
+    se = sum((test[i] - test[i]) ** 2 for i in range(common))
+    se += extra * 255 * 255
     mse = se / (l1 * l2)
     if mse > threshold:
         raise ValidationFailed(f"Image difference {mse} > {threshold}")
