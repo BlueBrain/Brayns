@@ -47,7 +47,7 @@ public:
     }
 
     template<typename T>
-    void addGeometry(
+    brayns::ModelInstance *addGeometry(
         T geometry,
         const brayns::Transform &transform = {},
         const brayns::Vector4f &color = brayns::Vector4f(1.f))
@@ -62,12 +62,14 @@ public:
         systems.setCommitSystem<brayns::GeometryCommitSystem>();
         systems.setInitSystem<brayns::GeometryInitSystem>();
 
-        addModel(std::move(model), transform);
+        auto instance = addModel(std::move(model), transform);
 
         brayns::SolidColorMethod().apply(components, {{"color", color}});
+
+        return instance;
     }
 
-    void addLight(brayns::Light light)
+    brayns::ModelInstance *addLight(brayns::Light light)
     {
         auto model = std::make_shared<brayns::Model>("light");
 
@@ -77,16 +79,17 @@ public:
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Lights>>();
 
-        addModel(std::move(model), {});
+        return addModel(std::move(model), {});
     }
 
-    void addModel(std::shared_ptr<brayns::Model> model, const brayns::Transform &transform)
+    brayns::ModelInstance *addModel(std::shared_ptr<brayns::Model> model, const brayns::Transform &transform)
     {
         auto &engine = _brayns.getEngine();
         auto &scene = engine.getScene();
         auto &models = scene.getModels();
         auto instance = models.add(std::move(model));
         instance->setTransform(transform);
+        return instance;
     }
 
     void loadModels(const std::string &path)
