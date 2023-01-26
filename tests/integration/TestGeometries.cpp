@@ -24,7 +24,7 @@
 #include <brayns/engine/geometry/types/Plane.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/geometry/types/TriangleMesh.h>
-#include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
+#include <brayns/io/loaders/mesh/parsers/PlyMeshParser.h>
 #include <brayns/utils/FileReader.h>
 
 #include <tests/helpers/BraynsTestUtils.h>
@@ -65,10 +65,10 @@ TEST_CASE("Geometry types")
     }
     SUBCASE("Box")
     {
-        auto min = brayns::Vector3f(-2.5f, -2.5f, -11.f);
-        auto max = brayns::Vector3f(2.5f, 2.5f, 11.f);
+        auto min = brayns::Vector3f(-1.f);
+        auto max = brayns::Vector3f(1.f);
         auto transform = brayns::Transform();
-        transform.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+        transform.rotation = glm::quat_cast(glm::rotate(glm::radians(20.f), brayns::Vector3f(0.f, 1.f, 0.f)));
         GeometryTypeTester::testType(brayns::Box{min, max}, "test_geometry_box.png", transform);
     }
     SUBCASE("Capsule")
@@ -81,10 +81,27 @@ TEST_CASE("Geometry types")
     }
     SUBCASE("Plane")
     {
-        auto equation = brayns::Vector4f(0.f, 0.f, 1.f, 0.f);
-        auto transform = brayns::Transform();
-        transform.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
-        GeometryTypeTester::testType(brayns::Plane{equation}, "test_geometry_plane.png", transform);
+        auto equation = brayns::Vector4f(0.f, 0.f, -1.f, 0.f);
+
+        auto transform1 = brayns::Transform();
+        transform1.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+
+        auto transform2 = brayns::Transform();
+        transform2.rotation = glm::quat_cast(glm::rotate(glm::radians(45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+
+        auto args = "brayns";
+        auto brayns = brayns::Brayns(1, &args);
+
+        auto utils = BraynsTestUtils(brayns);
+        utils.addDefaultLights();
+        utils.addGeometry(brayns::Plane{equation}, transform1);
+        utils.addGeometry(brayns::Plane{equation}, transform2, brayns::Vector4f(1.f, 0.f, 0.f, 1.f));
+
+        // Planes do not have bounds
+        auto bounds = brayns::Bounds(brayns::Vector3f(-5.f), brayns::Vector3f(5.f));
+        utils.adjustPerspectiveView(bounds);
+
+        CHECK(ImageValidator::validate(utils.render(), "test_geometry_plane.png"));
     }
     SUBCASE("Sphere")
     {
@@ -94,9 +111,8 @@ TEST_CASE("Geometry types")
     }
     SUBCASE("Triangle mesh")
     {
-        auto content = brayns::FileReader::read(TestPaths::Meshes::suzanne);
-        auto parser = brayns::ObjMeshParser();
-        auto mesh = parser.parse(content);
+        auto content = brayns::FileReader::read(TestPaths::Meshes::lucy);
+        auto mesh = brayns::PlyMeshParser().parse(content);
         GeometryTypeTester::testType(mesh, "test_geometry_mesh.png");
     }
 }

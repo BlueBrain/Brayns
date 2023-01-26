@@ -24,6 +24,7 @@
 
 #include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
+#include <brayns/engine/colormethods/SolidColorMethod.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/Lights.h>
 #include <brayns/engine/geometry/types/Box.h>
@@ -46,7 +47,10 @@ public:
     }
 
     template<typename T>
-    void addGeometry(T geometry, const brayns::Transform &transform = {})
+    void addGeometry(
+        T geometry,
+        const brayns::Transform &transform = {},
+        const brayns::Vector4f &color = brayns::Vector4f(1.f))
     {
         auto model = std::make_shared<brayns::Model>("geometry");
 
@@ -59,6 +63,8 @@ public:
         systems.setInitSystem<brayns::GeometryInitSystem>();
 
         addModel(std::move(model), transform);
+
+        brayns::SolidColorMethod().apply(components, {{"color", color}});
     }
 
     void addLight(brayns::Light light)
@@ -142,7 +148,11 @@ public:
     void adjustPerspectiveView()
     {
         auto bounds = getSceneBounds();
+        adjustPerspectiveView(bounds);
+    }
 
+    void adjustPerspectiveView(const brayns::Bounds &bounds)
+    {
         auto projection = brayns::Perspective();
 
         auto center = bounds.center();
