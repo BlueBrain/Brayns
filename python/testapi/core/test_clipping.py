@@ -41,50 +41,45 @@ class TestClipping(SimpleTestCase):
         with self.assertRaises(brayns.JsonRpcError):
             brayns.get_model(self.instance, models[3].id)
 
-    def test_clip_plane(self) -> None:
-        equation = brayns.PlaneEquation(0, 1, 0)
-        brayns.add_clipping_geometry(self.instance, brayns.ClipPlane(equation))
-        add_sphere(self)
-        render_and_validate(self, "clip_plane")
-
     def test_clipping_bounded_plane(self) -> None:
         equation = brayns.PlaneEquation(0, 0, 1, 0)
         bound_min = brayns.Vector3(-11, 0, 0)
         bound_max = brayns.Vector3(0, 11, 0.1)
         bounds = brayns.Bounds(bound_min, bound_max)
-        plane = brayns.ClippingBoundedPlane(equation, bounds)
+        plane = brayns.BoundedPlane(equation, bounds)
         self.run_tests(plane, "bounded_plane")
 
     def test_clipping_box(self) -> None:
         box_min = brayns.Vector3(0, -5, 0)
         box_max = brayns.Vector3(10, 10, 10)
-        box = brayns.ClippingBox(box_min, box_max)
+        box = brayns.Box(box_min, box_max)
         self.run_tests(box, "box")
 
     def test_clipping_capsule(self) -> None:
         rotation = brayns.euler(0, 45, 0, degrees=True)
         start = rotation.apply(brayns.Vector3(0, 0, 9))
         end = rotation.apply(brayns.Vector3(0, 10, 9))
-        capsule = brayns.ClippingCapsule(start, 7, end, 3)
+        capsule = brayns.Capsule(start, 7, end, 3)
         self.run_tests(capsule, "capsule")
 
     def test_clipping_plane(self) -> None:
         rotation = brayns.euler(0, 45, 0, degrees=True)
         vector = rotation.apply(brayns.Vector3(0, 0, -1))
         equation = brayns.PlaneEquation(*vector)
-        plane = brayns.ClippingPlane(equation)
+        plane = brayns.Plane(equation)
         self.run_tests(plane, "plane")
 
     def test_clipping_sphere(self) -> None:
         rotation = brayns.euler(0, 45, 0, degrees=True)
         center = rotation.apply(brayns.Vector3(0, 0, 9))
-        sphere = brayns.ClippingSphere(7, center)
+        sphere = brayns.Sphere(7, center)
         self.run_tests(sphere, "sphere")
 
-    def run_tests(self, geometry: brayns.ClippingGeometry, ref: str) -> None:
+    def run_tests(self, geometry: brayns.Geometry, ref: str) -> None:
         brayns.add_clipping_geometries(self.instance, [geometry])
-        sphere = brayns.Sphere(10).with_color(brayns.Color4.red)
-        brayns.add_geometries(self.instance, [sphere])
+        sphere = brayns.Sphere(10)
+        color = brayns.Color4.red
+        brayns.add_geometries(self.instance, [(sphere, color)])
         renderer = brayns.InteractiveRenderer(enable_shadows=False)
         settings = RenderSettings(renderer=renderer)
         render_and_validate(self, f"clipping_{ref}", settings)

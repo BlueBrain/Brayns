@@ -21,7 +21,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, TypeVar
 
 from brayns.network import Instance
@@ -29,57 +29,22 @@ from brayns.utils import Bounds, Color4, PlaneEquation, Vector3, serialize_bound
 
 from .model import Model, deserialize_model
 
-T = TypeVar("T", bound="Geometry")
-
 
 @dataclass
 class Geometry(ABC):
-    """Base class of all geometry types.
-
-    The color attribute is white by default and is not in the constructor, use
-    with_color to chain the color settings with the construction.
-
-    :param color: Geometry color, defaults to white.
-    :type color: Color4
-    """
-
-    color: Color4 = field(default=Color4.white, init=False)
+    """Base class of all geometry types."""
 
     @classmethod
     @property
     @abstractmethod
-    def method(cls) -> str:
-        """JSON-RPC method to add geometries of the derived type.
-
-        :return: JSON-RPC method.
-        :rtype: str
-        """
+    def name(cls) -> str:
+        """Low level API to serialize to JSON."""
         pass
 
     @abstractmethod
-    def get_additional_properties(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        pass
-
-    def with_color(self: T, color: Color4) -> T:
-        """Helper method to quickly change the color of the geometry.
-
-        Example: ``sphere = brayns.Sphere(1).with_color(my_color)``.
-
-        :param color: Geometry color.
-        :type color: Color4
-        :return: self
-        :rtype: type(self)
-        """
-        self.color = color
-        return self
-
     def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
-        return {
-            "geometry": self.get_additional_properties(),
-            "color": list(self.color),
-        }
+        pass
 
 
 @dataclass
@@ -102,15 +67,11 @@ class BoundedPlane(Geometry):
 
     @classmethod
     @property
-    def method(cls) -> str:
-        """JSON-RPC method to add bounded planes.
+    def name(cls) -> str:
+        """Low level API to serialize to JSON."""
+        return "bounded-planes"
 
-        :return: JSON-RPC method.
-        :rtype: str
-        """
-        return "add-bounded-planes"
-
-    def get_additional_properties(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             "coefficients": list(self.equation),
@@ -133,17 +94,16 @@ class Box(Geometry):
 
     @classmethod
     @property
-    def method(cls) -> str:
-        """JSON-RPC method to add boxes.
-
-        :return: JSON-RPC method.
-        :rtype: str
-        """
-        return "add-boxes"
-
-    def get_additional_properties(self) -> dict[str, Any]:
+    def name(cls) -> str:
         """Low level API to serialize to JSON."""
-        return serialize_bounds(self)
+        return "boxes"
+
+    def get_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        return {
+            "min": list(self.min),
+            "max": list(self.max),
+        }
 
 
 @dataclass
@@ -167,15 +127,11 @@ class Capsule(Geometry):
 
     @classmethod
     @property
-    def method(cls) -> str:
-        """JSON-RPC method to add capsules.
+    def name(cls) -> str:
+        """Low level API to serialize to JSON."""
+        return "capsules"
 
-        :return: JSON-RPC method.
-        :rtype: str
-        """
-        return "add-capsules"
-
-    def get_additional_properties(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             "p0": list(self.start_point),
@@ -197,15 +153,11 @@ class Plane(Geometry):
 
     @classmethod
     @property
-    def method(cls) -> str:
-        """JSON-RPC method to add planes.
+    def name(cls) -> str:
+        """Low level API to serialize to JSON."""
+        return "planes"
 
-        :return: JSON-RPC method.
-        :rtype: str
-        """
-        return "add-planes"
-
-    def get_additional_properties(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             "coefficients": list(self.equation),
@@ -227,15 +179,11 @@ class Sphere(Geometry):
 
     @classmethod
     @property
-    def method(cls) -> str:
-        """JSON-RPC method to add spheres.
+    def name(cls) -> str:
+        """Low level API to serialize to JSON."""
+        return "spheres"
 
-        :return: JSON-RPC method.
-        :rtype: str
-        """
-        return "add-spheres"
-
-    def get_additional_properties(self) -> dict[str, Any]:
+    def get_properties(self) -> dict[str, Any]:
         """Low level API to serialize to JSON."""
         return {
             "center": list(self.center),
@@ -243,8 +191,11 @@ class Sphere(Geometry):
         }
 
 
-def add_geometries(instance: Instance, geometries: list[T]) -> Model:
-    """Create a model from a list of geometries.
+T = TypeVar("T", bound="Geometry")
+
+
+def add_geometries(instance: Instance, geometries: list[tuple[T, Color4]]) -> Model:
+    """Create a model from a list of geometries with optional color.
 
     All geometries must have the same type.
 
@@ -260,7 +211,45 @@ def add_geometries(instance: Instance, geometries: list[T]) -> Model:
     """
     if not geometries:
         raise ValueError("Cannot create a model with no geometries")
-    method = geometries[0].method
+    method = f"add-{geometries[0][0].name}"
+    params = [
+        {
+            "geometry": geometry.get_properties(),
+            "color": list(color),
+        }
+        for geometry, color in geometries
+    ]
+    result = instance.request(method, params)
+    return deserialize_model(result)
+
+
+def add_clipping_geometries(instance: Instance, geometries: list[T]) -> Model:
+    """Create a model from a list of clipping geometries.
+
+    All geometries must have the same type.
+
+    Model witout geometries are not supported.
+
+    :param instance: Instance.
+    :type instance: Instance
+    :param geometries: Clipping geometries to add (boxes, capsules, etc...).
+    :type geometries: list[T]
+    :raises ValueError: List is empty.
+    :return: Model created from the geometries.
+    :rtype: Model
+    """
+    if not geometries:
+        raise ValueError("Cannot create a model with no clipping geometries")
+    method = f"add-clipping-{geometries[0].name}"
     params = [geometry.get_properties() for geometry in geometries]
     result = instance.request(method, params)
     return deserialize_model(result)
+
+
+def clear_clipping_geometries(instance: Instance) -> None:
+    """Clear all clipping geometries from the given instance.
+
+    :param instance: Instance.
+    :type instance: Instance
+    """
+    instance.request("clear-clip-planes")

@@ -24,8 +24,9 @@ from .simple_test_case import SimpleTestCase
 
 
 def add_sphere(context: SimpleTestCase) -> brayns.Model:
-    sphere = brayns.Sphere(1).with_color(brayns.Color4.red)
-    return brayns.add_geometries(context.instance, [sphere])
+    sphere = brayns.Sphere(1)
+    color = brayns.Color4.red
+    return brayns.add_geometries(context.instance, [(sphere, color)])
 
 
 def add_light(context: SimpleTestCase) -> brayns.Model:
@@ -34,7 +35,7 @@ def add_light(context: SimpleTestCase) -> brayns.Model:
 
 
 def add_clip_plane(context: SimpleTestCase) -> brayns.Model:
-    plane = brayns.ClippingPlane(brayns.PlaneEquation(1, 2, 3))
+    plane = brayns.Plane(brayns.PlaneEquation(1, 2, 3))
     return brayns.add_clipping_geometries(context.instance, [plane])
 
 

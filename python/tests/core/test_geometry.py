@@ -19,114 +19,83 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
+from typing import Any
 
 import brayns
 from tests.mock_instance import MockInstance
-from tests.mock_messages import mock_model, mock_model_message
+from tests.mock_messages import (
+    mock_bounds,
+    mock_bounds_message,
+    mock_model,
+    mock_model_message,
+)
 
 
-class TestGeometries(unittest.TestCase):
-    def test_add_geometries(self) -> None:
+class TestAddClippingGeometries(unittest.TestCase):
+    def test_clear_clipping_geometries(self) -> None:
+        instance = MockInstance()
+        brayns.clear_clipping_geometries(instance)
+        self.assertEqual(instance.method, "clear-clip-planes")
+        self.assertIsNone(instance.params)
+
+    def test_bounded_planes(self) -> None:
+        geometry = brayns.BoundedPlane(
+            equation=brayns.PlaneEquation(1, 2, 3, 4), bounds=mock_bounds()
+        )
+        message = {
+            "coefficients": [1, 2, 3, 4],
+            "bounds": mock_bounds_message(),
+        }
+        self.run_geometry_tests("add-bounded-planes", geometry, message)
+        self.run_clipping_tests("add-clipping-bounded-planes", geometry, message)
+
+    def test_boxes(self) -> None:
+        geometry = brayns.Box(brayns.Vector3.zero, brayns.Vector3.one)
+        message = {
+            "min": [0, 0, 0],
+            "max": [1, 1, 1],
+        }
+        self.run_geometry_tests("add-boxes", geometry, message)
+        self.run_clipping_tests("add-clipping-boxes", geometry, message)
+
+    def test_capsules(self) -> None:
+        geometry = brayns.Capsule(brayns.Vector3.zero, 1, brayns.Vector3.one, 1)
+        message = {
+            "p0": [0, 0, 0],
+            "r0": 1,
+            "p1": [1, 1, 1],
+            "r1": 1,
+        }
+        self.run_geometry_tests("add-capsules", geometry, message)
+        self.run_clipping_tests("add-clipping-capsules", geometry, message)
+
+    def test_planes(self) -> None:
+        geometry = brayns.Plane(brayns.PlaneEquation(1, 2, 3, 4))
+        message = {"coefficients": [1, 2, 3, 4]}
+        self.run_geometry_tests("add-planes", geometry, message)
+        self.run_clipping_tests("add-clipping-planes", geometry, message)
+
+    def test_spheres(self) -> None:
+        geometry = brayns.Sphere(1, brayns.Vector3(1, 2, 3))
+        message = {"center": [1, 2, 3], "radius": 1}
+        self.run_geometry_tests("add-spheres", geometry, message)
+        self.run_clipping_tests("add-clipping-spheres", geometry, message)
+
+    def run_geometry_tests(
+        self, method: str, geometry: brayns.Geometry, message: dict[str, Any]
+    ) -> None:
         instance = MockInstance(mock_model_message())
-        model = brayns.add_geometries(
-            instance,
-            [
-                brayns.Plane(brayns.PlaneEquation(1, 2, 3, 4)),
-                brayns.Plane(brayns.PlaneEquation(5, 6, 7, 8)).with_color(
-                    brayns.Color4.red
-                ),
-            ],
-        )
+        color = brayns.Color4.white
+        model = brayns.add_geometries(instance, [(geometry, color)])
         self.assertEqual(model, mock_model())
-        self.assertEqual(instance.method, "add-planes")
-        self.assertEqual(
-            instance.params,
-            [
-                {
-                    "geometry": {
-                        "coefficients": [1, 2, 3, 4],
-                    },
-                    "color": [1, 1, 1, 1],
-                },
-                {
-                    "geometry": {
-                        "coefficients": [5, 6, 7, 8],
-                    },
-                    "color": [1, 0, 0, 1],
-                },
-            ],
-        )
+        self.assertEqual(instance.method, method)
+        self.assertEqual(instance.params, [{"geometry": message, "color": list(color)}])
 
-    def test_bounded_plane(self) -> None:
-        self.assertEqual(brayns.BoundedPlane.method, "add-bounded-planes")
-        bounded_plane = brayns.BoundedPlane(
-            brayns.PlaneEquation(0, 0, 1, 0),
-            bounds=brayns.Bounds(
-                min=brayns.Vector3.zero,
-                max=brayns.Vector3.one,
-            ),
-        )
-        test = bounded_plane.get_additional_properties()
-        self.assertEqual(
-            test,
-            {
-                "coefficients": [0, 0, 1, 0],
-                "bounds": {
-                    "min": [0, 0, 0],
-                    "max": [1, 1, 1],
-                },
-            },
-        )
-
-    def test_box(self) -> None:
-        self.assertEqual(brayns.Box.method, "add-boxes")
-        box = brayns.Box(
-            min=brayns.Vector3.zero,
-            max=brayns.Vector3.one,
-        )
-        test = box.get_additional_properties()
-        self.assertEqual(
-            test,
-            {
-                "min": [0, 0, 0],
-                "max": [1, 1, 1],
-            },
-        )
-
-    def test_capsule(self) -> None:
-        self.assertEqual(brayns.Capsule.method, "add-capsules")
-        capsule = brayns.Capsule(
-            start_point=brayns.Vector3.zero,
-            start_radius=0,
-            end_point=brayns.Vector3.one,
-            end_radius=1,
-        )
-        test = capsule.get_additional_properties()
-        self.assertEqual(
-            test,
-            {
-                "p0": [0, 0, 0],
-                "r0": 0,
-                "p1": [1, 1, 1],
-                "r1": 1,
-            },
-        )
-
-    def test_plane(self) -> None:
-        self.assertEqual(brayns.Plane.method, "add-planes")
-        equation = brayns.PlaneEquation(1, 2, 3, 4)
-        plane = brayns.Plane(equation)
-        test = plane.get_additional_properties()
-        self.assertEqual(test, {"coefficients": [1, 2, 3, 4]})
-
-    def test_sphere(self) -> None:
-        self.assertEqual(brayns.Sphere.method, "add-spheres")
-        sphere = brayns.Sphere(1, brayns.Vector3.one)
-        test = sphere.get_additional_properties()
-        self.assertEqual(
-            test,
-            {
-                "center": [1, 1, 1],
-                "radius": 1,
-            },
-        )
+    def run_clipping_tests(
+        self, method: str, geometry: brayns.Geometry, message: dict[str, Any]
+    ) -> None:
+        instance = MockInstance(mock_model_message())
+        model = brayns.add_clipping_geometries(instance, [geometry])
+        self.assertEqual(model, mock_model())
+        self.assertEqual(instance.method, method)
+        self.assertEqual(instance.params, [message])

@@ -20,28 +20,38 @@
 
 from __future__ import annotations
 
+from typing import TypeVar
+
 import brayns
 from testapi.render import RenderSettings, render_and_validate
 from testapi.simple_test_case import SimpleTestCase
 
+T = TypeVar("T", bound=brayns.Geometry)
+
 
 class TestGeometry(SimpleTestCase):
     def test_bounded_planes(self) -> None:
-        geometries: list[brayns.Geometry] = [
-            brayns.BoundedPlane(
-                brayns.PlaneEquation(0, 0, 1, 0.5),
-                bounds=brayns.Bounds(
-                    min=-brayns.Vector3.one,
-                    max=brayns.Vector3.one,
+        geometries = [
+            (
+                brayns.BoundedPlane(
+                    brayns.PlaneEquation(0, 0, 1, 0.5),
+                    bounds=brayns.Bounds(
+                        min=-brayns.Vector3.one,
+                        max=brayns.Vector3.one,
+                    ),
                 ),
-            ).with_color(brayns.Color4.red),
-            brayns.BoundedPlane(
-                brayns.PlaneEquation(0, 0, 1, 0.0),
-                bounds=brayns.Bounds(
-                    min=-2 * brayns.Vector3.one,
-                    max=brayns.Vector3.one,
+                brayns.Color4.red,
+            ),
+            (
+                brayns.BoundedPlane(
+                    brayns.PlaneEquation(0, 0, 1, 0.0),
+                    bounds=brayns.Bounds(
+                        min=-2 * brayns.Vector3.one,
+                        max=brayns.Vector3.one,
+                    ),
                 ),
-            ).with_color(brayns.Color4.blue),
+                brayns.Color4.blue,
+            ),
         ]
         bounds = brayns.Bounds(
             -2 * brayns.Vector3.one,
@@ -50,15 +60,21 @@ class TestGeometry(SimpleTestCase):
         self.run_tests("bounded_planes", geometries, bounds)
 
     def test_boxes(self) -> None:
-        geometries: list[brayns.Geometry] = [
-            brayns.Box(
-                min=-brayns.Vector3.one,
-                max=brayns.Vector3(1, 1, 2),
-            ).with_color(brayns.Color4.red),
-            brayns.Box(
-                min=-2 * brayns.Vector3.one,
-                max=brayns.Vector3.one,
-            ).with_color(brayns.Color4.blue),
+        geometries = [
+            (
+                brayns.Box(
+                    min=-brayns.Vector3.one,
+                    max=brayns.Vector3(1, 1, 2),
+                ),
+                brayns.Color4.red,
+            ),
+            (
+                brayns.Box(
+                    min=-2 * brayns.Vector3.one,
+                    max=brayns.Vector3.one,
+                ),
+                brayns.Color4.blue,
+            ),
         ]
         bounds = brayns.Bounds(
             -2 * brayns.Vector3.one,
@@ -67,19 +83,25 @@ class TestGeometry(SimpleTestCase):
         self.run_tests("boxes", geometries, bounds)
 
     def test_capsules(self) -> None:
-        geometries: list[brayns.Geometry] = [
-            brayns.Capsule(
-                start_point=brayns.Vector3.zero,
-                start_radius=0,
-                end_point=brayns.Vector3.one,
-                end_radius=1,
-            ).with_color(brayns.Color4.red),
-            brayns.Capsule(
-                start_point=-brayns.Vector3.one,
-                start_radius=1,
-                end_point=brayns.Vector3.zero,
-                end_radius=0,
-            ).with_color(brayns.Color4.blue),
+        geometries = [
+            (
+                brayns.Capsule(
+                    start_point=brayns.Vector3.zero,
+                    start_radius=0,
+                    end_point=brayns.Vector3.one,
+                    end_radius=1,
+                ),
+                brayns.Color4.red,
+            ),
+            (
+                brayns.Capsule(
+                    start_point=-brayns.Vector3.one,
+                    start_radius=1,
+                    end_point=brayns.Vector3.zero,
+                    end_radius=0,
+                ),
+                brayns.Color4.blue,
+            ),
         ]
         bounds = brayns.Bounds(
             -2 * brayns.Vector3.one,
@@ -88,13 +110,19 @@ class TestGeometry(SimpleTestCase):
         self.run_tests("capsules", geometries, bounds)
 
     def test_planes(self) -> None:
-        geometries: list[brayns.Geometry] = [
-            brayns.Plane(
-                brayns.PlaneEquation(1, 1, 1, 0),
-            ).with_color(brayns.Color4.red),
-            brayns.Plane(
-                brayns.PlaneEquation(0, 0, 1, 0.25),
-            ).with_color(brayns.Color4.blue),
+        geometries = [
+            (
+                brayns.Plane(
+                    brayns.PlaneEquation(1, 1, 1, 0),
+                ),
+                brayns.Color4.red,
+            ),
+            (
+                brayns.Plane(
+                    brayns.PlaneEquation(0, 0, 1, 0.25),
+                ),
+                brayns.Color4.blue,
+            ),
         ]
         view = brayns.View(
             position=brayns.Axis.z,
@@ -103,14 +131,20 @@ class TestGeometry(SimpleTestCase):
         self.run_tests("planes", geometries, view=view)
 
     def test_spheres(self) -> None:
-        geometries: list[brayns.Geometry] = [
-            brayns.Sphere(
-                radius=2,
-            ).with_color(brayns.Color4.red),
-            brayns.Sphere(
-                radius=1,
-                center=2 * brayns.Vector3.one,
-            ).with_color(brayns.Color4.blue),
+        geometries = [
+            (
+                brayns.Sphere(
+                    radius=2,
+                ),
+                brayns.Color4.red,
+            ),
+            (
+                brayns.Sphere(
+                    radius=1,
+                    center=2 * brayns.Vector3.one,
+                ),
+                brayns.Color4.blue,
+            ),
         ]
         bounds = brayns.Bounds(
             -2 * brayns.Vector3.one,
@@ -121,7 +155,7 @@ class TestGeometry(SimpleTestCase):
     def run_tests(
         self,
         ref: str,
-        geometries: list[brayns.Geometry],
+        geometries: list[tuple[T, brayns.Color4]],
         bounds: brayns.Bounds | None = None,
         view: brayns.View | None = None,
     ) -> None:

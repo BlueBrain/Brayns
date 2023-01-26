@@ -60,8 +60,8 @@ always create one single model per function call.
 .. code-block:: python
 
     model = brayns.add_geometries(instance, [
-        brayns.Sphere(0.1).with_color(brayns.Color4.red),
-        brayns.Sphere(0.2, center=brayns.Vector3.one),
+        (brayns.Sphere(0.1), brayns.Color4.red),
+        (brayns.Sphere(0.2, center=brayns.Vector3.one), brayns.Color4.white),
     ])
 
 Circuits
