@@ -46,8 +46,8 @@ class TestAddClippingGeometries(unittest.TestCase):
             "coefficients": [1, 2, 3, 4],
             "bounds": mock_bounds_message(),
         }
-        self.run_geometry_tests("add-clipping-bounded-planes", geometry, message)
-        self.run_clipping_tests("add-bounded-planes", geometry, message)
+        self.run_geometry_tests("add-bounded-planes", geometry, message)
+        self.run_clipping_tests("add-clipping-bounded-planes", geometry, message)
 
     def test_boxes(self) -> None:
         geometry = brayns.Box(brayns.Vector3.zero, brayns.Vector3.one)
@@ -55,8 +55,8 @@ class TestAddClippingGeometries(unittest.TestCase):
             "min": [0, 0, 0],
             "max": [1, 1, 1],
         }
-        self.run_geometry_tests("add-clipping-boxes", geometry, message)
-        self.run_clipping_tests("add-boxes", geometry, message)
+        self.run_geometry_tests("add-boxes", geometry, message)
+        self.run_clipping_tests("add-clipping-boxes", geometry, message)
 
     def test_capsules(self) -> None:
         geometry = brayns.Capsule(brayns.Vector3.zero, 1, brayns.Vector3.one, 1)
@@ -66,20 +66,20 @@ class TestAddClippingGeometries(unittest.TestCase):
             "p1": [1, 1, 1],
             "r1": 1,
         }
-        self.run_geometry_tests("add-clipping-capsules", geometry, message)
-        self.run_clipping_tests("add-capsules", geometry, message)
+        self.run_geometry_tests("add-capsules", geometry, message)
+        self.run_clipping_tests("add-clipping-capsules", geometry, message)
 
     def test_planes(self) -> None:
         geometry = brayns.Plane(brayns.PlaneEquation(1, 2, 3, 4))
         message = {"coefficients": [1, 2, 3, 4]}
-        self.run_geometry_tests("add-clipping-planes", geometry, message)
-        self.run_clipping_tests("add-planes", geometry, message)
+        self.run_geometry_tests("add-planes", geometry, message)
+        self.run_clipping_tests("add-clipping-planes", geometry, message)
 
     def test_spheres(self) -> None:
         geometry = brayns.Sphere(1, brayns.Vector3(1, 2, 3))
         message = {"center": [1, 2, 3], "radius": 1}
-        self.run_geometry_tests("add-clipping-spheres", geometry, message)
-        self.run_clipping_tests("add-spheres", geometry, message)
+        self.run_geometry_tests("add-spheres", geometry, message)
+        self.run_clipping_tests("add-clipping-spheres", geometry, message)
 
     def run_geometry_tests(
         self, method: str, geometry: brayns.Geometry, message: dict[str, Any]

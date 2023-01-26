@@ -83,10 +83,10 @@ class TestModel(SimpleTestCase):
         brayns.get_model(self.instance, models[3].id)
 
     def test_instantiate_model(self) -> None:
-        sphere = brayns.Sphere(20).with_color(brayns.Color4.red)
+        sphere = (brayns.Sphere(20), brayns.Color4.red)
         model = brayns.add_geometries(self.instance, [sphere])
         ref_position = brayns.Vector3(0, -30, 0)
-        ref = brayns.Sphere(5, ref_position).with_color(brayns.Color4.blue)
+        ref = (brayns.Sphere(5, ref_position), brayns.Color4.blue)
         brayns.add_geometries(self.instance, [ref])
         transform = brayns.Transform(brayns.Vector3(50, 0, 0))
         instanciated = brayns.instantiate_model(self.instance, model.id, transform)
@@ -108,13 +108,16 @@ class TestModel(SimpleTestCase):
         model = brayns.add_geometries(
             self.instance,
             [
-                brayns.BoundedPlane(
-                    equation=brayns.PlaneEquation(0, 0, 1),
-                    bounds=brayns.Bounds(
-                        min=brayns.Vector3.zero,
-                        max=brayns.Vector3.one,
+                (
+                    brayns.BoundedPlane(
+                        equation=brayns.PlaneEquation(0, 0, 1),
+                        bounds=brayns.Bounds(
+                            min=brayns.Vector3.zero,
+                            max=brayns.Vector3.one,
+                        ),
                     ),
-                ).with_color(brayns.Color4.blue)
+                    brayns.Color4.blue,
+                )
             ],
         )
         transform = brayns.Transform(

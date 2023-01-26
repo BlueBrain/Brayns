@@ -33,8 +33,8 @@ def run_projection_tests(
     context.assertEqual(test, projection)
     brayns.clear_models(context.instance)
     spheres = [
-        brayns.Sphere(1).with_color(brayns.Color4.red),
-        brayns.Sphere(1, 3 * brayns.Vector3.one).with_color(brayns.Color4.blue),
+        (brayns.Sphere(1), brayns.Color4.red),
+        (brayns.Sphere(1, 3 * brayns.Vector3.one), brayns.Color4.blue),
     ]
     brayns.add_geometries(context.instance, spheres)
     camera = brayns.Camera(projection=projection)
