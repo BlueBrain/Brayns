@@ -70,7 +70,7 @@ public:
         utils.addGeometry(brayns::Sphere{brayns::Vector3f(0.f), 10.f});
         utils.adjustPerspectiveView();
 
-        ClipGeometryBuilder::build(brayns, geometry, transform);
+        ClipGeometryBuilder::build(utils.getEngine(), geometry, transform);
 
         auto interactive = brayns::Interactive();
         interactive.shadowsEnabled = false;
