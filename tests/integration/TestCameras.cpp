@@ -25,16 +25,13 @@
 
 TEST_CASE("Perspective camera")
 {
-    auto args = "brayns";
-    auto brayns = brayns::Brayns(1, &args);
-
-    auto utils = BraynsTestUtils(brayns);
+    auto utils = BraynsTestUtils();
     utils.createDefaultScene();
     utils.adjustPerspectiveView();
 
     CHECK(ImageValidator::validate(utils.render(), "test_perspective_camera.png"));
 
-    auto &engine = brayns.getEngine();
+    auto &engine = utils.getEngine();
     auto &camera = engine.getCamera();
     auto perspective = *camera.as<brayns::Perspective>();
 
@@ -47,10 +44,7 @@ TEST_CASE("Perspective camera")
 
 TEST_CASE("Orthographic camera")
 {
-    auto args = "brayns";
-    auto brayns = brayns::Brayns(1, &args);
-
-    auto utils = BraynsTestUtils(brayns);
+    auto utils = BraynsTestUtils();
     utils.createDefaultScene();
     utils.adjustOrthographicView();
 

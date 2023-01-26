@@ -37,10 +37,7 @@ public:
     template<typename T>
     static void test(T lightType, const std::string &filename)
     {
-        auto args = "brayns";
-        auto brayns = brayns::Brayns(1, &args);
-
-        auto utils = BraynsTestUtils(brayns);
+        auto utils = BraynsTestUtils();
         utils.loadModels(TestPaths::Meshes::lucy);
         utils.addLight(brayns::Light(lightType));
         utils.adjustPerspectiveView();
@@ -63,10 +60,7 @@ public:
 
 TEST_CASE("Light add/removal")
 {
-    auto args = "brayns";
-    auto brayns = brayns::Brayns(1, &args);
-
-    auto utils = BraynsTestUtils(brayns);
+    auto utils = BraynsTestUtils();
     utils.addLight(brayns::Light(brayns::AmbientLight()));
     utils.loadModels(TestPaths::Meshes::lucy);
     utils.adjustPerspectiveView();

@@ -40,10 +40,23 @@
  */
 class BraynsTestUtils
 {
+private:
+    inline static auto args = "brayns";
+
 public:
-    explicit BraynsTestUtils(brayns::Brayns &brayns)
-        : _brayns(brayns)
+    explicit BraynsTestUtils()
+        : _brayns(1, &args)
     {
+    }
+
+    brayns::Brayns &getBrayns()
+    {
+        return _brayns;
+    }
+
+    brayns::Engine &getEngine()
+    {
+        return _brayns.getEngine();
     }
 
     template<typename T>
@@ -216,5 +229,5 @@ public:
     }
 
 private:
-    brayns::Brayns &_brayns;
+    brayns::Brayns _brayns;
 };

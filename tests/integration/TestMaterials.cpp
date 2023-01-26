@@ -53,9 +53,7 @@ public:
     template<typename T>
     static void test(T materialType, const std::string &filename)
     {
-        auto args = "brayns";
-        auto brayns = brayns::Brayns(1, &args);
-        auto utils = BraynsTestUtils(brayns);
+        auto utils = BraynsTestUtils();
 
         utils.addDefaultLights();
         auto geometry = brayns::Sphere{brayns::Vector3f(0.f), 1.f};
@@ -73,9 +71,7 @@ public:
 
 TEST_CASE("Material change")
 {
-    auto args = "brayns";
-    auto brayns = brayns::Brayns(1, &args);
-    auto utils = BraynsTestUtils(brayns);
+    auto utils = BraynsTestUtils();
 
     utils.addDefaultLights();
     auto geometry = brayns::Sphere{brayns::Vector3f(0.f), 1.f};

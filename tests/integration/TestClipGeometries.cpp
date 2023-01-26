@@ -41,7 +41,7 @@ class ClipGeometryBuilder
 {
 public:
     template<typename T>
-    static void build(brayns::Brayns &brayns, T geometry, const brayns::Transform transform = {})
+    static void build(brayns::Engine &engine, T geometry, const brayns::Transform transform = {})
     {
         auto model = std::make_shared<brayns::Model>("clip_geometry");
 
@@ -52,7 +52,6 @@ public:
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
         systems.setInitSystem<brayns::ClipperInitSystem>();
 
-        auto &engine = brayns.getEngine();
         auto &scene = engine.getScene();
         auto &models = scene.getModels();
         auto instance = models.add(std::move(model));
@@ -66,10 +65,7 @@ public:
     template<typename T>
     static void testType(T geometry, const std::string &filename, const brayns::Transform &transform = {})
     {
-        auto args = "brayns";
-        auto brayns = brayns::Brayns(1, &args);
-
-        auto utils = BraynsTestUtils(brayns);
+        auto utils = BraynsTestUtils();
         utils.addDefaultLights();
         utils.addGeometry(brayns::Sphere{brayns::Vector3f(0.f), 10.f});
         utils.adjustPerspectiveView();
@@ -87,16 +83,13 @@ public:
 
 TEST_CASE("Clip geometry add/removal")
 {
-    auto args = "brayns";
-    auto brayns = brayns::Brayns(1, &args);
-
-    auto utils = BraynsTestUtils(brayns);
+    auto utils = BraynsTestUtils();
 
     utils.addDefaultLights();
     utils.addGeometry(brayns::Sphere{brayns::Vector3f(0.f), 10.f}, {});
     utils.adjustPerspectiveView();
 
-    ClipGeometryBuilder::build(brayns, brayns::Plane{{1.f, 0.f, 0.f, 0.f}});
+    ClipGeometryBuilder::build(utils.getEngine(), brayns::Plane{{1.f, 0.f, 0.f, 0.f}});
 
     CHECK(ImageValidator::validate(utils.render(), "test_clip_geometry_add.png"));
 
@@ -104,7 +97,7 @@ TEST_CASE("Clip geometry add/removal")
 
     CHECK(ImageValidator::validate(utils.render(), "test_clip_geometry_remove.png"));
 
-    ClipGeometryBuilder::build(brayns, brayns::Plane{{-1.f, 0.f, 0.f, 0.f}});
+    ClipGeometryBuilder::build(utils.getEngine(), brayns::Plane{{-1.f, 0.f, 0.f, 0.f}});
 
     CHECK(ImageValidator::validate(utils.render(), "test_clip_geometry_re_add.png"));
 }

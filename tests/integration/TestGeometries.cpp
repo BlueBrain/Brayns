@@ -41,10 +41,7 @@ public:
     template<typename T>
     static void testType(T geometry, const std::string &filename, const brayns::Transform &transform = {})
     {
-        auto args = "brayns";
-        auto brayns = brayns::Brayns(1, &args);
-
-        auto utils = BraynsTestUtils(brayns);
+        auto utils = BraynsTestUtils();
         utils.addDefaultLights();
         utils.addGeometry(geometry, transform);
         utils.adjustPerspectiveView();
@@ -89,10 +86,7 @@ TEST_CASE("Geometry types")
         auto transform2 = brayns::Transform();
         transform2.rotation = glm::quat_cast(glm::rotate(glm::radians(45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
 
-        auto args = "brayns";
-        auto brayns = brayns::Brayns(1, &args);
-
-        auto utils = BraynsTestUtils(brayns);
+        auto utils = BraynsTestUtils();
         utils.addDefaultLights();
         utils.addGeometry(brayns::Plane{equation}, transform1);
         utils.addGeometry(brayns::Plane{equation}, transform2, brayns::Vector4f(1.f, 0.f, 0.f, 1.f));
