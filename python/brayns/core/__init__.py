@@ -30,18 +30,6 @@ Include access to camera, renderer, models, materials, snapshots, etc...
 from .application import Application, get_application, set_resolution, stop
 from .camera import Camera, get_camera, set_camera
 from .camera_controller import CameraController, CameraRotation
-from .clipping import (
-    ClippingBoundedPlane,
-    ClippingBox,
-    ClippingCapsule,
-    ClippingGeometry,
-    ClippingPlane,
-    ClippingSphere,
-    ClipPlane,
-    add_clipping_geometries,
-    add_clipping_geometry,
-    clear_clipping_geometries,
-)
 from .color_ramp import ColorRamp, ValueRange, get_color_ramp, set_color_ramp
 from .coloring import (
     ColorMethod,
@@ -64,7 +52,9 @@ from .geometry import (
     Geometry,
     Plane,
     Sphere,
+    add_clipping_geometries,
     add_geometries,
+    clear_clipping_geometries,
 )
 from .image import Image, ImageInfo
 from .light import (
@@ -149,7 +139,6 @@ from .view import (
 
 __all__ = [
     "add_clipping_geometries",
-    "add_clipping_geometry",
     "add_geometries",
     "add_light",
     "AmbientLight",
@@ -166,13 +155,6 @@ __all__ = [
     "clear_lights",
     "clear_models",
     "clear_renderables",
-    "ClippingBoundedPlane",
-    "ClippingBox",
-    "ClippingCapsule",
-    "ClippingGeometry",
-    "ClippingPlane",
-    "ClippingSphere",
-    "ClipPlane",
     "color_model",
     "ColorMethod",
     "ColorRamp",

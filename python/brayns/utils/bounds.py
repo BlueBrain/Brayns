@@ -21,7 +21,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any
 
 from .transform import Rotation
 from .vector import Vector3, componentwise_max, componentwise_min
@@ -201,13 +201,7 @@ def deserialize_bounds(obj: dict[str, Any]) -> Bounds:
     )
 
 
-class BoundsLike(Protocol):
-
-    min: Vector3
-    max: Vector3
-
-
-def serialize_bounds(bounds: BoundsLike) -> dict[str, Any]:
+def serialize_bounds(bounds: Bounds) -> dict[str, Any]:
     return {
         "min": list(bounds.min),
         "max": list(bounds.max),
