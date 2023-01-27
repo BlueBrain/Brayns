@@ -19,3 +19,21 @@
  */
 
 #include <doctest/doctest.h>
+
+#include <brayns/engine/volume/types/RegularVolume.h>
+
+#include <tests/helpers/BraynsTestUtils.h>
+#include <tests/helpers/ImageValidator.h>
+#include <tests/paths.h>
+
+TEST_CASE("Volume types")
+{
+    SUBCASE("Regular volume")
+    {
+        auto utils = BraynsTestUtils();
+        utils.addDefaultLights();
+        utils.loadModels(TestPaths::Volumes::mhd);
+        utils.adjustOrthographicView();
+        CHECK(ImageValidator::validate(utils.render(), "test_volume_regular.png"));
+    }
+}

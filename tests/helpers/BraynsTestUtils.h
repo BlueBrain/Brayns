@@ -25,8 +25,10 @@
 #include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
 #include <brayns/engine/colormethods/SolidColorMethod.h>
+#include <brayns/engine/components/ColorRamp.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/Lights.h>
+#include <brayns/engine/components/Volumes.h>
 #include <brayns/engine/geometry/types/Box.h>
 #include <brayns/engine/light/types/AmbientLight.h>
 #include <brayns/engine/light/types/DirectionalLight.h>
@@ -34,6 +36,8 @@
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryCommitSystem.h>
 #include <brayns/engine/systems/GeometryInitSystem.h>
+#include <brayns/engine/systems/VolumeCommitSystem.h>
+#include <brayns/engine/systems/VolumeInitSystem.h>
 
 /**
  * @brief Encapsulates some utilities used across all the tests
@@ -80,6 +84,24 @@ public:
         brayns::SolidColorMethod().apply(components, {{"color", color}});
 
         return instance;
+    }
+
+    template<typename T>
+    brayns::ModelInstance *
+        addVolume(T volume, const brayns::Transform &transform = {}, const brayns::ColorRamp &colorRamp = {})
+    {
+        auto model = std::make_shared<brayns::Model>("volume");
+
+        auto &components = model->getComponents();
+        components.add<brayns::Volumes>(std::move(volume));
+        components.add<brayns::ColorRamp>(std::move(colorRamp));
+
+        auto &systems = model->getSystems();
+        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Volumes>>();
+        systems.setCommitSystem<brayns::VolumeCommitSystem>();
+        systems.setInitSystem<brayns::VolumeInitSystem>();
+
+        return addModel(std::move(model), transform);
     }
 
     brayns::ModelInstance *addLight(brayns::Light light)
