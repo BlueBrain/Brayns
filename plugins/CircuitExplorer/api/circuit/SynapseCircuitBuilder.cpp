@@ -23,8 +23,7 @@
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GenericColorSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
+#include <brayns/engine/systems/GeometryDataSystem.h>
 
 #include <api/coloring/handlers/ComposedColorHandler.h>
 #include <api/coloring/methods/BrainDatasetColorMethod.h>
@@ -59,8 +58,7 @@ public:
         }
 
         _systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-        _systems.setInitSystem<brayns::GeometryInitSystem>();
-        _systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        _systems.setDataSystem<brayns::GeometryDataSystem>();
     }
 
     void addColoring(std::unique_ptr<IBrainColorData> data)

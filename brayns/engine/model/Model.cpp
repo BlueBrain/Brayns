@@ -119,14 +119,10 @@ SystemsView Model::getSystemsView() noexcept
 
 void Model::init()
 {
-    if (_systems._init)
+    if (_systems._data)
     {
-        _systems._init->execute(_components);
-    }
-
-    if (_systems._commit)
-    {
-        _systems._commit->execute(_components);
+        _systems._data->init(_components);
+        _systems._data->commit(_components);
     }
 
     _handle = GroupBuilder::build(_components);
@@ -134,12 +130,12 @@ void Model::init()
 
 CommitResult Model::commit()
 {
-    if (!_systems._commit)
+    if (!_systems._data)
     {
         return {};
     }
 
-    auto result = _systems._commit->execute(_components);
+    auto result = _systems._data->commit(_components);
     if (result.needsRebuildBVH)
     {
         _handle.commit();

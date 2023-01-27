@@ -23,8 +23,7 @@
 #include <brayns/engine/components/ColorRamp.h>
 #include <brayns/engine/components/Volumes.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/VolumeCommitSystem.h>
-#include <brayns/engine/systems/VolumeInitSystem.h>
+#include <brayns/engine/systems/VolumeDataSystem.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
 
 #include <api/ModelType.h>
@@ -66,8 +65,7 @@ std::shared_ptr<brayns::Model> Density::run(const Atlas &atlas, const brayns::Js
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Volumes>>();
-    systems.setInitSystem<brayns::VolumeInitSystem>();
-    systems.setCommitSystem<brayns::VolumeCommitSystem>();
+    systems.setDataSystem<brayns::VolumeDataSystem>();
 
     return model;
 }

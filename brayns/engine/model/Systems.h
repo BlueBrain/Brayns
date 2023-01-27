@@ -25,8 +25,7 @@
 #include "Components.h"
 #include "systemtypes/BoundsSystem.h"
 #include "systemtypes/ColorSystem.h"
-#include "systemtypes/CommitSystem.h"
-#include "systemtypes/InitSystem.h"
+#include "systemtypes/DataSystem.h"
 #include "systemtypes/InspectSystem.h"
 #include "systemtypes/UpdateSystem.h"
 
@@ -36,15 +35,9 @@ class Systems
 {
 public:
     template<typename T, typename... Args>
-    void setInitSystem(Args &&...args)
+    void setDataSystem(Args &&...args)
     {
-        _init = std::make_unique<T>(std::forward<Args>(args)...);
-    }
-
-    template<typename T, typename... Args>
-    void setCommitSystem(Args &&...args)
-    {
-        _commit = std::make_unique<T>(std::forward<Args>(args)...);
+        _data = std::make_unique<T>(std::forward<Args>(args)...);
     }
 
     template<typename T, typename... Args>
@@ -75,8 +68,7 @@ private:
     friend class SystemsView;
     friend class Model;
 
-    std::unique_ptr<InitSystem> _init;
-    std::unique_ptr<CommitSystem> _commit;
+    std::unique_ptr<DataSystem> _data;
     std::unique_ptr<UpdateSystem> _update;
     std::unique_ptr<InspectSystem> _inspect;
     std::unique_ptr<BoundsSystem> _bounds;

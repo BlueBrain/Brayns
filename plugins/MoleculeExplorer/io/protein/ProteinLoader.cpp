@@ -26,8 +26,7 @@
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
+#include <brayns/engine/systems/GeometryDataSystem.h>
 
 #include <brayns/utils/FileReader.h>
 #include <brayns/utils/Log.h>
@@ -265,8 +264,7 @@ std::vector<std::shared_ptr<brayns::Model>> ProteinLoader::importFromFile(
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-    systems.setInitSystem<brayns::GeometryInitSystem>();
-    systems.setCommitSystem<brayns::GeometryCommitSystem>();
+    systems.setDataSystem<brayns::GeometryDataSystem>();
 
     std::vector<std::shared_ptr<brayns::Model>> result;
     result.push_back(std::move(model));

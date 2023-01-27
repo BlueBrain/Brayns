@@ -20,15 +20,22 @@
 
 #pragma once
 
+#include <brayns/engine/common/CommitResult.h>
 #include <brayns/engine/model/Components.h>
 
 namespace brayns
 {
-class InitSystem
+class DataSystem
 {
 public:
-    virtual ~InitSystem() = default;
+    virtual ~DataSystem() = default;
 
-    virtual void execute(Components &components) = 0;
+    virtual void init(Components &components) = 0;
+
+    virtual CommitResult commit(Components &components)
+    {
+        (void)components;
+        return {};
+    }
 };
 }

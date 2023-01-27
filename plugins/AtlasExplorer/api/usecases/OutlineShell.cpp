@@ -27,8 +27,7 @@
 #include <brayns/engine/geometry/types/Isosurface.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GenericColorSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
+#include <brayns/engine/systems/GeometryDataSystem.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
 
 #include <api/ModelType.h>
@@ -99,8 +98,7 @@ std::shared_ptr<brayns::Model> OutlineShell::run(const Atlas &atlas, const brayn
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-    systems.setInitSystem<brayns::GeometryInitSystem>();
-    systems.setCommitSystem<brayns::GeometryCommitSystem>();
+    systems.setDataSystem<brayns::GeometryDataSystem>();
 
     auto colorMethods = std::vector<std::unique_ptr<brayns::IColorMethod>>();
     colorMethods.push_back(std::make_unique<brayns::SolidColorMethod>());

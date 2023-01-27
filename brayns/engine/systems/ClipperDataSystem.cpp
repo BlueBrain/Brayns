@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClipperInitSystem.h"
+#include "ClipperDataSystem.h"
 
 #include <brayns/engine/components/ClipperViews.h>
 #include <brayns/engine/components/Geometries.h>
@@ -70,7 +70,7 @@ private:
 
 namespace brayns
 {
-void ClipperInitSystem::execute(Components &components)
+void ClipperDataSystem::init(Components &components)
 {
     ClippingInitializer::init(components);
 }

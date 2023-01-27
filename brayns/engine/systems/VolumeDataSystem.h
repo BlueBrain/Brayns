@@ -20,13 +20,14 @@
 
 #pragma once
 
-#include <brayns/engine/model/systemtypes/CommitSystem.h>
+#include <brayns/engine/model/systemtypes/DataSystem.h>
 
 namespace brayns
 {
-class GeometryCommitSystem final : public CommitSystem
+class VolumeDataSystem final : public DataSystem
 {
 public:
-    CommitResult execute(Components &components) override;
+    void init(Components &components) override;
+    CommitResult commit(Components &components) override;
 };
 }

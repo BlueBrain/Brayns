@@ -30,8 +30,7 @@
 #include <brayns/engine/scene/ModelManager.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GenericColorSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
+#include <brayns/engine/systems/GeometryDataSystem.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -117,8 +116,7 @@ private:
 
         auto &systems = model.getSystems();
         systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
-        systems.setInitSystem<GeometryInitSystem>();
-        systems.setCommitSystem<GeometryCommitSystem>();
+        systems.setDataSystem<GeometryDataSystem>();
         systems.setColorSystem<GenericColorSystem>(std::move(colorMethods));
     }
 

@@ -34,10 +34,8 @@
 #include <brayns/engine/light/types/DirectionalLight.h>
 #include <brayns/engine/scene/ModelsOperations.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
-#include <brayns/engine/systems/VolumeCommitSystem.h>
-#include <brayns/engine/systems/VolumeInitSystem.h>
+#include <brayns/engine/systems/GeometryDataSystem.h>
+#include <brayns/engine/systems/VolumeDataSystem.h>
 
 /**
  * @brief Encapsulates some utilities used across all the tests
@@ -76,8 +74,7 @@ public:
 
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-        systems.setCommitSystem<brayns::GeometryCommitSystem>();
-        systems.setInitSystem<brayns::GeometryInitSystem>();
+        systems.setDataSystem<brayns::GeometryDataSystem>();
 
         auto instance = addModel(std::move(model), transform);
 
@@ -98,8 +95,7 @@ public:
 
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Volumes>>();
-        systems.setCommitSystem<brayns::VolumeCommitSystem>();
-        systems.setInitSystem<brayns::VolumeInitSystem>();
+        systems.setDataSystem<brayns::VolumeDataSystem>();
 
         return addModel(std::move(model), transform);
     }

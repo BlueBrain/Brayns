@@ -28,8 +28,7 @@
 #include <brayns/engine/components/ColorRamp.h>
 #include <brayns/engine/components/Volumes.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/VolumeCommitSystem.h>
-#include <brayns/engine/systems/VolumeInitSystem.h>
+#include <brayns/engine/systems/VolumeDataSystem.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
 
 namespace
@@ -68,8 +67,7 @@ private:
 
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Volumes>>();
-        systems.setCommitSystem<brayns::VolumeCommitSystem>();
-        systems.setInitSystem<brayns::VolumeInitSystem>();
+        systems.setDataSystem<brayns::VolumeDataSystem>();
 
         return model;
     }

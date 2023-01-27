@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "VolumeInitSystem.h"
+#include "VolumeDataSystem.h"
 
 #include <brayns/engine/components/ColorRamp.h>
 #include <brayns/engine/components/VolumeViews.h>
@@ -62,12 +62,76 @@ private:
         }
     }
 };
+
+class VolumeCommitter
+{
+public:
+    static bool commitColorRamp(brayns::ColorRamp &colorRamp, brayns::VolumeViews &views)
+    {
+        if (!colorRamp.isModified())
+        {
+            return false;
+        }
+        colorRamp.resetModified();
+        for (auto &view : views.elements)
+        {
+            view.setColorRamp(colorRamp);
+        }
+        return true;
+    }
+
+    static bool commitVolumes(brayns::Volumes &volumes)
+    {
+        if (!volumes.modified)
+        {
+            return false;
+        }
+
+        volumes.modified.setModified(false);
+        for (auto &volume : volumes.elements)
+        {
+            volume.commit();
+        }
+        return true;
+    }
+
+    static bool commitVolumeViews(brayns::VolumeViews &views)
+    {
+        if (!views.modified)
+        {
+            return false;
+        }
+
+        views.modified.setModified(false);
+        for (auto &view : views.elements)
+        {
+            view.commit();
+        }
+        return true;
+    }
+};
 }
 
 namespace brayns
 {
-void VolumeInitSystem::execute(Components &components)
+void VolumeDataSystem::init(Components &components)
 {
     VolumeInitializer::init(components);
+}
+
+CommitResult VolumeDataSystem::commit(Components &components)
+{
+    auto &volumes = components.get<Volumes>();
+    auto &views = components.get<VolumeViews>();
+    auto &colorRamp = components.get<ColorRamp>();
+
+    bool rebuildBVH = false;
+    rebuildBVH |= VolumeCommitter::commitVolumes(volumes);
+
+    bool renderFrame = false;
+    renderFrame |= VolumeCommitter::commitColorRamp(colorRamp, views);
+    renderFrame |= VolumeCommitter::commitVolumeViews(views);
+
+    return {rebuildBVH, renderFrame};
 }
 }

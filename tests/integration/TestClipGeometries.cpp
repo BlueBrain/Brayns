@@ -25,7 +25,7 @@
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/geometry/types/TriangleMesh.h>
 #include <brayns/engine/renderer/types/Interactive.h>
-#include <brayns/engine/systems/ClipperInitSystem.h>
+#include <brayns/engine/systems/ClipperDataSystem.h>
 #include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
 #include <brayns/utils/FileReader.h>
 
@@ -50,7 +50,7 @@ public:
 
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-        systems.setInitSystem<brayns::ClipperInitSystem>();
+        systems.setDataSystem<brayns::ClipperDataSystem>();
 
         auto &scene = engine.getScene();
         auto &models = scene.getModels();

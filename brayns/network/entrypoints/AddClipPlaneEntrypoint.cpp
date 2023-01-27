@@ -22,7 +22,7 @@
 #include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
 
 #include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/systems/ClipperInitSystem.h>
+#include <brayns/engine/systems/ClipperDataSystem.h>
 
 namespace brayns
 {
@@ -56,7 +56,7 @@ void AddClipPlaneEntrypoint::onRequest(const Request &request)
     geometries.elements.emplace_back(plane);
 
     auto &systems = model->getSystems();
-    systems.setInitSystem<ClipperInitSystem>();
+    systems.setDataSystem<ClipperDataSystem>();
 
     auto *instance = _models.add(std::move(model));
     request.reply(*instance);

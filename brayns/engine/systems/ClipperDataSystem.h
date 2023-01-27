@@ -20,13 +20,13 @@
 
 #pragma once
 
-#include <brayns/engine/model/systemtypes/InitSystem.h>
+#include <brayns/engine/model/systemtypes/DataSystem.h>
 
 namespace brayns
 {
-class ClipperInitSystem final : public InitSystem
+class ClipperDataSystem final : public DataSystem
 {
 public:
-    void execute(Components &components) override;
+    void init(Components &components) override;
 };
 }
