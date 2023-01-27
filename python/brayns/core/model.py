@@ -217,15 +217,13 @@ def instantiate_model(
     if len(transforms) == 0:
         raise ValueError("transforms list cannot be empty")
 
-    serialized_transforms = list[dict[str, Any]]()
-    for transform in transforms:
-        serialized_transform = serialize_transform(transform)
-        serialized_transforms.append(serialized_transform)
+    params: dict[str, Any] = {
+        "model_id": model_id,
+        "transforms": [serialize_transform(transform) for transform in transforms],
+    }
 
-    params: dict[str, Any] = {"model_id": model_id, "transforms": serialized_transforms}
-
-    instances = instance.request("instantiate-model", params)
-    return [deserialize_model(instanceModel) for instanceModel in instances]
+    models = instance.request("instantiate-model", params)
+    return [deserialize_model(model) for model in models]
 
 
 def deserialize_model(message: dict[str, Any]) -> Model:
