@@ -58,7 +58,9 @@ TEST_CASE("ModelManager")
 
         auto model = std::make_shared<brayns::Model>("");
         auto firstInstance = manager.add(model);
-        auto secondInstance = manager.createInstance(firstInstance->getID());
+
+        auto instanceList = manager.createInstances(firstInstance->getID(), 1);
+        auto secondInstance = instanceList.front();
 
         CHECK(firstInstance->getID() == 0);
         CHECK(secondInstance->getID() == 1);

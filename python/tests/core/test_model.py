@@ -83,19 +83,20 @@ class TestModel(unittest.TestCase):
         self.assertIsNone(instance.params)
 
     def test_instantiate_model(self) -> None:
-        instance = MockInstance(mock_model_message())
-        model = brayns.instantiate_model(
+        instance = MockInstance([mock_model_message()])
+        models = brayns.instantiate_model(
             instance,
             model_id=0,
-            transform=mock_transform(),
+            transforms=[mock_transform()],
         )
-        self.assertEqual(model, mock_model())
+        self.assertEqual(len(models), 1)
+        self.assertEqual(models[0], mock_model())
         self.assertEqual(instance.method, "instantiate-model")
         self.assertEqual(
             instance.params,
             {
                 "model_id": 0,
-                "transform": mock_transform_message(),
+                "transforms": [mock_transform_message()],
             },
         )
 
