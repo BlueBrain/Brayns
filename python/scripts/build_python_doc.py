@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import inspect
 import sys
+from collections import defaultdict
 from pathlib import Path
 from types import ModuleType
 
@@ -42,29 +42,21 @@ Python API reference
 SUBPACKAGE_FILENAME = "{name}.rst"
 
 SUBPACKAGE = """
-{name}
+{title}
 {underline}
 
 .. automodule:: {module}
 
-Classes
--------
-
-{classes}
-
-Functions
----------
-
-{functions}
+{items}
 """.strip()
 
 
 AUTOMODULE = """
-{name}
+{title}
 {underline}
 
 .. automodule:: {module}
-    :members: {member}
+    :members: {members}
     :undoc-members:
     :show-inheritance:
 """.strip()
@@ -118,58 +110,38 @@ def build_subpackage(directory: Path, subpackage: str) -> None:
 
 
 def format_subpackage(subpackage: str) -> str:
-    underline = len(subpackage) * "="
-    module = f"brayns.{subpackage}"
-    obj = getattr(brayns, subpackage)
-    items = get_subpackage_items(obj)
-    classes = get_classes(items)
-    functions = get_functions(items)
+    obj: ModuleType = getattr(brayns, subpackage)
     return SUBPACKAGE.format(
-        name=subpackage,
-        underline=underline,
-        module=module,
-        classes=format_items(classes),
-        functions=format_items(functions),
+        title=subpackage,
+        underline=len(subpackage) * "=",
+        module=f"brayns.{subpackage}",
+        items=format_subpackage_modules(obj),
     )
 
 
-def format_items(items: list[str]) -> str:
-    if not items:
-        return "None"
-    return "\n\n".join(format_item(item) for item in items)
+def format_subpackage_modules(subpackage: ModuleType) -> str:
+    group = group_items_by_module(subpackage)
+    return "\n\n".join(format_module(module, items) for module, items in group.items())
 
 
-def format_item(item: str) -> str:
-    obj = getattr(brayns, item)
-    module = obj.__module__
+def group_items_by_module(subpackage: ModuleType) -> dict[str, list[str]]:
+    items: list[str] = subpackage.__all__
+    items = [item for item in items if item in brayns.__all__]
+    result = defaultdict[str, list[str]](list)
+    for item in items:
+        obj = getattr(subpackage, item)
+        result[obj.__module__].append(item)
+    return result
+
+
+def format_module(module: str, items: list[str]) -> str:
+    title = module.split(".")[-1]
     return AUTOMODULE.format(
-        name=item,
-        underline=len(item) * "~",
+        title=title,
+        underline=len(title) * "-",
         module=module,
-        member=item,
+        members=", ".join(items),
     )
-
-
-def get_subpackage_items(module: ModuleType) -> list[str]:
-    return [item for item in module.__all__ if item in brayns.__all__]
-
-
-def get_classes(items: list[str]) -> list[str]:
-    return sorted(item for item in items if is_class(item))
-
-
-def is_class(item: str) -> bool:
-    obj = getattr(brayns, item)
-    return inspect.isclass(obj)
-
-
-def get_functions(items: list[str]) -> list[str]:
-    return sorted(item for item in items if is_function(item))
-
-
-def is_function(item: str) -> bool:
-    obj = getattr(brayns, item)
-    return inspect.isfunction(obj)
 
 
 if __name__ == "__main__":

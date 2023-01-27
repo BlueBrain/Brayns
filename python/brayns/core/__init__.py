@@ -29,7 +29,7 @@ Include access to camera, renderer, models, materials, snapshots, etc...
 
 from .application import Application, get_application, set_resolution, stop
 from .camera import Camera, get_camera, set_camera
-from .camera_controller import CameraController, CameraRotation
+from .camera_controller import CameraController
 from .color_ramp import ColorRamp, ValueRange, get_color_ramp, set_color_ramp
 from .coloring import (
     ColorMethod,
@@ -147,7 +147,6 @@ __all__ = [
     "Box",
     "Camera",
     "CameraController",
-    "CameraRotation",
     "Capsule",
     "CarPaintMaterial",
     "check_version",

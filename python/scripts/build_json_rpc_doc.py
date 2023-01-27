@@ -56,7 +56,7 @@ ENTRYPOINT = """
 {name}
 {underline}
 
-{description}.{asynchronous}
+{description}.{asynchronous}{deprecated}
 
 **Params**:
 
@@ -70,6 +70,13 @@ ENTRYPOINT = """
 ASYNCHRONOUS = """
 This entrypoint is asynchronous, it means that it can take a long time and send
 progress notifications.
+""".strip()
+
+DEPRECATED = """
+.. attention::
+
+    This entrypoint is DEPRECATED, it will be removed or renamed in the next
+    major release.
 """.strip()
 
 NO_PARAMS = """
@@ -199,6 +206,7 @@ def format_entrypoint(entrypoint: brayns.Entrypoint, separator: bool = True) -> 
         underline=len(entrypoint.method) * "~",
         description=entrypoint.description,
         asynchronous=f"\n\n{ASYNCHRONOUS}" if entrypoint.asynchronous else "",
+        deprecated=f"\n\n{DEPRECATED}" if entrypoint.deprecated else "",
         params=format_params(entrypoint.params),
         result=format_result(entrypoint.result),
         separator=SEPARATOR if separator else "",

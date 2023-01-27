@@ -34,7 +34,6 @@ from .core import (
     Box,
     Camera,
     CameraController,
-    CameraRotation,
     Capsule,
     CarPaintMaterial,
     ColorMethod,
@@ -185,6 +184,7 @@ from .service import (
 from .utils import (
     Axis,
     Bounds,
+    CameraRotation,
     Color3,
     Color4,
     Error,

@@ -3,34 +3,18 @@ movie
 
 .. automodule:: brayns.movie
 
-Classes
--------
-
-Movie
-~~~~~
+movie
+-----
 
 .. automodule:: brayns.movie.movie
-    :members: Movie
+    :members: Movie, MovieError
     :undoc-members:
     :show-inheritance:
 
-MovieError
-~~~~~~~~~~
-
-.. automodule:: brayns.movie.movie_error
-    :members: MovieError
-    :undoc-members:
-    :show-inheritance:
-
-MovieFrames
-~~~~~~~~~~~
+movie_frames
+------------
 
 .. automodule:: brayns.movie.movie_frames
     :members: MovieFrames
     :undoc-members:
     :show-inheritance:
-
-Functions
----------
-
-None
