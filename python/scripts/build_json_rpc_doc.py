@@ -21,9 +21,9 @@
 from __future__ import annotations
 
 import json
-import pathlib
 import sys
 from collections import defaultdict
+from pathlib import Path
 
 import brayns
 
@@ -91,30 +91,30 @@ SEPARATOR = "\n\n----"
 
 
 def build_from_argv() -> None:
-    python = pathlib.Path(__file__).parent.parent
+    python = Path(__file__).parent.parent
     directory = python / "doc" / "source" / "jsonrpcapi"
     uri = "localhost:5000"
     argv = sys.argv
     if len(argv) > 1:
-        directory = pathlib.Path(argv[1])
+        directory = Path(argv[1])
     if len(argv) > 2:
         uri = argv[2]
     build_from_uri(uri, directory)
 
 
-def build_from_uri(uri: str, directory: pathlib.Path) -> None:
+def build_from_uri(uri: str, directory: Path) -> None:
     connector = brayns.Connector(uri)
     with connector.connect() as instance:
         build_from_instance(instance, directory)
 
 
-def build_from_instance(instance: brayns.Instance, directory: pathlib.Path) -> None:
+def build_from_instance(instance: brayns.Instance, directory: Path) -> None:
     entrypoints = brayns.get_entrypoints(instance)
     return build_from_entrypoints(entrypoints, directory)
 
 
 def build_from_entrypoints(
-    entrypoints: list[brayns.Entrypoint], directory: pathlib.Path
+    entrypoints: list[brayns.Entrypoint], directory: Path
 ) -> None:
     plugins = defaultdict[str, list[brayns.Entrypoint]](list)
     for entrypoint in entrypoints:
@@ -125,7 +125,7 @@ def build_from_entrypoints(
 
 
 def build_from_plugins(
-    plugins: dict[str, list[brayns.Entrypoint]], directory: pathlib.Path
+    plugins: dict[str, list[brayns.Entrypoint]], directory: Path
 ) -> None:
     directory.mkdir(exist_ok=True)
     filenames = list[str]()
@@ -136,7 +136,7 @@ def build_from_plugins(
     build_summary(directory, filenames)
 
 
-def build_summary(directory: pathlib.Path, filenames: list[str]) -> None:
+def build_summary(directory: Path, filenames: list[str]) -> None:
     summary = format_summary(filenames) + "\n"
     path = directory / SUMMARY_FILENAME
     with path.open("w") as file:
@@ -162,7 +162,7 @@ def format_summary_items(filenames: list[str]) -> str:
 def build_plugin(
     plugin: str,
     entrypoints: list[brayns.Entrypoint],
-    directory: pathlib.Path,
+    directory: Path,
     filename: str,
 ) -> None:
     data = format_plugin(plugin, entrypoints) + "\n"

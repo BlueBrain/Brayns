@@ -42,10 +42,10 @@ class ImageFormat(Enum):
 def parse_image_format(filename: str | Path) -> ImageFormat:
     """Parse the image format from a file path using its extension.
 
-    Supports both string and pathlib.Path input.
+    Supports both string and Path input.
 
     :param filename: Image file path.
-    :type filename: str | pathlib.Path
+    :type filename: str | Path
     :return: Image format.
     :rtype: ImageFormat
     """

@@ -19,8 +19,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import inspect
-import pathlib
 import sys
+from pathlib import Path
 from types import ModuleType
 
 import brayns
@@ -71,15 +71,15 @@ AUTOMODULE = """
 
 
 def build_from_argv() -> None:
-    python = pathlib.Path(__file__).parent.parent
+    python = Path(__file__).parent.parent
     directory = python / "doc" / "source" / "pythonapi"
     argv = sys.argv
     if len(argv) > 1:
-        directory = pathlib.Path(argv[1])
+        directory = Path(argv[1])
     build(directory)
 
 
-def build(directory: pathlib.Path) -> None:
+def build(directory: Path) -> None:
     directory.mkdir(exist_ok=True)
     subpackages = get_subpackages()
     build_summary(directory, subpackages)
@@ -88,7 +88,7 @@ def build(directory: pathlib.Path) -> None:
 
 
 def get_subpackages() -> list[str]:
-    python = pathlib.Path(__file__).parent.parent
+    python = Path(__file__).parent.parent
     directory = python / "brayns"
     return sorted(
         child.name
@@ -98,7 +98,7 @@ def get_subpackages() -> list[str]:
     )
 
 
-def build_summary(directory: pathlib.Path, subpackages: list[str]) -> None:
+def build_summary(directory: Path, subpackages: list[str]) -> None:
     path = directory / API_FILENAME
     summary = format_subpackages_summary(subpackages)
     data = API.format(subpackages=summary)
@@ -110,7 +110,7 @@ def format_subpackages_summary(subpackages: list[str]) -> str:
     return "\n".join(f"    {subpackage}" for subpackage in subpackages)
 
 
-def build_subpackage(directory: pathlib.Path, subpackage: str) -> None:
+def build_subpackage(directory: Path, subpackage: str) -> None:
     path = directory / f"{subpackage}.rst"
     data = format_subpackage(subpackage)
     with path.open("wt") as file:

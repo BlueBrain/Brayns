@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pathlib
 import tempfile
+from pathlib import Path
 
 import brayns
 from testapi.render import validate_file
@@ -35,7 +35,7 @@ class TestMovie(SimpleTestCase):
             ffmpeg_executable=self.ffmpeg,
         )
         with tempfile.TemporaryDirectory() as directory:
-            path = pathlib.Path(directory) / "movie.mp4"
+            path = Path(directory) / "movie.mp4"
             movie.save(str(path))
             ref = self.asset_folder / "movie.mp4"
             validate_file(path, ref)
