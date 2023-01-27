@@ -252,4 +252,4 @@ def clear_clipping_geometries(instance: Instance) -> None:
     :param instance: Instance.
     :type instance: Instance
     """
-    instance.request("clear-clip-planes")
+    instance.request("clear-clipping-geometries")

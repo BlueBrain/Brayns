@@ -35,7 +35,7 @@ class TestAddClippingGeometries(unittest.TestCase):
     def test_clear_clipping_geometries(self) -> None:
         instance = MockInstance()
         brayns.clear_clipping_geometries(instance)
-        self.assertEqual(instance.method, "clear-clip-planes")
+        self.assertEqual(instance.method, "clear-clipping-geometries")
         self.assertIsNone(instance.params)
 
     def test_bounded_planes(self) -> None:

@@ -38,7 +38,12 @@ std::string AddClipPlaneEntrypoint::getMethod() const
 
 std::string AddClipPlaneEntrypoint::getDescription() const
 {
-    return "Add a clip plane and returns the clip plane ID";
+    return "Old way of adding clip plane, use 'add-clipping-planes' instead";
+}
+
+bool AddClipPlaneEntrypoint::isDeprecated() const
+{
+    return true;
 }
 
 void AddClipPlaneEntrypoint::onRequest(const Request &request)

@@ -35,7 +35,12 @@ std::string ExitLaterEntrypoint::getMethod() const
 
 std::string ExitLaterEntrypoint::getDescription() const
 {
-    return "Schedules Brayns to shutdown after a given amount of minutes";
+    return "Old monitoring, use 'quit' instead to stop the service";
+}
+
+bool ExitLaterEntrypoint::isDeprecated() const
+{
+    return true;
 }
 
 void ExitLaterEntrypoint::onRequest(const Request &request)
