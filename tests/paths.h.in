@@ -46,6 +46,8 @@ struct Meshes
     static constexpr auto stl = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/cube.stl";
     static constexpr auto fbx = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/cube.fbx";
     static constexpr auto empty = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/empty.obj";
+    static constexpr auto lucy = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/lucy.ply";
+    static constexpr auto suzanne = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/suzanne.obj";
 };
 
 struct Volumes

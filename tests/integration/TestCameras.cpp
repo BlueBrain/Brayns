@@ -18,28 +18,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include <doctest/doctest.h>
 
-#include <brayns/engine/light/Light.h>
+#include <tests/helpers/BraynsTestUtils.h>
+#include <tests/helpers/ImageValidator.h>
 
-#include <vector>
-
-namespace brayns
+TEST_CASE("Perspective camera")
 {
-struct Lights
+    auto utils = BraynsTestUtils();
+    utils.createDefaultScene();
+    utils.adjustPerspectiveView();
+
+    CHECK(ImageValidator::validate(utils.render(), "test_perspective_camera.png"));
+
+    auto &engine = utils.getEngine();
+    auto &camera = engine.getCamera();
+    auto perspective = *camera.as<brayns::Perspective>();
+
+    auto higherFovy = perspective;
+    higherFovy.fovy *= 1.5f;
+    camera.set(higherFovy);
+
+    CHECK(ImageValidator::validate(utils.render(), "test_perspective_camera_fovy.png"));
+}
+
+TEST_CASE("Orthographic camera")
 {
-    Lights() = default;
+    auto utils = BraynsTestUtils();
+    utils.createDefaultScene();
+    utils.adjustOrthographicView();
 
-    explicit Lights(Light light)
-    {
-        elements.push_back(std::move(light));
-    }
-
-    explicit Lights(std::vector<Light> lights)
-    {
-        elements = std::move(lights);
-    }
-
-    std::vector<Light> elements;
-};
+    CHECK(ImageValidator::validate(utils.render(), "test_orthographic_camera.png"));
 }

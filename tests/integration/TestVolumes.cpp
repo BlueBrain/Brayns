@@ -18,28 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include <doctest/doctest.h>
 
-#include <brayns/engine/light/Light.h>
+#include <brayns/engine/volume/types/RegularVolume.h>
 
-#include <vector>
+#include <tests/helpers/BraynsTestUtils.h>
+#include <tests/helpers/ImageValidator.h>
+#include <tests/paths.h>
 
-namespace brayns
+TEST_CASE("Volume types")
 {
-struct Lights
-{
-    Lights() = default;
-
-    explicit Lights(Light light)
+    SUBCASE("Regular volume")
     {
-        elements.push_back(std::move(light));
+        auto utils = BraynsTestUtils();
+        utils.addDefaultLights();
+        utils.loadModels(TestPaths::Volumes::mhd);
+        utils.adjustOrthographicView();
+        CHECK(ImageValidator::validate(utils.render(), "test_volume_regular.png"));
     }
-
-    explicit Lights(std::vector<Light> lights)
-    {
-        elements = std::move(lights);
-    }
-
-    std::vector<Light> elements;
-};
 }
