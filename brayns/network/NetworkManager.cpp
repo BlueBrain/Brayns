@@ -37,7 +37,7 @@
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
 #include <brayns/network/entrypoints/CameraViewEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
-#include <brayns/network/entrypoints/ClearClipPlanesEntrypoint.h>
+#include <brayns/network/entrypoints/ClearClippingGeometriesEntrypoint.h>
 #include <brayns/network/entrypoints/ClearLightsEntrypoint.h>
 #include <brayns/network/entrypoints/ClearModelsEntrypoint.h>
 #include <brayns/network/entrypoints/ClearRenderablesEntrypoint.h>
@@ -105,6 +105,7 @@ public:
         builder.add<brayns::AddSpheresEntrypoint>(models);
         builder.add<brayns::CancelEntrypoint>(tasks);
         builder.add<brayns::ClearClipPlanesEntrypoint>(models);
+        builder.add<brayns::ClearClippingGeometriesEntrypoint>(models);
         builder.add<brayns::ClearLightsEntrypoint>(models);
         builder.add<brayns::ClearModelsEntrypoint>(models, simulation);
         builder.add<brayns::ClearRenderablesEntrypoint>(models, simulation);

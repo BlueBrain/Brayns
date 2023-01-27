@@ -768,7 +768,12 @@ Adds a list of capsules to the scene.
 add-clip-plane
 ~~~~~~~~~~~~~~
 
-Add a clip plane and returns the clip plane ID.
+Old way of adding clip plane, use 'add-clipping-planes' instead.
+
+.. attention::
+
+    This entrypoint is DEPRECATED, it will be removed or renamed in the next
+    major release.
 
 **Params**:
 
@@ -791,6 +796,1132 @@ Add a clip plane and returns the clip plane ID.
             "coefficients"
         ],
         "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "info": {
+                "title": "ModelInfo",
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "base_transform": {
+                        "title": "Transform",
+                        "description": "Model transform",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "rotation": {
+                                "description": "Rotation XYZW",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 4,
+                                "maxItems": 4
+                            },
+                            "scale": {
+                                "description": "Scale XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            },
+                            "translation": {
+                                "description": "Translation XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "load_info": {
+                        "title": "LoadInfo",
+                        "description": "Model load information",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "load_parameters": {
+                                "description": "Loader configuration"
+                            },
+                            "loader_name": {
+                                "description": "Loader used",
+                                "type": "string"
+                            },
+                            "path": {
+                                "description": "File path in case of file load type",
+                                "type": "string"
+                            },
+                            "source": {
+                                "description": "Model load source",
+                                "type": "string",
+                                "enum": [
+                                    "from_file",
+                                    "from_blob",
+                                    "none"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "source",
+                            "path",
+                            "loader_name",
+                            "load_parameters"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "metadata": {
+                        "description": "Model-specific metadata",
+                        "type": "object",
+                        "readOnly": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "model_type": {
+                "description": "Model type",
+                "type": "string",
+                "readOnly": true
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+add-clipping-bounded-planes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Add a list of axis-aligned bound limited clipping planes.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "title": "BoundedPlane",
+            "type": "object",
+            "properties": {
+                "bounds": {
+                    "title": "Box",
+                    "description": "Axis-aligned bounds to limit the plane geometry",
+                    "type": "object",
+                    "properties": {
+                        "max": {
+                            "description": "Maximum bound corner (top front right)",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        },
+                        "min": {
+                            "description": "Minimum bound corner (bottom back left)",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                        }
+                    },
+                    "required": [
+                        "min",
+                        "max"
+                    ],
+                    "additionalProperties": false
+                },
+                "coefficients": {
+                    "description": "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                }
+            },
+            "required": [
+                "coefficients",
+                "bounds"
+            ],
+            "additionalProperties": false
+        }
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "info": {
+                "title": "ModelInfo",
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "base_transform": {
+                        "title": "Transform",
+                        "description": "Model transform",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "rotation": {
+                                "description": "Rotation XYZW",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 4,
+                                "maxItems": 4
+                            },
+                            "scale": {
+                                "description": "Scale XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            },
+                            "translation": {
+                                "description": "Translation XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "load_info": {
+                        "title": "LoadInfo",
+                        "description": "Model load information",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "load_parameters": {
+                                "description": "Loader configuration"
+                            },
+                            "loader_name": {
+                                "description": "Loader used",
+                                "type": "string"
+                            },
+                            "path": {
+                                "description": "File path in case of file load type",
+                                "type": "string"
+                            },
+                            "source": {
+                                "description": "Model load source",
+                                "type": "string",
+                                "enum": [
+                                    "from_file",
+                                    "from_blob",
+                                    "none"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "source",
+                            "path",
+                            "loader_name",
+                            "load_parameters"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "metadata": {
+                        "description": "Model-specific metadata",
+                        "type": "object",
+                        "readOnly": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "model_type": {
+                "description": "Model type",
+                "type": "string",
+                "readOnly": true
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+add-clipping-boxes
+~~~~~~~~~~~~~~~~~~
+
+Add a list of clipping boxes to the scene.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "title": "Box",
+            "type": "object",
+            "properties": {
+                "max": {
+                    "description": "Maximum bound corner (top front right)",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                },
+                "min": {
+                    "description": "Minimum bound corner (bottom back left)",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                }
+            },
+            "required": [
+                "min",
+                "max"
+            ],
+            "additionalProperties": false
+        }
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "info": {
+                "title": "ModelInfo",
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "base_transform": {
+                        "title": "Transform",
+                        "description": "Model transform",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "rotation": {
+                                "description": "Rotation XYZW",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 4,
+                                "maxItems": 4
+                            },
+                            "scale": {
+                                "description": "Scale XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            },
+                            "translation": {
+                                "description": "Translation XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "load_info": {
+                        "title": "LoadInfo",
+                        "description": "Model load information",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "load_parameters": {
+                                "description": "Loader configuration"
+                            },
+                            "loader_name": {
+                                "description": "Loader used",
+                                "type": "string"
+                            },
+                            "path": {
+                                "description": "File path in case of file load type",
+                                "type": "string"
+                            },
+                            "source": {
+                                "description": "Model load source",
+                                "type": "string",
+                                "enum": [
+                                    "from_file",
+                                    "from_blob",
+                                    "none"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "source",
+                            "path",
+                            "loader_name",
+                            "load_parameters"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "metadata": {
+                        "description": "Model-specific metadata",
+                        "type": "object",
+                        "readOnly": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "model_type": {
+                "description": "Model type",
+                "type": "string",
+                "readOnly": true
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+add-clipping-capsules
+~~~~~~~~~~~~~~~~~~~~~
+
+Add a list of clipping capsules to the scene.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "title": "Capsule",
+            "type": "object",
+            "properties": {
+                "p0": {
+                    "description": "Starting point of the capsule",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                },
+                "p1": {
+                    "description": "Ending point of the capsule",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                },
+                "r0": {
+                    "description": "Capsule radius at p0",
+                    "type": "number"
+                },
+                "r1": {
+                    "description": "Capsule radius at p1",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "p0",
+                "r0",
+                "p1",
+                "r1"
+            ],
+            "additionalProperties": false
+        }
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "info": {
+                "title": "ModelInfo",
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "base_transform": {
+                        "title": "Transform",
+                        "description": "Model transform",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "rotation": {
+                                "description": "Rotation XYZW",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 4,
+                                "maxItems": 4
+                            },
+                            "scale": {
+                                "description": "Scale XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            },
+                            "translation": {
+                                "description": "Translation XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "load_info": {
+                        "title": "LoadInfo",
+                        "description": "Model load information",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "load_parameters": {
+                                "description": "Loader configuration"
+                            },
+                            "loader_name": {
+                                "description": "Loader used",
+                                "type": "string"
+                            },
+                            "path": {
+                                "description": "File path in case of file load type",
+                                "type": "string"
+                            },
+                            "source": {
+                                "description": "Model load source",
+                                "type": "string",
+                                "enum": [
+                                    "from_file",
+                                    "from_blob",
+                                    "none"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "source",
+                            "path",
+                            "loader_name",
+                            "load_parameters"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "metadata": {
+                        "description": "Model-specific metadata",
+                        "type": "object",
+                        "readOnly": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "model_type": {
+                "description": "Model type",
+                "type": "string",
+                "readOnly": true
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+add-clipping-planes
+~~~~~~~~~~~~~~~~~~~
+
+Add a list of clipping planes to the scene.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "title": "Plane",
+            "type": "object",
+            "properties": {
+                "coefficients": {
+                    "description": "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                }
+            },
+            "required": [
+                "coefficients"
+            ],
+            "additionalProperties": false
+        }
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "info": {
+                "title": "ModelInfo",
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "base_transform": {
+                        "title": "Transform",
+                        "description": "Model transform",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "rotation": {
+                                "description": "Rotation XYZW",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 4,
+                                "maxItems": 4
+                            },
+                            "scale": {
+                                "description": "Scale XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            },
+                            "translation": {
+                                "description": "Translation XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "load_info": {
+                        "title": "LoadInfo",
+                        "description": "Model load information",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "load_parameters": {
+                                "description": "Loader configuration"
+                            },
+                            "loader_name": {
+                                "description": "Loader used",
+                                "type": "string"
+                            },
+                            "path": {
+                                "description": "File path in case of file load type",
+                                "type": "string"
+                            },
+                            "source": {
+                                "description": "Model load source",
+                                "type": "string",
+                                "enum": [
+                                    "from_file",
+                                    "from_blob",
+                                    "none"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "source",
+                            "path",
+                            "loader_name",
+                            "load_parameters"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "metadata": {
+                        "description": "Model-specific metadata",
+                        "type": "object",
+                        "readOnly": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "model_type": {
+                "description": "Model type",
+                "type": "string",
+                "readOnly": true
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
+add-clipping-spheres
+~~~~~~~~~~~~~~~~~~~~
+
+Add a list of clipping spheres to the scene.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "array",
+        "items": {
+            "title": "Sphere",
+            "type": "object",
+            "properties": {
+                "center": {
+                    "description": "Sphere center point",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                },
+                "radius": {
+                    "description": "Sphere radius",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "center",
+                "radius"
+            ],
+            "additionalProperties": false
+        }
     }
 
 **Result**:
@@ -2373,7 +3504,28 @@ null.
 clear-clip-planes
 ~~~~~~~~~~~~~~~~~
 
-Clear all clip planes in the scene.
+Old clear for clipping geometries, use 'clear-clipping-geometries' instead.
+
+.. attention::
+
+    This entrypoint is DEPRECATED, it will be removed or renamed in the next
+    major release.
+
+**Params**:
+
+This entrypoint has no params, the "params" field can hence be omitted or null.
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always
+null.
+
+----
+
+clear-clipping-geometries
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Clear all clipping geometries in the scene.
 
 **Params**:
 
@@ -2522,7 +3674,12 @@ null.
 exit-later
 ~~~~~~~~~~
 
-Schedules Brayns to shutdown after a given amount of minutes.
+Old monitoring, use 'quit' instead to stop the service.
+
+.. attention::
+
+    This entrypoint is DEPRECATED, it will be removed or renamed in the next
+    major release.
 
 **Params**:
 
@@ -3472,7 +4629,8 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
         "properties": {
             "ao_samples": {
                 "description": "Ambient occlusion samples",
-                "type": "integer"
+                "type": "integer",
+                "minimum": 0
             },
             "background_color": {
                 "description": "Background color",
@@ -3489,7 +4647,8 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
             },
             "max_ray_bounces": {
                 "description": "Maximum ray bounces",
-                "type": "integer"
+                "type": "integer",
+                "minimum": 0
             },
             "samples_per_pixel": {
                 "description": "Ray samples per pixel",
@@ -3529,7 +4688,8 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
             },
             "max_ray_bounces": {
                 "description": "Maximum ray bounces",
-                "type": "integer"
+                "type": "integer",
+                "minimum": 0
             },
             "samples_per_pixel": {
                 "description": "Ray samples per pixel",
@@ -3950,6 +5110,245 @@ Inspect the scene at x-y position.
 
 ----
 
+instantiate-model
+~~~~~~~~~~~~~~~~~
+
+Creates a new instance of the given model. The underneath data is shared across all instances.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "model_id": {
+                "description": "Model to instantiate",
+                "type": "integer",
+                "minimum": 0
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "New instance transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "required": [
+            "model_id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model axis-aligned bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Bounds maximum (top front right corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bounds minimum (bottom back left corner)",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            },
+            "info": {
+                "title": "ModelInfo",
+                "description": "Model-specific metadata",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "base_transform": {
+                        "title": "Transform",
+                        "description": "Model transform",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "rotation": {
+                                "description": "Rotation XYZW",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 4,
+                                "maxItems": 4
+                            },
+                            "scale": {
+                                "description": "Scale XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            },
+                            "translation": {
+                                "description": "Translation XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "load_info": {
+                        "title": "LoadInfo",
+                        "description": "Model load information",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "load_parameters": {
+                                "description": "Loader configuration"
+                            },
+                            "loader_name": {
+                                "description": "Loader used",
+                                "type": "string"
+                            },
+                            "path": {
+                                "description": "File path in case of file load type",
+                                "type": "string"
+                            },
+                            "source": {
+                                "description": "Model load source",
+                                "type": "string",
+                                "enum": [
+                                    "from_file",
+                                    "from_blob",
+                                    "none"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "source",
+                            "path",
+                            "loader_name",
+                            "load_parameters"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "metadata": {
+                        "description": "Model-specific metadata",
+                        "type": "object",
+                        "readOnly": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "model_type": {
+                "description": "Model type",
+                "type": "string",
+                "readOnly": true
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
 quit
 ~~~~
 
@@ -4126,6 +5525,10 @@ Get the JSON schema of the given entrypoint.
                 "description": "Check if the entrypoint is asynchronous",
                 "type": "boolean"
             },
+            "deprecated": {
+                "description": "If true, the entrypoint will be removed / renamed in the next release",
+                "type": "boolean"
+            },
             "description": {
                 "description": "Description of the entrypoint",
                 "type": "string"
@@ -4151,7 +5554,8 @@ Get the JSON schema of the given entrypoint.
             "plugin",
             "title",
             "description",
-            "async"
+            "async",
+            "deprecated"
         ],
         "additionalProperties": false
     }
@@ -4396,7 +5800,7 @@ Stablishes a progressive-resolution frame rendering on the engine.
                 "description": "Frame size reduction factor",
                 "type": "integer",
                 "default": 4,
-                "minimum": 0
+                "minimum": 1
             }
         },
         "additionalProperties": false
@@ -4767,7 +6171,8 @@ Sets the system renderer to the interactive one.
         "properties": {
             "ao_samples": {
                 "description": "Ambient occlusion samples",
-                "type": "integer"
+                "type": "integer",
+                "minimum": 0
             },
             "background_color": {
                 "description": "Background color",
@@ -4784,7 +6189,8 @@ Sets the system renderer to the interactive one.
             },
             "max_ray_bounces": {
                 "description": "Maximum ray bounces",
-                "type": "integer"
+                "type": "integer",
+                "minimum": 0
             },
             "samples_per_pixel": {
                 "description": "Ray samples per pixel",
@@ -4825,7 +6231,8 @@ Sets the system renderer to the production one.
             },
             "max_ray_bounces": {
                 "description": "Maximum ray bounces",
-                "type": "integer"
+                "type": "integer",
+                "minimum": 0
             },
             "samples_per_pixel": {
                 "description": "Ray samples per pixel",

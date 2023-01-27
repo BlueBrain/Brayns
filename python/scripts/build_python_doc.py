@@ -18,9 +18,9 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import inspect
-import pathlib
 import sys
+from collections import defaultdict
+from pathlib import Path
 from types import ModuleType
 
 import brayns
@@ -42,44 +42,36 @@ Python API reference
 SUBPACKAGE_FILENAME = "{name}.rst"
 
 SUBPACKAGE = """
-{name}
+{title}
 {underline}
 
 .. automodule:: {module}
 
-Classes
--------
-
-{classes}
-
-Functions
----------
-
-{functions}
+{items}
 """.strip()
 
 
 AUTOMODULE = """
-{name}
+{title}
 {underline}
 
 .. automodule:: {module}
-    :members: {member}
+    :members: {members}
     :undoc-members:
     :show-inheritance:
 """.strip()
 
 
 def build_from_argv() -> None:
-    python = pathlib.Path(__file__).parent.parent
+    python = Path(__file__).parent.parent
     directory = python / "doc" / "source" / "pythonapi"
     argv = sys.argv
     if len(argv) > 1:
-        directory = pathlib.Path(argv[1])
+        directory = Path(argv[1])
     build(directory)
 
 
-def build(directory: pathlib.Path) -> None:
+def build(directory: Path) -> None:
     directory.mkdir(exist_ok=True)
     subpackages = get_subpackages()
     build_summary(directory, subpackages)
@@ -88,7 +80,7 @@ def build(directory: pathlib.Path) -> None:
 
 
 def get_subpackages() -> list[str]:
-    python = pathlib.Path(__file__).parent.parent
+    python = Path(__file__).parent.parent
     directory = python / "brayns"
     return sorted(
         child.name
@@ -98,7 +90,7 @@ def get_subpackages() -> list[str]:
     )
 
 
-def build_summary(directory: pathlib.Path, subpackages: list[str]) -> None:
+def build_summary(directory: Path, subpackages: list[str]) -> None:
     path = directory / API_FILENAME
     summary = format_subpackages_summary(subpackages)
     data = API.format(subpackages=summary)
@@ -110,7 +102,7 @@ def format_subpackages_summary(subpackages: list[str]) -> str:
     return "\n".join(f"    {subpackage}" for subpackage in subpackages)
 
 
-def build_subpackage(directory: pathlib.Path, subpackage: str) -> None:
+def build_subpackage(directory: Path, subpackage: str) -> None:
     path = directory / f"{subpackage}.rst"
     data = format_subpackage(subpackage)
     with path.open("wt") as file:
@@ -118,58 +110,38 @@ def build_subpackage(directory: pathlib.Path, subpackage: str) -> None:
 
 
 def format_subpackage(subpackage: str) -> str:
-    underline = len(subpackage) * "="
-    module = f"brayns.{subpackage}"
-    obj = getattr(brayns, subpackage)
-    items = get_subpackage_items(obj)
-    classes = get_classes(items)
-    functions = get_functions(items)
+    obj: ModuleType = getattr(brayns, subpackage)
     return SUBPACKAGE.format(
-        name=subpackage,
-        underline=underline,
-        module=module,
-        classes=format_items(classes),
-        functions=format_items(functions),
+        title=subpackage,
+        underline=len(subpackage) * "=",
+        module=f"brayns.{subpackage}",
+        items=format_subpackage_modules(obj),
     )
 
 
-def format_items(items: list[str]) -> str:
-    if not items:
-        return "None"
-    return "\n\n".join(format_item(item) for item in items)
+def format_subpackage_modules(subpackage: ModuleType) -> str:
+    group = group_items_by_module(subpackage)
+    return "\n\n".join(format_module(module, items) for module, items in group.items())
 
 
-def format_item(item: str) -> str:
-    obj = getattr(brayns, item)
-    module = obj.__module__
+def group_items_by_module(subpackage: ModuleType) -> dict[str, list[str]]:
+    items: list[str] = subpackage.__all__
+    items = [item for item in items if item in brayns.__all__]
+    result = defaultdict[str, list[str]](list)
+    for item in items:
+        obj = getattr(subpackage, item)
+        result[obj.__module__].append(item)
+    return result
+
+
+def format_module(module: str, items: list[str]) -> str:
+    title = module.split(".")[-1]
     return AUTOMODULE.format(
-        name=item,
-        underline=len(item) * "~",
+        title=title,
+        underline=len(title) * "-",
         module=module,
-        member=item,
+        members=", ".join(items),
     )
-
-
-def get_subpackage_items(module: ModuleType) -> list[str]:
-    return [item for item in module.__all__ if item in brayns.__all__]
-
-
-def get_classes(items: list[str]) -> list[str]:
-    return sorted(item for item in items if is_class(item))
-
-
-def is_class(item: str) -> bool:
-    obj = getattr(brayns, item)
-    return inspect.isclass(obj)
-
-
-def get_functions(items: list[str]) -> list[str]:
-    return sorted(item for item in items if is_function(item))
-
-
-def is_function(item: str) -> bool:
-    obj = getattr(brayns, item)
-    return inspect.isfunction(obj)
 
 
 if __name__ == "__main__":

@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pathlib
 import tempfile
+from pathlib import Path
 
 import brayns
 from testapi.loading import add_sphere
@@ -34,24 +34,24 @@ from testapi.simple_test_case import SimpleTestCase
 
 class TestSnapshot(SimpleTestCase):
     @property
-    def ref_png(self) -> pathlib.Path:
+    def ref_png(self) -> Path:
         return self.asset_folder / "snapshot.png"
 
     @property
-    def ref_jpg(self) -> pathlib.Path:
+    def ref_jpg(self) -> Path:
         return self.asset_folder / "snapshot.jpg"
 
     def test_save(self) -> None:
         snapshot = self._prepare_snapshot()
         with tempfile.TemporaryDirectory() as directory:
-            path = pathlib.Path(directory) / "snapshot.png"
+            path = Path(directory) / "snapshot.png"
             snapshot.save(self.instance, str(path))
             validate_file(path, self.ref_png)
 
     def test_save_task(self) -> None:
         snapshot = self._prepare_snapshot()
         with tempfile.TemporaryDirectory() as directory:
-            path = pathlib.Path(directory) / "test_save_task.jpg"
+            path = Path(directory) / "test_save_task.jpg"
             task = snapshot.save_task(self.instance, str(path))
             self.assertTrue(list(task))
             task.wait_for_result()
@@ -60,14 +60,14 @@ class TestSnapshot(SimpleTestCase):
     def test_save_remotely(self) -> None:
         snapshot = self._prepare_snapshot()
         with tempfile.TemporaryDirectory() as directory:
-            path = pathlib.Path(directory) / "test_save_remotely.png"
+            path = Path(directory) / "test_save_remotely.png"
             snapshot.save_remotely(self.instance, str(path))
             validate_file(path, self.ref_png)
 
     def test_save_remotely_task(self) -> None:
         snapshot = self._prepare_snapshot()
         with tempfile.TemporaryDirectory() as directory:
-            path = pathlib.Path(directory) / "test_save_remotely_task.jpg"
+            path = Path(directory) / "test_save_remotely_task.jpg"
             task = snapshot.save_remotely_task(self.instance, str(path))
             self.assertTrue(list(task))
             task.wait_for_result()

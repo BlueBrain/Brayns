@@ -120,10 +120,10 @@ from the name (%d C-style printf integer formatting).
 
 .. code-block:: python
 
-    import pathlib
+    from pathlib import Path
 
     # Choose a folder to export frames.
-    folder = pathlib.Path('frames')
+    folder = Path('frames')
 
     # Create it if not exists.
     folder.mkdir(parents=True, exist_ok=True)

@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-import pathlib
+from pathlib import Path
 
 import brayns
 from testapi.api_test_case import ApiTestCase
@@ -32,11 +32,11 @@ class TestConnector(ApiTestCase):
         return f"localhost:{self.port}"
 
     @property
-    def key(self) -> pathlib.Path:
+    def key(self) -> Path:
         return self.asset_folder / "key.pem"
 
     @property
-    def certificate(self) -> pathlib.Path:
+    def certificate(self) -> Path:
         return self.asset_folder / "certificate.pem"
 
     def test_connect(self) -> None:

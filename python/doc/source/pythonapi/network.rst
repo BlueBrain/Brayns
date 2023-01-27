@@ -3,130 +3,90 @@ network
 
 .. automodule:: brayns.network
 
-Classes
--------
+errors
+------
 
-ConnectionClosedError
-~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: brayns.network.websocket.exceptions.connection_closed_error
-    :members: ConnectionClosedError
+.. automodule:: brayns.network.websocket.errors
+    :members: ConnectionClosedError, InvalidServerCertificateError, ProtocolError, ServiceUnavailableError, WebSocketError
     :undoc-members:
     :show-inheritance:
 
-Connector
-~~~~~~~~~
+connector
+---------
 
 .. automodule:: brayns.network.connector
     :members: Connector
     :undoc-members:
     :show-inheritance:
 
-Future
-~~~~~~
+future
+------
 
 .. automodule:: brayns.network.future
     :members: Future
     :undoc-members:
     :show-inheritance:
 
-Instance
-~~~~~~~~
+instance
+--------
 
 .. automodule:: brayns.network.instance
     :members: Instance
     :undoc-members:
     :show-inheritance:
 
-InvalidServerCertificateError
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+json_rpc_error
+--------------
 
-.. automodule:: brayns.network.websocket.exceptions.invalid_server_certificate_error
-    :members: InvalidServerCertificateError
-    :undoc-members:
-    :show-inheritance:
-
-JsonRpcError
-~~~~~~~~~~~~
-
-.. automodule:: brayns.network.jsonrpc.messages.json_rpc_error
+.. automodule:: brayns.network.jsonrpc.json_rpc_error
     :members: JsonRpcError
     :undoc-members:
     :show-inheritance:
 
-JsonRpcFuture
-~~~~~~~~~~~~~
+json_rpc_future
+---------------
 
 .. automodule:: brayns.network.jsonrpc.json_rpc_future
     :members: JsonRpcFuture
     :undoc-members:
     :show-inheritance:
 
-JsonRpcProgress
-~~~~~~~~~~~~~~~
+json_rpc_progress
+-----------------
 
-.. automodule:: brayns.network.jsonrpc.messages.json_rpc_progress
+.. automodule:: brayns.network.jsonrpc.json_rpc_progress
     :members: JsonRpcProgress
     :undoc-members:
     :show-inheritance:
 
-JsonRpcReply
-~~~~~~~~~~~~
+json_rpc_reply
+--------------
 
-.. automodule:: brayns.network.jsonrpc.messages.json_rpc_reply
+.. automodule:: brayns.network.jsonrpc.json_rpc_reply
     :members: JsonRpcReply
     :undoc-members:
     :show-inheritance:
 
-JsonRpcRequest
-~~~~~~~~~~~~~~
+json_rpc_request
+----------------
 
-.. automodule:: brayns.network.jsonrpc.messages.json_rpc_request
+.. automodule:: brayns.network.jsonrpc.json_rpc_request
     :members: JsonRpcRequest
     :undoc-members:
     :show-inheritance:
 
-Logger
-~~~~~~
+logger
+------
 
 .. automodule:: brayns.network.logger
     :members: Logger
     :undoc-members:
     :show-inheritance:
 
-ProtocolError
-~~~~~~~~~~~~~
+web_socket_connector
+--------------------
 
-.. automodule:: brayns.network.websocket.exceptions.protocol_error
-    :members: ProtocolError
-    :undoc-members:
-    :show-inheritance:
-
-ServiceUnavailableError
-~~~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: brayns.network.websocket.exceptions.service_unavailable_error
-    :members: ServiceUnavailableError
-    :undoc-members:
-    :show-inheritance:
-
-SslClientContext
-~~~~~~~~~~~~~~~~
-
-.. automodule:: brayns.network.websocket.ssl_client_context
+.. automodule:: brayns.network.websocket.web_socket_connector
     :members: SslClientContext
     :undoc-members:
     :show-inheritance:
-
-WebSocketError
-~~~~~~~~~~~~~~
-
-.. automodule:: brayns.network.websocket.exceptions.web_socket_error
-    :members: WebSocketError
-    :undoc-members:
-    :show-inheritance:
-
-Functions
----------
-
-None

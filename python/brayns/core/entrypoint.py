@@ -44,6 +44,8 @@ class Entrypoint:
     :type plugin: str
     :param asynchronous: Check wether progress and cancellation are supported.
     :type asynchronous: bool
+    :param deprecated: Indicate a removal / renaming in the next major release.
+    :type deprecated: bool
     :param params: Schema of input if any, otherwise None.
     :type params: JsonSchema | None
     :param result: Schema of output if any, otherwise None.
@@ -54,6 +56,7 @@ class Entrypoint:
     description: str
     plugin: str
     asynchronous: bool
+    deprecated: bool
     params: JsonSchema | None
     result: JsonSchema | None
 
@@ -101,6 +104,7 @@ def _deserialize_entrypoint(message: dict[str, Any]) -> Entrypoint:
         description=message["description"],
         plugin=message["plugin"],
         asynchronous=message["async"],
+        deprecated=message.get("deprecated", False),
         params=_deserialize_schema(message, "params"),
         result=_deserialize_schema(message, "returns"),
     )

@@ -106,6 +106,20 @@ public:
     }
 
     /**
+     * @brief Indicate if the entrypoint is deprecated.
+     *
+     * Deprecated entrypoints will be removed / renamed in the next major
+     * release but are still supported.
+     *
+     * @return true Deprecated.
+     * @return false Not deprecated.
+     */
+    virtual bool isDeprecated() const
+    {
+        return false;
+    }
+
+    /**
      * @brief Called once per update.
      *
      */

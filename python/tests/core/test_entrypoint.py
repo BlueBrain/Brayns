@@ -47,6 +47,7 @@ class TestEntrypoint(unittest.TestCase):
             description="test2",
             plugin="test3",
             asynchronous=True,
+            deprecated=True,
             params=brayns.JsonSchema(type=brayns.JsonType.OBJECT),
             result=brayns.JsonSchema(type=brayns.JsonType.ARRAY),
         )
@@ -57,6 +58,7 @@ class TestEntrypoint(unittest.TestCase):
             "description": "test2",
             "plugin": "test3",
             "async": True,
+            "deprecated": True,
             "params": {"type": "object"},
             "returns": {"type": "array"},
         }

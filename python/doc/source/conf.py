@@ -11,10 +11,10 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import pathlib
 import sys
+from pathlib import Path
 
-SOURCE = pathlib.Path(__file__).parent
+SOURCE = Path(__file__).parent
 DOC = SOURCE.parent
 PYTHON = DOC.parent
 

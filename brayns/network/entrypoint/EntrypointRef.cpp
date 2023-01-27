@@ -32,6 +32,7 @@ public:
     {
         schema.description = entrypoint.getDescription();
         schema.async = entrypoint.isAsync();
+        schema.deprecated = entrypoint.isDeprecated();
         auto params = entrypoint.getParamsSchema();
         if (!brayns::JsonSchemaHelper::isNull(params))
         {

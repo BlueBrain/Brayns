@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ClearClipPlanesEntrypoint.h"
+#include "ClearClippingGeometriesEntrypoint.h"
 
 #include <brayns/engine/scene/ModelsOperations.h>
 
@@ -37,10 +37,36 @@ std::string ClearClipPlanesEntrypoint::getMethod() const
 
 std::string ClearClipPlanesEntrypoint::getDescription() const
 {
-    return "Clear all clip planes in the scene";
+    return "Old clear for clipping geometries, use 'clear-clipping-geometries' instead";
+}
+
+bool ClearClipPlanesEntrypoint::isDeprecated() const
+{
+    return true;
 }
 
 void ClearClipPlanesEntrypoint::onRequest(const Request &request)
+{
+    ModelsOperations::removeClippers(_models);
+    request.reply(EmptyMessage());
+}
+
+ClearClippingGeometriesEntrypoint::ClearClippingGeometriesEntrypoint(ModelManager &models)
+    : _models(models)
+{
+}
+
+std::string ClearClippingGeometriesEntrypoint::getMethod() const
+{
+    return "clear-clipping-geometries";
+}
+
+std::string ClearClippingGeometriesEntrypoint::getDescription() const
+{
+    return "Clear all clipping geometries in the scene";
+}
+
+void ClearClippingGeometriesEntrypoint::onRequest(const Request &request)
 {
     ModelsOperations::removeClippers(_models);
     request.reply(EmptyMessage());

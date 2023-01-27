@@ -55,13 +55,38 @@ Geometries
 
 Raw geometries with custom colors can also be loaded using a list of objects. A
 geometry is basically a primitive shape (sphere, box, ...) with a color. It
-always create one single model per function call.
+always create one single model per function call and all geometries must be of
+the same type.
+
+Supported geometry types are:
+
+* ``BoundedPlane``: plane limited in space.
+* ``Box``: regular box.
+* ``Capsule``: cylinder with spheres at its extemities.
+* ``Plane``: infinite plane.
+* ``Sphere``: regular sphere.
 
 .. code-block:: python
 
     model = brayns.add_geometries(instance, [
         (brayns.Sphere(0.1), brayns.Color4.red),
         (brayns.Sphere(0.2, center=brayns.Vector3.one), brayns.Color4.white),
+    ])
+
+Clipping geometries
+-------------------
+
+Raw geometries can also be used to clip parts of the scene. Each set of added
+clipping geometries is a single model like for regular geometries.
+
+For planes, everything below the plane is not rendered and for the rest,
+everything inside the shape is not rendered.
+
+.. code-block:: python
+
+    model = brayns.add_clipping_geometries(instance, [
+        brayns.Sphere(0.1),
+        brayns.Sphere(0.2, center=brayns.Vector3.one),
     ])
 
 Circuits

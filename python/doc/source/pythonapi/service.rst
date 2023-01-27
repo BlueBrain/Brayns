@@ -3,64 +3,26 @@ service
 
 .. automodule:: brayns.service
 
-Classes
+service
 -------
 
-LogLevel
-~~~~~~~~
-
-.. automodule:: brayns.service.log_level
-    :members: LogLevel
+.. automodule:: brayns.service.service
+    :members: LogLevel, Plugin, Service, SslServerContext
     :undoc-members:
     :show-inheritance:
 
-Manager
-~~~~~~~
+manager
+-------
 
 .. automodule:: brayns.service.manager
-    :members: Manager
+    :members: Manager, start
     :undoc-members:
     :show-inheritance:
 
-Plugin
-~~~~~~
-
-.. automodule:: brayns.service.plugin
-    :members: Plugin
-    :undoc-members:
-    :show-inheritance:
-
-Process
-~~~~~~~
+process
+-------
 
 .. automodule:: brayns.service.process
     :members: Process
-    :undoc-members:
-    :show-inheritance:
-
-Service
-~~~~~~~
-
-.. automodule:: brayns.service.service
-    :members: Service
-    :undoc-members:
-    :show-inheritance:
-
-SslServerContext
-~~~~~~~~~~~~~~~~
-
-.. automodule:: brayns.service.ssl_server_context
-    :members: SslServerContext
-    :undoc-members:
-    :show-inheritance:
-
-Functions
----------
-
-start
-~~~~~
-
-.. automodule:: brayns.service.start
-    :members: start
     :undoc-members:
     :show-inheritance:

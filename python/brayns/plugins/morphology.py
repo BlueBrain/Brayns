@@ -56,7 +56,7 @@ class Morphology:
     :param resampling: Min cos of angle between segments to merge them.
     :type resampling: float
     :param subsampling: Step factor to skip morphology samples.
-    :type subsmapling int
+    :type subsampling: int
     """
 
     radius_multiplier: float = 1.0

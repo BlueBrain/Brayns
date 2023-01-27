@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pathlib
 import unittest
+from pathlib import Path
 
 import brayns
 
@@ -41,6 +41,6 @@ class TestImage(unittest.TestCase):
         self.assertIs(test, brayns.ImageFormat.PNG)
 
     def test_path(self) -> None:
-        path = pathlib.Path("test/stuff/image.png")
+        path = Path("test/stuff/image.png")
         test = brayns.parse_image_format(path)
         self.assertIs(test, brayns.ImageFormat.PNG)
