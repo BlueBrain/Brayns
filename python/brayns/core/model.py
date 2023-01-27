@@ -209,7 +209,7 @@ def instantiate_model(
     :param model_id: ID of the model to instantiate.
     :type model_id: int
     :param transforms: List of new instances transformations.
-    :type transforms: list[Transform] | None, optional
+    :type transforms: list[Transform]
     :return: New instance model.
     :rtype: Model
     """
