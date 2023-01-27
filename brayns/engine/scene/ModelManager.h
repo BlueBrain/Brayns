@@ -51,19 +51,19 @@ public:
     std::vector<ModelInstance *> add(std::vector<std::shared_ptr<Model>> models);
 
     /**
-     * @brief Creates a new instance from the model that is being instantiated by the given instance ID
-     * @param sourceInstanceId The ID of the instance whose model will be used to create a new instance
-     * @returns ModelInstance &
-     * @throws std::invalid_argument if modelID does not correspond to any existing model
+     * @brief Creates new instances from the model that is being instantiated by the given instance ID.
+     * @param instanceId The ID of the instance whose model will be used to create new instances.
+     * @param count Number of instances to create.
+     * @return std::vector<ModelInstance *>
      */
-    ModelInstance *createInstance(const uint32_t sourceInstanceId);
+    std::vector<ModelInstance *> createInstances(uint32_t instanceId, size_t count);
 
     /**
      * @brief Returns the model instance identified by the given instance ID
      * @returns ModelInstance &
      * @throws std::invalid_argument if modelID does not correspond to any existing model
      */
-    ModelInstance &getModelInstance(const uint32_t instanceID);
+    ModelInstance &getModelInstance(uint32_t instanceID);
 
     /**
      * @brief Return a list of all model instances in the manager

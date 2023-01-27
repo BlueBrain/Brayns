@@ -198,26 +198,34 @@ def get_models(instance: Instance) -> list[Model]:
 
 
 def instantiate_model(
-    instance: Instance, model_id: int, transform: Transform | None = None
-) -> Model:
-    """Create an instance of the given model and return it.
+    instance: Instance, model_id: int, transforms: list[Transform]
+) -> list[Model]:
+    """Create instances of the given model and return them. \
+
+    The amount of new instances is equal to the number of transforms passed.
 
     :param instance: Instance.
     :type instance: Instance
     :param model_id: ID of the model to instantiate.
     :type model_id: int
-    :param transform: New instance transformation, defaults to None
-    :type transform: Transform | None, optional
+    :param transforms: List of new instances transformations.
+    :type transforms: list[Transform] | None, optional
     :return: New instance model.
     :rtype: Model
     """
-    params: dict[str, Any] = {
-        "model_id": model_id,
-    }
-    if transform is not None:
-        params["transform"] = serialize_transform(transform)
-    result = instance.request("instantiate-model", params)
-    return deserialize_model(result)
+
+    if len(transforms) == 0:
+        raise ValueError("transforms list cannot be empty")
+
+    serialized_transforms = list[dict[str, Any]]()
+    for transform in transforms:
+        serialized_transform = serialize_transform(transform)
+        serialized_transforms.append(serialized_transform)
+
+    params: dict[str, Any] = {"model_id": model_id, "transforms": serialized_transforms}
+
+    instances = instance.request("instantiate-model", params)
+    return [deserialize_model(instanceModel) for instanceModel in instances]
 
 
 def deserialize_model(message: dict[str, Any]) -> Model:

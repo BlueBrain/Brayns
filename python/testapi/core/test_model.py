@@ -89,9 +89,9 @@ class TestModel(SimpleTestCase):
         ref = (brayns.Sphere(5, ref_position), brayns.Color4.blue)
         brayns.add_geometries(self.instance, [ref])
         transform = brayns.Transform(brayns.Vector3(50, 0, 0))
-        instanciated = brayns.instantiate_model(self.instance, model.id, transform)
-        self.assertEqual(instanciated.transform, transform)
-        render_and_validate(self, "instanciate_model")
+        instantiated = brayns.instantiate_model(self.instance, model.id, [transform])
+        self.assertEqual(instantiated[0].transform, transform)
+        render_and_validate(self, "instantiate_model")
 
     def test_update_bounds(self) -> None:
         ref = add_sphere(self)

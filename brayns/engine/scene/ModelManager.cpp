@@ -73,16 +73,26 @@ std::vector<ModelInstance *> ModelManager::add(std::vector<std::shared_ptr<Model
     return result;
 }
 
-ModelInstance *ModelManager::createInstance(const uint32_t instanceID)
+std::vector<ModelInstance *> ModelManager::createInstances(uint32_t instanceId, size_t count)
 {
-    auto &sourceInstance = InstanceFinder::find(_instances, instanceID);
-    auto instanceId = _instanceIdFactory.generateID();
-    _instances.push_back(std::make_unique<ModelInstance>(instanceId, sourceInstance));
-    _dirty = true;
-    return _instances.back().get();
+    auto &sourceInstance = InstanceFinder::find(_instances, instanceId);
+
+    _instances.reserve(_instances.size() + count);
+
+    auto result = std::vector<ModelInstance *>();
+    result.reserve(count);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        auto instanceId = _instanceIdFactory.generateID();
+        _instances.push_back(std::make_unique<ModelInstance>(instanceId, sourceInstance));
+        result.push_back(_instances.back().get());
+    }
+
+    return result;
 }
 
-ModelInstance &ModelManager::getModelInstance(const uint32_t modelID)
+ModelInstance &ModelManager::getModelInstance(uint32_t modelID)
 {
     return InstanceFinder::find(_instances, modelID);
 }

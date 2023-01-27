@@ -28,6 +28,6 @@ namespace brayns
 {
 BRAYNS_JSON_OBJECT_BEGIN(InstantiateMessage)
 BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "Model to instantiate")
-BRAYNS_JSON_OBJECT_ENTRY(Transform, transform, "New instance transform", Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<Transform>, transforms, "New instances transforms")
 BRAYNS_JSON_OBJECT_END()
 }

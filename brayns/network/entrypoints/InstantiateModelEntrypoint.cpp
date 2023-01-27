@@ -34,16 +34,28 @@ std::string InstantiateModelEntrypoint::getMethod() const
 
 std::string InstantiateModelEntrypoint::getDescription() const
 {
-    return "Creates a new instance of the given model. The underneath data is shared across all instances";
+    return "Creates new instances of the given model. The underneath data is shared across all instances";
 }
 
 void InstantiateModelEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
+    auto modelId = params.model_id;
+    auto &transforms = params.transforms;
 
-    auto &newInstance = *_models.createInstance(params.model_id);
-    newInstance.setTransform(params.transform);
+    if (transforms.empty())
+    {
+        throw JsonRpcException("transforms list cannot be empty");
+    }
 
-    request.reply(newInstance);
+    auto count = transforms.size();
+    auto newInstances = _models.createInstances(modelId, count);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        newInstances[i]->setTransform(transforms[i]);
+    }
+
+    request.reply(newInstances);
 }
 }

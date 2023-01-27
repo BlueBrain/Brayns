@@ -28,7 +28,7 @@
 
 namespace brayns
 {
-class InstantiateModelEntrypoint final : public Entrypoint<InstantiateMessage, ModelInstance>
+class InstantiateModelEntrypoint final : public Entrypoint<InstantiateMessage, std::vector<ModelInstance *>>
 {
 public:
     explicit InstantiateModelEntrypoint(ModelManager &models);
