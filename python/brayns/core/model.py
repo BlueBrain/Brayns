@@ -200,7 +200,7 @@ def get_models(instance: Instance) -> list[Model]:
 def instantiate_model(
     instance: Instance, model_id: int, transforms: list[Transform]
 ) -> list[Model]:
-    """Create instances of the given model and return them. \
+    """Create instances of the given model and return them.
 
     The amount of new instances is equal to the number of transforms passed.
 
