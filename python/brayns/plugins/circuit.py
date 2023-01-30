@@ -35,6 +35,7 @@ class CircuitColorMethod:
     MORPHOLOGY: ClassVar[str] = "morphology"
     MORPHOLOGY_CLASS: ClassVar[str] = "morphology class"
     MORPHOLOGY_SECTION: ClassVar[str] = "morphology section"
+    SUBREGION: ClassVar[str] = "subregion"
     SYNAPSE_CLASS: ClassVar[str] = "synapse class"
 
 

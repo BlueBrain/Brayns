@@ -32,18 +32,16 @@ struct AttributeMethodEntry
 class AttributeMethodMapping
 {
 public:
-    static std::vector<AttributeMethodEntry> generate()
-    {
-        return {
-            {BrainColorMethod::ByEtype, "etype"},
-            {BrainColorMethod::ByHemisphere, "hemisphere"},
-            {BrainColorMethod::ByLayer, "layer"},
-            {BrainColorMethod::ByMorphology, "morphology"},
-            {BrainColorMethod::ByMorphologyClass, "morph_class"},
-            {BrainColorMethod::ByMtype, "mtype"},
-            {BrainColorMethod::ByRegion, "region"},
-            {BrainColorMethod::BySynapseClass, "synapse_class"}};
-    }
+    inline static const std::vector<AttributeMethodEntry> mapping = {
+        {BrainColorMethod::ByEtype, "etype"},
+        {BrainColorMethod::ByHemisphere, "hemisphere"},
+        {BrainColorMethod::ByLayer, "layer"},
+        {BrainColorMethod::ByMorphology, "morphology"},
+        {BrainColorMethod::ByMorphologyClass, "morph_class"},
+        {BrainColorMethod::ByMtype, "mtype"},
+        {BrainColorMethod::ByRegion, "region"},
+        {BrainColorMethod::BySubregion, "subregion"},
+        {BrainColorMethod::BySynapseClass, "synapse_class"}};
 
     static std::string getAttributeForMethod(const std::string &method)
     {
@@ -53,14 +51,13 @@ public:
 
     static std::string getAttributeForMethod(const BrainColorMethod method)
     {
-        const auto mapping = generate();
         const auto begin = mapping.begin();
         const auto end = mapping.end();
         auto it = std::find_if(begin, end, [&](const AttributeMethodEntry &entry) { return entry.method == method; });
 
         if (it == mapping.end())
         {
-            throw std::invalid_argument("Unknown method " + brayns::EnumInfo::getName(method));
+            throw std::invalid_argument("Unsupported method " + brayns::EnumInfo::getName(method));
         }
 
         return it->attribute;
@@ -107,7 +104,7 @@ SonataColorData::SonataColorData(bbp::sonata::NodePopulation population)
 
 std::vector<BrainColorMethod> SonataColorData::getMethods() const
 {
-    auto possibleMethods = AttributeMethodMapping::generate();
+    auto &possibleMethods = AttributeMethodMapping::mapping;
 
     auto result = std::vector<BrainColorMethod>();
     result.reserve(possibleMethods.size());
