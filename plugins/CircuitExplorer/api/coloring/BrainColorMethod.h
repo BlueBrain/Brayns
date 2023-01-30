@@ -34,6 +34,7 @@ enum class BrainColorMethod
     ByHemisphere,
     ByMorphology,
     ByMorphologyClass,
+    BySubregion,
     BySynapseClass
 };
 
@@ -52,6 +53,7 @@ struct EnumReflector<BrainColorMethod>
             {"hemisphere", BrainColorMethod::ByHemisphere},
             {"morphology", BrainColorMethod::ByMorphology},
             {"morphology class", BrainColorMethod::ByMorphologyClass},
+            {"subregion", BrainColorMethod::BySubregion},
             {"synapse class", BrainColorMethod::BySynapseClass}};
     }
 };
