@@ -18,14 +18,63 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "GeometryCommitSystem.h"
+#include "GeometryDataSystem.h"
 
+#include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/material/Material.h>
 
 namespace
 {
+class GeometryInitializer
+{
+public:
+    static void init(brayns::Components &components)
+    {
+        _initGeometryViews(components);
+        _initMaterial(components);
+        _initColor(components);
+    }
+
+private:
+    static void _initGeometryViews(brayns::Components &components)
+    {
+        if (components.has<brayns::GeometryViews>())
+        {
+            return;
+        }
+
+        auto &geometries = components.get<brayns::Geometries>();
+        components.add<brayns::GeometryViews>(geometries.elements);
+    }
+
+    static void _initMaterial(brayns::Components &components)
+    {
+        auto &material = components.getOrAdd<brayns::Material>();
+        auto &views = components.get<brayns::GeometryViews>();
+        for (auto &view : views.elements)
+        {
+            view.setMaterial(material);
+        }
+    }
+
+    static void _initColor(brayns::Components &components)
+    {
+        auto solidColor = components.find<brayns::ColorSolid>();
+        if (!solidColor)
+        {
+            return;
+        }
+
+        auto &views = components.get<brayns::GeometryViews>();
+        for (auto &view : views.elements)
+        {
+            view.setColor(solidColor->color);
+        }
+    }
+};
+
 class GeometryCommitter
 {
 public:
@@ -76,7 +125,12 @@ public:
 
 namespace brayns
 {
-CommitResult GeometryCommitSystem::execute(Components &components)
+void GeometryDataSystem::init(Components &components)
+{
+    GeometryInitializer::init(components);
+}
+
+CommitResult GeometryDataSystem::commit(Components &components)
 {
     auto &geometries = components.get<Geometries>();
     auto &views = components.get<GeometryViews>();

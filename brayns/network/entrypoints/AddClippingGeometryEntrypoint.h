@@ -24,7 +24,7 @@
 #include <brayns/engine/json/adapters/GeometryAdapters.h>
 #include <brayns/engine/json/adapters/ModelInstanceAdapter.h>
 #include <brayns/engine/scene/ModelManager.h>
-#include <brayns/engine/systems/ClipperInitSystem.h>
+#include <brayns/engine/systems/ClipperDataSystem.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
@@ -64,7 +64,7 @@ private:
     {
         auto &systems = model.getSystems();
         systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
-        systems.setInitSystem<ClipperInitSystem>();
+        systems.setDataSystem<ClipperDataSystem>();
     }
 
 private:

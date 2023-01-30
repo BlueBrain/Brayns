@@ -26,8 +26,7 @@
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GenericColorSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
+#include <brayns/engine/systems/GeometryDataSystem.h>
 
 #include <api/ModelType.h>
 #include <api/coloring/handlers/SimpleColorHandler.h>
@@ -59,8 +58,7 @@ public:
     {
         _components.add<brayns::Geometries>(std::move(primitives));
         _systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-        _systems.setInitSystem<brayns::GeometryInitSystem>();
-        _systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        _systems.setDataSystem<brayns::GeometryDataSystem>();
         _systems.setInspectSystem<SomaInspectSystem>();
     }
 

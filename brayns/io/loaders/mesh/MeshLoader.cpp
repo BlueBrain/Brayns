@@ -26,8 +26,7 @@
 #include <brayns/engine/components/Metadata.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GenericColorSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
+#include <brayns/engine/systems/GeometryDataSystem.h>
 
 #include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
 #include <brayns/io/loaders/mesh/parsers/OffMeshParser.h>
@@ -112,8 +111,7 @@ public:
 
         auto &systems = model->getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-        systems.setInitSystem<brayns::GeometryInitSystem>();
-        systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        systems.setDataSystem<brayns::GeometryDataSystem>();
         systems.setColorSystem<brayns::GenericColorSystem>(std::move(colorMethods));
 
         return model;

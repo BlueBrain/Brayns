@@ -25,8 +25,7 @@
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Capsule.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
+#include <brayns/engine/systems/GeometryDataSystem.h>
 
 #include <api/StreamlineColorGenerator.h>
 #include <components/StreamlineColors.h>
@@ -95,8 +94,7 @@ public:
     {
         auto &systems = _model.getSystems();
         systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-        systems.setInitSystem<brayns::GeometryInitSystem>();
-        systems.setCommitSystem<brayns::GeometryCommitSystem>();
+        systems.setDataSystem<brayns::GeometryDataSystem>();
     }
 
 private:

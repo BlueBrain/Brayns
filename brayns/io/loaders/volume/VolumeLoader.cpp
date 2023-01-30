@@ -21,8 +21,7 @@
 
 #include <brayns/engine/components/Volumes.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/VolumeCommitSystem.h>
-#include <brayns/engine/systems/VolumeInitSystem.h>
+#include <brayns/engine/systems/VolumeDataSystem.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
 
 #include <brayns/utils/FileReader.h>
@@ -194,8 +193,7 @@ public:
     void addSystems()
     {
         _systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Volumes>>();
-        _systems.setCommitSystem<brayns::VolumeCommitSystem>();
-        _systems.setInitSystem<brayns::VolumeInitSystem>();
+        _systems.setDataSystem<brayns::VolumeDataSystem>();
     }
 
 private:

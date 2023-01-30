@@ -29,8 +29,7 @@
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GenericColorSystem.h>
-#include <brayns/engine/systems/GeometryCommitSystem.h>
-#include <brayns/engine/systems/GeometryInitSystem.h>
+#include <brayns/engine/systems/GeometryDataSystem.h>
 
 #include <brayns/engine/geometry/types/Sphere.h>
 
@@ -154,8 +153,7 @@ std::vector<std::shared_ptr<brayns::Model>> XyzLoader::importFromBlob(
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-    systems.setInitSystem<brayns::GeometryInitSystem>();
-    systems.setCommitSystem<brayns::GeometryCommitSystem>();
+    systems.setDataSystem<brayns::GeometryDataSystem>();
     systems.setColorSystem<brayns::GenericColorSystem>(XYZColorMethods::build(sphereCount));
 
     std::vector<std::shared_ptr<brayns::Model>> result;
