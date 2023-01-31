@@ -33,7 +33,7 @@ public:
     void setFrameSize(const Vector2ui &frameSize) override;
     void setAccumulation(bool accumulation) noexcept override;
     void setFormat(PixelFormat frameBufferFormat) noexcept override;
-
+    void setChannels(const std::vector<FramebufferChannel> &channels) noexcept override;
     void clear() noexcept override;
 
     void incrementAccumFrames() noexcept override;
@@ -41,13 +41,14 @@ public:
     bool hasNewAccumulationFrame() const noexcept override;
     void resetNewAccumulationFrame() noexcept override;
 
-    Image getImage() override;
+    Image getImage(FramebufferChannel channel) override;
 
     const ospray::cpp::FrameBuffer &getHandle() const noexcept override;
 
 private:
     Vector2ui _frameSize = Vector2ui(800u, 600u);
     PixelFormat _format = PixelFormat::StandardRgbaI8;
+    uint32_t _channelMask = static_cast<uint32_t>(FramebufferChannel::Color);
     size_t _accumFrames = 0;
     bool _accumulation = true;
     bool _newAccumulationFrame = false;

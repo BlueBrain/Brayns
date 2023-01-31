@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2023, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2023 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
@@ -18,29 +18,4 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-namespace brayns
-{
-/**
- * @brief Pixel storage format in framebuffer.
- *
- */
-enum class PixelFormat
-{
-    /**
-     * @brief 4 channels of 8 bits each with lineal color curve.
-     */
-    RgbaI8,
-
-    /**
-     * @brief 4 channels of 8 bits each with non-lineal color curve.
-     */
-    StandardRgbaI8,
-
-    /**
-     * @brief 4 channels of 32 bits each.
-     */
-    RgbaF32
-};
-}
+#include "ExrCodec.h"

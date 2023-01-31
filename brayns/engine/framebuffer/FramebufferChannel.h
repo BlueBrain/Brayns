@@ -20,27 +20,18 @@
 
 #pragma once
 
+#include <ospray/ospray_cpp.h>
+
 namespace brayns
 {
 /**
- * @brief Pixel storage format in framebuffer.
- *
+ * @brief Type of buffer that a framebuffer will render.
  */
-enum class PixelFormat
+enum class FramebufferChannel : uint32_t
 {
-    /**
-     * @brief 4 channels of 8 bits each with lineal color curve.
-     */
-    RgbaI8,
-
-    /**
-     * @brief 4 channels of 8 bits each with non-lineal color curve.
-     */
-    StandardRgbaI8,
-
-    /**
-     * @brief 4 channels of 32 bits each.
-     */
-    RgbaF32
+    Color = OSPFrameBufferChannel::OSP_FB_COLOR,
+    Depth = OSPFrameBufferChannel::OSP_FB_DEPTH,
+    Normal = OSPFrameBufferChannel::OSP_FB_NORMAL,
+    Albedo = OSPFrameBufferChannel::OSP_FB_ALBEDO
 };
 }

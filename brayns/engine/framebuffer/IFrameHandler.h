@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "BufferType.h"
 #include "PixelFormat.h"
 
 #include <brayns/utils/MathTypes.h>
@@ -63,6 +64,11 @@ public:
     virtual void setFormat(PixelFormat frameBufferFormat) noexcept = 0;
 
     /**
+     * @copydoc Framebuffer::setChannels(const std::vector<FramebufferChannel> &)
+     */
+    virtual void setChannels(const std::vector<FramebufferChannel> &channels) noexcept = 0;
+
+    /**
      * @copydoc Framebuffer::clear()
      */
     virtual void clear() noexcept = 0;
@@ -90,7 +96,7 @@ public:
     /**
      * @copydoc Framebuffer::getImage()
      */
-    virtual Image getImage() = 0;
+    virtual Image getImage(FramebufferChannel channel) = 0;
 
     /**
      * @copydoc Framebuffer::getHandle()

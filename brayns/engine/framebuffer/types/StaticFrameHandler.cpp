@@ -51,7 +51,7 @@ struct FrameBufferParameters
 class OsprayFrameBufferFormat
 {
 public:
-    static OSPFrameBufferFormat fromPixelFormat(const brayns::PixelFormat frameBufferFormat)
+    static OSPFrameBufferFormat fromPixelFormat(brayns::PixelFormat frameBufferFormat)
     {
         switch (frameBufferFormat)
         {
@@ -65,6 +65,27 @@ public:
 
         throw std::invalid_argument("Unknown PixelFormat");
         return OSP_FB_NONE;
+    }
+};
+
+class OsprayFrameBufferChannel
+{
+public:
+    static uint32_t build(const std::vector<brayns::FramebufferChannel> &channels)
+    {
+        auto channelMask = 0u;
+
+        for (auto channel : channels)
+        {
+            channelMask |= static_cast<uint32_t>(channel);
+        }
+
+        if (channelMask == 0u)
+        {
+            throw std::runtime_error("Framebuffer without channels is not allowed");
+        }
+
+        return channelMask;
     }
 };
 
@@ -83,11 +104,11 @@ public:
     }
 
     template<typename Type>
-    Type *openAs(OSPFrameBufferChannel channel)
+    Type *openAs(brayns::FramebufferChannel channel)
     {
         if (!_channelHandle)
         {
-            _channelHandle = _handle.map(channel);
+            _channelHandle = _handle.map(static_cast<OSPFrameBufferChannel>(channel));
         }
         return static_cast<Type *>(_channelHandle);
     }
@@ -120,7 +141,7 @@ bool StaticFrameHandler::commit()
     auto width = static_cast<int>(_frameSize.x);
     auto height = static_cast<int>(_frameSize.y);
     auto format = OsprayFrameBufferFormat::fromPixelFormat(_format);
-    auto channels = _accumulation ? OSP_FB_COLOR | OSP_FB_ACCUM : OSP_FB_COLOR;
+    auto channels = _accumulation ? _channelMask & OSP_FB_ACCUM : _channelMask;
     _handle = ospray::cpp::FrameBuffer(width, height, format, channels);
 
     auto toneMapping = ToneMappingFactory::create();
@@ -153,6 +174,11 @@ void StaticFrameHandler::setFormat(PixelFormat frameBufferFormat) noexcept
     _flag.update(_format, frameBufferFormat);
 }
 
+void StaticFrameHandler::setChannels(const std::vector<FramebufferChannel> &channels) noexcept
+{
+    _flag.update(_channelMask, OsprayFrameBufferChannel::build(channels));
+}
+
 void StaticFrameHandler::clear() noexcept
 {
     _accumFrames = 0;
@@ -180,10 +206,10 @@ void StaticFrameHandler::resetNewAccumulationFrame() noexcept
     _newAccumulationFrame = false;
 }
 
-Image StaticFrameHandler::getImage()
+Image StaticFrameHandler::getImage(FramebufferChannel channel)
 {
     auto colorStream = FrameStream(_handle);
-    auto colorBuffer = colorStream.openAs<uint8_t>(OSP_FB_COLOR);
+    auto colorBuffer = colorStream.openAs<uint8_t>(channel);
 
     ImageInfo info;
 
