@@ -23,6 +23,7 @@ from brayns.core import Loader
 
 
 class XyzLoader(Loader):
+    """Loader for point clouds (XYZ)."""
 
     XYZ: ClassVar[str] = "xyz"
 

@@ -25,6 +25,14 @@ from brayns.core import Loader
 
 
 class ProteinColorScheme(Enum):
+    """Define how to color a protein model.
+
+    :param NONE: Doesn't color the proteins.
+    :param BY_ID: One color per protein.
+    :param PROTEIN_ATOMS: One color per atom.
+    :param PROTEIN_CHAINS: One color per protein chain.
+    :param PROTEIN_RESIDUES: One color per protein residue.
+    """
 
     NONE = "none"
     BY_ID = "by_id"
@@ -35,6 +43,13 @@ class ProteinColorScheme(Enum):
 
 @dataclass
 class ProteinLoader(Loader):
+    """Loader for protein files (PDB).
+
+    :param color_scheme: Describe how to color the proteins, defaults to none.
+    :type color_scheme: ProteinColorScheme, optional
+    :param radius_multiplier: Radius multiplier of the atoms, defaults to 1.
+    :type radius_multiplier: float
+    """
 
     PDB: ClassVar[str] = "pdb"
     PDB1: ClassVar[str] = "pdb1"
