@@ -27,6 +27,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "codecs/ExrCodec.h"
 #include "codecs/JpegCodec.h"
 #include "codecs/PngCodec.h"
 
@@ -80,6 +81,7 @@ private:
         ImageCodecMap codecs;
         codecs.add<PngCodec>();
         codecs.add<JpegCodec>();
+        codecs.add<ExrCodec>();
         return codecs;
     }
 };
@@ -87,12 +89,13 @@ private:
 
 namespace brayns
 {
-const ImageCodec &ImageCodecRegistry::getCodec(std::string format)
+const ImageCodec &ImageCodecRegistry::getCodec(const std::string &format)
 {
-    StringCase::lower(format);
+    auto lowerFormat = format;
+    StringCase::lower(lowerFormat);
 
     auto &codecs = ImageCodecStorage::getCodecs();
-    auto codec = codecs.find(format);
+    auto codec = codecs.find(lowerFormat);
     if (!codec)
     {
         throw std::runtime_error("Format not supported: '" + format + "'");

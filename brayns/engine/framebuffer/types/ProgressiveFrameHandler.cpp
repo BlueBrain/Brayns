@@ -57,6 +57,12 @@ void ProgressiveFrameHandler::setFormat(PixelFormat frameBufferFormat) noexcept
     _highRes.setFormat(frameBufferFormat);
 }
 
+void ProgressiveFrameHandler::setChannels(const std::vector<brayns::FramebufferChannel> &channels) noexcept
+{
+    _lowRes.setChannels(channels);
+    _highRes.setChannels(channels);
+}
+
 void ProgressiveFrameHandler::clear() noexcept
 {
     _lowResFrame = true;
@@ -85,9 +91,9 @@ void ProgressiveFrameHandler::resetNewAccumulationFrame() noexcept
     _highRes.resetNewAccumulationFrame();
 }
 
-Image ProgressiveFrameHandler::getImage()
+Image ProgressiveFrameHandler::getImage(brayns::FramebufferChannel channel)
 {
-    return (std::exchange(_lowResFrame, false) ? _lowRes : _highRes).getImage();
+    return (std::exchange(_lowResFrame, false) ? _lowRes : _highRes).getImage(channel);
 }
 
 const ospray::cpp::FrameBuffer &ProgressiveFrameHandler::getHandle() const noexcept

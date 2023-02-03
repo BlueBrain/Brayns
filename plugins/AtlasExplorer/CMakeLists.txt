@@ -12,7 +12,7 @@ add_library(braynsAtlasExplorer SHARED ${BRAYNSATLASEXPLORER_SOURCES} ${BRAYNSAT
 target_include_directories(braynsAtlasExplorer PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>"
     "$<INSTALL_INTERFACE:include>")
-target_link_libraries(braynsAtlasExplorer PRIVATE braynsPluginAPI braynsNetwork)
+target_link_libraries(braynsAtlasExplorer PRIVATE braynsPluginAPI braynsNetwork ${ZLIB_LIBRARIES})
 
 target_compile_options(braynsAtlasExplorer PRIVATE ${BRAYNS_COMPILE_OPTIONS})
 

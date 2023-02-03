@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2023 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -24,13 +23,13 @@
 #include <brayns/json/JsonObjectMacro.h>
 
 #include <brayns/engine/json/adapters/EngineObjectDataAdapter.h>
+#include <brayns/engine/json/adapters/FramebufferChannelAdapter.h>
 #include <brayns/engine/json/adapters/ViewAdapter.h>
-#include <brayns/network/messages/ImageSettingsMessage.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(SnapshotParams)
-BRAYNS_JSON_OBJECT_ENTRY(ImageSettings, image_settings, "Image settings", Required(false))
+BRAYNS_JSON_OBJECT_BEGIN(GBuffersParams)
+BRAYNS_JSON_OBJECT_ENTRY(Vector2ui, resolution, "Image resolution", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(EngineObjectData, camera, "Camera definition", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(View, camera_view, "Camera view settings", Required(false))
 BRAYNS_JSON_OBJECT_ENTRY(EngineObjectData, renderer, "Renderer definition", Required(false))
@@ -38,22 +37,8 @@ BRAYNS_JSON_OBJECT_ENTRY(uint32_t, simulation_frame, "Simulation frame to render
 BRAYNS_JSON_OBJECT_ENTRY(
     std::string,
     file_path,
-    "Snapshot will be saved at this path if specified, otherwise it will be returned as binary data with format from "
-    "image_settings",
+    "Buffers will be saved at this path if specified, otherwise it will be returned as EXR encoded binary data",
     Required(false))
+BRAYNS_JSON_OBJECT_ENTRY(std::vector<FramebufferChannel>, channels, "G buffer channels to export")
 BRAYNS_JSON_OBJECT_END()
-
-#define BRAYNS_BUFFER_PROPERTIES() \
-    BRAYNS_JSON_OBJECT_ENTRY(size_t, offset, "Buffer data offset in attached binary") \
-    BRAYNS_JSON_OBJECT_ENTRY(size_t, size, "Buffer data size in attached binary")
-
-BRAYNS_JSON_OBJECT_BEGIN(ColorBufferMessage)
-BRAYNS_BUFFER_PROPERTIES()
-BRAYNS_JSON_OBJECT_END()
-
-BRAYNS_JSON_OBJECT_BEGIN(SnapshotResult)
-BRAYNS_JSON_OBJECT_ENTRY(ColorBufferMessage, color_buffer, "Snapshot color buffer encoded in params format")
-BRAYNS_JSON_OBJECT_END()
-
-#undef BRAYNS_BUFFER_PROPERTIES
-} // namespace brayns
+}

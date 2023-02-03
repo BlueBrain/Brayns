@@ -23,7 +23,7 @@ target_link_libraries(braynsUtils PUBLIC
     spdlog::spdlog
 )
 
-target_link_libraries(braynsUtils PRIVATE stb ${CMAKE_DL_LIBS})
+target_link_libraries(braynsUtils PRIVATE stb tinyexr ${ZLIB_LIBRARIES} ${CMAKE_DL_LIBS})
 
 # Needed to allow DynamicLib class to find the plugins libraries
 set_target_properties(braynsUtils PROPERTIES BUILD_RPATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})

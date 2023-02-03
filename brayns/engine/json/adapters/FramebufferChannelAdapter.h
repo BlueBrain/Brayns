@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2023 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,27 +20,16 @@
 
 #pragma once
 
-#include <stdexcept>
-#include <string>
+#include <brayns/engine/framebuffer/FramebufferChannel.h>
 
-#include "ImageCodec.h"
+#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-/**
- * @brief Static class to store image codecs of supported formats.
- *
- */
-class ImageCodecRegistry
-{
-public:
-    /**
-     * @brief Get codec to handle the given format.
-     *
-     * @param format Image format.
-     * @return const ImageCodec& Image codec supporting format.
-     * @throw std::runtime_error Format not supported.
-     */
-    static const ImageCodec &getCodec(const std::string &format);
-};
-} // namespace brayns
+BRAYNS_JSON_ADAPTER_ENUM(
+    FramebufferChannel,
+    {"color", FramebufferChannel::Color},
+    {"depth", FramebufferChannel::Depth},
+    {"albedo", FramebufferChannel::Albedo},
+    {"normal", FramebufferChannel::Normal})
+}

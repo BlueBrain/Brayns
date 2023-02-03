@@ -25,6 +25,12 @@
 
 namespace brayns
 {
+enum class ImageDataType
+{
+    UnsignedInt,
+    Float
+};
+
 /**
  * @brief Summary of all info about an image except its content.
  *
@@ -60,6 +66,12 @@ struct ImageInfo
      *
      */
     size_t channelSize = 0;
+
+    /**
+     * @brief Underlying of the data stored in the image pixels.
+     *
+     */
+    ImageDataType dataType = ImageDataType::UnsignedInt;
 
     /**
      * @brief Compute the size of the image in bytes.

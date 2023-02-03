@@ -36,7 +36,7 @@ public:
     void setFrameSize(const Vector2ui &frameSize) override;
     void setAccumulation(bool accumulation) noexcept override;
     void setFormat(PixelFormat frameBufferFormat) noexcept override;
-
+    void setChannels(const std::vector<brayns::FramebufferChannel> &channels) noexcept override;
     void clear() noexcept override;
 
     void incrementAccumFrames() noexcept override;
@@ -44,7 +44,7 @@ public:
     bool hasNewAccumulationFrame() const noexcept override;
     void resetNewAccumulationFrame() noexcept override;
 
-    Image getImage() override;
+    Image getImage(brayns::FramebufferChannel channel) override;
 
     const ospray::cpp::FrameBuffer &getHandle() const noexcept override;
 

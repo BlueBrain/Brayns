@@ -80,6 +80,11 @@ size_t Image::getPixelSize() const
     return _info.getPixelSize();
 }
 
+ImageDataType Image::getDataType() const
+{
+    return _info.dataType;
+}
+
 void Image::write(const Image &image, size_t x, size_t y)
 {
     if (image.getChannelCount() != getChannelCount() || image.getChannelSize() != getChannelSize())

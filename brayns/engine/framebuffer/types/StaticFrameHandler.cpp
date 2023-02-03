@@ -25,27 +25,81 @@
 
 namespace
 {
+struct FrameBufferParameters
+{
+    inline static const std::string operations = "imageOperation";
+};
+
 /**
  * @brief Returns the size, in bytes, of each color channel of a given pixel format
  */
 class PixelFormatChannelByteSize
 {
 public:
-    static size_t get(brayns::PixelFormat format)
+    static size_t get(brayns::FramebufferChannel channel, brayns::PixelFormat format)
     {
-        switch (format)
+        if (channel == brayns::FramebufferChannel::Color)
         {
-        case brayns::PixelFormat::RgbaF32:
-            return 4;
-        default:
+            if (format == brayns::PixelFormat::RgbaF32)
+            {
+                return 4;
+            }
             return 1;
         }
+
+        return 4;
     }
 };
 
-struct FrameBufferParameters
+class FramebufferChannelCount
 {
-    inline static const std::string operations = "imageOperation";
+public:
+    static size_t get(brayns::FramebufferChannel channel)
+    {
+        switch (channel)
+        {
+        case brayns::FramebufferChannel::Color:
+            return 4;
+        case brayns::FramebufferChannel::Albedo:
+        case brayns::FramebufferChannel::Normal:
+            return 3;
+        case brayns::FramebufferChannel::Depth:
+            return 1;
+        }
+
+        throw std::runtime_error("Unsupported framebuffer channel");
+    }
+};
+
+class FramebufferDataType
+{
+public:
+    static brayns::ImageDataType get(brayns::FramebufferChannel channel)
+    {
+        switch (channel)
+        {
+        case brayns::FramebufferChannel::Color:
+            return brayns::ImageDataType::UnsignedInt;
+        case brayns::FramebufferChannel::Albedo:
+        case brayns::FramebufferChannel::Normal:
+        case brayns::FramebufferChannel::Depth:
+            return brayns::ImageDataType::Float;
+        }
+
+        throw std::runtime_error("Unsupported framebuffer channel");
+    }
+};
+
+class ValidFramebufferChannel
+{
+public:
+    static void check(uint32_t mask, brayns::FramebufferChannel channel)
+    {
+        if (!(mask & static_cast<uint32_t>(channel)))
+        {
+            throw std::invalid_argument("Requested framebuffer channel is not available");
+        }
+    }
 };
 
 class OsprayFrameBufferFormat
@@ -92,7 +146,7 @@ public:
 class FrameStream
 {
 public:
-    explicit FrameStream(ospray::cpp::FrameBuffer &handle)
+    explicit FrameStream(const ospray::cpp::FrameBuffer &handle)
         : _handle(handle)
         , _channelHandle(nullptr)
     {
@@ -124,7 +178,7 @@ public:
     }
 
 private:
-    ospray::cpp::FrameBuffer &_handle;
+    const ospray::cpp::FrameBuffer &_handle;
     void *_channelHandle;
 };
 }
@@ -208,17 +262,20 @@ void StaticFrameHandler::resetNewAccumulationFrame() noexcept
 
 Image StaticFrameHandler::getImage(FramebufferChannel channel)
 {
-    auto colorStream = FrameStream(_handle);
-    auto colorBuffer = colorStream.openAs<uint8_t>(channel);
+    ValidFramebufferChannel::check(_channelMask, channel);
+
+    auto stream = FrameStream(_handle);
+    auto buffer = stream.openAs<uint8_t>(channel);
 
     ImageInfo info;
 
     info.width = _frameSize.x;
     info.height = _frameSize.y;
-    info.channelCount = 4;
-    info.channelSize = PixelFormatChannelByteSize::get(_format);
+    info.dataType = FramebufferDataType::get(channel);
+    info.channelCount = FramebufferChannelCount::get(channel);
+    info.channelSize = PixelFormatChannelByteSize::get(channel, _format);
 
-    auto data = reinterpret_cast<const char *>(colorBuffer);
+    auto data = reinterpret_cast<const char *>(buffer);
     auto length = info.getSize();
     return Image(info, {data, length});
 }

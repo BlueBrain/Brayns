@@ -128,6 +128,13 @@ public:
     size_t getPixelSize() const;
 
     /**
+     * @brief Returns the underlying data type of the image pixels.
+     *
+     * @return ImageDataType
+     */
+    ImageDataType getDataType() const;
+
+    /**
      * @brief Write the given image inside the current one with given offset.
      *
      * X and Y will be the top-left position of the image in this one.

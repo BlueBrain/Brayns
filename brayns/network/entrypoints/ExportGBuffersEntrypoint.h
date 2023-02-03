@@ -1,7 +1,6 @@
 /* Copyright (c) 2015-2023 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,27 +20,28 @@
 
 #pragma once
 
-#include <stdexcept>
-#include <string>
-
-#include "ImageCodec.h"
+#include <brayns/engine/core/Engine.h>
+#include <brayns/network/common/CancellationToken.h>
+#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/network/messages/ExportGBuffersMessage.h>
 
 namespace brayns
 {
-/**
- * @brief Static class to store image codecs of supported formats.
- *
- */
-class ImageCodecRegistry
+class ExportGBuffersEntrypoint final : public Entrypoint<GBuffersParams, EmptyMessage>
 {
 public:
-    /**
-     * @brief Get codec to handle the given format.
-     *
-     * @param format Image format.
-     * @return const ImageCodec& Image codec supporting format.
-     * @throw std::runtime_error Format not supported.
-     */
-    static const ImageCodec &getCodec(const std::string &format);
+    ExportGBuffersEntrypoint(Engine &engine, CancellationToken token);
+
+    std::string getMethod() const override;
+    std::string getDescription() const override;
+    void onRequest(const Request &request) override;
+    bool isAsync() const override;
+    void onCancel() override;
+    void onDisconnect() override;
+
+private:
+    Engine &_engine;
+    CancellationToken _token;
+    bool _download = false;
 };
-} // namespace brayns
+}

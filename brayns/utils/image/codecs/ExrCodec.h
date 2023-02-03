@@ -69,7 +69,7 @@ public:
      * @param size Size of data in bytes.
      * @return Image Decoded image.
      */
-    virtual Image decode(const void *data, size_t size) const override;
+    Image decode(const void *data, size_t size) const override;
 
     /**
      * @brief Decode multi-frame EXR data.

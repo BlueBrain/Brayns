@@ -144,8 +144,12 @@ endif()
 
 add_library(tinyexr INTERFACE)
 
+set(BRAYNS_TINYEXR_INCLUDES
+    ${CMAKE_CURRENT_SOURCE_DIR}/tinyexr
+    ${CMAKE_CURRENT_SOURCE_DIR}/tinyexr/deps/miniz)
+
 target_include_directories(tinyexr SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tinyexr>"
+    "$<BUILD_INTERFACE:${BRAYNS_TINYEXR_INCLUDES}>"
     "$<INSTALL_INTERFACE:include>")
 
 # =============================================================================

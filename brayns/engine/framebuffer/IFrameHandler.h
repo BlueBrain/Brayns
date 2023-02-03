@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "BufferType.h"
+#include "FramebufferChannel.h"
 #include "PixelFormat.h"
 
 #include <brayns/utils/MathTypes.h>

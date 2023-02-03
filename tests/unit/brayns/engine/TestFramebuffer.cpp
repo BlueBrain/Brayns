@@ -49,12 +49,12 @@ TEST_CASE("Progressive frame handler")
         CHECK(handler.commit());
 
         handler.incrementAccumFrames();
-        auto image = handler.getImage();
+        auto image = handler.getImage(brayns::FramebufferChannel::Color);
         CHECK(image.getWidth() == 100);
         CHECK(image.getHeight() == 100);
 
         handler.incrementAccumFrames();
-        image = handler.getImage();
+        image = handler.getImage(brayns::FramebufferChannel::Color);
         CHECK(image.getWidth() == 400);
         CHECK(image.getHeight() == 400);
     }
@@ -97,14 +97,14 @@ TEST_CASE("Static frame handler")
         CHECK_NOTHROW(handler.setFrameSize(frameSize));
         CHECK(handler.commit());
 
-        auto image = handler.getImage();
+        auto image = handler.getImage(brayns::FramebufferChannel::Color);
         CHECK(image.getWidth() == 400);
         CHECK(image.getHeight() == 400);
 
         frameSize = brayns::Vector2ui(800, 100);
         handler.setFrameSize(frameSize);
         handler.commit();
-        image = handler.getImage();
+        image = handler.getImage(brayns::FramebufferChannel::Color);
         CHECK(image.getWidth() == 800);
         CHECK(image.getHeight() == 100);
     }

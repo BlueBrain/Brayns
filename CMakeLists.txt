@@ -38,6 +38,7 @@ find_package(OpenMP REQUIRED)
 find_package(ospray 2.10 REQUIRED)
 find_package(Poco QUIET COMPONENTS Foundation JSON Net NetSSL)
 find_package(glm QUIET)
+find_package(ZLIB REQUIRED)
 
 # Set up version
 include(GitUtils)
