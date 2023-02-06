@@ -48,7 +48,7 @@ public:
 private:
     Vector2ui _frameSize = Vector2ui(800u, 600u);
     PixelFormat _format = PixelFormat::StandardRgbaI8;
-    uint32_t _channelMask = static_cast<uint32_t>(FramebufferChannel::Color);
+    std::vector<FramebufferChannel> _channels{FramebufferChannel::Color};
     size_t _accumFrames = 0;
     bool _accumulation = true;
     bool _newAccumulationFrame = false;

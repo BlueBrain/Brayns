@@ -186,7 +186,7 @@ public:
         auto &imageSize = params.resolution;
         auto framebuffer = brayns::Framebuffer(std::make_unique<brayns::StaticFrameHandler>());
         framebuffer.setAccumulation(false);
-        framebuffer.setFormat(brayns::PixelFormat::StandardRgbaI8);
+        framebuffer.setFormat(brayns::PixelFormat::RgbaF32);
         framebuffer.setFrameSize(imageSize);
         framebuffer.setChannels(params.channels);
         framebuffer.commit();

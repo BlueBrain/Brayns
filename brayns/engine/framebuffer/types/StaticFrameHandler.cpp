@@ -23,6 +23,8 @@
 #include <brayns/engine/framebuffer/ToneMapping.h>
 #include <ospray/ospray_cpp/Data.h>
 
+#include <algorithm>
+
 namespace
 {
 struct FrameBufferParameters
@@ -74,12 +76,20 @@ public:
 class FramebufferDataType
 {
 public:
-    static brayns::ImageDataType get(brayns::FramebufferChannel channel)
+    static brayns::ImageDataType get(brayns::FramebufferChannel channel, brayns::PixelFormat format)
     {
         switch (channel)
         {
         case brayns::FramebufferChannel::Color:
-            return brayns::ImageDataType::UnsignedInt;
+        {
+            switch (format)
+            {
+            case brayns::PixelFormat::RgbaF32:
+                return brayns::ImageDataType::Float;
+            default:
+                return brayns::ImageDataType::UnsignedInt;
+            }
+        }
         case brayns::FramebufferChannel::Albedo:
         case brayns::FramebufferChannel::Normal:
         case brayns::FramebufferChannel::Depth:
@@ -93,12 +103,9 @@ public:
 class ValidFramebufferChannel
 {
 public:
-    static void check(uint32_t mask, brayns::FramebufferChannel channel)
+    static bool check(const std::vector<brayns::FramebufferChannel> &channels, brayns::FramebufferChannel channel)
     {
-        if (!(mask & static_cast<uint32_t>(channel)))
-        {
-            throw std::invalid_argument("Requested framebuffer channel is not available");
-        }
+        return std::find(channels.begin(), channels.end(), channel) != channels.end();
     }
 };
 
@@ -125,13 +132,18 @@ public:
 class OsprayFrameBufferChannel
 {
 public:
-    static uint32_t build(const std::vector<brayns::FramebufferChannel> &channels)
+    static uint32_t build(const std::vector<brayns::FramebufferChannel> &channels, bool accumulation)
     {
         auto channelMask = 0u;
 
         for (auto channel : channels)
         {
             channelMask |= static_cast<uint32_t>(channel);
+        }
+
+        if (accumulation)
+        {
+            channelMask |= OSP_FB_ACCUM;
         }
 
         if (channelMask == 0u)
@@ -195,7 +207,7 @@ bool StaticFrameHandler::commit()
     auto width = static_cast<int>(_frameSize.x);
     auto height = static_cast<int>(_frameSize.y);
     auto format = OsprayFrameBufferFormat::fromPixelFormat(_format);
-    auto channels = _accumulation ? _channelMask & OSP_FB_ACCUM : _channelMask;
+    auto channels = OsprayFrameBufferChannel::build(_channels, _accumulation);
     _handle = ospray::cpp::FrameBuffer(width, height, format, channels);
 
     auto toneMapping = ToneMappingFactory::create();
@@ -230,7 +242,7 @@ void StaticFrameHandler::setFormat(PixelFormat frameBufferFormat) noexcept
 
 void StaticFrameHandler::setChannels(const std::vector<FramebufferChannel> &channels) noexcept
 {
-    _flag.update(_channelMask, OsprayFrameBufferChannel::build(channels));
+    _flag.update(_channels, channels);
 }
 
 void StaticFrameHandler::clear() noexcept
@@ -262,7 +274,7 @@ void StaticFrameHandler::resetNewAccumulationFrame() noexcept
 
 Image StaticFrameHandler::getImage(FramebufferChannel channel)
 {
-    ValidFramebufferChannel::check(_channelMask, channel);
+    assert(ValidFramebufferChannel::check(_channels, channel));
 
     auto stream = FrameStream(_handle);
     auto buffer = stream.openAs<uint8_t>(channel);
@@ -271,7 +283,7 @@ Image StaticFrameHandler::getImage(FramebufferChannel channel)
 
     info.width = _frameSize.x;
     info.height = _frameSize.y;
-    info.dataType = FramebufferDataType::get(channel);
+    info.dataType = FramebufferDataType::get(channel, _format);
     info.channelCount = FramebufferChannelCount::get(channel);
     info.channelSize = PixelFormatChannelByteSize::get(channel, _format);
 

@@ -26,7 +26,6 @@
 #define TINYEXR_USE_MINIZ 0
 #include <tinyexr.h>
 
-#include <any>
 #include <cstring>
 
 namespace
@@ -46,11 +45,10 @@ struct TinyExrPixelType<float>
     static constexpr auto type = TINYEXR_PIXELTYPE_FLOAT;
 };
 
-template<typename T>
 struct TinyExrBuffer
 {
-    std::vector<std::vector<T>> channels;
-    std::vector<T *> flippedChannels;
+    std::vector<std::vector<unsigned char>> channels;
+    std::vector<unsigned char *> flippedChannels;
     std::vector<EXRChannelInfo> channelInfos;
     std::vector<int> pixelTypes;
 };
@@ -59,7 +57,7 @@ struct TinyExrFrame
 {
     EXRImage image;
     EXRHeader header;
-    std::any buffer;
+    TinyExrBuffer buffer;
 };
 
 template<typename T>
@@ -71,8 +69,8 @@ public:
         auto channelCount = input.getChannelCount();
 
         auto frame = TinyExrFrame();
+        auto &buffer = frame.buffer;
 
-        auto &buffer = _createFrameBuffer(frame);
         buffer.channels = _splitImageChannels(input);
         buffer.flippedChannels = _flipChannels(buffer.channels);
         buffer.channelInfos = _createChannelInfos(channelCount);
@@ -88,24 +86,17 @@ private:
     inline static const std::vector<std::string> channelNames = {"R", "G", "B", "A"};
 
 private:
-    static TinyExrBuffer<T> &_createFrameBuffer(TinyExrFrame &frame)
+    static std::vector<std::vector<unsigned char>> _allocateChannels(size_t count, size_t resolution)
     {
-        frame.buffer = std::make_any<TinyExrBuffer<T>>();
-        auto &buffer = std::any_cast<TinyExrBuffer<T> &>(frame.buffer);
-        return buffer;
-    }
-
-    static std::vector<std::vector<T>> _allocateChannels(size_t count, size_t dimensions)
-    {
-        auto imageChannels = std::vector<std::vector<T>>(count);
+        auto imageChannels = std::vector<std::vector<unsigned char>>(count);
         for (auto &channel : imageChannels)
         {
-            channel.reserve(dimensions);
+            channel.resize(resolution * sizeof(T));
         }
         return imageChannels;
     }
 
-    static std::vector<std::vector<T>> _splitImageChannels(const brayns::Image &image)
+    static std::vector<std::vector<unsigned char>> _splitImageChannels(const brayns::Image &image)
     {
         auto channelCount = image.getChannelCount();
         auto channelSize = image.getChannelSize();
@@ -121,22 +112,22 @@ private:
             auto pixel = image.getData(x, y);
             auto bytes = reinterpret_cast<const unsigned char *>(pixel);
 
-            for (size_t i = 0; i < channelCount; ++i)
+            for (size_t j = 0; j < channelCount; ++j)
             {
-                auto &imageChannel = imageChannels[i];
-                auto &exrChannelValue = imageChannel.emplace_back(0);
-                std::memcpy(&exrChannelValue, bytes + i * channelSize, channelSize);
+                auto &imageChannel = imageChannels[j];
+                auto &exrChannelValue = imageChannel[i * sizeof(T)];
+                std::memcpy(&exrChannelValue, bytes + j * channelSize, channelSize);
             }
         }
 
         return imageChannels;
     }
 
-    static std::vector<T *> _flipChannels(std::vector<std::vector<T>> &channels)
+    static std::vector<unsigned char *> _flipChannels(std::vector<std::vector<unsigned char>> &channels)
     {
         auto channelCount = channels.size();
 
-        auto flippedChannels = std::vector<T *>();
+        auto flippedChannels = std::vector<unsigned char *>();
         flippedChannels.reserve(channelCount);
 
         for (size_t i = 0; i < channelCount; ++i)
@@ -176,13 +167,13 @@ private:
         return types;
     }
 
-    static EXRImage _initializeExrImage(std::vector<T *> &channels, size_t width, size_t height)
+    static EXRImage _initializeExrImage(std::vector<unsigned char *> &channels, size_t width, size_t height)
     {
         EXRImage image;
         InitEXRImage(&image);
 
         image.num_channels = static_cast<int>(channels.size());
-        image.images = reinterpret_cast<unsigned char **>(channels.data());
+        image.images = channels.data();
         image.width = static_cast<int>(width);
         image.height = static_cast<int>(height);
 
@@ -231,7 +222,7 @@ public:
     }
 };
 
-class TinyExrHelper
+class TinyExrEconderHelper
 {
 public:
     static std::string encode(const brayns::Image &input)
@@ -279,7 +270,6 @@ private:
         {
             auto errorMessage = std::string(error);
             FreeEXRErrorMessage(error);
-            free(memory);
             throw std::runtime_error("Error encoding EXR image: " + errorMessage);
         }
 
@@ -315,6 +305,39 @@ private:
         return headerList;
     }
 };
+
+class TinyExrDecoderHelper
+{
+public:
+    static brayns::Image decode(const void *data, size_t size)
+    {
+        float *rgba = nullptr;
+        int width;
+        int height;
+        auto memory = reinterpret_cast<const unsigned char *>(data);
+        const char *error;
+        auto result = LoadEXRFromMemory(&rgba, &width, &height, memory, size, &error);
+
+        if (result != TINYEXR_SUCCESS)
+        {
+            auto message = std::string(error);
+            FreeEXRErrorMessage(error);
+            throw std::runtime_error("Error decoding EXR image: " + message);
+        }
+
+        auto imageInfo = brayns::ImageInfo();
+        imageInfo.channelCount = 4;
+        imageInfo.channelSize = sizeof(float);
+        imageInfo.dataType = brayns::ImageDataType::Float;
+        imageInfo.width = static_cast<size_t>(width);
+        imageInfo.height = static_cast<size_t>(height);
+
+        auto imageData = std::string(reinterpret_cast<const char *>(rgba), imageInfo.getSize());
+        free(rgba);
+
+        return brayns::Image(imageInfo, std::move(imageData));
+    }
+};
 }
 
 namespace brayns
@@ -327,27 +350,16 @@ std::string ExrCodec::getFormat() const
 std::string ExrCodec::encode(const Image &image, int quality) const
 {
     (void)quality;
-    return TinyExrHelper::encode(image);
+    return TinyExrEconderHelper::encode(image);
 }
 
 std::string ExrCodec::encode(const std::vector<ExrFrame> &frames) const
 {
-    return TinyExrHelper::encode(frames);
+    return TinyExrEconderHelper::encode(frames);
 }
 
 Image ExrCodec::decode(const void *data, size_t size) const
 {
-    (void)data;
-    (void)size;
-    return {};
-}
-
-std::vector<ExrFrame>
-    ExrCodec::decode(const void *data, size_t size, const std::optional<std::vector<std::string>> &layers) const
-{
-    (void)data;
-    (void)size;
-    (void)layers;
-    return {};
+    return TinyExrDecoderHelper::decode(data, size);
 }
 }

@@ -29,6 +29,8 @@
 #include <tests/helpers/TemporaryFilename.h>
 #include <tests/paths.h>
 
+#include <filesystem>
+
 namespace
 {
 class ImageFactory
@@ -42,6 +44,37 @@ public:
         info.channelCount = 1;
         info.channelSize = 1;
         return brayns::Image(info, std::move(pixels));
+    }
+};
+
+class ImageReadTest
+{
+public:
+    static void run(const std::string &path, uint32_t width, uint32_t height, uint32_t channels, uint32_t channelSize)
+    {
+        auto image = brayns::Image();
+        CHECK_NOTHROW(image = brayns::ImageDecoder::load(path));
+        CHECK(image.getWidth() == width);
+        CHECK(image.getHeight() == height);
+        CHECK(image.getChannelCount() == channels);
+        CHECK(image.getChannelSize() == channelSize);
+    }
+};
+
+class ImageWriteTest
+{
+public:
+    static void run(const std::string &path)
+    {
+        auto image = brayns::ImageDecoder::load(path);
+        auto extension = std::filesystem::path(path).extension().string();
+
+        auto dst = TemporaryFilename::generateValid() + extension;
+        CHECK_NOTHROW(brayns::ImageEncoder::save(image, dst));
+
+        auto readImage = brayns::Image();
+        CHECK_NOTHROW(readImage = brayns::ImageDecoder::load(dst));
+        CHECK(ImageValidator::validate(readImage, image));
     }
 };
 }
@@ -187,21 +220,15 @@ TEST_CASE("Image decoder")
 {
     SUBCASE("JPG")
     {
-        auto jpg = brayns::Image();
-        CHECK_NOTHROW(jpg = brayns::ImageDecoder::load(TestPaths::Images::jpg));
-        CHECK(jpg.getChannelCount() == 3);
-        CHECK(jpg.getChannelSize() == 1);
-        CHECK(jpg.getHeight() == 551);
-        CHECK(jpg.getWidth() == 800);
+        ImageReadTest::run(TestPaths::Images::jpg, 800, 551, 3, 1);
     }
     SUBCASE("PNG")
     {
-        auto png = brayns::Image();
-        CHECK_NOTHROW(png = brayns::ImageDecoder::load(TestPaths::Images::png));
-        CHECK(png.getChannelCount() == 3);
-        CHECK(png.getChannelSize() == 1);
-        CHECK(png.getHeight() == 551);
-        CHECK(png.getWidth() == 800);
+        ImageReadTest::run(TestPaths::Images::png, 800, 551, 3, 1);
+    }
+    SUBCASE("EXR")
+    {
+        ImageReadTest::run(TestPaths::Images::exr, 1920, 1080, 4, 4);
     }
 }
 
@@ -209,24 +236,14 @@ TEST_CASE("Image encoder")
 {
     SUBCASE("JPG")
     {
-        auto image = brayns::ImageDecoder::load(TestPaths::Images::jpg);
-
-        auto dst = TemporaryFilename::generateValid() + ".jpg";
-        CHECK_NOTHROW(brayns::ImageEncoder::save(image, dst));
-
-        auto readImage = brayns::Image();
-        CHECK_NOTHROW(readImage = brayns::ImageDecoder::load(dst));
-        CHECK(ImageValidator::validate(readImage, image));
+        ImageWriteTest::run(TestPaths::Images::jpg);
     }
     SUBCASE("PNG")
     {
-        auto image = brayns::ImageDecoder::load(TestPaths::Images::png);
-
-        auto dst = TemporaryFilename::generateValid() + ".png";
-        CHECK_NOTHROW(brayns::ImageEncoder::save(image, dst));
-
-        auto readImage = brayns::Image();
-        CHECK_NOTHROW(readImage = brayns::ImageDecoder::load(dst));
-        CHECK(ImageValidator::validate(readImage, image));
+        ImageWriteTest::run(TestPaths::Images::png);
+    }
+    SUBCASE("EXR")
+    {
+        ImageWriteTest::run(TestPaths::Images::exr);
     }
 }

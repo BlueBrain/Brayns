@@ -70,18 +70,5 @@ public:
      * @return Image Decoded image.
      */
     Image decode(const void *data, size_t size) const override;
-
-    /**
-     * @brief Decode multi-frame EXR data.
-     *
-     * @param data EXR data.
-     * @param size Size of data in bytes.
-     * @param layers Optinal list of specific layers to decode. If not provided, all layers will be decoded.
-     * @return std::vector<ExrFrame> List of Images decoded.
-     */
-    std::vector<ExrFrame> decode(
-        const void *data,
-        size_t size,
-        const std::optional<std::vector<std::string>> &layers = std::nullopt) const;
 };
 } // namespace brayns
