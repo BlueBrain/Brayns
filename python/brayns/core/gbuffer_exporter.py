@@ -186,10 +186,6 @@ def _task(instance: Instance, params: dict[str, Any]) -> JsonRpcFuture:
     return instance.task("export-gbuffers", params)
 
 
-# def _get_exr(reply: JsonRpcReply) -> bytes:
-#    return reply.binary
-
-
 def _save_exr(reply: JsonRpcReply, path: str) -> None:
     data = reply.binary
     with open(path, "wb") as file:

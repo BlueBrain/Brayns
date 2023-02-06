@@ -207,7 +207,7 @@ public:
         // Render
         auto progress = brayns::ProgressHandler(token, request);
         auto future = brayns::FrameRenderer::asynchronous(camera, framebuffer, renderer, scene);
-        const auto msg = "Rendering snapshot ...";
+        const auto msg = std::string("Exporting g-buffers ...");
         while (!future.isReady())
         {
             const auto percentage = future.progress();

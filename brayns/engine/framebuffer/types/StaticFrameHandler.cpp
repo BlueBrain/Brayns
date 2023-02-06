@@ -146,10 +146,7 @@ public:
             channelMask |= OSP_FB_ACCUM;
         }
 
-        if (channelMask == 0u)
-        {
-            throw std::runtime_error("Framebuffer without channels is not allowed");
-        }
+        assert(channelMask != 0u);
 
         return channelMask;
     }

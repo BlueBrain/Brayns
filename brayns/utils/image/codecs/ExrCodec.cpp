@@ -61,7 +61,7 @@ struct TinyExrFrame
 };
 
 template<typename T>
-class TinyExrEncoder
+class TinyExrFrameFactory
 {
 public:
     static TinyExrFrame create(const std::string &name, const brayns::Image &input)
@@ -213,9 +213,9 @@ public:
         switch (type)
         {
         case brayns::ImageDataType::Float:
-            return TinyExrEncoder<float>::create(name, input);
+            return TinyExrFrameFactory<float>::create(name, input);
         case brayns::ImageDataType::UnsignedInt:
-            return TinyExrEncoder<unsigned int>::create(name, input);
+            return TinyExrFrameFactory<unsigned int>::create(name, input);
         }
 
         throw std::runtime_error("Unhandled image data type");
