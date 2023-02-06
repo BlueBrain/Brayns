@@ -34,13 +34,13 @@ class TestAtlas(unittest.TestCase):
         self.assertEqual(instance.method, "get-available-atlas-usecases")
         self.assertEqual(instance.params, {"model_id": 2})
 
-    def test_visualize_atlas_usecase(self) -> None:
+    def test_run(self) -> None:
         instance = MockInstance(mock_model_message())
         usecase = brayns.AtlasColumnHighlight(
             position=brayns.ColumnPosition(1, 2),
             color=brayns.Color4.red,
         )
-        test = brayns.visualize_atlas_usecase(instance, 2, usecase)
+        test = usecase.run(instance, 2)
         self.assertEqual(test, mock_model())
         self.assertEqual(instance.method, "visualize-atlas-usecase")
         self.assertEqual(

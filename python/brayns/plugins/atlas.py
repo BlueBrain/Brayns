@@ -36,15 +36,39 @@ class AtlasUsecase(ABC):
     @property
     @abstractmethod
     def name(cls) -> str:
+        """Low level API."""
         pass
 
     @abstractmethod
     def get_properties(self) -> dict[str, Any]:
+        """Low level API."""
         pass
+
+    def run(self, instance: Instance, model_id: int) -> Model:
+        """Create a model to visualize the usecase on an atlas volume.
+
+        :param instance: Instance.
+        :type instance: Instance
+        :param model_id: ID of the atlas volume model.
+        :type model_id: int
+        :return: Model created for the usecase.
+        :rtype: Model
+        """
+        params = {
+            "model_id": model_id,
+            "use_case": self.name,
+            "params": self.get_properties(),
+        }
+        result = instance.request("visualize-atlas-usecase", params)
+        return deserialize_model(result)
 
 
 class AtlasDensity(AtlasUsecase):
-    """Display the volume density using the model color ramp."""
+    """Display the volume density.
+
+    The relation between the density and the color can be changed using the
+    color ramp of the model created.
+    """
 
     @classmethod
     @property
@@ -101,7 +125,9 @@ class ColumnNeighbor:
 
 @dataclass
 class AtlasColumnHighlight(AtlasUsecase):
-    """Highlight a column and (optionally) its neighbors.
+    """Place a column and (optionally) its neighbors.
+
+    Columns are always aligned on the Y axis so their position uses only XZ.
 
     :param position: Column coordinates.
     :type position: ColumnPosition
@@ -149,7 +175,7 @@ class AtlasOrientationField(AtlasUsecase):
 class AtlasShellOutline(AtlasUsecase):
     """Display the volume using its shell outline.
 
-    This is the default atlas volume display mode and is always supported.
+    This is the default atlas volume usecase and is always supported.
     """
 
     @classmethod
@@ -173,26 +199,3 @@ def get_atlas_usecases(instance: Instance, model_id: int) -> list[str]:
     """
     params = {"model_id": model_id}
     return instance.request("get-available-atlas-usecases", params)
-
-
-def visualize_atlas_usecase(
-    instance: Instance, model_id: int, usecase: AtlasUsecase
-) -> Model:
-    """Create a model to visualize an atlas volume for a given usecase.
-
-    :param instance: Instance.
-    :type instance: Instance
-    :param model_id: ID of the atlas volume model.
-    :type model_id: int
-    :param usecase: Usecase description.
-    :type usecase: AtlasUsecase
-    :return: Model created for the usecase.
-    :rtype: Model
-    """
-    params = {
-        "model_id": model_id,
-        "use_case": usecase.name,
-        "params": usecase.get_properties(),
-    }
-    result = instance.request("visualize-atlas-usecase", params)
-    return deserialize_model(result)

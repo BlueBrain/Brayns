@@ -34,7 +34,6 @@ from .atlas import (
     ColumnNeighbor,
     ColumnPosition,
     get_atlas_usecases,
-    visualize_atlas_usecase,
 )
 from .bbp import BbpCells, BbpLoader, BbpReport, BbpReportType
 from .cell_placement import CellPlacementLoader
@@ -86,7 +85,6 @@ __all__ = [
     "SonataNodes",
     "SonataReport",
     "SonataReportType",
-    "visualize_atlas_usecase",
     "VoxelType",
     "XyzLoader",
 ]

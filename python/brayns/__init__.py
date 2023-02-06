@@ -182,7 +182,6 @@ from .plugins import (
     get_atlas_usecases,
     get_circuit_ids,
     set_circuit_thickness,
-    visualize_atlas_usecase,
 )
 from .service import (
     LogLevel,
@@ -406,7 +405,6 @@ __all__ = [
     "Version",
     "VersionError",
     "View",
-    "visualize_atlas_usecase",
     "VolumeDataType",
     "VoxelType",
     "WebSocketError",
