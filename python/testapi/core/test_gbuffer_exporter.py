@@ -97,8 +97,12 @@ class TestGBufferExporter(SimpleTestCase):
         prepare_lights(self.instance)
 
         settings = RenderSettings()
-        channels = [brayns.GBufferChannel.ALBEDO, brayns.GBufferChannel.COLOR,
-                    brayns.GBufferChannel.DEPTH, brayns.GBufferChannel.NORMAL]
+        channels = [
+            brayns.GBufferChannel.ALBEDO,
+            brayns.GBufferChannel.COLOR,
+            brayns.GBufferChannel.DEPTH,
+            brayns.GBufferChannel.NORMAL,
+        ]
         return brayns.GBufferExporter(
             channels=channels,
             resolution=settings.resolution,

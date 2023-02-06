@@ -160,8 +160,9 @@ class GBufferExporter:
         return _task(instance, params)
 
 
-def _serialize_export(export: GBufferExporter, path: str | None = None
-                      ) -> dict[str, Any]:
+def _serialize_export(
+    export: GBufferExporter, path: str | None = None
+) -> dict[str, Any]:
     message: dict[str, Any] = {
         "channels": [channel.value for channel in export.channels]
     }
