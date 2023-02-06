@@ -24,6 +24,7 @@
 #include <ospray/ospray_cpp/Data.h>
 
 #include <algorithm>
+#include <unordered_set>
 
 namespace
 {
@@ -40,16 +41,17 @@ class PixelFormatChannelByteSize
 public:
     static size_t get(brayns::FramebufferChannel channel, brayns::PixelFormat format)
     {
-        if (channel == brayns::FramebufferChannel::Color)
+        if (channel != brayns::FramebufferChannel::Color)
         {
-            if (format == brayns::PixelFormat::RgbaF32)
-            {
-                return 4;
-            }
-            return 1;
+            return 4;
         }
 
-        return 4;
+        if (format == brayns::PixelFormat::RgbaF32)
+        {
+            return 4;
+        }
+
+        return 1;
     }
 };
 
@@ -132,7 +134,13 @@ public:
 class OsprayFrameBufferChannel
 {
 public:
-    static uint32_t build(const std::vector<brayns::FramebufferChannel> &channels, bool accumulation)
+    static bool hasDuplicates(const std::vector<brayns::FramebufferChannel> &channels)
+    {
+        auto uniques = std::unordered_set<brayns::FramebufferChannel>(channels.begin(), channels.end());
+        return uniques.size() < channels.size();
+    }
+
+    static uint32_t buildMask(const std::vector<brayns::FramebufferChannel> &channels, bool accumulation)
     {
         auto channelMask = 0u;
 
@@ -204,7 +212,7 @@ bool StaticFrameHandler::commit()
     auto width = static_cast<int>(_frameSize.x);
     auto height = static_cast<int>(_frameSize.y);
     auto format = OsprayFrameBufferFormat::fromPixelFormat(_format);
-    auto channels = OsprayFrameBufferChannel::build(_channels, _accumulation);
+    auto channels = OsprayFrameBufferChannel::buildMask(_channels, _accumulation);
     _handle = ospray::cpp::FrameBuffer(width, height, format, channels);
 
     auto toneMapping = ToneMappingFactory::create();
@@ -239,6 +247,7 @@ void StaticFrameHandler::setFormat(PixelFormat frameBufferFormat) noexcept
 
 void StaticFrameHandler::setChannels(const std::vector<FramebufferChannel> &channels) noexcept
 {
+    assert(!OsprayFrameBufferChannel::hasDuplicates(channels));
     _flag.update(_channels, channels);
 }
 

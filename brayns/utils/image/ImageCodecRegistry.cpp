@@ -91,8 +91,7 @@ namespace brayns
 {
 const ImageCodec &ImageCodecRegistry::getCodec(const std::string &format)
 {
-    auto lowerFormat = format;
-    StringCase::lower(lowerFormat);
+    auto lowerFormat = StringCase::toLower(format);
 
     auto &codecs = ImageCodecStorage::getCodecs();
     auto codec = codecs.find(lowerFormat);
