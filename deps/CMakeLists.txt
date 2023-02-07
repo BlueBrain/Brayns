@@ -127,6 +127,32 @@ target_include_directories(stb SYSTEM INTERFACE
     "$<INSTALL_INTERFACE:include>")
 
 # =============================================================================
+# tinyexr
+# =============================================================================
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tinyexr")
+    message(STATUS "Downloading tinyexr from submodules")
+    FetchContent_Declare(
+        tinyexr
+        GIT_REPOSITORY https://github.com/syoyo/tinyexr
+        GIT_TAG v1.0.1
+        GIT_SHALLOW ON
+        GIT_SUBMODULES_RECURSE OFF
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tinyexr
+    )
+    FetchContent_Populate(tinyexr)
+endif()
+
+add_library(tinyexr INTERFACE)
+
+set(BRAYNS_TINYEXR_INCLUDES
+    ${CMAKE_CURRENT_SOURCE_DIR}/tinyexr
+    ${CMAKE_CURRENT_SOURCE_DIR}/tinyexr/deps/miniz)
+
+target_include_directories(tinyexr SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${BRAYNS_TINYEXR_INCLUDES}>"
+    "$<INSTALL_INTERFACE:include>")
+
+# =============================================================================
 # doctest
 # =============================================================================
 if(BRAYNS_TESTS_ENABLED)

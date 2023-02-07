@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "FramebufferChannel.h"
 #include "IFrameHandler.h"
 #include "PixelFormat.h"
 
@@ -70,6 +71,19 @@ public:
     void setFormat(PixelFormat frameBufferFormat) noexcept;
 
     /**
+     * @brief Set the channels this framebuffer will store.
+     * @param channels List of channels to store.
+     */
+    void setChannels(const std::vector<FramebufferChannel> &channels) noexcept;
+
+    /**
+     * @brief Enables or disables the usage of tone mapping when rendering on this framebuffer.
+     *
+     * @param enabled
+     */
+    void setToneMappingEnabled(bool enabled) noexcept;
+
+    /**
      * @brief Resets the accumulation frames to 0.
      */
     void clear() noexcept;
@@ -100,10 +114,11 @@ public:
     void resetNewAccumulationFrame() noexcept;
 
     /**
-     * @brief Returns an Image object with the current contents of the framebuffer.
+     * @brief Returns an Image object with the current contents of the specified channel.
+     * @brief channel The channel to retrieve as an Image.
      * @return Image The image object.
      */
-    Image getImage();
+    Image getImage(FramebufferChannel channel = FramebufferChannel::Color);
 
     /**
      * @brief Returns the Ospray backend framebuffer handle object.

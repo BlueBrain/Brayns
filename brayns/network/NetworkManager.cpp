@@ -44,6 +44,7 @@
 #include <brayns/network/entrypoints/ColorRampEntrypoint.h>
 #include <brayns/network/entrypoints/EnableSimulationEntrypoint.h>
 #include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
+#include <brayns/network/entrypoints/ExportGBuffersEntrypoint.h>
 #include <brayns/network/entrypoints/FramebufferEntrypoint.h>
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
 #include <brayns/network/entrypoints/GetModelEntrypoint.h>
@@ -112,6 +113,7 @@ public:
         builder.add<brayns::ColorModelEntrypoint>(models);
         builder.add<brayns::EnableSimulationEntrypoint>(models);
         builder.add<brayns::ExitLaterEntrypoint>(engine);
+        builder.add<brayns::ExportGBuffersEntrypoint>(engine, token);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
         builder.add<brayns::GetCameraViewEntrypoint>(engine);
         builder.add<brayns::GetCameraOrthographicEntrypoint>(engine);

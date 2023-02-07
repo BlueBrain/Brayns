@@ -21,23 +21,13 @@
 
 #pragma once
 
-#define BRAYNS_TESTDATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/files/"
-#define BRAYNS_TESTDATA_REFERENCE_IMAGES_PATH BRAYNS_TESTDATA_PATH "referenceimages/"
-#define BRAYNS_TESTDATA_MODELS_PATH BRAYNS_TESTDATA_PATH "models/"
-#define BRAYNS_TESTDATA_INVALID_MODELS_PATH BRAYNS_TESTDATA_PATH "invalidmodels/"
-
-// Models
-constexpr auto BRAYNS_TESTDATA_MODEL_OBJ_PATH = BRAYNS_TESTDATA_MODELS_PATH "bennu.obj";
-constexpr auto BRAYNS_TESTDATA_MODEL_XYZ_PATH = BRAYNS_TESTDATA_MODELS_PATH "monkey.xyz";
-constexpr auto BRAYNS_TESTDATA_MODEL_PLY_PATH = BRAYNS_TESTDATA_MODELS_PATH "lucy.ply";
-constexpr auto BRAYNS_TESTDATA_MODEL_PDB_PATH = BRAYNS_TESTDATA_MODELS_PATH "1bna.pdb";
-
-// Invalid models
-constexpr auto BRAYNS_TESTDATA_MODEL_BROKEN_PATH = BRAYNS_TESTDATA_INVALID_MODELS_PATH "broken.xyz";
-constexpr auto BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH = BRAYNS_TESTDATA_INVALID_MODELS_PATH "unsupported.abc";
-
 namespace TestPaths
 {
+struct ReferenceImages
+{
+    static constexpr auto folder = "${CMAKE_CURRENT_SOURCE_DIR}/files/referenceimages/";
+};
+
 struct Meshes
 {
     static constexpr auto obj = "${CMAKE_CURRENT_SOURCE_DIR}/files/models/meshes/cube.obj";
@@ -77,5 +67,6 @@ struct Images
 {
     static constexpr auto jpg = "${CMAKE_CURRENT_SOURCE_DIR}/files/images/image.jpg";
     static constexpr auto png = "${CMAKE_CURRENT_SOURCE_DIR}/files/images/image.png";
+    static constexpr auto exr = "${CMAKE_CURRENT_SOURCE_DIR}/files/images/image.exr";
 };
 }

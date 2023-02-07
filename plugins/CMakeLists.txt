@@ -23,7 +23,6 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED)
 endif()
 
 if(BRAYNS_ATLASEXPLORER_ENABLED)
-    find_package(ZLIB REQUIRED)
     find_package(BZip2 REQUIRED)
 endif()
 

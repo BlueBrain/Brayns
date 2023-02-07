@@ -36,12 +36,12 @@ The following components must be installed on the system where Brayns will be bu
 * SSL Development files
 * Python 3.9 or higher
 * OSPRay 2.10.0 (https://github.com/ospray/OSPRay/tree/v2.10.0)
+* zlib
 
 Optionally, to build the core plugins of Brayns, the following components are required.
 
 * HDF5 development files
 * Bzip2
-* zlib
 
 Brayns uses further dependencies, but if they are not present on the system, it will download them by itself during build.
 

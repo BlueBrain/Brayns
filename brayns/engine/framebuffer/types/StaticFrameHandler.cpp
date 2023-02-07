@@ -23,35 +23,98 @@
 #include <brayns/engine/framebuffer/ToneMapping.h>
 #include <ospray/ospray_cpp/Data.h>
 
+#include <algorithm>
+#include <unordered_set>
+
 namespace
 {
+struct FrameBufferParameters
+{
+    inline static const std::string operations = "imageOperation";
+};
+
 /**
  * @brief Returns the size, in bytes, of each color channel of a given pixel format
  */
 class PixelFormatChannelByteSize
 {
 public:
-    static size_t get(brayns::PixelFormat format)
+    static size_t get(brayns::FramebufferChannel channel, brayns::PixelFormat format)
     {
-        switch (format)
+        if (channel != brayns::FramebufferChannel::Color)
         {
-        case brayns::PixelFormat::RgbaF32:
             return 4;
-        default:
-            return 1;
         }
+
+        if (format == brayns::PixelFormat::RgbaF32)
+        {
+            return 4;
+        }
+
+        return 1;
     }
 };
 
-struct FrameBufferParameters
+class FramebufferChannelCount
 {
-    inline static const std::string operations = "imageOperation";
+public:
+    static size_t get(brayns::FramebufferChannel channel)
+    {
+        switch (channel)
+        {
+        case brayns::FramebufferChannel::Color:
+            return 4;
+        case brayns::FramebufferChannel::Albedo:
+        case brayns::FramebufferChannel::Normal:
+            return 3;
+        case brayns::FramebufferChannel::Depth:
+            return 1;
+        }
+
+        throw std::runtime_error("Unsupported framebuffer channel");
+    }
+};
+
+class FramebufferDataType
+{
+public:
+    static brayns::ImageDataType get(brayns::FramebufferChannel channel, brayns::PixelFormat format)
+    {
+        switch (channel)
+        {
+        case brayns::FramebufferChannel::Color:
+        {
+            switch (format)
+            {
+            case brayns::PixelFormat::RgbaF32:
+                return brayns::ImageDataType::Float;
+            default:
+                return brayns::ImageDataType::UnsignedInt;
+            }
+        }
+        case brayns::FramebufferChannel::Albedo:
+        case brayns::FramebufferChannel::Normal:
+        case brayns::FramebufferChannel::Depth:
+            return brayns::ImageDataType::Float;
+        }
+
+        throw std::runtime_error("Unsupported framebuffer channel");
+    }
+};
+
+class ValidFramebufferChannel
+{
+public:
+    static bool check(const std::vector<brayns::FramebufferChannel> &channels, brayns::FramebufferChannel channel)
+    {
+        return std::find(channels.begin(), channels.end(), channel) != channels.end();
+    }
 };
 
 class OsprayFrameBufferFormat
 {
 public:
-    static OSPFrameBufferFormat fromPixelFormat(const brayns::PixelFormat frameBufferFormat)
+    static OSPFrameBufferFormat fromPixelFormat(brayns::PixelFormat frameBufferFormat)
     {
         switch (frameBufferFormat)
         {
@@ -68,10 +131,39 @@ public:
     }
 };
 
+class OsprayFrameBufferChannel
+{
+public:
+    static bool hasDuplicates(const std::vector<brayns::FramebufferChannel> &channels)
+    {
+        auto uniques = std::unordered_set<brayns::FramebufferChannel>(channels.begin(), channels.end());
+        return uniques.size() < channels.size();
+    }
+
+    static uint32_t buildMask(const std::vector<brayns::FramebufferChannel> &channels, bool accumulation)
+    {
+        auto channelMask = 0u;
+
+        for (auto channel : channels)
+        {
+            channelMask |= static_cast<uint32_t>(channel);
+        }
+
+        if (accumulation)
+        {
+            channelMask |= OSP_FB_ACCUM;
+        }
+
+        assert(channelMask != 0u);
+
+        return channelMask;
+    }
+};
+
 class FrameStream
 {
 public:
-    explicit FrameStream(ospray::cpp::FrameBuffer &handle)
+    explicit FrameStream(const ospray::cpp::FrameBuffer &handle)
         : _handle(handle)
         , _channelHandle(nullptr)
     {
@@ -83,11 +175,11 @@ public:
     }
 
     template<typename Type>
-    Type *openAs(OSPFrameBufferChannel channel)
+    Type *openAs(brayns::FramebufferChannel channel)
     {
         if (!_channelHandle)
         {
-            _channelHandle = _handle.map(channel);
+            _channelHandle = _handle.map(static_cast<OSPFrameBufferChannel>(channel));
         }
         return static_cast<Type *>(_channelHandle);
     }
@@ -103,7 +195,7 @@ public:
     }
 
 private:
-    ospray::cpp::FrameBuffer &_handle;
+    const ospray::cpp::FrameBuffer &_handle;
     void *_channelHandle;
 };
 }
@@ -120,11 +212,14 @@ bool StaticFrameHandler::commit()
     auto width = static_cast<int>(_frameSize.x);
     auto height = static_cast<int>(_frameSize.y);
     auto format = OsprayFrameBufferFormat::fromPixelFormat(_format);
-    auto channels = _accumulation ? OSP_FB_COLOR | OSP_FB_ACCUM : OSP_FB_COLOR;
+    auto channels = OsprayFrameBufferChannel::buildMask(_channels, _accumulation);
     _handle = ospray::cpp::FrameBuffer(width, height, format, channels);
 
-    auto toneMapping = ToneMappingFactory::create();
-    _handle.setParam(FrameBufferParameters::operations, ospray::cpp::CopiedData(&toneMapping, 1));
+    if (_toneMapping)
+    {
+        auto toneMapping = ToneMappingFactory::create();
+        _handle.setParam(FrameBufferParameters::operations, ospray::cpp::CopiedData(&toneMapping, 1));
+    }
 
     _handle.commit();
 
@@ -151,6 +246,17 @@ void StaticFrameHandler::setAccumulation(bool accumulation) noexcept
 void StaticFrameHandler::setFormat(PixelFormat frameBufferFormat) noexcept
 {
     _flag.update(_format, frameBufferFormat);
+}
+
+void StaticFrameHandler::setChannels(const std::vector<FramebufferChannel> &channels) noexcept
+{
+    assert(!OsprayFrameBufferChannel::hasDuplicates(channels));
+    _flag.update(_channels, channels);
+}
+
+void StaticFrameHandler::setToneMappingEnabled(bool enabled) noexcept
+{
+    _flag.update(_toneMapping, enabled);
 }
 
 void StaticFrameHandler::clear() noexcept
@@ -180,19 +286,22 @@ void StaticFrameHandler::resetNewAccumulationFrame() noexcept
     _newAccumulationFrame = false;
 }
 
-Image StaticFrameHandler::getImage()
+Image StaticFrameHandler::getImage(FramebufferChannel channel)
 {
-    auto colorStream = FrameStream(_handle);
-    auto colorBuffer = colorStream.openAs<uint8_t>(OSP_FB_COLOR);
+    assert(ValidFramebufferChannel::check(_channels, channel));
+
+    auto stream = FrameStream(_handle);
+    auto buffer = stream.openAs<uint8_t>(channel);
 
     ImageInfo info;
 
     info.width = _frameSize.x;
     info.height = _frameSize.y;
-    info.channelCount = 4;
-    info.channelSize = PixelFormatChannelByteSize::get(_format);
+    info.dataType = FramebufferDataType::get(channel, _format);
+    info.channelCount = FramebufferChannelCount::get(channel);
+    info.channelSize = PixelFormatChannelByteSize::get(channel, _format);
 
-    auto data = reinterpret_cast<const char *>(colorBuffer);
+    auto data = reinterpret_cast<const char *>(buffer);
     auto length = info.getSize();
     return Image(info, {data, length});
 }

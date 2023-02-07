@@ -25,7 +25,6 @@
 
 #include <brayns/engine/json/adapters/EngineObjectDataAdapter.h>
 #include <brayns/engine/json/adapters/ViewAdapter.h>
-#include <brayns/network/adapters/SimulationParametersAdapter.h>
 #include <brayns/network/messages/ImageSettingsMessage.h>
 
 namespace brayns

@@ -30,19 +30,16 @@ enum class PixelFormat
 {
     /**
      * @brief 4 channels of 8 bits each with lineal color curve.
-     *
      */
     RgbaI8,
 
     /**
      * @brief 4 channels of 8 bits each with non-lineal color curve.
-     *
      */
     StandardRgbaI8,
 
     /**
      * @brief 4 channels of 32 bits each.
-     *
      */
     RgbaF32
 };

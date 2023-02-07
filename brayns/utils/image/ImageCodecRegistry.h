@@ -42,6 +42,6 @@ public:
      * @return const ImageCodec& Image codec supporting format.
      * @throw std::runtime_error Format not supported.
      */
-    static const ImageCodec &getCodec(std::string format);
+    static const ImageCodec &getCodec(const std::string &format);
 };
 } // namespace brayns

@@ -45,6 +45,7 @@ from .framebuffer import (
     StaticFramebuffer,
     set_framebuffer,
 )
+from .gbuffer_exporter import GBufferChannel, GBufferExporter
 from .geometry import (
     BoundedPlane,
     Box,
@@ -166,6 +167,8 @@ __all__ = [
     "Entrypoint",
     "Fovy",
     "Framebuffer",
+    "GBufferChannel",
+    "GBufferExporter",
     "Geometry",
     "get_application",
     "get_bounds",

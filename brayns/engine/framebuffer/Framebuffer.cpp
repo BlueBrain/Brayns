@@ -53,6 +53,16 @@ void Framebuffer::setFormat(PixelFormat format) noexcept
     _frame->setFormat(format);
 }
 
+void Framebuffer::setChannels(const std::vector<FramebufferChannel> &channels) noexcept
+{
+    _frame->setChannels(channels);
+}
+
+void Framebuffer::setToneMappingEnabled(bool enabled) noexcept
+{
+    _frame->setToneMappingEnabled(enabled);
+}
+
 void Framebuffer::clear() noexcept
 {
     _frame->clear();
@@ -78,9 +88,9 @@ void Framebuffer::resetNewAccumulationFrame() noexcept
     _frame->resetNewAccumulationFrame();
 }
 
-Image Framebuffer::getImage()
+Image Framebuffer::getImage(FramebufferChannel channel)
 {
-    return _frame->getImage();
+    return _frame->getImage(channel);
 }
 
 const ospray::cpp::FrameBuffer &Framebuffer::getHandle() const noexcept
