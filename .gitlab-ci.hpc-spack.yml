@@ -43,7 +43,7 @@ brayns-python-venv:
     - module load unstable python
     - python -m venv pythonvenv
     - source pythonvenv/bin/activate
-    - pip install requirements.txt
+    - pip install -r requirements.txt
     - python setup.py sdist
     - pip install dist/*
     - deactivate
