@@ -77,6 +77,13 @@ public:
     void setChannels(const std::vector<FramebufferChannel> &channels) noexcept;
 
     /**
+     * @brief Enables or disables the usage of tone mapping when rendering on this framebuffer.
+     *
+     * @param enabled
+     */
+    void setToneMappingEnabled(bool enabled) noexcept;
+
+    /**
      * @brief Resets the accumulation frames to 0.
      */
     void clear() noexcept;

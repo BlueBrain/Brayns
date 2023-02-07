@@ -37,6 +37,7 @@ public:
     void setAccumulation(bool accumulation) noexcept override;
     void setFormat(PixelFormat frameBufferFormat) noexcept override;
     void setChannels(const std::vector<brayns::FramebufferChannel> &channels) noexcept override;
+    void setToneMappingEnabled(bool enabled) noexcept override;
     void clear() noexcept override;
 
     void incrementAccumFrames() noexcept override;

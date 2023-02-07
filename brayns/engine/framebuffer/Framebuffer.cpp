@@ -58,6 +58,11 @@ void Framebuffer::setChannels(const std::vector<FramebufferChannel> &channels) n
     _frame->setChannels(channels);
 }
 
+void Framebuffer::setToneMappingEnabled(bool enabled) noexcept
+{
+    _frame->setToneMappingEnabled(enabled);
+}
+
 void Framebuffer::clear() noexcept
 {
     _frame->clear();

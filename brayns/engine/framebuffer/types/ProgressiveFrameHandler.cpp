@@ -63,6 +63,12 @@ void ProgressiveFrameHandler::setChannels(const std::vector<brayns::FramebufferC
     _highRes.setChannels(channels);
 }
 
+void ProgressiveFrameHandler::setToneMappingEnabled(bool enabled) noexcept
+{
+    _lowRes.setToneMappingEnabled(enabled);
+    _highRes.setToneMappingEnabled(enabled);
+}
+
 void ProgressiveFrameHandler::clear() noexcept
 {
     _lowResFrame = true;

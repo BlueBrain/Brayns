@@ -69,6 +69,11 @@ public:
     virtual void setChannels(const std::vector<FramebufferChannel> &channels) noexcept = 0;
 
     /**
+     * @copydoc Framebuffer::setToneMappingEnabled(bool)
+     */
+    virtual void setToneMappingEnabled(bool enabled) noexcept = 0;
+
+    /**
      * @copydoc Framebuffer::clear()
      */
     virtual void clear() noexcept = 0;

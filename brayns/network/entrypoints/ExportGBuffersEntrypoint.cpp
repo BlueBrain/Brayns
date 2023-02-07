@@ -189,6 +189,7 @@ public:
         framebuffer.setFormat(brayns::PixelFormat::RgbaF32);
         framebuffer.setFrameSize(imageSize);
         framebuffer.setChannels(params.channels);
+        framebuffer.setToneMappingEnabled(false);
         framebuffer.commit();
 
         // Camera
@@ -243,7 +244,6 @@ void ExportGBuffersEntrypoint::onRequest(const Request &request)
     auto params = ParamsBuilder::build(request, _engine);
     _download = params.file_path.empty();
     ExportHandler::handle(request, params, _token, _engine);
-    _download = false;
 }
 
 bool ExportGBuffersEntrypoint::isAsync() const

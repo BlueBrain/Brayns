@@ -215,8 +215,11 @@ bool StaticFrameHandler::commit()
     auto channels = OsprayFrameBufferChannel::buildMask(_channels, _accumulation);
     _handle = ospray::cpp::FrameBuffer(width, height, format, channels);
 
-    auto toneMapping = ToneMappingFactory::create();
-    _handle.setParam(FrameBufferParameters::operations, ospray::cpp::CopiedData(&toneMapping, 1));
+    if (_toneMapping)
+    {
+        auto toneMapping = ToneMappingFactory::create();
+        _handle.setParam(FrameBufferParameters::operations, ospray::cpp::CopiedData(&toneMapping, 1));
+    }
 
     _handle.commit();
 
@@ -249,6 +252,11 @@ void StaticFrameHandler::setChannels(const std::vector<FramebufferChannel> &chan
 {
     assert(!OsprayFrameBufferChannel::hasDuplicates(channels));
     _flag.update(_channels, channels);
+}
+
+void StaticFrameHandler::setToneMappingEnabled(bool enabled) noexcept
+{
+    _flag.update(_toneMapping, enabled);
 }
 
 void StaticFrameHandler::clear() noexcept

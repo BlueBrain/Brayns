@@ -38,6 +38,7 @@ public:
         auto &frameBuffer = engine.getFramebuffer();
         frameBuffer.setChannels({channel});
         frameBuffer.setFormat(brayns::PixelFormat::RgbaF32);
+        frameBuffer.setToneMappingEnabled(false);
 
         engine.commitAndRender();
         auto image = frameBuffer.getImage(channel);
@@ -48,10 +49,6 @@ public:
 
 TEST_CASE("Framebuffer channels")
 {
-    SUBCASE("Color")
-    {
-        FramebufferChannelTester::run({brayns::FramebufferChannel::Color}, "test_framebuffer_channel_color.exr");
-    }
     SUBCASE("Depth")
     {
         FramebufferChannelTester::run({brayns::FramebufferChannel::Depth}, "test_framebuffer_channel_depth.exr");

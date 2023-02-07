@@ -34,6 +34,7 @@ public:
     void setAccumulation(bool accumulation) noexcept override;
     void setFormat(PixelFormat frameBufferFormat) noexcept override;
     void setChannels(const std::vector<FramebufferChannel> &channels) noexcept override;
+    void setToneMappingEnabled(bool enabled) noexcept override;
     void clear() noexcept override;
 
     void incrementAccumFrames() noexcept override;
@@ -52,6 +53,7 @@ private:
     size_t _accumFrames = 0;
     bool _accumulation = true;
     bool _newAccumulationFrame = false;
+    bool _toneMapping = true;
     ospray::cpp::FrameBuffer _handle;
     ModifiedFlag _flag;
 };
