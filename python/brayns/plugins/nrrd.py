@@ -18,33 +18,41 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any, ClassVar
 
 from brayns.core import Loader
 
 
-@dataclass
-class DtiLoader(Loader):
-    """Diffuse Tensor Imaging loader.
+class VoxelType(Enum):
+    """Defines the representation of the voxels of an NRRD volume.
 
-    :param streamline_radius: Radius of the streamlines, defaults to 1.
-    :type streamline_radius: float, optional
-    :param streamline_radius: Radius of the streamlines, defaults to 1.
-    :type streamline_radius: float, optional
+    :param SCALAR: Each voxel holds a single scalar value.
+    :param ORIENTATION: Each voxel holds a quaternion (orientation field).
+    :param FLATMAP: Each voxel is a pair of integer.
     """
 
-    JSON: ClassVar[str] = "json"
+    SCALAR = "scalar"
+    ORIENTATION = "orientation"
+    FLATMAP = "flatmap"
 
-    streamline_radius: float = 1.0
-    spike_decay_time: float = 1.0
+
+@dataclass
+class NrrdLoader(Loader):
+    """Loader for NRRD volumes.
+
+    :param voxel_type: Defines the representation of the volume voxels.
+    :type voxel_type: VoxelType
+    """
+
+    NRRD: ClassVar[str] = "nrrd"
+
+    voxel_type: VoxelType
 
     @classmethod
     @property
     def name(cls) -> str:
-        return "DTI loader"
+        return "NRRD loader"
 
     def get_properties(self) -> dict[str, Any]:
-        return {
-            "radius": self.streamline_radius,
-            "spike_decay_time": self.spike_decay_time,
-        }
+        return {"type": self.voxel_type.value}

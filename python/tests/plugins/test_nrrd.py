@@ -1,6 +1,7 @@
 # Copyright (c) 2015-2023 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-# Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+#
+# Responsible Author: adrien.fleury@epfl.ch
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 #
@@ -17,20 +18,20 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from typing import Any, ClassVar
+import unittest
 
-from brayns.core import Loader
+import brayns
 
 
-class XyzLoader(Loader):
-    """Loader for point clouds (XYZ)."""
+class TestNrrdLoader(unittest.TestCase):
+    def test_name(self) -> None:
+        self.assertEqual(brayns.NrrdLoader.name, "NRRD loader")
 
-    XYZ: ClassVar[str] = "xyz"
-
-    @classmethod
-    @property
-    def name(cls) -> str:
-        return "xyz"
-
-    def get_properties(self) -> dict[str, Any]:
-        return {}
+    def test_get_properties(self) -> None:
+        loader = brayns.NrrdLoader(brayns.VoxelType.FLATMAP)
+        self.assertEqual(
+            loader.get_properties(),
+            {
+                "type": "flatmap",
+            },
+        )

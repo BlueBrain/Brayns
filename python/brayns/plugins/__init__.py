@@ -24,12 +24,24 @@ Plugins subpackage.
 It includes all science related features and optional components.
 """
 
+from .atlas import (
+    AtlasColumnHighlight,
+    AtlasDensity,
+    AtlasFlatmapAreas,
+    AtlasOrientationField,
+    AtlasShellOutline,
+    AtlasUsecase,
+    ColumnNeighbor,
+    ColumnPosition,
+    get_atlas_usecases,
+)
 from .bbp import BbpCells, BbpLoader, BbpReport, BbpReportType
 from .cell_placement import CellPlacementLoader
 from .circuit import CircuitColorMethod, get_circuit_ids, set_circuit_thickness
 from .cylindric_camera import CylindricProjection
 from .dti import DtiLoader
 from .morphology import GeometryType, Morphology, MorphologyLoader
+from .nrrd import NrrdLoader, VoxelType
 from .protein import ProteinColorScheme, ProteinLoader
 from .sonata import (
     SonataEdgePopulation,
@@ -42,18 +54,28 @@ from .sonata import (
 from .xyz import XyzLoader
 
 __all__ = [
+    "AtlasColumnHighlight",
+    "AtlasDensity",
+    "AtlasFlatmapAreas",
+    "AtlasOrientationField",
+    "AtlasShellOutline",
+    "AtlasUsecase",
     "BbpCells",
     "BbpLoader",
     "BbpReport",
     "BbpReportType",
     "CellPlacementLoader",
     "CircuitColorMethod",
+    "ColumnNeighbor",
+    "ColumnPosition",
     "CylindricProjection",
     "DtiLoader",
     "GeometryType",
+    "get_atlas_usecases",
     "get_circuit_ids",
     "Morphology",
     "MorphologyLoader",
+    "NrrdLoader",
     "ProteinColorScheme",
     "ProteinLoader",
     "set_circuit_thickness",
@@ -63,5 +85,6 @@ __all__ = [
     "SonataNodes",
     "SonataReport",
     "SonataReportType",
+    "VoxelType",
     "XyzLoader",
 ]

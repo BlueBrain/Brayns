@@ -59,6 +59,22 @@ class ApiTestCase(unittest.TestCase):
         return os.environ["BRAYNS_TEST_DTI_FILE"]
 
     @property
+    def nrrd_folder(self) -> Path:
+        return Path(os.environ["BRAYNS_TEST_NRRD_FOLDER"])
+
+    @property
+    def nrrd_density(self) -> str:
+        return str(self.nrrd_folder / "density.nrrd")
+
+    @property
+    def nrrd_flatmap(self) -> str:
+        return str(self.nrrd_folder / "flatmap.nrrd")
+
+    @property
+    def nrrd_orientation(self) -> str:
+        return str(self.nrrd_folder / "orientation.nrrd")
+
+    @property
     def ffmpeg(self) -> str:
         return os.environ.get("BRAYNS_TEST_FFMPEG", "ffmpeg")
 

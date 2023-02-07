@@ -43,13 +43,9 @@ brayns-python-venv:
     - module load unstable python
     - python -m venv pythonvenv
     - source pythonvenv/bin/activate
+    - pip install -r requirements.txt
     - python setup.py sdist
     - pip install dist/*
-    - pip install PySimpleGUI
-    - pip install Pillow
-    - pip install pyright
-    - pip install flake8
-    - pip install black
     - deactivate
 
 brayns-python-test:
@@ -87,5 +83,6 @@ brayns-python-testapi:
     - export BRAYNS_TEST_BBP_CIRCUIT=/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/circuitBuilding_1000neurons/BlueConfig
     - export BRAYNS_TEST_MORPHOLOGY=/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/circuitBuilding_1000neurons/morphologies/C150501A-I3.h5
     - export BRAYNS_TEST_DTI_FILE=/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/DTI/dtitest.json
+    - export BRAYNS_TEST_NRRD_FOLDER=/gpfs/bbp.cscs.ch/project/proj3/TestData/install/share/BBPTestData/nrrd
     - python -m unittest discover -s testapi -p test_*.py
     - deactivate
