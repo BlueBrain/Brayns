@@ -30,7 +30,7 @@
 #include <vector>
 
 class GetAvailableAtlasUseCasesEntrypoint
-    : public brayns::Entrypoint<AvailableUseCasesMessage, std::vector<std::string>>
+    : public brayns::Entrypoint<AvailableUseCasesMessage, std::vector<UseCaseMessage>>
 {
 public:
     explicit GetAvailableAtlasUseCasesEntrypoint(brayns::ModelManager &models);

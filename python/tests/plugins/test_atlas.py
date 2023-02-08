@@ -19,6 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import unittest
+from typing import Any
 
 import brayns
 from tests.mock_instance import MockInstance
@@ -27,10 +28,20 @@ from tests.mock_messages import mock_model, mock_model_message
 
 class TestAtlas(unittest.TestCase):
     def test_get_atlas_usecases(self) -> None:
-        names = ["test1", "test2"]
-        instance = MockInstance(names)
+        use_cases = [("test1", brayns.JsonSchema()), ("test2", brayns.JsonSchema())]
+        instance_use_cases: list[dict[str, Any]] = [
+            {
+                "name": "test1",
+                "params_schema": {},
+            },
+            {
+                "name": "test2",
+                "params_schema": {},
+            },
+        ]
+        instance = MockInstance(instance_use_cases)
         test = brayns.get_atlas_usecases(instance, 2)
-        self.assertEqual(test, names)
+        self.assertEqual(test, use_cases)
         self.assertEqual(instance.method, "get-available-atlas-usecases")
         self.assertEqual(instance.params, {"model_id": 2})
 

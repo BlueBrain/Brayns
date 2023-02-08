@@ -43,6 +43,10 @@ class LayerDistance final : public IUseCase
 {
 public:
     std::string getName() const override;
+    brayns::JsonSchema getParamsSchema() const override;
     bool isValidAtlas(const Atlas &atlas) const override;
     std::shared_ptr<brayns::Model> run(const Atlas &atlas, const brayns::JsonValue &payload) const override;
+
+private:
+    brayns::JsonSchema _paramsSchema = brayns::Json::getSchema<LayerDistanceParameters>();
 };

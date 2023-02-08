@@ -24,6 +24,33 @@
 
 #include "common/ExtractAtlas.h"
 
+namespace
+{
+class ReplyBuilder
+{
+public:
+    static std::vector<UseCaseMessage> build(const UseCaseManager &manager, const Atlas &atlas)
+    {
+        auto &allUseCases = manager.getUseCases();
+
+        auto result = std::vector<UseCaseMessage>();
+        result.reserve(allUseCases.size());
+
+        for (auto &useCase : allUseCases)
+        {
+            if (!useCase->isValidAtlas(atlas))
+            {
+                continue;
+            }
+
+            result.push_back({useCase->getName(), useCase->getParamsSchema()});
+        }
+
+        return result;
+    }
+};
+}
+
 GetAvailableAtlasUseCasesEntrypoint::GetAvailableAtlasUseCasesEntrypoint(brayns::ModelManager &models)
     : _models(models)
     , _useCases(UseCaseManager::createDefault())
@@ -45,6 +72,5 @@ void GetAvailableAtlasUseCasesEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     auto modelId = params.model_id;
     auto &component = ExtractAtlas::fromId(_models, modelId);
-    auto useCases = _useCases.getValidUseCasesForAtlas(*component.atlas);
-    request.reply(useCases);
+    request.reply(ReplyBuilder::build(_useCases, *component.atlas));
 }

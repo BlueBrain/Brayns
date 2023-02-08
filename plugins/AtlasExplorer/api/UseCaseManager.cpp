@@ -46,19 +46,9 @@ UseCaseManager::UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases)
 {
 }
 
-std::vector<std::string> UseCaseManager::getValidUseCasesForAtlas(const Atlas &atlas) const
+const std::vector<std::unique_ptr<IUseCase>> &UseCaseManager::getUseCases() const
 {
-    std::vector<std::string> result;
-    result.reserve(_useCases.size());
-
-    for (const auto &useCase : _useCases)
-    {
-        if (useCase->isValidAtlas(atlas))
-        {
-            result.push_back(useCase->getName());
-        }
-    }
-    return result;
+    return _useCases;
 }
 
 const IUseCase &UseCaseManager::getUseCase(const std::string &name) const

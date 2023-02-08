@@ -56,7 +56,7 @@ class TestAtlas(SimpleTestCase):
 
     def check_usecases(self, model: brayns.Model, ref: list[str]) -> None:
         usecases = brayns.get_atlas_usecases(self.instance, model.id)
-        self.assertEqual(set(usecases), set(ref))
+        self.assertEqual(set(item[0] for item in usecases), set(ref))
 
     def render_and_validate(self, ref: str) -> None:
         settings = RenderSettings()

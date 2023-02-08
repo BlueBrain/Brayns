@@ -21,7 +21,7 @@
 #pragma once
 
 #include <brayns/engine/model/Model.h>
-#include <brayns/json/JsonType.h>
+#include <brayns/json/JsonSchema.h>
 
 #include "Atlas.h"
 
@@ -35,6 +35,15 @@ public:
      * @return std::string
      */
     virtual std::string getName() const = 0;
+
+    /**
+     * @brief Returns the schema of the parameters accepted by the use case, if any.
+     * @return brayns::JsonSchema
+     */
+    virtual brayns::JsonSchema getParamsSchema() const
+    {
+        return {};
+    }
 
     /**
      * @brief Tests wether the use case can be applied to the atlas.
