@@ -21,7 +21,13 @@
 #pragma once
 
 #include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/adapters/JsonSchemaAdapter.h>
 
 BRAYNS_JSON_OBJECT_BEGIN(AvailableUseCasesMessage)
 BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model holding an atlas volume")
+BRAYNS_JSON_OBJECT_END()
+
+BRAYNS_JSON_OBJECT_BEGIN(UseCaseMessage)
+BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Use case name")
+BRAYNS_JSON_OBJECT_ENTRY(brayns::JsonSchema, params_schema, "Use case parameters schema")
 BRAYNS_JSON_OBJECT_END()

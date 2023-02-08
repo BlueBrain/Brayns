@@ -122,6 +122,11 @@ std::string LayerDistance::getName() const
     return "Layer distance";
 }
 
+brayns::JsonSchema LayerDistance::getParamsSchema() const
+{
+    return _paramsSchema;
+}
+
 bool LayerDistance::isValidAtlas(const Atlas &atlas) const
 {
     return atlas.getVoxelType() == VoxelType::LayerDistance;

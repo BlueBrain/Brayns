@@ -41,11 +41,10 @@ public:
     explicit UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases);
 
     /**
-     * @brief Return the names of the valid use-cases for a specific atlas object.
-     * @param atlas Atlas object to check for valid use cases.
-     * @return std::vector<std::string> Names of the valid use cases
+     * @brief Return the all the use cases stored in this manager.
+     * @return const std::vector<std::unique_ptr<IUseCase>>&
      */
-    std::vector<std::string> getValidUseCasesForAtlas(const Atlas &atlas) const;
+    const std::vector<std::unique_ptr<IUseCase>> &getUseCases() const;
 
     /**
      * @brief Returns the use-case handler for the given use-case name.

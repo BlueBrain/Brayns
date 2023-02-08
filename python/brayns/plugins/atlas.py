@@ -26,7 +26,7 @@ from typing import Any
 
 from brayns.core import Model, deserialize_model
 from brayns.network import Instance
-from brayns.utils import Color4, Vector
+from brayns.utils import Color4, JsonSchema, Vector, deserialize_schema
 
 
 class AtlasUsecase(ABC):
@@ -187,7 +187,9 @@ class AtlasShellOutline(AtlasUsecase):
         return {}
 
 
-def get_atlas_usecases(instance: Instance, model_id: int) -> list[str]:
+def get_atlas_usecases(
+    instance: Instance, model_id: int
+) -> list[tuple[str, JsonSchema]]:
     """Return the list of visualization usecases supported by an atlas volume.
 
     :param instance: Instance.
@@ -198,4 +200,9 @@ def get_atlas_usecases(instance: Instance, model_id: int) -> list[str]:
     :rtype: list[str]
     """
     params = {"model_id": model_id}
-    return instance.request("get-available-atlas-usecases", params)
+    result: list[dict[str, Any]] = instance.request(
+        "get-available-atlas-usecases", params
+    )
+    return [
+        (item["name"], deserialize_schema(item["params_schema"])) for item in result
+    ]

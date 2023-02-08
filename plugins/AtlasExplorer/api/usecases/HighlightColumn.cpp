@@ -35,7 +35,7 @@ namespace
 class CoordinatesValidator
 {
 public:
-    static void validate(const HighlighColumParams &params, const brayns::Vector3ui &size)
+    static void validate(const HighlightColumParams &params, const brayns::Vector3ui &size)
     {
         auto &mainCoords = params.xz_coordinate;
         auto mainX = static_cast<uint32_t>(mainCoords.x);
@@ -120,6 +120,11 @@ std::string HighlightColumn::getName() const
     return "Highlight column";
 }
 
+brayns::JsonSchema HighlightColumn::getParamsSchema() const
+{
+    return _paramsSchema;
+}
+
 bool HighlightColumn::isValidAtlas(const Atlas &atlas) const
 {
     (void)atlas;
@@ -128,7 +133,7 @@ bool HighlightColumn::isValidAtlas(const Atlas &atlas) const
 
 std::shared_ptr<brayns::Model> HighlightColumn::run(const Atlas &atlas, const brayns::JsonValue &payload) const
 {
-    const auto params = ParamsParser::parse<HighlighColumParams>(payload);
+    const auto params = ParamsParser::parse<HighlightColumParams>(payload);
     CoordinatesValidator::validate(params, atlas.getSize());
 
     const auto numColumns = params.neighbours.size() + 1;

@@ -29,7 +29,7 @@ BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector2i, relative_xz, "Relative coordinates re
 BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector4f, color, "Highlight color")
 BRAYNS_JSON_OBJECT_END()
 
-BRAYNS_JSON_OBJECT_BEGIN(HighlighColumParams)
+BRAYNS_JSON_OBJECT_BEGIN(HighlightColumParams)
 BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector2i, xz_coordinate, "Coordinates of the column to highlight")
 BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector4f, color, "Highlight  color")
 BRAYNS_JSON_OBJECT_ENTRY(
@@ -43,6 +43,10 @@ class HighlightColumn final : public IUseCase
 {
 public:
     std::string getName() const override;
+    brayns::JsonSchema getParamsSchema() const override;
     bool isValidAtlas(const Atlas &atlas) const override;
     std::shared_ptr<brayns::Model> run(const Atlas &atlas, const brayns::JsonValue &payload) const override;
+
+private:
+    brayns::JsonSchema _paramsSchema = brayns::Json::getSchema<HighlightColumParams>();
 };
