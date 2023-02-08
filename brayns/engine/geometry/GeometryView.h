@@ -38,6 +38,8 @@ public:
 
     void setMaterial(const Material &material);
 
+    void setNormalsInverted(bool inverted);
+
     void setColor(const Vector3f &color);
     void setColor(const Vector4f &color);
 

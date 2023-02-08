@@ -20,19 +20,33 @@
 
 #pragma once
 
-#include <brayns/engine/geometry/GeometryView.h>
+#include <brayns/engine/components/ClipperViews.h>
+#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/model/Model.h>
+#include <brayns/engine/systems/ClipperDataSystem.h>
 
 namespace brayns
 {
-struct ClipperViews
+class ClippingModelBuilder
 {
-    std::vector<GeometryView> elements;
-
-    ClipperViews() = default;
-
-    explicit ClipperViews(const Geometry &geometry)
+public:
+    template<typename T>
+    static std::shared_ptr<Model> build(std::vector<T> primitives, bool invertNormals)
     {
-        elements.emplace_back(geometry);
+        auto model = std::make_shared<brayns::Model>("clip_geometry");
+
+        auto &components = model->getComponents();
+        auto &geometries = components.add<brayns::Geometries>(std::move(primitives));
+        auto &geometry = geometries.elements.back();
+
+        auto &views = components.add<brayns::ClipperViews>(geometry);
+        auto &view = views.elements.back();
+        view.setNormalsInverted(invertNormals);
+
+        auto &systems = model->getSystems();
+        systems.setDataSystem<brayns::ClipperDataSystem>();
+
+        return model;
     }
 };
 }

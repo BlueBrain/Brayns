@@ -56,7 +56,7 @@ private:
     static void _commit(brayns::Components &components)
     {
         auto &geometries = components.get<brayns::Geometries>();
-        auto &views = components.add<brayns::ClipperViews>();
+        auto &views = components.get<brayns::ClipperViews>();
 
         assert(geometries.elements.size() == views.elements.size());
         for (size_t i = 0; i < geometries.elements.size(); ++i)

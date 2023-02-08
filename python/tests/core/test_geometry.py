@@ -81,8 +81,17 @@ class TestAddClippingGeometries(unittest.TestCase):
         self.run_geometry_tests("add-spheres", geometry, message)
         self.run_clipping_tests("add-clipping-spheres", geometry, message)
 
+    def test_clipping_normal_inversion(self) -> None:
+        geometry = brayns.Sphere(1, brayns.Vector3(1, 2, 3))
+        message = {"center": [1, 2, 3], "radius": 1}
+        self.run_clipping_tests("add-clipping-spheres", geometry, message)
+        self.run_clipping_tests("add-clipping-spheres", geometry, message, True)
+
     def run_geometry_tests(
-        self, method: str, geometry: brayns.Geometry, message: dict[str, Any]
+        self,
+        method: str,
+        geometry: brayns.Geometry,
+        message: dict[str, Any],
     ) -> None:
         instance = MockInstance(mock_model_message())
         color = brayns.Color4.white
@@ -92,10 +101,20 @@ class TestAddClippingGeometries(unittest.TestCase):
         self.assertEqual(instance.params, [{"geometry": message, "color": list(color)}])
 
     def run_clipping_tests(
-        self, method: str, geometry: brayns.Geometry, message: dict[str, Any]
+        self,
+        method: str,
+        geometry: brayns.Geometry,
+        message: dict[str, Any],
+        invert_normals: bool = False,
     ) -> None:
         instance = MockInstance(mock_model_message())
-        model = brayns.add_clipping_geometries(instance, [geometry])
+        model = brayns.add_clipping_geometries(instance, [geometry], invert_normals)
         self.assertEqual(model, mock_model())
         self.assertEqual(instance.method, method)
-        self.assertEqual(instance.params, [message])
+        self.assertEqual(
+            instance.params,
+            {
+                "geometry": [message],
+                "invert_normals": invert_normals,
+            },
+        )

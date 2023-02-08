@@ -29,6 +29,7 @@ struct GeometryViewParameters
     inline static const std::string material = "material";
     inline static const std::string color = "color";
     inline static const std::string index = "index";
+    inline static const std::string invertNormals = "invertNormals";
 };
 }
 
@@ -43,7 +44,13 @@ GeometryView::GeometryView(const Geometry &geometry)
 void GeometryView::setMaterial(const Material &material)
 {
     _handle.setParam(GeometryViewParameters::material, material.getHandle());
-    _flag = true;
+    _flag.setModified(true);
+}
+
+void GeometryView::setNormalsInverted(bool inverted)
+{
+    _handle.setParam(GeometryViewParameters::invertNormals, inverted);
+    _flag.setModified(true);
 }
 
 void GeometryView::setColor(const Vector3f &color)
@@ -55,7 +62,7 @@ void GeometryView::setColor(const Vector4f &color)
 {
     _handle.setParam(GeometryViewParameters::color, color);
     _handle.removeParam(GeometryViewParameters::index);
-    _flag = true;
+    _flag.setModified(true);
 }
 
 bool GeometryView::commit()
@@ -64,7 +71,7 @@ bool GeometryView::commit()
     {
         return false;
     }
-    _flag = false;
+    _flag.setModified(false);
     _handle.commit();
     return true;
 }
@@ -78,13 +85,13 @@ void GeometryView::_setColorPerPrimitive(const OSPData handle)
 {
     _handle.setParam(GeometryViewParameters::color, OSPDataType::OSP_DATA, &handle);
     _handle.removeParam(GeometryViewParameters::index);
-    _flag = true;
+    _flag.setModified(true);
 }
 
 void GeometryView::_setColorMap(const OSPData indexHandle, const OSPData colorHandle)
 {
     _handle.setParam(GeometryViewParameters::index, OSPDataType::OSP_DATA, &indexHandle);
     _handle.setParam(GeometryViewParameters::color, OSPDataType::OSP_DATA, &colorHandle);
-    _flag = true;
+    _flag.setModified(true);
 }
 }

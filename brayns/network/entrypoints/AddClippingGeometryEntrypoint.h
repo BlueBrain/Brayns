@@ -20,22 +20,20 @@
 
 #pragma once
 
-#include <brayns/engine/components/Geometries.h>
+#include <brayns/engine/common/ClippingModelBuilder.h>
 #include <brayns/engine/json/adapters/GeometryAdapters.h>
 #include <brayns/engine/json/adapters/ModelInstanceAdapter.h>
 #include <brayns/engine/scene/ModelManager.h>
-#include <brayns/engine/systems/ClipperDataSystem.h>
-#include <brayns/engine/systems/GenericBoundsSystem.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
 template<typename T>
-class AddClippingGeometryEntrypoint : public Entrypoint<std::vector<T>, ModelInstance>
+class AddClippingGeometryEntrypoint : public Entrypoint<ClippingGeometry<T>, ModelInstance>
 {
 public:
-    using Request = typename Entrypoint<std::vector<T>, ModelInstance>::Request;
+    using Request = typename Entrypoint<ClippingGeometry<T>, ModelInstance>::Request;
 
     explicit AddClippingGeometryEntrypoint(ModelManager &models)
         : _models(models)
@@ -44,27 +42,11 @@ public:
 
     void onRequest(const Request &request) override
     {
-        auto model = std::make_shared<Model>("clipping_geometry");
-
-        _addGeometry(*model, request.getParams());
-        _setUpSystems(*model);
+        auto clipping = request.getParams();
+        auto model = ClippingModelBuilder::build(clipping.primitives, clipping.invertNormals);
 
         auto instance = _models.add(std::move(model));
         request.reply(*instance);
-    }
-
-private:
-    void _addGeometry(Model &model, std::vector<T> primitives)
-    {
-        auto &components = model.getComponents();
-        components.add<Geometries>(std::move(primitives));
-    }
-
-    void _setUpSystems(Model &model)
-    {
-        auto &systems = model.getSystems();
-        systems.setBoundsSystem<GenericBoundsSystem<Geometries>>();
-        systems.setDataSystem<ClipperDataSystem>();
     }
 
 private:
