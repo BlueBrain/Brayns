@@ -114,7 +114,7 @@ class TestAddClippingGeometries(unittest.TestCase):
         self.assertEqual(
             instance.params,
             {
-                "geometry": [message],
+                "primitives": [message],
                 "invert_normals": invert_normals,
             },
         )
