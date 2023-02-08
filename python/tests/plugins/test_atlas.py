@@ -101,6 +101,11 @@ class TestAtlas(unittest.TestCase):
             },
         )
 
+    def test_layer_distance(self) -> None:
+        self.assertEqual(brayns.AtlasLayerDistance.name, "Layer distance")
+        usecase = brayns.AtlasLayerDistance(brayns.AtlasDistanceType.UPPER)
+        self.assertEqual(usecase.get_properties(), {"type": "upper"})
+
     def test_orientation_field(self) -> None:
         self.assertEqual(brayns.AtlasOrientationField.name, "Orientation field")
 
