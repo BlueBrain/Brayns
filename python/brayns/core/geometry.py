@@ -223,7 +223,9 @@ def add_geometries(instance: Instance, geometries: list[tuple[T, Color4]]) -> Mo
     return deserialize_model(result)
 
 
-def add_clipping_geometries(instance: Instance, geometries: list[T]) -> Model:
+def add_clipping_geometries(
+    instance: Instance, geometries: list[T], invert_normals: bool = False
+) -> Model:
     """Create a model from a list of clipping geometries.
 
     All geometries must have the same type.
@@ -234,6 +236,8 @@ def add_clipping_geometries(instance: Instance, geometries: list[T]) -> Model:
     :type instance: Instance
     :param geometries: Clipping geometries to add (boxes, capsules, etc...).
     :type geometries: list[T]
+    :param invert_normals: Invert shading normals to switch clipping side.
+    :type invert_normals: bool
     :raises ValueError: List is empty.
     :return: Model created from the geometries.
     :rtype: Model
@@ -241,7 +245,10 @@ def add_clipping_geometries(instance: Instance, geometries: list[T]) -> Model:
     if not geometries:
         raise ValueError("Cannot create a model with no clipping geometries")
     method = f"add-clipping-{geometries[0].name}"
-    params = [geometry.get_properties() for geometry in geometries]
+    params: dict[str, Any] = {
+        "primitives": [geometry.get_properties() for geometry in geometries],
+        "invert_normals": invert_normals,
+    }
     result = instance.request(method, params)
     return deserialize_model(result)
 

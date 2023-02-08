@@ -85,4 +85,25 @@ ADD_GEOMETRY_ADAPTER(Capsule)
 ADD_GEOMETRY_ADAPTER(Sphere)
 
 #undef ADD_GEOMETRY_ADAPTER
+
+template<typename T>
+struct ClippingGeometry
+{
+    std::vector<T> primitives;
+    bool invertNormals;
+};
+
+#define CLIPPING_GEOMETRY_ADAPTER(TYPE) \
+    BRAYNS_JSON_ADAPTER_BEGIN(ClippingGeometry<TYPE>) \
+    BRAYNS_JSON_ADAPTER_ENTRY(primitives, "Clipping primitive list") \
+    BRAYNS_JSON_ADAPTER_NAMED_ENTRY("invert_normals", invertNormals, "Switches clipping side", Default(false)) \
+    BRAYNS_JSON_ADAPTER_END()
+
+CLIPPING_GEOMETRY_ADAPTER(BoundedPlane)
+CLIPPING_GEOMETRY_ADAPTER(Box)
+CLIPPING_GEOMETRY_ADAPTER(Plane)
+CLIPPING_GEOMETRY_ADAPTER(Capsule)
+CLIPPING_GEOMETRY_ADAPTER(Sphere)
+
+#undef CLIPPING_GEOMETRY_ADAPTER
 }

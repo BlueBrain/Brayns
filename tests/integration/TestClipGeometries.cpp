@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/engine/common/ClippingModelBuilder.h>
 #include <brayns/engine/geometry/types/BoundedPlane.h>
 #include <brayns/engine/geometry/types/Box.h>
 #include <brayns/engine/geometry/types/Capsule.h>
@@ -25,7 +26,6 @@
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/geometry/types/TriangleMesh.h>
 #include <brayns/engine/renderer/types/Interactive.h>
-#include <brayns/engine/systems/ClipperDataSystem.h>
 #include <brayns/io/loaders/mesh/parsers/ObjMeshParser.h>
 #include <brayns/utils/FileReader.h>
 
@@ -33,24 +33,20 @@
 #include <tests/helpers/ImageValidator.h>
 #include <tests/paths.h>
 
+#include <spdlog/fmt/fmt.h>
+
 #include <doctest/doctest.h>
 
 namespace
 {
-class ClipGeometryBuilder
+class ClippingBuilder
 {
 public:
     template<typename T>
-    static void build(brayns::Engine &engine, T geometry, const brayns::Transform transform = {})
+    static void
+        build(brayns::Engine &engine, T geometry, const brayns::Transform transform = {}, bool invertNormals = false)
     {
-        auto model = std::make_shared<brayns::Model>("clip_geometry");
-
-        auto &components = model->getComponents();
-        components.add<brayns::Geometries>(std::move(geometry));
-
-        auto &systems = model->getSystems();
-        systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
-        systems.setDataSystem<brayns::ClipperDataSystem>();
+        auto model = brayns::ClippingModelBuilder::build<T>({std::move(geometry)}, invertNormals);
 
         auto &scene = engine.getScene();
         auto &models = scene.getModels();
@@ -63,20 +59,104 @@ class ClipGeometryTypeTester
 {
 public:
     template<typename T>
-    static void testType(T geometry, const std::string &filename, const brayns::Transform &transform = {})
+    static void testType(
+        T geometry,
+        const std::string &filename,
+        const brayns::Transform &transform = {},
+        bool invertNormals = false)
     {
         auto utils = BraynsTestUtils();
         utils.addDefaultLights();
         utils.addGeometry(brayns::Sphere{brayns::Vector3f(0.f), 10.f});
         utils.adjustPerspectiveView();
 
-        ClipGeometryBuilder::build(utils.getEngine(), geometry, transform);
+        ClippingBuilder::build(utils.getEngine(), geometry, transform, invertNormals);
 
         auto interactive = brayns::Interactive();
         interactive.shadowsEnabled = false;
         utils.setRenderer(interactive);
 
         CHECK(ImageValidator::validate(utils.render(), filename));
+    }
+};
+
+class ClipGeometryTester
+{
+public:
+    static void test(bool invertNormals)
+    {
+        SUBCASE("Bounded plane")
+        {
+            auto min = brayns::Vector3f(0.f);
+            auto max = brayns::Vector3f(11.f);
+            auto equation = brayns::Vector4f{0.f, 0.f, 1.f, 0.f};
+            auto plane = brayns::BoundedPlane{equation, {min, max}};
+            auto reference = _filename("test_clip_geometry_bounded_plane", invertNormals);
+            ClipGeometryTypeTester::testType(plane, reference, {}, invertNormals);
+        }
+        SUBCASE("Box")
+        {
+            auto min = brayns::Vector3f(-2.5f, -2.5f, -11.f);
+            auto max = brayns::Vector3f(2.5f, 2.5f, 11.f);
+            auto box = brayns::Box{min, max};
+            auto transform = brayns::Transform();
+            transform.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+            auto reference = _filename("test_clip_geometry_box", invertNormals);
+            ClipGeometryTypeTester::testType(box, reference, transform, invertNormals);
+        }
+        SUBCASE("Capsule")
+        {
+            auto p0 = brayns::Vector3f(0.f, -10.f, 7.5f);
+            auto r0 = 6.f;
+            auto p1 = brayns::Vector3f(0.f, 10.f, 7.5f);
+            auto r1 = 3.f;
+            auto capsule = brayns::Capsule{p0, r0, p1, r1};
+            auto reference = _filename("test_clip_geometry_capsule", invertNormals);
+            ClipGeometryTypeTester::testType(capsule, reference, {}, invertNormals);
+        }
+        SUBCASE("Plane")
+        {
+            auto equation = brayns::Vector4f(0.f, 0.f, 1.f, 0.f);
+            auto transform = brayns::Transform();
+            transform.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+            auto plane = brayns::Plane{equation};
+            auto reference = _filename("test_clip_geometry_plane", invertNormals);
+            ClipGeometryTypeTester::testType(plane, reference, transform, invertNormals);
+        }
+        SUBCASE("Sphere")
+        {
+            auto center = brayns::Vector3f(0.f, 0.f, 6.f);
+            auto radius = 7.f;
+            auto sphere = brayns::Sphere{center, radius};
+            auto reference = _filename("test_clip_geometry_sphere", invertNormals);
+            ClipGeometryTypeTester::testType(sphere, reference, {}, invertNormals);
+        }
+        SUBCASE("Triangle mesh")
+        {
+            auto content = brayns::FileReader::read(TestPaths::Meshes::suzanne);
+            auto parser = brayns::ObjMeshParser();
+            auto mesh = parser.parse(content);
+            auto bounds = brayns::GeometryTraits<brayns::TriangleMesh>::computeBounds({}, mesh);
+
+            auto dimensions = bounds.dimensions();
+            auto scale = brayns::Vector3f(5.f);
+            auto position = -bounds.center();
+            position.z += 10.f - dimensions.z * 0.5f;
+            auto transform = brayns::Transform{position, {}, scale};
+
+            auto reference = _filename("test_clip_geometry_mesh", invertNormals);
+            ClipGeometryTypeTester::testType(mesh, reference, transform, invertNormals);
+        }
+    }
+
+private:
+    static std::string _filename(std::string_view baseName, bool invertNormals)
+    {
+        if (invertNormals)
+        {
+            return fmt::format("{}_inverted.png", baseName);
+        }
+        return fmt::format("{}.png", baseName);
     }
 };
 }
@@ -89,7 +169,7 @@ TEST_CASE("Clip geometry add/removal")
     utils.addGeometry(brayns::Sphere{brayns::Vector3f(0.f), 10.f}, {});
     utils.adjustPerspectiveView();
 
-    ClipGeometryBuilder::build(utils.getEngine(), brayns::Plane{{1.f, 0.f, 0.f, 0.f}});
+    ClippingBuilder::build(utils.getEngine(), brayns::Plane{{1.f, 0.f, 0.f, 0.f}});
 
     CHECK(ImageValidator::validate(utils.render(), "test_clip_geometry_add.png"));
 
@@ -97,64 +177,17 @@ TEST_CASE("Clip geometry add/removal")
 
     CHECK(ImageValidator::validate(utils.render(), "test_clip_geometry_remove.png"));
 
-    ClipGeometryBuilder::build(utils.getEngine(), brayns::Plane{{-1.f, 0.f, 0.f, 0.f}});
+    ClippingBuilder::build(utils.getEngine(), brayns::Plane{{-1.f, 0.f, 0.f, 0.f}});
 
     CHECK(ImageValidator::validate(utils.render(), "test_clip_geometry_re_add.png"));
 }
 
-TEST_CASE("Clip geometry types")
+TEST_CASE("Clip geometry types (outward normals)")
 {
-    SUBCASE("Bounded plane")
-    {
-        auto min = brayns::Vector3f(0.f);
-        auto max = brayns::Vector3f(11.f);
-        auto equation = brayns::Vector4f{0.f, 0.f, 1.f, 0.f};
-        ClipGeometryTypeTester::testType(
-            brayns::BoundedPlane{equation, {min, max}},
-            "test_clip_geometry_bounded_plane.png");
-    }
-    SUBCASE("Box")
-    {
-        auto min = brayns::Vector3f(-2.5f, -2.5f, -11.f);
-        auto max = brayns::Vector3f(2.5f, 2.5f, 11.f);
-        auto transform = brayns::Transform();
-        transform.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
-        ClipGeometryTypeTester::testType(brayns::Box{min, max}, "test_clip_geometry_box.png", transform);
-    }
-    SUBCASE("Capsule")
-    {
-        auto p0 = brayns::Vector3f(0.f, -10.f, 7.5f);
-        auto r0 = 6.f;
-        auto p1 = brayns::Vector3f(0.f, 10.f, 7.5f);
-        auto r1 = 3.f;
-        ClipGeometryTypeTester::testType(brayns::Capsule{p0, r0, p1, r1}, "test_clip_geometry_capsule.png");
-    }
-    SUBCASE("Plane")
-    {
-        auto equation = brayns::Vector4f(0.f, 0.f, 1.f, 0.f);
-        auto transform = brayns::Transform();
-        transform.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
-        ClipGeometryTypeTester::testType(brayns::Plane{equation}, "test_clip_geometry_plane.png", transform);
-    }
-    SUBCASE("Sphere")
-    {
-        auto center = brayns::Vector3f(0.f, 0.f, 6.f);
-        auto radius = 7.f;
-        ClipGeometryTypeTester::testType(brayns::Sphere{center, radius}, "test_clip_geometry_sphere.png");
-    }
-    SUBCASE("Triangle mesh")
-    {
-        auto content = brayns::FileReader::read(TestPaths::Meshes::suzanne);
-        auto parser = brayns::ObjMeshParser();
-        auto mesh = parser.parse(content);
-        auto bounds = brayns::GeometryTraits<brayns::TriangleMesh>::computeBounds({}, mesh);
+    ClipGeometryTester::test(false);
+}
 
-        auto dimensions = bounds.dimensions();
-        auto scale = brayns::Vector3f(5.f);
-        auto position = -bounds.center();
-        position.z += 10.f - dimensions.z * 0.5f;
-        auto transform = brayns::Transform{position, {}, scale};
-
-        ClipGeometryTypeTester::testType(mesh, "test_clip_geometry_mesh.png", transform);
-    }
+TEST_CASE("Clip geometry types (inward normals)")
+{
+    ClipGeometryTester::test(true);
 }

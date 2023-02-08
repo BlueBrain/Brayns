@@ -75,8 +75,19 @@ class TestClipping(SimpleTestCase):
         sphere = brayns.Sphere(7, center)
         self.run_tests(sphere, "sphere")
 
-    def run_tests(self, geometry: brayns.Geometry, ref: str) -> None:
-        brayns.add_clipping_geometries(self.instance, [geometry])
+    def test_clipping_inverted_normals(self) -> None:
+        rotation = brayns.euler(0, 45, 0, degrees=True)
+        center = rotation.apply(brayns.Vector3(0, 0, 9))
+        sphere = brayns.Sphere(7, center)
+        self.run_tests(sphere, "inverted_normals", True)
+
+    def run_tests(
+        self,
+        geometry: brayns.Geometry,
+        ref: str,
+        invert_normals: bool = False,
+    ) -> None:
+        brayns.add_clipping_geometries(self.instance, [geometry], invert_normals)
         sphere = brayns.Sphere(10)
         color = brayns.Color4.red
         brayns.add_geometries(self.instance, [(sphere, color)])
