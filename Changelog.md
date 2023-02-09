@@ -1,5 +1,27 @@
 # Change Log
 
+## [3.1.0](https://github.com/BlueBrain/Brayns/tree/3.1.0)
+
+**Minor breaking changes**
+
+- Python: ``Geometry.with_color`` removed and replaced by tuple (see doc).
+- JSON-RPC ``get-available-atlas-usecases`` returns also the schemas of each usecase (see API reference).
+
+**Implemented enhancements:**
+
+- Geometry buffer export [\#1158](https://github.com/BlueBrain/Brayns/pull/1158)
+- NRRD support in Python API [\#1157](https://github.com/BlueBrain/Brayns/pull/1157)
+- Color circuit by subregion [\#1156](https://github.com/BlueBrain/Brayns/pull/1156)
+- Clipping geometries in Python API [\#1151](https://github.com/BlueBrain/Brayns/pull/1151)
+- Clipping geometries [\#1148](https://github.com/BlueBrain/Brayns/pull/1148)
+- Volume loaders [\#1139](https://github.com/BlueBrain/Brayns/pull/1139)
+- NRRD support improved [\#1138](https://github.com/BlueBrain/Brayns/pull/1138)
+- Cell placement loader [\#1130](https://github.com/BlueBrain/Brayns/pull/1130)
+- Model instanciation [\#1124](https://github.com/BlueBrain/Brayns/pull/1124)
+- Morphology resampling / subsampling [\#1122](https://github.com/BlueBrain/Brayns/pull/1122)
+- Progressive framebuffer [\#1120](https://github.com/BlueBrain/Brayns/pull/1120)
+- SONATA support improved [\#1119](https://github.com/BlueBrain/Brayns/pull/1119)
+
 ## [3.0.0](https://github.com/BlueBrain/Brayns/tree/3.0.0)
 
 **Implemented enhancements:**

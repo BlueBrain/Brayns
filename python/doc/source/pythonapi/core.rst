@@ -123,6 +123,14 @@ framebuffer
     :undoc-members:
     :show-inheritance:
 
+gbuffer_exporter
+----------------
+
+.. automodule:: brayns.core.gbuffer_exporter
+    :members: GBufferChannel, GBufferExporter
+    :undoc-members:
+    :show-inheritance:
+
 view
 ----
 
