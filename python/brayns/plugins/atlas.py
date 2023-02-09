@@ -22,6 +22,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any
 
 from brayns.core import Model, deserialize_model
@@ -158,6 +159,32 @@ class AtlasColumnHighlight(AtlasUsecase):
                 for neighbor in self.neighbors
             ],
         }
+
+
+class AtlasDistanceType(Enum):
+    """Type of distance displayed for an atlas layer.
+
+    :params LOWER: Distance of the current layer from the one below.
+    :params UPPER: Distance of the current layer from the one above.
+    """
+
+    LOWER = "lower"
+    UPPER = "upper"
+
+
+@dataclass
+class AtlasLayerDistance(AtlasUsecase):
+    """Display the volume as the distance of a layer from its neighbors."""
+
+    distance_type: AtlasDistanceType
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        return "Layer distance"
+
+    def get_properties(self) -> dict[str, Any]:
+        return {"type": self.distance_type.value}
 
 
 class AtlasOrientationField(AtlasUsecase):

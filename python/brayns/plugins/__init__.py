@@ -27,7 +27,9 @@ It includes all science related features and optional components.
 from .atlas import (
     AtlasColumnHighlight,
     AtlasDensity,
+    AtlasDistanceType,
     AtlasFlatmapAreas,
+    AtlasLayerDistance,
     AtlasOrientationField,
     AtlasShellOutline,
     AtlasUsecase,
@@ -56,7 +58,9 @@ from .xyz import XyzLoader
 __all__ = [
     "AtlasColumnHighlight",
     "AtlasDensity",
+    "AtlasDistanceType",
     "AtlasFlatmapAreas",
+    "AtlasLayerDistance",
     "AtlasOrientationField",
     "AtlasShellOutline",
     "AtlasUsecase",
