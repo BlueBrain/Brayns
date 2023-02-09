@@ -36,7 +36,23 @@ Returns a list of available atlas visualization usecases for the given model.
     {
         "type": "array",
         "items": {
-            "type": "string"
+            "title": "UseCaseMessage",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Use case name",
+                    "type": "string"
+                },
+                "params_schema": {
+                    "description": "Use case parameters schema",
+                    "type": "object"
+                }
+            },
+            "required": [
+                "name",
+                "params_schema"
+            ],
+            "additionalProperties": false
         }
     }
 

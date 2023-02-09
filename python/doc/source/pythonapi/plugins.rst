@@ -3,6 +3,14 @@ plugins
 
 .. automodule:: brayns.plugins
 
+atlas
+-----
+
+.. automodule:: brayns.plugins.atlas
+    :members: AtlasColumnHighlight, AtlasDensity, AtlasDistanceType, AtlasFlatmapAreas, AtlasLayerDistance, AtlasOrientationField, AtlasShellOutline, AtlasUsecase, ColumnNeighbor, ColumnPosition, get_atlas_usecases
+    :undoc-members:
+    :show-inheritance:
+
 bbp
 ---
 
@@ -48,6 +56,14 @@ morphology
 
 .. automodule:: brayns.plugins.morphology
     :members: GeometryType, Morphology, MorphologyLoader
+    :undoc-members:
+    :show-inheritance:
+
+nrrd
+----
+
+.. automodule:: brayns.plugins.nrrd
+    :members: NrrdLoader, VoxelType
     :undoc-members:
     :show-inheritance:
 
