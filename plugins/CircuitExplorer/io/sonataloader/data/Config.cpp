@@ -42,7 +42,7 @@ struct MorphologyFormat
 class MorphologyPathResolver
 {
 public:
-    static std::string getFormatPath(const bbp::sonata::PopulationProperties &params, const std::string &format)
+    static std::string getFormatPath(const bbp::sonata::NodePopulationProperties &params, const std::string &format)
     {
         if (format == MorphologyFormat::swc)
         {
@@ -160,7 +160,7 @@ bbp::sonata::NodePopulation Config::getNodes(const std::string &name) const
     return _config.getNodePopulation(name);
 }
 
-bbp::sonata::PopulationProperties Config::getNodesProperties(const std::string &name) const
+bbp::sonata::NodePopulationProperties Config::getNodesProperties(const std::string &name) const
 {
     return _config.getNodePopulationProperties(name);
 }
@@ -175,7 +175,7 @@ bbp::sonata::EdgePopulation Config::getEdges(const std::string &name) const
     return _config.getEdgePopulation(name);
 }
 
-bbp::sonata::PopulationProperties Config::getEdgesProperties(const std::string &name) const
+bbp::sonata::EdgePopulationProperties Config::getEdgesProperties(const std::string &name) const
 {
     return _config.getEdgePopulationProperties(name);
 }
