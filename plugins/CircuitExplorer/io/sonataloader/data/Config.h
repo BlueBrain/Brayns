@@ -76,7 +76,7 @@ public:
      * @param name Name of the node population.
      * @return bbp::sonata::PopulationProperties
      */
-    bbp::sonata::PopulationProperties getNodesProperties(const std::string &name) const;
+    bbp::sonata::NodePopulationProperties getNodesProperties(const std::string &name) const;
 
     /**
      * @brief Return the name of all node populations in the network.
@@ -96,7 +96,7 @@ public:
      * @param name Name of the edge population.
      * @return bbp::sonata::PopulationProperties
      */
-    bbp::sonata::PopulationProperties getEdgesProperties(const std::string &name) const;
+    bbp::sonata::EdgePopulationProperties getEdgesProperties(const std::string &name) const;
 
     /**
      * @brief Returns any available path to the directory containing the population morphologies.

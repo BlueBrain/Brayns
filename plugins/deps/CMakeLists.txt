@@ -17,7 +17,7 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT sonata_FOUND AND
         FetchContent_Declare(
             libsonata
             GIT_REPOSITORY https://github.com/BlueBrain/libsonata.git
-            GIT_TAG v0.1.16
+            GIT_TAG v0.1.17
             GIT_SHALLOW OFF # Required for its own CMakeLists.txt not to fail
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libsonata
@@ -27,6 +27,10 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT sonata_FOUND AND
 
     set(EXTLIB_FROM_SUBMODULES ON CACHE BOOL "" FORCE)
     set(SONATA_TESTS OFF CACHE BOOL "" FORCE)
+
+    # Force C++14 for GCC < 12.2.0
+    set(CMAKE_CXX_STANDARD 14 CACHE STRING "" FORCE)
+
     add_subdirectory(libsonata)
     add_library(sonata::sonata_shared ALIAS sonata_shared)
 endif()
