@@ -18,7 +18,7 @@ if(NOT Poco_FOUND)
         FetchContent_Declare(
             poco
             GIT_REPOSITORY https://github.com/pocoproject/poco.git
-            GIT_TAG poco-1.11.1-release
+            GIT_TAG poco-1.12.4-release
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/poco
