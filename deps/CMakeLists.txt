@@ -18,7 +18,7 @@ if(NOT Poco_FOUND)
         FetchContent_Declare(
             poco
             GIT_REPOSITORY https://github.com/pocoproject/poco.git
-            GIT_TAG poco-1.11.1-release
+            GIT_TAG poco-1.12.4-release
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/poco
@@ -26,7 +26,7 @@ if(NOT Poco_FOUND)
         FetchContent_Populate(poco)
     endif()
 
-    # Both Poco and GLM create "uninstall" targets. But GLM check wether the
+    # Both Poco and GLM create "uninstall" targets. But GLM checks wether the
     # target exists before or not, whereas POCO doesn't give a damn.
     set(ENABLE_REDIS OFF CACHE BOOL "Enable Redis")
     set(ENABLE_ENCODINGS OFF CACHE BOOL "Enable Encodings")
