@@ -159,6 +159,10 @@ class Fovy:
             return False
         return self._angle == other._angle
 
+    def __hash__(self) -> int:
+        """Mark the class as immutable."""
+        return hash(self._angle)
+
     @property
     def radians(self) -> float:
         """Get angle in radians.

@@ -112,6 +112,10 @@ class Rotation:
             return False
         return self._quaternion == other.quaternion
 
+    def __hash__(self) -> int:
+        """Mark the class as immutable."""
+        return hash(self._quaternion)
+
     @property
     def quaternion(self) -> Quaternion:
         """Get rotation as normalized quaternion.
