@@ -110,7 +110,7 @@ public:
         }
         if (!_running)
         {
-            brayns::Log::info("Cancelling JSON-RPC request {} before execution (entrypoint will not be called).");
+            brayns::Log::info("Cancelling JSON-RPC request {} before execution.", request);
             return;
         }
         brayns::Log::debug("Runtime cancellation of JSON-RPC request {}.", request);

@@ -72,84 +72,91 @@ public:
      *
      * @tparam Args Arguments types.
      * @param level Log level.
-     * @param args Arguments to log, must be at least a message.
+     * @param format Message format.
+     * @param args Arguments to format.
      */
     template<typename... Args>
-    static void log(LogLevel level, Args &&...args)
+    static void log(LogLevel level, fmt::format_string<Args...> format, Args &&...args)
     {
-        _logger->log(spdlog::level::level_enum(level), std::forward<Args>(args)...);
+        _logger->log(spdlog::level::level_enum(level), format, std::forward<Args>(args)...);
     }
 
     /**
      * @brief Log the given message with optional arguments and trace level.
      *
      * @tparam Args Arguments types.
-     * @param args Arguments to log, must be at least a message.
+     * @param format Message format.
+     * @param args Arguments to format.
      */
     template<typename... Args>
-    static void trace(Args &&...args)
+    static void trace(fmt::format_string<Args...> format, Args &&...args)
     {
-        log(LogLevel::Trace, std::forward<Args>(args)...);
+        log(LogLevel::Trace, format, std::forward<Args>(args)...);
     }
 
     /**
      * @brief Log the given message with optional arguments and debug level.
      *
      * @tparam Args Arguments types.
-     * @param args Arguments to log, must be at least a message.
+     * @param format Message format.
+     * @param args Arguments to format.
      */
     template<typename... Args>
-    static void debug(Args &&...args)
+    static void debug(fmt::format_string<Args...> format, Args &&...args)
     {
-        log(LogLevel::Debug, std::forward<Args>(args)...);
+        log(LogLevel::Debug, format, std::forward<Args>(args)...);
     }
 
     /**
      * @brief Log the given message with optional arguments and info level.
      *
      * @tparam Args Arguments types.
-     * @param args Arguments to log, must be at least a message.
+     * @param format Message format.
+     * @param args Arguments to format.
      */
     template<typename... Args>
-    static void info(Args &&...args)
+    static void info(fmt::format_string<Args...> format, Args &&...args)
     {
-        log(LogLevel::Info, std::forward<Args>(args)...);
+        log(LogLevel::Info, format, std::forward<Args>(args)...);
     }
 
     /**
      * @brief Log the given message with optional arguments and warn level.
      *
      * @tparam Args Arguments types.
-     * @param args Arguments to log, must be at least a message.
+     * @param format Message format.
+     * @param args Arguments to format.
      */
     template<typename... Args>
-    static void warn(Args &&...args)
+    static void warn(fmt::format_string<Args...> format, Args &&...args)
     {
-        log(LogLevel::Warn, std::forward<Args>(args)...);
+        log(LogLevel::Warn, format, std::forward<Args>(args)...);
     }
 
     /**
      * @brief Log the given message with optional arguments and error level.
      *
      * @tparam Args Arguments types.
-     * @param args Arguments to log, must be at least a message.
+     * @param format Message format.
+     * @param args Arguments to format.
      */
     template<typename... Args>
-    static void error(Args &&...args)
+    static void error(fmt::format_string<Args...> format, Args &&...args)
     {
-        log(LogLevel::Error, std::forward<Args>(args)...);
+        log(LogLevel::Error, format, std::forward<Args>(args)...);
     }
 
     /**
      * @brief Log the given message with optional arguments and critical level.
      *
      * @tparam Args Arguments types.
-     * @param args Arguments to log, must be at least a message.
+     * @param format Message format.
+     * @param args Arguments to format.
      */
     template<typename... Args>
-    static void critical(Args &&...args)
+    static void critical(fmt::format_string<Args...> format, Args &&...args)
     {
-        log(LogLevel::Critical, std::forward<Args>(args)...);
+        log(LogLevel::Critical, format, std::forward<Args>(args)...);
     }
 
 private:
