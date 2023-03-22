@@ -45,11 +45,11 @@ int main(int argc, const char **argv)
             return 0;
         }
 
-        brayns::Brayns instance(argc, argv);
+        auto instance = brayns::Brayns(argc, argv);
 
         brayns::Log::info("Starting Brayns service.");
 
-        brayns::Timer timer;
+        auto timer = brayns::Timer();
 
         instance.runAsService();
 
@@ -57,12 +57,12 @@ int main(int argc, const char **argv)
     }
     catch (const std::exception &e)
     {
-        brayns::Log::critical(e.what());
+        brayns::Log::critical("Fatal error: '{}'.", e.what());
         return 1;
     }
     catch (...)
     {
-        brayns::Log::critical("Unknown error.");
+        brayns::Log::critical("Unknown fatal error.");
         return 1;
     }
 
