@@ -22,7 +22,17 @@
 #pragma once
 
 #include "JsonAdapter.h"
-#include "JsonType.h"
+#include "JsonErrors.h"
+#include "JsonSchema.h"
+#include "JsonTypes.h"
+#include "JsonValidator.h"
+
+#include "adapters/ArrayAdapter.h"
+#include "adapters/EnumAdapter.h"
+#include "adapters/GlmAdapter.h"
+#include "adapters/MapAdapter.h"
+#include "adapters/PrimitiveAdapter.h"
+#include "adapters/PtrAdapter.h"
 
 namespace brayns
 {
@@ -31,7 +41,7 @@ namespace brayns
  *
  * Can also be used to build JSON schemas.
  *
- * A valid specialization of JsonAdapter<T> is required to allow this usage.
+ * A valid specialization of JsonAdapter<T> is required for custom types.
  *
  * Example:
  * @code {.cpp}
@@ -62,6 +72,24 @@ struct Json
     static JsonValue parse(const std::string &json);
 
     /**
+     * @brief Validate JSON using given schema.
+     *
+     * @param json JSON to validate.
+     * @param schema JSON schema.
+     * @return JsonErrors Errors detected during validation (empty if valid).
+     */
+    static JsonErrors validate(const JsonValue &json, const JsonSchema &schema);
+
+    /**
+     * @brief Validate JSON using given schema with output parameter.
+     *
+     * @param json JSON to validate.
+     * @param schema JSON schema.
+     * @param errors Store schema errors.
+     */
+    static void validate(const JsonValue &json, const JsonSchema &schema, JsonErrors &errors);
+
+    /**
      * @brief Return the JSON schema of T using JsonAdapter<T>::getSchema().
      *
      * @tparam T Type to get the schema from.
@@ -84,7 +112,7 @@ struct Json
     template<typename T>
     static JsonValue serialize(const T &value)
     {
-        JsonValue json;
+        auto json = JsonValue();
         serialize(value, json);
         return json;
     }
@@ -113,7 +141,8 @@ struct Json
     template<typename T>
     static std::string stringify(const T &value)
     {
-        return stringify(serialize(value));
+        auto json = serialize(value);
+        return stringify(json);
     }
 
     /**
@@ -127,7 +156,7 @@ struct Json
     template<typename T>
     static T deserialize(const JsonValue &json)
     {
-        T value{};
+        auto value = T{};
         deserialize(json, value);
         return value;
     }
@@ -150,44 +179,14 @@ struct Json
      * parse.
      *
      * @tparam T The resulting object type.
-     * @param json The JSON string to parse representing the object.
+     * @param data The JSON string to parse representing the object.
      * @return T The parsed object.
      */
     template<typename T>
-    static T parse(const std::string &json)
+    static T parse(const std::string &data)
     {
-        return deserialize<T>(parse(json));
+        auto json = parse(data);
+        return deserialize<T>(json);
     }
-};
-
-/**
- * @brief Specialization to do nothing if value is already JSON.
- *
- */
-template<>
-struct JsonAdapter<JsonValue>
-{
-    /**
-     * @brief Create an empty schema.
-     *
-     * @return JsonSchema Empty schema.
-     */
-    static JsonSchema getSchema();
-
-    /**
-     * @brief Copy value into json.
-     *
-     * @param value The input JSON.
-     * @param json The output JSON.
-     */
-    static void serialize(const JsonValue &value, JsonValue &json);
-
-    /**
-     * @brief Copy json into value.
-     *
-     * @param json The input JSON.
-     * @param value The output JSON.
-     */
-    static void deserialize(const JsonValue &json, JsonValue &value);
 };
 } // namespace brayns

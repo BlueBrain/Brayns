@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <stdexcept>
+
 #include <brayns/utils/MathTypes.h>
 
 #include "PrimitiveAdapter.h"
@@ -28,83 +30,56 @@
 namespace brayns
 {
 /**
- * @brief Helper class to serialize GLM types to a JSON array.
+ * @brief Helper class to serialize GLM types to fixed-size JSON array.
  *
- * @tparam T GLM type.
+ * @tparam T GLM vector type.
  */
 template<typename T>
 struct GlmAdapter
 {
     using ValueType = typename T::value_type;
 
-    /**
-     * @brief Create a JSON schema with type array, item type of the reflected
-     * GLM type items and min and max size of the GLM type size.
-     *
-     * @return JsonSchema JSON schema of T.
-     */
     static JsonSchema getSchema()
     {
-        JsonSchema schema;
-        schema.type = JsonType::Array;
-        schema.items = {Json::getSchema<ValueType>()};
-        schema.minItems = static_cast<size_t>(T::length());
-        schema.maxItems = static_cast<size_t>(T::length());
-        return schema;
+        auto items = JsonAdapter<ValueType>::getSchema();
+        auto size = static_cast<size_t>(T::length());
+        auto range = JsonRange(size, size);
+        return JsonSchemaFactory::create(ArraySchema(std::move(items), range));
     }
 
-    /**
-     * @brief Serialize value in json.
-     *
-     * Derialize all elements of the GLM type using JsonAdapter<T::value_type>.
-     *
-     * @param value Input value.
-     * @param json Output JSON.
-     */
     static void serialize(const T &value, JsonValue &json)
     {
         auto array = Poco::makeShared<JsonArray>();
         for (glm::length_t i = 0; i < T::length(); ++i)
         {
-            auto jsonItem = Json::serialize(value[i]);
-            array->add(jsonItem);
+            auto child = JsonValue();
+            JsonAdapter<ValueType>::serialize(value[i], child);
+            array->add(child);
         }
         json = array;
     }
 
-    /**
-     * @brief Deserialize json in value.
-     *
-     * Deserialize all elements using JsonAdapter<T::value_type>.
-     *
-     * @param json Input JSON.
-     * @param value Output value.
-     */
     static void deserialize(const JsonValue &json, T &value)
     {
-        auto array = JsonExtractor::extractArray(json);
-        if (!array)
+        auto &array = *json.extract<JsonArray::Ptr>();
+        if (array.size() != T::length())
         {
-            throw std::runtime_error("Not a JSON array");
+            throw std::invalid_argument("Invalid array size");
         }
-        auto size = static_cast<glm::length_t>(array->size());
-        if (size != T::length())
+        auto i = glm::length_t(0);
+        for (const auto &item : array)
         {
-            throw std::runtime_error("Invalid array size");
-        }
-        glm::length_t i = 0;
-        for (const auto &item : *array)
-        {
-            Json::deserialize(item, value[i++]);
+            JsonAdapter<ValueType>::deserialize(item, value[i]);
+            ++i;
         }
     }
 };
 
 /**
- * @brief Partial specialization of JsonAdapter for glm::vec<S, T>.
+ * @brief JSON handling for glm::vec<S, T>.
  *
- * @tparam S Size of the vector.
- * @tparam T Type of the vector components.
+ * @tparam S Component count.
+ * @tparam T Component type.
  */
 template<glm::length_t S, typename T>
 struct JsonAdapter<glm::vec<S, T>> : GlmAdapter<glm::vec<S, T>>
@@ -112,9 +87,9 @@ struct JsonAdapter<glm::vec<S, T>> : GlmAdapter<glm::vec<S, T>>
 };
 
 /**
- * @brief Partial specialization of JsonAdapter for glm::qua<T>.
+ * @brief JSON handling for glm::qua<T>.
  *
- * @tparam T Type of the quaternion components.
+ * @tparam T Component type.
  */
 template<typename T>
 struct JsonAdapter<glm::qua<T>> : GlmAdapter<glm::qua<T>>

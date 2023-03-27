@@ -22,7 +22,7 @@
 #pragma once
 
 #include "JsonSchema.h"
-#include "JsonType.h"
+#include "JsonTypes.h"
 
 namespace brayns
 {
@@ -30,10 +30,10 @@ namespace brayns
  * @brief Default JsonAdapter intrusive implementation.
  *
  * Use static method T::getSchema() to get the schema.
- * Use value.serialize(json) to serialize.
- * Use value.deserialize(json) to deserialize.
+ * Use method value.serialize(json) to serialize.
+ * Use method value.deserialize(json) to deserialize.
  *
- * @tparam T Type to reflect.
+ * @tparam T Type to adapt for JSON usage.
  */
 template<typename T>
 struct JsonAdapter
@@ -41,7 +41,7 @@ struct JsonAdapter
     /**
      * @brief Get the JSON schema using getSchema() static method of T.
      *
-     * @return JsonSchema JSON schema of value.
+     * @return JsonSchema JSON schema of type.
      */
     static JsonSchema getSchema()
     {
@@ -53,6 +53,7 @@ struct JsonAdapter
      *
      * @param value Input value.
      * @param json Output JSON.
+     * @throw std::exception Invalid value.
      */
     static void serialize(const T &value, JsonValue &json)
     {
@@ -64,6 +65,7 @@ struct JsonAdapter
      *
      * @param json Input JSON.
      * @param value Output value.
+     * @throw std::exception Invalid JSON.
      */
     static void deserialize(const JsonValue &json, T &value)
     {

@@ -23,236 +23,246 @@
 
 #include <map>
 #include <memory>
-#include <optional>
 #include <string>
 #include <vector>
 
-#include "JsonType.h"
+#include "JsonErrors.h"
+#include "JsonTypes.h"
 
 namespace brayns
 {
 /**
- * @brief Representation of a JSON schema.
+ * @brief Schema serialization trait.
+ *
+ * @tparam T Schema type (without options).
+ */
+template<typename T>
+struct JsonSchemaSerializer
+{
+    static void serialize(T &schema, JsonObject &json)
+    {
+        schema.serialize(json);
+    }
+};
+
+/**
+ * @brief Schema validation trait.
+ *
+ * @tparam T Schema type (without options).
+ */
+template<typename T>
+struct JsonSchemaValidator
+{
+    static void validate(const JsonValue &json, const T &schema, JsonErrors &errors)
+    {
+        schema.validate(json, errors);
+    }
+};
+
+/**
+ * @brief Interface to access different schema types at runtime.
+ *
+ */
+class IJsonSchema
+{
+public:
+    virtual ~IJsonSchema() = default;
+
+    virtual std::unique_ptr<IJsonSchema> clone() const = 0;
+    virtual void serialize(JsonObject &json) const = 0;
+    virtual void validate(const JsonValue &json, JsonErrors &errors) const = 0;
+};
+
+/**
+ * @brief Schema interface implementation for specific schema type.
+ *
+ * @tparam T Schema type (without options).
+ */
+template<typename T>
+class JsonSchemaInterface : public IJsonSchema
+{
+public:
+    template<typename... Args>
+    explicit JsonSchemaInterface(Args &&...args)
+        : _schema(std::forward<Args>(args)...)
+    {
+    }
+
+    virtual std::unique_ptr<IJsonSchema> clone() const override
+    {
+        return std::make_unique<JsonSchemaInterface<T>>(_schema);
+    }
+
+    virtual void serialize(JsonObject &json) const override
+    {
+        return JsonSchemaSerializer<T>::serialize(_schema, json);
+    }
+
+    virtual void validate(const JsonValue &json, JsonErrors &errors) const override
+    {
+        return JsonSchemaValidator<T>::validate(json, _schema, errors);
+    }
+
+private:
+    T _schema;
+};
+
+/**
+ * @brief Wraps a schema interface to have a copyable type.
+ *
+ */
+class JsonSchemaHolder
+{
+public:
+    explicit JsonSchemaHolder(std::unique_ptr<IJsonSchema> schema)
+        : _schema(std::move(schema))
+    {
+    }
+
+    JsonSchemaHolder(const JsonSchemaHolder &other)
+        : _schema(other._schema->clone())
+    {
+    }
+
+    JsonSchemaHolder(JsonSchemaHolder &&) = default;
+
+    JsonSchemaHolder &operator=(const JsonSchemaHolder &other)
+    {
+        _schema = other._schema->clone();
+        return *this;
+    }
+
+    JsonSchemaHolder &operator=(JsonSchemaHolder &&) = default;
+
+    void serialize(JsonObject &json) const
+    {
+        _schema->serialize(json);
+    }
+
+    void validate(const JsonValue &json, JsonErrors &errors) const
+    {
+        _schema->validate(json, errors);
+    }
+
+private:
+    std::unique_ptr<IJsonSchema> _schema;
+};
+
+/**
+ * @brief Options common to all JSON schemas.
+ *
+ */
+struct JsonOptions
+{
+    std::string title;
+    std::string description;
+    JsonValue defaultValue;
+};
+
+/**
+ * @brief Full JSON schema with options.
  *
  */
 struct JsonSchema
 {
-    /**
-     * @brief Union description, empty if not an union.
-     *
-     */
-    std::vector<JsonSchema> oneOf;
-
-    /**
-     * @brief Title of the schema (type name usually).
-     *
-     */
-    std::string title;
-
-    /**
-     * @brief Schema description.
-     *
-     */
-    std::string description;
-
-    /**
-     * @brief JSON type.
-     *
-     */
-    JsonType type = JsonType::Undefined;
-
-    /**
-     * @brief Check if read only.
-     *
-     */
-    bool readOnly = false;
-
-    /**
-     * @brief Check if write only.
-     *
-     */
-    bool writeOnly = false;
-
-    /**
-     * @brief Default value (null if not set).
-     *
-     */
-    JsonValue defaultValue;
-
-    /**
-     * @brief Optional min value if number.
-     *
-     */
-    std::optional<double> minimum;
-
-    /**
-     * @brief Optional max value if number.
-     *
-     */
-    std::optional<double> maximum;
-
-    /**
-     * @brief Enum description, empty if not an enum.
-     *
-     */
-    std::vector<std::string> enums;
-
-    /**
-     * @brief List of object properties if object, else empty.
-     *
-     */
-    std::map<std::string, JsonSchema> properties;
-
-    /**
-     * @brief List of required properties if object, else empty.
-     *
-     */
-    std::vector<std::string> required;
-
-    /**
-     * @brief Description of additional properties, can be an empty schema if
-     * any property is authorized, empty if not authorized.
-     *
-     */
-    std::vector<JsonSchema> additionalProperties;
-
-    /**
-     * @brief Item description if array, else empty.
-     *
-     */
-    std::vector<JsonSchema> items;
-
-    /**
-     * @brief Optional min item count if array.
-     *
-     */
-    std::optional<size_t> minItems;
-
-    /**
-     * @brief Optional max item count if array.
-     *
-     */
-    std::optional<size_t> maxItems;
+    JsonSchemaHolder holder;
+    JsonOptions options;
 };
 
 /**
- * @brief Helper class to get some basic info about a JSON schema.
+ * @brief Helper class to create a full schema from a specific schema type.
  *
  */
-struct JsonSchemaHelper
+class JsonSchemaFactory
 {
-    /**
-     * @brief Check if the schema is a wildcard (allow anything).
-     *
-     * @param schema Schema to check.
-     * @return true Wildcard schema.
-     * @return false Not a wildcard schema.
-     */
-    static bool isWildcard(const JsonSchema &schema);
+public:
+    template<typename T>
+    static JsonSchema create(T schema, JsonOptions options = {})
+    {
+        auto interface = std::make_unique<JsonSchemaInterface<T>>(std::move(schema));
+        auto holder = JsonSchemaHolder(std::move(interface));
+        return {std::move(holder), std::move(options)};
+    }
+};
 
-    /**
-     * @brief Check if the schema specifies a null element.
-     *
-     * @param schema Schema to check.
-     * @return true Null.
-     * @return false Not null.
-     */
-    static bool isNull(const JsonSchema &schema);
+/**
+ * @brief Schema of a primitive type (undefined, null, boolean, string).
+ *
+ * @tparam T Primitive type.
+ */
+template<typename T>
+struct PrimitiveSchema
+{
+    JsonType type = JsonTypeInfo::getType<T>();
+};
 
-    /**
-     * @brief Check wether the schema is an union.
-     *
-     * @param schema Schema to check.
-     * @return true Union.
-     * @return false Not an union.
-     */
-    static bool isOneOf(const JsonSchema &schema);
+/**
+ * @brief Defines a range of allowed values for numeric types.
+ *
+ * @tparam T Numeric type.
+ */
+template<typename T>
+struct JsonRange
+{
+    T min = std::numeric_limits<T>::lowest();
+    T max = std::numeric_limits<T>::max();
+};
 
-    /**
-     * @brief Check if the schema describes a number or an integer.
-     *
-     * @param schema Schema to check.
-     * @return true Number or integer.
-     * @return false Not numeric.
-     */
-    static bool isNumeric(const JsonSchema &schema);
+/**
+ * @brief Schema of numeric values (integer and number).
+ *
+ * @tparam T Numeric type.
+ */
+template<typename T>
+struct NumericSchema : PrimitiveSchema<T>
+{
+    JsonRange<T> range;
+};
 
-    /**
-     * @brief Check wether the schema is an enum.
-     *
-     * @param schema Schema to check.
-     * @return true Enum.
-     * @return false Not an enum.
-     */
-    static bool isEnum(const JsonSchema &schema);
+/**
+ * @brief Schema of arrays.
+ *
+ */
+struct ArraySchema
+{
+    JsonSchema items;
+    JsonRange<size_t> itemCount;
+};
 
-    /**
-     * @brief Check if the schema is an object.
-     *
-     * @param schema Schema to check.
-     * @return true Object.
-     * @return false Not an object.
-     */
-    static bool isObject(const JsonSchema &schema);
+/**
+ * @brief Schemas of generic maps.
+ *
+ */
+struct MapSchema
+{
+    JsonSchema items;
+};
 
-    /**
-     * @brief Check if the schema is an array.
-     *
-     * @param schema Schema to check.
-     * @return true Array.
-     * @return false Not an array.
-     */
-    static bool isArray(const JsonSchema &schema);
+/**
+ * @brief Schema of structured objects.
+ *
+ */
+struct ObjectSchema
+{
+    std::map<std::string, JsonSchema> properties;
+    std::vector<std::string> required;
+};
 
-    /**
-     * @brief Check if the schema has the given property.
-     *
-     * @param schema Schema to check.
-     * @param key Key to find in schema properties.
-     * @return true Has property.
-     * @return false Don't have the property.
-     */
-    static bool hasProperty(const JsonSchema &schema, const std::string &key);
+/**
+ * @brief Schema of enumerations.
+ *
+ */
+struct EnumSchema
+{
+    std::vector<std::string> enums;
+};
 
-    /**
-     * @brief Check wether the property is required in the given schema.
-     *
-     * @param schema Schema to check.
-     * @param key Property key to test.
-     * @return true Property is required.
-     * @return false Property is not required.
-     */
-    static bool isRequired(const JsonSchema &schema, const std::string &key);
-
-    /**
-     * @brief Check if the given schema validate the given type.
-     *
-     * @param schema Schema to check.
-     * @param type Type to check.
-     * @return true The type is allowed by schema.
-     * @return false The type is not allowed by schema.
-     */
-    static bool checkType(const JsonSchema &schema, JsonType type);
-
-    /**
-     * @brief Set a wildcard for authorized additional properties.
-     *
-     * @param schema Schema to update.
-     */
-    static void allowAnyAdditionalProperty(JsonSchema &schema);
-
-    /**
-     * @brief Get a wildcard schema (allow everything)
-     *
-     * @return JsonSchema Wildcard schema.
-     */
-    static JsonSchema getWildcardSchema();
-
-    /**
-     * @brief Get the schema of null (nothing to provide).
-     *
-     * @return JsonSchema Null schema.
-     */
-    static JsonSchema getNullSchema();
+/**
+ * @brief Schema of variants.
+ *
+ */
+struct OneOfSchema
+{
+    std::vector<JsonSchema> oneOf;
 };
 } // namespace brayns

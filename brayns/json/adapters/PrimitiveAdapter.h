@@ -22,97 +22,99 @@
 #pragma once
 
 #include <cmath>
-#include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <string>
+#include <type_traits>
 
-#include <brayns/json/Json.h>
-#include <brayns/json/JsonExtractor.h>
+#include <brayns/json/JsonAdapter.h>
 
 namespace brayns
 {
 /**
- * @brief Helper class to reflect primitives (numbers and strings).
+ * @brief Helper class to handle JSON primitives (boolean, number and string).
  *
  * @tparam T Primitive type.
  */
 template<typename T>
 struct PrimitiveAdapter
 {
-    /**
-     * @brief Create a JSON schema with type and minimum if unsigned.
-     *
-     * @return JsonSchema Schema.
-     */
     static JsonSchema getSchema()
     {
-        JsonSchema schema;
-        schema.type = GetJsonType::fromPrimitive<T>();
-        if (!std::is_same<T, bool>() && std::is_unsigned<T>())
+        if constexpr (JsonTypeInfo::isNumeric<T>())
         {
-            schema.minimum = 0.0;
+            return JsonSchemaFactory::create(NumericSchema<T>());
         }
-        return schema;
+        else
+        {
+            return JsonSchemaFactory::create(PrimitiveSchema<T>());
+        }
     }
 
-    /**
-     * @brief Serialize contained value using JSON backend.
-     *
-     * @param value Input value.
-     * @param json Output JSON.
-     */
     static void serialize(const T &value, JsonValue &json)
     {
-        json = value;
+        if constexpr (std::is_same_v<T, EmptyJson>)
+        {
+            json.clear();
+        }
+        else if constexpr (std::is_floating_point_v<T>)
+        {
+            json = _checkInfAndNan(value);
+        }
+        else
+        {
+            json = value;
+        }
     }
 
-    /**
-     * @brief Deserialize contained value using JSON backend.
-     *
-     * @param json Input JSON.
-     * @param value Output value.
-     */
     static void deserialize(const JsonValue &json, T &value)
     {
-        if (!json.isNumeric() && !json.isString())
+        if constexpr (std::is_same_v<T, JsonValue>)
         {
-            throw std::runtime_error("Not a primitive type");
+            value = json;
         }
-        value = json.convert<T>();
+        else if constexpr (!std::is_same_v<T, EmptyJson>)
+        {
+            value = json.convert<T>();
+        }
     }
-};
 
-/**
- * @brief JSON adapter for floating point numbers.
- *
- * @tparam T Type (usually float or double).
- */
-template<typename T>
-struct FloatAdapter : PrimitiveAdapter<T>
-{
-    /**
-     * @brief Override serialization to handle inf and nan.
-     *
-     * @param value Input value.
-     * @param json Ouput JSON.
-     */
-    static void serialize(T value, JsonValue &json)
+private:
+    template<typename U>
+    static U _checkInfAndNan(U value)
     {
         if (std::isinf(value))
         {
-            json = std::numeric_limits<T>::max();
-            return;
+            return std::numeric_limits<U>::max();
         }
         if (std::isnan(value))
         {
-            json = T{};
-            return;
+            return U{0};
         }
-        json = value;
+        return value;
     }
 };
 
 /**
- * @brief Allow boolean JSON handling.
+ * @brief JSON handling for undefined types.
+ *
+ */
+template<>
+struct JsonAdapter<JsonValue> : PrimitiveAdapter<JsonValue>
+{
+};
+
+/**
+ * @brief JSON handling for empty JSON.
+ *
+ */
+template<>
+struct JsonAdapter<EmptyJson> : PrimitiveAdapter<EmptyJson>
+{
+};
+
+/**
+ * @brief JSON handling for bool.
  *
  */
 template<>
@@ -121,7 +123,7 @@ struct JsonAdapter<bool> : PrimitiveAdapter<bool>
 };
 
 /**
- * @brief Allow int8 JSON handling.
+ * @brief JSON handling for int8.
  *
  */
 template<>
@@ -130,7 +132,7 @@ struct JsonAdapter<int8_t> : PrimitiveAdapter<int8_t>
 };
 
 /**
- * @brief Allow uint8 JSON handling.
+ * @brief JSON handling for uint8.
  *
  */
 template<>
@@ -139,7 +141,7 @@ struct JsonAdapter<uint8_t> : PrimitiveAdapter<uint8_t>
 };
 
 /**
- * @brief Allow int16 JSON handling.
+ * @brief JSON handling for int16.
  *
  */
 template<>
@@ -148,7 +150,7 @@ struct JsonAdapter<int16_t> : PrimitiveAdapter<int16_t>
 };
 
 /**
- * @brief Allow uint16 JSON handling.
+ * @brief JSON handling for uint16.
  *
  */
 template<>
@@ -157,7 +159,7 @@ struct JsonAdapter<uint16_t> : PrimitiveAdapter<uint16_t>
 };
 
 /**
- * @brief Allow int32 JSON handling.
+ * @brief JSON handling for int32.
  *
  */
 template<>
@@ -166,7 +168,7 @@ struct JsonAdapter<int32_t> : PrimitiveAdapter<int32_t>
 };
 
 /**
- * @brief Allow uint64 JSON handling.
+ * @brief JSON handling for uint64.
  *
  */
 template<>
@@ -175,7 +177,7 @@ struct JsonAdapter<uint32_t> : PrimitiveAdapter<uint32_t>
 };
 
 /**
- * @brief Allow int64 JSON handling.
+ * @brief JSON handling for int64.
  *
  */
 template<>
@@ -184,7 +186,7 @@ struct JsonAdapter<int64_t> : PrimitiveAdapter<int64_t>
 };
 
 /**
- * @brief Allow uint64 JSON handling.
+ * @brief JSON handling for uint64.
  *
  */
 template<>
@@ -193,25 +195,25 @@ struct JsonAdapter<uint64_t> : PrimitiveAdapter<uint64_t>
 };
 
 /**
- * @brief Allow float JSON handling
+ * @brief JSON handling for float.
  *
  */
 template<>
-struct JsonAdapter<float> : FloatAdapter<float>
+struct JsonAdapter<float> : PrimitiveAdapter<float>
 {
 };
 
 /**
- * @brief Allow double JSON handling.
+ * @brief JSON handling for double.
  *
  */
 template<>
-struct JsonAdapter<double> : FloatAdapter<double>
+struct JsonAdapter<double> : PrimitiveAdapter<double>
 {
 };
 
 /**
- * @brief Allow string JSON handling.
+ * @brief JSON handling for string.
  *
  */
 template<>
