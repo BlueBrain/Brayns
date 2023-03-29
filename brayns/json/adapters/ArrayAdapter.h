@@ -44,7 +44,7 @@ struct ArrayAdapter
     static JsonSchema getSchema()
     {
         auto items = JsonAdapter<ValueType>::getSchema();
-        return JsonSchemaFactory::create(ArraySchema(std::move(items)));
+        return JsonSchema::from(ArraySchema(std::move(items)));
     }
 
     static void serialize(const T &value, JsonValue &json)
@@ -61,13 +61,38 @@ struct ArrayAdapter
 
     static void deserialize(const JsonValue &json, T &value)
     {
-        auto &array = *json.extract<JsonArray::Ptr>();
+        auto &array = JsonExtractor::extractArray(json);
         value.clear();
         for (const auto &child : array)
         {
             auto &item = value.emplace_back();
             JsonAdapter<ValueType>::deserialize(child, item);
         }
+    }
+};
+
+/**
+ * @brief JSON handling for std::vector<bool>::reference.
+ *
+ */
+template<>
+struct JsonAdapter<std::vector<bool>::reference>
+{
+    using Ref = std::vector<bool>::reference;
+
+    static JsonSchema getSchema()
+    {
+        return JsonAdapter<bool>::getSchema();
+    }
+
+    static void serialize(Ref value, JsonValue &json)
+    {
+        json = static_cast<bool>(value);
+    }
+
+    static void deserialize(const JsonValue &json, Ref value)
+    {
+        value = json.convert<bool>();
     }
 };
 

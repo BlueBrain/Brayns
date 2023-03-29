@@ -43,8 +43,7 @@ struct GlmAdapter
     {
         auto items = JsonAdapter<ValueType>::getSchema();
         auto size = static_cast<size_t>(T::length());
-        auto range = JsonRange(size, size);
-        return JsonSchemaFactory::create(ArraySchema(std::move(items), range));
+        return JsonSchema::from(ArraySchema(std::move(items), size, size));
     }
 
     static void serialize(const T &value, JsonValue &json)
@@ -61,7 +60,7 @@ struct GlmAdapter
 
     static void deserialize(const JsonValue &json, T &value)
     {
-        auto &array = *json.extract<JsonArray::Ptr>();
+        auto &array = JsonExtractor::extractArray(json);
         if (array.size() != T::length())
         {
             throw std::invalid_argument("Invalid array size");

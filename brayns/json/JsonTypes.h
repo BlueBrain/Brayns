@@ -26,6 +26,8 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include <spdlog/fmt/ostr.h>
+
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
 
@@ -170,4 +172,20 @@ private:
     template<typename T>
     static constexpr auto _alwaysFalse = false;
 };
+
+/**
+ * @brief Helper class to extract JSON.
+ *
+ */
+class JsonExtractor
+{
+public:
+    static const JsonObject &extractObject(const JsonValue &json);
+    static const JsonArray &extractArray(const JsonValue &json);
+};
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::JsonType &type);
+} // namespace std

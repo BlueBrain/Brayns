@@ -41,13 +41,34 @@ struct PrimitiveAdapter
 {
     static JsonSchema getSchema()
     {
-        if constexpr (JsonTypeInfo::isNumeric<T>())
+        static constexpr auto type = JsonTypeInfo::getType<T>();
+        if constexpr (type == JsonType::Undefined)
         {
-            return JsonSchemaFactory::create(NumericSchema<T>());
+            return JsonSchema::from(WildcardSchema());
+        }
+        else if constexpr (type == JsonType::Null)
+        {
+            return JsonSchema::from(NullSchema());
+        }
+        else if constexpr (type == JsonType::Boolean)
+        {
+            return JsonSchema::from(BooleanSchema());
+        }
+        else if constexpr (type == JsonType::Integer)
+        {
+            return JsonSchema::from(IntegerSchema(_getMin<T>(), _getMax<T>()));
+        }
+        else if constexpr (type == JsonType::Number)
+        {
+            return JsonSchema::from(NumberSchema(_getMin<T>(), _getMax<T>()));
+        }
+        else if constexpr (type == JsonType::String)
+        {
+            return JsonSchema::from(StringSchema());
         }
         else
         {
-            return JsonSchemaFactory::create(PrimitiveSchema<T>());
+            static_assert(_alwaysFalse<T>, "Not a primitive type");
         }
     }
 
@@ -80,6 +101,23 @@ struct PrimitiveAdapter
     }
 
 private:
+    template<typename U>
+    static constexpr auto _alwaysFalse = false;
+
+    template<typename U>
+    static constexpr double _getMin()
+    {
+        auto result = std::numeric_limits<U>::lowest();
+        return static_cast<double>(result);
+    }
+
+    template<typename U>
+    static constexpr double _getMax()
+    {
+        auto result = std::numeric_limits<U>::max();
+        return static_cast<double>(result);
+    }
+
     template<typename U>
     static U _checkInfAndNan(U value)
     {

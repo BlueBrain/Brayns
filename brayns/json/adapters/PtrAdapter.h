@@ -24,7 +24,7 @@
 #include <memory>
 #include <optional>
 
-#include "PrimitiveAdapter.h"
+#include <brayns/json/JsonAdapter.h>
 
 namespace brayns
 {

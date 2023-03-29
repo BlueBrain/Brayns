@@ -68,6 +68,24 @@ JsonType JsonTypeInfo::getType(const JsonValue &json)
     {
         return JsonType::Object;
     }
-    throw std::invalid_argument("Invalid JSON type");
+    throw std::invalid_argument("Value is not a JSON type");
+}
+
+const JsonObject &JsonExtractor::extractObject(const JsonValue &json)
+{
+    return *json.extract<JsonObject::Ptr>();
+}
+
+const JsonArray &JsonExtractor::extractArray(const JsonValue &json)
+{
+    return *json.extract<JsonArray::Ptr>();
 }
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::JsonType &type)
+{
+    stream << brayns::EnumInfo::getName(type);
+}
+} // namespace std

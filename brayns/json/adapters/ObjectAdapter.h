@@ -21,44 +21,55 @@
 
 #pragma once
 
-#include <brayns/utils/EnumInfo.h>
+#include <functional>
+#include <string>
 
-#include "PrimitiveAdapter.h"
+#include <brayns/json/JsonAdapter.h>
 
 namespace brayns
 {
-/**
- * @brief Base JSON adapter for enumerations.
- *
- * @tparam T Enum type.
- */
+struct JsonProperty
+{
+    std::string name;
+    JsonSchema schema;
+    bool required = false;
+    std::function<void(const void *, JsonValue &)> serialize;
+    std::function<void(const JsonValue &, void *)> deserialize;
+};
+
+struct JsonObjectInfo
+{
+    std::string title;
+    std::vector<JsonProperty> properties;
+};
+
+class JsonObjectHelper
+{
+public:
+    static JsonSchema getSchema(const JsonObjectInfo &object);
+    static void serialize(const JsonObjectInfo &object, const void *value, JsonValue &json);
+    static void deserialize(const JsonObjectInfo &object, const JsonValue &json, void *value);
+};
+
 template<typename T>
-struct EnumAdapter
+struct ObjectAdapter
 {
     static JsonSchema getSchema()
     {
-        auto values = EnumInfo::getNames<T>();
-        return JsonSchema::from(EnumSchema(std::move(values)));
+        return JsonObjectHelper::getSchema(_object);
     }
 
     static void serialize(const T &value, JsonValue &json)
     {
-        json = EnumInfo::getName(value);
+        JsonObjectHelper::serialize(_object, value, json);
     }
 
     static void deserialize(const JsonValue &json, T &value)
     {
-        auto name = json.extract<std::string>(value);
-        value = EnumInfo::getValue<T>(name);
+        JsonObjectHelper::deserialize(_object, json, value);
     }
-};
 
-/**
- * @brief JSON handling for JsonType.
- *
- */
-template<>
-struct JsonAdapter<JsonType> : EnumAdapter<JsonType>
-{
+private:
+    static inline JsonObjectInfo _object;
 };
 } // namespace brayns

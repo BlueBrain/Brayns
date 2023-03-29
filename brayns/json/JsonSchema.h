@@ -39,7 +39,7 @@ namespace brayns
 template<typename T>
 struct JsonSchemaSerializer
 {
-    static void serialize(T &schema, JsonObject &json)
+    static void serialize(const T &schema, JsonObject &json)
     {
         schema.serialize(json);
     }
@@ -86,6 +86,16 @@ public:
     explicit JsonSchemaInterface(Args &&...args)
         : _schema(std::forward<Args>(args)...)
     {
+    }
+
+    const T &get() const
+    {
+        return _schema;
+    }
+
+    T &get()
+    {
+        return _schema;
     }
 
     virtual std::unique_ptr<IJsonSchema> clone() const override
@@ -144,6 +154,13 @@ public:
         _schema->validate(json, errors);
     }
 
+    template<typename T>
+    T &as() const
+    {
+        auto &schema = dynamic_cast<JsonSchemaInterface<T> &>(*_schema);
+        return schema.get();
+    }
+
 private:
     std::unique_ptr<IJsonSchema> _schema;
 };
@@ -157,66 +174,118 @@ struct JsonOptions
     std::string title;
     std::string description;
     JsonValue defaultValue;
+    bool readOnly = false;
+    bool writeOnly = false;
 };
 
 /**
  * @brief Full JSON schema with options.
  *
  */
-struct JsonSchema
-{
-    JsonSchemaHolder holder;
-    JsonOptions options;
-};
-
-/**
- * @brief Helper class to create a full schema from a specific schema type.
- *
- */
-class JsonSchemaFactory
+class JsonSchema
 {
 public:
     template<typename T>
-    static JsonSchema create(T schema, JsonOptions options = {})
+    static JsonSchema from(T schema, JsonOptions options = {})
     {
         auto interface = std::make_unique<JsonSchemaInterface<T>>(std::move(schema));
         auto holder = JsonSchemaHolder(std::move(interface));
-        return {std::move(holder), std::move(options)};
+        return JsonSchema(std::move(holder), std::move(options));
     }
+
+    explicit JsonSchema(JsonSchemaHolder holder, JsonOptions options)
+        : _holder(std::move(holder))
+        , _options(std::move(options))
+    {
+    }
+
+    const JsonOptions &getOptions() const
+    {
+        return _options;
+    }
+
+    JsonOptions &getOptions()
+    {
+        return _options;
+    }
+
+    void serialize(JsonObject &json) const
+    {
+        _holder.serialize(json);
+    }
+
+    void validate(const JsonValue &json, JsonErrors &errors) const
+    {
+        _holder.validate(json, errors);
+    }
+
+    template<typename T>
+    const T &as() const
+    {
+        return _holder.as<T>();
+    }
+
+    template<typename T>
+    T &as()
+    {
+        return _holder.as<T>();
+    }
+
+private:
+    JsonSchemaHolder _holder;
+    JsonOptions _options;
 };
 
 /**
- * @brief Schema of a primitive type (undefined, null, boolean, string).
+ * @brief Schema of undefined types.
  *
- * @tparam T Primitive type.
  */
-template<typename T>
-struct PrimitiveSchema
+struct WildcardSchema
 {
-    JsonType type = JsonTypeInfo::getType<T>();
 };
 
 /**
- * @brief Defines a range of allowed values for numeric types.
+ * @brief Schema of null.
  *
- * @tparam T Numeric type.
  */
-template<typename T>
-struct JsonRange
+struct NullSchema
 {
-    T min = std::numeric_limits<T>::lowest();
-    T max = std::numeric_limits<T>::max();
 };
 
 /**
- * @brief Schema of numeric values (integer and number).
+ * @brief Schema of booleans
  *
- * @tparam T Numeric type.
  */
-template<typename T>
-struct NumericSchema : PrimitiveSchema<T>
+struct BooleanSchema
 {
-    JsonRange<T> range;
+};
+
+/**
+ * @brief Schema of integers.
+ *
+ */
+struct IntegerSchema
+{
+    double min = 0.0;
+    double max = 0.0;
+};
+
+/**
+ * @brief Schema of numbers.
+ *
+ */
+struct NumberSchema
+{
+    double min = 0.0;
+    double max = 0.0;
+};
+
+/**
+ * @brief Schema of numbers.
+ *
+ */
+struct StringSchema
+{
 };
 
 /**
@@ -226,7 +295,8 @@ struct NumericSchema : PrimitiveSchema<T>
 struct ArraySchema
 {
     JsonSchema items;
-    JsonRange<size_t> itemCount;
+    size_t minItems = 0;
+    size_t maxItems = 0;
 };
 
 /**
@@ -254,7 +324,7 @@ struct ObjectSchema
  */
 struct EnumSchema
 {
-    std::vector<std::string> enums;
+    std::vector<std::string> values;
 };
 
 /**
@@ -263,6 +333,6 @@ struct EnumSchema
  */
 struct OneOfSchema
 {
-    std::vector<JsonSchema> oneOf;
+    std::vector<JsonSchema> schemas;
 };
 } // namespace brayns

@@ -32,8 +32,7 @@ namespace brayns
 /**
  * @brief Helper class to serialize map-like types to a JSON object.
  *
- * Map-like means iterable yielding pair<string, T> and operator[string] to
- * emplace values.
+ * Map types have methods begin(), end() and operator[](const std::string &).
  *
  * @tparam T Map-like type.
  */
@@ -45,7 +44,7 @@ struct MapAdapter
     static JsonSchema getSchema()
     {
         auto items = JsonAdapter<ValueType>::getSchema();
-        return JsonSchemaFactory::create(MapSchema(std::move(items)));
+        return JsonSchema::from(MapSchema(std::move(items)));
     }
 
     static void serialize(const T &value, JsonValue &json)
@@ -62,7 +61,7 @@ struct MapAdapter
 
     static void deserialize(const JsonValue &json, T &value)
     {
-        auto &object = *json.extract<JsonObject::Ptr>();
+        auto &object = JsonExtractor::extractObject(json);
         value.clear();
         for (const auto &[key, child] : object)
         {

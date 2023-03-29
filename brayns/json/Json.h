@@ -25,12 +25,13 @@
 #include "JsonErrors.h"
 #include "JsonSchema.h"
 #include "JsonTypes.h"
-#include "JsonValidator.h"
+#include "JsonValidators.h"
 
 #include "adapters/ArrayAdapter.h"
 #include "adapters/EnumAdapter.h"
 #include "adapters/GlmAdapter.h"
 #include "adapters/MapAdapter.h"
+#include "adapters/ObjectAdapter.h"
 #include "adapters/PrimitiveAdapter.h"
 #include "adapters/PtrAdapter.h"
 
@@ -79,15 +80,6 @@ struct Json
      * @return JsonErrors Errors detected during validation (empty if valid).
      */
     static JsonErrors validate(const JsonValue &json, const JsonSchema &schema);
-
-    /**
-     * @brief Validate JSON using given schema with output parameter.
-     *
-     * @param json JSON to validate.
-     * @param schema JSON schema.
-     * @param errors Store schema errors.
-     */
-    static void validate(const JsonValue &json, const JsonSchema &schema, JsonErrors &errors);
 
     /**
      * @brief Return the JSON schema of T using JsonAdapter<T>::getSchema().
