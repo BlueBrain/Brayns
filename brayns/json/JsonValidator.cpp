@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "JsonValidators.h"
+#include "JsonValidator.h"
 
 #include <sstream>
 
@@ -86,10 +86,10 @@ public:
     static void checkItems(const brayns::JsonArray &array, const brayns::JsonSchema &schema, brayns::JsonErrors &errors)
     {
         auto i = size_t(0);
-        for (const auto &child : array)
+        for (const auto &item : array)
         {
             errors.push(i);
-            schema.validate(child, errors);
+            brayns::JsonValidator::validate(item, schema, errors);
             errors.pop();
             ++i;
         }
@@ -116,7 +116,7 @@ public:
         const std::map<std::string, brayns::JsonSchema> &properties,
         brayns::JsonErrors &errors)
     {
-        for (const auto &[key, child] : object)
+        for (const auto &[key, value] : object)
         {
             auto i = properties.find(key);
             if (i == properties.end())
@@ -125,8 +125,7 @@ public:
                 continue;
             }
             errors.push(key);
-            auto &items = i->second;
-            items.validate(child, errors);
+            brayns::JsonValidator::validate(value, i->second, errors);
             errors.pop();
         }
     }
@@ -172,6 +171,16 @@ public:
 
 namespace brayns
 {
+void JsonValidator::validate(const JsonValue &json, const JsonSchema &schema, JsonErrors &errors)
+{
+    if (json.isEmpty())
+    {
+        schema.holder.validate(schema.options.defaultValue, errors);
+        return;
+    }
+    schema.holder.validate(json, errors);
+}
+
 void JsonSchemaValidator<WildcardSchema>::validate(
     const JsonValue &json,
     const WildcardSchema &schema,
@@ -244,10 +253,10 @@ void JsonSchemaValidator<MapSchema>::validate(const JsonValue &json, const MapSc
         return;
     }
     auto &object = JsonExtractor::extractObject(json);
-    for (const auto &[key, child] : object)
+    for (const auto &[key, value] : object)
     {
         errors.push(key);
-        schema.items.validate(child, errors);
+        JsonValidator::validate(value, schema.items, errors);
         errors.pop();
     }
 }
@@ -278,7 +287,7 @@ void JsonSchemaValidator<OneOfSchema>::validate(const JsonValue &json, const One
     for (const auto &oneOf : schema.schemas)
     {
         auto mismatch = JsonErrors();
-        oneOf.validate(json, errors);
+        JsonValidator::validate(json, oneOf, errors);
         if (mismatch.isEmpty())
         {
             return;

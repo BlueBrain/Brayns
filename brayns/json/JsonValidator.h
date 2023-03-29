@@ -25,6 +25,12 @@
 
 namespace brayns
 {
+class JsonValidator
+{
+public:
+    static void validate(const JsonValue &json, const JsonSchema &schema, JsonErrors &errors);
+};
+
 /**
  * @brief JSON validation for wildcards.
  *

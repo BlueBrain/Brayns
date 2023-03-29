@@ -182,9 +182,11 @@ struct JsonOptions
  * @brief Full JSON schema with options.
  *
  */
-class JsonSchema
+struct JsonSchema
 {
-public:
+    JsonSchemaHolder holder;
+    JsonOptions options;
+
     template<typename T>
     static JsonSchema from(T schema, JsonOptions options = {})
     {
@@ -192,48 +194,6 @@ public:
         auto holder = JsonSchemaHolder(std::move(interface));
         return JsonSchema(std::move(holder), std::move(options));
     }
-
-    explicit JsonSchema(JsonSchemaHolder holder, JsonOptions options)
-        : _holder(std::move(holder))
-        , _options(std::move(options))
-    {
-    }
-
-    const JsonOptions &getOptions() const
-    {
-        return _options;
-    }
-
-    JsonOptions &getOptions()
-    {
-        return _options;
-    }
-
-    void serialize(JsonObject &json) const
-    {
-        _holder.serialize(json);
-    }
-
-    void validate(const JsonValue &json, JsonErrors &errors) const
-    {
-        _holder.validate(json, errors);
-    }
-
-    template<typename T>
-    const T &as() const
-    {
-        return _holder.as<T>();
-    }
-
-    template<typename T>
-    T &as()
-    {
-        return _holder.as<T>();
-    }
-
-private:
-    JsonSchemaHolder _holder;
-    JsonOptions _options;
 };
 
 /**
@@ -274,10 +234,8 @@ struct IntegerSchema
  * @brief Schema of numbers.
  *
  */
-struct NumberSchema
+struct NumberSchema : IntegerSchema
 {
-    double min = 0.0;
-    double max = 0.0;
 };
 
 /**

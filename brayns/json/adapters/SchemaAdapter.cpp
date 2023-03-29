@@ -19,32 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Json.h"
-
-#include <sstream>
-
-#include <Poco/JSON/Parser.h>
-#include <Poco/JSON/Stringifier.h>
+#include "SchemaAdapter.h"
 
 namespace brayns
 {
-std::string Json::stringify(const JsonValue &json)
-{
-    auto stream = std::ostringstream();
-    Poco::JSON::Stringifier::condense(json, stream);
-    return stream.str();
-}
-
-JsonValue Json::parse(const std::string &json)
-{
-    auto parser = Poco::JSON::Parser();
-    return parser.parse(json);
-}
-
-JsonErrors Json::validate(const JsonValue &json, const JsonSchema &schema)
-{
-    auto errors = JsonErrors();
-    JsonValidator::validate(json, schema, errors);
-    return errors;
-}
 } // namespace brayns

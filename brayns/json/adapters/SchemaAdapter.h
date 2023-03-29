@@ -19,32 +19,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Json.h"
+#pragma once
 
-#include <sstream>
+#include <brayns/json/JsonSchema.h>
 
-#include <Poco/JSON/Parser.h>
-#include <Poco/JSON/Stringifier.h>
+#include "ArrayAdapter.h"
+#include "MapAdapter.h"
+#include "PrimitiveAdapter.h"
 
 namespace brayns
 {
-std::string Json::stringify(const JsonValue &json)
+struct JsonAdapter<JsonSchema>
 {
-    auto stream = std::ostringstream();
-    Poco::JSON::Stringifier::condense(json, stream);
-    return stream.str();
-}
-
-JsonValue Json::parse(const std::string &json)
-{
-    auto parser = Poco::JSON::Parser();
-    return parser.parse(json);
-}
-
-JsonErrors Json::validate(const JsonValue &json, const JsonSchema &schema)
-{
-    auto errors = JsonErrors();
-    JsonValidator::validate(json, schema, errors);
-    return errors;
-}
+    static JsonSchema getSchema();
+    static void serialize(const T &value, JsonValue &json);
+    static void deserialize(const JsonValue &json, T &value);
+};
 } // namespace brayns

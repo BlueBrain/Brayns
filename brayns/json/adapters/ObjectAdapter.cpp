@@ -1,0 +1,126 @@
+/* Copyright (c) 2015-2023 EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "ObjectAdapter.h"
+
+namespace brayns
+{
+JsonSchema JsonObjectHandler::getSchema(const JsonObjectInfo &object)
+{
+    auto schema = ObjectSchema();
+    for (const auto &property : object.properties)
+    {
+        schema.properties[property.name] = property.schema;
+        if (property.required)
+        {
+            schema.required.push_back(property.name);
+        }
+    }
+    auto options = JsonOptions();
+    options.title = object.title;
+    return JsonSchema::from(schema, options);
+}
+
+void JsonObjectHandler::serialize(const JsonObjectInfo &object, const void *value, JsonValue &json)
+{
+    auto result = Poco::makeShared<JsonObject>();
+    for (const auto &property : object.properties)
+    {
+        if (property.schema.options.writeOnly)
+        {
+            continue;
+        }
+        auto child = JsonValue();
+        property.serialize(value, child);
+        if (child.isEmpty() && !property.required)
+        {
+            continue;
+        }
+        result->set(property.name, child);
+    }
+    json = result;
+}
+
+void JsonObjectHandler::deserialize(const JsonObjectInfo &object, const JsonValue &json, void *value)
+{
+    auto &result = JsonExtractor::extractObject(json);
+    for (const auto &property : object.properties)
+    {
+        if (property.schema.options.readOnly)
+        {
+            continue;
+        }
+        auto child = result.get(property.name);
+        if (child.isEmpty() && !property.required)
+        {
+            continue;
+        }
+        property.deserialize(child, value);
+    }
+}
+
+JsonPropertyBuilder::JsonPropertyBuilder(JsonProperty &property)
+    : _property(property)
+{
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::description(std::string value)
+{
+    _property.schema.options.description = std::move(value);
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::defaultValue(const JsonValue &value)
+{
+    _property.schema.options.defaultValue = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::minimum(double value)
+{
+    _property.schema.holder.as<IntegerSchema>().min = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::maximum(double value)
+{
+    _property.schema.holder.as<IntegerSchema>().max = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::minItems(size_t value)
+{
+    _property.schema.holder.as<ArraySchema>().minItems = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::maxItems(size_t value)
+{
+    _property.schema.holder.as<ArraySchema>().maxItems = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::required(bool value)
+{
+    _property.required = value;
+    return *this;
+}
+} // namespace brayns

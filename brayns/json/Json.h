@@ -25,7 +25,7 @@
 #include "JsonErrors.h"
 #include "JsonSchema.h"
 #include "JsonTypes.h"
-#include "JsonValidators.h"
+#include "JsonValidator.h"
 
 #include "adapters/ArrayAdapter.h"
 #include "adapters/EnumAdapter.h"
@@ -51,8 +51,9 @@ namespace brayns
  * @endcode
  *
  */
-struct Json
+class Json
 {
+public:
     /**
      * @brief Convert a JsonValue to string.
      *
