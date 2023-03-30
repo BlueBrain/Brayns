@@ -28,7 +28,7 @@
 namespace brayns
 {
 /**
- * @brief Base JSON adapter for enumerations.
+ * @brief Base JSON adapter for enumerations relying on EnumInfo.
  *
  * @tparam T Enum type.
  */
@@ -37,8 +37,10 @@ struct EnumAdapter
 {
     static JsonSchema getSchema()
     {
-        auto values = EnumInfo::getNames<T>();
-        return JsonSchema::from(EnumSchema(std::move(values)));
+        auto schema = JsonSchema();
+        schema.type = JsonType::String;
+        schema.enums = EnumInfo::getNames<T>();
+        return schema;
     }
 
     static void serialize(const T &value, JsonValue &json)

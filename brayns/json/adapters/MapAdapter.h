@@ -43,20 +43,21 @@ struct MapAdapter
 
     static JsonSchema getSchema()
     {
-        auto items = JsonAdapter<ValueType>::getSchema();
-        return JsonSchema::from(MapSchema(std::move(items)));
+        auto schema = JsonSchema();
+        schema.type = JsonType::Object;
+        schema.items = JsonAdapter<ValueType>::getSchema();
+        return schema;
     }
 
     static void serialize(const T &value, JsonValue &json)
     {
-        auto object = Poco::makeShared<JsonObject>();
+        auto &object = JsonFactory::emplaceObject(json);
         for (const auto &[key, item] : value)
         {
             auto child = JsonValue();
             JsonAdapter<ValueType>::serialize(item, child);
-            object->set(key, child);
+            object.set(key, child);
         }
-        json = object;
     }
 
     static void deserialize(const JsonValue &json, T &value)

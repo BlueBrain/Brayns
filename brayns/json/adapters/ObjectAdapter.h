@@ -33,8 +33,7 @@ namespace brayns
 struct JsonProperty
 {
     std::string name;
-    JsonSchema schema = JsonSchema::from(NullSchema());
-    bool required = true;
+    JsonSchema schema;
     std::function<void(const void *, JsonValue &)> serialize;
     std::function<void(const JsonValue &, void *)> deserialize;
 };
@@ -78,30 +77,30 @@ public:
     using Reflect = decltype(std::declval<GetterType>()(std::declval<ObjectType>()));
 
     template<typename GetterType>
-    using Decay = std::decay_t<Reflect<ObjectType, GetterType>>;
+    using Decay = std::decay_t<Reflect<GetterType>>;
 
     template<typename GetterType, typename SetterType>
     static void reflectGetSet(GetterType get, SetterType set, JsonProperty &property)
     {
-        using PropertyType = Decay<ObjectType, GetterType>;
+        using PropertyType = Decay<GetterType>;
         property.schema = JsonAdapter<PropertyType>::getSchema();
-        _reflectGet<ObjectType, PropertyType>(get, property);
-        _reflectSet<ObjectType, PropertyType>(set, property);
+        _reflectGet<PropertyType>(get, property);
+        _reflectSet<PropertyType>(set, property);
     }
 
     template<typename GetterType>
     static void reflectGet(GetterType get, JsonProperty &property)
     {
-        using PropertyType = Decay<ObjectType, GetterType>;
+        using PropertyType = Decay<GetterType>;
         property.schema = JsonAdapter<PropertyType>::getSchema();
-        _reflectGet<ObjectType, PropertyType>(get, property);
+        _reflectGet<PropertyType>(get, property);
     }
 
     template<typename PropertyType, typename SetterType>
     static void reflectSet(SetterType set, JsonProperty &property)
     {
         property.schema = JsonAdapter<PropertyType>::getSchema();
-        _reflectSet<ObjectType, PropertyType>(set, property);
+        _reflectSet<PropertyType>(set, property);
     }
 
 private:
@@ -113,7 +112,7 @@ private:
             auto &object = *static_cast<const ObjectType *>(ptr);
             JsonAdapter<PropertyType>::serialize(get(object), json);
         };
-    };
+    }
 
     template<typename PropertyType, typename SetterType>
     static void _reflectSet(SetterType set, JsonProperty &property)
@@ -125,7 +124,7 @@ private:
             JsonAdapter<PropertyType>::deserialize(json, value);
             set(object, std::move(value));
         };
-    };
+    }
 };
 
 template<typename ObjectType>
@@ -167,7 +166,7 @@ public:
     {
         auto &property = _object.properties.emplace_back();
         property.name = std::move(name);
-        JsonReflector<ObjectType>::reflectSet<PropertyType>(set, property);
+        JsonReflector<ObjectType>::template reflectSet<PropertyType>(set, property);
         property.schema.options.writeOnly = true;
         return JsonPropertyBuilder(property);
     }

@@ -39,29 +39,33 @@ struct GlmAdapter
 {
     using ValueType = typename T::value_type;
 
+    static constexpr auto itemCount = static_cast<size_t>(T::length());
+
     static JsonSchema getSchema()
     {
-        auto items = JsonAdapter<ValueType>::getSchema();
-        auto size = static_cast<size_t>(T::length());
-        return JsonSchema::from(ArraySchema(std::move(items), size, size));
+        auto schema = JsonSchema();
+        schema.type = JsonType::Array;
+        schema.items = JsonAdapter<ValueType>::getSchema();
+        schema.minItems = itemCount;
+        schema.maxItems = itemCount;
+        return schema;
     }
 
     static void serialize(const T &value, JsonValue &json)
     {
-        auto array = Poco::makeShared<JsonArray>();
+        auto &array = JsonFactory::emplaceArray(json);
         for (glm::length_t i = 0; i < T::length(); ++i)
         {
             auto child = JsonValue();
             JsonAdapter<ValueType>::serialize(value[i], child);
-            array->add(child);
+            array.add(child);
         }
-        json = array;
     }
 
     static void deserialize(const JsonValue &json, T &value)
     {
         auto &array = JsonExtractor::extractArray(json);
-        if (array.size() != T::length())
+        if (array.size() != itemCount)
         {
             throw std::invalid_argument("Invalid array size");
         }

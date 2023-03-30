@@ -71,14 +71,28 @@ JsonType JsonTypeInfo::getType(const JsonValue &json)
     throw std::invalid_argument("Value is not a JSON type");
 }
 
+const JsonArray &JsonExtractor::extractArray(const JsonValue &json)
+{
+    return *json.extract<JsonArray::Ptr>();
+}
+
 const JsonObject &JsonExtractor::extractObject(const JsonValue &json)
 {
     return *json.extract<JsonObject::Ptr>();
 }
 
-const JsonArray &JsonExtractor::extractArray(const JsonValue &json)
+JsonArray &JsonFactory::emplaceArray(JsonValue &json)
 {
-    return *json.extract<JsonArray::Ptr>();
+    auto array = Poco::makeShared<JsonArray>();
+    json = array;
+    return *array;
+}
+
+JsonObject &JsonFactory::emplaceObject(JsonValue &json)
+{
+    auto object = Poco::makeShared<JsonObject>();
+    json = object;
+    return *object;
 }
 } // namespace brayns
 
@@ -86,6 +100,6 @@ namespace std
 {
 std::ostream &operator<<(std::ostream &stream, const brayns::JsonType &type)
 {
-    stream << brayns::EnumInfo::getName(type);
+    return stream << brayns::EnumInfo::getName(type);
 }
 } // namespace std

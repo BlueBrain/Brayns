@@ -21,18 +21,19 @@
 
 #pragma once
 
-#include <brayns/json/JsonSchema.h>
-
-#include "ArrayAdapter.h"
-#include "MapAdapter.h"
-#include "PrimitiveAdapter.h"
+#include <brayns/json/JsonAdapter.h>
 
 namespace brayns
 {
+/**
+ * @brief JSON handling for JSON schemas.
+ *
+ */
+template<>
 struct JsonAdapter<JsonSchema>
 {
     static JsonSchema getSchema();
-    static void serialize(const T &value, JsonValue &json);
-    static void deserialize(const JsonValue &json, T &value);
+    static void serialize(const JsonSchema &schema, JsonValue &json);
+    static void deserialize(const JsonValue &json, JsonSchema &schema);
 };
 } // namespace brayns

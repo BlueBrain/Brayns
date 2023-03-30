@@ -43,20 +43,23 @@ struct ArrayAdapter
 
     static JsonSchema getSchema()
     {
-        auto items = JsonAdapter<ValueType>::getSchema();
-        return JsonSchema::from(ArraySchema(std::move(items)));
+        auto schema = JsonSchema();
+        schema.type = JsonType::Array;
+        schema.items = JsonAdapter<ValueType>::getSchema();
+        schema.minItems = std::numeric_limits<size_t>::lowest();
+        schema.maxItems = std::numeric_limits<size_t>::max();
+        return schema;
     }
 
     static void serialize(const T &value, JsonValue &json)
     {
-        auto array = Poco::makeShared<JsonArray>();
+        auto &array = JsonFactory::emplaceArray(json);
         for (const auto &item : value)
         {
             auto child = JsonValue();
             JsonAdapter<ValueType>::serialize(item, child);
-            array->add(child);
+            array.add(child);
         }
-        json = array;
     }
 
     static void deserialize(const JsonValue &json, T &value)

@@ -32,44 +32,25 @@
 namespace brayns
 {
 /**
- * @brief Helper class to handle JSON primitives (boolean, number and string).
+ * @brief Helper class to handle JSON primitives (not arrays nor objects).
  *
  * @tparam T Primitive type.
  */
 template<typename T>
 struct PrimitiveAdapter
 {
+    static constexpr auto type = JsonTypeInfo::getType<T>();
+
     static JsonSchema getSchema()
     {
-        static constexpr auto type = JsonTypeInfo::getType<T>();
-        if constexpr (type == JsonType::Undefined)
+        auto schema = JsonSchema();
+        schema.type = type;
+        if constexpr (JsonTypeInfo::isNumeric(type))
         {
-            return JsonSchema::from(WildcardSchema());
+            schema.minimum = static_cast<double>(std::numeric_limits<T>::lowest());
+            schema.maximum = static_cast<double>(std::numeric_limits<T>::max());
         }
-        else if constexpr (type == JsonType::Null)
-        {
-            return JsonSchema::from(NullSchema());
-        }
-        else if constexpr (type == JsonType::Boolean)
-        {
-            return JsonSchema::from(BooleanSchema());
-        }
-        else if constexpr (type == JsonType::Integer)
-        {
-            return JsonSchema::from(IntegerSchema(_getMin<T>(), _getMax<T>()));
-        }
-        else if constexpr (type == JsonType::Number)
-        {
-            return JsonSchema::from(NumberSchema(_getMin<T>(), _getMax<T>()));
-        }
-        else if constexpr (type == JsonType::String)
-        {
-            return JsonSchema::from(StringSchema());
-        }
-        else
-        {
-            static_assert(_alwaysFalse<T>, "Not a primitive type");
-        }
+        return schema;
     }
 
     static void serialize(const T &value, JsonValue &json)
@@ -101,23 +82,6 @@ struct PrimitiveAdapter
     }
 
 private:
-    template<typename U>
-    static constexpr auto _alwaysFalse = false;
-
-    template<typename U>
-    static constexpr double _getMin()
-    {
-        auto result = std::numeric_limits<U>::lowest();
-        return static_cast<double>(result);
-    }
-
-    template<typename U>
-    static constexpr double _getMax()
-    {
-        auto result = std::numeric_limits<U>::max();
-        return static_cast<double>(result);
-    }
-
     template<typename U>
     static U _checkInfAndNan(U value)
     {

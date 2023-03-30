@@ -174,14 +174,25 @@ private:
 };
 
 /**
- * @brief Helper class to extract JSON.
+ * @brief Helper class to extract JSON elements.
  *
  */
 class JsonExtractor
 {
 public:
-    static const JsonObject &extractObject(const JsonValue &json);
     static const JsonArray &extractArray(const JsonValue &json);
+    static const JsonObject &extractObject(const JsonValue &json);
+};
+
+/**
+ * @brief Helper class to create JSON elements.
+ *
+ */
+class JsonFactory
+{
+public:
+    static JsonArray &emplaceArray(JsonValue &json);
+    static JsonObject &emplaceObject(JsonValue &json);
 };
 } // namespace brayns
 
