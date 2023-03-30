@@ -139,54 +139,6 @@ private:
     }
 };
 
-template<typename ObjectType>
-class JsonObjectBuilder
-{
-public:
-    explicit JsonObjectBuilder(JsonObjectInfo &object)
-        : _object(object)
-    {
-    }
-
-    JsonObjectBuilder title(std::string value)
-    {
-        _object.title = std::move(value);
-        return *this;
-    }
-
-    template<typename GetterType, typename SetterType>
-    JsonPropertyBuilder property(std::string name, GetterType get, SetterType set)
-    {
-        auto &item = _object.properties.emplace_back();
-        item.name = std::move(name);
-        JsonReflector<ObjectType>::reflectGetSet(get, set, item);
-        return JsonPropertyBuilder(item);
-    }
-
-    template<typename GetterType>
-    JsonPropertyBuilder readOnly(std::string name, GetterType get)
-    {
-        auto &item = _object.properties.emplace_back();
-        item.name = std::move(name);
-        JsonReflector<ObjectType>::reflectGet(get, item);
-        item.schema.readOnly = true;
-        return JsonPropertyBuilder(item);
-    }
-
-    template<typename PropertyType, typename SetterType>
-    JsonPropertyBuilder writeOnly(std::string name, SetterType set)
-    {
-        auto &item = _object.properties.emplace_back();
-        item.name = std::move(name);
-        JsonReflector<ObjectType>::template reflectSet<PropertyType>(set, item);
-        item.schema.writeOnly = true;
-        return JsonPropertyBuilder(item);
-    }
-
-private:
-    JsonObjectInfo &_object;
-};
-
 template<typename T>
 struct ObjectAdapter
 {
@@ -206,14 +158,55 @@ struct ObjectAdapter
     }
 
 private:
-    static JsonObjectInfo _buildObject()
+    static inline JsonObjectInfo _object;
+
+protected:
+    static void title(std::string value)
     {
-        auto object = JsonObjectInfo();
-        auto builder = JsonObjectBuilder<T>(object);
-        JsonAdapter<T>::reflect(builder);
-        return object;
+        _object.title = std::move(value);
     }
 
-    static inline JsonObjectInfo _object = _buildObject();
+    template<typename GetterType, typename SetterType>
+    static JsonPropertyBuilder entry(std::string name, GetterType get, SetterType set)
+    {
+        auto &property = _emplace(std::move(name));
+        JsonReflector<T>::reflectGetSet(get, set, property);
+        return JsonPropertyBuilder(property);
+    }
+
+    template<typename GetterType>
+    static JsonPropertyBuilder readOnly(std::string name, GetterType get)
+    {
+        auto &property = _emplace(std::move(name));
+        JsonReflector<T>::reflectGet(get, property);
+        property.schema.readOnly = true;
+        return JsonPropertyBuilder(property);
+    }
+
+    template<typename PropertyType, typename SetterType>
+    static JsonPropertyBuilder writeOnly(std::string name, SetterType set)
+    {
+        auto &property = _emplace(std::move(name));
+        JsonReflector<T>::template reflectSet<PropertyType>(set, property);
+        property.schema.writeOnly = true;
+        return JsonPropertyBuilder(property);
+    }
+
+private:
+    static JsonProperty &_emplace(std::string name)
+    {
+        auto &property = _object.properties.emplace_back();
+        property.name = std::move(name);
+        property.schema.required = true;
+        return property;
+    }
+
+    static int _buildObject()
+    {
+        JsonAdapter<T>::reflect();
+        return 0;
+    }
+
+    static inline int _trigger = _buildObject();
 };
 } // namespace brayns
