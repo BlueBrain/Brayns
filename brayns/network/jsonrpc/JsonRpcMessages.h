@@ -21,108 +21,175 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include "RequestId.h"
 
 namespace brayns
 {
 /**
- * @brief Message used to send a request to brayns.
+ * @brief Message used to send a request to Brayns.
  *
  */
-BRAYNS_JSON_OBJECT_BEGIN(RequestMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_JSON_OBJECT_ENTRY(RequestId, id, "Message ID", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::string, method, "Entrypoint name")
-BRAYNS_JSON_OBJECT_ENTRY(JsonValue, params, "Request content", Required(false))
-BRAYNS_JSON_OBJECT_END()
+struct RequestMessage
+{
+    std::string jsonrpc;
+    RequestId id;
+    std::string method;
+    JsonValue params;
+};
+
+template<>
+struct JsonAdapter<RequestMessage> : ObjectAdapter<RequestMessage>
+{
+    static void reflect()
+    {
+        title("RequestMessage");
+        set<std::string>("jsonrpc", [](auto &object, auto value) { object.jsonrpc = std::move(value); })
+            .description("JSON-RPC version");
+        set<RequestId>("id", [](auto &object, auto value) { object.id = std::move(value); })
+            .description("Request ID")
+            .required(false);
+        set<std::string>("method", [](auto &object, auto value) { object.method = std::move(value); })
+            .description("Entrypoint name");
+        set<JsonValue>("params", [](auto &object, const auto &value) { object.params = value; })
+            .description("Request content")
+            .required(false);
+    }
+};
 
 /**
- * @brief Cancel info received in cancel message params.
+ * @brief Request parameter to cancel an async entrypoint.
  *
  */
-BRAYNS_JSON_OBJECT_BEGIN(CancelParams)
-BRAYNS_JSON_OBJECT_ENTRY(RequestId, id, "ID of the request to cancel")
-BRAYNS_JSON_OBJECT_END()
+struct CancelParams
+{
+    RequestId id;
+};
+
+template<>
+struct JsonAdapter<CancelParams> : ObjectAdapter<CancelParams>
+{
+    static void reflect()
+    {
+        title("CancelParams");
+        set<RequestId>("id", [](auto &object, auto value) { object.id = std::move(value); })
+            .description("ID of the request to cancel");
+    }
+};
 
 /**
- * @brief Message used by brayns to send the reply.
+ * @brief Message used to send a reply from Brayns.
  *
  */
-BRAYNS_JSON_OBJECT_BEGIN(ReplyMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_JSON_OBJECT_ENTRY(RequestId, id, "Message ID")
-BRAYNS_JSON_OBJECT_ENTRY(JsonValue, result, "Reply content")
-BRAYNS_JSON_OBJECT_END()
+struct ReplyMessage
+{
+    std::string jsonrpc;
+    RequestId id;
+    JsonValue result;
+};
+
+template<>
+struct JsonAdapter<ReplyMessage> : ObjectAdapter<ReplyMessage>
+{
+    static void reflect()
+    {
+        title("ReplyMessage");
+        get("jsonrpc", [](auto &object) { return object.jsonrpc; }).description("JSON-RPC version");
+        get("id", [](auto &object) { return object.id; }).description("ID of the corresponding request");
+        get("result", [](auto &object) { return object.result; }).description("Reply content");
+    }
+};
 
 /**
- * @brief Description of an error used in error message.
+ * @brief Error details when a request processing fails.
  *
  */
-BRAYNS_JSON_OBJECT_BEGIN(ErrorDescriptionMessage)
-BRAYNS_JSON_OBJECT_ENTRY(int, code, "Error code")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, message, "Error description")
-BRAYNS_JSON_OBJECT_ENTRY(JsonValue, data, "Additional error info")
-BRAYNS_JSON_OBJECT_END()
+struct ErrorInfo
+{
+    int code = 0;
+    std::string message;
+    JsonValue data;
+};
+
+template<>
+struct JsonAdapter<ErrorInfo> : ObjectAdapter<ErrorInfo>
+{
+    static void reflect()
+    {
+        title("ErrorInfo");
+        get("code", [](auto &object) { return object.code; }).description("Error code");
+        get("message", [](auto &object) { return object.message; }).description("Error description");
+        get("data", [](auto &object) { return object.data; }).description("Additional error info");
+    }
+};
 
 /**
  * @brief Message used by brayns to send an error reply.
  *
  */
-BRAYNS_JSON_OBJECT_BEGIN(ErrorMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_JSON_OBJECT_ENTRY(RequestId, id, "Message ID")
-BRAYNS_JSON_OBJECT_ENTRY(ErrorDescriptionMessage, error, "Error object")
-BRAYNS_JSON_OBJECT_END()
+struct ErrorMessage
+{
+    std::string jsonrpc;
+    RequestId id;
+    ErrorInfo error;
+};
+
+template<>
+struct JsonAdapter<ErrorMessage> : ObjectAdapter<ErrorMessage>
+{
+    static void reflect()
+    {
+        title("ErrorMessage");
+        get("jsonrpc", [](auto &object) { return object.jsonrpc; }).description("JSON-RPC version");
+        get("id", [](auto &object) { return object.id; }).description("ID of the corresponding request");
+        get("error", [](auto &object) { return object.error; }).description("Error info");
+    }
+};
 
 /**
  * @brief Progress info used in progress messages.
  *
  */
-BRAYNS_JSON_OBJECT_BEGIN(ProgressInfoMessage)
-BRAYNS_JSON_OBJECT_ENTRY(RequestId, id, "Request ID")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, operation, "Operation description")
-BRAYNS_JSON_OBJECT_ENTRY(double, amount, "Progress percentage [0-1]")
-BRAYNS_JSON_OBJECT_END()
+struct ProgressInfo
+{
+    RequestId id;
+    std::string operation;
+    double amount = 0.0;
+};
+
+template<>
+struct JsonAdapter<ProgressInfo> : ObjectAdapter<ProgressInfo>
+{
+    static void reflect()
+    {
+        title("ProgressInfo");
+        get("id", [](auto &object) { return object.id; }).description("ID of the corresponding request");
+        get("operation", [](auto &object) { return object.operation; }).description("Description of the current task");
+        get("amount", [](auto &object) { return object.amount; }).description("Global progess [0-1]");
+    }
+};
 
 /**
  * @brief Progress message sent during a request processing.
  *
  */
-BRAYNS_JSON_OBJECT_BEGIN(ProgressMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, jsonrpc, "Protocol version")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, method, "Entrypoint name")
-BRAYNS_JSON_OBJECT_ENTRY(ProgressInfoMessage, params, "Progression info")
-BRAYNS_JSON_OBJECT_END()
-
-/**
- * @brief Empty message when no params or result is needed.
- *
- */
-struct EmptyMessage
+struct ProgressMessage
 {
+    std::string jsonrpc;
+    std::string method;
+    ProgressInfo params;
 };
 
 template<>
-class JsonAdapter<EmptyMessage>
+struct JsonAdapter<ProgressMessage> : ObjectAdapter<ProgressMessage>
 {
-public:
-    static JsonSchema getSchema()
+    static void reflect()
     {
-        return JsonSchemaHelper::getNullSchema();
-    }
-
-    static void serialize(const EmptyMessage &value, JsonValue &json)
-    {
-        (void)value;
-        json = {};
-    }
-
-    static void deserialize(const JsonValue &json, EmptyMessage &value)
-    {
-        (void)json;
-        (void)value;
+        title("ProgressMessage");
+        get("jsonrpc", [](auto &object) { return object.jsonrpc; }).description("JSON-RPC version");
+        get("method", [](auto &object) { return object.method; }).description("Entrypoint name");
+        get("params", [](auto &object) { return object.params; }).description("Progress info");
     }
 };
 } // namespace brayns

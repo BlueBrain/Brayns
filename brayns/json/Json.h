@@ -22,6 +22,7 @@
 #pragma once
 
 #include "JsonAdapter.h"
+#include "JsonBuffer.h"
 #include "JsonErrors.h"
 #include "JsonSchema.h"
 #include "JsonTypes.h"

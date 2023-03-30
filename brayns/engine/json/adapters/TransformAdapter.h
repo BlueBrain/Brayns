@@ -23,13 +23,31 @@
 
 #include <brayns/engine/components/Transform.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Transform)
-BRAYNS_JSON_ADAPTER_ENTRY(translation, "Translation XYZ", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(rotation, "Rotation XYZW", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(scale, "Scale XYZ", Required(false))
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Transform> : ObjectAdapter<Transform>
+{
+    static void reflect()
+    {
+        title("Transform");
+        getset(
+            "translation",
+            [](auto &object) -> decltype(auto) { return object.translation; },
+            [](auto &object, const auto &value) { object.translation = value; })
+            .description("Translation XYZ");
+        getset(
+            "rotation",
+            [](auto &object) -> decltype(auto) { return object.rotation; },
+            [](auto &object, const auto &value) { object.rotation = value; })
+            .description("Rotation XYZW");
+        getset(
+            "scale",
+            [](auto &object) -> decltype(auto) { return object.scale; },
+            [](auto &object, const auto &value) { object.scale = value; })
+            .description("Scale XYZ");
+    }
+};
 } // namespace brayns

@@ -24,7 +24,6 @@
 #include <Poco/JSON/JSONException.h>
 
 #include <brayns/json/Json.h>
-#include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/string/StringExtractor.h>
 
@@ -53,8 +52,8 @@ class RequestSchemaValidator
 public:
     static void validate(const brayns::JsonValue &json)
     {
-        auto errors = brayns::JsonSchemaValidator::validate(json, _schema);
-        if (!errors.empty())
+        auto errors = brayns::Json::validate(json, _schema);
+        if (!errors.isEmpty())
         {
             throw brayns::InvalidRequestException("Invalid request schema", errors);
         }

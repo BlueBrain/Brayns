@@ -26,8 +26,7 @@
 #include <brayns/engine/geometry/types/Plane.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/geometry/types/TriangleMesh.h>
-#include <brayns/json/JsonAdapterMacro.h>
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {

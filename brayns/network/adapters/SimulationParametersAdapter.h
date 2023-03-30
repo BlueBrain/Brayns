@@ -21,17 +21,28 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/parameters/SimulationParameters.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(SimulationParameters)
-BRAYNS_JSON_ADAPTER_GETSET("start_frame", getStartFrame, setStartFrame, "Global initial simulation frame index")
-BRAYNS_JSON_ADAPTER_GETSET("end_frame", getEndFrame, setEndFrame, "Global final simulation frame index")
-BRAYNS_JSON_ADAPTER_GETSET("current", getFrame, setFrame, "Current frame index")
-BRAYNS_JSON_ADAPTER_GET("dt", getDt, "Frame time")
-BRAYNS_JSON_ADAPTER_GET("unit", getTimeUnit, "Time unit")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<SimulationParameters> : ObjectAdapter<SimulationParameters>
+{
+    static void reflect()
+    {
+        title("SimulationParameters");
+        get("start_frame", [](auto &object) { return object.getStartFrame(); })
+            .description("Initial simulation frame index");
+        get("end_frame", [](auto &object) { return object.getEndFrame(); }).description("Final simulation frame index");
+        getset(
+            "current",
+            [](auto &object) { return object.getFrame(); },
+            [](auto &object, auto value) { object.setFrame(value); })
+            .description("Current simulation frame index");
+        get("dt", [](auto &object) { return object.getDt(); }).description("Delta time between two frames");
+        get("unit", [](auto &object) -> decltype(auto) { return object.getTimeUnit(); }).description("Time unit");
+    }
+};
 } // namespace brayns

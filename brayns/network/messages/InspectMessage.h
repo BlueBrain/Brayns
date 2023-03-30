@@ -21,21 +21,48 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(InspectMessage)
-BRAYNS_JSON_OBJECT_ENTRY(Vector2f, position, "Position XY (normalized)")
-BRAYNS_JSON_OBJECT_END()
+struct InspectMessage
+{
+    Vector2f position{0.0f};
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(InspectResult)
-BRAYNS_JSON_OBJECT_ENTRY(
-    bool,
-    hit,
-    "A boolean flag indicating wether there was a hit. If false, the rest of the fields must be ignored")
-BRAYNS_JSON_OBJECT_ENTRY(Vector3f, position, "3D hit position")
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model hitted")
-BRAYNS_JSON_OBJECT_ENTRY(JsonValue, metadata, "Extra attributes which vary depending on the type of model hitted")
-BRAYNS_JSON_OBJECT_END()
+template<>
+struct JsonAdapter<InspectMessage> : ObjectAdapter<InspectMessage>
+{
+    static void reflect()
+    {
+        title("InspectMessage");
+        set<Vector2f>("position", [](auto &object, const auto &value) { object.position = value; })
+            .description("Normalized screen position XY");
+    }
+};
+
+struct InspectResult
+{
+    bool hit = false;
+    Vector3f position{0.0f};
+    uint32_t model_id = 0;
+    JsonValue metadata;
+};
+
+template<>
+struct JsonAdapter<InspectResult> : ObjectAdapter<InspectResult>
+{
+    static void reflect()
+    {
+        title("InspectResult");
+        get("hit", [](auto &object) { return object.hit; })
+            .description("True if a model was at given position, otherwise the rest is invalid");
+        get("position", [](auto &object) -> decltype(auto) { return object.position; })
+            .description("World position XYZ where the model was hit");
+        get("model_id", [](auto &object) { return object.model_id; })
+            .description("ID of the model that was hit at given position");
+        get("metadata", [](auto &object) -> decltype(auto) { return object.metadata; })
+            .description("Extra attributes depending on the type of model hitted");
+    }
+};
 } // namespace brayns

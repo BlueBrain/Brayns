@@ -71,11 +71,23 @@ public:
 
     JsonPropertyBuilder description(std::string value);
     JsonPropertyBuilder required(bool value);
-    JsonPropertyBuilder defaultValue(const JsonValue &value);
     JsonPropertyBuilder minimum(double value);
     JsonPropertyBuilder maximum(double value);
     JsonPropertyBuilder minItems(size_t value);
     JsonPropertyBuilder maxItems(size_t value);
+
+    template<typename T>
+    JsonPropertyBuilder defaultValue(const T &value)
+    {
+        JsonAdapter<T>::serialize(value, _property.schema.defaultValue);
+        _property.schema.required = false;
+        return *this;
+    }
+
+    JsonPropertyBuilder defaultValue(const char *value)
+    {
+        return defaultValue(std::string(value));
+    }
 
 private:
     JsonProperty &_property;
@@ -86,7 +98,7 @@ class JsonReflector
 {
 public:
     template<typename GetterType>
-    using Reflect = decltype(std::declval<GetterType>()(std::declval<ObjectType>()));
+    using Reflect = decltype(std::declval<GetterType>()(std::declval<const ObjectType>()));
 
     template<typename GetterType>
     using Decay = std::decay_t<Reflect<GetterType>>;
@@ -167,7 +179,7 @@ protected:
     }
 
     template<typename GetterType, typename SetterType>
-    static JsonPropertyBuilder entry(std::string name, GetterType get, SetterType set)
+    static JsonPropertyBuilder getset(std::string name, GetterType get, SetterType set)
     {
         auto &property = _emplace(std::move(name));
         JsonReflector<T>::reflectGetSet(get, set, property);
@@ -175,7 +187,7 @@ protected:
     }
 
     template<typename GetterType>
-    static JsonPropertyBuilder readOnly(std::string name, GetterType get)
+    static JsonPropertyBuilder get(std::string name, GetterType get)
     {
         auto &property = _emplace(std::move(name));
         JsonReflector<T>::reflectGet(get, property);
@@ -184,7 +196,7 @@ protected:
     }
 
     template<typename PropertyType, typename SetterType>
-    static JsonPropertyBuilder writeOnly(std::string name, SetterType set)
+    static JsonPropertyBuilder set(std::string name, SetterType set)
     {
         auto &property = _emplace(std::move(name));
         JsonReflector<T>::template reflectSet<PropertyType>(set, property);

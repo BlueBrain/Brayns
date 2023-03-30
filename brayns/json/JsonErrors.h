@@ -27,8 +27,6 @@
 
 #include <spdlog/fmt/fmt.h>
 
-#include "JsonTypes.h"
-
 namespace brayns
 {
 /**

@@ -33,6 +33,13 @@ namespace brayns
 class JsonValidator
 {
 public:
+    /**
+     * @brief Validate JSON using schema and store result into errors.
+     *
+     * @param json JSON to validate.
+     * @param schema JSON schema.
+     * @param errors Output errors (empty if valid).
+     */
     static void validate(const JsonValue &json, const JsonSchema &schema, JsonErrors &errors);
 };
 } // namespace brayns

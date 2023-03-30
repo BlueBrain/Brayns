@@ -88,12 +88,6 @@ JsonPropertyBuilder JsonPropertyBuilder::required(bool value)
     return *this;
 }
 
-JsonPropertyBuilder JsonPropertyBuilder::defaultValue(const JsonValue &value)
-{
-    _property.schema.defaultValue = value;
-    return *this;
-}
-
 JsonPropertyBuilder JsonPropertyBuilder::minimum(double value)
 {
     _property.schema.minimum = value;

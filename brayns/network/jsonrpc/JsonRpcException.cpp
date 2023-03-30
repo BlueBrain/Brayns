@@ -21,9 +21,20 @@
 
 #include "JsonRpcException.h"
 
-#include <brayns/json/Json.h>
-#include <brayns/json/adapters/ArrayAdapter.h>
-#include <brayns/json/adapters/PrimitiveAdapter.h>
+#include <spdlog/fmt/fmt.h>
+
+namespace
+{
+class ErrorFormatter
+{
+public:
+    static brayns::JsonValue format(const brayns::JsonErrors &errors)
+    {
+        auto messages = brayns::JsonErrorFormatter::format(errors);
+        return brayns::Json::serialize(messages);
+    }
+};
+} // namespace
 
 namespace brayns
 {
@@ -50,7 +61,7 @@ const JsonValue &JsonRpcException::getData() const
 }
 
 ParsingErrorException::ParsingErrorException(const std::string &message)
-    : JsonRpcException(-32700, "Request is not a valid JSON: '" + message + "'")
+    : JsonRpcException(-32700, fmt::format("Invalid JSON: '{}'", message))
 {
 }
 
@@ -59,13 +70,13 @@ InvalidRequestException::InvalidRequestException(const std::string &message)
 {
 }
 
-InvalidRequestException::InvalidRequestException(const std::string &message, const std::vector<std::string> &errors)
-    : JsonRpcException(-32600, message, Json::serialize(errors))
+InvalidRequestException::InvalidRequestException(const std::string &message, const JsonErrors &errors)
+    : JsonRpcException(-32600, message, ErrorFormatter::format(errors))
 {
 }
 
 MethodNotFoundException::MethodNotFoundException(const std::string &method)
-    : JsonRpcException(-32601, "Method '" + method + "' not found")
+    : JsonRpcException(-32601, fmt::format("Method '{}' not found", method))
 {
 }
 
@@ -74,8 +85,8 @@ InvalidParamsException::InvalidParamsException(const std::string &message)
 {
 }
 
-InvalidParamsException::InvalidParamsException(const std::string &message, const std::vector<std::string> &errors)
-    : JsonRpcException(-32602, message, Json::serialize(errors))
+InvalidParamsException::InvalidParamsException(const std::string &message, const JsonErrors &errors)
+    : JsonRpcException(-32602, message, ErrorFormatter::format(errors))
 {
 }
 

@@ -20,20 +20,50 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/engine/model/systemtypes/ColorSystem.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(ColorMethodValuesMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "ID of the model to check")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, method, "The method to query for color values")
-BRAYNS_JSON_OBJECT_END()
+struct ColorMethodValuesMessage
+{
+    uint32_t id = 0;
+    std::string method;
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(ColorModelMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "ID of the model to color")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, method, "The method to use for coloring")
-BRAYNS_JSON_OBJECT_ENTRY(ColorMethodInput, values, "Color input")
-BRAYNS_JSON_OBJECT_END()
-}
+template<>
+struct JsonAdapter<ColorMethodValuesMessage> : ObjectAdapter<ColorMethodValuesMessage>
+{
+    static void reflect()
+    {
+        title("ColorMethodValuesMessage");
+        set<uint32_t>("id", [](auto &object, auto value) { object.id = value; })
+            .description("ID of the model that will be colored");
+        set<std::string>("method", [](auto &object, auto value) { object.method = std::move(value); })
+            .description("Coloring method which values will be returned");
+    }
+};
+
+struct ColorModelMessage
+{
+    uint32_t id = 0;
+    std::string method;
+    ColorMethodInput values;
+};
+
+template<>
+struct JsonAdapter<ColorModelMessage> : ObjectAdapter<ColorModelMessage>
+{
+    static void reflect()
+    {
+        title("ColorModelMessage");
+        set<uint32_t>("id", [](auto &object, auto value) { object.id = value; })
+            .description("ID of the model to color");
+        set<std::string>("method", [](auto &object, auto value) { object.method = std::move(value); })
+            .description("Coloring method");
+        set<ColorMethodInput>("values", [](auto &object, auto value) { object.values = std::move(value); })
+            .description("Coloring parameters");
+    }
+};
+} // namespace brayns

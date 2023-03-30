@@ -23,12 +23,28 @@
 
 #include <brayns/engine/components/ColorRamp.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ColorRamp)
-BRAYNS_JSON_ADAPTER_GETSET("range", getValuesRange, setValuesRange, "Values range", Required(false))
-BRAYNS_JSON_ADAPTER_GETSET("colors", getColors, setColors, "List of colors (RGBA) to map", Required(false))
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<ColorRamp> : ObjectAdapter<ColorRamp>
+{
+    static void reflect()
+    {
+        title("Bounds");
+        getset(
+            "range",
+            [](auto &object) -> decltype(auto) { return object.getValuesRange(); },
+            [](auto &object, const auto &value) { object.setValuesRange(value); })
+            .description("Value range")
+            .required(false);
+        getset(
+            "colors",
+            [](auto &object) -> decltype(auto) { return object.getColors(); },
+            [](auto &object, auto value) { object.setColors(std::move(value)); })
+            .description("RGBA colors")
+            .required(false);
+    }
+};
 } // namespace brayns

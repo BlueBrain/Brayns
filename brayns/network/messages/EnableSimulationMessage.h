@@ -20,12 +20,26 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(EnableSimulationMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model to enable or disable simulation")
-BRAYNS_JSON_OBJECT_ENTRY(bool, enabled, "Bool flag enabling or disabling the simulation")
-BRAYNS_JSON_OBJECT_END()
-}
+struct EnableSimulationMessage
+{
+    uint32_t model_id = 0;
+    bool enabled = false;
+};
+
+template<>
+struct JsonAdapter<EnableSimulationMessage> : ObjectAdapter<EnableSimulationMessage>
+{
+    static void reflect()
+    {
+        title("EnableSimulationMessage");
+        set<uint32_t>("model_id", [](auto &object, auto value) { object.model_id = value; })
+            .description("ID of the model to color");
+        set<bool>("enabled", [](auto &object, auto value) { object.enabled = value; })
+            .description("Enable simulation if true");
+    }
+};
+} // namespace brayns

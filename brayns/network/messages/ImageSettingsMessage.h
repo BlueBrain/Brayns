@@ -22,7 +22,7 @@
 
 #include <brayns/engine/framebuffer/Framebuffer.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 #include <optional>
 
@@ -53,7 +53,7 @@ public:
         return _format;
     }
 
-    void setFormat(const std::string &format) noexcept
+    void setFormat(std::string format) noexcept
     {
         _format = format;
     }
@@ -74,14 +74,21 @@ private:
     uint32_t _quality{100u};
 };
 
-BRAYNS_JSON_ADAPTER_BEGIN(ImageSettings)
-BRAYNS_JSON_ADAPTER_GETSET("format", getFormat, setFormat, "Image format (jpg or png)", Required(false))
-BRAYNS_JSON_ADAPTER_GETSET(
-    "quality",
-    getQuality,
-    setQuality,
-    "Image quality (0 = lowest quality, 100 = highest quality",
-    Required(false))
-BRAYNS_JSON_ADAPTER_GETSET("size", getSize, setSize, "Image dimensions [width, height]", Required(false))
-BRAYNS_JSON_ADAPTER_END()
-}
+template<>
+struct JsonAdapter<ImageSettings> : ObjectAdapter<ImageSettings>
+{
+    static void reflect()
+    {
+        title("ImageSettings");
+        set<std::string>("format", [](auto &object, auto value) { object.setFormat(std::move(value)); })
+            .description("Image format (jpg or png)")
+            .defaultValue("png");
+        set<uint32_t>("quality", [](auto &object, auto value) { object.setQuality(value); })
+            .description("Image quality (0 = lowest quality, 100 = highest quality")
+            .defaultValue(100);
+        set<Vector2ui>("size", [](auto &object, const auto &value) { object.setSize(value); })
+            .description("Image width and height")
+            .required(false);
+    }
+};
+} // namespace brayns

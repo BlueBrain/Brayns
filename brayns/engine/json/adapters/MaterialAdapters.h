@@ -28,46 +28,129 @@
 #include <brayns/engine/material/types/Phong.h>
 #include <brayns/engine/material/types/Plastic.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(CarPaint)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
-    "flake_density",
-    flakeDensity,
-    "Metal flakes density",
-    Minimum(0),
-    Maximum(1),
-    Required(false))
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<CarPaint> : ObjectAdapter<CarPaint>
+{
+    static void reflect()
+    {
+        title("CarPaint");
+        getset(
+            "flake_density",
+            [](auto &object) { return object.flakeDensity; },
+            [](auto &object, auto value) { object.flakeDensity = value; })
+            .description("Metal flake density")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Emissive)
-BRAYNS_JSON_ADAPTER_ENTRY(color, "Base color of the material", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(intensity, "Emitted light intensity", Minimum(0), Required(false))
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Emissive> : ObjectAdapter<Emissive>
+{
+    static void reflect()
+    {
+        title("Emissive");
+        getset(
+            "color",
+            [](auto &object) -> decltype(auto) { return object.color; },
+            [](auto &object, const auto &value) { object.color = value; })
+            .description("Emission color")
+            .required(false);
+        getset(
+            "intensity",
+            [](auto &object) { return object.intensity; },
+            [](auto &object, auto value) { object.intensity = value; })
+            .description("Emission intensity")
+            .minimum(0)
+            .required(false);
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Glass)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
-    "index_of_refraction",
-    indexOfRefraction,
-    "Index of refraction of the glass",
-    Required(false))
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Glass> : ObjectAdapter<Glass>
+{
+    static void reflect()
+    {
+        title("Glass");
+        getset(
+            "index_of_refraction",
+            [](auto &object) { return object.indexOfRefraction; },
+            [](auto &object, auto value) { object.indexOfRefraction = value; })
+            .description("Index of refraction of the glass")
+            .required(false);
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Matte)
-BRAYNS_JSON_ADAPTER_ENTRY(opacity, "Opacity of the surface", Minimum(0), Maximum(1), Required(false))
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Matte> : ObjectAdapter<Matte>
+{
+    static void reflect()
+    {
+        title("Matte");
+        getset(
+            "opacity",
+            [](auto &object) { return object.opacity; },
+            [](auto &object, auto value) { object.opacity = value; })
+            .description("Surface opacity")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Metal)
-BRAYNS_JSON_ADAPTER_ENTRY(roughness, "Surface roughness", Minimum(0.01), Maximum(1), Required(false))
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Metal> : ObjectAdapter<Metal>
+{
+    static void reflect()
+    {
+        title("Metal");
+        getset(
+            "roughness",
+            [](auto &object) { return object.roughness; },
+            [](auto &object, auto value) { object.roughness = value; })
+            .description("Surface roughness")
+            .minimum(0.01)
+            .maximum(1)
+            .required(false);
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Phong)
-BRAYNS_JSON_ADAPTER_ENTRY(opacity, "Opacity of the surface", Minimum(0), Maximum(1), Required(false))
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Phong> : ObjectAdapter<Phong>
+{
+    static void reflect()
+    {
+        title("Phong");
+        getset(
+            "opacity",
+            [](auto &object) { return object.opacity; },
+            [](auto &object, auto value) { object.opacity = value; })
+            .description("Surface opacity")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Plastic)
-BRAYNS_JSON_ADAPTER_ENTRY(opacity, "Opacity of the surface", Minimum(0), Maximum(1), Required(false))
-BRAYNS_JSON_ADAPTER_END()
-}
+template<>
+struct JsonAdapter<Plastic> : ObjectAdapter<Plastic>
+{
+    static void reflect()
+    {
+        title("Plastic");
+        getset(
+            "opacity",
+            [](auto &object) { return object.opacity; },
+            [](auto &object, auto value) { object.opacity = value; })
+            .description("Surface opacity")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+    }
+};
+} // namespace brayns

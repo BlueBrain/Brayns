@@ -22,12 +22,20 @@
 
 #include <brayns/engine/components/Bounds.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Bounds)
-BRAYNS_JSON_ADAPTER_GET("min", getMin, "Bounds minimum (bottom back left corner)")
-BRAYNS_JSON_ADAPTER_GET("max", getMax, "Bounds maximum (top front right corner)")
-BRAYNS_JSON_ADAPTER_END()
-}
+template<>
+struct JsonAdapter<Bounds> : ObjectAdapter<Bounds>
+{
+    static void reflect()
+    {
+        title("Bounds");
+        get("min", [](auto &object) -> decltype(auto) { return object.getMin(); })
+            .description("Bottom back left corner");
+        get("max", [](auto &object) -> decltype(auto) { return object.getMax(); })
+            .description("Top front right corner");
+    }
+};
+} // namespace brayns

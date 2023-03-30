@@ -22,14 +22,25 @@
 
 #include <brayns/engine/framebuffer/FramebufferChannel.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_ENUM(
-    FramebufferChannel,
-    {"color", FramebufferChannel::Color},
-    {"depth", FramebufferChannel::Depth},
-    {"albedo", FramebufferChannel::Albedo},
-    {"normal", FramebufferChannel::Normal})
-}
+template<>
+struct EnumReflector<FramebufferChannel>
+{
+    static EnumMap<VolumeDataType> reflect()
+    {
+        return {
+            {"color", FramebufferChannel::Color},
+            {"depth", FramebufferChannel::Depth},
+            {"albedo", FramebufferChannel::Albedo},
+            {"normal", FramebufferChannel::Normal}};
+    }
+};
+
+template<>
+struct JsonAdapter<FramebufferChannel> : EnumAdapter<FramebufferChannel>
+{
+};
+} // namespace brayns

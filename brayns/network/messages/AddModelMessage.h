@@ -20,13 +20,29 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(AddModelParams)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, path, "Path to the file to load")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, loader_name, "Name of the loader to use")
-BRAYNS_JSON_OBJECT_ENTRY(JsonValue, loader_properties, "Settings to configure the loading process")
-BRAYNS_JSON_OBJECT_END()
+struct AddModelMessage
+{
+    std::string path;
+    std::string loader_name;
+    JsonValue loader_properties;
+};
+
+template<>
+struct JsonAdapter<AddModelMessage> : ObjectAdapter<AddModelMessage>
+{
+    static void reflect()
+    {
+        title("AddModelMessage");
+        set<std::string>("path", [](auto &object, auto value) { object.path = std::move(value); })
+            .description("Path of the file to load");
+        set<std::string>("loader_name", [](auto &object, auto value) { object.loader_name = std::move(value); })
+            .description("Name of the loader used to parse the model file");
+        set<JsonValue>("loader_properties", [](auto &object, const auto &value) { object.loader_properties = value; })
+            .description("Settings to configure the loading process");
+    }
+};
 } // namespace brayns
