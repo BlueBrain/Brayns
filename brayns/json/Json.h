@@ -31,7 +31,7 @@
 #include "adapters/EnumAdapter.h"
 #include "adapters/GlmAdapter.h"
 #include "adapters/MapAdapter.h"
-// #include "adapters/ObjectAdapter.h"
+#include "adapters/ObjectAdapter.h"
 #include "adapters/PrimitiveAdapter.h"
 #include "adapters/PtrAdapter.h"
 #include "adapters/SchemaAdapter.h"

@@ -25,38 +25,32 @@ namespace brayns
 {
 JsonSchema JsonObjectHandler::getSchema(const JsonObjectInfo &object)
 {
-    auto schema = ObjectSchema();
+    auto schema = JsonSchema();
+    schema.title = object.title;
     for (const auto &property : object.properties)
     {
         schema.properties[property.name] = property.schema;
-        if (property.required)
-        {
-            schema.required.push_back(property.name);
-        }
     }
-    auto options = JsonOptions();
-    options.title = object.title;
-    return JsonSchema::from(schema, options);
+    return schema;
 }
 
 void JsonObjectHandler::serialize(const JsonObjectInfo &object, const void *value, JsonValue &json)
 {
-    auto result = Poco::makeShared<JsonObject>();
+    auto &result = JsonFactory::emplaceObject(json);
     for (const auto &property : object.properties)
     {
-        if (property.schema.options.writeOnly)
+        if (property.schema.writeOnly)
         {
             continue;
         }
         auto child = JsonValue();
         property.serialize(value, child);
-        if (child.isEmpty() && !property.required)
+        if (child.isEmpty() && !property.schema.required)
         {
             continue;
         }
-        result->set(property.name, child);
+        result.set(property.name, child);
     }
-    json = result;
 }
 
 void JsonObjectHandler::deserialize(const JsonObjectInfo &object, const JsonValue &json, void *value)
@@ -64,12 +58,12 @@ void JsonObjectHandler::deserialize(const JsonObjectInfo &object, const JsonValu
     auto &result = JsonExtractor::extractObject(json);
     for (const auto &property : object.properties)
     {
-        if (property.schema.options.readOnly)
+        if (property.schema.readOnly)
         {
             continue;
         }
         auto child = result.get(property.name);
-        if (child.isEmpty() && !property.required)
+        if (child.isEmpty() && !property.schema.required)
         {
             continue;
         }
@@ -84,43 +78,43 @@ JsonPropertyBuilder::JsonPropertyBuilder(JsonProperty &property)
 
 JsonPropertyBuilder JsonPropertyBuilder::description(std::string value)
 {
-    _property.schema.options.description = std::move(value);
-    return *this;
-}
-
-JsonPropertyBuilder JsonPropertyBuilder::defaultValue(const JsonValue &value)
-{
-    _property.schema.options.defaultValue = value;
-    return *this;
-}
-
-JsonPropertyBuilder JsonPropertyBuilder::minimum(double value)
-{
-    _property.schema.holder.as<IntegerSchema>().min = value;
-    return *this;
-}
-
-JsonPropertyBuilder JsonPropertyBuilder::maximum(double value)
-{
-    _property.schema.holder.as<IntegerSchema>().max = value;
-    return *this;
-}
-
-JsonPropertyBuilder JsonPropertyBuilder::minItems(size_t value)
-{
-    _property.schema.holder.as<ArraySchema>().minItems = value;
-    return *this;
-}
-
-JsonPropertyBuilder JsonPropertyBuilder::maxItems(size_t value)
-{
-    _property.schema.holder.as<ArraySchema>().maxItems = value;
+    _property.schema.description = std::move(value);
     return *this;
 }
 
 JsonPropertyBuilder JsonPropertyBuilder::required(bool value)
 {
-    _property.required = value;
+    _property.schema.required = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::defaultValue(const JsonValue &value)
+{
+    _property.schema.defaultValue = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::minimum(double value)
+{
+    _property.schema.minimum = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::maximum(double value)
+{
+    _property.schema.maximum = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::minItems(size_t value)
+{
+    _property.schema.minItems = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::maxItems(size_t value)
+{
+    _property.schema.maxItems = value;
     return *this;
 }
 } // namespace brayns

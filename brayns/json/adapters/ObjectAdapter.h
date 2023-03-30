@@ -30,6 +30,10 @@
 
 namespace brayns
 {
+/**
+ * @brief Reflected info about a JSON object property.
+ *
+ */
 struct JsonProperty
 {
     std::string name;
@@ -38,12 +42,20 @@ struct JsonProperty
     std::function<void(const JsonValue &, void *)> deserialize;
 };
 
+/**
+ * @brief Reflected info about a JSON object.
+ *
+ */
 struct JsonObjectInfo
 {
     std::string title;
     std::vector<JsonProperty> properties;
 };
 
+/**
+ * @brief Helper to build JSON from reflection info.
+ *
+ */
 class JsonObjectHandler
 {
 public:
@@ -58,12 +70,12 @@ public:
     explicit JsonPropertyBuilder(JsonProperty &property);
 
     JsonPropertyBuilder description(std::string value);
+    JsonPropertyBuilder required(bool value);
     JsonPropertyBuilder defaultValue(const JsonValue &value);
     JsonPropertyBuilder minimum(double value);
     JsonPropertyBuilder maximum(double value);
     JsonPropertyBuilder minItems(size_t value);
     JsonPropertyBuilder maxItems(size_t value);
-    JsonPropertyBuilder required(bool value);
 
 private:
     JsonProperty &_property;
@@ -145,30 +157,30 @@ public:
     template<typename GetterType, typename SetterType>
     JsonPropertyBuilder property(std::string name, GetterType get, SetterType set)
     {
-        auto &property = _object.properties.emplace_back();
-        property.name = std::move(name);
-        JsonReflector<ObjectType>::reflectGetSet(get, set, property);
-        return JsonPropertyBuilder(property);
+        auto &item = _object.properties.emplace_back();
+        item.name = std::move(name);
+        JsonReflector<ObjectType>::reflectGetSet(get, set, item);
+        return JsonPropertyBuilder(item);
     }
 
     template<typename GetterType>
     JsonPropertyBuilder readOnly(std::string name, GetterType get)
     {
-        auto &property = _object.properties.emplace_back();
-        property.name = std::move(name);
-        JsonReflector<ObjectType>::reflectGet(get, property);
-        property.schema.options.readOnly = true;
-        return JsonPropertyBuilder(property);
+        auto &item = _object.properties.emplace_back();
+        item.name = std::move(name);
+        JsonReflector<ObjectType>::reflectGet(get, item);
+        item.schema.readOnly = true;
+        return JsonPropertyBuilder(item);
     }
 
     template<typename PropertyType, typename SetterType>
     JsonPropertyBuilder writeOnly(std::string name, SetterType set)
     {
-        auto &property = _object.properties.emplace_back();
-        property.name = std::move(name);
-        JsonReflector<ObjectType>::template reflectSet<PropertyType>(set, property);
-        property.schema.options.writeOnly = true;
-        return JsonPropertyBuilder(property);
+        auto &item = _object.properties.emplace_back();
+        item.name = std::move(name);
+        JsonReflector<ObjectType>::template reflectSet<PropertyType>(set, item);
+        item.schema.writeOnly = true;
+        return JsonPropertyBuilder(item);
     }
 
 private:
