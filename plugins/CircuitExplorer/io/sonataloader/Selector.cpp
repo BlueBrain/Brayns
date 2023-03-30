@@ -41,7 +41,7 @@ public:
             for (auto &nodeSetName : nodeSets)
             {
                 auto newSelection = nodeSetFile.materialize(nodeSetName, nodePopulation);
-                result = result & newSelection;
+                result = result | newSelection;
             }
 
             return result;
