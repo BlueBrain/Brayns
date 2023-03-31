@@ -33,11 +33,13 @@ struct JsonAdapter<ApplicationParameters> : ObjectAdapter<ApplicationParameters>
     static void reflect()
     {
         title("ApplicationParameters");
-        get("plugins", [](auto &object) -> decltype(auto) { return object.getPlugins(); })
+        get(
+            "plugins",
+            [](auto &object) -> auto & { return object.getPlugins(); })
             .description("Plugins loaded when the application was started");
         getset(
             "viewport",
-            [](auto &object) -> decltype(auto) { return object.getWindowSize(); },
+            [](auto &object) -> auto & { return object.getWindowSize(); },
             [](auto &object, const auto &value) { object.setWindowSize(value); })
             .description("Framebuffer resolution in pixels");
     }

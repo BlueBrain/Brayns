@@ -33,10 +33,17 @@ struct JsonAdapter<LoaderInfo> : ObjectAdapter<LoaderInfo>
     static void reflect()
     {
         title("LoaderInfo");
-        get("name", [](auto &object) -> decltype(auto) { return object.name; }).description("Loader name");
-        get("extensions", [](auto &object) -> decltype(auto) { return object.extensions; })
+        get(
+            "name",
+            [](auto &object) -> auto & { return object.name; })
+            .description("Loader name");
+        get(
+            "extensions",
+            [](auto &object) -> auto & { return object.extensions; })
             .description("Supported file extensions");
-        get("input_parameters_schema", [](auto &object) -> decltype(auto) { return object.inputParametersSchema; })
+        get(
+            "input_parameters_schema",
+            [](auto &object) -> auto & { return object.inputParametersSchema; })
             .description("Loader properties");
     }
 };

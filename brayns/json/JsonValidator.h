@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "JsonErrors.h"
+#include "JsonError.h"
 #include "JsonSchema.h"
 
 namespace brayns

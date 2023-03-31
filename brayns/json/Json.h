@@ -23,9 +23,9 @@
 
 #include "JsonAdapter.h"
 #include "JsonBuffer.h"
-#include "JsonErrors.h"
+#include "JsonError.h"
 #include "JsonSchema.h"
-#include "JsonTypes.h"
+#include "JsonType.h"
 #include "JsonValidator.h"
 
 #include "adapters/ArrayAdapter.h"

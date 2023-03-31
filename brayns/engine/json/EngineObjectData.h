@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/json/JsonTypes.h>
+#include <brayns/json/JsonType.h>
 
 #include <string>
 

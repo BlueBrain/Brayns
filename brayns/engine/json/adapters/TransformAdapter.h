@@ -35,17 +35,17 @@ struct JsonAdapter<Transform> : ObjectAdapter<Transform>
         title("Transform");
         getset(
             "translation",
-            [](auto &object) -> decltype(auto) { return object.translation; },
+            [](auto &object) -> auto & { return object.translation; },
             [](auto &object, const auto &value) { object.translation = value; })
             .description("Translation XYZ");
         getset(
             "rotation",
-            [](auto &object) -> decltype(auto) { return object.rotation; },
+            [](auto &object) -> auto & { return object.rotation; },
             [](auto &object, const auto &value) { object.rotation = value; })
             .description("Rotation XYZW");
         getset(
             "scale",
-            [](auto &object) -> decltype(auto) { return object.scale; },
+            [](auto &object) -> auto & { return object.scale; },
             [](auto &object, const auto &value) { object.scale = value; })
             .description("Scale XYZ");
     }

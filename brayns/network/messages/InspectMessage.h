@@ -57,11 +57,15 @@ struct JsonAdapter<InspectResult> : ObjectAdapter<InspectResult>
         title("InspectResult");
         get("hit", [](auto &object) { return object.hit; })
             .description("True if a model was at given position, otherwise the rest is invalid");
-        get("position", [](auto &object) -> decltype(auto) { return object.position; })
+        get(
+            "position",
+            [](auto &object) -> auto & { return object.position; })
             .description("World position XYZ where the model was hit");
         get("model_id", [](auto &object) { return object.model_id; })
             .description("ID of the model that was hit at given position");
-        get("metadata", [](auto &object) -> decltype(auto) { return object.metadata; })
+        get(
+            "metadata",
+            [](auto &object) -> auto & { return object.metadata; })
             .description("Extra attributes depending on the type of model hitted");
     }
 };

@@ -32,9 +32,13 @@ struct JsonAdapter<Bounds> : ObjectAdapter<Bounds>
     static void reflect()
     {
         title("Bounds");
-        get("min", [](auto &object) -> decltype(auto) { return object.getMin(); })
+        get(
+            "min",
+            [](auto &object) -> auto & { return object.getMin(); })
             .description("Bottom back left corner");
-        get("max", [](auto &object) -> decltype(auto) { return object.getMax(); })
+        get(
+            "max",
+            [](auto &object) -> auto & { return object.getMax(); })
             .description("Top front right corner");
     }
 };

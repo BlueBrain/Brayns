@@ -21,20 +21,61 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(RenderImageParams)
-BRAYNS_JSON_OBJECT_ENTRY(bool, send, "Send image once rendered", Default(true))
-BRAYNS_JSON_OBJECT_ENTRY(bool, force, "Send image even if nothing new was rendered", Default(false))
-BRAYNS_JSON_OBJECT_ENTRY(bool, accumulate, "Keep rendering until max accumulation", Default(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::string, format, "Encoding of returned image data (jpg or png)", Default("jpg"))
-BRAYNS_JSON_OBJECT_ENTRY(int, jpeg_quality, "Quality if using JPEG encoding", Minimum(0), Maximum(100), Default(100))
-BRAYNS_JSON_OBJECT_END()
+struct RenderImageParams
+{
+    bool send = false;
+    bool force = false;
+    bool accumulate = false;
+    std::string format;
+    int jpeg_quality = 0;
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(RenderImageResult)
-BRAYNS_JSON_OBJECT_ENTRY(size_t, accumulation, "Current frame accumulation")
-BRAYNS_JSON_OBJECT_ENTRY(size_t, max_accumulation, "Maximum frame accumulation")
-BRAYNS_JSON_OBJECT_END()
+template<>
+struct JsonAdapter<RenderImageParams> : ObjectAdapter<RenderImageParams>
+{
+    static void reflect()
+    {
+        title("RenderImageParams");
+        set<bool>("send", [](auto &object, auto value) { object.send = value; })
+            .description("Send image once rendered")
+            .defaultValue(true);
+        set<bool>("force", [](auto &object, auto value) { object.force = value; })
+            .description("Send image even if nothing new was rendered")
+            .defaultValue(false);
+        set<bool>("accumulate", [](auto &object, auto value) { object.accumulate = value; })
+            .description("Render all images until max accumulation")
+            .defaultValue(false);
+        set<std::string>("format", [](auto &object, auto value) { object.format = std::move(value); })
+            .description("Encoding of returned image data (jpg or png)")
+            .defaultValue("jpg");
+        set<int>("jpeg_quality", [](auto &object, auto value) { object.jpeg_quality = value; })
+            .description("Quality if using JPEG encoding")
+            .minimum(0)
+            .maximum(100)
+            .defaultValue(100);
+    }
+};
+
+struct RenderImageResult
+{
+    size_t accumulation = 0;
+    size_t max_accumulation = 0;
+};
+
+template<>
+struct JsonAdapter<RenderImageResult> : ObjectAdapter<RenderImageResult>
+{
+    static void reflect()
+    {
+        title("RenderImageResult");
+        get("accumulation", [](auto &object, auto value) { object.accumulation = value; })
+            .description("Current frame accumulation");
+        get("max_accumulation", [](auto &object, auto value) { object.max_accumulation = value; })
+            .description("Maximum frame accumulation");
+    }
+};
 } // namespace brayns

@@ -42,7 +42,10 @@ struct JsonAdapter<SimulationParameters> : ObjectAdapter<SimulationParameters>
             [](auto &object, auto value) { object.setFrame(value); })
             .description("Current simulation frame index");
         get("dt", [](auto &object) { return object.getDt(); }).description("Delta time between two frames");
-        get("unit", [](auto &object) -> decltype(auto) { return object.getTimeUnit(); }).description("Time unit");
+        get(
+            "unit",
+            [](auto &object) -> auto & { return object.getTimeUnit(); })
+            .description("Time unit");
     }
 };
 } // namespace brayns

@@ -20,22 +20,48 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/engine/components/LoadInfo.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_ENUM(
-    LoadInfo::LoadSource,
-    {"from_file", LoadInfo::LoadSource::FromFile},
-    {"from_blob", LoadInfo::LoadSource::FromBlob},
-    {"none", LoadInfo::LoadSource::None})
+template<>
+struct EnumReflector<LoadInfo::LoadSource>
+{
+    static EnumMap<LoadInfo::LoadSource> reflect()
+    {
+        return {
+            {"from_file", LoadInfo::LoadSource::FromFile},
+            {"from_blob", LoadInfo::LoadSource::FromBlob},
+            {"none", LoadInfo::LoadSource::None}};
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(LoadInfo)
-BRAYNS_JSON_ADAPTER_ENTRY(source, "Model load source")
-BRAYNS_JSON_ADAPTER_ENTRY(path, "File path in case of file load type")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("loader_name", loaderName, "Loader used")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("load_parameters", loadParameters, "Loader configuration")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<LoadInfo::LoadSource> : EnumAdapter<LoadInfo::LoadSource>
+{
+};
+
+template<>
+struct JsonAdapter<LoadInfo> : ObjectAdapter<LoadInfo>
+{
+    static void reflect()
+    {
+        title("LoadInfo");
+        get("source", [](auto &object) { return object.source; }).description("Model load source");
+        get(
+            "path",
+            [](auto &object) -> auto & { return object.path; })
+            .description("File path in case of file load type");
+        get(
+            "loader_name",
+            [](auto &object) -> auto & { return object.loaderName; })
+            .description("Loader name");
+        get(
+            "load_parameters",
+            [](auto &object) -> auto & { return object.loadParameters; })
+            .description("Loader settings");
+    }
+};
 } // namespace brayns

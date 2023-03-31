@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 #include "LoadInfoAdapter.h"
 #include "TransformAdapter.h"

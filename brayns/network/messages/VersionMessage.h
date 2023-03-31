@@ -21,14 +21,28 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(VersionMessage)
-BRAYNS_JSON_OBJECT_ENTRY(int, major, "Major version")
-BRAYNS_JSON_OBJECT_ENTRY(int, minor, "Minor version")
-BRAYNS_JSON_OBJECT_ENTRY(int, patch, "Patch level")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, revision, "SCM revision")
-BRAYNS_JSON_OBJECT_END()
+struct VersionMessage
+{
+    int major = 0;
+    int minor = 0;
+    int patch = 0;
+    std::string revision;
+};
+
+template<>
+struct JsonAdapter<VersionMessage> : ObjectAdapter<VersionMessage>
+{
+    static void reflect()
+    {
+        title("VersionMessage");
+        get("major", [](auto &object) { return object.major; }).description("Major version");
+        get("minor", [](auto &object) { return object.minor; }).description("Minor version");
+        get("patch", [](auto &object) { return object.patch; }).description("Patch version");
+        get("revision", [](auto &object) -> decltype(auto) { return object.revision; }).description("SCM revision");
+    }
+};
 } // namespace brayns

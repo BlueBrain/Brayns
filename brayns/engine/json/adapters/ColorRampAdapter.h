@@ -35,13 +35,13 @@ struct JsonAdapter<ColorRamp> : ObjectAdapter<ColorRamp>
         title("Bounds");
         getset(
             "range",
-            [](auto &object) -> decltype(auto) { return object.getValuesRange(); },
+            [](auto &object) -> auto & { return object.getValuesRange(); },
             [](auto &object, const auto &value) { object.setValuesRange(value); })
             .description("Value range")
             .required(false);
         getset(
             "colors",
-            [](auto &object) -> decltype(auto) { return object.getColors(); },
+            [](auto &object) -> auto & { return object.getColors(); },
             [](auto &object, auto value) { object.setColors(std::move(value)); })
             .description("RGBA colors")
             .required(false);

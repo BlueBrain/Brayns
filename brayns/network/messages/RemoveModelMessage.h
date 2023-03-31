@@ -21,11 +21,23 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(RemoveModelMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint32_t>, ids, "List of model ID to remove")
-BRAYNS_JSON_OBJECT_END()
+struct RemoveModelMessage
+{
+    std::vector<uint32_t> ids;
+};
+
+template<>
+struct JsonAdapter<RemoveModelMessage> : ObjectAdapter<RemoveModelMessage>
+{
+    static void reflect()
+    {
+        title("RemoveModelMessage");
+        set<std::vector<uint32_t>>("ids", [](auto &object, auto value) { object.ids = std::move(value); })
+            .description("Model ID list");
+    }
+};
 } // namespace brayns

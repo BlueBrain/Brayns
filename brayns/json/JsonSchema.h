@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-#include "JsonTypes.h"
+#include "JsonType.h"
 
 namespace brayns
 {

@@ -57,7 +57,7 @@ struct JsonAdapter<Emissive> : ObjectAdapter<Emissive>
         title("Emissive");
         getset(
             "color",
-            [](auto &object) -> decltype(auto) { return object.color; },
+            [](auto &object) -> auto & { return object.color; },
             [](auto &object, const auto &value) { object.color = value; })
             .description("Emission color")
             .required(false);

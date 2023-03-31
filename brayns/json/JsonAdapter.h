@@ -22,7 +22,7 @@
 #pragma once
 
 #include "JsonSchema.h"
-#include "JsonTypes.h"
+#include "JsonType.h"
 
 namespace brayns
 {
