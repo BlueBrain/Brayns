@@ -61,8 +61,7 @@ public:
      *
      * @param json The JsonValue to stringify.
      * @return std::string A JSON string representing the given value.
-     * @throw Poco::JSON::Exception The JsonValue doesn't contain JSON
-     * values.
+     * @throw std::exception JSON cannot be converted to string.
      */
     static std::string stringify(const JsonValue &json);
 
@@ -71,7 +70,7 @@ public:
      *
      * @param json A JSON string to parse.
      * @return JsonValue The resulting JsonValue
-     * @throw Poco::JSON::Exception The JSON format is incorrect.
+     * @throw JsonParsingException The JSON format is incorrect.
      */
     static JsonValue parse(const std::string &json);
 

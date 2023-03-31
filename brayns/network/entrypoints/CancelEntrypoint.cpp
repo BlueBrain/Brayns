@@ -49,6 +49,6 @@ void CancelEntrypoint::onRequest(const Request &request)
     auto &id = params.id;
     auto &client = request.getClient();
     _tasks.cancel(client, id);
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 } // namespace brayns

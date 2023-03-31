@@ -26,43 +26,98 @@
 #include <brayns/engine/geometry/types/Plane.h>
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/geometry/types/TriangleMesh.h>
+
 #include <brayns/json/Json.h>
+
+#include "BoundsAdapter.h"
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Box)
-BRAYNS_JSON_ADAPTER_ENTRY(min, "Minimum bound corner (bottom back left)")
-BRAYNS_JSON_ADAPTER_ENTRY(max, "Maximum bound corner (top front right)")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Box> : ObjectAdapter<Box>
+{
+    static void reflect()
+    {
+        title("Box");
+        set<Vector3f>("min", [](auto &object, const auto &value) { object.min = value; })
+            .description("Bottom back left corner XYZ");
+        set<Vector3f>("max", [](auto &object, const auto &value) { object.max = value; })
+            .description("Top front right corner XYZ");
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(BoundedPlane)
-BRAYNS_JSON_ADAPTER_ENTRY(coefficients, "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)")
-BRAYNS_JSON_ADAPTER_ENTRY(bounds, "Axis-aligned bounds to limit the plane geometry")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<BoundedPlane> : ObjectAdapter<BoundedPlane>
+{
+    static void reflect()
+    {
+        title("BoundedPlane");
+        set<Vector4f>("coefficients", [](auto &object, const auto &value) { object.coefficients = value; })
+            .description("Equation coefficients ABCD from Ax + By + Cz + D = 0");
+        set<Bounds>("bounds", [](auto &object, const auto &value) { object.bounds = value; })
+            .description("Axis-aligned bounds to limit the plane geometry");
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Plane)
-BRAYNS_JSON_ADAPTER_ENTRY(coefficients, "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Plane> : ObjectAdapter<Plane>
+{
+    static void reflect()
+    {
+        title("Plane");
+        set<Vector4f>("coefficients", [](auto &object, const auto &value) { object.coefficients = value; })
+            .description("Equation coefficients ABCD from Ax + By + Cz + D = 0");
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Capsule)
-BRAYNS_JSON_ADAPTER_ENTRY(p0, "Starting point of the capsule")
-BRAYNS_JSON_ADAPTER_ENTRY(r0, "Capsule radius at p0")
-BRAYNS_JSON_ADAPTER_ENTRY(p1, "Ending point of the capsule")
-BRAYNS_JSON_ADAPTER_ENTRY(r1, "Capsule radius at p1")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Capsule> : ObjectAdapter<Capsule>
+{
+    static void reflect()
+    {
+        title("Capsule");
+        set<Vector3f>("p0", [](auto &object, const auto &value) { object.p0 = value; })
+            .description("Start point of the capsule XYZ");
+        set<float>("r0", [](auto &object, auto value) { object.r0 = value; }).description("Capsule radius at p0");
+        set<Vector3f>("p1", [](auto &object, const auto &value) { object.p1 = value; })
+            .description("End point of the capsule XYZ");
+        set<float>("r1", [](auto &object, auto value) { object.r1 = value; }).description("Capsule radius at p1");
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Sphere)
-BRAYNS_JSON_ADAPTER_ENTRY(center, "Sphere center point")
-BRAYNS_JSON_ADAPTER_ENTRY(radius, "Sphere radius")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Sphere> : ObjectAdapter<Sphere>
+{
+    static void reflect()
+    {
+        title("Sphere");
+        set<Vector3f>("center", [](auto &object, const auto &value) { object.center = value; })
+            .description("Sphere center XYZ");
+        set<float>("radius", [](auto &object, auto value) { object.radius = value; }).description("Sphere radius");
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(TriangleMesh)
-BRAYNS_JSON_ADAPTER_ENTRY(vertices, "Mesh vertex positions")
-BRAYNS_JSON_ADAPTER_ENTRY(normals, "Mesh vertex normals", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(colors, "Mesh vertex colors", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(uvs, "Mesh vertex texture coordinates", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(indices, "Mesh triangle vertex indices")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<TriangleMesh> : ObjectAdapter<TriangleMesh>
+{
+    static void reflect()
+    {
+        title("TriangleMesh");
+        set<std::vector<Vector3f>>("vertices", [](auto &object, auto value) { object.vertices = std::move(value); })
+            .description("Mesh vertex positions");
+        set<std::vector<Vector3f>>("normals", [](auto &object, auto value) { object.normals = std::move(value); })
+            .description("Mesh vertex normals")
+            .required(false);
+        set<std::vector<Vector4f>>("colors", [](auto &object, auto value) { object.colors = std::move(value); })
+            .description("Mesh vertex colors")
+            .required(false);
+        set<std::vector<Vector2f>>("uvs", [](auto &object, auto value) { object.uvs = std::move(value); })
+            .description("Mesh vertex texture coordinates")
+            .required(false);
+        set<std::vector<Vector3ui>>("indices", [](auto &object, auto value) { object.indices = std::move(value); })
+            .description("Mesh vertex triangle indices");
+    }
+};
 
 template<typename T>
 struct GeometryWithColor
@@ -71,19 +126,18 @@ struct GeometryWithColor
     Vector4f color;
 };
 
-#define ADD_GEOMETRY_ADAPTER(TYPE) \
-    BRAYNS_JSON_ADAPTER_BEGIN(GeometryWithColor<TYPE>) \
-    BRAYNS_JSON_ADAPTER_ENTRY(geometry, "Geometry data") \
-    BRAYNS_JSON_ADAPTER_ENTRY(color, "Geometry color") \
-    BRAYNS_JSON_ADAPTER_END()
-
-ADD_GEOMETRY_ADAPTER(BoundedPlane)
-ADD_GEOMETRY_ADAPTER(Box)
-ADD_GEOMETRY_ADAPTER(Plane)
-ADD_GEOMETRY_ADAPTER(Capsule)
-ADD_GEOMETRY_ADAPTER(Sphere)
-
-#undef ADD_GEOMETRY_ADAPTER
+template<typename T>
+struct JsonAdapter<GeometryWithColor<T>> : ObjectAdapter<GeometryWithColor<T>>
+{
+    static void reflect()
+    {
+        title("GeometryWithColor");
+        set<T>("geometry", [](auto &object, const auto &value) { object.geometry = value; })
+            .description("Geometry data");
+        set<Vector4f>("color", [](auto &object, const auto &value) { object.color = value; })
+            .description("Geometry color");
+    }
+};
 
 template<typename T>
 struct ClippingGeometry
@@ -92,17 +146,17 @@ struct ClippingGeometry
     bool invertNormals;
 };
 
-#define CLIPPING_GEOMETRY_ADAPTER(TYPE) \
-    BRAYNS_JSON_ADAPTER_BEGIN(ClippingGeometry<TYPE>) \
-    BRAYNS_JSON_ADAPTER_ENTRY(primitives, "Clipping primitive list") \
-    BRAYNS_JSON_ADAPTER_NAMED_ENTRY("invert_normals", invertNormals, "Switches clipping side", Default(false)) \
-    BRAYNS_JSON_ADAPTER_END()
-
-CLIPPING_GEOMETRY_ADAPTER(BoundedPlane)
-CLIPPING_GEOMETRY_ADAPTER(Box)
-CLIPPING_GEOMETRY_ADAPTER(Plane)
-CLIPPING_GEOMETRY_ADAPTER(Capsule)
-CLIPPING_GEOMETRY_ADAPTER(Sphere)
-
-#undef CLIPPING_GEOMETRY_ADAPTER
-}
+template<typename T>
+struct JsonAdapter<ClippingGeometry<T>> : ObjectAdapter<ClippingGeometry<T>>
+{
+    static void reflect()
+    {
+        title("ClippingGeometry");
+        set<std::vector<T>>("primitives", [](auto &object, auto value) { object.primitives = std::move(value); })
+            .description("Clipping primitive list");
+        set<bool>("invert_normals", [](auto &object, auto value) { object.invertNormals = value; })
+            .description("Switches clipping side")
+            .defaultValue(false);
+    }
+};
+} // namespace brayns

@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-class EnableSimulationEntrypoint final : public Entrypoint<EnableSimulationMessage, EmptyMessage>
+class EnableSimulationEntrypoint final : public Entrypoint<EnableSimulationMessage, EmptyJson>
 {
 public:
     explicit EnableSimulationEntrypoint(ModelManager &models);

@@ -21,13 +21,30 @@
 #pragma once
 
 #include <brayns/engine/json/adapters/VolumeAdapter.h>
-#include <brayns/json/JsonObjectMacro.h>
+
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(RawVolumeLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(Vector3ui, dimensions, "Volume grid size (x,y,z)")
-BRAYNS_JSON_OBJECT_ENTRY(Vector3f, spacing, "Volume grid cell spacing")
-BRAYNS_JSON_OBJECT_ENTRY(VolumeDataType, data_type, "Volume byte data type")
-BRAYNS_JSON_OBJECT_END()
+struct RawVolumeLoaderParameters
+{
+    Vector3ui dimensions{0};
+    Vector3f spacing{0};
+    VolumeDataType data_type = VolumeDataType::UnsignedChar;
+};
+
+template<>
+struct JsonAdapter<RawVolumeLoaderParameters> : ObjectAdapter<RawVolumeLoaderParameters>
+{
+    static void reflect()
+    {
+        title("RawVolumeLoaderParameters");
+        set<Vector3ui>("dimensions", [](auto &object, const auto &value) { object.dimensions = value; })
+            .description("Volume grid size XYZ");
+        set<Vector3f>("spacing", [](auto &object, const auto &value) { object.spacing = value; })
+            .description("Volume grid cell spacing XYZ");
+        set<VolumeDataType>("data_type", [](auto &object, auto value) { object.data_type = value; })
+            .description("Volume byte data type");
+    }
+};
 } // namespace brayns

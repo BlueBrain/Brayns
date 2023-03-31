@@ -37,17 +37,20 @@ struct JsonAdapter<Transform> : ObjectAdapter<Transform>
             "translation",
             [](auto &object) -> auto & { return object.translation; },
             [](auto &object, const auto &value) { object.translation = value; })
-            .description("Translation XYZ");
+            .description("Translation XYZ")
+            .required(false);
         getset(
             "rotation",
             [](auto &object) -> auto & { return object.rotation; },
             [](auto &object, const auto &value) { object.rotation = value; })
-            .description("Rotation XYZW");
+            .description("Rotation XYZW")
+            .required(false);
         getset(
             "scale",
             [](auto &object) -> auto & { return object.scale; },
             [](auto &object, const auto &value) { object.scale = value; })
-            .description("Scale XYZ");
+            .description("Scale XYZ")
+            .required(false);
     }
 };
 } // namespace brayns

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <stdexcept>
 #include <string>
 #include <variant>
 #include <vector>
@@ -103,5 +104,20 @@ public:
     static std::string format(const JsonPath &path);
     static std::string format(const JsonError &error);
     static std::vector<std::string> format(const JsonErrors &errors);
+};
+
+/**
+ * @brief Promote JSON schema errors to exception.
+ *
+ */
+class JsonSchemaException : public std::runtime_error
+{
+public:
+    explicit JsonSchemaException(const std::string &message, JsonErrors errors);
+
+    const JsonErrors &getErrors() const;
+
+private:
+    JsonErrors _errors;
 };
 } // namespace brayns

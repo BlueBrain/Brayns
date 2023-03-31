@@ -100,6 +100,6 @@ void ColorModelEntrypoint::onRequest(const Request &request)
     auto &model = instance.getModel();
     auto systemView = model.getSystemsView();
     systemView.applyColor(params.method, params.values);
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 }

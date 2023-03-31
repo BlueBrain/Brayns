@@ -30,9 +30,15 @@
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ModelInfo)
-BRAYNS_JSON_ADAPTER_GET("load_info", getLoadInfo, "Model load information")
-BRAYNS_JSON_ADAPTER_GET("metadata", getMetadata, "Model-specific metadata")
-BRAYNS_JSON_ADAPTER_GET("base_transform", getBaseTransform, "Model transform")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<ModelInfo> : ObjectAdapter<ModelInfo>
+{
+    static void reflect()
+    {
+        title("ModelInfo");
+        get("load_info", [](auto &object) { return object.getLoadInfo(); }).description("Model load info");
+        get("metadata", [](auto &object) { return object.getMetadata(); }).description("Model-specific metadata");
+        get("base_transform", [](auto &object) { return object.getBaseTransform(); }).description("Model transform");
+    }
+};
 } // namespace brayns

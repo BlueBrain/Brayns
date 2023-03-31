@@ -24,7 +24,7 @@
 namespace brayns
 {
 GetSceneEntrypoint::GetSceneEntrypoint(const Scene &scene)
-    : _sceneProxy(&scene)
+    : _scene(scene)
 {
 }
 
@@ -40,6 +40,6 @@ std::string GetSceneEntrypoint::getDescription() const
 
 void GetSceneEntrypoint::onRequest(const Request &request)
 {
-    request.reply(_sceneProxy);
+    request.reply(_scene);
 }
 } // namespace brayns

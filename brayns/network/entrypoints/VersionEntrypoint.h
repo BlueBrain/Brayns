@@ -28,7 +28,7 @@
 
 namespace brayns
 {
-class VersionEntrypoint : public Entrypoint<EmptyMessage, VersionMessage>
+class VersionEntrypoint : public Entrypoint<EmptyJson, VersionMessage>
 {
 public:
     virtual std::string getMethod() const override;

@@ -79,8 +79,7 @@ void TaskManager::cancel(const ClientRef &client, const RequestId &id)
     }
     if (!found)
     {
-        auto message = fmt::format("No requests found with client {} and ID {}.", client, id);
-        throw InvalidParamsException(message);
+        throw InvalidParamsException(fmt::format("No requests found with ID {}.", client, id));
     }
 }
 } // namespace brayns

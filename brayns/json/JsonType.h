@@ -29,6 +29,7 @@
 #include <spdlog/fmt/ostr.h>
 
 #include <Poco/JSON/Array.h>
+#include <Poco/JSON/JSONException.h>
 #include <Poco/JSON/Object.h>
 
 #include <brayns/utils/EnumInfo.h>
@@ -60,6 +61,12 @@ using JsonArray = Poco::JSON::Array;
  *
  */
 using JsonObject = Poco::JSON::Object;
+
+/**
+ * @brief Exception thrown when the JSON parsing fails.
+ *
+ */
+using JsonParsingError = Poco::JSON::JSONException;
 
 /**
  * @brief All available JSON types.

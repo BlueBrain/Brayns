@@ -47,7 +47,7 @@ void SetStaticFramebufferEntrypoint::onRequest(const Request &request)
     auto &framebuffer = _engine.getFramebuffer();
     framebuffer.setFrameHandler(std::make_unique<StaticFrameHandler>());
 
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 
 SetProgressiveFramebufferEntrypoint::SetProgressiveFramebufferEntrypoint(Engine &engine)
@@ -73,6 +73,6 @@ void SetProgressiveFramebufferEntrypoint::onRequest(const Request &request)
     auto &framebuffer = _engine.getFramebuffer();
     framebuffer.setFrameHandler(std::make_unique<ProgressiveFrameHandler>(scale));
 
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 }

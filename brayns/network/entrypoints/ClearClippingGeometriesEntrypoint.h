@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-class ClearClipPlanesEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
+class ClearClipPlanesEntrypoint : public Entrypoint<EmptyJson, EmptyJson>
 {
 public:
     explicit ClearClipPlanesEntrypoint(ModelManager &models);
@@ -40,7 +40,7 @@ private:
     ModelManager &_models;
 };
 
-class ClearClippingGeometriesEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
+class ClearClippingGeometriesEntrypoint : public Entrypoint<EmptyJson, EmptyJson>
 {
 public:
     explicit ClearClippingGeometriesEntrypoint(ModelManager &models);

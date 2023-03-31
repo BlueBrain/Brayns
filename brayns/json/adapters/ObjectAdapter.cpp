@@ -27,6 +27,7 @@ JsonSchema JsonObjectHandler::getSchema(const JsonObjectInfo &object)
 {
     auto schema = JsonSchema();
     schema.title = object.title;
+    schema.type = JsonType::Object;
     for (const auto &property : object.properties)
     {
         schema.properties[property.name] = property.schema;

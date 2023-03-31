@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-class ClearRenderablesEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
+class ClearRenderablesEntrypoint : public Entrypoint<EmptyJson, EmptyJson>
 {
 public:
     ClearRenderablesEntrypoint(ModelManager &models, SimulationParameters &simulation);

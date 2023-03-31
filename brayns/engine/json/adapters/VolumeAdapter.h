@@ -22,7 +22,8 @@
 
 #include <brayns/engine/volume/VolumeDataType.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
-#include <brayns/json/JsonAdapterMacro.h>
+
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
@@ -31,14 +32,22 @@ struct JsonAdapter<VolumeDataType> : EnumAdapter<VolumeDataType>
 {
 };
 
-BRAYNS_JSON_ADAPTER_BEGIN(RegularVolume)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("data_type", dataType, "Voxel data type")
-BRAYNS_JSON_ADAPTER_ENTRY(voxels, "Voxel data as byte array")
-BRAYNS_JSON_ADAPTER_ENTRY(size, "Width, height and depth of the volume")
-BRAYNS_JSON_ADAPTER_ENTRY(spacing, "Voxel dimensions in world space")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
-    "data_on_vertex",
-    perVertexData,
-    "Specifies if the voxel is located at the cell vertices or in the center")
-BRAYNS_JSON_ADAPTER_END()
-}
+template<>
+struct JsonAdapter<RegularVolume> : ObjectAdapter<RegularVolume>
+{
+    static void reflect()
+    {
+        title("RegularVolume");
+        set<VolumeDataType>("data_type", [](auto &object, auto value) { object.dataType = value; })
+            .description("Voxel data as byte array");
+        set<VolumeDataType>("voxels", [](auto &object, auto value) { object.voxels = std::move(value); })
+            .description("Voxel data type");
+        set<Vector3f>("size", [](auto &object, const auto &value) { object.size = value; })
+            .description("Width, height and depth of the volume");
+        set<Vector3f>("spacing", [](auto &object, const auto &value) { object.spacing = value; })
+            .description("Voxel dimensions in world space");
+        set<bool>("data_on_vertex", [](auto &object, auto value) { object.perVertexData = value; })
+            .description("Specify if the voxel is located at the cell vertices or in the center");
+    }
+};
+} // namespace brayns

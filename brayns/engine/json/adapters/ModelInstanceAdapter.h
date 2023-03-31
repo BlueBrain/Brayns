@@ -31,12 +31,37 @@
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ModelInstance)
-BRAYNS_JSON_ADAPTER_GET("model_id", getID, "Model ID")
-BRAYNS_JSON_ADAPTER_GET("model_type", getModelType, "Model type")
-BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Model axis-aligned bounds")
-BRAYNS_JSON_ADAPTER_GET("info", getModelData, "Model-specific metadata")
-BRAYNS_JSON_ADAPTER_GETSET("transform", getTransform, setTransform, "Model transform")
-BRAYNS_JSON_ADAPTER_GETSET("is_visible", isVisible, setVisible, "Wether the model is being rendered or not")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<ModelInstance> : ObjectAdapter<ModelInstance>
+{
+    static void reflect()
+    {
+        title("ModelInstance");
+        get("model_id", [](auto &object) { return object.getID(); }).description("Model ID");
+        get(
+            "model_type",
+            [](auto &object) -> auto & { return object.getModelType(); })
+            .description("Model type");
+        get(
+            "bounds",
+            [](auto &object) -> auto & { return object.getBounds(); })
+            .description("Model bounds");
+        get(
+            "info",
+            [](auto &object) -> auto & { return object.getModelData(); })
+            .description("Model-specific info");
+        getset(
+            "transform",
+            [](auto &object) -> auto & { return object.getTransform(); },
+            [](auto &object, const auto &value) { object.setTransform(value); })
+            .description("Model transform")
+            .required(false);
+        getset(
+            "is_visible",
+            [](auto &object) { return object.isVisible(); },
+            [](auto &object, auto value) { object.setVisible(value); })
+            .description("Wether the model is being rendered or not")
+            .required(false);
+    }
+};
 } // namespace brayns

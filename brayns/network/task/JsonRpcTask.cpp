@@ -23,6 +23,8 @@
 
 #include <cassert>
 
+#include <spdlog/fmt/fmt.h>
+
 #include <brayns/utils/Log.h>
 
 #include <brayns/network/jsonrpc/JsonRpcException.h>
@@ -32,17 +34,12 @@ namespace
 class RequestHandler
 {
 public:
-    RequestHandler(bool cancelled, bool disconnected)
-        : _cancelled(cancelled)
-        , _disconnected(disconnected)
-    {
-    }
-
-    void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
+    static void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
     {
         try
         {
-            _handle(request, entrypoint);
+            entrypoint.onRequest(request);
+            brayns::Log::info("Successfully executed JSON-RPC request {}.", request);
         }
         catch (const brayns::JsonRpcException &e)
         {
@@ -58,83 +55,6 @@ public:
         {
             brayns::Log::error("Unknown failure of during execution of JSON-RPC request {}.", request);
             request.error(brayns::InternalErrorException("Unknown error"));
-        }
-    }
-
-private:
-    bool _cancelled = false;
-    bool _disconnected = false;
-
-    void _handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
-    {
-        if (_disconnected)
-        {
-            brayns::Log::info("Skipping execution of JSON-RPC request {} as client is disconnected.", request);
-            return;
-        }
-        brayns::Log::info("Execution of JSON-RPC request {}.", request);
-        if (_cancelled)
-        {
-            brayns::Log::info("JSON-RPC request {} has been cancelled before execution.", request);
-            throw brayns::TaskCancelledException();
-        }
-        entrypoint.onRequest(request);
-        brayns::Log::info("Successfully executed JSON-RPC request {}.", request);
-    }
-};
-
-class CancelHandler
-{
-public:
-    CancelHandler(bool running, bool cancelled)
-        : _running(running)
-        , _cancelled(cancelled)
-    {
-    }
-
-    void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
-    {
-        brayns::Log::info("Cancelling JSON-RPC request {}.", request);
-        if (!entrypoint.isAsync())
-        {
-            auto &method = entrypoint.getMethod();
-            brayns::Log::info("Method '{}' is not cancellable.", method);
-            throw brayns::InvalidParamsException("Method '" + method + "' is not cancellable");
-        }
-        if (_cancelled)
-        {
-            auto &id = request.getId();
-            auto text = id.getDisplayText();
-            brayns::Log::info("Request {} cancelled twice.", request);
-            throw brayns::InvalidParamsException("Trying to cancel request '" + text + "' twice");
-        }
-        if (!_running)
-        {
-            brayns::Log::info("Cancelling JSON-RPC request {} before execution.", request);
-            return;
-        }
-        brayns::Log::debug("Runtime cancellation of JSON-RPC request {}.", request);
-        entrypoint.onCancel();
-    }
-
-private:
-    bool _running = false;
-    bool _cancelled = false;
-};
-
-class DisconnectionHandler
-{
-public:
-    void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
-    {
-        try
-        {
-            brayns::Log::info("Cancelling request {} because of disconnection.", request);
-            entrypoint.onDisconnect();
-        }
-        catch (...)
-        {
-            brayns::Log::error("Unexpected error during disconnection handling.");
         }
     }
 };
@@ -172,24 +92,56 @@ bool JsonRpcTask::hasPriority() const
 void JsonRpcTask::run()
 {
     assert(!_running);
+    Log::info("Execution of JSON-RPC request {}.", _request);
+    if (_disconnected)
+    {
+        Log::info("Skipping execution of JSON-RPC request {} as client is disconnected.", _request);
+        return;
+    }
+    if (_cancelled)
+    {
+        Log::info("JSON-RPC request {} has been cancelled before execution.", _request);
+        _request.error(TaskCancelledException());
+        return;
+    }
     _running = true;
-    RequestHandler handler(_cancelled, _disconnected);
-    handler.handle(_request, _entrypoint);
+    RequestHandler::handle(_request, _entrypoint);
     _running = false;
 }
 
 void JsonRpcTask::cancel()
 {
-    CancelHandler handler(_running, _cancelled);
-    handler.handle(_request, _entrypoint);
+    Log::info("Cancelling JSON-RPC request {}.", _request);
+    if (!_entrypoint.isAsync())
+    {
+        throw InvalidParamsException(fmt::format("Method '{}' is not cancellable.", _entrypoint.getMethod()));
+    }
+    if (_cancelled)
+    {
+        throw InvalidParamsException(fmt::format("Request {} already cancelled", _request.getId()));
+    }
     _cancelled = true;
+    if (!_running)
+    {
+        Log::info("Cancelling JSON-RPC request {} before execution.", _request);
+        return;
+    }
+    Log::debug("Runtime cancellation of JSON-RPC request {}.", _request);
+    _entrypoint.onCancel();
 }
 
 void JsonRpcTask::disconnect()
 {
     assert(!_disconnected);
-    DisconnectionHandler handler;
-    handler.handle(_request, _entrypoint);
+    try
+    {
+        Log::info("Notifying disconnection to request {}.", _request);
+        _entrypoint.onDisconnect();
+    }
+    catch (...)
+    {
+        Log::error("Unexpected error during disconnection.");
+    }
     _disconnected = true;
 }
 } // namespace brayns

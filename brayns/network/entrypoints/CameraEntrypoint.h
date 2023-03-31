@@ -23,12 +23,14 @@
 
 #include <brayns/engine/core/Engine.h>
 #include <brayns/engine/json/adapters/ProjectionAdapters.h>
-#include <brayns/json/JsonSchemaValidator.h>
+
+#include <brayns/json/Json.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-class GetCameraTypeEntrypoint : public Entrypoint<EmptyMessage, std::string>
+class GetCameraTypeEntrypoint : public Entrypoint<EmptyJson, std::string>
 {
 public:
     explicit GetCameraTypeEntrypoint(Engine &engine);
@@ -42,10 +44,10 @@ private:
 };
 
 template<typename T>
-class SetCameraEntrypoint : public Entrypoint<T, EmptyMessage>
+class SetCameraEntrypoint : public Entrypoint<T, EmptyJson>
 {
 public:
-    using Request = typename Entrypoint<T, EmptyMessage>::Request;
+    using Request = typename Entrypoint<T, EmptyJson>::Request;
 
     explicit SetCameraEntrypoint(Engine &engine)
         : _engine(engine)
@@ -63,7 +65,7 @@ public:
         }
         request.getParams(projection);
         camera.set(projection);
-        request.reply(EmptyMessage());
+        request.reply(EmptyJson());
     }
 
 private:
@@ -89,10 +91,10 @@ public:
 };
 
 template<typename T>
-class GetCameraEntrypoint : public Entrypoint<EmptyMessage, T>
+class GetCameraEntrypoint : public Entrypoint<EmptyJson, T>
 {
 public:
-    using Request = typename Entrypoint<EmptyMessage, T>::Request;
+    using Request = typename Entrypoint<EmptyJson, T>::Request;
 
     explicit GetCameraEntrypoint(Engine &engine)
         : _engine(engine)

@@ -81,7 +81,7 @@ void SetColorRampEntrypoint::onRequest(const Request &request)
     if (auto colorRamp = components.find<ColorRamp>())
     {
         buffer.extract(*colorRamp);
-        request.reply(EmptyMessage());
+        request.reply(EmptyJson());
         return;
     }
 

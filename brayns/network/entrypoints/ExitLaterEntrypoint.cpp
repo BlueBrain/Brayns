@@ -48,7 +48,7 @@ void ExitLaterEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     _start = Clock::now();
     _duration = std::chrono::minutes(params.minutes);
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 
 void ExitLaterEntrypoint::onUpdate()

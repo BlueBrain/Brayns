@@ -27,7 +27,7 @@
 
 #include <network/messages/SetCircuitThicknessMessage.h>
 
-class SetCircuitThicknessEntrypoint : public brayns::Entrypoint<SetCircuitThicknessMessage, brayns::EmptyMessage>
+class SetCircuitThicknessEntrypoint : public brayns::Entrypoint<SetCircuitThicknessMessage, brayns::EmptyJson>
 {
 public:
     explicit SetCircuitThicknessEntrypoint(brayns::ModelManager &models);

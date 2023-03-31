@@ -23,17 +23,48 @@
 #include <brayns/engine/camera/projections/Orthographic.h>
 #include <brayns/engine/camera/projections/Perspective.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Orthographic)
-BRAYNS_JSON_ADAPTER_ENTRY(height, "Orthographic projection plane height")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Orthographic> : ObjectAdapter<Orthographic>
+{
+    static void reflect()
+    {
+        title("Orthographic");
+        getset(
+            "height",
+            [](auto &object) { return object.height; },
+            [](auto &object, auto value) { object.height = value; })
+            .description("Height of the projection plane");
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Perspective)
-BRAYNS_JSON_ADAPTER_ENTRY(fovy, "Vertical field of view", Required(false))
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("aperture_radius", apertureRadius, "Lens aperture radius", Required(false))
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("focus_distance", focusDistance, "Camera focus distance", Required(false))
-BRAYNS_JSON_ADAPTER_END()
-}
+template<>
+struct JsonAdapter<Perspective> : ObjectAdapter<Perspective>
+{
+    static void reflect()
+    {
+        title("Perspective");
+        getset(
+            "fovy",
+            [](auto &object) { return object.fovy; },
+            [](auto &object, auto value) { object.fovy = value; })
+            .description("Vertical field of view")
+            .required(false);
+        getset(
+            "aperture_radius",
+            [](auto &object) { return object.apertureRadius; },
+            [](auto &object, auto value) { object.apertureRadius = value; })
+            .description("Lens aperture radius")
+            .required(false);
+        getset(
+            "focus_distance",
+            [](auto &object) { return object.focusDistance; },
+            [](auto &object, auto value) { object.focusDistance = value; })
+            .description("Camera focus distance")
+            .required(false);
+    }
+};
+} // namespace brayns

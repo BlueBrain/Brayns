@@ -115,7 +115,7 @@ public:
 class MhdRawFilePathResolver
 {
 public:
-    static std::string resolve(const std::string filename, const std::string mhdFilePath)
+    static std::string resolve(const std::string &filename, const std::string mhdFilePath)
     {
         auto filePath = std::filesystem::path(filename);
         if (!filePath.is_absolute())

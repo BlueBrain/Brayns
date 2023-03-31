@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-class SetCameraViewEntrypoint final : public Entrypoint<View, EmptyMessage>
+class SetCameraViewEntrypoint final : public Entrypoint<View, EmptyJson>
 {
 public:
     explicit SetCameraViewEntrypoint(Engine &engine);
@@ -39,7 +39,7 @@ private:
     Engine &_engine;
 };
 
-class GetCameraViewEntrypoint final : public Entrypoint<EmptyMessage, View>
+class GetCameraViewEntrypoint final : public Entrypoint<EmptyJson, View>
 {
 public:
     explicit GetCameraViewEntrypoint(Engine &engine);

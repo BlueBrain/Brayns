@@ -31,7 +31,7 @@
 
 namespace brayns
 {
-class ExitLaterEntrypoint : public Entrypoint<ExitLaterMessage, EmptyMessage>
+class ExitLaterEntrypoint : public Entrypoint<ExitLaterMessage, EmptyJson>
 {
 public:
     explicit ExitLaterEntrypoint(Engine &engine);

@@ -124,4 +124,15 @@ std::vector<std::string> JsonErrorFormatter::format(const JsonErrors &errors)
     }
     return result;
 }
+
+JsonSchemaException::JsonSchemaException(const std::string &message, JsonErrors errors)
+    : std::runtime_error(message)
+    , _errors(std::move(errors))
+{
+}
+
+const JsonErrors &JsonSchemaException::getErrors() const
+{
+    return _errors;
+}
 } // namespace brayns

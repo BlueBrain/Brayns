@@ -23,6 +23,8 @@
 
 #include <stdexcept>
 
+#include <spdlog/fmt/fmt.h>
+
 namespace brayns
 {
 const EntrypointRef *EntrypointRegistry::find(const std::string &method) const
@@ -40,7 +42,7 @@ void EntrypointRegistry::add(EntrypointRef entrypoint)
     }
     if (find(method))
     {
-        throw std::invalid_argument("Entrypoint '" + method + "' already registered");
+        throw std::invalid_argument(fmt::format("Entrypoint '{}' already registered", method));
     }
     _entrypoints.emplace(method, std::move(entrypoint));
 }

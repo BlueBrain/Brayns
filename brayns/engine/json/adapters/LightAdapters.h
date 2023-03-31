@@ -24,30 +24,65 @@
 #include <brayns/engine/light/types/DirectionalLight.h>
 #include <brayns/engine/light/types/QuadLight.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-#define BRAYNS_LIGHT_PROPERTIES() \
-    BRAYNS_JSON_ADAPTER_ENTRY(color, "Light color (Normalized RGB)", Required(false)) \
-    BRAYNS_JSON_ADAPTER_ENTRY(intensity, "Light intensity", Minimum(0.0), Required(false))
+template<typename T>
+struct LightAdapter : ObjectAdapter<T>
+{
+protected:
+    static void reflectDefault()
+    {
+        set<Vector3f>("color", [](auto &object, const auto &value) { object.color = value; })
+            .description("Light color RGB normalized")
+            .required(false);
+        set<float>("intensity", [](auto &object, auto value) { object.intensity = value; })
+            .description("Light intensity")
+            .minimum(0)
+            .defaultValue(1);
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(AmbientLight)
-BRAYNS_LIGHT_PROPERTIES()
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<AmbientLight> : LightAdapter<AmbientLight>
+{
+    static void reflect()
+    {
+        title("AmbientLight");
+        reflectDefault();
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(DirectionalLight)
-BRAYNS_JSON_ADAPTER_ENTRY(direction, "Light direction vector", Required(false))
-BRAYNS_LIGHT_PROPERTIES()
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<DirectionalLight> : LightAdapter<DirectionalLight>
+{
+    static void reflect()
+    {
+        title("DirectionalLight");
+        reflectDefault();
+        set<Vector3f>("direction", [](auto &object, const auto &value) { object.direction = value; })
+            .description("Light direction XYZ")
+            .defaultValue(Vector3f(-1, -1, 0));
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(QuadLight)
-BRAYNS_JSON_ADAPTER_ENTRY(position, "Sets the corner position of the quad light", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(edge1, "Sets one of the quad light edges", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(edge2, "Sets one of the quad light edges", Required(false))
-BRAYNS_LIGHT_PROPERTIES()
-BRAYNS_JSON_ADAPTER_END()
-
-#undef BRAYNS_LIGHT_PROPERTIES
-
+template<>
+struct JsonAdapter<QuadLight> : LightAdapter<QuadLight>
+{
+    static void reflect()
+    {
+        title("QuadLight");
+        reflectDefault();
+        set<Vector3f>("position", [](auto &object, const auto &value) { object.position = value; })
+            .description("Light base corner position XYZ")
+            .defaultValue(Vector3f(0));
+        set<Vector3f>("edge1", [](auto &object, const auto &value) { object.edge1 = value; })
+            .description("Edge 1 XYZ")
+            .defaultValue(Vector3f(1, 0, 0));
+        set<Vector3f>("edge2", [](auto &object, const auto &value) { object.edge2 = value; })
+            .description("Edge 2 XYZ")
+            .defaultValue(Vector3f(0, 0, 1));
+    }
+};
 } // namespace brayns

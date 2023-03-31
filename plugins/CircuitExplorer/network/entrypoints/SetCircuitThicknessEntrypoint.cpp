@@ -118,5 +118,5 @@ void SetCircuitThicknessEntrypoint::onRequest(const Request &request)
 {
     auto params = request.getParams();
     CircuitThicknessModifier::set(_models, params);
-    request.reply(brayns::EmptyMessage());
+    request.reply(brayns::EmptyJson());
 }

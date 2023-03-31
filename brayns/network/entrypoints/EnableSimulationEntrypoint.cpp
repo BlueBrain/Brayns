@@ -55,6 +55,6 @@ void EnableSimulationEntrypoint::onRequest(const Request &request)
     }
 
     simulation->enabled = params.enabled;
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 }

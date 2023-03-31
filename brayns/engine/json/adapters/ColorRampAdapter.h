@@ -32,7 +32,7 @@ struct JsonAdapter<ColorRamp> : ObjectAdapter<ColorRamp>
 {
     static void reflect()
     {
-        title("Bounds");
+        title("ColorRamp");
         getset(
             "range",
             [](auto &object) -> auto & { return object.getValuesRange(); },

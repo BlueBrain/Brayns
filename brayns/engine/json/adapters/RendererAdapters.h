@@ -23,35 +23,66 @@
 #include <brayns/engine/renderer/types/Interactive.h>
 #include <brayns/engine/renderer/types/Production.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Interactive)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
-    "samples_per_pixel",
-    samplesPerPixel,
-    "Ray samples per pixel",
-    Minimum(1),
-    Required(false))
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("max_ray_bounces", maxRayBounces, "Maximum ray bounces", Required(false))
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("background_color", backgroundColor, "Background color", Required(false))
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
-    "enable_shadows",
-    shadowsEnabled,
-    "Enable casted shadows when rendering",
-    Required(false))
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("ao_samples", aoSamples, "Ambient occlusion samples", Required(false))
-BRAYNS_JSON_ADAPTER_END()
+template<typename T>
+struct RendererAdapter<T> : ObjectAdapter<T>
+{
+    static void reflectDefault()
+    {
+        getset(
+            "samples_per_pixel",
+            [](auto &object) { return object.samplesPerPixel; },
+            [](auto &object, auto value) { object.samplesPerPixel = value; })
+            .description("Ray samples per pixel")
+            .minimum(1)
+            .required(false);
+        getset(
+            "max_ray_bounces",
+            [](auto &object) { return object.maxRayBounces; },
+            [](auto &object, auto value) { object.maxRayBounces = value; })
+            .description("Maximum ray bounces")
+            .required(false);
+        getset(
+            "background_color",
+            [](auto &object) -> auto & { return object.backgroundColor; },
+            [](auto &object, const auto &value) { object.backgroundColor = value; })
+            .description("Background color")
+            .required(false);
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(Production)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
-    "samples_per_pixel",
-    samplesPerPixel,
-    "Ray samples per pixel",
-    Minimum(1),
-    Required(false))
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("max_ray_bounces", maxRayBounces, "Maximum ray bounces", Required(false))
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("background_color", backgroundColor, "Background color", Required(false))
-BRAYNS_JSON_ADAPTER_END()
-}
+template<>
+struct JsonAdapter<Interactive> : RendererAdapter<Interactive>
+{
+    static void reflect()
+    {
+        title("Interactive");
+        reflectDefault();
+        getset(
+            "enable_shadows",
+            [](auto &object) { return object.shadowsEnabled; },
+            [](auto &object, auto value) { object.shadowsEnabled = value; })
+            .description("Enable casted shadows when rendering")
+            .required(false);
+        getset(
+            "ao_samples",
+            [](auto &object) { return object.aoSamples; },
+            [](auto &object, auto value) { object.aoSamples = value; })
+            .description("Ambient occlusion samples")
+            .required(false);
+    }
+};
+
+template<>
+struct JsonAdapter<Production> : ObjectAdapter<Production>
+{
+    static void reflect()
+    {
+        title("Production");
+        reflectDefault();
+    }
+};
+} // namespace brayns

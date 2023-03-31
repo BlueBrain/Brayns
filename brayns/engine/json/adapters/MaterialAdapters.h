@@ -45,7 +45,7 @@ struct JsonAdapter<CarPaint> : ObjectAdapter<CarPaint>
             .description("Metal flake density")
             .minimum(0)
             .maximum(1)
-            .required(false);
+            .defaultValue(0);
     }
 };
 
@@ -60,14 +60,14 @@ struct JsonAdapter<Emissive> : ObjectAdapter<Emissive>
             [](auto &object) -> auto & { return object.color; },
             [](auto &object, const auto &value) { object.color = value; })
             .description("Emission color")
-            .required(false);
+            .defaultValue(Vector4f(1));
         getset(
             "intensity",
             [](auto &object) { return object.intensity; },
             [](auto &object, auto value) { object.intensity = value; })
             .description("Emission intensity")
             .minimum(0)
-            .required(false);
+            .defaultValue(1);
     }
 };
 
@@ -82,7 +82,7 @@ struct JsonAdapter<Glass> : ObjectAdapter<Glass>
             [](auto &object) { return object.indexOfRefraction; },
             [](auto &object, auto value) { object.indexOfRefraction = value; })
             .description("Index of refraction of the glass")
-            .required(false);
+            .defaultValue(1.5f);
     }
 };
 
@@ -99,7 +99,7 @@ struct JsonAdapter<Matte> : ObjectAdapter<Matte>
             .description("Surface opacity")
             .minimum(0)
             .maximum(1)
-            .required(false);
+            .defaultValue(1);
     }
 };
 
@@ -116,7 +116,7 @@ struct JsonAdapter<Metal> : ObjectAdapter<Metal>
             .description("Surface roughness")
             .minimum(0.01)
             .maximum(1)
-            .required(false);
+            .defaultValue(0.1f);
     }
 };
 
@@ -133,7 +133,7 @@ struct JsonAdapter<Phong> : ObjectAdapter<Phong>
             .description("Surface opacity")
             .minimum(0)
             .maximum(1)
-            .required(false);
+            .defaultValue(1);
     }
 };
 
@@ -150,7 +150,7 @@ struct JsonAdapter<Plastic> : ObjectAdapter<Plastic>
             .description("Surface opacity")
             .minimum(0)
             .maximum(1)
-            .required(false);
+            .defaultValue(1);
     }
 };
 } // namespace brayns
