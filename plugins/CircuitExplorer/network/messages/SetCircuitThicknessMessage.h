@@ -21,9 +21,32 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
-BRAYNS_JSON_OBJECT_BEGIN(SetCircuitThicknessMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the circuit model")
-BRAYNS_JSON_OBJECT_ENTRY(float, radius_multiplier, "Scaling factor")
-BRAYNS_JSON_OBJECT_END()
+struct SetCircuitThicknessMessage
+{
+    uint32_t model_id = 0;
+    float radius_multiplier = 0;
+};
+
+namespace brayns
+{
+template<>
+struct JsonAdapter<SetCircuitThicknessMessage> : ObjectAdapter<SetCircuitThicknessMessage>
+{
+    static void reflect()
+    {
+        title("SetCircuitThicknessMessage");
+        getset(
+            "model_id",
+            [](auto &object) { return object.model_id; },
+            [](auto &object, auto value) { object.model_id = value; })
+            .description("ID of the circuit model");
+        getset(
+            "radius_multiplier",
+            [](auto &object) { return object.radius_multiplier; },
+            [](auto &object, auto value) { object.radius_multiplier = value; })
+            .description("Scaling factor");
+    }
+};
+} // namespace brayns

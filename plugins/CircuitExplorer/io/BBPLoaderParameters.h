@@ -20,68 +20,108 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include <io/NeuronMorphologyLoaderParameters.h>
 #include <io/bbploader/reports/ReportType.h>
 
 #include <optional>
 
+struct BBPLoaderParameters
+{
+    float percentage = 0;
+    std::optional<std::vector<std::string>> targets;
+    std::optional<std::vector<uint64_t>> gids;
+    bbploader::ReportType report_type = bbploader::ReportType::None;
+    std::string report_name;
+    float spike_transition_time = 0;
+    NeuronMorphologyLoaderParameters neuron_morphology_parameters;
+    bool load_afferent_synapses = false;
+    bool load_efferent_synapses = false;
+};
+
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_ENUM(
-    bbploader::ReportType,
-    {"none", bbploader::ReportType::None},
-    {"spikes", bbploader::ReportType::Spikes},
-    {"compartment", bbploader::ReportType::Compartment})
-}
+template<>
+struct EnumReflector<bbploader::ReportType>
+{
+    static EnumMap<bbploader::ReportType> reflect()
+    {
+        return {
+            {"none", bbploader::ReportType::None},
+            {"spikes", bbploader::ReportType::Spikes},
+            {"compartment", bbploader::ReportType::Compartment}};
+    }
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(BBPLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(
-    float,
-    percentage,
-    "Percentage of neurons to load (Ignored if a list of gids is specified)",
-    brayns::Minimum(0.0f),
-    brayns::Maximum(1.f),
-    brayns::Default(0.1f))
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::optional<std::vector<std::string>>,
-    targets,
-    "List of targets to load. If empty, circuit's default target will be used "
-    "(Ignored if a list of gids is specified",
-    brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::optional<std::vector<uint64_t>>,
-    gids,
-    "List of GIDs to load. Invalidates 'percentage' and 'targets' parameters",
-    brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(bbploader::ReportType, report_type, "Type of report to load.", brayns::Default("none"))
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::string,
-    report_name,
-    "Name of the report to load. Used only if 'report_type' is 'compartment'",
-    brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(
-    float,
-    spike_transition_time,
-    "When loading a spike report, fade-in and fade-out time, in milliseconds, from "
-    "resting state to spike state.",
-    brayns::Default(1.f),
-    brayns::Minimum(0.f))
-BRAYNS_JSON_OBJECT_ENTRY(
-    NeuronMorphologyLoaderParameters,
-    neuron_morphology_parameters,
-    "Settings to configure neuron morphology load",
-    brayns::Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(
-    bool,
-    load_afferent_synapses,
-    "Wether to add geometry for afferent synapses or not",
-    brayns::Default(false))
-BRAYNS_JSON_OBJECT_ENTRY(
-    bool,
-    load_efferent_synapses,
-    "Wether to add geometry for efferent synapses or not",
-    brayns::Default(false))
-BRAYNS_JSON_OBJECT_END()
+template<>
+struct JsonAdapter<bbploader::ReportType> : EnumAdapter<bbploader::ReportType>
+{
+};
+
+template<>
+struct JsonAdapter<BBPLoaderParameters> : ObjectAdapter<BBPLoaderParameters>
+{
+    static void reflect()
+    {
+        title("BBPLoaderParameters");
+        getset(
+            "percentage",
+            [](auto &object) { return object.percentage; },
+            [](auto &object, auto value) { object.percentage = value; })
+            .description("Percentage of neurons to load (Ignored if a list of gids is specified)")
+            .minimum(0)
+            .maximum(1)
+            .defaultValue(0.1);
+        getset(
+            "targets",
+            [](auto &object) -> auto & { return object.targets; },
+            [](auto &object, auto value) { object.targets = std::move(value); })
+            .description("List of targets to load (empty = default target) (Ignored if a list of gids is specified)")
+            .required(false);
+        getset(
+            "gids",
+            [](auto &object) -> auto & { return object.gids; },
+            [](auto &object, auto value) { object.gids = std::move(value); })
+            .description("List of GIDs to load, invalidates 'percentage' and 'targets' parameters")
+            .required(false);
+        getset(
+            "report_type",
+            [](auto &object) { return object.report_type; },
+            [](auto &object, auto value) { object.report_type = value; })
+            .description("Type of report to load")
+            .defaultValue(bbploader::ReportType::None);
+        getset(
+            "report_name",
+            [](auto &object) -> auto & { return object.report_name; },
+            [](auto &object, auto value) { object.report_name = std::move(value); })
+            .description("Name of the report to load, used only if 'report_type' is 'compartment'")
+            .required(false);
+        getset(
+            "spike_transition_time",
+            [](auto &object) { return object.spike_transition_time; },
+            [](auto &object, auto value) { object.spike_transition_time = value; })
+            .description("For spike reports, fade-in/out time [ms] from resting to spike state")
+            .minimum(0)
+            .defaultValue(1);
+        getset(
+            "neuron_morphology_parameters",
+            [](auto &object) -> auto & { return object.neuron_morphology_parameters; },
+            [](auto &object, auto value) { object.neuron_morphology_parameters = std::move(value); })
+            .description("Settings to configure neuron morphology loading")
+            .required(false);
+        getset(
+            "load_afferent_synapses",
+            [](auto &object) { return object.load_afferent_synapses; },
+            [](auto &object, auto value) { object.load_afferent_synapses = value; })
+            .description("Wether to add geometry for afferent synapses or not")
+            .defaultValue(false);
+        getset(
+            "load_efferent_synapses",
+            [](auto &object) { return object.load_efferent_synapses; },
+            [](auto &object, auto value) { object.load_efferent_synapses = value; })
+            .description("Wether to add geometry for efferent synapses or not")
+            .defaultValue(false);
+    }
+};
+} // namespace brayns

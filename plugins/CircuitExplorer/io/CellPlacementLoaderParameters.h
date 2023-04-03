@@ -20,16 +20,42 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
-BRAYNS_JSON_OBJECT_BEGIN(CellPlacementLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, morphology_folder, "Path to morphology folder")
-BRAYNS_JSON_OBJECT_ENTRY(
-    float,
-    percentage,
-    "Percentage of cells to load",
-    brayns::Default(1.f),
-    brayns::Minimum(0.f),
-    brayns::Maximum(1.f))
-BRAYNS_JSON_OBJECT_ENTRY(std::optional<std::string>, extension, "Morphology file extension", brayns::Required(false))
-BRAYNS_JSON_OBJECT_END()
+struct CellPlacementLoaderParameters
+{
+    std::string morphology_folder;
+    float percentage = 0;
+    std::optional<std::string> extension;
+};
+
+namespace brayns
+{
+template<>
+struct JsonAdapter<CellPlacementLoaderParameters> : ObjectAdapter<CellPlacementLoaderParameters>
+{
+    static void reflect()
+    {
+        title("CellPlacementLoaderParameters");
+        getset(
+            "morphology_folder",
+            [](auto &object) -> auto & { return object.morphology_folder; },
+            [](auto &object, auto value) { object.morphology_folder = std::move(value); })
+            .description("Path to morphology folder");
+        getset(
+            "percentage",
+            [](auto &object) { return object.percentage; },
+            [](auto &object, auto value) { object.percentage = value; })
+            .description("Percentage of cells to load")
+            .minimum(0)
+            .maximum(1)
+            .defaultValue(1);
+        getset(
+            "extension",
+            [](auto &object) -> auto & { return object.extension; },
+            [](auto &object, auto value) { object.extension = std::move(value); })
+            .description("Morphology file extension")
+            .required(false);
+    }
+};
+} // namespace brayns

@@ -20,45 +20,90 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include <api/neuron/NeuronGeometryType.h>
 
+struct NeuronMorphologyLoaderParameters
+{
+    float radius_multiplier = 0;
+    bool load_soma = false;
+    bool load_axon = false;
+    bool load_dendrites = false;
+    NeuronGeometryType geometry_type = NeuronGeometryType::Original;
+    float resampling = 0;
+    uint32_t subsampling = 1;
+};
+
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_ENUM(
-    NeuronGeometryType,
-    {"original", NeuronGeometryType::Original},
-    {"smooth", NeuronGeometryType::Smooth},
-    {"section_smooth", NeuronGeometryType::SectionSmooth},
-    {"constant_radii", NeuronGeometryType::ConstantRadii})
-}
+template<>
+struct EnumReflector<NeuronGeometryType>
+{
+    static EnumMap<NeuronGeometryType> reflect()
+    {
+        return {
+            {"original", NeuronGeometryType::Original},
+            {"smooth", NeuronGeometryType::Smooth},
+            {"section_smooth", NeuronGeometryType::SectionSmooth},
+            {"constant_radii", NeuronGeometryType::ConstantRadii}};
+    }
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(NeuronMorphologyLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(
-    float,
-    radius_multiplier,
-    "Parameter to multiply all morphology sample radii by",
-    brayns::Default(1.f),
-    brayns::Minimum(0.1f))
-BRAYNS_JSON_OBJECT_ENTRY(bool, load_soma, "Load the soma section of the neuron", brayns::Default(true))
-BRAYNS_JSON_OBJECT_ENTRY(bool, load_axon, "Load the axon section of the neuron", brayns::Default(false))
-BRAYNS_JSON_OBJECT_ENTRY(bool, load_dendrites, "Load the dendrite secitons of the neuron", brayns::Default(false))
-BRAYNS_JSON_OBJECT_ENTRY(
-    NeuronGeometryType,
-    geometry_type,
-    "Geometry generation configuration",
-    brayns::Default("smooth"))
-BRAYNS_JSON_OBJECT_ENTRY(
-    float,
-    resampling,
-    "Minimum cosine of the angle between 2 segments to consider them aligned, and thus remove the middle sample. "
-    "Resampling can be disabled with any value higher than 1",
-    brayns::Default(0.9f),
-    brayns::Minimum(0.f))
-BRAYNS_JSON_OBJECT_ENTRY(
-    uint32_t,
-    subsampling,
-    "Skip factor when converting samples into geometry. A value of 1 or less will disable subsampling",
-    brayns::Default(1))
-BRAYNS_JSON_OBJECT_END()
+template<>
+struct JsonAdapter<NeuronGeometryType> : EnumAdapter<NeuronGeometryType>
+{
+};
+
+template<>
+struct JsonAdapter<NeuronMorphologyLoaderParameters> : ObjectAdapter<NeuronMorphologyLoaderParameters>
+{
+    static void reflect()
+    {
+        title("NeuronMorphologyLoaderParameters");
+        getset(
+            "radius_multiplier",
+            [](auto &object) { return object.radius_multiplier; },
+            [](auto &object, auto value) { object.radius_multiplier = value; })
+            .description("Parameter to multiply all morphology sample radii by")
+            .defaultValue(1)
+            .minimum(0.1);
+        getset(
+            "load_soma",
+            [](auto &object) { return object.load_soma; },
+            [](auto &object, auto value) { object.load_soma = value; })
+            .description("Load the soma section of the neuron")
+            .defaultValue(true);
+        getset(
+            "load_axon",
+            [](auto &object) { return object.load_axon; },
+            [](auto &object, auto value) { object.load_axon = value; })
+            .description("Load the axon section of the neuron")
+            .defaultValue(false);
+        getset(
+            "load_dendrites",
+            [](auto &object) { return object.load_dendrites; },
+            [](auto &object, auto value) { object.load_dendrites = value; })
+            .description("Load the dendrites section of the neuron")
+            .defaultValue(false);
+        getset(
+            "geometry_type",
+            [](auto &object) { return object.geometry_type; },
+            [](auto &object, auto value) { object.geometry_type = value; })
+            .description("Geometry generation configuration")
+            .defaultValue(NeuronGeometryType::Smooth);
+        getset(
+            "resampling",
+            [](auto &object) { return object.resampling; },
+            [](auto &object, auto value) { object.resampling = value; })
+            .description("Minimum angle cosine between 2 segments to merge them (disabled if > 1)")
+            .defaultValue(0.9);
+        getset(
+            "subsampling",
+            [](auto &object) { return object.subsampling; },
+            [](auto &object, auto value) { object.subsampling = value; })
+            .description("Skip factor when converting samples into geometry (disabled if <= 1)")
+            .defaultValue(1);
+    }
+};
+} // namespace brayns
