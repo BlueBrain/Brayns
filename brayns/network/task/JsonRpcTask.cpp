@@ -46,14 +46,19 @@ public:
             brayns::Log::info("Failed to execute JSON-RPC request {}: {}.", request, e);
             request.error(e);
         }
+        catch (const brayns::JsonSchemaException &e)
+        {
+            brayns::Log::info("JSON exception during execution of JSON-RPC request {}: '{}'", request, e.what());
+            request.error(brayns::InvalidParamsException(e.what(), e.getErrors()));
+        }
         catch (const std::exception &e)
         {
-            brayns::Log::error("Unexpected failure during execution of JSON-RPC request {}: '{}'.", request, e.what());
+            brayns::Log::info("Custom exception during execution of JSON-RPC request {}: '{}'.", request, e.what());
             request.error(brayns::InternalErrorException(e.what()));
         }
         catch (...)
         {
-            brayns::Log::error("Unknown failure of during execution of JSON-RPC request {}.", request);
+            brayns::Log::error("Unknown failure during execution of JSON-RPC request {}.", request);
             request.error(brayns::InternalErrorException("Unknown error"));
         }
     }

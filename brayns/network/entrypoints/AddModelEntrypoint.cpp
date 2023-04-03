@@ -58,6 +58,29 @@ public:
         return info;
     }
 };
+
+class ModelLoader
+{
+public:
+    static std::vector<brayns::ModelInstance *> load(
+        const brayns::LoaderRegistry &loaders,
+        brayns::ModelManager &manager,
+        brayns::SimulationParameters &simulation,
+        const brayns::AddModelParams &params,
+        const brayns::LoaderProgress &progress)
+    {
+        auto &path = params.path;
+        auto &name = params.loader_name;
+        auto &loader = loaders.getSuitableLoader(path, "", name);
+        auto &parameters = params.loader_properties;
+        auto models = loader.loadFromFile(path, progress, parameters);
+        auto instances = manager.add(std::move(models));
+        auto loadInfo = LoadInfoFactory::create(params);
+        brayns::AddLoadInfo::toInstances(loadInfo, instances);
+        brayns::SimulationScanner::scanAndUpdate(manager, simulation);
+        return instances;
+    }
+};
 } // namespace
 
 namespace brayns
@@ -94,18 +117,8 @@ void AddModelEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     ModelParametersValidator::validate(params, _loaders);
     auto progress = brayns::ProgressHandler(_token, request);
-    auto &path = params.path;
-    auto &name = params.loader_name;
-    auto &loader = _loaders.getSuitableLoader(path, "", name);
-    auto &parameters = params.loader_properties;
     auto callback = [&](const auto &operation, auto amount) { progress.notify(operation, amount); };
-    auto models = loader.loadFromFile(path, brayns::LoaderProgress(callback), parameters);
-    auto instances = _models.add(std::move(models));
-
-    auto loadInfo = LoadInfoFactory::create(params);
-    AddLoadInfo::toInstances(loadInfo, instances);
-    SimulationScanner::scanAndUpdate(_models, _simulation);
-
+    auto instances = ModelLoader::load(_loaders, _models, _simulation, params, LoaderProgress(callback));
     request.reply(instances);
 }
 

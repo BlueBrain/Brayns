@@ -66,7 +66,7 @@ private:
     static void _validate(const brayns::JsonValue &params, const brayns::JsonSchema &schema)
     {
         auto errors = brayns::Json::validate(params, schema);
-        if (!errors.isEmpty())
+        if (!errors.empty())
         {
             throw brayns::InvalidParamsException("Invalid params schema", errors);
         }

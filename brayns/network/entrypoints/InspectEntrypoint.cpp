@@ -36,7 +36,7 @@ public:
         auto pickResult = _pickOSPRayScene(position);
         if (!pickResult.hasHit)
         {
-            return brayns::InspectResult{false};
+            return brayns::InspectResult();
         }
 
         auto inspectContext = _buildInspectContext(pickResult);

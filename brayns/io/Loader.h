@@ -197,7 +197,7 @@ private:
             return Json::deserialize<T>(Json::parse("{}"));
         }
         auto errors = Json::validate(input, _parameterSchema);
-        if (!errors.isEmpty())
+        if (!errors.empty())
         {
             throw JsonSchemaException("Invalid loader parameters", std::move(errors));
         }

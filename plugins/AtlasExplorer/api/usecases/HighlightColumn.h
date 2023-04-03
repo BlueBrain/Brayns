@@ -20,24 +20,69 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include <api/IUseCase.h>
 
-BRAYNS_JSON_OBJECT_BEGIN(HighlightNeighbour)
-BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector2i, relative_xz, "Relative coordinates respect the main column")
-BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector4f, color, "Highlight color")
-BRAYNS_JSON_OBJECT_END()
+struct HighlightNeighbour
+{
+    brayns::Vector2i relative_xz{0};
+    brayns::Vector4f color{0};
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(HighlightColumParams)
-BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector2i, xz_coordinate, "Coordinates of the column to highlight")
-BRAYNS_JSON_OBJECT_ENTRY(brayns::Vector4f, color, "Highlight  color")
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::vector<HighlightNeighbour>,
-    neighbours,
-    "Optional neighbours to highlight",
-    brayns::Required(false))
-BRAYNS_JSON_OBJECT_END()
+struct HighlightColumParams
+{
+    brayns::Vector2i xz_coordinate{0};
+    brayns::Vector4f color{0};
+    std::vector<HighlightNeighbour> neighbours;
+};
+
+namespace brayns
+{
+template<>
+struct JsonAdapter<HighlightNeighbour> : ObjectAdapter<HighlightNeighbour>
+{
+    static void reflect()
+    {
+        title("HighlightNeighbour");
+        getset(
+            "relative_xz",
+            [](auto &object) -> auto & { return object.relative_xz; },
+            [](auto &object, const auto &value) { object.relative_xz = value; })
+            .description("Relative coordinates respect the main column");
+        getset(
+            "color",
+            [](auto &object) -> auto & { return object.color; },
+            [](auto &object, const auto &value) { object.color = value; })
+            .description("Highlight color");
+    }
+};
+
+template<>
+struct JsonAdapter<HighlightColumParams> : ObjectAdapter<HighlightColumParams>
+{
+    static void reflect()
+    {
+        title("HighlightColumParams");
+        getset(
+            "xz_coordinate",
+            [](auto &object) -> auto & { return object.xz_coordinate; },
+            [](auto &object, const auto &value) { object.xz_coordinate = value; })
+            .description("Coordinates of the column to highlight");
+        getset(
+            "color",
+            [](auto &object) -> auto & { return object.color; },
+            [](auto &object, const auto &value) { object.color = value; })
+            .description("Highlight color");
+        getset(
+            "neighbours",
+            [](auto &object) -> auto & { return object.neighbours; },
+            [](auto &object, auto value) { object.neighbours = std::move(value); })
+            .description("Optional neighbours to highlight")
+            .required(false);
+    }
+};
+} // namespace brayns
 
 class HighlightColumn final : public IUseCase
 {

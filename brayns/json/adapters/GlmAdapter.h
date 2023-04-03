@@ -45,7 +45,7 @@ struct GlmAdapter
     {
         auto schema = JsonSchema();
         schema.type = JsonType::Array;
-        schema.items.push_back(JsonAdapter<ValueType>::getSchema());
+        schema.items = {JsonAdapter<ValueType>::getSchema()};
         schema.minItems = itemCount;
         schema.maxItems = itemCount;
         return schema;

@@ -54,7 +54,7 @@ public:
     static void validate(const brayns::JsonValue &json)
     {
         auto errors = brayns::Json::validate(json, _schema);
-        if (!errors.isEmpty())
+        if (!errors.empty())
         {
             throw brayns::InvalidRequestException("Invalid JSON-RPC request schema", errors);
         }

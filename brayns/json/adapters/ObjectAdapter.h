@@ -26,7 +26,7 @@
 #include <string>
 #include <type_traits>
 
-#include <brayns/json/JsonAdapter.h>
+#include "PrimitiveAdapter.h"
 
 namespace brayns
 {

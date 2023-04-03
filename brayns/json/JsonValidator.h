@@ -38,8 +38,8 @@ public:
      *
      * @param json JSON to validate.
      * @param schema JSON schema.
-     * @param errors Output errors (empty if valid).
+     * @param errors Output errors.
      */
-    static void validate(const JsonValue &json, const JsonSchema &schema, JsonErrors &errors);
+    static void validate(const JsonValue &json, const JsonSchema &schema, JsonErrorBuilder &errors);
 };
 } // namespace brayns

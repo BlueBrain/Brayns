@@ -64,7 +64,7 @@ public:
         {
             auto schema = Json::getSchema<SubT>();
             auto errors = Json::validate(payload, schema);
-            if (!errors.isEmpty())
+            if (!errors.empty())
             {
                 throw JsonSchemaException("Invalid engine JSON schema", std::move(errors));
             }

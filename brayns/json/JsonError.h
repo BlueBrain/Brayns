@@ -58,7 +58,7 @@ private:
 using JsonPath = std::vector<JsonPathElement>;
 
 /**
- * @brief Json error info.
+ * @brief JSON error info.
  *
  */
 struct JsonError
@@ -68,18 +68,23 @@ struct JsonError
 };
 
 /**
+ * @brief Result of JSON schema validation.
+ *
+ */
+using JsonErrors = std::vector<JsonError>;
+
+/**
  * @brief Stores the current JSON errors during a validation process.
  *
  */
-class JsonErrors
+class JsonErrorBuilder
 {
 public:
-    bool isEmpty() const;
-    const std::vector<JsonError> &asVector() const;
     void push(size_t index);
     void push(std::string key);
     void pop();
     void add(std::string message);
+    std::vector<JsonError> build();
 
     template<typename... Args>
     void add(fmt::format_string<Args...> format, Args &&...args)

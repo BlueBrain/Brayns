@@ -49,7 +49,7 @@ template<>
 struct JsonAdapter<TestEnum> : EnumAdapter<TestEnum>
 {
 };
-}
+} // namespace brayns
 
 TEST_CASE("JsonAdapters")
 {
@@ -88,8 +88,8 @@ TEST_CASE("JsonAdapters")
     {
         auto schema = brayns::Json::getSchema<std::map<std::string, int>>();
         CHECK_EQ(schema.type, brayns::JsonType::Object);
-        CHECK_EQ(schema.additionalProperties.size(), 1);
-        CHECK_EQ(schema.additionalProperties[0].type, brayns::JsonType::Integer);
+        CHECK_EQ(schema.items.size(), 1);
+        CHECK_EQ(schema.items[0].type, brayns::JsonType::Integer);
         auto json = brayns::Json::stringify(std::map<std::string, int>({{"test", 1}}));
         CHECK_EQ(json, "{\"test\":1}");
         auto value = brayns::Json::parse<std::map<std::string, int>>("{\"test\": 1}");

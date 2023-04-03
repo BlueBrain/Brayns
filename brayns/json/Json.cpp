@@ -43,8 +43,8 @@ JsonValue Json::parse(const std::string &json)
 
 JsonErrors Json::validate(const JsonValue &json, const JsonSchema &schema)
 {
-    auto errors = JsonErrors();
+    auto errors = JsonErrorBuilder();
     JsonValidator::validate(json, schema, errors);
-    return errors;
+    return errors.build();
 }
 } // namespace brayns

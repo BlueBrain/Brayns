@@ -263,4 +263,4 @@ void ExportGBuffersEntrypoint::onDisconnect()
         _token.cancel();
     }
 }
-}
+} // namespace brayns

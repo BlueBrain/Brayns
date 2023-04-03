@@ -53,34 +53,29 @@ const std::string &JsonPathElement::asKey() const
     return std::get<std::string>(_value);
 }
 
-bool JsonErrors::isEmpty() const
-{
-    return _errors.empty();
-}
-
-const std::vector<JsonError> &JsonErrors::asVector() const
-{
-    return _errors;
-}
-
-void JsonErrors::push(size_t index)
+void JsonErrorBuilder::push(size_t index)
 {
     _path.emplace_back(index);
 }
 
-void JsonErrors::push(std::string key)
+void JsonErrorBuilder::push(std::string key)
 {
     _path.emplace_back(std::move(key));
 }
 
-void JsonErrors::pop()
+void JsonErrorBuilder::pop()
 {
     _path.pop_back();
 }
 
-void JsonErrors::add(std::string message)
+void JsonErrorBuilder::add(std::string message)
 {
     _errors.push_back({std::move(message), _path});
+}
+
+std::vector<JsonError> JsonErrorBuilder::build()
+{
+    return std::exchange(_errors, {});
 }
 
 std::string JsonErrorFormatter::format(const JsonPathElement &element)
@@ -106,21 +101,21 @@ std::string JsonErrorFormatter::format(const JsonPath &path)
 std::string JsonErrorFormatter::format(const JsonError &error)
 {
     auto path = format(error.path);
-    if (!path.empty())
+    if (path.empty())
     {
-        path = fmt::format(" for {}", path);
+        return error.message;
     }
-    return fmt::format("Invalid schema{}: {}", path, error.message);
+    return fmt::format("{}: {}", path, error.message);
 }
 
 std::vector<std::string> JsonErrorFormatter::format(const JsonErrors &errors)
 {
     auto result = std::vector<std::string>();
-    auto &items = errors.asVector();
-    result.reserve(items.size());
-    for (const auto &item : items)
+    result.reserve(errors.size());
+    for (const auto &error : errors)
     {
-        result.push_back(format(item));
+        auto text = format(error);
+        result.push_back(text);
     }
     return result;
 }

@@ -34,7 +34,7 @@ public:
     template<typename T>
     static void set(brayns::JsonObject &object, const std::string &key, const T &value)
     {
-        auto json = JsonValue();
+        auto json = brayns::JsonValue();
         brayns::JsonAdapter<T>::serialize(value, json);
         object.set(key, json);
     }
@@ -149,6 +149,8 @@ void JsonAdapter<JsonSchema>::serialize(const JsonSchema &schema, JsonValue &jso
 
 void JsonAdapter<JsonSchema>::deserialize(const JsonValue &json, JsonSchema &schema)
 {
+    (void)json;
+    (void)schema;
     throw std::runtime_error("JSON schemas cannot be deserialized");
 }
 } // namespace brayns
