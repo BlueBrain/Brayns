@@ -20,11 +20,38 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
-#include <brayns/json/JsonType.h>
+#include <brayns/json/Json.h>
 
-BRAYNS_JSON_OBJECT_BEGIN(VisualizeUseCaseMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model holding an atlas volume")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, use_case, "Use case name")
-BRAYNS_JSON_OBJECT_ENTRY(brayns::JsonValue, params, "Additional use case parameters")
-BRAYNS_JSON_OBJECT_END()
+struct VisualizeUseCaseMessage
+{
+    uint32_t model_id = 0;
+    std::string use_case;
+    brayns::JsonValue params;
+};
+
+namespace brayns
+{
+template<>
+struct JsonAdapter<VisualizeUseCaseMessage> : ObjectAdapter<VisualizeUseCaseMessage>
+{
+    static void reflect()
+    {
+        title("VisualizeUseCaseMessage");
+        getset(
+            "model_id",
+            [](auto &object) { return object.model_id; },
+            [](auto &object, auto value) { object.model_id = value; })
+            .description("ID of the model holding an atlas volume");
+        getset(
+            "use_case",
+            [](auto &object) -> auto & { return object.use_case; },
+            [](auto &object, auto value) { object.use_case = std::move(value); })
+            .description("Use case name");
+        getset(
+            "params",
+            [](auto &object) -> auto & { return object.params; },
+            [](auto &object, const auto &value) { object.params = value; })
+            .description("Additional use case parameters");
+    }
+};
+} // namespace brayns
