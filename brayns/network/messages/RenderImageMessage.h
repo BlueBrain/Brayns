@@ -40,19 +40,34 @@ struct JsonAdapter<RenderImageParams> : ObjectAdapter<RenderImageParams>
     static void reflect()
     {
         title("RenderImageParams");
-        set<bool>("send", [](auto &object, auto value) { object.send = value; })
+        getset(
+            "send",
+            [](auto &object) { return object.send; },
+            [](auto &object, auto value) { object.send = value; })
             .description("Send image once rendered")
             .defaultValue(true);
-        set<bool>("force", [](auto &object, auto value) { object.force = value; })
+        getset(
+            "force",
+            [](auto &object) { return object.force; },
+            [](auto &object, auto value) { object.force = value; })
             .description("Send image even if nothing new was rendered")
             .defaultValue(false);
-        set<bool>("accumulate", [](auto &object, auto value) { object.accumulate = value; })
+        getset(
+            "accumulate",
+            [](auto &object) { return object.accumulate; },
+            [](auto &object, auto value) { object.accumulate = value; })
             .description("Render all images until max accumulation")
             .defaultValue(false);
-        set<std::string>("format", [](auto &object, auto value) { object.format = std::move(value); })
+        getset(
+            "format",
+            [](auto &object) -> auto & { return object.format; },
+            [](auto &object, auto value) { object.format = std::move(value); })
             .description("Encoding of returned image data (jpg or png)")
             .defaultValue("jpg");
-        set<int>("jpeg_quality", [](auto &object, auto value) { object.jpeg_quality = value; })
+        getset(
+            "jpeg_quality",
+            [](auto &object) { return object.jpeg_quality; },
+            [](auto &object, auto value) { object.jpeg_quality = value; })
             .description("Quality if using JPEG encoding")
             .minimum(0)
             .maximum(100)
@@ -72,9 +87,8 @@ struct JsonAdapter<RenderImageResult> : ObjectAdapter<RenderImageResult>
     static void reflect()
     {
         title("RenderImageResult");
-        get("accumulation", [](auto &object, auto value) { object.accumulation = value; })
-            .description("Current frame accumulation");
-        get("max_accumulation", [](auto &object, auto value) { object.max_accumulation = value; })
+        get("accumulation", [](auto &object) { return object.accumulation; }).description("Current frame accumulation");
+        get("max_accumulation", [](auto &object) { return object.max_accumulation; })
             .description("Maximum frame accumulation");
     }
 };

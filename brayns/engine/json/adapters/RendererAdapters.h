@@ -28,8 +28,11 @@
 namespace brayns
 {
 template<typename T>
-struct RendererAdapter<T> : ObjectAdapter<T>
+struct RendererAdapter : ObjectAdapter<T>
 {
+protected:
+    using ObjectAdapter<T>::getset;
+
     static void reflectDefault()
     {
         getset(
@@ -77,7 +80,7 @@ struct JsonAdapter<Interactive> : RendererAdapter<Interactive>
 };
 
 template<>
-struct JsonAdapter<Production> : ObjectAdapter<Production>
+struct JsonAdapter<Production> : RendererAdapter<Production>
 {
     static void reflect()
     {

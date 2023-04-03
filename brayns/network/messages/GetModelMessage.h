@@ -36,7 +36,11 @@ struct JsonAdapter<GetModelMessage> : ObjectAdapter<GetModelMessage>
     static void reflect()
     {
         title("GetModelMessage");
-        set<uint32_t>("id", [](auto &object, auto value) { object.id = value; }).description("Model ID");
+        getset(
+            "id",
+            [](auto &object) { return object.id; },
+            [](auto &object, auto value) { object.id = value; })
+            .description("Model ID");
     }
 };
 } // namespace brayns

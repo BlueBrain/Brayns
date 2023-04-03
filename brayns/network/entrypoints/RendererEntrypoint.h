@@ -23,7 +23,7 @@
 
 #include <brayns/engine/core/Engine.h>
 #include <brayns/engine/json/adapters/RendererAdapters.h>
-#include <brayns/json/JsonSchemaValidator.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns

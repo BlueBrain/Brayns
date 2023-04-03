@@ -32,10 +32,16 @@ struct JsonAdapter<EngineObjectData> : ObjectAdapter<EngineObjectData>
     static void reflect()
     {
         title("EngineObjectData");
-        set<std::string>("name", [](auto &object, auto value) { object.name = std::move(value); })
+        getset(
+            "name",
+            [](auto &object) -> auto & { return object.name; },
+            [](auto &object, auto value) { object.name = std::move(value); })
             .description("Object type name")
             .required(false);
-        set<JsonValue>("params", [](auto &object, const auto &value) { object.params = value; })
+        getset(
+            "params",
+            [](auto &object) -> auto & { return object.params; },
+            [](auto &object, const auto &value) { object.params = value; })
             .description("Object parameters")
             .required(false);
     }

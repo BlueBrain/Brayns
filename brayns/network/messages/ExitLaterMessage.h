@@ -36,7 +36,10 @@ struct JsonAdapter<ExitLaterMessage> : ObjectAdapter<ExitLaterMessage>
     static void reflect()
     {
         title("ExitLaterMessage");
-        set<uint32_t>("minutes", [](auto &object, auto value) { object.minutes = value; })
+        getset(
+            "minutes",
+            [](auto &object) { return object.minutes; },
+            [](auto &object, auto value) { object.minutes = value; })
             .description("Number of minutes after which Brayns will shut down");
     }
 };

@@ -46,10 +46,7 @@ struct JsonAdapter<ModelInstance> : ObjectAdapter<ModelInstance>
             "bounds",
             [](auto &object) -> auto & { return object.getBounds(); })
             .description("Model bounds");
-        get(
-            "info",
-            [](auto &object) -> auto & { return object.getModelData(); })
-            .description("Model-specific info");
+        get("info", [](auto &object) { return object.getModelData(); }).description("Model-specific info");
         getset(
             "transform",
             [](auto &object) -> auto & { return object.getTransform(); },

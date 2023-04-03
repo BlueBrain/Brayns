@@ -80,13 +80,22 @@ struct JsonAdapter<ImageSettings> : ObjectAdapter<ImageSettings>
     static void reflect()
     {
         title("ImageSettings");
-        set<std::string>("format", [](auto &object, auto value) { object.setFormat(std::move(value)); })
+        getset(
+            "format",
+            [](auto &object) -> auto & { return object.getFormat(); },
+            [](auto &object, auto value) { object.setFormat(std::move(value)); })
             .description("Image format (jpg or png)")
             .defaultValue("png");
-        set<uint32_t>("quality", [](auto &object, auto value) { object.setQuality(value); })
+        getset(
+            "quality",
+            [](auto &object) { return object.getQuality(); },
+            [](auto &object, auto value) { object.setQuality(value); })
             .description("Image quality (0 = lowest quality, 100 = highest quality")
             .defaultValue(100);
-        set<Vector2ui>("size", [](auto &object, const auto &value) { object.setSize(value); })
+        getset(
+            "size",
+            [](auto &object) -> auto & { return object.getSize(); },
+            [](auto &object, const auto &value) { object.setSize(value); })
             .description("Image width and height")
             .required(false);
     }

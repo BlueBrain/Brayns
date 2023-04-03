@@ -39,9 +39,15 @@ struct JsonAdapter<Box> : ObjectAdapter<Box>
     static void reflect()
     {
         title("Box");
-        set<Vector3f>("min", [](auto &object, const auto &value) { object.min = value; })
+        getset(
+            "min",
+            [](auto &object) -> auto & { return object.min; },
+            [](auto &object, const auto &value) { object.min = value; })
             .description("Bottom back left corner XYZ");
-        set<Vector3f>("max", [](auto &object, const auto &value) { object.max = value; })
+        getset(
+            "max",
+            [](auto &object) -> auto & { return object.max; },
+            [](auto &object, const auto &value) { object.max = value; })
             .description("Top front right corner XYZ");
     }
 };
@@ -52,9 +58,15 @@ struct JsonAdapter<BoundedPlane> : ObjectAdapter<BoundedPlane>
     static void reflect()
     {
         title("BoundedPlane");
-        set<Vector4f>("coefficients", [](auto &object, const auto &value) { object.coefficients = value; })
+        getset(
+            "coefficients",
+            [](auto &object) -> auto & { return object.coefficients; },
+            [](auto &object, const auto &value) { object.coefficients = value; })
             .description("Equation coefficients ABCD from Ax + By + Cz + D = 0");
-        set<Bounds>("bounds", [](auto &object, const auto &value) { object.bounds = value; })
+        getset(
+            "bounds",
+            [](auto &object) -> auto & { return object.bounds; },
+            [](auto &object, const auto &value) { object.bounds = value; })
             .description("Axis-aligned bounds to limit the plane geometry");
     }
 };
@@ -65,7 +77,10 @@ struct JsonAdapter<Plane> : ObjectAdapter<Plane>
     static void reflect()
     {
         title("Plane");
-        set<Vector4f>("coefficients", [](auto &object, const auto &value) { object.coefficients = value; })
+        getset(
+            "coefficients",
+            [](auto &object) -> auto & { return object.coefficients; },
+            [](auto &object, const auto &value) { object.coefficients = value; })
             .description("Equation coefficients ABCD from Ax + By + Cz + D = 0");
     }
 };
@@ -76,12 +91,26 @@ struct JsonAdapter<Capsule> : ObjectAdapter<Capsule>
     static void reflect()
     {
         title("Capsule");
-        set<Vector3f>("p0", [](auto &object, const auto &value) { object.p0 = value; })
+        getset(
+            "p0",
+            [](auto &object) -> auto & { return object.p0; },
+            [](auto &object, const auto &value) { object.p0 = value; })
             .description("Start point of the capsule XYZ");
-        set<float>("r0", [](auto &object, auto value) { object.r0 = value; }).description("Capsule radius at p0");
-        set<Vector3f>("p1", [](auto &object, const auto &value) { object.p1 = value; })
+        getset(
+            "r0",
+            [](auto &object) { return object.r0; },
+            [](auto &object, auto value) { object.r0 = value; })
+            .description("Capsule radius at p0");
+        getset(
+            "p1",
+            [](auto &object) -> auto & { return object.p1; },
+            [](auto &object, const auto &value) { object.p1 = value; })
             .description("End point of the capsule XYZ");
-        set<float>("r1", [](auto &object, auto value) { object.r1 = value; }).description("Capsule radius at p1");
+        getset(
+            "r1",
+            [](auto &object) { return object.r1; },
+            [](auto &object, auto value) { object.r1 = value; })
+            .description("Capsule radius at p1");
     }
 };
 
@@ -91,9 +120,16 @@ struct JsonAdapter<Sphere> : ObjectAdapter<Sphere>
     static void reflect()
     {
         title("Sphere");
-        set<Vector3f>("center", [](auto &object, const auto &value) { object.center = value; })
+        getset(
+            "center",
+            [](auto &object) -> auto & { return object.center; },
+            [](auto &object, const auto &value) { object.center = value; })
             .description("Sphere center XYZ");
-        set<float>("radius", [](auto &object, auto value) { object.radius = value; }).description("Sphere radius");
+        getset(
+            "radius",
+            [](auto &object) { return object.radius; },
+            [](auto &object, auto value) { object.radius = value; })
+            .description("Sphere radius");
     }
 };
 
@@ -103,18 +139,33 @@ struct JsonAdapter<TriangleMesh> : ObjectAdapter<TriangleMesh>
     static void reflect()
     {
         title("TriangleMesh");
-        set<std::vector<Vector3f>>("vertices", [](auto &object, auto value) { object.vertices = std::move(value); })
+        getset(
+            "vertices",
+            [](auto &object) -> auto & { return object.vertices; },
+            [](auto &object, auto value) { object.vertices = std::move(value); })
             .description("Mesh vertex positions");
-        set<std::vector<Vector3f>>("normals", [](auto &object, auto value) { object.normals = std::move(value); })
+        getset(
+            "normals",
+            [](auto &object) -> auto & { return object.normals; },
+            [](auto &object, auto value) { object.normals = std::move(value); })
             .description("Mesh vertex normals")
             .required(false);
-        set<std::vector<Vector4f>>("colors", [](auto &object, auto value) { object.colors = std::move(value); })
+        getset(
+            "colors",
+            [](auto &object) -> auto & { return object.colors; },
+            [](auto &object, auto value) { object.colors = std::move(value); })
             .description("Mesh vertex colors")
             .required(false);
-        set<std::vector<Vector2f>>("uvs", [](auto &object, auto value) { object.uvs = std::move(value); })
+        getset(
+            "uvs",
+            [](auto &object) -> auto & { return object.uvs; },
+            [](auto &object, auto value) { object.uvs = std::move(value); })
             .description("Mesh vertex texture coordinates")
             .required(false);
-        set<std::vector<Vector3ui>>("indices", [](auto &object, auto value) { object.indices = std::move(value); })
+        getset(
+            "indices",
+            [](auto &object) -> auto & { return object.indices; },
+            [](auto &object, auto value) { object.indices = std::move(value); })
             .description("Mesh vertex triangle indices");
     }
 };
@@ -129,12 +180,21 @@ struct GeometryWithColor
 template<typename T>
 struct JsonAdapter<GeometryWithColor<T>> : ObjectAdapter<GeometryWithColor<T>>
 {
+    using ObjectAdapter<GeometryWithColor<T>>::title;
+    using ObjectAdapter<GeometryWithColor<T>>::getset;
+
     static void reflect()
     {
         title("GeometryWithColor");
-        set<T>("geometry", [](auto &object, const auto &value) { object.geometry = value; })
+        getset(
+            "geometry",
+            [](auto &object) -> auto & { return object.geometry; },
+            [](auto &object, const auto &value) { object.geometry = value; })
             .description("Geometry data");
-        set<Vector4f>("color", [](auto &object, const auto &value) { object.color = value; })
+        getset(
+            "color",
+            [](auto &object) -> auto & { return object.color; },
+            [](auto &object, const auto &value) { object.color = value; })
             .description("Geometry color");
     }
 };
@@ -149,12 +209,21 @@ struct ClippingGeometry
 template<typename T>
 struct JsonAdapter<ClippingGeometry<T>> : ObjectAdapter<ClippingGeometry<T>>
 {
+    using ObjectAdapter<ClippingGeometry<T>>::title;
+    using ObjectAdapter<ClippingGeometry<T>>::getset;
+
     static void reflect()
     {
         title("ClippingGeometry");
-        set<std::vector<T>>("primitives", [](auto &object, auto value) { object.primitives = std::move(value); })
+        getset(
+            "primitives",
+            [](auto &object) -> auto & { return object.primitives; },
+            [](auto &object, auto value) { object.primitives = std::move(value); })
             .description("Clipping primitive list");
-        set<bool>("invert_normals", [](auto &object, auto value) { object.invertNormals = value; })
+        getset(
+            "invert_normals",
+            [](auto &object) { return object.invert_normals; },
+            [](auto &object, auto value) { object.invertNormals = value; })
             .description("Switches clipping side")
             .defaultValue(false);
     }

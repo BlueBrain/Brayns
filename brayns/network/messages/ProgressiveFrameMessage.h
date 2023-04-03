@@ -36,7 +36,10 @@ struct JsonAdapter<ProgressiveFrameMessage> : ObjectAdapter<ProgressiveFrameMess
     static void reflect()
     {
         title("ProgressiveFrameMessage");
-        set<uint32_t>("scale", [](auto &object, auto value) { object.scale = value; })
+        getset(
+            "scale",
+            [](auto &object) { return object.scale; },
+            [](auto &object, auto value) { object.scale = value; })
             .description("Frame size reduction factor")
             .minimum(1)
             .defaultValue(4);

@@ -71,6 +71,8 @@ public:
 
     JsonPropertyBuilder description(std::string value);
     JsonPropertyBuilder required(bool value);
+    JsonPropertyBuilder readOnly(bool value);
+    JsonPropertyBuilder writeOnly(bool value);
     JsonPropertyBuilder minimum(double value);
     JsonPropertyBuilder maximum(double value);
     JsonPropertyBuilder minItems(size_t value);

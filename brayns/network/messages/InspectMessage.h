@@ -36,7 +36,10 @@ struct JsonAdapter<InspectMessage> : ObjectAdapter<InspectMessage>
     static void reflect()
     {
         title("InspectMessage");
-        set<Vector2f>("position", [](auto &object, const auto &value) { object.position = value; })
+        getset(
+            "position",
+            [](auto &object) -> auto & { return object.position; },
+            [](auto &object, const auto &value) { object.position = value; })
             .description("Normalized screen position XY");
     }
 };

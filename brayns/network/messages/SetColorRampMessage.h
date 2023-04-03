@@ -34,13 +34,20 @@ struct SetColorRampMessage
 };
 
 template<>
-struct JsonAdapter<ColorRamp> : ObjectAdapter<ColorRamp>
+struct JsonAdapter<SetColorRampMessage> : ObjectAdapter<SetColorRampMessage>
 {
     static void reflect()
     {
-        title("ColorRamp");
-        set<uint32_t>("id", [](auto &object, auto value) { object.id = value; }).description("Model ID");
-        set<JsonBuffer<ColorRamp>>("color_ramp", [](auto &object, auto value) { object.color_ramp = std::move(value); })
+        title("SetColorRampMessage");
+        getset(
+            "id",
+            [](auto &object) { return object.id; },
+            [](auto &object, auto value) { object.id = value; })
+            .description("Model ID");
+        getset(
+            "color_ramp",
+            [](auto &object) -> auto & { return object.color_ramp; },
+            [](auto &object, const auto &value) { object.color_ramp = value; })
             .description("Color ramp");
     }
 };

@@ -36,7 +36,10 @@ struct JsonAdapter<RemoveModelMessage> : ObjectAdapter<RemoveModelMessage>
     static void reflect()
     {
         title("RemoveModelMessage");
-        set<std::vector<uint32_t>>("ids", [](auto &object, auto value) { object.ids = std::move(value); })
+        getset(
+            "ids",
+            [](auto &object) -> auto & { return object.ids; },
+            [](auto &object, auto value) { object.ids = std::move(value); })
             .description("Model ID list");
     }
 };

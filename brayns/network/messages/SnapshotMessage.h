@@ -45,22 +45,40 @@ struct JsonAdapter<SnapshotParams> : ObjectAdapter<SnapshotParams>
     static void reflect()
     {
         title("SnapshotParams");
-        set<uint32_t>("image_settings", [](auto &object, auto value) { object.image_settings = std::move(value); })
+        getset(
+            "image_settings",
+            [](auto &object) -> auto & { return object.image_settings; },
+            [](auto &object, auto value) { object.image_settings = std::move(value); })
             .description("Image settings")
             .required(false);
-        set<EngineObjectData>("camera", [](auto &object, const auto &value) { object.camera = value; })
+        getset(
+            "camera",
+            [](auto &object) -> auto & { return object.camera; },
+            [](auto &object, const auto &value) { object.camera = value; })
             .description("Camera definition")
             .required(false);
-        set<View>("camera_view", [](auto &object, const auto &value) { object.camera_view = value; })
+        getset(
+            "camera_view",
+            [](auto &object) -> auto & { return object.camera_view; },
+            [](auto &object, const auto &value) { object.camera_view = value; })
             .description("Camera view")
             .required(false);
-        set<EngineObjectData>("renderer", [](auto &object, const auto &value) { object.renderer = value; })
+        getset(
+            "renderer",
+            [](auto &object) -> auto & { return object.renderer; },
+            [](auto &object, const auto &value) { object.renderer = value; })
             .description("Renderer definition")
             .required(false);
-        set<uint32_t>("simulation_frame", [](auto &object, auto value) { object.simulation_frame = value; })
+        getset(
+            "simulation_frame",
+            [](auto &object) { return object.simulation_frame; },
+            [](auto &object, auto value) { object.simulation_frame = value; })
             .description("Simulation frame to render")
             .required(false);
-        set<std::string>("file_path", [](auto &object, auto value) { object.file_path = std::move(value); })
+        getset(
+            "file_path",
+            [](auto &object) -> auto & { return object.file_path; },
+            [](auto &object, auto value) { object.file_path = std::move(value); })
             .description("Path to save image, raw encoded data will be returned if empty")
             .required(false);
     }

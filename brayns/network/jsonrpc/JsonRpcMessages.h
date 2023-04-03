@@ -45,14 +45,26 @@ struct JsonAdapter<RequestMessage> : ObjectAdapter<RequestMessage>
     static void reflect()
     {
         title("RequestMessage");
-        set<std::string>("jsonrpc", [](auto &object, auto value) { object.jsonrpc = std::move(value); })
+        getset(
+            "jsonrpc",
+            [](auto &object) -> auto & { return object.jsonrpc; },
+            [](auto &object, auto value) { object.jsonrpc = std::move(value); })
             .description("JSON-RPC version");
-        set<RequestId>("id", [](auto &object, auto value) { object.id = std::move(value); })
+        getset(
+            "id",
+            [](auto &object) -> auto & { return object.id; },
+            [](auto &object, auto value) { object.id = std::move(value); })
             .description("Request ID")
             .required(false);
-        set<std::string>("method", [](auto &object, auto value) { object.method = std::move(value); })
+        getset(
+            "method",
+            [](auto &object) -> auto & { return object.method; },
+            [](auto &object, auto value) { object.method = std::move(value); })
             .description("Entrypoint name");
-        set<JsonValue>("params", [](auto &object, const auto &value) { object.params = value; })
+        getset(
+            "params",
+            [](auto &object) -> auto & { return object.params; },
+            [](auto &object, const auto &value) { object.params = value; })
             .description("Request content")
             .required(false);
     }
@@ -73,7 +85,10 @@ struct JsonAdapter<CancelParams> : ObjectAdapter<CancelParams>
     static void reflect()
     {
         title("CancelParams");
-        set<RequestId>("id", [](auto &object, auto value) { object.id = std::move(value); })
+        getset(
+            "id",
+            [](auto &object) -> auto & { return object.id; },
+            [](auto &object, auto value) { object.id = std::move(value); })
             .description("ID of the request to cancel");
     }
 };
@@ -95,9 +110,18 @@ struct JsonAdapter<ReplyMessage> : ObjectAdapter<ReplyMessage>
     static void reflect()
     {
         title("ReplyMessage");
-        get("jsonrpc", [](auto &object) { return object.jsonrpc; }).description("JSON-RPC version");
-        get("id", [](auto &object) { return object.id; }).description("ID of the corresponding request");
-        get("result", [](auto &object) { return object.result; }).description("Reply content");
+        get(
+            "jsonrpc",
+            [](auto &object) -> auto & { return object.jsonrpc; })
+            .description("JSON-RPC version");
+        get(
+            "id",
+            [](auto &object) -> auto & { return object.id; })
+            .description("ID of the corresponding request");
+        get(
+            "result",
+            [](auto &object) -> auto & { return object.result; })
+            .description("Reply content");
     }
 };
 
@@ -119,8 +143,14 @@ struct JsonAdapter<ErrorInfo> : ObjectAdapter<ErrorInfo>
     {
         title("ErrorInfo");
         get("code", [](auto &object) { return object.code; }).description("Error code");
-        get("message", [](auto &object) { return object.message; }).description("Error description");
-        get("data", [](auto &object) { return object.data; }).description("Additional error info");
+        get(
+            "message",
+            [](auto &object) -> auto & { return object.message; })
+            .description("Error description");
+        get(
+            "data",
+            [](auto &object) -> auto & { return object.data; })
+            .description("Additional error info");
     }
 };
 
@@ -141,9 +171,18 @@ struct JsonAdapter<ErrorMessage> : ObjectAdapter<ErrorMessage>
     static void reflect()
     {
         title("ErrorMessage");
-        get("jsonrpc", [](auto &object) { return object.jsonrpc; }).description("JSON-RPC version");
-        get("id", [](auto &object) { return object.id; }).description("ID of the corresponding request");
-        get("error", [](auto &object) { return object.error; }).description("Error info");
+        get(
+            "jsonrpc",
+            [](auto &object) -> auto & { return object.jsonrpc; })
+            .description("JSON-RPC version");
+        get(
+            "id",
+            [](auto &object) -> auto & { return object.id; })
+            .description("ID of the corresponding request");
+        get(
+            "error",
+            [](auto &object) -> auto & { return object.error; })
+            .description("Error info");
     }
 };
 
@@ -164,8 +203,14 @@ struct JsonAdapter<ProgressInfo> : ObjectAdapter<ProgressInfo>
     static void reflect()
     {
         title("ProgressInfo");
-        get("id", [](auto &object) { return object.id; }).description("ID of the corresponding request");
-        get("operation", [](auto &object) { return object.operation; }).description("Description of the current task");
+        get(
+            "id",
+            [](auto &object) -> auto & { return object.id; })
+            .description("ID of the corresponding request");
+        get(
+            "operation",
+            [](auto &object) -> auto & { return object.operation; })
+            .description("Description of the current task");
         get("amount", [](auto &object) { return object.amount; }).description("Global progess [0-1]");
     }
 };
@@ -187,9 +232,18 @@ struct JsonAdapter<ProgressMessage> : ObjectAdapter<ProgressMessage>
     static void reflect()
     {
         title("ProgressMessage");
-        get("jsonrpc", [](auto &object) { return object.jsonrpc; }).description("JSON-RPC version");
-        get("method", [](auto &object) { return object.method; }).description("Entrypoint name");
-        get("params", [](auto &object) { return object.params; }).description("Progress info");
+        get(
+            "jsonrpc",
+            [](auto &object) -> auto & { return object.jsonrpc; })
+            .description("JSON-RPC version");
+        get(
+            "method",
+            [](auto &object) -> auto & { return object.method; })
+            .description("Entrypoint name");
+        get(
+            "params",
+            [](auto &object) -> auto & { return object.params; })
+            .description("Progress info");
     }
 };
 } // namespace brayns

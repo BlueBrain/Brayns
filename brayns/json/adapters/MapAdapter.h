@@ -45,7 +45,7 @@ struct MapAdapter
     {
         auto schema = JsonSchema();
         schema.type = JsonType::Object;
-        schema.items = JsonAdapter<ValueType>::getSchema();
+        schema.items.push_back(JsonAdapter<ValueType>::getSchema());
         return schema;
     }
 

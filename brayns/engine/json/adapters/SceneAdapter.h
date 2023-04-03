@@ -35,13 +35,10 @@ struct JsonAdapter<Scene> : ObjectAdapter<Scene>
     static void reflect()
     {
         title("Scene");
-        get(
-            "bounds",
-            [](auto &object) -> auto & { return object.getBounds(); })
-            .description("Scene bounds");
+        get("bounds", [](auto &object) { return object.getBounds(); }).description("Scene bounds");
         get(
             "models",
-            [](auto &object) -> auto & { return object.getAllInstances(); })
+            [](auto &object) -> auto & { return object.getModels().getAllModelInstances(); })
             .description("Scene models");
     }
 };

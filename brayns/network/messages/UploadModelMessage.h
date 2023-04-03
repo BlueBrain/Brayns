@@ -38,11 +38,20 @@ struct JsonAdapter<UploadModelParams> : ObjectAdapter<UploadModelParams>
     static void reflect()
     {
         title("UploadModelParams");
-        set<std::string>("type", [](auto &object, auto value) { object.type = std::move(value); })
+        getset(
+            "type",
+            [](auto &object) -> auto & { return object.type; },
+            [](auto &object, auto value) { object.type = std::move(value); })
             .description("File extension");
-        set<std::string>("loader_name", [](auto &object, auto value) { object.type = std::move(value); })
+        getset(
+            "loader_name",
+            [](auto &object) -> auto & { return object.loader_name; },
+            [](auto &object, auto value) { object.type = std::move(value); })
             .description("Loader name");
-        set<JsonValue>("loader_properties", [](auto &object, const auto &value) { object.loader_properties = value; })
+        getset(
+            "loader_properties",
+            [](auto &object) -> auto & { return object.loader_properties; },
+            [](auto &object, const auto &value) { object.loader_properties = value; })
             .description("Loader properties");
     }
 };

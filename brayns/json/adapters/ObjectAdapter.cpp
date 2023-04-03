@@ -89,6 +89,18 @@ JsonPropertyBuilder JsonPropertyBuilder::required(bool value)
     return *this;
 }
 
+JsonPropertyBuilder JsonPropertyBuilder::readOnly(bool value)
+{
+    _property.schema.readOnly = value;
+    return *this;
+}
+
+JsonPropertyBuilder JsonPropertyBuilder::writeOnly(bool value)
+{
+    _property.schema.writeOnly = value;
+    return *this;
+}
+
 JsonPropertyBuilder JsonPropertyBuilder::minimum(double value)
 {
     _property.schema.minimum = value;

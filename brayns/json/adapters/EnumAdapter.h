@@ -50,7 +50,7 @@ struct EnumAdapter
 
     static void deserialize(const JsonValue &json, T &value)
     {
-        auto name = json.extract<std::string>(value);
+        auto name = json.extract<std::string>();
         value = EnumInfo::getValue<T>(name);
     }
 };

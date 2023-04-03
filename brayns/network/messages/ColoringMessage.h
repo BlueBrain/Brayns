@@ -38,9 +38,15 @@ struct JsonAdapter<ColorMethodValuesMessage> : ObjectAdapter<ColorMethodValuesMe
     static void reflect()
     {
         title("ColorMethodValuesMessage");
-        set<uint32_t>("id", [](auto &object, auto value) { object.id = value; })
+        getset(
+            "id",
+            [](auto &object) { return object.id; },
+            [](auto &object, auto value) { object.id = value; })
             .description("ID of the model that will be colored");
-        set<std::string>("method", [](auto &object, auto value) { object.method = std::move(value); })
+        getset(
+            "method",
+            [](auto &object) -> auto & { return object.method; },
+            [](auto &object, auto value) { object.method = std::move(value); })
             .description("Coloring method which values will be returned");
     }
 };
@@ -58,11 +64,20 @@ struct JsonAdapter<ColorModelMessage> : ObjectAdapter<ColorModelMessage>
     static void reflect()
     {
         title("ColorModelMessage");
-        set<uint32_t>("id", [](auto &object, auto value) { object.id = value; })
+        getset(
+            "id",
+            [](auto &object) { return object.id; },
+            [](auto &object, auto value) { object.id = value; })
             .description("ID of the model to color");
-        set<std::string>("method", [](auto &object, auto value) { object.method = std::move(value); })
+        getset(
+            "method",
+            [](auto &object) -> auto & { return object.method; },
+            [](auto &object, auto value) { object.method = std::move(value); })
             .description("Coloring method");
-        set<ColorMethodInput>("values", [](auto &object, auto value) { object.values = std::move(value); })
+        getset(
+            "values",
+            [](auto &object) -> auto & { return object.values; },
+            [](auto &object, auto value) { object.values = std::move(value); })
             .description("Coloring parameters");
     }
 };

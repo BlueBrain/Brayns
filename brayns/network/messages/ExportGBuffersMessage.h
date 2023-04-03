@@ -45,26 +45,45 @@ struct JsonAdapter<GBuffersParams> : ObjectAdapter<GBuffersParams>
     static void reflect()
     {
         title("GBuffersParams");
-        set<Vector2ui>("resolution", [](auto &object, const auto &value) { object.resolution = value; })
+        getset(
+            "resolution",
+            [](auto &object) -> auto & { return object.resolution; },
+            [](auto &object, const auto &value) { object.resolution = value; })
             .description("Image resolution")
             .required(false);
-        set<EngineObjectData>("camera", [](auto &object, const auto &value) { object.camera = value; })
+        getset(
+            "camera",
+            [](auto &object) -> auto & { return object.camera; },
+            [](auto &object, const auto &value) { object.camera = value; })
             .description("Camera definition")
             .required(false);
-        set<View>("camera_view", [](auto &object, const auto &value) { object.camera_view = value; })
+        getset(
+            "camera_view",
+            [](auto &object) -> auto & { return object.camera_view; },
+            [](auto &object, const auto &value) { object.camera_view = value; })
             .description("Camera view")
             .required(false);
-        set<EngineObjectData>("renderer", [](auto &object, const auto &value) { object.renderer = value; })
+        getset(
+            "renderer",
+            [](auto &object) -> auto & { return object.renderer; },
+            [](auto &object, const auto &value) { object.renderer = value; })
             .description("Renderer")
             .required(false);
-        set<uint32_t>("simulation_frame", [](auto &object, auto value) { object.simulation_frame = value; })
+        getset(
+            "simulation_frame",
+            [](auto &object) { return object.simulation_frame; },
+            [](auto &object, auto value) { object.simulation_frame = value; })
             .description("Simulation frame to render")
             .required(false);
-        set<std::string>("file_path", [](auto &object, auto value) { object.file_path = std::move(value); })
+        getset(
+            "file_path",
+            [](auto &object) -> auto & { return object.file_path; },
+            [](auto &object, auto value) { object.file_path = std::move(value); })
             .description("Path to save the buffer as EXR, encoded data is returned if unset")
             .required(false);
-        set<std::vector<FramebufferChannel>>(
+        getset(
             "channels",
+            [](auto &object) -> auto & { return object.channels; },
             [](auto &object, auto value) { object.channels = std::move(value); })
             .description("Framebuffer channels to export");
     }

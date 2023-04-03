@@ -38,15 +38,30 @@ struct JsonAdapter<RegularVolume> : ObjectAdapter<RegularVolume>
     static void reflect()
     {
         title("RegularVolume");
-        set<VolumeDataType>("data_type", [](auto &object, auto value) { object.dataType = value; })
+        getset(
+            "data_type",
+            [](auto &object) { return object.dataType; },
+            [](auto &object, auto value) { object.dataType = value; })
             .description("Voxel data as byte array");
-        set<VolumeDataType>("voxels", [](auto &object, auto value) { object.voxels = std::move(value); })
+        getset(
+            "voxels",
+            [](auto &object) -> auto & { return object.voxels; },
+            [](auto &object, auto value) { object.voxels = std::move(value); })
             .description("Voxel data type");
-        set<Vector3f>("size", [](auto &object, const auto &value) { object.size = value; })
+        getset(
+            "size",
+            [](auto &object) -> auto & { return object.size; },
+            [](auto &object, const auto &value) { object.size = value; })
             .description("Width, height and depth of the volume");
-        set<Vector3f>("spacing", [](auto &object, const auto &value) { object.spacing = value; })
+        getset(
+            "spacing",
+            [](auto &object) -> auto & { return object.spacing; },
+            [](auto &object, const auto &value) { object.spacing = value; })
             .description("Voxel dimensions in world space");
-        set<bool>("data_on_vertex", [](auto &object, auto value) { object.perVertexData = value; })
+        getset(
+            "data_on_vertex",
+            [](auto &object) { return object.perVertexData; },
+            [](auto &object, auto value) { object.perVertexData = value; })
             .description("Specify if the voxel is located at the cell vertices or in the center");
     }
 };

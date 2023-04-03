@@ -32,12 +32,20 @@ template<typename T>
 struct LightAdapter : ObjectAdapter<T>
 {
 protected:
+    using ObjectAdapter<T>::getset;
+
     static void reflectDefault()
     {
-        set<Vector3f>("color", [](auto &object, const auto &value) { object.color = value; })
+        getset(
+            "color",
+            [](auto &object) -> auto & { return object.color; },
+            [](auto &object, const auto &value) { object.color = value; })
             .description("Light color RGB normalized")
-            .required(false);
-        set<float>("intensity", [](auto &object, auto value) { object.intensity = value; })
+            .defaultValue(Vector3f(1));
+        getset(
+            "intensity",
+            [](auto &object) { return object.intensity; },
+            [](auto &object, auto value) { object.intensity = value; })
             .description("Light intensity")
             .minimum(0)
             .defaultValue(1);
@@ -61,7 +69,10 @@ struct JsonAdapter<DirectionalLight> : LightAdapter<DirectionalLight>
     {
         title("DirectionalLight");
         reflectDefault();
-        set<Vector3f>("direction", [](auto &object, const auto &value) { object.direction = value; })
+        getset(
+            "direction",
+            [](auto &object) -> auto & { return object.direction; },
+            [](auto &object, const auto &value) { object.direction = value; })
             .description("Light direction XYZ")
             .defaultValue(Vector3f(-1, -1, 0));
     }
@@ -74,13 +85,22 @@ struct JsonAdapter<QuadLight> : LightAdapter<QuadLight>
     {
         title("QuadLight");
         reflectDefault();
-        set<Vector3f>("position", [](auto &object, const auto &value) { object.position = value; })
+        getset(
+            "position",
+            [](auto &object) -> auto & { return object.position; },
+            [](auto &object, const auto &value) { object.position = value; })
             .description("Light base corner position XYZ")
             .defaultValue(Vector3f(0));
-        set<Vector3f>("edge1", [](auto &object, const auto &value) { object.edge1 = value; })
+        getset(
+            "edge1",
+            [](auto &object) -> auto & { return object.edge1; },
+            [](auto &object, const auto &value) { object.edge1 = value; })
             .description("Edge 1 XYZ")
             .defaultValue(Vector3f(1, 0, 0));
-        set<Vector3f>("edge2", [](auto &object, const auto &value) { object.edge2 = value; })
+        getset(
+            "edge2",
+            [](auto &object) -> auto & { return object.edge2; },
+            [](auto &object, const auto &value) { object.edge2 = value; })
             .description("Edge 2 XYZ")
             .defaultValue(Vector3f(0, 0, 1));
     }

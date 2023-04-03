@@ -24,7 +24,7 @@
 
 namespace brayns
 {
-struct AddModelMessage
+struct AddModelParams
 {
     std::string path;
     std::string loader_name;
@@ -32,16 +32,25 @@ struct AddModelMessage
 };
 
 template<>
-struct JsonAdapter<AddModelMessage> : ObjectAdapter<AddModelMessage>
+struct JsonAdapter<AddModelParams> : ObjectAdapter<AddModelParams>
 {
     static void reflect()
     {
-        title("AddModelMessage");
-        set<std::string>("path", [](auto &object, auto value) { object.path = std::move(value); })
+        title("AddModelParams");
+        getset(
+            "path",
+            [](auto &object) -> auto & { return object.path; },
+            [](auto &object, auto value) { object.path = std::move(value); })
             .description("Path of the file to load");
-        set<std::string>("loader_name", [](auto &object, auto value) { object.loader_name = std::move(value); })
+        getset(
+            "loader_name",
+            [](auto &object) -> auto & { return object.loader_name; },
+            [](auto &object, auto value) { object.loader_name = std::move(value); })
             .description("Name of the loader used to parse the model file");
-        set<JsonValue>("loader_properties", [](auto &object, const auto &value) { object.loader_properties = value; })
+        getset(
+            "loader_properties",
+            [](auto &object) -> auto & { return object.loader_properties; },
+            [](auto &object, const auto &value) { object.loader_properties = value; })
             .description("Settings to configure the loading process");
     }
 };

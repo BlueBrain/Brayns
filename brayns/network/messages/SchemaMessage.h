@@ -36,7 +36,10 @@ struct JsonAdapter<SchemaParams> : ObjectAdapter<SchemaParams>
     static void reflect()
     {
         title("SchemaParams");
-        set<std::string>("endpoint", [](auto &object, auto value) { object.endpoint = std::move(value); })
+        getset(
+            "endpoint",
+            [](auto &object) -> auto & { return object.endpoint; },
+            [](auto &object, auto value) { object.endpoint = std::move(value); })
             .description("Name of the endpoint");
     }
 };

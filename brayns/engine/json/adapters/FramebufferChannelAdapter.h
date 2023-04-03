@@ -29,7 +29,7 @@ namespace brayns
 template<>
 struct EnumReflector<FramebufferChannel>
 {
-    static EnumMap<VolumeDataType> reflect()
+    static EnumMap<FramebufferChannel> reflect()
     {
         return {
             {"color", FramebufferChannel::Color},

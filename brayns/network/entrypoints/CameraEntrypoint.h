@@ -24,8 +24,6 @@
 #include <brayns/engine/core/Engine.h>
 #include <brayns/engine/json/adapters/ProjectionAdapters.h>
 
-#include <brayns/json/Json.h>
-
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns

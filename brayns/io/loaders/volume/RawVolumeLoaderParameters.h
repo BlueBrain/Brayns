@@ -39,11 +39,20 @@ struct JsonAdapter<RawVolumeLoaderParameters> : ObjectAdapter<RawVolumeLoaderPar
     static void reflect()
     {
         title("RawVolumeLoaderParameters");
-        set<Vector3ui>("dimensions", [](auto &object, const auto &value) { object.dimensions = value; })
+        getset(
+            "dimensions",
+            [](auto &object) -> auto & { return object.dimensions; },
+            [](auto &object, const auto &value) { object.dimensions = value; })
             .description("Volume grid size XYZ");
-        set<Vector3f>("spacing", [](auto &object, const auto &value) { object.spacing = value; })
+        getset(
+            "spacing",
+            [](auto &object) -> auto & { return object.spacing; },
+            [](auto &object, const auto &value) { object.spacing = value; })
             .description("Volume grid cell spacing XYZ");
-        set<VolumeDataType>("data_type", [](auto &object, auto value) { object.data_type = value; })
+        getset(
+            "data_type",
+            [](auto &object) { return object.data_type; },
+            [](auto &object, auto value) { object.data_type = value; })
             .description("Volume byte data type");
     }
 };

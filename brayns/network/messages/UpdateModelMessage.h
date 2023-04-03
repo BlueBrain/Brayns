@@ -39,8 +39,15 @@ struct JsonAdapter<UpdateModelMessage> : ObjectAdapter<UpdateModelMessage>
     static void reflect()
     {
         title("UpdateModelMessage");
-        set<uint32_t>("model_id", [](auto &object, auto value) { object.model_id = value; }).description("Model ID");
-        set<JsonBuffer<ModelInstance>>("model", [](auto &object, const auto &value) { object.model = value; })
+        getset(
+            "model_id",
+            [](auto &object) { return object.model_id; },
+            [](auto &object, auto value) { object.model_id = value; })
+            .description("Model ID");
+        getset(
+            "model",
+            [](auto &object) -> auto & { return object.model; },
+            [](auto &object, const auto &value) { object.model = value; })
             .description("Model data to update");
     }
 };

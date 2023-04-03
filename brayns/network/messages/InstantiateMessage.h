@@ -38,10 +38,14 @@ struct JsonAdapter<InstantiateMessage> : ObjectAdapter<InstantiateMessage>
     static void reflect()
     {
         title("InstantiateMessage");
-        set<uint32_t>("model_id", [](auto &object, auto value) { object.model_id = value; })
+        getset(
+            "model_id",
+            [](auto &object) { return object.model_id; },
+            [](auto &object, auto value) { object.model_id = value; })
             .description("ID of the model to instantiate");
-        set<std::vector<Transform>>(
+        getset(
             "transforms",
+            [](auto &object) -> auto & { return object.transforms; },
             [](auto &object, auto value) { object.transforms = std::move(value); })
             .description("Transformations to apply to the new instances");
     }
