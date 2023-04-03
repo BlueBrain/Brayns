@@ -20,14 +20,34 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
-BRAYNS_JSON_OBJECT_BEGIN(DTILoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(float, radius, "Connectivity streamlines radius")
-BRAYNS_JSON_OBJECT_ENTRY(
-    float,
-    spike_decay_time,
-    "Time, in milliseconds, that a spikes takes to go from the beginning to the end of the streamline",
-    brayns::Default(1.f),
-    brayns::Minimum(0.f))
-BRAYNS_JSON_OBJECT_END()
+struct DTILoaderParameters
+{
+    float radius = 0;
+    float spike_decay_time = 0;
+};
+
+namespace brayns
+{
+template<>
+struct JsonAdapter<DTILoaderParameters> : ObjectAdapter<DTILoaderParameters>
+{
+    static void reflect()
+    {
+        title("DTILoaderParameters");
+        getset(
+            "radius",
+            [](auto &object) { return object.radius; },
+            [](auto &object, auto value) { object.radius = value; })
+            .description("Connectivity streamlines radius");
+        getset(
+            "spike_decay_time",
+            [](auto &object) { return object.spike_decay_time; },
+            [](auto &object, auto value) { object.spike_decay_time = value; })
+            .description("Time [ms], that a spikes takes to go from the beginning to the end of the streamline")
+            .minimum(0)
+            .defaultValue(1);
+    }
+};
+} // namespace brayns
