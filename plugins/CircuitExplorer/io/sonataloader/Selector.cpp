@@ -152,7 +152,8 @@ bbp::sonata::Selection EdgeSelector::select(
     auto population = config.getEdges(populationName);
 
     auto flatNodes = baseNodes.flatten();
-    auto edgeSelection = population.afferentEdges(flatNodes);
+    auto edgeSelection =
+        params.load_afferent ? population.afferentEdges(flatNodes) : population.efferentEdges(flatNodes);
 
     auto percentage = params.edge_percentage;
     return PercentageFilter::filter(edgeSelection, percentage);
