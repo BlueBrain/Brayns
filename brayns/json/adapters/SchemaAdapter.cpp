@@ -151,6 +151,6 @@ void JsonAdapter<JsonSchema>::deserialize(const JsonValue &json, JsonSchema &sch
 {
     (void)json;
     (void)schema;
-    throw std::runtime_error("JSON schemas cannot be deserialized");
+    throw std::runtime_error("JSON schemas deserialization not supported");
 }
 } // namespace brayns

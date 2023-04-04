@@ -222,7 +222,7 @@ struct JsonAdapter<ClippingGeometry<T>> : ObjectAdapter<ClippingGeometry<T>>
             .description("Clipping primitive list");
         getset(
             "invert_normals",
-            [](auto &object) { return object.invert_normals; },
+            [](auto &object) { return object.invertNormals; },
             [](auto &object, auto value) { object.invertNormals = value; })
             .description("Switches clipping side")
             .defaultValue(false);
