@@ -48,7 +48,7 @@ struct JsonAdapter<UploadModelParams> : ObjectAdapter<UploadModelParams>
             .getset(
                 "loader_name",
                 [](auto &object) -> auto & { return object.loader_name; },
-                [](auto &object, auto value) { object.type = std::move(value); })
+                [](auto &object, auto value) { object.loader_name = std::move(value); })
             .description("Loader name");
         builder
             .getset(
