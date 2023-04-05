@@ -46,6 +46,7 @@ struct JsonAdapter<ColorRamp> : ObjectAdapter<ColorRamp>
                 [](auto &object) -> auto & { return object.getColors(); },
                 [](auto &object, auto value) { object.setColors(std::move(value)); })
             .description("RGBA colors")
+            .maxItems(256)
             .required(false);
         return builder.build();
     }

@@ -61,8 +61,6 @@ TEST_CASE("JsonValidator")
         CHECK_EQ(errors[0].message, "invalid type, expected string got integer");
 
         schema.type = brayns::JsonType::Number;
-        schema.minimum = 0;
-        schema.maximum = 1;
         errors = brayns::Json::validate(1, schema);
         CHECK(errors.empty());
     }
@@ -89,6 +87,13 @@ TEST_CASE("JsonValidator")
         errors = brayns::Json::validate(4, schema);
         CHECK_EQ(errors.size(), 1);
         CHECK_EQ(errors[0].message, "value above maximum 4 > 3");
+
+        schema.minimum = std::nullopt;
+        schema.maximum = std::nullopt;
+        errors = brayns::Json::validate(-8, schema);
+        CHECK(errors.empty());
+        errors = brayns::Json::validate(125, schema);
+        CHECK(errors.empty());
     }
     SUBCASE("Enums")
     {
@@ -180,7 +185,6 @@ TEST_CASE("JsonValidator")
         auto schema = brayns::JsonSchema();
         schema.type = brayns::JsonType::Array;
         schema.items = {brayns::Json::getSchema<int>()};
-        schema.maxItems = 100;
 
         auto json = brayns::Json::parse(R"([1, 2, 3])");
         auto errors = brayns::Json::validate(json, schema);

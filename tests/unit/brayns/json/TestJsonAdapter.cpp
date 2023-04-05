@@ -21,12 +21,6 @@
 #include <doctest/doctest.h>
 
 #include <brayns/json/Json.h>
-#include <brayns/json/adapters/ArrayAdapter.h>
-#include <brayns/json/adapters/EnumAdapter.h>
-#include <brayns/json/adapters/GlmAdapter.h>
-#include <brayns/json/adapters/MapAdapter.h>
-#include <brayns/json/adapters/PrimitiveAdapter.h>
-#include <brayns/json/adapters/PtrAdapter.h>
 
 enum class TestEnum
 {
@@ -107,5 +101,22 @@ TEST_CASE("JsonAdapters")
     {
         auto schema = brayns::Json::getSchema<std::unique_ptr<int>>();
         CHECK_EQ(schema.type, brayns::JsonType::Integer);
+    }
+    SUBCASE("Schema")
+    {
+        auto schema = brayns::Json::getSchema<int>();
+        auto json = brayns::Json::stringify(schema);
+        auto ref = R"({"type":"integer"})";
+        CHECK_EQ(json, ref);
+
+        schema = brayns::Json::getSchema<std::string>();
+        json = brayns::Json::stringify(schema);
+        ref = R"({"type":"string"})";
+        CHECK_EQ(json, ref);
+
+        schema = brayns::Json::getSchema<std::vector<int>>();
+        json = brayns::Json::stringify(schema);
+        ref = R"({"items":{"type":"integer"},"type":"array"})";
+        CHECK_EQ(json, ref);
     }
 }

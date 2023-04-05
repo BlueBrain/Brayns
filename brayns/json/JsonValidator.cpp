@@ -72,18 +72,18 @@ public:
         validate(const brayns::JsonValue &json, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
     {
         auto value = json.convert<double>();
-        checkRange(value, schema.minimum, schema.maximum, errors);
+        checkRange(value, schema, errors);
     }
 
-    static void checkRange(double value, double min, double max, brayns::JsonErrorBuilder &errors)
+    static void checkRange(double value, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
     {
-        if (value < min)
+        if (schema.minimum && value < *schema.minimum)
         {
-            errors.add("value below minimum {} < {}", value, min);
+            errors.add("value below minimum {} < {}", value, *schema.minimum);
         }
-        if (value > max)
+        if (schema.maximum && value > *schema.maximum)
         {
-            errors.add("value above maximum {} > {}", value, max);
+            errors.add("value above maximum {} > {}", value, *schema.maximum);
         }
     }
 };
@@ -100,7 +100,7 @@ public:
         }
         auto &array = brayns::JsonExtractor::extractArray(json);
         checkItemSchema(array, schema.items[0], errors);
-        checkItemCount(array.size(), schema.minItems, schema.maxItems, errors);
+        checkItemCount(array.size(), schema, errors);
     }
 
     static void checkItemSchema(
@@ -118,15 +118,15 @@ public:
         }
     }
 
-    static void checkItemCount(size_t size, size_t min, size_t max, brayns::JsonErrorBuilder &errors)
+    static void checkItemCount(size_t size, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
     {
-        if (size < min)
+        if (schema.minItems && size < *schema.minItems)
         {
-            errors.add("item count below minimum {} < {}", size, min);
+            errors.add("item count below minimum {} < {}", size, *schema.minItems);
         }
-        if (size > max)
+        if (schema.maxItems && size > *schema.maxItems)
         {
-            errors.add("item count above maximum {} > {}", size, max);
+            errors.add("item count above maximum {} > {}", size, *schema.maxItems);
         }
     }
 };

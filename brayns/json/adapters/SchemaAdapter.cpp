@@ -68,11 +68,53 @@ public:
     }
 };
 
+class NumberSerializer
+{
+public:
+    static void serialize(const brayns::JsonSchema &schema, brayns::JsonObject &object)
+    {
+        if (schema.minimum)
+        {
+            Helper::set(object, "minimum", *schema.minimum);
+        }
+        if (schema.maximum)
+        {
+            Helper::set(object, "maximum", *schema.maximum);
+        }
+    }
+};
+
+class ArraySerializer
+{
+public:
+    static void serialize(const brayns::JsonSchema &schema, brayns::JsonObject &object)
+    {
+        if (schema.items.empty())
+        {
+            throw std::invalid_argument("Invalid array schema without items");
+        }
+        Helper::set(object, "items", schema.items[0]);
+        if (schema.minItems)
+        {
+            Helper::set(object, "minItems", *schema.minItems);
+        }
+        if (schema.maxItems)
+        {
+            Helper::set(object, "maxItems", *schema.maxItems);
+        }
+    }
+};
+
 class ObjectSerializer
 {
 public:
     static void serialize(const brayns::JsonSchema &schema, brayns::JsonObject &object)
     {
+        if (!schema.items.empty())
+        {
+            Helper::set(object, "additionalProperties", schema.items[0]);
+            return;
+        }
         Helper::set(object, "properties", schema.properties);
         Helper::set(object, "required", _getRequired(schema.properties));
         Helper::set(object, "additionalProperties", false);
@@ -117,32 +159,24 @@ void JsonAdapter<JsonSchema>::serialize(const JsonSchema &schema, JsonValue &jso
     {
         Helper::set(object, "type", schema.type);
     }
+    if (JsonTypeInfo::isNumeric(schema.type))
+    {
+        NumberSerializer::serialize(schema, object);
+        return;
+    }
     if (!schema.enums.empty())
     {
         Helper::set(object, "enum", schema.enums);
         return;
     }
-    if (!schema.properties.empty())
-    {
-        ObjectSerializer::serialize(schema, object);
-        return;
-    }
-    if (JsonTypeInfo::isNumeric(schema.type))
-    {
-        Helper::set(object, "minimum", schema.minimum);
-        Helper::set(object, "maximum", schema.maximum);
-        return;
-    }
     if (schema.type == JsonType::Array)
     {
-        Helper::set(object, "items", schema.items);
-        Helper::set(object, "minItems", schema.minItems);
-        Helper::set(object, "maxItems", schema.maxItems);
+        ArraySerializer::serialize(schema, object);
         return;
     }
     if (schema.type == JsonType::Object)
     {
-        Helper::set(object, "additionalProperties", schema.items);
+        ObjectSerializer::serialize(schema, object);
         return;
     }
 }
@@ -151,6 +185,6 @@ void JsonAdapter<JsonSchema>::deserialize(const JsonValue &json, JsonSchema &sch
 {
     (void)json;
     (void)schema;
-    throw std::runtime_error("JSON schemas deserialization not supported");
+    throw std::runtime_error("JSON schema deserialization not supported");
 }
 } // namespace brayns

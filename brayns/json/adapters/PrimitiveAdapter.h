@@ -45,10 +45,9 @@ struct PrimitiveAdapter
     {
         auto schema = JsonSchema();
         schema.type = type;
-        if constexpr (JsonTypeInfo::isNumeric(type))
+        if constexpr (std::is_unsigned_v<T>)
         {
-            schema.minimum = static_cast<double>(std::numeric_limits<T>::lowest());
-            schema.maximum = static_cast<double>(std::numeric_limits<T>::max());
+            schema.minimum = 0.0;
         }
         return schema;
     }

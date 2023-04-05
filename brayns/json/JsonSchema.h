@@ -22,6 +22,7 @@
 #pragma once
 
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -81,13 +82,13 @@ struct JsonSchema
      * @brief Optional min value if integer or number.
      *
      */
-    double minimum = 0.0;
+    std::optional<double> minimum;
 
     /**
      * @brief Optional max value if integer or number.
      *
      */
-    double maximum = 0.0;
+    std::optional<double> maximum;
 
     /**
      * @brief Holds one schema of items if array or map, else empty.
@@ -99,13 +100,13 @@ struct JsonSchema
      * @brief Optional min item count if array.
      *
      */
-    size_t minItems = 0;
+    std::optional<size_t> minItems;
 
     /**
      * @brief Optional max item count if array.
      *
      */
-    size_t maxItems = 0;
+    std::optional<size_t> maxItems;
 
     /**
      * @brief List of object properties if object, else empty.
