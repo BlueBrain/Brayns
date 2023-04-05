@@ -36,11 +36,15 @@ struct JsonAdapter<ModelInfo> : ObjectAdapter<ModelInfo>
     static JsonObjectInfo reflect()
     {
         auto builder = Builder("ModelInfo");
-        builder.get("load_info", [](auto &object) { return object.getLoadInfo(); }).description("Model load info");
+        builder.get("load_info", [](auto &object) { return object.getLoadInfo(); })
+            .description("Model load info")
+            .required(false);
         builder.get("metadata", [](auto &object) { return object.getMetadata(); })
-            .description("Model-specific metadata");
+            .description("Model-specific metadata")
+            .required(false);
         builder.get("base_transform", [](auto &object) { return object.getBaseTransform(); })
-            .description("Model transform");
+            .description("Model transform")
+            .required(false);
         return builder.build();
     }
 };
