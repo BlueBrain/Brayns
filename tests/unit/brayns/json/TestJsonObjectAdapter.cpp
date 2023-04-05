@@ -194,7 +194,7 @@ TEST_CASE("Schema")
         CHECK_EQ(internal.title, "Internal");
         CHECK_EQ(internal.type, brayns::JsonType::Object);
         CHECK_EQ(internal.properties.size(), 4);
-        auto &property = internal.properties.at("test1");
+        auto &property = internal.properties.at("get");
         CHECK_EQ(property.type, brayns::JsonType::Integer);
         CHECK(property.required);
     }
@@ -212,7 +212,7 @@ TEST_CASE("Parsing")
     }
     SUBCASE("Stringify")
     {
-        auto ref = R"({"getset":1,"get":2,"methods":4})";
+        auto ref = R"({"get":2,"getset":1,"methods":4})";
         auto test = Internal{1, 2, 3};
         auto json = brayns::Json::stringify(test);
         CHECK_EQ(json, ref);

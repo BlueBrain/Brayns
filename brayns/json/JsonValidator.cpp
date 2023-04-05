@@ -94,6 +94,10 @@ public:
     static void
         validate(const brayns::JsonValue &json, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
     {
+        if (schema.items.empty())
+        {
+            throw std::invalid_argument("Invalid array schema without items");
+        }
         auto &array = brayns::JsonExtractor::extractArray(json);
         checkItemSchema(array, schema.items[0], errors);
         checkItemCount(array.size(), schema.minItems, schema.maxItems, errors);
@@ -133,6 +137,10 @@ public:
     static void
         validate(const brayns::JsonValue &json, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
     {
+        if (schema.items.empty())
+        {
+            throw std::invalid_argument("Invalid map schema without items");
+        }
         auto &object = brayns::JsonExtractor::extractObject(json);
         checkItemSchema(object, schema.items[0], errors);
     }
@@ -229,6 +237,7 @@ public:
         {
             stream << ", '" << values[i] << "'";
         }
+        stream << ']';
         errors.add("invalid enum '{}' not in {}", value, stream.str());
     }
 };
@@ -276,19 +285,14 @@ public:
         {
             return;
         }
-        if (!schema.enums.empty())
-        {
-            EnumValidator::validate(json, schema, errors);
-            return;
-        }
-        if (!schema.properties.empty())
-        {
-            ObjectValidator::validate(json, schema, errors);
-            return;
-        }
         if (brayns::JsonTypeInfo::isNumeric(schema.type))
         {
             NumberValidator::validate(json, schema, errors);
+            return;
+        }
+        if (!schema.enums.empty())
+        {
+            EnumValidator::validate(json, schema, errors);
             return;
         }
         if (schema.type == brayns::JsonType::Array)
@@ -298,9 +302,23 @@ public:
         }
         if (schema.type == brayns::JsonType::Object)
         {
+            _validateObject(json, schema, errors);
+            return;
+        }
+    }
+
+private:
+    static void _validateObject(
+        const brayns::JsonValue &json,
+        const brayns::JsonSchema &schema,
+        brayns::JsonErrorBuilder &errors)
+    {
+        if (!schema.items.empty())
+        {
             MapValidator::validate(json, schema, errors);
             return;
         }
+        ObjectValidator::validate(json, schema, errors);
     }
 };
 } // namespace

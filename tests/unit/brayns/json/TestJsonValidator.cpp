@@ -61,6 +61,8 @@ TEST_CASE("JsonValidator")
         CHECK_EQ(errors[0].message, "invalid type, expected string got integer");
 
         schema.type = brayns::JsonType::Number;
+        schema.minimum = 0;
+        schema.maximum = 1;
         errors = brayns::Json::validate(1, schema);
         CHECK(errors.empty());
     }
@@ -144,13 +146,13 @@ TEST_CASE("JsonValidator")
         json = brayns::Json::parse(R"({"string": "test"})");
         errors = brayns::Json::validate(json, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0].message, "missing property 'integer'");
+        CHECK_EQ(errors[0].message, "missing required property 'integer'");
 
         json = brayns::Json::parse(R"({"integer": 1})");
         errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
     }
-    SUBCASE("Additional properties")
+    SUBCASE("Unknown properties")
     {
         auto schema = brayns::JsonSchema();
         schema.type = brayns::JsonType::Object;
@@ -160,6 +162,7 @@ TEST_CASE("JsonValidator")
         CHECK_EQ(errors.size(), 1);
         CHECK_EQ(errors[0].message, "unknown property 'something'");
 
+        json = brayns::Json::parse(R"({})");
         errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
     }
@@ -168,6 +171,7 @@ TEST_CASE("JsonValidator")
         auto schema = brayns::JsonSchema();
         schema.type = brayns::JsonType::Array;
         schema.items = {brayns::Json::getSchema<int>()};
+        schema.maxItems = 100;
 
         auto json = brayns::Json::parse(R"([1, 2, 3])");
         auto errors = brayns::Json::validate(json, schema);
@@ -216,7 +220,9 @@ TEST_CASE("JsonValidator")
 
         auto schema = brayns::JsonSchema();
         schema.type = brayns::JsonType::Object;
-        schema.properties["test1"] = brayns::Json::getSchema<int>();
+        auto integer = brayns::Json::getSchema<int>();
+        integer.required = true;
+        schema.properties["test1"] = std::move(integer);
         schema.properties["test2"] = internal;
 
         auto json = brayns::Json::parse(R"({"test2": {"test3": [1.3]}})");
