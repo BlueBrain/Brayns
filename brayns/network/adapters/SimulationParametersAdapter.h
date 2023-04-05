@@ -30,22 +30,26 @@ namespace brayns
 template<>
 struct JsonAdapter<SimulationParameters> : ObjectAdapter<SimulationParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("SimulationParameters");
-        get("start_frame", [](auto &object) { return object.getStartFrame(); })
+        auto builder = Builder("SimulationParameters");
+        builder.get("start_frame", [](auto &object) { return object.getStartFrame(); })
             .description("Initial simulation frame index");
-        get("end_frame", [](auto &object) { return object.getEndFrame(); }).description("Final simulation frame index");
-        getset(
-            "current",
-            [](auto &object) { return object.getFrame(); },
-            [](auto &object, auto value) { object.setFrame(value); })
+        builder.get("end_frame", [](auto &object) { return object.getEndFrame(); })
+            .description("Final simulation frame index");
+        builder
+            .getset(
+                "current",
+                [](auto &object) { return object.getFrame(); },
+                [](auto &object, auto value) { object.setFrame(value); })
             .description("Current simulation frame index");
-        get("dt", [](auto &object) { return object.getDt(); }).description("Delta time between two frames");
-        get(
-            "unit",
-            [](auto &object) -> auto & { return object.getTimeUnit(); })
+        builder.get("dt", [](auto &object) { return object.getDt(); }).description("Delta time between two frames");
+        builder
+            .get(
+                "unit",
+                [](auto &object) -> auto & { return object.getTimeUnit(); })
             .description("Time unit");
+        return builder.build();
     }
 };
 } // namespace brayns

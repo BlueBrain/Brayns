@@ -30,21 +30,25 @@ namespace brayns
 template<>
 struct JsonAdapter<LoaderInfo> : ObjectAdapter<LoaderInfo>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("LoaderInfo");
-        get(
-            "name",
-            [](auto &object) -> auto & { return object.name; })
+        auto builder = Builder("LoaderInfo");
+        builder
+            .get(
+                "name",
+                [](auto &object) -> auto & { return object.name; })
             .description("Loader name");
-        get(
-            "extensions",
-            [](auto &object) -> auto & { return object.extensions; })
+        builder
+            .get(
+                "extensions",
+                [](auto &object) -> auto & { return object.extensions; })
             .description("Supported file extensions");
-        get(
-            "input_parameters_schema",
-            [](auto &object) -> auto & { return object.inputParametersSchema; })
+        builder
+            .get(
+                "input_parameters_schema",
+                [](auto &object) -> auto & { return object.inputParametersSchema; })
             .description("Loader properties");
+        return builder.build();
     }
 };
 } // namespace brayns

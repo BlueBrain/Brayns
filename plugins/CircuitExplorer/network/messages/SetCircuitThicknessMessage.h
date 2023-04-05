@@ -34,19 +34,22 @@ namespace brayns
 template<>
 struct JsonAdapter<SetCircuitThicknessMessage> : ObjectAdapter<SetCircuitThicknessMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("SetCircuitThicknessMessage");
-        getset(
-            "model_id",
-            [](auto &object) { return object.model_id; },
-            [](auto &object, auto value) { object.model_id = value; })
+        auto builder = Builder("SetCircuitThicknessMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
             .description("ID of the circuit model");
-        getset(
-            "radius_multiplier",
-            [](auto &object) { return object.radius_multiplier; },
-            [](auto &object, auto value) { object.radius_multiplier = value; })
+        builder
+            .getset(
+                "radius_multiplier",
+                [](auto &object) { return object.radius_multiplier; },
+                [](auto &object, auto value) { object.radius_multiplier = value; })
             .description("Scaling factor");
+        return builder.build();
     }
 };
 } // namespace brayns

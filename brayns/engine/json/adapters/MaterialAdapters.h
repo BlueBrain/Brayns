@@ -35,122 +35,137 @@ namespace brayns
 template<>
 struct JsonAdapter<CarPaint> : ObjectAdapter<CarPaint>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("CarPaint");
-        getset(
-            "flake_density",
-            [](auto &object) { return object.flakeDensity; },
-            [](auto &object, auto value) { object.flakeDensity = value; })
+        auto builder = Builder("CarPaint");
+        builder
+            .getset(
+                "flake_density",
+                [](auto &object) { return object.flakeDensity; },
+                [](auto &object, auto value) { object.flakeDensity = value; })
             .description("Metal flake density")
             .minimum(0)
             .maximum(1)
             .required(false);
+        return builder.build();
     }
 };
 
 template<>
 struct JsonAdapter<Emissive> : ObjectAdapter<Emissive>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Emissive");
-        getset(
-            "color",
-            [](auto &object) -> auto & { return object.color; },
-            [](auto &object, const auto &value) { object.color = value; })
+        auto builder = Builder("Emissive");
+        builder
+            .getset(
+                "color",
+                [](auto &object) -> auto & { return object.color; },
+                [](auto &object, const auto &value) { object.color = value; })
             .description("Emission color")
             .required(false);
-        getset(
-            "intensity",
-            [](auto &object) { return object.intensity; },
-            [](auto &object, auto value) { object.intensity = value; })
+        builder
+            .getset(
+                "intensity",
+                [](auto &object) { return object.intensity; },
+                [](auto &object, auto value) { object.intensity = value; })
             .description("Emission intensity")
             .minimum(0)
             .required(false);
+        return builder.build();
     }
 };
 
 template<>
 struct JsonAdapter<Glass> : ObjectAdapter<Glass>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Glass");
-        getset(
-            "index_of_refraction",
-            [](auto &object) { return object.indexOfRefraction; },
-            [](auto &object, auto value) { object.indexOfRefraction = value; })
+        auto builder = Builder("Glass");
+        builder
+            .getset(
+                "index_of_refraction",
+                [](auto &object) { return object.indexOfRefraction; },
+                [](auto &object, auto value) { object.indexOfRefraction = value; })
             .description("Index of refraction of the glass")
             .required(false);
+        return builder.build();
     }
 };
 
 template<>
 struct JsonAdapter<Matte> : ObjectAdapter<Matte>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Matte");
-        getset(
-            "opacity",
-            [](auto &object) { return object.opacity; },
-            [](auto &object, auto value) { object.opacity = value; })
+        auto builder = Builder("Matte");
+        builder
+            .getset(
+                "opacity",
+                [](auto &object) { return object.opacity; },
+                [](auto &object, auto value) { object.opacity = value; })
             .description("Surface opacity")
             .minimum(0)
             .maximum(1)
             .required(false);
+        return builder.build();
     }
 };
 
 template<>
 struct JsonAdapter<Metal> : ObjectAdapter<Metal>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Metal");
-        getset(
-            "roughness",
-            [](auto &object) { return object.roughness; },
-            [](auto &object, auto value) { object.roughness = value; })
+        auto builder = Builder("Metal");
+        builder
+            .getset(
+                "roughness",
+                [](auto &object) { return object.roughness; },
+                [](auto &object, auto value) { object.roughness = value; })
             .description("Surface roughness")
             .minimum(0.01)
             .maximum(1)
             .required(false);
+        return builder.build();
     }
 };
 
 template<>
 struct JsonAdapter<Phong> : ObjectAdapter<Phong>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Phong");
-        getset(
-            "opacity",
-            [](auto &object) { return object.opacity; },
-            [](auto &object, auto value) { object.opacity = value; })
+        auto builder = Builder("Phong");
+        builder
+            .getset(
+                "opacity",
+                [](auto &object) { return object.opacity; },
+                [](auto &object, auto value) { object.opacity = value; })
             .description("Surface opacity")
             .minimum(0)
             .maximum(1)
             .required(false);
+        return builder.build();
     }
 };
 
 template<>
 struct JsonAdapter<Plastic> : ObjectAdapter<Plastic>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Plastic");
-        getset(
-            "opacity",
-            [](auto &object) { return object.opacity; },
-            [](auto &object, auto value) { object.opacity = value; })
+        auto builder = Builder("Plastic");
+        builder
+            .getset(
+                "opacity",
+                [](auto &object) { return object.opacity; },
+                [](auto &object, auto value) { object.opacity = value; })
             .description("Surface opacity")
             .minimum(0)
             .maximum(1)
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

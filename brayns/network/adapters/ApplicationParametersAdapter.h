@@ -30,18 +30,21 @@ namespace brayns
 template<>
 struct JsonAdapter<ApplicationParameters> : ObjectAdapter<ApplicationParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ApplicationParameters");
-        get(
-            "plugins",
-            [](auto &object) -> auto & { return object.getPlugins(); })
+        auto builder = Builder("ApplicationParameters");
+        builder
+            .get(
+                "plugins",
+                [](auto &object) -> auto & { return object.getPlugins(); })
             .description("Plugins loaded when the application was started");
-        getset(
-            "viewport",
-            [](auto &object) -> auto & { return object.getWindowSize(); },
-            [](auto &object, const auto &value) { object.setWindowSize(value); })
+        builder
+            .getset(
+                "viewport",
+                [](auto &object) -> auto & { return object.getWindowSize(); },
+                [](auto &object, const auto &value) { object.setWindowSize(value); })
             .description("Framebuffer resolution in pixels");
+        return builder.build();
     }
 };
 } // namespace brayns

@@ -35,19 +35,22 @@ struct ColorMethodValuesMessage
 template<>
 struct JsonAdapter<ColorMethodValuesMessage> : ObjectAdapter<ColorMethodValuesMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ColorMethodValuesMessage");
-        getset(
-            "id",
-            [](auto &object) { return object.id; },
-            [](auto &object, auto value) { object.id = value; })
+        auto builder = Builder("ColorMethodValuesMessage");
+        builder
+            .getset(
+                "id",
+                [](auto &object) { return object.id; },
+                [](auto &object, auto value) { object.id = value; })
             .description("ID of the model that will be colored");
-        getset(
-            "method",
-            [](auto &object) -> auto & { return object.method; },
-            [](auto &object, auto value) { object.method = std::move(value); })
+        builder
+            .getset(
+                "method",
+                [](auto &object) -> auto & { return object.method; },
+                [](auto &object, auto value) { object.method = std::move(value); })
             .description("Coloring method which values will be returned");
+        return builder.build();
     }
 };
 
@@ -61,24 +64,28 @@ struct ColorModelMessage
 template<>
 struct JsonAdapter<ColorModelMessage> : ObjectAdapter<ColorModelMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ColorModelMessage");
-        getset(
-            "id",
-            [](auto &object) { return object.id; },
-            [](auto &object, auto value) { object.id = value; })
+        auto builder = Builder("ColorModelMessage");
+        builder
+            .getset(
+                "id",
+                [](auto &object) { return object.id; },
+                [](auto &object, auto value) { object.id = value; })
             .description("ID of the model to color");
-        getset(
-            "method",
-            [](auto &object) -> auto & { return object.method; },
-            [](auto &object, auto value) { object.method = std::move(value); })
+        builder
+            .getset(
+                "method",
+                [](auto &object) -> auto & { return object.method; },
+                [](auto &object, auto value) { object.method = std::move(value); })
             .description("Coloring method");
-        getset(
-            "values",
-            [](auto &object) -> auto & { return object.values; },
-            [](auto &object, auto value) { object.values = std::move(value); })
+        builder
+            .getset(
+                "values",
+                [](auto &object) -> auto & { return object.values; },
+                [](auto &object, auto value) { object.values = std::move(value); })
             .description("Coloring parameters");
+        return builder.build();
     }
 };
 } // namespace brayns

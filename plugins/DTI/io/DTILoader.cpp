@@ -46,25 +46,29 @@ namespace brayns
 template<>
 struct JsonAdapter<DTIConfiguration> : ObjectAdapter<DTIConfiguration>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("DTIConfiguration");
-        getset(
-            "streamlines_path",
-            [](auto &object) -> auto & { return object.streamlines_path; },
-            [](auto &object, auto value) { object.streamlines_path = std::move(value); })
+        auto builder = Builder("DTIConfiguration");
+        builder
+            .getset(
+                "streamlines_path",
+                [](auto &object) -> auto & { return object.streamlines_path; },
+                [](auto &object, auto value) { object.streamlines_path = std::move(value); })
             .description("Path to the streamlines file");
-        getset(
-            "gids_to_streamlines_path",
-            [](auto &object) -> auto & { return object.gids_to_streamlines_path; },
-            [](auto &object, auto value) { object.gids_to_streamlines_path = std::move(value); })
+        builder
+            .getset(
+                "gids_to_streamlines_path",
+                [](auto &object) -> auto & { return object.gids_to_streamlines_path; },
+                [](auto &object, auto value) { object.gids_to_streamlines_path = std::move(value); })
             .description("Path to the gid-streamline mapping file");
-        getset(
-            "circuit_path",
-            [](auto &object) -> auto & { return object.circuit_path; },
-            [](auto &object, auto value) { object.circuit_path = std::move(value); })
+        builder
+            .getset(
+                "circuit_path",
+                [](auto &object) -> auto & { return object.circuit_path; },
+                [](auto &object, auto value) { object.circuit_path = std::move(value); })
             .description("Path to the source circuit for spike simulation")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

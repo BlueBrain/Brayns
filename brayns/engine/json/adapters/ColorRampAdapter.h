@@ -30,21 +30,24 @@ namespace brayns
 template<>
 struct JsonAdapter<ColorRamp> : ObjectAdapter<ColorRamp>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ColorRamp");
-        getset(
-            "range",
-            [](auto &object) -> auto & { return object.getValuesRange(); },
-            [](auto &object, const auto &value) { object.setValuesRange(value); })
+        auto builder = Builder("ColorRamp");
+        builder
+            .getset(
+                "range",
+                [](auto &object) -> auto & { return object.getValuesRange(); },
+                [](auto &object, const auto &value) { object.setValuesRange(value); })
             .description("Value range")
             .required(false);
-        getset(
-            "colors",
-            [](auto &object) -> auto & { return object.getColors(); },
-            [](auto &object, auto value) { object.setColors(std::move(value)); })
+        builder
+            .getset(
+                "colors",
+                [](auto &object) -> auto & { return object.getColors(); },
+                [](auto &object, auto value) { object.setColors(std::move(value)); })
             .description("RGBA colors")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

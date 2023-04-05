@@ -33,14 +33,16 @@ struct InspectMessage
 template<>
 struct JsonAdapter<InspectMessage> : ObjectAdapter<InspectMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("InspectMessage");
-        getset(
-            "position",
-            [](auto &object) -> auto & { return object.position; },
-            [](auto &object, const auto &value) { object.position = value; })
+        auto builder = Builder("InspectMessage");
+        builder
+            .getset(
+                "position",
+                [](auto &object) -> auto & { return object.position; },
+                [](auto &object, const auto &value) { object.position = value; })
             .description("Normalized screen position XY");
+        return builder.build();
     }
 };
 
@@ -55,21 +57,24 @@ struct InspectResult
 template<>
 struct JsonAdapter<InspectResult> : ObjectAdapter<InspectResult>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("InspectResult");
-        get("hit", [](auto &object) { return object.hit; })
+        auto builder = Builder("InspectResult");
+        builder.get("hit", [](auto &object) { return object.hit; })
             .description("True if a model was at given position, otherwise the rest is invalid");
-        get(
-            "position",
-            [](auto &object) -> auto & { return object.position; })
+        builder
+            .get(
+                "position",
+                [](auto &object) -> auto & { return object.position; })
             .description("World position XYZ where the model was hit");
-        get("model_id", [](auto &object) { return object.model_id; })
+        builder.get("model_id", [](auto &object) { return object.model_id; })
             .description("ID of the model that was hit at given position");
-        get(
-            "metadata",
-            [](auto &object) -> auto & { return object.metadata; })
+        builder
+            .get(
+                "metadata",
+                [](auto &object) -> auto & { return object.metadata; })
             .description("Extra attributes depending on the type of model hitted");
+        return builder.build();
     }
 };
 } // namespace brayns

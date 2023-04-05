@@ -36,13 +36,18 @@ struct VersionMessage
 template<>
 struct JsonAdapter<VersionMessage> : ObjectAdapter<VersionMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("VersionMessage");
-        get("major", [](auto &object) { return object.major; }).description("Major version");
-        get("minor", [](auto &object) { return object.minor; }).description("Minor version");
-        get("patch", [](auto &object) { return object.patch; }).description("Patch version");
-        get("revision", [](auto &object) -> decltype(auto) { return object.revision; }).description("SCM revision");
+        auto builder = Builder("VersionMessage");
+        builder.get("major", [](auto &object) { return object.major; }).description("Major version");
+        builder.get("minor", [](auto &object) { return object.minor; }).description("Minor version");
+        builder.get("patch", [](auto &object) { return object.patch; }).description("Patch version");
+        builder
+            .get(
+                "revision",
+                [](auto &object) -> auto & { return object.revision; })
+            .description("SCM revision");
+        return builder.build();
     }
 };
 } // namespace brayns

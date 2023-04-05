@@ -42,31 +42,36 @@ struct RequestMessage
 template<>
 struct JsonAdapter<RequestMessage> : ObjectAdapter<RequestMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("RequestMessage");
-        getset(
-            "jsonrpc",
-            [](auto &object) -> auto & { return object.jsonrpc; },
-            [](auto &object, auto value) { object.jsonrpc = std::move(value); })
+        auto builder = Builder("RequestMessage");
+        builder
+            .getset(
+                "jsonrpc",
+                [](auto &object) -> auto & { return object.jsonrpc; },
+                [](auto &object, auto value) { object.jsonrpc = std::move(value); })
             .description("JSON-RPC version");
-        getset(
-            "id",
-            [](auto &object) -> auto & { return object.id; },
-            [](auto &object, auto value) { object.id = std::move(value); })
+        builder
+            .getset(
+                "id",
+                [](auto &object) -> auto & { return object.id; },
+                [](auto &object, auto value) { object.id = std::move(value); })
             .description("Request ID")
             .required(false);
-        getset(
-            "method",
-            [](auto &object) -> auto & { return object.method; },
-            [](auto &object, auto value) { object.method = std::move(value); })
+        builder
+            .getset(
+                "method",
+                [](auto &object) -> auto & { return object.method; },
+                [](auto &object, auto value) { object.method = std::move(value); })
             .description("Entrypoint name");
-        getset(
-            "params",
-            [](auto &object) -> auto & { return object.params; },
-            [](auto &object, const auto &value) { object.params = value; })
+        builder
+            .getset(
+                "params",
+                [](auto &object) -> auto & { return object.params; },
+                [](auto &object, const auto &value) { object.params = value; })
             .description("Request content")
             .required(false);
+        return builder.build();
     }
 };
 
@@ -82,14 +87,16 @@ struct CancelParams
 template<>
 struct JsonAdapter<CancelParams> : ObjectAdapter<CancelParams>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("CancelParams");
-        getset(
-            "id",
-            [](auto &object) -> auto & { return object.id; },
-            [](auto &object, auto value) { object.id = std::move(value); })
+        auto builder = Builder("CancelParams");
+        builder
+            .getset(
+                "id",
+                [](auto &object) -> auto & { return object.id; },
+                [](auto &object, auto value) { object.id = std::move(value); })
             .description("ID of the request to cancel");
+        return builder.build();
     }
 };
 
@@ -107,21 +114,25 @@ struct ReplyMessage
 template<>
 struct JsonAdapter<ReplyMessage> : ObjectAdapter<ReplyMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ReplyMessage");
-        get(
-            "jsonrpc",
-            [](auto &object) -> auto & { return object.jsonrpc; })
+        auto builder = Builder("ReplyMessage");
+        builder
+            .get(
+                "jsonrpc",
+                [](auto &object) -> auto & { return object.jsonrpc; })
             .description("JSON-RPC version");
-        get(
-            "id",
-            [](auto &object) -> auto & { return object.id; })
+        builder
+            .get(
+                "id",
+                [](auto &object) -> auto & { return object.id; })
             .description("ID of the corresponding request");
-        get(
-            "result",
-            [](auto &object) -> auto & { return object.result; })
+        builder
+            .get(
+                "result",
+                [](auto &object) -> auto & { return object.result; })
             .description("Reply content");
+        return builder.build();
     }
 };
 
@@ -139,18 +150,21 @@ struct ErrorInfo
 template<>
 struct JsonAdapter<ErrorInfo> : ObjectAdapter<ErrorInfo>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ErrorInfo");
-        get("code", [](auto &object) { return object.code; }).description("Error code");
-        get(
-            "message",
-            [](auto &object) -> auto & { return object.message; })
+        auto builder = Builder("ErrorInfo");
+        builder.get("code", [](auto &object) { return object.code; }).description("Error code");
+        builder
+            .get(
+                "message",
+                [](auto &object) -> auto & { return object.message; })
             .description("Error description");
-        get(
-            "data",
-            [](auto &object) -> auto & { return object.data; })
+        builder
+            .get(
+                "data",
+                [](auto &object) -> auto & { return object.data; })
             .description("Additional error info");
+        return builder.build();
     }
 };
 
@@ -168,21 +182,25 @@ struct ErrorMessage
 template<>
 struct JsonAdapter<ErrorMessage> : ObjectAdapter<ErrorMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ErrorMessage");
-        get(
-            "jsonrpc",
-            [](auto &object) -> auto & { return object.jsonrpc; })
+        auto builder = Builder("ErrorMessage");
+        builder
+            .get(
+                "jsonrpc",
+                [](auto &object) -> auto & { return object.jsonrpc; })
             .description("JSON-RPC version");
-        get(
-            "id",
-            [](auto &object) -> auto & { return object.id; })
+        builder
+            .get(
+                "id",
+                [](auto &object) -> auto & { return object.id; })
             .description("ID of the corresponding request");
-        get(
-            "error",
-            [](auto &object) -> auto & { return object.error; })
+        builder
+            .get(
+                "error",
+                [](auto &object) -> auto & { return object.error; })
             .description("Error info");
+        return builder.build();
     }
 };
 
@@ -200,18 +218,21 @@ struct ProgressInfo
 template<>
 struct JsonAdapter<ProgressInfo> : ObjectAdapter<ProgressInfo>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ProgressInfo");
-        get(
-            "id",
-            [](auto &object) -> auto & { return object.id; })
+        auto builder = Builder("ProgressInfo");
+        builder
+            .get(
+                "id",
+                [](auto &object) -> auto & { return object.id; })
             .description("ID of the corresponding request");
-        get(
-            "operation",
-            [](auto &object) -> auto & { return object.operation; })
+        builder
+            .get(
+                "operation",
+                [](auto &object) -> auto & { return object.operation; })
             .description("Description of the current task");
-        get("amount", [](auto &object) { return object.amount; }).description("Global progess [0-1]");
+        builder.get("amount", [](auto &object) { return object.amount; }).description("Global progess [0-1]");
+        return builder.build();
     }
 };
 
@@ -229,21 +250,25 @@ struct ProgressMessage
 template<>
 struct JsonAdapter<ProgressMessage> : ObjectAdapter<ProgressMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ProgressMessage");
-        get(
-            "jsonrpc",
-            [](auto &object) -> auto & { return object.jsonrpc; })
+        auto builder = Builder("ProgressMessage");
+        builder
+            .get(
+                "jsonrpc",
+                [](auto &object) -> auto & { return object.jsonrpc; })
             .description("JSON-RPC version");
-        get(
-            "method",
-            [](auto &object) -> auto & { return object.method; })
+        builder
+            .get(
+                "method",
+                [](auto &object) -> auto & { return object.method; })
             .description("Entrypoint name");
-        get(
-            "params",
-            [](auto &object) -> auto & { return object.params; })
+        builder
+            .get(
+                "params",
+                [](auto &object) -> auto & { return object.params; })
             .description("Progress info");
+        return builder.build();
     }
 };
 } // namespace brayns

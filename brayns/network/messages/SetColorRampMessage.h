@@ -36,19 +36,22 @@ struct SetColorRampMessage
 template<>
 struct JsonAdapter<SetColorRampMessage> : ObjectAdapter<SetColorRampMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("SetColorRampMessage");
-        getset(
-            "id",
-            [](auto &object) { return object.id; },
-            [](auto &object, auto value) { object.id = value; })
+        auto builder = Builder("SetColorRampMessage");
+        builder
+            .getset(
+                "id",
+                [](auto &object) { return object.id; },
+                [](auto &object, auto value) { object.id = value; })
             .description("Model ID");
-        getset(
-            "color_ramp",
-            [](auto &object) -> auto & { return object.color_ramp; },
-            [](auto &object, const auto &value) { object.color_ramp = value; })
+        builder
+            .getset(
+                "color_ramp",
+                [](auto &object) -> auto & { return object.color_ramp; },
+                [](auto &object, const auto &value) { object.color_ramp = value; })
             .description("Color ramp");
+        return builder.build();
     }
 };
 } // namespace brayns

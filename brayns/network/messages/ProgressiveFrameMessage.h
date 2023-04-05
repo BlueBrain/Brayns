@@ -33,16 +33,18 @@ struct ProgressiveFrameMessage
 template<>
 struct JsonAdapter<ProgressiveFrameMessage> : ObjectAdapter<ProgressiveFrameMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ProgressiveFrameMessage");
-        getset(
-            "scale",
-            [](auto &object) { return object.scale; },
-            [](auto &object, auto value) { object.scale = value; })
+        auto builder = Builder("ProgressiveFrameMessage");
+        builder
+            .getset(
+                "scale",
+                [](auto &object) { return object.scale; },
+                [](auto &object, auto value) { object.scale = value; })
             .description("Frame size reduction factor")
             .minimum(1)
             .defaultValue(4);
+        return builder.build();
     }
 };
 } // namespace brayns

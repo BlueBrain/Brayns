@@ -35,19 +35,22 @@ struct InstantiateMessage
 template<>
 struct JsonAdapter<InstantiateMessage> : ObjectAdapter<InstantiateMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("InstantiateMessage");
-        getset(
-            "model_id",
-            [](auto &object) { return object.model_id; },
-            [](auto &object, auto value) { object.model_id = value; })
+        auto builder = Builder("InstantiateMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
             .description("ID of the model to instantiate");
-        getset(
-            "transforms",
-            [](auto &object) -> auto & { return object.transforms; },
-            [](auto &object, auto value) { object.transforms = std::move(value); })
+        builder
+            .getset(
+                "transforms",
+                [](auto &object) -> auto & { return object.transforms; },
+                [](auto &object, auto value) { object.transforms = std::move(value); })
             .description("Transformations to apply to the new instances");
+        return builder.build();
     }
 };
 } // namespace brayns

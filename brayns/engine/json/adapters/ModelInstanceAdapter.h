@@ -34,31 +34,36 @@ namespace brayns
 template<>
 struct JsonAdapter<ModelInstance> : ObjectAdapter<ModelInstance>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ModelInstance");
-        get("model_id", [](auto &object) { return object.getID(); }).description("Model ID");
-        get(
-            "model_type",
-            [](auto &object) -> auto & { return object.getModelType(); })
+        auto builder = Builder("ModelInstance");
+        builder.get("model_id", [](auto &object) { return object.getID(); }).description("Model ID");
+        builder
+            .get(
+                "model_type",
+                [](auto &object) -> auto & { return object.getModelType(); })
             .description("Model type");
-        get(
-            "bounds",
-            [](auto &object) -> auto & { return object.getBounds(); })
+        builder
+            .get(
+                "bounds",
+                [](auto &object) -> auto & { return object.getBounds(); })
             .description("Model bounds");
-        get("info", [](auto &object) { return object.getModelData(); }).description("Model-specific info");
-        getset(
-            "transform",
-            [](auto &object) -> auto & { return object.getTransform(); },
-            [](auto &object, const auto &value) { object.setTransform(value); })
+        builder.get("info", [](auto &object) { return object.getModelData(); }).description("Model-specific info");
+        builder
+            .getset(
+                "transform",
+                [](auto &object) -> auto & { return object.getTransform(); },
+                [](auto &object, const auto &value) { object.setTransform(value); })
             .description("Model transform")
             .required(false);
-        getset(
-            "is_visible",
-            [](auto &object) { return object.isVisible(); },
-            [](auto &object, auto value) { object.setVisible(value); })
+        builder
+            .getset(
+                "is_visible",
+                [](auto &object) { return object.isVisible(); },
+                [](auto &object, auto value) { object.setVisible(value); })
             .description("Wether the model is being rendered or not")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

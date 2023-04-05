@@ -46,22 +46,26 @@ struct JsonAdapter<LoadInfo::LoadSource> : EnumAdapter<LoadInfo::LoadSource>
 template<>
 struct JsonAdapter<LoadInfo> : ObjectAdapter<LoadInfo>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("LoadInfo");
-        get("source", [](auto &object) { return object.source; }).description("Model load source");
-        get(
-            "path",
-            [](auto &object) -> auto & { return object.path; })
+        auto builder = Builder("LoadInfo");
+        builder.get("source", [](auto &object) { return object.source; }).description("Model load source");
+        builder
+            .get(
+                "path",
+                [](auto &object) -> auto & { return object.path; })
             .description("File path in case of file load type");
-        get(
-            "loader_name",
-            [](auto &object) -> auto & { return object.loaderName; })
+        builder
+            .get(
+                "loader_name",
+                [](auto &object) -> auto & { return object.loaderName; })
             .description("Loader name");
-        get(
-            "load_parameters",
-            [](auto &object) -> auto & { return object.loadParameters; })
+        builder
+            .get(
+                "load_parameters",
+                [](auto &object) -> auto & { return object.loadParameters; })
             .description("Loader settings");
+        return builder.build();
     }
 };
 } // namespace brayns

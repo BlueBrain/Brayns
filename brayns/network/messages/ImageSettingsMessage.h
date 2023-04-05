@@ -77,27 +77,31 @@ private:
 template<>
 struct JsonAdapter<ImageSettings> : ObjectAdapter<ImageSettings>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ImageSettings");
-        getset(
-            "format",
-            [](auto &object) -> auto & { return object.getFormat(); },
-            [](auto &object, auto value) { object.setFormat(std::move(value)); })
+        auto builder = Builder("ImageSettings");
+        builder
+            .getset(
+                "format",
+                [](auto &object) -> auto & { return object.getFormat(); },
+                [](auto &object, auto value) { object.setFormat(std::move(value)); })
             .description("Image format (jpg or png)")
             .defaultValue("png");
-        getset(
-            "quality",
-            [](auto &object) { return object.getQuality(); },
-            [](auto &object, auto value) { object.setQuality(value); })
+        builder
+            .getset(
+                "quality",
+                [](auto &object) { return object.getQuality(); },
+                [](auto &object, auto value) { object.setQuality(value); })
             .description("Image quality (0 = lowest quality, 100 = highest quality")
             .defaultValue(100);
-        getset(
-            "size",
-            [](auto &object) -> auto & { return object.getSize(); },
-            [](auto &object, const auto &value) { object.setSize(value); })
+        builder
+            .getset(
+                "size",
+                [](auto &object) -> auto & { return object.getSize(); },
+                [](auto &object, const auto &value) { object.setSize(value); })
             .description("Image width and height")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

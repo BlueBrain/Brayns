@@ -52,14 +52,16 @@ struct JsonAdapter<VoxelType> : EnumAdapter<VoxelType>
 template<>
 struct JsonAdapter<NRRDLoaderParameters> : ObjectAdapter<NRRDLoaderParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("NRRDLoaderParameters");
-        getset(
-            "type",
-            [](auto &object) { return object.type; },
-            [](auto &object, auto value) { object.type = value; })
+        auto builder = Builder("NRRDLoaderParameters");
+        builder
+            .getset(
+                "type",
+                [](auto &object) { return object.type; },
+                [](auto &object, auto value) { object.type = value; })
             .description("Voxel type to interpret the atlas being loaded");
+        return builder.build();
     }
 };
 } // namespace brayns

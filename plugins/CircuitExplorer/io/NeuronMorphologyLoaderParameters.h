@@ -58,52 +58,60 @@ struct JsonAdapter<NeuronGeometryType> : EnumAdapter<NeuronGeometryType>
 template<>
 struct JsonAdapter<NeuronMorphologyLoaderParameters> : ObjectAdapter<NeuronMorphologyLoaderParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("NeuronMorphologyLoaderParameters");
-        getset(
-            "radius_multiplier",
-            [](auto &object) { return object.radius_multiplier; },
-            [](auto &object, auto value) { object.radius_multiplier = value; })
+        auto builder = Builder("NeuronMorphologyLoaderParameters");
+        builder
+            .getset(
+                "radius_multiplier",
+                [](auto &object) { return object.radius_multiplier; },
+                [](auto &object, auto value) { object.radius_multiplier = value; })
             .description("Parameter to multiply all morphology sample radii by")
             .defaultValue(1)
             .minimum(0.1);
-        getset(
-            "load_soma",
-            [](auto &object) { return object.load_soma; },
-            [](auto &object, auto value) { object.load_soma = value; })
+        builder
+            .getset(
+                "load_soma",
+                [](auto &object) { return object.load_soma; },
+                [](auto &object, auto value) { object.load_soma = value; })
             .description("Load the soma section of the neuron")
             .defaultValue(true);
-        getset(
-            "load_axon",
-            [](auto &object) { return object.load_axon; },
-            [](auto &object, auto value) { object.load_axon = value; })
+        builder
+            .getset(
+                "load_axon",
+                [](auto &object) { return object.load_axon; },
+                [](auto &object, auto value) { object.load_axon = value; })
             .description("Load the axon section of the neuron")
             .defaultValue(false);
-        getset(
-            "load_dendrites",
-            [](auto &object) { return object.load_dendrites; },
-            [](auto &object, auto value) { object.load_dendrites = value; })
+        builder
+            .getset(
+                "load_dendrites",
+                [](auto &object) { return object.load_dendrites; },
+                [](auto &object, auto value) { object.load_dendrites = value; })
             .description("Load the dendrites section of the neuron")
             .defaultValue(false);
-        getset(
-            "geometry_type",
-            [](auto &object) { return object.geometry_type; },
-            [](auto &object, auto value) { object.geometry_type = value; })
+        builder
+            .getset(
+                "geometry_type",
+                [](auto &object) { return object.geometry_type; },
+                [](auto &object, auto value) { object.geometry_type = value; })
             .description("Geometry generation configuration")
             .defaultValue(NeuronGeometryType::Smooth);
-        getset(
-            "resampling",
-            [](auto &object) { return object.resampling; },
-            [](auto &object, auto value) { object.resampling = value; })
+        builder
+            .getset(
+                "resampling",
+                [](auto &object) { return object.resampling; },
+                [](auto &object, auto value) { object.resampling = value; })
             .description("Minimum angle cosine between 2 segments to merge them (disabled if > 1)")
             .defaultValue(0.9);
-        getset(
-            "subsampling",
-            [](auto &object) { return object.subsampling; },
-            [](auto &object, auto value) { object.subsampling = value; })
+        builder
+            .getset(
+                "subsampling",
+                [](auto &object) { return object.subsampling; },
+                [](auto &object, auto value) { object.subsampling = value; })
             .description("Skip factor when converting samples into geometry (disabled if <= 1)")
             .defaultValue(1);
+        return builder.build();
     }
 };
 } // namespace brayns

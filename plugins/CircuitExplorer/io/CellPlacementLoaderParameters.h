@@ -34,28 +34,32 @@ namespace brayns
 template<>
 struct JsonAdapter<CellPlacementLoaderParameters> : ObjectAdapter<CellPlacementLoaderParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("CellPlacementLoaderParameters");
-        getset(
-            "morphology_folder",
-            [](auto &object) -> auto & { return object.morphology_folder; },
-            [](auto &object, auto value) { object.morphology_folder = std::move(value); })
+        auto builder = Builder("CellPlacementLoaderParameters");
+        builder
+            .getset(
+                "morphology_folder",
+                [](auto &object) -> auto & { return object.morphology_folder; },
+                [](auto &object, auto value) { object.morphology_folder = std::move(value); })
             .description("Path to morphology folder");
-        getset(
-            "percentage",
-            [](auto &object) { return object.percentage; },
-            [](auto &object, auto value) { object.percentage = value; })
+        builder
+            .getset(
+                "percentage",
+                [](auto &object) { return object.percentage; },
+                [](auto &object, auto value) { object.percentage = value; })
             .description("Percentage of cells to load")
             .minimum(0)
             .maximum(1)
             .defaultValue(1);
-        getset(
-            "extension",
-            [](auto &object) -> auto & { return object.extension; },
-            [](auto &object, auto value) { object.extension = std::move(value); })
+        builder
+            .getset(
+                "extension",
+                [](auto &object) -> auto & { return object.extension; },
+                [](auto &object, auto value) { object.extension = std::move(value); })
             .description("Morphology file extension")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

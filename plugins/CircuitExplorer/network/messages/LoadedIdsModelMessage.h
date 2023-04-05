@@ -32,14 +32,16 @@ namespace brayns
 template<>
 struct JsonAdapter<LoadedIdsModelMessage> : ObjectAdapter<LoadedIdsModelMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("LoadedIdsModelMessage");
-        getset(
-            "model_id",
-            [](auto &object) { return object.model_id; },
-            [](auto &object, auto value) { object.model_id = value; })
+        auto builder = Builder("LoadedIdsModelMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
             .description("ID of the model to query");
+        return builder.build();
     }
 };
 } // namespace brayns

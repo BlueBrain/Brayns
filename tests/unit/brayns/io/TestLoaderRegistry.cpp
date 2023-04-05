@@ -38,19 +38,22 @@ namespace brayns
 template<>
 struct JsonAdapter<MockParameters> : ObjectAdapter<MockParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("MockParameters");
-        getset(
-            "stringParam",
-            [](auto &object) -> auto & { return object.stringParam; },
-            [](auto &object, auto value) { object.stringParam = std::move(value); })
+        auto builder = Builder("MockParameters");
+        builder
+            .getset(
+                "stringParam",
+                [](auto &object) -> auto & { return object.stringParam; },
+                [](auto &object, auto value) { object.stringParam = std::move(value); })
             .description("A string parameter");
-        getset(
-            "intParam",
-            [](auto &object) { return object.intParam; },
-            [](auto &object, auto value) { object.intParam = value; })
+        builder
+            .getset(
+                "intParam",
+                [](auto &object) { return object.intParam; },
+                [](auto &object, auto value) { object.intParam = value; })
             .description("An integer parameter");
+        return builder.build();
     }
 };
 } // namespace brayns

@@ -29,24 +29,28 @@ namespace brayns
 template<>
 struct JsonAdapter<View> : ObjectAdapter<View>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("View");
-        getset(
-            "position",
-            [](auto &object) -> auto & { return object.position; },
-            [](auto &object, const auto &value) { object.position = value; })
+        auto builder = Builder("View");
+        builder
+            .getset(
+                "position",
+                [](auto &object) -> auto & { return object.position; },
+                [](auto &object, const auto &value) { object.position = value; })
             .description("Camera position XYZ");
-        getset(
-            "target",
-            [](auto &object) -> auto & { return object.target; },
-            [](auto &object, const auto &value) { object.target = value; })
+        builder
+            .getset(
+                "target",
+                [](auto &object) -> auto & { return object.target; },
+                [](auto &object, const auto &value) { object.target = value; })
             .description("Camera target XYZ");
-        getset(
-            "up",
-            [](auto &object) -> auto & { return object.up; },
-            [](auto &object, const auto &value) { object.up = value; })
+        builder
+            .getset(
+                "up",
+                [](auto &object) -> auto & { return object.up; },
+                [](auto &object, const auto &value) { object.up = value; })
             .description("Camera up vector XYZ");
+        return builder.build();
     }
 };
 } // namespace brayns

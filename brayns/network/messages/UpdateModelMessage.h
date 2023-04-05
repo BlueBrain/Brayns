@@ -36,19 +36,22 @@ struct UpdateModelMessage
 template<>
 struct JsonAdapter<UpdateModelMessage> : ObjectAdapter<UpdateModelMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("UpdateModelMessage");
-        getset(
-            "model_id",
-            [](auto &object) { return object.model_id; },
-            [](auto &object, auto value) { object.model_id = value; })
+        auto builder = Builder("UpdateModelMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
             .description("Model ID");
-        getset(
-            "model",
-            [](auto &object) -> auto & { return object.model; },
-            [](auto &object, const auto &value) { object.model = value; })
+        builder
+            .getset(
+                "model",
+                [](auto &object) -> auto & { return object.model; },
+                [](auto &object, const auto &value) { object.model = value; })
             .description("Model data to update");
+        return builder.build();
     }
 };
 } // namespace brayns

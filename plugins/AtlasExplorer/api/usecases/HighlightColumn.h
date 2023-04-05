@@ -42,44 +42,51 @@ namespace brayns
 template<>
 struct JsonAdapter<HighlightNeighbour> : ObjectAdapter<HighlightNeighbour>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("HighlightNeighbour");
-        getset(
-            "relative_xz",
-            [](auto &object) -> auto & { return object.relative_xz; },
-            [](auto &object, const auto &value) { object.relative_xz = value; })
+        auto builder = Builder("HighlightNeighbour");
+        builder
+            .getset(
+                "relative_xz",
+                [](auto &object) -> auto & { return object.relative_xz; },
+                [](auto &object, const auto &value) { object.relative_xz = value; })
             .description("Relative coordinates respect the main column");
-        getset(
-            "color",
-            [](auto &object) -> auto & { return object.color; },
-            [](auto &object, const auto &value) { object.color = value; })
+        builder
+            .getset(
+                "color",
+                [](auto &object) -> auto & { return object.color; },
+                [](auto &object, const auto &value) { object.color = value; })
             .description("Highlight color");
+        return builder.build();
     }
 };
 
 template<>
 struct JsonAdapter<HighlightColumParams> : ObjectAdapter<HighlightColumParams>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("HighlightColumParams");
-        getset(
-            "xz_coordinate",
-            [](auto &object) -> auto & { return object.xz_coordinate; },
-            [](auto &object, const auto &value) { object.xz_coordinate = value; })
+        auto builder = Builder("HighlightColumParams");
+        builder
+            .getset(
+                "xz_coordinate",
+                [](auto &object) -> auto & { return object.xz_coordinate; },
+                [](auto &object, const auto &value) { object.xz_coordinate = value; })
             .description("Coordinates of the column to highlight");
-        getset(
-            "color",
-            [](auto &object) -> auto & { return object.color; },
-            [](auto &object, const auto &value) { object.color = value; })
+        builder
+            .getset(
+                "color",
+                [](auto &object) -> auto & { return object.color; },
+                [](auto &object, const auto &value) { object.color = value; })
             .description("Highlight color");
-        getset(
-            "neighbours",
-            [](auto &object) -> auto & { return object.neighbours; },
-            [](auto &object, auto value) { object.neighbours = std::move(value); })
+        builder
+            .getset(
+                "neighbours",
+                [](auto &object) -> auto & { return object.neighbours; },
+                [](auto &object, auto value) { object.neighbours = std::move(value); })
             .description("Optional neighbours to highlight")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

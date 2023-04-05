@@ -33,14 +33,16 @@ struct RemoveModelMessage
 template<>
 struct JsonAdapter<RemoveModelMessage> : ObjectAdapter<RemoveModelMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("RemoveModelMessage");
-        getset(
-            "ids",
-            [](auto &object) -> auto & { return object.ids; },
-            [](auto &object, auto value) { object.ids = std::move(value); })
+        auto builder = Builder("RemoveModelMessage");
+        builder
+            .getset(
+                "ids",
+                [](auto &object) -> auto & { return object.ids; },
+                [](auto &object, auto value) { object.ids = std::move(value); })
             .description("Model ID list");
+        return builder.build();
     }
 };
 } // namespace brayns

@@ -29,15 +29,17 @@ namespace brayns
 template<>
 struct JsonAdapter<Cylindric> : ObjectAdapter<Cylindric>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Cylindric");
-        getset(
-            "fovy",
-            [](auto &object) { return object.fovy; },
-            [](auto &object, auto value) { object.fovy = value; })
+        auto builder = Builder("Cylindric");
+        builder
+            .getset(
+                "fovy",
+                [](auto &object) { return object.fovy; },
+                [](auto &object, auto value) { object.fovy = value; })
             .description("Vertical field of view (in degrees)")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

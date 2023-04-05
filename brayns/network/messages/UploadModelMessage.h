@@ -35,24 +35,28 @@ struct UploadModelParams
 template<>
 struct JsonAdapter<UploadModelParams> : ObjectAdapter<UploadModelParams>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("UploadModelParams");
-        getset(
-            "type",
-            [](auto &object) -> auto & { return object.type; },
-            [](auto &object, auto value) { object.type = std::move(value); })
+        auto builder = Builder("UploadModelParams");
+        builder
+            .getset(
+                "type",
+                [](auto &object) -> auto & { return object.type; },
+                [](auto &object, auto value) { object.type = std::move(value); })
             .description("File extension");
-        getset(
-            "loader_name",
-            [](auto &object) -> auto & { return object.loader_name; },
-            [](auto &object, auto value) { object.type = std::move(value); })
+        builder
+            .getset(
+                "loader_name",
+                [](auto &object) -> auto & { return object.loader_name; },
+                [](auto &object, auto value) { object.type = std::move(value); })
             .description("Loader name");
-        getset(
-            "loader_properties",
-            [](auto &object) -> auto & { return object.loader_properties; },
-            [](auto &object, const auto &value) { object.loader_properties = value; })
+        builder
+            .getset(
+                "loader_properties",
+                [](auto &object) -> auto & { return object.loader_properties; },
+                [](auto &object, const auto &value) { object.loader_properties = value; })
             .description("Loader properties");
+        return builder.build();
     }
 };
 } // namespace brayns

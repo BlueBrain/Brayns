@@ -28,24 +28,24 @@
 
 namespace brayns
 {
-template<typename T>
-struct LightAdapter : ObjectAdapter<T>
+class LightAdapter
 {
-protected:
-    using ObjectAdapter<T>::getset;
-
-    static void reflectDefault()
+public:
+    template<typename T>
+    static void reflect(JsonObjectBuilder<T> &builder)
     {
-        getset(
-            "color",
-            [](auto &object) -> auto & { return object.color; },
-            [](auto &object, const auto &value) { object.color = value; })
+        builder
+            .getset(
+                "color",
+                [](auto &object) -> auto & { return object.color; },
+                [](auto &object, const auto &value) { object.color = value; })
             .description("Light color RGB normalized")
             .defaultValue(Vector3f(1));
-        getset(
-            "intensity",
-            [](auto &object) { return object.intensity; },
-            [](auto &object, auto value) { object.intensity = value; })
+        builder
+            .getset(
+                "intensity",
+                [](auto &object) { return object.intensity; },
+                [](auto &object, auto value) { object.intensity = value; })
             .description("Light intensity")
             .minimum(0)
             .defaultValue(1);
@@ -53,56 +53,63 @@ protected:
 };
 
 template<>
-struct JsonAdapter<AmbientLight> : LightAdapter<AmbientLight>
+struct JsonAdapter<AmbientLight> : ObjectAdapter<AmbientLight>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("AmbientLight");
-        reflectDefault();
+        auto builder = Builder("AmbientLight");
+        LightAdapter::reflect(builder);
+        return builder.build();
     }
 };
 
 template<>
-struct JsonAdapter<DirectionalLight> : LightAdapter<DirectionalLight>
+struct JsonAdapter<DirectionalLight> : ObjectAdapter<DirectionalLight>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("DirectionalLight");
-        reflectDefault();
-        getset(
-            "direction",
-            [](auto &object) -> auto & { return object.direction; },
-            [](auto &object, const auto &value) { object.direction = value; })
+        auto builder = Builder("DirectionalLight");
+        LightAdapter::reflect(builder);
+        builder
+            .getset(
+                "direction",
+                [](auto &object) -> auto & { return object.direction; },
+                [](auto &object, const auto &value) { object.direction = value; })
             .description("Light direction XYZ")
             .defaultValue(Vector3f(-1, -1, 0));
+        return builder.build();
     }
 };
 
 template<>
-struct JsonAdapter<QuadLight> : LightAdapter<QuadLight>
+struct JsonAdapter<QuadLight> : ObjectAdapter<QuadLight>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("QuadLight");
-        reflectDefault();
-        getset(
-            "position",
-            [](auto &object) -> auto & { return object.position; },
-            [](auto &object, const auto &value) { object.position = value; })
+        auto builder = Builder("QuadLight");
+        LightAdapter::reflect(builder);
+        builder
+            .getset(
+                "position",
+                [](auto &object) -> auto & { return object.position; },
+                [](auto &object, const auto &value) { object.position = value; })
             .description("Light base corner position XYZ")
             .defaultValue(Vector3f(0));
-        getset(
-            "edge1",
-            [](auto &object) -> auto & { return object.edge1; },
-            [](auto &object, const auto &value) { object.edge1 = value; })
+        builder
+            .getset(
+                "edge1",
+                [](auto &object) -> auto & { return object.edge1; },
+                [](auto &object, const auto &value) { object.edge1 = value; })
             .description("Edge 1 XYZ")
             .defaultValue(Vector3f(1, 0, 0));
-        getset(
-            "edge2",
-            [](auto &object) -> auto & { return object.edge2; },
-            [](auto &object, const auto &value) { object.edge2 = value; })
+        builder
+            .getset(
+                "edge2",
+                [](auto &object) -> auto & { return object.edge2; },
+                [](auto &object, const auto &value) { object.edge2 = value; })
             .description("Edge 2 XYZ")
             .defaultValue(Vector3f(0, 0, 1));
+        return builder.build();
     }
 };
 } // namespace brayns

@@ -30,41 +30,47 @@ namespace brayns
 template<>
 struct JsonAdapter<Orthographic> : ObjectAdapter<Orthographic>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Orthographic");
-        getset(
-            "height",
-            [](auto &object) { return object.height; },
-            [](auto &object, auto value) { object.height = value; })
+        auto builder = Builder("Orthographic");
+        builder
+            .getset(
+                "height",
+                [](auto &object) { return object.height; },
+                [](auto &object, auto value) { object.height = value; })
             .description("Height of the projection plane");
+        return builder.build();
     }
 };
 
 template<>
 struct JsonAdapter<Perspective> : ObjectAdapter<Perspective>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Perspective");
-        getset(
-            "fovy",
-            [](auto &object) { return object.fovy; },
-            [](auto &object, auto value) { object.fovy = value; })
+        auto builder = Builder("Perspective");
+        builder
+            .getset(
+                "fovy",
+                [](auto &object) { return object.fovy; },
+                [](auto &object, auto value) { object.fovy = value; })
             .description("Vertical field of view")
             .required(false);
-        getset(
-            "aperture_radius",
-            [](auto &object) { return object.apertureRadius; },
-            [](auto &object, auto value) { object.apertureRadius = value; })
+        builder
+            .getset(
+                "aperture_radius",
+                [](auto &object) { return object.apertureRadius; },
+                [](auto &object, auto value) { object.apertureRadius = value; })
             .description("Lens aperture radius")
             .required(false);
-        getset(
-            "focus_distance",
-            [](auto &object) { return object.focusDistance; },
-            [](auto &object, auto value) { object.focusDistance = value; })
+        builder
+            .getset(
+                "focus_distance",
+                [](auto &object) { return object.focusDistance; },
+                [](auto &object, auto value) { object.focusDistance = value; })
             .description("Camera focus distance")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

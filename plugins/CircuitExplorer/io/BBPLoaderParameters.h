@@ -62,66 +62,76 @@ struct JsonAdapter<bbploader::ReportType> : EnumAdapter<bbploader::ReportType>
 template<>
 struct JsonAdapter<BBPLoaderParameters> : ObjectAdapter<BBPLoaderParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("BBPLoaderParameters");
-        getset(
-            "percentage",
-            [](auto &object) { return object.percentage; },
-            [](auto &object, auto value) { object.percentage = value; })
+        auto builder = Builder("BBPLoaderParameters");
+        builder
+            .getset(
+                "percentage",
+                [](auto &object) { return object.percentage; },
+                [](auto &object, auto value) { object.percentage = value; })
             .description("Percentage of neurons to load (Ignored if a list of gids is specified)")
             .minimum(0)
             .maximum(1)
             .defaultValue(0.1);
-        getset(
-            "targets",
-            [](auto &object) -> auto & { return object.targets; },
-            [](auto &object, auto value) { object.targets = std::move(value); })
+        builder
+            .getset(
+                "targets",
+                [](auto &object) -> auto & { return object.targets; },
+                [](auto &object, auto value) { object.targets = std::move(value); })
             .description("List of targets to load (empty = default target) (Ignored if a list of gids is specified)")
             .required(false);
-        getset(
-            "gids",
-            [](auto &object) -> auto & { return object.gids; },
-            [](auto &object, auto value) { object.gids = std::move(value); })
+        builder
+            .getset(
+                "gids",
+                [](auto &object) -> auto & { return object.gids; },
+                [](auto &object, auto value) { object.gids = std::move(value); })
             .description("List of GIDs to load, invalidates 'percentage' and 'targets' parameters")
             .required(false);
-        getset(
-            "report_type",
-            [](auto &object) { return object.report_type; },
-            [](auto &object, auto value) { object.report_type = value; })
+        builder
+            .getset(
+                "report_type",
+                [](auto &object) { return object.report_type; },
+                [](auto &object, auto value) { object.report_type = value; })
             .description("Type of report to load")
             .defaultValue(bbploader::ReportType::None);
-        getset(
-            "report_name",
-            [](auto &object) -> auto & { return object.report_name; },
-            [](auto &object, auto value) { object.report_name = std::move(value); })
+        builder
+            .getset(
+                "report_name",
+                [](auto &object) -> auto & { return object.report_name; },
+                [](auto &object, auto value) { object.report_name = std::move(value); })
             .description("Name of the report to load, used only if 'report_type' is 'compartment'")
             .required(false);
-        getset(
-            "spike_transition_time",
-            [](auto &object) { return object.spike_transition_time; },
-            [](auto &object, auto value) { object.spike_transition_time = value; })
+        builder
+            .getset(
+                "spike_transition_time",
+                [](auto &object) { return object.spike_transition_time; },
+                [](auto &object, auto value) { object.spike_transition_time = value; })
             .description("For spike reports, fade-in/out time [ms] from resting to spike state")
             .minimum(0)
             .defaultValue(1);
-        getset(
-            "neuron_morphology_parameters",
-            [](auto &object) -> auto & { return object.neuron_morphology_parameters; },
-            [](auto &object, auto value) { object.neuron_morphology_parameters = std::move(value); })
+        builder
+            .getset(
+                "neuron_morphology_parameters",
+                [](auto &object) -> auto & { return object.neuron_morphology_parameters; },
+                [](auto &object, auto value) { object.neuron_morphology_parameters = std::move(value); })
             .description("Settings to configure neuron morphology loading")
             .required(false);
-        getset(
-            "load_afferent_synapses",
-            [](auto &object) { return object.load_afferent_synapses; },
-            [](auto &object, auto value) { object.load_afferent_synapses = value; })
+        builder
+            .getset(
+                "load_afferent_synapses",
+                [](auto &object) { return object.load_afferent_synapses; },
+                [](auto &object, auto value) { object.load_afferent_synapses = value; })
             .description("Wether to add geometry for afferent synapses or not")
             .defaultValue(false);
-        getset(
-            "load_efferent_synapses",
-            [](auto &object) { return object.load_efferent_synapses; },
-            [](auto &object, auto value) { object.load_efferent_synapses = value; })
+        builder
+            .getset(
+                "load_efferent_synapses",
+                [](auto &object) { return object.load_efferent_synapses; },
+                [](auto &object, auto value) { object.load_efferent_synapses = value; })
             .description("Wether to add geometry for efferent synapses or not")
             .defaultValue(false);
+        return builder.build();
     }
 };
 } // namespace brayns

@@ -33,12 +33,15 @@ namespace brayns
 template<>
 struct JsonAdapter<ModelInfo> : ObjectAdapter<ModelInfo>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ModelInfo");
-        get("load_info", [](auto &object) { return object.getLoadInfo(); }).description("Model load info");
-        get("metadata", [](auto &object) { return object.getMetadata(); }).description("Model-specific metadata");
-        get("base_transform", [](auto &object) { return object.getBaseTransform(); }).description("Model transform");
+        auto builder = Builder("ModelInfo");
+        builder.get("load_info", [](auto &object) { return object.getLoadInfo(); }).description("Model load info");
+        builder.get("metadata", [](auto &object) { return object.getMetadata(); })
+            .description("Model-specific metadata");
+        builder.get("base_transform", [](auto &object) { return object.getBaseTransform(); })
+            .description("Model transform");
+        return builder.build();
     }
 };
 } // namespace brayns

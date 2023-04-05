@@ -42,50 +42,58 @@ struct GBuffersParams
 template<>
 struct JsonAdapter<GBuffersParams> : ObjectAdapter<GBuffersParams>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("GBuffersParams");
-        getset(
-            "resolution",
-            [](auto &object) -> auto & { return object.resolution; },
-            [](auto &object, const auto &value) { object.resolution = value; })
+        auto builder = Builder("GBuffersParams");
+        builder
+            .getset(
+                "resolution",
+                [](auto &object) -> auto & { return object.resolution; },
+                [](auto &object, const auto &value) { object.resolution = value; })
             .description("Image resolution")
             .required(false);
-        getset(
-            "camera",
-            [](auto &object) -> auto & { return object.camera; },
-            [](auto &object, const auto &value) { object.camera = value; })
+        builder
+            .getset(
+                "camera",
+                [](auto &object) -> auto & { return object.camera; },
+                [](auto &object, const auto &value) { object.camera = value; })
             .description("Camera definition")
             .required(false);
-        getset(
-            "camera_view",
-            [](auto &object) -> auto & { return object.camera_view; },
-            [](auto &object, const auto &value) { object.camera_view = value; })
+        builder
+            .getset(
+                "camera_view",
+                [](auto &object) -> auto & { return object.camera_view; },
+                [](auto &object, const auto &value) { object.camera_view = value; })
             .description("Camera view")
             .required(false);
-        getset(
-            "renderer",
-            [](auto &object) -> auto & { return object.renderer; },
-            [](auto &object, const auto &value) { object.renderer = value; })
+        builder
+            .getset(
+                "renderer",
+                [](auto &object) -> auto & { return object.renderer; },
+                [](auto &object, const auto &value) { object.renderer = value; })
             .description("Renderer")
             .required(false);
-        getset(
-            "simulation_frame",
-            [](auto &object) { return object.simulation_frame; },
-            [](auto &object, auto value) { object.simulation_frame = value; })
+        builder
+            .getset(
+                "simulation_frame",
+                [](auto &object) { return object.simulation_frame; },
+                [](auto &object, auto value) { object.simulation_frame = value; })
             .description("Simulation frame to render")
             .required(false);
-        getset(
-            "file_path",
-            [](auto &object) -> auto & { return object.file_path; },
-            [](auto &object, auto value) { object.file_path = std::move(value); })
+        builder
+            .getset(
+                "file_path",
+                [](auto &object) -> auto & { return object.file_path; },
+                [](auto &object, auto value) { object.file_path = std::move(value); })
             .description("Path to save the buffer as EXR, encoded data is returned if unset")
             .required(false);
-        getset(
-            "channels",
-            [](auto &object) -> auto & { return object.channels; },
-            [](auto &object, auto value) { object.channels = std::move(value); })
+        builder
+            .getset(
+                "channels",
+                [](auto &object) -> auto & { return object.channels; },
+                [](auto &object, auto value) { object.channels = std::move(value); })
             .description("Framebuffer channels to export");
+        return builder.build();
     }
 };
 } // namespace brayns

@@ -36,24 +36,28 @@ struct RawVolumeLoaderParameters
 template<>
 struct JsonAdapter<RawVolumeLoaderParameters> : ObjectAdapter<RawVolumeLoaderParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("RawVolumeLoaderParameters");
-        getset(
-            "dimensions",
-            [](auto &object) -> auto & { return object.dimensions; },
-            [](auto &object, const auto &value) { object.dimensions = value; })
+        auto builder = Builder("RawVolumeLoaderParameters");
+        builder
+            .getset(
+                "dimensions",
+                [](auto &object) -> auto & { return object.dimensions; },
+                [](auto &object, const auto &value) { object.dimensions = value; })
             .description("Volume grid size XYZ");
-        getset(
-            "spacing",
-            [](auto &object) -> auto & { return object.spacing; },
-            [](auto &object, const auto &value) { object.spacing = value; })
+        builder
+            .getset(
+                "spacing",
+                [](auto &object) -> auto & { return object.spacing; },
+                [](auto &object, const auto &value) { object.spacing = value; })
             .description("Volume grid cell spacing XYZ");
-        getset(
-            "data_type",
-            [](auto &object) { return object.data_type; },
-            [](auto &object, auto value) { object.data_type = value; })
+        builder
+            .getset(
+                "data_type",
+                [](auto &object) { return object.data_type; },
+                [](auto &object, auto value) { object.data_type = value; })
             .description("Volume byte data type");
+        return builder.build();
     }
 };
 } // namespace brayns

@@ -54,14 +54,16 @@ struct JsonAdapter<LayerDistanceType> : EnumAdapter<LayerDistanceType>
 template<>
 struct JsonAdapter<LayerDistanceParameters> : ObjectAdapter<LayerDistanceParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("LayerDistanceParameters");
-        getset(
-            "xz_coordinate",
-            [](auto &object) { return object.type; },
-            [](auto &object, auto value) { object.type = value; })
+        auto builder = Builder("LayerDistanceParameters");
+        builder
+            .getset(
+                "xz_coordinate",
+                [](auto &object) { return object.type; },
+                [](auto &object, auto value) { object.type = value; })
             .description("Type of distance to show");
+        return builder.build();
     }
 };
 } // namespace brayns

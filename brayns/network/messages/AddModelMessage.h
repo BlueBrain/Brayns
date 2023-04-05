@@ -34,24 +34,28 @@ struct AddModelParams
 template<>
 struct JsonAdapter<AddModelParams> : ObjectAdapter<AddModelParams>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("AddModelParams");
-        getset(
-            "path",
-            [](auto &object) -> auto & { return object.path; },
-            [](auto &object, auto value) { object.path = std::move(value); })
+        auto builder = Builder("AddModelParams");
+        builder
+            .getset(
+                "path",
+                [](auto &object) -> auto & { return object.path; },
+                [](auto &object, auto value) { object.path = std::move(value); })
             .description("Path of the file to load");
-        getset(
-            "loader_name",
-            [](auto &object) -> auto & { return object.loader_name; },
-            [](auto &object, auto value) { object.loader_name = std::move(value); })
+        builder
+            .getset(
+                "loader_name",
+                [](auto &object) -> auto & { return object.loader_name; },
+                [](auto &object, auto value) { object.loader_name = std::move(value); })
             .description("Name of the loader used to parse the model file");
-        getset(
-            "loader_properties",
-            [](auto &object) -> auto & { return object.loader_properties; },
-            [](auto &object, const auto &value) { object.loader_properties = value; })
+        builder
+            .getset(
+                "loader_properties",
+                [](auto &object) -> auto & { return object.loader_properties; },
+                [](auto &object, const auto &value) { object.loader_properties = value; })
             .description("Settings to configure the loading process");
+        return builder.build();
     }
 };
 } // namespace brayns

@@ -33,19 +33,22 @@ struct EnableSimulationMessage
 template<>
 struct JsonAdapter<EnableSimulationMessage> : ObjectAdapter<EnableSimulationMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("EnableSimulationMessage");
-        getset(
-            "model_id",
-            [](auto &object) { return object.model_id; },
-            [](auto &object, auto value) { object.model_id = value; })
+        auto builder = Builder("EnableSimulationMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
             .description("ID of the model to color");
-        getset(
-            "enabled",
-            [](auto &object) -> auto & { return object.enabled; },
-            [](auto &object, auto value) { object.enabled = value; })
+        builder
+            .getset(
+                "enabled",
+                [](auto &object) { return object.enabled; },
+                [](auto &object, auto value) { object.enabled = value; })
             .description("Enable simulation if true");
+        return builder.build();
     }
 };
 } // namespace brayns

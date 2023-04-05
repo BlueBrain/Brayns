@@ -33,14 +33,16 @@ struct GetModelMessage
 template<>
 struct JsonAdapter<GetModelMessage> : ObjectAdapter<GetModelMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("GetModelMessage");
-        getset(
-            "id",
-            [](auto &object) { return object.id; },
-            [](auto &object, auto value) { object.id = value; })
+        auto builder = Builder("GetModelMessage");
+        builder
+            .getset(
+                "id",
+                [](auto &object) { return object.id; },
+                [](auto &object, auto value) { object.id = value; })
             .description("Model ID");
+        return builder.build();
     }
 };
 } // namespace brayns

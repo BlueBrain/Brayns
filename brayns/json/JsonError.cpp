@@ -109,14 +109,14 @@ std::string JsonErrorFormatter::format(const JsonError &error)
 
 std::vector<std::string> JsonErrorFormatter::format(const JsonErrors &errors)
 {
-    auto result = std::vector<std::string>();
-    result.reserve(errors.size());
+    auto messages = std::vector<std::string>();
+    messages.reserve(errors.size());
     for (const auto &error : errors)
     {
-        auto text = format(error);
-        result.push_back(text);
+        auto message = format(error);
+        messages.push_back(message);
     }
-    return result;
+    return messages;
 }
 
 JsonSchemaException::JsonSchemaException(const std::string &message, JsonErrors errors)

@@ -32,14 +32,16 @@ namespace brayns
 template<>
 struct JsonAdapter<Scene> : ObjectAdapter<Scene>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Scene");
-        get("bounds", [](auto &object) { return object.getBounds(); }).description("Scene bounds");
-        get(
-            "models",
-            [](auto &object) -> auto & { return object.getModels().getAllModelInstances(); })
+        auto builder = Builder("Scene");
+        builder.get("bounds", [](auto &object) { return object.getBounds(); }).description("Scene bounds");
+        builder
+            .get(
+                "models",
+                [](auto &object) -> auto & { return object.getModels().getAllModelInstances(); })
             .description("Scene models");
+        return builder.build();
     }
 };
 } // namespace brayns

@@ -29,17 +29,20 @@ namespace brayns
 template<>
 struct JsonAdapter<Bounds> : ObjectAdapter<Bounds>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Bounds");
-        get(
-            "min",
-            [](auto &object) -> auto & { return object.getMin(); })
+        auto builder = Builder("Bounds");
+        builder
+            .get(
+                "min",
+                [](auto &object) -> auto & { return object.getMin(); })
             .description("Bottom back left corner");
-        get(
-            "max",
-            [](auto &object) -> auto & { return object.getMax(); })
+        builder
+            .get(
+                "max",
+                [](auto &object) -> auto & { return object.getMax(); })
             .description("Top front right corner");
+        return builder.build();
     }
 };
 } // namespace brayns

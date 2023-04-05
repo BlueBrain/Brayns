@@ -36,22 +36,24 @@ struct SetMaterialMessage
 template<typename T>
 struct JsonAdapter<SetMaterialMessage<T>> : ObjectAdapter<SetMaterialMessage<T>>
 {
-    using ObjectAdapter<SetMaterialMessage<T>>::title;
-    using ObjectAdapter<SetMaterialMessage<T>>::getset;
+    using Builder = JsonObjectBuilder<SetMaterialMessage<T>>;
 
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("SetMaterialMessage");
-        getset(
-            "model_id",
-            [](auto &object) { return object.model_id; },
-            [](auto &object, auto value) { object.model_id = value; })
+        auto builder = Builder("SetMaterialMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
             .description("ID of the model to apply the material");
-        getset(
-            "material",
-            [](auto &object) -> auto & { return object.material; },
-            [](auto &object, const auto &value) { object.material = value; })
+        builder
+            .getset(
+                "material",
+                [](auto &object) -> auto & { return object.material; },
+                [](auto &object, const auto &value) { object.material = value; })
             .description("Material parameters");
+        return builder.build();
     }
 };
 } // namespace brayns

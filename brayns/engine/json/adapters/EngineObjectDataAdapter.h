@@ -29,21 +29,24 @@ namespace brayns
 template<>
 struct JsonAdapter<EngineObjectData> : ObjectAdapter<EngineObjectData>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("EngineObjectData");
-        getset(
-            "name",
-            [](auto &object) -> auto & { return object.name; },
-            [](auto &object, auto value) { object.name = std::move(value); })
+        auto builder = Builder("EngineObjectData");
+        builder
+            .getset(
+                "name",
+                [](auto &object) -> auto & { return object.name; },
+                [](auto &object, auto value) { object.name = std::move(value); })
             .description("Object type name")
             .required(false);
-        getset(
-            "params",
-            [](auto &object) -> auto & { return object.params; },
-            [](auto &object, const auto &value) { object.params = value; })
+        builder
+            .getset(
+                "params",
+                [](auto &object) -> auto & { return object.params; },
+                [](auto &object, const auto &value) { object.params = value; })
             .description("Object parameters")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

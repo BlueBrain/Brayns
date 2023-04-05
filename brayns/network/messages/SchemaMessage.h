@@ -33,14 +33,16 @@ struct SchemaParams
 template<>
 struct JsonAdapter<SchemaParams> : ObjectAdapter<SchemaParams>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("SchemaParams");
-        getset(
-            "endpoint",
-            [](auto &object) -> auto & { return object.endpoint; },
-            [](auto &object, auto value) { object.endpoint = std::move(value); })
+        auto builder = Builder("SchemaParams");
+        builder
+            .getset(
+                "endpoint",
+                [](auto &object) -> auto & { return object.endpoint; },
+                [](auto &object, auto value) { object.endpoint = std::move(value); })
             .description("Name of the endpoint");
+        return builder.build();
     }
 };
 
@@ -58,35 +60,41 @@ struct SchemaResult
 template<>
 struct JsonAdapter<SchemaResult> : ObjectAdapter<SchemaResult>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("SchemaResult");
-        get(
-            "plugin",
-            [](auto &object) -> auto & { return object.plugin; })
+        auto builder = Builder("SchemaResult");
+        builder
+            .get(
+                "plugin",
+                [](auto &object) -> auto & { return object.plugin; })
             .description("Name of the plugin that loads the entrypoint");
-        get(
-            "title",
-            [](auto &object) -> auto & { return object.title; })
+        builder
+            .get(
+                "title",
+                [](auto &object) -> auto & { return object.title; })
             .description("Name of the entrypoint (method)");
-        get(
-            "description",
-            [](auto &object) -> auto & { return object.description; })
+        builder
+            .get(
+                "description",
+                [](auto &object) -> auto & { return object.description; })
             .description("Description of the entrypoint");
-        get("async", [](auto &object) { return object.async; })
-            .description("Check if the entrypoint is asynchronous (send progress, can be cancelled)");
-        get("deprecated", [](auto &object) { return object.deprecated; })
+        builder.get("async", [](auto &object) { return object.async; })
+            .description("Check if the entrypoint is asynchronous (send progress and can be cancelled)");
+        builder.get("deprecated", [](auto &object) { return object.deprecated; })
             .description("If true, the entrypoint will be removed / renamed in the next release");
-        get(
-            "params",
-            [](auto &object) -> auto & { return object.params; })
+        builder
+            .get(
+                "params",
+                [](auto &object) -> auto & { return object.params; })
             .description("Input schema")
             .required(false);
-        get(
-            "returns",
-            [](auto &object) -> auto & { return object.returns; })
+        builder
+            .get(
+                "returns",
+                [](auto &object) -> auto & { return object.returns; })
             .description("Output schema")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

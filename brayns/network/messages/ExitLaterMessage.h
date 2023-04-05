@@ -33,14 +33,16 @@ struct ExitLaterMessage
 template<>
 struct JsonAdapter<ExitLaterMessage> : ObjectAdapter<ExitLaterMessage>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ExitLaterMessage");
-        getset(
-            "minutes",
-            [](auto &object) { return object.minutes; },
-            [](auto &object, auto value) { object.minutes = value; })
+        auto builder = Builder("ExitLaterMessage");
+        builder
+            .getset(
+                "minutes",
+                [](auto &object) { return object.minutes; },
+                [](auto &object, auto value) { object.minutes = value; })
             .description("Number of minutes after which Brayns will shut down");
+        return builder.build();
     }
 };
 } // namespace brayns

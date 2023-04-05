@@ -56,76 +56,86 @@ namespace brayns
 template<>
 struct JsonAdapter<Internal> : ObjectAdapter<Internal>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Internal");
-        getset(
+        auto builder = Builder("Internal");
+        builder.getset(
             "getset",
             [](auto &object) { return object.test1; },
             [](auto &object, auto value) { object.test1 = value; });
-        get("get", [](auto &object) { return object.test2; });
-        set<int>("set", [](auto &object, auto value) { object.test3 = value; });
-        getset(
+        builder.get("get", [](auto &object) { return object.test2; });
+        builder.set<int>("set", [](auto &object, auto value) { object.test3 = value; });
+        builder.getset(
             "methods",
             [](auto &object) { return object.get(); },
             [](auto &object, auto value) { object.set(value); });
+        return builder.build();
     }
 };
 
 template<>
 struct JsonAdapter<Test> : ObjectAdapter<Test>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Test");
-        getset(
-            "normal",
-            [](auto &object) { return object.normal; },
-            [](auto &object, auto value) { object.normal = value; })
+        auto builder = Builder("Test");
+        builder
+            .getset(
+                "normal",
+                [](auto &object) { return object.normal; },
+                [](auto &object, auto value) { object.normal = value; })
             .description("Test normal");
-        getset(
-            "readOnly",
-            [](auto &object) { return object.readOnly; },
-            [](auto &object, auto value) { object.readOnly = value; })
+        builder
+            .getset(
+                "readOnly",
+                [](auto &object) { return object.readOnly; },
+                [](auto &object, auto value) { object.readOnly = value; })
             .description("Test readOnly")
             .readOnly(true);
-        getset(
-            "writeOnly",
-            [](auto &object) { return object.writeOnly; },
-            [](auto &object, auto value) { object.writeOnly = value; })
+        builder
+            .getset(
+                "writeOnly",
+                [](auto &object) { return object.writeOnly; },
+                [](auto &object, auto value) { object.writeOnly = value; })
             .description("Test writeOnly")
             .writeOnly(true);
-        getset(
-            "optional",
-            [](auto &object) { return object.optional; },
-            [](auto &object, auto value) { object.optional = value; })
+        builder
+            .getset(
+                "optional",
+                [](auto &object) { return object.optional; },
+                [](auto &object, auto value) { object.optional = value; })
             .description("Test optional")
             .required(false);
-        getset(
-            "defaulted",
-            [](auto &object) { return object.defaulted; },
-            [](auto &object, auto value) { object.defaulted = value; })
+        builder
+            .getset(
+                "defaulted",
+                [](auto &object) { return object.defaulted; },
+                [](auto &object, auto value) { object.defaulted = value; })
             .description("Test defaulted")
             .defaultValue(brayns::Vector2f(1));
-        getset(
-            "number",
-            [](auto &object) { return object.number; },
-            [](auto &object, auto value) { object.number = value; })
+        builder
+            .getset(
+                "number",
+                [](auto &object) { return object.number; },
+                [](auto &object, auto value) { object.number = value; })
             .description("Test number")
             .minimum(1)
             .maximum(3);
-        getset(
-            "array",
-            [](auto &object) -> auto & { return object.array; },
-            [](auto &object, auto value) { object.array = std::move(value); })
+        builder
+            .getset(
+                "array",
+                [](auto &object) -> auto & { return object.array; },
+                [](auto &object, auto value) { object.array = std::move(value); })
             .description("Test array")
             .minItems(2)
             .maxItems(4);
-        getset(
-            "internal",
-            [](auto &object) -> auto & { return object.internal; },
-            [](auto &object, auto value) { object.internal = std::move(value); })
+        builder
+            .getset(
+                "internal",
+                [](auto &object) -> auto & { return object.internal; },
+                [](auto &object, auto value) { object.internal = std::move(value); })
             .description("Test internal");
+        return builder.build();
     }
 };
 } // namespace brayns

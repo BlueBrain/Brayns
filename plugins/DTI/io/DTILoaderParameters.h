@@ -33,21 +33,24 @@ namespace brayns
 template<>
 struct JsonAdapter<DTILoaderParameters> : ObjectAdapter<DTILoaderParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("DTILoaderParameters");
-        getset(
-            "radius",
-            [](auto &object) { return object.radius; },
-            [](auto &object, auto value) { object.radius = value; })
+        auto builder = Builder("DTILoaderParameters");
+        builder
+            .getset(
+                "radius",
+                [](auto &object) { return object.radius; },
+                [](auto &object, auto value) { object.radius = value; })
             .description("Connectivity streamlines radius");
-        getset(
-            "spike_decay_time",
-            [](auto &object) { return object.spike_decay_time; },
-            [](auto &object, auto value) { object.spike_decay_time = value; })
+        builder
+            .getset(
+                "spike_decay_time",
+                [](auto &object) { return object.spike_decay_time; },
+                [](auto &object, auto value) { object.spike_decay_time = value; })
             .description("Time [ms], that a spikes takes to go from the beginning to the end of the streamline")
             .minimum(0)
             .defaultValue(1);
+        return builder.build();
     }
 };
 } // namespace brayns

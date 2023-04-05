@@ -35,34 +35,40 @@ struct JsonAdapter<VolumeDataType> : EnumAdapter<VolumeDataType>
 template<>
 struct JsonAdapter<RegularVolume> : ObjectAdapter<RegularVolume>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("RegularVolume");
-        getset(
-            "data_type",
-            [](auto &object) { return object.dataType; },
-            [](auto &object, auto value) { object.dataType = value; })
+        auto builder = Builder("RegularVolume");
+        builder
+            .getset(
+                "data_type",
+                [](auto &object) { return object.dataType; },
+                [](auto &object, auto value) { object.dataType = value; })
             .description("Voxel data as byte array");
-        getset(
-            "voxels",
-            [](auto &object) -> auto & { return object.voxels; },
-            [](auto &object, auto value) { object.voxels = std::move(value); })
+        builder
+            .getset(
+                "voxels",
+                [](auto &object) -> auto & { return object.voxels; },
+                [](auto &object, auto value) { object.voxels = std::move(value); })
             .description("Voxel data type");
-        getset(
-            "size",
-            [](auto &object) -> auto & { return object.size; },
-            [](auto &object, const auto &value) { object.size = value; })
+        builder
+            .getset(
+                "size",
+                [](auto &object) -> auto & { return object.size; },
+                [](auto &object, const auto &value) { object.size = value; })
             .description("Width, height and depth of the volume");
-        getset(
-            "spacing",
-            [](auto &object) -> auto & { return object.spacing; },
-            [](auto &object, const auto &value) { object.spacing = value; })
+        builder
+            .getset(
+                "spacing",
+                [](auto &object) -> auto & { return object.spacing; },
+                [](auto &object, const auto &value) { object.spacing = value; })
             .description("Voxel dimensions in world space");
-        getset(
-            "data_on_vertex",
-            [](auto &object) { return object.perVertexData; },
-            [](auto &object, auto value) { object.perVertexData = value; })
+        builder
+            .getset(
+                "data_on_vertex",
+                [](auto &object) { return object.perVertexData; },
+                [](auto &object, auto value) { object.perVertexData = value; })
             .description("Specify if the voxel is located at the cell vertices or in the center");
+        return builder.build();
     }
 };
 } // namespace brayns

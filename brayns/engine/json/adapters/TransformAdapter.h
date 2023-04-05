@@ -30,27 +30,31 @@ namespace brayns
 template<>
 struct JsonAdapter<Transform> : ObjectAdapter<Transform>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Transform");
-        getset(
-            "translation",
-            [](auto &object) -> auto & { return object.translation; },
-            [](auto &object, const auto &value) { object.translation = value; })
+        auto builder = Builder("Transform");
+        builder
+            .getset(
+                "translation",
+                [](auto &object) -> auto & { return object.translation; },
+                [](auto &object, const auto &value) { object.translation = value; })
             .description("Translation XYZ")
             .required(false);
-        getset(
-            "rotation",
-            [](auto &object) -> auto & { return object.rotation; },
-            [](auto &object, const auto &value) { object.rotation = value; })
+        builder
+            .getset(
+                "rotation",
+                [](auto &object) -> auto & { return object.rotation; },
+                [](auto &object, const auto &value) { object.rotation = value; })
             .description("Rotation XYZW")
             .required(false);
-        getset(
-            "scale",
-            [](auto &object) -> auto & { return object.scale; },
-            [](auto &object, const auto &value) { object.scale = value; })
+        builder
+            .getset(
+                "scale",
+                [](auto &object) -> auto & { return object.scale; },
+                [](auto &object, const auto &value) { object.scale = value; })
             .description("Scale XYZ")
             .required(false);
+        return builder.build();
     }
 };
 } // namespace brayns

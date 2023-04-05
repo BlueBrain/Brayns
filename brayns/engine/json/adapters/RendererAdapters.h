@@ -27,65 +27,70 @@
 
 namespace brayns
 {
-template<typename T>
-struct RendererAdapter : ObjectAdapter<T>
+class RendererAdapter
 {
-protected:
-    using ObjectAdapter<T>::getset;
-
-    static void reflectDefault()
+public:
+    template<typename T>
+    static void reflect(JsonObjectBuilder<T> &builder)
     {
-        getset(
-            "samples_per_pixel",
-            [](auto &object) { return object.samplesPerPixel; },
-            [](auto &object, auto value) { object.samplesPerPixel = value; })
+        builder
+            .getset(
+                "samples_per_pixel",
+                [](auto &object) { return object.samplesPerPixel; },
+                [](auto &object, auto value) { object.samplesPerPixel = value; })
             .description("Ray samples per pixel")
             .minimum(1)
             .required(false);
-        getset(
-            "max_ray_bounces",
-            [](auto &object) { return object.maxRayBounces; },
-            [](auto &object, auto value) { object.maxRayBounces = value; })
+        builder
+            .getset(
+                "max_ray_bounces",
+                [](auto &object) { return object.maxRayBounces; },
+                [](auto &object, auto value) { object.maxRayBounces = value; })
             .description("Maximum ray bounces")
             .required(false);
-        getset(
-            "background_color",
-            [](auto &object) -> auto & { return object.backgroundColor; },
-            [](auto &object, const auto &value) { object.backgroundColor = value; })
+        builder
+            .getset(
+                "background_color",
+                [](auto &object) -> auto & { return object.backgroundColor; },
+                [](auto &object, const auto &value) { object.backgroundColor = value; })
             .description("Background color")
             .required(false);
     }
 };
 
 template<>
-struct JsonAdapter<Interactive> : RendererAdapter<Interactive>
+struct JsonAdapter<Interactive> : ObjectAdapter<Interactive>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Interactive");
-        reflectDefault();
-        getset(
-            "enable_shadows",
-            [](auto &object) { return object.shadowsEnabled; },
-            [](auto &object, auto value) { object.shadowsEnabled = value; })
+        auto builder = Builder("Interactive");
+        RendererAdapter::reflect(builder);
+        builder
+            .getset(
+                "enable_shadows",
+                [](auto &object) { return object.shadowsEnabled; },
+                [](auto &object, auto value) { object.shadowsEnabled = value; })
             .description("Enable casted shadows when rendering")
             .required(false);
-        getset(
-            "ao_samples",
-            [](auto &object) { return object.aoSamples; },
-            [](auto &object, auto value) { object.aoSamples = value; })
+        builder
+            .getset(
+                "ao_samples",
+                [](auto &object) { return object.aoSamples; },
+                [](auto &object, auto value) { object.aoSamples = value; })
             .description("Ambient occlusion samples")
             .required(false);
+        return builder.build();
     }
 };
 
 template<>
-struct JsonAdapter<Production> : RendererAdapter<Production>
+struct JsonAdapter<Production> : ObjectAdapter<Production>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("Production");
-        reflectDefault();
+        auto builder = Builder("Production");
+        RendererAdapter::reflect(builder);
+        return builder.build();
     }
 };
 } // namespace brayns

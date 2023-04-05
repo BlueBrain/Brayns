@@ -37,41 +37,47 @@ struct RenderImageParams
 template<>
 struct JsonAdapter<RenderImageParams> : ObjectAdapter<RenderImageParams>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("RenderImageParams");
-        getset(
-            "send",
-            [](auto &object) { return object.send; },
-            [](auto &object, auto value) { object.send = value; })
+        auto builder = Builder("RenderImageParams");
+        builder
+            .getset(
+                "send",
+                [](auto &object) { return object.send; },
+                [](auto &object, auto value) { object.send = value; })
             .description("Send image once rendered")
             .defaultValue(true);
-        getset(
-            "force",
-            [](auto &object) { return object.force; },
-            [](auto &object, auto value) { object.force = value; })
+        builder
+            .getset(
+                "force",
+                [](auto &object) { return object.force; },
+                [](auto &object, auto value) { object.force = value; })
             .description("Send image even if nothing new was rendered")
             .defaultValue(false);
-        getset(
-            "accumulate",
-            [](auto &object) { return object.accumulate; },
-            [](auto &object, auto value) { object.accumulate = value; })
+        builder
+            .getset(
+                "accumulate",
+                [](auto &object) { return object.accumulate; },
+                [](auto &object, auto value) { object.accumulate = value; })
             .description("Render all images until max accumulation")
             .defaultValue(false);
-        getset(
-            "format",
-            [](auto &object) -> auto & { return object.format; },
-            [](auto &object, auto value) { object.format = std::move(value); })
+        builder
+            .getset(
+                "format",
+                [](auto &object) -> auto & { return object.format; },
+                [](auto &object, auto value) { object.format = std::move(value); })
             .description("Encoding of returned image data (jpg or png)")
             .defaultValue("jpg");
-        getset(
-            "jpeg_quality",
-            [](auto &object) { return object.jpeg_quality; },
-            [](auto &object, auto value) { object.jpeg_quality = value; })
+        builder
+            .getset(
+                "jpeg_quality",
+                [](auto &object) { return object.jpeg_quality; },
+                [](auto &object, auto value) { object.jpeg_quality = value; })
             .description("Quality if using JPEG encoding")
             .minimum(0)
             .maximum(100)
             .defaultValue(100);
+        return builder.build();
     }
 };
 
@@ -84,12 +90,14 @@ struct RenderImageResult
 template<>
 struct JsonAdapter<RenderImageResult> : ObjectAdapter<RenderImageResult>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("RenderImageResult");
-        get("accumulation", [](auto &object) { return object.accumulation; }).description("Current frame accumulation");
-        get("max_accumulation", [](auto &object) { return object.max_accumulation; })
+        auto builder = Builder("RenderImageResult");
+        builder.get("accumulation", [](auto &object) { return object.accumulation; })
+            .description("Current frame accumulation");
+        builder.get("max_accumulation", [](auto &object) { return object.max_accumulation; })
             .description("Maximum frame accumulation");
+        return builder.build();
     }
 };
 } // namespace brayns

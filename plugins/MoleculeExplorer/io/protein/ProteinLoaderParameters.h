@@ -61,21 +61,24 @@ struct JsonAdapter<ProteinLoaderColorScheme> : EnumAdapter<ProteinLoaderColorSch
 template<>
 struct JsonAdapter<ProteinLoaderParameters> : ObjectAdapter<ProteinLoaderParameters>
 {
-    static void reflect()
+    static JsonObjectInfo reflect()
     {
-        title("ProteinLoaderParameters");
-        getset(
-            "color_scheme",
-            [](auto &object) { return object.color_scheme; },
-            [](auto &object, auto value) { object.color_scheme = value; })
+        auto builder = Builder("ProteinLoaderParameters");
+        builder
+            .getset(
+                "color_scheme",
+                [](auto &object) { return object.color_scheme; },
+                [](auto &object, auto value) { object.color_scheme = value; })
             .description("Proteins coloring scheme")
             .defaultValue(ProteinLoaderColorScheme::None);
-        getset(
-            "radius_multiplier",
-            [](auto &object) { return object.radius_multiplier; },
-            [](auto &object, auto value) { object.radius_multiplier = value; })
+        builder
+            .getset(
+                "radius_multiplier",
+                [](auto &object) { return object.radius_multiplier; },
+                [](auto &object, auto value) { object.radius_multiplier = value; })
             .description("Protein sample radius multiplier")
             .defaultValue(1);
+        return builder.build();
     }
 };
 } // namespace brayns
