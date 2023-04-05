@@ -105,7 +105,6 @@ private:
 class JsonErrorFormatter
 {
 public:
-    static std::string format(const JsonPathElement &element);
     static std::string format(const JsonPath &path);
     static std::string format(const JsonError &error);
     static std::vector<std::string> format(const JsonErrors &errors);

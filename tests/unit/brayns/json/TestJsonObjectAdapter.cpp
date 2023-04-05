@@ -22,7 +22,7 @@
 
 #include <brayns/json/Json.h>
 
-struct Test
+struct Internal
 {
     int test1 = 0;
     int test2 = 0;
@@ -39,8 +39,39 @@ struct Test
     }
 };
 
+struct Test
+{
+    int normal = 0;
+    int readOnly = 0;
+    int writeOnly = 0;
+    int optional = 0;
+    brayns::Vector2f defaulted{0};
+    double number = 0;
+    std::vector<int> array;
+    Internal internal;
+};
+
 namespace brayns
 {
+template<>
+struct JsonAdapter<Internal> : ObjectAdapter<Internal>
+{
+    static void reflect()
+    {
+        title("Internal");
+        getset(
+            "getset",
+            [](auto &object) { return object.test1; },
+            [](auto &object, auto value) { object.test1 = value; });
+        get("get", [](auto &object) { return object.test2; });
+        set<int>("set", [](auto &object, auto value) { object.test3 = value; });
+        getset(
+            "methods",
+            [](auto &object) { return object.get(); },
+            [](auto &object, auto value) { object.set(value); });
+    }
+};
+
 template<>
 struct JsonAdapter<Test> : ObjectAdapter<Test>
 {
@@ -48,55 +79,132 @@ struct JsonAdapter<Test> : ObjectAdapter<Test>
     {
         title("Test");
         getset(
-            "getset",
-            [](auto &object) { return object.test1; },
-            [](auto &object, auto value) { object.test1 = value; })
-            .description("Test getset");
-        get("get", [](auto &object) { return object.test2; }).description("Test get").required(false);
-        set<int>("set", [](auto &object, auto value) { object.test3 = value; }).description("Test set");
+            "normal",
+            [](auto &object) { return object.normal; },
+            [](auto &object, auto value) { object.normal = value; })
+            .description("Test normal");
         getset(
-            "methods",
-            [](auto &object) { return object.get(); },
-            [](auto &object, auto value) { object.set(value); })
-            .description("Test methods");
+            "readOnly",
+            [](auto &object) { return object.readOnly; },
+            [](auto &object, auto value) { object.readOnly = value; })
+            .description("Test readOnly")
+            .readOnly(true);
+        getset(
+            "writeOnly",
+            [](auto &object) { return object.writeOnly; },
+            [](auto &object, auto value) { object.writeOnly = value; })
+            .description("Test writeOnly")
+            .writeOnly(true);
+        getset(
+            "optional",
+            [](auto &object) { return object.optional; },
+            [](auto &object, auto value) { object.optional = value; })
+            .description("Test optional")
+            .required(false);
+        getset(
+            "defaulted",
+            [](auto &object) { return object.defaulted; },
+            [](auto &object, auto value) { object.defaulted = value; })
+            .description("Test defaulted")
+            .defaultValue(brayns::Vector2f(1));
+        getset(
+            "number",
+            [](auto &object) { return object.number; },
+            [](auto &object, auto value) { object.number = value; })
+            .description("Test number")
+            .minimum(1)
+            .maximum(3);
+        getset(
+            "array",
+            [](auto &object) -> auto & { return object.array; },
+            [](auto &object, auto value) { object.array = std::move(value); })
+            .description("Test array")
+            .minItems(2)
+            .maxItems(4);
+        getset(
+            "internal",
+            [](auto &object) -> auto & { return object.internal; },
+            [](auto &object, auto value) { object.internal = std::move(value); })
+            .description("Test internal");
     }
 };
 } // namespace brayns
 
-TEST_CASE("JsonObjectAdapter")
+TEST_CASE("Schema")
 {
-    SUBCASE("Schema")
+    SUBCASE("Title and type")
     {
         auto schema = brayns::Json::getSchema<Test>();
         CHECK_EQ(schema.title, "Test");
         CHECK_EQ(schema.type, brayns::JsonType::Object);
-        CHECK_EQ(schema.properties.at("getset").type, brayns::JsonType::Integer);
-        CHECK_EQ(schema.properties.at("get").type, brayns::JsonType::Integer);
-        CHECK_EQ(schema.properties.at("set").type, brayns::JsonType::Integer);
-        CHECK_EQ(schema.properties.at("methods").type, brayns::JsonType::Integer);
-        CHECK_EQ(schema.properties.at("getset").description, "Test getset");
-        CHECK_FALSE(schema.properties.at("get").required);
-        CHECK(schema.properties.at("get").readOnly);
-        CHECK_FALSE(schema.properties.at("get").writeOnly);
-        CHECK(schema.properties.at("set").writeOnly);
-        CHECK_FALSE(schema.properties.at("set").readOnly);
     }
-    SUBCASE("Serialize")
+    SUBCASE("Read and write only")
     {
-        auto test = Test{1, 2, 3};
-        auto json = brayns::Json::serialize(test);
-        auto object = brayns::JsonExtractor::extractObject(json);
-        CHECK_EQ(object.size(), 3);
-        CHECK_EQ(object.get("getset").convert<int>(), 1);
-        CHECK_EQ(object.get("get").convert<int>(), 2);
-        CHECK_EQ(object.get("methods").convert<int>(), 4);
+        auto schema = brayns::Json::getSchema<Test>();
+        auto &normal = schema.properties.at("normal");
+        CHECK_FALSE(normal.readOnly);
+        CHECK_FALSE(normal.writeOnly);
+        auto &readOnly = schema.properties.at("readOnly");
+        CHECK(readOnly.readOnly);
+        CHECK_FALSE(readOnly.writeOnly);
+        auto &writeOnly = schema.properties.at("writeOnly");
+        CHECK_FALSE(writeOnly.readOnly);
+        CHECK(writeOnly.writeOnly);
     }
-    SUBCASE("Deserialize")
+    SUBCASE("Required and default")
+    {
+        auto schema = brayns::Json::getSchema<Test>();
+        CHECK_FALSE(schema.properties.at("optional").required);
+        CHECK_FALSE(schema.properties.at("defaulted").required);
+        CHECK(schema.properties.at("normal").required);
+        auto &defaultValue = schema.properties.at("defaulted").defaultValue;
+        CHECK_EQ(brayns::Json::deserialize<brayns::Vector2f>(defaultValue), brayns::Vector2f(1));
+    }
+    SUBCASE("Min and max")
+    {
+        auto schema = brayns::Json::getSchema<Test>();
+        auto &number = schema.properties.at("number");
+        CHECK_EQ(number.type, brayns::JsonType::Number);
+        CHECK_EQ(number.minimum, 1);
+        CHECK_EQ(number.maximum, 3);
+    }
+    SUBCASE("Min and max items")
+    {
+        auto schema = brayns::Json::getSchema<Test>();
+        auto &array = schema.properties.at("array");
+        CHECK_EQ(array.type, brayns::JsonType::Array);
+        CHECK_EQ(array.items.at(0).type, brayns::JsonType::Integer);
+        CHECK_EQ(array.minItems, 2);
+        CHECK_EQ(array.maxItems, 4);
+    }
+    SUBCASE("Internal")
+    {
+        auto schema = brayns::Json::getSchema<Test>();
+        auto &internal = schema.properties.at("internal");
+        CHECK_EQ(internal.title, "Internal");
+        CHECK_EQ(internal.type, brayns::JsonType::Object);
+        CHECK_EQ(internal.properties.size(), 4);
+        auto &property = internal.properties.at("test1");
+        CHECK_EQ(property.type, brayns::JsonType::Integer);
+        CHECK(property.required);
+    }
+}
+
+TEST_CASE("Parsing")
+{
+    SUBCASE("Parse")
     {
         auto json = R"({"getset": 1, "set": 2, "methods": 3})";
-        auto test = brayns::Json::parse<Test>(json);
-        CHECK_EQ(test.test1, 1);
-        CHECK_EQ(test.test2, 6);
-        CHECK_EQ(test.test3, 2);
+        auto internal = brayns::Json::parse<Internal>(json);
+        CHECK_EQ(internal.test1, 1);
+        CHECK_EQ(internal.test2, 6);
+        CHECK_EQ(internal.test3, 2);
+    }
+    SUBCASE("Stringify")
+    {
+        auto ref = R"({"getset":1,"get":2,"methods":4})";
+        auto test = Internal{1, 2, 3};
+        auto json = brayns::Json::stringify(test);
+        CHECK_EQ(json, ref);
     }
 }

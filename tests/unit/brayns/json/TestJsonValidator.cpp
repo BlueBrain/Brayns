@@ -208,4 +208,23 @@ TEST_CASE("JsonValidator")
         CHECK_EQ(errors.size(), 1);
         CHECK_EQ(errors[0].message, "item count above maximum 4 > 3");
     }
+    SUBCASE("Nested")
+    {
+        auto internal = brayns::JsonSchema();
+        internal.type = brayns::JsonType::Object;
+        internal.properties["test3"] = brayns::Json::getSchema<std::vector<int>>();
+
+        auto schema = brayns::JsonSchema();
+        schema.type = brayns::JsonType::Object;
+        schema.properties["test1"] = brayns::Json::getSchema<int>();
+        schema.properties["test2"] = internal;
+
+        auto json = brayns::Json::parse(R"({"test2": {"test3": [1.3]}})");
+        auto errors = brayns::Json::validate(json, schema);
+        CHECK_EQ(errors.size(), 2);
+
+        auto messages = brayns::JsonErrorFormatter::format(errors);
+        CHECK_EQ(messages[0], "test2.test3[0]: invalid type, expected integer got number");
+        CHECK_EQ(messages[1], "missing required property 'test1'");
+    }
 }

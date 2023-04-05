@@ -78,22 +78,21 @@ std::vector<JsonError> JsonErrorBuilder::build()
     return std::exchange(_errors, {});
 }
 
-std::string JsonErrorFormatter::format(const JsonPathElement &element)
-{
-    if (element.isIndex())
-    {
-        return fmt::format("[{}]", element.asIndex());
-    }
-    return fmt::format(".{}", element.asKey());
-}
-
 std::string JsonErrorFormatter::format(const JsonPath &path)
 {
     auto result = std::string();
     for (const auto &element : path)
     {
-        auto part = format(element);
-        result.append(part);
+        if (element.isIndex())
+        {
+            result.append(fmt::format("[{}]", element.asIndex()));
+            continue;
+        }
+        if (!result.empty())
+        {
+            result.append(".");
+        }
+        result.append(element.asKey());
     }
     return result;
 }
