@@ -39,7 +39,7 @@ struct GlmAdapter
 {
     using ValueType = typename T::value_type;
 
-    static const auto itemCount = static_cast<size_t>(T::length());
+    static inline const auto itemCount = static_cast<size_t>(T::length());
 
     static JsonSchema getSchema()
     {

@@ -44,6 +44,7 @@ Returns a list of available atlas visualization usecases for the given model.
                     "type": "string"
                 },
                 "params_schema": {
+                    "title": "JsonSchema",
                     "description": "Use case parameters schema",
                     "type": "object"
                 }
@@ -85,8 +86,8 @@ Visualizes the specified use case based on the atlas data of the given model.
         },
         "required": [
             "model_id",
-            "use_case",
-            "params"
+            "params",
+            "use_case"
         ],
         "additionalProperties": false
     }
@@ -100,12 +101,12 @@ Visualizes the specified use case based on the atlas data of the given model.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -115,7 +116,7 @@ Visualizes the specified use case based on the atlas data of the given model.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -125,11 +126,15 @@ Visualizes the specified use case based on the atlas data of the given model.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -171,24 +176,28 @@ Visualizes the specified use case based on the atlas data of the given model.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -197,10 +206,10 @@ Visualizes the specified use case based on the atlas data of the given model.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -266,5 +275,11 @@ Visualizes the specified use case based on the atlas data of the given model.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }

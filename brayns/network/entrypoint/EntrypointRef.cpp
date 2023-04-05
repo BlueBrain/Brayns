@@ -39,9 +39,9 @@ public:
             schema.params = std::move(params);
         }
         auto returns = entrypoint.getResultSchema();
-        if (params.type != brayns::JsonType::Null)
+        if (returns.type != brayns::JsonType::Null)
         {
-            schema.returns = returns;
+            schema.returns = std::move(returns);
         }
     }
 };

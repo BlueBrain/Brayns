@@ -93,7 +93,11 @@ public:
         {
             throw std::invalid_argument("Invalid array schema without items");
         }
-        Helper::set(object, "items", schema.items[0]);
+        auto &items = schema.items[0];
+        if (items.type != brayns::JsonType::Undefined)
+        {
+            Helper::set(object, "items", items);
+        }
         if (schema.minItems)
         {
             Helper::set(object, "minItems", *schema.minItems);
@@ -112,15 +116,38 @@ public:
     {
         if (!schema.items.empty())
         {
-            Helper::set(object, "additionalProperties", schema.items[0]);
+            _serializeMap(schema.items[0], object);
             return;
         }
-        Helper::set(object, "properties", schema.properties);
-        Helper::set(object, "required", _getRequired(schema.properties));
-        Helper::set(object, "additionalProperties", false);
+        _serializeObject(schema.properties, object);
     }
 
 private:
+    static void _serializeMap(const brayns::JsonSchema &items, brayns::JsonObject &object)
+    {
+        if (items.type != brayns::JsonType::Undefined)
+        {
+            Helper::set(object, "additionalProperties", items);
+        }
+    }
+
+    static void _serializeObject(
+        const std::map<std::string, brayns::JsonSchema> &properties,
+        brayns::JsonObject &object)
+    {
+        Helper::set(object, "additionalProperties", false);
+        if (properties.empty())
+        {
+            return;
+        }
+        Helper::set(object, "properties", properties);
+        auto required = _getRequired(properties);
+        if (!required.empty())
+        {
+            Helper::set(object, "required", _getRequired(properties));
+        }
+    }
+
     static std::vector<std::string> _getRequired(const std::map<std::string, brayns::JsonSchema> &properties)
     {
         auto required = std::vector<std::string>();
@@ -143,6 +170,7 @@ JsonSchema JsonAdapter<JsonSchema>::getSchema()
     auto schema = JsonSchema();
     schema.type = JsonType::Object;
     schema.title = "JsonSchema";
+    schema.items = {JsonSchema()};
     return schema;
 }
 
