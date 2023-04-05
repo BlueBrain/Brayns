@@ -156,11 +156,20 @@ TEST_CASE("JsonValidator")
     {
         auto schema = brayns::JsonSchema();
         schema.type = brayns::JsonType::Object;
-        auto json = brayns::Json::parse(R"({"something": 1})");
+        auto readOnly = brayns::Json::getSchema<int>();
+        readOnly.required = true;
+        readOnly.readOnly = true;
+        schema.properties["readOnly"] = std::move(readOnly);
 
+        auto json = brayns::Json::parse(R"({"something": 1})");
         auto errors = brayns::Json::validate(json, schema);
         CHECK_EQ(errors.size(), 1);
         CHECK_EQ(errors[0].message, "unknown property 'something'");
+
+        json = brayns::Json::parse(R"({"readOnly": 1})");
+        errors = brayns::Json::validate(json, schema);
+        CHECK_EQ(errors.size(), 1);
+        CHECK_EQ(errors[0].message, "read only property 'readOnly'");
 
         json = brayns::Json::parse(R"({})");
         errors = brayns::Json::validate(json, schema);

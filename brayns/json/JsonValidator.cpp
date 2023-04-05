@@ -184,8 +184,14 @@ public:
                 errors.add("unknown property '{}'", key);
                 continue;
             }
+            auto &schema = i->second;
+            if (schema.readOnly)
+            {
+                errors.add("read only property '{}'", key);
+                continue;
+            }
             errors.push(key);
-            brayns::JsonValidator::validate(value, i->second, errors);
+            brayns::JsonValidator::validate(value, schema, errors);
             errors.pop();
         }
     }
@@ -198,6 +204,10 @@ public:
         for (const auto &[key, value] : properties)
         {
             if (!value.required)
+            {
+                continue;
+            }
+            if (value.readOnly)
             {
                 continue;
             }

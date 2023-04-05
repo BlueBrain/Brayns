@@ -43,7 +43,8 @@ struct JsonAdapter<ApplicationParameters> : ObjectAdapter<ApplicationParameters>
                 "viewport",
                 [](auto &object) -> auto & { return object.getWindowSize(); },
                 [](auto &object, const auto &value) { object.setWindowSize(value); })
-            .description("Framebuffer resolution in pixels");
+            .description("Framebuffer resolution in pixels")
+            .required(false);
         return builder.build();
     }
 };

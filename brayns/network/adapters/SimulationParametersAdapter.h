@@ -42,7 +42,8 @@ struct JsonAdapter<SimulationParameters> : ObjectAdapter<SimulationParameters>
                 "current",
                 [](auto &object) { return object.getFrame(); },
                 [](auto &object, auto value) { object.setFrame(value); })
-            .description("Current simulation frame index");
+            .description("Current simulation frame index")
+            .required(false);
         builder.get("dt", [](auto &object) { return object.getDt(); }).description("Delta time between two frames");
         builder
             .get(
