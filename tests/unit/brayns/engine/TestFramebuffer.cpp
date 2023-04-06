@@ -58,6 +58,23 @@ TEST_CASE("Progressive frame handler")
         CHECK(image.getWidth() == 400);
         CHECK(image.getHeight() == 400);
     }
+    SUBCASE("Scale auto adjustment")
+    {
+        auto handler = brayns::ProgressiveFrameHandler();
+        auto frameSize = brayns::Vector2ui(256, 120);
+        handler.setFrameSize(frameSize);
+        CHECK(handler.commit());
+
+        handler.incrementAccumFrames();
+        auto image = handler.getImage(brayns::FramebufferChannel::Color);
+        CHECK(image.getWidth() == 256);
+        CHECK(image.getHeight() == 120);
+
+        handler.incrementAccumFrames();
+        image = handler.getImage(brayns::FramebufferChannel::Color);
+        CHECK(image.getWidth() == 256);
+        CHECK(image.getHeight() == 120);
+    }
     SUBCASE("Accumulation")
     {
         auto handler = brayns::ProgressiveFrameHandler();

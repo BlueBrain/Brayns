@@ -20,6 +20,20 @@
 
 #include "ProgressiveFrameHandler.h"
 
+namespace
+{
+class FrameSizeScaler
+{
+public:
+    static brayns::Vector2ui safeScale(const brayns::Vector2ui &frameSize, uint32_t scale)
+    {
+        auto safeScale = glm::max(frameSize / brayns::Vector2ui(64), brayns::Vector2ui(1));
+        auto applyScale = glm::min(scale, glm::compMin(safeScale));
+        return frameSize / applyScale;
+    }
+};
+}
+
 namespace brayns
 {
 ProgressiveFrameHandler::ProgressiveFrameHandler(uint32_t scale)
@@ -41,8 +55,7 @@ bool ProgressiveFrameHandler::commit()
 
 void ProgressiveFrameHandler::setFrameSize(const Vector2ui &frameSize)
 {
-    auto lowResolution = frameSize / _scale;
-    _lowRes.setFrameSize(lowResolution);
+    _lowRes.setFrameSize(FrameSizeScaler::safeScale(frameSize, _scale));
     _highRes.setFrameSize(frameSize);
 }
 
