@@ -170,7 +170,7 @@ NeuronMorphology NeuronMorphologyReader::read(const std::string &path, bool soma
         throw std::runtime_error("Soma-only NeuronMorphologies not allowed");
     }
 
-    const auto morph = morphio::Morphology(path);
+    auto morph = MorphIOReader::read(path);
 
     auto sections = NeuriteReader::read(morph, axon, dendrites);
     std::optional<NeuronMorphology::Soma> somaObject = std::nullopt;
